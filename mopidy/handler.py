@@ -27,6 +27,9 @@ class MpdHandler(object):
                 return _request_handlers[pattern](self, **groups)
         logger.warning(u'Unhandled request: %s', request)
 
+    def register_backend(self, backend):
+        self.backend = backend
+
     @register(r'^currentsong$')
     def _currentsong(self):
         return None # TODO
