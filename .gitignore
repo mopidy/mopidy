@@ -1,2 +1,5 @@
 *.pyc
 *.swp
+.coverage
+src/
+pip-log.txt

@@ -92,3 +92,16 @@ To start mopidy, go to the root of the mopidy project, then simply run::
 
 To stop mopidy, press ``CTRL+C``.
 
+
+Running tests
+-------------
+
+To run tests, you need a couple of dependiencies which can be installed using
+pip::
+
+    pip install -r test-requirements.txt
+
+Then, to run all tests::
+
+    python tests
+
