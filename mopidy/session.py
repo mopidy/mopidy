@@ -1,7 +1,7 @@
 import asynchat
 import logging
 
-from mopidy import get_version, settings
+from mopidy import get_mpd_version, settings
 from mopidy.handler import MpdHandler
 
 logger = logging.getLogger(u'session')
@@ -12,7 +12,7 @@ class MpdSession(asynchat.async_chat):
         self.input_buffer = []
         self.set_terminator(settings.MPD_LINE_TERMINATOR)
         self.handler = handler()
-        self.send_response(u'OK MPD (mopidy %s)' % get_version())
+        self.send_response(u'OK MPD %s' % get_mpd_version())
 
     def collect_incoming_data(self, data):
         self.input_buffer.append(data)
