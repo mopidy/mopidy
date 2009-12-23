@@ -20,8 +20,8 @@ def register(pattern):
     return decorator
 
 class MpdHandler(object):
-    def __init__(self, backend=DummyBackend()):
-        self.register_backend(backend)
+    def __init__(self, backend=DummyBackend):
+        self.register_backend(backend())
 
     def handle_request(self, request):
         for pattern in _request_handlers:
