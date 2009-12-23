@@ -82,3 +82,13 @@ Spotify Premium account), ask for a search query, list all your playlists with
 tracks, play 10s from a random song from the search result, pause for two
 seconds, play for five more seconds, and quit.
 
+
+Running mopidy
+--------------
+
+To start mopidy, go to the root of the mopidy project, then simply run::
+
+    python mopidy
+
+To stop mopidy, press ``CTRL+C``.
+
