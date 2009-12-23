@@ -1,2 +1,2 @@
 def get_version():
-    return '0'
+    return u'0'
