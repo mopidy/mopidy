@@ -3,7 +3,6 @@ import logging
 
 from mopidy import get_mpd_version, settings
 from mopidy.handler import MpdHandler
-from mopidy.backends.dummy_backend import DummyBackend
 
 logger = logging.getLogger(u'session')
 
