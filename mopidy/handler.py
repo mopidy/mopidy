@@ -32,11 +32,11 @@ class MpdHandler(object):
 
     @register(r'^currentsong$')
     def _currentsong(self):
-        return None # TODO
+        return self.backend.current_song()
 
     @register(r'^listplaylists$')
     def _listplaylists(self):
-        return None # TODO
+        return self.backend.list_playlists()
 
     @register(r'^lsinfo( "(?P<uri>[^"]*)")*$')
     def _lsinfo(self, uri):
@@ -50,19 +50,8 @@ class MpdHandler(object):
 
     @register(r'^plchanges "(?P<version>\d+)"$')
     def _plchanges(self, version):
-        return None # TODO
+        return self.backend.playlist_changes(version)
 
     @register(r'^status$')
     def _status(self):
-        # TODO
-        return {
-            'volume': 0,
-            'repeat': 0,
-            'random': 0,
-            'single': 0,
-            'consume': 0,
-            'playlist': 0,
-            'playlistlength': 0,
-            'xfade': 0,
-            'state': 'stop',
-        }
+        return self.backend.status()
