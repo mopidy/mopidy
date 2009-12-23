@@ -5,42 +5,51 @@ from mopidy import settings
 
 logger = logging.getLogger('handler')
 
-class MpdHandler(object):
-    def __init__(self):
-        self.request_handlers = [
-            (r'^currentsong$', self._currentsong),
-            (r'^listplaylists$', self._listplaylists),
-            (r'^lsinfo( "(?P<uri>[^"]*)")*$', self._lsinfo),
-            (r'^ping$', self._ping),
-            (r'^plchanges "(?P<version>\d+)"$', self._plchanges),
-            (r'^status$', self._status),
-        ]
+global _request_handlers
+_request_handlers = {}
 
+def register(pattern):
+    def decorator(func):
+        global _request_handlers
+        if pattern in _request_handlers:
+            raise ValueError(u'Tried to redefine handler for %s with %s' % (
+                pattern, func))
+        _request_handlers[pattern] = func
+        return func
+    return decorator
+
+class MpdHandler(object):
     def handle_request(self, request):
-        for request_pattern, request_handling_method in self.request_handlers:
-            matches = re.match(request_pattern, request)
+        for pattern in _request_handlers:
+            matches = re.match(pattern, request)
             if matches is not None:
                 groups = matches.groupdict()
-                return request_handling_method(**groups)
+                return _request_handlers[pattern](self, **groups)
         logger.warning(u'Unhandled request: %s', request)
 
+    @register(r'^currentsong$')
     def _currentsong(self):
         return None # TODO
 
+    @register(r'^listplaylists$')
     def _listplaylists(self):
         return None # TODO
 
+    @register(r'^lsinfo( "(?P<uri>[^"]*)")*$')
     def _lsinfo(self, uri):
         if uri == u'/':
             return self._listplaylists()
         return None # TODO
 
+    @register(r'^ping$')
     def _ping(self):
         return None
 
+    @register(r'^plchanges "(?P<version>\d+)"$')
     def _plchanges(self, version):
         return None # TODO
 
+    @register(r'^status$')
     def _status(self):
         # TODO
         return [
