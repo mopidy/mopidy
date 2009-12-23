@@ -96,9 +96,13 @@ To stop mopidy, press ``CTRL+C``.
 Running tests
 -------------
 
-To run tests, you need a couple of dependiencies which can be installed using
-pip::
+To run tests, you need a couple of dependiencies. Some can be installed through Debian/Ubuntu package management::
 
+    sudo aptitude install python-coverage
+
+The rest can be installed using pip::
+
+    sudo aptitude install python-pip python-setuptools bzr
     pip install -r test-requirements.txt
 
 Then, to run all tests::
