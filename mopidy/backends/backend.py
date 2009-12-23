@@ -9,15 +9,29 @@ class BaseBackend(object):
     def playlist_changes(self, version):
         return None
 
-    def status(self):
-        return {
-            'volume': 0,
-            'repeat': 0,
-            'random': 0,
-            'single': 0,
-            'consume': 0,
-            'playlist': 0,
-            'playlistlength': 0,
-            'xfade': 0,
-            'state': 'stop',
-        }
+    def status_volume(self):
+        return 0
+
+    def status_repeat(self):
+        return 0
+
+    def status_random(self):
+        return 0
+
+    def status_single(self):
+        return 0
+
+    def status_consume(self):
+        return 0
+
+    def status_playlist(self):
+        return 0
+
+    def status_playlist_length(self):
+        return 0
+
+    def status_xfade(self):
+        return 0
+
+    def status_state(self):
+        return 'stop'
