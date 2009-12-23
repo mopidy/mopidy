@@ -2,6 +2,7 @@ import logging
 import re
 
 from mopidy import settings
+from mopidy.backends.dummy_backend import DummyBackend
 
 logger = logging.getLogger('handler')
 
@@ -19,6 +20,9 @@ def register(pattern):
     return decorator
 
 class MpdHandler(object):
+    def __init__(self, backend=DummyBackend()):
+        self.register_backend(backend)
+
     def handle_request(self, request):
         for pattern in _request_handlers:
             matches = re.match(pattern, request)

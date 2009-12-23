@@ -13,7 +13,6 @@ class MpdSession(asynchat.async_chat):
         self.input_buffer = []
         self.set_terminator(settings.MPD_LINE_TERMINATOR)
         self.handler = handler()
-        self.handler.register_backend(DummyBackend())
         self.send_response(u'OK MPD %s' % get_mpd_version())
 
     def collect_incoming_data(self, data):
