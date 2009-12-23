@@ -52,14 +52,14 @@ class MpdHandler(object):
     @register(r'^status$')
     def _status(self):
         # TODO
-        return [
-            'volume: 0',
-            'repeat: 0',
-            'random: 0',
-            'single: 0',
-            'consume: 0',
-            'playlist: 0',
-            'playlistlength: 0',
-            'xfade: 0',
-            'state: stop',
-        ]
+        return {
+            'volume': 0,
+            'repeat': 0,
+            'random': 0,
+            'single': 0,
+            'consume': 0,
+            'playlist': 0,
+            'playlistlength': 0,
+            'xfade': 0,
+            'state': 'stop',
+        }

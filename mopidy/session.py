@@ -26,9 +26,14 @@ class MpdSession(asynchat.async_chat):
 
     def handle_request(self, input):
         response = self.handler.handle_request(input)
-        if response is not None:
+        if isinstance(response, list):
             for line in response:
                 self.send_response(line)
+        elif isinstance(response, dict):
+            for key, value in response.items():
+                self.send_response(u'%s: %s' % (key, value))
+        elif response is not None:
+            self.send_response(response)
         self.send_response(u'OK')
 
     def send_response(self, output):
