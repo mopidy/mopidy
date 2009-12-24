@@ -20,7 +20,8 @@ def register(pattern):
     return decorator
 
 class MpdHandler(object):
-    def __init__(self, backend=DummyBackend):
+    def __init__(self, session=None, backend=DummyBackend):
+        self.session = session
         self.register_backend(backend())
 
     def handle_request(self, request):
@@ -54,7 +55,7 @@ class MpdHandler(object):
 
     @register(r'^close$')
     def _close(self):
-        pass # TODO
+        self.session.close_when_done()
 
     @register(r'^consume (?P<state>[01])$')
     def _consume(self, state):
