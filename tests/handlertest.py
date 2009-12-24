@@ -419,7 +419,10 @@ class StickersHandlerTest(unittest.TestCase):
 
 
 class DummySession(object):
-    def close_when_done(self):
+    def do_close(self):
+        pass
+
+    def do_kill(self):
         pass
 
 

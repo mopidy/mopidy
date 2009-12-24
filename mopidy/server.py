@@ -1,6 +1,7 @@
 import asyncore
 import logging
 import socket
+import sys
 
 from mopidy import settings
 from mopidy.session import MpdSession
@@ -19,7 +20,13 @@ class MpdServer(asyncore.dispatcher):
     def handle_accept(self):
         (client_socket, client_address) = self.accept()
         logger.info(u'Connection from: [%s]:%s', *client_address)
-        self.handler_class(client_socket, client_address)
+        self.handler_class(self, client_socket, client_address)
 
     def handle_close(self):
         self.close()
+
+    def do_kill(self):
+        logger.info('Received "kill". Shutting down.')
+        self.handle_close()
+        sys.exit(0)
+
