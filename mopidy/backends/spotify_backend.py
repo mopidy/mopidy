@@ -13,3 +13,13 @@ class SpotifyBackend(BaseBackend):
         for playlist in self.spotify.stored_playlists:
             playlists += u'playlist: %s\n' % playlist.name
         return playlists
+
+    def load(self, name):
+        for playlist in self.spotify.stored_playlists:
+            if playlist.name == 'name':
+                break
+
+        tracks = u''
+        for track in playlist.tracks:
+            tracks += u'add %s\n' % track.file_id
+        return tracks

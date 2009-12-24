@@ -9,6 +9,9 @@ class BaseBackend(object):
     def playlist_changes(self, version):
         return None
 
+    def load(self, name):
+        pass
+
 # Status methods
     def status_volume(self):
         return 0
