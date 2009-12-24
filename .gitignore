@@ -3,3 +3,4 @@
 .coverage
 src/
 pip-log.txt
+local_settings.py
