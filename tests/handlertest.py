@@ -231,10 +231,117 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler()
 
-    pass # TODO
+    def test_add(self):
+        result = self.h.handle_request(u'add "file:///dev/urandom"')
+        self.assert_(result is None)
+
+    def test_addid_without_position(self):
+        result = self.h.handle_request(u'addid "file:///dev/urandom"')
+        self.assert_('id' in result)
+
+    def test_addid_with_position(self):
+        result = self.h.handle_request(u'addid "file:///dev/urandom" 0')
+        self.assert_('id' in result)
+
+    def test_clear(self):
+        result = self.h.handle_request(u'clear')
+        self.assert_(result is None)
+
+    def test_delete_position(self):
+        result = self.h.handle_request(u'delete 5')
+        self.assert_(result is None)
+
+    def test_delete_open_range(self):
+        result = self.h.handle_request(u'delete 10:')
+        self.assert_(result is None)
+
+    def test_delete_closed_range(self):
+        result = self.h.handle_request(u'delete 10:20')
+        self.assert_(result is None)
+
+    def test_deleteid(self):
+        result = self.h.handle_request(u'deleteid 0')
+        self.assert_(result is None)
+
+    def test_move_position(self):
+        result = self.h.handle_request(u'move 5 0')
+        self.assert_(result is None)
+
+    def test_move_open_range(self):
+        result = self.h.handle_request(u'move 10: 0')
+        self.assert_(result is None)
+
+    def test_move_closed_range(self):
+        result = self.h.handle_request(u'move 10:20 0')
+        self.assert_(result is None)
+
+    def test_moveid(self):
+        result = self.h.handle_request(u'moveid 0 10')
+        self.assert_(result is None)
+
+    def test_playlist_returns_same_as_playlistinfo(self):
+        playlist_result = self.h.handle_request(u'playlist')
+        playlistinfo_result = self.h.handle_request(u'playlistinfo')
+        self.assertEquals(playlist_result, playlistinfo_result)
+
+    def test_playlistfind(self):
+        result = self.h.handle_request(u'playlistfind tag needle')
+        self.assert_(result is None)
+
+    def test_playlistid_without_songid(self):
+        result = self.h.handle_request(u'playlistid')
+        self.assert_(result is None)
+
+    def test_playlistid_with_songid(self):
+        result = self.h.handle_request(u'playlistid 10')
+        self.assert_(result is None)
+
+    def test_playlistinfo_without_position_or_range(self):
+        result = self.h.handle_request(u'playlistinfo')
+        self.assert_(result is None)
+
+    def test_playlistinfo_with_position(self):
+        result = self.h.handle_request(u'playlistinfo 5')
+        self.assert_(result is None)
+
+    def test_playlistinfo_with_open_range(self):
+        result = self.h.handle_request(u'playlistinfo 10:')
+        self.assert_(result is None)
+
+    def test_playlistinfo_with_closed_range(self):
+        result = self.h.handle_request(u'playlistinfo 10:20')
+        self.assert_(result is None)
+
+    def test_playlistsearch(self):
+        result = self.h.handle_request(u'playlistsearch tag needle')
+        self.assert_(result is None)
 
     def test_plchanges(self):
         result = self.h.handle_request(u'plchanges 0')
+        self.assert_(result is None)
+
+    def test_plchangesposid(self):
+        result = self.h.handle_request(u'plchangesposid 0')
+        self.assert_(result is None)
+
+    def test_shuffle_without_range(self):
+        result = self.h.handle_request(u'shuffle')
+        self.assert_(result is None)
+
+    def test_shuffle_with_open_range(self):
+        result = self.h.handle_request(u'shuffle 10:')
+        self.assert_(result is None)
+
+    def test_shuffle_with_closed_range(self):
+        result = self.h.handle_request(u'shuffle 10:20')
+        self.assert_(result is None)
+
+    def test_swap(self):
+        result = self.h.handle_request(u'swap 10 20')
+        self.assert_(result is None)
+
+    def test_swapid(self):
+        result = self.h.handle_request(u'swapid 10 20')
         self.assert_(result is None)
 
 

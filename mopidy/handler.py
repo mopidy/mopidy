@@ -35,6 +35,19 @@ class MpdHandler(object):
     def register_backend(self, backend):
         self.backend = backend
 
+    @register(r'^add "(?P<uri>[^"]*)"$')
+    def _add(self, uri):
+        pass # TODO
+
+    @register(r'^addid "(?P<uri>[^"]*)"( (?P<position>\d+))*$')
+    def _add(self, uri, position=None):
+        pass # TODO
+        return {'id': 0}
+
+    @register(r'^clear$')
+    def _clear(self):
+        pass # TODO
+
     @register(r'^clearerror$')
     def _clearerror(self):
         pass # TODO
@@ -56,6 +69,14 @@ class MpdHandler(object):
     def _currentsong(self):
         return self.backend.current_song()
 
+    @register(r'^delete ((?P<position>\d+)|(?P<start>\d+):(?P<end>\d+)*)$')
+    def _delete(self, position=None, start=None, end=None):
+        pass # TODO
+
+    @register(r'^deleteid (?P<songid>.*)$')
+    def _deleteid(self, songid):
+        pass # TODO
+
     @register(r'^idle( (?P<subsystems>.+))*$')
     def _idle(self, subsystems=None):
         pass # TODO
@@ -68,6 +89,14 @@ class MpdHandler(object):
     def _lsinfo(self, uri):
         if uri == u'/':
             return self._listplaylists()
+        pass # TODO
+
+    @register(r'^move ((?P<position>\d+)|(?P<start>\d+):(?P<end>\d+)*) (?P<to>\d+)$')
+    def _move(self, position=None, start=None, end=None, to=None):
+        pass # TODO
+
+    @register(r'^moveid (?P<songid>\S+) (?P<to>\d+)$')
+    def _moveid(self, songid, to):
         pass # TODO
 
     @register(r'^next$')
@@ -90,13 +119,37 @@ class MpdHandler(object):
     def _playid(self, songid):
         pass # TODO
 
-    @register(r'^previous$')
-    def _previous(self):
+    @register(r'^playlist$')
+    def _playlist(self):
+        return self._playlistinfo()
+
+    @register(r'^playlistfind (?P<tag>\S+) (?P<needle>\S+)$')
+    def _playlistfind(self, tag, needle):
+        pass # TODO
+
+    @register(r'^playlistid( (?P<songid>\S+))*$')
+    def _playlistid(self, songid=None):
+        pass # TODO
+
+    @register(r'^playlistinfo( ((?P<position>\d+)|(?P<start>\d+):(?P<end>\d+)*))*$')
+    def _playlistinfo(self, position=None, start=None, end=None):
+        pass # TODO
+
+    @register(r'^playlistsearch (?P<tag>\S+) (?P<needle>\S+)$')
+    def _playlistsearch(self, tag, needle):
         pass # TODO
 
     @register(r'^plchanges (?P<version>\d+)$')
     def _plchanges(self, version):
         return self.backend.playlist_changes(version)
+
+    @register(r'^plchangesposid (?P<version>\d+)$')
+    def _plchangesposid(self, version):
+        pass # TODO
+
+    @register(r'^previous$')
+    def _previous(self):
+        pass # TODO
 
     @register(r'^random (?P<state>[01])$')
     def _random(self, state):
@@ -139,6 +192,10 @@ class MpdHandler(object):
             volume = 100
         pass # TODO
 
+    @register(r'^shuffle( (?P<start>\d+):(?P<end>\d+)*)*$')
+    def _shuffle(self, start=None, end=None):
+        pass # TODO
+
     @register(r'^single (?P<state>[01])$')
     def _single(self, state):
         state = int(state)
@@ -177,3 +234,11 @@ class MpdHandler(object):
             'xfade': self.backend.status_xfade(),
             'state': self.backend.status_state(),
         }
+
+    @register(r'^swap (?P<position1>\d+) (?P<position2>\d+)$')
+    def _swap(self, position1, position2):
+        pass # TODO
+
+    @register(r'^swapid (?P<songid1>\S+) (?P<songid2>\S+)$')
+    def _swapid(self, songid1, songid2):
+        pass # TODO
