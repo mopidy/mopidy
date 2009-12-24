@@ -105,18 +105,18 @@ class MpdHandler(object):
 
     @register(r'^listplaylists$')
     def _listplaylists(self):
-        return self.backend.list_playlists()
+        return self.backend.playlists_list()
 
     @register(r'^load (?P<name>.+)$')
     def _load(self, name):
-        self.backend.load(name)
-        pass # TODO
+        return self.backend.playlist_load(name)
 
     @register(r'^lsinfo( "(?P<uri>[^"]*)")*$')
     def _lsinfo(self, uri):
         if uri == u'/':
             return self._listplaylists()
         pass # TODO
+        return self._listplaylists()
 
     @register(r'^move ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*) (?P<to>\d+)$')
     def _move(self, songpos=None, start=None, end=None, to=None):

@@ -3,15 +3,6 @@ class BaseBackend(object):
     def current_song(self):
         return None
 
-    def list_playlists(self):
-        return None
-
-    def playlist_changes(self, version):
-        return None
-
-    def load(self, name):
-        pass
-
 # Status methods
     def status_volume(self):
         return 0
@@ -43,3 +34,14 @@ class BaseBackend(object):
 # Control methods
     def stop(self):
         pass
+
+# Current/single playlist methods
+    def playlist_changes(self, version):
+        return None
+
+    def playlist_load(self, name):
+        pass
+
+# Stored playlist methods
+    def playlists_list(self):
+        return None
