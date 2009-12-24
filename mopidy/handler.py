@@ -3,7 +3,7 @@ import re
 import sys
 
 from mopidy import settings
-from mopidy.backends.spotify_backend import SpotifyBackend
+from mopidy.backends.spotify import SpotifyBackend
 
 logger = logging.getLogger('handler')
 
@@ -58,7 +58,7 @@ class MpdHandler(object):
     def _close(self):
         self.session.do_close()
 
-    @register(r'^consume (?P<state>[01])$')
+    @register(r'^consume "(?P<state>[01])"$')
     def _consume(self, state):
         state = int(state)
         if state:
@@ -66,7 +66,7 @@ class MpdHandler(object):
         else:
             pass # TODO
 
-    @register(r'^crossfade (?P<seconds>\d+)$')
+    @register(r'^crossfade "(?P<seconds>\d+)"$')
     def _crossfade(self, seconds):
         seconds = int(seconds)
         pass # TODO
@@ -202,7 +202,7 @@ class MpdHandler(object):
     def _rename(self, old_name, new_name):
         pass # TODO
 
-    @register(r'^random (?P<state>[01])$')
+    @register(r'^random "(?P<state>[01])"$')
     def _random(self, state):
         state = int(state)
         if state:
@@ -210,7 +210,7 @@ class MpdHandler(object):
         else:
             pass # TODO
 
-    @register(r'^repeat (?P<state>[01])$')
+    @register(r'^repeat "(?P<state>[01])"$')
     def _repeat(self, state):
         state = int(state)
         if state:
@@ -242,7 +242,7 @@ class MpdHandler(object):
     def _seekid(self, songid, seconds):
         pass # TODO
 
-    @register(r'^setvol (?P<volume>-*\d+)$')
+    @register(r'^setvol "(?P<volume>-*\d+)"$')
     def _setvol(self, volume):
         volume = int(volume)
         if volume < 0:
@@ -255,7 +255,7 @@ class MpdHandler(object):
     def _shuffle(self, start=None, end=None):
         pass # TODO
 
-    @register(r'^single (?P<state>[01])$')
+    @register(r'^single "(?P<state>[01])"$')
     def _single(self, state):
         state = int(state)
         if state:

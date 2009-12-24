@@ -4,8 +4,8 @@ MPD_LINE_TERMINATOR = u'\n'
 MPD_SERVER_HOSTNAME = u'localhost'
 MPD_SERVER_PORT = 6600
 
-SPOTIFY_USERNAME = ''
-SPOTIFY_PASSWORD = ''
+SPOTIFY_USERNAME = u''
+SPOTIFY_PASSWORD = u''
 
 try:
     from mopidy.local_settings import *

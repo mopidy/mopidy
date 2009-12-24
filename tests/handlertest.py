@@ -1,10 +1,11 @@
 import unittest
 
 from mopidy import handler
+from mopidy.backends.dummy import DummyBackend
 
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
@@ -33,7 +34,7 @@ class RequestHandlerTest(unittest.TestCase):
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
@@ -92,62 +93,62 @@ class StatusHandlerTest(unittest.TestCase):
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     def test_consume_off(self):
-        result = self.h.handle_request(u'consume 0')
+        result = self.h.handle_request(u'consume "0"')
         self.assert_(result is None)
 
     def test_consume_on(self):
-        result = self.h.handle_request(u'consume 1')
+        result = self.h.handle_request(u'consume "1"')
         self.assert_(result is None)
 
     def test_crossfade(self):
-        result = self.h.handle_request(u'crossfade 10')
+        result = self.h.handle_request(u'crossfade "10"')
         self.assert_(result is None)
 
     def test_random_off(self):
-        result = self.h.handle_request(u'random 0')
+        result = self.h.handle_request(u'random "0"')
         self.assert_(result is None)
 
     def test_random_on(self):
-        result = self.h.handle_request(u'random 1')
+        result = self.h.handle_request(u'random "1"')
         self.assert_(result is None)
 
     def test_repeat_off(self):
-        result = self.h.handle_request(u'repeat 0')
+        result = self.h.handle_request(u'repeat "0"')
         self.assert_(result is None)
 
     def test_repeat_on(self):
-        result = self.h.handle_request(u'repeat 1')
+        result = self.h.handle_request(u'repeat "1"')
         self.assert_(result is None)
 
     def test_setvol_below_min(self):
-        result = self.h.handle_request(u'setvol -10')
+        result = self.h.handle_request(u'setvol "-10"')
         self.assert_(result is None)
 
     def test_setvol_min(self):
-        result = self.h.handle_request(u'setvol 0')
+        result = self.h.handle_request(u'setvol "0"')
         self.assert_(result is None)
 
     def test_setvol_middle(self):
-        result = self.h.handle_request(u'setvol 50')
+        result = self.h.handle_request(u'setvol "50"')
         self.assert_(result is None)
 
     def test_setvol_max(self):
-        result = self.h.handle_request(u'setvol 100')
+        result = self.h.handle_request(u'setvol "100"')
         self.assert_(result is None)
 
     def test_setvol_above_max(self):
-        result = self.h.handle_request(u'setvol 110')
+        result = self.h.handle_request(u'setvol "110"')
         self.assert_(result is None)
 
     def test_single_off(self):
-        result = self.h.handle_request(u'single 0')
+        result = self.h.handle_request(u'single "0"')
         self.assert_(result is None)
 
     def test_single_on(self):
-        result = self.h.handle_request(u'single 1')
+        result = self.h.handle_request(u'single "1"')
         self.assert_(result is None)
 
     def test_replay_gain_mode_off(self):
@@ -188,7 +189,7 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
 class PlaybackControlHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     def test_next(self):
         result = self.h.handle_request(u'next')
@@ -229,7 +230,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     def test_add(self):
         result = self.h.handle_request(u'add "file:///dev/urandom"')
@@ -347,7 +348,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     def test_listplaylist(self):
         result = self.h.handle_request(u'listplaylist name')
@@ -397,7 +398,7 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     pass # TODO
 
@@ -413,7 +414,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
 class StickersHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     pass # TODO
 
@@ -428,7 +429,8 @@ class DummySession(object):
 
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(session=DummySession())
+        self.h = handler.MpdHandler(session=DummySession(),
+            backend=DummyBackend)
 
     def test_close(self):
         result = self.h.handle_request(u'close')
@@ -452,13 +454,13 @@ class ConnectionHandlerTest(unittest.TestCase):
 
 class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     pass # TODO
 
 
 class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(backend=DummyBackend)
 
     pass # TODO
