@@ -26,7 +26,7 @@ class MpdServer(asyncore.dispatcher):
         self.close()
 
     def do_kill(self):
-        logger.info('Received "kill". Shutting down.')
+        logger.info(u'Received "kill". Shutting down.')
         self.handle_close()
         sys.exit(0)
 
