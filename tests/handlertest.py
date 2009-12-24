@@ -434,6 +434,10 @@ class ConnectionHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'close')
         self.assert_(result is None)
 
+    def test_empty_request(self):
+        result = self.h.handle_request(u'')
+        self.assert_(result is None)
+
     def test_kill(self):
         result = self.h.handle_request(u'kill')
         self.assert_(result is None)

@@ -83,6 +83,10 @@ class MpdHandler(object):
     def _deleteid(self, songid):
         pass # TODO
 
+    @register(r'^$')
+    def _empty(self):
+        pass
+
     @register(r'^idle( (?P<subsystems>.+))*$')
     def _idle(self, subsystems=None):
         pass # TODO
