@@ -419,16 +419,15 @@ class StickersHandlerTest(unittest.TestCase):
 
 
 class DummySession(object):
-    def close(self):
+    def close_when_done(self):
         pass
 
 
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler()
+        self.h = handler.MpdHandler(session=DummySession())
 
     def test_close(self):
-        self.h.session = DummySession()
         result = self.h.handle_request(u'close')
         self.assert_(result is None)
 
