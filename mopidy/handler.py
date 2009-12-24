@@ -1,5 +1,6 @@
 import logging
 import re
+import sys
 
 from mopidy import settings
 from mopidy.backends.spotify_backend import SpotifyBackend
@@ -55,7 +56,7 @@ class MpdHandler(object):
 
     @register(r'^close$')
     def _close(self):
-        self.session.close_when_done()
+        self.session.do_close()
 
     @register(r'^consume (?P<state>[01])$')
     def _consume(self, state):
@@ -82,13 +83,17 @@ class MpdHandler(object):
     def _deleteid(self, songid):
         pass # TODO
 
+    @register(r'^$')
+    def _empty(self):
+        pass
+
     @register(r'^idle( (?P<subsystems>.+))*$')
     def _idle(self, subsystems=None):
         pass # TODO
 
     @register(r'^kill$')
     def _kill(self):
-        pass # TODO
+        self.session.do_kill()
 
     @register(r'^listplaylist (?P<name>.+)$')
     def _listplaylist(self, name):
