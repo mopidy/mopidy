@@ -235,11 +235,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'add "file:///dev/urandom"')
         self.assert_(result is None)
 
-    def test_addid_without_position(self):
+    def test_addid_without_songpos(self):
         result = self.h.handle_request(u'addid "file:///dev/urandom"')
         self.assert_('id' in result)
 
-    def test_addid_with_position(self):
+    def test_addid_with_songpos(self):
         result = self.h.handle_request(u'addid "file:///dev/urandom" 0')
         self.assert_('id' in result)
 
@@ -247,7 +247,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'clear')
         self.assert_(result is None)
 
-    def test_delete_position(self):
+    def test_delete_songpos(self):
         result = self.h.handle_request(u'delete 5')
         self.assert_(result is None)
 
@@ -263,7 +263,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'deleteid 0')
         self.assert_(result is None)
 
-    def test_move_position(self):
+    def test_move_songpos(self):
         result = self.h.handle_request(u'move 5 0')
         self.assert_(result is None)
 
@@ -296,11 +296,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'playlistid 10')
         self.assert_(result is None)
 
-    def test_playlistinfo_without_position_or_range(self):
+    def test_playlistinfo_without_songpos_or_range(self):
         result = self.h.handle_request(u'playlistinfo')
         self.assert_(result is None)
 
-    def test_playlistinfo_with_position(self):
+    def test_playlistinfo_with_songpos(self):
         result = self.h.handle_request(u'playlistinfo 5')
         self.assert_(result is None)
 
@@ -317,7 +317,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(result is None)
 
     def test_plchanges(self):
-        result = self.h.handle_request(u'plchanges 0')
+        result = self.h.handle_request(u'plchanges "0"')
         self.assert_(result is None)
 
     def test_plchangesposid(self):
@@ -349,11 +349,50 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler()
 
-    def test_listplaylists(self):
-        result = self.h._listplaylists()
+    def test_listplaylist(self):
+        result = self.h.handle_request(u'listplaylist name')
         self.assert_(result is None)
 
-    pass # TODO
+    def test_listplaylistinfo(self):
+        result = self.h.handle_request(u'listplaylistinfo name')
+        self.assert_(result is None)
+
+    def test_listplaylists(self):
+        result = self.h.handle_request(u'listplaylists')
+        self.assert_(result is None)
+
+    def test_load(self):
+        result = self.h.handle_request(u'load name')
+        self.assert_(result is None)
+
+    def test_playlistadd(self):
+        result = self.h.handle_request(
+            u'playlistadd name "file:///dev/urandom"')
+        self.assert_(result is None)
+
+    def test_playlistclear(self):
+        result = self.h.handle_request(u'playlistclear name')
+        self.assert_(result is None)
+
+    def test_playlistdelete(self):
+        result = self.h.handle_request(u'playlistdelete name 5')
+        self.assert_(result is None)
+
+    def test_playlistmove(self):
+        result = self.h.handle_request(u'playlistmove name 5a 10')
+        self.assert_(result is None)
+
+    def test_rename(self):
+        result = self.h.handle_request(u'rename name new_name')
+        self.assert_(result is None)
+
+    def test_rm(self):
+        result = self.h.handle_request(u'rm name')
+        self.assert_(result is None)
+
+    def test_save(self):
+        result = self.h.handle_request(u'save name')
+        self.assert_(result is None)
 
 
 class MusicDatabaseHandlerTest(unittest.TestCase):

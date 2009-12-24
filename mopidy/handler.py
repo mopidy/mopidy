@@ -39,8 +39,8 @@ class MpdHandler(object):
     def _add(self, uri):
         pass # TODO
 
-    @register(r'^addid "(?P<uri>[^"]*)"( (?P<position>\d+))*$')
-    def _add(self, uri, position=None):
+    @register(r'^addid "(?P<uri>[^"]*)"( (?P<songpos>\d+))*$')
+    def _add(self, uri, songpos=None):
         pass # TODO
         return {'id': 0}
 
@@ -69,8 +69,8 @@ class MpdHandler(object):
     def _currentsong(self):
         return self.backend.current_song()
 
-    @register(r'^delete ((?P<position>\d+)|(?P<start>\d+):(?P<end>\d+)*)$')
-    def _delete(self, position=None, start=None, end=None):
+    @register(r'^delete ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*)$')
+    def _delete(self, songpos=None, start=None, end=None):
         pass # TODO
 
     @register(r'^deleteid (?P<songid>.*)$')
@@ -81,9 +81,21 @@ class MpdHandler(object):
     def _idle(self, subsystems=None):
         pass # TODO
 
+    @register(r'^listplaylist (?P<name>.+)$')
+    def _listplaylist(self, name):
+        pass # TODO
+
+    @register(r'^listplaylistinfo (?P<name>.+)$')
+    def _listplaylistinfo(self, name):
+        pass # TODO
+
     @register(r'^listplaylists$')
     def _listplaylists(self):
         return self.backend.list_playlists()
+
+    @register(r'^load (?P<name>.+)$')
+    def _load(self, name):
+        pass # TODO
 
     @register(r'^lsinfo( "(?P<uri>[^"]*)")*$')
     def _lsinfo(self, uri):
@@ -91,8 +103,8 @@ class MpdHandler(object):
             return self._listplaylists()
         pass # TODO
 
-    @register(r'^move ((?P<position>\d+)|(?P<start>\d+):(?P<end>\d+)*) (?P<to>\d+)$')
-    def _move(self, position=None, start=None, end=None, to=None):
+    @register(r'^move ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*) (?P<to>\d+)$')
+    def _move(self, songpos=None, start=None, end=None, to=None):
         pass # TODO
 
     @register(r'^moveid (?P<songid>\S+) (?P<to>\d+)$')
@@ -123,6 +135,18 @@ class MpdHandler(object):
     def _playlist(self):
         return self._playlistinfo()
 
+    @register(r'^playlistadd (?P<name>\S+) "(?P<uri>[^"]+)"$')
+    def _playlistadd(self, name, uri):
+        pass # TODO
+
+    @register(r'^playlistclear (?P<name>\S+)$')
+    def _playlistclear(self, name):
+        pass # TODO
+
+    @register(r'^playlistdelete (?P<name>\S+) (?P<songpos>\d+)$')
+    def _playlistdelete(self, name, songpos):
+        pass # TODO
+
     @register(r'^playlistfind (?P<tag>\S+) (?P<needle>\S+)$')
     def _playlistfind(self, tag, needle):
         pass # TODO
@@ -131,15 +155,19 @@ class MpdHandler(object):
     def _playlistid(self, songid=None):
         pass # TODO
 
-    @register(r'^playlistinfo( ((?P<position>\d+)|(?P<start>\d+):(?P<end>\d+)*))*$')
-    def _playlistinfo(self, position=None, start=None, end=None):
+    @register(r'^playlistinfo( ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*))*$')
+    def _playlistinfo(self, songpos=None, start=None, end=None):
+        pass # TODO
+
+    @register(r'^playlistmove (?P<name>\S+) (?P<songid>\S+) (?P<songpos>\d+)$')
+    def _playlistdelete(self, name, songid, songpos):
         pass # TODO
 
     @register(r'^playlistsearch (?P<tag>\S+) (?P<needle>\S+)$')
     def _playlistsearch(self, tag, needle):
         pass # TODO
 
-    @register(r'^plchanges (?P<version>\d+)$')
+    @register(r'^plchanges "(?P<version>\d+)"$')
     def _plchanges(self, version):
         return self.backend.playlist_changes(version)
 
@@ -149,6 +177,10 @@ class MpdHandler(object):
 
     @register(r'^previous$')
     def _previous(self):
+        pass # TODO
+
+    @register(r'^rename (?P<old_name>\S+) (?P<new_name>\S+)$')
+    def _rename(self, old_name, new_name):
         pass # TODO
 
     @register(r'^random (?P<state>[01])$')
@@ -173,7 +205,15 @@ class MpdHandler(object):
 
     @register(r'^replay_gain_status$')
     def _replay_gain_status(self):
-        return u'off'
+        return u'off' # TODO
+
+    @register(r'^rm (?P<name>\S+)$')
+    def _rm(self, name):
+        pass # TODO
+
+    @register(r'^save (?P<name>\S+)$')
+    def _save(self, name):
+        pass # TODO
 
     @register(r'^seek (?P<songpos>.+) (?P<seconds>\d+)$')
     def _seek(self, songpos, seconds):
@@ -235,8 +275,8 @@ class MpdHandler(object):
             'state': self.backend.status_state(),
         }
 
-    @register(r'^swap (?P<position1>\d+) (?P<position2>\d+)$')
-    def _swap(self, position1, position2):
+    @register(r'^swap (?P<songpos1>\d+) (?P<songpos2>\d+)$')
+    def _swap(self, songpos1, songpos2):
         pass # TODO
 
     @register(r'^swapid (?P<songid1>\S+) (?P<songid2>\S+)$')
