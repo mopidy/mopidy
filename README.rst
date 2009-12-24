@@ -42,19 +42,14 @@ Resources
 Installing despotify and spytify
 --------------------------------
 
-Check out the despotify source code::
+Check out the despotify source code revision 483 (or possibly newer)::
 
-    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@363 despotify
-
-As spytify does not seem up to date with the latest revision of despotify we
-explicitly fetch revision 363, which was when spytify was last changed.
+    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@483 despotify
 
 Install despotify's dependencies. At Debian/Ubuntu systems::
 
     sudo aptitude install libssl-dev zlib1g-dev libvorbis-dev \
-        libtool libncursesw5-dev libpulse-dev \
-        libgstreamer-plugins-base0.10-0 libgstreamer0.10-dev \
-        libao-dev
+        libtool libncursesw5-dev libao-dev
 
 Build and install despotify::
 
@@ -69,8 +64,8 @@ Install spytify's dependencies. At Debian/Ubuntu systems::
 Build and install spytify::
 
     cd despotify/src/bindings/python/
-    python setup.py build
-    sudo python setup.py install
+    make
+    sudo make install
 
 To validate that everything is working, run the ``test.py`` script which is
 distributed with spytify::
