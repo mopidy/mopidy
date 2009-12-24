@@ -422,7 +422,17 @@ class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler()
 
-    pass # TODO
+    def test_close(self):
+        result = self.h.handle_request(u'close')
+        self.assert_(result is None)
+
+    def test_kill(self):
+        result = self.h.handle_request(u'kill')
+        self.assert_(result is None)
+
+    def test_password(self):
+        result = self.h.handle_request(u'password "secret"')
+        self.assert_(result is None)
 
     def test_ping(self):
         result = self.h.handle_request(u'ping')

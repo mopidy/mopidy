@@ -52,6 +52,10 @@ class MpdHandler(object):
     def _clearerror(self):
         pass # TODO
 
+    @register(r'^close$')
+    def _close(self):
+        pass # TODO
+
     @register(r'^consume (?P<state>[01])$')
     def _consume(self, state):
         state = int(state)
@@ -79,6 +83,10 @@ class MpdHandler(object):
 
     @register(r'^idle( (?P<subsystems>.+))*$')
     def _idle(self, subsystems=None):
+        pass # TODO
+
+    @register(r'^kill$')
+    def _kill(self):
         pass # TODO
 
     @register(r'^listplaylist (?P<name>.+)$')
@@ -113,6 +121,10 @@ class MpdHandler(object):
 
     @register(r'^next$')
     def _next(self):
+        pass # TODO
+
+    @register(r'^password "(?P<password>[^"]+)"$')
+    def _password(self, password):
         pass # TODO
 
     @register(r'^pause (?P<state>[01])$')
