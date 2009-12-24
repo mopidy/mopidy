@@ -9,6 +9,7 @@ class BaseBackend(object):
     def playlist_changes(self, version):
         return None
 
+# Status methods
     def status_volume(self):
         return 0
 
@@ -35,3 +36,7 @@ class BaseBackend(object):
 
     def status_state(self):
         return 'stop'
+
+# Control methods
+    def stop(self):
+        pass

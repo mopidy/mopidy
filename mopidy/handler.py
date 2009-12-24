@@ -2,7 +2,7 @@ import logging
 import re
 
 from mopidy import settings
-from mopidy.backends.dummy_backend import DummyBackend
+from mopidy.backends.spotify_backend import SpotifyBackend
 
 logger = logging.getLogger('handler')
 
@@ -20,7 +20,7 @@ def register(pattern):
     return decorator
 
 class MpdHandler(object):
-    def __init__(self, backend=DummyBackend):
+    def __init__(self, backend=SpotifyBackend):
         self.register_backend(backend())
 
     def handle_request(self, request):
@@ -271,7 +271,7 @@ class MpdHandler(object):
 
     @register(r'^stop$')
     def _stop(self):
-        pass # TODO
+        self.backend.stop()
 
     @register(r'^status$')
     def _status(self):
