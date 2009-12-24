@@ -2,7 +2,7 @@ import unittest
 
 from mopidy import handler
 
-class HandlerTest(unittest.TestCase):
+class RequestHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler()
 
@@ -17,7 +17,7 @@ class HandlerTest(unittest.TestCase):
 
     def test_handling_unknown_request_returns_none(self):
         result = self.h.handle_request('an unhandled request')
-        self.assert_(result is None)
+        self.assertFalse(result)
 
     def test_handling_known_request(self):
         expected = 'magic'
@@ -25,33 +25,51 @@ class HandlerTest(unittest.TestCase):
         result = self.h.handle_request('known request')
         self.assertEquals(expected, result)
 
+    def test_register_backend(self):
+        expected = 'magic'
+        self.h.register_backend(expected)
+        self.assertEquals(expected, self.h.backend)
+
+
+class StatusHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    def test_clearerror(self):
+        result = self.h.handle_request(u'clearerror')
+        self.assert_(result is None)
+
     def test_currentsong(self):
-        result = self.h._currentsong()
+        result = self.h.handle_request(u'currentsong')
         self.assert_(result is None)
 
-    def test_listplaylists(self):
-        result = self.h._listplaylists()
+    def test_idle_without_subsystems(self):
+        result = self.h.handle_request(u'idle')
         self.assert_(result is None)
 
-    def test_lsinfo_for_root_returns_same_as_listplaylists(self):
-        lsinfo_result = self.h._lsinfo('/')
-        listplaylists_result = self.h._listplaylists()
-        self.assertEquals(lsinfo_result, listplaylists_result)
-
-    def test_lsinfo(self):
-        result = self.h._lsinfo('')
+    def test_idle_with_subsystems(self):
+        result = self.h.handle_request(u'idle database playlist')
         self.assert_(result is None)
 
-    def test_ping(self):
-        result = self.h._ping()
-        self.assert_(result is None)
-
-    def test_version(self):
-        result = self.h._plchanges('0')
-        self.assert_(result is None)
+    def test_stats(self):
+        result = self.h.handle_request(u'stats')
+        self.assert_('artists' in result)
+        self.assert_(int(result['artists']) >= 0)
+        self.assert_('albums' in result)
+        self.assert_(int(result['albums']) >= 0)
+        self.assert_('songs' in result)
+        self.assert_(int(result['songs']) >= 0)
+        self.assert_('uptime' in result)
+        self.assert_(int(result['uptime']) >= 0)
+        self.assert_('db_playtime' in result)
+        self.assert_(int(result['db_playtime']) >= 0)
+        self.assert_('db_update' in result)
+        self.assert_(int(result['db_update']) >= 0)
+        self.assert_('playtime' in result)
+        self.assert_(int(result['playtime']) >= 0)
 
     def test_status(self):
-        result = self.h._status()
+        result = self.h.handle_request(u'status')
         self.assert_('volume' in result)
         self.assert_(int(result['volume']) in xrange(0, 101))
         self.assert_('repeat' in result)
@@ -70,3 +88,209 @@ class HandlerTest(unittest.TestCase):
         self.assert_(int(result['xfade']) >= 0)
         self.assert_('state' in result)
         self.assert_(result['state'] in ('play', 'stop', 'pause'))
+
+
+class PlaybackOptionsHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    def test_consume_off(self):
+        result = self.h.handle_request(u'consume 0')
+        self.assert_(result is None)
+
+    def test_consume_on(self):
+        result = self.h.handle_request(u'consume 1')
+        self.assert_(result is None)
+
+    def test_crossfade(self):
+        result = self.h.handle_request(u'crossfade 10')
+        self.assert_(result is None)
+
+    def test_random_off(self):
+        result = self.h.handle_request(u'random 0')
+        self.assert_(result is None)
+
+    def test_random_on(self):
+        result = self.h.handle_request(u'random 1')
+        self.assert_(result is None)
+
+    def test_repeat_off(self):
+        result = self.h.handle_request(u'repeat 0')
+        self.assert_(result is None)
+
+    def test_repeat_on(self):
+        result = self.h.handle_request(u'repeat 1')
+        self.assert_(result is None)
+
+    def test_setvol_below_min(self):
+        result = self.h.handle_request(u'setvol -10')
+        self.assert_(result is None)
+
+    def test_setvol_min(self):
+        result = self.h.handle_request(u'setvol 0')
+        self.assert_(result is None)
+
+    def test_setvol_middle(self):
+        result = self.h.handle_request(u'setvol 50')
+        self.assert_(result is None)
+
+    def test_setvol_max(self):
+        result = self.h.handle_request(u'setvol 100')
+        self.assert_(result is None)
+
+    def test_setvol_above_max(self):
+        result = self.h.handle_request(u'setvol 110')
+        self.assert_(result is None)
+
+    def test_single_off(self):
+        result = self.h.handle_request(u'single 0')
+        self.assert_(result is None)
+
+    def test_single_on(self):
+        result = self.h.handle_request(u'single 1')
+        self.assert_(result is None)
+
+    def test_replay_gain_mode_off(self):
+        result = self.h.handle_request(u'replay_gain_mode off')
+        self.assert_(result is None)
+
+    def test_replay_gain_mode_track(self):
+        result = self.h.handle_request(u'replay_gain_mode track')
+        self.assert_(result is None)
+
+    def test_replay_gain_mode_album(self):
+        result = self.h.handle_request(u'replay_gain_mode album')
+        self.assert_(result is None)
+
+    def test_replay_gain_status_default(self):
+        expected = u'off'
+        result = self.h.handle_request(u'replay_gain_status')
+        self.assertEquals(expected, result)
+
+    def test_replay_gain_status_off(self):
+        expected = u'off'
+        self.h._replay_gain_mode(expected)
+        result = self.h.handle_request(u'replay_gain_status')
+        self.assertEquals(expected, result)
+
+    #def test_replay_gain_status_track(self):
+    #    expected = u'track'
+    #    self.h._replay_gain_mode(expected)
+    #    result = self.h.handle_request(u'replay_gain_status')
+    #    self.assertEquals(expected, result)
+
+    #def test_replay_gain_status_album(self):
+    #    expected = u'album'
+    #    self.h._replay_gain_mode(expected)
+    #    result = self.h.handle_request(u'replay_gain_status')
+    #    self.assertEquals(expected, result)
+
+
+class PlaybackControlHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    def test_next(self):
+        result = self.h.handle_request(u'next')
+        self.assert_(result is None)
+
+    def test_pause_off(self):
+        result = self.h.handle_request(u'pause 0')
+        self.assert_(result is None)
+
+    def test_pause_on(self):
+        result = self.h.handle_request(u'pause 1')
+        self.assert_(result is None)
+
+    def test_play(self):
+        result = self.h.handle_request(u'play 0')
+        self.assert_(result is None)
+
+    def test_playid(self):
+        result = self.h.handle_request(u'playid 0')
+        self.assert_(result is None)
+
+    def test_previous(self):
+        result = self.h.handle_request(u'previous')
+        self.assert_(result is None)
+
+    def test_seek(self):
+        result = self.h.handle_request(u'seek 0 30')
+        self.assert_(result is None)
+
+    def test_seekid(self):
+        result = self.h.handle_request(u'seekid 0 30')
+        self.assert_(result is None)
+
+    def test_stop(self):
+        result = self.h.handle_request(u'stop')
+        self.assert_(result is None)
+
+
+class CurrentPlaylistHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    pass # TODO
+
+    def test_plchanges(self):
+        result = self.h.handle_request(u'plchanges 0')
+        self.assert_(result is None)
+
+
+class StoredPlaylistsHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    def test_listplaylists(self):
+        result = self.h._listplaylists()
+        self.assert_(result is None)
+
+    pass # TODO
+
+
+class MusicDatabaseHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    pass # TODO
+
+    def test_lsinfo_for_root_returns_same_as_listplaylists(self):
+        lsinfo_result = self.h.handle_request(u'lsinfo "/"')
+        listplaylists_result = self.h.handle_request(u'listplaylists')
+        self.assertEquals(lsinfo_result, listplaylists_result)
+
+    def test_lsinfo(self):
+        result = self.h.handle_request(u'lsinfo ""')
+        self.assert_(result is None)
+
+
+class StickersHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    pass # TODO
+
+
+class ConnectionHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    pass # TODO
+
+    def test_ping(self):
+        result = self.h.handle_request(u'ping')
+        self.assert_(result is None)
+
+class AudioOutputHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    pass # TODO
+
+
+class ReflectionHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler()
+
+    pass # TODO
