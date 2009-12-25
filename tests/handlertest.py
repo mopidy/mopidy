@@ -5,7 +5,7 @@ from mopidy.backends.dummy import DummyBackend
 
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
@@ -26,15 +26,10 @@ class RequestHandlerTest(unittest.TestCase):
         result = self.h.handle_request('known request')
         self.assertEquals(expected, result)
 
-    def test_register_backend(self):
-        expected = 'magic'
-        self.h.register_backend(expected)
-        self.assertEquals(expected, self.h.backend)
-
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
@@ -93,7 +88,7 @@ class StatusHandlerTest(unittest.TestCase):
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_consume_off(self):
         result = self.h.handle_request(u'consume "0"')
@@ -189,7 +184,7 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
 class PlaybackControlHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_next(self):
         result = self.h.handle_request(u'next')
@@ -230,7 +225,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_add(self):
         result = self.h.handle_request(u'add "file:///dev/urandom"')
@@ -348,7 +343,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_listplaylist(self):
         result = self.h.handle_request(u'listplaylist name')
@@ -398,9 +393,55 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
-    pass # TODO
+    def test_count(self):
+        result = self.h.handle_request(u'count tag needle')
+        self.assert_(result is None)
+
+    def test_find_album(self):
+        result = self.h.handle_request(u'find album what')
+        self.assert_(result is None)
+
+    def test_find_artist(self):
+        result = self.h.handle_request(u'find artist what')
+        self.assert_(result is None)
+
+    def test_find_title(self):
+        result = self.h.handle_request(u'find title what')
+        self.assert_(result is None)
+
+    def test_find_else_should_fail(self):
+        result = self.h.handle_request(u'find somethingelse what')
+        self.assert_(result is False)
+
+    def test_findadd(self):
+        result = self.h.handle_request(u'findadd album what')
+        self.assert_(result is None)
+
+    def test_list_artist(self):
+        result = self.h.handle_request(u'list artist')
+        self.assert_(result is None)
+
+    def test_list_artist_with_artist_should_fail(self):
+        result = self.h.handle_request(u'list artist anartist')
+        self.assert_(result is False)
+
+    def test_list_album_without_artist(self):
+        result = self.h.handle_request(u'list album')
+        self.assert_(result is None)
+
+    def test_list_album_with_artist(self):
+        result = self.h.handle_request(u'list album anartist')
+        self.assert_(result is None)
+
+    def test_listall(self):
+        result = self.h.handle_request(u'listall "file:///dev/urandom"')
+        self.assert_(result is None)
+
+    def test_listallinfo(self):
+        result = self.h.handle_request(u'listallinfo "file:///dev/urandom"')
+        self.assert_(result is None)
 
     def test_lsinfo_for_root_returns_same_as_listplaylists(self):
         lsinfo_result = self.h.handle_request(u'lsinfo "/"')
@@ -411,10 +452,58 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'lsinfo ""')
         self.assert_(result is None)
 
+    def test_search_album(self):
+        result = self.h.handle_request(u'search album analbum')
+        self.assert_(result is None)
+
+    def test_search_artist(self):
+        result = self.h.handle_request(u'search artist anartist')
+        self.assert_(result is None)
+
+    def test_search_filename(self):
+        result = self.h.handle_request(u'search filename afilename')
+        self.assert_(result is None)
+
+    def test_search_title(self):
+        result = self.h.handle_request(u'search title atitle')
+        self.assert_(result is None)
+
+    def test_search_else_should_fail(self):
+        result = self.h.handle_request(u'search sometype something')
+        self.assert_(result is False)
+
+    def test_update_without_uri(self):
+        result = self.h.handle_request(u'update')
+        (label, jobid) = result.split(':', 1)
+        self.assertEquals(u'updating_db', label)
+        self.assert_(jobid.strip().isdigit())
+        self.assert_(int(jobid) >= 0)
+
+    def test_update_with_uri(self):
+        result = self.h.handle_request(u'update "file:///dev/urandom"')
+        (label, jobid) = result.split(':', 1)
+        self.assertEquals(u'updating_db', label)
+        self.assert_(jobid.strip().isdigit())
+        self.assert_(int(jobid) >= 0)
+
+    def test_rescan_without_uri(self):
+        result = self.h.handle_request(u'rescan')
+        (label, jobid) = result.split(':', 1)
+        self.assertEquals(u'updating_db', label)
+        self.assert_(jobid.strip().isdigit())
+        self.assert_(int(jobid) >= 0)
+
+    def test_rescan_with_uri(self):
+        result = self.h.handle_request(u'rescan "file:///dev/urandom"')
+        (label, jobid) = result.split(':', 1)
+        self.assertEquals(u'updating_db', label)
+        self.assert_(jobid.strip().isdigit())
+        self.assert_(int(jobid) >= 0)
+
 
 class StickersHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     pass # TODO
 
@@ -430,7 +519,7 @@ class DummySession(object):
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(session=DummySession(),
-            backend=DummyBackend)
+            backend=DummyBackend())
 
     def test_close(self):
         result = self.h.handle_request(u'close')
@@ -454,13 +543,17 @@ class ConnectionHandlerTest(unittest.TestCase):
 
 class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     pass # TODO
 
 
 class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
+
+    def test_urlhandlers(self):
+        result = self.h.handle_request(u'urlhandlers')
+        self.assert_('dummy:' in result)
 
     pass # TODO

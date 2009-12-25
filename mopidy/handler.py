@@ -21,9 +21,9 @@ def register(pattern):
     return decorator
 
 class MpdHandler(object):
-    def __init__(self, session=None, backend=SpotifyBackend):
+    def __init__(self, session=None, backend=None):
         self.session = session
-        self.register_backend(backend())
+        self.backend = backend
 
     def handle_request(self, request):
         for pattern in _request_handlers:
@@ -33,9 +33,6 @@ class MpdHandler(object):
                 return _request_handlers[pattern](self, **groups)
         logger.warning(u'Unhandled request: %s', request)
         return False
-
-    def register_backend(self, backend):
-        self.backend = backend
 
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):
@@ -66,6 +63,10 @@ class MpdHandler(object):
         else:
             pass # TODO
 
+    @register(r'^count (?P<tag>\S+) (?P<needle>\S+)$')
+    def _count(self, tag, needle):
+        pass # TODO
+
     @register(r'^crossfade "(?P<seconds>\d+)"$')
     def _crossfade(self, seconds):
         seconds = int(seconds)
@@ -87,6 +88,16 @@ class MpdHandler(object):
     def _empty(self):
         pass
 
+    @register(r'^find (?P<type>(album|artist|title)) (?P<what>.*)$')
+    def _find(self, type, what):
+        pass # TODO
+
+    @register(r'^findadd (?P<type>(album|artist|title)) (?P<what>.*)$')
+    def _findadd(self, type, what):
+        result = self._find(type, what)
+        # TODO Add result to current playlist
+        return result
+
     @register(r'^idle( (?P<subsystems>.+))*$')
     def _idle(self, subsystems=None):
         pass # TODO
@@ -94,6 +105,20 @@ class MpdHandler(object):
     @register(r'^kill$')
     def _kill(self):
         self.session.do_kill()
+
+    @register(r'^list (?P<type>(artist|album))( (?P<artist>.*))*$')
+    def _list(self, type, artist=None):
+        if type == u'artist' and artist is not None:
+            return False
+        pass # TODO
+
+    @register(r'^listall "(?P<uri>[^"]+)"')
+    def _listall(self, uri):
+        pass # TODO
+
+    @register(r'^listallinfo "(?P<uri>[^"]+)"')
+    def _listallinfo(self, uri):
+        pass # TODO
 
     @register(r'^listplaylist (?P<name>.+)$')
     def _listplaylist(self, name):
@@ -115,8 +140,7 @@ class MpdHandler(object):
     def _lsinfo(self, uri):
         if uri == u'/':
             return self._listplaylists()
-        # TODO
-        return self._listplaylists()
+        pass # TODO
 
     @register(r'^move ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*) (?P<to>\d+)$')
     def _move(self, songpos=None, start=None, end=None, to=None):
@@ -226,12 +250,20 @@ class MpdHandler(object):
     def _replay_gain_status(self):
         return u'off' # TODO
 
+    @register(r'^rescan( "(?P<uri>[^"]+)")*$')
+    def _update(self, uri=None):
+        return self._update(uri, rescan_unmodified_files=True)
+
     @register(r'^rm (?P<name>\S+)$')
     def _rm(self, name):
         pass # TODO
 
     @register(r'^save (?P<name>\S+)$')
     def _save(self, name):
+        pass # TODO
+
+    @register(r'^search (?P<type>(album|artist|filename|title)) (?P<what>.+)$')
+    def _search(self, type, what):
         pass # TODO
 
     @register(r'^seek (?P<songpos>.+) (?P<seconds>\d+)$')
@@ -301,3 +333,11 @@ class MpdHandler(object):
     @register(r'^swapid (?P<songid1>\S+) (?P<songid2>\S+)$')
     def _swapid(self, songid1, songid2):
         pass # TODO
+
+    @register(r'^update( "(?P<uri>[^"]+)")*$')
+    def _update(self, uri=None, rescan_unmodified_files=False):
+        return u'updating_db: 0' # TODO
+
+    @register(r'^urlhandlers$')
+    def _urlhandlers(self):
+        return self.backend.url_handlers()
