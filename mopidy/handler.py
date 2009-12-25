@@ -138,6 +138,8 @@ class MpdHandler(object):
     def _lsinfo(self, uri):
         if uri == u'/':
             return self._listplaylists()
+        elif uri is None:
+            return self._listplaylists()
         pass # TODO
 
     @register(r'^move ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*) (?P<to>\d+)$')
