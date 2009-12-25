@@ -42,7 +42,7 @@ class BaseBackend(object):
         pass
 
 # Current/single playlist methods
-    def playlist_changes(self, version):
+    def playlist_changes_since(self, version):
         return None
 
     def playlist_load(self, name):

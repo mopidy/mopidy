@@ -227,7 +227,7 @@ class MpdHandler(object):
 
     @register(r'^plchanges "(?P<version>\d+)"$')
     def _plchanges(self, version):
-        return self.backend.playlist_changes(version)
+        return self.backend.playlist_changes_since(version)
 
     @register(r'^plchangesposid (?P<version>\d+)$')
     def _plchangesposid(self, version):
