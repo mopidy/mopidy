@@ -43,7 +43,7 @@ class MpdHandler(object):
 
     @register(r'^addid "(?P<uri>[^"]*)"( (?P<songpos>\d+))*$')
     def _add(self, uri, songpos=None):
-        pass # TODO
+        # TODO
         return {'id': 0}
 
     @register(r'^clear$')
@@ -115,7 +115,7 @@ class MpdHandler(object):
     def _lsinfo(self, uri):
         if uri == u'/':
             return self._listplaylists()
-        pass # TODO
+        # TODO
         return self._listplaylists()
 
     @register(r'^move ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*) (?P<to>\d+)$')
