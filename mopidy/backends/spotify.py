@@ -111,6 +111,10 @@ class SpotifyBackend(BaseBackend):
     def playlists_list(self):
         return [u'playlist: %s' % decode(p.name) for p in self._playlists]
 
+    def playlist_changes_since(self, version='0'):
+        if int(version) < self._current_playlist_version:
+            return self._format_playlist(self._current_playlist)
+
     def playlist_info(self, songpos=None, start=None, end=None):
         if songpos is not None:
             songpos = int(songpos)
@@ -125,10 +129,6 @@ class SpotifyBackend(BaseBackend):
                 return self._format_playlist(self._current_playlist[start:],
                     range(start, len(self._current_playlist)))
         else:
-            return self._format_playlist(self._current_playlist)
-
-    def playlist_changes_since(self, version='0'):
-        if int(version) < self._current_playlist_version:
             return self._format_playlist(self._current_playlist)
 
     def stop(self):

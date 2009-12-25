@@ -39,16 +39,6 @@ class MpdHandler(object):
         logger.warning(u'Unhandled request: %s', request)
         return False
 
-    @register(r'^command_list_begin$')
-    def _command_list_begin(self):
-        self.response_buffer = []
-        self.buffer = True
-    
-    @register(r'^command_list_end$')
-    def _command_list_end(self):
-        self.buffer = False
-        return self.response_buffer
-
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):
         pass # TODO
@@ -69,6 +59,16 @@ class MpdHandler(object):
     @register(r'^close$')
     def _close(self):
         self.session.do_close()
+
+    @register(r'^command_list_begin$')
+    def _command_list_begin(self):
+        self.response_buffer = []
+        self.buffer = True
+
+    @register(r'^command_list_end$')
+    def _command_list_end(self):
+        self.buffer = False
+        return self.response_buffer
 
     @register(r'^consume "(?P<state>[01])"$')
     def _consume(self, state):
