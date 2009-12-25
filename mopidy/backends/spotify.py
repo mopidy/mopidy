@@ -63,6 +63,24 @@ class SpotifyBackend(BaseBackend):
             self._x_current_playlist_version = 0
         return self._x_current_playlist_version
 
+    def _format_track(self, track, pos=0):
+        result = []
+        result.append(u'file: %s' % track.get_uri())
+        result.append(u'Time: %d' % (track.length // 1000))
+        result.append(u'Artist: %s' % self._format_artists(track.artists))
+        result.append(u'Title: %s' % decode(track.title))
+        result.append(u'Album: %s' % decode(track.album))
+        result.append(u'Track: %d/0' % track.tracknumber)
+        result.append(u'Date: %s' % track.year)
+        result.append(u'Pos: %d' % pos)
+        result.append(u'Id: %d' % pos)
+        return result
+
+    def _format_artists(self, artists):
+        artist_names = [decode(artist.name) for artist in artists]
+        return u', '.join(artist_names)
+
+
     ### MPD handlers
 
     def play_id(self, songid):
@@ -82,14 +100,7 @@ class SpotifyBackend(BaseBackend):
     def playlist_changes(self, songpos):
         tracks = []
         for i, track in enumerate(self._current_playlist):
-            tracks.append(u'file: %s' % decode(track.track_id))
-            tracks.append(u'Time: %d' % (track.length // 1000))
-            tracks.append(u'Artist: %s' % decode(track.artists[0].name))
-            tracks.append(u'Title: %s' % decode(track.title))
-            tracks.append(u'Album: %s' % decode(track.album))
-            tracks.append(u'Track: %s' % track.tracknumber)
-            tracks.append(u'Pos: %d' % i)
-            tracks.append(u'Id: %d' % i)
+            tracks.extend(self._format_track(track, i))
         return tracks
 
     def stop(self):
