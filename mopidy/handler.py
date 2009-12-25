@@ -260,7 +260,7 @@ class MpdHandler(object):
     def _save(self, name):
         pass # TODO
 
-    @register(r'^search (?P<type>(album|artist|filename|title)) (?P<what>.+)$')
+    @register(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>.+)"$')
     def _search(self, type, what):
         pass # TODO
 

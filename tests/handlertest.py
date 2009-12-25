@@ -458,23 +458,23 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         self.assertEquals(lsinfo_result, listplaylists_result)
 
     def test_search_album(self):
-        result = self.h.handle_request(u'search album analbum')
+        result = self.h.handle_request(u'search "album" "analbum"')
         self.assert_(result is None)
 
     def test_search_artist(self):
-        result = self.h.handle_request(u'search artist anartist')
+        result = self.h.handle_request(u'search "artist" "anartist"')
         self.assert_(result is None)
 
     def test_search_filename(self):
-        result = self.h.handle_request(u'search filename afilename')
+        result = self.h.handle_request(u'search "filename" "afilename"')
         self.assert_(result is None)
 
     def test_search_title(self):
-        result = self.h.handle_request(u'search title atitle')
+        result = self.h.handle_request(u'search "title" "atitle"')
         self.assert_(result is None)
 
     def test_search_else_should_fail(self):
-        result = self.h.handle_request(u'search sometype something')
+        result = self.h.handle_request(u'search "sometype" "something"')
         self.assert_(result is False)
 
     def test_update_without_uri(self):
