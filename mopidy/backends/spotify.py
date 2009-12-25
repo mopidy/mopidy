@@ -6,7 +6,11 @@ import spytify
 from mopidy import settings
 from mopidy.backends.base import BaseBackend
 
-logger = logging.getLogger(u'spotify')
+logger = logging.getLogger(u'backends.spotify')
+
+PLAY = u'play'
+PAUSE = u'pause'
+STOP = u'stop'
 
 def encode(string):
     return string.encode('utf-8')
@@ -17,6 +21,7 @@ def decode(string):
 class SpotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(SpotifyBackend, self).__init__(*args, **kwargs)
+        self.mode = STOP
         logger.info(u'Connecting to Spotify')
         self.spotify = spytify.Spytify(self._username, self._password)
         logger.info(u'Preloading data')
@@ -83,7 +88,13 @@ class SpotifyBackend(BaseBackend):
 
     ### MPD handlers
 
+    def current_song(self):
+        track = self.spotify.current_track
+        if track is not None and self.mode in (PLAY, PAUSE):
+            return self._format_track(track)
+
     def play_id(self, songid):
+        self.mode = PLAY
         track = self._current_playlist[songid]
         self.spotify.play(track)
 
@@ -111,6 +122,7 @@ class SpotifyBackend(BaseBackend):
         return tracks
 
     def stop(self):
+        self.mode = STOP
         self.spotify.stop()
 
     def status_playlist(self):
