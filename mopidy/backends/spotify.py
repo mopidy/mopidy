@@ -97,10 +97,17 @@ class SpotifyBackend(BaseBackend):
     def playlists_list(self):
         return [u'playlist: %s' % decode(p.name) for p in self._playlists]
 
+    def playlist_info(self, songpos, start, end):
+        return self.playlist_changes(songpos)
+
     def playlist_changes(self, songpos):
         tracks = []
-        for i, track in enumerate(self._current_playlist):
-            tracks.extend(self._format_track(track, i))
+        if songpos:
+            track = self._current_playlist[int(songpos)]
+            tracks.extend(self._format_track(track, int(songpos)))
+        else:
+            for i, track in enumerate(self._current_playlist):
+                tracks.extend(self._format_track(track, i))
         return tracks
 
     def stop(self):

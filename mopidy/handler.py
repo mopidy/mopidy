@@ -23,14 +23,31 @@ class MpdHandler(object):
         self.session = session
         self.backend = backend
 
+        self.buffer = False
+
     def handle_request(self, request):
         for pattern in _request_handlers:
             matches = re.match(pattern, request)
             if matches is not None:
                 groups = matches.groupdict()
-                return _request_handlers[pattern](self, **groups)
+                response = _request_handlers[pattern](self, **groups)
+                if self.buffer:
+                    self.response_buffer.append(response)
+                    return None
+                else:
+                    return response
         logger.warning(u'Unhandled request: %s', request)
         return False
+
+    @register(r'^command_list_begin$')
+    def _command_list_begin(self):
+        self.response_buffer = []
+        self.buffer = True
+    
+    @register(r'^command_list_end$')
+    def _command_list_end(self):
+        self.buffer = False
+        return self.response_buffer
 
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):
