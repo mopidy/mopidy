@@ -340,3 +340,7 @@ class MpdHandler(object):
     @register(r'^update( "(?P<uri>[^"]+)")*$')
     def _update(self, uri=None, rescan_unmodified_files=False):
         return u'updating_db: 0' # TODO
+
+    @register(r'^urlhandlers$')
+    def _urlhandlers(self):
+        return self.backend.url_handlers()

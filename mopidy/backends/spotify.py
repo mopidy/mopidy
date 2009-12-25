@@ -28,4 +28,5 @@ class SpotifyBackend(BaseBackend):
             playlists.append(u'playlist: %s' % playlist.name.decode('utf-8'))
         return playlists
 
-
+    def url_handlers(self):
+        return [u'spotify:', u'http://open.spotify.com/']

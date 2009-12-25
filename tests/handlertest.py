@@ -557,4 +557,8 @@ class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend)
 
+    def test_urlhandlers(self):
+        result = self.h.handle_request(u'urlhandlers')
+        self.assert_('dummy:' in result)
+
     pass # TODO
