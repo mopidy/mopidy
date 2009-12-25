@@ -39,19 +39,19 @@ class BaseBackend(object):
 
 # Control methods
     def pause(self):
-        pass
+        self.state = self.PAUSE
 
-    def play(self, songid):
-        pass
+    def play_pos(self, songpos):
+        self.state = self.PLAY
 
     def play_id(self, songid):
-        pass
+        self.state = self.PLAY
 
     def resume(self):
-        pass
+        self.state = self.PLAY
 
     def stop(self):
-        pass
+        self.state = self.STOP
 
 # Current/single playlist methods
     def playlist_changes_since(self, version):

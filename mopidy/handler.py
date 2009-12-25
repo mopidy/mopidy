@@ -186,7 +186,7 @@ class MpdHandler(object):
 
     @register(r'^play "(?P<songpos>\d+)"$')
     def _play(self, songpos):
-        pass # TODO
+        return self.backend.play_pos(int(songpos))
 
     @register(r'^playid "(?P<songid>\d+)"$')
     def _playid(self, songid):

@@ -201,7 +201,8 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
 class PlaybackControlHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.b = DummyBackend()
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_next(self):
         result = self.h.handle_request(u'next')
@@ -210,18 +211,22 @@ class PlaybackControlHandlerTest(unittest.TestCase):
     def test_pause_off(self):
         result = self.h.handle_request(u'pause "0"')
         self.assert_(result is None)
+        self.assertEquals(self.b.PLAY, self.b.state)
 
     def test_pause_on(self):
         result = self.h.handle_request(u'pause "1"')
         self.assert_(result is None)
+        self.assertEquals(self.b.PAUSE, self.b.state)
 
     def test_play(self):
         result = self.h.handle_request(u'play "0"')
         self.assert_(result is None)
+        self.assertEquals(self.b.PLAY, self.b.state)
 
     def test_playid(self):
         result = self.h.handle_request(u'playid "0"')
         self.assert_(result is None)
+        self.assertEquals(self.b.PLAY, self.b.state)
 
     def test_previous(self):
         result = self.h.handle_request(u'previous')
@@ -238,6 +243,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
     def test_stop(self):
         result = self.h.handle_request(u'stop')
         self.assert_(result is None)
+        self.assertEquals(self.b.STOP, self.b.state)
 
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):

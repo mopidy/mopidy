@@ -100,6 +100,11 @@ class SpotifyBackend(BaseBackend):
         self.state = self.PAUSE
         self.spotify.pause()
 
+    def play_pos(self, songpos):
+        self.state = self.PLAY
+        track = self._current_playlist[songpos]
+        self.spotify.play(track)
+
     def play_id(self, songid):
         self.state = self.PLAY
         track = self._current_playlist[songid]
