@@ -502,31 +502,23 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_update_without_uri(self):
         result = self.h.handle_request(u'update')
-        (label, jobid) = result.split(':', 1)
-        self.assertEquals(u'updating_db', label)
-        self.assert_(jobid.strip().isdigit())
-        self.assert_(int(jobid) >= 0)
+        self.assert_('updating_db' in result)
+        self.assert_(result['updating_db'] >= 0)
 
     def test_update_with_uri(self):
         result = self.h.handle_request(u'update "file:///dev/urandom"')
-        (label, jobid) = result.split(':', 1)
-        self.assertEquals(u'updating_db', label)
-        self.assert_(jobid.strip().isdigit())
-        self.assert_(int(jobid) >= 0)
+        self.assert_('updating_db' in result)
+        self.assert_(result['updating_db'] >= 0)
 
     def test_rescan_without_uri(self):
         result = self.h.handle_request(u'rescan')
-        (label, jobid) = result.split(':', 1)
-        self.assertEquals(u'updating_db', label)
-        self.assert_(jobid.strip().isdigit())
-        self.assert_(int(jobid) >= 0)
+        self.assert_('updating_db' in result)
+        self.assert_(result['updating_db'] >= 0)
 
     def test_rescan_with_uri(self):
         result = self.h.handle_request(u'rescan "file:///dev/urandom"')
-        (label, jobid) = result.split(':', 1)
-        self.assertEquals(u'updating_db', label)
-        self.assert_(jobid.strip().isdigit())
-        self.assert_(int(jobid) >= 0)
+        self.assert_('updating_db' in result)
+        self.assert_(result['updating_db'] >= 0)
 
 
 class StickersHandlerTest(unittest.TestCase):
