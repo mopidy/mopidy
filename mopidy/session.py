@@ -13,7 +13,8 @@ class MpdSession(asynchat.async_chat):
         self.server = server
         self.client_address = client_address
         self.input_buffer = []
-        self.set_terminator(settings.MPD_LINE_TERMINATOR)
+        self.set_terminator(settings.MPD_LINE_TERMINATOR.encode(
+            settings.MPD_LINE_ENCODING))
         self.handler = handler_class(session=self, backend=backend)
         self.send_response(u'OK MPD %s' % get_mpd_version())
 
