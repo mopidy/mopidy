@@ -443,14 +443,19 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'listallinfo "file:///dev/urandom"')
         self.assert_(result is None)
 
+    def test_lsinfo_without_path_returns_same_as_listplaylists(self):
+        lsinfo_result = self.h.handle_request(u'lsinfo')
+        listplaylists_result = self.h.handle_request(u'listplaylists')
+        self.assertEquals(lsinfo_result, listplaylists_result)
+
+    def test_lsinfo_with_path(self):
+        result = self.h.handle_request(u'lsinfo ""')
+        self.assert_(result is None)
+
     def test_lsinfo_for_root_returns_same_as_listplaylists(self):
         lsinfo_result = self.h.handle_request(u'lsinfo "/"')
         listplaylists_result = self.h.handle_request(u'listplaylists')
         self.assertEquals(lsinfo_result, listplaylists_result)
-
-    def test_lsinfo(self):
-        result = self.h.handle_request(u'lsinfo ""')
-        self.assert_(result is None)
 
     def test_search_album(self):
         result = self.h.handle_request(u'search album analbum')

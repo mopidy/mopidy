@@ -136,9 +136,7 @@ class MpdHandler(object):
 
     @register(r'^lsinfo( "(?P<uri>[^"]*)")*$')
     def _lsinfo(self, uri):
-        if uri == u'/':
-            return self._listplaylists()
-        elif uri is None:
+        if uri == u'/' or uri is None:
             return self._listplaylists()
         pass # TODO
 
