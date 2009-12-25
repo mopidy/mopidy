@@ -7,12 +7,10 @@ from mopidy.backends.spotify import SpotifyBackend
 
 logger = logging.getLogger('handler')
 
-global _request_handlers
 _request_handlers = {}
 
 def register(pattern):
     def decorator(func):
-        global _request_handlers
         if pattern in _request_handlers:
             raise ValueError(u'Tried to redefine handler for %s with %s' % (
                 pattern, func))
