@@ -302,15 +302,15 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(result is None)
 
     def test_playlistinfo_with_songpos(self):
-        result = self.h.handle_request(u'playlistinfo 5')
+        result = self.h.handle_request(u'playlistinfo "5"')
         self.assert_(result is None)
 
     def test_playlistinfo_with_open_range(self):
-        result = self.h.handle_request(u'playlistinfo 10:')
+        result = self.h.handle_request(u'playlistinfo "10:"')
         self.assert_(result is None)
 
     def test_playlistinfo_with_closed_range(self):
-        result = self.h.handle_request(u'playlistinfo 10:20')
+        result = self.h.handle_request(u'playlistinfo "10:20"')
         self.assert_(result is None)
 
     def test_playlistsearch(self):

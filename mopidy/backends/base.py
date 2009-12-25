@@ -42,6 +42,9 @@ class BaseBackend(object):
     def playlist_load(self, name):
         pass
 
+    def playlist_info(self, songpos, start, end):
+        return None
+
 # Stored playlist methods
     def playlists_list(self):
         return None

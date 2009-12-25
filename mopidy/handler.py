@@ -174,9 +174,9 @@ class MpdHandler(object):
     def _playlistid(self, songid=None):
         pass # TODO
 
-    @register(r'^playlistinfo( ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*))*$')
+    @register(r'^playlistinfo( "((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*)")*$')
     def _playlistinfo(self, songpos=None, start=None, end=None):
-        pass # TODO
+        return self.backend.playlist_info(songpos, start, end)
 
     @register(r'^playlistmove (?P<name>\S+) (?P<songid>\S+) (?P<songpos>\d+)$')
     def _playlistdelete(self, name, songid, songpos):
