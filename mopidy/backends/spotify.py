@@ -63,10 +63,12 @@ class SpotifyBackend(BaseBackend):
             self._x_current_playlist_version = 0
         return self._x_current_playlist_version
 
-    def _format_playlist(self, playlist):
+    def _format_playlist(self, playlist, pos_range=None):
+        if pos_range is None:
+            pos_range = range(len(playlist))
         tracks = []
-        for i, track in enumerate(playlist):
-            tracks.extend(self._format_track(track, i))
+        for track, pos in zip(playlist, pos_range):
+            tracks.extend(self._format_track(track, pos))
         return tracks
 
     def _format_track(self, track, pos=0):
@@ -111,15 +113,19 @@ class SpotifyBackend(BaseBackend):
 
     def playlist_info(self, songpos=None, start=None, end=None):
         if songpos is not None:
-            result = [self._current_playlist[int(songpos)]]
+            songpos = int(songpos)
+            return self._format_track(self._current_playlist[songpos], songpos)
         elif start is not None:
+            start = int(start)
             if end is not None:
-                result = self._current_playlist[int(start):int(end)]
+                end = int(end)
+                return self._format_playlist(self._current_playlist[start:end],
+                    range(start, end))
             else:
-                result = self._current_playlist[int(start):]
+                return self._format_playlist(self._current_playlist[start:],
+                    range(start, len(self._current_playlist)))
         else:
-            result = self._current_playlist
-        return self._format_playlist(result)
+            return self._format_playlist(self._current_playlist)
 
     def playlist_changes_since(self, version='0'):
         if int(version) < self._current_playlist_version:
