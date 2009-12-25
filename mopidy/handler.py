@@ -332,17 +332,17 @@ class MpdHandler(object):
 
     @register(r'^status$')
     def _status(self):
-        return {
-            'volume': self.backend.status_volume(),
-            'repeat': self.backend.status_repeat(),
-            'random': self.backend.status_random(),
-            'single': self.backend.status_single(),
-            'consume': self.backend.status_consume(),
-            'playlist': self.backend.status_playlist(),
-            'playlistlength': self.backend.status_playlist_length(),
-            'xfade': self.backend.status_xfade(),
-            'state': self.backend.status_state(),
-        }
+        return [
+            ('volume', self.backend.status_volume()),
+            ('repeat', self.backend.status_repeat()),
+            ('random', self.backend.status_random()),
+            ('single', self.backend.status_single()),
+            ('consume', self.backend.status_consume()),
+            ('playlist', self.backend.status_playlist()),
+            ('playlistlength', self.backend.status_playlist_length()),
+            ('xfade', self.backend.status_xfade()),
+            ('state', self.backend.status_state()),
+        ]
 
     @register(r'^swap (?P<songpos1>\d+) (?P<songpos2>\d+)$')
     def _swap(self, songpos1, songpos2):

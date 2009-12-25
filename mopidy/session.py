@@ -46,8 +46,11 @@ class MpdSession(asynchat.async_chat):
             for line in response:
                 self.handle_response(line)
         elif isinstance(response, dict):
-            for key, value in response.items():
-                self.send_response(u'%s: %s' % (key, value))
+            for item in response.items():
+                self.handle_response(item)
+        elif isinstance(response, tuple):
+            (key, value) = response
+            self.send_response(u'%s: %s' % (key, value))
         elif response is not None:
             self.send_response(response)
 

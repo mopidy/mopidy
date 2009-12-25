@@ -68,20 +68,21 @@ class SpotifyBackend(BaseBackend):
             pos_range = range(len(playlist))
         tracks = []
         for track, pos in zip(playlist, pos_range):
-            tracks.extend(self._format_track(track, pos))
+            tracks.append(self._format_track(track, pos))
         return tracks
 
     def _format_track(self, track, pos=0):
-        result = []
-        result.append(u'file: %s' % track.get_uri())
-        result.append(u'Time: %d' % (track.length // 1000))
-        result.append(u'Artist: %s' % self._format_artists(track.artists))
-        result.append(u'Title: %s' % decode(track.title))
-        result.append(u'Album: %s' % decode(track.album))
-        result.append(u'Track: %d/0' % track.tracknumber)
-        result.append(u'Date: %s' % track.year)
-        result.append(u'Pos: %d' % pos)
-        result.append(u'Id: %d' % pos)
+        result = [
+            ('file', track.get_uri()),
+            ('Time', (track.length // 1000)),
+            ('Artist', self._format_artists(track.artists)),
+            ('Title', decode(track.title)),
+            ('Album', decode(track.album)),
+            ('Track', '%d/0' % track.tracknumber),
+            ('Date', track.year),
+            ('Pos', pos),
+            ('Id', pos),
+        ]
         return result
 
     def _format_artists(self, artists):
