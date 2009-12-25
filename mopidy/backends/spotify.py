@@ -1,3 +1,4 @@
+import logging
 import sys
 
 import spytify
@@ -5,10 +6,15 @@ import spytify
 from mopidy import settings
 from mopidy.backends.base import BaseBackend
 
+logger = logging.getLogger('spotify')
+
 class SpotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(SpotifyBackend, self).__init__(*args, **kwargs)
+
+        logger.debug('Signing in')
         self.spotify = spytify.Spytify(self.username, self.password)
+
         self._playlist_load_cache = None
         self.current_playlist = []
         self.current_playlist_version = 0

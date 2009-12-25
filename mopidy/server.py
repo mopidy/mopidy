@@ -5,15 +5,14 @@ import sys
 
 from mopidy import settings
 from mopidy.session import MpdSession
-from mopidy.backends.spotify import SpotifyBackend
 
 logger = logging.getLogger(u'server')
 
 class MpdServer(asyncore.dispatcher):
-    def __init__(self, session_class=MpdSession, backend=SpotifyBackend):
+    def __init__(self, session_class=MpdSession, backend=None):
         asyncore.dispatcher.__init__(self)
         self.session_class = session_class
-        self.backend = SpotifyBackend()
+        self.backend = backend
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
         self.bind((settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT))
