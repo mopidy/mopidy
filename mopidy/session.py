@@ -7,14 +7,14 @@ from mopidy.handler import MpdHandler
 logger = logging.getLogger(u'session')
 
 class MpdSession(asynchat.async_chat):
-    def __init__(self, server, client_socket, client_address,
-            handler=MpdHandler):
+    def __init__(self, server, client_socket, client_address, backend,
+            handler_class=MpdHandler):
         asynchat.async_chat.__init__(self, sock=client_socket)
         self.server = server
         self.client_address = client_address
         self.input_buffer = []
         self.set_terminator(settings.MPD_LINE_TERMINATOR)
-        self.handler = handler(session=self)
+        self.handler = handler_class(session=self, backend=backend)
         self.send_response(u'OK MPD %s' % get_mpd_version())
 
     def do_close(self):
@@ -51,4 +51,3 @@ class MpdSession(asynchat.async_chat):
         output = u'%s%s' % (output, settings.MPD_LINE_TERMINATOR)
         data = output.encode(settings.MPD_LINE_ENCODING)
         self.push(data)
-

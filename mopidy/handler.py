@@ -21,9 +21,9 @@ def register(pattern):
     return decorator
 
 class MpdHandler(object):
-    def __init__(self, session=None, backend=SpotifyBackend):
+    def __init__(self, session=None, backend=None):
         self.session = session
-        self.register_backend(backend())
+        self.backend = backend
 
     def handle_request(self, request):
         for pattern in _request_handlers:
@@ -33,9 +33,6 @@ class MpdHandler(object):
                 return _request_handlers[pattern](self, **groups)
         logger.warning(u'Unhandled request: %s', request)
         return False
-
-    def register_backend(self, backend):
-        self.backend = backend
 
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):

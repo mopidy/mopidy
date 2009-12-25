@@ -5,7 +5,7 @@ from mopidy.backends.dummy import DummyBackend
 
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
@@ -26,15 +26,10 @@ class RequestHandlerTest(unittest.TestCase):
         result = self.h.handle_request('known request')
         self.assertEquals(expected, result)
 
-    def test_register_backend(self):
-        expected = 'magic'
-        self.h.register_backend(expected)
-        self.assertEquals(expected, self.h.backend)
-
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
@@ -93,7 +88,7 @@ class StatusHandlerTest(unittest.TestCase):
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_consume_off(self):
         result = self.h.handle_request(u'consume "0"')
@@ -189,7 +184,7 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
 class PlaybackControlHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_next(self):
         result = self.h.handle_request(u'next')
@@ -230,7 +225,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_add(self):
         result = self.h.handle_request(u'add "file:///dev/urandom"')
@@ -348,7 +343,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_listplaylist(self):
         result = self.h.handle_request(u'listplaylist name')
@@ -398,7 +393,7 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_count(self):
         result = self.h.handle_request(u'count tag needle')
@@ -508,7 +503,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
 class StickersHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     pass # TODO
 
@@ -524,7 +519,7 @@ class DummySession(object):
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(session=DummySession(),
-            backend=DummyBackend)
+            backend=DummyBackend())
 
     def test_close(self):
         result = self.h.handle_request(u'close')
@@ -548,14 +543,14 @@ class ConnectionHandlerTest(unittest.TestCase):
 
 class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     pass # TODO
 
 
 class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend)
+        self.h = handler.MpdHandler(backend=DummyBackend())
 
     def test_urlhandlers(self):
         result = self.h.handle_request(u'urlhandlers')
