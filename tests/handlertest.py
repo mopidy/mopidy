@@ -199,11 +199,11 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(result is None)
 
     def test_play(self):
-        result = self.h.handle_request(u'play 0')
+        result = self.h.handle_request(u'play "0"')
         self.assert_(result is None)
 
     def test_playid(self):
-        result = self.h.handle_request(u'playid 0')
+        result = self.h.handle_request(u'playid "0"')
         self.assert_(result is None)
 
     def test_previous(self):
@@ -358,7 +358,7 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
         self.assert_(result is None)
 
     def test_load(self):
-        result = self.h.handle_request(u'load name')
+        result = self.h.handle_request(u'load "name"')
         self.assert_(result is None)
 
     def test_playlistadd(self):
