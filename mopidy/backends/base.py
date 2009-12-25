@@ -1,5 +1,11 @@
-
 class BaseBackend(object):
+    PLAY = u'play'
+    PAUSE = u'pause'
+    STOP = u'stop'
+
+    def __init__(self):
+        self.state = self.STOP
+
     def current_song(self):
         return None
 
@@ -29,7 +35,7 @@ class BaseBackend(object):
         return 0
 
     def status_state(self):
-        return 'stop'
+        return self.state
 
 # Control methods
     def stop(self):
