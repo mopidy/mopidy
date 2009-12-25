@@ -14,8 +14,6 @@ def main():
     _setup_logging(2)
     backend = SpotifyBackend()
     MpdServer(backend=backend)
-    print 'Please connect to %s port %s using a MPD client.' % (
-        settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT)
     asyncore.loop()
 
 def _setup_logging(verbosity_level):

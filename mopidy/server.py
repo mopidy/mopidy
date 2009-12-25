@@ -17,6 +17,8 @@ class MpdServer(asyncore.dispatcher):
         self.set_reuse_addr()
         self.bind((settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT))
         self.listen(1)
+        logger.info(u'Please connect to %s port %s using a MPD client.',
+            settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT)
 
     def handle_accept(self):
         (client_socket, client_address) = self.accept()
