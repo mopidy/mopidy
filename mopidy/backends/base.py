@@ -38,6 +38,9 @@ class BaseBackend(object):
     def play(self, songid):
         pass
 
+    def play_id(self, songid):
+        pass
+
 # Current/single playlist methods
     def playlist_changes(self, version):
         return None
