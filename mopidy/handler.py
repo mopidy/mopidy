@@ -107,7 +107,7 @@ class MpdHandler(object):
     def _listplaylists(self):
         return self.backend.playlists_list()
 
-    @register(r'^load (?P<name>.+)$')
+    @register(r'^load "(?P<name>.+)"$')
     def _load(self, name):
         return self.backend.playlist_load(name)
 
@@ -142,13 +142,13 @@ class MpdHandler(object):
     def _ping(self):
         pass
 
-    @register(r'^play (?P<songpos>.+)$')
+    @register(r'^play "(?P<songpos>\d+)"$')
     def _play(self, songpos):
         pass # TODO
 
-    @register(r'^playid (?P<songid>.+)$')
+    @register(r'^playid "(?P<songid>\d+)"$')
     def _playid(self, songid):
-        pass # TODO
+        return self.backend.play_id(int(songid))
 
     @register(r'^playlist$')
     def _playlist(self):

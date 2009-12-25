@@ -35,6 +35,9 @@ class BaseBackend(object):
     def stop(self):
         pass
 
+    def play(self, songid):
+        pass
+
 # Current/single playlist methods
     def playlist_changes(self, version):
         return None
