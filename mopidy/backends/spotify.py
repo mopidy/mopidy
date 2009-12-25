@@ -96,6 +96,10 @@ class SpotifyBackend(BaseBackend):
         if track is not None and self.state in (self.PLAY, self.PAUSE):
             return self._format_track(track)
 
+    def pause(self):
+        self.state = self.PAUSE
+        self.spotify.pause()
+
     def play_id(self, songid):
         self.state = self.PLAY
         track = self._current_playlist[songid]
@@ -130,6 +134,10 @@ class SpotifyBackend(BaseBackend):
                     range(start, len(self._current_playlist)))
         else:
             return self._format_playlist(self._current_playlist)
+
+    def resume(self):
+        self.state = self.PLAY
+        self.spotify.resume()
 
     def stop(self):
         self.state = self.STOP

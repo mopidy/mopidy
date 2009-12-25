@@ -173,9 +173,12 @@ class MpdHandler(object):
     def _password(self, password):
         pass # TODO
 
-    @register(r'^pause (?P<state>[01])$')
+    @register(r'^pause "(?P<state>[01])"$')
     def _pause(self, state):
-        pass # TODO
+        if int(state):
+            self.backend.pause()
+        else:
+            self.backend.resume()
 
     @register(r'^ping$')
     def _ping(self):

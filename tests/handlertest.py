@@ -208,11 +208,11 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(result is None)
 
     def test_pause_off(self):
-        result = self.h.handle_request(u'pause 0')
+        result = self.h.handle_request(u'pause "0"')
         self.assert_(result is None)
 
     def test_pause_on(self):
-        result = self.h.handle_request(u'pause 1')
+        result = self.h.handle_request(u'pause "1"')
         self.assert_(result is None)
 
     def test_play(self):
