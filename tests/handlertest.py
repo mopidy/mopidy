@@ -26,6 +26,23 @@ class RequestHandlerTest(unittest.TestCase):
         result = self.h.handle_request('known request')
         self.assertEquals(expected, result)
 
+class CommandListsTest(unittest.TestCase):
+    def setUp(self):
+        self.h = handler.MpdHandler(backend=DummyBackend())
+
+    def test_commandlist_begin(self):
+        self.h.handle_request(u'command_list_begin')
+        expected = 'magic'
+        handler._request_handlers['known request'] = lambda x: expected
+        result = self.h.handle_request('known request')
+        self.assert_(result is None)
+
+    def test_commandlist_end(self):
+        expected = 'magic'
+        self.test_commandlist_begin()
+        result = self.h.handle_request(u'command_list_end')
+        self.assert_(expected, result)
+
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
