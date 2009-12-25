@@ -50,12 +50,12 @@ class SpotifyBackend(BaseBackend):
         id = 0
 
         for track in self.current_playlist:
-            tracks.append(u'file: %s' % track.track_id.encode('utf-8'))
+            tracks.append(u'file: %s' % track.track_id.decode('utf-8'))
             tracks.append(u'Time: %d' % (track.length/1000))
-            tracks.append(u'Artist: %s' % track.artists[0].name.encode('utf-8'))
-            tracks.append(u'Title: %s' % track.title.encode('utf-8'))
-            tracks.append(u'Album: %s' % track.album.encode('utf-8'))
-            tracks.append(u'Track: %d' % track.tracknumber)
+            tracks.append(u'Artist: %s' % track.artists[0].name.decode('utf-8'))
+            tracks.append(u'Title: %s' % track.title.decode('utf-8'))
+            tracks.append(u'Album: %s' % track.album.decode('utf-8'))
+            tracks.append(u'Track: %s' % track.tracknumber)
             tracks.append(u'Pos: %d' % pos)
             tracks.append(u'Id: %d' % id)
 
