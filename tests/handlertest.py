@@ -4,6 +4,17 @@ from mopidy import handler
 from mopidy.backends.dummy import DummyBackend
 from mopidy.exceptions import MpdAckError
 
+class DummySession(object):
+    def do_close(self):
+        pass
+
+    def do_kill(self):
+        pass
+
+    def stats_uptime(self):
+        return 0
+
+
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
@@ -74,7 +85,8 @@ class CommandListsTest(unittest.TestCase):
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend()
-        self.h = handler.MpdHandler(backend=self.b)
+        self.s = DummySession()
+        self.h = handler.MpdHandler(backend=self.b, session=self.s)
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
@@ -137,6 +149,14 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(int(result['xfade']) >= 0)
         self.assert_('state' in result)
         self.assert_(result['state'] in ('play', 'stop', 'pause'))
+
+    def test_status_method_when_playlist_loaded(self):
+        self.b.status_playlist_length = lambda: 1
+        result = dict(self.h._status())
+        self.assert_('song' in result)
+        self.assert_(int(result['song']) >= 0)
+        self.assert_('songid' in result)
+        self.assert_(int(result['songid']) >= 0)
 
     def test_status_method_when_playing(self):
         self.b.state = self.b.PLAY
@@ -258,11 +278,14 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_pause_off(self):
+        self.h.handle_request(u'play')
+        self.h.handle_request(u'pause "1"')
         result = self.h.handle_request(u'pause "0"')
         self.assert_(u'OK' in result)
         self.assertEquals(self.b.PLAY, self.b.state)
 
     def test_pause_on(self):
+        self.h.handle_request(u'play')
         result = self.h.handle_request(u'pause "1"')
         self.assert_(u'OK' in result)
         self.assertEquals(self.b.PAUSE, self.b.state)
@@ -589,14 +612,6 @@ class StickersHandlerTest(unittest.TestCase):
         self.h = handler.MpdHandler(backend=DummyBackend())
 
     pass # TODO
-
-
-class DummySession(object):
-    def do_close(self):
-        pass
-
-    def do_kill(self):
-        pass
 
 
 class ConnectionHandlerTest(unittest.TestCase):
