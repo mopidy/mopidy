@@ -37,11 +37,8 @@ class MpdSession(asynchat.async_chat):
         self.handle_request(input)
 
     def handle_request(self, input):
-        try:
-            response = self.handler.handle_request(input)
-            self.handle_response(response)
-        except MpdAckError, e:
-            self.send_response(u'ACK %s' % e)
+        response = self.handler.handle_request(input)
+        self.handle_response(response)
 
     def handle_response(self, response):
         for line in response:
