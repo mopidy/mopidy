@@ -6,7 +6,7 @@ import sys
 from mopidy import settings
 from mopidy.session import MpdSession
 
-logger = logging.getLogger(u'server')
+logger = logging.getLogger(u'mpdserver')
 
 class MpdServer(asyncore.dispatcher):
     def __init__(self, session_class=MpdSession, backend=None):

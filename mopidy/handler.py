@@ -6,7 +6,7 @@ from mopidy import settings
 from mopidy.backends.spotify import SpotifyBackend
 from mopidy.exceptions import MpdAckError, MpdNotImplemented
 
-logger = logging.getLogger('handler')
+logger = logging.getLogger('mpdhandler')
 
 _request_handlers = {}
 
