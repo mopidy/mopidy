@@ -45,14 +45,28 @@ class MpdHandler(object):
                 result = _request_handlers[pattern](self, **groups)
                 if self.command_list is not False:
                     return None
-                response = []
-                if result is not None:
-                    response.append(result)
-                if add_ok:
-                    response.append(u'OK')
-                return flatten(response)
-        logger.warning(u'Unhandled request: %s', request)
-        raise MpdAckError(u'Unhandled request: %s' % request)
+                else:
+                    return self.handle_response(result, add_ok)
+        raise MpdAckError(u'Unknown command: %s' % request)
+
+    def handle_response(self, result, add_ok=True):
+        response = []
+        if result is None:
+            result = []
+        elif not isinstance(result, list):
+            result = [result]
+        for line in flatten(result):
+            if isinstance(line, dict):
+                for (key, value) in line.items():
+                    response.append(u'%s: %s' % (key, value))
+            elif isinstance(line, tuple):
+                (key, value) = line
+                response.append(u'%s: %s' % (key, value))
+            else:
+                response.append(line)
+        if add_ok:
+            response.append(u'OK')
+        return response
 
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):

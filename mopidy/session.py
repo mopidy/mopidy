@@ -44,17 +44,8 @@ class MpdSession(asynchat.async_chat):
             self.send_response(u'ACK %s' % e)
 
     def handle_response(self, response):
-        if isinstance(response, list):
-            for line in response:
-                self.handle_response(line)
-        elif isinstance(response, dict):
-            for item in response.items():
-                self.handle_response(item)
-        elif isinstance(response, tuple):
-            (key, value) = response
-            self.send_response(u'%s: %s' % (key, value))
-        elif response is not None:
-            self.send_response(response)
+        for line in response:
+            self.send_response(line)
 
     def send_response(self, output):
         logger.debug(u'Output: %s', output)

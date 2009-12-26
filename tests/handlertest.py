@@ -91,10 +91,12 @@ class StatusHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'idle database playlist')
         self.assert_(u'OK' in result)
 
-    def test_stats(self):
+    def test_stats_command(self):
         result = self.h.handle_request(u'stats')
         self.assert_(u'OK' in result)
-        result = result[0]
+
+    def test_stats_method(self):
+        result = self.h._stats()
         self.assert_('artists' in result)
         self.assert_(int(result['artists']) >= 0)
         self.assert_('albums' in result)
@@ -110,10 +112,12 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_('playtime' in result)
         self.assert_(int(result['playtime']) >= 0)
 
-    def test_status(self):
+    def test_status_command(self):
         result = self.h.handle_request(u'status')
         self.assert_(u'OK' in result)
-        result = dict(result)
+
+    def test_status_method(self):
+        result = dict(self.h._status())
         self.assert_('volume' in result)
         self.assert_(int(result['volume']) in xrange(0, 101))
         self.assert_('repeat' in result)
@@ -551,30 +555,22 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
     def test_update_without_uri(self):
         result = self.h.handle_request(u'update')
         self.assert_(u'OK' in result)
-        result = result[0]
-        self.assert_('updating_db' in result)
-        self.assert_(result['updating_db'] >= 0)
+        self.assert_(u'updating_db: 0' in result)
 
     def test_update_with_uri(self):
         result = self.h.handle_request(u'update "file:///dev/urandom"')
         self.assert_(u'OK' in result)
-        result = result[0]
-        self.assert_('updating_db' in result)
-        self.assert_(result['updating_db'] >= 0)
+        self.assert_(u'updating_db: 0' in result)
 
     def test_rescan_without_uri(self):
         result = self.h.handle_request(u'rescan')
         self.assert_(u'OK' in result)
-        result = result[0]
-        self.assert_('updating_db' in result)
-        self.assert_(result['updating_db'] >= 0)
+        self.assert_(u'updating_db: 0' in result)
 
     def test_rescan_with_uri(self):
         result = self.h.handle_request(u'rescan "file:///dev/urandom"')
         self.assert_(u'OK' in result)
-        result = result[0]
-        self.assert_('updating_db' in result)
-        self.assert_(result['updating_db'] >= 0)
+        self.assert_(u'updating_db: 0' in result)
 
 
 class StickersHandlerTest(unittest.TestCase):
