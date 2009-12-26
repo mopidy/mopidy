@@ -7,6 +7,15 @@ from mopidy.handler import MpdHandler
 
 logger = logging.getLogger(u'session')
 
+def indent(string, places=4, linebreak=settings.MPD_LINE_TERMINATOR):
+    lines = string.split(linebreak)
+    if len(lines) == 1:
+        return string
+    result = u''
+    for line in lines:
+        result += linebreak + ' ' * places + line
+    return result
+
 class MpdSession(asynchat.async_chat):
     def __init__(self, server, client_socket, client_address, backend,
             handler_class=MpdHandler):
@@ -33,7 +42,7 @@ class MpdSession(asynchat.async_chat):
         data = ''.join(self.input_buffer).strip()
         self.input_buffer = []
         input = data.decode(settings.MPD_LINE_ENCODING)
-        logger.debug(u'Input: %s', input)
+        logger.debug(u'Input: %s', indent(input))
         self.handle_request(input)
 
     def handle_request(self, input):
@@ -45,11 +54,10 @@ class MpdSession(asynchat.async_chat):
             return self.send_response(u'ACK %s' % e)
 
     def handle_response(self, response):
-        for line in response:
-            self.send_response(line)
+        self.send_response(settings.MPD_LINE_TERMINATOR.join(response))
 
     def send_response(self, output):
-        logger.debug(u'Output: %s', output)
+        logger.debug(u'Output: %s', indent(output))
         output = u'%s%s' % (output, settings.MPD_LINE_TERMINATOR)
         data = output.encode(settings.MPD_LINE_ENCODING)
         self.push(data)
