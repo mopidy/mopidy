@@ -195,3 +195,8 @@ class SpotifyBackend(BaseBackend):
 
     def url_handlers(self):
         return [u'spotify:', u'http://open.spotify.com/']
+
+# Music database methods
+    def search(self, type, what):
+        result = self.spotify.search(encode(u'%s:%s' % (type, what)))
+        return self._format_playlist(result.playlist.tracks)

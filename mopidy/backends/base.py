@@ -78,3 +78,7 @@ class BaseBackend(object):
 # Stored playlist methods
     def playlists_list(self):
         return None
+
+# Music database methods
+    def search(self, type, what):
+        return None
