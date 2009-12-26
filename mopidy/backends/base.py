@@ -34,11 +34,14 @@ class BaseBackend(object):
     def status_playlist_length(self):
         return 0
 
-    def status_xfade(self):
-        return 0
-
     def status_state(self):
         return self.state
+
+    def status_time(self):
+        return 0
+
+    def status_xfade(self):
+        return 0
 
 # Control methods
     def next(self):

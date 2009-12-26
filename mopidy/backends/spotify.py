@@ -143,7 +143,7 @@ class SpotifyBackend(BaseBackend):
     def current_song(self):
         try:
             track = self._current_playlist[self._current_song_id]
-            return self._format_track(track)
+            return self._format_track(track, self._current_song_id)
         except IndexError:
             return None
 
@@ -186,6 +186,12 @@ class SpotifyBackend(BaseBackend):
 
     def status_song_id(self):
         return self._current_song_id
+
+    def status_time(self):
+        if self.state is self.PLAY:
+            return u'0:00'
+        else:
+            return None
 
     def url_handlers(self):
         return [u'spotify:', u'http://open.spotify.com/']

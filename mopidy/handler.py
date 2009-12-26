@@ -385,6 +385,7 @@ class MpdHandler(object):
             ('state', self.backend.status_state()),
             ('song', self.backend.status_song_id()),
             ('songid', self.backend.status_song_id()),
+            ('time', self.backend.status_time()),
         ]
 
     @register(r'^swap (?P<songpos1>\d+) (?P<songpos2>\d+)$')
