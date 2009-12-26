@@ -527,19 +527,19 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_search_album(self):
         result = self.h.handle_request(u'search "album" "analbum"')
-        self.assert_(u'None', result)
+        self.assert_(u'OK' in result)
 
     def test_search_artist(self):
         result = self.h.handle_request(u'search "artist" "anartist"')
-        self.assert_(u'None', result)
+        self.assert_(u'OK' in result)
 
     def test_search_filename(self):
         result = self.h.handle_request(u'search "filename" "afilename"')
-        self.assert_(u'None', result)
+        self.assert_(u'OK' in result)
 
     def test_search_title(self):
         result = self.h.handle_request(u'search "title" "atitle"')
-        self.assert_(u'None', result)
+        self.assert_(u'OK' in result)
 
     def test_search_else_should_fail(self):
         try:
