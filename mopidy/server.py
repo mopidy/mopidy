@@ -2,6 +2,7 @@ import asyncore
 import logging
 import socket
 import sys
+import time
 
 from mopidy import settings
 from mopidy.session import MpdSession
@@ -17,6 +18,7 @@ class MpdServer(asyncore.dispatcher):
         self.set_reuse_addr()
         self.bind((settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT))
         self.listen(1)
+        self.started_at = int(time.time())
         logger.info(u'Please connect to %s port %s using an MPD client.',
             settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT)
 
@@ -34,3 +36,6 @@ class MpdServer(asyncore.dispatcher):
         self.handle_close()
         sys.exit(0)
 
+    @property
+    def uptime(self):
+        return int(time.time()) - self.started_at

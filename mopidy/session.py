@@ -61,3 +61,6 @@ class MpdSession(asynchat.async_chat):
         output = u'%s%s' % (output, settings.MPD_LINE_TERMINATOR)
         data = output.encode(settings.MPD_LINE_ENCODING)
         self.push(data)
+
+    def stats_uptime(self):
+        return self.server.uptime

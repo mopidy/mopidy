@@ -373,7 +373,7 @@ class MpdHandler(object):
             'artists': 0,
             'albums': 0,
             'songs': 0,
-            'uptime': 0,
+            'uptime': self.session.stats_uptime(),
             'db_playtime': 0,
             'db_update': 0,
             'playtime': 0,
