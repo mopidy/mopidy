@@ -10,6 +10,9 @@ class BaseBackend(object):
         return None
 
 # Status methods
+    def status_consume(self):
+        return 0
+
     def status_volume(self):
         return 0
 
@@ -22,7 +25,7 @@ class BaseBackend(object):
     def status_single(self):
         return 0
 
-    def status_consume(self):
+    def status_song_id(self):
         return 0
 
     def status_playlist(self):
@@ -38,6 +41,9 @@ class BaseBackend(object):
         return self.state
 
 # Control methods
+    def next(self):
+        pass
+
     def pause(self):
         self.state = self.PAUSE
 
@@ -46,6 +52,9 @@ class BaseBackend(object):
 
     def play_id(self, songid):
         self.state = self.PLAY
+
+    def previous(self):
+        pass
 
     def resume(self):
         self.state = self.PLAY

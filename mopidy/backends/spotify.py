@@ -63,6 +63,23 @@ class SpotifyBackend(BaseBackend):
             self._x_current_playlist_version = 0
         return self._x_current_playlist_version
 
+    @property
+    def _current_song_id(self):
+        if not hasattr(self, '_x_current_song_id'):
+            self._x_current_song_id = 0
+        return self._x_current_song_id
+
+    @_current_song_id.setter
+    def _current_song_id(self, songid):
+        if (self._current_playlist is None
+                or len(self._current_playlist) == 0
+                or songid < 0):
+            self._x_current_song_id = 0
+        elif songid >= len(self._current_playlist):
+            self._x_current_song_id = len(self._current_playlist) - 1
+        else:
+            self._x_current_song_id = songid
+
     def _format_playlist(self, playlist, pos_range=None):
         if pos_range is None:
             pos_range = range(len(playlist))
@@ -90,26 +107,45 @@ class SpotifyBackend(BaseBackend):
         return u', '.join(artist_names)
 
 
-    ### MPD handlers
-
-    def current_song(self):
-        track = self.spotify.current_track
-        if track is not None and self.state in (self.PLAY, self.PAUSE):
-            return self._format_track(track)
+# Control methods
+    def next(self):
+        self._current_song_id += 1
+        self.play_id(self._current_song_id)
 
     def pause(self):
         self.state = self.PAUSE
         self.spotify.pause()
 
     def play_pos(self, songpos):
-        self.state = self.PLAY
-        track = self._current_playlist[songpos]
-        self.spotify.play(track)
+        self.play_id(songpos)
 
     def play_id(self, songid):
         self.state = self.PLAY
+        self._current_song_id = songid
         track = self._current_playlist[songid]
         self.spotify.play(track)
+
+    def previous(self):
+        self._current_song_id -= 1
+        self.play_id(self._current_song_id)
+
+    def resume(self):
+        self.state = self.PLAY
+        self.spotify.resume()
+
+    def stop(self):
+        if self.state is not self.STOP:
+            self.state = self.STOP
+            self.spotify.stop()
+
+    ### MPD handlers
+
+    def current_song(self):
+        try:
+            track = self._current_playlist[self._current_song_id]
+            return self._format_track(track)
+        except IndexError:
+            return None
 
     def playlist_load(self, name):
         playlists = filter(lambda p: decode(p.name) == name, self._playlists)
@@ -141,19 +177,15 @@ class SpotifyBackend(BaseBackend):
         else:
             return self._format_playlist(self._current_playlist)
 
-    def resume(self):
-        self.state = self.PLAY
-        self.spotify.resume()
-
-    def stop(self):
-        self.state = self.STOP
-        self.spotify.stop()
-
+# Status methods
     def status_playlist(self):
         return self._current_playlist_version
 
     def status_playlist_length(self):
         return len(self._current_playlist)
+
+    def status_song_id(self):
+        return self._current_song_id
 
     def url_handlers(self):
         return [u'spotify:', u'http://open.spotify.com/']
