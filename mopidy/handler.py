@@ -135,7 +135,8 @@ class MpdHandler(object):
     def _currentsong(self):
         return self.backend.current_song()
 
-    @register(r'^delete ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*)$')
+    @register(r'^delete (?P<songpos>\d+)$')
+    @register(r'^delete (?P<start>\d+):(?P<end>\d+)*$')
     def _delete(self, songpos=None, start=None, end=None):
         raise MpdNotImplemented # TODO
 
@@ -157,7 +158,8 @@ class MpdHandler(object):
         # TODO Add result to current playlist
         #return result
 
-    @register(r'^idle( (?P<subsystems>.+))*$')
+    @register(r'^idle$')
+    @register(r'^idle (?P<subsystems>.+)$')
     def _idle(self, subsystems=None):
         raise MpdNotImplemented # TODO
 
@@ -190,7 +192,7 @@ class MpdHandler(object):
     def _listplaylists(self):
         return self.backend.playlists_list()
 
-    @register(r'^load "(?P<name>.+)"$')
+    @register(r'^load "(?P<name>[^"]+)"$')
     def _load(self, name):
         return self.backend.playlist_load(name)
 
@@ -200,7 +202,8 @@ class MpdHandler(object):
             return self._listplaylists()
         raise MpdNotImplemented # TODO
 
-    @register(r'^move ((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*) (?P<to>\d+)$')
+    @register(r'^move (?P<songpos>\d+) (?P<to>\d+)$')
+    @register(r'^move (?P<start>\d+):(?P<end>\d+)* (?P<to>\d+)$')
     def _move(self, songpos=None, start=None, end=None, to=None):
         raise MpdNotImplemented # TODO
 
@@ -263,7 +266,9 @@ class MpdHandler(object):
     def _playlistid(self, songid=None):
         return self.backend.playlist_info(songid, None, None)
 
-    @register(r'^playlistinfo( "((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*)")*$')
+    @register(r'^playlistinfo$')
+    @register(r'^playlistinfo "(?P<songpos>\d+)"$')
+    @register(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
     def _playlistinfo(self, songpos=None, start=None, end=None):
         return self.backend.playlist_info(songpos, start, end)
 
@@ -327,7 +332,7 @@ class MpdHandler(object):
     def _save(self, name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>.+)"$')
+    @register(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>[^"]+)"$')
     def _search(self, type, what):
         return self.backend.search(type, what)
 
@@ -348,7 +353,8 @@ class MpdHandler(object):
             volume = 100
         raise MpdNotImplemented # TODO
 
-    @register(r'^shuffle( (?P<start>\d+):(?P<end>\d+)*)*$')
+    @register(r'^shuffle$')
+    @register(r'^shuffle (?P<start>\d+):(?P<end>\d+)*$')
     def _shuffle(self, start=None, end=None):
         raise MpdNotImplemented # TODO
 
