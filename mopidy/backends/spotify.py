@@ -65,24 +65,24 @@ class SpotifyBackend(BaseBackend):
 
     @property
     def _current_track(self):
-        return self._current_playlist[self._current_song_id]
+        if self._current_song_pos is not None:
+            return self._current_playlist[self._current_song_pos]
 
     @property
-    def _current_song_id(self):
-        if not hasattr(self, '_x_current_song_id'):
-            self._x_current_song_id = 0
-        return self._x_current_song_id
+    def _current_song_pos(self):
+        if not hasattr(self, '_x_current_song_pos'):
+            self._x_current_song_pos = None
+        if self._current_playlist is None or len(self._current_playlist) == 0:
+            self._x_current_song_pos = None
+        elif self._x_current_song_pos < 0:
+            self._x_current_song_pos = 0
+        elif self._x_current_song_pos >= len(self._current_playlist):
+            self._x_current_song_pos = len(self._current_playlist) - 1
+        return self._x_current_song_pos
 
-    @_current_song_id.setter
-    def _current_song_id(self, songid):
-        if (self._current_playlist is None
-                or len(self._current_playlist) == 0
-                or songid < 0):
-            self._x_current_song_id = 0
-        elif songid >= len(self._current_playlist):
-            self._x_current_song_id = len(self._current_playlist) - 1
-        else:
-            self._x_current_song_id = songid
+    @_current_song_pos.setter
+    def _current_song_pos(self, songid):
+        self._x_current_song_pos = songid
 
     def _format_playlist(self, playlist, pos_range=None):
         if pos_range is None:
@@ -113,7 +113,7 @@ class SpotifyBackend(BaseBackend):
 # Control methods
 
     def next(self):
-        self._current_song_id += 1
+        self._current_song_pos += 1
         self.play()
 
     def pause(self):
@@ -123,23 +123,22 @@ class SpotifyBackend(BaseBackend):
     def play(self):
         if self.state == self.PAUSE:
             return self.resume()
-        super(SpotifyBackend, self).play()
-        self.spotify.play(self._current_track)
+        if self._current_track is not None:
+            super(SpotifyBackend, self).play()
+            self.spotify.play(self._current_track)
 
     def play_pos(self, songpos):
         super(SpotifyBackend, self).play_pos(songpos)
-        self._current_song_id = songpos
-        track = self._current_playlist[songid]
-        self.spotify.play(track)
+        self._current_song_pos = songpos
+        self.spotify.play(self._current_track)
 
     def play_id(self, songid):
         super(SpotifyBackend, self).play_id(songid)
-        self._current_song_id = songid
-        track = self._current_playlist[songid]
-        self.spotify.play(track)
+        self._current_song_pos = songid # XXX
+        self.spotify.play(self._current_track)
 
     def previous(self):
-        self._current_song_id -= 1
+        self._current_song_pos -= 1
         self.play()
 
     def resume(self):
@@ -147,20 +146,16 @@ class SpotifyBackend(BaseBackend):
         self.spotify.resume()
 
     def stop(self):
-        super(SpotifyBackend, self).stop()
-        self.spotify.stop()
+        if self.state != self.STOP:
+            super(SpotifyBackend, self).stop()
+            self.spotify.stop()
 
 # Unsorted
 
     def current_song(self):
-        try:
-            if self.state is not self.STOP:
-                track = self._current_playlist[self._current_song_id]
-                return self._format_track(track, self._current_song_id)
-            else:
-                return None
-        except IndexError:
-            return None
+        if self.state is not self.STOP and self._current_track is not None:
+            return self._format_track(self._current_track,
+                self._current_song_pos)
 
     def playlist_load(self, name):
         playlists = filter(lambda p: decode(p.name) == name, self._playlists)
@@ -204,10 +199,13 @@ class SpotifyBackend(BaseBackend):
         return len(self._current_playlist)
 
     def status_song_id(self):
-        return self._current_song_id
+        return self._current_song_pos # XXX
 
     def status_time_total(self):
-        return self._current_track.length // 1000
+        if self._current_track is not None:
+            return self._current_track.length // 1000
+        else:
+            return 0
 
     def url_handlers(self):
         return [u'spotify:', u'http://open.spotify.com/']
