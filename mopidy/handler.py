@@ -395,9 +395,10 @@ class MpdHandler(object):
             ('playlistlength', self.backend.status_playlist_length()),
             ('xfade', self.backend.status_xfade()),
             ('state', self.backend.status_state()),
-            ('song', self.backend.status_song_id()),
-            ('songid', self.backend.status_song_id()),
         ]
+        if self.backend.status_playlist_length() > 0:
+            result.append(('song', self.backend.status_song_id()))
+            result.append(('songid', self.backend.status_song_id()))
         if self.backend.state in (self.backend.PLAY, self.backend.PAUSE):
             result.append(('time', self.backend.status_time()))
             result.append(('bitrate', self.backend.status_bitrate()))
