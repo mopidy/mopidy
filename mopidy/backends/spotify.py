@@ -16,7 +16,6 @@ def decode(string):
 
 class SpotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
-        super(SpotifyBackend, self).__init__(*args, **kwargs)
         logger.info(u'Connecting to Spotify')
         self.spotify = spytify.Spytify(self._username, self._password)
         logger.info(u'Preloading data')
