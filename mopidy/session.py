@@ -2,6 +2,7 @@ import asynchat
 import logging
 
 from mopidy import get_mpd_version, settings
+from mopidy.exceptions import MpdAckError
 from mopidy.handler import MpdHandler
 
 logger = logging.getLogger(u'session')
@@ -36,10 +37,11 @@ class MpdSession(asynchat.async_chat):
         self.handle_request(input)
 
     def handle_request(self, input):
-        response = self.handler.handle_request(input)
-        self.handle_response(response)
-        if not self.handler.buffer:
-            self.send_response(u'OK')
+        try:
+            response = self.handler.handle_request(input)
+            self.handle_response(response)
+        except MpdAckError, e:
+            self.send_response(u'ACK %s' % e)
 
     def handle_response(self, response):
         if isinstance(response, list):

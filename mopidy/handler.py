@@ -4,6 +4,7 @@ import sys
 
 from mopidy import settings
 from mopidy.backends.spotify import SpotifyBackend
+from mopidy.exceptions import MpdAckError, MpdNotImplemented
 
 logger = logging.getLogger('handler')
 
@@ -18,26 +19,40 @@ def register(pattern):
         return func
     return decorator
 
+def flatten(the_list):
+    result = []
+    for element in the_list:
+        if isinstance(element, list):
+            result.extend(flatten(element))
+        else:
+            result.append(element)
+    return result
+
 class MpdHandler(object):
     def __init__(self, session=None, backend=None):
         self.session = session
         self.backend = backend
+        self.command_list = False
 
-        self.buffer = False
-
-    def handle_request(self, request):
+    def handle_request(self, request, add_ok=True):
+        if self.command_list is not False and request != u'command_list_end':
+            self.command_list.append(request)
+            return None
         for pattern in _request_handlers:
             matches = re.match(pattern, request)
             if matches is not None:
                 groups = matches.groupdict()
-                response = _request_handlers[pattern](self, **groups)
-                if self.buffer:
-                    self.response_buffer.append(response)
+                result = _request_handlers[pattern](self, **groups)
+                if self.command_list is not False:
                     return None
-                else:
-                    return response
+                response = []
+                if result is not None:
+                    response.append(result)
+                if add_ok:
+                    response.append(u'OK')
+                return flatten(response)
         logger.warning(u'Unhandled request: %s', request)
-        return False
+        raise MpdAckError(u'Unhandled request: %s' % request)
 
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):
@@ -62,13 +77,26 @@ class MpdHandler(object):
 
     @register(r'^command_list_begin$')
     def _command_list_begin(self):
-        self.response_buffer = []
-        self.buffer = True
+        self.command_list = []
+        self.command_list_ok = False
+
+    @register(r'^command_list_ok_begin$')
+    def _command_list_ok_begin(self):
+        self.command_list = []
+        self.command_list_ok = True
 
     @register(r'^command_list_end$')
     def _command_list_end(self):
-        self.buffer = False
-        return self.response_buffer
+        (command_list, self.command_list) = (self.command_list, False)
+        (command_list_ok, self.command_list_ok) = (self.command_list_ok, False)
+        result = []
+        for command in command_list:
+            response = self.handle_request(command, add_ok=False)
+            if response is not None:
+                result.append(response)
+            if command_list_ok:
+                response.append(u'list_OK')
+        return result
 
     @register(r'^consume "(?P<state>[01])"$')
     def _consume(self, state):
@@ -121,10 +149,9 @@ class MpdHandler(object):
     def _kill(self):
         self.session.do_kill()
 
-    @register(r'^list (?P<type>(artist|album))( (?P<artist>.*))*$')
+    @register(r'^list (?P<type>artist)$')
+    @register(r'^list (?P<type>album)( (?P<artist>.*))*$')
     def _list(self, type, artist=None):
-        if type == u'artist' and artist is not None:
-            return False
         pass # TODO
 
     @register(r'^listall "(?P<uri>[^"]+)"')
