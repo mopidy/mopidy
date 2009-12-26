@@ -145,8 +145,11 @@ class SpotifyBackend(BaseBackend):
 
     def current_song(self):
         try:
-            track = self._current_playlist[self._current_song_id]
-            return self._format_track(track, self._current_song_id)
+            if self.state is not self.STOP:
+                track = self._current_playlist[self._current_song_id]
+                return self._format_track(track, self._current_song_id)
+            else:
+                return None
         except IndexError:
             return None
 
