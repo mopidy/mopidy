@@ -77,7 +77,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_currentsong(self):
         result = self.h.handle_request(u'currentsong')
@@ -85,11 +85,11 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_idle_without_subsystems(self):
         result = self.h.handle_request(u'idle')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_idle_with_subsystems(self):
         result = self.h.handle_request(u'idle database playlist')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_stats_command(self):
         result = self.h.handle_request(u'stats')
@@ -144,71 +144,71 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
     def test_consume_off(self):
         result = self.h.handle_request(u'consume "0"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_consume_on(self):
         result = self.h.handle_request(u'consume "1"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_crossfade(self):
         result = self.h.handle_request(u'crossfade "10"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_random_off(self):
         result = self.h.handle_request(u'random "0"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_random_on(self):
         result = self.h.handle_request(u'random "1"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_repeat_off(self):
         result = self.h.handle_request(u'repeat "0"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_repeat_on(self):
         result = self.h.handle_request(u'repeat "1"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_setvol_below_min(self):
         result = self.h.handle_request(u'setvol "-10"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_setvol_min(self):
         result = self.h.handle_request(u'setvol "0"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_setvol_middle(self):
         result = self.h.handle_request(u'setvol "50"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_setvol_max(self):
         result = self.h.handle_request(u'setvol "100"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_setvol_above_max(self):
         result = self.h.handle_request(u'setvol "110"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_single_off(self):
         result = self.h.handle_request(u'single "0"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_single_on(self):
         result = self.h.handle_request(u'single "1"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_replay_gain_mode_off(self):
         result = self.h.handle_request(u'replay_gain_mode off')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_replay_gain_mode_track(self):
         result = self.h.handle_request(u'replay_gain_mode track')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_replay_gain_mode_album(self):
         result = self.h.handle_request(u'replay_gain_mode album')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_replay_gain_status_default(self):
         expected = u'off'
@@ -216,24 +216,26 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assert_(expected in result)
 
-    def test_replay_gain_status_off(self):
-        expected = u'off'
-        self.h._replay_gain_mode(expected)
-        result = self.h.handle_request(u'replay_gain_status')
-        self.assert_(u'OK' in result)
-        self.assert_(expected in result)
+    #def test_replay_gain_status_off(self):
+    #    expected = u'off'
+    #    self.h._replay_gain_mode(expected)
+    #    result = self.h.handle_request(u'replay_gain_status')
+    #    self.assert_(u'OK' in result)
+    #    self.assert_(expected in result)
 
     #def test_replay_gain_status_track(self):
     #    expected = u'track'
     #    self.h._replay_gain_mode(expected)
     #    result = self.h.handle_request(u'replay_gain_status')
-    #    self.assertEquals(expected, result)
+    #    self.assert_(u'OK' in result)
+    #    self.assert_(expected in result)
 
     #def test_replay_gain_status_album(self):
     #    expected = u'album'
     #    self.h._replay_gain_mode(expected)
     #    result = self.h.handle_request(u'replay_gain_status')
-    #    self.assertEquals(expected, result)
+    #    self.assert_(u'OK' in result)
+    #    self.assert_(expected in result)
 
 
 class PlaybackControlHandlerTest(unittest.TestCase):
@@ -271,11 +273,11 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
     def test_seek(self):
         result = self.h.handle_request(u'seek 0 30')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_seekid(self):
         result = self.h.handle_request(u'seekid 0 30')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_stop(self):
         result = self.h.handle_request(u'stop')
@@ -289,57 +291,51 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_add(self):
         result = self.h.handle_request(u'add "file:///dev/urandom"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_addid_without_songpos(self):
         result = self.h.handle_request(u'addid "file:///dev/urandom"')
-        self.assert_(u'OK' in result)
-        result = result[0]
-        self.assert_(u'id' in result)
-
-        self.assert_(u'id' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_addid_with_songpos(self):
         result = self.h.handle_request(u'addid "file:///dev/urandom" 0')
-        self.assert_(u'OK' in result)
-        result = result[0]
-        self.assert_(u'id' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_clear(self):
         result = self.h.handle_request(u'clear')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_delete_songpos(self):
         result = self.h.handle_request(u'delete 5')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_delete_open_range(self):
         result = self.h.handle_request(u'delete 10:')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_delete_closed_range(self):
         result = self.h.handle_request(u'delete 10:20')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_deleteid(self):
         result = self.h.handle_request(u'deleteid 0')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_move_songpos(self):
         result = self.h.handle_request(u'move 5 0')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_move_open_range(self):
         result = self.h.handle_request(u'move 10: 0')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_move_closed_range(self):
         result = self.h.handle_request(u'move 10:20 0')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_moveid(self):
         result = self.h.handle_request(u'moveid 0 10')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_playlist_returns_same_as_playlistinfo(self):
         playlist_result = self.h.handle_request(u'playlist')
@@ -348,7 +344,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_playlistfind(self):
         result = self.h.handle_request(u'playlistfind tag needle')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_playlistid_without_songid(self):
         result = self.h.handle_request(u'playlistid')
@@ -376,7 +372,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_playlistsearch(self):
         result = self.h.handle_request(u'playlistsearch tag needle')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_plchanges(self):
         result = self.h.handle_request(u'plchanges "0"')
@@ -384,27 +380,27 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_plchangesposid(self):
         result = self.h.handle_request(u'plchangesposid 0')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_shuffle_without_range(self):
         result = self.h.handle_request(u'shuffle')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_shuffle_with_open_range(self):
         result = self.h.handle_request(u'shuffle 10:')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_shuffle_with_closed_range(self):
         result = self.h.handle_request(u'shuffle 10:20')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_swap(self):
         result = self.h.handle_request(u'swap 10 20')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_swapid(self):
         result = self.h.handle_request(u'swapid 10 20')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
@@ -413,11 +409,11 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
     def test_listplaylist(self):
         result = self.h.handle_request(u'listplaylist name')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_listplaylistinfo(self):
         result = self.h.handle_request(u'listplaylistinfo name')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_listplaylists(self):
         result = self.h.handle_request(u'listplaylists')
@@ -430,31 +426,31 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
     def test_playlistadd(self):
         result = self.h.handle_request(
             u'playlistadd name "file:///dev/urandom"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_playlistclear(self):
         result = self.h.handle_request(u'playlistclear name')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_playlistdelete(self):
         result = self.h.handle_request(u'playlistdelete name 5')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_playlistmove(self):
         result = self.h.handle_request(u'playlistmove name 5a 10')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_rename(self):
         result = self.h.handle_request(u'rename name new_name')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_rm(self):
         result = self.h.handle_request(u'rm name')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_save(self):
         result = self.h.handle_request(u'save name')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
@@ -463,19 +459,19 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_count(self):
         result = self.h.handle_request(u'count tag needle')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_find_album(self):
         result = self.h.handle_request(u'find album what')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_find_artist(self):
         result = self.h.handle_request(u'find artist what')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_find_title(self):
         result = self.h.handle_request(u'find title what')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_find_else_should_fail(self):
         try:
@@ -486,11 +482,11 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_findadd(self):
         result = self.h.handle_request(u'findadd album what')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_list_artist(self):
         result = self.h.handle_request(u'list artist')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_list_artist_with_artist_should_fail(self):
         try:
@@ -501,19 +497,19 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_list_album_without_artist(self):
         result = self.h.handle_request(u'list album')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_list_album_with_artist(self):
         result = self.h.handle_request(u'list album anartist')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_listall(self):
         result = self.h.handle_request(u'listall "file:///dev/urandom"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_listallinfo(self):
         result = self.h.handle_request(u'listallinfo "file:///dev/urandom"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_lsinfo_without_path_returns_same_as_listplaylists(self):
         lsinfo_result = self.h.handle_request(u'lsinfo')
@@ -522,7 +518,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_lsinfo_with_path(self):
         result = self.h.handle_request(u'lsinfo ""')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_lsinfo_for_root_returns_same_as_listplaylists(self):
         lsinfo_result = self.h.handle_request(u'lsinfo "/"')
@@ -531,19 +527,19 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_search_album(self):
         result = self.h.handle_request(u'search "album" "analbum"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_search_artist(self):
         result = self.h.handle_request(u'search "artist" "anartist"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_search_filename(self):
         result = self.h.handle_request(u'search "filename" "afilename"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_search_title(self):
         result = self.h.handle_request(u'search "title" "atitle"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_search_else_should_fail(self):
         try:
@@ -607,7 +603,7 @@ class ConnectionHandlerTest(unittest.TestCase):
 
     def test_password(self):
         result = self.h.handle_request(u'password "secret"')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_ping(self):
         result = self.h.handle_request(u'ping')
