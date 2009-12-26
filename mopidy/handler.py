@@ -167,7 +167,7 @@ class MpdHandler(object):
 
     @register(r'^next$')
     def _next(self):
-        pass # TODO
+        return self.backend.next()
 
     @register(r'^password "(?P<password>[^"]+)"$')
     def _password(self, password):
@@ -212,9 +212,9 @@ class MpdHandler(object):
     def _playlistfind(self, tag, needle):
         pass # TODO
 
-    @register(r'^playlistid( (?P<songid>\S+))*$')
+    @register(r'^playlistid( "(?P<songid>\S+)")*$')
     def _playlistid(self, songid=None):
-        pass # TODO
+        return self.backend.playlist_info(songid, None, None)
 
     @register(r'^playlistinfo( "((?P<songpos>\d+)|(?P<start>\d+):(?P<end>\d+)*)")*$')
     def _playlistinfo(self, songpos=None, start=None, end=None):
@@ -238,7 +238,7 @@ class MpdHandler(object):
 
     @register(r'^previous$')
     def _previous(self):
-        pass # TODO
+        return self.backend.previous()
 
     @register(r'^rename (?P<old_name>\S+) (?P<new_name>\S+)$')
     def _rename(self, old_name, new_name):
@@ -342,6 +342,8 @@ class MpdHandler(object):
             ('playlistlength', self.backend.status_playlist_length()),
             ('xfade', self.backend.status_xfade()),
             ('state', self.backend.status_state()),
+            ('song', self.backend.status_song_id()),
+            ('songid', self.backend.status_song_id()),
         ]
 
     @register(r'^swap (?P<songpos1>\d+) (?P<songpos2>\d+)$')

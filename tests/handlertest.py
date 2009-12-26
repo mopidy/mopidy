@@ -312,7 +312,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(result is None)
 
     def test_playlistid_with_songid(self):
-        result = self.h.handle_request(u'playlistid 10')
+        result = self.h.handle_request(u'playlistid "10"')
         self.assert_(result is None)
 
     def test_playlistinfo_without_songpos_or_range(self):
