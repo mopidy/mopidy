@@ -73,7 +73,8 @@ class CommandListsTest(unittest.TestCase):
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.b = DummyBackend()
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
@@ -136,6 +137,15 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(int(result['xfade']) >= 0)
         self.assert_('state' in result)
         self.assert_(result['state'] in ('play', 'stop', 'pause'))
+
+    def test_status_method_when_playing(self):
+        self.b.state = self.b.PLAY
+        result = dict(self.h._status())
+        self.assert_('time' in result)
+        (position, total) = result['time'].split(':')
+        position = int(position)
+        total = int(total)
+        self.assert_(position <= total)
 
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):

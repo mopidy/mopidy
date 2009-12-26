@@ -64,6 +64,10 @@ class SpotifyBackend(BaseBackend):
         return self._x_current_playlist_version
 
     @property
+    def _current_track(self):
+        return self._current_playlist[self._current_song_id]
+
+    @property
     def _current_song_id(self):
         if not hasattr(self, '_x_current_song_id'):
             self._x_current_song_id = 0
@@ -106,42 +110,47 @@ class SpotifyBackend(BaseBackend):
         artist_names = [decode(artist.name) for artist in artists]
         return u', '.join(artist_names)
 
-
 # Control methods
+
     def next(self):
         self._current_song_id += 1
-        self.play_id(self._current_song_id)
+        self.play()
 
     def pause(self):
-        self.state = self.PAUSE
+        super(SpotifyBackend, self).pause()
         self.spotify.pause()
 
     def play(self):
-        self.play_id(self._current_song_id)
+        if self.state == self.PAUSE:
+            return self.resume()
+        super(SpotifyBackend, self).play()
+        self.spotify.play(self._current_track)
 
     def play_pos(self, songpos):
-        self.play_id(songpos)
+        super(SpotifyBackend, self).play_pos(songpos)
+        self._current_song_id = songpos
+        track = self._current_playlist[songid]
+        self.spotify.play(track)
 
     def play_id(self, songid):
-        self.state = self.PLAY
+        super(SpotifyBackend, self).play_id(songid)
         self._current_song_id = songid
         track = self._current_playlist[songid]
         self.spotify.play(track)
 
     def previous(self):
         self._current_song_id -= 1
-        self.play_id(self._current_song_id)
+        self.play()
 
     def resume(self):
-        self.state = self.PLAY
+        super(SpotifyBackend, self).resume()
         self.spotify.resume()
 
     def stop(self):
-        if self.state is not self.STOP:
-            self.state = self.STOP
-            self.spotify.stop()
+        super(SpotifyBackend, self).stop()
+        self.spotify.stop()
 
-    ### MPD handlers
+# Unsorted
 
     def current_song(self):
         try:
@@ -184,6 +193,7 @@ class SpotifyBackend(BaseBackend):
             return self._format_playlist(self._current_playlist)
 
 # Status methods
+
     def status_playlist(self):
         return self._current_playlist_version
 
@@ -193,16 +203,14 @@ class SpotifyBackend(BaseBackend):
     def status_song_id(self):
         return self._current_song_id
 
-    def status_time(self):
-        if self.state is self.PLAY:
-            return u'0:00'
-        else:
-            return None
+    def status_time_total(self):
+        return self._current_track.length // 1000
 
     def url_handlers(self):
         return [u'spotify:', u'http://open.spotify.com/']
 
 # Music database methods
+
     def search(self, type, what):
         result = self.spotify.search(encode(u'%s:%s' % (type, what)))
         return self._format_playlist(result.playlist.tracks)

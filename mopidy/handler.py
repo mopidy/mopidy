@@ -379,7 +379,7 @@ class MpdHandler(object):
 
     @register(r'^status$')
     def _status(self):
-        return [
+        result = [
             ('volume', self.backend.status_volume()),
             ('repeat', self.backend.status_repeat()),
             ('random', self.backend.status_random()),
@@ -391,8 +391,10 @@ class MpdHandler(object):
             ('state', self.backend.status_state()),
             ('song', self.backend.status_song_id()),
             ('songid', self.backend.status_song_id()),
-            ('time', self.backend.status_time()),
         ]
+        if self.backend.state in (self.backend.PLAY, self.backend.PAUSE):
+            result.append(('time', self.backend.status_time()))
+        return result
 
     @register(r'^swap (?P<songpos1>\d+) (?P<songpos2>\d+)$')
     def _swap(self, songpos1, songpos2):
