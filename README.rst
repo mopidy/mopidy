@@ -81,6 +81,13 @@ seconds, play for five more seconds, and quit.
 Running mopidy
 --------------
 
+Create a file name ``local_settings.py`` in the same directory as
+``settings.py``. Enter your Spotify Premium account's username and password
+into the file, like this::
+
+    SPOTIFY_USERNAME = u'myusername'
+    SPOTIFY_PASSWORD = u'mysecret'
+
 To start mopidy, go to the root of the mopidy project, then simply run::
 
     python mopidy
