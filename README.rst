@@ -16,29 +16,6 @@ modular, so we can extend it with other backends in the future, like file
 playback and other online music services such as Last.fm.
 
 
-Architecture
-------------
-
-**TODO**
-
-
-Resources
----------
-
-- MPD
-
-  - `MPD protocol documentation <http://www.musicpd.org/doc/protocol/>`_
-  - The original `MPD server <http://mpd.wikia.com/>`_
-
-- Spotify
-
-  - `spytify <http://despotify.svn.sourceforge.net/viewvc/despotify/src/bindings/python/>`_,
-    the Python bindings for `despotify <http://despotify.se/>`_
-  - `Spotify's official metadata API <http://developer.spotify.com/en/metadata-api/overview/>`_
-  - `pyspotify <http://code.google.com/p/pyspotify/>`_,
-    Python bindings for the official Spotify library, libspotify
-
-
 Installing despotify and spytify
 --------------------------------
 
@@ -111,3 +88,19 @@ Then, to run all tests::
 
     python tests
 
+
+Resources
+---------
+
+- MPD
+
+  - `MPD protocol documentation <http://www.musicpd.org/doc/protocol/>`_
+  - The original `MPD server <http://mpd.wikia.com/>`_
+
+- Spotify
+
+  - `spytify <http://despotify.svn.sourceforge.net/viewvc/despotify/src/bindings/python/>`_,
+    the Python bindings for `despotify <http://despotify.se/>`_
+  - `Spotify's official metadata API <http://developer.spotify.com/en/metadata-api/overview/>`_
+  - `pyspotify <http://code.google.com/p/pyspotify/>`_,
+    Python bindings for the official Spotify library, libspotify
