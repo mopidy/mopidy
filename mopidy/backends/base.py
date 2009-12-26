@@ -50,6 +50,9 @@ class BaseBackend(object):
     def pause(self):
         self.state = self.PAUSE
 
+    def play(self):
+        self.state = self.PLAY
+
     def play_pos(self, songpos):
         self.state = self.PLAY
 

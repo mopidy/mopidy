@@ -257,7 +257,12 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assertEquals(self.b.PAUSE, self.b.state)
 
-    def test_play(self):
+    def test_play_without_pos(self):
+        result = self.h.handle_request(u'play')
+        self.assert_(u'OK' in result)
+        self.assertEquals(self.b.PLAY, self.b.state)
+
+    def test_play_with_pos(self):
         result = self.h.handle_request(u'play "0"')
         self.assert_(u'OK' in result)
         self.assertEquals(self.b.PLAY, self.b.state)

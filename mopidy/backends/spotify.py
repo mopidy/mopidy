@@ -116,6 +116,9 @@ class SpotifyBackend(BaseBackend):
         self.state = self.PAUSE
         self.spotify.pause()
 
+    def play(self):
+        self.play_id(self._current_song_id)
+
     def play_pos(self, songpos):
         self.play_id(songpos)
 
