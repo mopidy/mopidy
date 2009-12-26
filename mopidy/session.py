@@ -1,7 +1,7 @@
 import asynchat
 import logging
 
-from mopidy import get_mpd_version, settings
+from mopidy import get_mpd_protocol_version, settings
 from mopidy.exceptions import MpdAckError
 from mopidy.handler import MpdHandler
 
@@ -17,7 +17,7 @@ class MpdSession(asynchat.async_chat):
         self.set_terminator(settings.MPD_LINE_TERMINATOR.encode(
             settings.MPD_LINE_ENCODING))
         self.handler = handler_class(session=self, backend=backend)
-        self.send_response(u'OK MPD %s' % get_mpd_version())
+        self.send_response(u'OK MPD %s' % get_mpd_protocol_version())
 
     def do_close(self):
         logger.info(u'Closing connection with [%s]:%s', *self.client_address)
