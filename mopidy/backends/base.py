@@ -18,7 +18,7 @@ class BaseBackend(object):
 
     @state.setter
     def state(self, new_state):
-        (old_state, self._state) = (self._state, new_state)
+        (old_state, self._state) = (self.state, new_state)
         logger.debug(u'Changing state: %s -> %s', old_state, new_state)
         if old_state in (self.PLAY, self.STOP) and new_state == self.PLAY:
             self._play_time_start()
@@ -123,10 +123,10 @@ class BaseBackend(object):
     def _play(self):
         raise MpdNotImplemented
 
-    def _play_id(self):
+    def _play_id(self, songid):
         raise MpdNotImplemented
 
-    def _play_pos(self):
+    def _play_pos(self, songpos):
         raise MpdNotImplemented
 
     def previous(self):
