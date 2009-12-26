@@ -112,43 +112,44 @@ class SpotifyBackend(BaseBackend):
 
 # Control methods
 
-    def next(self):
+    def _next(self):
         self._current_song_pos += 1
-        self.play()
-
-    def pause(self):
-        super(SpotifyBackend, self).pause()
-        self.spotify.pause()
-
-    def play(self):
-        if self.state == self.PAUSE:
-            return self.resume()
-        if self._current_track is not None:
-            super(SpotifyBackend, self).play()
-            self.spotify.play(self._current_track)
-
-    def play_pos(self, songpos):
-        super(SpotifyBackend, self).play_pos(songpos)
-        self._current_song_pos = songpos
         self.spotify.play(self._current_track)
+        return True
 
-    def play_id(self, songid):
-        super(SpotifyBackend, self).play_id(songid)
+    def _pause(self):
+        self.spotify.pause()
+        return True
+
+    def _play(self):
+        if self._current_track is not None:
+            self.spotify.play(self._current_track)
+            return True
+        else:
+            return False
+
+    def _play_id(self, songid):
         self._current_song_pos = songid # XXX
         self.spotify.play(self._current_track)
+        return True
 
-    def previous(self):
+    def _play_pos(self, songpos):
+        self._current_song_pos = songpos
+        self.spotify.play(self._current_track)
+        return True
+
+    def _previous(self):
         self._current_song_pos -= 1
-        self.play()
+        self.spotify.play(self._current_track)
+        return True
 
-    def resume(self):
-        super(SpotifyBackend, self).resume()
+    def _resume(self):
         self.spotify.resume()
+        return True
 
-    def stop(self):
-        if self.state != self.STOP:
-            super(SpotifyBackend, self).stop()
-            self.spotify.stop()
+    def _stop(self):
+        self.spotify.stop()
+        return True
 
 # Unsorted
 

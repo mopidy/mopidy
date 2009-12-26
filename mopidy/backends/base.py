@@ -1,5 +1,7 @@
 import time
 
+from mopidy.exceptions import MpdNotImplemented
+
 class BaseBackend(object):
     PLAY = u'play'
     PAUSE = u'pause'
@@ -65,36 +67,72 @@ class BaseBackend(object):
 
 # Control methods
     def next(self):
-        pass
+        self.stop()
+        if self._next():
+            self.state = self.PLAY
+            self._play_time_accumulated = 0
+            self._play_start = int(time.time())
+
+    def _next(self):
+        raise MpdNotImplemented
 
     def pause(self):
-        self.state = self.PAUSE
-        self._play_time_accumulated += int(time.time()) - self._play_start
+        if self.state == self.PLAY and self._pause():
+            self.state = self.PAUSE
+            self._play_time_accumulated += (
+                int(time.time()) - self._play_start)
 
-    def play(self):
-        self.state = self.PLAY
-        self._play_time_accumulated = 0
-        self._play_start = int(time.time())
+    def _pause(self):
+        raise MpdNotImplemented
 
-    def play_pos(self, songpos):
-        self.state = self.PLAY
-        self._play_time_accumulated = 0
-        self._play_start = int(time.time())
+    def play(self, songpos=None, songid=None):
+        if self.state == self.PAUSE and songpos is None and songid is None:
+            return self.resume()
+        self.stop()
+        if songpos is not None:
+            result = self._play_pos(songpos)
+        elif songid is not None:
+            result = self._play_id(songid)
+        else:
+            result = self._play()
+        if result:
+            self.state = self.PLAY
+            self._play_time_accumulated = 0
+            self._play_start = int(time.time())
 
-    def play_id(self, songid):
-        self.state = self.PLAY
-        self._play_time_accumulated = 0
-        self._play_start = int(time.time())
+    def _play(self):
+        raise MpdNotImplemented
+
+    def _play_id(self):
+        raise MpdNotImplemented
+
+    def _play_pos(self):
+        raise MpdNotImplemented
 
     def previous(self):
-        pass
+        self.stop()
+        if self._previous():
+            self.state = self.PLAY
+            self._play_time_accumulated = 0
+            self._play_start = int(time.time())
+
+    def _previous(self):
+        raise MpdNotImplemented
 
     def resume(self):
-        self.state = self.PLAY
-        self._play_start = int(time.time())
+        if self.state == self.PAUSE and self._resume():
+            self.state = self.PLAY
+            self._play_start = int(time.time())
+
+    def _resume(self):
+        raise MpdNotImplemented
 
     def stop(self):
-        self.state = self.STOP
+        if self.state != self.STOP and self._stop():
+            self.state = self.STOP
+
+    def _stop(self):
+        raise MpdNotImplemented
 
 # Current/single playlist methods
     def playlist_changes_since(self, version):
