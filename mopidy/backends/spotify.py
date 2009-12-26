@@ -194,6 +194,9 @@ class SpotifyBackend(BaseBackend):
 
 # Status methods
 
+    def status_bitrate(self):
+        return 320
+
     def status_playlist(self):
         return self._current_playlist_version
 

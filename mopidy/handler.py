@@ -394,6 +394,7 @@ class MpdHandler(object):
         ]
         if self.backend.state in (self.backend.PLAY, self.backend.PAUSE):
             result.append(('time', self.backend.status_time()))
+            result.append(('bitrate', self.backend.status_bitrate()))
         return result
 
     @register(r'^swap (?P<songpos1>\d+) (?P<songpos2>\d+)$')

@@ -14,6 +14,9 @@ class BaseBackend(object):
         return None
 
 # Status methods
+    def status_bitrate(self):
+        return 0
+
     def status_consume(self):
         return 0
 
