@@ -6,7 +6,7 @@ import spytify
 from mopidy import settings
 from mopidy.backends.base import BaseBackend
 
-logger = logging.getLogger(u'backends.spotify')
+logger = logging.getLogger(u'backends.despotify')
 
 def encode(string):
     return string.encode('utf-8')
@@ -14,7 +14,7 @@ def encode(string):
 def decode(string):
     return string.decode('utf-8')
 
-class SpotifyBackend(BaseBackend):
+class DespotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         logger.info(u'Connecting to Spotify')
         self.spotify = spytify.Spytify(self._username, self._password)

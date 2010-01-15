@@ -8,11 +8,11 @@ sys.path.insert(0,
 
 from mopidy import settings
 from mopidy.server import MpdServer
-from mopidy.backends.spotify import SpotifyBackend
+from mopidy.backends.despotify import DespotifyBackend
 
 def main():
     _setup_logging(2)
-    backend = SpotifyBackend()
+    backend = DespotifyBackend()
     MpdServer(backend=backend)
     asyncore.loop()
 

@@ -3,7 +3,6 @@ import re
 import sys
 
 from mopidy import settings
-from mopidy.backends.spotify import SpotifyBackend
 from mopidy.exceptions import MpdAckError, MpdNotImplemented
 
 logger = logging.getLogger('mpdhandler')
