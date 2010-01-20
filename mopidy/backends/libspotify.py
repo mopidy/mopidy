@@ -1,4 +1,5 @@
 import logging
+import threading
 
 from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
@@ -8,10 +9,14 @@ from mopidy.backends.base import BaseBackend
 
 logger = logging.getLogger(u'backends.libspotify')
 
-class LibspotifySession(SpotifySessionManager):
+class LibspotifySession(SpotifySessionManager, threading.Thread):
     def __init__(self, *args, **kwargs):
-        super(LibspotifySession, self).__init__(*args, **kwargs)
+        SpotifySessionManager.__init__(self, *args, **kwargs)
+        threading.Thread.__init__(self)
         self.audio = AlsaController()
+
+    def run(self):
+        self.connect()
 
     def logged_in(self, session, error):
         logger.info('Logged in')
@@ -48,4 +53,4 @@ class LibspotifyBackend(BaseBackend):
         self.spotify = LibspotifySession(
             config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
         logger.info(u'Connecting to Spotify')
-        self.spotify.connect()
+        self.spotify.start()
