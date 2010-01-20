@@ -6,7 +6,8 @@ import sys
 sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from mopidy import config, ConfigError
+from mopidy import config
+from mopidy.exceptions import ConfigError
 from mopidy.server import MpdServer
 from mopidy.backends.libspotify import LibspotifyBackend
 

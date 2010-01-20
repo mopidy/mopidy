@@ -1,3 +1,6 @@
+class ConfigError(Exception):
+    pass
+
 class MpdAckError(Exception):
     pass
 

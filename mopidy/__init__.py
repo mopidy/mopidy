@@ -1,13 +1,11 @@
 from mopidy import settings
+from mopidy.exceptions import ConfigError
 
 def get_version():
     return u'0'
 
 def get_mpd_protocol_version():
     return u'0.15.0'
-
-class ConfigError(Exception):
-    pass
 
 class Config(object):
     def __getattr__(self, attr):
