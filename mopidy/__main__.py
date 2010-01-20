@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from mopidy import settings
+from mopidy import config, ConfigError
 from mopidy.server import MpdServer
 from mopidy.backends.despotify import DespotifyBackend
 
@@ -24,7 +24,7 @@ def _setup_logging(verbosity_level):
     else:
         level = logging.INFO
     logging.basicConfig(
-        format=settings.CONSOLE_LOG_FORMAT,
+        format=config.CONSOLE_LOG_FORMAT,
         level=level,
     )
 
@@ -33,3 +33,5 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         sys.exit('\nInterrupted by user')
+    except ConfigError, e:
+        sys.exit('%s' % e)

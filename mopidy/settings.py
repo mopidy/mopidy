@@ -11,3 +11,4 @@ try:
     from mopidy.local_settings import *
 except ImportError:
     pass
+

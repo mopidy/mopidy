@@ -3,7 +3,7 @@ import sys
 
 import spytify
 
-from mopidy import settings
+from mopidy import config
 from mopidy.backends.base import BaseBackend
 
 logger = logging.getLogger(u'backends.despotify')
@@ -17,24 +17,11 @@ def decode(string):
 class DespotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         logger.info(u'Connecting to Spotify')
-        self.spotify = spytify.Spytify(self._username, self._password)
+        self.spotify = spytify.Spytify(
+            config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
         logger.info(u'Preloading data')
         self._playlists
         logger.debug(u'Done preloading data')
-
-    @property
-    def _username(self):
-        username = encode(settings.SPOTIFY_USERNAME)
-        if not username:
-            sys.exit(u'Setting SPOTIFY_USERNAME is not set.')
-        return username
-
-    @property
-    def _password(self):
-        password = encode(settings.SPOTIFY_PASSWORD)
-        if not password:
-            sys.exit(u'Setting SPOTIFY_PASSWORD is not set.')
-        return password
 
     @property
     def _playlists(self):
