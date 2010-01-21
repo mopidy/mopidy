@@ -14,18 +14,37 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
         SpotifySessionManager.__init__(self, *args, **kwargs)
         threading.Thread.__init__(self)
         self.audio = AlsaController()
+        self.queued = False
 
     def run(self):
         self.connect()
 
     def logged_in(self, session, error):
         logger.info('Logged in')
+        try:
+            self.playlists = session.playlist_container()
+            logger.debug('Got playlist container')
+        except Exception, e:
+            logger.exception(e)
 
     def logged_out(self, sess):
         logger.info('Logged out')
 
-    def metadata_updated(self, sess):
+    def metadata_updated(self, session):
         logger.debug('Metadata updated')
+
+        # XXX This should play the first song in your first playlist :-)
+        try:
+            if not self.queued:
+                playlist = self.playlists[0]
+                if playlist.is_loaded():
+                    if playlist[0].is_loaded():
+                        session.load(playlist[0])
+                        session.play(1)
+                        self.queued = True
+                        logger.info('Playing "%s"', playlist[0].name())
+        except Exception, e:
+            logger.exception(e)
 
     def connection_error(self, sess, error):
         logger.error('Connection error: %s', error)
