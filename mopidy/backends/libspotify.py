@@ -34,15 +34,19 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
         logger.debug('Metadata updated')
 
         # XXX This should play the first song in your first playlist :-)
+        playlist_no = 0
+        track_no = 0
         try:
             if not self.queued:
-                playlist = self.playlists[0]
-                if playlist.is_loaded():
-                    if playlist[0].is_loaded():
-                        session.load(playlist[0])
-                        session.play(1)
-                        self.queued = True
-                        logger.info('Playing "%s"', playlist[0].name())
+                if len(self.playlists) > playlist_no:
+                    playlist = self.playlists[playlist_no]
+                    if playlist.is_loaded():
+                        if playlist[track_no].is_loaded():
+                            session.load(playlist[track_no])
+                            session.play(1)
+                            self.queued = True
+                            logger.info('Playing "%s"',
+                                playlist[track_no].name())
         except Exception, e:
             logger.exception(e)
 
