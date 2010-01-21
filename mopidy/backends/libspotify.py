@@ -27,7 +27,7 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
         except Exception, e:
             logger.exception(e)
 
-    def logged_out(self, sess):
+    def logged_out(self, session):
         logger.info('Logged out')
 
     def metadata_updated(self, session):
@@ -46,25 +46,25 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
         except Exception, e:
             logger.exception(e)
 
-    def connection_error(self, sess, error):
+    def connection_error(self, session, error):
         logger.error('Connection error: %s', error)
 
-    def message_to_user(self, sess, message):
+    def message_to_user(self, session, message):
         logger.info(message)
 
-    def notify_main_thread(self, sess):
+    def notify_main_thread(self, session):
         logger.debug('Notify main thread')
 
     def music_delivery(self, *args, **kwargs):
         self.audio.music_delivery(*args, **kwargs)
 
-    def play_token_lost(self, sess):
+    def play_token_lost(self, session):
         logger.debug('Play token lost')
 
-    def log_message(self, sess, data):
+    def log_message(self, session, data):
         logger.debug(data)
 
-    def end_of_track(self, sess):
+    def end_of_track(self, session):
         logger.debug('End of track')
 
 class LibspotifyBackend(BaseBackend):
