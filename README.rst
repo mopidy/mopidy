@@ -46,10 +46,6 @@ Build and install despotify::
     make
     sudo make install
 
-Install spytify's dependencies. At Debian/Ubuntu systems::
-
-    sudo aptitude install python-pyrex
-
 Build and install spytify::
 
     cd despotify/src/bindings/python/
