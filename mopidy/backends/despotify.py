@@ -137,12 +137,7 @@ class DespotifyBackend(BaseBackend):
         self.spotify.stop()
         return True
 
-# Unsorted
-
-    def current_song(self):
-        if self.state is not self.STOP and self._current_track is not None:
-            return self._format_track(self._current_track,
-                self._current_song_pos)
+# Playlist methods
 
     def playlist_load(self, name):
         playlists = filter(lambda p: decode(p.name) == name, self._playlists)
@@ -175,6 +170,11 @@ class DespotifyBackend(BaseBackend):
             return self._format_playlist(self._current_playlist)
 
 # Status methods
+
+    def current_song(self):
+        if self.state is not self.STOP and self._current_track is not None:
+            return self._format_track(self._current_track,
+                self._current_song_pos)
 
     def status_bitrate(self):
         return 320
