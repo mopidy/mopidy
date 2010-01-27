@@ -13,7 +13,7 @@ from mopidy.backends.libspotify import LibspotifyBackend
 
 def main():
     _setup_logging(2)
-    backend = LibspotifyBackend()
+    backend = _get_backend(config.BACKEND)
     MpdServer(backend=backend)
     asyncore.loop()
 
@@ -28,6 +28,14 @@ def _setup_logging(verbosity_level):
         format=config.CONSOLE_LOG_FORMAT,
         level=level,
     )
+
+def _get_backend(name):
+    module_name = name[:name.rindex('.')]
+    class_name = name[name.rindex('.') + 1:]
+    module = __import__(module_name, globals(), locals(), [class_name], -1)
+    class_object = getattr(module, class_name)
+    instance = class_object()
+    return instance
 
 if __name__ == '__main__':
     try:
