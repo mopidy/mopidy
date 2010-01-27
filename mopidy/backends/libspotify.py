@@ -33,23 +33,6 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
     def metadata_updated(self, session):
         logger.debug('Metadata updated')
 
-        # XXX This should play the first song in your first playlist :-)
-        playlist_no = 0
-        track_no = 0
-        try:
-            if not self.queued:
-                if len(self.playlists) > playlist_no:
-                    playlist = self.playlists[playlist_no]
-                    if playlist.is_loaded():
-                        if playlist[track_no].is_loaded():
-                            session.load(playlist[track_no])
-                            session.play(1)
-                            self.queued = True
-                            logger.info('Playing "%s"',
-                                playlist[track_no].name())
-        except Exception, e:
-            logger.exception(e)
-
     def connection_error(self, session, error):
         logger.error('Connection error: %s', error)
 
@@ -70,6 +53,25 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
 
     def end_of_track(self, session):
         logger.debug('End of track')
+
+    def test(self):
+        # XXX This should play the first song in your first playlist :-)
+        playlist_no = 0
+        track_no = 0
+        try:
+            if not self.queued:
+                if len(self.playlists) > playlist_no:
+                    playlist = self.playlists[playlist_no]
+                    if playlist.is_loaded():
+                        if playlist[track_no].is_loaded():
+                            session.load(playlist[track_no])
+                            session.play(1)
+                            self.queued = True
+                            logger.info('Playing "%s"',
+                                playlist[track_no].name())
+        except Exception, e:
+            logger.exception(e)
+
 
 class LibspotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
