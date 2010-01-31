@@ -1,4 +1,4 @@
-from mopidy.backends.base import BaseBackend
+from mopidy.backends import BaseBackend
 
 class DummyBackend(BaseBackend):
     def url_handlers(self):

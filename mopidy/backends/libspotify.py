@@ -5,7 +5,7 @@ from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
 
 from mopidy import config
-from mopidy.backends.base import BaseBackend
+from mopidy.backends import BaseBackend
 
 logger = logging.getLogger(u'backends.libspotify')
 
