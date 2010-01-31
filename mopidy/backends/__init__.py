@@ -212,9 +212,6 @@ class BaseBackend(object):
         else:
             self._current_playlist = None
 
-    def playlists_list(self):
-        return [u'playlist: %s' % p.name for p in self._playlists]
-
     def playlist_changes_since(self, version='0'):
         if int(version) < self._current_playlist_version:
             return self._current_playlist.mpd_format()
@@ -234,7 +231,7 @@ class BaseBackend(object):
 # Stored playlist methods
 
     def playlists_list(self):
-        return None
+        return [u'playlist: %s' % p.name for p in self._playlists]
 
 # Music database methods
 
