@@ -62,6 +62,19 @@ class LibspotifyBackend(BaseBackend):
             tracks=[self._to_mopidy_track(t) for t in spotify_playlist],
         )
 
+# Playback control
+
+    # TODO Needs a way to lookup tracks by URI first
+
+# Status querying
+
+    def status_bitrate(self):
+        return 320
+
+    def url_handlers(self):
+        return [u'spotify:', u'http://open.spotify.com/']
+
+
 class LibspotifySession(SpotifySessionManager, threading.Thread):
     def __init__(self, username, password, backend):
         SpotifySessionManager.__init__(self, username, password)
