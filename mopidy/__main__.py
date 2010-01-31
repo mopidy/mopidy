@@ -8,7 +8,7 @@ sys.path.insert(0,
 
 from mopidy import config
 from mopidy.exceptions import ConfigError
-from mopidy.server import MpdServer
+from mopidy.mpd.server import MpdServer
 from mopidy.backends.libspotify import LibspotifyBackend
 
 def main():

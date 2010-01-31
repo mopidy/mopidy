@@ -5,7 +5,7 @@ import sys
 from mopidy import settings
 from mopidy.exceptions import MpdAckError, MpdNotImplemented
 
-logger = logging.getLogger('mpdhandler')
+logger = logging.getLogger('mpd.handler')
 
 _request_handlers = {}
 

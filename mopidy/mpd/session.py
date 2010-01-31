@@ -3,9 +3,9 @@ import logging
 
 from mopidy import get_mpd_protocol_version, config
 from mopidy.exceptions import MpdAckError
-from mopidy.handler import MpdHandler
+from mopidy.mpd.handler import MpdHandler
 
-logger = logging.getLogger(u'mpdsession')
+logger = logging.getLogger(u'mpd.session')
 
 def indent(string, places=4, linebreak=config.MPD_LINE_TERMINATOR):
     lines = string.split(linebreak)

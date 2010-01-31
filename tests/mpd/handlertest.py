@@ -1,8 +1,8 @@
 import unittest
 
-from mopidy import handler
 from mopidy.backends.dummy import DummyBackend
 from mopidy.exceptions import MpdAckError
+from mopidy.mpd.handler import MpdHandler
 
 class DummySession(object):
     def do_close(self):
@@ -17,7 +17,7 @@ class DummySession(object):
 
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
@@ -44,7 +44,7 @@ class RequestHandlerTest(unittest.TestCase):
 
 class CommandListsTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     def test_command_list_begin(self):
         result = self.h.handle_request(u'command_list_begin')
@@ -86,7 +86,7 @@ class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend()
         self.s = DummySession()
-        self.h = handler.MpdHandler(backend=self.b, session=self.s)
+        self.h = MpdHandler(backend=self.b, session=self.s)
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
@@ -170,7 +170,7 @@ class StatusHandlerTest(unittest.TestCase):
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     def test_consume_off(self):
         result = self.h.handle_request(u'consume "0"')
@@ -271,7 +271,7 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 class PlaybackControlHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend()
-        self.h = handler.MpdHandler(backend=self.b)
+        self.h = MpdHandler(backend=self.b)
 
     def test_next(self):
         result = self.h.handle_request(u'next')
@@ -325,7 +325,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     def test_add(self):
         result = self.h.handle_request(u'add "file:///dev/urandom"')
@@ -443,7 +443,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     def test_listplaylist(self):
         result = self.h.handle_request(u'listplaylist "name"')
@@ -493,7 +493,7 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     def test_count(self):
         result = self.h.handle_request(u'count "tag" "needle"')
@@ -609,14 +609,14 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
 class StickersHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     pass # TODO
 
 
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(session=DummySession(),
+        self.h = MpdHandler(session=DummySession(),
             backend=DummyBackend())
 
     def test_close(self):
@@ -641,14 +641,14 @@ class ConnectionHandlerTest(unittest.TestCase):
 
 class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     pass # TODO
 
 
 class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.h = MpdHandler(backend=DummyBackend())
 
     def test_urlhandlers(self):
         result = self.h.handle_request(u'urlhandlers')
