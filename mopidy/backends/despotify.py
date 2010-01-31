@@ -14,6 +14,7 @@ ENCODING = 'utf-8'
 
 class DespotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
+        super(DespotifyBackend, self).__init__(*args, **kwargs)
         logger.info(u'Connecting to Spotify')
         self.spotify = spytify.Spytify(
             config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)

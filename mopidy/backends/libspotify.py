@@ -75,6 +75,7 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
 
 class LibspotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
+        super(LibspotifyBackend, self).__init__(*args, **kwargs)
         self.spotify = LibspotifySession(
             config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
         logger.info(u'Connecting to Spotify')

@@ -1,6 +1,9 @@
 from mopidy.backends import BaseBackend
 
 class DummyBackend(BaseBackend):
+    def __init__(self, *args, **kwargs):
+        super(DummyBackend, self).__init__(*args, **kwargs)
+
     def url_handlers(self):
         return [u'dummy:']
 

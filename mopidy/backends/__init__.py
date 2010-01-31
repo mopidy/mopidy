@@ -11,12 +11,16 @@ class BaseBackend(object):
     PAUSE = u'pause'
     STOP = u'stop'
 
+    def __init__(self, *args, **kwargs):
+        self._state = self.STOP
+        self._playlists = []
+        self._x_current_playlist = Playlist()
+        self._current_playlist_version = 0
+
 # Backend state
 
     @property
     def state(self):
-        if not hasattr(self, '_state'):
-            self._state = self.STOP
         return self._state
 
     @state.setter
@@ -52,31 +56,13 @@ class BaseBackend(object):
         self._play_time_started = int(time.time())
 
     @property
-    def _playlists(self):
-        if not hasattr(self, '_x_playlists') or not self._x_playlists:
-            self._x_playlists = []
-        return self._x_playlists
-
-    @_playlists.setter
-    def _playlists(self, playlists):
-        self._x_playlists = playlists
-
-    @property
     def _current_playlist(self):
-        if not hasattr(self, '_x_current_playlist'):
-            self._x_current_playlist = Playlist()
         return self._x_current_playlist
 
     @_current_playlist.setter
     def _current_playlist(self, playlist):
         self._x_current_playlist = playlist
-        self._x_current_playlist_version += 1
-
-    @property
-    def _current_playlist_version(self):
-        if not hasattr(self, '_x_current_playlist_version'):
-            self._x_current_playlist_version = 0
-        return self._x_current_playlist_version
+        self._current_playlist_version += 1
 
     @property
     def _current_track(self):
@@ -237,6 +223,12 @@ class BaseBackend(object):
         if songpos is not None:
             start = int(songpos)
             end = start + 1
+        else:
+            if start is None:
+                start = 0
+            start = int(start)
+            if end is not None:
+                end = int(end)
         return self._current_playlist.mpd_format(start, end)
 
 # Stored playlist methods
