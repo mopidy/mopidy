@@ -9,6 +9,15 @@ from mopidy.backends import BaseBackend
 
 logger = logging.getLogger(u'backends.libspotify')
 
+class LibspotifyBackend(BaseBackend):
+    def __init__(self, *args, **kwargs):
+        super(LibspotifyBackend, self).__init__(*args, **kwargs)
+        logger.info(u'Connecting to Spotify')
+        self.spotify = LibspotifySession(
+            config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
+        self.spotify.start()
+
+
 class LibspotifySession(SpotifySessionManager, threading.Thread):
     def __init__(self, *args, **kwargs):
         SpotifySessionManager.__init__(self, *args, **kwargs)
@@ -72,11 +81,3 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
         except Exception, e:
             logger.exception(e)
 
-
-class LibspotifyBackend(BaseBackend):
-    def __init__(self, *args, **kwargs):
-        super(LibspotifyBackend, self).__init__(*args, **kwargs)
-        self.spotify = LibspotifySession(
-            config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
-        logger.info(u'Connecting to Spotify')
-        self.spotify.start()
