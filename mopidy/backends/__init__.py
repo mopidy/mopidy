@@ -2,6 +2,7 @@ import logging
 import time
 
 from mopidy.exceptions import MpdNotImplemented
+from mopidy.models import Playlist
 
 logger = logging.getLogger('backends.base')
 
@@ -9,6 +10,8 @@ class BaseBackend(object):
     PLAY = u'play'
     PAUSE = u'pause'
     STOP = u'stop'
+
+# Backend state
 
     @property
     def state(self):
@@ -48,10 +51,60 @@ class BaseBackend(object):
     def _play_time_resume(self):
         self._play_time_started = int(time.time())
 
+    @property
+    def _playlists(self):
+        if not hasattr(self, '_x_playlists') or not self._x_playlists:
+            self._x_playlists = []
+        return self._x_playlists
+
+    @_playlists.setter
+    def _playlists(self, playlists):
+        self._x_playlists = playlists
+
+    @property
+    def _current_playlist(self):
+        if not hasattr(self, '_x_current_playlist'):
+            self._x_current_playlist = Playlist()
+        return self._x_current_playlist
+
+    @_current_playlist.setter
+    def _current_playlist(self, playlist):
+        self._x_current_playlist = playlist
+        self._x_current_playlist_version += 1
+
+    @property
+    def _current_playlist_version(self):
+        if not hasattr(self, '_x_current_playlist_version'):
+            self._x_current_playlist_version = 0
+        return self._x_current_playlist_version
+
+    @property
+    def _current_track(self):
+        if self._current_song_pos is not None:
+            return self._current_playlist.tracks[self._current_song_pos]
+
+    @property
+    def _current_song_pos(self):
+        if not hasattr(self, '_x_current_song_pos'):
+            self._x_current_song_pos = None
+        if (self._current_playlist is None
+                or self._current_playlist.length == 0):
+            self._x_current_song_pos = None
+        elif self._x_current_song_pos < 0:
+            self._x_current_song_pos = 0
+        elif self._x_current_song_pos >= self._current_playlist.length:
+            self._x_current_song_pos = self._current_playlist.length - 1
+        return self._x_current_song_pos
+
+    @_current_song_pos.setter
+    def _current_song_pos(self, songid):
+        self._x_current_song_pos = songid
+
 # Status methods
 
     def current_song(self):
-        return None
+        if self.state is not self.STOP and self._current_track is not None:
+            return self._current_track.mpd_format(self._current_song_pos)
 
     def status_bitrate(self):
         return 0
@@ -72,13 +125,13 @@ class BaseBackend(object):
         return 0
 
     def status_song_id(self):
-        return 0
+        return self._current_song_pos # Override if you got a better ID scheme
 
     def status_playlist(self):
-        return 0
+        return self._current_playlist_version
 
     def status_playlist_length(self):
-        return 0
+        return self._current_playlist.length
 
     def status_state(self):
         return self.state
@@ -91,7 +144,10 @@ class BaseBackend(object):
         return u'%s:%s' % (self._play_time_elapsed, self.status_time_total())
 
     def status_time_total(self):
-        return 0
+        if self._current_track is not None:
+            return self._current_track.length // 1000
+        else:
+            return 0
 
     def status_xfade(self):
         return 0
@@ -164,10 +220,24 @@ class BaseBackend(object):
         return None
 
     def playlist_load(self, name):
-        pass
+        matches = filter(lambda p: p.name == name, self._playlists)
+        if matches:
+            self._current_playlist = matches[0]
+        else:
+            self._current_playlist = None
 
-    def playlist_info(self, songpos, start, end):
-        return None
+    def playlists_list(self):
+        return [u'playlist: %s' % p.name for p in self._playlists]
+
+    def playlist_changes_since(self, version='0'):
+        if int(version) < self._current_playlist_version:
+            return self._current_playlist.mpd_format()
+
+    def playlist_info(self, songpos=None, start=0, end=None):
+        if songpos is not None:
+            start = int(songpos)
+            end = start + 1
+        return self._current_playlist.mpd_format(start, end)
 
 # Stored playlist methods
 

@@ -52,59 +52,14 @@ class DespotifyBackend(BaseBackend):
         logger.info(u'Connecting to Spotify')
         self.spotify = spytify.Spytify(
             config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
-        self._playlists # Touch to cache
+        self.cache_stored_playlists()
 
     def cache_stored_playlists(self):
         logger.info(u'Caching stored playlists')
+        playlists = []
         for spotify_playlist in self.spotify.stored_playlists:
-            self._x_playlists.append(to_mopidy_playlist(spotify_playlist))
-
-# State
-
-    @property
-    def _playlists(self):
-        if not hasattr(self, '_x_playlists') or not self._x_playlists:
-            self._x_playlists = []
-        return self._x_playlists
-
-    @property
-    def _current_playlist(self):
-        if not hasattr(self, '_x_current_playlist'):
-            self._x_current_playlist = Playlist()
-        return self._x_current_playlist
-
-    @_current_playlist.setter
-    def _current_playlist(self, playlist):
-        self._x_current_playlist = playlist
-        self._x_current_playlist_version += 1
-
-    @property
-    def _current_playlist_version(self):
-        if not hasattr(self, '_x_current_playlist_version'):
-            self._x_current_playlist_version = 0
-        return self._x_current_playlist_version
-
-    @property
-    def _current_track(self):
-        if self._current_song_pos is not None:
-            return self._current_playlist.tracks[self._current_song_pos]
-
-    @property
-    def _current_song_pos(self):
-        if not hasattr(self, '_x_current_song_pos'):
-            self._x_current_song_pos = None
-        if (self._current_playlist is None
-                or self._current_playlist.length == 0):
-            self._x_current_song_pos = None
-        elif self._x_current_song_pos < 0:
-            self._x_current_song_pos = 0
-        elif self._x_current_song_pos >= self._current_playlist.length:
-            self._x_current_song_pos = self._current_playlist.length - 1
-        return self._x_current_song_pos
-
-    @_current_song_pos.setter
-    def _current_song_pos(self, songid):
-        self._x_current_song_pos = songid
+            playlists.append(to_mopidy_playlist(spotify_playlist))
+        self._playlists = playlists
 
 # Control methods
 
@@ -147,51 +102,10 @@ class DespotifyBackend(BaseBackend):
         self.spotify.stop()
         return True
 
-# Playlist methods
-
-    def playlist_load(self, name):
-        matches = filter(lambda p: p.name == name, self._playlists)
-        if matches:
-            self._current_playlist = matches[0]
-        else:
-            self._current_playlist = None
-
-    def playlists_list(self):
-        return [u'playlist: %s' % p.name for p in self._playlists]
-
-    def playlist_changes_since(self, version='0'):
-        if int(version) < self._current_playlist_version:
-            return self._current_playlist.mpd_format()
-
-    def playlist_info(self, songpos=None, start=0, end=None):
-        if songpos is not None:
-            start = int(songpos)
-            end = start + 1
-        return self._current_playlist.mpd_format(start, end)
-
 # Status methods
-
-    def current_song(self):
-        if self.state is not self.STOP and self._current_track is not None:
-            return self._current_track.mpd_format(self._current_song_pos)
 
     def status_bitrate(self):
         return 320
-
-    def status_playlist(self):
-        return self._current_playlist_version
-
-    def status_playlist_length(self):
-        return self._current_playlist.length
-
-    def status_song_id(self):
-        return self._current_song_pos # XXX
-
-    def status_time_total(self):
-        if self._current_track is not None:
-            return self._current_track.length // 1000
-        else:
-            return 0
 
     def url_handlers(self):
         return [u'spotify:', u'http://open.spotify.com/']
