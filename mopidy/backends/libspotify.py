@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 import threading
 
@@ -6,22 +7,66 @@ from spotify.alsahelper import AlsaController
 
 from mopidy import config
 from mopidy.backends import BaseBackend
+from mopidy.models import Artist, Album, Track, Playlist
 
 logger = logging.getLogger(u'backends.libspotify')
+
+ENCODING = 'utf-8'
 
 class LibspotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(LibspotifyBackend, self).__init__(*args, **kwargs)
         logger.info(u'Connecting to Spotify')
         self.spotify = LibspotifySession(
-            config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
+            config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD, backend=self)
         self.spotify.start()
 
+    def update_stored_playlists(self, spotify_playlists):
+        logger.info(u'Updating stored playlists')
+        playlists = []
+        for spotify_playlist in spotify_playlists:
+            playlists.append(self._to_mopidy_playlist(spotify_playlist))
+        self._playlists = playlists
+        logger.debug(u'Available playlists: %s',
+            u', '.join([u'<%s>' % p.name for p in self._playlists]))
+
+# Model translation
+
+    def _to_mopidy_artist(self, spotify_artist):
+        return Artist(
+            uri=u'', # FIXME Not supported by pyspotify?
+            name=spotify_artist.name().decode(ENCODING),
+        )
+
+    def _to_mopidy_album(self, spotify_album):
+        # TODO pyspotify got much more data on albums than this
+        return Album(name=spotify_album.name().decode(ENCODING))
+
+    def _to_mopidy_track(self, spotify_track):
+        return Track(
+            uri=u'', # FIXME Not supported by pyspotify?
+            title=spotify_track.name().decode(ENCODING),
+            artists=[self._to_mopidy_artist(a)
+                for a in spotify_track.artists()],
+            album=self._to_mopidy_album(spotify_track.album()),
+            track_no=spotify_track.index(),
+            date=dt.date(spotify_track.album().year(), 1, 1),
+            length=spotify_track.duration(),
+            id=0, # FIXME need URI or something unique first
+        )
+
+    def _to_mopidy_playlist(self, spotify_playlist):
+        return Playlist(
+            uri=u'', # FIXME Not supported by pyspotify?
+            name=spotify_playlist.name().decode(ENCODING),
+            tracks=[self._to_mopidy_track(t) for t in spotify_playlist],
+        )
 
 class LibspotifySession(SpotifySessionManager, threading.Thread):
-    def __init__(self, *args, **kwargs):
-        SpotifySessionManager.__init__(self, *args, **kwargs)
+    def __init__(self, username, password, backend):
+        SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)
+        self.backend = backend
         self.audio = AlsaController()
         self.queued = False
 
@@ -41,6 +86,7 @@ class LibspotifySession(SpotifySessionManager, threading.Thread):
 
     def metadata_updated(self, session):
         logger.debug('Metadata updated')
+        self.backend.update_stored_playlists(self.playlists)
 
     def connection_error(self, session, error):
         logger.error('Connection error: %s', error)
