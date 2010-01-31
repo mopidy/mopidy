@@ -195,8 +195,9 @@ class MpdHandler(object):
     def _load(self, name):
         return self.backend.playlist_load(name)
 
-    @register(r'^lsinfo( "(?P<uri>[^"]*)")*$')
-    def _lsinfo(self, uri):
+    @register(r'^lsinfo$')
+    @register(r'^lsinfo "(?P<uri>[^"]*)"$')
+    def _lsinfo(self, uri=None):
         if uri == u'/' or uri is None:
             return self._listplaylists()
         raise MpdNotImplemented # TODO
