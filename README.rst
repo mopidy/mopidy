@@ -31,9 +31,9 @@ backend requires you to get an application key from Spotify before use.
 Installing despotify and spytify
 --------------------------------
 
-Check out the despotify source code revision 483 (or possibly newer)::
+Check out the despotify source code revision 497 (or possibly newer)::
 
-    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@483 despotify
+    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@497 despotify
 
 Install despotify's dependencies. At Debian/Ubuntu systems::
 

@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 import sys
 
@@ -5,42 +6,76 @@ import spytify
 
 from mopidy import config
 from mopidy.backends import BaseBackend
+from mopidy.models import Artist, Album, Track, Playlist
 
 logger = logging.getLogger(u'backends.despotify')
 
-def encode(string):
-    return string.encode('utf-8')
+ENCODING = 'utf-8'
 
-def decode(string):
-    return string.decode('utf-8')
+def to_mopidy_id(spotify_uri):
+    return 0 # TODO
+
+def to_mopidy_artist(spotify_artist):
+    return Artist(
+        uri=spotify_artist.get_uri(),
+        name=spotify_artist.name.decode(ENCODING)
+    )
+
+def to_mopidy_album(spotify_album_name):
+    return Album(name=spotify_album_name.decode(ENCODING))
+
+def to_mopidy_track(spotify_track):
+    if dt.MINYEAR <= int(spotify_track.year) <= dt.MAXYEAR:
+        date = dt.date(spotify_track.year, 1, 1)
+    else:
+        date = None
+    return Track(
+        uri=spotify_track.get_uri(),
+        title=spotify_track.title.decode(ENCODING),
+        artists=[to_mopidy_artist(a) for a in spotify_track.artists],
+        album=to_mopidy_album(spotify_track.album),
+        track_no=spotify_track.tracknumber,
+        date=date,
+        length=spotify_track.length,
+        id=to_mopidy_id(spotify_track.get_uri()),
+    )
+
+def to_mopidy_playlist(spotify_playlist):
+    return Playlist(
+        uri=spotify_playlist.get_uri(),
+        name=spotify_playlist.name.decode(ENCODING),
+        tracks=[to_mopidy_track(t) for t in spotify_playlist.tracks],
+    )
 
 class DespotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         logger.info(u'Connecting to Spotify')
         self.spotify = spytify.Spytify(
             config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
-        logger.info(u'Preloading data')
-        self._playlists
-        logger.debug(u'Done preloading data')
+        self._playlists # Touch to cache
+
+    def cache_stored_playlists(self):
+        logger.info(u'Caching stored playlists')
+        for spotify_playlist in self.spotify.stored_playlists:
+            self._x_playlists.append(to_mopidy_playlist(spotify_playlist))
+
+# State
 
     @property
     def _playlists(self):
         if not hasattr(self, '_x_playlists') or not self._x_playlists:
-            logger.debug(u'Caching stored playlists')
             self._x_playlists = []
-            for playlist in self.spotify.stored_playlists:
-                self._x_playlists.append(playlist)
         return self._x_playlists
 
     @property
     def _current_playlist(self):
         if not hasattr(self, '_x_current_playlist'):
-            self._x_current_playlist = []
+            self._x_current_playlist = Playlist()
         return self._x_current_playlist
 
     @_current_playlist.setter
-    def _current_playlist(self, tracks):
-        self._x_current_playlist = tracks
+    def _current_playlist(self, playlist):
+        self._x_current_playlist = playlist
         self._x_current_playlist_version += 1
 
     @property
@@ -52,55 +87,30 @@ class DespotifyBackend(BaseBackend):
     @property
     def _current_track(self):
         if self._current_song_pos is not None:
-            return self._current_playlist[self._current_song_pos]
+            return self._current_playlist.tracks[self._current_song_pos]
 
     @property
     def _current_song_pos(self):
         if not hasattr(self, '_x_current_song_pos'):
             self._x_current_song_pos = None
-        if self._current_playlist is None or len(self._current_playlist) == 0:
+        if (self._current_playlist is None
+                or self._current_playlist.length == 0):
             self._x_current_song_pos = None
         elif self._x_current_song_pos < 0:
             self._x_current_song_pos = 0
-        elif self._x_current_song_pos >= len(self._current_playlist):
-            self._x_current_song_pos = len(self._current_playlist) - 1
+        elif self._x_current_song_pos >= self._current_playlist.length:
+            self._x_current_song_pos = self._current_playlist.length - 1
         return self._x_current_song_pos
 
     @_current_song_pos.setter
     def _current_song_pos(self, songid):
         self._x_current_song_pos = songid
 
-    def _format_playlist(self, playlist, pos_range=None):
-        if pos_range is None:
-            pos_range = range(len(playlist))
-        tracks = []
-        for track, pos in zip(playlist, pos_range):
-            tracks.append(self._format_track(track, pos))
-        return tracks
-
-    def _format_track(self, track, pos=0):
-        result = [
-            ('file', track.get_uri()),
-            ('Time', (track.length // 1000)),
-            ('Artist', self._format_artists(track.artists)),
-            ('Title', decode(track.title)),
-            ('Album', decode(track.album)),
-            ('Track', '%d/0' % track.tracknumber),
-            ('Date', track.year),
-            ('Pos', pos),
-            ('Id', pos),
-        ]
-        return result
-
-    def _format_artists(self, artists):
-        artist_names = [decode(artist.name) for artist in artists]
-        return u', '.join(artist_names)
-
 # Control methods
 
     def _next(self):
         self._current_song_pos += 1
-        self.spotify.play(self._current_track)
+        self.spotify.play(self.spotify.lookup(self._current_track.uri))
         return True
 
     def _pause(self):
@@ -109,24 +119,24 @@ class DespotifyBackend(BaseBackend):
 
     def _play(self):
         if self._current_track is not None:
-            self.spotify.play(self._current_track)
+            self.spotify.play(self.spotify.lookup(self._current_track.uri))
             return True
         else:
             return False
 
     def _play_id(self, songid):
         self._current_song_pos = songid # XXX
-        self.spotify.play(self._current_track)
+        self.spotify.play(self.spotify.lookup(self._current_track.uri))
         return True
 
     def _play_pos(self, songpos):
         self._current_song_pos = songpos
-        self.spotify.play(self._current_track)
+        self.spotify.play(self.spotify.lookup(self._current_track.uri))
         return True
 
     def _previous(self):
         self._current_song_pos -= 1
-        self.spotify.play(self._current_track)
+        self.spotify.play(self.spotify.lookup(self._current_track.uri))
         return True
 
     def _resume(self):
@@ -140,41 +150,30 @@ class DespotifyBackend(BaseBackend):
 # Playlist methods
 
     def playlist_load(self, name):
-        playlists = filter(lambda p: decode(p.name) == name, self._playlists)
-        if playlists:
-            self._current_playlist = playlists[0].tracks
+        matches = filter(lambda p: p.name == name, self._playlists)
+        if matches:
+            self._current_playlist = matches[0]
         else:
-            self._current_playlist = []
+            self._current_playlist = None
 
     def playlists_list(self):
-        return [u'playlist: %s' % decode(p.name) for p in self._playlists]
+        return [u'playlist: %s' % p.name for p in self._playlists]
 
     def playlist_changes_since(self, version='0'):
         if int(version) < self._current_playlist_version:
-            return self._format_playlist(self._current_playlist)
+            return self._current_playlist.mpd_format()
 
-    def playlist_info(self, songpos=None, start=None, end=None):
+    def playlist_info(self, songpos=None, start=0, end=None):
         if songpos is not None:
-            songpos = int(songpos)
-            return self._format_track(self._current_playlist[songpos], songpos)
-        elif start is not None:
-            start = int(start)
-            if end is not None:
-                end = int(end)
-                return self._format_playlist(self._current_playlist[start:end],
-                    range(start, end))
-            else:
-                return self._format_playlist(self._current_playlist[start:],
-                    range(start, len(self._current_playlist)))
-        else:
-            return self._format_playlist(self._current_playlist)
+            start = int(songpos)
+            end = start + 1
+        return self._current_playlist.mpd_format(start, end)
 
 # Status methods
 
     def current_song(self):
         if self.state is not self.STOP and self._current_track is not None:
-            return self._format_track(self._current_track,
-                self._current_song_pos)
+            return self._current_track.mpd_format(self._current_song_pos)
 
     def status_bitrate(self):
         return 320
@@ -183,7 +182,7 @@ class DespotifyBackend(BaseBackend):
         return self._current_playlist_version
 
     def status_playlist_length(self):
-        return len(self._current_playlist)
+        return self._current_playlist.length
 
     def status_song_id(self):
         return self._current_song_pos # XXX
@@ -200,5 +199,6 @@ class DespotifyBackend(BaseBackend):
 # Music database methods
 
     def search(self, type, what):
-        result = self.spotify.search(encode(u'%s:%s' % (type, what)))
-        return self._format_playlist(result.playlist.tracks)
+        query = u'%s:%s' % (type, what)
+        result = self.spotify.search(query.encode(ENCODING))
+        return to_mopidy_playlist(result.playlist).mpd_format()
