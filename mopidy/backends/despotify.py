@@ -26,6 +26,8 @@ class DespotifyBackend(BaseBackend):
         for spotify_playlist in self.spotify.stored_playlists:
             playlists.append(self._to_mopidy_playlist(spotify_playlist))
         self._playlists = playlists
+        logger.debug(u'Available playlists: %s',
+            u', '.join([u'<%s>' % p.name for p in self._playlists]))
 
 # Model translation
 
