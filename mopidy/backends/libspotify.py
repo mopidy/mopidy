@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 import threading
 
+from spotify import Link
 from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
 
@@ -32,9 +33,12 @@ class LibspotifyBackend(BaseBackend):
 
 # Model translation
 
+    def _to_mopidy_id(self, spotify_uri):
+        return 0 # TODO
+
     def _to_mopidy_artist(self, spotify_artist):
         return Artist(
-            uri=u'', # FIXME Not supported by pyspotify?
+            uri=str(Link.from_artist(spotify_artist)),
             name=spotify_artist.name().decode(ENCODING),
         )
 
@@ -44,7 +48,7 @@ class LibspotifyBackend(BaseBackend):
 
     def _to_mopidy_track(self, spotify_track):
         return Track(
-            uri=u'', # FIXME Not supported by pyspotify?
+            uri=str(Link.from_track(spotify_track, 0)),
             title=spotify_track.name().decode(ENCODING),
             artists=[self._to_mopidy_artist(a)
                 for a in spotify_track.artists()],
@@ -52,19 +56,19 @@ class LibspotifyBackend(BaseBackend):
             track_no=spotify_track.index(),
             date=dt.date(spotify_track.album().year(), 1, 1),
             length=spotify_track.duration(),
-            id=0, # FIXME need URI or something unique first
+            id=self._to_mopidy_id(str(Link.from_track(spotify_track, 0))),
         )
 
     def _to_mopidy_playlist(self, spotify_playlist):
         return Playlist(
-            uri=u'', # FIXME Not supported by pyspotify?
+            uri=str(Link.from_playlist(spotify_playlist)),
             name=spotify_playlist.name().decode(ENCODING),
             tracks=[self._to_mopidy_track(t) for t in spotify_playlist],
         )
 
 # Playback control
 
-    # TODO Needs a way to lookup tracks by URI first
+    # TODO
 
 # Status querying
 
