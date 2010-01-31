@@ -12,41 +12,6 @@ logger = logging.getLogger(u'backends.despotify')
 
 ENCODING = 'utf-8'
 
-def to_mopidy_id(spotify_uri):
-    return 0 # TODO
-
-def to_mopidy_artist(spotify_artist):
-    return Artist(
-        uri=spotify_artist.get_uri(),
-        name=spotify_artist.name.decode(ENCODING)
-    )
-
-def to_mopidy_album(spotify_album_name):
-    return Album(name=spotify_album_name.decode(ENCODING))
-
-def to_mopidy_track(spotify_track):
-    if dt.MINYEAR <= int(spotify_track.year) <= dt.MAXYEAR:
-        date = dt.date(spotify_track.year, 1, 1)
-    else:
-        date = None
-    return Track(
-        uri=spotify_track.get_uri(),
-        title=spotify_track.title.decode(ENCODING),
-        artists=[to_mopidy_artist(a) for a in spotify_track.artists],
-        album=to_mopidy_album(spotify_track.album),
-        track_no=spotify_track.tracknumber,
-        date=date,
-        length=spotify_track.length,
-        id=to_mopidy_id(spotify_track.get_uri()),
-    )
-
-def to_mopidy_playlist(spotify_playlist):
-    return Playlist(
-        uri=spotify_playlist.get_uri(),
-        name=spotify_playlist.name.decode(ENCODING),
-        tracks=[to_mopidy_track(t) for t in spotify_playlist.tracks],
-    )
-
 class DespotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         logger.info(u'Connecting to Spotify')
@@ -116,3 +81,39 @@ class DespotifyBackend(BaseBackend):
         query = u'%s:%s' % (type, what)
         result = self.spotify.search(query.encode(ENCODING))
         return to_mopidy_playlist(result.playlist).mpd_format()
+
+
+def to_mopidy_id(spotify_uri):
+    return 0 # TODO
+
+def to_mopidy_artist(spotify_artist):
+    return Artist(
+        uri=spotify_artist.get_uri(),
+        name=spotify_artist.name.decode(ENCODING)
+    )
+
+def to_mopidy_album(spotify_album_name):
+    return Album(name=spotify_album_name.decode(ENCODING))
+
+def to_mopidy_track(spotify_track):
+    if dt.MINYEAR <= int(spotify_track.year) <= dt.MAXYEAR:
+        date = dt.date(spotify_track.year, 1, 1)
+    else:
+        date = None
+    return Track(
+        uri=spotify_track.get_uri(),
+        title=spotify_track.title.decode(ENCODING),
+        artists=[to_mopidy_artist(a) for a in spotify_track.artists],
+        album=to_mopidy_album(spotify_track.album),
+        track_no=spotify_track.tracknumber,
+        date=date,
+        length=spotify_track.length,
+        id=to_mopidy_id(spotify_track.get_uri()),
+    )
+
+def to_mopidy_playlist(spotify_playlist):
+    return Playlist(
+        uri=spotify_playlist.get_uri(),
+        name=spotify_playlist.name.decode(ENCODING),
+        tracks=[to_mopidy_track(t) for t in spotify_playlist.tracks],
+    )
