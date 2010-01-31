@@ -68,7 +68,51 @@ class LibspotifyBackend(BaseBackend):
 
 # Playback control
 
-    # TODO
+    def _load_track(self, uri):
+        self.spotify.session.load(Link.from_string(uri).as_track())
+
+    def _play_current_track(self):
+        self._load_track(self._current_track.uri)
+        self.spotify.session.play(1)
+
+    def _next(self):
+        self._current_song_pos += 1
+        self._play_current_track()
+        return True
+
+    def _pause(self):
+        # TODO
+        return False
+
+    def _play(self):
+        if self._current_track is not None:
+            self._play_current_track()
+            return True
+        else:
+            return False
+
+    def _play_id(self, songid):
+        self._current_song_pos = songid # XXX
+        self._play_current_track()
+        return True
+
+    def _play_pos(self, songpos):
+        self._current_song_pos = songpos
+        self._play_current_track()
+        return True
+
+    def _previous(self):
+        self._current_song_pos -= 1
+        self._play_current_track()
+        return True
+
+    def _resume(self):
+        # TODO
+        return False
+
+    def _stop(self):
+        self.spotify.session.play(0)
+        return True
 
 # Status querying
 
@@ -91,6 +135,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def logged_in(self, session, error):
         logger.info('Logged in')
+        self.session = session
         try:
             self.playlists = session.playlist_container()
             logger.debug('Got playlist container')
