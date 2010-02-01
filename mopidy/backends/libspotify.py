@@ -44,6 +44,7 @@ class LibspotifyBackend(BaseBackend):
             id = self._next_id
             self._next_id += 1
             self._id_to_uri_map[id] = spotify_uri
+            self._uri_to_id_map[spotify_uri] = id
             return id
 
     def _to_mopidy_artist(self, spotify_artist):
