@@ -1,3 +1,4 @@
+from copy import deepcopy
 import datetime as dt
 import logging
 import threading
@@ -17,15 +18,18 @@ ENCODING = 'utf-8'
 class LibspotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(LibspotifyBackend, self).__init__(*args, **kwargs)
+        self._next_id = 0
+        self._id_to_uri_map = {}
+        self._uri_to_id_map = {}
         logger.info(u'Connecting to Spotify')
         self.spotify = LibspotifySessionManager(
             config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD, backend=self)
         self.spotify.start()
 
-    def update_stored_playlists(self, spotify_playlists):
+    def update_stored_playlists(self):
         logger.info(u'Updating stored playlists')
         playlists = []
-        for spotify_playlist in spotify_playlists:
+        for spotify_playlist in self.spotify.playlists:
             playlists.append(self._to_mopidy_playlist(spotify_playlist))
         self._playlists = playlists
         logger.debug(u'Available playlists: %s',
@@ -34,7 +38,13 @@ class LibspotifyBackend(BaseBackend):
 # Model translation
 
     def _to_mopidy_id(self, spotify_uri):
-        return 0 # TODO
+        if spotify_uri in self._uri_to_id_map:
+            return self._uri_to_id_map[spotify_uri]
+        else:
+            id = self._next_id
+            self._next_id += 1
+            self._id_to_uri_map[id] = spotify_uri
+            return id
 
     def _to_mopidy_artist(self, spotify_artist):
         return Artist(
@@ -65,7 +75,6 @@ class LibspotifyBackend(BaseBackend):
             name=spotify_playlist.name().decode(ENCODING),
             tracks=[self._to_mopidy_track(t) for t in spotify_playlist],
         )
-
 # Playback control
 
     def _play_current_track(self):
@@ -90,9 +99,13 @@ class LibspotifyBackend(BaseBackend):
             return False
 
     def _play_id(self, songid):
-        self._current_song_pos = songid # XXX
-        self._play_current_track()
-        return True
+        matches = filter(lambda t: t.id == songid, self._current_playlist)
+        if matches:
+            self._current_song_pos = self._current_playlist.index(matches[0])
+            self._play_current_track()
+            return True
+        else:
+            return False
 
     def _play_pos(self, songpos):
         self._current_song_pos = songpos
@@ -145,7 +158,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def metadata_updated(self, session):
         logger.debug('Metadata updated')
-        self.backend.update_stored_playlists(self.playlists)
+        self.backend.update_stored_playlists()
 
     def connection_error(self, session, error):
         logger.error('Connection error: %s', error)
@@ -167,3 +180,4 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def end_of_track(self, session):
         logger.debug('End of track')
+
