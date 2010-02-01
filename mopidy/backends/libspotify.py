@@ -68,11 +68,9 @@ class LibspotifyBackend(BaseBackend):
 
 # Playback control
 
-    def _load_track(self, uri):
-        self.spotify.session.load(Link.from_string(uri).as_track())
-
     def _play_current_track(self):
-        self._load_track(self._current_track.uri)
+        self.spotify.session.load(
+            Link.from_string(self._current_track.uri).as_track())
         self.spotify.session.play(1)
 
     def _next(self):
