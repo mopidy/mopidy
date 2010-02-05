@@ -138,6 +138,9 @@ class BaseBackend(object):
     def status_xfade(self):
         return 0
 
+    def url_handlers(self):
+        return []
+
 # Control methods
 
     def end_of_track(self):
