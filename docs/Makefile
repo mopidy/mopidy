@@ -99,6 +99,6 @@ public: clean html
 	    (find . -type f | xargs sed -i -e 's/_sources/sources/g') && \
 	    mv _static static && \
 	    (find . -type f | xargs sed -i -e 's/_static/static/g') && \
-	    mv _images images && \
+	    if [ -d _images ]; then mv _images images; fi && \
 	    (find . -type f | xargs sed -i -e 's/_images/images/g') && \
 	    git add *
