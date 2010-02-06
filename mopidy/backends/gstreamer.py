@@ -20,17 +20,14 @@ class GStreamerBackend(BaseBackend):
 
         self.player = player
 
+    def _play(self):
+        if self._current_track is None:
+            return False
 
-    def _play_current_track(self):
         self.player.set_property("uri", self._current_track.uri)
         self.player.set_state(gst.STATE_PLAYING)
 
-    def _play(self):
-        if self._current_track is not None:
-            self._play_current_track()
-            return True
-        else:
-            return False
+        return True
 
     def _stop(self):
         self.player.set_state(gst.STATE_NULL)
