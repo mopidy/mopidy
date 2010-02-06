@@ -120,4 +120,5 @@ class DespotifyBackend(BaseBackend):
     def search(self, type, what):
         query = u'%s:%s' % (type, what)
         result = self.spotify.search(query.encode(ENCODING))
-        return self._to_mopidy_playlist(result.playlist).mpd_format()
+        if result is not None:
+            return self._to_mopidy_playlist(result.playlist).mpd_format()
