@@ -38,9 +38,9 @@ Install despotify's dependencies. At Debian/Ubuntu systems::
     sudo aptitude install libssl-dev zlib1g-dev libvorbis-dev \
         libtool libncursesw5-dev libao-dev
 
-Check out revision 483 of the despotify source code::
+Check out revision 499 of the despotify source code::
 
-    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@483 despotify
+    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@499 despotify
 
 Build and install despotify::
 

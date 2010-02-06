@@ -57,21 +57,18 @@ Issues
 A list of the issues we currently experience with spytify, both bugs and
 features we wished was there.
 
-* r483: Track lookup support. Possibly fixed in r497. To reproduce::
+* r483: Sometimes segfaults when traversing stored playlists, their tracks,
+  artists, and albums. As it is not predictable, it may be a concurrency issue.
+
+* r499: Segfaults when looking up playlists, both your own lists and other
+  peoples shared lists. To reproduce::
 
     >>> import spytify
     >>> s = spytify.Spytify('alice', 'secret')
-    >>> s.lookup('spotify:track:1mr3616BzLdhXfJmLmRsO8')
-    ---------------------------------------------------------------------------
-    SpytifyError                              Traceback (most recent call last)
+    >>> s.lookup('spotify:user:klette:playlist:5rOGYPwwKqbAcVX8bW4k5V')
+    Segmentation fault
 
-    /home/jodal/<ipython console> in <module>()
-
-    /usr/local/lib/python2.6/dist-packages/spytify.so in spytify.Spytify.lookup (src/spytify.c:7914)()
-
-    SpytifyError: URI specifies invalid type: track
-
-* r483: Error when accessing an album through an artist. To reproduce::
+* r499: Error when accessing an album through an artist. To reproduce::
 
     >>> import spytify
     >>> s = spytify.Spytify('alice', 'secret')
@@ -98,22 +95,6 @@ features we wished was there.
     /usr/local/lib/python2.6/dist-packages/spytify.so in spytify.Artist.get_full_data (src/spytify.c:4539)()
 
     TypeError: Cannot convert spytify.AlbumDataFull to spytify.ArtistDataFull
-
-* r483: Sometimes segfaults when traversing stored playlists, their tracks,
-  artists, and albums. As it is not predictable, it may be a concurrency issue.
-
-* r483: Segfaults when looking up playlists, both your own lists and other
-  peoples shared lists. To reproduce::
-
-    >>> import spytify
-    >>> s = spytify.Spytify('alice', 'secret')
-    >>> s.lookup('spotify:user:klette:playlist:5rOGYPwwKqbAcVX8bW4k5V')
-    Segmentation fault
-
-* r497: spytify fails on ``make`` because the despotify API has changed::
-
-    src/spytify.c: In function ‘__pyx_pf_7spytify_7Spytify___init__’:
-    src/spytify.c:7325: error: too few arguments to function ‘despotify_init_client’
 
 
 pyspotify
