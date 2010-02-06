@@ -205,9 +205,12 @@ class BaseBackend(object):
         return None
 
     def playlist_load(self, name):
+        self._current_song_pos = None
         matches = filter(lambda p: p.name == name, self._playlists)
         if matches:
             self._current_playlist = matches[0]
+            if self.state == self.PLAY:
+                self.play(songpos=0)
         else:
             self._current_playlist = None
 
