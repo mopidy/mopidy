@@ -33,3 +33,9 @@ class GStreamerBackend(BaseBackend):
         self.player.set_state(gst.STATE_NULL)
 
         return True
+
+    def playlist_add_track(self, uri, pos=None):
+        tracks = self._current_playlist.tracks
+        tracks.insert(pos or -1, Track(uri))
+
+        self._current_playlist = Playlist(tracks=tracks)
