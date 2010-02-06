@@ -60,41 +60,13 @@ features we wished was there.
 * r483: Sometimes segfaults when traversing stored playlists, their tracks,
   artists, and albums. As it is not predictable, it may be a concurrency issue.
 
-* r499: Segfaults when looking up playlists, both your own lists and other
+* r503: Segfaults when looking up playlists, both your own lists and other
   peoples shared lists. To reproduce::
 
     >>> import spytify
     >>> s = spytify.Spytify('alice', 'secret')
     >>> s.lookup('spotify:user:klette:playlist:5rOGYPwwKqbAcVX8bW4k5V')
     Segmentation fault
-
-* r499: Error when accessing an album through an artist. To reproduce::
-
-    >>> import spytify
-    >>> s = spytify.Spytify('alice', 'secret')
-    >>> result = s.search('Gorillaz')
-    >>> artist = result.playlist.tracks[0].artists[0]
-    >>> artist
-    <Artist: Gorillaz (75f4ed7ec8514e91abaab17306ebbbb6)>
-    >>> artist.albums
-    ERROR: An unexpected error occurred while tokenizing input
-    The following traceback may be corrupted or invalid
-    The error message is: ('EOF in multi-line statement', (1423, 0))
-
-    ERROR: An unexpected error occurred while tokenizing input
-    The following traceback may be corrupted or invalid
-    The error message is: ('EOF in multi-line statement', (1455, 0))
-
-    ---------------------------------------------------------------------------
-    TypeError                                 Traceback (most recent call last)
-
-    /home/jodal/<ipython console> in <module>()
-
-    /usr/local/lib/python2.6/dist-packages/spytify.so in spytify.Artist.albums.__get__ (src/spytify.c:4867)()
-
-    /usr/local/lib/python2.6/dist-packages/spytify.so in spytify.Artist.get_full_data (src/spytify.c:4539)()
-
-    TypeError: Cannot convert spytify.AlbumDataFull to spytify.ArtistDataFull
 
 
 pyspotify
