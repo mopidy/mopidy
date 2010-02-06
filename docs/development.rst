@@ -6,6 +6,15 @@ Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
 ``irc.freenode.net`` and through `GitHub <http://github.com/>`_.
 
 
+API documentation
+=================
+
+.. toctree::
+    :glob:
+
+    api/*
+
+
 Scope
 =====
 
