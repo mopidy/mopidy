@@ -201,9 +201,6 @@ class BaseBackend(object):
 
 # Current/single playlist methods
 
-    def playlist_changes_since(self, version):
-        return None
-
     def playlist_load(self, name):
         self._current_song_pos = None
         matches = filter(lambda p: p.name == name, self._playlists)
