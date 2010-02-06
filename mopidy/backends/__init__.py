@@ -123,10 +123,6 @@ class BaseBackend(object):
         return self.state
 
     def status_time(self):
-        # XXX This is only called when a client is connected, and is thus not a
-        # complete solution
-        if self._play_time_elapsed >= self.status_time_total() > 0:
-            self.end_of_track()
         return u'%s:%s' % (self._play_time_elapsed, self.status_time_total())
 
     def status_time_total(self):
