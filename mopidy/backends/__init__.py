@@ -151,6 +151,9 @@ class BaseBackend(object):
         if self._next():
             self.state = self.PLAY
 
+    def playlist_add_track(self, uri, pos=None):
+        pass
+
     def _next(self):
         raise MpdNotImplemented
 

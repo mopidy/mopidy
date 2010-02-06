@@ -72,11 +72,11 @@ class MpdHandler(object):
 
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):
-        raise MpdNotImplemented # TODO
+        self.backend.playlist_add_track(uri)
 
     @register(r'^addid "(?P<uri>[^"]*)"( (?P<songpos>\d+))*$')
     def _add(self, uri, songpos=None):
-        raise MpdNotImplemented # TODO
+        self.backend.playlist_add_track(uri, int(songpos))
 
     @register(r'^clear$')
     def _clear(self):
