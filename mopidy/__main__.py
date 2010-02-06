@@ -10,6 +10,8 @@ from mopidy import config
 from mopidy.exceptions import ConfigError
 from mopidy.mpd.server import MpdServer
 
+logger = logging.getLogger('mopidy')
+
 def main():
     _setup_logging(2)
     backend = _get_backend(config.BACKEND)
@@ -31,6 +33,7 @@ def _setup_logging(verbosity_level):
 def _get_backend(name):
     module_name = name[:name.rindex('.')]
     class_name = name[name.rindex('.') + 1:]
+    logger.info('Loading: %s from %s', class_name, module_name)
     module = __import__(module_name, globals(), locals(), [class_name], -1)
     class_object = getattr(module, class_name)
     instance = class_object()
