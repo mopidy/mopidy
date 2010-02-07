@@ -2,6 +2,7 @@ import logging
 
 import gst
 
+from mopidy.models import Track, Playlist
 from mopidy.backends import (BaseBackend,
                              BasePlaybackController,
                              BaseCurrentPlaylistController)
@@ -16,7 +17,11 @@ class GStreamerBackend(BaseBackend):
         self.current_playlist = GStreamerCurrentPlaylistController(self)
 
 class GStreamerCurrentPlaylistController(BaseCurrentPlaylistController):
-    pass
+    def add(self, uri, at_position=None):
+        tracks = self.playlist.tracks
+        tracks.append(Track(uri))
+
+        self.playlist = Playlist(tracks=tracks)
 
 class GStreamerPlaybackController(BasePlaybackController):
     PAUSED = gst.STATE_PAUSED
