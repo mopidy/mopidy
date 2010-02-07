@@ -29,6 +29,14 @@ class BaseCurrentPlaylistControllerTest(object):
         controller.add(uri, len(self.uris)+2)
         self.assertEqual(uri, controller.playlist.tracks[-1].uri)
 
+    def test_clear(self):
+        self.test_add()
+        controller = self.backend.current_playlist
+
+        controller.clear()
+
+        self.assertEqual(len(controller.playlist.tracks), 0)
+
 class BasePlaybackControllerTest(object):
     uris = []
     backend_class = None

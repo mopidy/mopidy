@@ -21,6 +21,9 @@ class BaseCurrentPlaylistController(object):
     def add(self, uri, at_position=None):
         raise NotImplementedError
 
+    def clear(self):
+        self.playlist = Playlist()
+
 class BasePlaybackController(object):
     PAUSED = 'paused'
     PLAYING = 'playing'
