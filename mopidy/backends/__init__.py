@@ -239,3 +239,7 @@ class BaseBackend(object):
 
     def search(self, type, what):
         return None
+
+class BasePlaybackController(object):
+    def __init__(self, backend):
+        self.backend = backend
