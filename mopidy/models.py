@@ -78,12 +78,14 @@ class Track(object):
     :type date: :class:`datetime.date`
     :param length: track length in milliseconds
     :type length: integer
+    :param bitrate: bitrate in kbit/s
+    :type bitrate: integer
     :param id: track ID (unique and non-changing as long as the process lives)
     :type id: integer
     """
 
     def __init__(self, uri=None, title=None, artists=None, album=None,
-            track_no=0, date=None, length=None, id=None):
+            track_no=0, date=None, length=None, bitrate=None, id=None):
         self._uri = uri
         self._title = title
         self._artists = artists or []
@@ -91,6 +93,7 @@ class Track(object):
         self._track_no = track_no
         self._date = date
         self._length = length
+        self._bitrate = bitrate
         self._id = id
 
     @property
@@ -127,6 +130,11 @@ class Track(object):
     def length(self):
         """The track length in milliseconds. Read-only."""
         return self._length
+
+    @property
+    def bitrate(self):
+        """The track's bitrate in kbit/s. Read-only."""
+        return self._bitrate
 
     @property
     def id(self):
