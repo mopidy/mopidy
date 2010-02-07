@@ -37,6 +37,19 @@ class BaseCurrentPlaylistControllerTest(object):
 
         self.assertEqual(len(controller.playlist.tracks), 0)
 
+    def test_clear_when_playing(self):
+        self.test_add()
+        controller = self.backend.current_playlist
+        playback = self.backend.playback
+
+        playback.play()
+
+        self.assertEqual(playback.state, playback.PLAYING)
+
+        controller.clear()
+
+        self.assertEqual(playback.state, playback.STOPPED)
+
 class BasePlaybackControllerTest(object):
     uris = []
     backend_class = None
