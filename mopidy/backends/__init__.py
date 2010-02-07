@@ -241,5 +241,11 @@ class BaseBackend(object):
         return None
 
 class BasePlaybackController(object):
+    PAUSED = 1
+    PLAYING = 2
+    STOPPED = 3
+    
     def __init__(self, backend):
         self.backend = backend
+        self.state = self.STOPPED
+
