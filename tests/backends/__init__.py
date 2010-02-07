@@ -11,18 +11,18 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assert_(self.uris)
 
     def test_add(self):
-        playlist = self.backend.current_playlist
+        controller = self.backend.current_playlist
 
         for uri in self.uris:
-            playlist.add(uri)
-            self.assertEqual(uri, playlist.tracks[-1].uri)
+            controller.add(uri)
+            self.assertEqual(uri, controller.playlist.tracks[-1].uri)
 
     def test_add_at_position(self):
-        playlist = self.backend.current_playlist
+        controller = self.backend.current_playlist
 
         for uri in self.uris:
-            playlist.add(uri, 0)
-            self.assertEqual(uri, playlist.tracks[0].uri)
+            controller.add(uri, 0)
+            self.assertEqual(uri, controller.playlist.tracks[0].uri)
 
         # FIXME test other placements
 
