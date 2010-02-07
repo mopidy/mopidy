@@ -19,7 +19,11 @@ class GStreamerBackend(BaseBackend):
 class GStreamerCurrentPlaylistController(BaseCurrentPlaylistController):
     def add(self, uri, at_position=None):
         tracks = self.playlist.tracks
-        tracks.append(Track(uri))
+
+        if at_position is None:
+            tracks.append(Track(uri))
+        else:
+            tracks.insert(at_position, Track(uri))
 
         self.playlist = Playlist(tracks=tracks)
 
