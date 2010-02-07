@@ -17,6 +17,9 @@ class BaseCurrentPlaylistController(object):
     def __init__(self, backend):
         self.backend = backend
 
+    def add(self, track, at_position=None):
+        raise NotImplementedError
+
 class BasePlaybackController(object):
     PAUSED = 'paused'
     PLAYING = 'playing'
