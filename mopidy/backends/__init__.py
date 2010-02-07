@@ -68,6 +68,23 @@ class BaseCurrentPlaylistController(object):
         self.playlist = self.playlist.with_(tracks=before+shuffled+after)
 
 
+class BaseLibraryController(object):
+    def __init__(self, backend):
+        self.backend = backend
+
+    def find_exact(self, type, query):
+        raise NotImplementedError
+
+    def lookup(self, uri):
+        raise NotImplementedError
+
+    def refresh(self, uri=None):
+        raise NotImplementedError
+
+    def search(self, type, query):
+        raise NotImplementedError
+
+
 class BasePlaybackController(object):
     PAUSED = u'paused'
     PLAYING = u'playing'
@@ -186,23 +203,6 @@ class BasePlaybackController(object):
             self.state = self.STOPPED
 
     def _stop(self):
-        raise NotImplementedError
-
-
-class BaseLibraryController(object):
-    def __init__(self, backend):
-        self.backend = backend
-
-    def find_exact(self, type, query):
-        raise NotImplementedError
-
-    def lookup(self, uri):
-        raise NotImplementedError
-
-    def refresh(self, uri=None):
-        raise NotImplementedError
-
-    def search(self, type, query):
         raise NotImplementedError
 
 
