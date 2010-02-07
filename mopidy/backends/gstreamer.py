@@ -28,5 +28,10 @@ class GStreamerPlaybackController(BasePlaybackController):
         self.bin = bin
 
     def play(self, id=None, position=None):
+        if not self.current_track:
+            return False
+
         self.bin.set_property("uri", self.current_track.uri)
         self.bin.set_state(self.PLAYING)
+
+        return True
