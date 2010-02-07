@@ -42,6 +42,13 @@ class BaseCurrentPlaylistController(object):
 
         self.playlist = Playlist(tracks=new_tracks)
 
+    def remove(self, position):
+        tracks = self.playlist.tracks
+
+        del tracks[position]
+
+        self.playlist = Playlist(tracks=tracks)
+
 class BasePlaybackController(object):
     PAUSED = 'paused'
     PLAYING = 'playing'

@@ -54,6 +54,8 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.load(new_playlist)
         self.assertEqual(new_playlist, self.controller.playlist)
 
+    # FIXME test that player switches to playing new song
+
     @populate_playlist
     def test_move_single(self):
         tracks = self.controller.playlist.tracks
@@ -75,6 +77,14 @@ class BaseCurrentPlaylistControllerTest(object):
         tracks = self.controller.playlist.tracks
         self.assertEqual(tracks[1].uri, self.uris[0])
         self.assertEqual(tracks[2].uri, self.uris[1])
+
+    @populate_playlist
+    def test_remove(self):
+        track = self.controller.playlist.tracks[1]
+
+        self.controller.remove(1)
+
+        self.assertNotEqual(track, self.controller.playlist.tracks[1])
 
 class BasePlaybackControllerTest(object):
     uris = []
