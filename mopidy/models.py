@@ -218,7 +218,7 @@ class Playlist(object):
             tracks.append(track.mpd_format(position))
         return tracks
 
-    def with(self, uri=None, name=None, tracks=None):
+    def with_(self, uri=None, name=None, tracks=None):
         """
         Create a new playlist object with the given values. The values that are
         not given are taken from the object the method is called on.
