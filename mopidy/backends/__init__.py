@@ -22,6 +22,7 @@ class BaseCurrentPlaylistController(object):
         raise NotImplementedError
 
     def clear(self):
+        self.backend.playback.stop()
         self.playlist = Playlist()
 
 class BasePlaybackController(object):
@@ -37,6 +38,9 @@ class BasePlaybackController(object):
         self.playlist_position = 0
 
     def play(self, id=None, position=None):
+        raise NotImplementedError
+
+    def stop(self):
         raise NotImplementedError
 
     def next(self):

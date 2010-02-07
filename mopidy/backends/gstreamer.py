@@ -67,6 +67,9 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         return True
 
+    def stop(self):
+        self.bin.set_state(gst.STATE_NULL)
+
     def next(self):
         playlist = self.backend.current_playlist.playlist
 
