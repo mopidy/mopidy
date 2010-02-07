@@ -208,7 +208,7 @@ class BasePlaybackController(object):
         raise NotImplementedError
 
 
-class BaseStoredPlaylistController(object):
+class BaseStoredPlaylistsController(object):
     def __init__(self, backend):
         self.backend = backend
         self._playlists = []
