@@ -28,9 +28,11 @@ class GStreamerCurrentPlaylistController(BaseCurrentPlaylistController):
         self.playlist = Playlist(tracks=tracks)
 
 class GStreamerPlaybackController(BasePlaybackController):
-    PAUSED = gst.STATE_PAUSED
-    PLAYING = gst.STATE_PLAYING
-    STOPPED = gst.STATE_NULL
+    STATE_MAPPING = {
+        gst.STATE_PAUSED: BasePlaybackController.PAUSED,
+        gst.STATE_PLAYING: BasePlaybackController.PLAYING,
+        gst.STATE_NULL: BasePlaybackController.STOPPED,
+    }
 
     def __init__(self, backend):
         super(GStreamerPlaybackController, self).__init__(backend)
@@ -42,6 +44,11 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         self.bin = bin
 
+    @property
+    def state(self):
+        gst_state = self.bin.get_state()
+        return self.STATE_MAPPING.get(gst_state, self.STOPPED)
+
     def play(self, id=None, position=None):
         playlist = self.backend.current_playlist.playlist
 
@@ -52,8 +59,7 @@ class GStreamerPlaybackController(BasePlaybackController):
             self.playlist_position = 0
 
         self.bin.set_property("uri", self.current_track.uri)
-        self.bin.set_state(self.PLAYING)
-        self.state = self.PLAYING
+        self.bin.set_state(gst.STATE_PLAYING)
 
         return True
 

@@ -25,10 +25,11 @@ class BasePlaybackController(object):
     PAUSED = 'paused'
     PLAYING = 'playing'
     STOPPED = 'stopped'
+
+    state = STOPPED
     
     def __init__(self, backend):
         self.backend = backend
-        self.state = self.STOPPED
         self.current_track = None
         self.playlist_position = None
 
