@@ -1,0 +1,24 @@
+from mopidy.models import Track
+
+class BaseCurrentPlaylistControllerTest(object):
+    uris = []
+    backend_class = None
+
+    def setUp(self):
+        self.backend = self.backend_class()
+
+    def test_add(self):
+        playlist = self.backend.current_playlist
+
+        for uri in self.uris:
+            playlist.add(uri)
+            self.assertEqual(uri, playlist.tracks[-1].uri)
+
+    def test_add_at_position(self):
+        playlist = self.backend.current_playlist
+
+        for uri in self.uris:
+            playlist.add(uri, 0)
+            self.assertEqual(uri, playlist.tracks[0].uri)
+
+        # FIXME test other placements
