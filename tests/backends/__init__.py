@@ -48,8 +48,10 @@ class BasePlaybackControllerTest(object):
     def test_next(self):
         playback = self.backend.playback
 
-        current_song = playback.playlist_position
+        old_position = playback.playlist_position
+        old_uri = playback.current_track.uri
 
         playback.next()
 
-        self.assertEqual(playback.playlist_position, current_song+1)
+        self.assertEqual(playback.playlist_position, old_position+1)
+        self.assertNotEqual(playback.current_track.uri, old_uri)
