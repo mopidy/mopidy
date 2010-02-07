@@ -18,7 +18,7 @@ class BaseCurrentPlaylistController(object):
         self.backend = backend
         self.playlist = Playlist()
 
-    def add(self, track, at_position=None):
+    def add(self, uri, at_position=None):
         raise NotImplementedError
 
 class BasePlaybackController(object):
