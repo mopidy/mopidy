@@ -87,8 +87,8 @@ doctest:
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in _build/doctest/output.txt."
 
-public: clean html
-	rm -rf /tmp/mopidy-html && cp -r _build/html /tmp/mopidy-html
+public: clean dirhtml
+	rm -rf /tmp/mopidy-html && cp -r _build/dirhtml /tmp/mopidy-html
 	git stash save
 	cd .. && \
 	    git checkout gh-pages && \
