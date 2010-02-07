@@ -125,15 +125,12 @@
 
         Constant representing the paused state.
 
-    .. method:: play(id=None, position=None)
+    .. method:: play(track=None)
 
-        Play either the track with the given ID, the given position, or the
-        currently active track.
+        Play the given track or the currently active track.
 
-        :param id: ID of track to play
-        :type id: int
-        :param position: position in current playlist of track to play
-        :type position: int
+        :param track: track to play
+        :type track: :class:`mopidy.models.Track` or :class:`None`
 
     .. attribute:: PLAYING
 
