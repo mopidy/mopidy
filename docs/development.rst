@@ -34,7 +34,7 @@ To run tests, you need a couple of dependiencies. Some can be installed through 
 The rest can be installed using pip::
 
     sudo aptitude install python-pip python-setuptools bzr
-    pip install -r test-requirements.txt
+    sudo pip install -r test-requirements.txt
 
 Then, to run all tests::
 

@@ -61,12 +61,11 @@
 
     .. method:: move(start, end, to_position)
 
-        Move the tracks at positions in [``start``, ``end``] to
-        ``to_position``.
+        Move the tracks in the slice ``[start:end]`` to ``to_position``.
 
         :param start: position of first track to move
         :type start: int
-        :param end: position of last track to move
+        :param end: position after last track to move
         :type end: int
         :param to_position: new position for the tracks
         :type to_position: int
@@ -84,12 +83,12 @@
 
     .. method:: shuffle(start=None, end=None)
 
-        Shuffles the playlist, optionally a part of the playlist given by
-        ``start`` and ``end``.
+        Shuffles the entire playlist. If ``start`` and ``end`` is given only
+        shuffles the slice ``[start:end]``.
 
         :param start: position of first track to shuffle
         :type start: int or :class:`None`
-        :param end: position of last track to shuffle
+        :param end: position after last track to shuffle
         :type end: int or :class:`None`
 
     .. attribute:: version
@@ -126,15 +125,12 @@
 
         Constant representing the paused state.
 
-    .. method:: play(id=None, position=None)
+    .. method:: play(track=None)
 
-        Play either the track with the given ID, the given position, or the
-        currently active track.
+        Play the given track or the currently active track.
 
-        :param id: ID of track to play
-        :type id: int
-        :param position: position in current playlist of track to play
-        :type position: int
+        :param track: track to play
+        :type track: :class:`mopidy.models.Track` or :class:`None`
 
     .. attribute:: PLAYING
 
