@@ -1,4 +1,5 @@
 import logging
+import random
 import time
 
 from mopidy.exceptions import MpdNotImplemented
@@ -44,8 +45,13 @@ class BaseCurrentPlaylistController(object):
 
     def remove(self, position):
         tracks = self.playlist.tracks
-
         del tracks[position]
+
+        self.playlist = Playlist(tracks=tracks)
+
+    def shuffle(self, start=None, end=None):
+        tracks = self.playlist.tracks
+        random.shuffle(tracks)
 
         self.playlist = Playlist(tracks=tracks)
 

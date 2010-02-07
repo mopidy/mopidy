@@ -1,3 +1,5 @@
+import random
+
 from mopidy.models import Track, Playlist
 
 def populate_playlist(func):
@@ -85,6 +87,17 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.remove(1)
 
         self.assertNotEqual(track, self.controller.playlist.tracks[1])
+
+    @populate_playlist
+    def test_shuffle_all(self):
+        tracks = self.controller.playlist.tracks
+        random.seed(1)
+        self.controller.shuffle()
+
+        shuffled_tracks = self.controller.playlist.tracks
+
+        self.assertNotEqual(tracks, shuffled_tracks)
+        self.assertEqual(set(tracks), set(shuffled_tracks))
 
 class BasePlaybackControllerTest(object):
     uris = []
