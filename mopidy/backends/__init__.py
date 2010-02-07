@@ -14,9 +14,9 @@ class BaseBackend(object):
     uri_handlers = []
 
 class BasePlaybackController(object):
-    PAUSED = 1
-    PLAYING = 2
-    STOPPED = 3
+    PAUSED = 'paused'
+    PLAYING = 'playing'
+    STOPPED = 'stopped'
     
     def __init__(self, backend):
         self.backend = backend
