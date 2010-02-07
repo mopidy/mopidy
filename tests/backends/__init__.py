@@ -29,14 +29,15 @@ class BasePlaybackControllerTest(object):
     def setUp(self):
         self.backend = self.backend_class()
 
-    def test_play(self):
+    def test_play_with_no_current_track(self):
         playback = self.backend.playback
 
         self.assertEqual(playback.state, playback.STOPPED)
 
-        playback.play()
+        result = playback.play()
 
-        self.assertEqual(playback.state, playback.PLAYING)
+        self.assertEqual(result, False)
+        self.assertEqual(playback.state, playback.STOPPED)
 
     def test_next(self):
         playback = self.backend.playback
