@@ -119,7 +119,7 @@ class BasePlaybackController(object):
         if self.current_track is None:
             return None
         try:
-            return self.backend.current_playlist.playlist.index(
+            return self.backend.current_playlist.playlist.tracks.index(
                 self.current_track)
         except ValueError:
             return None
