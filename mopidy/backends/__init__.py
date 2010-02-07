@@ -31,7 +31,7 @@ class BasePlaybackController(object):
     def __init__(self, backend):
         self.backend = backend
         self.current_track = None
-        self.playlist_position = None
+        self.playlist_position = 0
 
     def play(self, id=None, position=None):
         raise NotImplementedError
