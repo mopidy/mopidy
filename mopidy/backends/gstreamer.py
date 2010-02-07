@@ -46,8 +46,13 @@ class GStreamerPlaybackController(BasePlaybackController):
 
     @property
     def state(self):
-        gst_state = self.bin.get_state()
-        return self.STATE_MAPPING.get(gst_state, self.STOPPED)
+        gststate = type(gst.STATE_NULL)
+
+        for state in self.bin.get_state():
+            if type(state) == gststate and state in self.STATE_MAPPING:
+                return self.STATE_MAPPING[state]
+
+        return self.STOPPED
 
     def play(self, id=None, position=None):
         playlist = self.backend.current_playlist.playlist
