@@ -1,15 +1,20 @@
 from mopidy.models import Track, Playlist
 
+def populate_playlist(func):
+    def wrapper(self):
+        for uri in self.uris:
+            self.backend.current_playlist.add(uri)
+
+        return func(self)
+
+    return wrapper
+
 class BaseCurrentPlaylistControllerTest(object):
     uris = []
     backend_class = None
 
     def setUp(self):
         self.backend = self.backend_class()
-
-    def populate_playlist(self):
-        for uri in self.uris:
-            self.backend.current_playlist.add(uri)
 
     def test_uri_set(self):
         self.assert_(len(self.uris) >= 3)
@@ -33,16 +38,16 @@ class BaseCurrentPlaylistControllerTest(object):
         controller.add(uri, len(self.uris)+2)
         self.assertEqual(uri, controller.playlist.tracks[-1].uri)
 
+    @populate_playlist
     def test_clear(self):
-        self.populate_playlist()
         controller = self.backend.current_playlist
 
         controller.clear()
 
         self.assertEqual(len(controller.playlist.tracks), 0)
 
+    @populate_playlist
     def test_clear_when_playing(self):
-        self.populate_playlist()
         controller = self.backend.current_playlist
         playback = self.backend.playback
 
@@ -72,10 +77,6 @@ class BasePlaybackControllerTest(object):
     def setUp(self):
         self.backend = self.backend_class()
 
-    def populate_playlist(self):
-        for uri in self.uris:
-            self.backend.current_playlist.add(uri)
-
     def test_play_with_empty_playlist(self):
         playback = self.backend.playback
 
@@ -86,8 +87,8 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(result, False)
         self.assertEqual(playback.state, playback.STOPPED)
 
+    @populate_playlist
     def test_play(self):
-        self.populate_playlist()
         playback = self.backend.playback
 
         self.assertEqual(playback.state, playback.STOPPED)
@@ -97,8 +98,8 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(result, True)
         self.assertEqual(playback.state, playback.PLAYING)
 
+    @populate_playlist
     def test_next(self):
-        self.populate_playlist()
         playback = self.backend.playback
 
         playback.play()
