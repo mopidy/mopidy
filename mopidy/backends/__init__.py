@@ -17,7 +17,17 @@ class BaseBackend(object):
 class BaseCurrentPlaylistController(object):
     def __init__(self, backend):
         self.backend = backend
+        self.version = 0
         self.playlist = Playlist()
+
+    def get_playlist(self):
+        return self._playlist
+
+    def set_playlist(self, playlist):
+        self._playlist = playlist
+        self.version += 1
+
+    playlist = property(get_playlist, set_playlist)
 
     def add(self, uri, at_position=None):
         raise NotImplementedError

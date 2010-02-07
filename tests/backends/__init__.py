@@ -111,6 +111,13 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(tracks[0], shuffled_tracks[0])
         self.assertEqual(set(tracks), set(shuffled_tracks))
 
+    def test_version(self):
+        version = self.controller.version
+
+        self.controller.playlist = Playlist()
+
+        self.assertEqual(version+1, self.controller.version)
+
 class BasePlaybackControllerTest(object):
     uris = []
     backend_class = None
