@@ -6,7 +6,7 @@ from tests.backends import (BasePlaybackControllerTest,
                             BaseCurrentPlaylistControllerTest)
 
 class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
-    uri = ['file://data/song1.mp3',
+    uris = ['file://data/song1.mp3',
            'file://data/song2.mp3',
            'file://data/song3.mp3',
           ]
