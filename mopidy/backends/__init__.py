@@ -92,6 +92,7 @@ class BasePlaybackController(object):
 
     def __init__(self, backend):
         self.backend = backend
+        self._state = self.STOPPED
         self.consume = False
         self.current_track = None
         self.random = False
@@ -117,21 +118,22 @@ class BasePlaybackController(object):
     def state(self, new_state):
         (old_state, self._state) = (self.state, new_state)
         logger.debug(u'Changing state: %s -> %s', old_state, new_state)
-        if old_state in (self.PLAY, self.STOP) and new_state == self.PLAY:
+        if (old_state in (self.PLAYING, self.STOPPED)
+                and new_state == self.PLAYING):
             self._play_time_start()
-        elif old_state == self.PLAY and new_state == self.PAUSE:
+        elif old_state == self.PLAYING and new_state == self.PAUSED:
             self._play_time_pause()
-        elif old_state == self.PAUSE and new_state == self.PLAY:
+        elif old_state == self.PAUSED and new_state == self.PLAYING:
             self._play_time_resume()
 
     @property
     def time_position(self):
-        if self.state == self.PLAY:
+        if self.state == self.PLAYING:
             time_since_started = int(time.time()) - self._play_time_started
             return self._play_time_accumulated + time_since_started
-        elif self.state == self.PAUSE:
+        elif self.state == self.PAUSED:
             return self._play_time_accumulated
-        elif self.state == self.STOP:
+        elif self.state == self.STOPPED:
             return 0
 
     def _play_time_start(self):
