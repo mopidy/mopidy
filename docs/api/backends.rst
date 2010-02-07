@@ -75,12 +75,12 @@
 
         The currently loaded :class:`mopidy.models.Playlist`.
 
-    .. method:: remove(position)
+    .. method:: remove(track)
 
-        Remove the track at ``position`` from the current playlist.
+        Remove the track from the current playlist.
 
-        :param position: position of track to remove
-        :type position: int
+        :param track: track to remove
+        :type track: :class:`mopidy.models.Track`
 
     .. method:: shuffle(start=None, end=None)
 
