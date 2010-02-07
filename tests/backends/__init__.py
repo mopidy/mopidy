@@ -54,6 +54,15 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.load(new_playlist)
         self.assertEqual(new_playlist, self.controller.playlist)
 
+    @populate_playlist
+    def test_move_single(self):
+        tracks = self.controller.playlist.tracks
+        self.assertEqual(tracks[0].uri, self.uris[0])
+        self.controller.move(0, 0, 2)
+
+        tracks = self.controller.playlist.tracks
+        self.assertEqual(tracks[2].uri, self.uris[0])
+
 class BasePlaybackControllerTest(object):
     uris = []
     backend_class = None

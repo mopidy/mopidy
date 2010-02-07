@@ -28,6 +28,20 @@ class BaseCurrentPlaylistController(object):
     def load(self, playlist):
         self.playlist = playlist
 
+    def move(self, start, end, to_position):
+        tracks = self.playlist.tracks
+
+        if start == end:
+            end += 1
+
+        new_tracks = tracks[:start] + tracks[end:]
+
+        for track in tracks[start:end]:
+            new_tracks.insert(to_position, track)
+            to_position += 1
+
+        self.playlist = Playlist(tracks=new_tracks)
+
 class BasePlaybackController(object):
     PAUSED = 'paused'
     PLAYING = 'playing'
