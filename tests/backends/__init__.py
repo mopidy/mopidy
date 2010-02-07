@@ -62,6 +62,8 @@ class BasePlaybackControllerTest(object):
     def test_next(self):
         playback = self.backend.playback
 
+        playback.play()
+
         old_position = playback.playlist_position
         old_uri = playback.current_track.uri
 
