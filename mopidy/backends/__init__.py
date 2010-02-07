@@ -1,23 +1,96 @@
+from copy import copy
 import logging
+import random
 import time
 
-from mopidy.exceptions import MpdNotImplemented
 from mopidy.models import Playlist
 
 logger = logging.getLogger('backends.base')
 
 class BaseBackend(object):
-    PLAY = u'play'
-    PAUSE = u'pause'
-    STOP = u'stop'
+    current_playlist = None
+    library = None
+    playback = None
+    stored_playlists = None
+    uri_handlers = []
 
-    def __init__(self, *args, **kwargs):
-        self._state = self.STOP
-        self._playlists = []
-        self._x_current_playlist = Playlist()
-        self._current_playlist_version = 0
 
-# Backend state
+class BaseCurrentPlaylistController(object):
+    def __init__(self, backend):
+        self.backend = backend
+        self.version = 0
+        self.playlist = Playlist()
+
+    @property
+    def playlist(self):
+        return copy(self._playlist)
+
+    @playlist.setter
+    def playlist(self, new_playlist):
+        self._playlist = new_playlist
+        self.version += 1
+
+    def add(self, uri, at_position=None):
+        raise NotImplementedError
+
+    def clear(self):
+        self.backend.playback.stop()
+        self.playlist = Playlist()
+
+    def load(self, playlist):
+        self.playlist = playlist
+        self.version = 0
+
+    def move(self, start, end, to_position):
+        tracks = self.playlist.tracks
+        new_tracks = tracks[:start] + tracks[end:]
+
+        for track in tracks[start:end]:
+            new_tracks.insert(to_position, track)
+            to_position += 1
+
+        self.playlist = self.playlist.with_(tracks=new_tracks)
+
+    def remove(self, position):
+        tracks = self.playlist.tracks
+        del tracks[position]
+        self.playlist = self.playlist.with_(tracks=tracks)
+
+    def shuffle(self, start=None, end=None):
+        tracks = self.playlist.tracks
+
+        before = tracks[:start or 0]
+        shuffled = tracks[start:end]
+        after = tracks[end or len(tracks):]
+
+        random.shuffle(shuffled)
+
+        self.playlist = self.playlist.with_(tracks=before+shuffled+after)
+
+
+class BasePlaybackController(object):
+    PAUSED = u'paused'
+    PLAYING = u'playing'
+    STOPPED = u'stopped'
+
+    def __init__(self, backend):
+        self.backend = backend
+        self.consume = False
+        self.current_track = None
+        self.random = False
+        self.repeat = False
+        self.state = self.STOPPED
+        self.volume = None
+
+    @property
+    def playlist_position(self):
+        if self.current_track is None:
+            return None
+        try:
+            return self.backend.current_playlist.playlist.index(
+                self.current_track)
+        except ValueError:
+            return None
 
     @property
     def state(self):
@@ -35,7 +108,7 @@ class BaseBackend(object):
             self._play_time_resume()
 
     @property
-    def _play_time_elapsed(self):
+    def time_position(self):
         if self.state == self.PLAY:
             time_since_started = int(time.time()) - self._play_time_started
             return self._play_time_accumulated + time_since_started
@@ -55,184 +128,113 @@ class BaseBackend(object):
     def _play_time_resume(self):
         self._play_time_started = int(time.time())
 
-    @property
-    def _current_playlist(self):
-        return self._x_current_playlist
-
-    @_current_playlist.setter
-    def _current_playlist(self, playlist):
-        self._x_current_playlist = playlist
-        self._current_playlist_version += 1
-
-    @property
-    def _current_track(self):
-        if self._current_song_pos is not None:
-            return self._current_playlist.tracks[self._current_song_pos]
-
-    @property
-    def _current_song_pos(self):
-        if not hasattr(self, '_x_current_song_pos'):
-            self._x_current_song_pos = None
-        if (self._current_playlist is None
-                or self._current_playlist.length == 0):
-            self._x_current_song_pos = None
-        elif self._x_current_song_pos < 0:
-            self._x_current_song_pos = 0
-        elif self._x_current_song_pos >= self._current_playlist.length:
-            self._x_current_song_pos = self._current_playlist.length - 1
-        return self._x_current_song_pos
-
-    @_current_song_pos.setter
-    def _current_song_pos(self, songid):
-        self._x_current_song_pos = songid
-
-# Status methods
-
-    def current_song(self):
-        if self.state is not self.STOP and self._current_track is not None:
-            return self._current_track.mpd_format(self._current_song_pos)
-
-    def status_bitrate(self):
-        return 0
-
-    def status_consume(self):
-        return 0
-
-    def status_volume(self):
-        return 0
-
-    def status_repeat(self):
-        return 0
-
-    def status_random(self):
-        return 0
-
-    def status_single(self):
-        return 0
-
-    def status_song_id(self):
-        return self._current_song_pos # Override if you got a better ID scheme
-
-    def status_playlist(self):
-        return self._current_playlist_version
-
-    def status_playlist_length(self):
-        return self._current_playlist.length
-
-    def status_state(self):
-        return self.state
-
-    def status_time(self):
-        return u'%s:%s' % (self._play_time_elapsed, self.status_time_total())
-
-    def status_time_total(self):
-        if self._current_track is not None:
-            return self._current_track.length // 1000
-        else:
-            return 0
-
-    def status_xfade(self):
-        return 0
-
-    def url_handlers(self):
-        return []
-
-# Control methods
-
-    def end_of_track(self):
-        self.next()
+    def new_playlist_loaded_callback(self):
+        self.current_track = None
+        if self.state == self.PLAYING:
+            if self.backend.current_playlist.playlist.length > 0:
+                self.play(self.backend.current_playlist.playlist.tracks[0])
+            else:
+                self.stop()
 
     def next(self):
         self.stop()
         if self._next():
-            self.state = self.PLAY
+            self.state = self.PLAYING
 
     def _next(self):
-        raise MpdNotImplemented
+        raise NotImplementedError
 
     def pause(self):
-        if self.state == self.PLAY and self._pause():
-            self.state = self.PAUSE
+        if self.state == self.PLAYING and self._pause():
+            self.state = self.PAUSED
 
     def _pause(self):
-        raise MpdNotImplemented
+        raise NotImplementedError
 
-    def play(self, songpos=None, songid=None):
-        if self.state == self.PAUSE and songpos is None and songid is None:
+    def play(self, track=None):
+        if self.state == self.PAUSED and track is None:
             return self.resume()
+        if track is not None:
+            self.current_track = track
         self.stop()
-        if songpos is not None and self._play_pos(songpos):
-            self.state = self.PLAY
-        elif songid is not None and self._play_id(songid):
-            self.state = self.PLAY
-        elif self._play():
-            self.state = self.PLAY
+        if self._play(track):
+            self.state = self.PLAYING
 
-    def _play(self):
-        raise MpdNotImplemented
-
-    def _play_id(self, songid):
-        raise MpdNotImplemented
-
-    def _play_pos(self, songpos):
-        raise MpdNotImplemented
+    def _play(self, track):
+        raise NotImplementedError
 
     def previous(self):
         self.stop()
         if self._previous():
-            self.state = self.PLAY
+            self.state = self.PLAYING
 
     def _previous(self):
-        raise MpdNotImplemented
+        raise NotImplementedError
 
     def resume(self):
-        if self.state == self.PAUSE and self._resume():
-            self.state = self.PLAY
+        if self.state == self.PAUSED and self._resume():
+            self.state = self.PLAYING
 
     def _resume(self):
-        raise MpdNotImplemented
+        raise NotImplementedError
+
+    def seek(self, time_position):
+        raise NotImplementedError
 
     def stop(self):
-        if self.state != self.STOP and self._stop():
-            self.state = self.STOP
+        if self.state != self.STOPPED and self._stop():
+            self.state = self.STOPPED
 
     def _stop(self):
-        raise MpdNotImplemented
+        raise NotImplementedError
 
-# Current/single playlist methods
 
-    def playlist_load(self, name):
-        self._current_song_pos = None
-        matches = filter(lambda p: p.name == name, self._playlists)
-        if matches:
-            self._current_playlist = matches[0]
-            if self.state == self.PLAY:
-                self.play(songpos=0)
-        else:
-            self._current_playlist = None
+class BaseLibraryController(object):
+    def __init__(self, backend):
+        self.backend = backend
 
-    def playlist_changes_since(self, version='0'):
-        if int(version) < self._current_playlist_version:
-            return self._current_playlist.mpd_format()
+    def find_exact(self, type, query):
+        raise NotImplementedError
 
-    def playlist_info(self, songpos=None, start=0, end=None):
-        if songpos is not None:
-            start = int(songpos)
-            end = start + 1
-        else:
-            if start is None:
-                start = 0
-            start = int(start)
-            if end is not None:
-                end = int(end)
-        return self._current_playlist.mpd_format(start, end)
+    def lookup(self, uri):
+        raise NotImplementedError
 
-# Stored playlist methods
+    def refresh(self, uri=None):
+        raise NotImplementedError
 
-    def playlists_list(self):
-        return [u'playlist: %s' % p.name for p in self._playlists]
+    def search(self, type, query):
+        raise NotImplementedError
 
-# Music database methods
 
-    def search(self, type, what):
-        return None
+class BaseStoredPlaylistController(object):
+    def __init__(self, backend):
+        self.backend = backend
+        self._playlists = []
+
+    @property
+    def playlists(self):
+        return copy(self._playlists)
+
+    def add(self, uri):
+        raise NotImplementedError
+
+    def create(self, name):
+        raise NotImplementedError
+
+    def delete(self, playlist):
+        raise NotImplementedError
+
+    def lookup(self, uri):
+        raise NotImplementedError
+
+    def refresh(self):
+        raise NotImplementedError
+
+    def rename(self, playlist, new_name):
+        raise NotImplementedError
+
+    def save(self, playlist):
+        raise NotImplementedError
+
+    def search(self, query):
+        return filter(lambda p: query in p.name, self._playlists)

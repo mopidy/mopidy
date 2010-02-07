@@ -189,11 +189,15 @@ class MpdHandler(object):
 
     @register(r'^listplaylists$')
     def _listplaylists(self):
-        return self.backend.playlists_list()
+        return [u'playlist: %s' % p.name
+            for p in self.backend.stored_playlists.playlists]
 
     @register(r'^load "(?P<name>[^"]+)"$')
     def _load(self, name):
-        return self.backend.playlist_load(name)
+        matches = self.backend.stored_playlists.search(name)
+        if matches:
+            self.backend.current_playlist.load(matches[0])
+            self.backend.playback.new_playlist_loaded_callback()
 
     @register(r'^lsinfo$')
     @register(r'^lsinfo "(?P<uri>[^"]*)"$')
@@ -264,13 +268,22 @@ class MpdHandler(object):
 
     @register(r'^playlistid( "(?P<songid>\S+)")*$')
     def _playlistid(self, songid=None):
-        return self.backend.playlist_info(songid, None, None)
+        return self.backend.current_playlist.playlist.mpd_format()
 
     @register(r'^playlistinfo$')
     @register(r'^playlistinfo "(?P<songpos>\d+)"$')
     @register(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
     def _playlistinfo(self, songpos=None, start=None, end=None):
-        return self.backend.playlist_info(songpos, start, end)
+        if songpos is not None:
+            return self.backend.current_playlist.playlist.mpd_format(
+                songpos, songpos + 1)
+        else:
+            if start is None:
+                start = 0
+            start = int(start)
+            if end is not None:
+                end = int(end)
+            return self.backend.current_playlist.playlist.mpd_format(start, end)
 
     @register(r'^playlistmove "(?P<name>[^"]+)" "(?P<songid>\d+)" "(?P<songpos>\d+)"$')
     def _playlistdelete(self, name, songid, songpos):
@@ -282,7 +295,8 @@ class MpdHandler(object):
 
     @register(r'^plchanges "(?P<version>\d+)"$')
     def _plchanges(self, version):
-        return self.backend.playlist_changes_since(version)
+        if int(version) < self.backend.current_playlist.version:
+            return self.backend.current_playlist.playlist.mpd_format()
 
     @register(r'^plchangesposid "(?P<version>\d+)"$')
     def _plchangesposid(self, version):
@@ -400,9 +414,22 @@ class MpdHandler(object):
             result.append(('song', self.backend.status_song_id()))
             result.append(('songid', self.backend.status_song_id()))
         if self.backend.state in (self.backend.PLAY, self.backend.PAUSE):
-            result.append(('time', self.backend.status_time()))
+            result.append(('time', self._status_time()))
             result.append(('bitrate', self.backend.status_bitrate()))
         return result
+
+    def _status_time(self):
+        return u'%s:%s' % (
+            self._status_time_elapsed(), self._status_time_total())
+
+    def _status_time_elapsed(self):
+        return self.backend.playback.time_position
+
+    def _status_time_total(self):
+        if self.backend.playback.current_track is not None:
+            return self.backend.playback.current_track.length // 1000
+        else:
+            return 0
 
     @register(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
     def _swap(self, songpos1, songpos2):
