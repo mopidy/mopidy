@@ -22,3 +22,18 @@ class BaseCurrentPlaylistControllerTest(object):
             self.assertEqual(uri, playlist.tracks[0].uri)
 
         # FIXME test other placements
+
+class BasePlaybackControllerTest(object):
+    backend_class = None
+
+    def setUp(self):
+        self.backend = self.backend_class()
+
+    def test_play(self):
+        playback = self.backend.playback
+
+        self.assertEqual(playback.state, playback.STOPPED)
+
+        playback.play()
+
+        self.assertEqual(playback.state, playback.PLAYING)
