@@ -52,6 +52,20 @@
 
         Clear the current playlist.
 
+    .. method:: get_by_id(id)
+
+        Get track by ID. Raises :class:`KeyError` if not found.
+
+        :param id: track ID
+        :type id: int
+
+    .. method:: get_by_uri(uri)
+
+        Get track by URI. Raises :class:`KeyError` if not found.
+
+        :param uri: track URI
+        :type uri: string
+
     .. method:: load(playlist)
 
         Replace the current playlist with the given playlist.

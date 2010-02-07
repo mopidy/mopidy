@@ -37,6 +37,20 @@ class BaseCurrentPlaylistController(object):
         self.backend.playback.stop()
         self.playlist = Playlist()
 
+    def get_by_id(self, id):
+        matches = filter(lambda t: t.id == id, self._playlist.tracks)
+        if matches:
+            return matches[0]
+        else:
+            raise KeyError('Track with ID "%s" not found' % id)
+
+    def get_by_uri(self, uri):
+        matches = filter(lambda t: t.uri == uri, self._playlist.tracks)
+        if matches:
+            return matches[0]
+        else:
+            raise KeyError('Track with URI "%s" not found' % uri)
+
     def load(self, playlist):
         self.playlist = playlist
         self.version = 0
