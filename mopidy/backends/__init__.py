@@ -123,10 +123,6 @@ class BaseBackend(object):
         return self.state
 
     def status_time(self):
-        # XXX This is only called when a client is connected, and is thus not a
-        # complete solution
-        if self._play_time_elapsed >= self.status_time_total() > 0:
-            self.end_of_track()
         return u'%s:%s' % (self._play_time_elapsed, self.status_time_total())
 
     def status_time_total(self):
@@ -205,13 +201,13 @@ class BaseBackend(object):
 
 # Current/single playlist methods
 
-    def playlist_changes_since(self, version):
-        return None
-
     def playlist_load(self, name):
+        self._current_song_pos = None
         matches = filter(lambda p: p.name == name, self._playlists)
         if matches:
             self._current_playlist = matches[0]
+            if self.state == self.PLAY:
+                self.play(songpos=0)
         else:
             self._current_playlist = None
 
