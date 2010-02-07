@@ -249,6 +249,7 @@ class BasePlaybackController(object):
         self.backend = backend
         self.state = self.STOPPED
         self.current_track = None
+        self.playlist_position = None
 
     def play(self, id=None, position=None):
         raise NotImplementedError
