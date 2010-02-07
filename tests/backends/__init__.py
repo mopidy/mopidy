@@ -15,60 +15,52 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
+        self.controller = self.backend.current_playlist
 
     def test_uri_set(self):
         self.assert_(len(self.uris) >= 3)
 
     def test_add(self):
-        controller = self.backend.current_playlist
-
         for uri in self.uris:
-            controller.add(uri)
-            self.assertEqual(uri, controller.playlist.tracks[-1].uri)
+            self.controller.add(uri)
+            self.assertEqual(uri, self.controller.playlist.tracks[-1].uri)
 
     def test_add_at_position(self):
-        controller = self.backend.current_playlist
-
         for uri in self.uris[:-1]:
-            controller.add(uri, 0)
-            self.assertEqual(uri, controller.playlist.tracks[0].uri)
+            self.controller.add(uri, 0)
+            self.assertEqual(uri, self.controller.playlist.tracks[0].uri)
 
         uri = self.uris[-1]
 
-        controller.add(uri, len(self.uris)+2)
-        self.assertEqual(uri, controller.playlist.tracks[-1].uri)
+        self.controller.add(uri, len(self.uris)+2)
+        self.assertEqual(uri, self.controller.playlist.tracks[-1].uri)
 
     @populate_playlist
     def test_clear(self):
-        controller = self.backend.current_playlist
+        self.controller.clear()
 
-        controller.clear()
-
-        self.assertEqual(len(controller.playlist.tracks), 0)
+        self.assertEqual(len(self.controller.playlist.tracks), 0)
 
     @populate_playlist
     def test_clear_when_playing(self):
-        controller = self.backend.current_playlist
         playback = self.backend.playback
 
         playback.play()
 
         self.assertEqual(playback.state, playback.PLAYING)
 
-        controller.clear()
+        self.controller.clear()
 
         self.assertEqual(playback.state, playback.STOPPED)
 
     def test_load(self):
-        controller = self.backend.current_playlist
-
         new_playlist = Playlist()
 
-        self.assertNotEqual(new_playlist, controller.playlist)
+        self.assertNotEqual(new_playlist, self.controller.playlist)
 
-        controller.load(new_playlist)
+        self.controller.load(new_playlist)
 
-        self.assertEqual(new_playlist, controller.playlist)
+        self.assertEqual(new_playlist, self.controller.playlist)
 
 class BasePlaybackControllerTest(object):
     uris = []
