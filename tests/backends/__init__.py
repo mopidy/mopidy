@@ -1,4 +1,4 @@
-from mopidy.models import Track
+from mopidy.models import Track, Playlist
 
 class BaseCurrentPlaylistControllerTest(object):
     uris = []
@@ -49,6 +49,17 @@ class BaseCurrentPlaylistControllerTest(object):
         controller.clear()
 
         self.assertEqual(playback.state, playback.STOPPED)
+
+    def test_load(self):
+        controller = self.backend.current_playlist
+
+        new_playlist = Playlist()
+
+        self.assertNotEqual(new_playlist, controller.playlist)
+
+        controller.load(new_playlist)
+
+        self.assertEqual(new_playlist, controller.playlist)
 
 class BasePlaybackControllerTest(object):
     uris = []

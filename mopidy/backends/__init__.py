@@ -25,6 +25,9 @@ class BaseCurrentPlaylistController(object):
         self.backend.playback.stop()
         self.playlist = Playlist()
 
+    def load(self, playlist):
+        self.playlist = playlist
+
 class BasePlaybackController(object):
     PAUSED = 'paused'
     PLAYING = 'playing'
