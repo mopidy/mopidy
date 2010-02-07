@@ -99,6 +99,18 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertNotEqual(tracks, shuffled_tracks)
         self.assertEqual(set(tracks), set(shuffled_tracks))
 
+    @populate_playlist
+    def test_shuffle_subset(self):
+        tracks = self.controller.playlist.tracks
+        random.seed(1)
+        self.controller.shuffle(1, 3)
+
+        shuffled_tracks = self.controller.playlist.tracks
+
+        self.assertNotEqual(tracks, shuffled_tracks)
+        self.assertEqual(tracks[0], shuffled_tracks[0])
+        self.assertEqual(set(tracks), set(shuffled_tracks))
+
 class BasePlaybackControllerTest(object):
     uris = []
     backend_class = None

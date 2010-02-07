@@ -51,9 +51,14 @@ class BaseCurrentPlaylistController(object):
 
     def shuffle(self, start=None, end=None):
         tracks = self.playlist.tracks
-        random.shuffle(tracks)
 
-        self.playlist = Playlist(tracks=tracks)
+        before = tracks[:start or 0]
+        shuffled = tracks[start:end]
+        after = tracks[end or len(tracks):]
+
+        random.shuffle(shuffled)
+
+        self.playlist = Playlist(tracks=before+shuffled+after)
 
 class BasePlaybackController(object):
     PAUSED = 'paused'
