@@ -209,6 +209,12 @@ class Playlist(object):
         """
         Format playlist for output to MPD client.
 
+        Optionally limit output to the slice ``[start:end]`` of the playlist.
+
+        :param start: position of first track to include in output
+        :type start: int
+        :param end: position after last track to include in output
+        :type end: int or :class:`None` for end of list
         :rtype: list of lists of two-tuples
         """
         if end is None:
