@@ -113,6 +113,10 @@
 
         The currently playing or selected :class:`mopidy.models.Track`.
 
+    .. method:: new_playlist_loaded_callback()
+
+        Tell the playback controller that a new playlist has been loaded.
+
     .. method:: next()
 
         Play the next track.
@@ -284,6 +288,13 @@
         :type playlist: :class:`mopidy.models.Playlist`
         :param new_name: the new name
         :type new_name: string
+
+    .. method:: save(playlist)
+
+        Save the playlist.
+
+        :param playlist: the playlist
+        :type playlist: :class:`mopidy.models.Playlist`
 
     .. method:: search(query)
 
