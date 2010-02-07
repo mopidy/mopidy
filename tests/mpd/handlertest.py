@@ -152,7 +152,9 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(result['state'] in ('play', 'stop', 'pause'))
 
     def test_status_method_when_playlist_loaded(self):
-        self.b._current_playlist = Playlist(tracks=[Track()])
+        track = Track()
+        self.b.current_playlist.load(Playlist(tracks=[track]))
+        self.b.playback.current_track = track
         result = dict(self.h._status())
         self.assert_('song' in result)
         self.assert_(int(result['song']) >= 0)
@@ -160,7 +162,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(int(result['songid']) >= 0)
 
     def test_status_method_when_playing(self):
-        self.b.state = self.b.PLAY
+        self.b.playback.state = self.b.playback.PLAYING
         result = dict(self.h._status())
         self.assert_('time' in result)
         (position, total) = result['time'].split(':')
@@ -283,28 +285,36 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.h.handle_request(u'pause "1"')
         result = self.h.handle_request(u'pause "0"')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PLAY, self.b.state)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_pause_on(self):
         self.h.handle_request(u'play')
         result = self.h.handle_request(u'pause "1"')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PAUSE, self.b.state)
+        self.assertEquals(self.b.playback.PAUSED, self.b.playback.state)
 
     def test_play_without_pos(self):
         result = self.h.handle_request(u'play')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PLAY, self.b.state)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_play_with_pos(self):
+        self.b.current_playlist.load(Playlist(tracks=[Track()]))
         result = self.h.handle_request(u'play "0"')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PLAY, self.b.state)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
+
+    def test_play_with_pos_out_of_bounds(self):
+        self.b.current_playlist.load(Playlist())
+        result = self.h.handle_request(u'play "0"')
+        self.assert_(u'ACK Position out of bounds' in result)
+        self.assertEquals(self.b.playback.STOPPED, self.b.playback.state)
 
     def test_playid(self):
+        self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
         result = self.h.handle_request(u'playid "0"')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PLAY, self.b.state)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_previous(self):
         result = self.h.handle_request(u'previous')
@@ -321,7 +331,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
     def test_stop(self):
         result = self.h.handle_request(u'stop')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.STOP, self.b.state)
+        self.assertEquals(self.b.playback.STOPPED, self.b.playback.state)
 
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):

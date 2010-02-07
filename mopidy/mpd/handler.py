@@ -132,7 +132,8 @@ class MpdHandler(object):
 
     @register(r'^currentsong$')
     def _currentsong(self):
-        return self.backend.current_song()
+        if self.backend.playback.current_track is not None:
+            return self.backend.playback.current_track.mpd_format()
 
     @register(r'^delete "(?P<songpos>\d+)"$')
     @register(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
@@ -217,7 +218,7 @@ class MpdHandler(object):
 
     @register(r'^next$')
     def _next(self):
-        return self.backend.next()
+        return self.backend.playback.next()
 
     @register(r'^password "(?P<password>[^"]+)"$')
     def _password(self, password):
@@ -226,9 +227,9 @@ class MpdHandler(object):
     @register(r'^pause "(?P<state>[01])"$')
     def _pause(self, state):
         if int(state):
-            self.backend.pause()
+            self.backend.playback.pause()
         else:
-            self.backend.resume()
+            self.backend.playback.resume()
 
     @register(r'^ping$')
     def _ping(self):
@@ -236,15 +237,25 @@ class MpdHandler(object):
 
     @register(r'^play$')
     def _play(self):
-        return self.backend.play()
+        return self.backend.playback.play()
 
     @register(r'^play "(?P<songpos>\d+)"$')
     def _playpos(self, songpos):
-        return self.backend.play(songpos=int(songpos))
+        songpos = int(songpos)
+        try:
+            track = self.backend.current_playlist.playlist.tracks[songpos]
+            return self.backend.playback.play(track)
+        except IndexError:
+            raise MpdAckError(u'Position out of bounds')
 
     @register(r'^playid "(?P<songid>\d+)"$')
     def _playid(self, songid):
-        return self.backend.play(songid=int(songid))
+        songid = int(songid)
+        try:
+            track = self.backend.current_playlist.get_by_id(songid)
+            return self.backend.playback.play(track)
+        except KeyError, e:
+            raise MpdAckError(unicode(e))
 
     @register(r'^playlist$')
     def _playlist(self):
@@ -275,6 +286,7 @@ class MpdHandler(object):
     @register(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
     def _playlistinfo(self, songpos=None, start=None, end=None):
         if songpos is not None:
+            songpos = int(songpos)
             return self.backend.current_playlist.playlist.mpd_format(
                 songpos, songpos + 1)
         else:
@@ -304,7 +316,7 @@ class MpdHandler(object):
 
     @register(r'^previous$')
     def _previous(self):
-        return self.backend.previous()
+        return self.backend.playback.previous()
 
     @register(r'^rename "(?P<old_name>[^"]+)" "(?P<new_name>[^"]+)"$')
     def _rename(self, old_name, new_name):
@@ -348,7 +360,7 @@ class MpdHandler(object):
 
     @register(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>[^"]+)"$')
     def _search(self, type, what):
-        return self.backend.search(type, what)
+        return self.backend.library.search(type, what)
 
     @register(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
     def _seek(self, songpos, seconds):
@@ -395,28 +407,77 @@ class MpdHandler(object):
 
     @register(r'^stop$')
     def _stop(self):
-        self.backend.stop()
+        self.backend.playback.stop()
 
     @register(r'^status$')
     def _status(self):
         result = [
-            ('volume', self.backend.status_volume()),
-            ('repeat', self.backend.status_repeat()),
-            ('random', self.backend.status_random()),
-            ('single', self.backend.status_single()),
-            ('consume', self.backend.status_consume()),
-            ('playlist', self.backend.status_playlist()),
-            ('playlistlength', self.backend.status_playlist_length()),
-            ('xfade', self.backend.status_xfade()),
-            ('state', self.backend.status_state()),
+            ('volume', self._status_volume()),
+            ('repeat', self._status_repeat()),
+            ('random', self._status_random()),
+            ('single', self._status_single()),
+            ('consume', self._status_consume()),
+            ('playlist', self._status_playlist_version()),
+            ('playlistlength', self._status_playlist_length()),
+            ('xfade', self._status_xfade()),
+            ('state', self._status_state()),
         ]
-        if self.backend.status_playlist_length() > 0:
-            result.append(('song', self.backend.status_song_id()))
-            result.append(('songid', self.backend.status_song_id()))
-        if self.backend.state in (self.backend.PLAY, self.backend.PAUSE):
+        if self.backend.playback.current_track is not None:
+            result.append(('song', self._status_songpos()))
+            result.append(('songid', self._status_songid()))
+        if self.backend.playback.state in (
+                self.backend.playback.PLAYING, self.backend.playback.PAUSED):
             result.append(('time', self._status_time()))
-            result.append(('bitrate', self.backend.status_bitrate()))
+            result.append(('bitrate', self._status_bitrate()))
         return result
+
+    def _status_bitrate(self):
+        if self.backend.playback.current_track is not None:
+            return self.backend.playback.current_track.bitrate
+
+    def _status_consume(self):
+        if self.backend.playback.consume:
+            return 1
+        else:
+            return 0
+
+    def _status_playlist_length(self):
+        return self.backend.current_playlist.playlist.length
+
+    def _status_playlist_version(self):
+        return self.backend.current_playlist.version
+
+    def _status_random(self):
+        if self.backend.playback.random:
+            return 1
+        else:
+            return 0
+
+    def _status_repeat(self):
+        if self.backend.playback.repeat:
+            return 1
+        else:
+            return 0
+
+    def _status_single(self):
+        return 0 # TODO
+
+    def _status_songid(self):
+        if self.backend.playback.current_track.id is not None:
+            return self.backend.playback.current_track.id
+        else:
+            return self._status_songpos()
+
+    def _status_songpos(self):
+        return self.backend.playback.playlist_position
+
+    def _status_state(self):
+        if self.backend.playback.state == self.backend.playback.PLAYING:
+            return u'play'
+        elif self.backend.playback.state == self.backend.playback.STOPPED:
+            return u'stop'
+        elif self.backend.playback.state == self.backend.playback.PAUSED:
+            return u'pause'
 
     def _status_time(self):
         return u'%s:%s' % (
@@ -430,6 +491,15 @@ class MpdHandler(object):
             return self.backend.playback.current_track.length // 1000
         else:
             return 0
+
+    def _status_volume(self):
+        if self.backend.playback.volume is not None:
+            return self.backend.playback.volume
+        else:
+            return 0
+
+    def _status_xfade(self):
+        return 0 # TODO
 
     @register(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
     def _swap(self, songpos1, songpos2):
@@ -445,4 +515,4 @@ class MpdHandler(object):
 
     @register(r'^urlhandlers$')
     def _urlhandlers(self):
-        return self.backend.url_handlers()
+        return self.backend.uri_handlers
