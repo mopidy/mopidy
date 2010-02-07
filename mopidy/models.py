@@ -217,3 +217,26 @@ class Playlist(object):
         for track, position in zip(self.tracks, range(start, end)):
             tracks.append(track.mpd_format(position))
         return tracks
+
+    def with(self, uri=None, name=None, tracks=None):
+        """
+        Create a new playlist object with the given values. The values that are
+        not given are taken from the object the method is called on.
+
+        Does not change the object on which it is called.
+
+        :param uri: playlist URI
+        :type uri: string
+        :param name: playlist name
+        :type name: string
+        :param tracks: playlist's tracks
+        :type tracks: list of :class:`Track` elements
+        :rtype: :class:`Playlist`
+        """
+        if uri is None:
+            uri = self.uri
+        if name is None:
+            name = self.name
+        if tracks is None:
+            tracks = self.tracks
+        return Playlist(uri=uri, name=name, tracks=tracks)
