@@ -13,6 +13,10 @@ class BaseBackend(object):
     stored_playlists = None
     uri_handlers = []
 
+class BaseCurrentPlaylistController(object):
+    def __init__(self, backend):
+        self.backend = backend
+
 class BasePlaybackController(object):
     PAUSED = 'paused'
     PLAYING = 'playing'
