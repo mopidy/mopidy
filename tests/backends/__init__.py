@@ -37,3 +37,12 @@ class BasePlaybackControllerTest(object):
         playback.play()
 
         self.assertEqual(playback.state, playback.PLAYING)
+
+    def test_next(self):
+        playback = self.backend.playback
+
+        current_song = playback.playlist_position
+
+        playback.next()
+
+        self.assertEqual(playback.playlist_position, current_song+1)
