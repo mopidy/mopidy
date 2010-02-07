@@ -30,12 +30,13 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(uri, controller.playlist.tracks[-1].uri)
 
 class BasePlaybackControllerTest(object):
+    uris = []
     backend_class = None
 
     def setUp(self):
         self.backend = self.backend_class()
 
-    def test_play_with_no_current_track(self):
+    def test_play_with_empty_playlist(self):
         playback = self.backend.playback
 
         self.assertEqual(playback.state, playback.STOPPED)
@@ -44,6 +45,19 @@ class BasePlaybackControllerTest(object):
 
         self.assertEqual(result, False)
         self.assertEqual(playback.state, playback.STOPPED)
+
+    def test_play(self):
+        playback = self.backend.playback
+
+        for uri in self.uris:
+            self.backend.current_playlist.add(uri)
+
+        self.assertEqual(playback.state, playback.STOPPED)
+
+        result = playback.play()
+
+        self.assertEqual(result, True)
+        self.assertEqual(playback.state, playback.PLAYING)
 
     def test_next(self):
         playback = self.backend.playback

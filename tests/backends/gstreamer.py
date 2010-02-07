@@ -7,13 +7,18 @@ from tests.backends import (BasePlaybackControllerTest,
 
 class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
     uris = ['file://data/song1.mp3',
-           'file://data/song2.mp3',
-           'file://data/song3.mp3',
-          ]
+            'file://data/song2.mp3',
+            'file://data/song3.mp3',
+           ]
 
     backend_class = GStreamerBackend
 
 class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestCase):
+    uris = ['file://data/song1.mp3',
+            'file://data/song2.mp3',
+            'file://data/song3.mp3',
+           ]
+
     backend_class = GStreamerBackend
 
 if __name__ == '__main__':
