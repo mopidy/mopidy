@@ -150,15 +150,16 @@ class Track(object):
         :rtype: list of two-tuples
         """
         return [
-            ('file', self.uri),
-            ('Time', self.length // 1000),
+            ('file', self.uri or ''),
+            ('Time', self.length and (self.length // 1000) or 0),
             ('Artist', self.mpd_format_artists()),
-            ('Title', self.title),
-            ('Album', self.album.name),
-            ('Track', '%d/%d' % (self.track_no, self.album.num_tracks)),
-            ('Date', self.date),
+            ('Title', self.title or ''),
+            ('Album', self.album and self.album.name or ''),
+            ('Track', '%d/%d' % (self.track_no,
+                self.album and self.album.num_tracks or 0)),
+            ('Date', self.date or ''),
             ('Pos', position),
-            ('Id', self.id),
+            ('Id', self.id or position),
         ]
 
     def mpd_format_artists(self):
