@@ -26,3 +26,7 @@ class GStreamerPlaybackController(BasePlaybackController):
         bin.set_property("video-sink", sink)
 
         self.bin = bin
+
+    def play(self, id=None, position=None):
+        self.bin.set_property("uri", self.current_track.uri)
+        self.bin.set_state(self.PLAYING)
