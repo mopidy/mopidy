@@ -7,6 +7,9 @@ class BaseCurrentPlaylistControllerTest(object):
     def setUp(self):
         self.backend = self.backend_class()
 
+    def test_uri_set(self):
+        self.assert_(self.uris)
+
     def test_add(self):
         playlist = self.backend.current_playlist
 
