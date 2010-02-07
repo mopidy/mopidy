@@ -16,6 +16,7 @@ class BaseBackend(object):
 class BaseCurrentPlaylistController(object):
     def __init__(self, backend):
         self.backend = backend
+        self.playlist = Playlist()
 
     def add(self, track, at_position=None):
         raise NotImplementedError
