@@ -253,3 +253,6 @@ class BasePlaybackController(object):
 
     def play(self, id=None, position=None):
         raise NotImplementedError
+
+    def next(self):
+        raise NotImplementedError
