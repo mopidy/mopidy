@@ -33,7 +33,8 @@ class BaseCurrentPlaylistController(object):
     """
 
     #: The current playlist version. Integer which is increased every time the
-    #: current playlist is changed.
+    #: current playlist is changed. Is not reset before the MPD server is
+    #: restarted.
     version = 0
 
     def __init__(self, backend):
@@ -101,7 +102,6 @@ class BaseCurrentPlaylistController(object):
         :type playlist: :class:`mopidy.models.Playlist`
         """
         self.playlist = playlist
-        self.version = 0
 
     def move(self, start, end, to_position):
         """
