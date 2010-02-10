@@ -1,6 +1,7 @@
 from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BasePlaybackController, BaseLibraryController,
     BaseStoredPlaylistsController)
+from mopidy.models import Playlist
 
 class DummyBackend(BaseBackend):
     def __init__(self):
@@ -15,7 +16,7 @@ class DummyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 class DummyLibraryController(BaseLibraryController):
     def search(self, type, query):
-        return []
+        return Playlist()
 
 class DummyPlaybackController(BasePlaybackController):
     def _next(self):
