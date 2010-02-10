@@ -247,7 +247,6 @@ class BasePlaybackController(object):
     def __init__(self, backend):
         self.backend = backend
         self._state = self.STOPPED
-        self.state = self.STOPPED
 
     @property
     def next_track(self):
