@@ -335,7 +335,7 @@ class BasePlaybackController(object):
             self.state = self.PLAYING
 
     def _next(self, track):
-        raise NotImplementedError
+        return self._play(track)
 
     def pause(self):
         """Pause playback."""
@@ -369,7 +369,7 @@ class BasePlaybackController(object):
             self.state = self.PLAYING
 
     def _previous(self, track):
-        raise NotImplementedError
+        return self._play(track)
 
     def resume(self):
         """If paused, resume playing the current track."""

@@ -46,9 +46,6 @@ class LibspotifyLibraryController(BaseLibraryController):
 
 
 class LibspotifyPlaybackController(BasePlaybackController):
-    def _next(self, track):
-        return self._play(track)
-
     def _pause(self):
         # TODO
         return False
@@ -58,9 +55,6 @@ class LibspotifyPlaybackController(BasePlaybackController):
             Link.from_string(self._current_track.uri).as_track())
         self.backend.spotify.session.play(1)
         return True
-
-    def _previous(self, track):
-        return self._play(track)
 
     def _resume(self):
         # TODO

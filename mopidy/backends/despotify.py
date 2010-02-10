@@ -43,9 +43,6 @@ class DespotifyLibraryController(BaseLibraryController):
 
 
 class DespotifyPlaybackController(BasePlaybackController):
-    def _next(self, track):
-        return self._play(track)
-
     def _pause(self):
         self.backend.spotify.pause()
         return True
@@ -53,9 +50,6 @@ class DespotifyPlaybackController(BasePlaybackController):
     def _play(self, track):
         self.backend.spotify.play(self.backend.spotify.lookup(track.uri))
         return True
-
-    def _previous(self, track):
-        return self._play(track)
 
     def _resume(self):
         self.backend.spotify.resume()
