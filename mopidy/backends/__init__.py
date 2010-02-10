@@ -331,7 +331,6 @@ class BasePlaybackController(object):
 
     def next(self):
         """Play the next track."""
-        self.stop()
         if self.next_track is not None and self._next(self.next_track):
             self.current_track = self.next_track
             self.state = self.PLAYING
@@ -356,7 +355,6 @@ class BasePlaybackController(object):
         """
         if self.state == self.PAUSED and track is None:
             return self.resume()
-        self.stop()
         if track is not None and self._play(track):
             self.current_track = track
             self.state = self.PLAYING
@@ -366,7 +364,6 @@ class BasePlaybackController(object):
 
     def previous(self):
         """Play the previous track."""
-        self.stop()
         if (self.previous_track is not None
                 and self._previous(self.previous_track)):
             self.current_track = self.previous_track
