@@ -15,7 +15,7 @@ logger = logging.getLogger(u'backends.despotify')
 ENCODING = 'utf-8'
 
 class DespotifyBackend(BaseBackend):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         self.current_playlist = DespotifyCurrentPlaylistController(backend=self)
         self.library = DespotifyLibraryController(backend=self)
         self.playback = DespotifyPlaybackController(backend=self)
