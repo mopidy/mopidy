@@ -251,6 +251,8 @@ class BasePlaybackController(object):
     @property
     def next_track(self):
         """The next :class:`mopidy.models.Track` in the playlist."""
+        if self.current_track is None:
+            return None
         try:
             return self.backend.current_playlist.playlist.tracks[
                 self.playlist_position + 1]
@@ -271,6 +273,8 @@ class BasePlaybackController(object):
     @property
     def previous_track(self):
         """The previous :class:`mopidy.models.Track` in the playlist."""
+        if self.current_track is None:
+            return None
         try:
             return self.backend.current_playlist.playlist.tracks[
                 self.playlist_position - 1]
