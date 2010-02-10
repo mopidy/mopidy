@@ -86,9 +86,9 @@ class DespotifyTranslator(object):
 
     def to_mopidy_id(self, spotify_uri):
         if spotify_uri not in self.uri_to_id_map:
-            id = self.next_id
+            this_id = self.next_id
             self.next_id += 1
-            self.uri_to_id_map[spotify_uri] = id
+            self.uri_to_id_map[spotify_uri] = this_id
         return self.uri_to_id_map[spotify_uri]
 
     def to_mopidy_artist(self, spotify_artist):
