@@ -250,6 +250,15 @@ class BasePlaybackController(object):
         self.state = self.STOPPED
 
     @property
+    def next_track(self):
+        """The next track in the playlist."""
+        try:
+            return self.backend.current_playlist.playlist.tracks[
+                self.playlist_position + 1]
+        except IndexError:
+            return None
+
+    @property
     def playlist_position(self):
         """The position in the current playlist."""
         if self.current_track is None:
@@ -258,6 +267,15 @@ class BasePlaybackController(object):
             return self.backend.current_playlist.playlist.tracks.index(
                 self.current_track)
         except ValueError:
+            return None
+
+    @property
+    def previous_track(self):
+        """The previous track in the playlist."""
+        try:
+            return self.backend.current_playlist.playlist.tracks[
+                self.playlist_position - 1]
+        except IndexError:
             return None
 
     @property
@@ -314,10 +332,11 @@ class BasePlaybackController(object):
     def next(self):
         """Play the next track."""
         self.stop()
-        if self._next():
+        if self.next_track is not None and self._next(self.next_track):
+            self.current_track = self.next_track
             self.state = self.PLAYING
 
-    def _next(self):
+    def _next(self, track):
         raise NotImplementedError
 
     def pause(self):
@@ -337,10 +356,9 @@ class BasePlaybackController(object):
         """
         if self.state == self.PAUSED and track is None:
             return self.resume()
-        if track is not None:
-            self.current_track = track
         self.stop()
-        if self._play(track):
+        if track is not None and self._play(track):
+            self.current_track = track
             self.state = self.PLAYING
 
     def _play(self, track):
@@ -349,10 +367,12 @@ class BasePlaybackController(object):
     def previous(self):
         """Play the previous track."""
         self.stop()
-        if self._previous():
+        if (self.previous_track is not None
+                and self._previous(self.previous_track)):
+            self.current_track = self.previous_track
             self.state = self.PLAYING
 
-    def _previous(self):
+    def _previous(self, track):
         raise NotImplementedError
 
     def resume(self):
