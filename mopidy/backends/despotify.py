@@ -38,8 +38,9 @@ class DespotifyLibraryController(BaseLibraryController):
     def search(self, type, what):
         query = u'%s:%s' % (type, what)
         result = self.backend.spotify.search(query.encode(ENCODING))
-        if result is not None:
-            return self.backend.translate.to_mopidy_playlist(result.playlist)
+        if result is None:
+            return Playlist()
+        return self.backend.translate.to_mopidy_playlist(result.playlist)
 
 
 class DespotifyPlaybackController(BasePlaybackController):
