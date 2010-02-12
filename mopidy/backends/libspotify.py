@@ -86,7 +86,7 @@ class LibspotifyTranslator(object):
             this_id = self.next_id
             self.next_id += 1
             self.uri_to_id_map[spotify_uri] = this_id
-        return self._uri_to_id_map[spotify_uri]
+        return self.uri_to_id_map[spotify_uri]
 
     def to_mopidy_artist(self, spotify_artist):
         return Artist(
