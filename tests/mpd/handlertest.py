@@ -295,19 +295,29 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_pause_off(self):
-        self.h.handle_request(u'play')
+        track = Track()
+        self.b.current_playlist.playlist = Playlist(tracks=[track])
+        self.b.playback.current_track = track
+        self.h.handle_request(u'play "0"')
         self.h.handle_request(u'pause "1"')
         result = self.h.handle_request(u'pause "0"')
         self.assert_(u'OK' in result)
         self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_pause_on(self):
-        self.h.handle_request(u'play')
+        track = Track()
+        self.b.current_playlist.playlist = Playlist(tracks=[track])
+        self.b.playback.current_track = track
+        self.h.handle_request(u'play "0"')
         result = self.h.handle_request(u'pause "1"')
         self.assert_(u'OK' in result)
         self.assertEquals(self.b.playback.PAUSED, self.b.playback.state)
 
     def test_play_without_pos(self):
+        track = Track()
+        self.b.current_playlist.playlist = Playlist(tracks=[track])
+        self.b.playback.current_track = track
+        self.b.playback.state = self.b.playback.PAUSED
         result = self.h.handle_request(u'play')
         self.assert_(u'OK' in result)
         self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
