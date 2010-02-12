@@ -394,15 +394,14 @@ class MpdHandler(object):
 
     @register(r'^stats$')
     def _stats(self):
-        pass # TODO
         return {
-            'artists': 0,
-            'albums': 0,
-            'songs': 0,
+            'artists': 0, # TODO
+            'albums': 0, # TODO
+            'songs': 0, # TODO
             'uptime': self.session.stats_uptime(),
-            'db_playtime': 0,
-            'db_update': 0,
-            'playtime': 0,
+            'db_playtime': 0, # TODO
+            'db_update': 0, # TODO
+            'playtime': 0, # TODO
         }
 
     @register(r'^stop$')
@@ -487,10 +486,12 @@ class MpdHandler(object):
         return self.backend.playback.time_position
 
     def _status_time_total(self):
-        if self.backend.playback.current_track is not None:
-            return self.backend.playback.current_track.length // 1000
-        else:
+        if self.backend.playback.current_track is None:
             return 0
+        elif self.backend.playback.current_track.length is None:
+            return 0
+        else:
+            return self.backend.playback.current_track.length // 1000
 
     def _status_volume(self):
         if self.backend.playback.volume is not None:

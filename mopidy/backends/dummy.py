@@ -35,4 +35,5 @@ class DummyPlaybackController(BasePlaybackController):
         return True
 
 class DummyStoredPlaylistsController(BaseStoredPlaylistsController):
-    pass
+    def search(self, query):
+        return [Playlist(name=query)]
