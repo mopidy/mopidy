@@ -1,6 +1,6 @@
 import random
 
-from mopidy.models import Playlist
+from mopidy.models import Playlist, Track
 
 def populate_playlist(func):
     def wrapper(self):
@@ -153,13 +153,10 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_removing_track_that_does_not_exist(self):
-        track = self.controller.playlist.tracks[0]
-
-        self.controller.remove(track)
-        self.controller.remove(track)
+        self.controller.remove(Track())
 
     def test_removing_from_empty_playlist(self):
-        raise NotImplementedError
+        self.controller.remove(Track())
 
     @populate_playlist
     def test_shuffle(self):
