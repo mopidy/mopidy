@@ -360,7 +360,8 @@ class MpdHandler(object):
 
     @register(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>[^"]+)"$')
     def _search(self, type, what):
-        return self.backend.library.search(type, what).mpd_format()
+        return self.backend.library.search(type, what).mpd_format(
+            search_result=True)
 
     @register(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
     def _seek(self, songpos, seconds):

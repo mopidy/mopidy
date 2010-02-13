@@ -110,7 +110,7 @@ class Track(ImmutableObject):
         """List of :class:`Artist`. Read-only."""
         return copy(self._artists)
 
-    def mpd_format(self, position=0):
+    def mpd_format(self, position=0, search_result=False):
         """
         Format track for output to MPD client.
 
@@ -118,18 +118,23 @@ class Track(ImmutableObject):
         :type position: integer
         :rtype: list of two-tuples
         """
-        return [
+        result = [
             ('file', self.uri or ''),
             ('Time', self.length and (self.length // 1000) or 0),
             ('Artist', self.mpd_format_artists()),
             ('Title', self.title or ''),
             ('Album', self.album and self.album.name or ''),
-            ('Track', '%d/%d' % (self.track_no,
-                self.album and self.album.num_tracks or 0)),
             ('Date', self.date or ''),
-            ('Pos', position),
-            ('Id', self.id or position),
         ]
+        if self.album is not None and self.album.num_tracks != 0:
+            result.append(('Track', '%d/%d' % (
+                self.track_no, self.album.num_tracks)))
+        else:
+            result.append(('Track', self.track_no))
+        if not search_result:
+            result.append(('Pos', position))
+            result.append(('Id', self.id or position))
+        return result
 
     def mpd_format_artists(self):
         """
@@ -170,7 +175,7 @@ class Playlist(ImmutableObject):
         """The number of tracks in the playlist. Read-only."""
         return len(self._tracks)
 
-    def mpd_format(self, start=0, end=None):
+    def mpd_format(self, start=0, end=None, search_result=False):
         """
         Format playlist for output to MPD client.
 
@@ -186,7 +191,7 @@ class Playlist(ImmutableObject):
             end = self.length
         tracks = []
         for track, position in zip(self.tracks[start:end], range(start, end)):
-            tracks.append(track.mpd_format(position))
+            tracks.append(track.mpd_format(position, search_result))
         return tracks
 
     def with_(self, uri=None, name=None, tracks=None):
