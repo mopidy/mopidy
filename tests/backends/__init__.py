@@ -203,3 +203,21 @@ class BasePlaybackControllerTest(object):
     def test_next_triggers_playback(self):
         self.playback.next()
         self.assertEqual(self.playback.state, self.playback.PLAYING)
+
+    @populate_playlist
+    def test_next_at_end_of_playlist(self):
+        playback = self.backend.playback
+        tracks = self.backend.current_playlist.playlist.tracks
+
+        playback.play()
+
+        for i, track in enumerate(tracks):
+            self.assertEqual(playback.state, playback.PLAYING)
+            self.assertEqual(playback.current_track, track)
+            self.assertEqual(playback.playlist_position, i)
+
+            playback.next()
+
+        self.assertEqual(playback.state, playback.STOPPED)
+        self.assertEqual(playback.current_track, tracks[-1])
+        self.assertEqual(playback.playlist_position, len(tracks) - 1)
