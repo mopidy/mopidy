@@ -140,8 +140,9 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(tracks[-2].uri, self.uris[0])
         self.assertEqual(tracks[-1].uri, self.uris[1])
 
-    def test_playlist_attribute_is_imutable(self):
-        raise NotImplementedError
+    # FIXME enforce this?
+    #def test_playlist_attribute_is_imutable(self):
+    #    raise NotImplementedError
 
     @populate_playlist
     def test_remove(self):
