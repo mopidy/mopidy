@@ -39,6 +39,20 @@ class BaseCurrentPlaylistController(object):
     def load(self, playlist):
         self.playlist = playlist
 
+        playback = self.backend.playback
+
+        # FIXME introduce a mechanism for telling
+        # playback that it needs to reset
+        playback.playlist_position = 0
+
+        if playlist.tracks:
+            playback.current_track = playlist.tracks[0]
+        else:
+            playback.current_track = None
+
+        if playback.state == playback.PLAYING:
+            self.backend.playback.play()
+
     def move(self, start, end, to_position):
         tracks = self.playlist.tracks
 
