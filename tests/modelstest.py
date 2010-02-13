@@ -8,11 +8,13 @@ class ArtistTest(unittest.TestCase):
         uri = u'an_uri'
         artist = Artist(uri=uri)
         self.assertEqual(artist.uri, uri)
+        self.assertRaises(AttributeError, setattr, artist, 'uri', None)
 
     def test_name(self):
         name = u'a name'
         artist = Artist(name=name)
         self.assertEqual(artist.name, name)
+        self.assertRaises(AttributeError, setattr, artist, 'name', None)
 
 
 class AlbumTest(unittest.TestCase):
@@ -20,21 +22,25 @@ class AlbumTest(unittest.TestCase):
         uri = u'an_uri'
         album = Album(uri=uri)
         self.assertEqual(album.uri, uri)
+        self.assertRaises(AttributeError, setattr, album, 'uri', None)
 
     def test_name(self):
         name = u'a name'
         album = Album(name=name)
         self.assertEqual(album.name, name)
+        self.assertRaises(AttributeError, setattr, album, 'name', None)
 
     def test_artists(self):
         artists = [Artist()]
         album = Album(artists=artists)
         self.assertEqual(album.artists, artists)
+        self.assertRaises(AttributeError, setattr, album, 'artists', None)
 
     def test_num_tracks(self):
         num_tracks = 11
         album = Album(num_tracks=11)
         self.assertEqual(album.num_tracks, num_tracks)
+        self.assertRaises(AttributeError, setattr, album, 'num_tracks', None)
 
 
 class TrackTest(unittest.TestCase):
@@ -42,46 +48,55 @@ class TrackTest(unittest.TestCase):
         uri = u'an_uri'
         track = Track(uri=uri)
         self.assertEqual(track.uri, uri)
+        self.assertRaises(AttributeError, setattr, track, 'uri', None)
 
     def test_title(self):
         title = u'a title'
         track = Track(title=title)
         self.assertEqual(track.title, title)
+        self.assertRaises(AttributeError, setattr, track, 'title', None)
 
     def test_artists(self):
         artists = [Artist(), Artist()]
         track = Track(artists=artists)
         self.assertEqual(track.artists, artists)
+        self.assertRaises(AttributeError, setattr, track, 'artists', None)
 
     def test_album(self):
         album = Album()
         track = Track(album=album)
         self.assertEqual(track.album, album)
+        self.assertRaises(AttributeError, setattr, track, 'album', None)
 
     def test_track_no(self):
         track_no = 7
         track = Track(track_no=track_no)
         self.assertEqual(track.track_no, track_no)
+        self.assertRaises(AttributeError, setattr, track, 'track_no', None)
 
     def test_date(self):
         date = dt.date(1977, 1, 1)
         track = Track(date=date)
         self.assertEqual(track.date, date)
+        self.assertRaises(AttributeError, setattr, track, 'date', None)
 
     def test_length(self):
         length = 137000
         track = Track(length=length)
         self.assertEqual(track.length, length)
+        self.assertRaises(AttributeError, setattr, track, 'length', None)
 
     def test_bitrate(self):
         bitrate = 160
         track = Track(bitrate=bitrate)
         self.assertEqual(track.bitrate, bitrate)
+        self.assertRaises(AttributeError, setattr, track, 'bitrate', None)
 
     def test_id(self):
         id = 17
         track = Track(id=id)
         self.assertEqual(track.id, id)
+        self.assertRaises(AttributeError, setattr, track, 'id', None)
 
     def test_mpd_format_for_empty_track(self):
         track = Track()
@@ -105,16 +120,19 @@ class PlaylistTest(unittest.TestCase):
         uri = u'an_uri'
         playlist = Playlist(uri=uri)
         self.assertEqual(playlist.uri, uri)
+        self.assertRaises(AttributeError, setattr, playlist, 'uri', None)
 
     def test_name(self):
         name = u'a name'
         playlist = Playlist(name=name)
         self.assertEqual(playlist.name, name)
+        self.assertRaises(AttributeError, setattr, playlist, 'name', None)
 
     def test_tracks(self):
         tracks = [Track(), Track(), Track()]
         playlist = Playlist(tracks=tracks)
         self.assertEqual(playlist.tracks, tracks)
+        self.assertRaises(AttributeError, setattr, playlist, 'tracks', None)
 
     def test_length(self):
         tracks = [Track(), Track(), Track()]
