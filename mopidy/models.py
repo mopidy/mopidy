@@ -9,7 +9,7 @@ class Artist(object):
     """
 
     def __init__(self, uri=None, name=None):
-        self._uri = None
+        self._uri = uri
         self._name = name
 
     @property
@@ -221,7 +221,7 @@ class Playlist(object):
         if end is None:
             end = self.length
         tracks = []
-        for track, position in zip(self.tracks, range(start, end)):
+        for track, position in zip(self.tracks[start:end], range(start, end)):
             tracks.append(track.mpd_format(position))
         return tracks
 
