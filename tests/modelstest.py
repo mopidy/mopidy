@@ -106,10 +106,32 @@ class TrackTest(unittest.TestCase):
         self.assert_(('Artist', '') in result)
         self.assert_(('Title', '') in result)
         self.assert_(('Album', '') in result)
-        self.assert_(('Track', '0/0') in result)
+        self.assert_(('Track', 0) in result)
         self.assert_(('Date', '') in result)
         self.assert_(('Pos', 0) in result)
         self.assert_(('Id', 0) in result)
+
+    def test_mpd_format_for_nonempty_track(self):
+        track = Track(
+            uri=u'a uri',
+            artists=[Artist(name=u'an artist')],
+            title=u'a title',
+            album=Album(name=u'an album', num_tracks=13),
+            track_no=7,
+            date=dt.date(1977, 1, 1),
+            length=137000,
+            id=122,
+        )
+        result = track.mpd_format(position=9)
+        self.assert_(('file', 'a uri') in result)
+        self.assert_(('Time', 137) in result)
+        self.assert_(('Artist', 'an artist') in result)
+        self.assert_(('Title', 'a title') in result)
+        self.assert_(('Album', 'an album') in result)
+        self.assert_(('Track', '7/13') in result)
+        self.assert_(('Date', dt.date(1977, 1, 1)) in result)
+        self.assert_(('Pos', 9) in result)
+        self.assert_(('Id', 122) in result)
 
     def test_mpd_format_artists(self):
         track = Track(artists=[Artist(name=u'ABBA'), Artist(name=u'Beatles')])
@@ -150,7 +172,7 @@ class PlaylistTest(unittest.TestCase):
             Track(track_no=1), Track(track_no=2), Track(track_no=3)])
         result = playlist.mpd_format(1, 2)
         self.assertEqual(len(result), 1)
-        self.assertEqual(dict(result[0])['Track'], '2/0')
+        self.assertEqual(dict(result[0])['Track'], 2)
 
     def test_with_new_uri(self):
         tracks = [Track()]

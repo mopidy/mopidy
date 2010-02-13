@@ -101,7 +101,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(u'Artist: ' in result)
         self.assert_(u'Title: ' in result)
         self.assert_(u'Album: ' in result)
-        self.assert_(u'Track: 0/0' in result)
+        self.assert_(u'Track: 0' in result)
         self.assert_(u'Date: ' in result)
         self.assert_(u'Pos: 0' in result)
         self.assert_(u'Id: 0' in result)
