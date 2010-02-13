@@ -198,3 +198,8 @@ class BasePlaybackControllerTest(object):
 
         self.assertEqual(self.playback.playlist_position, old_position+1)
         self.assertNotEqual(self.playback.current_track.uri, old_uri)
+
+    @populate_playlist
+    def test_next_triggers_playback(self):
+        self.playback.next()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
