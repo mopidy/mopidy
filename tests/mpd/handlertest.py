@@ -774,11 +774,17 @@ class ConnectionHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'ping')
         self.assert_(u'OK' in result)
 
+
 class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
 
-    pass # TODO
+    def test_outputs(self):
+        result = self.h.handle_request(u'outputs')
+        self.assert_(u'outputid: 0' in result)
+        self.assert_(u'outputname: DummyBackend' in result)
+        self.assert_(u'outputenabled: 1' in result)
+        self.assert_(u'OK' in result)
 
 
 class ReflectionHandlerTest(unittest.TestCase):

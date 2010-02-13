@@ -220,6 +220,14 @@ class MpdHandler(object):
     def _next(self):
         return self.backend.playback.next()
 
+    @register(r'^outputs$')
+    def _outputs(self):
+        return [
+            ('outputid', 0),
+            ('outputname', self.backend.__class__.__name__),
+            ('outputenabled', 1),
+        ]
+
     @register(r'^password "(?P<password>[^"]+)"$')
     def _password(self, password):
         raise MpdNotImplemented # TODO
