@@ -153,7 +153,10 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_removing_track_that_does_not_exist(self):
-        raise NotImplementedError
+        track = self.controller.playlist.tracks[0]
+
+        self.controller.remove(track)
+        self.controller.remove(track)
 
     def test_removing_from_empty_playlist(self):
         raise NotImplementedError
