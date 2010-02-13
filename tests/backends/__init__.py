@@ -171,36 +171,30 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_play_with_empty_playlist(self):
-        playback = self.backend.playback
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
-        self.assertEqual(playback.state, playback.STOPPED)
-
-        result = playback.play()
+        result = self.playback.play()
 
         self.assertEqual(result, False)
-        self.assertEqual(playback.state, playback.STOPPED)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
     def test_play(self):
-        playback = self.backend.playback
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
-        self.assertEqual(playback.state, playback.STOPPED)
-
-        result = playback.play()
+        result = self.playback.play()
 
         self.assertEqual(result, True)
-        self.assertEqual(playback.state, playback.PLAYING)
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
 
     @populate_playlist
     def test_next(self):
-        playback = self.backend.playback
+        self.playback.play()
 
-        playback.play()
+        old_position = self.playback.playlist_position
+        old_uri = self.playback.current_track.uri
 
-        old_position = playback.playlist_position
-        old_uri = playback.current_track.uri
+        self.playback.next()
 
-        playback.next()
-
-        self.assertEqual(playback.playlist_position, old_position+1)
-        self.assertNotEqual(playback.current_track.uri, old_uri)
+        self.assertEqual(self.playback.playlist_position, old_position+1)
+        self.assertNotEqual(self.playback.current_track.uri, old_uri)
