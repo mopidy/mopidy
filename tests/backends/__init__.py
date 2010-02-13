@@ -46,7 +46,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_get_by_id_raises_error_for_invalid_id(self):
-        self.assertRaises(self.controller.get_by_id(1337))
+        self.assertRaises(KeyError, lambda: self.controller.get_by_id(1337))
 
     @populate_playlist
     def test_get_by_url(self):
@@ -55,7 +55,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_get_by_url_raises_error_for_invalid_id(self):
-        self.assertRaises(self.controller.get_by_url('foobar'))
+        self.assertRaises(KeyError, lambda: self.controller.get_by_url('foobar'))
 
     @populate_playlist
     def test_clear(self):
