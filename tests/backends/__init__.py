@@ -41,19 +41,21 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_get_by_id(self):
-        raise NotImplementedError
+        track = self.controller.playlist.tracks[1]
+        self.assertEqual(track, self.controller.get_by_id(track.id))
 
     @populate_playlist
     def test_get_by_id_raises_error_for_invalid_id(self):
-        raise NotImplementedError
+        self.assertRaises(self.controller.get_by_id(1337))
 
     @populate_playlist
     def test_get_by_url(self):
-        raise NotImplementedError
+        track = self.controller.playlist.tracks[1]
+        self.assertEqual(track, self.controller.get_by_url(track.uri))
 
     @populate_playlist
     def test_get_by_url_raises_error_for_invalid_id(self):
-        raise NotImplementedError
+        self.assertRaises(self.controller.get_by_url('foobar'))
 
     @populate_playlist
     def test_clear(self):
