@@ -188,9 +188,11 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def play_token_lost(self, session):
         logger.debug('Play token lost')
+        self.backend.playback.stop()
 
     def log_message(self, session, data):
         logger.debug(data)
 
     def end_of_track(self, session):
         logger.debug('End of track')
+        self.backend.playback.next()
