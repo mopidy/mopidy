@@ -20,8 +20,7 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
-    def test_uri_set(self):
-        self.assert_(len(self.uris) >= 3)
+        assert len(self.uris) >= 3, 'Need at least three urls to run tests.'
 
     def test_add(self):
         for uri in self.uris:
