@@ -89,16 +89,22 @@ class LibspotifyTranslator(object):
         return self.uri_to_id_map[spotify_uri]
 
     def to_mopidy_artist(self, spotify_artist):
+        if not spotify_artist.is_loaded():
+            return Artist(name=u'[loading...]')
         return Artist(
             uri=str(Link.from_artist(spotify_artist)),
             name=spotify_artist.name().decode(ENCODING),
         )
 
     def to_mopidy_album(self, spotify_album):
+        if not spotify_album.is_loaded():
+            return Album(name=u'[loading...]')
         # TODO pyspotify got much more data on albums than this
         return Album(name=spotify_album.name().decode(ENCODING))
 
     def to_mopidy_track(self, spotify_track):
+        if not spotify_track.is_loaded():
+            return Track(title=u'[loading...]')
         uri = str(Link.from_track(spotify_track, 0))
         return Track(
             uri=uri,
@@ -113,6 +119,8 @@ class LibspotifyTranslator(object):
         )
 
     def to_mopidy_playlist(self, spotify_playlist):
+        if not spotify_playlist.is_loaded():
+            return Playlist(name=u'[loading...]')
         return Playlist(
             uri=str(Link.from_playlist(spotify_playlist)),
             name=spotify_playlist.name().decode(ENCODING),
