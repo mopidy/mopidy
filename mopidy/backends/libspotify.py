@@ -42,7 +42,8 @@ class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 
 class LibspotifyLibraryController(BaseLibraryController):
-    pass
+    def search(self, type, query):
+        return Playlist() # TODO
 
 
 class LibspotifyPlaybackController(BasePlaybackController):
