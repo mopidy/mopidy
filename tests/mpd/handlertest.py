@@ -94,6 +94,20 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Not implemented' in result)
 
     def test_currentsong(self):
+        self.b.playback.current_track = Track()
+        result = self.h.handle_request(u'currentsong')
+        self.assert_(u'file: ' in result)
+        self.assert_(u'Time: 0' in result)
+        self.assert_(u'Artist: ' in result)
+        self.assert_(u'Title: ' in result)
+        self.assert_(u'Album: ' in result)
+        self.assert_(u'Track: 0' in result)
+        self.assert_(u'Date: ' in result)
+        self.assert_(u'Pos: 0' in result)
+        self.assert_(u'Id: 0' in result)
+        self.assert_(u'OK' in result)
+
+    def test_currentsong_without_song(self):
         result = self.h.handle_request(u'currentsong')
         self.assert_(u'OK' in result)
 
@@ -130,43 +144,140 @@ class StatusHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'status')
         self.assert_(u'OK' in result)
 
-    def test_status_method(self):
+    def test_status_method_contains_volume_which_defaults_to_0(self):
+        self.b.playback.volume = None
         result = dict(self.h._status())
         self.assert_('volume' in result)
-        self.assert_(int(result['volume']) in xrange(0, 101))
+        self.assertEquals(int(result['volume']), 0)
+
+    def test_status_method_contains_volume(self):
+        self.b.playback.volume = 17
+        result = dict(self.h._status())
+        self.assert_('volume' in result)
+        self.assertEquals(int(result['volume']), 17)
+
+    def test_status_method_contains_repeat_is_0(self):
+        result = dict(self.h._status())
         self.assert_('repeat' in result)
-        self.assert_(int(result['repeat']) in (0, 1))
+        self.assertEquals(int(result['repeat']), 0)
+
+    def test_status_method_contains_repeat_is_1(self):
+        self.b.playback.repeat = 1
+        result = dict(self.h._status())
+        self.assert_('repeat' in result)
+        self.assertEquals(int(result['repeat']), 1)
+
+    def test_status_method_contains_random_is_0(self):
+        result = dict(self.h._status())
         self.assert_('random' in result)
-        self.assert_(int(result['random']) in (0, 1))
+        self.assertEquals(int(result['random']), 0)
+
+    def test_status_method_contains_random_is_1(self):
+        self.b.playback.random = 1
+        result = dict(self.h._status())
+        self.assert_('random' in result)
+        self.assertEquals(int(result['random']), 1)
+
+    def test_status_method_contains_single(self):
+        result = dict(self.h._status())
         self.assert_('single' in result)
         self.assert_(int(result['single']) in (0, 1))
+
+    def test_status_method_contains_consume_is_0(self):
+        result = dict(self.h._status())
         self.assert_('consume' in result)
-        self.assert_(int(result['consume']) in (0, 1))
+        self.assertEquals(int(result['consume']), 0)
+
+    def test_status_method_contains_consume_is_1(self):
+        self.b.playback.consume = 1
+        result = dict(self.h._status())
+        self.assert_('consume' in result)
+        self.assertEquals(int(result['consume']), 1)
+
+    def test_status_method_contains_playlist(self):
+        result = dict(self.h._status())
         self.assert_('playlist' in result)
         self.assert_(int(result['playlist']) in xrange(0, 2**31))
+
+    def test_status_method_contains_playlistlength(self):
+        result = dict(self.h._status())
         self.assert_('playlistlength' in result)
         self.assert_(int(result['playlistlength']) >= 0)
+
+    def test_status_method_contains_xfade(self):
+        result = dict(self.h._status())
         self.assert_('xfade' in result)
         self.assert_(int(result['xfade']) >= 0)
-        self.assert_('state' in result)
-        self.assert_(result['state'] in ('play', 'stop', 'pause'))
 
-    def test_status_method_when_playlist_loaded(self):
-        self.b._current_playlist = Playlist(tracks=[Track()])
+    def test_status_method_contains_state_is_play(self):
+        self.b.playback.state = self.b.playback.PLAYING
+        result = dict(self.h._status())
+        self.assert_('state' in result)
+        self.assertEquals(result['state'], 'play')
+
+    def test_status_method_contains_state_is_stop(self):
+        self.b.playback.state = self.b.playback.STOPPED
+        result = dict(self.h._status())
+        self.assert_('state' in result)
+        self.assertEquals(result['state'], 'stop')
+
+    def test_status_method_contains_state_is_pause(self):
+        self.b.playback.state = self.b.playback.PLAYING
+        self.b.playback.state = self.b.playback.PAUSED
+        result = dict(self.h._status())
+        self.assert_('state' in result)
+        self.assertEquals(result['state'], 'pause')
+
+    def test_status_method_when_playlist_loaded_contains_song(self):
+        track = Track()
+        self.b.current_playlist.load(Playlist(tracks=[track]))
+        self.b.playback.current_track = track
         result = dict(self.h._status())
         self.assert_('song' in result)
         self.assert_(int(result['song']) >= 0)
+
+    def test_status_method_when_playlist_loaded_contains_pos_as_songid(self):
+        track = Track()
+        self.b.current_playlist.load(Playlist(tracks=[track]))
+        self.b.playback.current_track = track
+        result = dict(self.h._status())
         self.assert_('songid' in result)
         self.assert_(int(result['songid']) >= 0)
 
-    def test_status_method_when_playing(self):
-        self.b.state = self.b.PLAY
+    def test_status_method_when_playlist_loaded_contains_id_as_songid(self):
+        track = Track(id=1)
+        self.b.current_playlist.load(Playlist(tracks=[track]))
+        self.b.playback.current_track = track
+        result = dict(self.h._status())
+        self.assert_('songid' in result)
+        self.assertEquals(int(result['songid']), 1)
+
+    def test_status_method_when_playing_contains_time_with_no_length(self):
+        self.b.playback.current_track = Track(length=None)
+        self.b.playback.state = self.b.playback.PLAYING
         result = dict(self.h._status())
         self.assert_('time' in result)
         (position, total) = result['time'].split(':')
         position = int(position)
         total = int(total)
         self.assert_(position <= total)
+
+    def test_status_method_when_playing_contains_time_with_length(self):
+        self.b.playback.current_track = Track(length=10000)
+        self.b.playback.state = self.b.playback.PLAYING
+        result = dict(self.h._status())
+        self.assert_('time' in result)
+        (position, total) = result['time'].split(':')
+        position = int(position)
+        total = int(total)
+        self.assert_(position <= total)
+
+    def test_status_method_when_playing_contains_bitrate(self):
+        self.b.playback.state = self.b.playback.PLAYING
+        self.b.playback.current_track = Track(bitrate=320)
+        result = dict(self.h._status())
+        self.assert_('bitrate' in result)
+        self.assertEquals(int(result['bitrate']), 320)
 
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):
@@ -279,32 +390,55 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_pause_off(self):
-        self.h.handle_request(u'play')
+        track = Track()
+        self.b.current_playlist.playlist = Playlist(tracks=[track])
+        self.b.playback.current_track = track
+        self.h.handle_request(u'play "0"')
         self.h.handle_request(u'pause "1"')
         result = self.h.handle_request(u'pause "0"')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PLAY, self.b.state)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_pause_on(self):
-        self.h.handle_request(u'play')
+        track = Track()
+        self.b.current_playlist.playlist = Playlist(tracks=[track])
+        self.b.playback.current_track = track
+        self.h.handle_request(u'play "0"')
         result = self.h.handle_request(u'pause "1"')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PAUSE, self.b.state)
+        self.assertEquals(self.b.playback.PAUSED, self.b.playback.state)
 
     def test_play_without_pos(self):
+        track = Track()
+        self.b.current_playlist.playlist = Playlist(tracks=[track])
+        self.b.playback.current_track = track
+        self.b.playback.state = self.b.playback.PAUSED
         result = self.h.handle_request(u'play')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PLAY, self.b.state)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_play_with_pos(self):
+        self.b.current_playlist.load(Playlist(tracks=[Track()]))
         result = self.h.handle_request(u'play "0"')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PLAY, self.b.state)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
+
+    def test_play_with_pos_out_of_bounds(self):
+        self.b.current_playlist.load(Playlist())
+        result = self.h.handle_request(u'play "0"')
+        self.assert_(u'ACK Position out of bounds' in result)
+        self.assertEquals(self.b.playback.STOPPED, self.b.playback.state)
 
     def test_playid(self):
+        self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
         result = self.h.handle_request(u'playid "0"')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.PLAY, self.b.state)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
+
+    def test_playid_which_does_not_exist(self):
+        self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
+        result = self.h.handle_request(u'playid "1"')
+        self.assert_(u'ACK Track with ID "1" not found' in result)
 
     def test_previous(self):
         result = self.h.handle_request(u'previous')
@@ -321,7 +455,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
     def test_stop(self):
         result = self.h.handle_request(u'stop')
         self.assert_(u'OK' in result)
-        self.assertEquals(self.b.STOP, self.b.state)
+        self.assertEquals(self.b.playback.STOPPED, self.b.playback.state)
 
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
@@ -640,11 +774,17 @@ class ConnectionHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'ping')
         self.assert_(u'OK' in result)
 
+
 class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
 
-    pass # TODO
+    def test_outputs(self):
+        result = self.h.handle_request(u'outputs')
+        self.assert_(u'outputid: 0' in result)
+        self.assert_(u'outputname: DummyBackend' in result)
+        self.assert_(u'outputenabled: 1' in result)
+        self.assert_(u'OK' in result)
 
 
 class ReflectionHandlerTest(unittest.TestCase):

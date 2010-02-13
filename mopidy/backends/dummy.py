@@ -1,25 +1,31 @@
-from mopidy.backends import BaseBackend
+from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+    BasePlaybackController, BaseLibraryController,
+    BaseStoredPlaylistsController)
+from mopidy.models import Playlist
 
 class DummyBackend(BaseBackend):
-    def __init__(self, *args, **kwargs):
-        super(DummyBackend, self).__init__(*args, **kwargs)
+    def __init__(self):
+        self.current_playlist = DummyCurrentPlaylistController(backend=self)
+        self.library = DummyLibraryController(backend=self)
+        self.playback = DummyPlaybackController(backend=self)
+        self.stored_playlists = DummyStoredPlaylistsController(backend=self)
+        self.uri_handlers = [u'dummy:']
 
-    def url_handlers(self):
-        return [u'dummy:']
+class DummyCurrentPlaylistController(BaseCurrentPlaylistController):
+    pass
 
+class DummyLibraryController(BaseLibraryController):
+    def search(self, type, query):
+        return Playlist()
+
+class DummyPlaybackController(BasePlaybackController):
     def _next(self):
         return True
 
     def _pause(self):
         return True
 
-    def _play(self):
-        return True
-
-    def _play_id(self, songid):
-        return True
-
-    def _play_pos(self, songpos):
+    def _play(self, track):
         return True
 
     def _previous(self):
@@ -27,3 +33,7 @@ class DummyBackend(BaseBackend):
 
     def _resume(self):
         return True
+
+class DummyStoredPlaylistsController(BaseStoredPlaylistsController):
+    def search(self, query):
+        return [Playlist(name=query)]

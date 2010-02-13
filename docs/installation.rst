@@ -126,7 +126,7 @@ libspotify backend, copy the Spotify application key to
 ``mopidy/spotify_appkey.key``, and add the following to
 ``mopidy/mopidy/local_settings.py``::
 
-    BACKEND=u'mopidy.backends.libspotify.LibspotifyBackend'
+    BACKEND = u'mopidy.backends.libspotify.LibspotifyBackend'
 
 To start Mopidy, go to the root of the Mopidy project, then simply run::
 

@@ -1,14 +1,16 @@
-from copy import deepcopy
 import datetime as dt
 import logging
 import threading
+import time
 
 from spotify import Link
 from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
 
 from mopidy import config
-from mopidy.backends import BaseBackend
+from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+    BaseLibraryController, BasePlaybackController,
+    BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
 
 logger = logging.getLogger(u'backends.libspotify')
@@ -16,106 +18,61 @@ logger = logging.getLogger(u'backends.libspotify')
 ENCODING = 'utf-8'
 
 class LibspotifyBackend(BaseBackend):
-    def __init__(self, *args, **kwargs):
-        super(LibspotifyBackend, self).__init__(*args, **kwargs)
-        self._next_id = 0
-        self._id_to_uri_map = {}
-        self._uri_to_id_map = {}
+    def __init__(self):
+        self.current_playlist = LibspotifyCurrentPlaylistController(
+            backend=self)
+        self.library = LibspotifyLibraryController(backend=self)
+        self.playback = LibspotifyPlaybackController(backend=self)
+        self.stored_playlists = LibspotifyStoredPlaylistsController(
+            backend=self)
+        self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
+        self.translate = LibspotifyTranslator()
+        self.spotify = self._connect()
+
+    def _connect(self):
         logger.info(u'Connecting to Spotify')
-        self.spotify = LibspotifySessionManager(
+        spotify = LibspotifySessionManager(
             config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD, backend=self)
-        self.spotify.start()
+        spotify.start()
+        return spotify
 
-    def update_stored_playlists(self):
-        logger.info(u'Updating stored playlists')
-        playlists = []
-        for spotify_playlist in self.spotify.playlists:
-            playlists.append(self._to_mopidy_playlist(spotify_playlist))
-        self._playlists = playlists
-        logger.debug(u'Available playlists: %s',
-            u', '.join([u'<%s>' % p.name for p in self._playlists]))
 
-# Model translation
+class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
+    pass
 
-    def _to_mopidy_id(self, spotify_uri):
-        if spotify_uri in self._uri_to_id_map:
-            return self._uri_to_id_map[spotify_uri]
-        else:
-            id = self._next_id
-            self._next_id += 1
-            self._id_to_uri_map[id] = spotify_uri
-            self._uri_to_id_map[spotify_uri] = id
-            return id
 
-    def _to_mopidy_artist(self, spotify_artist):
-        return Artist(
-            uri=str(Link.from_artist(spotify_artist)),
-            name=spotify_artist.name().decode(ENCODING),
-        )
+class LibspotifyLibraryController(BaseLibraryController):
+    search_results = False
 
-    def _to_mopidy_album(self, spotify_album):
-        # TODO pyspotify got much more data on albums than this
-        return Album(name=spotify_album.name().decode(ENCODING))
+    def search(self, type, what):
+        # XXX This is slow
+        self.search_results = None
+        def callback(results, userdata):
+            logger.debug(u'Search results received')
+            self.search_results = results
+        query = u'%s:%s' % (type, what)
+        self.backend.spotify.search(query.encode(ENCODING), callback)
+        while self.search_results is None:
+            time.sleep(0.01)
+        result = Playlist(tracks=[self.backend.translate.to_mopidy_track(t)
+            for t in self.search_results.tracks()])
+        self.search_results = False
+        return result
 
-    def _to_mopidy_track(self, spotify_track):
-        return Track(
-            uri=str(Link.from_track(spotify_track, 0)),
-            title=spotify_track.name().decode(ENCODING),
-            artists=[self._to_mopidy_artist(a)
-                for a in spotify_track.artists()],
-            album=self._to_mopidy_album(spotify_track.album()),
-            track_no=spotify_track.index(),
-            date=dt.date(spotify_track.album().year(), 1, 1),
-            length=spotify_track.duration(),
-            id=self._to_mopidy_id(str(Link.from_track(spotify_track, 0))),
-        )
 
-    def _to_mopidy_playlist(self, spotify_playlist):
-        return Playlist(
-            uri=str(Link.from_playlist(spotify_playlist)),
-            name=spotify_playlist.name().decode(ENCODING),
-            tracks=[self._to_mopidy_track(t) for t in spotify_playlist],
-        )
-# Playback control
-
-    def _play_current_track(self):
-        self.spotify.session.load(
-            Link.from_string(self._current_track.uri).as_track())
-        self.spotify.session.play(1)
-
-    def _next(self):
-        self._current_song_pos += 1
-        self._play_current_track()
-        return True
-
+class LibspotifyPlaybackController(BasePlaybackController):
     def _pause(self):
         # TODO
         return False
 
-    def _play(self):
-        if self._current_track is not None:
-            self._play_current_track()
-            return True
-        else:
+    def _play(self, track):
+        if self.state == self.PLAYING:
+            self.stop()
+        if track.uri is None:
             return False
-
-    def _play_id(self, songid):
-        matches = filter(lambda t: t.id == songid, self._current_playlist)
-        if matches:
-            self._current_song_pos = self._current_playlist.index(matches[0])
-            self._play_current_track()
-            return True
-        else:
-            return False
-
-    def _play_pos(self, songpos):
-        self._current_song_pos = songpos
-        self._play_current_track()
-        return True
-
-    def _previous(self):
-        self._current_song_pos -= 1
-        self._play_current_track()
+        self.backend.spotify.session.load(
+            Link.from_string(track.uri).as_track())
+        self.backend.spotify.session.play(1)
         return True
 
     def _resume(self):
@@ -123,16 +80,71 @@ class LibspotifyBackend(BaseBackend):
         return False
 
     def _stop(self):
-        self.spotify.session.play(0)
+        self.backend.spotify.session.play(0)
         return True
 
-# Status querying
 
-    def status_bitrate(self):
-        return 320
+class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
+    def refresh(self):
+        logger.info(u'Refreshing stored playlists')
+        playlists = []
+        for spotify_playlist in self.backend.spotify.playlists:
+            playlists.append(
+                self.backend.translate.to_mopidy_playlist(spotify_playlist))
+        self._playlists = playlists
+        logger.debug(u'Available playlists: %s',
+            u', '.join([u'<%s>' % p.name for p in self.playlists]))
 
-    def url_handlers(self):
-        return [u'spotify:', u'http://open.spotify.com/']
+
+class LibspotifyTranslator(object):
+    uri_to_id_map = {}
+    next_id = 0
+
+    def to_mopidy_id(self, spotify_uri):
+        if spotify_uri not in self.uri_to_id_map:
+            this_id = self.next_id
+            self.next_id += 1
+            self.uri_to_id_map[spotify_uri] = this_id
+        return self.uri_to_id_map[spotify_uri]
+
+    def to_mopidy_artist(self, spotify_artist):
+        if not spotify_artist.is_loaded():
+            return Artist(name=u'[loading...]')
+        return Artist(
+            uri=str(Link.from_artist(spotify_artist)),
+            name=spotify_artist.name().decode(ENCODING),
+        )
+
+    def to_mopidy_album(self, spotify_album):
+        if not spotify_album.is_loaded():
+            return Album(name=u'[loading...]')
+        # TODO pyspotify got much more data on albums than this
+        return Album(name=spotify_album.name().decode(ENCODING))
+
+    def to_mopidy_track(self, spotify_track):
+        if not spotify_track.is_loaded():
+            return Track(title=u'[loading...]')
+        uri = str(Link.from_track(spotify_track, 0))
+        return Track(
+            uri=uri,
+            title=spotify_track.name().decode(ENCODING),
+            artists=[self.to_mopidy_artist(a) for a in spotify_track.artists()],
+            album=self.to_mopidy_album(spotify_track.album()),
+            track_no=spotify_track.index(),
+            date=dt.date(spotify_track.album().year(), 1, 1),
+            length=spotify_track.duration(),
+            bitrate=320,
+            id=self.to_mopidy_id(uri),
+        )
+
+    def to_mopidy_playlist(self, spotify_playlist):
+        if not spotify_playlist.is_loaded():
+            return Playlist(name=u'[loading...]')
+        return Playlist(
+            uri=str(Link.from_playlist(spotify_playlist)),
+            name=spotify_playlist.name().decode(ENCODING),
+            tracks=[self.to_mopidy_track(t) for t in spotify_playlist],
+        )
 
 
 class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
@@ -141,6 +153,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         threading.Thread.__init__(self)
         self.backend = backend
         self.audio = AlsaController()
+        self.playlists = []
 
     def run(self):
         self.connect()
@@ -159,7 +172,9 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def metadata_updated(self, session):
         logger.debug('Metadata updated')
-        self.backend.update_stored_playlists()
+        # XXX This changes data "owned" by another thread, and leads to
+        # segmentation fault. We should use locking and messaging here.
+        self.backend.stored_playlists.refresh()
 
     def connection_error(self, session, error):
         logger.error('Connection error: %s', error)
@@ -175,10 +190,14 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def play_token_lost(self, session):
         logger.debug('Play token lost')
+        self.backend.playback.stop()
 
     def log_message(self, session, data):
         logger.debug(data)
 
     def end_of_track(self, session):
         logger.debug('End of track')
+        self.backend.playback.next()
 
+    def search(self, query, callback):
+        self.session.search(query, callback)
