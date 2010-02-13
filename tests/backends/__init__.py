@@ -55,11 +55,11 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.load(new_playlist)
         self.assertEqual(new_playlist, self.controller.playlist)
 
-    def test_load_resets_version(self):
-        self.controller.playlist = Playlist()
-        self.assertNotEqual(self.controller.version, 0)
+    def test_load_does_not_reset_version(self):
+        version = self.controller.version
+
         self.controller.load(Playlist())
-        self.assertEqual(self.controller.version, 0)
+        self.assertEqual(self.controller.version, version+1)
 
     # FIXME test that player switches to playing new song
 

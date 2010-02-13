@@ -38,7 +38,6 @@ class BaseCurrentPlaylistController(object):
 
     def load(self, playlist):
         self.playlist = playlist
-        self.version = 0
 
     def move(self, start, end, to_position):
         tracks = self.playlist.tracks
