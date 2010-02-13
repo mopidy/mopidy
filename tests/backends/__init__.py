@@ -130,6 +130,16 @@ class BaseCurrentPlaylistControllerTest(object):
         tracks = self.controller.playlist.tracks
         self.assertEqual(tracks[-1].uri, self.uris[0])
 
+    @populate_playlist
+    def test_move_group_outside_of_playlist(self):
+        tracks = self.controller.playlist.tracks
+
+        self.controller.move(0, 2, len(tracks)+5)
+
+        tracks = self.controller.playlist.tracks
+        self.assertEqual(tracks[-2].uri, self.uris[0])
+        self.assertEqual(tracks[-1].uri, self.uris[1])
+
     def test_playlist_attribute_is_imutable(self):
         raise NotImplementedError
 
