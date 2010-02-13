@@ -89,7 +89,7 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(self.controller.version, version+1)
 
     @populate_playlist
-    def test_load_preserves_and_updates_play_state(self):
+    def test_load_preserves_playing_state(self):
         tracks = self.controller.playlist.tracks
         playback = self.playback
 
@@ -98,13 +98,14 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(playback.state, playback.PLAYING)
         self.assertEqual(tracks[1], self.playback.current_track)
 
-        self.playback.stop()
+    @populate_playlist
+    def test_load_preserves_stopped_state(self):
+        tracks = self.controller.playlist.tracks
+        playback = self.playback
+
         self.controller.load(Playlist(tracks=[tracks[2]]))
         self.assertEqual(playback.state, playback.STOPPED)
         self.assertEqual(tracks[2], self.playback.current_track)
-
-    def test_load_triggers_playing_of_new_playlist_if_allready_playing(self):
-        raise NotImplementedError
 
     @populate_playlist
     def test_move_single(self):
