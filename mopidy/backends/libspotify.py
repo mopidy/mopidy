@@ -27,7 +27,6 @@ class LibspotifyBackend(BaseBackend):
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
         self.translate = LibspotifyTranslator()
         self.spotify = self._connect()
-        self.stored_playlists.refresh()
 
     def _connect(self):
         logger.info(u'Connecting to Spotify')
