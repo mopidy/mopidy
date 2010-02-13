@@ -1,6 +1,15 @@
 from copy import copy
 
-class Artist(object):
+class ImmutableObject(object):
+    def __init__(self, *args, **kwargs):
+        self.__dict__.update(kwargs)
+
+    def __setattr__(self, name, value):
+        if name.startswith('_'):
+            return super(ImmutableObject, self).__setattr__(name, value)
+        raise AttributeError('Object is immutable.')
+
+class Artist(ImmutableObject):
     """
     :param uri: artist URI
     :type uri: string
@@ -8,22 +17,14 @@ class Artist(object):
     :type name: string
     """
 
-    def __init__(self, uri=None, name=None):
-        self._uri = uri
-        self._name = name
+    #: The artist URI. Read-only.
+    uri = None
 
-    @property
-    def uri(self):
-        """The artist URI. Read-only."""
-        return self._uri
-
-    @property
-    def name(self):
-        """The artist name. Read-only."""
-        return self._name
+    #: The artist name. Read-only.
+    name = None
 
 
-class Album(object):
+class Album(ImmutableObject):
     """
     :param uri: album URI
     :type uri: string
@@ -35,34 +36,26 @@ class Album(object):
     :type num_tracks: integer
     """
 
-    def __init__(self, uri=None, name=None, artists=None, num_tracks=0):
-        self._uri = uri
-        self._name = name
-        self._artists = artists or []
-        self._num_tracks = num_tracks
+    #: The album URI. Read-only.
+    uri = None
 
-    @property
-    def uri(self):
-        """The album URI. Read-only."""
-        return self._uri
+    #: The album name. Read-only."""
+    name = None
 
-    @property
-    def name(self):
-        """The album name. Read-only."""
-        return self._name
+    #: The number of tracks in the album. Read-only.
+    num_tracks = 0
+
+    def __init__(self, *args, **kwargs):
+        self._artists = kwargs.pop('artists', [])
+        super(Album, self).__init__(*args, **kwargs)
 
     @property
     def artists(self):
         """List of :class:`Artist` elements. Read-only."""
         return copy(self._artists)
 
-    @property
-    def num_tracks(self):
-        """The number of tracks in the album. Read-only."""
-        return self._num_tracks
 
-
-class Track(object):
+class Track(ImmutableObject):
     """
     :param uri: track URI
     :type uri: string
@@ -84,62 +77,38 @@ class Track(object):
     :type id: integer
     """
 
-    def __init__(self, uri=None, title=None, artists=None, album=None,
-            track_no=0, date=None, length=None, bitrate=None, id=None):
-        self._uri = uri
-        self._title = title
-        self._artists = artists or []
-        self._album = album
-        self._track_no = track_no
-        self._date = date
-        self._length = length
-        self._bitrate = bitrate
-        self._id = id
+    #: The track URI. Read-only.
+    uri = None
 
-    @property
-    def uri(self):
-        """The track URI. Read-only."""
-        return self._uri
+    #: The track title. Read-only.
+    title = None
 
-    @property
-    def title(self):
-        """The track title. Read-only."""
-        return self._title
+    #: The track :class:`Album`. Read-only.
+    album = None
+
+    #: The track number in album. Read-only.
+    track_no = 0
+
+    #: The track release date. Read-only.
+    date = None
+
+    #: The track length in milliseconds. Read-only.
+    length = None
+
+    #: The track's bitrate in kbit/s. Read-only.
+    bitrate = None
+
+    #: The track ID. Read-only.
+    id = None
+
+    def __init__(self, *args, **kwargs):
+        self._artists = kwargs.pop('artists', [])
+        super(Track, self).__init__(*args, **kwargs)
 
     @property
     def artists(self):
         """List of :class:`Artist`. Read-only."""
         return copy(self._artists)
-
-    @property
-    def album(self):
-        """The track :class:`Album`. Read-only."""
-        return self._album
-
-    @property
-    def track_no(self):
-        """The track number in album. Read-only."""
-        return self._track_no
-
-    @property
-    def date(self):
-        """The track release date. Read-only."""
-        return self._date
-
-    @property
-    def length(self):
-        """The track length in milliseconds. Read-only."""
-        return self._length
-
-    @property
-    def bitrate(self):
-        """The track's bitrate in kbit/s. Read-only."""
-        return self._bitrate
-
-    @property
-    def id(self):
-        """The track ID. Read-only."""
-        return self._id
 
     def mpd_format(self, position=0):
         """
@@ -171,7 +140,7 @@ class Track(object):
         return u', '.join([a.name for a in self.artists])
 
 
-class Playlist(object):
+class Playlist(ImmutableObject):
     """
         :param uri: playlist URI
         :type uri: string
@@ -181,20 +150,15 @@ class Playlist(object):
         :type tracks: list of :class:`Track` elements
     """
 
-    def __init__(self, uri=None, name=None, tracks=None):
-        self._uri = uri
-        self._name = name
-        self._tracks = tracks or []
+    #: The playlist URI. Read-only.
+    uri = None
 
-    @property
-    def uri(self):
-        """The playlist URI. Read-only."""
-        return self._uri
+    #: The playlist name. Read-only.
+    name = None
 
-    @property
-    def name(self):
-        """The playlist name. Read-only."""
-        return self._name
+    def __init__(self, *args, **kwargs):
+        self._tracks = kwargs.pop('tracks', [])
+        super(Playlist, self).__init__(*args, **kwargs)
 
     @property
     def tracks(self):
