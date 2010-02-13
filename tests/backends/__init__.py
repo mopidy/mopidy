@@ -88,11 +88,11 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_remove(self):
-        track = self.controller.playlist.tracks[1]
-
+        track1 = self.controller.playlist.tracks[1]
+        track2 = self.controller.playlist.tracks[2]
         self.controller.remove(1)
-
-        self.assertNotEqual(track, self.controller.playlist.tracks[1])
+        self.assert_(track1 not in self.controller.playlist.tracks)
+        self.assertEqual(track2, self.controller.playlist.tracks[1])
 
     @populate_playlist
     def test_shuffle_all(self):
@@ -119,9 +119,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_version(self):
         version = self.controller.version
-
         self.controller.playlist = Playlist()
-
         self.assertEqual(version+1, self.controller.version)
 
 class BasePlaybackControllerTest(object):
