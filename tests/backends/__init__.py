@@ -38,9 +38,32 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(uri, self.controller.playlist.tracks[-1].uri)
 
     @populate_playlist
+    def test_add_at_position_outside_of_playlist(self):
+        raise NotImplementedError
+
+    @populate_playlist
+    def test_get_by_id(self):
+        raise NotImplementedError
+
+    @populate_playlist
+    def test_get_by_id_raises_error_for_invalid_id(self):
+        raise NotImplementedError
+
+    @populate_playlist
+    def test_get_by_url(self):
+        raise NotImplementedError
+
+    @populate_playlist
+    def test_get_by_url_raises_error_for_invalid_id(self):
+        raise NotImplementedError
+
+    @populate_playlist
     def test_clear(self):
         self.controller.clear()
         self.assertEqual(len(self.controller.playlist.tracks), 0)
+
+    def test_clear_empty_playlist(self):
+        raise NotImplementedError
 
     @populate_playlist
     def test_clear_when_playing(self):
@@ -61,7 +84,8 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.load(Playlist())
         self.assertEqual(self.controller.version, version+1)
 
-    # FIXME test that player switches to playing new song
+    def test_load_triggers_playing_of_new_playlist(self):
+        raise NotImplementedError
 
     @populate_playlist
     def test_move_single(self):
@@ -86,6 +110,13 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(tracks[2].uri, self.uris[1])
 
     @populate_playlist
+    def test_moving_track_outside_of_playlist(self):
+        raise NotImplementedError
+
+    def test_playlist_attribute_is_imutable(self):
+        raise NotImplementedError
+
+    @populate_playlist
     def test_remove(self):
         track1 = self.controller.playlist.tracks[1]
         track2 = self.controller.playlist.tracks[2]
@@ -94,7 +125,14 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(track2, self.controller.playlist.tracks[1])
 
     @populate_playlist
-    def test_shuffle_all(self):
+    def test_removing_track_that_does_not_exist(self):
+        raise NotImplementedError
+
+    def test_removing_from_empty_playlist(self):
+        raise NotImplementedError
+
+    @populate_playlist
+    def test_shuffle(self):
         tracks = self.controller.playlist.tracks
         random.seed(1)
         self.controller.shuffle()
