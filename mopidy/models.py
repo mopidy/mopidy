@@ -39,7 +39,7 @@ class Album(ImmutableObject):
     #: The album URI. Read-only.
     uri = None
 
-    #: The album name. Read-only."""
+    #: The album name. Read-only.
     name = None
 
     #: The number of tracks in the album. Read-only.
