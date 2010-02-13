@@ -1,6 +1,6 @@
 import random
 
-from mopidy.models import Track, Playlist
+from mopidy.models import Playlist
 
 def populate_playlist(func):
     def wrapper(self):
