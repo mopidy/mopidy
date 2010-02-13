@@ -2,8 +2,8 @@ import unittest
 
 from mopidy.backends.gstreamer import GStreamerBackend
 
-from tests.backends import (BasePlaybackControllerTest,
-                            BaseCurrentPlaylistControllerTest)
+from tests.backends.basetests import (BasePlaybackControllerTest,
+                                      BaseCurrentPlaylistControllerTest)
 
 class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
     uris = ['file://data/song1.mp3',
