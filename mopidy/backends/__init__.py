@@ -81,9 +81,8 @@ class BaseCurrentPlaylistController(object):
 
         self.playlist = Playlist(tracks=new_tracks)
 
-    def remove(self, position):
-        tracks = self.playlist.tracks
-        del tracks[position]
+    def remove(self,track):
+        tracks = filter(lambda t: t != track, self.playlist.tracks)
 
         self.playlist = Playlist(tracks=tracks)
 
