@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 import threading
+import time
 
 from spotify import Link
 from spotify.manager import SpotifySessionManager
@@ -41,8 +42,22 @@ class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 
 class LibspotifyLibraryController(BaseLibraryController):
-    def search(self, type, query):
-        return Playlist() # TODO
+    search_results = False
+
+    def search(self, type, what):
+        # XXX This is slow
+        self.search_results = None
+        def callback(results, userdata):
+            logger.debug(u'Search results received')
+            self.search_results = results
+        query = u'%s:%s' % (type, what)
+        self.backend.spotify.search(query.encode(ENCODING), callback)
+        while self.search_results is None:
+            time.sleep(0.01)
+        result = Playlist(tracks=[self.backend.translate.to_mopidy_track(t)
+            for t in self.search_results.tracks()])
+        self.search_results = False
+        return result
 
 
 class LibspotifyPlaybackController(BasePlaybackController):
@@ -183,3 +198,6 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     def end_of_track(self, session):
         logger.debug('End of track')
         self.backend.playback.next()
+
+    def search(self, query, callback):
+        self.session.search(query, callback)
