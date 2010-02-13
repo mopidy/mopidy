@@ -124,7 +124,11 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_moving_track_outside_of_playlist(self):
-        raise NotImplementedError
+        tracks = self.controller.playlist.tracks
+
+        self.controller.move(0, 0, len(tracks)+5)
+        tracks = self.controller.playlist.tracks
+        self.assertEqual(tracks[-1].uri, self.uris[0])
 
     def test_playlist_attribute_is_imutable(self):
         raise NotImplementedError
