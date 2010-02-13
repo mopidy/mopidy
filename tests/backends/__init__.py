@@ -32,14 +32,12 @@ class BaseCurrentPlaylistControllerTest(object):
             self.controller.add(uri, 0)
             self.assertEqual(uri, self.controller.playlist.tracks[0].uri)
 
-        uri = self.uris[-1]
+    @populate_playlist
+    def test_add_at_position_outside_of_playlist(self):
+        uri = self.uris[0]
 
         self.controller.add(uri, len(self.uris)+2)
         self.assertEqual(uri, self.controller.playlist.tracks[-1].uri)
-
-    @populate_playlist
-    def test_add_at_position_outside_of_playlist(self):
-        raise NotImplementedError
 
     @populate_playlist
     def test_get_by_id(self):
