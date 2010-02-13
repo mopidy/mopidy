@@ -6,7 +6,6 @@ def populate_playlist(func):
     def wrapper(self):
         for uri in self.uris:
             self.backend.current_playlist.add(uri)
-
         return func(self)
 
     return wrapper
@@ -38,6 +37,11 @@ class BaseCurrentPlaylistControllerTest(object):
 
         self.controller.add(uri, len(self.uris)+2)
         self.assertEqual(uri, self.controller.playlist.tracks[-1].uri)
+
+    @populate_playlist
+    def test_add_sets_id_property(self):
+        for track in self.controller.playlist.tracks:
+            self.assertNotEqual(None, track.id)
 
     @populate_playlist
     def test_get_by_id(self):
