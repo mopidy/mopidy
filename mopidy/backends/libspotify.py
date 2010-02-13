@@ -47,14 +47,30 @@ class LibspotifyLibraryController(BaseLibraryController):
 
 
 class LibspotifyPlaybackController(BasePlaybackController):
+    def _next(self, track):
+        if self.state == self.PLAYING:
+            self._stop()
+        self._play(track)
+        return True
+
     def _pause(self):
         # TODO
         return False
 
     def _play(self, track):
+        if self.state == self.PLAYING:
+            self._stop()
+        if track.uri is None:
+            return False
         self.backend.spotify.session.load(
-            Link.from_string(self._current_track.uri).as_track())
+            Link.from_string(track.uri).as_track())
         self.backend.spotify.session.play(1)
+        return True
+
+    def _previous(self, track):
+        if self.state == self.PLAYING:
+            self._stop()
+        self._play(track)
         return True
 
     def _resume(self):
@@ -62,7 +78,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
         return False
 
     def _stop(self):
-        self.spotify.session.play(0)
+        self.backend.spotify.session.play(0)
         return True
 
 
