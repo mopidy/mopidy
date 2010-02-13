@@ -165,6 +165,10 @@ class BasePlaybackControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
+        self.playback = self.backend.playback
+
+    def test_initial_state_is_stopped(self):
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_play_with_empty_playlist(self):
         playback = self.backend.playback
