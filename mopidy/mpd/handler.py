@@ -70,6 +70,15 @@ class MpdHandler(object):
             response.append(u'OK')
         return response
 
+    @register(r'^ack$')
+    def _ack(self):
+        """
+        Always returns an 'ACK' and not 'OK'.
+
+        Not a part of the MPD protocol.
+        """
+        raise MpdNotImplemented
+
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):
         raise MpdNotImplemented # TODO

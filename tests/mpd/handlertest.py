@@ -66,6 +66,12 @@ class CommandListsTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assertEquals(False, self.h.command_list)
 
+    def test_command_list_with_error(self):
+        self.h.handle_request(u'command_list_begin')
+        self.h.handle_request(u'ack')
+        result = self.h.handle_request(u'command_list_end')
+        self.assert_(u'ACK' in result[-1])
+
     def test_command_list_ok_begin(self):
         result = self.h.handle_request(u'command_list_ok_begin')
         self.assert_(result is None)
