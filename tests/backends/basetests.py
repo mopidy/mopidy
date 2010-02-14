@@ -398,7 +398,8 @@ class BasePlaybackControllerTest(object):
         raise NotImplementedError
 
     def test_stop_when_stopped(self):
-        raise NotImplementedError
+        self.playback.stop()
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_stop_when_playing(self):
         raise NotImplementedError
