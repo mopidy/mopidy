@@ -353,6 +353,12 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.next_track, None)
 
     @populate_playlist
+    def test_next_track_at_end_of_playlist(self):
+        for uri in self.uris:
+            self.playback.next()
+        self.assertEqual(self.playback.next_track, None)
+
+    @populate_playlist
     def test_previous_track_before_play(self):
         self.assertEqual(self.playback.previous_track, None)
 
