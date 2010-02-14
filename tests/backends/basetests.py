@@ -276,3 +276,21 @@ class BasePlaybackControllerTest(object):
         self.playback.play()
         self.playback.next()
         self.assertEqual(self.playback.previous_track, tracks[0])
+
+    @populate_playlist
+    def test_initial_current_track(self):
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.assertEqual(self.playback.current_track, None)
+
+    @populate_playlist
+    def test_current_track_during_play(self):
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.playback.play()
+        self.assertEqual(self.playback.current_track, tracks[0])
+
+    @populate_playlist
+    def test_current_track_after_next(self):
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.playback.play()
+        self.playback.next()
+        self.assertEqual(self.playback.current_track, tracks[1])
