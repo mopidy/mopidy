@@ -746,7 +746,35 @@ class StickersHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
 
-    pass # TODO
+    def test_sticker_get(self):
+        result = self.h.handle_request(
+            u'sticker get "song" "file:///dev/urandom" "a_name"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_set(self):
+        result = self.h.handle_request(
+            u'sticker set "song" "file:///dev/urandom" "a_name" "a_value"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_delete_with_name(self):
+        result = self.h.handle_request(
+            u'sticker delete "song" "file:///dev/urandom" "a_name"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_delete_without_name(self):
+        result = self.h.handle_request(
+            u'sticker delete "song" "file:///dev/urandom"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_list(self):
+        result = self.h.handle_request(
+            u'sticker list "song" "file:///dev/urandom"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_find(self):
+        result = self.h.handle_request(
+            u'sticker find "song" "file:///dev/urandom" "a_name"')
+        self.assert_(u'ACK Not implemented' in result)
 
 
 class ConnectionHandlerTest(unittest.TestCase):
@@ -820,5 +848,3 @@ class ReflectionHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         result = result[0]
         self.assert_('dummy:' in result)
-
-    pass # TODO

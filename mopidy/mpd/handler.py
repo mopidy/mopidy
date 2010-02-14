@@ -538,6 +538,26 @@ class MpdHandler(object):
     def _status_xfade(self):
         return 0 # TODO
 
+    @register(r'^sticker delete "(?P<type>[^"]+)" "(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')
+    def _sticker_delete(self, type, uri, name=None):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^sticker find "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
+    def sticker_find(self, type, uri, name):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^sticker get "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
+    def _sticker_get(self, type, uri, name):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^sticker list "(?P<type>[^"]+)" "(?P<uri>[^"]+)"$')
+    def _sticker_list(self, type, uri):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^sticker set "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)" "(?P<value>[^"]+)"$')
+    def _sticker_set(self, type, uri, name, value):
+        raise MpdNotImplemented # TODO
+
     @register(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
     def _swap(self, songpos1, songpos2):
         raise MpdNotImplemented # TODO
