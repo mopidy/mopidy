@@ -67,7 +67,7 @@ class GStreamerPlaybackController(BasePlaybackController):
         elif not self.current_track and not playlist.tracks:
             return False
         elif playlist.tracks:
-            self.current_track = playlist.tracks[self.playlist_position]
+            self.current_track = playlist.tracks[0]
 
         self.bin.set_property("uri", self.current_track.uri)
         self.bin.set_state(gst.STATE_PLAYING)
@@ -80,7 +80,9 @@ class GStreamerPlaybackController(BasePlaybackController):
     def next(self):
         playlist = self.backend.current_playlist.playlist
 
-        if self.playlist_position + 1 >= len(playlist.tracks):
+        if not self.current_track:
+            self.play()
+        elif self.playlist_position + 1 >= len(playlist.tracks):
             self.stop()
         else:
             next_track = playlist.tracks[self.playlist_position+1]

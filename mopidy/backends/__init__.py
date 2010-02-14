@@ -119,7 +119,7 @@ class BasePlaybackController(object):
 
         try:
             if self.current_track is None:
-                return playlist.tracks[self.playlist_position]
+                return playlist.tracks[0]
             return playlist.tracks[self.playlist_position + 1]
         except IndexError:
             return None
@@ -145,4 +145,4 @@ class BasePlaybackController(object):
         try:
             return playlist.tracks.index(self.current_track)
         except ValueError:
-            return 0
+            return None
