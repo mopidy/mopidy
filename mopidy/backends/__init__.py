@@ -117,6 +117,9 @@ class BasePlaybackController(object):
     def pause(self):
         raise NotImplementedError
 
+    def resume(self):
+        raise NotImplementedError
+
     @property
     def next_track(self):
         playlist = self.backend.current_playlist.playlist
