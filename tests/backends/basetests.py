@@ -291,7 +291,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(playback.playlist_position, len(tracks) - 1)
 
     def test_next_for_empty_playlist(self):
-        raise NotImplementedError
+        self.playback.next()
 
     @populate_playlist
     def test_previous(self):
