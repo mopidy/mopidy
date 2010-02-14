@@ -30,12 +30,33 @@ Code style
 We generally follow the `PEP-8 <http://www.python.org/dev/peps/pep-0008/>`_
 style guidelines, with a couple of notable exceptions:
 
-- We only indent continuation lines with an addition four spaces relative to
-  the previous line.
+- We indent continuation lines with four spaces more than the previous line.
+  For example::
+
+    from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+        BasePlaybackController, BaseLibraryController,
+        BaseStoredPlaylistsController)
+
+  And not::
+
+    from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+                                 BasePlaybackController, BaseLibraryController,
+                                 BaseStoredPlaylistsController)
+
 - An exception to the previous exception: When continuing control flow
-  statements like ``if``, ``for`` and ``while``, indent the continuation lines
-  with eight spaces, so that it is indented an additional level compared to the
-  following block of code.
+  statements like ``if``, ``for`` and ``while``, we indent with eight spaces
+  more than the previous line. In other words, the line is indented one level
+  further to the right than the following block of code. For example::
+
+    if (old_state in (self.PLAYING, self.STOPPED)
+            and new_state == self.PLAYING):
+        self._play_time_start()
+
+  And not::
+
+    if (old_state in (self.PLAYING, self.STOPPED)
+        and new_state == self.PLAYING):
+        self._play_time_start()
 
 
 Running tests
