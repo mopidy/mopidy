@@ -117,3 +117,13 @@ class BasePlaybackController(object):
 
     def next(self):
         raise NotImplementedError
+
+    @property
+    def next_track(self):
+        if self.current_track is None:
+            return None
+        try:
+            return self.backend.current_playlist.playlist.tracks[
+                self.playlist_position + 1]
+        except IndexError:
+            return None

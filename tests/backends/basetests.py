@@ -249,3 +249,15 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(playback.state, playback.STOPPED)
         self.assertEqual(playback.current_track, tracks[-1])
         self.assertEqual(playback.playlist_position, len(tracks) - 1)
+
+    @populate_playlist
+    def test_next_track_before_play(self):
+        # FIXME should next_track reflect which track is about to be played?
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.assertEqual(self.playback.next_track, None)
+
+    @populate_playlist
+    def test_next_track_during_play(self):
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.playback.play()
+        self.assertEqual(self.playback.next_track, tracks[1])
