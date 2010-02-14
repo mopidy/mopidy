@@ -460,7 +460,8 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.b = DummyBackend()
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_add(self):
         result = self.h.handle_request(u'add "file:///dev/urandom"')
@@ -491,8 +492,13 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Not implemented' in result)
 
     def test_deleteid(self):
+        self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
         result = self.h.handle_request(u'deleteid "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
+
+    def test_deleteid_does_not_exist(self):
+        result = self.h.handle_request(u'deleteid "0"')
+        self.assert_(u'ACK Track with ID "0" not found' in result)
 
     def test_move_songpos(self):
         result = self.h.handle_request(u'move "5" "0"')
