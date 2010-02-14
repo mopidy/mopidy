@@ -144,7 +144,12 @@ class MpdHandler(object):
 
     @register(r'^deleteid "(?P<songid>\d+)"$')
     def _deleteid(self, songid):
-        raise MpdNotImplemented # TODO
+        songid = int(songid)
+        try:
+            track = self.backend.current_playlist.get_by_id(songid)
+            return self.backend.current_playlist.remove(track)
+        except KeyError, e:
+            raise MpdAckError(unicode(e))
 
     @register(r'^$')
     def _empty(self):
