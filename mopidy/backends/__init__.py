@@ -74,6 +74,7 @@ class BaseCurrentPlaylistController(object):
 
         :param id: track ID
         :type id: int
+        :rtype: :class:`mopidy.models.Track`
         """
         matches = filter(lambda t: t.id == id, self._playlist.tracks)
         if matches:
@@ -87,6 +88,7 @@ class BaseCurrentPlaylistController(object):
 
         :param uri: track URI
         :type uri: string
+        :rtype: :class:`mopidy.models.Track`
         """
         matches = filter(lambda t: t.uri == uri, self._playlist.tracks)
         if matches:
