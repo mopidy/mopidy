@@ -779,6 +779,14 @@ class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
 
+    def test_enableoutput(self):
+        result = self.h.handle_request(u'enableoutput "0"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_disableoutput(self):
+        result = self.h.handle_request(u'disableoutput "0"')
+        self.assert_(u'ACK Not implemented' in result)
+
     def test_outputs(self):
         result = self.h.handle_request(u'outputs')
         self.assert_(u'outputid: 0' in result)
@@ -790,6 +798,22 @@ class AudioOutputHandlerTest(unittest.TestCase):
 class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
+
+    def test_commands(self):
+        result = self.h.handle_request(u'commands')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_decoders(self):
+        result = self.h.handle_request(u'decoders')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_notcommands(self):
+        result = self.h.handle_request(u'notcommands')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_tagtypes(self):
+        result = self.h.handle_request(u'tagtypes')
+        self.assert_(u'ACK Not implemented' in result)
 
     def test_urlhandlers(self):
         result = self.h.handle_request(u'urlhandlers')

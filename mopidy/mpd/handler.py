@@ -113,6 +113,10 @@ class MpdHandler(object):
                 response.append(u'list_OK')
         return result
 
+    @register(r'^commands$')
+    def _commands(self):
+        raise MpdNotImplemented # TODO
+
     @register(r'^consume "(?P<state>[01])"$')
     def _consume(self, state):
         state = int(state)
@@ -135,6 +139,10 @@ class MpdHandler(object):
         if self.backend.playback.current_track is not None:
             return self.backend.playback.current_track.mpd_format()
 
+    @register(r'^decoders$')
+    def _decoders(self):
+        raise MpdNotImplemented # TODO
+
     @register(r'^delete "(?P<songpos>\d+)"$')
     @register(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
     def _delete(self, songpos=None, start=None, end=None):
@@ -144,9 +152,17 @@ class MpdHandler(object):
     def _deleteid(self, songid):
         raise MpdNotImplemented # TODO
 
+    @register(r'^disableoutput "(?P<outputid>\d+)"$')
+    def _disableoutput(self, outputid):
+        raise MpdNotImplemented # TODO
+
     @register(r'^$')
     def _empty(self):
         pass
+
+    @register(r'^enableoutput "(?P<outputid>\d+)"$')
+    def _enableoutput(self, outputid):
+        raise MpdNotImplemented # TODO
 
     @register(r'^find "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
     def _find(self, type, what):
@@ -219,6 +235,10 @@ class MpdHandler(object):
     @register(r'^next$')
     def _next(self):
         return self.backend.playback.next()
+
+    @register(r'^notcommands$')
+    def _notcommands(self):
+        raise MpdNotImplemented # TODO
 
     @register(r'^outputs$')
     def _outputs(self):
@@ -517,6 +537,10 @@ class MpdHandler(object):
 
     @register(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
     def _swapid(self, songid1, songid2):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^tagtypes$')
+    def _tagtypes(self):
         raise MpdNotImplemented # TODO
 
     @register(r'^update( "(?P<uri>[^"]+)")*$')
