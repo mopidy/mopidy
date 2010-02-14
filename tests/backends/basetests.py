@@ -232,12 +232,16 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_play_when_playing(self):
         self.playback.play()
-        trac = self.playback.current_track
+        track = self.playback.current_track
         self.playback.play()
         self.assertEqual(track, self.playback.current_track)
 
+    @populate_playlist
     def test_play_when_paused(self):
-        raise NotImplementedError
+        self.playback.play()
+        self.playback.pause()
+        self.playback.play()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
 
     @populate_playlist
     def test_play_sets_current_track(self):
