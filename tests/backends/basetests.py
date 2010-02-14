@@ -423,7 +423,7 @@ class BasePlaybackControllerTest(object):
 
     def test_stop_when_paused(self):
         self.playback.play()
-        self.playback.paused()
+        self.playback.pause()
         self.playback.stop()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
