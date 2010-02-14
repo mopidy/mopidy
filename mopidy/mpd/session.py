@@ -48,7 +48,8 @@ class MpdSession(asynchat.async_chat):
     def handle_request(self, input):
         try:
             response = self.handler.handle_request(input)
-            self.handle_response(response)
+            if response is not None:
+                self.handle_response(response)
         except MpdAckError, e:
             logger.warning(e)
             return self.send_response(u'ACK %s' % e)

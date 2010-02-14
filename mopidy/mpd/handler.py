@@ -66,7 +66,7 @@ class MpdHandler(object):
                 response.append(u'%s: %s' % (key, value))
             else:
                 response.append(line)
-        if add_ok:
+        if add_ok and (not response or not response[-1].startswith(u'ACK')):
             response.append(u'OK')
         return response
 
@@ -109,6 +109,8 @@ class MpdHandler(object):
             response = self.handle_request(command, add_ok=False)
             if response is not None:
                 result.append(response)
+            if response and response[-1].startswith(u'ACK'):
+                return result
             if command_list_ok:
                 response.append(u'list_OK')
         return result
@@ -150,7 +152,12 @@ class MpdHandler(object):
 
     @register(r'^deleteid "(?P<songid>\d+)"$')
     def _deleteid(self, songid):
-        raise MpdNotImplemented # TODO
+        songid = int(songid)
+        try:
+            track = self.backend.current_playlist.get_by_id(songid)
+            return self.backend.current_playlist.remove(track)
+        except KeyError, e:
+            raise MpdAckError(unicode(e))
 
     @register(r'^disableoutput "(?P<outputid>\d+)"$')
     def _disableoutput(self, outputid):
