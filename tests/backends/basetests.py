@@ -384,7 +384,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.previous_track, tracks[0])
 
     def test_previous_track_empty_playlist(self):
-        raise NotImplementedError
+        self.assertEqual(self.playback.previous_track, None)
 
     @populate_playlist
     def test_initial_current_track(self):
