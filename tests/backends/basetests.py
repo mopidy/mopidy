@@ -332,7 +332,15 @@ class BasePlaybackControllerTest(object):
         self.playback.play()
         self.assertEqual(self.playback.next_track, tracks[1])
 
+    @populate_playlist
     def test_next_track_after_previous(self):
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.playback.play()
+        self.playback.next()
+        self.playback.previous()
+        self.assertEqual(self.playback.next_track, tracks[1])
+
+    def test_next_track_empty_playlist(self):
         raise NotImplementedError
 
     @populate_playlist
