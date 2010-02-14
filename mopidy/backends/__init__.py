@@ -112,10 +112,29 @@ class BasePlaybackController(object):
         raise NotImplementedError
 
     def next(self):
-        raise NotImplementedError
+        playlist = self.backend.current_playlist.playlist
+
+        if not self.current_track:
+            self.play()
+        elif self.playlist_position + 1 >= len(playlist.tracks):
+            self.stop()
+        else:
+            next_track = playlist.tracks[self.playlist_position+1]
+            self.play(next_track)
 
     def previous(self):
-        raise NotImplementedError
+        playlist = self.backend.current_playlist.playlist
+
+        if not self.current_track:
+            self.play()
+        elif not playlist.tracks:
+            self.stop()
+        elif self.playlist_position - 1 > 0:
+            first_track = playlist.tracks[0]
+            self.play(first_track)
+        else:
+            previous_track = playlist.tracks[self.playlist_position-1]
+            self.play(previous_track)
 
     def pause(self):
         raise NotImplementedError
