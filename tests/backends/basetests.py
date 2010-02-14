@@ -349,20 +349,34 @@ class BasePlaybackControllerTest(object):
     def test_new_playlist_loaded_callback(self):
         raise NotImplementedError
 
+    @populate_playlist
     def test_pause_when_stopped(self):
-        raise NotImplementedError
+        self.playback.pause()
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
+    @populate_playlist
     def test_pause_when_playing(self):
-        raise NotImplementedError
+        self.playback.play()
+        self.playback.pause()
+        self.assertEqual(self.playback.state, self.playback.PAUSED)
 
+    @populate_playlist
     def test_pause_when_paused(self):
-        raise NotImplementedError
+        self.playback.play()
+        self.playback.pause()
+        self.playback.pause()
+        self.assertEqual(self.playback.state, self.playback.PAUSED)
 
+    @populate_playlist
     def test_resume_when_stopped(self):
-        raise NotImplementedError
+        self.playback.resume()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
 
+    @populate_playlist
     def test_resume_when_playing(self):
-        raise NotImplementedError
+        self.playback.play()
+        self.playback.resume()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
 
     def test_resume_when_paused(self):
         raise NotImplementedError
