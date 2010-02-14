@@ -127,3 +127,17 @@ class BasePlaybackController(object):
                 self.playlist_position + 1]
         except IndexError:
             return None
+
+    @property
+    def previous_track(self):
+        if self.current_track is None:
+            return None
+
+        if self.playlist_position - 1 < 0:
+            return None
+
+        try:
+            return self.backend.current_playlist.playlist.tracks[
+                self.playlist_position - 1]
+        except IndexError:
+            return None
