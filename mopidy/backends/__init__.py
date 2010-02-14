@@ -120,11 +120,12 @@ class BasePlaybackController(object):
 
     @property
     def next_track(self):
-        if self.current_track is None:
-            return None
+        playlist = self.backend.current_playlist.playlist
+
         try:
-            return self.backend.current_playlist.playlist.tracks[
-                self.playlist_position + 1]
+            if self.current_track is None:
+                return playlist.tracks[self.playlist_position]
+            return playlist.tracks[self.playlist_position + 1]
         except IndexError:
             return None
 

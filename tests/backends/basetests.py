@@ -252,9 +252,8 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_next_track_before_play(self):
-        # FIXME should next_track reflect which track is about to be played?
         tracks = self.backend.current_playlist.playlist.tracks
-        self.assertEqual(self.playback.next_track, None)
+        self.assertEqual(self.playback.next_track, tracks[0])
 
     @populate_playlist
     def test_next_track_during_play(self):
