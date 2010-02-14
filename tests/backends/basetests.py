@@ -190,6 +190,7 @@ class BaseCurrentPlaylistControllerTest(object):
 class BasePlaybackControllerTest(object):
     uris = []
     backend_class = None
+    supports_volume = False
 
     def setUp(self):
         self.backend = self.backend_class()
@@ -369,7 +370,14 @@ class BasePlaybackControllerTest(object):
         raise NotImplementedError
 
     def test_volume(self):
-        raise NotImplementedError
+        if not self.supports_volume:
+            self.assertEqual(self.playback.volume, None)
+        else:
+            self.assertEqual(self.playback.volume, 100)
+            self.playback.volume = 50
+            self.assertEqual(self.playback.volume, 50)
+            self.playback.volume = 0
+            self.assertEqual(self.playback.volume, 0)
 
     def test_play_with_consume(self):
         raise NotImplementedError

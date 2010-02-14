@@ -87,3 +87,11 @@ class GStreamerPlaybackController(BasePlaybackController):
         else:
             next_track = playlist.tracks[self.playlist_position+1]
             self.play(next_track)
+
+    @property
+    def volume(self):
+        return self.bin.get_property('volume') * 100
+
+    @volume.setter
+    def volume(self, value):
+        return self.bin.set_property('volume', float(value) / 100)

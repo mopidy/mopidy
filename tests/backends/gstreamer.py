@@ -20,6 +20,7 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestC
            ]
 
     backend_class = GStreamerBackend
+    supports_volume = True
 
 if __name__ == '__main__':
     unittest.main()
