@@ -334,3 +334,60 @@ class BasePlaybackControllerTest(object):
         self.playback.play()
         self.playback.next()
         self.assertEqual(self.playback.playlist_position, 1)
+
+    def test_new_playlist_loaded_callback(self):
+        raise NotImplementedError
+
+    def test_pause_when_stopped(self):
+        raise NotImplementedError
+
+    def test_pause_when_playing(self):
+        raise NotImplementedError
+
+    def test_resume_when_stopped(self):
+        raise NotImplementedError
+
+    def test_resume_when_playing(self):
+        raise NotImplementedError
+
+    def test_seek_when_stopped(self):
+        raise NotImplementedError
+
+    def test_seek_when_playing(self):
+        raise NotImplementedError
+
+    def test_stop_when_stopped(self):
+        raise NotImplementedError
+
+    def test_stop_when_playing(self):
+        raise NotImplementedError
+
+    def test_time_position_when_stopped(self):
+        raise NotImplementedError
+
+    def test_time_position_when_playing(self):
+        raise NotImplementedError
+
+    def test_volume(self):
+        raise NotImplementedError
+
+    def test_play_with_consume(self):
+        raise NotImplementedError
+
+    def test_next_with_consume(self):
+        raise NotImplementedError
+
+    def test_previous_track_with_consume(self):
+        raise NotImplementedError
+
+    def test_play_with_shuffle(self):
+        raise NotImplementedError
+
+    def test_next_with_shuffle(self):
+        raise NotImplementedError
+
+    def test_next_track_with_shuffle(self):
+        raise NotImplementedError
+
+    def test_previous_track_with_shuffle(self):
+        raise NotImplementedError
