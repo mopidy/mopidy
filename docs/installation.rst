@@ -27,11 +27,13 @@ despotify backend
 
 To use the despotify backend, you first need to install despotify and spytify.
 
-*This backend requires a Spotify premium account.*
+.. note::
+
+    This backend requires a Spotify premium account.
 
 
-Installing despotify and spytify
---------------------------------
+Installing despotify
+--------------------
 
 Install despotify's dependencies. At Debian/Ubuntu systems::
 
@@ -47,6 +49,12 @@ Build and install despotify::
     cd despotify/src/
     make
     sudo make install
+
+
+Installing spytify
+------------------
+
+spytify's source comes bundled with despotify.
 
 Build and install spytify::
 
@@ -64,6 +72,7 @@ Spotify Premium account), ask for a search query, list all your playlists with
 tracks, play 10s from a random song from the search result, pause for two
 seconds, play for five more seconds, and quit.
 
+
 .. _libspotify:
 
 libspotify backend
@@ -73,19 +82,24 @@ As an alternative to the despotify backend, we are working on a libspotify
 backend. To use the libspotify backend you must install libspotify and
 pyspotify.
 
-*This backend requires a Spotify premium account.*
+.. note::
 
-*This backend requires you to get an application key from Spotify before use.*
+    This backend requires a Spotify premium account, and it requires you to get
+    an application key from Spotify before use.
 
 
-Installing libspotify and pyspotify
------------------------------------
+Installing libspotify
+---------------------
 
 As libspotify's installation script at the moment is somewhat broken (see this
 `GetSatisfaction thread <http://getsatisfaction.com/spotify/topics/libspotify_please_fix_the_installation_script>`_
 for details), it is easiest to use the libspotify files bundled with pyspotify.
 The files bundled with pyspotify are for 64-bit, so if you run a 32-bit OS, you
 must get libspotify from https://developer.spotify.com/en/libspotify/.
+
+
+Installing pyspotify
+--------------------
 
 Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
@@ -106,9 +120,11 @@ Test your libspotify setup::
 
     ./example1.py -u USERNAME -p PASSWORD
 
-Until Spotify fixes their installation script, you'll have to set
-``LD_LIBRARY_PATH`` every time you are going to use libspotify (in other words
-before starting Mopidy).
+.. note::
+
+    Until Spotify fixes their installation script, you'll have to set
+    ``LD_LIBRARY_PATH`` every time you are going to use libspotify (in other
+    words before starting Mopidy).
 
 
 Running Mopidy
