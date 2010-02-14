@@ -431,6 +431,13 @@ class BasePlaybackControllerTest(object):
             self.playback.volume = 0
             self.assertEqual(self.playback.volume, 0)
 
+    def test_volume_is_not_float(self):
+        if not self.supports_volume:
+            return
+
+        self.playback.volume = 1.0 / 3 * 100
+        self.assertEqual(self.playback.volume, 33)
+
     def test_play_with_consume(self):
         raise NotImplementedError
 

@@ -98,7 +98,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 
     @property
     def volume(self):
-        return self.bin.get_property('volume') * 100
+        return int(self.bin.get_property('volume') * 100)
 
     @volume.setter
     def volume(self, value):
