@@ -290,6 +290,15 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(playback.current_track, tracks[-1])
         self.assertEqual(playback.playlist_position, len(tracks) - 1)
 
+    def test_previous(self):
+        raise NotImplementedError
+
+    def test_previous_triggers_playback(self):
+        raise NotImplementedError
+
+    def test_previous_at_start_of_playlist(self):
+        raise NotImplementedError
+
     @populate_playlist
     def test_next_track_before_play(self):
         tracks = self.backend.current_playlist.playlist.tracks
@@ -300,6 +309,9 @@ class BasePlaybackControllerTest(object):
         tracks = self.backend.current_playlist.playlist.tracks
         self.playback.play()
         self.assertEqual(self.playback.next_track, tracks[1])
+
+    def test_next_track_after_previous(self):
+        raise NotImplementedError
 
     @populate_playlist
     def test_previous_track_before_play(self):
@@ -316,6 +328,9 @@ class BasePlaybackControllerTest(object):
         self.playback.play()
         self.playback.next()
         self.assertEqual(self.playback.previous_track, tracks[0])
+
+    def test_previous_track_after_previous(self):
+        raise NotImplementedError
 
     @populate_playlist
     def test_initial_current_track(self):
@@ -451,6 +466,9 @@ class BasePlaybackControllerTest(object):
         raise NotImplementedError
 
     def test_next_with_shuffle(self):
+        raise NotImplementedError
+
+    def test_previous_with_shuffle(self):
         raise NotImplementedError
 
     def test_next_track_with_shuffle(self):
