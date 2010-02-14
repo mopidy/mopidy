@@ -114,6 +114,9 @@ class BasePlaybackController(object):
     def next(self):
         raise NotImplementedError
 
+    def previous(self):
+        raise NotImplementedError
+
     def pause(self):
         raise NotImplementedError
 

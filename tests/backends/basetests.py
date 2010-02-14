@@ -290,13 +290,24 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(playback.current_track, tracks[-1])
         self.assertEqual(playback.playlist_position, len(tracks) - 1)
 
-    def test_previous(self):
+    def test_next_for_empty_playlist(self):
         raise NotImplementedError
+
+    @populate_playlist
+    def test_previous(self):
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.playback.play()
+        self.playback.next()
+        self.playback.previous()
+        self.assertEqual(self.playback.current_track, tracks[0])
 
     def test_previous_triggers_playback(self):
         raise NotImplementedError
 
     def test_previous_at_start_of_playlist(self):
+        raise NotImplementedError
+
+    def test_previous_for_empty_playlist(self):
         raise NotImplementedError
 
     @populate_playlist
