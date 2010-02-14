@@ -230,6 +230,16 @@ class BasePlaybackControllerTest(object):
         self.assert_(self.playback.play(tracks[-1]))
 
     @populate_playlist
+    def test_play_when_playing(self):
+        self.playback.play()
+        trac = self.playback.current_track
+        self.playback.play()
+        self.assertEqual(track, self.playback.current_track)
+
+    def test_play_when_paused(self):
+        raise NotImplementedError
+
+    @populate_playlist
     def test_play_sets_current_track(self):
         tracks = self.backend.current_playlist.playlist.tracks
         self.playback.play()
@@ -331,7 +341,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.playlist_position, 0)
 
     @populate_playlist
-    def test_playlist_position_during_play(self):
+    def test_playlist_position_after_next(self):
         self.playback.play()
         self.playback.next()
         self.assertEqual(self.playback.playlist_position, 1)
@@ -345,10 +355,16 @@ class BasePlaybackControllerTest(object):
     def test_pause_when_playing(self):
         raise NotImplementedError
 
+    def test_pause_when_paused(self):
+        raise NotImplementedError
+
     def test_resume_when_stopped(self):
         raise NotImplementedError
 
     def test_resume_when_playing(self):
+        raise NotImplementedError
+
+    def test_resume_when_paused(self):
         raise NotImplementedError
 
     def test_seek_when_stopped(self):
@@ -357,16 +373,25 @@ class BasePlaybackControllerTest(object):
     def test_seek_when_playing(self):
         raise NotImplementedError
 
+    def test_seek_when_paused(self):
+        raise NotImplementedError
+
     def test_stop_when_stopped(self):
         raise NotImplementedError
 
     def test_stop_when_playing(self):
         raise NotImplementedError
 
+    def test_stop_when_paused(self):
+        raise NotImplementedError
+
     def test_time_position_when_stopped(self):
         raise NotImplementedError
 
     def test_time_position_when_playing(self):
+        raise NotImplementedError
+
+    def test_time_position_when_paused(self):
         raise NotImplementedError
 
     def test_volume(self):
