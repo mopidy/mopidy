@@ -383,7 +383,10 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
     def test_resume_when_paused(self):
-        raise NotImplementedError
+        self.playback.play()
+        self.playback.pause()
+        self.playback.resume()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
 
     def test_seek_when_stopped(self):
         raise NotImplementedError
