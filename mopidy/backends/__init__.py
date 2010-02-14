@@ -112,6 +112,7 @@ class BasePlaybackController(object):
         raise NotImplementedError
 
     def next(self):
+        # FIXME needs to be simplified by using next_track
         playlist = self.backend.current_playlist.playlist
 
         if not self.current_track:
@@ -123,6 +124,7 @@ class BasePlaybackController(object):
             self.play(next_track)
 
     def previous(self):
+        # FIXME needs to be simplified by using previous_track
         playlist = self.backend.current_playlist.playlist
 
         if not self.current_track:
