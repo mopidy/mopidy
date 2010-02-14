@@ -297,7 +297,7 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_initial_playlist_position(self):
-        self.assertEqual(self.playback.playlist_position, 0)
+        self.assertEqual(self.playback.playlist_position, None)
 
     @populate_playlist
     def test_playlist_position_during_play(self):

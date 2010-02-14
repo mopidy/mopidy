@@ -81,7 +81,5 @@ class GStreamerPlaybackController(BasePlaybackController):
         if self.playlist_position + 1 >= len(playlist.tracks):
             self.stop()
         else:
-            self.playlist_position += 1
-            self.current_track = playlist.tracks[self.playlist_position]
-
+            self.current_track = playlist.tracks[self.playlist_position+1]
             self.play()

@@ -55,10 +55,6 @@ class BaseCurrentPlaylistController(object):
 
         playback = self.backend.playback
 
-        # FIXME introduce a mechanism for telling
-        # playback that it needs to reset
-        playback.playlist_position = 0
-
         if playlist.tracks:
             playback.current_track = playlist.tracks[0]
         else:
@@ -107,7 +103,6 @@ class BasePlaybackController(object):
     def __init__(self, backend):
         self.backend = backend
         self.current_track = None
-        self.playlist_position = 0
 
     def play(self, id=None, position=None):
         raise NotImplementedError
@@ -142,3 +137,12 @@ class BasePlaybackController(object):
                 self.playlist_position - 1]
         except IndexError:
             return None
+
+    @property
+    def playlist_position(self):
+        playlist = self.backend.current_playlist.playlist
+
+        try:
+            return playlist.tracks.index(self.current_track)
+        except ValueError:
+            return 0
