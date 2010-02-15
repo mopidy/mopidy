@@ -23,7 +23,7 @@ Dependencies
 .. _despotify:
 
 despotify backend
-=================
+-----------------
 
 To use the despotify backend, you first need to install despotify and spytify.
 
@@ -33,7 +33,7 @@ To use the despotify backend, you first need to install despotify and spytify.
 
 
 Installing despotify
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 *Linux:* Install despotify's dependencies. At Debian/Ubuntu systems::
 
@@ -67,7 +67,7 @@ lines so that it reads::
 
 
 Installing spytify
-------------------
+^^^^^^^^^^^^^^^^^^
 
 spytify's source comes bundled with despotify.
 
@@ -92,7 +92,7 @@ seconds, play for five more seconds, and quit.
 .. _libspotify:
 
 libspotify backend
-==================
+------------------
 
 As an alternative to the despotify backend, we are working on a libspotify
 backend. To use the libspotify backend you must install libspotify and
@@ -105,7 +105,7 @@ pyspotify.
 
 
 Installing libspotify
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 As libspotify's installation script at the moment is somewhat broken (see this
 `GetSatisfaction thread <http://getsatisfaction.com/spotify/topics/libspotify_please_fix_the_installation_script>`_
@@ -115,7 +115,7 @@ must get libspotify from https://developer.spotify.com/en/libspotify/.
 
 
 Installing pyspotify
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
@@ -143,8 +143,8 @@ Test your libspotify setup::
     words before starting Mopidy).
 
 
-Running Mopidy
-==============
+Settings
+========
 
 Create a file name ``local_settings.py`` in the same directory as
 ``settings.py``. Enter your Spotify Premium account's username and password
@@ -159,6 +159,9 @@ libspotify backend, copy the Spotify application key to
 ``mopidy/mopidy/local_settings.py``::
 
     BACKEND = u'mopidy.backends.libspotify.LibspotifyBackend'
+
+Running Mopidy
+==============
 
 To start Mopidy, go to the root of the Mopidy project, then simply run::
 
