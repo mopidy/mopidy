@@ -148,7 +148,8 @@ class MpdHandler(object):
     @register(r'^currentsong$')
     def _currentsong(self):
         if self.backend.playback.current_track is not None:
-            return self.backend.playback.current_track.mpd_format()
+            return self.backend.playback.current_track.mpd_format(
+                position=self.backend.playback.playlist_position)
 
     @register(r'^decoders$')
     def _decoders(self):
