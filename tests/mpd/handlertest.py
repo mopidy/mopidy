@@ -100,7 +100,9 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Not implemented' in result)
 
     def test_currentsong(self):
-        self.b.playback.current_track = Track()
+        track = Track()
+        self.b.current_playlist.playlist = Playlist(tracks=[track])
+        self.b.playback.current_track = track
         result = self.h.handle_request(u'currentsong')
         self.assert_(u'file: ' in result)
         self.assert_(u'Time: 0' in result)
