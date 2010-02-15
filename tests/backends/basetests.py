@@ -196,6 +196,9 @@ class BasePlaybackControllerTest(object):
         self.backend = self.backend_class()
         self.playback = self.backend.playback
 
+    def tearDown(self):
+        self.backend.destroy()
+
     def test_initial_state_is_stopped(self):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 

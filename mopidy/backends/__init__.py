@@ -14,6 +14,9 @@ class BaseBackend(object):
     stored_playlists = None
     uri_handlers = []
 
+    def destroy(self):
+        self.playback.destroy()
+
 class BaseCurrentPlaylistController(object):
     def __init__(self, backend):
         self.backend = backend
@@ -164,3 +167,6 @@ class BasePlaybackController(object):
     @property
     def volume(self):
         return self._volume
+
+    def destroy(self):
+        pass
