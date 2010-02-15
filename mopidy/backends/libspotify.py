@@ -42,21 +42,22 @@ class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 
 class LibspotifyLibraryController(BaseLibraryController):
-    search_results = False
+    _search_results = None
+    _search_results_received = threading.Event()
 
     def search(self, type, what):
-        # XXX This is slow
-        self.search_results = None
+        # FIXME This is slow, like 12-14s between querying and getting results
+        self._search_results_received.clear()
+        query = u'%s:%s' % (type, what)
         def callback(results, userdata):
             logger.debug(u'Search results received')
-            self.search_results = results
-        query = u'%s:%s' % (type, what)
+            self._search_results = results
+            self._search_results_received.set()
         self.backend.spotify.search(query.encode(ENCODING), callback)
-        while self.search_results is None:
-            time.sleep(0.01)
+        self._search_results_received.wait()
         result = Playlist(tracks=[self.backend.translate.to_mopidy_track(t)
-            for t in self.search_results.tracks()])
-        self.search_results = False
+            for t in self._search_results.tracks()])
+        self._search_results = None
         return result
 
 
