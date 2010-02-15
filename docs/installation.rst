@@ -35,16 +35,31 @@ To use the despotify backend, you first need to install despotify and spytify.
 Installing despotify
 --------------------
 
-Install despotify's dependencies. At Debian/Ubuntu systems::
+*Linux:* Install despotify's dependencies. At Debian/Ubuntu systems::
 
     sudo aptitude install libssl-dev zlib1g-dev libvorbis-dev \
         libtool libncursesw5-dev libao-dev
 
-Check out revision 503 of the despotify source code::
+*OS X:* In OS X you need to have `XCode
+<http://developer.apple.com/tools/xcode/>`_ and `MacPorts
+<http://www.macports.org/>`_ installed. Then, to install despotify's
+dependencies::
 
-    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@503 despotify
+    sudo port install openssl zlib libvorbis libtool ncursesw libao
 
-Build and install despotify::
+*All OS:* Check out revision 503 of the despotify source code::
+
+    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@503
+
+*OS X:* Edit ``despotify/src/Makefile.local.mk`` and uncomment the last two
+lines so that it reads::
+
+    ## If you're on Mac OS X and have installed libvorbisfile
+    ## via 'port install ..', try uncommenting these lines
+    CFLAGS += -I/opt/local/include
+    LDFLAGS += -L/opt/local/lib
+
+*All OS:* Build and install despotify::
 
     cd despotify/src/
     make
@@ -59,6 +74,7 @@ spytify's source comes bundled with despotify.
 Build and install spytify::
 
     cd despotify/src/bindings/python/
+    export PKG_CONFIG_PATH=../../lib       # Needed on OS X
     make
     sudo make install
 
