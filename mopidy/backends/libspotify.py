@@ -1,7 +1,6 @@
 import datetime as dt
 import logging
 import threading
-import time
 
 from spotify import Link
 from spotify.manager import SpotifySessionManager
