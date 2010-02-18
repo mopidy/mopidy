@@ -693,3 +693,6 @@ class BasePlaybackControllerTest(object):
 
     def test_shufflet_off_by_default(self):
         self.assertEqual(self.playback.shuffle, False)
+
+    def test_consume_off_by_default(self):
+        self.assertEqual(self.playback.consume, False)
