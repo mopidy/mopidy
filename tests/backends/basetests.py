@@ -23,6 +23,9 @@ class BaseCurrentPlaylistControllerTest(object):
 
         assert len(self.uris) >= 3, 'Need at least three urls to run tests.'
 
+    def tearDown(self):
+        self.backend.destroy()
+
     def test_add(self):
         for uri in self.uris:
             self.controller.add(uri)
@@ -197,6 +200,8 @@ class BasePlaybackControllerTest(object):
     def setUp(self):
         self.backend = self.backend_class()
         self.playback = self.backend.playback
+
+        assert len(self.uris) >= 3, 'Need at least three urls to run tests.'
 
     def tearDown(self):
         self.backend.destroy()
