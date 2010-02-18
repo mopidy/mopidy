@@ -537,7 +537,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_seek_when_playing(self):
         self.playback.play()
-        self.playback.seek(1000)
+        self.playback.seek(1000) # FIXME use track.duration
         position = self.playback.time_position
         self.assert_(position >= 990, position)
 
@@ -545,7 +545,7 @@ class BasePlaybackControllerTest(object):
     def test_seek_when_paused(self):
         self.playback.play()
         self.playback.pause()
-        self.playback.seek(1000)
+        self.playback.seek(1000) # FIXME use track.duration
         position = self.playback.time_position
         self.assert_(position >= 990, position)
 
@@ -556,14 +556,19 @@ class BasePlaybackControllerTest(object):
         self.playback.seek(0)
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
-    def test_seek_return_value(self):
-        raise NotImplementedError # design decision needed
-
     def test_seek_beyond_end_of_song(self):
         raise NotImplementedError
 
+    @populate_playlist
     def test_seek_beyond_start_of_song(self):
-        raise NotImplementedError
+        self.playback.play()
+        self.playback.seek(-1000)
+        position = self.playback.time_position
+        self.assert_(position >= 0, position)
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
+
+    def test_seek_return_value(self):
+        raise NotImplementedError # design decision needed
 
     @populate_playlist
     def test_stop_when_stopped(self):

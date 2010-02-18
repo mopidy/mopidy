@@ -88,6 +88,9 @@ class GStreamerPlaybackController(BasePlaybackController):
         if self.state == self.STOPPED:
             self.play()
 
+        if time_position < 0:
+            time_position = 0
+
         self.bin.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, time_position * gst.MSECOND)
         self._set_state(gst.STATE_PLAYING)
