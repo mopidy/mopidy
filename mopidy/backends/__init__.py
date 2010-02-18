@@ -55,16 +55,7 @@ class BaseCurrentPlaylistController(object):
 
     def load(self, playlist):
         self.playlist = playlist
-
-        playback = self.backend.playback
-
-        if playlist.tracks:
-            playback.current_track = playlist.tracks[0]
-        else:
-            playback.current_track = None
-
-        if playback.state == playback.PLAYING:
-            self.backend.playback.play()
+        self.backend.playback.new_playlist_loaded_callback()
 
     def move(self, start, end, to_position):
         tracks = self.playlist.tracks
@@ -115,7 +106,12 @@ class BasePlaybackController(object):
         raise NotImplementedError
 
     def new_playlist_loaded_callback(self):
-        pass
+        self.current_track = None
+
+        if self.state == self.PLAYING:
+            self.play()
+        elif self.state == self.PAUSED:
+            self.stop()
 
     def next(self):
         if not self.next_track:
