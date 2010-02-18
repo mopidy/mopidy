@@ -670,5 +670,10 @@ class BasePlaybackControllerTest(object):
         time.sleep(0.1)
         self.assertEqual(self.playback.current_track, tracks[1])
 
+    @populate_playlist
     def test_end_of_playlist_stops(self):
-        raise NotImplementedError
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.playback.play(tracks[-1])
+        self.playback.seek(tracks[-1].length - 10)
+        time.sleep(0.1)
+        self.assertEqual(self.playback.state, self.playback.stopped)
