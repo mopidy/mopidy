@@ -114,6 +114,9 @@ class BasePlaybackController(object):
     def stop(self):
         raise NotImplementedError
 
+    def new_playlist_loaded_callback(self):
+        pass
+
     def next(self):
         if not self.next_track:
             self.stop()

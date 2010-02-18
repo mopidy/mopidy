@@ -434,8 +434,18 @@ class BasePlaybackControllerTest(object):
         self.playback.next()
         self.assertEqual(self.playback.playlist_position, 1)
 
-    def test_new_playlist_loaded_callback(self):
-        raise NotImplementedError
+    def test_new_playlist_loaded_callback_gets_called(self):
+        new_playlist_loaded_callback = self.playback.new_playlist_loaded_callback
+
+        def wrapper():
+            wrapper.called = True
+            return new_playlist_loaded_callback()
+        wrapper.called = False
+
+        self.playback.new_playlist_loaded_callback = wrapper
+        self.backend.current_playlist.load(Playlist())
+
+        self.assert_(wrapper.called)
 
     @populate_playlist
     def test_pause_when_stopped(self):
