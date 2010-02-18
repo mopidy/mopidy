@@ -1,6 +1,8 @@
 import logging
 
 import gst
+import gobject
+import thread
 
 from mopidy.models import Track, Playlist
 from mopidy.backends import (BaseBackend,
@@ -8,6 +10,14 @@ from mopidy.backends import (BaseBackend,
                              BaseCurrentPlaylistController)
 
 logger = logging.getLogger(u'backends.gstreamer')
+
+def loop():
+    gobject.threads_init()
+
+    while True:
+        gobject.MainLoop().get_context().iteration(True)
+
+thread.start_new_thread(loop, tuple())
 
 class GStreamerBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
@@ -36,6 +46,9 @@ class GStreamerPlaybackController(BasePlaybackController):
         sink = gst.element_factory_make("fakesink", "fakesink")
 
         self.bin.set_property("video-sink", sink)
+        self.bus.add_signal_watch()
+        self.bus.connect('message', self._message)
+
         self.stop()
 
     def _set_state(self, state):
@@ -49,6 +62,10 @@ class GStreamerPlaybackController(BasePlaybackController):
             self.state = self.STOPPED
         elif new == gst.STATE_PAUSED:
             self.state = self.PAUSED
+
+    def _message(self, bus, message):
+        if message.type == gst.MESSAGE_EOS:
+            self.next()
 
     def play(self, track=None, position=None):
         playlist = self.backend.current_playlist.playlist
@@ -107,4 +124,5 @@ class GStreamerPlaybackController(BasePlaybackController):
 
     def destroy(self):
         self.bin.set_state(gst.STATE_NULL)
+        self.bus.remove_signal_watch()
         del self.bin

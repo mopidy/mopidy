@@ -662,8 +662,13 @@ class BasePlaybackControllerTest(object):
     def test_previous_track_with_shuffle(self):
         raise NotImplementedError
 
+    @populate_playlist
     def test_end_of_song_starts_next_track(self):
-        raise NotImplementedError
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.playback.play()
+        self.playback.seek(tracks[0].length - 10)
+        time.sleep(0.1)
+        self.assertEqual(self.playback.current_track, tracks[1])
 
     def test_end_of_playlist_stops(self):
         raise NotImplementedError
