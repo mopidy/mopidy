@@ -31,6 +31,7 @@ class BaseCurrentPlaylistController(object):
     def playlist(self, playlist):
         self._playlist = playlist
         self.version += 1
+        self.backend.playback.new_playlist_loaded_callback()
 
     def add(self, uri, at_position=None):
         raise NotImplementedError
@@ -55,7 +56,6 @@ class BaseCurrentPlaylistController(object):
 
     def load(self, playlist):
         self.playlist = playlist
-        self.backend.playback.new_playlist_loaded_callback()
 
     def move(self, start, end, to_position):
         tracks = self.playlist.tracks
