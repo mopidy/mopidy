@@ -94,7 +94,10 @@ class GStreamerPlaybackController(BasePlaybackController):
 
     @property
     def time_position(self):
-        return 0
+        try:
+            return self.bin.query_position(gst.FORMAT_TIME)[0] // gst.MSECOND
+        except gst.QueryError:
+            return 0
 
     def destroy(self):
         self.bin.set_state(gst.STATE_NULL)

@@ -1,4 +1,5 @@
 import random
+import time
 
 from mopidy.models import Playlist, Track
 
@@ -559,11 +560,25 @@ class BasePlaybackControllerTest(object):
     def test_time_position_when_stopped_with_playlist(self):
         self.assertEqual(self.playback.time_position, 0)
 
+    @populate_playlist
     def test_time_position_when_playing(self):
-        raise NotImplementedError
+        self.playback.play()
+        time.sleep(0.1)
+        first = self.playback.time_position
+        time.sleep(0.1)
+        second = self.playback.time_position
 
+        self.assert_(second > first, '%s - %s' % (first, second))
+
+    @populate_playlist
     def test_time_position_when_paused(self):
-        raise NotImplementedError
+        self.playback.play()
+        time.sleep(0.1)
+        self.playback.pause()
+        first = self.playback.time_position
+        second = self.playback.time_position
+
+        self.assertEqual(first, second)
 
     def test_volume(self):
         if not self.supports_volume:
