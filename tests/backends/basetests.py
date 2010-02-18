@@ -465,6 +465,7 @@ class BasePlaybackControllerTest(object):
         self.playback.resume()
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
+    @populate_playlist
     def test_resume_when_paused(self):
         self.playback.play()
         self.playback.pause()
