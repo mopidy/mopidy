@@ -339,8 +339,8 @@ class BasePlaybackControllerTest(object):
     def test_previous_at_start_of_playlist(self):
         tracks = self.backend.current_playlist.playlist.tracks
         self.playback.previous()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
-        self.assertEqual(self.playback.current_track, tracks[0])
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
+        self.assertEqual(self.playback.current_track, None)
 
     def test_previous_for_empty_playlist(self):
         self.playback.previous()

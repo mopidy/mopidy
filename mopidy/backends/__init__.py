@@ -122,7 +122,8 @@ class BasePlaybackController(object):
             self.play(self.next_track)
 
     def previous(self):
-        self.play(self.previous_track)
+        if self.previous_track:
+            self.play(self.previous_track)
 
     def pause(self):
         raise NotImplementedError
