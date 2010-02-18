@@ -128,6 +128,9 @@ class BasePlaybackController(object):
     def resume(self):
         raise NotImplementedError
 
+    def seek(self, time_position):
+        raise NotImplementedError
+
     @property
     def next_track(self):
         playlist = self.backend.current_playlist.playlist

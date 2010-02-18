@@ -84,6 +84,14 @@ class GStreamerPlaybackController(BasePlaybackController):
         else:
             self._set_state(gst.STATE_PLAYING)
 
+    def seek(self, time_position):
+        if self.state == self.STOPPED:
+            self.play()
+
+        self.bin.seek_simple(gst.Format(gst.FORMAT_TIME),
+            gst.SEEK_FLAG_FLUSH, time_position * gst.MSECOND)
+        self._set_state(gst.STATE_PLAYING)
+
     @property
     def volume(self):
         return int(self.bin.get_property('volume') * 100)
