@@ -266,6 +266,9 @@ class BasePlaybackControllerTest(object):
         self.playback.play(tracks[-1])
         self.assertEqual(self.playback.current_track, tracks[-1])
 
+    def test_current_track_after_completed_playlist(self):
+        raise NotImplementedError # design decision needed
+
     @populate_playlist
     def test_next(self):
         self.playback.play()
