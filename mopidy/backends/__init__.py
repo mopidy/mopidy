@@ -94,6 +94,7 @@ class BasePlaybackController(object):
 
     state = STOPPED
     repeat = False
+    shuffle = False
     
     def __init__(self, backend):
         self.backend = backend
