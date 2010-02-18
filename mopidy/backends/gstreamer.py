@@ -123,6 +123,12 @@ class GStreamerPlaybackController(BasePlaybackController):
             return 0
 
     def destroy(self):
-        self.bin.set_state(gst.STATE_NULL)
-        self.bus.remove_signal_watch()
-        del self.bin
+        bin, self.bin = self.bin, None
+        bus, self.bus = self.bus, None
+
+        bus.remove_signal_watch()
+        bin.get_state(-1)
+        bin.set_state(gst.STATE_NULL)
+
+        del bus
+        del bin
