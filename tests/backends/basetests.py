@@ -648,11 +648,19 @@ class BasePlaybackControllerTest(object):
         self.playback.volume = 1.0 / 3 * 100
         self.assertEqual(self.playback.volume, 33)
 
+    @populate_playlist
     def test_play_with_consume(self):
-        raise NotImplementedError
+        self.playback.consume = True
+        self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
 
+    @populate_playlist
     def test_next_with_consume(self):
-        raise NotImplementedError
+        self.playback.consume = True
+        self.playback.play()
+        self.playback.next()
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.assert_(self.tracks[0] not in tracks)
 
     def test_previous_track_with_consume(self):
         raise NotImplementedError
