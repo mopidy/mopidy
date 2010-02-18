@@ -145,9 +145,8 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(tracks[-2].uri, self.uris[0])
         self.assertEqual(tracks[-1].uri, self.uris[1])
 
-    # FIXME enforce this?
-    #def test_playlist_attribute_is_imutable(self):
-    #    raise NotImplementedError
+    def test_playlist_attribute_is_imutable(self):
+        raise NotImplementedError # design decision needed
 
     @populate_playlist
     def test_remove(self):
@@ -278,7 +277,7 @@ class BasePlaybackControllerTest(object):
         self.assertNotEqual(self.playback.current_track.uri, old_uri)
 
     def test_next_return_value(self):
-        raise NotImplementedError
+        raise NotImplementedError # design decision needed
 
     @populate_playlist
     def test_next_triggers_playback(self):
@@ -324,7 +323,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.current_track, tracks[1])
 
     def test_previous_return_value(self):
-        raise NotImplementedError
+        raise NotImplementedError # design decision needed
 
     @populate_playlist
     def test_previous_triggers_playback(self):
@@ -457,7 +456,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.PAUSED)
 
     def test_pause_return_value(self):
-        raise NotImplementedError
+        raise NotImplementedError # design decision needed
 
     @populate_playlist
     def test_resume_when_stopped(self):
@@ -478,7 +477,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
     def test_resume_return_value(self):
-        raise NotImplementedError
+        raise NotImplementedError # design decision needed
 
     def test_resume_continues_from_right_position(self):
         raise NotImplementedError
@@ -493,9 +492,12 @@ class BasePlaybackControllerTest(object):
         raise NotImplementedError
 
     def test_seek_return_value(self):
-        raise NotImplementedError
+        raise NotImplementedError # design decision needed
 
     def test_seek_beyond_end_of_song(self):
+        raise NotImplementedError
+
+    def test_seek_beyond_start_of_song(self):
         raise NotImplementedError
 
     def test_stop_when_stopped(self):
@@ -514,7 +516,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_stop_return_value(self):
-        raise NotImplementedError
+        raise NotImplementedError # design decision needed
 
     def test_time_position_when_stopped(self):
         raise NotImplementedError
