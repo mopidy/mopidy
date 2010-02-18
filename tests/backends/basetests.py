@@ -531,15 +531,18 @@ class BasePlaybackControllerTest(object):
     def test_seek_beyond_start_of_song(self):
         raise NotImplementedError
 
+    @populate_playlist
     def test_stop_when_stopped(self):
         self.playback.stop()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
+    @populate_playlist
     def test_stop_when_playing(self):
         self.playback.play()
         self.playback.stop()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
+    @populate_playlist
     def test_stop_when_paused(self):
         self.playback.play()
         self.playback.pause()
