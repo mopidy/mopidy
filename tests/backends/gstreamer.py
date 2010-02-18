@@ -1,6 +1,7 @@
 import unittest
 import os
 
+from mopidy.models import Playlist, Track
 from mopidy.backends.gstreamer import GStreamerBackend
 
 from tests.backends.basetests import (BasePlaybackControllerTest,
@@ -13,12 +14,12 @@ song = os.path.join(folder, 'song%s.mp3')
 song = 'file://' + song
 
 class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
-    uris = [song % i for i in range(1, 4)]
+    tracks = [Track(uri=song % i, id=i) for i in range(1, 4)]
 
     backend_class = GStreamerBackend
 
 class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestCase):
-    uris = [song % i for i in range(1, 4)]
+    tracks = [Track(uri=song % i, id=i) for i in range(1, 4)]
 
     backend_class = GStreamerBackend
     supports_volume = True

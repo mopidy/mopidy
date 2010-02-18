@@ -5,8 +5,8 @@ from mopidy.models import Playlist, Track
 
 def populate_playlist(func):
     def wrapper(self):
-        for uri in self.uris:
-            self.backend.current_playlist.add(uri)
+        for track in self.tracks:
+            self.backend.current_playlist.add(track)
         return func(self)
 
     wrapper.__name__ = func.__name__
@@ -14,7 +14,7 @@ def populate_playlist(func):
     return wrapper
 
 class BaseCurrentPlaylistControllerTest(object):
-    uris = []
+    tracks = []
     backend_class = None
 
     def setUp(self):
@@ -22,27 +22,25 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
-        assert len(self.uris) >= 3, 'Need at least three urls to run tests.'
+        assert len(self.tracks) >= 3, 'Need at least three tracks to run tests.'
 
     def tearDown(self):
         self.backend.destroy()
 
     def test_add(self):
-        for uri in self.uris:
-            self.controller.add(uri)
-            self.assertEqual(uri, self.controller.playlist.tracks[-1].uri)
+        for track in self.tracks:
+            self.controller.add(track)
+            self.assertEqual(track, self.controller.playlist.tracks[-1])
 
     def test_add_at_position(self):
-        for uri in self.uris[:-1]:
-            self.controller.add(uri, 0)
-            self.assertEqual(uri, self.controller.playlist.tracks[0].uri)
+        for track in self.tracks[:-1]:
+            self.controller.add(track, 0)
+            self.assertEqual(track, self.controller.playlist.tracks[0])
 
     @populate_playlist
     def test_add_at_position_outside_of_playlist(self):
-        uri = self.uris[0]
-
-        self.controller.add(uri, len(self.uris)+2)
-        self.assertEqual(uri, self.controller.playlist.tracks[-1].uri)
+        self.controller.add(self.tracks[0], len(self.tracks)+2)
+        self.assertEqual(self.tracks[0], self.controller.playlist.tracks[-1])
 
     @populate_playlist
     def test_add_sets_id_property(self):
@@ -118,15 +116,15 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.move(0, 0, 2)
 
         tracks = self.controller.playlist.tracks
-        self.assertEqual(tracks[2].uri, self.uris[0])
+        self.assertEqual(tracks[2], self.tracks[0])
 
     @populate_playlist
     def test_move_group(self):
         self.controller.move(0, 2, 1)
 
         tracks = self.controller.playlist.tracks
-        self.assertEqual(tracks[1].uri, self.uris[0])
-        self.assertEqual(tracks[2].uri, self.uris[1])
+        self.assertEqual(tracks[1], self.tracks[0])
+        self.assertEqual(tracks[2], self.tracks[1])
 
     @populate_playlist
     def test_moving_track_outside_of_playlist(self):
@@ -134,7 +132,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
         self.controller.move(0, 0, len(tracks)+5)
         tracks = self.controller.playlist.tracks
-        self.assertEqual(tracks[-1].uri, self.uris[0])
+        self.assertEqual(tracks[-1], self.tracks[0])
 
     @populate_playlist
     def test_move_group_outside_of_playlist(self):
@@ -143,8 +141,8 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.move(0, 2, len(tracks)+5)
 
         tracks = self.controller.playlist.tracks
-        self.assertEqual(tracks[-2].uri, self.uris[0])
-        self.assertEqual(tracks[-1].uri, self.uris[1])
+        self.assertEqual(tracks[-2], self.tracks[0])
+        self.assertEqual(tracks[-1], self.tracks[1])
 
     def test_playlist_attribute_is_imutable(self):
         raise NotImplementedError # design decision needed
@@ -193,7 +191,7 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(version+1, self.controller.version)
 
 class BasePlaybackControllerTest(object):
-    uris = []
+    tracks = []
     backend_class = None
     supports_volume = False
 
@@ -201,7 +199,7 @@ class BasePlaybackControllerTest(object):
         self.backend = self.backend_class()
         self.playback = self.backend.playback
 
-        assert len(self.uris) >= 3, 'Need at least three urls to run tests.'
+        assert len(self.tracks) >= 3, 'Need at least three tracks to run tests.'
 
     def tearDown(self):
         self.backend.destroy()
@@ -370,7 +368,7 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_next_track_at_end_of_playlist(self):
-        for uri in self.uris:
+        for track in self.tracks:
             self.playback.next()
         self.assertEqual(self.playback.next_track, None)
 
