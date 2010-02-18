@@ -93,6 +93,7 @@ class BasePlaybackController(object):
     STOPPED = 'stopped'
 
     state = STOPPED
+    repeat = False
     
     def __init__(self, backend):
         self.backend = backend
@@ -135,9 +136,14 @@ class BasePlaybackController(object):
     def next_track(self):
         playlist = self.backend.current_playlist.playlist
 
+        if self.current_track is None:
+            return playlist.tracks[0]
+
+        if self.repeat:
+            position = (self.playlist_position + 1) % len(playlist.tracks)
+            return playlist.tracks[position]
+
         try:
-            if self.current_track is None:
-                return playlist.tracks[0]
             return playlist.tracks[self.playlist_position + 1]
         except IndexError:
             return None

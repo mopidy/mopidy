@@ -376,6 +376,13 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.next_track, None)
 
     @populate_playlist
+    def test_next_track_at_end_of_playlist_with_repeat(self):
+        self.playback.repeat = True
+        for track in self.tracks:
+            self.playback.next()
+        self.assertEqual(self.playback.next_track, self.tracks[0])
+
+    @populate_playlist
     def test_previous_track_before_play(self):
         self.assertEqual(self.playback.previous_track, None)
 
@@ -676,4 +683,7 @@ class BasePlaybackControllerTest(object):
         self.playback.play(tracks[-1])
         self.playback.seek(tracks[-1].length - 10)
         time.sleep(0.1)
-        self.assertEqual(self.playback.state, self.playback.stopped)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
+
+    def test_repeat_off_by_default(self):
+        self.assertEqual(self.playback.repeat, False)
