@@ -668,19 +668,19 @@ class BasePlaybackControllerTest(object):
         self.playback.next()
         self.assertEqual(self.playback.current_track, None)
 
-    def test_play_with_shuffle(self):
+    def test_play_with_random(self):
         raise NotImplementedError
 
-    def test_next_with_shuffle(self):
+    def test_next_with_random(self):
         raise NotImplementedError
 
-    def test_previous_with_shuffle(self):
+    def test_previous_with_random(self):
         raise NotImplementedError
 
-    def test_next_track_with_shuffle(self):
+    def test_next_track_with_random(self):
         raise NotImplementedError
 
-    def test_previous_track_with_shuffle(self):
+    def test_previous_track_with_random(self):
         raise NotImplementedError
 
     @populate_playlist
@@ -702,8 +702,8 @@ class BasePlaybackControllerTest(object):
     def test_repeat_off_by_default(self):
         self.assertEqual(self.playback.repeat, False)
 
-    def test_shufflet_off_by_default(self):
-        self.assertEqual(self.playback.shuffle, False)
+    def test_random_off_by_default(self):
+        self.assertEqual(self.playback.random, False)
 
     def test_consume_off_by_default(self):
         self.assertEqual(self.playback.consume, False)
