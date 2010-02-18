@@ -199,7 +199,10 @@ class BasePlaybackControllerTest(object):
         self.backend = self.backend_class()
         self.playback = self.backend.playback
 
-        assert len(self.tracks) >= 3, 'Need at least three tracks to run tests.'
+        assert len(self.tracks) >= 3, \
+            'Need at least three tracks to run tests.'
+        assert self.tracks[0].length >= 2000, \
+            'First song needs to be at least 2000 miliseconds'
 
     def tearDown(self):
         self.backend.destroy()
@@ -534,18 +537,20 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_playing(self):
+        length = self.backend.current_playlist.playlist.tracks[0].length
         self.playback.play()
-        self.playback.seek(1000) # FIXME use track.duration
+        self.playback.seek(length - 1000)
         position = self.playback.time_position
-        self.assert_(position >= 990, position)
+        self.assert_(position >= length - 1010, position)
 
     @populate_playlist
     def test_seek_when_paused(self):
+        length = self.backend.current_playlist.playlist.tracks[0].length
         self.playback.play()
         self.playback.pause()
-        self.playback.seek(1000) # FIXME use track.duration
+        self.playback.seek(length - 1000)
         position = self.playback.time_position
-        self.assert_(position >= 990, position)
+        self.assert_(position >= length - 1010, position)
 
     @populate_playlist
     def test_seek_when_paused_triggers_play(self):
