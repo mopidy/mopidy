@@ -663,7 +663,10 @@ class BasePlaybackControllerTest(object):
         self.assert_(self.tracks[0] not in tracks)
 
     def test_previous_track_with_consume(self):
-        raise NotImplementedError
+        self.playback.consume = True
+        self.playback.play()
+        self.playback.next()
+        self.assertEqual(self.playback.current_track, None)
 
     def test_play_with_shuffle(self):
         raise NotImplementedError
