@@ -519,11 +519,27 @@ class BasePlaybackControllerTest(object):
         self.playback.resume()
         self.assertNotEqual(self.playback.time_position, 0)
 
+    @populate_playlist
     def test_seek_when_stopped(self):
-        raise NotImplementedError
+        self.playback.seek(1000)
+        position = self.playback.time_position
+        self.assert_(position >= 990, position)
 
+    def test_seek_on_empty_playlist(self):
+        self.playback.seek(0)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
+
+    @populate_playlist
+    def test_seek_when_stopped_triggers_play(self):
+        self.playback.seek(0)
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
+
+    @populate_playlist
     def test_seek_when_playing(self):
-        raise NotImplementedError
+        self.playback.play()
+        self.playback.seek(1000)
+        position = self.playback.time_position
+        self.assert_(position >= 990, position)
 
     def test_seek_when_paused(self):
         raise NotImplementedError
