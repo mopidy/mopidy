@@ -139,6 +139,9 @@ class BasePlaybackController(object):
     def next_track(self):
         playlist = self.backend.current_playlist.playlist
 
+        if not playlist.tracks:
+            return None
+
         if self.current_track is None:
             return playlist.tracks[0]
 
