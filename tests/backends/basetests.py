@@ -511,8 +511,13 @@ class BasePlaybackControllerTest(object):
     def test_resume_return_value(self):
         raise NotImplementedError # design decision needed
 
+    @populate_playlist
     def test_resume_continues_from_right_position(self):
-        raise NotImplementedError
+        self.playback.play()
+        time.sleep(0.1)
+        self.playback.pause()
+        self.playback.resume()
+        self.assertNotEqual(self.playback.time_position, 0)
 
     def test_seek_when_stopped(self):
         raise NotImplementedError
