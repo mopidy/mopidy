@@ -167,5 +167,9 @@ class BasePlaybackController(object):
     def volume(self):
         return self._volume
 
+    @property
+    def time_position(self):
+        raise NotImplementedError
+
     def destroy(self):
         pass

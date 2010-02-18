@@ -553,7 +553,11 @@ class BasePlaybackControllerTest(object):
         raise NotImplementedError # design decision needed
 
     def test_time_position_when_stopped(self):
-        raise NotImplementedError
+        self.assertEqual(self.playback.time_position, 0)
+
+    @populate_playlist
+    def test_time_position_when_stopped_with_playlist(self):
+        self.assertEqual(self.playback.time_position, 0)
 
     def test_time_position_when_playing(self):
         raise NotImplementedError

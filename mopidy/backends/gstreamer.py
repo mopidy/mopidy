@@ -92,6 +92,10 @@ class GStreamerPlaybackController(BasePlaybackController):
     def volume(self, value):
         return self.bin.set_property('volume', float(value) / 100)
 
+    @property
+    def time_position(self):
+        return 0
+
     def destroy(self):
         self.bin.set_state(gst.STATE_NULL)
         del self.bin
