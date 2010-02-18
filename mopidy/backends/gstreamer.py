@@ -33,31 +33,27 @@ class GStreamerCurrentPlaylistController(BaseCurrentPlaylistController):
         self.playlist = Playlist(tracks=tracks)
 
 class GStreamerPlaybackController(BasePlaybackController):
-    STATE_MAPPING = {
-        gst.STATE_PAUSED: BasePlaybackController.PAUSED,
-        gst.STATE_PLAYING: BasePlaybackController.PLAYING,
-        gst.STATE_NULL: BasePlaybackController.STOPPED,
-    }
-
     def __init__(self, backend):
         super(GStreamerPlaybackController, self).__init__(backend)
 
-        bin = gst.element_factory_make("playbin", "player")
+        self.bin = gst.element_factory_make("playbin", "player")
+        self.bus = self.bin.get_bus()
         sink = gst.element_factory_make("fakesink", "fakesink")
 
-        bin.set_property("video-sink", sink)
+        self.bin.set_property("video-sink", sink)
+        self.stop()
 
-        self.bin = bin
+    def _set_state(self, state):
+        self.bin.set_state(state)
 
-    @property
-    def state(self):
-        gststate = type(gst.STATE_NULL)
+        result, new, old = self.bin.get_state()
 
-        for state in self.bin.get_state():
-            if type(state) == gststate and state in self.STATE_MAPPING:
-                return self.STATE_MAPPING[state]
-
-        return self.STOPPED
+        if new == gst.STATE_PLAYING:
+            self.state = self.PLAYING
+        elif new == gst.STATE_READY:
+            self.state = self.STOPPED
+        elif new == gst.STATE_PAUSED:
+            self.state = self.PAUSED
 
     def play(self, track=None, position=None):
         playlist = self.backend.current_playlist.playlist
@@ -70,17 +66,17 @@ class GStreamerPlaybackController(BasePlaybackController):
             self.current_track = playlist.tracks[0]
 
         self.bin.set_state(gst.STATE_READY)
-        self.bin.set_property("uri", self.current_track.uri)
-        self.bin.set_state(gst.STATE_PLAYING)
+        self.bin.set_property('uri', self.current_track.uri)
+        self._set_state(gst.STATE_PLAYING)
 
-        return True
+        return self.state == self.PLAYING
 
     def stop(self):
-        self.bin.set_state(gst.STATE_NULL)
+        self._set_state(gst.STATE_READY)
 
     def pause(self):
         if self.state == self.PLAYING:
-            self.bin.set_state(gst.STATE_PAUSED)
+            self._set_state(gst.STATE_PAUSED)
 
     def resume(self):
         if self.state != self.PLAYING:
