@@ -66,9 +66,18 @@ class MpdHandler(object):
                 response.append(u'%s: %s' % (key, value))
             else:
                 response.append(line)
-        if add_ok:
+        if add_ok and (not response or not response[-1].startswith(u'ACK')):
             response.append(u'OK')
         return response
+
+    @register(r'^ack$')
+    def _ack(self):
+        """
+        Always returns an 'ACK' and not 'OK'.
+
+        Not a part of the MPD protocol.
+        """
+        raise MpdNotImplemented
 
     @register(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):
@@ -109,9 +118,15 @@ class MpdHandler(object):
             response = self.handle_request(command, add_ok=False)
             if response is not None:
                 result.append(response)
+            if response and response[-1].startswith(u'ACK'):
+                return result
             if command_list_ok:
                 response.append(u'list_OK')
         return result
+
+    @register(r'^commands$')
+    def _commands(self):
+        raise MpdNotImplemented # TODO
 
     @register(r'^consume "(?P<state>[01])"$')
     def _consume(self, state):
@@ -133,7 +148,12 @@ class MpdHandler(object):
     @register(r'^currentsong$')
     def _currentsong(self):
         if self.backend.playback.current_track is not None:
-            return self.backend.playback.current_track.mpd_format()
+            return self.backend.playback.current_track.mpd_format(
+                position=self.backend.playback.playlist_position)
+
+    @register(r'^decoders$')
+    def _decoders(self):
+        raise MpdNotImplemented # TODO
 
     @register(r'^delete "(?P<songpos>\d+)"$')
     @register(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
@@ -142,11 +162,24 @@ class MpdHandler(object):
 
     @register(r'^deleteid "(?P<songid>\d+)"$')
     def _deleteid(self, songid):
+        songid = int(songid)
+        try:
+            track = self.backend.current_playlist.get_by_id(songid)
+            return self.backend.current_playlist.remove(track)
+        except KeyError, e:
+            raise MpdAckError(unicode(e))
+
+    @register(r'^disableoutput "(?P<outputid>\d+)"$')
+    def _disableoutput(self, outputid):
         raise MpdNotImplemented # TODO
 
     @register(r'^$')
     def _empty(self):
         pass
+
+    @register(r'^enableoutput "(?P<outputid>\d+)"$')
+    def _enableoutput(self, outputid):
+        raise MpdNotImplemented # TODO
 
     @register(r'^find "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
     def _find(self, type, what):
@@ -219,6 +252,10 @@ class MpdHandler(object):
     @register(r'^next$')
     def _next(self):
         return self.backend.playback.next()
+
+    @register(r'^notcommands$')
+    def _notcommands(self):
+        raise MpdNotImplemented # TODO
 
     @register(r'^outputs$')
     def _outputs(self):
@@ -511,12 +548,36 @@ class MpdHandler(object):
     def _status_xfade(self):
         return 0 # TODO
 
+    @register(r'^sticker delete "(?P<type>[^"]+)" "(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')
+    def _sticker_delete(self, type, uri, name=None):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^sticker find "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
+    def sticker_find(self, type, uri, name):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^sticker get "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
+    def _sticker_get(self, type, uri, name):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^sticker list "(?P<type>[^"]+)" "(?P<uri>[^"]+)"$')
+    def _sticker_list(self, type, uri):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^sticker set "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)" "(?P<value>[^"]+)"$')
+    def _sticker_set(self, type, uri, name, value):
+        raise MpdNotImplemented # TODO
+
     @register(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
     def _swap(self, songpos1, songpos2):
         raise MpdNotImplemented # TODO
 
     @register(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
     def _swapid(self, songid1, songid2):
+        raise MpdNotImplemented # TODO
+
+    @register(r'^tagtypes$')
+    def _tagtypes(self):
         raise MpdNotImplemented # TODO
 
     @register(r'^update( "(?P<uri>[^"]+)")*$')

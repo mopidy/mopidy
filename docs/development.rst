@@ -24,10 +24,46 @@ modular, so we can extend it with other backends in the future, like file
 playback and other online music services such as Last.fm.
 
 
+Code style
+==========
+
+We generally follow the `PEP-8 <http://www.python.org/dev/peps/pep-0008/>`_
+style guidelines, with a couple of notable exceptions:
+
+- We indent continuation lines with four spaces more than the previous line.
+  For example::
+
+    from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+        BasePlaybackController, BaseLibraryController,
+        BaseStoredPlaylistsController)
+
+  And not::
+
+    from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+                                 BasePlaybackController, BaseLibraryController,
+                                 BaseStoredPlaylistsController)
+
+- An exception to the previous exception: When continuing control flow
+  statements like ``if``, ``for`` and ``while``, we indent with eight spaces
+  more than the previous line. In other words, the line is indented one level
+  further to the right than the following block of code. For example::
+
+    if (old_state in (self.PLAYING, self.STOPPED)
+            and new_state == self.PLAYING):
+        self._play_time_start()
+
+  And not::
+
+    if (old_state in (self.PLAYING, self.STOPPED)
+        and new_state == self.PLAYING):
+        self._play_time_start()
+
+
 Running tests
 =============
 
-To run tests, you need a couple of dependiencies. Some can be installed through Debian/Ubuntu package management::
+To run tests, you need a couple of dependencies. Some can be installed through
+Debian/Ubuntu package management::
 
     sudo aptitude install python-coverage
 

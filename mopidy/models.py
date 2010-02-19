@@ -1,6 +1,14 @@
 from copy import copy
 
 class ImmutableObject(object):
+    """
+    Superclass for immutable objects whose fields can only be modified via the
+    constructor.
+
+    :param kwargs: kwargs to set as fields on the object
+    :type kwargs: any
+    """
+
     def __init__(self, *args, **kwargs):
         self.__dict__.update(kwargs)
 

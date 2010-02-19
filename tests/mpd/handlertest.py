@@ -66,6 +66,12 @@ class CommandListsTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assertEquals(False, self.h.command_list)
 
+    def test_command_list_with_error(self):
+        self.h.handle_request(u'command_list_begin')
+        self.h.handle_request(u'ack')
+        result = self.h.handle_request(u'command_list_end')
+        self.assert_(u'ACK' in result[-1])
+
     def test_command_list_ok_begin(self):
         result = self.h.handle_request(u'command_list_ok_begin')
         self.assert_(result is None)
@@ -94,7 +100,9 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Not implemented' in result)
 
     def test_currentsong(self):
-        self.b.playback.current_track = Track()
+        track = Track()
+        self.b.current_playlist.playlist = Playlist(tracks=[track])
+        self.b.playback.current_track = track
         result = self.h.handle_request(u'currentsong')
         self.assert_(u'file: ' in result)
         self.assert_(u'Time: 0' in result)
@@ -460,7 +468,8 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.b = DummyBackend()
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_add(self):
         result = self.h.handle_request(u'add "file:///dev/urandom"')
@@ -491,8 +500,13 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Not implemented' in result)
 
     def test_deleteid(self):
+        self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
         result = self.h.handle_request(u'deleteid "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
+
+    def test_deleteid_does_not_exist(self):
+        result = self.h.handle_request(u'deleteid "0"')
+        self.assert_(u'ACK Track with ID "0" not found' in result)
 
     def test_move_songpos(self):
         result = self.h.handle_request(u'move "5" "0"')
@@ -746,7 +760,35 @@ class StickersHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
 
-    pass # TODO
+    def test_sticker_get(self):
+        result = self.h.handle_request(
+            u'sticker get "song" "file:///dev/urandom" "a_name"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_set(self):
+        result = self.h.handle_request(
+            u'sticker set "song" "file:///dev/urandom" "a_name" "a_value"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_delete_with_name(self):
+        result = self.h.handle_request(
+            u'sticker delete "song" "file:///dev/urandom" "a_name"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_delete_without_name(self):
+        result = self.h.handle_request(
+            u'sticker delete "song" "file:///dev/urandom"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_list(self):
+        result = self.h.handle_request(
+            u'sticker list "song" "file:///dev/urandom"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_sticker_find(self):
+        result = self.h.handle_request(
+            u'sticker find "song" "file:///dev/urandom" "a_name"')
+        self.assert_(u'ACK Not implemented' in result)
 
 
 class ConnectionHandlerTest(unittest.TestCase):
@@ -779,6 +821,14 @@ class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
 
+    def test_enableoutput(self):
+        result = self.h.handle_request(u'enableoutput "0"')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_disableoutput(self):
+        result = self.h.handle_request(u'disableoutput "0"')
+        self.assert_(u'ACK Not implemented' in result)
+
     def test_outputs(self):
         result = self.h.handle_request(u'outputs')
         self.assert_(u'outputid: 0' in result)
@@ -791,10 +841,24 @@ class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
         self.h = handler.MpdHandler(backend=DummyBackend())
 
+    def test_commands(self):
+        result = self.h.handle_request(u'commands')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_decoders(self):
+        result = self.h.handle_request(u'decoders')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_notcommands(self):
+        result = self.h.handle_request(u'notcommands')
+        self.assert_(u'ACK Not implemented' in result)
+
+    def test_tagtypes(self):
+        result = self.h.handle_request(u'tagtypes')
+        self.assert_(u'ACK Not implemented' in result)
+
     def test_urlhandlers(self):
         result = self.h.handle_request(u'urlhandlers')
         self.assert_(u'OK' in result)
         result = result[0]
         self.assert_('dummy:' in result)
-
-    pass # TODO
