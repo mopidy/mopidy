@@ -41,20 +41,20 @@ class GStreamerPlaybackController(BasePlaybackController):
     def __init__(self, backend):
         super(GStreamerPlaybackController, self).__init__(backend)
 
-        self.bin = gst.element_factory_make("playbin", "player")
-        self.bus = self.bin.get_bus()
+        self._bin = gst.element_factory_make("playbin", "player")
+        self._bus = self._bin.get_bus()
         sink = gst.element_factory_make("fakesink", "fakesink")
 
-        self.bin.set_property("video-sink", sink)
-        self.bus.add_signal_watch()
-        self.bus_id = self.bus.connect('message', self._message)
+        self._bin.set_property("video-sink", sink)
+        self._bus.add_signal_watch()
+        self._bus_id = self._bus.connect('message', self._message)
 
         self.stop()
 
     def _set_state(self, state):
-        self.bin.set_state(state)
+        self._bin.set_state(state)
 
-        result, new, old = self.bin.get_state()
+        result, new, old = self._bin.get_state()
 
         if new == gst.STATE_PLAYING:
             self.state = self.PLAYING
@@ -77,8 +77,8 @@ class GStreamerPlaybackController(BasePlaybackController):
         elif playlist.tracks:
             self.current_track = playlist.tracks[0]
 
-        self.bin.set_state(gst.STATE_READY)
-        self.bin.set_property('uri', self.current_track.uri)
+        self._bin.set_state(gst.STATE_READY)
+        self._bin.set_property('uri', self.current_track.uri)
         self._set_state(gst.STATE_PLAYING)
 
         return self.state == self.PLAYING
@@ -103,30 +103,30 @@ class GStreamerPlaybackController(BasePlaybackController):
         if time_position < 0:
             time_position = 0
 
-        self.bin.seek_simple(gst.Format(gst.FORMAT_TIME),
+        self._bin.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, time_position * gst.MSECOND)
         self._set_state(gst.STATE_PLAYING)
 
     @property
     def volume(self):
-        return int(self.bin.get_property('volume') * 100)
+        return int(self._bin.get_property('volume') * 100)
 
     @volume.setter
     def volume(self, value):
-        return self.bin.set_property('volume', float(value) / 100)
+        return self._bin.set_property('volume', float(value) / 100)
 
     @property
     def time_position(self):
         try:
-            return self.bin.query_position(gst.FORMAT_TIME)[0] // gst.MSECOND
+            return self._bin.query_position(gst.FORMAT_TIME)[0] // gst.MSECOND
         except gst.QueryError:
             return 0
 
     def destroy(self):
-        bin, self.bin = self.bin, None
-        bus, self.bus = self.bus, None
+        bin, self._bin = self._bin, None
+        bus, self._bus = self._bus, None
 
-        bus.disconnect(self.bus_id)
+        bus.disconnect(self._bus_id)
         bus.remove_signal_watch()
         bin.get_state(-1)
         bin.set_state(gst.STATE_NULL)
