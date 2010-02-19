@@ -117,13 +117,13 @@ class BasePlaybackController(object):
             self.stop()
 
     def next(self):
-        if self.consume:
-            self.backend.current_playlist.remove(self.current_track)
-
         if not self.next_track:
             self.stop()
         else:
             self.play(self.next_track)
+
+        if self.consume:
+            self.backend.current_playlist.remove(self.current_track)
 
     def previous(self):
         if self.previous_track:
