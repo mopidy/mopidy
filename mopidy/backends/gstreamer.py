@@ -47,7 +47,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         self.bin.set_property("video-sink", sink)
         self.bus.add_signal_watch()
-        self.bus.connect('message', self._message)
+        self.bus_id = self.bus.connect('message', self._message)
 
         self.stop()
 
@@ -126,6 +126,7 @@ class GStreamerPlaybackController(BasePlaybackController):
         bin, self.bin = self.bin, None
         bus, self.bus = self.bus, None
 
+        bus.disconnect(self.bus_id)
         bus.remove_signal_watch()
         bin.get_state(-1)
         bin.set_state(gst.STATE_NULL)

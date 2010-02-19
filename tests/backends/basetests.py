@@ -662,6 +662,7 @@ class BasePlaybackControllerTest(object):
         tracks = self.backend.current_playlist.playlist.tracks
         self.assert_(self.tracks[0] not in tracks)
 
+    @populate_playlist
     def test_previous_track_with_consume(self):
         self.playback.consume = True
         self.playback.play()
