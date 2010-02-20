@@ -252,7 +252,14 @@ class BasePlaybackController(object):
 
     @property
     def next_track(self):
-        """The next :class:`mopidy.models.Track` in the playlist."""
+        """
+        The next :class:`mopidy.models.Track` in the playlist.
+
+        For normal playback this is the next track in the playlist. If repeat
+        is enabled the next track can loop around the playlist. When random is
+        enabled this should be a random track, all tracks should be played once
+        before the list repeats.
+        """
         if self.current_track is None:
             return None
         try:
@@ -274,7 +281,12 @@ class BasePlaybackController(object):
 
     @property
     def previous_track(self):
-        """The previous :class:`mopidy.models.Track` in the playlist."""
+        """
+        The previous :class:`mopidy.models.Track` in the playlist.
+
+        For normal playback this is the next track in the playlist. If random
+        and/or consume is enabled it should return the current track instead.
+        """
         if self.current_track is None:
             return None
         try:
