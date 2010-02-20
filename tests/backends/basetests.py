@@ -212,11 +212,11 @@ class BasePlaybackControllerTest(object):
 
     def test_play_with_empty_playlist(self):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
-
-        result = self.playback.play()
-
-        self.assertEqual(result, False)
+        self.playback.play()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
+
+    def test_play_with_empty_playlist_return_value(self):
+        self.assertEqual(self.playback.play(), None)
 
     @populate_playlist
     def test_play_state(self):
@@ -226,7 +226,7 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_play_return_value(self):
-        self.assert_(self.playback.play())
+        self.assertEqual(self.playback.play(), None)
 
     @populate_playlist
     def test_play_track_state(self):
@@ -238,7 +238,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_play_track_return_value(self):
         tracks = self.backend.current_playlist.playlist.tracks
-        self.assert_(self.playback.play(tracks[-1]))
+        self.assertEqual(self.playback.play(tracks[-1]), None)
 
     @populate_playlist
     def test_play_when_playing(self):
@@ -281,8 +281,10 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.playlist_position, old_position+1)
         self.assertNotEqual(self.playback.current_track.uri, old_uri)
 
+    @populate_playlist
     def test_next_return_value(self):
-        raise NotImplementedError # design decision needed
+        self.playback.play()
+        self.assertEqual(self.playback.next(), None)
 
     @populate_playlist
     def test_next_triggers_playback(self):
@@ -327,8 +329,11 @@ class BasePlaybackControllerTest(object):
         self.playback.previous() # At track 1
         self.assertEqual(self.playback.current_track, tracks[1])
 
+    @populate_playlist
     def test_previous_return_value(self):
-        raise NotImplementedError # design decision needed
+        self.playback.play()
+        self.playback.next()
+        self.assertEqual(self.playback.previous(), None)
 
     @populate_playlist
     def test_previous_triggers_playback(self):
@@ -514,8 +519,10 @@ class BasePlaybackControllerTest(object):
         self.playback.pause()
         self.assertEqual(self.playback.state, self.playback.PAUSED)
 
+    @populate_playlist
     def test_pause_return_value(self):
-        raise NotImplementedError # design decision needed
+        self.playback.play()
+        self.assertEqual(self.playback.pause(), None)
 
     @populate_playlist
     def test_resume_when_stopped(self):
@@ -535,8 +542,11 @@ class BasePlaybackControllerTest(object):
         self.playback.resume()
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
+    @populate_playlist
     def test_resume_return_value(self):
-        raise NotImplementedError # design decision needed
+        self.playback.play()
+        self.playback.pause()
+        self.assertEqual(self.playback.resume(), None)
 
     @populate_playlist
     def test_resume_continues_from_right_position(self):
@@ -596,8 +606,10 @@ class BasePlaybackControllerTest(object):
         self.assert_(position >= 0, position)
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
+    @populate_playlist
     def test_seek_return_value(self):
-        raise NotImplementedError # design decision needed
+        self.playback.play()
+        self.assertEqual(self.playback.seek(0), None)
 
     @populate_playlist
     def test_stop_when_stopped(self):
@@ -618,7 +630,8 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_stop_return_value(self):
-        raise NotImplementedError # design decision needed
+        self.playback.play()
+        self.assertEqual(self.playback.stop(), None)
 
     def test_time_position_when_stopped(self):
         self.assertEqual(self.playback.time_position, 0)

@@ -75,13 +75,11 @@ class GStreamerPlaybackController(BasePlaybackController):
             self.current_track = self.next_track
 
         if not self.current_track:
-            return False
+            return
 
         self._bin.set_state(gst.STATE_READY)
         self._bin.set_property('uri', self.current_track.uri)
         self._set_state(gst.STATE_PLAYING)
-
-        return self.state == self.PLAYING
 
     def stop(self):
         self._set_state(gst.STATE_READY)
