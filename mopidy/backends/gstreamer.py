@@ -1,7 +1,6 @@
-import logging
-
-import gst
 import gobject
+import gst
+import logging
 import thread
 
 from mopidy.models import Track, Playlist
