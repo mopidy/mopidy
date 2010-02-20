@@ -414,6 +414,22 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.previous_track, None)
 
     @populate_playlist
+    def test_previous_track_with_consume(self):
+        self.playback.consume = True
+        for track in self.tracks:
+            self.playback.next()
+            self.assertEqual(self.playback.previous_track,
+                self.playback.current_track)
+
+    @populate_playlist
+    def test_previous_track_with_random(self):
+        self.playback.repeat = True
+        for track in self.tracks:
+            self.playback.next()
+            self.assertEqual(self.playback.previous_track,
+                self.playback.current_track)
+
+    @populate_playlist
     def test_initial_current_track(self):
         tracks = self.backend.current_playlist.playlist.tracks
         self.assertEqual(self.playback.current_track, None)
@@ -662,13 +678,6 @@ class BasePlaybackControllerTest(object):
         tracks = self.backend.current_playlist.playlist.tracks
         self.assert_(self.tracks[0] not in tracks)
 
-    @populate_playlist
-    def test_previous_track_with_consume(self):
-        self.playback.consume = True
-        self.playback.play()
-        self.playback.next()
-        self.assertEqual(self.playback.previous_track, None)
-
     def test_play_with_random(self):
         raise NotImplementedError
 
@@ -679,9 +688,6 @@ class BasePlaybackControllerTest(object):
         raise NotImplementedError
 
     def test_next_track_with_random(self):
-        raise NotImplementedError
-
-    def test_previous_track_with_random(self):
         raise NotImplementedError
 
     @populate_playlist

@@ -163,6 +163,9 @@ class BasePlaybackController(object):
     def previous_track(self):
         playlist = self.backend.current_playlist.playlist
 
+        if self.repeat or self.consume:
+            return self.current_track
+
         if self.current_track is None:
             return None
 
