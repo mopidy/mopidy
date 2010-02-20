@@ -700,12 +700,14 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_play_with_random(self):
         random.seed(1)
+        self.playback.random = True
         self.playback.play()
         self.assertEqual(self.playback.current_track, self.tracks[2])
 
     @populate_playlist
     def test_next_with_random(self):
         random.seed(1)
+        self.playback.random = True
         self.playback.play()
         self.playback.next()
         self.assertEqual(self.playback.current_track, self.tracks[1])
@@ -713,6 +715,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_previous_with_random(self):
         random.seed(1)
+        self.playback.random = True
         self.playback.play()
         self.playback.next()
         self.playback.previous()

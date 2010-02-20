@@ -101,6 +101,7 @@ class BasePlaybackController(object):
     def __init__(self, backend):
         self.backend = backend
         self.current_track = None
+        self._shuffled = []
 
     def play(self, id=None, position=None):
         raise NotImplementedError
@@ -146,6 +147,13 @@ class BasePlaybackController(object):
 
         if not playlist.tracks:
             return None
+
+        if self.random and not self._shuffled:
+            self._shuffled = playlist.tracks
+            random.shuffle(self._shuffled)
+
+        if self._shuffled:
+            return self._shuffled[0]
 
         if self.current_track is None:
             return playlist.tracks[0]
