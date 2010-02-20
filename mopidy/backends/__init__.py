@@ -96,11 +96,11 @@ class BasePlaybackController(object):
     repeat = False
     random = False
     consume = False
+    volume = None
     
     def __init__(self, backend):
         self.backend = backend
         self.current_track = None
-        self._volume = None
 
     def play(self, id=None, position=None):
         raise NotImplementedError
@@ -185,10 +185,6 @@ class BasePlaybackController(object):
             return playlist.tracks.index(self.current_track)
         except ValueError:
             return None
-
-    @property
-    def volume(self):
-        return self._volume
 
     @property
     def time_position(self):
