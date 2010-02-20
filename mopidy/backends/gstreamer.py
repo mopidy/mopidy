@@ -71,10 +71,11 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         if track:
             self.current_track = track
-        elif not self.current_track and not playlist.tracks:
+        elif not self.current_track:
+            self.current_track = self.next_track
+
+        if not self.current_track:
             return False
-        elif playlist.tracks:
-            self.current_track = playlist.tracks[0]
 
         self._bin.set_state(gst.STATE_READY)
         self._bin.set_property('uri', self.current_track.uri)
