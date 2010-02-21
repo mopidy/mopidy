@@ -8,6 +8,7 @@ Contents
 
     changes
     installation
+    settings
     development
 
 Indices and tables

@@ -143,8 +143,8 @@ Test your libspotify setup::
     words before starting Mopidy).
 
 
-Settings
-========
+Spotify settings
+================
 
 Create a file name ``local_settings.py`` in the same directory as
 ``settings.py``. Enter your Spotify Premium account's username and password
@@ -159,6 +159,9 @@ libspotify backend, copy the Spotify application key to
 ``mopidy/mopidy/local_settings.py``::
 
     BACKEND = u'mopidy.backends.libspotify.LibspotifyBackend'
+
+For a full list of available settings, see :mod:`mopidy.settings`.
+
 
 Running Mopidy
 ==============

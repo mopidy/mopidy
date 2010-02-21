@@ -14,7 +14,7 @@ logger = logging.getLogger('mopidy')
 
 def main():
     _setup_logging(2)
-    backend = _get_backend(config.BACKEND)
+    backend = _get_backend(config.BACKENDS[0])
     MpdServer(backend=backend)
     asyncore.loop()
 
