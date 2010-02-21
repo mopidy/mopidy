@@ -106,6 +106,11 @@ requests and responses. Thus we have to talk a great deal with the the original
 to implement our own MPD server which is compatible with the numerous existing
 `MPD clients <http://mpd.wikia.com/wiki/Clients>`_.
 
+.. toctree::
+    :glob:
+
+    mpd/*
+
 
 spytify
 =======
