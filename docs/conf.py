@@ -84,7 +84,7 @@ exclude_trees = ['_build']
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-#modindex_common_prefix = []
+modindex_common_prefix = ['mopidy.']
 
 
 # -- Options for HTML output ---------------------------------------------------
