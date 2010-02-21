@@ -553,7 +553,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @register(r'^sticker find "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
-    def sticker_find(self, type, uri, name):
+    def _sticker_find(self, type, uri, name):
         raise MpdNotImplemented # TODO
 
     @register(r'^sticker get "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
