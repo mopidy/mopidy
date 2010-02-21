@@ -15,6 +15,9 @@ def register(pattern):
             raise ValueError(u'Tried to redefine handler for %s with %s' % (
                 pattern, func))
         _request_handlers[pattern] = func
+        if func.__doc__ is None:
+            func.__doc__ = ''
+        func.__doc__ += '\n\n- **Pattern:** ``%s``' % pattern
         return func
     return decorator
 
