@@ -67,14 +67,33 @@ Debian/Ubuntu package management::
 
     sudo aptitude install python-coverage
 
-The rest can be installed using pip::
+The rest (or all dependencies if you want to) can be installed using pip::
 
     sudo aptitude install python-pip python-setuptools bzr
-    sudo pip install -r test-requirements.txt
+    sudo pip install -r requirements-tests.txt
 
 Then, to run all tests::
 
     python tests
+
+
+Generating documentation
+========================
+
+To generate documentation, you also need some additional dependencies. You can either install them through Debian/Ubuntu package management::
+
+    sudo aptitude install python-sphinx
+
+Or, install them using pip::
+
+    sudo aptitude install python-pip python-setuptools
+    sudo pip install -r requirements-docs.txt
+
+Then, to generate docs::
+
+    cd docs/
+    make        # For help on available targets
+    make html   # To generate HTML docs
 
 
 Music Player Daemon (MPD)
