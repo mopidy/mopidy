@@ -3,7 +3,7 @@ import logging
 
 import spytify
 
-from mopidy import config
+from mopidy import settings
 from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
@@ -27,8 +27,8 @@ class DespotifyBackend(BaseBackend):
     def _connect(self):
         logger.info(u'Connecting to Spotify')
         return spytify.Spytify(
-            config.SPOTIFY_USERNAME.encode(ENCODING),
-            config.SPOTIFY_PASSWORD.encode(ENCODING))
+            settings.SPOTIFY_USERNAME.encode(ENCODING),
+            settings.SPOTIFY_PASSWORD.encode(ENCODING))
 
 
 class DespotifyCurrentPlaylistController(BaseCurrentPlaylistController):

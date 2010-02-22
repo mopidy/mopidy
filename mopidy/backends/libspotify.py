@@ -6,7 +6,7 @@ from spotify import Link
 from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
 
-from mopidy import config
+from mopidy import settings
 from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
@@ -31,7 +31,7 @@ class LibspotifyBackend(BaseBackend):
     def _connect(self):
         logger.info(u'Connecting to Spotify')
         spotify = LibspotifySessionManager(
-            config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD, backend=self)
+            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD, backend=self)
         spotify.start()
         return spotify
 

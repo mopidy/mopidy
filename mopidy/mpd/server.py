@@ -4,7 +4,7 @@ import socket
 import sys
 import time
 
-from mopidy import config
+from mopidy import settings
 from mopidy.mpd.session import MpdSession
 
 logger = logging.getLogger(u'mpd.server')
@@ -16,11 +16,11 @@ class MpdServer(asyncore.dispatcher):
         self.backend = backend
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
-        self.bind((config.MPD_SERVER_HOSTNAME, config.MPD_SERVER_PORT))
+        self.bind((settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT))
         self.listen(1)
         self.started_at = int(time.time())
         logger.info(u'Please connect to %s port %s using an MPD client.',
-            config.MPD_SERVER_HOSTNAME, config.MPD_SERVER_PORT)
+            settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT)
 
     def handle_accept(self):
         (client_socket, client_address) = self.accept()

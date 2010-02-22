@@ -6,15 +6,15 @@ import sys
 sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from mopidy import config
-from mopidy.exceptions import ConfigError
+from mopidy import settings
+from mopidy.exceptions import SettingError
 from mopidy.mpd.server import MpdServer
 
 logger = logging.getLogger('mopidy')
 
 def main():
     _setup_logging(2)
-    backend = _get_backend(config.BACKENDS[0])
+    backend = _get_backend(settings.BACKENDS[0])
     MpdServer(backend=backend)
     asyncore.loop()
 
@@ -26,7 +26,7 @@ def _setup_logging(verbosity_level):
     else:
         level = logging.INFO
     logging.basicConfig(
-        format=config.CONSOLE_LOG_FORMAT,
+        format=settings.CONSOLE_LOG_FORMAT,
         level=level,
     )
 
@@ -44,5 +44,5 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         sys.exit('\nInterrupted by user')
-    except ConfigError, e:
+    except SettingError, e:
         sys.exit('%s' % e)

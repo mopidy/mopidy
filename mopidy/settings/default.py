@@ -1,17 +1,10 @@
 """
 Available settings and their default values.
 
-.. warning:: To users
+.. warning::
 
     Do *not* change settings here. Instead, add a file called
     ``mopidy/settings/local.py`` and redefine settings there.
-
-.. note:: To developers
-
-    When you need to read a setting, import :mod:`mopidy.config` instead of
-    :mod:`mopidy.settings`. This way basic error handling is done for you, and
-    a :exc:`mopidy.exceptions.ConfigError` exception is raised if a setting is
-    not set or is empty when used.
 """
 
 #: List of playback backends to use. Default::

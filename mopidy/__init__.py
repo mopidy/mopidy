@@ -1,5 +1,5 @@
-from mopidy.exceptions import ConfigError
-from mopidy import settings
+from mopidy.exceptions import SettingError
+from mopidy import settings as original_settings
 
 def get_version():
     return u'0.1.dev'
@@ -7,13 +7,13 @@ def get_version():
 def get_mpd_protocol_version():
     return u'0.15.0'
 
-class Config(object):
+class Settings(object):
     def __getattr__(self, attr):
-        if not hasattr(settings, attr):
-            raise ConfigError(u'Setting "%s" is not set.' % attr)
-        value = getattr(settings, attr)
+        if not hasattr(original_settings, attr):
+            raise SettingError(u'Setting "%s" is not set.' % attr)
+        value = getattr(original_settings, attr)
         if type(value) != bool and not value:
-            raise ConfigError(u'Setting "%s" is empty.' % attr)
+            raise SettingError(u'Setting "%s" is empty.' % attr)
         return value
 
-config = Config()
+settings = Settings()
