@@ -4,7 +4,7 @@ Available settings and their default values.
 .. warning:: To users
 
     Do *not* change settings here. Instead, add a file called
-    ``mopidy/local_settings.py`` and redefine settings there.
+    ``mopidy/settings/local.py`` and redefine settings there.
 
 .. note:: To developers
 
@@ -47,8 +47,3 @@ SPOTIFY_USERNAME = u''
 
 #: Your Spotify Premium password. Used by all Spotify backends.
 SPOTIFY_PASSWORD = u''
-
-try:
-    from mopidy.local_settings import *
-except ImportError:
-    pass

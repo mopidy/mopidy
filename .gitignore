@@ -3,8 +3,8 @@
 .coverage
 .idea
 docs/_build
-local_settings.py
 pip-log.txt
+mopidy/settings/local.py
 spotify_appkey.key
 src/
 tmp/

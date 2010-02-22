@@ -147,9 +147,8 @@ Test your libspotify setup::
 Spotify settings
 ================
 
-Create a file name ``local_settings.py`` in the same directory as
-``settings.py``. Enter your Spotify Premium account's username and password
-into the file, like this::
+Create a file named ``local.py`` in the directory ``mopidy/settings/``. Enter
+your Spotify Premium account's username and password into the file, like this::
 
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
@@ -157,11 +156,11 @@ into the file, like this::
 Currently the despotify backend is the default. If you want to use the
 libspotify backend, copy the Spotify application key to
 ``mopidy/spotify_appkey.key``, and add the following to
-``mopidy/mopidy/local_settings.py``::
+``mopidy/mopidy/settings/local.py``::
 
-    BACKEND = u'mopidy.backends.libspotify.LibspotifyBackend'
+    BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
 
-For a full list of available settings, see :mod:`mopidy.settings`.
+For a full list of available settings, see :mod:`mopidy.settings.default`.
 
 
 Running Mopidy

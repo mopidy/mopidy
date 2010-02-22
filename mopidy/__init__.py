@@ -1,8 +1,8 @@
-from mopidy import settings
 from mopidy.exceptions import ConfigError
+from mopidy import settings
 
 def get_version():
-    return u'0'
+    return u'0.1.dev'
 
 def get_mpd_protocol_version():
     return u'0.15.0'
