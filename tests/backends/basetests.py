@@ -745,3 +745,28 @@ class BasePlaybackControllerTest(object):
 
     def test_consume_off_by_default(self):
         self.assertEqual(self.playback.consume, False)
+
+    @populate_playlist
+    def test_random_until_end_of_playlist(self):
+        self.playback.random = True
+        for track in self.tracks:
+            self.playback.next()
+        self.assertEqual(self.playback.next_track, None)
+
+    @populate_playlist
+    def test_random_until_end_of_playlist_with_repeat(self):
+        self.playback.repeat = True
+        self.playback.random = True
+        for track in self.tracks:
+            self.playback.next()
+        self.assertNotEqual(self.playback.next_track, None)
+
+    @populate_playlist
+    def test_play_track_with_random_removes_track(self):
+        self.playback.random = True
+        played = []
+        for track in self.tracks:
+            self.playback.next()
+            self.assert_(self.playback.current_track not in played)
+            played.append(self.playback.current_track)
+        self.assertEqual(self.playback.next_track, None)
