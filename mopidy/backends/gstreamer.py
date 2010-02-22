@@ -77,7 +77,7 @@ class GStreamerPlaybackController(BasePlaybackController):
         if not self.current_track:
             return
 
-        if self.random:
+        if self.random and self._shuffled:
             self._shuffled.pop(0)
 
         self._bin.set_state(gst.STATE_READY)
