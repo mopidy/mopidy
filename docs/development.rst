@@ -12,8 +12,7 @@ API documentation
 .. toctree::
     :glob:
 
-    api/*
-
+    api/**
 
 Scope
 =====
@@ -94,22 +93,6 @@ Then, to generate docs::
     cd docs/
     make        # For help on available targets
     make html   # To generate HTML docs
-
-
-Music Player Daemon (MPD)
-=========================
-
-The `MPD protocol documentation <http://www.musicpd.org/doc/protocol/>`_ is a
-useful resource. It is rather incomplete with regards to data formats, both for
-requests and responses. Thus we have to talk a great deal with the the original
-`MPD server <http://mpd.wikia.com/>`_ using telnet to get the details we need
-to implement our own MPD server which is compatible with the numerous existing
-`MPD clients <http://mpd.wikia.com/wiki/Clients>`_.
-
-.. toctree::
-    :glob:
-
-    mpd/*
 
 
 spytify
