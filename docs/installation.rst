@@ -14,6 +14,7 @@ Dependencies
 ============
 
 * Python >= 2.5
+* pyalsaaudio >= 0.2 (Debian/Ubuntu: python-alsaaudio)
 * Dependencies for at least one Mopidy backend:
 
   * :ref:`despotify`

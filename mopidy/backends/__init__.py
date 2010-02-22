@@ -3,6 +3,8 @@ import logging
 import random
 import time
 
+import alsaaudio
+
 from mopidy.models import Playlist
 
 logger = logging.getLogger('backends.base')
@@ -242,13 +244,10 @@ class BasePlaybackController(object):
     #:     The current track is played once.
     repeat = False
 
-    #: The audio volume as an int in the range [0, 100]. :class:`None` if
-    #: unknown.
-    volume = None
-
-    def __init__(self, backend):
+    def __init__(self, backend, mixer=alsaaudio.Mixer):
         self.backend = backend
         self._state = self.STOPPED
+        self._mixer = mixer()
 
     @property
     def next_track(self):
@@ -324,6 +323,19 @@ class BasePlaybackController(object):
 
     def _play_time_resume(self):
         self._play_time_started = int(time.time())
+
+    @property
+    def volume(self):
+        """
+        The audio volume as an int in the range [0, 100].
+
+        :class:`None` if unknown.
+        """
+        return self._mixer.getvolume()[0]
+
+    @volume.setter
+    def volume(self, volume):
+        self._mixer.setvolume(volume)
 
     def new_playlist_loaded_callback(self):
         """Tell the playback controller that a new playlist has been loaded."""

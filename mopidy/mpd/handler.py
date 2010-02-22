@@ -419,14 +419,15 @@ class MpdHandler(object):
     def _seekid(self, songid, seconds):
         raise MpdNotImplemented # TODO
 
-    @register(r'^setvol "(?P<volume>-*\d+)"$')
+    @register(r'^setvol (?P<volume>[-+]*\d+)$')
+    @register(r'^setvol "(?P<volume>[-+]*\d+)"$')
     def _setvol(self, volume):
         volume = int(volume)
         if volume < 0:
             volume = 0
         if volume > 100:
             volume = 100
-        raise MpdNotImplemented # TODO
+        self.backend.playback.volume = volume
 
     @register(r'^shuffle$')
     @register(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')

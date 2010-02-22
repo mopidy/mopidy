@@ -7,7 +7,7 @@ class DummyBackend(BaseBackend):
     def __init__(self):
         self.current_playlist = DummyCurrentPlaylistController(backend=self)
         self.library = DummyLibraryController(backend=self)
-        self.playback = DummyPlaybackController(backend=self)
+        self.playback = DummyPlaybackController(backend=self, mixer=DummyMixer)
         self.stored_playlists = DummyStoredPlaylistsController(backend=self)
         self.uri_handlers = [u'dummy:']
 
@@ -37,3 +37,12 @@ class DummyPlaybackController(BasePlaybackController):
 class DummyStoredPlaylistsController(BaseStoredPlaylistsController):
     def search(self, query):
         return [Playlist(name=query)]
+
+class DummyMixer(object):
+    volume = 0
+
+    def getvolume(self):
+        return [self.volume, self.volume]
+
+    def setvolume(self, volume):
+        self.volume = volume

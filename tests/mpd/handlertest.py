@@ -290,7 +290,8 @@ class StatusHandlerTest(unittest.TestCase):
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.b = DummyBackend()
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_consume_off(self):
         result = self.h.handle_request(u'consume "0"')
@@ -322,23 +323,33 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
     def test_setvol_below_min(self):
         result = self.h.handle_request(u'setvol "-10"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
+        self.assertEqual(0, self.b.playback.volume)
 
     def test_setvol_min(self):
         result = self.h.handle_request(u'setvol "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
+        self.assertEqual(0, self.b.playback.volume)
 
     def test_setvol_middle(self):
         result = self.h.handle_request(u'setvol "50"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
+        self.assertEqual(50, self.b.playback.volume)
 
     def test_setvol_max(self):
         result = self.h.handle_request(u'setvol "100"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
+        self.assertEqual(100, self.b.playback.volume)
 
     def test_setvol_above_max(self):
         result = self.h.handle_request(u'setvol "110"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
+        self.assertEqual(100, self.b.playback.volume)
+
+    def test_setvol_plus_is_ignored(self):
+        result = self.h.handle_request(u'setvol "+10"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(10, self.b.playback.volume)
 
     def test_single_off(self):
         result = self.h.handle_request(u'single "0"')
