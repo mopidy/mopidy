@@ -6,6 +6,15 @@ Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
 ``irc.freenode.net`` and through `GitHub <http://github.com/>`_.
 
 
+Scope for the first release
+===========================
+
+To limit scope, we will start by implementing an MPD server which only
+supports Spotify, and not playback of files from disk. We will make Mopidy
+modular, so we can extend it with other backends in the future, like file
+playback and other online music services such as Last.fm.
+
+
 API documentation
 =================
 
@@ -13,14 +22,6 @@ API documentation
     :glob:
 
     api/**
-
-Scope
-=====
-
-To limit scope, we will start by implementing an MPD server which only
-supports Spotify, and not playback of files from disk. We will make Mopidy
-modular, so we can extend it with other backends in the future, like file
-playback and other online music services such as Last.fm.
 
 
 Code style
@@ -36,7 +37,7 @@ style guidelines, with a couple of notable exceptions:
         BasePlaybackController, BaseLibraryController,
         BaseStoredPlaylistsController)
 
-  And not::
+  And *not*::
 
     from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
                                  BasePlaybackController, BaseLibraryController,
@@ -51,7 +52,7 @@ style guidelines, with a couple of notable exceptions:
             and new_state == self.PLAYING):
         self._play_time_start()
 
-  And not::
+  And *not*::
 
     if (old_state in (self.PLAYING, self.STOPPED)
         and new_state == self.PLAYING):
@@ -76,10 +77,14 @@ Then, to run all tests::
     python tests
 
 
-Generating documentation
-========================
+Writing documentation
+=====================
 
-To generate documentation, you also need some additional dependencies. You can either install them through Debian/Ubuntu package management::
+To write documentation, we use `Sphinx <http://sphinx.pocoo.org/>`_. See their
+site for lots of documentation on how to use Sphinx. To generate HTML or LaTeX
+from the documentation files, you need some additional dependencies.
+
+You can either install them through Debian/Ubuntu package management::
 
     sudo aptitude install python-sphinx
 
@@ -94,20 +99,21 @@ Then, to generate docs::
     make        # For help on available targets
     make html   # To generate HTML docs
 
+The documentation at http://www.mopidy.com/docs/ is automatically updated
+within 10 minutes after a documentation update is pushed to
+``jodal/mopidy/master`` at GitHub.
 
-spytify
-=======
+
+Notes on despotify/spytify
+==========================
 
 `spytify <http://despotify.svn.sourceforge.net/viewvc/despotify/src/bindings/python/>`_
 is the Python bindings for the open source `despotify <http://despotify.se/>`_
 library. It got no documentation to speak of, but a couple of examples are
 available.
 
-Issues
-------
-
 A list of the issues we currently experience with spytify, both bugs and
-features we wished was there.
+features we wished was there:
 
 * r483: Sometimes segfaults when traversing stored playlists, their tracks,
   artists, and albums. As it is not predictable, it may be a concurrency issue.
@@ -121,17 +127,14 @@ features we wished was there.
     Segmentation fault
 
 
-pyspotify
-=========
+Notes on libspotify/libopenspotify/pyspotify
+============================================
 
 `pyspotify <http://github.com/winjer/pyspotify/>`_ is the Python bindings for
 the official Spotify library, libspotify. It got no documentation to speak of,
 but multiple examples are available.
 
-Issues
-------
-
 A list of the issues we currently experience with pyspotify, both bugs and
-features we wished was there.
+features we wished was there:
 
 * None at the moment.
