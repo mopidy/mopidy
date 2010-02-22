@@ -14,8 +14,6 @@ class Config(object):
         value = getattr(settings, attr)
         if type(value) != bool and not value:
             raise ConfigError(u'Setting "%s" is empty.' % attr)
-        if type(value) == unicode:
-            value = value.encode('utf-8')
         return value
 
 config = Config()
