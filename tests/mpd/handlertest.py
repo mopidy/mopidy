@@ -23,8 +23,8 @@ class RequestHandlerTest(unittest.TestCase):
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
         try:
-            handler.register('a pattern')(func)
-            handler.register('a pattern')(func)
+            handler.handle_pattern('a pattern')(func)
+            handler.handle_pattern('a pattern')(func)
             self.fail('Registering a pattern twice shoulde raise ValueError')
         except ValueError:
             pass
