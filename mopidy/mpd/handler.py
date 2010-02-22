@@ -9,7 +9,7 @@ logger = logging.getLogger('mpd.handler')
 
 _request_handlers = {}
 
-def register(pattern):
+def handle_pattern(pattern):
     def decorator(func):
         if pattern in _request_handlers:
             raise ValueError(u'Tried to redefine handler for %s with %s' % (
@@ -73,7 +73,7 @@ class MpdHandler(object):
             response.append(u'OK')
         return response
 
-    @register(r'^ack$')
+    @handle_pattern(r'^ack$')
     def _ack(self):
         """
         Always returns an 'ACK' and not 'OK'.
@@ -82,37 +82,37 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented
 
-    @register(r'^add "(?P<uri>[^"]*)"$')
+    @handle_pattern(r'^add "(?P<uri>[^"]*)"$')
     def _add(self, uri):
         raise MpdNotImplemented # TODO
 
-    @register(r'^addid "(?P<uri>[^"]*)"( (?P<songpos>\d+))*$')
+    @handle_pattern(r'^addid "(?P<uri>[^"]*)"( (?P<songpos>\d+))*$')
     def _add(self, uri, songpos=None):
         raise MpdNotImplemented # TODO
 
-    @register(r'^clear$')
+    @handle_pattern(r'^clear$')
     def _clear(self):
         raise MpdNotImplemented # TODO
 
-    @register(r'^clearerror$')
+    @handle_pattern(r'^clearerror$')
     def _clearerror(self):
         raise MpdNotImplemented # TODO
 
-    @register(r'^close$')
+    @handle_pattern(r'^close$')
     def _close(self):
         self.session.do_close()
 
-    @register(r'^command_list_begin$')
+    @handle_pattern(r'^command_list_begin$')
     def _command_list_begin(self):
         self.command_list = []
         self.command_list_ok = False
 
-    @register(r'^command_list_ok_begin$')
+    @handle_pattern(r'^command_list_ok_begin$')
     def _command_list_ok_begin(self):
         self.command_list = []
         self.command_list_ok = True
 
-    @register(r'^command_list_end$')
+    @handle_pattern(r'^command_list_end$')
     def _command_list_end(self):
         (command_list, self.command_list) = (self.command_list, False)
         (command_list_ok, self.command_list_ok) = (self.command_list_ok, False)
@@ -127,11 +127,11 @@ class MpdHandler(object):
                 response.append(u'list_OK')
         return result
 
-    @register(r'^commands$')
+    @handle_pattern(r'^commands$')
     def _commands(self):
         raise MpdNotImplemented # TODO
 
-    @register(r'^consume "(?P<state>[01])"$')
+    @handle_pattern(r'^consume "(?P<state>[01])"$')
     def _consume(self, state):
         state = int(state)
         if state:
@@ -139,31 +139,31 @@ class MpdHandler(object):
         else:
             raise MpdNotImplemented # TODO
 
-    @register(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
+    @handle_pattern(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
     def _count(self, tag, needle):
         raise MpdNotImplemented # TODO
 
-    @register(r'^crossfade "(?P<seconds>\d+)"$')
+    @handle_pattern(r'^crossfade "(?P<seconds>\d+)"$')
     def _crossfade(self, seconds):
         seconds = int(seconds)
         raise MpdNotImplemented # TODO
 
-    @register(r'^currentsong$')
+    @handle_pattern(r'^currentsong$')
     def _currentsong(self):
         if self.backend.playback.current_track is not None:
             return self.backend.playback.current_track.mpd_format(
                 position=self.backend.playback.playlist_position)
 
-    @register(r'^decoders$')
+    @handle_pattern(r'^decoders$')
     def _decoders(self):
         raise MpdNotImplemented # TODO
 
-    @register(r'^delete "(?P<songpos>\d+)"$')
-    @register(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
+    @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
+    @handle_pattern(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
     def _delete(self, songpos=None, start=None, end=None):
         raise MpdNotImplemented # TODO
 
-    @register(r'^deleteid "(?P<songid>\d+)"$')
+    @handle_pattern(r'^deleteid "(?P<songid>\d+)"$')
     def _deleteid(self, songid):
         songid = int(songid)
         try:
@@ -172,95 +172,95 @@ class MpdHandler(object):
         except KeyError, e:
             raise MpdAckError(unicode(e))
 
-    @register(r'^disableoutput "(?P<outputid>\d+)"$')
+    @handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
     def _disableoutput(self, outputid):
         raise MpdNotImplemented # TODO
 
-    @register(r'^$')
+    @handle_pattern(r'^$')
     def _empty(self):
         pass
 
-    @register(r'^enableoutput "(?P<outputid>\d+)"$')
+    @handle_pattern(r'^enableoutput "(?P<outputid>\d+)"$')
     def _enableoutput(self, outputid):
         raise MpdNotImplemented # TODO
 
-    @register(r'^find "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
+    @handle_pattern(r'^find "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
     def _find(self, type, what):
         raise MpdNotImplemented # TODO
 
-    @register(r'^findadd "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
+    @handle_pattern(r'^findadd "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
     def _findadd(self, type, what):
         result = self._find(type, what)
         # TODO Add result to current playlist
         #return result
 
-    @register(r'^idle$')
-    @register(r'^idle (?P<subsystems>.+)$')
+    @handle_pattern(r'^idle$')
+    @handle_pattern(r'^idle (?P<subsystems>.+)$')
     def _idle(self, subsystems=None):
         raise MpdNotImplemented # TODO
 
-    @register(r'^kill$')
+    @handle_pattern(r'^kill$')
     def _kill(self):
         self.session.do_kill()
 
-    @register(r'^list "(?P<type>artist)"$')
-    @register(r'^list "(?P<type>album)"( "(?P<artist>[^"]+)")*$')
+    @handle_pattern(r'^list "(?P<type>artist)"$')
+    @handle_pattern(r'^list "(?P<type>album)"( "(?P<artist>[^"]+)")*$')
     def _list(self, type, artist=None):
         raise MpdNotImplemented # TODO
 
-    @register(r'^listall "(?P<uri>[^"]+)"')
+    @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
     def _listall(self, uri):
         raise MpdNotImplemented # TODO
 
-    @register(r'^listallinfo "(?P<uri>[^"]+)"')
+    @handle_pattern(r'^listallinfo "(?P<uri>[^"]+)"')
     def _listallinfo(self, uri):
         raise MpdNotImplemented # TODO
 
-    @register(r'^listplaylist "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^listplaylist "(?P<name>[^"]+)"$')
     def _listplaylist(self, name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^listplaylistinfo "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
     def _listplaylistinfo(self, name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^listplaylists$')
+    @handle_pattern(r'^listplaylists$')
     def _listplaylists(self):
         return [u'playlist: %s' % p.name
             for p in self.backend.stored_playlists.playlists]
 
-    @register(r'^load "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^load "(?P<name>[^"]+)"$')
     def _load(self, name):
         matches = self.backend.stored_playlists.search(name)
         if matches:
             self.backend.current_playlist.load(matches[0])
             self.backend.playback.new_playlist_loaded_callback()
 
-    @register(r'^lsinfo$')
-    @register(r'^lsinfo "(?P<uri>[^"]*)"$')
+    @handle_pattern(r'^lsinfo$')
+    @handle_pattern(r'^lsinfo "(?P<uri>[^"]*)"$')
     def _lsinfo(self, uri=None):
         if uri == u'/' or uri is None:
             return self._listplaylists()
         raise MpdNotImplemented # TODO
 
-    @register(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
-    @register(r'^move "(?P<start>\d+):(?P<end>\d+)*" "(?P<to>\d+)"$')
+    @handle_pattern(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
+    @handle_pattern(r'^move "(?P<start>\d+):(?P<end>\d+)*" "(?P<to>\d+)"$')
     def _move(self, songpos=None, start=None, end=None, to=None):
         raise MpdNotImplemented # TODO
 
-    @register(r'^moveid "(?P<songid>\d+)" "(?P<to>\d+)"$')
+    @handle_pattern(r'^moveid "(?P<songid>\d+)" "(?P<to>\d+)"$')
     def _moveid(self, songid, to):
         raise MpdNotImplemented # TODO
 
-    @register(r'^next$')
+    @handle_pattern(r'^next$')
     def _next(self):
         return self.backend.playback.next()
 
-    @register(r'^notcommands$')
+    @handle_pattern(r'^notcommands$')
     def _notcommands(self):
         raise MpdNotImplemented # TODO
 
-    @register(r'^outputs$')
+    @handle_pattern(r'^outputs$')
     def _outputs(self):
         return [
             ('outputid', 0),
@@ -268,26 +268,26 @@ class MpdHandler(object):
             ('outputenabled', 1),
         ]
 
-    @register(r'^password "(?P<password>[^"]+)"$')
+    @handle_pattern(r'^password "(?P<password>[^"]+)"$')
     def _password(self, password):
         raise MpdNotImplemented # TODO
 
-    @register(r'^pause "(?P<state>[01])"$')
+    @handle_pattern(r'^pause "(?P<state>[01])"$')
     def _pause(self, state):
         if int(state):
             self.backend.playback.pause()
         else:
             self.backend.playback.resume()
 
-    @register(r'^ping$')
+    @handle_pattern(r'^ping$')
     def _ping(self):
         pass
 
-    @register(r'^play$')
+    @handle_pattern(r'^play$')
     def _play(self):
         return self.backend.playback.play()
 
-    @register(r'^play "(?P<songpos>\d+)"$')
+    @handle_pattern(r'^play "(?P<songpos>\d+)"$')
     def _playpos(self, songpos):
         songpos = int(songpos)
         try:
@@ -296,7 +296,7 @@ class MpdHandler(object):
         except IndexError:
             raise MpdAckError(u'Position out of bounds')
 
-    @register(r'^playid "(?P<songid>\d+)"$')
+    @handle_pattern(r'^playid "(?P<songid>\d+)"$')
     def _playid(self, songid):
         songid = int(songid)
         try:
@@ -305,33 +305,33 @@ class MpdHandler(object):
         except KeyError, e:
             raise MpdAckError(unicode(e))
 
-    @register(r'^playlist$')
+    @handle_pattern(r'^playlist$')
     def _playlist(self):
         return self._playlistinfo()
 
-    @register(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
+    @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
     def _playlistadd(self, name, uri):
         raise MpdNotImplemented # TODO
 
-    @register(r'^playlistclear "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^playlistclear "(?P<name>[^"]+)"$')
     def _playlistclear(self, name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^playlistdelete "(?P<name>[^"]+)" "(?P<songpos>\d+)"$')
+    @handle_pattern(r'^playlistdelete "(?P<name>[^"]+)" "(?P<songpos>\d+)"$')
     def _playlistdelete(self, name, songpos):
         raise MpdNotImplemented # TODO
 
-    @register(r'^playlistfind "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
+    @handle_pattern(r'^playlistfind "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
     def _playlistfind(self, tag, needle):
         raise MpdNotImplemented # TODO
 
-    @register(r'^playlistid( "(?P<songid>\S+)")*$')
+    @handle_pattern(r'^playlistid( "(?P<songid>\S+)")*$')
     def _playlistid(self, songid=None):
         return self.backend.current_playlist.playlist.mpd_format()
 
-    @register(r'^playlistinfo$')
-    @register(r'^playlistinfo "(?P<songpos>\d+)"$')
-    @register(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
+    @handle_pattern(r'^playlistinfo$')
+    @handle_pattern(r'^playlistinfo "(?P<songpos>\d+)"$')
+    @handle_pattern(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
     def _playlistinfo(self, songpos=None, start=None, end=None):
         if songpos is not None:
             songpos = int(songpos)
@@ -345,32 +345,32 @@ class MpdHandler(object):
                 end = int(end)
             return self.backend.current_playlist.playlist.mpd_format(start, end)
 
-    @register(r'^playlistmove "(?P<name>[^"]+)" "(?P<songid>\d+)" "(?P<songpos>\d+)"$')
+    @handle_pattern(r'^playlistmove "(?P<name>[^"]+)" "(?P<songid>\d+)" "(?P<songpos>\d+)"$')
     def _playlistdelete(self, name, songid, songpos):
         raise MpdNotImplemented # TODO
 
-    @register(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
+    @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
     def _playlistsearch(self, tag, needle):
         raise MpdNotImplemented # TODO
 
-    @register(r'^plchanges "(?P<version>\d+)"$')
+    @handle_pattern(r'^plchanges "(?P<version>\d+)"$')
     def _plchanges(self, version):
         if int(version) < self.backend.current_playlist.version:
             return self.backend.current_playlist.playlist.mpd_format()
 
-    @register(r'^plchangesposid "(?P<version>\d+)"$')
+    @handle_pattern(r'^plchangesposid "(?P<version>\d+)"$')
     def _plchangesposid(self, version):
         raise MpdNotImplemented # TODO
 
-    @register(r'^previous$')
+    @handle_pattern(r'^previous$')
     def _previous(self):
         return self.backend.playback.previous()
 
-    @register(r'^rename "(?P<old_name>[^"]+)" "(?P<new_name>[^"]+)"$')
+    @handle_pattern(r'^rename "(?P<old_name>[^"]+)" "(?P<new_name>[^"]+)"$')
     def _rename(self, old_name, new_name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^random "(?P<state>[01])"$')
+    @handle_pattern(r'^random "(?P<state>[01])"$')
     def _random(self, state):
         state = int(state)
         if state:
@@ -378,7 +378,7 @@ class MpdHandler(object):
         else:
             raise MpdNotImplemented # TODO
 
-    @register(r'^repeat "(?P<state>[01])"$')
+    @handle_pattern(r'^repeat "(?P<state>[01])"$')
     def _repeat(self, state):
         state = int(state)
         if state:
@@ -386,41 +386,41 @@ class MpdHandler(object):
         else:
             raise MpdNotImplemented # TODO
 
-    @register(r'^replay_gain_mode "(?P<mode>(off|track|album))"$')
+    @handle_pattern(r'^replay_gain_mode "(?P<mode>(off|track|album))"$')
     def _replay_gain_mode(self, mode):
         raise MpdNotImplemented # TODO
 
-    @register(r'^replay_gain_status$')
+    @handle_pattern(r'^replay_gain_status$')
     def _replay_gain_status(self):
         return u'off' # TODO
 
-    @register(r'^rescan( "(?P<uri>[^"]+)")*$')
+    @handle_pattern(r'^rescan( "(?P<uri>[^"]+)")*$')
     def _update(self, uri=None):
         return self._update(uri, rescan_unmodified_files=True)
 
-    @register(r'^rm "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^rm "(?P<name>[^"]+)"$')
     def _rm(self, name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^save "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^save "(?P<name>[^"]+)"$')
     def _save(self, name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>[^"]+)"$')
+    @handle_pattern(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>[^"]+)"$')
     def _search(self, type, what):
         return self.backend.library.search(type, what).mpd_format(
             search_result=True)
 
-    @register(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
+    @handle_pattern(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
     def _seek(self, songpos, seconds):
         raise MpdNotImplemented # TODO
 
-    @register(r'^seekid "(?P<songid>\d+)" "(?P<seconds>\d+)"$')
+    @handle_pattern(r'^seekid "(?P<songid>\d+)" "(?P<seconds>\d+)"$')
     def _seekid(self, songid, seconds):
         raise MpdNotImplemented # TODO
 
-    @register(r'^setvol (?P<volume>[-+]*\d+)$')
-    @register(r'^setvol "(?P<volume>[-+]*\d+)"$')
+    @handle_pattern(r'^setvol (?P<volume>[-+]*\d+)$')
+    @handle_pattern(r'^setvol "(?P<volume>[-+]*\d+)"$')
     def _setvol(self, volume):
         volume = int(volume)
         if volume < 0:
@@ -429,12 +429,12 @@ class MpdHandler(object):
             volume = 100
         self.backend.playback.volume = volume
 
-    @register(r'^shuffle$')
-    @register(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')
+    @handle_pattern(r'^shuffle$')
+    @handle_pattern(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')
     def _shuffle(self, start=None, end=None):
         raise MpdNotImplemented # TODO
 
-    @register(r'^single "(?P<state>[01])"$')
+    @handle_pattern(r'^single "(?P<state>[01])"$')
     def _single(self, state):
         state = int(state)
         if state:
@@ -442,7 +442,7 @@ class MpdHandler(object):
         else:
             raise MpdNotImplemented # TODO
 
-    @register(r'^stats$')
+    @handle_pattern(r'^stats$')
     def _stats(self):
         return {
             'artists': 0, # TODO
@@ -454,11 +454,11 @@ class MpdHandler(object):
             'playtime': 0, # TODO
         }
 
-    @register(r'^stop$')
+    @handle_pattern(r'^stop$')
     def _stop(self):
         self.backend.playback.stop()
 
-    @register(r'^status$')
+    @handle_pattern(r'^status$')
     def _status(self):
         result = [
             ('volume', self._status_volume()),
@@ -552,42 +552,42 @@ class MpdHandler(object):
     def _status_xfade(self):
         return 0 # TODO
 
-    @register(r'^sticker delete "(?P<type>[^"]+)" "(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')
+    @handle_pattern(r'^sticker delete "(?P<type>[^"]+)" "(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')
     def _sticker_delete(self, type, uri, name=None):
         raise MpdNotImplemented # TODO
 
-    @register(r'^sticker find "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^sticker find "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
     def _sticker_find(self, type, uri, name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^sticker get "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^sticker get "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
     def _sticker_get(self, type, uri, name):
         raise MpdNotImplemented # TODO
 
-    @register(r'^sticker list "(?P<type>[^"]+)" "(?P<uri>[^"]+)"$')
+    @handle_pattern(r'^sticker list "(?P<type>[^"]+)" "(?P<uri>[^"]+)"$')
     def _sticker_list(self, type, uri):
         raise MpdNotImplemented # TODO
 
-    @register(r'^sticker set "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)" "(?P<value>[^"]+)"$')
+    @handle_pattern(r'^sticker set "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)" "(?P<value>[^"]+)"$')
     def _sticker_set(self, type, uri, name, value):
         raise MpdNotImplemented # TODO
 
-    @register(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
+    @handle_pattern(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
     def _swap(self, songpos1, songpos2):
         raise MpdNotImplemented # TODO
 
-    @register(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
+    @handle_pattern(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
     def _swapid(self, songid1, songid2):
         raise MpdNotImplemented # TODO
 
-    @register(r'^tagtypes$')
+    @handle_pattern(r'^tagtypes$')
     def _tagtypes(self):
         raise MpdNotImplemented # TODO
 
-    @register(r'^update( "(?P<uri>[^"]+)")*$')
+    @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
     def _update(self, uri=None, rescan_unmodified_files=False):
         return {'updating_db': 0} # TODO
 
-    @register(r'^urlhandlers$')
+    @handle_pattern(r'^urlhandlers$')
     def _urlhandlers(self):
         return self.backend.uri_handlers
