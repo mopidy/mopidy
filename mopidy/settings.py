@@ -31,9 +31,6 @@ BACKENDS = (
 #: the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  %(message)s'
 
-#: Line terminator character used in MPD protocol. *Default:* ``\n``
-MPD_LINE_TERMINATOR = u'\n'
-
 #: Which address Mopidy should bind to. Examples:
 #:
 #: ``localhost``
