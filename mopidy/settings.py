@@ -31,9 +31,6 @@ BACKENDS = (
 #: the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  %(message)s'
 
-#: Encoding used in MPD protocol. *Default:* ``utf-8``
-MPD_LINE_ENCODING = u'utf-8'
-
 #: Line terminator character used in MPD protocol. *Default:* ``\n``
 MPD_LINE_TERMINATOR = u'\n'
 

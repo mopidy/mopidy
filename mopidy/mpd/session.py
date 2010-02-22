@@ -7,6 +7,9 @@ from mopidy.mpd.handler import MpdHandler
 
 logger = logging.getLogger(u'mpd.session')
 
+#: All data between the client and the server is encoded in UTF-8.
+ENCODING = 'utf-8'
+
 def indent(string, places=4, linebreak=config.MPD_LINE_TERMINATOR):
     lines = string.split(linebreak)
     if len(lines) == 1:
@@ -23,8 +26,7 @@ class MpdSession(asynchat.async_chat):
         self.server = server
         self.client_address = client_address
         self.input_buffer = []
-        self.set_terminator(config.MPD_LINE_TERMINATOR.encode(
-            config.MPD_LINE_ENCODING))
+        self.set_terminator(config.MPD_LINE_TERMINATOR.encode(ENCODING))
         self.handler = handler_class(session=self, backend=backend)
         self.send_response(u'OK MPD %s' % get_mpd_protocol_version())
 
@@ -41,7 +43,7 @@ class MpdSession(asynchat.async_chat):
     def found_terminator(self):
         data = ''.join(self.input_buffer).strip()
         self.input_buffer = []
-        input = data.decode(config.MPD_LINE_ENCODING)
+        input = data.decode(ENCODING)
         logger.debug(u'Input: %s', indent(input))
         self.handle_request(input)
 
@@ -60,7 +62,7 @@ class MpdSession(asynchat.async_chat):
     def send_response(self, output):
         logger.debug(u'Output: %s', indent(output))
         output = u'%s%s' % (output, config.MPD_LINE_TERMINATOR)
-        data = output.encode(config.MPD_LINE_ENCODING)
+        data = output.encode(ENCODING)
         self.push(data)
 
     def stats_uptime(self):
