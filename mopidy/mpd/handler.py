@@ -14,7 +14,6 @@ import logging
 import re
 import sys
 
-from mopidy import settings
 from mopidy.exceptions import MpdAckError, MpdNotImplemented
 
 logger = logging.getLogger('mpd.handler')
