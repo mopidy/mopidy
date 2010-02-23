@@ -480,7 +480,8 @@ class MpdHandler(object):
             Standard track listing, with fields: file, Time, Title, Date,
             Album, Artist, Track
         """
-        raise MpdNotImplemented # TODO
+        return self.backend.stored_playlists.playlist.mpd_format(
+            search_result=True)
 
     @handle_pattern(r'^listplaylists$')
     def _listplaylists(self):
