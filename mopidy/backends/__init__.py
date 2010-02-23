@@ -430,6 +430,10 @@ class BaseStoredPlaylistsController(object):
         """List of :class:`mopidy.models.Playlist`."""
         return copy(self._playlists)
 
+    @playlists.setter
+    def playlists(self, playlists):
+        self._playlists = playlists
+
     def create(self, name):
         """
         Create a new playlist.
@@ -448,6 +452,24 @@ class BaseStoredPlaylistsController(object):
         :type playlist: :class:`mopidy.models.Playlist`
         """
         raise NotImplementedError
+
+    def get_by_name(self, name):
+        """
+        Get playlist with given name from the set of stored playlists.
+
+        Raises :exc:`KeyError` if not a unique match is found.
+
+        :param name: playlist name
+        :type name: string
+        :rtype: :class:`mopidy.models.Playlist`
+        """
+        matches = filter(lambda p: name == p.name, self._playlists)
+        if len(matches) == 1:
+            return matches[0]
+        elif len(matches) == 0:
+            raise KeyError('Name "%s" not found' % name)
+        else:
+            raise KeyError('Name "%s" matched multiple elements' % name)
 
     def lookup(self, uri):
         """
