@@ -172,7 +172,7 @@ class BaseLibraryController(object):
         :type type: string
         :param query: the search query
         :type query: string
-        :rtype: list of :class:`mopidy.models.Track`
+        :rtype: :class:`mopidy.models.Playlist`
         """
         raise NotImplementedError
 
