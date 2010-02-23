@@ -60,6 +60,8 @@ class LibspotifyLibraryController(BaseLibraryController):
         self._search_results = None
         return result
 
+    find_exact = search
+
 
 class LibspotifyPlaybackController(BasePlaybackController):
     def _pause(self):

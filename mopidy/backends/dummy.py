@@ -18,6 +18,8 @@ class DummyLibraryController(BaseLibraryController):
     def search(self, type, query):
         return Playlist()
 
+    find_exact = search
+
 class DummyPlaybackController(BasePlaybackController):
     def _next(self):
         return True

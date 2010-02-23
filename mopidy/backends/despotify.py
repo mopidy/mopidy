@@ -43,6 +43,8 @@ class DespotifyLibraryController(BaseLibraryController):
             return Playlist()
         return self.backend.translate.to_mopidy_playlist(result.playlist)
 
+    find_exact = search
+
 
 class DespotifyPlaybackController(BasePlaybackController):
     def _pause(self):
