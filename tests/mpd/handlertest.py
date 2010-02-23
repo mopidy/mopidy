@@ -127,6 +127,10 @@ class StatusHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'idle database playlist')
         self.assert_(u'ACK Not implemented' in result)
 
+    def test_noidle(self):
+        result = self.h.handle_request(u'noidle')
+        self.assert_(u'ACK Not implemented' in result)
+
     def test_stats_command(self):
         result = self.h.handle_request(u'stats')
         self.assert_(u'OK' in result)
