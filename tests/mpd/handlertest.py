@@ -603,15 +603,32 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.b = DummyBackend()
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_listplaylist(self):
+        self.b.stored_playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
         result = self.h.handle_request(u'listplaylist "name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'file: file:///dev/urandom' in result)
+        self.assert_(u'OK' in result)
+
+    def test_listplaylist_fails_if_no_playlist_is_found(self):
+        result = self.h.handle_request(u'listplaylist "name"')
+        self.assert_(u'ACK Name "name" not found' in result)
 
     def test_listplaylistinfo(self):
+        self.b.stored_playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
         result = self.h.handle_request(u'listplaylistinfo "name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'file: file:///dev/urandom' in result)
+        self.assert_(u'Track: 0' in result)
+        self.assert_(u'Pos: 0' not in result)
+        self.assert_(u'OK' in result)
+
+    def test_listplaylistinfo_fails_if_no_playlist_is_found(self):
+        result = self.h.handle_request(u'listplaylistinfo "name"')
+        self.assert_(u'ACK Name "name" not found' in result)
 
     def test_listplaylists(self):
         result = self.h.handle_request(u'listplaylists')

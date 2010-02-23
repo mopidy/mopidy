@@ -464,7 +464,11 @@ class MpdHandler(object):
             file: relative/path/to/file2.ogg
             file: relative/path/to/file3.mp3
         """
-        raise MpdNotImplemented # TODO
+        try:
+            return ['file: %s' % t.uri
+                for t in self.backend.stored_playlists.get_by_name(name).tracks]
+        except KeyError, e:
+            raise MpdAckError(e)
 
     @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
     def _listplaylistinfo(self, name):
@@ -480,8 +484,11 @@ class MpdHandler(object):
             Standard track listing, with fields: file, Time, Title, Date,
             Album, Artist, Track
         """
-        return self.backend.stored_playlists.playlist.mpd_format(
-            search_result=True)
+        try:
+            return self.backend.stored_playlists.get_by_name(name).mpd_format(
+                search_result=True)
+        except KeyError, e:
+            raise MpdAckError(e)
 
     @handle_pattern(r'^listplaylists$')
     def _listplaylists(self):
