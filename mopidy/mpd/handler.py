@@ -457,6 +457,12 @@ class MpdHandler(object):
             ``listplaylist {NAME}``
 
             Lists the files in the playlist ``NAME.m3u``.
+
+        Output format::
+
+            file: relative/path/to/file1.flac
+            file: relative/path/to/file2.ogg
+            file: relative/path/to/file3.mp3
         """
         raise MpdNotImplemented # TODO
 
@@ -468,6 +474,11 @@ class MpdHandler(object):
             ``listplaylistinfo {NAME}``
 
             Lists songs in the playlist ``NAME.m3u``.
+
+        Output format:
+
+            Standard track listing, with fields: file, Time, Title, Date,
+            Album, Artist, Track
         """
         raise MpdNotImplemented # TODO
 
@@ -484,6 +495,13 @@ class MpdHandler(object):
             time as attribute ``Last-Modified`` in ISO 8601 format. To avoid
             problems due to clock differences between clients and the server,
             clients should not compare this value with their local clock.
+
+        Output format::
+
+            playlist: a
+            Last-Modified: 2010-02-06T02:10:25Z
+            playlist: b
+            Last-Modified: 2010-02-06T02:11:08Z
         """
         # TODO Add Last-Modified attribute to output
         return [u'playlist: %s' % p.name
