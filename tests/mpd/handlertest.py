@@ -674,7 +674,8 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.b = DummyBackend()
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_count(self):
         result = self.h.handle_request(u'count "tag" "needle"')
@@ -682,15 +683,15 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_find_album(self):
         result = self.h.handle_request(u'find "album" "what"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_find_artist(self):
         result = self.h.handle_request(u'find "artist" "what"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_find_title(self):
         result = self.h.handle_request(u'find "title" "what"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_find_else_should_fail(self):
         try:
@@ -701,7 +702,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_findadd(self):
         result = self.h.handle_request(u'findadd "album" "what"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_list_artist(self):
         result = self.h.handle_request(u'list "artist"')

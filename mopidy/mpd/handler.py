@@ -345,7 +345,10 @@ class MpdHandler(object):
             Finds songs in the db that are exactly ``WHAT``. ``TYPE`` should be
             ``album``, ``artist``, or ``title``. ``WHAT`` is what to find.
         """
-        raise MpdNotImplemented # TODO
+        if type == u'title':
+            type = u'track'
+        return self.backend.library.find_exact(type, what).mpd_format(
+            search_result=True)
 
     @handle_pattern(r'^findadd "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
     def _findadd(self, type, what):
@@ -971,6 +974,8 @@ class MpdHandler(object):
             ``title``, ``artist``, ``album`` or ``filename``. Search is not
             case sensitive.
         """
+        if type == u'title':
+            type = u'track'
         return self.backend.library.search(type, what).mpd_format(
             search_result=True)
 
