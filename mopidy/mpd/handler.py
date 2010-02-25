@@ -204,7 +204,7 @@ class MpdHandler(object):
 
             Shows which commands the current user has access to.
         """
-        raise MpdNotImplemented # TODO
+        pass # TODO
 
     @handle_pattern(r'^consume "(?P<state>[01])"$')
     def _consume(self, state):
@@ -601,7 +601,7 @@ class MpdHandler(object):
 
             Shows which commands the current user does not have access to.
         """
-        raise MpdNotImplemented # TODO
+        pass # TODO
 
     @handle_pattern(r'^outputs$')
     def _outputs(self):
@@ -1300,7 +1300,7 @@ class MpdHandler(object):
 
             Shows a list of available song metadata.
         """
-        raise MpdNotImplemented # TODO
+        pass # TODO
 
     @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
     def _update(self, uri=None, rescan_unmodified_files=False):
