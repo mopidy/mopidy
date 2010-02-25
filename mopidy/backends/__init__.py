@@ -168,7 +168,7 @@ class BaseLibraryController(object):
         """
         Find tracks in the library where ``type`` matches ``query`` exactly.
 
-        :param type: 'title', 'artist', or 'album'
+        :param type: 'track', 'artist', or 'album'
         :type type: string
         :param query: the search query
         :type query: string
@@ -199,7 +199,7 @@ class BaseLibraryController(object):
         """
         Search the library for tracks where ``type`` contains ``query``.
 
-        :param type: 'title', 'artist', 'album', or 'uri'
+        :param type: 'track', 'artist', 'album', or 'uri'
         :type type: string
         :param query: the search query
         :type query: string
