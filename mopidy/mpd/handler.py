@@ -481,7 +481,11 @@ class MpdHandler(object):
             Shuffles the current playlist. ``START:END`` is optional and
             specifies a range of songs.
         """
-        raise MpdNotImplemented # TODO
+        if start is not None:
+            start = int(start)
+        if end is not None:
+            end = int(end)
+        self.backend.current_playlist.shuffle(start, end)
 
     @handle_pattern(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
     def _current_playlist_swap(self, songpos1, songpos2):
