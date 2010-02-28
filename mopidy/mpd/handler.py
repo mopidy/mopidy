@@ -805,11 +805,10 @@ class MpdHandler(object):
 
             Sets repeat state to ``STATE``, ``STATE`` should be 0 or 1.
         """
-        state = int(state)
-        if state:
-            raise MpdNotImplemented # TODO
+        if int(state):
+            self.backend.playback.repeat = True
         else:
-            raise MpdNotImplemented # TODO
+            self.backend.playback.repeat = False
 
     @handle_pattern(r'^replay_gain_mode "(?P<mode>(off|track|album))"$')
     def _playback_replay_gain_mode(self, mode):

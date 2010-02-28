@@ -331,11 +331,13 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
     def test_repeat_off(self):
         result = self.h.handle_request(u'repeat "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertFalse(self.b.playback.repeat)
+        self.assert_(u'OK' in result)
 
     def test_repeat_on(self):
         result = self.h.handle_request(u'repeat "1"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertTrue(self.b.playback.repeat)
+        self.assert_(u'OK' in result)
 
     def test_setvol_below_min(self):
         result = self.h.handle_request(u'setvol "-10"')
