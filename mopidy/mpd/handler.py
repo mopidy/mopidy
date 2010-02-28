@@ -306,10 +306,8 @@ class MpdHandler(object):
         """
         self.backend.current_playlist.clear()
 
-    @handle_pattern(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
     @handle_pattern(r'^move "(?P<start>\d+):(?P<end>\d+)*" "(?P<to>\d+)"$')
-    def _current_playlist_move(self, songpos=None,
-            start=None, end=None, to=None):
+    def _current_playlist_move_range(self, start, to, end=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -318,7 +316,18 @@ class MpdHandler(object):
             Moves the song at ``FROM`` or range of songs at ``START:END`` to
             ``TO`` in the playlist.
         """
-        raise MpdNotImplemented # TODO
+        if end is None:
+            end = self.backend.current_playlist.playlist.length
+        start = int(start)
+        end = int(end)
+        to = int(to)
+        self.backend.current_playlist.move(start, end, to)
+
+    @handle_pattern(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
+    def _current_playlist_move_songpos(self, songpos, to):
+        """See :meth:`_current_playlist_move_range`."""
+        songpos = int(songpos)
+        self._current_playlist_move_range(start=songpos, end=songpos + 1, to=to)
 
     @handle_pattern(r'^moveid "(?P<songid>\d+)" "(?P<to>\d+)"$')
     def _current_playlist_moveid(self, songid, to):

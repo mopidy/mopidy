@@ -592,16 +592,43 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Track with ID "0" not found' in result)
 
     def test_move_songpos(self):
-        result = self.h.handle_request(u'move "5" "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.b.current_playlist.load(Playlist(tracks=[
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e'), Track(name='f')]))
+        result = self.h.handle_request(u'move "1" "0"')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[0].name, 'b')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[1].name, 'a')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[2].name, 'c')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[3].name, 'd')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[4].name, 'e')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[5].name, 'f')
+        self.assert_(u'OK' in result)
 
     def test_move_open_range(self):
-        result = self.h.handle_request(u'move "10:" "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.b.current_playlist.load(Playlist(tracks=[
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e'), Track(name='f')]))
+        result = self.h.handle_request(u'move "2:" "0"')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[0].name, 'c')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[1].name, 'd')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[2].name, 'e')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[3].name, 'f')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[4].name, 'a')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[5].name, 'b')
+        self.assert_(u'OK' in result)
 
     def test_move_closed_range(self):
-        result = self.h.handle_request(u'move "10:20" "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.b.current_playlist.load(Playlist(tracks=[
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e'), Track(name='f')]))
+        result = self.h.handle_request(u'move "1:3" "0"')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[0].name, 'b')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[1].name, 'c')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[2].name, 'a')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[3].name, 'd')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[4].name, 'e')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[5].name, 'f')
+        self.assert_(u'OK' in result)
 
     def test_moveid(self):
         result = self.h.handle_request(u'moveid "0" "10"')
