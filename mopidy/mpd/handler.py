@@ -373,6 +373,7 @@ class MpdHandler(object):
             if end is not None:
                 end = int(end)
             return self.backend.current_playlist.playlist.mpd_format(start, end)
+
     @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
     def _current_playlist_playlistsearch(self, tag, needle):
         """
