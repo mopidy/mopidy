@@ -373,7 +373,7 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^playlistid( "(?P<songid>\S+)")*$')
+    @handle_pattern(r'^playlistid( "(?P<songid>\d+)")*$')
     def _current_playlist_playlistid(self, songid=None):
         """
         *musicpd.org, current playlist section:*
@@ -383,8 +383,15 @@ class MpdHandler(object):
             Displays a list of songs in the playlist. ``SONGID`` is optional
             and specifies a single song to display info for.
         """
-        # TODO Limit selection to songid
-        return self.backend.current_playlist.playlist.mpd_format()
+        if songid is not None:
+            try:
+                songid = int(songid)
+                track = self.backend.current_playlist.get_by_id(songid)
+                return track.mpd_format()
+            except KeyError, e:
+                raise MpdAckError(e)
+        else:
+            return self.backend.current_playlist.playlist.mpd_format()
 
     @handle_pattern(r'^playlistinfo$')
     @handle_pattern(r'^playlistinfo "(?P<songpos>\d+)"$')

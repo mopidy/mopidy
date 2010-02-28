@@ -653,12 +653,30 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Not implemented' in result)
 
     def test_playlistid_without_songid(self):
+        self.b.current_playlist.load(Playlist(
+            tracks=[Track(name='a', id=33), Track(name='b', id=38)]))
         result = self.h.handle_request(u'playlistid')
+        self.assert_(u'Title: a' in result)
+        self.assert_(u'Id: 33' in result)
+        self.assert_(u'Title: b' in result)
+        self.assert_(u'Id: 38' in result)
         self.assert_(u'OK' in result)
 
     def test_playlistid_with_songid(self):
-        result = self.h.handle_request(u'playlistid "10"')
+        self.b.current_playlist.load(Playlist(
+            tracks=[Track(name='a', id=33), Track(name='b', id=38)]))
+        result = self.h.handle_request(u'playlistid "38"')
+        self.assert_(u'Title: a' not in result)
+        self.assert_(u'Id: 33' not in result)
+        self.assert_(u'Title: b' in result)
+        self.assert_(u'Id: 38' in result)
         self.assert_(u'OK' in result)
+
+    def test_playlistid_with_not_existing_songid_fails(self):
+        self.b.current_playlist.load(Playlist(
+            tracks=[Track(name='a', id=33), Track(name='b', id=38)]))
+        result = self.h.handle_request(u'playlistid "25"')
+        self.assert_(u'ACK Track with ID "25" not found' in result)
 
     def test_playlistinfo_without_songpos_or_range(self):
         result = self.h.handle_request(u'playlistinfo')
