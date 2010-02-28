@@ -791,11 +791,10 @@ class MpdHandler(object):
 
             Sets random state to ``STATE``, ``STATE`` should be 0 or 1.
         """
-        state = int(state)
-        if state:
-            raise MpdNotImplemented # TODO
+        if int(state):
+            self.backend.playback.random = True
         else:
-            raise MpdNotImplemented # TODO
+            self.backend.playback.random = False
 
     @handle_pattern(r'^repeat "(?P<state>[01])"$')
     def _playback_repeat(self, state):

@@ -321,11 +321,13 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
     def test_random_off(self):
         result = self.h.handle_request(u'random "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertFalse(self.b.playback.random)
+        self.assert_(u'OK' in result)
 
     def test_random_on(self):
         result = self.h.handle_request(u'random "1"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertTrue(self.b.playback.random)
+        self.assert_(u'OK' in result)
 
     def test_repeat_off(self):
         result = self.h.handle_request(u'repeat "0"')
