@@ -10,6 +10,7 @@ implement our own MPD server which is compatible with the numerous existing
 `MPD clients <http://mpd.wikia.com/wiki/Clients>`_.
 """
 
+import datetime as dt
 import logging
 import re
 import sys
@@ -1264,9 +1265,13 @@ class MpdHandler(object):
             playlist: b
             Last-Modified: 2010-02-06T02:11:08Z
         """
-        # TODO Add Last-Modified attribute to output
-        return [u'playlist: %s' % p.name
-            for p in self.backend.stored_playlists.playlists]
+        result = []
+        for playlist in self.backend.stored_playlists.playlists:
+            result.append((u'playlist', playlist.name))
+            # TODO Remove microseconds and add time zone information
+            result.append((u'Last-Modified',
+                (playlist.last_modified or dt.datetime.now()).isoformat()))
+        return result
 
     @handle_pattern(r'^load "(?P<name>[^"]+)"$')
     def _stored_playlists_load(self, name):
