@@ -91,7 +91,7 @@ class MpdHandler(object):
         raise MpdNotImplemented
 
     @handle_pattern(r'^add "(?P<uri>[^"]*)"$')
-    def _add(self, uri):
+    def _current_playlist_add(self, uri):
         """
         *musicpd.org, current playlist section:*
 
@@ -103,7 +103,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^addid "(?P<uri>[^"]*)"( (?P<songpos>\d+))*$')
-    def _addid(self, uri, songpos=None):
+    def _current_playlist_addid(self, uri, songpos=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -131,7 +131,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^clearerror$')
-    def _clearerror(self):
+    def _status_clearerror(self):
         """
         *musicpd.org, status section:*
 
@@ -143,7 +143,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^close$')
-    def _close(self):
+    def _connection_close(self):
         """
         *musicpd.org, connection section:*
 
@@ -196,7 +196,7 @@ class MpdHandler(object):
         return result
 
     @handle_pattern(r'^commands$')
-    def _commands(self):
+    def _reflection_commands(self):
         """
         *musicpd.org, reflection section:*
 
@@ -207,7 +207,7 @@ class MpdHandler(object):
         pass # TODO
 
     @handle_pattern(r'^consume "(?P<state>[01])"$')
-    def _consume(self, state):
+    def _playback_consume(self, state):
         """
         *musicpd.org, playback section:*
 
@@ -224,7 +224,7 @@ class MpdHandler(object):
             raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
-    def _count(self, tag, needle):
+    def _music_db_count(self, tag, needle):
         """
         *musicpd.org, music database section:*
 
@@ -236,7 +236,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^crossfade "(?P<seconds>\d+)"$')
-    def _crossfade(self, seconds):
+    def _playback_crossfade(self, seconds):
         """
         *musicpd.org, playback section:*
 
@@ -248,7 +248,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^currentsong$')
-    def _currentsong(self):
+    def _status_currentsong(self):
         """
         *musicpd.org, status section:*
 
@@ -262,7 +262,7 @@ class MpdHandler(object):
                 position=self.backend.playback.playlist_position)
 
     @handle_pattern(r'^decoders$')
-    def _decoders(self):
+    def _reflection_decoders(self):
         """
         *musicpd.org, reflection section:*
 
@@ -282,7 +282,7 @@ class MpdHandler(object):
 
     @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
     @handle_pattern(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
-    def _delete(self, songpos=None, start=None, end=None):
+    def _current_playlist_delete(self, songpos=None, start=None, end=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -293,7 +293,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^deleteid "(?P<songid>\d+)"$')
-    def _deleteid(self, songid):
+    def _current_playlist_deleteid(self, songid):
         """
         *musicpd.org, current playlist section:*
 
@@ -309,7 +309,7 @@ class MpdHandler(object):
             raise MpdAckError(unicode(e))
 
     @handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
-    def _disableoutput(self, outputid):
+    def _audio_output_disableoutput(self, outputid):
         """
         *musicpd.org, audio output section:*
 
@@ -325,7 +325,7 @@ class MpdHandler(object):
         pass
 
     @handle_pattern(r'^enableoutput "(?P<outputid>\d+)"$')
-    def _enableoutput(self, outputid):
+    def _audio_output_enableoutput(self, outputid):
         """
         *musicpd.org, audio output section:*
 
@@ -336,7 +336,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^find "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
-    def _find(self, type, what):
+    def _music_db_find(self, type, what):
         """
         *musicpd.org, music database section:*
 
@@ -351,7 +351,7 @@ class MpdHandler(object):
             search_result=True)
 
     @handle_pattern(r'^findadd "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
-    def _findadd(self, type, what):
+    def _music_db_findadd(self, type, what):
         """
         *musicpd.org, music database section:*
 
@@ -361,13 +361,13 @@ class MpdHandler(object):
             current playlist. ``TYPE`` can be any tag supported by MPD.
             ``WHAT`` is what to find.
         """
-        result = self._find(type, what)
+        result = self._music_db_find(type, what)
         # TODO Add result to current playlist
         #return result
 
     @handle_pattern(r'^idle$')
     @handle_pattern(r'^idle (?P<subsystems>.+)$')
-    def _idle(self, subsystems=None):
+    def _status_idle(self, subsystems=None):
         """
         *musicpd.org, status section:*
 
@@ -403,7 +403,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^kill$')
-    def _kill(self):
+    def _connection_kill(self):
         """
         *musicpd.org, connection section:*
 
@@ -415,7 +415,7 @@ class MpdHandler(object):
 
     @handle_pattern(r'^list "(?P<type>artist)"$')
     @handle_pattern(r'^list "(?P<type>album)"( "(?P<artist>[^"]+)")*$')
-    def _list(self, type, artist=None):
+    def _music_db_list(self, type, artist=None):
         """
         *musicpd.org, music database section:*
 
@@ -430,7 +430,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
-    def _listall(self, uri):
+    def _music_db_listall(self, uri):
         """
         *musicpd.org, music database section:*
 
@@ -441,7 +441,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^listallinfo "(?P<uri>[^"]+)"')
-    def _listallinfo(self, uri):
+    def _music_db_listallinfo(self, uri):
         """
         *musicpd.org, music database section:*
 
@@ -453,7 +453,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^listplaylist "(?P<name>[^"]+)"$')
-    def _listplaylist(self, name):
+    def _stored_playlists_listplaylist(self, name):
         """
         *musicpd.org, stored playlists section:*
 
@@ -474,7 +474,7 @@ class MpdHandler(object):
             raise MpdAckError(e)
 
     @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
-    def _listplaylistinfo(self, name):
+    def _stored_playlists_listplaylistinfo(self, name):
         """
         *musicpd.org, stored playlists section:*
 
@@ -494,7 +494,7 @@ class MpdHandler(object):
             raise MpdAckError(e)
 
     @handle_pattern(r'^listplaylists$')
-    def _listplaylists(self):
+    def _stored_playlists_listplaylists(self):
         """
         *musicpd.org, stored playlists section:*
 
@@ -519,7 +519,7 @@ class MpdHandler(object):
             for p in self.backend.stored_playlists.playlists]
 
     @handle_pattern(r'^load "(?P<name>[^"]+)"$')
-    def _load(self, name):
+    def _stored_playlists_load(self, name):
         """
         *musicpd.org, stored playlists section:*
 
@@ -534,7 +534,7 @@ class MpdHandler(object):
 
     @handle_pattern(r'^lsinfo$')
     @handle_pattern(r'^lsinfo "(?P<uri>[^"]*)"$')
-    def _lsinfo(self, uri=None):
+    def _music_db_lsinfo(self, uri=None):
         """
         *musicpd.org, music database section:*
 
@@ -547,12 +547,13 @@ class MpdHandler(object):
             ``listplaylists`` instead.
         """
         if uri == u'/' or uri is None:
-            return self._listplaylists()
+            return self._stored_playlists_listplaylists()
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
     @handle_pattern(r'^move "(?P<start>\d+):(?P<end>\d+)*" "(?P<to>\d+)"$')
-    def _move(self, songpos=None, start=None, end=None, to=None):
+    def _current_playlist_move(self, songpos=None,
+            start=None, end=None, to=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -564,7 +565,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^moveid "(?P<songid>\d+)" "(?P<to>\d+)"$')
-    def _moveid(self, songid, to):
+    def _current_playlist_moveid(self, songid, to):
         """
         *musicpd.org, current playlist section:*
 
@@ -577,7 +578,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^next$')
-    def _next(self):
+    def _playback_next(self):
         """
         *musicpd.org, playback section:*
 
@@ -588,12 +589,12 @@ class MpdHandler(object):
         return self.backend.playback.next()
 
     @handle_pattern(r'^noidle$')
-    def _noidle(self):
+    def _status_noidle(self):
         """See :meth:`_idle`."""
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^notcommands$')
-    def _notcommands(self):
+    def _reflection_notcommands(self):
         """
         *musicpd.org, reflection section:*
 
@@ -604,7 +605,7 @@ class MpdHandler(object):
         pass # TODO
 
     @handle_pattern(r'^outputs$')
-    def _outputs(self):
+    def _audio_ouput_outputs(self):
         """
         *musicpd.org, audio output section:*
 
@@ -619,7 +620,7 @@ class MpdHandler(object):
         ]
 
     @handle_pattern(r'^password "(?P<password>[^"]+)"$')
-    def _password(self, password):
+    def _connection_password(self, password):
         """
         *musicpd.org, connection section:*
 
@@ -631,7 +632,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^pause "(?P<state>[01])"$')
-    def _pause(self, state):
+    def _playback_pause(self, state):
         """
         *musicpd.org, playback section:*
 
@@ -645,7 +646,7 @@ class MpdHandler(object):
             self.backend.playback.resume()
 
     @handle_pattern(r'^ping$')
-    def _ping(self):
+    def _connection_ping(self):
         """
         *musicpd.org, connection section:*
 
@@ -656,7 +657,7 @@ class MpdHandler(object):
         pass
 
     @handle_pattern(r'^play$')
-    def _play(self):
+    def _playback_play(self):
         """
         The original MPD server resumes from the paused state on ``play``
         without arguments.
@@ -664,7 +665,7 @@ class MpdHandler(object):
         return self.backend.playback.play()
 
     @handle_pattern(r'^play "(?P<songpos>\d+)"$')
-    def _playpos(self, songpos):
+    def _playback_playpos(self, songpos):
         """
         *musicpd.org, playback section:*
 
@@ -680,7 +681,7 @@ class MpdHandler(object):
             raise MpdAckError(u'Position out of bounds')
 
     @handle_pattern(r'^playid "(?P<songid>\d+)"$')
-    def _playid(self, songid):
+    def _playback_playid(self, songid):
         """
         *musicpd.org, playback section:*
 
@@ -696,7 +697,7 @@ class MpdHandler(object):
             raise MpdAckError(unicode(e))
 
     @handle_pattern(r'^playlist$')
-    def _playlist(self):
+    def _current_playlist_playlist(self):
         """
         *musicpd.org, current playlist section:*
 
@@ -708,10 +709,10 @@ class MpdHandler(object):
 
                 Do not use this, instead use ``playlistinfo``.
         """
-        return self._playlistinfo()
+        return self._current_playlist_playlistinfo()
 
     @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
-    def _playlistadd(self, name, uri):
+    def _stored_playlist_playlistadd(self, name, uri):
         """
         *musicpd.org, stored playlists section:*
 
@@ -724,7 +725,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^playlistclear "(?P<name>[^"]+)"$')
-    def _playlistclear(self, name):
+    def _stored_playlist_playlistclear(self, name):
         """
         *musicpd.org, stored playlists section:*
 
@@ -735,7 +736,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^playlistdelete "(?P<name>[^"]+)" "(?P<songpos>\d+)"$')
-    def _playlistdelete(self, name, songpos):
+    def _stored_playlist_playlistdelete(self, name, songpos):
         """
         *musicpd.org, stored playlists section:*
 
@@ -746,7 +747,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^playlistfind "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
-    def _playlistfind(self, tag, needle):
+    def _current_playlist_playlistfind(self, tag, needle):
         """
         *musicpd.org, current playlist section:*
 
@@ -757,7 +758,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^playlistid( "(?P<songid>\S+)")*$')
-    def _playlistid(self, songid=None):
+    def _current_playlist_playlistid(self, songid=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -772,7 +773,8 @@ class MpdHandler(object):
     @handle_pattern(r'^playlistinfo$')
     @handle_pattern(r'^playlistinfo "(?P<songpos>\d+)"$')
     @handle_pattern(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
-    def _playlistinfo(self, songpos=None, start=None, end=None):
+    def _current_playlist_playlistinfo(self, songpos=None,
+            start=None, end=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -794,8 +796,9 @@ class MpdHandler(object):
                 end = int(end)
             return self.backend.current_playlist.playlist.mpd_format(start, end)
 
-    @handle_pattern(r'^playlistmove "(?P<name>[^"]+)" "(?P<songid>\d+)" "(?P<songpos>\d+)"$')
-    def _playlistmove(self, name, songid, songpos):
+    @handle_pattern(r'^playlistmove "(?P<name>[^"]+)" '
+        r'"(?P<songid>\d+)" "(?P<songpos>\d+)"$')
+    def _stored_playlist_playlistmove(self, name, songid, songpos):
         """
         *musicpd.org, stored playlists section:*
 
@@ -807,7 +810,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
-    def _playlistsearch(self, tag, needle):
+    def _current_playlist_playlistsearch(self, tag, needle):
         """
         *musicpd.org, current playlist section:*
 
@@ -819,7 +822,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^plchanges "(?P<version>\d+)"$')
-    def _plchanges(self, version):
+    def _current_playlist_plchanges(self, version):
         """
         *musicpd.org, current playlist section:*
 
@@ -834,7 +837,7 @@ class MpdHandler(object):
             return self.backend.current_playlist.playlist.mpd_format()
 
     @handle_pattern(r'^plchangesposid "(?P<version>\d+)"$')
-    def _plchangesposid(self, version):
+    def _current_playlist_plchangesposid(self, version):
         """
         *musicpd.org, current playlist section:*
 
@@ -850,7 +853,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^previous$')
-    def _previous(self):
+    def _playback_previous(self):
         """
         *musicpd.org, playback section:*
 
@@ -861,7 +864,7 @@ class MpdHandler(object):
         return self.backend.playback.previous()
 
     @handle_pattern(r'^rename "(?P<old_name>[^"]+)" "(?P<new_name>[^"]+)"$')
-    def _rename(self, old_name, new_name):
+    def _stored_playlists_rename(self, old_name, new_name):
         """
         *musicpd.org, stored playlists section:*
 
@@ -872,7 +875,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^random "(?P<state>[01])"$')
-    def _random(self, state):
+    def _playback_random(self, state):
         """
         *musicpd.org, playback section:*
 
@@ -887,7 +890,7 @@ class MpdHandler(object):
             raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^repeat "(?P<state>[01])"$')
-    def _repeat(self, state):
+    def _playback_repeat(self, state):
         """
         *musicpd.org, playback section:*
 
@@ -902,7 +905,7 @@ class MpdHandler(object):
             raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^replay_gain_mode "(?P<mode>(off|track|album))"$')
-    def _replay_gain_mode(self, mode):
+    def _playback_replay_gain_mode(self, mode):
         """
         *musicpd.org, playback section:*
 
@@ -918,7 +921,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^replay_gain_status$')
-    def _replay_gain_status(self):
+    def _playback_replay_gain_status(self):
         """
         *musicpd.org, playback section:*
 
@@ -930,7 +933,7 @@ class MpdHandler(object):
         return u'off' # TODO
 
     @handle_pattern(r'^rescan( "(?P<uri>[^"]+)")*$')
-    def _rescan(self, uri=None):
+    def _music_db_rescan(self, uri=None):
         """
         *musicpd.org, music database section:*
 
@@ -938,10 +941,10 @@ class MpdHandler(object):
 
             Same as ``update``, but also rescans unmodified files.
         """
-        return self._update(uri, rescan_unmodified_files=True)
+        return self._music_db_update(uri, rescan_unmodified_files=True)
 
     @handle_pattern(r'^rm "(?P<name>[^"]+)"$')
-    def _rm(self, name):
+    def _stored_playlists_rm(self, name):
         """
         *musicpd.org, stored playlists section:*
 
@@ -952,7 +955,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^save "(?P<name>[^"]+)"$')
-    def _save(self, name):
+    def _stored_playlists_save(self, name):
         """
         *musicpd.org, stored playlists section:*
 
@@ -964,7 +967,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>[^"]+)"$')
-    def _search(self, type, what):
+    def _music_db_search(self, type, what):
         """
         *musicpd.org, music database section:*
 
@@ -980,7 +983,7 @@ class MpdHandler(object):
             search_result=True)
 
     @handle_pattern(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
-    def _seek(self, songpos, seconds):
+    def _playback_seek(self, songpos, seconds):
         """
         *musicpd.org, playback section:*
 
@@ -992,7 +995,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^seekid "(?P<songid>\d+)" "(?P<seconds>\d+)"$')
-    def _seekid(self, songid, seconds):
+    def _playback_seekid(self, songid, seconds):
         """
         *musicpd.org, playback section:*
 
@@ -1003,7 +1006,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^setvol "(?P<volume>[-+]*\d+)"$')
-    def _setvol(self, volume):
+    def _playback_setvol(self, volume):
         """
         *musicpd.org, playback section:*
 
@@ -1020,7 +1023,7 @@ class MpdHandler(object):
 
     @handle_pattern(r'^shuffle$')
     @handle_pattern(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')
-    def _shuffle(self, start=None, end=None):
+    def _current_playlist_shuffle(self, start=None, end=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -1032,7 +1035,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^single "(?P<state>[01])"$')
-    def _single(self, state):
+    def _playback_single(self, state):
         """
         *musicpd.org, playback section:*
 
@@ -1049,7 +1052,7 @@ class MpdHandler(object):
             raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^stats$')
-    def _stats(self):
+    def _status_stats(self):
         """
         *musicpd.org, status section:*
 
@@ -1075,7 +1078,7 @@ class MpdHandler(object):
         }
 
     @handle_pattern(r'^stop$')
-    def _stop(self):
+    def _playback_stop(self):
         """
         *musicpd.org, playback section:*
 
@@ -1086,7 +1089,7 @@ class MpdHandler(object):
         self.backend.playback.stop()
 
     @handle_pattern(r'^status$')
-    def _status(self):
+    def _status_status(self):
         """
         *musicpd.org, status section:*
 
@@ -1118,67 +1121,67 @@ class MpdHandler(object):
             - ``error``: if there is an error, returns message here
         """
         result = [
-            ('volume', self._status_volume()),
-            ('repeat', self._status_repeat()),
-            ('random', self._status_random()),
-            ('single', self._status_single()),
-            ('consume', self._status_consume()),
-            ('playlist', self._status_playlist_version()),
-            ('playlistlength', self._status_playlist_length()),
-            ('xfade', self._status_xfade()),
-            ('state', self._status_state()),
+            ('volume', self.__status_status_volume()),
+            ('repeat', self.__status_status_repeat()),
+            ('random', self.__status_status_random()),
+            ('single', self.__status_status_single()),
+            ('consume', self.__status_status_consume()),
+            ('playlist', self.__status_status_playlist_version()),
+            ('playlistlength', self.__status_status_playlist_length()),
+            ('xfade', self.__status_status_xfade()),
+            ('state', self.__status_status_state()),
         ]
         if self.backend.playback.current_track is not None:
-            result.append(('song', self._status_songpos()))
-            result.append(('songid', self._status_songid()))
+            result.append(('song', self.__status_status_songpos()))
+            result.append(('songid', self.__status_status_songid()))
         if self.backend.playback.state in (
                 self.backend.playback.PLAYING, self.backend.playback.PAUSED):
-            result.append(('time', self._status_time()))
+            result.append(('time', self.__status_status_time()))
             # TODO Add 'elapsed' here when moving to MPD 0.16.0
-            result.append(('bitrate', self._status_bitrate()))
+            result.append(('bitrate', self.__status_status_bitrate()))
         return result
 
-    def _status_bitrate(self):
+    def __status_status_bitrate(self):
         if self.backend.playback.current_track is not None:
             return self.backend.playback.current_track.bitrate
 
-    def _status_consume(self):
+    def __status_status_consume(self):
         if self.backend.playback.consume:
             return 1
         else:
             return 0
 
-    def _status_playlist_length(self):
+    def __status_status_playlist_length(self):
         return self.backend.current_playlist.playlist.length
 
-    def _status_playlist_version(self):
+    def __status_status_playlist_version(self):
         return self.backend.current_playlist.version
 
-    def _status_random(self):
+    def __status_status_random(self):
         if self.backend.playback.random:
             return 1
         else:
             return 0
 
-    def _status_repeat(self):
+    def __status_status_repeat(self):
         if self.backend.playback.repeat:
             return 1
         else:
             return 0
 
-    def _status_single(self):
+    def __status_status_single(self):
         return 0 # TODO
 
-    def _status_songid(self):
+    def __status_status_songid(self):
         if self.backend.playback.current_track.id is not None:
             return self.backend.playback.current_track.id
         else:
-            return self._status_songpos()
+            return self.__status_status_songpos()
 
-    def _status_songpos(self):
+    def __status_status_songpos(self):
         return self.backend.playback.playlist_position
 
-    def _status_state(self):
+    def __status_status_state(self):
         if self.backend.playback.state == self.backend.playback.PLAYING:
             return u'play'
         elif self.backend.playback.state == self.backend.playback.STOPPED:
@@ -1186,14 +1189,14 @@ class MpdHandler(object):
         elif self.backend.playback.state == self.backend.playback.PAUSED:
             return u'pause'
 
-    def _status_time(self):
-        return u'%s:%s' % (
-            self._status_time_elapsed(), self._status_time_total())
+    def __status_status_time(self):
+        return u'%s:%s' % (self.__status_status_time_elapsed(),
+            self.__status_status_time_total())
 
-    def _status_time_elapsed(self):
+    def __status_status_time_elapsed(self):
         return self.backend.playback.time_position
 
-    def _status_time_total(self):
+    def __status_status_time_total(self):
         if self.backend.playback.current_track is None:
             return 0
         elif self.backend.playback.current_track.length is None:
@@ -1201,16 +1204,17 @@ class MpdHandler(object):
         else:
             return self.backend.playback.current_track.length // 1000
 
-    def _status_volume(self):
+    def __status_status_volume(self):
         if self.backend.playback.volume is not None:
             return self.backend.playback.volume
         else:
             return 0
 
-    def _status_xfade(self):
+    def __status_status_xfade(self):
         return 0 # TODO
 
-    @handle_pattern(r'^sticker delete "(?P<type>[^"]+)" "(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')
+    @handle_pattern(r'^sticker delete "(?P<type>[^"]+)" '
+        r'"(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')
     def _sticker_delete(self, type, uri, name=None):
         """
         *musicpd.org, sticker section:*
@@ -1281,7 +1285,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
-    def _swapid(self, songid1, songid2):
+    def _current_playlist_swapid(self, songid1, songid2):
         """
         *musicpd.org, current playlist section:*
 
@@ -1292,7 +1296,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^tagtypes$')
-    def _tagtypes(self):
+    def _reflection_tagtypes(self):
         """
         *musicpd.org, reflection section:*
 
@@ -1303,7 +1307,7 @@ class MpdHandler(object):
         pass # TODO
 
     @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
-    def _update(self, uri=None, rescan_unmodified_files=False):
+    def _music_db_update(self, uri=None, rescan_unmodified_files=False):
         """
         *musicpd.org, music database section:*
 
@@ -1322,7 +1326,7 @@ class MpdHandler(object):
         return {'updating_db': 0} # TODO
 
     @handle_pattern(r'^urlhandlers$')
-    def _urlhandlers(self):
+    def _reflection_urlhandlers(self):
         """
         *musicpd.org, reflection section:*
 
