@@ -249,6 +249,12 @@ class BasePlaybackController(object):
     #:     The current track is played once.
     repeat = False
 
+    #: :class:`True`
+    #:     Playback is stopped after current song, unless in repeat mode.
+    #: :class:`False`
+    #:     Playback continues after current song.
+    single = False
+
     def __init__(self, backend, mixer=alsaaudio.Mixer):
         self.backend = backend
         self._state = self.STOPPED

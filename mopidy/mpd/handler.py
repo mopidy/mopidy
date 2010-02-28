@@ -888,11 +888,10 @@ class MpdHandler(object):
             single is activated, playback is stopped after current song, or
             song is repeated if the ``repeat`` mode is enabled.
         """
-        state = int(state)
-        if state:
-            raise MpdNotImplemented # TODO
+        if int(state):
+            self.backend.playback.single = True
         else:
-            raise MpdNotImplemented # TODO
+            self.backend.playback.single = False
 
     @handle_pattern(r'^stop$')
     def _playback_stop(self):

@@ -371,11 +371,13 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
     def test_single_off(self):
         result = self.h.handle_request(u'single "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertFalse(self.b.playback.single)
+        self.assert_(u'OK' in result)
 
     def test_single_on(self):
         result = self.h.handle_request(u'single "1"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertTrue(self.b.playback.single)
+        self.assert_(u'OK' in result)
 
     def test_replay_gain_mode_off(self):
         result = self.h.handle_request(u'replay_gain_mode "off"')
