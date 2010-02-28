@@ -29,7 +29,7 @@ CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  
 #: ``localhost``
 #:     Listens only on the loopback interface. *Default.*
 #: ``0.0.0.0``
-#:     listens on all interfaces.
+#:     Listens on all interfaces.
 MPD_SERVER_HOSTNAME = u'localhost'
 
 #: Which TCP port Mopidy should listen to. *Default: 6600*
