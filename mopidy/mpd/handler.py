@@ -113,7 +113,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^outputs$')
-    def _audio_ouput_outputs(self):
+    def _audio_output_outputs(self):
         """
         *musicpd.org, audio output section:*
 
