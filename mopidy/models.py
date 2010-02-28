@@ -68,8 +68,8 @@ class Track(ImmutableObject):
     """
     :param uri: track URI
     :type uri: string
-    :param title: track title
-    :type title: string
+    :param name: track name
+    :type name: string
     :param artists: track artists
     :type artists: list of :class:`Artist`
     :param album: track album
@@ -89,8 +89,8 @@ class Track(ImmutableObject):
     #: The track URI. Read-only.
     uri = None
 
-    #: The track title. Read-only.
-    title = None
+    #: The track name. Read-only.
+    name = None
 
     #: The track :class:`Album`. Read-only.
     album = None
@@ -131,7 +131,7 @@ class Track(ImmutableObject):
             ('file', self.uri or ''),
             ('Time', self.length and (self.length // 1000) or 0),
             ('Artist', self.mpd_format_artists()),
-            ('Title', self.title or ''),
+            ('Title', self.name or ''),
             ('Album', self.album and self.album.name or ''),
             ('Date', self.date or ''),
         ]

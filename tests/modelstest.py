@@ -50,11 +50,11 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track.uri, uri)
         self.assertRaises(AttributeError, setattr, track, 'uri', None)
 
-    def test_title(self):
-        title = u'a title'
-        track = Track(title=title)
-        self.assertEqual(track.title, title)
-        self.assertRaises(AttributeError, setattr, track, 'title', None)
+    def test_name(self):
+        name = u'a name'
+        track = Track(name=name)
+        self.assertEqual(track.name, name)
+        self.assertRaises(AttributeError, setattr, track, 'name', None)
 
     def test_artists(self):
         artists = [Artist(), Artist()]
@@ -115,7 +115,7 @@ class TrackTest(unittest.TestCase):
         track = Track(
             uri=u'a uri',
             artists=[Artist(name=u'an artist')],
-            title=u'a title',
+            name=u'a name',
             album=Album(name=u'an album', num_tracks=13),
             track_no=7,
             date=dt.date(1977, 1, 1),
@@ -126,7 +126,7 @@ class TrackTest(unittest.TestCase):
         self.assert_(('file', 'a uri') in result)
         self.assert_(('Time', 137) in result)
         self.assert_(('Artist', 'an artist') in result)
-        self.assert_(('Title', 'a title') in result)
+        self.assert_(('Title', 'a name') in result)
         self.assert_(('Album', 'an album') in result)
         self.assert_(('Track', '7/13') in result)
         self.assert_(('Date', dt.date(1977, 1, 1)) in result)

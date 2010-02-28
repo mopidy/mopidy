@@ -126,11 +126,11 @@ class LibspotifyTranslator(object):
 
     def to_mopidy_track(self, spotify_track):
         if not spotify_track.is_loaded():
-            return Track(title=u'[loading...]')
+            return Track(name=u'[loading...]')
         uri = str(Link.from_track(spotify_track, 0))
         return Track(
             uri=uri,
-            title=spotify_track.name().decode(ENCODING),
+            name=spotify_track.name().decode(ENCODING),
             artists=[self.to_mopidy_artist(a) for a in spotify_track.artists()],
             album=self.to_mopidy_album(spotify_track.album()),
             track_no=spotify_track.index(),

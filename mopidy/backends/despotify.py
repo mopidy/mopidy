@@ -103,7 +103,7 @@ class DespotifyTranslator(object):
             date = None
         return Track(
             uri=spotify_track.get_uri(),
-            title=spotify_track.title.decode(ENCODING),
+            name=spotify_track.title.decode(ENCODING),
             artists=[self.to_mopidy_artist(a) for a in spotify_track.artists],
             album=self.to_mopidy_album(spotify_track.album),
             track_no=spotify_track.tracknumber,
