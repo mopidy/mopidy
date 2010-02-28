@@ -876,7 +876,7 @@ class ReflectionHandlerTest(unittest.TestCase):
 
     def test_commands(self):
         result = self.h.handle_request(u'commands')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_decoders(self):
         result = self.h.handle_request(u'decoders')
@@ -884,11 +884,11 @@ class ReflectionHandlerTest(unittest.TestCase):
 
     def test_notcommands(self):
         result = self.h.handle_request(u'notcommands')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_tagtypes(self):
         result = self.h.handle_request(u'tagtypes')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_urlhandlers(self):
         result = self.h.handle_request(u'urlhandlers')
