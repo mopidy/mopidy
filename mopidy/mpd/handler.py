@@ -248,9 +248,8 @@ class MpdHandler(object):
             self.backend.current_playlist.add(track, at_position=songpos)
             return ('Id', track.id)
 
-    @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
     @handle_pattern(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
-    def _current_playlist_delete(self, songpos=None, start=None, end=None):
+    def _current_playlist_delete_range(self, start, end=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -258,22 +257,24 @@ class MpdHandler(object):
 
             Deletes a song from the playlist.
         """
+        start = int(start)
+        if end is not None:
+            end = int(end)
+        else:
+            end = self.backend.current_playlist.playlist.length
+        tracks = self.backend.current_playlist.playlist.tracks[start:end]
+        if not tracks:
+            raise MpdAckError(u'Position out of bounds')
+        for track in tracks:
+            self.backend.current_playlist.remove(track)
+
+    @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
+    def _current_playlist_delete_songpos(self, songpos):
+        """See :meth:`_current_playlist_delete_range`"""
         try:
-            tracks = []
-            if songpos is not None:
-                songpos = int(songpos)
-                tracks = [
-                    self.backend.current_playlist.playlist.tracks[songpos]]
-            elif start is not None:
-                start = int(start)
-                if end is not None:
-                    end = int(end)
-                else:
-                    end = self.backend.current_playlist.playlist.length
-                tracks = self.backend.current_playlist.playlist.tracks[
-                    start:end]
-            for track in tracks:
-                self.backend.current_playlist.remove(track)
+            songpos = int(songpos)
+            track = self.backend.current_playlist.playlist.tracks[songpos]
+            self.backend.current_playlist.remove(track)
         except IndexError, e:
             raise MpdAckError(u'Position out of bounds')
 

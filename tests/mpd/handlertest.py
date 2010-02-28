@@ -544,6 +544,14 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEquals(self.b.current_playlist.playlist.length, 4)
         self.assert_(u'OK' in result)
 
+    def test_delete_songpos_out_of_bounds(self):
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        result = self.h.handle_request(u'delete "5"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        self.assert_(u'ACK Position out of bounds' in result)
+
     def test_delete_open_range(self):
         self.b.current_playlist.playlist = Playlist(
             tracks=[Track(), Track(), Track(), Track(), Track()])
@@ -560,11 +568,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEquals(self.b.current_playlist.playlist.length, 3)
         self.assert_(u'OK' in result)
 
-    def test_delete_out_of_range(self):
+    def test_delete_range_out_of_bounds(self):
         self.b.current_playlist.playlist = Playlist(
             tracks=[Track(), Track(), Track(), Track(), Track()])
         self.assertEquals(self.b.current_playlist.playlist.length, 5)
-        result = self.h.handle_request(u'delete "5"')
+        result = self.h.handle_request(u'delete "5:7"')
         self.assertEquals(self.b.current_playlist.playlist.length, 5)
         self.assert_(u'ACK Position out of bounds' in result)
 
