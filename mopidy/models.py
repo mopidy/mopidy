@@ -17,6 +17,7 @@ class ImmutableObject(object):
             return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
 
+
 class Artist(ImmutableObject):
     """
     :param uri: artist URI
@@ -169,6 +170,11 @@ class Playlist(ImmutableObject):
     #: The playlist name. Read-only.
     name = None
 
+    #: The playlist modification time. Read-only.
+    #:
+    #: :class:`datetime.datetime`, or :class:`None` if unknown.
+    last_modified = None
+
     def __init__(self, *args, **kwargs):
         self._tracks = kwargs.pop('tracks', [])
         super(Playlist, self).__init__(*args, **kwargs)
@@ -202,7 +208,7 @@ class Playlist(ImmutableObject):
             tracks.append(track.mpd_format(position, search_result))
         return tracks
 
-    def with_(self, uri=None, name=None, tracks=None):
+    def with_(self, uri=None, name=None, tracks=None, last_modified=None):
         """
         Create a new playlist object with the given values. The values that are
         not given are taken from the object the method is called on.
@@ -223,4 +229,7 @@ class Playlist(ImmutableObject):
             name = self.name
         if tracks is None:
             tracks = self.tracks
-        return Playlist(uri=uri, name=name, tracks=tracks)
+        if last_modified is None:
+            last_modified = self.last_modified
+        return Playlist(uri=uri, name=name, tracks=tracks,
+            last_modified=last_modified)

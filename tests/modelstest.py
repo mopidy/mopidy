@@ -137,6 +137,7 @@ class TrackTest(unittest.TestCase):
         track = Track(artists=[Artist(name=u'ABBA'), Artist(name=u'Beatles')])
         self.assertEqual(track.mpd_format_artists(), u'ABBA, Beatles')
 
+
 class PlaylistTest(unittest.TestCase):
     def test_uri(self):
         uri = u'an_uri'
@@ -161,6 +162,13 @@ class PlaylistTest(unittest.TestCase):
         playlist = Playlist(tracks=tracks)
         self.assertEqual(playlist.length, 3)
 
+    def test_last_modified(self):
+        last_modified = dt.datetime.now()
+        playlist = Playlist(last_modified=last_modified)
+        self.assertEqual(playlist.last_modified, last_modified)
+        self.assertRaises(AttributeError, setattr, playlist, 'last_modified',
+            None)
+
     def test_mpd_format(self):
         playlist = Playlist(tracks=[
             Track(track_no=1), Track(track_no=2), Track(track_no=3)])
@@ -176,25 +184,46 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_uri(self):
         tracks = [Track()]
-        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks)
+        last_modified = dt.datetime.now()
+        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
+            last_modified=last_modified)
         new_playlist = playlist.with_(uri=u'another uri')
         self.assertEqual(new_playlist.uri, u'another uri')
         self.assertEqual(new_playlist.name, u'a name')
         self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(new_playlist.last_modified, last_modified)
 
     def test_with_new_name(self):
         tracks = [Track()]
-        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks)
+        last_modified = dt.datetime.now()
+        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
+            last_modified=last_modified)
         new_playlist = playlist.with_(name=u'another name')
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'another name')
         self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(new_playlist.last_modified, last_modified)
 
     def test_with_new_tracks(self):
         tracks = [Track()]
-        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks)
+        last_modified = dt.datetime.now()
+        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
+            last_modified=last_modified)
         new_tracks = [Track(), Track()]
         new_playlist = playlist.with_(tracks=new_tracks)
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'a name')
         self.assertEqual(new_playlist.tracks, new_tracks)
+        self.assertEqual(new_playlist.last_modified, last_modified)
+
+    def test_with_new_last_modified(self):
+        tracks = [Track()]
+        last_modified = dt.datetime.now()
+        new_last_modified = last_modified + dt.timedelta(1)
+        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
+            last_modified=last_modified)
+        new_playlist = playlist.with_(last_modified=new_last_modified)
+        self.assertEqual(new_playlist.uri, u'an uri')
+        self.assertEqual(new_playlist.name, u'a name')
+        self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(new_playlist.last_modified, new_last_modified)
