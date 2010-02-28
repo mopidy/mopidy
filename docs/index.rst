@@ -10,6 +10,7 @@ Contents
     installation
     settings
     development
+    api/index
 
 Indices and tables
 ==================

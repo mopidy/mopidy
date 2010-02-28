@@ -15,15 +15,6 @@ modular, so we can extend it with other backends in the future, like file
 playback and other online music services such as Last.fm.
 
 
-API documentation
-=================
-
-.. toctree::
-    :glob:
-
-    api/**
-
-
 Code style
 ==========
 
