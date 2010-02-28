@@ -90,6 +90,130 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented
 
+    @handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
+    def _audio_output_disableoutput(self, outputid):
+        """
+        *musicpd.org, audio output section:*
+
+            ``disableoutput``
+
+            Turns an output off.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^enableoutput "(?P<outputid>\d+)"$')
+    def _audio_output_enableoutput(self, outputid):
+        """
+        *musicpd.org, audio output section:*
+
+            ``enableoutput``
+
+            Turns an output on.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^outputs$')
+    def _audio_ouput_outputs(self):
+        """
+        *musicpd.org, audio output section:*
+
+            ``outputs``
+
+            Shows information about all outputs.
+        """
+        return [
+            ('outputid', 0),
+            ('outputname', self.backend.__class__.__name__),
+            ('outputenabled', 1),
+        ]
+
+    @handle_pattern(r'^command_list_begin$')
+    def _command_list_begin(self):
+        """
+        *musicpd.org, command list section:*
+
+            To facilitate faster adding of files etc. you can pass a list of
+            commands all at once using a command list. The command list begins
+            with ``command_list_begin`` or ``command_list_ok_begin`` and ends
+            with ``command_list_end``.
+
+            It does not execute any commands until the list has ended. The
+            return value is whatever the return for a list of commands is. On
+            success for all commands, ``OK`` is returned. If a command fails,
+            no more commands are executed and the appropriate ``ACK`` error is
+            returned. If ``command_list_ok_begin`` is used, ``list_OK`` is
+            returned for each successful command executed in the command list.
+        """
+        self.command_list = []
+        self.command_list_ok = False
+
+    @handle_pattern(r'^command_list_end$')
+    def _command_list_end(self):
+        """See :meth:`_command_list_begin`."""
+        (command_list, self.command_list) = (self.command_list, False)
+        (command_list_ok, self.command_list_ok) = (self.command_list_ok, False)
+        result = []
+        for command in command_list:
+            response = self.handle_request(command, add_ok=False)
+            if response is not None:
+                result.append(response)
+            if response and response[-1].startswith(u'ACK'):
+                return result
+            if command_list_ok:
+                response.append(u'list_OK')
+        return result
+
+    @handle_pattern(r'^command_list_ok_begin$')
+    def _command_list_ok_begin(self):
+        """See :meth:`_command_list_begin`."""
+        self.command_list = []
+        self.command_list_ok = True
+
+    @handle_pattern(r'^close$')
+    def _connection_close(self):
+        """
+        *musicpd.org, connection section:*
+
+            ``close``
+
+            Closes the connection to MPD.
+        """
+        self.session.do_close()
+
+    @handle_pattern(r'^kill$')
+    def _connection_kill(self):
+        """
+        *musicpd.org, connection section:*
+
+            ``kill``
+
+            Kills MPD.
+        """
+        self.session.do_kill()
+
+    @handle_pattern(r'^password "(?P<password>[^"]+)"$')
+    def _connection_password(self, password):
+        """
+        *musicpd.org, connection section:*
+
+            ``password {PASSWORD}``
+
+            This is used for authentication with the server. ``PASSWORD`` is
+            simply the plaintext password.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^ping$')
+    def _connection_ping(self):
+        """
+        *musicpd.org, connection section:*
+
+            ``ping``
+
+            Does nothing but return ``OK``.
+        """
+        pass
+
     @handle_pattern(r'^add "(?P<uri>[^"]*)"$')
     def _current_playlist_add(self, uri):
         """
@@ -116,167 +240,6 @@ class MpdHandler(object):
                 addid "foo.mp3"
                 Id: 999
                 OK
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^clear$')
-    def _current_playlist_clear(self):
-        """
-        *musicpd.org, current playlist section:*
-
-            ``clear``
-
-            Clears the current playlist.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^clearerror$')
-    def _status_clearerror(self):
-        """
-        *musicpd.org, status section:*
-
-            ``clearerror``
-
-            Clears the current error message in status (this is also
-            accomplished by any command that starts playback).
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^close$')
-    def _connection_close(self):
-        """
-        *musicpd.org, connection section:*
-
-            ``close``
-
-            Closes the connection to MPD.
-        """
-        self.session.do_close()
-
-    @handle_pattern(r'^command_list_begin$')
-    def _command_list_begin(self):
-        """
-        *musicpd.org, command list section:*
-
-            To facilitate faster adding of files etc. you can pass a list of
-            commands all at once using a command list. The command list begins
-            with ``command_list_begin`` or ``command_list_ok_begin`` and ends
-            with ``command_list_end``.
-
-            It does not execute any commands until the list has ended. The
-            return value is whatever the return for a list of commands is. On
-            success for all commands, ``OK`` is returned. If a command fails,
-            no more commands are executed and the appropriate ``ACK`` error is
-            returned. If ``command_list_ok_begin`` is used, ``list_OK`` is
-            returned for each successful command executed in the command list.
-        """
-        self.command_list = []
-        self.command_list_ok = False
-
-    @handle_pattern(r'^command_list_ok_begin$')
-    def _command_list_ok_begin(self):
-        """See :meth:`_command_list_begin`."""
-        self.command_list = []
-        self.command_list_ok = True
-
-    @handle_pattern(r'^command_list_end$')
-    def _command_list_end(self):
-        """See :meth:`_command_list_begin`."""
-        (command_list, self.command_list) = (self.command_list, False)
-        (command_list_ok, self.command_list_ok) = (self.command_list_ok, False)
-        result = []
-        for command in command_list:
-            response = self.handle_request(command, add_ok=False)
-            if response is not None:
-                result.append(response)
-            if response and response[-1].startswith(u'ACK'):
-                return result
-            if command_list_ok:
-                response.append(u'list_OK')
-        return result
-
-    @handle_pattern(r'^commands$')
-    def _reflection_commands(self):
-        """
-        *musicpd.org, reflection section:*
-
-            ``commands``
-
-            Shows which commands the current user has access to.
-        """
-        pass # TODO
-
-    @handle_pattern(r'^consume "(?P<state>[01])"$')
-    def _playback_consume(self, state):
-        """
-        *musicpd.org, playback section:*
-
-            ``consume {STATE}``
-
-            Sets consume state to ``STATE``, ``STATE`` should be 0 or
-            1. When consume is activated, each song played is removed from
-            playlist.
-        """
-        state = int(state)
-        if state:
-            raise MpdNotImplemented # TODO
-        else:
-            raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
-    def _music_db_count(self, tag, needle):
-        """
-        *musicpd.org, music database section:*
-
-            ``count {TAG} {NEEDLE}``
-
-            Counts the number of songs and their total playtime in the db
-            matching ``TAG`` exactly.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^crossfade "(?P<seconds>\d+)"$')
-    def _playback_crossfade(self, seconds):
-        """
-        *musicpd.org, playback section:*
-
-            ``crossfade {SECONDS}``
-
-            Sets crossfading between songs.
-        """
-        seconds = int(seconds)
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^currentsong$')
-    def _status_currentsong(self):
-        """
-        *musicpd.org, status section:*
-
-            ``currentsong``
-
-            Displays the song info of the current song (same song that is
-            identified in status).
-        """
-        if self.backend.playback.current_track is not None:
-            return self.backend.playback.current_track.mpd_format(
-                position=self.backend.playback.playlist_position)
-
-    @handle_pattern(r'^decoders$')
-    def _reflection_decoders(self):
-        """
-        *musicpd.org, reflection section:*
-
-            ``decoders``
-
-            Print a list of decoder plugins, followed by their supported
-            suffixes and MIME types. Example response::
-
-                plugin: mad
-                suffix: mp3
-                suffix: mp2
-                mime_type: audio/mpeg
-                plugin: mpcdec
-                suffix: mpc
         """
         raise MpdNotImplemented # TODO
 
@@ -308,248 +271,15 @@ class MpdHandler(object):
         except KeyError, e:
             raise MpdAckError(unicode(e))
 
-    @handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
-    def _audio_output_disableoutput(self, outputid):
+    @handle_pattern(r'^clear$')
+    def _current_playlist_clear(self):
         """
-        *musicpd.org, audio output section:*
+        *musicpd.org, current playlist section:*
 
-            ``disableoutput``
+            ``clear``
 
-            Turns an output off.
+            Clears the current playlist.
         """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^$')
-    def _empty(self):
-        """The original MPD server returns ``OK`` on an empty request.``"""
-        pass
-
-    @handle_pattern(r'^enableoutput "(?P<outputid>\d+)"$')
-    def _audio_output_enableoutput(self, outputid):
-        """
-        *musicpd.org, audio output section:*
-
-            ``enableoutput``
-
-            Turns an output on.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^find "(?P<type>(album|artist|title))" '
-        r'"(?P<what>[^"]+)"$')
-    def _music_db_find(self, type, what):
-        """
-        *musicpd.org, music database section:*
-
-            ``find {TYPE} {WHAT}``
-
-            Finds songs in the db that are exactly ``WHAT``. ``TYPE`` should be
-            ``album``, ``artist``, or ``title``. ``WHAT`` is what to find.
-        """
-        if type == u'title':
-            type = u'track'
-        return self.backend.library.find_exact(type, what).mpd_format(
-            search_result=True)
-
-    @handle_pattern(r'^findadd "(?P<type>(album|artist|title))" '
-        r'"(?P<what>[^"]+)"$')
-    def _music_db_findadd(self, type, what):
-        """
-        *musicpd.org, music database section:*
-
-            ``findadd {TYPE} {WHAT}``
-
-            Finds songs in the db that are exactly ``WHAT`` and adds them to
-            current playlist. ``TYPE`` can be any tag supported by MPD.
-            ``WHAT`` is what to find.
-        """
-        result = self._music_db_find(type, what)
-        # TODO Add result to current playlist
-        #return result
-
-    @handle_pattern(r'^idle$')
-    @handle_pattern(r'^idle (?P<subsystems>.+)$')
-    def _status_idle(self, subsystems=None):
-        """
-        *musicpd.org, status section:*
-
-            ``idle [SUBSYSTEMS...]``
-
-            Waits until there is a noteworthy change in one or more of MPD's
-            subsystems. As soon as there is one, it lists all changed systems
-            in a line in the format ``changed: SUBSYSTEM``, where ``SUBSYSTEM``
-            is one of the following:
-
-            - ``database``: the song database has been modified after update.
-            - ``update``: a database update has started or finished. If the
-              database was modified during the update, the database event is
-              also emitted.
-            - ``stored_playlist``: a stored playlist has been modified,
-              renamed, created or deleted
-            - ``playlist``: the current playlist has been modified
-            - ``player``: the player has been started, stopped or seeked
-            - ``mixer``: the volume has been changed
-            - ``output``: an audio output has been enabled or disabled
-            - ``options``: options like repeat, random, crossfade, replay gain
-
-            While a client is waiting for idle results, the server disables
-            timeouts, allowing a client to wait for events as long as MPD runs.
-            The idle command can be canceled by sending the command ``noidle``
-            (no other commands are allowed). MPD will then leave idle mode and
-            print results immediately; might be empty at this time.
-
-            If the optional ``SUBSYSTEMS`` argument is used, MPD will only send
-            notifications when something changed in one of the specified
-            subsystems.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^kill$')
-    def _connection_kill(self):
-        """
-        *musicpd.org, connection section:*
-
-            ``kill``
-
-            Kills MPD.
-        """
-        self.session.do_kill()
-
-    @handle_pattern(r'^list "(?P<type>artist)"$')
-    @handle_pattern(r'^list "(?P<type>album)"( "(?P<artist>[^"]+)")*$')
-    def _music_db_list(self, type, artist=None):
-        """
-        *musicpd.org, music database section:*
-
-            ``list {TYPE} [ARTIST]``
-
-            Lists all tags of the specified type. ``TYPE`` should be ``album``
-            or artist.
-
-            ``ARTIST`` is an optional parameter when type is ``album``, this
-            specifies to list albums by an artist.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
-    def _music_db_listall(self, uri):
-        """
-        *musicpd.org, music database section:*
-
-            ``listall [URI]``
-
-            Lists all songs and directories in ``URI``.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^listallinfo "(?P<uri>[^"]+)"')
-    def _music_db_listallinfo(self, uri):
-        """
-        *musicpd.org, music database section:*
-
-            ``listallinfo [URI]``
-
-            Same as ``listall``, except it also returns metadata info in the
-            same format as ``lsinfo``.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^listplaylist "(?P<name>[^"]+)"$')
-    def _stored_playlists_listplaylist(self, name):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``listplaylist {NAME}``
-
-            Lists the files in the playlist ``NAME.m3u``.
-
-        Output format::
-
-            file: relative/path/to/file1.flac
-            file: relative/path/to/file2.ogg
-            file: relative/path/to/file3.mp3
-        """
-        try:
-            return ['file: %s' % t.uri
-                for t in self.backend.stored_playlists.get_by_name(name).tracks]
-        except KeyError, e:
-            raise MpdAckError(e)
-
-    @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
-    def _stored_playlists_listplaylistinfo(self, name):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``listplaylistinfo {NAME}``
-
-            Lists songs in the playlist ``NAME.m3u``.
-
-        Output format:
-
-            Standard track listing, with fields: file, Time, Title, Date,
-            Album, Artist, Track
-        """
-        try:
-            return self.backend.stored_playlists.get_by_name(name).mpd_format(
-                search_result=True)
-        except KeyError, e:
-            raise MpdAckError(e)
-
-    @handle_pattern(r'^listplaylists$')
-    def _stored_playlists_listplaylists(self):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``listplaylists``
-
-            Prints a list of the playlist directory.
-
-            After each playlist name the server sends its last modification
-            time as attribute ``Last-Modified`` in ISO 8601 format. To avoid
-            problems due to clock differences between clients and the server,
-            clients should not compare this value with their local clock.
-
-        Output format::
-
-            playlist: a
-            Last-Modified: 2010-02-06T02:10:25Z
-            playlist: b
-            Last-Modified: 2010-02-06T02:11:08Z
-        """
-        # TODO Add Last-Modified attribute to output
-        return [u'playlist: %s' % p.name
-            for p in self.backend.stored_playlists.playlists]
-
-    @handle_pattern(r'^load "(?P<name>[^"]+)"$')
-    def _stored_playlists_load(self, name):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``load {NAME}``
-
-            Loads the playlist ``NAME.m3u`` from the playlist directory.
-        """
-        matches = self.backend.stored_playlists.search(name)
-        if matches:
-            self.backend.current_playlist.load(matches[0])
-            self.backend.playback.new_playlist_loaded_callback()
-
-    @handle_pattern(r'^lsinfo$')
-    @handle_pattern(r'^lsinfo "(?P<uri>[^"]*)"$')
-    def _music_db_lsinfo(self, uri=None):
-        """
-        *musicpd.org, music database section:*
-
-            ``lsinfo [URI]``
-
-            Lists the contents of the directory ``URI``.
-
-            When listing the root directory, this currently returns the list of
-            stored playlists. This behavior is deprecated; use
-            ``listplaylists`` instead.
-        """
-        if uri == u'/' or uri is None:
-            return self._stored_playlists_listplaylists()
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
@@ -579,125 +309,6 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^next$')
-    def _playback_next(self):
-        """
-        *musicpd.org, playback section:*
-
-            ``next``
-
-            Plays next song in the playlist.
-        """
-        return self.backend.playback.next()
-
-    @handle_pattern(r'^noidle$')
-    def _status_noidle(self):
-        """See :meth:`_idle`."""
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^notcommands$')
-    def _reflection_notcommands(self):
-        """
-        *musicpd.org, reflection section:*
-
-            ``notcommands``
-
-            Shows which commands the current user does not have access to.
-        """
-        pass # TODO
-
-    @handle_pattern(r'^outputs$')
-    def _audio_ouput_outputs(self):
-        """
-        *musicpd.org, audio output section:*
-
-            ``outputs``
-
-            Shows information about all outputs.
-        """
-        return [
-            ('outputid', 0),
-            ('outputname', self.backend.__class__.__name__),
-            ('outputenabled', 1),
-        ]
-
-    @handle_pattern(r'^password "(?P<password>[^"]+)"$')
-    def _connection_password(self, password):
-        """
-        *musicpd.org, connection section:*
-
-            ``password {PASSWORD}``
-
-            This is used for authentication with the server. ``PASSWORD`` is
-            simply the plaintext password.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^pause "(?P<state>[01])"$')
-    def _playback_pause(self, state):
-        """
-        *musicpd.org, playback section:*
-
-            ``pause {PAUSE}``
-
-            Toggles pause/resumes playing, ``PAUSE`` is 0 or 1.
-        """
-        if int(state):
-            self.backend.playback.pause()
-        else:
-            self.backend.playback.resume()
-
-    @handle_pattern(r'^ping$')
-    def _connection_ping(self):
-        """
-        *musicpd.org, connection section:*
-
-            ``ping``
-
-            Does nothing but return ``OK``.
-        """
-        pass
-
-    @handle_pattern(r'^play$')
-    def _playback_play(self):
-        """
-        The original MPD server resumes from the paused state on ``play``
-        without arguments.
-        """
-        return self.backend.playback.play()
-
-    @handle_pattern(r'^play "(?P<songpos>\d+)"$')
-    def _playback_playpos(self, songpos):
-        """
-        *musicpd.org, playback section:*
-
-            ``play [SONGPOS]``
-
-            Begins playing the playlist at song number ``SONGPOS``.
-        """
-        songpos = int(songpos)
-        try:
-            track = self.backend.current_playlist.playlist.tracks[songpos]
-            return self.backend.playback.play(track)
-        except IndexError:
-            raise MpdAckError(u'Position out of bounds')
-
-    @handle_pattern(r'^playid "(?P<songid>\d+)"$')
-    def _playback_playid(self, songid):
-        """
-        *musicpd.org, playback section:*
-
-            ``playid [SONGID]``
-
-            Begins playing the playlist at song ``SONGID``.
-        """
-        songid = int(songid)
-        try:
-            track = self.backend.current_playlist.get_by_id(songid)
-            return self.backend.playback.play(track)
-        except KeyError, e:
-            raise MpdAckError(unicode(e))
-
     @handle_pattern(r'^playlist$')
     def _current_playlist_playlist(self):
         """
@@ -712,41 +323,6 @@ class MpdHandler(object):
                 Do not use this, instead use ``playlistinfo``.
         """
         return self._current_playlist_playlistinfo()
-
-    @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
-    def _stored_playlist_playlistadd(self, name, uri):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``playlistadd {NAME} {URI}``
-
-            Adds ``URI`` to the playlist ``NAME.m3u``.
-
-            ``NAME.m3u`` will be created if it does not exist.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^playlistclear "(?P<name>[^"]+)"$')
-    def _stored_playlist_playlistclear(self, name):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``playlistclear {NAME}``
-
-            Clears the playlist ``NAME.m3u``.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^playlistdelete "(?P<name>[^"]+)" "(?P<songpos>\d+)"$')
-    def _stored_playlist_playlistdelete(self, name, songpos):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``playlistdelete {NAME} {SONGPOS}``
-
-            Deletes ``SONGPOS`` from the playlist ``NAME.m3u``.
-        """
-        raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^playlistfind "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
     def _current_playlist_playlistfind(self, tag, needle):
@@ -797,20 +373,6 @@ class MpdHandler(object):
             if end is not None:
                 end = int(end)
             return self.backend.current_playlist.playlist.mpd_format(start, end)
-
-    @handle_pattern(r'^playlistmove "(?P<name>[^"]+)" '
-        r'"(?P<songid>\d+)" "(?P<songpos>\d+)"$')
-    def _stored_playlist_playlistmove(self, name, songid, songpos):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``playlistmove {NAME} {SONGID} {SONGPOS}``
-
-            Moves ``SONGID`` in the playlist ``NAME.m3u`` to the position
-            ``SONGPOS``.
-        """
-        raise MpdNotImplemented # TODO
-
     @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
     def _current_playlist_playlistsearch(self, tag, needle):
         """
@@ -854,6 +416,287 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
+    @handle_pattern(r'^shuffle$')
+    @handle_pattern(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')
+    def _current_playlist_shuffle(self, start=None, end=None):
+        """
+        *musicpd.org, current playlist section:*
+
+            ``shuffle [START:END]``
+
+            Shuffles the current playlist. ``START:END`` is optional and
+            specifies a range of songs.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
+    def _current_playlist_swap(self, songpos1, songpos2):
+        """
+        *musicpd.org, current playlist section:*
+
+            ``swap {SONG1} {SONG2}``
+
+            Swaps the positions of ``SONG1`` and ``SONG2``.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
+    def _current_playlist_swapid(self, songid1, songid2):
+        """
+        *musicpd.org, current playlist section:*
+
+            ``swapid {SONG1} {SONG2}``
+
+            Swaps the positions of ``SONG1`` and ``SONG2`` (both song ids).
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^$')
+    def _empty(self):
+        """The original MPD server returns ``OK`` on an empty request.``"""
+        pass
+
+    @handle_pattern(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
+    def _music_db_count(self, tag, needle):
+        """
+        *musicpd.org, music database section:*
+
+            ``count {TAG} {NEEDLE}``
+
+            Counts the number of songs and their total playtime in the db
+            matching ``TAG`` exactly.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^find "(?P<type>(album|artist|title))" '
+        r'"(?P<what>[^"]+)"$')
+    def _music_db_find(self, type, what):
+        """
+        *musicpd.org, music database section:*
+
+            ``find {TYPE} {WHAT}``
+
+            Finds songs in the db that are exactly ``WHAT``. ``TYPE`` should be
+            ``album``, ``artist``, or ``title``. ``WHAT`` is what to find.
+        """
+        if type == u'title':
+            type = u'track'
+        return self.backend.library.find_exact(type, what).mpd_format(
+            search_result=True)
+
+    @handle_pattern(r'^findadd "(?P<type>(album|artist|title))" '
+        r'"(?P<what>[^"]+)"$')
+    def _music_db_findadd(self, type, what):
+        """
+        *musicpd.org, music database section:*
+
+            ``findadd {TYPE} {WHAT}``
+
+            Finds songs in the db that are exactly ``WHAT`` and adds them to
+            current playlist. ``TYPE`` can be any tag supported by MPD.
+            ``WHAT`` is what to find.
+        """
+        result = self._music_db_find(type, what)
+        # TODO Add result to current playlist
+        #return result
+
+    @handle_pattern(r'^list "(?P<type>artist)"$')
+    @handle_pattern(r'^list "(?P<type>album)"( "(?P<artist>[^"]+)")*$')
+    def _music_db_list(self, type, artist=None):
+        """
+        *musicpd.org, music database section:*
+
+            ``list {TYPE} [ARTIST]``
+
+            Lists all tags of the specified type. ``TYPE`` should be ``album``
+            or artist.
+
+            ``ARTIST`` is an optional parameter when type is ``album``, this
+            specifies to list albums by an artist.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
+    def _music_db_listall(self, uri):
+        """
+        *musicpd.org, music database section:*
+
+            ``listall [URI]``
+
+            Lists all songs and directories in ``URI``.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^listallinfo "(?P<uri>[^"]+)"')
+    def _music_db_listallinfo(self, uri):
+        """
+        *musicpd.org, music database section:*
+
+            ``listallinfo [URI]``
+
+            Same as ``listall``, except it also returns metadata info in the
+            same format as ``lsinfo``.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^lsinfo$')
+    @handle_pattern(r'^lsinfo "(?P<uri>[^"]*)"$')
+    def _music_db_lsinfo(self, uri=None):
+        """
+        *musicpd.org, music database section:*
+
+            ``lsinfo [URI]``
+
+            Lists the contents of the directory ``URI``.
+
+            When listing the root directory, this currently returns the list of
+            stored playlists. This behavior is deprecated; use
+            ``listplaylists`` instead.
+        """
+        if uri == u'/' or uri is None:
+            return self._stored_playlists_listplaylists()
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^rescan( "(?P<uri>[^"]+)")*$')
+    def _music_db_rescan(self, uri=None):
+        """
+        *musicpd.org, music database section:*
+
+            ``rescan [URI]``
+
+            Same as ``update``, but also rescans unmodified files.
+        """
+        return self._music_db_update(uri, rescan_unmodified_files=True)
+
+    @handle_pattern(r'^search "(?P<type>(album|artist|filename|title))" '
+        r'"(?P<what>[^"]+)"$')
+    def _music_db_search(self, type, what):
+        """
+        *musicpd.org, music database section:*
+
+            ``search {TYPE} {WHAT}``
+
+            Searches for any song that contains ``WHAT``. ``TYPE`` can be
+            ``title``, ``artist``, ``album`` or ``filename``. Search is not
+            case sensitive.
+        """
+        if type == u'title':
+            type = u'track'
+        return self.backend.library.search(type, what).mpd_format(
+            search_result=True)
+
+    @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
+    def _music_db_update(self, uri=None, rescan_unmodified_files=False):
+        """
+        *musicpd.org, music database section:*
+
+            ``update [URI]``
+
+            Updates the music database: find new files, remove deleted files,
+            update modified files.
+
+            ``URI`` is a particular directory or song/file to update. If you do
+            not specify it, everything is updated.
+
+            Prints ``updating_db: JOBID`` where ``JOBID`` is a positive number
+            identifying the update job. You can read the current job id in the
+            ``status`` response.
+        """
+        return {'updating_db': 0} # TODO
+
+    @handle_pattern(r'^consume "(?P<state>[01])"$')
+    def _playback_consume(self, state):
+        """
+        *musicpd.org, playback section:*
+
+            ``consume {STATE}``
+
+            Sets consume state to ``STATE``, ``STATE`` should be 0 or
+            1. When consume is activated, each song played is removed from
+            playlist.
+        """
+        state = int(state)
+        if state:
+            raise MpdNotImplemented # TODO
+        else:
+            raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^crossfade "(?P<seconds>\d+)"$')
+    def _playback_crossfade(self, seconds):
+        """
+        *musicpd.org, playback section:*
+
+            ``crossfade {SECONDS}``
+
+            Sets crossfading between songs.
+        """
+        seconds = int(seconds)
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^next$')
+    def _playback_next(self):
+        """
+        *musicpd.org, playback section:*
+
+            ``next``
+
+            Plays next song in the playlist.
+        """
+        return self.backend.playback.next()
+
+    @handle_pattern(r'^pause "(?P<state>[01])"$')
+    def _playback_pause(self, state):
+        """
+        *musicpd.org, playback section:*
+
+            ``pause {PAUSE}``
+
+            Toggles pause/resumes playing, ``PAUSE`` is 0 or 1.
+        """
+        if int(state):
+            self.backend.playback.pause()
+        else:
+            self.backend.playback.resume()
+
+    @handle_pattern(r'^play$')
+    def _playback_play(self):
+        """
+        The original MPD server resumes from the paused state on ``play``
+        without arguments.
+        """
+        return self.backend.playback.play()
+    @handle_pattern(r'^playid "(?P<songid>\d+)"$')
+    def _playback_playid(self, songid):
+        """
+        *musicpd.org, playback section:*
+
+            ``playid [SONGID]``
+
+            Begins playing the playlist at song ``SONGID``.
+        """
+        songid = int(songid)
+        try:
+            track = self.backend.current_playlist.get_by_id(songid)
+            return self.backend.playback.play(track)
+        except KeyError, e:
+            raise MpdAckError(unicode(e))
+
+    @handle_pattern(r'^play "(?P<songpos>\d+)"$')
+    def _playback_playpos(self, songpos):
+        """
+        *musicpd.org, playback section:*
+
+            ``play [SONGPOS]``
+
+            Begins playing the playlist at song number ``SONGPOS``.
+        """
+        songpos = int(songpos)
+        try:
+            track = self.backend.current_playlist.playlist.tracks[songpos]
+            return self.backend.playback.play(track)
+        except IndexError:
+            raise MpdAckError(u'Position out of bounds')
+
     @handle_pattern(r'^previous$')
     def _playback_previous(self):
         """
@@ -864,17 +707,6 @@ class MpdHandler(object):
             Plays previous song in the playlist.
         """
         return self.backend.playback.previous()
-
-    @handle_pattern(r'^rename "(?P<old_name>[^"]+)" "(?P<new_name>[^"]+)"$')
-    def _stored_playlists_rename(self, old_name, new_name):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``rename {NAME} {NEW_NAME}``
-
-            Renames the playlist ``NAME.m3u`` to ``NEW_NAME.m3u``.
-        """
-        raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^random "(?P<state>[01])"$')
     def _playback_random(self, state):
@@ -934,57 +766,6 @@ class MpdHandler(object):
         """
         return u'off' # TODO
 
-    @handle_pattern(r'^rescan( "(?P<uri>[^"]+)")*$')
-    def _music_db_rescan(self, uri=None):
-        """
-        *musicpd.org, music database section:*
-
-            ``rescan [URI]``
-
-            Same as ``update``, but also rescans unmodified files.
-        """
-        return self._music_db_update(uri, rescan_unmodified_files=True)
-
-    @handle_pattern(r'^rm "(?P<name>[^"]+)"$')
-    def _stored_playlists_rm(self, name):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``rm {NAME}``
-
-            Removes the playlist ``NAME.m3u`` from the playlist directory.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^save "(?P<name>[^"]+)"$')
-    def _stored_playlists_save(self, name):
-        """
-        *musicpd.org, stored playlists section:*
-
-            ``save {NAME}``
-
-            Saves the current playlist to ``NAME.m3u`` in the playlist
-            directory.
-        """
-        raise MpdNotImplemented # TODO
-
-    @handle_pattern(r'^search "(?P<type>(album|artist|filename|title))" '
-        r'"(?P<what>[^"]+)"$')
-    def _music_db_search(self, type, what):
-        """
-        *musicpd.org, music database section:*
-
-            ``search {TYPE} {WHAT}``
-
-            Searches for any song that contains ``WHAT``. ``TYPE`` can be
-            ``title``, ``artist``, ``album`` or ``filename``. Search is not
-            case sensitive.
-        """
-        if type == u'title':
-            type = u'track'
-        return self.backend.library.search(type, what).mpd_format(
-            search_result=True)
-
     @handle_pattern(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
     def _playback_seek(self, songpos, seconds):
         """
@@ -1024,19 +805,6 @@ class MpdHandler(object):
             volume = 100
         self.backend.playback.volume = volume
 
-    @handle_pattern(r'^shuffle$')
-    @handle_pattern(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')
-    def _current_playlist_shuffle(self, start=None, end=None):
-        """
-        *musicpd.org, current playlist section:*
-
-            ``shuffle [START:END]``
-
-            Shuffles the current playlist. ``START:END`` is optional and
-            specifies a range of songs.
-        """
-        raise MpdNotImplemented # TODO
-
     @handle_pattern(r'^single "(?P<state>[01])"$')
     def _playback_single(self, state):
         """
@@ -1053,6 +821,148 @@ class MpdHandler(object):
             raise MpdNotImplemented # TODO
         else:
             raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^stop$')
+    def _playback_stop(self):
+        """
+        *musicpd.org, playback section:*
+
+            ``stop``
+
+            Stops playing.
+        """
+        self.backend.playback.stop()
+
+    @handle_pattern(r'^commands$')
+    def _reflection_commands(self):
+        """
+        *musicpd.org, reflection section:*
+
+            ``commands``
+
+            Shows which commands the current user has access to.
+        """
+        pass # TODO
+
+    @handle_pattern(r'^decoders$')
+    def _reflection_decoders(self):
+        """
+        *musicpd.org, reflection section:*
+
+            ``decoders``
+
+            Print a list of decoder plugins, followed by their supported
+            suffixes and MIME types. Example response::
+
+                plugin: mad
+                suffix: mp3
+                suffix: mp2
+                mime_type: audio/mpeg
+                plugin: mpcdec
+                suffix: mpc
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^notcommands$')
+    def _reflection_notcommands(self):
+        """
+        *musicpd.org, reflection section:*
+
+            ``notcommands``
+
+            Shows which commands the current user does not have access to.
+        """
+        pass # TODO
+
+    @handle_pattern(r'^tagtypes$')
+    def _reflection_tagtypes(self):
+        """
+        *musicpd.org, reflection section:*
+
+            ``tagtypes``
+
+            Shows a list of available song metadata.
+        """
+        pass # TODO
+
+    @handle_pattern(r'^urlhandlers$')
+    def _reflection_urlhandlers(self):
+        """
+        *musicpd.org, reflection section:*
+
+            ``urlhandlers``
+
+            Gets a list of available URL handlers.
+        """
+        return self.backend.uri_handlers
+
+    @handle_pattern(r'^clearerror$')
+    def _status_clearerror(self):
+        """
+        *musicpd.org, status section:*
+
+            ``clearerror``
+
+            Clears the current error message in status (this is also
+            accomplished by any command that starts playback).
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^currentsong$')
+    def _status_currentsong(self):
+        """
+        *musicpd.org, status section:*
+
+            ``currentsong``
+
+            Displays the song info of the current song (same song that is
+            identified in status).
+        """
+        if self.backend.playback.current_track is not None:
+            return self.backend.playback.current_track.mpd_format(
+                position=self.backend.playback.playlist_position)
+
+    @handle_pattern(r'^idle$')
+    @handle_pattern(r'^idle (?P<subsystems>.+)$')
+    def _status_idle(self, subsystems=None):
+        """
+        *musicpd.org, status section:*
+
+            ``idle [SUBSYSTEMS...]``
+
+            Waits until there is a noteworthy change in one or more of MPD's
+            subsystems. As soon as there is one, it lists all changed systems
+            in a line in the format ``changed: SUBSYSTEM``, where ``SUBSYSTEM``
+            is one of the following:
+
+            - ``database``: the song database has been modified after update.
+            - ``update``: a database update has started or finished. If the
+              database was modified during the update, the database event is
+              also emitted.
+            - ``stored_playlist``: a stored playlist has been modified,
+              renamed, created or deleted
+            - ``playlist``: the current playlist has been modified
+            - ``player``: the player has been started, stopped or seeked
+            - ``mixer``: the volume has been changed
+            - ``output``: an audio output has been enabled or disabled
+            - ``options``: options like repeat, random, crossfade, replay gain
+
+            While a client is waiting for idle results, the server disables
+            timeouts, allowing a client to wait for events as long as MPD runs.
+            The idle command can be canceled by sending the command ``noidle``
+            (no other commands are allowed). MPD will then leave idle mode and
+            print results immediately; might be empty at this time.
+
+            If the optional ``SUBSYSTEMS`` argument is used, MPD will only send
+            notifications when something changed in one of the specified
+            subsystems.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^noidle$')
+    def _status_noidle(self):
+        """See :meth:`_idle`."""
+        raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^stats$')
     def _status_stats(self):
@@ -1078,18 +988,7 @@ class MpdHandler(object):
             'db_playtime': 0, # TODO
             'db_update': 0, # TODO
             'playtime': 0, # TODO
-        }
-
-    @handle_pattern(r'^stop$')
-    def _playback_stop(self):
-        """
-        *musicpd.org, playback section:*
-
-            ``stop``
-
-            Stops playing.
-        """
-        self.backend.playback.stop()
+        }        
 
     @handle_pattern(r'^status$')
     def _status_status(self):
@@ -1279,65 +1178,164 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
-    def _swap(self, songpos1, songpos2):
+    @handle_pattern(r'^listplaylist "(?P<name>[^"]+)"$')
+    def _stored_playlists_listplaylist(self, name):
         """
-        *musicpd.org, current playlist section:*
+        *musicpd.org, stored playlists section:*
 
-            ``swap {SONG1} {SONG2}``
+            ``listplaylist {NAME}``
 
-            Swaps the positions of ``SONG1`` and ``SONG2``.
+            Lists the files in the playlist ``NAME.m3u``.
+
+        Output format::
+
+            file: relative/path/to/file1.flac
+            file: relative/path/to/file2.ogg
+            file: relative/path/to/file3.mp3
+        """
+        try:
+            return ['file: %s' % t.uri
+                for t in self.backend.stored_playlists.get_by_name(name).tracks]
+        except KeyError, e:
+            raise MpdAckError(e)
+
+    @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
+    def _stored_playlists_listplaylistinfo(self, name):
+        """
+        *musicpd.org, stored playlists section:*
+
+            ``listplaylistinfo {NAME}``
+
+            Lists songs in the playlist ``NAME.m3u``.
+
+        Output format:
+
+            Standard track listing, with fields: file, Time, Title, Date,
+            Album, Artist, Track
+        """
+        try:
+            return self.backend.stored_playlists.get_by_name(name).mpd_format(
+                search_result=True)
+        except KeyError, e:
+            raise MpdAckError(e)
+
+    @handle_pattern(r'^listplaylists$')
+    def _stored_playlists_listplaylists(self):
+        """
+        *musicpd.org, stored playlists section:*
+
+            ``listplaylists``
+
+            Prints a list of the playlist directory.
+
+            After each playlist name the server sends its last modification
+            time as attribute ``Last-Modified`` in ISO 8601 format. To avoid
+            problems due to clock differences between clients and the server,
+            clients should not compare this value with their local clock.
+
+        Output format::
+
+            playlist: a
+            Last-Modified: 2010-02-06T02:10:25Z
+            playlist: b
+            Last-Modified: 2010-02-06T02:11:08Z
+        """
+        # TODO Add Last-Modified attribute to output
+        return [u'playlist: %s' % p.name
+            for p in self.backend.stored_playlists.playlists]
+
+    @handle_pattern(r'^load "(?P<name>[^"]+)"$')
+    def _stored_playlists_load(self, name):
+        """
+        *musicpd.org, stored playlists section:*
+
+            ``load {NAME}``
+
+            Loads the playlist ``NAME.m3u`` from the playlist directory.
+        """
+        matches = self.backend.stored_playlists.search(name)
+        if matches:
+            self.backend.current_playlist.load(matches[0])
+            self.backend.playback.new_playlist_loaded_callback()
+
+    @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
+    def _stored_playlist_playlistadd(self, name, uri):
+        """
+        *musicpd.org, stored playlists section:*
+
+            ``playlistadd {NAME} {URI}``
+
+            Adds ``URI`` to the playlist ``NAME.m3u``.
+
+            ``NAME.m3u`` will be created if it does not exist.
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
-    def _current_playlist_swapid(self, songid1, songid2):
+    @handle_pattern(r'^playlistclear "(?P<name>[^"]+)"$')
+    def _stored_playlist_playlistclear(self, name):
         """
-        *musicpd.org, current playlist section:*
+        *musicpd.org, stored playlists section:*
 
-            ``swapid {SONG1} {SONG2}``
+            ``playlistclear {NAME}``
 
-            Swaps the positions of ``SONG1`` and ``SONG2`` (both song ids).
+            Clears the playlist ``NAME.m3u``.
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^tagtypes$')
-    def _reflection_tagtypes(self):
+    @handle_pattern(r'^playlistdelete "(?P<name>[^"]+)" "(?P<songpos>\d+)"$')
+    def _stored_playlist_playlistdelete(self, name, songpos):
         """
-        *musicpd.org, reflection section:*
+        *musicpd.org, stored playlists section:*
 
-            ``tagtypes``
+            ``playlistdelete {NAME} {SONGPOS}``
 
-            Shows a list of available song metadata.
+            Deletes ``SONGPOS`` from the playlist ``NAME.m3u``.
         """
-        pass # TODO
+        raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
-    def _music_db_update(self, uri=None, rescan_unmodified_files=False):
+    @handle_pattern(r'^playlistmove "(?P<name>[^"]+)" '
+        r'"(?P<songid>\d+)" "(?P<songpos>\d+)"$')
+    def _stored_playlist_playlistmove(self, name, songid, songpos):
         """
-        *musicpd.org, music database section:*
+        *musicpd.org, stored playlists section:*
 
-            ``update [URI]``
+            ``playlistmove {NAME} {SONGID} {SONGPOS}``
 
-            Updates the music database: find new files, remove deleted files,
-            update modified files.
-
-            ``URI`` is a particular directory or song/file to update. If you do
-            not specify it, everything is updated.
-
-            Prints ``updating_db: JOBID`` where ``JOBID`` is a positive number
-            identifying the update job. You can read the current job id in the
-            ``status`` response.
+            Moves ``SONGID`` in the playlist ``NAME.m3u`` to the position
+            ``SONGPOS``.
         """
-        return {'updating_db': 0} # TODO
+        raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^urlhandlers$')
-    def _reflection_urlhandlers(self):
+    @handle_pattern(r'^rename "(?P<old_name>[^"]+)" "(?P<new_name>[^"]+)"$')
+    def _stored_playlists_rename(self, old_name, new_name):
         """
-        *musicpd.org, reflection section:*
+        *musicpd.org, stored playlists section:*
 
-            ``urlhandlers``
+            ``rename {NAME} {NEW_NAME}``
 
-            Gets a list of available URL handlers.
+            Renames the playlist ``NAME.m3u`` to ``NEW_NAME.m3u``.
         """
-        return self.backend.uri_handlers
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^rm "(?P<name>[^"]+)"$')
+    def _stored_playlists_rm(self, name):
+        """
+        *musicpd.org, stored playlists section:*
+
+            ``rm {NAME}``
+
+            Removes the playlist ``NAME.m3u`` from the playlist directory.
+        """
+        raise MpdNotImplemented # TODO
+
+    @handle_pattern(r'^save "(?P<name>[^"]+)"$')
+    def _stored_playlists_save(self, name):
+        """
+        *musicpd.org, stored playlists section:*
+
+            ``save {NAME}``
+
+            Saves the current playlist to ``NAME.m3u`` in the playlist
+            directory.
+        """
+        raise MpdNotImplemented # TODO
