@@ -86,11 +86,11 @@ from the documentation files, you need some additional dependencies.
 
 You can either install them through Debian/Ubuntu package management::
 
-    sudo aptitude install python-sphinx
+    sudo aptitude install python-sphinx python-pygraphviz graphviz
 
 Or, install them using pip::
 
-    sudo aptitude install python-pip python-setuptools
+    sudo aptitude install python-pip python-setuptools graphviz
     sudo pip install -r requirements-docs.txt
 
 Then, to generate docs::
