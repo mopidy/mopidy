@@ -253,7 +253,24 @@ class MpdHandler(object):
 
             Deletes a song from the playlist.
         """
-        raise MpdNotImplemented # TODO
+        try:
+            tracks = []
+            if songpos is not None:
+                songpos = int(songpos)
+                tracks = [
+                    self.backend.current_playlist.playlist.tracks[songpos]]
+            elif start is not None:
+                start = int(start)
+                if end is not None:
+                    end = int(end)
+                else:
+                    end = self.backend.current_playlist.playlist.length
+                tracks = self.backend.current_playlist.playlist.tracks[
+                    start:end]
+            for track in tracks:
+                self.backend.current_playlist.remove(track)
+        except IndexError, e:
+            raise MpdAckError(u'Position out of bounds')
 
     @handle_pattern(r'^deleteid "(?P<songid>\d+)"$')
     def _current_playlist_deleteid(self, songid):

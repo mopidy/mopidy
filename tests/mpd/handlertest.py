@@ -510,16 +510,36 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Not implemented' in result)
 
     def test_delete_songpos(self):
-        result = self.h.handle_request(u'delete "5"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        result = self.h.handle_request(u'delete "2"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 4)
+        self.assert_(u'OK' in result)
 
     def test_delete_open_range(self):
-        result = self.h.handle_request(u'delete "10:"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        result = self.h.handle_request(u'delete "1:"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 1)
+        self.assert_(u'OK' in result)
 
     def test_delete_closed_range(self):
-        result = self.h.handle_request(u'delete "10:20"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        result = self.h.handle_request(u'delete "1:3"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 3)
+        self.assert_(u'OK' in result)
+
+    def test_delete_out_of_range(self):
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        result = self.h.handle_request(u'delete "5"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        self.assert_(u'ACK Position out of bounds' in result)
 
     def test_deleteid(self):
         self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
