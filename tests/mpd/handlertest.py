@@ -699,12 +699,25 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Not implemented' in result)
 
     def test_plchanges(self):
+        self.b.current_playlist.load(Playlist(
+            tracks=[Track(name='a'), Track(name='b'), Track(name='c')]))
         result = self.h.handle_request(u'plchanges "0"')
+        self.assert_(u'Title: a' in result)
+        self.assert_(u'Title: b' in result)
+        self.assert_(u'Title: c' in result)
         self.assert_(u'OK' in result)
 
     def test_plchangesposid(self):
+        self.b.current_playlist.load(Playlist(
+            tracks=[Track(id=11), Track(id=12), Track(id=13)]))
         result = self.h.handle_request(u'plchangesposid "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'cpos: 0' in result)
+        self.assert_(u'Id: 11' in result)
+        self.assert_(u'cpos: 2' in result)
+        self.assert_(u'Id: 12' in result)
+        self.assert_(u'cpos: 2' in result)
+        self.assert_(u'Id: 13' in result)
+        self.assert_(u'OK' in result)
 
     def test_shuffle_without_range(self):
         result = self.h.handle_request(u'shuffle')

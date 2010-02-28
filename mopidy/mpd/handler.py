@@ -443,6 +443,7 @@ class MpdHandler(object):
             To detect songs that were deleted at the end of the playlist, use
             ``playlistlength`` returned by status command.
         """
+        # XXX Naive implementation that returns all tracks as changed
         if int(version) < self.backend.current_playlist.version:
             return self.backend.current_playlist.playlist.mpd_format()
 
@@ -460,7 +461,14 @@ class MpdHandler(object):
             To detect songs that were deleted at the end of the playlist, use
             ``playlistlength`` returned by status command.
         """
-        raise MpdNotImplemented # TODO
+        # XXX Naive implementation that returns all tracks as changed
+        if int(version) != self.backend.current_playlist.version:
+            result = []
+            for position, track in enumerate(
+                    self.backend.current_playlist.playlist.tracks):
+                result.append((u'cpos', position))
+                result.append((u'Id', track.id))
+            return result
 
     @handle_pattern(r'^shuffle$')
     @handle_pattern(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')
