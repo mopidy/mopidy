@@ -496,7 +496,17 @@ class MpdHandler(object):
 
             Swaps the positions of ``SONG1`` and ``SONG2``.
         """
-        raise MpdNotImplemented # TODO
+        songpos1 = int(songpos1)
+        songpos2 = int(songpos2)
+        playlist = self.backend.current_playlist.playlist
+        tracks = playlist.tracks
+        song1 = tracks[songpos1]
+        song2 = tracks[songpos2]
+        del tracks[songpos1]
+        tracks.insert(songpos1, song2)
+        del tracks[songpos2]
+        tracks.insert(songpos2, song1)
+        self.backend.current_playlist.load(playlist.with_(tracks=tracks))
 
     @handle_pattern(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
     def _current_playlist_swapid(self, songid1, songid2):
