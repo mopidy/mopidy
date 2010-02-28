@@ -138,3 +138,22 @@ A list of the issues we currently experience with pyspotify, both bugs and
 features we wished was there:
 
 * None at the moment.
+
+
+Class instantiation and usage
+=============================
+
+The following diagram shows how Mopidy with the despotify backend is wired
+together. The gray nodes are part of external dependencies, and not Mopidy.
+
+.. digraph:: class_instantiation_and_usage
+
+    "spytify" [ color="gray" ]
+    "despotify" [ color="gray" ]
+    "__main__" -> "MpdServer" [ label="create 1" ]
+    "__main__" -> "DespotifyBackend" [ label="create 1" ]
+    "MpdServer" -> "MpdSession" [ label="create 1 per client" ]
+    "MpdSession" -> "MpdHandler" [ label="pass MPD requests to" ]
+    "MpdHandler" -> "DespotifyBackend" [ label="use backend API" ]
+    "DespotifyBackend" -> "spytify" [ label="use Python wrapper" ]
+    "spytify" -> "despotify" [ label="use C library" ]
