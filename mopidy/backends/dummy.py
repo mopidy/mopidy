@@ -15,6 +15,13 @@ class DummyCurrentPlaylistController(BaseCurrentPlaylistController):
     pass
 
 class DummyLibraryController(BaseLibraryController):
+    _library = []
+
+    def lookup(self, uri):
+        matches = filter(lambda t: uri == t.uri, self._library)
+        if matches:
+            return matches[0]
+
     def search(self, type, query):
         return Playlist()
 

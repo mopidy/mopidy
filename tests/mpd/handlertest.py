@@ -494,8 +494,13 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.h = handler.MpdHandler(backend=self.b)
 
     def test_add(self):
-        result = self.h.handle_request(u'add "file:///dev/urandom"')
-        self.assert_(u'ACK Not implemented' in result)
+        needle = Track(uri='dummy://foo')
+        self.b.library._library = [Track(), Track(), needle, Track()]
+        self.assertEquals(self.b.current_playlist.playlist.length, 0)
+        result = self.h.handle_request(u'add "dummy://foo"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 1)
+        self.assert_(needle in self.b.current_playlist.playlist.tracks)
+        self.assert_(u'OK' in result)
 
     def test_addid_without_songpos(self):
         result = self.h.handle_request(u'addid "file:///dev/urandom"')

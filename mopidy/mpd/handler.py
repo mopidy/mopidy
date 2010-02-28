@@ -224,7 +224,9 @@ class MpdHandler(object):
             Adds the file ``URI`` to the playlist (directories add recursively).
             ``URI`` can also be a single file.
         """
-        raise MpdNotImplemented # TODO
+        track = self.backend.library.lookup(uri)
+        if track is not None:
+            self.backend.current_playlist.add(track)
 
     @handle_pattern(r'^addid "(?P<uri>[^"]*)"( (?P<songpos>\d+))*$')
     def _current_playlist_addid(self, uri, songpos=None):

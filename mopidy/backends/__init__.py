@@ -63,7 +63,12 @@ class BaseCurrentPlaylistController(object):
         :param at_position: position in current playlist to add track
         :type at_position: int or :class:`None`
         """
-        raise NotImplementedError
+        tracks = self.playlist.tracks
+        if at_position:
+            tracks.insert(at_position, track)
+        else:
+            tracks.append(track)
+        self.playlist = self.playlist.with_(tracks=tracks)
 
     def clear(self):
         """Clear the current playlist."""
