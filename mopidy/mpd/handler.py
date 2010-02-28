@@ -303,7 +303,7 @@ class MpdHandler(object):
 
             ``moveid {FROM} {TO}``
 
-            Moves the song with ``FROM`` (songid) to ``TO` (playlist index) in
+            Moves the song with ``FROM`` (songid) to ``TO`` (playlist index) in
             the playlist. If ``TO`` is negative, it is relative to the current
             song in the playlist (if there is one).
         """
