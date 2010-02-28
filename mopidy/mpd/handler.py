@@ -738,6 +738,7 @@ class MpdHandler(object):
         without arguments.
         """
         return self.backend.playback.play()
+
     @handle_pattern(r'^playid "(?P<songid>\d+)"$')
     def _playback_playid(self, songid):
         """
