@@ -307,11 +307,13 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
     def test_consume_off(self):
         result = self.h.handle_request(u'consume "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertFalse(self.b.playback.consume)
+        self.assert_(u'OK' in result)
 
     def test_consume_on(self):
         result = self.h.handle_request(u'consume "1"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertTrue(self.b.playback.consume)
+        self.assert_(u'OK' in result)
 
     def test_crossfade(self):
         result = self.h.handle_request(u'crossfade "10"')

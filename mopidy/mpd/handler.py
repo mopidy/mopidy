@@ -689,11 +689,10 @@ class MpdHandler(object):
             1. When consume is activated, each song played is removed from
             playlist.
         """
-        state = int(state)
-        if state:
-            raise MpdNotImplemented # TODO
+        if int(state):
+            self.backend.playback.consume = True
         else:
-            raise MpdNotImplemented # TODO
+            self.backend.playback.consume = False
 
     @handle_pattern(r'^crossfade "(?P<seconds>\d+)"$')
     def _playback_crossfade(self, seconds):
