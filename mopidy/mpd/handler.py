@@ -327,7 +327,8 @@ class MpdHandler(object):
     def _current_playlist_move_songpos(self, songpos, to):
         """See :meth:`_current_playlist_move_range`."""
         songpos = int(songpos)
-        self._current_playlist_move_range(start=songpos, end=songpos + 1, to=to)
+        to = int(to)
+        self.backend.current_playlist.move(songpos, songpos + 1, to)
 
     @handle_pattern(r'^moveid "(?P<songid>\d+)" "(?P<to>\d+)"$')
     def _current_playlist_moveid(self, songid, to):
@@ -340,7 +341,11 @@ class MpdHandler(object):
             the playlist. If ``TO`` is negative, it is relative to the current
             song in the playlist (if there is one).
         """
-        raise MpdNotImplemented # TODO
+        songid = int(songid)
+        to = int(to)
+        track = self.backend.current_playlist.get_by_id(songid)
+        position = self.backend.current_playlist.playlist.tracks.index(track)
+        self.backend.current_playlist.move(position, position + 1, to)
 
     @handle_pattern(r'^playlist$')
     def _current_playlist_playlist(self):

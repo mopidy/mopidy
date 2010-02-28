@@ -631,8 +631,17 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_moveid(self):
-        result = self.h.handle_request(u'moveid "0" "10"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.b.current_playlist.load(Playlist(tracks=[
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e', id=137), Track(name='f')]))
+        result = self.h.handle_request(u'moveid "137" "2"')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[0].name, 'a')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[1].name, 'b')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[2].name, 'e')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[3].name, 'c')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[4].name, 'd')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[5].name, 'f')
+        self.assert_(u'OK' in result)
 
     def test_playlist_returns_same_as_playlistinfo(self):
         playlist_result = self.h.handle_request(u'playlist')
