@@ -569,12 +569,17 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Position out of bounds' in result)
 
     def test_deleteid(self):
-        self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
+        self.b.current_playlist.load(Playlist(tracks=[Track(id=0), Track()]))
+        self.assertEquals(self.b.current_playlist.playlist.length, 2)
         result = self.h.handle_request(u'deleteid "0"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 1)
         self.assert_(u'OK' in result)
 
     def test_deleteid_does_not_exist(self):
+        self.b.current_playlist.load(Playlist(tracks=[Track(id=1), Track()]))
+        self.assertEquals(self.b.current_playlist.playlist.length, 2)
         result = self.h.handle_request(u'deleteid "0"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 2)
         self.assert_(u'ACK Track with ID "0" not found' in result)
 
     def test_move_songpos(self):
