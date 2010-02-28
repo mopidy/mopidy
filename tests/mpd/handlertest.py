@@ -496,19 +496,37 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
     def test_add(self):
         needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
-        self.assertEquals(self.b.current_playlist.playlist.length, 0)
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
         result = self.h.handle_request(u'add "dummy://foo"')
-        self.assertEquals(self.b.current_playlist.playlist.length, 1)
-        self.assert_(needle in self.b.current_playlist.playlist.tracks)
+        self.assertEquals(self.b.current_playlist.playlist.length, 6)
+        self.assertEquals(self.b.current_playlist.playlist.tracks[5], needle)
         self.assert_(u'OK' in result)
 
     def test_addid_without_songpos(self):
-        result = self.h.handle_request(u'addid "file:///dev/urandom"')
-        self.assert_(u'ACK Not implemented' in result)
+        needle = Track(uri='dummy://foo', id=137)
+        self.b.library._library = [Track(), Track(), needle, Track()]
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        result = self.h.handle_request(u'addid "dummy://foo"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 6)
+        self.assertEquals(self.b.current_playlist.playlist.tracks[5], needle)
+        self.assert_(u'Id: 137' in result)
+        self.assert_(u'OK' in result)
 
     def test_addid_with_songpos(self):
-        result = self.h.handle_request(u'addid "file:///dev/urandom" 0')
-        self.assert_(u'ACK Not implemented' in result)
+        needle = Track(uri='dummy://foo', id=137)
+        self.b.library._library = [Track(), Track(), needle, Track()]
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
+        result = self.h.handle_request(u'addid "dummy://foo" "3"')
+        self.assertEquals(self.b.current_playlist.playlist.length, 6)
+        self.assertEquals(self.b.current_playlist.playlist.tracks[3], needle)
+        self.assert_(u'Id: 137' in result)
+        self.assert_(u'OK' in result)
 
     def test_clear(self):
         result = self.h.handle_request(u'clear')
