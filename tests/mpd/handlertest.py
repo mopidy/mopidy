@@ -284,6 +284,13 @@ class StatusHandlerTest(unittest.TestCase):
         total = int(total)
         self.assert_(position <= total)
 
+    def test_status_method_when_playing_contains_elapsed(self):
+        self.b.playback.state = self.b.playback.PAUSED
+        self.b.playback._play_time_accumulated = 59123
+        result = dict(self.h._status_status())
+        self.assert_('elapsed' in result)
+        self.assertEquals(int(result['elapsed']), 59123)
+
     def test_status_method_when_playing_contains_bitrate(self):
         self.b.playback.state = self.b.playback.PLAYING
         self.b.playback.current_track = Track(bitrate=320)

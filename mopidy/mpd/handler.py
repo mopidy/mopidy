@@ -1039,7 +1039,7 @@ class MpdHandler(object):
         if self.backend.playback.state in (
                 self.backend.playback.PLAYING, self.backend.playback.PAUSED):
             result.append(('time', self.__status_status_time()))
-            # TODO Add 'elapsed' here when moving to MPD 0.16.0
+            result.append(('elapsed', self.__status_status_time_elapsed()))
             result.append(('bitrate', self.__status_status_bitrate()))
         return result
 
@@ -1092,8 +1092,8 @@ class MpdHandler(object):
             return u'pause'
 
     def __status_status_time(self):
-        return u'%s:%s' % (self.__status_status_time_elapsed(),
-            self.__status_status_time_total())
+        return u'%s:%s' % (self.__status_status_time_elapsed() // 1000,
+            self.__status_status_time_total() // 1000)
 
     def __status_status_time_elapsed(self):
         return self.backend.playback.time_position
@@ -1104,7 +1104,7 @@ class MpdHandler(object):
         elif self.backend.playback.current_track.length is None:
             return 0
         else:
-            return self.backend.playback.current_track.length // 1000
+            return self.backend.playback.current_track.length
 
     def __status_status_volume(self):
         if self.backend.playback.volume is not None:

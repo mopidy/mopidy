@@ -5,7 +5,7 @@ def get_version():
     return u'0.1.dev'
 
 def get_mpd_protocol_version():
-    return u'0.15.0'
+    return u'0.16.0'
 
 class Settings(object):
     def __getattr__(self, attr):
