@@ -287,6 +287,17 @@ class BasePlaybackController(object):
         """
         The playback state. Must be :attr:`PLAYING`, :attr:`PAUSED`, or
         :attr:`STOPPED`.
+
+        Possible states and transitions:
+
+        .. digraph:: state_transitions
+
+            "STOPPED" -> "PLAYING" [ label="play" ]
+            "PLAYING" -> "STOPPED" [ label="stop" ]
+            "PLAYING" -> "PAUSED" [ label="pause" ]
+            "PLAYING" -> "PLAYING" [ label="play" ]
+            "PAUSED" -> "PLAYING" [ label="resume" ]
+            "PAUSED" -> "STOPPED" [ label="stop" ]
         """
         return self._state
 
