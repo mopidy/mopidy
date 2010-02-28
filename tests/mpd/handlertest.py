@@ -768,8 +768,17 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_swapid(self):
-        result = self.h.handle_request(u'swapid "10" "20"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.b.current_playlist.load(Playlist(tracks=[
+            Track(name='a'), Track(name='b', id=13), Track(name='c'),
+            Track(name='d'), Track(name='e', id=29), Track(name='f')]))
+        result = self.h.handle_request(u'swapid "13" "29"')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[0].name, 'a')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[1].name, 'e')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[2].name, 'c')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[3].name, 'd')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[4].name, 'b')
+        self.assertEquals(self.b.current_playlist.playlist.tracks[5].name, 'f')
+        self.assert_(u'OK' in result)
 
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
