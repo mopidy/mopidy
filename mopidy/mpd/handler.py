@@ -120,7 +120,7 @@ class MpdHandler(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^clear$')
-    def _clear(self):
+    def _current_playlist_clear(self):
         """
         *musicpd.org, current playlist section:*
 
