@@ -529,8 +529,12 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_clear(self):
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEquals(self.b.current_playlist.playlist.length, 5)
         result = self.h.handle_request(u'clear')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assertEquals(self.b.current_playlist.playlist.length, 0)
+        self.assert_(u'OK' in result)
 
     def test_delete_songpos(self):
         self.b.current_playlist.playlist = Playlist(

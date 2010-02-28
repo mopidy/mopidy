@@ -302,7 +302,7 @@ class MpdHandler(object):
 
             Clears the current playlist.
         """
-        raise MpdNotImplemented # TODO
+        self.backend.current_playlist.clear()
 
     @handle_pattern(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
     @handle_pattern(r'^move "(?P<start>\d+):(?P<end>\d+)*" "(?P<to>\d+)"$')
