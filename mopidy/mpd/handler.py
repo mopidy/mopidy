@@ -335,7 +335,8 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^find "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
+    @handle_pattern(r'^find "(?P<type>(album|artist|title))" '
+        r'"(?P<what>[^"]+)"$')
     def _music_db_find(self, type, what):
         """
         *musicpd.org, music database section:*
@@ -350,7 +351,8 @@ class MpdHandler(object):
         return self.backend.library.find_exact(type, what).mpd_format(
             search_result=True)
 
-    @handle_pattern(r'^findadd "(?P<type>(album|artist|title))" "(?P<what>[^"]+)"$')
+    @handle_pattern(r'^findadd "(?P<type>(album|artist|title))" '
+        r'"(?P<what>[^"]+)"$')
     def _music_db_findadd(self, type, what):
         """
         *musicpd.org, music database section:*
@@ -966,7 +968,8 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^search "(?P<type>(album|artist|filename|title))" "(?P<what>[^"]+)"$')
+    @handle_pattern(r'^search "(?P<type>(album|artist|filename|title))" '
+        r'"(?P<what>[^"]+)"$')
     def _music_db_search(self, type, what):
         """
         *musicpd.org, music database section:*
@@ -1226,7 +1229,8 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^sticker find "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^sticker find "(?P<type>[^"]+)" "(?P<uri>[^"]+)" '
+        r'"(?P<name>[^"]+)"$')
     def _sticker_find(self, type, uri, name):
         """
         *musicpd.org, sticker section:*
@@ -1239,7 +1243,8 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^sticker get "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)"$')
+    @handle_pattern(r'^sticker get "(?P<type>[^"]+)" "(?P<uri>[^"]+)" '
+        r'"(?P<name>[^"]+)"$')
     def _sticker_get(self, type, uri, name):
         """
         *musicpd.org, sticker section:*
@@ -1261,7 +1266,8 @@ class MpdHandler(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^sticker set "(?P<type>[^"]+)" "(?P<uri>[^"]+)" "(?P<name>[^"]+)" "(?P<value>[^"]+)"$')
+    @handle_pattern(r'^sticker set "(?P<type>[^"]+)" "(?P<uri>[^"]+)" '
+        r'"(?P<name>[^"]+)" "(?P<value>[^"]+)"$')
     def _sticker_set(self, type, uri, name, value):
         """
         *musicpd.org, sticker section:*
