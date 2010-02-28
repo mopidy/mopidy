@@ -1059,7 +1059,7 @@ class MpdHandler(object):
             'db_playtime': 0, # TODO
             'db_update': 0, # TODO
             'playtime': 0, # TODO
-        }        
+        }
 
     @handle_pattern(r'^status$')
     def _status_status(self):
