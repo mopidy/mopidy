@@ -1131,19 +1131,13 @@ class MpdHandler(object):
         return self.backend.current_playlist.version
 
     def __status_status_random(self):
-        if self.backend.playback.random:
-            return 1
-        else:
-            return 0
+        return int(self.backend.playback.random)
 
     def __status_status_repeat(self):
-        if self.backend.playback.repeat:
-            return 1
-        else:
-            return 0
+        return int(self.backend.playback.repeat)
 
     def __status_status_single(self):
-        return 0 # TODO
+        return int(self.backend.playback.single)
 
     def __status_status_songid(self):
         if self.backend.playback.current_track.id is not None:
