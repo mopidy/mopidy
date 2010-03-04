@@ -13,7 +13,7 @@ guides here.
 Dependencies
 ============
 
-* Python >= 2.5
+* Python >= 2.6
 * pyalsaaudio >= 0.2 (Debian/Ubuntu: python-alsaaudio)
 * Dependencies for at least one Mopidy backend:
 
