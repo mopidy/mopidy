@@ -555,7 +555,9 @@ class MpdHandler(object):
             Finds songs in the db that are exactly ``WHAT``. ``TYPE`` should be
             ``album``, ``artist``, or ``title``. ``WHAT`` is what to find.
 
-        GMPC does not add ``"`` around the type argument.
+        *GMPC:*
+
+        - does not add quotes around the type argument.
         """
         if type == u'title':
             type = u'track'
@@ -660,9 +662,15 @@ class MpdHandler(object):
             ``title``, ``artist``, ``album`` or ``filename``. Search is not
             case sensitive.
 
-        GMPC does not add ``"`` around the type argument, and uses the type
-        ``any`` too.
+        *GMPC:*
+
+        - does not add quotes around the type argument.
+        - uses the undocumented type ``any``.
+        - searches for multiple words like this::
+
+            search any "foo" any "bar" any "baz"
         """
+        # TODO Support GMPC multi-word search
         if type == u'title':
             type = u'track'
         return self.backend.library.search(type, what).mpd_format(
