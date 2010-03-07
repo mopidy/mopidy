@@ -340,7 +340,8 @@ class BasePlaybackController(object):
     def time_position(self):
         """Time position in milliseconds."""
         if self.state == self.PLAYING:
-            time_since_started = int(time.time()) - self._play_time_started
+            time_since_started = (self._current_wall_time -
+                self._play_time_started)
             return self._play_time_accumulated + time_since_started
         elif self.state == self.PAUSED:
             return self._play_time_accumulated
@@ -349,14 +350,18 @@ class BasePlaybackController(object):
 
     def _play_time_start(self):
         self._play_time_accumulated = 0
-        self._play_time_started = int(time.time())
+        self._play_time_started = self._current_wall_time
 
     def _play_time_pause(self):
-        time_since_started = int(time.time()) - self._play_time_started
+        time_since_started = self._current_wall_time - self._play_time_started
         self._play_time_accumulated += time_since_started
 
     def _play_time_resume(self):
-        self._play_time_started = int(time.time())
+        self._play_time_started = self._current_wall_time
+
+    @property
+    def _current_wall_time(self):
+        return int(time.time() * 1000)
 
     @property
     def volume(self):
