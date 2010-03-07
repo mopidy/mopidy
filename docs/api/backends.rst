@@ -3,6 +3,6 @@
 *************************************
 
 .. automodule:: mopidy.backends
-    :synopsis: Interface between Mopidy and its various backends.
+    :synopsis: Backend interface.
     :members:
     :undoc-members:
