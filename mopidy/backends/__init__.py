@@ -204,7 +204,7 @@ class BaseLibraryController(object):
         """
         Search the library for tracks where ``type`` contains ``query``.
 
-        :param type: 'track', 'artist', 'album', or 'uri'
+        :param type: 'track', 'artist', 'album', 'uri', and 'any'
         :type type: string
         :param query: the search query
         :type query: string

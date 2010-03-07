@@ -48,7 +48,10 @@ class LibspotifyLibraryController(BaseLibraryController):
         # FIXME When searching while playing music, this is really slow, like
         # 12-14s between querying and getting results.
         self._search_results_received.clear()
-        query = u'%s:%s' % (type, what)
+        if type is u'any':
+            query = what
+        else:
+            query = u'%s:%s' % (type, what)
         def callback(results, userdata):
             logger.debug(u'Search results received')
             self._search_results = results
