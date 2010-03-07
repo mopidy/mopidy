@@ -868,7 +868,9 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_count(self):
         result = self.h.handle_request(u'count "tag" "needle"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'songs: 0' in result)
+        self.assert_(u'playtime: 0' in result)
+        self.assert_(u'OK' in result)
 
     def test_find_album(self):
         result = self.h.handle_request(u'find "album" "what"')
@@ -895,7 +897,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_list_artist(self):
         result = self.h.handle_request(u'list "artist"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_list_artist_with_artist_should_fail(self):
         try:
@@ -906,11 +908,11 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_list_album_without_artist(self):
         result = self.h.handle_request(u'list "album"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_list_album_with_artist(self):
         result = self.h.handle_request(u'list "album" "anartist"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_listall(self):
         result = self.h.handle_request(u'listall "file:///dev/urandom"')

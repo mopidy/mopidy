@@ -540,7 +540,7 @@ class MpdHandler(object):
             Counts the number of songs and their total playtime in the db
             matching ``TAG`` exactly.
         """
-        raise MpdNotImplemented # TODO
+        return [('songs', 0), ('playtime', 0)] # TODO
 
     @handle_pattern(r'^find "(?P<type>(album|artist|title))" '
         r'"(?P<what>[^"]+)"$')
@@ -588,7 +588,7 @@ class MpdHandler(object):
             ``ARTIST`` is an optional parameter when type is ``album``, this
             specifies to list albums by an artist.
         """
-        raise MpdNotImplemented # TODO
+        pass # TODO
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
     def _music_db_listall(self, uri):
