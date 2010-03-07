@@ -542,6 +542,8 @@ class MpdHandler(object):
         """
         return [('songs', 0), ('playtime', 0)] # TODO
 
+    @handle_pattern(r'^find (?P<type>(album|artist|title)) '
+        r'"(?P<what>[^"]+)"$')
     @handle_pattern(r'^find "(?P<type>(album|artist|title))" '
         r'"(?P<what>[^"]+)"$')
     def _music_db_find(self, type, what):
@@ -552,6 +554,8 @@ class MpdHandler(object):
 
             Finds songs in the db that are exactly ``WHAT``. ``TYPE`` should be
             ``album``, ``artist``, or ``title``. ``WHAT`` is what to find.
+
+        GMPC does not add ``"`` around the type argument.
         """
         if type == u'title':
             type = u'track'
@@ -642,7 +646,9 @@ class MpdHandler(object):
         """
         return self._music_db_update(uri, rescan_unmodified_files=True)
 
-    @handle_pattern(r'^search "(?P<type>(album|artist|filename|title))" '
+    @handle_pattern(r'^search (?P<type>(album|artist|filename|title|any)) '
+        r'"(?P<what>[^"]+)"$')
+    @handle_pattern(r'^search "(?P<type>(album|artist|filename|title|any))" '
         r'"(?P<what>[^"]+)"$')
     def _music_db_search(self, type, what):
         """
@@ -653,6 +659,9 @@ class MpdHandler(object):
             Searches for any song that contains ``WHAT``. ``TYPE`` can be
             ``title``, ``artist``, ``album`` or ``filename``. Search is not
             case sensitive.
+
+        GMPC does not add ``"`` around the type argument, and uses the type
+        ``any`` too.
         """
         if type == u'title':
             type = u'track'
