@@ -1,6 +1,6 @@
-********************************
-:mod:`mopidy.mixer` -- Mixer API
-********************************
+*********************************
+:mod:`mopidy.mixers` -- Mixer API
+*********************************
 
 .. automodule:: mopidy.mixers
     :synopsis: Sound mixer interface.
