@@ -4,10 +4,11 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
 from mopidy.models import Playlist
 
 class DummyBackend(BaseBackend):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(DummyBackend, self).__init__(*args, **kwargs)
         self.current_playlist = DummyCurrentPlaylistController(backend=self)
         self.library = DummyLibraryController(backend=self)
-        self.playback = DummyPlaybackController(backend=self, mixer=DummyMixer)
+        self.playback = DummyPlaybackController(backend=self)
         self.stored_playlists = DummyStoredPlaylistsController(backend=self)
         self.uri_handlers = [u'dummy:']
 
@@ -46,12 +47,3 @@ class DummyPlaybackController(BasePlaybackController):
 class DummyStoredPlaylistsController(BaseStoredPlaylistsController):
     def search(self, query):
         return [Playlist(name=query)]
-
-class DummyMixer(object):
-    volume = 0
-
-    def getvolume(self):
-        return [self.volume, self.volume]
-
-    def setvolume(self, volume):
-        self.volume = volume

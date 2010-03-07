@@ -13,7 +13,6 @@ Available settings and their default values.
 #:
 #: .. note::
 #:     Currently only the first backend in the list is used.
-#:
 BACKENDS = (
     u'mopidy.backends.despotify.DespotifyBackend',
     #u'mopidy.backends.libspotify.LibspotifyBackend',
@@ -23,6 +22,11 @@ BACKENDS = (
 #: http://docs.python.org/library/logging.html#formatter-objects for details on
 #: the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  %(message)s'
+
+#: Sound mixer to use. Default::
+#:
+#:     MIXER = u'mopidy.mixers.alsa.AlsaMixer'
+MIXER = u'mopidy.mixers.alsa.AlsaMixer'
 
 #: Which address Mopidy should bind to. Examples:
 #:

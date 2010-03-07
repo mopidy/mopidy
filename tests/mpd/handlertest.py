@@ -3,6 +3,7 @@ import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.exceptions import MpdAckError
+from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track, Playlist
 from mopidy.mpd import handler
 
@@ -19,7 +20,9 @@ class DummySession(object):
 
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
@@ -46,7 +49,9 @@ class RequestHandlerTest(unittest.TestCase):
 
 class CommandListsTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_command_list_begin(self):
         result = self.h.handle_request(u'command_list_begin')
@@ -92,7 +97,8 @@ class CommandListsTest(unittest.TestCase):
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
         self.s = DummySession()
         self.h = handler.MpdHandler(backend=self.b, session=self.s)
 
@@ -158,7 +164,6 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_status_method_contains_volume_which_defaults_to_0(self):
-        self.b.playback.volume = None
         result = dict(self.h._status_status())
         self.assert_('volume' in result)
         self.assertEquals(int(result['volume']), 0)
@@ -302,7 +307,8 @@ class StatusHandlerTest(unittest.TestCase):
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
         self.h = handler.MpdHandler(backend=self.b)
 
     def test_consume_off(self):
@@ -421,7 +427,8 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
 class PlaybackControlHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
         self.h = handler.MpdHandler(backend=self.b)
 
     def test_next(self):
@@ -499,7 +506,8 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
         self.h = handler.MpdHandler(backend=self.b)
 
     def test_add(self):
@@ -791,7 +799,8 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
         self.h = handler.MpdHandler(backend=self.b)
 
     def test_listplaylist(self):
@@ -863,7 +872,8 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
         self.h = handler.MpdHandler(backend=self.b)
 
     def test_count(self):
@@ -1018,7 +1028,9 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
 class StickersHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_sticker_get(self):
         result = self.h.handle_request(
@@ -1053,8 +1065,10 @@ class StickersHandlerTest(unittest.TestCase):
 
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(session=DummySession(),
-            backend=DummyBackend())
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
+        self.s = DummySession()
+        self.h = handler.MpdHandler(backend=self.b, session=self.s)
 
     def test_close(self):
         result = self.h.handle_request(u'close')
@@ -1079,7 +1093,9 @@ class ConnectionHandlerTest(unittest.TestCase):
 
 class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_enableoutput(self):
         result = self.h.handle_request(u'enableoutput "0"')
@@ -1099,7 +1115,9 @@ class AudioOutputHandlerTest(unittest.TestCase):
 
 class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.h = handler.MpdHandler(backend=DummyBackend())
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
+        self.h = handler.MpdHandler(backend=self.b)
 
     def test_commands(self):
         result = self.h.handle_request(u'commands')

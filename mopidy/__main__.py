@@ -14,7 +14,8 @@ logger = logging.getLogger('mopidy')
 
 def main():
     _setup_logging(2)
-    backend = _get_backend(settings.BACKENDS[0])
+    mixer = _get_class(settings.MIXER)()
+    backend = _get_class(settings.BACKENDS[0])(mixer=mixer)
     MpdServer(backend=backend)
     asyncore.loop()
 
@@ -30,14 +31,13 @@ def _setup_logging(verbosity_level):
         level=level,
     )
 
-def _get_backend(name):
+def _get_class(name):
     module_name = name[:name.rindex('.')]
     class_name = name[name.rindex('.') + 1:]
     logger.info('Loading: %s from %s', class_name, module_name)
     module = __import__(module_name, globals(), locals(), [class_name], -1)
     class_object = getattr(module, class_name)
-    instance = class_object()
-    return instance
+    return class_object
 
 if __name__ == '__main__':
     try:

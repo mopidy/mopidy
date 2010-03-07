@@ -3,19 +3,23 @@ import logging
 import random
 import time
 
-import alsaaudio
-
 from mopidy.models import Playlist
 
 logger = logging.getLogger('backends.base')
 
 class BaseBackend(object):
+    def __init__(self, mixer=None):
+        self.mixer = mixer
+
     #: The current playlist controller. An instance of
     #: :class:`BaseCurrentPlaylistController`.
     current_playlist = None
 
     #: The library controller. An instance of :class:`BaseLibraryController`.
     library = None
+
+    #: The sound mixer. An instance of :class:`mopidy.mixers.BaseMixer`.
+    mixer = None
 
     #: The playback controller. An instance of :class:`BasePlaybackController`.
     playback = None
@@ -255,10 +259,9 @@ class BasePlaybackController(object):
     #:     Playback continues after current song.
     single = False
 
-    def __init__(self, backend, mixer=alsaaudio.Mixer):
+    def __init__(self, backend):
         self.backend = backend
         self._state = self.STOPPED
-        self._mixer = mixer()
 
     @property
     def next_track(self):
@@ -370,11 +373,11 @@ class BasePlaybackController(object):
 
         :class:`None` if unknown.
         """
-        return self._mixer.getvolume()[0]
+        return self.backend.mixer.volume
 
     @volume.setter
     def volume(self, volume):
-        self._mixer.setvolume(volume)
+        self.backend.mixer.volume = volume
 
     def new_playlist_loaded_callback(self):
         """Tell the playback controller that a new playlist has been loaded."""

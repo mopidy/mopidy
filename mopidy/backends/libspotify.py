@@ -17,7 +17,8 @@ logger = logging.getLogger(u'backends.libspotify')
 ENCODING = 'utf-8'
 
 class LibspotifyBackend(BaseBackend):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(LibspotifyBackend, self).__init__(*args, **kwargs)
         self.current_playlist = LibspotifyCurrentPlaylistController(
             backend=self)
         self.library = LibspotifyLibraryController(backend=self)
