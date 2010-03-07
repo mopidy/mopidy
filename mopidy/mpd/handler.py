@@ -974,7 +974,7 @@ class MpdHandler(object):
 
             Gets a list of available URL handlers.
         """
-        return self.backend.uri_handlers
+        return [(u'handler', uri) for uri in self.backend.uri_handlers]
 
     @handle_pattern(r'^clearerror$')
     def _status_clearerror(self):
