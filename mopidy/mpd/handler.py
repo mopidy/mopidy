@@ -530,7 +530,7 @@ class MpdHandler(object):
         """The original MPD server returns ``OK`` on an empty request.``"""
         pass
 
-    @handle_pattern(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
+    @handle_pattern(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
     def _music_db_count(self, tag, needle):
         """
         *musicpd.org, music database section:*
