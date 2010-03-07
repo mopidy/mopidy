@@ -587,7 +587,7 @@ class MpdHandler(object):
             ``list {TYPE} [ARTIST]``
 
             Lists all tags of the specified type. ``TYPE`` should be ``album``
-            or artist.
+            or ``artist``.
 
             ``ARTIST`` is an optional parameter when type is ``album``, this
             specifies to list albums by an artist.
