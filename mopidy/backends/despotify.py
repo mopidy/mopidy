@@ -36,6 +36,10 @@ class DespotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 
 class DespotifyLibraryController(BaseLibraryController):
+    def lookup(self, uri):
+        track = self.backend.spotify.lookup(uri.encode(ENCODING))
+        return self.backend.translate.to_mopidy_track(track)
+
     def search(self, type, what):
         query = u'%s:%s' % (type, what)
         result = self.backend.spotify.search(query.encode(ENCODING))
