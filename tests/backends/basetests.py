@@ -587,8 +587,17 @@ class BasePlaybackControllerTest(object):
         self.playback.seek(0)
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
+    @populate_playlist
     def test_seek_beyond_end_of_song(self):
-        raise NotImplementedError
+        self.playback.play()
+        self.playback.seek(self.tracks[0].length*100)
+        self.assertEqual(self.playback.current_track, self.tracks[1])
+
+    @populate_playlist
+    def test_seek_beyond_end_of_song_for_last_track(self):
+        self.playback.play(self.tracks[-1])
+        self.playback.seek(self.tracks[-1].length*100)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
     def test_seek_beyond_start_of_song(self):

@@ -103,6 +103,9 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         if time_position < 0:
             time_position = 0
+        elif self.current_track and time_position > self.current_track.length:
+            self.next()
+            return
 
         self._bin.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, time_position * gst.MSECOND)
