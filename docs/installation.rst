@@ -183,4 +183,10 @@ To start Mopidy, go to the root of the Mopidy project, then simply run::
 
     python mopidy
 
+When Mopidy says ``Please connect to localhost port 6600 using an MPD client.``
+it's ready to accept connections by any MPD client. You can find a list of tons
+of MPD clients at http://mpd.wikia.com/wiki/Clients. We use Sonata, GMPC,
+ncmpc, and ncmpcpp during development. The first two are GUI clients, while the
+last two are terminal clients.
+
 To stop Mopidy, press ``CTRL+C``.
