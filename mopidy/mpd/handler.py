@@ -658,6 +658,8 @@ class MpdHandler(object):
 
     @handle_pattern(r'^search (?P<type>(album|artist|filename|title|any)) '
         r'"(?P<what>[^"]+)"$')
+    @handle_pattern(r'^search (?P<type>(Album|Artist|Filename|Title|Any)) '
+        r'"(?P<what>[^"]+)"$')
     @handle_pattern(r'^search "(?P<type>(album|artist|filename|title|any))" '
         r'"(?P<what>[^"]+)"$')
     def _music_db_search(self, type, what):
@@ -677,6 +679,11 @@ class MpdHandler(object):
         - searches for multiple words like this::
 
             search any "foo" any "bar" any "baz"
+
+        *ncmpc:*
+
+        - does not add quotes around the type argument.
+        - capitalizes the type argument.
         """
         # TODO Support GMPC multi-word search
         if type == u'title':
