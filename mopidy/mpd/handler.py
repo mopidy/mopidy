@@ -544,6 +544,8 @@ class MpdHandler(object):
 
     @handle_pattern(r'^find (?P<type>(album|artist|title)) '
         r'"(?P<what>[^"]+)"$')
+    @handle_pattern(r'^find (?P<type>(Album|Artist|Title)) '
+        r'"(?P<what>[^"]+)"$')
     @handle_pattern(r'^find "(?P<type>(album|artist|title))" '
         r'"(?P<what>[^"]+)"$')
     def _music_db_find(self, type, what):
@@ -558,7 +560,13 @@ class MpdHandler(object):
         *GMPC:*
 
         - does not add quotes around the type argument.
+
+        *ncmpc:*
+
+        - does not add quotes around the type argument.
+        - capitalizes the type argument.
         """
+        type = type.lower()
         if type == u'title':
             type = u'track'
         return self.backend.library.find_exact(type, what).mpd_format(
