@@ -7,7 +7,6 @@ Contents
     :maxdepth: 3
 
     installation
-    settings
     development
     api/index
     changes
