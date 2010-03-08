@@ -1045,7 +1045,7 @@ class MpdHandler(object):
             notifications when something changed in one of the specified
             subsystems.
         """
-        raise MpdNotImplemented # TODO
+        pass # TODO
 
     @handle_pattern(r'^noidle$')
     def _status_noidle(self):
