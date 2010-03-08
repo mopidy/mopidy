@@ -127,11 +127,11 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_idle_without_subsystems(self):
         result = self.h.handle_request(u'idle')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_idle_with_subsystems(self):
         result = self.h.handle_request(u'idle database playlist')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_noidle(self):
         result = self.h.handle_request(u'noidle')
