@@ -135,7 +135,7 @@ binary version, and place the file at ``pyspotify/spotify_appkey.key``.
 
 Test your libspotify setup::
 
-    ./example1.py -u USERNAME -p PASSWORD
+    examples/example1.py -u USERNAME -p PASSWORD
 
 .. note::
 
