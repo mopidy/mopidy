@@ -2,7 +2,7 @@ import asynchat
 import logging
 
 from mopidy import get_mpd_protocol_version
-from mopidy.exceptions import MpdAckError
+from mopidy.mpd import MpdAckError
 from mopidy.mpd.handler import MpdHandler
 
 logger = logging.getLogger(u'mpd.session')

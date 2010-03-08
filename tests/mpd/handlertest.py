@@ -2,10 +2,9 @@ import datetime as dt
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
-from mopidy.exceptions import MpdAckError
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track, Playlist
-from mopidy.mpd import handler
+from mopidy.mpd import handler, MpdAckError
 
 class DummySession(object):
     def do_close(self):
