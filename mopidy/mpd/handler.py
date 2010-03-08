@@ -686,6 +686,7 @@ class MpdHandler(object):
         - capitalizes the type argument.
         """
         # TODO Support GMPC multi-word search
+        type = type.lower()
         if type == u'title':
             type = u'track'
         return self.backend.library.search(type, what).mpd_format(
