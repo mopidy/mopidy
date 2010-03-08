@@ -589,6 +589,7 @@ class MpdHandler(object):
         #return result
 
     @handle_pattern(r'^list "(?P<type>artist)"$')
+    @handle_pattern(r'^list (?P<type>Artist)$')
     @handle_pattern(r'^list "(?P<type>album)"( "(?P<artist>[^"]+)")*$')
     def _music_db_list(self, type, artist=None):
         """
@@ -601,7 +602,13 @@ class MpdHandler(object):
 
             ``ARTIST`` is an optional parameter when type is ``album``, this
             specifies to list albums by an artist.
+
+        *ncmpc:*
+
+        - does not add quotes around the type argument.
+        - capitalizes the type argument.
         """
+        type = type.lower()
         pass # TODO
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
