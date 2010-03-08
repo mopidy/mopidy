@@ -6,11 +6,11 @@ Contents
 .. toctree::
     :maxdepth: 3
 
-    changes
     installation
     settings
     development
     api/index
+    changes
 
 Indices and tables
 ==================
