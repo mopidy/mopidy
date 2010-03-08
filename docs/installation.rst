@@ -42,18 +42,24 @@ Installing despotify
         libtool libncursesw5-dev libao-dev
 
 *OS X:* In OS X you need to have `XCode
-<http://developer.apple.com/tools/xcode/>`_ and `MacPorts
-<http://www.macports.org/>`_ installed. Then, to install despotify's
-dependencies::
+<http://developer.apple.com/tools/xcode/>`_ installed, and either `MacPorts
+<http://www.macports.org/>`_ or `Homebrew <http://mxcl.github.com/homebrew/>`_.
 
-    sudo port install openssl zlib libvorbis libtool ncursesw libao
+*OS X, Homebrew:* Install dependencies::
+
+    brew install libvorbis ncursesw libao pkg-config
+
+*OS X, MacPorts:* Install dependencies::
+
+    sudo port install libvorbis libtool ncursesw libao
 
 *All OS:* Check out revision 503 of the despotify source code::
 
-    svn co https://despotify.svn.sourceforge.net/svnroot/despotify@503
+    svn checkout https://despotify.svn.sourceforge.net/svnroot/despotify@503
 
-*OS X:* Edit ``despotify/src/Makefile.local.mk`` and uncomment the last two
-lines so that it reads::
+*OS X, MacPorts:* Copy ``despotify/src/Makefile.local.mk.dist`` to
+``despotify/src/Makefile.local.mk`` and uncomment the last two lines of the new
+file so that it reads::
 
     ## If you're on Mac OS X and have installed libvorbisfile
     ## via 'port install ..', try uncommenting these lines
