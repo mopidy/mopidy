@@ -31,12 +31,18 @@ CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  
 #:
 #:     MIXER = u'mopidy.mixers.alsa.AlsaMixer'
 #:
+#: Default on OS X::
+#:
+#:     MIXER = u'mopidy.mixers.osa.OsaMixer'
+#:
 #: Default on other operating systems::
 #:
 #:     MIXER = u'mopidy.mixers.dummy.DummyMixer'
 MIXER = u'mopidy.mixers.dummy.DummyMixer'
 if sys.platform == 'linux2':
     MIXER = u'mopidy.mixers.alsa.AlsaMixer'
+elif sys.platform == 'darwin':
+    MIXER = u'mopidy.mixers.osa.OsaMixer'
 
 #: Which address Mopidy should bind to. Examples:
 #:
