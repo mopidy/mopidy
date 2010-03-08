@@ -6,8 +6,7 @@ import sys
 sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from mopidy import settings
-from mopidy.exceptions import SettingError
+from mopidy import settings, SettingsError
 from mopidy.mpd.server import MpdServer
 
 logger = logging.getLogger('mopidy')
@@ -44,5 +43,5 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         sys.exit('\nInterrupted by user')
-    except SettingError, e:
+    except SettingsError, e:
         sys.exit('%s' % e)

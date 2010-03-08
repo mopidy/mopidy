@@ -1,6 +1,3 @@
-class SettingError(Exception):
-    pass
-
 class MpdAckError(Exception):
     pass
 
