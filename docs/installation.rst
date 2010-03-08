@@ -160,11 +160,6 @@ libspotify backend, copy the Spotify application key to
 
     BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
 
-*OS X:* The default mixer does not work on OS X, so you must change to a dummy
-mixer::
-
-    MIXER = u'mopidy.mixers.dummy.DummyMixer'
-
 For a full list of available settings, see :mod:`mopidy.settings.default`.
 
 

@@ -7,6 +7,8 @@ Available settings and their default values.
     ``mopidy/settings/local.py`` and redefine settings there.
 """
 
+import sys
+
 #: List of playback backends to use. Default::
 #:
 #:     BACKENDS = (u'mopidy.backends.despotify.DespotifyBackend',)
@@ -23,10 +25,18 @@ BACKENDS = (
 #: the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  %(message)s'
 
-#: Sound mixer to use. Default::
+#: Sound mixer to use.
+#:
+#: Default on Linux::
 #:
 #:     MIXER = u'mopidy.mixers.alsa.AlsaMixer'
-MIXER = u'mopidy.mixers.alsa.AlsaMixer'
+#:
+#: Default on other operating systems::
+#:
+#:     MIXER = u'mopidy.mixers.dummy.DummyMixer'
+MIXER = u'mopidy.mixers.dummy.DummyMixer'
+if sys.platform == 'linux2':
+    MIXER = u'mopidy.mixers.alsa.AlsaMixer'
 
 #: Which address Mopidy should bind to. Examples:
 #:
