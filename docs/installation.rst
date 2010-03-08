@@ -13,12 +13,19 @@ guides here.
 Dependencies
 ============
 
-* Python >= 2.6
-* pyalsaaudio >= 0.2 (Debian/Ubuntu: python-alsaaudio)
-* Dependencies for at least one Mopidy backend:
+- Python >= 2.6
+- Dependencies for at least one Mopidy mixer:
 
-  * :ref:`despotify`
-  * :ref:`libspotify`
+  - *Linux, AlsaMixer:* pyalsaaudio >= 0.2 (Debian/Ubuntu package:
+    python-alsaaudio)
+  - *OS X, OsaMixer:* Nothing needed.
+
+- Dependencies for at least one Mopidy backend:
+
+  - :ref:`despotify`
+  - :ref:`libspotify`
+
+
 
 
 .. _despotify:
