@@ -51,3 +51,7 @@ Crazy stuff we had to write down somewhere
   stream instead of playing it locally.
 - Integrate with `Squeezebox <http://www.logitechsqueezebox.com/>`_ in some
   way.
+- AirPort Express support, like in
+  `PulseAudio <http://git.0pointer.de/?p=pulseaudio.git;a=blob;f=src/modules/raop/raop_client.c;hb=HEAD>`_.
+- NAD amplifier mixer through their RS-232 connection. (This I'm actually going
+  to sooner rather than later. --jodal)
