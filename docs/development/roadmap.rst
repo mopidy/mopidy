@@ -53,5 +53,5 @@ Crazy stuff we had to write down somewhere
   way.
 - AirPort Express support, like in
   `PulseAudio <http://git.0pointer.de/?p=pulseaudio.git;a=blob;f=src/modules/raop/raop_client.c;hb=HEAD>`_.
-- NAD amplifier mixer through their RS-232 connection. (This I'm actually going
-  to sooner rather than later. --jodal)
+- NAD/Denon amplifier mixer through their RS-232 connection. (This I'm actually
+  going to sooner rather than later. --jodal)
