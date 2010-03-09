@@ -7,7 +7,7 @@ Contents
     :maxdepth: 3
 
     installation/index
-    development
+    development/index
     api/index
     changes
 

@@ -1,18 +1,9 @@
-***********
-Development
-***********
+*****************
+How to contribute
+*****************
 
 Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
 ``irc.freenode.net`` and through `GitHub <http://github.com/>`_.
-
-
-Scope for the first release
-===========================
-
-To limit scope, we will start by implementing an MPD server which only
-supports Spotify, and not playback of files from disk. We will make Mopidy
-modular, so we can extend it with other backends in the future, like file
-playback and other online music services such as Last.fm.
 
 
 Code style
@@ -94,62 +85,3 @@ The documentation at http://www.mopidy.com/docs/ is automatically updated
 within 10 minutes after a documentation update is pushed to
 ``jodal/mopidy/master`` at GitHub.
 
-
-Notes on despotify/spytify
-==========================
-
-`spytify <http://despotify.svn.sourceforge.net/viewvc/despotify/src/bindings/python/>`_
-is the Python bindings for the open source `despotify <http://despotify.se/>`_
-library. It got no documentation to speak of, but a couple of examples are
-available.
-
-A list of the issues we currently experience with spytify, both bugs and
-features we wished was there:
-
-* r483: Sometimes segfaults when traversing stored playlists, their tracks,
-  artists, and albums. As it is not predictable, it may be a concurrency issue.
-
-* r503: Segfaults when looking up playlists, both your own lists and other
-  peoples shared lists. To reproduce::
-
-    >>> import spytify
-    >>> s = spytify.Spytify('alice', 'secret')
-    >>> s.lookup('spotify:user:klette:playlist:5rOGYPwwKqbAcVX8bW4k5V')
-    Segmentation fault
-
-
-Notes on libspotify/libopenspotify/pyspotify
-============================================
-
-`pyspotify <http://github.com/winjer/pyspotify/>`_ is the Python bindings for
-the official Spotify library, libspotify. It got no documentation to speak of,
-but multiple examples are available.
-
-A list of the issues we currently experience with pyspotify, both bugs and
-features we wished was there:
-
-* None at the moment.
-
-
-Class instantiation and usage
-=============================
-
-The following diagram shows how Mopidy with the despotify backend and ALSA
-mixer is wired together. The gray nodes are part of external dependencies, and
-not Mopidy.
-
-.. digraph:: class_instantiation_and_usage
-
-    "spytify" [ color="gray" ]
-    "despotify" [ color="gray" ]
-    "alsaaudio" [ color="gray" ]
-    "__main__" -> "MpdServer" [ label="create 1" ]
-    "__main__" -> "AlsaMixer" [ label="create 1" ]
-    "__main__" -> "DespotifyBackend" [ label="create 1" ]
-    "MpdServer" -> "MpdSession" [ label="create 1 per client" ]
-    "MpdSession" -> "MpdHandler" [ label="pass MPD requests to" ]
-    "MpdHandler" -> "DespotifyBackend" [ label="use backend API" ]
-    "DespotifyBackend" -> "spytify" [ label="use Python wrapper" ]
-    "spytify" -> "despotify" [ label="use C library" ]
-    "DespotifyBackend" -> "AlsaMixer" [ label="use mixer API" ]
-    "AlsaMixer" -> "alsaaudio" [ label="use Python library" ]
