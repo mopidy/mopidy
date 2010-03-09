@@ -6,6 +6,8 @@ Some of the following notes and details will hopefully be useful when you start
 developing on Mopidy, while some may only be useful when you get deeper into
 specific parts of Mopidy.
 
+In addition to what you'll find here, don't forget the :doc:`/api/index`.
+
 
 Class instantiation and usage
 =============================
