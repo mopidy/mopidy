@@ -6,7 +6,7 @@ Contents
 .. toctree::
     :maxdepth: 3
 
-    installation
+    installation/index
     development
     api/index
     changes
