@@ -2,7 +2,8 @@
 despotify installation
 **********************
 
-To use the despotify backend, you first need to install despotify and spytify.
+To use the `despotify <http://despotify.se/>`_ backend, you first need to
+install despotify and spytify.
 
 .. note::
 
