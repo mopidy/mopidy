@@ -7,7 +7,7 @@ As an alternative to the despotify backend, we are working on a
 To use the libspotify backend you must install libspotify and
 `pyspotify <http://github.com/winjer/pyspotify>`_.
 
-.. note::
+.. warning::
 
     This backend requires a Spotify premium account, and it requires you to get
     an application key from Spotify before use.

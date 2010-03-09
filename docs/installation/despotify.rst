@@ -5,7 +5,7 @@ despotify installation
 To use the `despotify <http://despotify.se/>`_ backend, you first need to
 install despotify and spytify.
 
-.. note::
+.. warning::
 
     This backend requires a Spotify premium account.
 
