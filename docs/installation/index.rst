@@ -40,6 +40,17 @@ Dependencies
 
     - see :doc:`libspotify`
 
+To install Mopidy itself (i.e. no backend dependencies), on Debian/Ubuntu::
+
+    sudo aptitude install python-alsaaudio git-core
+    git clone git://github.com/jodal/mopidy.git
+    cd mopidy/
+
+And on OS X, assuming you allready got git installed, e.g. from Homebrew::
+
+    git clone git://github.com/jodal/mopidy.git
+    cd mopidy/
+
 
 Spotify settings
 ================
