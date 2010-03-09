@@ -34,11 +34,11 @@ Dependencies
 
   - DespotifyBackend (Linux and OS X)
 
-    - see :ref:`despotify`
+    - see :doc:`despotify`
 
   - LibspotifyBackend (Linux only)
 
-    - see :ref:`libspotify`
+    - see :doc:`libspotify`
 
 
 Spotify settings

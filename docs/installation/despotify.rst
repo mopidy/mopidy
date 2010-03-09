@@ -1,5 +1,3 @@
-.. _despotify:
-
 **********************
 despotify installation
 **********************

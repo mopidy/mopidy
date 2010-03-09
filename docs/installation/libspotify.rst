@@ -1,5 +1,3 @@
-.. _libspotify:
-
 ***********************
 libspotify installation
 ***********************
