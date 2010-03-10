@@ -15,6 +15,11 @@ class NadMixer(BaseMixer):
     increasing or decreasing the volume one step at the time. Other NAD
     amplifiers may support more advanced volume adjustment than what is
     currently used by this mixer.
+
+    Sadly, this means that if you use the remote control to change the volume
+    on the amplifier, Mopidy will no longer report the correct volume. To
+    recalibrate the mixer, set the volume to 0, and then back again to the
+    level you want.
     """
 
     #: Number of volume levels the device supports
@@ -75,6 +80,8 @@ class NadMixer(BaseMixer):
 
     def _set_volume(self, volume):
         self._volume = volume
+        if volume == 0:
+            self._calibrate() # Recalibrate internal volume
         self._set_nad_volume(int(round(volume * self.NUM_STEPS / 100.0)))
 
     def _set_nad_volume(self, target_volume):
