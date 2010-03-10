@@ -22,9 +22,6 @@ class DenonMixerTest(unittest.TestCase):
         self.m = DenonMixer()
         self.m._device = DenonMixerDeviceMock()
 
-    def test_volume_is_None_initially(self):
-        self.assertEqual(self.m.volume, None)
-
     def test_volume_set_to_min(self):
         self.m.volume = 0
         self.assertEqual(self.m.volume, 0)
