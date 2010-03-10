@@ -54,7 +54,7 @@ if sys.platform == 'linux2':
 elif sys.platform == 'darwin':
     MIXER = u'mopidy.mixers.osa.OsaMixer'
 
-#: Which port a mixer is connected to if using an external mixer.
+#: Which port the mixer is connected to if using an external mixer.
 #: This must point to the device port like ``/dev/ttyUSB0`` or similar.
 MIXER_PORT = None
 
