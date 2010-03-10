@@ -11,15 +11,9 @@ class DenonMixer(BaseMixer):
         self._volume = None
 
     def _get_volume(self):
-        try:
-            self._device.write('MV?\r')
-            vol = self._device.read(2)
-            if vol:
-                return self._levels.index(int(vol))
-        except:
-            pass # No support for volume query on device
-
-        return self._volume
+        self._device.write('MV?\r')
+        vol = self._device.read(20)[2:4]
+        return self._levels.index(vol)
 
     def _set_volume(self, volume):
         # Clamp according to Denon-spec
