@@ -1,6 +1,6 @@
 import logging
 from serial import Serial
-from threading import Lock
+from multiprocessing import Process, Pipe
 
 from mopidy.mixers import BaseMixer
 from mopidy.settings import MIXER_PORT
@@ -22,24 +22,45 @@ class NadMixer(BaseMixer):
     level you want.
     """
 
+    def __init__(self):
+        self._volume = None
+        self._pipe, other_end = Pipe()
+        NadTalker(pipe=other_end).start()
+
+    def _get_volume(self):
+        return self._volume
+
+    def _set_volume(self, volume):
+        self._volume = volume
+        if volume == 0:
+            self._pipe.send({'command': 'calibrate'})
+        self._pipe.send({'command': 'set_volume', 'volume': volume})
+
+
+class NadTalker(Process):
     #: Number of volume levels the device supports
     NUM_STEPS = 40
 
-    def __init__(self):
-        #: Volume in range [0..100]. :class:`None` before calibration.
-        self._volume = None
-        #: Volume in range [0..NUM_STEPS]. :class:`None` before calibration.
-        self._nad_volume = None
-        #: Acquire this lock before you touch the device.
-        self._lock = Lock()
-        #: The serial device through which we talk to the amplifier.
-        #:
-        #: If you set the timeout too low, the reads will never get complete
-        #: confirmations and calibration will decrease volume forever.
+    #: Volume in range [0..NUM_STEPS]. :class:`None` before calibration.
+    _nad_volume = None
+
+    def __init__(self, pipe=None):
+        Process.__init__(self)
+        self.pipe = pipe
+
+    def run(self):
+        # If you set the timeout too low, the reads will never get complete
+        # confirmations and calibration will decrease volume forever.
         self._device = Serial(port=MIXER_PORT, baudrate=115200, timeout=0.2)
         self._clear()
         self._device_model = self._get_device_model()
         self._calibrate()
+        while self.pipe.poll(None):
+            message = self.pipe.recv()
+            if message['command'] == 'set_volume':
+                self._set_volume(message['volume'])
+            elif message['command'] == 'calibrate':
+                self._calibrate()
 
     def _get_device_model(self):
         self._write('Main.Model?')
@@ -61,27 +82,11 @@ class NadMixer(BaseMixer):
         while steps_left:
             if self._decrease_volume():
                 steps_left -= 1
-        self._volume = 0
         self._nad_volume = 0
-
-    def _get_volume(self):
-        """
-        Return volume as set by client, and not a translation from
-        the internal volume with the same discrete steps as the device.
-
-        If we used a translation from the internal volume, _get_volume would
-        not match what the client selected and _set_volume received, which will
-        make the volume controller "skip". This is particularily irritating in
-        console clients where you use +/- to adjust volume. E.g.  "get: 50,
-        press -, set: 49, (wait 1 sec), repeat". You will never get to 48
-        without pressing minus faster.
-        """
-        return self._volume
+        logger.info(u'Calibration of NAD amplifier done')
 
     def _set_volume(self, volume):
-        self._volume = volume
-        if volume == 0:
-            self._calibrate() # Recalibrate internal volume
+        logger.debug(u'Setting volume to %d' % volume)
         self._set_nad_volume(int(round(volume * self.NUM_STEPS / 100.0)))
 
     def _set_nad_volume(self, target_volume):
@@ -108,29 +113,23 @@ class NadMixer(BaseMixer):
         return self._readline() == 'Main.Volume-'
 
     def _clear(self):
-        """Clear input and output buffers while keeping the lock."""
-        self._lock.acquire()
+        """Clear input and output buffers."""
         self._device.flushInput()
         self._device.flushOutput()
-        self._lock.release()
 
     def _write(self, data):
-        """Write and flush data to device while keeping the lock."""
-        self._lock.acquire()
+        """Write and flush data to device."""
         if not self._device.isOpen():
             self._device.open()
         self._device.write('\r%s\r' % data)
         self._device.flush()
-        self._lock.release()
 
     def _readline(self):
         """
-        Read line from device while keeping the lock. The result is stripped
-        for leading and trailing whitespace.
+        Read line from device. The result is stripped for leading and trailing
+        whitespace.
         """
-        self._lock.acquire()
         if not self._device.isOpen():
             self._device.open()
         result = self._device.readline(eol='\r')
-        self._lock.release()
         return result.strip()
