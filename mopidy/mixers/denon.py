@@ -11,7 +11,7 @@ logger = logging.getLogger(u'mopidy.mixers.denon')
 class DenonMixer(BaseMixer):
     def __init__(self):
         self._device = Serial(port=MIXER_PORT, timeout=0.2)
-        self._levels = ['99']+["%(#)02d" % {'#': v} for v in range(0,99)]
+        self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0
         self._lock = Lock()
 
