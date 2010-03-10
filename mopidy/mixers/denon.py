@@ -6,14 +6,19 @@ from mopidy.settings import MIXER_PORT
 
 class DenonMixer(BaseMixer):
     def __init__(self):
-        self._device = Serial(port=MIXER_PORT)
+        self._device = Serial(port=MIXER_PORT, timeout=0.2)
         self._levels = ['99']+["%(#)02d"% {'#': v} for v in range(0,99)]
         self._volume = None
 
     def _get_volume(self):
-        # The Denon spec doesnt seem to document
-        # how to query the volume, so we keep the
-        # state internally
+        try:
+            self._device.write('MV?\r')
+            vol = self._device.read(2)
+            if vol:
+                return self._levels.index(int(vol))
+        except:
+            pass # No support for volume query on device
+
         return self._volume
 
     def _set_volume(self, volume):
@@ -23,5 +28,7 @@ class DenonMixer(BaseMixer):
         elif volume > 99:
             volume = 99
 
-        self._volume = volume
+        if not self._device.isOpen():
+            self._device.open()
         self._device.write('MV%s\r'% self._levels[volume])
+        self._volume = volume
