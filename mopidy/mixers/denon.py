@@ -21,9 +21,7 @@ class DenonMixer(BaseMixer):
 
     def _set_volume(self, volume):
         # Clamp according to Denon-spec
-        if not volume:
-            volume = 0
-        elif volume > 99:
+        if volume > 99:
             volume = 99
 
         if not self._device.isOpen():
