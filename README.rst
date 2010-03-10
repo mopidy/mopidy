@@ -13,4 +13,5 @@ Mopidy.
 
 * `Source code <http://github.com/jodal/mopidy>`_
 * `Documentation <http://www.mopidy.com/>`_
+* `Presentation of Mopidy <http://www.slideshare.net/jodal/mopidy-3380516>`_
 * IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
