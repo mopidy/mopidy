@@ -19,12 +19,13 @@ class DenonMixer(BaseMixer):
         self._lock.acquire();
         self.ensure_open_device()
         self._device.write('MV?\r')
-        vol = self._device.readline()[2:4]
+        vol = str(self._device.readline()[2:4])
         self._lock.release()
         logger.debug(u'_get_volume() = %s' % vol)
         return self._levels.index(vol)
 
     def _set_volume(self, volume):
+        volume = int(volume)
         # Clamp according to Denon-spec
         if volume > 99:
             volume = 99
