@@ -14,6 +14,7 @@ class DenonMixer(BaseMixer):
         self._volume = None
 
     def _get_volume(self):
+        self.ensure_open_device()
         self._device.write('MV?\r')
         vol = self._device.read(20)[2:4]
         logger.debug(u'Volume: %s' % self._levels.index(vol))
@@ -24,8 +25,13 @@ class DenonMixer(BaseMixer):
         if volume > 99:
             volume = 99
 
-        if not self._device.isOpen():
-            self._device.open()
+        self.ensure_open_device()
         self._device.write('MV%s\r'% self._levels[volume])
         vol = self._device.read(20)[2:4]
         self._volume = self._levels.index(vol)
+        logger.debug(u'Volume: %s' % self._volume)
+
+    def ensure_open_device(self):
+        if not self._device.isOpen():
+            logger.debug(u'(re)connecting to Denon device')
+            self._device.open()
