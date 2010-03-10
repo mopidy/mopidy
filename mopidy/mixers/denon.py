@@ -25,7 +25,6 @@ class DenonMixer(BaseMixer):
         return self._levels.index(vol)
 
     def _set_volume(self, volume):
-        volume = int(volume)
         # Clamp according to Denon-spec
         if volume > 99:
             volume = 99
