@@ -25,4 +25,5 @@ class DenonMixer(BaseMixer):
         if not self._device.isOpen():
             self._device.open()
         self._device.write('MV%s\r'% self._levels[volume])
-        self._volume = volume
+        vol = self._device.read(20)[2:4]
+        self._volume = self._levels.index(vol)
