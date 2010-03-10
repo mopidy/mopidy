@@ -6,10 +6,11 @@ from mopidy.mixers.denon import DenonMixer
 class DenonMixerDeviceMock(object):
     def __init__(self):
         self._open = True
-        self.ret_val = bytes('00')
+        self.ret_val = bytes('MV00\r')
 
     def write(self, x):
-        pass
+        if x[2] != '?':
+            self.ret_val = bytes(x)
     def read(self, x):
         return self.ret_val
     def isOpen(self):
