@@ -1,8 +1,11 @@
+import logging
+
 from serial import Serial
 
 from mopidy.mixers import BaseMixer
 from mopidy.settings import MIXER_PORT
 
+logger = logging.get_logger(u'mopidy.mixers.denon')
 
 class DenonMixer(BaseMixer):
     def __init__(self):
@@ -13,6 +16,7 @@ class DenonMixer(BaseMixer):
     def _get_volume(self):
         self._device.write('MV?\r')
         vol = self._device.read(20)[2:4]
+        logger.debug(u'Volume: %s' % self._levels.index(vol))
         return self._levels.index(vol)
 
     def _set_volume(self, volume):
