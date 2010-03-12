@@ -98,21 +98,21 @@ class NadTalker(Process):
         return model
 
     def _power_device_on(self):
-        logger.info(u'Powering device on')
         while self._ask_device('Main.Power') != 'On':
+            logger.info(u'Powering device on')
             self._command_device('Main.Power', 'On')
 
     def _select_speakers(self):
-        logger.info(u'Setting speakers A "%s"', self.SPEAKERS_A)
         while self._ask_device('Main.SpeakerA') != self.SPEAKERS_A:
+            logger.info(u'Setting speakers A "%s"', self.SPEAKERS_A)
             self._command_device('Main.SpeakerA', self.SPEAKERS_A)
-        logger.info(u'Setting speakers B "%s"', self.SPEAKERS_B)
         while self._ask_device('Main.SpeakerB') != self.SPEAKERS_B:
+            logger.info(u'Setting speakers B "%s"', self.SPEAKERS_B)
             self._command_device('Main.SpeakerB', self.SPEAKERS_B)
 
     def _select_input_source(self):
-        logger.info(u'Selecting input source "%s"', self.SOURCE)
         while self._ask_device('Main.Source') != self.SOURCE:
+            logger.info(u'Selecting input source "%s"', self.SOURCE)
             self._command_device('Main.Source', self.SOURCE)
 
     def _ask_device(self, key):
