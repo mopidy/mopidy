@@ -38,11 +38,25 @@ CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  
 #: Default on other operating systems::
 #:
 #:     MIXER = u'mopidy.mixers.dummy.DummyMixer'
+#:
+#: **Available external mixers**
+#:
+#: .. note::
+#:     Using external mixers depends on the pyserial library.
+#:
+#: Denon AVR/AVC via RS-232::
+#:
+#:     MIXER = u'mopidy.mixers.denon.DenonMixer'
+#:
 MIXER = u'mopidy.mixers.dummy.DummyMixer'
 if sys.platform == 'linux2':
     MIXER = u'mopidy.mixers.alsa.AlsaMixer'
 elif sys.platform == 'darwin':
     MIXER = u'mopidy.mixers.osa.OsaMixer'
+
+#: Which port the mixer is connected to if using an external mixer.
+#: This must point to the device port like ``/dev/ttyUSB0`` or similar.
+MIXER_PORT = None
 
 #: Which address Mopidy should bind to. Examples:
 #:
