@@ -90,6 +90,7 @@ class NadTalker(Process):
         self._power_device_on()
         self._select_speakers()
         self._select_input_source()
+        self._unmute()
         self._calibrate_volume()
 
     def _get_device_model(self):
@@ -114,6 +115,11 @@ class NadTalker(Process):
         while self._ask_device('Main.Source') != self.SOURCE:
             logger.info(u'Selecting input source "%s"', self.SOURCE)
             self._command_device('Main.Source', self.SOURCE)
+
+    def _unmute(self):
+        while self._ask_device('Main.Mute') != 'Off':
+            logger.info(u'Unmuting device')
+            self._command_device('Main.Mute', 'Off')
 
     def _ask_device(self, key):
         self._write('%s?' % key)
