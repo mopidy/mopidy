@@ -214,7 +214,7 @@ class StatusHandlerTest(unittest.TestCase):
     def test_status_method_contains_playlist(self):
         result = dict(self.h._status_status())
         self.assert_('playlist' in result)
-        self.assert_(int(result['playlist']) in xrange(0, 2**31))
+        self.assert_(int(result['playlist']) in xrange(0, 2**31 - 1))
 
     def test_status_method_contains_playlistlength(self):
         result = dict(self.h._status_status())
