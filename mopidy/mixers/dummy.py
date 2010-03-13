@@ -1,7 +1,7 @@
 from mopidy.mixers import BaseMixer
 
 class DummyMixer(BaseMixer):
-    """Mixer which just stores and reports the choosen volume."""
+    """Mixer which just stores and reports the chosen volume."""
 
     def __init__(self):
         self._volume = None
