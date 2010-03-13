@@ -1,6 +1,24 @@
-*********************************
-:mod:`mopidy.mixers` -- Mixer API
-*********************************
+********************
+:mod:`mopidy.mixers`
+********************
+
+Mixers are responsible for controlling volume. Clients of the mixers will
+simply instantiate a mixer and read/write to the ``volume`` attribute::
+
+    >>> from mopidy.mixers.alsa import AlsaMixer
+    >>> mixer = AlsaMixer()
+    >>> mixer.volume
+    100
+    >>> mixer.volume = 80
+    >>> mixer.volume
+    80
+
+
+Mixer API
+=========
+
+All mixers should subclass :class:`mopidy.mixers.BaseMixer` and override
+methods as described below.
 
 .. automodule:: mopidy.mixers
     :synopsis: Sound mixer interface.
@@ -11,7 +29,7 @@
 Internal mixers
 ===============
 
-Most users will use on of these internal mixers which controls the volume on
+Most users will use one of these internal mixers which controls the volume on
 the computer running Mopidy. If you do not specify which mixer you want to use
 in the settings, Mopidy will choose one for you based upon what OS you run. See
 :attr:`mopidy.settings.default.MIXER` for the defaults.
@@ -52,9 +70,10 @@ External device mixers
 
 Mopidy supports controlling volume on external devices instead of on the
 computer running Mopidy through the use of custom mixer implementations. To
-enable one of the following mixers, you must the set `MIXER` setting to point
-to one of the classes found below, and possibly add some extra settings
-required by the mixer you choose.
+enable one of the following mixers, you must the set
+:attr:`mopidy.settings.default.MIXER` setting to point to one of the classes
+found below, and possibly add some extra settings required by the mixer you
+choose.
 
 
 :mod:`mopidy.mixers.denon` -- Denon amplifier mixer
