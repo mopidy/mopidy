@@ -9,6 +9,9 @@ logger = logging.getLogger('mopidy.mixers.nad')
 
 class NadMixer(BaseMixer):
     """
+    Mixer for controlling NAD amplifiers and receivers using the NAD RS-232
+    protocol.
+
     The NAD mixer was created using a NAD C 355BEE amplifier, but should also
     work with other NAD amplifiers supporting the same RS-232 protocol (v2.x).
     The C 355BEE does not give you access to the current volume. It only
@@ -18,10 +21,9 @@ class NadMixer(BaseMixer):
 
     Sadly, this means that if you use the remote control to change the volume
     on the amplifier, Mopidy will no longer report the correct volume. To
-    recalibrate the mixer, set the volume to 0, and then back again to the
-    level you want. This will reset the amplifier to a known state, including
-    powering on the device, selecting the configured speakers and input
-    sources.
+    recalibrate the mixer, set the volume to 0 through Mopidy. This will reset
+    the amplifier to a known state, including powering on the device, selecting
+    the configured speakers and input sources.
     """
 
     def __init__(self):

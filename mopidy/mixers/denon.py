@@ -8,27 +8,21 @@ from mopidy.settings import MIXER_PORT
 
 logger = logging.getLogger(u'mopidy.mixers.denon')
 
-"""
- Mixer for controlling Denon recivers and amplifiers using the RS-232 protocol.
-
- Connects using the serial specifications from
- Denon's RS-232 Protocol specification.
-
- Communication speed       : 9600bps
- Character length                 : 8 bits
- Parity control                   : None
- Start bit                        : 1 bit
- Stop bit                         : 1 bit
- Communication procedure          : Non procedural
- Communication data length : 135 bytes (maximum)
-
- The external mixer is the authoritative source for the current volume.
- This allows the user to use his remote control the volume without
- mopidy cancelling the volume setting.
-"""
-
 class DenonMixer(BaseMixer):
+    """
+    Mixer for controlling Denon amplifiers and receivers using the RS-232
+    protocol.
+
+    The external mixer is the authoritative source for the current volume.
+    This allows the user to use his remote control the volume without Mopidy
+    cancelling the volume setting.
+    """
+
     def __init__(self):
+        """
+        Connects using the serial specifications from Denon's RS-232 Protocol
+        specification: 9600bps 8N1.
+        """
         self._device = Serial(port=MIXER_PORT, timeout=0.2)
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0

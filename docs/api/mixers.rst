@@ -6,3 +6,62 @@
     :synopsis: Sound mixer interface.
     :members:
     :undoc-members:
+
+
+Internal mixers
+===============
+
+Most users will use on of these internal mixers which controls the volume on
+the computer running Mopidy. If you do not specify which mixer you want to use
+in the settings, Mopidy will choose one for you based upon what OS you run. See
+:attr:`mopidy.settings.default.MIXER` for the defaults.
+
+
+:mod:`mopidy.mixers.alsa` -- ALSA mixer
+---------------------------------------
+
+.. automodule:: mopidy.mixers.alsa
+    :synopsis: ALSA mixer
+    :members:
+
+
+:mod:`mopidy.mixers.dummy` -- Dummy mixer
+-----------------------------------------
+
+.. automodule:: mopidy.mixers.dummy
+    :synopsis: Dummy mixer
+    :members:
+
+
+:mod:`mopidy.mixers.osa` -- Osa mixer
+-------------------------------------
+
+.. automodule:: mopidy.mixers.osa
+    :synopsis: Osa mixer
+    :members:
+
+
+External device mixers
+======================
+
+Mopidy supports controlling volume on external devices instead of on the
+computer running Mopidy through the use of custom mixer implementations. To
+enable one of the following mixers, you must the set `MIXER` setting to point
+to one of the classes found below, and possibly add some extra settings
+required by the mixer you choose.
+
+
+:mod:`mopidy.mixers.denon` -- Denon amplifier mixer
+---------------------------------------------------
+
+.. automodule:: mopidy.mixers.denon
+    :synopsis: Denon amplifier mixer
+    :members:
+
+
+:mod:`mopidy.mixers.nad` -- NAD amplifier mixer
+-----------------------------------------------
+
+.. automodule:: mopidy.mixers.nad
+    :synopsis: NAD amplifier mixer
+    :members:

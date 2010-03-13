@@ -3,16 +3,18 @@ import time
 
 from mopidy.mixers import BaseMixer
 
-CACHE_TTL = 30
-
 class OsaMixer(BaseMixer):
+    """Mixer which uses ``osascript`` on OS X to control volume."""
+
+    CACHE_TTL = 30
+
     _cache = None
     _last_update = None
 
     def _valid_cache(self):
         return (self._cache is not None
             and self._last_update is not None
-            and (int(time.time() - self._last_update) < CACHE_TTL))
+            and (int(time.time() - self._last_update) < self.CACHE_TTL))
 
     def _get_volume(self):
 	if not self._valid_cache():
