@@ -3,7 +3,8 @@ from serial import Serial
 from multiprocessing import Pipe, Process
 
 from mopidy.mixers import BaseMixer
-from mopidy.settings import MIXER_PORT
+from mopidy.settings import (MIXER_EXT_PORT, MIXER_EXT_SOURCE,
+    MIXER_EXT_SPEAKERS_A, MIXER_EXT_SPEAKERS_B)
 
 logger = logging.getLogger('mopidy.mixers.nad')
 
@@ -24,6 +25,19 @@ class NadMixer(BaseMixer):
     recalibrate the mixer, set the volume to 0 through Mopidy. This will reset
     the amplifier to a known state, including powering on the device, selecting
     the configured speakers and input sources.
+
+    **Dependencies**
+
+    - pyserial (python-serial on Debian/Ubuntu)
+
+    **Settings**
+
+    - :attr:`mopidy.settings.default.MIXER_EXT_PORT` --
+      Example: ``/dev/ttyUSB0``
+    - :attr:`mopidy.settings.default.MIXER_EXT_SOURCE` -- Example: ``Aux``
+    - :attr:`mopidy.settings.default.MIXER_EXT_SPEAKERS_A` -- Example: ``On``
+    - :attr:`mopidy.settings.default.MIXER_EXT_SPEAKERS_B` -- Example: ``Off``
+
     """
 
     def __init__(self):
@@ -42,26 +56,25 @@ class NadMixer(BaseMixer):
 
 
 class NadTalker(Process):
-    #: Timeout in seconds used for read/write operations.
-    #:
-    #: If you set the timeout too low, the reads will never get complete
-    #: confirmations and calibration will decrease volume forever. If you set
-    #: the timeout too high, stuff takes more time.
+    """
+    Independent process which does the communication with the NAD device.
+
+    Since the communication is done in an independent process, Mopidy won't
+    block other requests while doing rather time consuming work like
+    calibrating the NAD device's volume.
+    """
+
+    # Timeout in seconds used for read/write operations.
+    # If you set the timeout too low, the reads will never get complete
+    # confirmations and calibration will decrease volume forever. If you set
+    # the timeout too high, stuff takes more time. 0.2s seems like a good value
+    # for NAD C 355BEE.
     TIMEOUT = 0.2
 
-    #: Number of volume levels the device supports
-    NUM_STEPS = 40
+    # Number of volume levels the device supports. 40 for NAD C 355BEE.
+    VOLUME_LEVELS = 40
 
-    #: The amplifier source to use
-    SOURCE = 'Aux'
-
-    #: State of speakers A
-    SPEAKERS_A = 'On'
-
-    #: State of speakers B
-    SPEAKERS_B = 'Off'
-
-    #: Volume in range [0..NUM_STEPS]. :class:`None` before calibration.
+    # Volume in range 0..VOLUME_LEVELS. :class:`None` before calibration.
     _nad_volume = None
 
     def __init__(self, pipe=None):
@@ -79,12 +92,9 @@ class NadTalker(Process):
                 self._set_device_to_known_state()
 
     def _open_connection(self):
-        """
-        Opens serial connection to the device.
-
-        Communication settings: 115200 bps 8N1
-        """
-        self._device = Serial(port=MIXER_PORT, baudrate=115200,
+        # Opens serial connection to the device.
+        # Communication settings: 115200 bps 8N1
+        self._device = Serial(port=MIXER_EXT_PORT, baudrate=115200,
             timeout=self.TIMEOUT)
         self._get_device_model()
 
@@ -106,17 +116,17 @@ class NadTalker(Process):
             self._command_device('Main.Power', 'On')
 
     def _select_speakers(self):
-        while self._ask_device('Main.SpeakerA') != self.SPEAKERS_A:
-            logger.info(u'Setting speakers A "%s"', self.SPEAKERS_A)
-            self._command_device('Main.SpeakerA', self.SPEAKERS_A)
-        while self._ask_device('Main.SpeakerB') != self.SPEAKERS_B:
-            logger.info(u'Setting speakers B "%s"', self.SPEAKERS_B)
-            self._command_device('Main.SpeakerB', self.SPEAKERS_B)
+        while self._ask_device('Main.SpeakerA') != MIXER_EXT_SPEAKERS_A:
+            logger.info(u'Setting speakers A "%s"', MIXER_EXT_SPEAKERS_A)
+            self._command_device('Main.SpeakerA', MIXER_EXT_SPEAKERS_A)
+        while self._ask_device('Main.SpeakerB') != MIXER_EXT_SPEAKERS_B:
+            logger.info(u'Setting speakers B "%s"', MIXER_EXT_SPEAKERS_B)
+            self._command_device('Main.SpeakerB', MIXER_EXT_SPEAKERS_B)
 
     def _select_input_source(self):
-        while self._ask_device('Main.Source') != self.SOURCE:
-            logger.info(u'Selecting input source "%s"', self.SOURCE)
-            self._command_device('Main.Source', self.SOURCE)
+        while self._ask_device('Main.Source') != MIXER_EXT_SOURCE:
+            logger.info(u'Selecting input source "%s"', MIXER_EXT_SOURCE)
+            self._command_device('Main.Source', MIXER_EXT_SOURCE)
 
     def _unmute(self):
         while self._ask_device('Main.Mute') != 'Off':
@@ -132,13 +142,11 @@ class NadTalker(Process):
         self._readline()
 
     def _calibrate_volume(self):
-        """
-        The NAD C 355BEE amplifier has 40 different volume levels. We have no
-        way of asking on which level we are. Thus, we must calibrate the mixer
-        by decreasing the volume 39 times.
-        """
+        # The NAD C 355BEE amplifier has 40 different volume levels. We have no
+        # way of asking on which level we are. Thus, we must calibrate the
+        # mixer by decreasing the volume 39 times.
         logger.info(u'Calibrating NAD amplifier')
-        steps_left = self.NUM_STEPS - 1
+        steps_left = self.VOLUME_LEVELS - 1
         while steps_left:
             if self._decrease_volume():
                 steps_left -= 1
@@ -146,12 +154,10 @@ class NadTalker(Process):
         logger.info(u'Done calibrating NAD amplifier')
 
     def _set_volume(self, volume):
-        """
-        Increase or decrease the amplifier volume until it matches the given
-        target volume.
-        """
+        # Increase or decrease the amplifier volume until it matches the given
+        # target volume.
         logger.debug(u'Setting volume to %d' % volume)
-        target_nad_volume = int(round(volume * self.NUM_STEPS / 100.0))
+        target_nad_volume = int(round(volume * self.VOLUME_LEVELS / 100.0))
         if self._nad_volume is None:
             return # Calibration needed
         while target_nad_volume > self._nad_volume:
@@ -162,30 +168,26 @@ class NadTalker(Process):
                 self._nad_volume -= 1
 
     def _increase_volume(self):
+        # Increase volume. Returns :class:`True` if confirmed by device.
         self._write('Main.Volume+')
         return self._readline() == 'Main.Volume+'
 
     def _decrease_volume(self):
+        # Decrease volume. Returns :class:`True` if confirmed by device.
         self._write('Main.Volume-')
         return self._readline() == 'Main.Volume-'
 
     def _write(self, data):
-        """
-        Write data to device.
-
-        Prepends and appends a newline to the data, as recommended by the NAD
-        documentation.
-        """
+        # Write data to device. Prepends and appends a newline to the data, as
+        # recommended by the NAD documentation.
         if not self._device.isOpen():
             self._device.open()
         self._device.write('\n%s\n' % data)
         logger.debug('Write: %s', data)
 
     def _readline(self):
-        """
-        Read line from device. The result is stripped for leading and trailing
-        whitespace.
-        """
+        # Read line from device. The result is stripped for leading and
+        # trailing whitespace.
         if not self._device.isOpen():
             self._device.open()
         result = self._device.readline(eol='\n').strip()

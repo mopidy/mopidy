@@ -4,7 +4,7 @@ from threading import Lock
 from serial import Serial
 
 from mopidy.mixers import BaseMixer
-from mopidy.settings import MIXER_PORT
+from mopidy.settings import MIXER_EXT_PORT
 
 logger = logging.getLogger(u'mopidy.mixers.denon')
 
@@ -16,6 +16,15 @@ class DenonMixer(BaseMixer):
     The external mixer is the authoritative source for the current volume.
     This allows the user to use his remote control the volume without Mopidy
     cancelling the volume setting.
+
+    **Dependencies**
+
+    - pyserial (python-serial on Debian/Ubuntu)
+
+    **Settings**
+
+    - :attr:`mopidy.settings.default.MIXER_EXT_PORT` -- Example:
+      ``/dev/ttyUSB0``
     """
 
     def __init__(self):
@@ -23,7 +32,7 @@ class DenonMixer(BaseMixer):
         Connects using the serial specifications from Denon's RS-232 Protocol
         specification: 9600bps 8N1.
         """
-        self._device = Serial(port=MIXER_PORT, timeout=0.2)
+        self._device = Serial(port=MIXER_EXT_PORT, timeout=0.2)
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0
         self._lock = Lock()
