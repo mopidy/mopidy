@@ -24,6 +24,8 @@ in the settings, Mopidy will choose one for you based upon what OS you run. See
     :synopsis: ALSA mixer
     :members:
 
+.. inheritance-diagram:: mopidy.mixers.alsa.AlsaMixer
+
 
 :mod:`mopidy.mixers.dummy` -- Dummy mixer
 -----------------------------------------
@@ -32,6 +34,8 @@ in the settings, Mopidy will choose one for you based upon what OS you run. See
     :synopsis: Dummy mixer
     :members:
 
+.. inheritance-diagram:: mopidy.mixers.dummy
+
 
 :mod:`mopidy.mixers.osa` -- Osa mixer
 -------------------------------------
@@ -39,6 +43,8 @@ in the settings, Mopidy will choose one for you based upon what OS you run. See
 .. automodule:: mopidy.mixers.osa
     :synopsis: Osa mixer
     :members:
+
+.. inheritance-diagram:: mopidy.mixers.osa
 
 
 External device mixers
@@ -58,6 +64,8 @@ required by the mixer you choose.
     :synopsis: Denon amplifier mixer
     :members:
 
+.. inheritance-diagram:: mopidy.mixers.denon
+
 
 :mod:`mopidy.mixers.nad` -- NAD amplifier mixer
 -----------------------------------------------
@@ -65,3 +73,5 @@ required by the mixer you choose.
 .. automodule:: mopidy.mixers.nad
     :synopsis: NAD amplifier mixer
     :members:
+
+.. inheritance-diagram:: mopidy.mixers.nad
