@@ -30,3 +30,40 @@ Backend API
     :synopsis: Backend interface.
     :members:
     :undoc-members:
+
+
+Spotify backends
+================
+
+:mod:`mopidy.backends.despotify` -- Despotify backend
+-----------------------------------------------------
+
+.. automodule:: mopidy.backends.despotify
+    :synopsis: Spotify backend using the despotify library.
+    :members:
+
+
+:mod:`mopidy.backends.libspotify` -- Libspotify backend
+-------------------------------------------------------
+
+.. automodule:: mopidy.backends.libspotify
+    :synopsis: Spotify backend using the libspotify library.
+    :members:
+
+
+Other backends
+==============
+
+:mod:`mopidy.backends.dummy` -- Dummy backend
+---------------------------------------------
+
+.. automodule:: mopidy.backends.dummy
+    :synopsis: Dummy backend used for testing.
+    :members:
+
+
+GStreamer backend
+-----------------
+
+``GstreamerBackend`` is pending merge from `adamcik/mopidy/gstreamer
+<http://github.com/adamcik/mopidy/tree/gstreamer>`_.

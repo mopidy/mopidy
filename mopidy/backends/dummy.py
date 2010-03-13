@@ -4,6 +4,13 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
 from mopidy.models import Playlist
 
 class DummyBackend(BaseBackend):
+    """
+    A backend which implements the backend API in the simplest way possible.
+    Used in tests of the frontends.
+
+    Handles URIs starting with ``dummy:``.
+    """
+
     def __init__(self, *args, **kwargs):
         super(DummyBackend, self).__init__(*args, **kwargs)
         self.current_playlist = DummyCurrentPlaylistController(backend=self)

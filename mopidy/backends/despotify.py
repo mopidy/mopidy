@@ -14,6 +14,30 @@ logger = logging.getLogger(u'backends.despotify')
 ENCODING = 'utf-8'
 
 class DespotifyBackend(BaseBackend):
+    """
+    A Spotify backend which uses the open source `despotify library
+    <http://despotify.se/>`_.
+
+    `spytify <http://despotify.svn.sourceforge.net/viewvc/despotify/src/bindings/python/>`_
+    is the Python bindings for the despotify library. It got litle
+    documentation, but a couple of examples are available.
+
+    **Issues**
+
+    - r503: Sometimes segfaults when traversing stored playlists, their tracks,
+      artists, and albums. As it is not predictable, it may be a concurrency
+      issue.
+
+    - r503: Segfaults when looking up playlists, both your own lists and other
+      peoples shared lists. To reproduce::
+
+        >>> import spytify
+        >>> s = spytify.Spytify('alice', 'secret')
+        >>> s.lookup('spotify:user:klette:playlist:5rOGYPwwKqbAcVX8bW4k5V')
+        Segmentation fault
+
+    """
+
     def __init__(self, *args, **kwargs):
         super(DespotifyBackend, self).__init__(*args, **kwargs)
         self.current_playlist = DespotifyCurrentPlaylistController(backend=self)

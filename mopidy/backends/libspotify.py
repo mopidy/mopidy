@@ -17,6 +17,24 @@ logger = logging.getLogger(u'backends.libspotify')
 ENCODING = 'utf-8'
 
 class LibspotifyBackend(BaseBackend):
+    """
+    A Spotify backend which uses the official `libspotify library
+    <http://developer.spotify.com/en/libspotify/overview/>`_.
+
+    `pyspotify <http://github.com/winjer/pyspotify/>`_ is the Python bindings
+    for libspotify. It got no documentation, but multiple examples are
+    available. Like libspotify, pyspotify's calls are mostly asynchronous.
+
+    This backend should also work with `openspotify
+    <http://github.com/noahwilliamsson/openspotify>`_, but we haven't tested
+    that yet.
+
+    **Issues**
+
+    - libspotify is badly packaged. See
+      http://getsatisfaction.com/spotify/topics/libspotify_please_fix_the_installation_script.
+    """
+
     def __init__(self, *args, **kwargs):
         super(LibspotifyBackend, self).__init__(*args, **kwargs)
         self.current_playlist = LibspotifyCurrentPlaylistController(
