@@ -51,7 +51,7 @@ class DespotifyBackend(BaseBackend):
 
     def _connect(self):
         logger.info(u'Connecting to Spotify')
-        return spytify.Spytify(
+        return DespotifySessionManager(
             settings.SPOTIFY_USERNAME.encode(ENCODING),
             settings.SPOTIFY_PASSWORD.encode(ENCODING))
 
@@ -154,3 +154,19 @@ class DespotifyTranslator(object):
             name=spotify_playlist.name.decode(ENCODING),
             tracks=[self.to_mopidy_track(t) for t in spotify_playlist.tracks],
         )
+
+
+class DespotifySessionManager(spytify.Spytify):
+    DESPOTIFY_NEW_TRACK = 1
+    DESPOTIFY_TIME_TELL = 2
+    DESPOTIFY_END_OF_PLAYLIST = 3
+    DESPOTIFY_TRACK_PLAY_ERROR = 4
+
+    def __init__(self, *args, **kwargs):
+        kwargs['callback'] = self.callback
+        super(DespotifySessionManager, self).__init__(*args, **kwargs)
+
+    def callback(self, signal, data):
+        if signal == self.DESPOTIFY_END_OF_PLAYLIST:
+            logger.debug('Despotify signalled end of playlist')
+            # TODO Ask backend to play next track
