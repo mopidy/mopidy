@@ -196,15 +196,24 @@ class Playlist(ImmutableObject):
         Optionally limit output to the slice ``[start:end]`` of the playlist.
 
         :param start: position of first track to include in output
-        :type start: int
+        :type start: int (positive or negative)
         :param end: position after last track to include in output
-        :type end: int or :class:`None` for end of list
+        :type end: int (positive or negative) or :class:`None` for end of list
         :rtype: list of lists of two-tuples
         """
-        if end is None:
-            end = self.length
+        if start < 0:
+            range_start = self.length + start
+        else:
+            range_start = start
+        if end is not None and end < 0:
+            range_end = self.length - end
+        elif end is not None and end >= 0:
+            range_end = end
+        else:
+            range_end = self.length
         tracks = []
-        for track, position in zip(self.tracks[start:end], range(start, end)):
+        for track, position in zip(self.tracks[start:end],
+                range(range_start, range_end)):
             tracks.append(track.mpd_format(position, search_result))
         return tracks
 

@@ -701,6 +701,10 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'playlistinfo "5"')
         self.assert_(u'OK' in result)
 
+    def test_playlistinfo_with_negative_songpos(self):
+        result = self.h.handle_request(u'playlistinfo "-1"')
+        self.assert_(u'OK' in result)
+
     def test_playlistinfo_with_open_range(self):
         result = self.h.handle_request(u'playlistinfo "10:"')
         self.assert_(u'OK' in result)

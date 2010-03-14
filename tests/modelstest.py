@@ -182,6 +182,20 @@ class PlaylistTest(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(dict(result[0])['Track'], 2)
 
+    def test_mpd_format_with_negative_start_and_no_end(self):
+        playlist = Playlist(tracks=[
+            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
+        result = playlist.mpd_format(-1, None)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(dict(result[0])['Track'], 3)
+
+    def test_mpd_format_with_negative_start_and_end(self):
+        playlist = Playlist(tracks=[
+            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
+        result = playlist.mpd_format(-2, -1)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(dict(result[0])['Track'], 2)
+
     def test_with_new_uri(self):
         tracks = [Track()]
         last_modified = dt.datetime.now()

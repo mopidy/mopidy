@@ -394,7 +394,7 @@ class MpdHandler(object):
             return self.backend.current_playlist.playlist.mpd_format()
 
     @handle_pattern(r'^playlistinfo$')
-    @handle_pattern(r'^playlistinfo "(?P<songpos>\d+)"$')
+    @handle_pattern(r'^playlistinfo "(?P<songpos>-?\d+)"$')
     @handle_pattern(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
     def _current_playlist_playlistinfo(self, songpos=None,
             start=None, end=None):
@@ -406,11 +406,20 @@ class MpdHandler(object):
             Displays a list of all songs in the playlist, or if the optional
             argument is given, displays information only for the song
             ``SONGPOS`` or the range of songs ``START:END``.
+
+        *ncmpc:*
+
+        - uses negative indexes, like ``playlistinfo "-1"``, to request
+          information on the last track in the playlist.
         """
         if songpos is not None:
             songpos = int(songpos)
+            start = songpos
+            end = songpos + 1
+            if start == -1:
+                end = None
             return self.backend.current_playlist.playlist.mpd_format(
-                songpos, songpos + 1)
+                start, end)
         else:
             if start is None:
                 start = 0
