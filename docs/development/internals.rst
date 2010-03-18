@@ -31,3 +31,13 @@ not Mopidy.
     "spytify" -> "despotify" [ label="use C library" ]
     "DespotifyBackend" -> "AlsaMixer" [ label="use mixer API" ]
     "AlsaMixer" -> "alsaaudio" [ label="use Python library" ]
+
+
+Thread communication
+====================
+
+.. warning::
+
+    This is a plan, and does not necessarily reflect what has been implemented.
+
+.. image:: /_static/thread_communication.png

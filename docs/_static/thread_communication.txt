@@ -1,0 +1,32 @@
+Script for use with www.websequencediagrams.com
+===============================================
+
+Main -> NadMixer: start
+activate NadMixer
+note over NadMixer: calibrate device
+NadMixer -> Main: ready
+Main -> MpdHandler/Backend: start
+activate MpdHandler/Backend
+MpdHandler/Backend -> despotify: connect to Spotify
+activate despotify
+MpdHandler/Backend -> Main: ready
+Main -> MpdServer/MpdSession: start
+activate MpdServer/MpdSession
+note over MpdServer/MpdSession: opens port
+MpdServer/MpdSession -> Main: ready
+Client -> MpdServer/MpdSession: connect
+Client -> MpdServer/MpdSession: play 1
+MpdServer/MpdSession -> MpdHandler/Backend: play 1
+MpdHandler/Backend -> despotify: play first track
+Client -> MpdServer/MpdSession: setvol 50
+MpdServer/MpdSession -> MpdHandler/Backend: setvol 50
+MpdHandler/Backend -> NadMixer: volume = 50
+Client -> MpdServer/MpdSession: status
+MpdServer/MpdSession -> MpdHandler/Backend: status
+MpdHandler/Backend -> NadMixer: volume?
+NadMixer -> MpdHandler/Backend: volume = 50
+MpdHandler/Backend -> MpdServer/MpdSession: status response
+MpdServer/MpdSession -> Client: status response
+despotify -> MpdHandler/Backend: end of track callback
+MpdHandler/Backend -> despotify: play second track
+MpdServer/MpdSession -> MpdHandler/Backend: stop
