@@ -18,12 +18,10 @@ def main():
     # ---------------------------
     #
     # TODO Init backend in new Process (named core?)
-    # TODO Init mixer from backend
     # TODO Init MpdHandler from backend/core
     # TODO Init MpdServer in MainThread or in new Process?
 
-    mixer = get_class(settings.MIXER)()
-    backend = get_class(settings.BACKENDS[0])(mixer=mixer)
+    backend = get_class(settings.BACKENDS[0])()
     MpdServer(backend=backend)
     asyncore.loop()
 

@@ -3,13 +3,14 @@ import logging
 import random
 import time
 
+from mopidy import get_class, settings
 from mopidy.models import Playlist
 
 logger = logging.getLogger('backends.base')
 
 class BaseBackend(object):
-    def __init__(self, mixer=None):
-        self.mixer = mixer
+    def __init__(self):
+        self.mixer = get_class(settings.MIXER)()
 
     #: The current playlist controller. An instance of
     #: :class:`BaseCurrentPlaylistController`.
