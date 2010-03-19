@@ -1,5 +1,6 @@
 import asyncore
 import logging
+from multiprocessing import Queue
 import os
 import sys
 
@@ -7,6 +8,7 @@ sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 from mopidy import get_class, settings, SettingsError
+from mopidy.core import CoreProcess
 from mopidy.mpd.server import MpdServer
 
 logger = logging.getLogger('mopidy')
@@ -17,13 +19,22 @@ def main():
     # multiprocessing branch plan
     # ---------------------------
     #
-    # TODO Init backend in new Process (named core?)
     # TODO Init MpdHandler from backend/core
     # TODO Init MpdServer in MainThread or in new Process?
 
-    backend = get_class(settings.BACKENDS[0])()
-    MpdServer(backend=backend)
-    asyncore.loop()
+    main_queue = Queue()
+    core_queue = Queue()
+    server_queue = Queue()
+    core = CoreProcess(core_queue=core_queue,
+        main_queue=main_queue, server_queue=server_queue)
+    core.start()
+    while True:
+        message = main_queue.get()
+        if message['command'] == 'core_ready':
+            MpdServer(backend=None)
+            asyncore.loop()
+        else:
+            logger.warning(u'Cannot handle message: %s', message)
 
 def _setup_logging(verbosity_level):
     if verbosity_level == 0:
