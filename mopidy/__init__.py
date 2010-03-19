@@ -1,4 +1,6 @@
 import logging
+from multiprocessing.reduction import reduce_connection
+import pickle
 
 from mopidy import settings as raw_settings
 
@@ -17,6 +19,16 @@ def get_class(name):
     module = __import__(module_name, globals(), locals(), [class_name], -1)
     class_object = getattr(module, class_name)
     return class_object
+
+def pickle_connection(connection):
+    return pickle.dumps(reduce_connection(connection))
+
+def unpickle_connection(pickled_connection):
+    # From http://stackoverflow.com/questions/1446004
+    unpickled = pickle.loads(pickled_connection)
+    func = unpickled[0]
+    args = unpickled[1]
+    return func(*args)
 
 class SettingsError(Exception):
     pass
