@@ -13,6 +13,15 @@ logger = logging.getLogger('mopidy')
 
 def main():
     _setup_logging(2)
+
+    # multiprocessing branch plan
+    # ---------------------------
+    #
+    # TODO Init backend in new Process (named core?)
+    # TODO Init mixer from backend
+    # TODO Init MpdHandler from backend/core
+    # TODO Init MpdServer in MainThread or in new Process?
+
     mixer = get_class(settings.MIXER)()
     backend = get_class(settings.BACKENDS[0])(mixer=mixer)
     MpdServer(backend=backend)
