@@ -23,7 +23,7 @@ BACKENDS = (
 #: The log format used on the console. See
 #: http://docs.python.org/library/logging.html#formatter-objects for details on
 #: the format.
-CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  %(message)s'
+CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
