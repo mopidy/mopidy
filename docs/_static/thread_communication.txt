@@ -12,9 +12,10 @@ activate despotify
 MpdHandler/Backend -> Main: ready
 Main -> MpdServer/MpdSession: start
 activate MpdServer/MpdSession
-note over MpdServer/MpdSession: opens port
+note over MpdServer/MpdSession: open port
 MpdServer/MpdSession -> Main: ready
 Client -> MpdServer/MpdSession: connect
+note over MpdServer/MpdSession: open session
 Client -> MpdServer/MpdSession: play 1
 MpdServer/MpdSession -> MpdHandler/Backend: play 1
 MpdHandler/Backend -> despotify: play first track
@@ -29,4 +30,8 @@ MpdHandler/Backend -> MpdServer/MpdSession: status response
 MpdServer/MpdSession -> Client: status response
 despotify -> MpdHandler/Backend: end of track callback
 MpdHandler/Backend -> despotify: play second track
+Client -> MpdServer/MpdSession: stop
 MpdServer/MpdSession -> MpdHandler/Backend: stop
+MpdHandler/Backend -> despotify: stop
+Client -> MpdServer/MpdSession: disconnect
+note over MpdServer/MpdSession: close session
