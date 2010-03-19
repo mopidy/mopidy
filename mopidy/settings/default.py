@@ -25,6 +25,11 @@ BACKENDS = (
 #: the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
+#: Protocol frontend to use. Default::
+#:
+#:     FRONTEND = u'mopidy.mpd.handler.MpdHandler'
+FRONTEND = u'mopidy.mpd.handler.MpdHandler'
+
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
 #: Default on Linux::
