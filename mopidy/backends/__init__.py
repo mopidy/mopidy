@@ -9,8 +9,11 @@ from mopidy.models import Playlist
 logger = logging.getLogger('backends.base')
 
 class BaseBackend(object):
-    def __init__(self):
-        self.mixer = get_class(settings.MIXER)()
+    def __init__(self, mixer=None):
+        if mixer is not None:
+            self.mixer = mixer
+        else:
+            self.mixer = get_class(settings.MIXER)()
 
     #: The current playlist controller. An instance of
     #: :class:`BaseCurrentPlaylistController`.
