@@ -19,7 +19,6 @@ def main():
     # multiprocessing branch plan
     # ---------------------------
     #
-    # TODO Init MpdHandler from backend/core
     # TODO Init MpdServer in MainThread or in new Process?
 
     main_queue = Queue()
@@ -31,7 +30,7 @@ def main():
     while True:
         message = main_queue.get()
         if message['command'] == 'core_ready':
-            MpdServer(backend=None)
+            MpdServer(core_queue=core_queue)
             asyncore.loop()
         else:
             logger.warning(u'Cannot handle message: %s', message)

@@ -1,23 +1,26 @@
 import logging
-from multiprocessing import Process, Queue
+import multiprocessing
 
-from mopidy import get_class, settings
+from mopidy import get_class, settings, unpickle_connection
 
 logger = logging.getLogger('mopidy.core')
 
-class CoreProcess(Process):
+class CoreProcess(multiprocessing.Process):
     def __init__(self, core_queue=None, main_queue=None, server_queue=None):
-        Process.__init__(self)
+        multiprocessing.Process.__init__(self)
         self.queue = core_queue
         self.main_queue = main_queue
         self.server_queue = server_queue
 
     def run(self):
-        self._setup()
+        backend = get_class(settings.BACKENDS[0])()
+        frontend = get_class(settings.FRONTEND)(backend=backend)
+        self.main_queue.put({'command': 'core_ready'})
         while True:
             message = self.queue.get()
-            # TODO Do something with the message
-
-    def _setup(self):
-        self.backend = get_class(settings.BACKENDS[0])()
-        self.main_queue.put({'command': 'core_ready'})
+            if message['command'] == 'mpd_request':
+                response = frontend.handle_request(message['request'])
+                connection = unpickle_connection(message['reply_to'])
+                connection.send(response)
+            else:
+                logger.warning(u'Cannot handle message: %s', message)

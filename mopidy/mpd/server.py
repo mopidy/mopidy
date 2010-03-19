@@ -10,10 +10,10 @@ from mopidy.mpd.session import MpdSession
 logger = logging.getLogger(u'mpd.server')
 
 class MpdServer(asyncore.dispatcher):
-    def __init__(self, session_class=MpdSession, backend=None):
+    def __init__(self, session_class=MpdSession, core_queue=None):
         asyncore.dispatcher.__init__(self)
         self.session_class = session_class
-        self.backend = backend
+        self.core_queue = core_queue
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
         self.bind((settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT))
@@ -26,7 +26,7 @@ class MpdServer(asyncore.dispatcher):
         (client_socket, client_address) = self.accept()
         logger.info(u'Connection from: [%s]:%s', *client_address)
         self.session_class(self, client_socket, client_address,
-            backend=self.backend)
+            core_queue=self.core_queue)
 
     def handle_close(self):
         self.close()
