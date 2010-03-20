@@ -4,7 +4,7 @@ import multiprocessing
 from mopidy import settings
 from mopidy.utils import get_class, unpickle_connection
 
-logger = logging.getLogger('mopidy.core')
+logger = logging.getLogger('mopidy.process')
 
 class CoreProcess(multiprocessing.Process):
     def __init__(self, core_queue):
