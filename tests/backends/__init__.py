@@ -1,5 +1,3 @@
-from mopidy.models import Track
-
 class BaseCurrentPlaylistControllerTest(object):
     uris = []
     backend_class = None

@@ -10,7 +10,6 @@ import socket
 import sys
 
 from mopidy import get_mpd_protocol_version, settings
-from mopidy.mpd import MpdAckError
 from mopidy.utils import indent, pickle_connection
 
 logger = logging.getLogger('mopidy.mpd.server')

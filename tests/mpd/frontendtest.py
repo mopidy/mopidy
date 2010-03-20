@@ -4,7 +4,7 @@ import unittest
 from mopidy.backends.dummy import DummyBackend
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track, Playlist
-from mopidy.mpd import frontend, MpdAckError
+from mopidy.mpd import frontend
 
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):

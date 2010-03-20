@@ -13,7 +13,6 @@ implement our own MPD server which is compatible with the numerous existing
 import datetime as dt
 import logging
 import re
-import sys
 
 from mopidy.mpd import MpdAckError, MpdNotImplemented
 from mopidy.utils import flatten

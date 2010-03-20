@@ -1,5 +1,4 @@
 import unittest
-import os
 
 from mopidy.mixers.denon import DenonMixer
 
