@@ -390,7 +390,10 @@ class BasePlaybackController(object):
 
     def end_of_track_callback(self):
         """Tell the playback controller that end of track is reached."""
-        self.next()
+        if self.next_track is not None:
+            self.next()
+        else:
+            self.stop()
 
     def new_playlist_loaded_callback(self):
         """Tell the playback controller that a new playlist has been loaded."""
