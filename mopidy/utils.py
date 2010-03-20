@@ -16,7 +16,7 @@ def flatten(the_list):
 def get_class(name):
     module_name = name[:name.rindex('.')]
     class_name = name[name.rindex('.') + 1:]
-    logger.info('Loading: %s', name)
+    logger.debug('Loading: %s', name)
     module = __import__(module_name, globals(), locals(), [class_name], -1)
     class_object = getattr(module, class_name)
     return class_object
