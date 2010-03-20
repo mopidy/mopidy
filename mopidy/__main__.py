@@ -46,6 +46,11 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        sys.exit('\nInterrupted by user')
+        logger.info(u'Interrupted by user')
+        sys.exit(0)
     except SettingsError, e:
-        sys.exit('%s' % e)
+        logger.error(e)
+        sys.exit(1)
+    except SystemExit, e:
+        logger.error(e)
+        sys.exit(1)
