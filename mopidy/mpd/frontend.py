@@ -22,6 +22,23 @@ logger = logging.getLogger('mopidy.mpd.frontend')
 _request_handlers = {}
 
 def handle_pattern(pattern):
+    """
+    Decorator for connecting command handlers to command patterns.
+
+    If you use named groups in the pattern, the decorated method will get the
+    groups as keyword arguments. If the group is optional, remember to give the
+    argument a default value.
+
+    For example, if the command is ``do that thing`` the ``what`` argument will
+    be ``this thing``::
+
+        @handle_pattern('^do (?P<what>.+)$')
+        def do(what):
+            ...
+
+    :param pattern: regexp pattern for matching commands
+    :type pattern: string
+    """
     def decorator(func):
         if pattern in _request_handlers:
             raise ValueError(u'Tried to redefine handler for %s with %s' % (
