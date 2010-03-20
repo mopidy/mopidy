@@ -3,8 +3,9 @@ import logging
 import random
 import time
 
-from mopidy import get_class, settings
+from mopidy import settings
 from mopidy.models import Playlist
+from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.backends.base')
 

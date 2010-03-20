@@ -9,14 +9,16 @@ import multiprocessing
 import socket
 import sys
 
-from mopidy import get_mpd_protocol_version, pickle_connection, settings
+from mopidy import get_mpd_protocol_version, settings
 from mopidy.mpd import MpdAckError
+from mopidy.utils import indent, pickle_connection
 
 logger = logging.getLogger('mopidy.mpd.server')
 
-#: All data between the client and the server is encoded in UTF-8.
+#: The MPD protocol uses UTF-8 for encoding all data.
 ENCODING = u'utf-8'
 
+#: The MPD protocol uses ``\n`` as line terminator.
 LINE_TERMINATOR = u'\n'
 
 class MpdServer(asyncore.dispatcher):
@@ -87,13 +89,3 @@ class MpdSession(asynchat.async_chat):
         output = u'%s%s' % (output, LINE_TERMINATOR)
         data = output.encode(ENCODING)
         self.push(data)
-
-
-def indent(string, places=4, linebreak=LINE_TERMINATOR):
-    lines = string.split(linebreak)
-    if len(lines) == 1:
-        return string
-    result = u''
-    for line in lines:
-        result += linebreak + ' ' * places + line
-    return result

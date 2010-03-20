@@ -16,6 +16,7 @@ import re
 import sys
 
 from mopidy.mpd import MpdAckError, MpdNotImplemented
+from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.mpd.frontend')
 
@@ -48,15 +49,6 @@ def handle_pattern(pattern):
             pattern, func.__doc__ or '')
         return func
     return decorator
-
-def flatten(the_list):
-    result = []
-    for element in the_list:
-        if isinstance(element, list):
-            result.extend(flatten(element))
-        else:
-            result.append(element)
-    return result
 
 class MpdFrontend(object):
     def __init__(self, backend=None):

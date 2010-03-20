@@ -1,7 +1,8 @@
 import logging
 import multiprocessing
 
-from mopidy import get_class, settings, unpickle_connection
+from mopidy import settings
+from mopidy.utils import get_class, unpickle_connection
 
 logger = logging.getLogger('mopidy.core')
 

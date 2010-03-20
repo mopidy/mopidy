@@ -7,8 +7,9 @@ import sys
 sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from mopidy import get_class, settings, SettingsError
+from mopidy import settings, SettingsError
 from mopidy.core import CoreProcess
+from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.main')
 
