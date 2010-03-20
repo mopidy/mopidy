@@ -1,5 +1,6 @@
 import datetime as dt
 import logging
+import multiprocessing
 import threading
 
 from spotify import Link
@@ -44,7 +45,6 @@ class LibspotifyBackend(BaseBackend):
         self.stored_playlists = LibspotifyStoredPlaylistsController(
             backend=self)
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
-        self.translate = LibspotifyTranslator()
         self.spotify = self._connect()
 
     def _connect(self):
@@ -61,27 +61,19 @@ class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 
 class LibspotifyLibraryController(BaseLibraryController):
-    _search_results = None
-    _search_results_received = threading.Event()
-
     def search(self, type, what):
-        # FIXME When searching while playing music, this is really slow, like
-        # 12-14s between querying and getting results.
-        self._search_results_received.clear()
         if type is u'any':
             query = what
         else:
             query = u'%s:%s' % (type, what)
-        def callback(results, userdata):
-            logger.debug(u'Search results received')
-            self._search_results = results
-            self._search_results_received.set()
-        self.backend.spotify.search(query.encode(ENCODING), callback)
-        self._search_results_received.wait()
-        result = Playlist(tracks=[self.backend.translate.to_mopidy_track(t)
-            for t in self._search_results.tracks()])
-        self._search_results = None
-        return result
+        my_end, other_end = multiprocessing.Pipe()
+        self.backend.spotify.search(query.encode(ENCODING), other_end)
+        my_end.poll(None)
+        logger.debug(u'In search method, receiving search results')
+        playlist = my_end.recv()
+        logger.debug(u'In search method, done receiving search results')
+        logger.debug(['%s' % t.name for t in playlist.tracks])
+        return playlist
 
     find_exact = search
 
@@ -111,16 +103,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
 
 
 class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
-    def refresh(self):
-        logger.info(u'Refreshing stored playlists')
-        playlists = []
-        for spotify_playlist in self.backend.spotify.playlists:
-            playlists.append(
-                self.backend.translate.to_mopidy_playlist(spotify_playlist))
-        self._playlists = playlists
-        logger.debug(u'Available playlists: %s',
-            u', '.join([u'<%s>' % p.name for p in self.playlists]))
-        logger.info(u'Done refreshing stored playlists')
+    pass
 
 
 class LibspotifyTranslator(object):
@@ -180,6 +163,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         threading.Thread.__init__(self)
         self.core_queue = core_queue
         self.connected = threading.Event()
+        self.translate = LibspotifyTranslator()
         self.audio = AlsaController()
         self.playlists = []
 
@@ -187,6 +171,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         self.connect()
 
     def logged_in(self, session, error):
+        """Callback used by pyspotify"""
         logger.info('Logged in')
         self.session = session
         try:
@@ -197,35 +182,62 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         self.connected.set()
 
     def logged_out(self, session):
+        """Callback used by pyspotify"""
         logger.info('Logged out')
 
     def metadata_updated(self, session):
+        """Callback used by pyspotify"""
         logger.debug('Metadata updated')
-        self.core_queue.put({'command': 'stored_playlists_updated'})
+        playlists = []
+        for spotify_playlist in session.playlist_container():
+            playlists.append(
+                self.translate.to_mopidy_playlist(spotify_playlist))
+        self.core_queue.put({
+            'command': 'set_stored_playlists',
+            'playlists': playlists,
+        })
 
     def connection_error(self, session, error):
+        """Callback used by pyspotify"""
         logger.error('Connection error: %s', error)
 
     def message_to_user(self, session, message):
+        """Callback used by pyspotify"""
         logger.info(message)
 
     def notify_main_thread(self, session):
+        """Callback used by pyspotify"""
         logger.debug('Notify main thread')
 
     def music_delivery(self, *args, **kwargs):
+        """Callback used by pyspotify"""
         self.audio.music_delivery(*args, **kwargs)
 
     def play_token_lost(self, session):
+        """Callback used by pyspotify"""
         logger.debug('Play token lost')
         self.core_queue.put({'command': 'stop_playback'})
 
     def log_message(self, session, data):
+        """Callback used by pyspotify"""
         logger.debug(data)
 
     def end_of_track(self, session):
+        """Callback used by pyspotify"""
         logger.debug('End of track')
         self.core_queue.put({'command': 'end_of_track'})
 
-    def search(self, query, callback):
+    def search(self, query, connection):
+        """Search method used by Mopidy backend"""
         self.connected.wait()
+        def callback(results, userdata):
+            logger.debug(u'In search callback, translating search results')
+            logger.debug(results.tracks())
+            # TODO Include results from results.albums(), etc. too
+            playlist = Playlist(tracks=[
+                self.translate.to_mopidy_track(t)
+                for t in results.tracks()])
+            logger.debug(u'In search callback, sending search results')
+            logger.debug(['%s' % t.name for t in playlist.tracks])
+            connection.send(playlist)
         self.session.search(query, callback)
