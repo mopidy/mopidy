@@ -43,11 +43,17 @@ not Mopidy. The red nodes lives in the ``main`` process (running an
     "AlsaMixer" -> "alsaaudio" [ label="use Python library" ]
 
 
-Thread communication
-====================
+Thread/process communication
+============================
 
-.. warning::
-
-    This is a plan, and does not necessarily reflect what has been implemented.
+- Everything starts with ``Main``.
+- ``Main`` creates a ``Core`` process which runs the frontend, backend, and
+  mixer.
+- Mixers *may* create an additional process for communication with external
+  devices, like ``NadTalker`` in this example.
+- Backend libraries *may* have threads of their own, like ``despotify`` here
+  which has additional threads in the ``Core`` process.
+- ``Server`` part currently runs in the same process and thread as ``Main``.
+- ``Client`` is some external client talking to ``Server`` over a socket.
 
 .. image:: /_static/thread_communication.png
