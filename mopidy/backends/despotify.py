@@ -53,7 +53,8 @@ class DespotifyBackend(BaseBackend):
         logger.info(u'Connecting to Spotify')
         return DespotifySessionManager(
             settings.SPOTIFY_USERNAME.encode(ENCODING),
-            settings.SPOTIFY_PASSWORD.encode(ENCODING))
+            settings.SPOTIFY_PASSWORD.encode(ENCODING),
+            core_queue=self.core_queue)
 
 
 class DespotifyCurrentPlaylistController(BaseCurrentPlaylistController):
@@ -164,9 +165,10 @@ class DespotifySessionManager(spytify.Spytify):
 
     def __init__(self, *args, **kwargs):
         kwargs['callback'] = self.callback
+        self.core_queue = kwargs.pop('core_queue')
         super(DespotifySessionManager, self).__init__(*args, **kwargs)
 
     def callback(self, signal, data):
         if signal == self.DESPOTIFY_END_OF_PLAYLIST:
             logger.debug('Despotify signalled end of playlist')
-            # TODO Ask backend to play next track
+            self.core_queue.put({'command': 'end_of_track'})

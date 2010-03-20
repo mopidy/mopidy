@@ -1,21 +1,23 @@
 import asyncore
 import logging
+import multiprocessing
 import os
 import sys
 
 sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from mopidy import settings, SettingsError
-from mopidy.mpd.server import MpdServer
+from mopidy import get_class, settings, SettingsError
+from mopidy.core import CoreProcess
 
-logger = logging.getLogger('mopidy')
+logger = logging.getLogger('mopidy.main')
 
 def main():
     _setup_logging(2)
-    mixer = _get_class(settings.MIXER)()
-    backend = _get_class(settings.BACKENDS[0])(mixer=mixer)
-    MpdServer(backend=backend)
+    core_queue = multiprocessing.Queue()
+    core = CoreProcess(core_queue)
+    core.start()
+    get_class(settings.SERVER)(core_queue=core_queue)
     asyncore.loop()
 
 def _setup_logging(verbosity_level):
@@ -29,14 +31,6 @@ def _setup_logging(verbosity_level):
         format=settings.CONSOLE_LOG_FORMAT,
         level=level,
     )
-
-def _get_class(name):
-    module_name = name[:name.rindex('.')]
-    class_name = name[name.rindex('.') + 1:]
-    logger.info('Loading: %s from %s', class_name, module_name)
-    module = __import__(module_name, globals(), locals(), [class_name], -1)
-    class_object = getattr(module, class_name)
-    return class_object
 
 if __name__ == '__main__':
     try:

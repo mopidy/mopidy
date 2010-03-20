@@ -23,7 +23,12 @@ BACKENDS = (
 #: The log format used on the console. See
 #: http://docs.python.org/library/logging.html#formatter-objects for details on
 #: the format.
-CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(threadName)s] %(name)s\n  %(message)s'
+CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
+
+#: Protocol frontend to use. Default::
+#:
+#:     FRONTEND = u'mopidy.mpd.handler.MpdHandler'
+FRONTEND = u'mopidy.mpd.handler.MpdHandler'
 
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
@@ -65,16 +70,21 @@ MIXER_EXT_SPEAKERS_A = None
 #: *Default:* :class:`None`.
 MIXER_EXT_SPEAKERS_B = None
 
+#: Server to use. Default::
+#:
+#:     SERVER = u'mopidy.mpd.server.MpdServer'
+SERVER = u'mopidy.mpd.server.MpdServer'
+
 #: Which address Mopidy should bind to. Examples:
 #:
 #: ``localhost``
 #:     Listens only on the loopback interface. *Default.*
 #: ``0.0.0.0``
 #:     Listens on all interfaces.
-MPD_SERVER_HOSTNAME = u'localhost'
+SERVER_HOSTNAME = u'localhost'
 
 #: Which TCP port Mopidy should listen to. *Default: 6600*
-MPD_SERVER_PORT = 6600
+SERVER_PORT = 6600
 
 #: Your Spotify Premium username. Used by all Spotify backends.
 SPOTIFY_USERNAME = u''

@@ -1,9 +1,9 @@
 import asynchat
 import logging
+import multiprocessing
 
-from mopidy import get_mpd_protocol_version
+from mopidy import get_mpd_protocol_version, pickle_connection
 from mopidy.mpd import MpdAckError
-from mopidy.mpd.handler import MpdHandler
 
 logger = logging.getLogger(u'mpd.session')
 
@@ -22,14 +22,13 @@ def indent(string, places=4, linebreak=LINE_TERMINATOR):
     return result
 
 class MpdSession(asynchat.async_chat):
-    def __init__(self, server, client_socket, client_address, backend,
-            handler_class=MpdHandler):
+    def __init__(self, server, client_socket, client_address, core_queue):
         asynchat.async_chat.__init__(self, sock=client_socket)
         self.server = server
         self.client_address = client_address
+        self.core_queue = core_queue
         self.input_buffer = []
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
-        self.handler = handler_class(session=self, backend=backend)
         self.send_response(u'OK MPD %s' % get_mpd_protocol_version())
 
     def do_close(self):
@@ -51,7 +50,14 @@ class MpdSession(asynchat.async_chat):
 
     def handle_request(self, input):
         try:
-            response = self.handler.handle_request(input)
+            my_end, other_end = multiprocessing.Pipe()
+            self.core_queue.put({
+                'command': 'mpd_request',
+                'request': input,
+                'reply_to': pickle_connection(other_end),
+            })
+            my_end.poll(None)
+            response = my_end.recv()
             if response is not None:
                 self.handle_response(response)
         except MpdAckError, e:

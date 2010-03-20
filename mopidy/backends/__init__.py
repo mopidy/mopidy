@@ -3,13 +3,22 @@ import logging
 import random
 import time
 
+from mopidy import get_class, settings
 from mopidy.models import Playlist
 
 logger = logging.getLogger('backends.base')
 
 class BaseBackend(object):
-    def __init__(self, mixer=None):
-        self.mixer = mixer
+    def __init__(self, core_queue=None, mixer=None):
+        self.core_queue = core_queue
+        if mixer is not None:
+            self.mixer = mixer
+        else:
+            self.mixer = get_class(settings.MIXER)()
+
+    #: A :class:`multiprocessing.Queue` which can be used by e.g. library
+    #: callbacks to send messages to the core.
+    core_queue = None
 
     #: The current playlist controller. An instance of
     #: :class:`BaseCurrentPlaylistController`.
@@ -378,6 +387,13 @@ class BasePlaybackController(object):
     @volume.setter
     def volume(self, volume):
         self.backend.mixer.volume = volume
+
+    def end_of_track_callback(self):
+        """Tell the playback controller that end of track is reached."""
+        if self.next_track is not None:
+            self.next()
+        else:
+            self.stop()
 
     def new_playlist_loaded_callback(self):
         """Tell the playback controller that a new playlist has been loaded."""
