@@ -8,7 +8,6 @@ import logging
 import multiprocessing
 import socket
 import sys
-import time
 
 from mopidy import get_mpd_protocol_version, pickle_connection, settings
 from mopidy.mpd import MpdAckError
@@ -32,7 +31,6 @@ class MpdServer(asyncore.dispatcher):
         self.set_reuse_addr()
         self.bind((settings.SERVER_HOSTNAME, settings.SERVER_PORT))
         self.listen(1)
-        self.started_at = int(time.time())
         logger.info(u'Please connect to %s port %s using an MPD client.',
             settings.SERVER_HOSTNAME, settings.SERVER_PORT)
 
@@ -43,15 +41,6 @@ class MpdServer(asyncore.dispatcher):
 
     def handle_close(self):
         self.close()
-
-    def do_kill(self):
-        logger.info(u'Received "kill". Shutting down.')
-        self.handle_close()
-        sys.exit(0)
-
-    @property
-    def uptime(self):
-        return int(time.time()) - self.started_at
 
 
 class MpdSession(asynchat.async_chat):
@@ -67,13 +56,6 @@ class MpdSession(asynchat.async_chat):
         self.input_buffer = []
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
         self.send_response(u'OK MPD %s' % get_mpd_protocol_version())
-
-    def do_close(self):
-        logger.info(u'Closing connection with [%s]:%s', *self.client_address)
-        self.close_when_done()
-
-    def do_kill(self):
-        self.server.do_kill()
 
     def collect_incoming_data(self, data):
         self.input_buffer.append(data)
@@ -105,9 +87,6 @@ class MpdSession(asynchat.async_chat):
         output = u'%s%s' % (output, LINE_TERMINATOR)
         data = output.encode(ENCODING)
         self.push(data)
-
-    def stats_uptime(self):
-        return self.server.uptime
 
 
 def indent(string, places=4, linebreak=LINE_TERMINATOR):
