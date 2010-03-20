@@ -12,7 +12,7 @@ def main():
     r.add_pair('mopidy/mixers/dummy.py', 'tests/mixers/dummytest.py')
     r.add_pair('mopidy/mixers/denon.py', 'tests/mixers/denontest.py')
     r.add_pair('mopidy/models.py', 'tests/modelstest.py')
-    r.add_pair('mopidy/mpd/handler.py', 'tests/mpd/handlertest.py')
+    r.add_pair('mopidy/mpd/frontend.py', 'tests/mpd/frontendtest.py')
     r.run()
 
 if __name__ == '__main__':
