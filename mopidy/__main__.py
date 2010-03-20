@@ -40,10 +40,7 @@ def _setup_logging(verbosity_level):
         level = logging.DEBUG
     else:
         level = logging.INFO
-    logging.basicConfig(
-        format=settings.CONSOLE_LOG_FORMAT,
-        level=level,
-    )
+    logging.basicConfig(format=settings.CONSOLE_LOG_FORMAT, level=level)
 
 if __name__ == '__main__':
     try:
