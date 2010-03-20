@@ -62,7 +62,7 @@ class MpdHandler(object):
                     return None
                 else:
                     return self.handle_response(result, add_ok)
-        raise MpdAckError(u'Unknown command: %s' % request)
+        return self.handle_response(u'ACK Unknown command: %s' % request)
 
     def handle_response(self, result, add_ok=True):
         response = []
