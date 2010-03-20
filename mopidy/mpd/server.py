@@ -74,20 +74,16 @@ class MpdSession(asynchat.async_chat):
         self.handle_request(input)
 
     def handle_request(self, input):
-        try:
-            my_end, other_end = multiprocessing.Pipe()
-            self.core_queue.put({
-                'command': 'mpd_request',
-                'request': input,
-                'reply_to': pickle_connection(other_end),
-            })
-            my_end.poll(None)
-            response = my_end.recv()
-            if response is not None:
-                self.handle_response(response)
-        except MpdAckError, e:
-            logger.warning(e)
-            return self.send_response(u'ACK %s' % e)
+        my_end, other_end = multiprocessing.Pipe()
+        self.core_queue.put({
+            'command': 'mpd_request',
+            'request': input,
+            'reply_to': pickle_connection(other_end),
+        })
+        my_end.poll(None)
+        response = my_end.recv()
+        if response is not None:
+            self.handle_response(response)
 
     def handle_response(self, response):
         self.send_response(LINE_TERMINATOR.join(response))
