@@ -12,7 +12,7 @@ import sys
 from mopidy import get_mpd_protocol_version, pickle_connection, settings
 from mopidy.mpd import MpdAckError
 
-logger = logging.getLogger(u'mpd.server')
+logger = logging.getLogger('mopidy.mpd.server')
 
 #: All data between the client and the server is encoded in UTF-8.
 ENCODING = u'utf-8'

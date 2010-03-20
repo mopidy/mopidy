@@ -6,7 +6,7 @@ import time
 from mopidy import get_class, settings
 from mopidy.models import Playlist
 
-logger = logging.getLogger('backends.base')
+logger = logging.getLogger('mopidy.backends.base')
 
 class BaseBackend(object):
     def __init__(self, core_queue=None, mixer=None):

@@ -9,7 +9,7 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
 
-logger = logging.getLogger(u'backends.despotify')
+logger = logging.getLogger('mopidy.backends.despotify')
 
 ENCODING = 'utf-8'
 

@@ -12,7 +12,7 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
 
-logger = logging.getLogger(u'backends.libspotify')
+logger = logging.getLogger('mopidy.backends.libspotify')
 
 ENCODING = 'utf-8'
 
