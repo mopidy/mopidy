@@ -7,20 +7,28 @@ from mopidy.utils import get_class, unpickle_connection
 
 logger = logging.getLogger('mopidy.process')
 
-class CoreProcess(multiprocessing.Process):
-    def __init__(self, core_queue):
-        multiprocessing.Process.__init__(self)
-        self.core_queue = core_queue
-
+class BaseProcess(multiprocessing.Process):
     def run(self):
         try:
-            self._setup()
-            while True:
-                message = self.core_queue.get()
-                self._process_message(message)
+            self._run()
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
             sys.exit(0)
+
+    def _run(self):
+        raise NotImplementedError
+
+
+class CoreProcess(BaseProcess):
+    def __init__(self, core_queue):
+        super(CoreProcess, self).__init__()
+        self.core_queue = core_queue
+
+    def _run(self):
+        self._setup()
+        while True:
+            message = self.core_queue.get()
+            self._process_message(message)
 
     def _setup(self):
         self._backend = get_class(settings.BACKENDS[0])(

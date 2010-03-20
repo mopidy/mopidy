@@ -1,8 +1,9 @@
 import logging
 from serial import Serial
-from multiprocessing import Pipe, Process
+from multiprocessing import Pipe
 
 from mopidy.mixers import BaseMixer
+from mopidy.process import BaseProcess
 from mopidy.settings import (MIXER_EXT_PORT, MIXER_EXT_SOURCE,
     MIXER_EXT_SPEAKERS_A, MIXER_EXT_SPEAKERS_B)
 
@@ -55,7 +56,7 @@ class NadMixer(BaseMixer):
         self._pipe.send({'command': 'set_volume', 'volume': volume})
 
 
-class NadTalker(Process):
+class NadTalker(BaseProcess):
     """
     Independent process which does the communication with the NAD device.
 
@@ -78,10 +79,10 @@ class NadTalker(Process):
     _nad_volume = None
 
     def __init__(self, pipe=None):
-        Process.__init__(self)
+        super(NadTalker, self).__init__()
         self.pipe = pipe
 
-    def run(self):
+    def _run(self):
         self._open_connection()
         self._set_device_to_known_state()
         while self.pipe.poll(None):
