@@ -1,6 +1,7 @@
 import asyncore
 import logging
 import multiprocessing
+import optparse
 import os
 import sys
 
@@ -14,12 +15,23 @@ from mopidy.utils import get_class
 logger = logging.getLogger('mopidy.main')
 
 def main():
-    _setup_logging(2)
+    options, args = _parse_options()
+    _setup_logging(options.verbosity_level)
     core_queue = multiprocessing.Queue()
     core = CoreProcess(core_queue)
     core.start()
     get_class(settings.SERVER)(core_queue)
     asyncore.loop()
+
+def _parse_options():
+    parser = optparse.OptionParser()
+    parser.add_option('-q', '--quiet',
+        action='store_const', const=0, dest='verbosity_level',
+        help='less output (warning level)')
+    parser.add_option('-v', '--verbose',
+        action='store_const', const=2, dest='verbosity_level',
+        help='more output (debug level)')
+    return parser.parse_args()
 
 def _setup_logging(verbosity_level):
     if verbosity_level == 0:
