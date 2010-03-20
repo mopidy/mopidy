@@ -18,9 +18,9 @@ def main():
     options, args = _parse_options()
     _setup_logging(options.verbosity_level)
     core_queue = multiprocessing.Queue()
+    get_class(settings.SERVER)(core_queue)
     core = CoreProcess(core_queue)
     core.start()
-    get_class(settings.SERVER)(core_queue)
     asyncore.loop()
 
 def _parse_options():
