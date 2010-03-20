@@ -19,5 +19,7 @@ class CoreProcess(multiprocessing.Process):
                 response = frontend.handle_request(message['request'])
                 connection = unpickle_connection(message['reply_to'])
                 connection.send(response)
+            elif message['command'] == 'end_of_track':
+                backend.playback.end_of_track_callback()
             else:
                 logger.warning(u'Cannot handle message: %s', message)

@@ -388,6 +388,10 @@ class BasePlaybackController(object):
     def volume(self, volume):
         self.backend.mixer.volume = volume
 
+    def end_of_track_callback(self):
+        """Tell the playback controller that end of track is reached."""
+        self.next()
+
     def new_playlist_loaded_callback(self):
         """Tell the playback controller that a new playlist has been loaded."""
         self.current_track = None
