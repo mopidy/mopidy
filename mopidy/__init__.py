@@ -35,7 +35,7 @@ class SettingsError(Exception):
 
 class Settings(object):
     def __getattr__(self, attr):
-        if not hasattr(raw_settings, attr):
+        if attr.isupper() and not hasattr(raw_settings, attr):
             raise SettingsError(u'Setting "%s" is not set.' % attr)
         value = getattr(raw_settings, attr)
         if type(value) != bool and not value:
