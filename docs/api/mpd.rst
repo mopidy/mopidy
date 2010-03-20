@@ -6,7 +6,7 @@ MPD protocol implementation
 ===========================
 
 .. automodule:: mopidy.mpd.frontend
-    :synopsis: Our implementation of the MPD protocol.
+    :synopsis: Our MPD protocol implementation.
     :members:
     :undoc-members:
 
@@ -18,3 +18,5 @@ MPD server implementation
     :synopsis: Our MPD server implementation.
     :members:
     :undoc-members:
+
+.. inheritance-diagram:: mopidy.mpd.server
