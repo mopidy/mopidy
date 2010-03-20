@@ -17,7 +17,7 @@ import sys
 
 from mopidy.mpd import MpdAckError, MpdNotImplemented
 
-logger = logging.getLogger('mpd.handler')
+logger = logging.getLogger('mopidy.mpd.frontend')
 
 _request_handlers = {}
 
@@ -41,7 +41,7 @@ def flatten(the_list):
             result.append(element)
     return result
 
-class MpdHandler(object):
+class MpdFrontend(object):
     def __init__(self, backend=None):
         self.backend = backend
         self.command_list = False

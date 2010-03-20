@@ -27,8 +27,8 @@ CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] 
 
 #: Protocol frontend to use. Default::
 #:
-#:     FRONTEND = u'mopidy.mpd.handler.MpdHandler'
-FRONTEND = u'mopidy.mpd.handler.MpdHandler'
+#:     FRONTEND = u'mopidy.mpd.frontend.MpdFrontend'
+FRONTEND = u'mopidy.mpd.frontend.MpdFrontend'
 
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
