@@ -70,16 +70,21 @@ MIXER_EXT_SPEAKERS_A = None
 #: *Default:* :class:`None`.
 MIXER_EXT_SPEAKERS_B = None
 
+#: Server to use. Default::
+#:
+#:     SERVER = u'mopidy.mpd.server.MpdServer'
+SERVER = u'mopidy.mpd.server.MpdServer'
+
 #: Which address Mopidy should bind to. Examples:
 #:
 #: ``localhost``
 #:     Listens only on the loopback interface. *Default.*
 #: ``0.0.0.0``
 #:     Listens on all interfaces.
-MPD_SERVER_HOSTNAME = u'localhost'
+SERVER_HOSTNAME = u'localhost'
 
 #: Which TCP port Mopidy should listen to. *Default: 6600*
-MPD_SERVER_PORT = 6600
+SERVER_PORT = 6600
 
 #: Your Spotify Premium username. Used by all Spotify backends.
 SPOTIFY_USERNAME = u''

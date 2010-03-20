@@ -16,11 +16,11 @@ class MpdServer(asyncore.dispatcher):
         self.core_queue = core_queue
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
-        self.bind((settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT))
+        self.bind((settings.SERVER_HOSTNAME, settings.SERVER_PORT))
         self.listen(1)
         self.started_at = int(time.time())
         logger.info(u'Please connect to %s port %s using an MPD client.',
-            settings.MPD_SERVER_HOSTNAME, settings.MPD_SERVER_PORT)
+            settings.SERVER_HOSTNAME, settings.SERVER_PORT)
 
     def handle_accept(self):
         (client_socket, client_address) = self.accept()
