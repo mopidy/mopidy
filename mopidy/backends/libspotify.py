@@ -50,7 +50,8 @@ class LibspotifyBackend(BaseBackend):
     def _connect(self):
         logger.info(u'Connecting to Spotify')
         spotify = LibspotifySessionManager(
-            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD, backend=self)
+            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
+            core_queue=self.core_queue)
         spotify.start()
         return spotify
 
@@ -119,6 +120,7 @@ class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
         self._playlists = playlists
         logger.debug(u'Available playlists: %s',
             u', '.join([u'<%s>' % p.name for p in self.playlists]))
+        logger.info(u'Done refreshing stored playlists')
 
 
 class LibspotifyTranslator(object):
@@ -173,10 +175,11 @@ class LibspotifyTranslator(object):
 
 
 class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
-    def __init__(self, username, password, backend):
+    def __init__(self, username, password, core_queue):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)
-        self.backend = backend
+        self.core_queue = core_queue
+        self.connected = threading.Event()
         self.audio = AlsaController()
         self.playlists = []
 
@@ -191,15 +194,14 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
             logger.debug('Got playlist container')
         except Exception, e:
             logger.exception(e)
+        self.connected.set()
 
     def logged_out(self, session):
         logger.info('Logged out')
 
     def metadata_updated(self, session):
         logger.debug('Metadata updated')
-        # XXX This changes data "owned" by another thread, and leads to
-        # segmentation fault. We should use locking and messaging here.
-        self.backend.stored_playlists.refresh()
+        self.core_queue.put({'command': 'stored_playlists_updated'})
 
     def connection_error(self, session, error):
         logger.error('Connection error: %s', error)
@@ -215,14 +217,15 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def play_token_lost(self, session):
         logger.debug('Play token lost')
-        self.backend.playback.stop()
+        self.core_queue.put({'command': 'stop_playback'})
 
     def log_message(self, session, data):
         logger.debug(data)
 
     def end_of_track(self, session):
         logger.debug('End of track')
-        self.backend.playback.next()
+        self.core_queue.put({'command': 'end_of_track'})
 
     def search(self, query, callback):
+        self.connected.wait()
         self.session.search(query, callback)

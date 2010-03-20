@@ -42,5 +42,9 @@ class CoreProcess(BaseProcess):
             connection.send(response)
         elif message['command'] == 'end_of_track':
             self._backend.playback.end_of_track_callback()
+        elif message['command'] == 'stop_playback':
+            self._backend.playback.stop()
+        elif message['command'] == 'stored_playlists_updated':
+            self._backend.stored_playlists.refresh()
         else:
             logger.warning(u'Cannot handle message: %s', message)
