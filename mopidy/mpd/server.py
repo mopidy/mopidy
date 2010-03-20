@@ -28,13 +28,16 @@ class MpdServer(asyncore.dispatcher):
 
     def __init__(self, core_queue):
         asyncore.dispatcher.__init__(self)
-        self.core_queue = core_queue
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.set_reuse_addr()
-        self.bind((settings.SERVER_HOSTNAME, settings.SERVER_PORT))
-        self.listen(1)
-        logger.info(u'MPD server running at [%s]:%s',
-            settings.SERVER_HOSTNAME, settings.SERVER_PORT)
+        try:
+            self.core_queue = core_queue
+            self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.set_reuse_addr()
+            self.bind((settings.SERVER_HOSTNAME, settings.SERVER_PORT))
+            self.listen(1)
+            logger.info(u'MPD server running at [%s]:%s',
+                settings.SERVER_HOSTNAME, settings.SERVER_PORT)
+        except IOError, e:
+            sys.exit('MPD server startup failed: %s' % e)
 
     def handle_accept(self):
         (client_socket, client_address) = self.accept()
