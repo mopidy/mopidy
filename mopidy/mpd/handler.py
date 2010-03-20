@@ -42,8 +42,7 @@ def flatten(the_list):
     return result
 
 class MpdHandler(object):
-    def __init__(self, session=None, backend=None):
-        self.session = session
+    def __init__(self, backend=None):
         self.backend = backend
         self.command_list = False
 
@@ -179,7 +178,8 @@ class MpdHandler(object):
 
             Closes the connection to MPD.
         """
-        self.session.do_close()
+        # TODO Does not work after multiprocessing branch merge
+        #self.session.do_close()
 
     @handle_pattern(r'^kill$')
     def _connection_kill(self):
@@ -190,7 +190,8 @@ class MpdHandler(object):
 
             Kills MPD.
         """
-        self.session.do_kill()
+        # TODO Does not work after multiprocessing branch merge
+        #self.session.do_kill()
 
     @handle_pattern(r'^password "(?P<password>[^"]+)"$')
     def _connection_password(self, password):
@@ -1104,7 +1105,8 @@ class MpdHandler(object):
             'artists': 0, # TODO
             'albums': 0, # TODO
             'songs': 0, # TODO
-            'uptime': self.session.stats_uptime(),
+            # TODO Does not work after multiprocessing branch merge
+            'uptime': 0, # self.session.stats_uptime(),
             'db_playtime': 0, # TODO
             'db_update': 0, # TODO
             'playtime': 0, # TODO
