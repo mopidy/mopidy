@@ -35,7 +35,5 @@ def pickle_connection(connection):
 
 def unpickle_connection(pickled_connection):
     # From http://stackoverflow.com/questions/1446004
-    unpickled = pickle.loads(pickled_connection)
-    func = unpickled[0]
-    args = unpickled[1]
+    (func, args) = pickle.loads(pickled_connection)
     return func(*args)
