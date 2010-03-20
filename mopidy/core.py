@@ -11,7 +11,7 @@ class CoreProcess(multiprocessing.Process):
         self.core_queue = core_queue
 
     def run(self):
-        backend = get_class(settings.BACKENDS[0])()
+        backend = get_class(settings.BACKENDS[0])(core_queue=self.core_queue)
         frontend = get_class(settings.FRONTEND)(backend=backend)
         while True:
             message = self.core_queue.get()

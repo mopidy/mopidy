@@ -9,11 +9,16 @@ from mopidy.models import Playlist
 logger = logging.getLogger('backends.base')
 
 class BaseBackend(object):
-    def __init__(self, mixer=None):
+    def __init__(self, core_queue=None, mixer=None):
+        self.core_queue = core_queue
         if mixer is not None:
             self.mixer = mixer
         else:
             self.mixer = get_class(settings.MIXER)()
+
+    #: A :class:`multiprocessing.Queue` which can be used by e.g. library
+    #: callbacks to send messages to the core.
+    core_queue = None
 
     #: The current playlist controller. An instance of
     #: :class:`BaseCurrentPlaylistController`.
