@@ -1,5 +1,5 @@
 """
-Our MPD protocol implementation
+This is our MPD protocol implementation.
 
 This is partly based upon the `MPD protocol documentation
 <http://www.musicpd.org/doc/protocol/>`_, which is a useful resource, but it is

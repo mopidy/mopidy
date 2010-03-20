@@ -1,3 +1,7 @@
+"""
+This is our MPD server implementation.
+"""
+
 import asynchat
 import asyncore
 import logging
@@ -17,7 +21,11 @@ ENCODING = u'utf-8'
 LINE_TERMINATOR = u'\n'
 
 class MpdServer(asyncore.dispatcher):
-    def __init__(self, core_queue=None):
+    """
+    The MPD server. Creates a :class:`MpdSession` for each client connection.
+    """
+
+    def __init__(self, core_queue):
         asyncore.dispatcher.__init__(self)
         self.core_queue = core_queue
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -47,6 +55,10 @@ class MpdServer(asyncore.dispatcher):
 
 
 class MpdSession(asynchat.async_chat):
+    """
+    The MPD client session. Dispatches MPD requests to the frontend.
+    """
+
     def __init__(self, server, client_socket, client_address, core_queue):
         asynchat.async_chat.__init__(self, sock=client_socket)
         self.server = server
