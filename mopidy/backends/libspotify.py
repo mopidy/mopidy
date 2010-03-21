@@ -165,7 +165,6 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         self.connected = threading.Event()
         self.translate = LibspotifyTranslator()
         self.audio = AlsaController()
-        self.playlists = []
 
     def run(self):
         self.connect()
@@ -174,11 +173,6 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         """Callback used by pyspotify"""
         logger.info('Logged in')
         self.session = session
-        try:
-            self.playlists = session.playlist_container()
-            logger.debug('Got playlist container')
-        except Exception, e:
-            logger.exception(e)
         self.connected.set()
 
     def logged_out(self, session):
@@ -187,7 +181,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
-        logger.debug('Metadata updated')
+        logger.debug('Metadata updated, refreshing stored playlists')
         playlists = []
         for spotify_playlist in session.playlist_container():
             playlists.append(
