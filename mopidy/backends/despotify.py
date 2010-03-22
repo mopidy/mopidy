@@ -46,7 +46,6 @@ class DespotifyBackend(BaseBackend):
         self.playback = DespotifyPlaybackController(backend=self)
         self.stored_playlists = DespotifyStoredPlaylistsController(backend=self)
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
-        self.translate = DespotifyTranslator()
         self.spotify = self._connect()
         self.stored_playlists.refresh()
 
@@ -65,7 +64,7 @@ class DespotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 class DespotifyLibraryController(BaseLibraryController):
     def lookup(self, uri):
         track = self.backend.spotify.lookup(uri.encode(ENCODING))
-        return self.backend.translate.to_mopidy_track(track)
+        return DespotifyTranslator.to_mopidy_track(track)
 
     def search(self, type, what):
         if type == u'track':
@@ -78,7 +77,7 @@ class DespotifyLibraryController(BaseLibraryController):
         if (result is None or result.playlist.tracks[0].get_uri() ==
                 'spotify:track:0000000000000000000000'):
             return Playlist()
-        return self.backend.translate.to_mopidy_playlist(result.playlist)
+        return DespotifyTranslator.to_mopidy_playlist(result.playlist)
 
     find_exact = search
 
@@ -107,7 +106,7 @@ class DespotifyStoredPlaylistsController(BaseStoredPlaylistsController):
         playlists = []
         for spotify_playlist in self.backend.spotify.stored_playlists:
             playlists.append(
-                self.backend.translate.to_mopidy_playlist(spotify_playlist))
+                DespotifyTranslator.to_mopidy_playlist(spotify_playlist))
         self._playlists = playlists
         logger.debug(u'Available playlists: %s',
             u', '.join([u'<%s>' % p.name for p in self.playlists]))
@@ -115,19 +114,23 @@ class DespotifyStoredPlaylistsController(BaseStoredPlaylistsController):
 
 
 class DespotifyTranslator(object):
-    def to_mopidy_id(self, spotify_uri):
+    @classmethod
+    def to_mopidy_id(cls, spotify_uri):
         return spotify_uri_to_int(spotify_uri)
 
-    def to_mopidy_artist(self, spotify_artist):
+    @classmethod
+    def to_mopidy_artist(cls, spotify_artist):
         return Artist(
             uri=spotify_artist.get_uri(),
             name=spotify_artist.name.decode(ENCODING)
         )
 
-    def to_mopidy_album(self, spotify_album_name):
+    @classmethod
+    def to_mopidy_album(cls, spotify_album_name):
         return Album(name=spotify_album_name.decode(ENCODING))
 
-    def to_mopidy_track(self, spotify_track):
+    @classmethod
+    def to_mopidy_track(cls, spotify_track):
         if dt.MINYEAR <= int(spotify_track.year) <= dt.MAXYEAR:
             date = dt.date(spotify_track.year, 1, 1)
         else:
@@ -135,20 +138,21 @@ class DespotifyTranslator(object):
         return Track(
             uri=spotify_track.get_uri(),
             name=spotify_track.title.decode(ENCODING),
-            artists=[self.to_mopidy_artist(a) for a in spotify_track.artists],
-            album=self.to_mopidy_album(spotify_track.album),
+            artists=[cls.to_mopidy_artist(a) for a in spotify_track.artists],
+            album=cls.to_mopidy_album(spotify_track.album),
             track_no=spotify_track.tracknumber,
             date=date,
             length=spotify_track.length,
             bitrate=320,
-            id=self.to_mopidy_id(spotify_track.get_uri()),
+            id=cls.to_mopidy_id(spotify_track.get_uri()),
         )
 
-    def to_mopidy_playlist(self, spotify_playlist):
+    @classmethod
+    def to_mopidy_playlist(cls, spotify_playlist):
         return Playlist(
             uri=spotify_playlist.get_uri(),
             name=spotify_playlist.name.decode(ENCODING),
-            tracks=[self.to_mopidy_track(t) for t in spotify_playlist.tracks],
+            tracks=[cls.to_mopidy_track(t) for t in spotify_playlist.tracks],
         )
 
 

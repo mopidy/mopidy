@@ -108,10 +108,12 @@ class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
 
 
 class LibspotifyTranslator(object):
-    def to_mopidy_id(self, spotify_uri):
+    @classmethod
+    def to_mopidy_id(cls, spotify_uri):
         return spotify_uri_to_int(spotify_uri)
 
-    def to_mopidy_artist(self, spotify_artist):
+    @classmethod
+    def to_mopidy_artist(cls, spotify_artist):
         if not spotify_artist.is_loaded():
             return Artist(name=u'[loading...]')
         return Artist(
@@ -119,35 +121,38 @@ class LibspotifyTranslator(object):
             name=spotify_artist.name().decode(ENCODING),
         )
 
-    def to_mopidy_album(self, spotify_album):
+    @classmethod
+    def to_mopidy_album(cls, spotify_album):
         if not spotify_album.is_loaded():
             return Album(name=u'[loading...]')
         # TODO pyspotify got much more data on albums than this
         return Album(name=spotify_album.name().decode(ENCODING))
 
-    def to_mopidy_track(self, spotify_track):
+    @classmethod
+    def to_mopidy_track(cls, spotify_track):
         if not spotify_track.is_loaded():
             return Track(name=u'[loading...]')
         uri = str(Link.from_track(spotify_track, 0))
         return Track(
             uri=uri,
             name=spotify_track.name().decode(ENCODING),
-            artists=[self.to_mopidy_artist(a) for a in spotify_track.artists()],
-            album=self.to_mopidy_album(spotify_track.album()),
+            artists=[cls.to_mopidy_artist(a) for a in spotify_track.artists()],
+            album=cls.to_mopidy_album(spotify_track.album()),
             track_no=spotify_track.index(),
             date=dt.date(spotify_track.album().year(), 1, 1),
             length=spotify_track.duration(),
             bitrate=320,
-            id=self.to_mopidy_id(uri),
+            id=cls.to_mopidy_id(uri),
         )
 
-    def to_mopidy_playlist(self, spotify_playlist):
+    @classmethod
+    def to_mopidy_playlist(cls, spotify_playlist):
         if not spotify_playlist.is_loaded():
             return Playlist(name=u'[loading...]')
         return Playlist(
             uri=str(Link.from_playlist(spotify_playlist)),
             name=spotify_playlist.name().decode(ENCODING),
-            tracks=[self.to_mopidy_track(t) for t in spotify_playlist],
+            tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
         )
 
 
@@ -157,7 +162,6 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         threading.Thread.__init__(self)
         self.core_queue = core_queue
         self.connected = threading.Event()
-        self.translate = LibspotifyTranslator()
         self.audio = AlsaController()
 
     def run(self):
@@ -179,7 +183,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         playlists = []
         for spotify_playlist in session.playlist_container():
             playlists.append(
-                self.translate.to_mopidy_playlist(spotify_playlist))
+                LibspotifyTranslator.to_mopidy_playlist(spotify_playlist))
         self.core_queue.put({
             'command': 'set_stored_playlists',
             'playlists': playlists,
@@ -223,7 +227,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
             logger.debug(results.tracks())
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
-                self.translate.to_mopidy_track(t)
+                LibspotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
             logger.debug(u'In search callback, sending search results')
             logger.debug(['%s' % t.name for t in playlist.tracks])
