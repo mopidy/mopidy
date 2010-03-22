@@ -3,11 +3,15 @@ Available settings and their default values.
 
 .. warning::
 
-    Do *not* change settings in ``mopidy/settings/default.py``. Instead, add a
-    file called ``~/.mopidy/settings.py`` and redefine settings there.
+    Do *not* change settings in ``mopidy/settings.py``. Instead, add a file
+    called ``~/.mopidy/settings.py`` and redefine settings there.
 """
 
+from __future__ import absolute_import
+import os
 import sys
+
+from mopidy.utils import get_or_create_dotdir
 
 #: List of playback backends to use. Default::
 #:
@@ -91,3 +95,12 @@ SPOTIFY_USERNAME = u''
 
 #: Your Spotify Premium password. Used by all Spotify backends.
 SPOTIFY_PASSWORD = u''
+
+# Import user specific settings
+dotdir = get_or_create_dotdir()
+settings_file = os.path.join(dotdir, u'settings.py')
+if not os.path.isfile(settings_file):
+    logger.warning(u'Settings not found: %s', settings_file)
+else:
+    sys.path.insert(0, dotdir)
+    from settings import *
