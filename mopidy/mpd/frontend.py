@@ -371,6 +371,7 @@ class MpdFrontend(object):
         """
         return self._current_playlist_playlistinfo()
 
+    @handle_pattern(r'^playlistfind (?P<tag>[^"]+) "(?P<needle>[^"]+)"$')
     @handle_pattern(r'^playlistfind "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
     def _current_playlist_playlistfind(self, tag, needle):
         """
@@ -379,7 +380,17 @@ class MpdFrontend(object):
             ``playlistfind {TAG} {NEEDLE}``
 
             Finds songs in the current playlist with strict matching.
+
+        *GMPC:*
+
+        - does not add quotes around the tag.
         """
+        if tag == 'filename':
+            try:
+                track = self.backend.current_playlist.get_by_uri(needle)
+                return track.mpd_format()
+            except KeyError:
+                return None
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^playlistid( "(?P<songid>\d+)")*$')

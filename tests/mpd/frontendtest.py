@@ -652,6 +652,21 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'playlistfind "tag" "needle"')
         self.assert_(u'ACK Not implemented' in result)
 
+    def test_playlistfind_by_filename(self):
+        result = self.h.handle_request(u'playlistfind "filename" "file:///dev/null"')
+        self.assert_(u'OK' in result)
+
+    def test_playlistfind_by_filename_without_quotes(self):
+        result = self.h.handle_request(u'playlistfind filename "file:///dev/null"')
+        self.assert_(u'OK' in result)
+
+    def test_playlistfind_by_filename_in_current_playlist(self):
+        self.b.current_playlist.playlist = Playlist(tracks=[
+            Track(uri='file:///exists')])
+        result = self.h.handle_request(u'playlistfind filename "file:///exists"')
+        self.assert_(u'file: file:///exists' in result)
+        self.assert_(u'OK' in result)
+
     def test_playlistid_without_songid(self):
         self.b.current_playlist.load(Playlist(
             tracks=[Track(name='a', id=33), Track(name='b', id=38)]))
