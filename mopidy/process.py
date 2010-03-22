@@ -2,7 +2,7 @@ import logging
 import multiprocessing
 import sys
 
-from mopidy import settings
+from mopidy import settings, SettingsError
 from mopidy.utils import get_class, unpickle_connection
 
 logger = logging.getLogger('mopidy.process')
@@ -14,6 +14,9 @@ class BaseProcess(multiprocessing.Process):
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
             sys.exit(0)
+        except SettingsError, e:
+            logger.error(e)
+            sys.exit(1)
 
     def _run(self):
         raise NotImplementedError
