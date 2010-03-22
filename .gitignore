@@ -2,9 +2,12 @@
 *.swp
 .coverage
 .idea
+MANIFEST
+build/
+dist/
 docs/_build
-pip-log.txt
 mopidy/settings/local.py
+pip-log.txt
 spotify_appkey.key
 src/
 tmp/
