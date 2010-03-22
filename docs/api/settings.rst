@@ -21,7 +21,7 @@ A complete ``~/.mopidy/settings.py`` may look like this::
 Available settings
 ==================
 
-.. automodule:: mopidy.settings.default
+.. automodule:: mopidy.settings
     :synopsis: Available settings and their default values.
     :members:
     :undoc-members:

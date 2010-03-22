@@ -33,11 +33,10 @@ class NadMixer(BaseMixer):
 
     **Settings**
 
-    - :attr:`mopidy.settings.default.MIXER_EXT_PORT` --
-      Example: ``/dev/ttyUSB0``
-    - :attr:`mopidy.settings.default.MIXER_EXT_SOURCE` -- Example: ``Aux``
-    - :attr:`mopidy.settings.default.MIXER_EXT_SPEAKERS_A` -- Example: ``On``
-    - :attr:`mopidy.settings.default.MIXER_EXT_SPEAKERS_B` -- Example: ``Off``
+    - :attr:`mopidy.settings.MIXER_EXT_PORT` -- Example: ``/dev/ttyUSB0``
+    - :attr:`mopidy.settings.MIXER_EXT_SOURCE` -- Example: ``Aux``
+    - :attr:`mopidy.settings.MIXER_EXT_SPEAKERS_A` -- Example: ``On``
+    - :attr:`mopidy.settings.MIXER_EXT_SPEAKERS_B` -- Example: ``Off``
 
     """
 

@@ -23,8 +23,7 @@ class DenonMixer(BaseMixer):
 
     **Settings**
 
-    - :attr:`mopidy.settings.default.MIXER_EXT_PORT` -- Example:
-      ``/dev/ttyUSB0``
+    - :attr:`mopidy.settings.MIXER_EXT_PORT` -- Example: ``/dev/ttyUSB0``
     """
 
     def __init__(self):

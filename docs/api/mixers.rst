@@ -32,7 +32,7 @@ Internal mixers
 Most users will use one of these internal mixers which controls the volume on
 the computer running Mopidy. If you do not specify which mixer you want to use
 in the settings, Mopidy will choose one for you based upon what OS you run. See
-:attr:`mopidy.settings.default.MIXER` for the defaults.
+:attr:`mopidy.settings.MIXER` for the defaults.
 
 
 :mod:`mopidy.mixers.alsa` -- ALSA mixer
@@ -71,7 +71,7 @@ External device mixers
 Mopidy supports controlling volume on external devices instead of on the
 computer running Mopidy through the use of custom mixer implementations. To
 enable one of the following mixers, you must the set
-:attr:`mopidy.settings.default.MIXER` setting to point to one of the classes
+:attr:`mopidy.settings.MIXER` setting to point to one of the classes
 found below, and possibly add some extra settings required by the mixer you
 choose.
 

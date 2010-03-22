@@ -72,7 +72,7 @@ libspotify backend instead, copy the Spotify application key to
 
     BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
 
-For a full list of available settings, see :mod:`mopidy.settings.default`.
+For a full list of available settings, see :mod:`mopidy.settings`.
 
 
 Running Mopidy
