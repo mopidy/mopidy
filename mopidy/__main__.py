@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from mopidy import settings, SettingsError
+from mopidy import get_version, settings, SettingsError
 from mopidy.process import CoreProcess
 from mopidy.utils import get_class
 
@@ -24,7 +24,7 @@ def main():
     asyncore.loop()
 
 def _parse_options():
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(version='Mopidy %s' % get_version())
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
