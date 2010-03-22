@@ -51,10 +51,14 @@ class DespotifyBackend(BaseBackend):
 
     def _connect(self):
         logger.info(u'Connecting to Spotify')
-        return DespotifySessionManager(
-            settings.SPOTIFY_USERNAME.encode(ENCODING),
-            settings.SPOTIFY_PASSWORD.encode(ENCODING),
-            core_queue=self.core_queue)
+        try:
+            return DespotifySessionManager(
+                settings.SPOTIFY_USERNAME.encode(ENCODING),
+                settings.SPOTIFY_PASSWORD.encode(ENCODING),
+                core_queue=self.core_queue)
+        except spytify.SpytifyError as e:
+            logger.exception(e)
+            sys.exit(1)
 
 
 class DespotifyCurrentPlaylistController(BaseCurrentPlaylistController):
