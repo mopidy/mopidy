@@ -12,6 +12,7 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
+from mopidy.utils import spotify_uri_to_int
 
 logger = logging.getLogger('mopidy.backends.libspotify')
 
@@ -107,15 +108,8 @@ class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
 
 
 class LibspotifyTranslator(object):
-    uri_to_id_map = {}
-    next_id = 0
-
     def to_mopidy_id(self, spotify_uri):
-        if spotify_uri not in self.uri_to_id_map:
-            this_id = self.next_id
-            self.next_id += 1
-            self.uri_to_id_map[spotify_uri] = this_id
-        return self.uri_to_id_map[spotify_uri]
+        return spotify_uri_to_int(spotify_uri)
 
     def to_mopidy_artist(self, spotify_artist):
         if not spotify_artist.is_loaded():
