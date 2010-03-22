@@ -4,7 +4,7 @@ Available settings and their default values.
 .. warning::
 
     Do *not* change settings in ``mopidy/settings/default.py``. Instead, add a
-    file called ``mopidy/settings/local.py`` and redefine settings there.
+    file called ``~/.mopidy/settings.py`` and redefine settings there.
 """
 
 import sys

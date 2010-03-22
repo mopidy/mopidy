@@ -55,7 +55,7 @@ And on OS X, assuming you allready got git installed, e.g. from Homebrew::
 Spotify settings
 ================
 
-Create a file named ``local.py`` in the directory ``mopidy/settings/``. Enter
+Create a file named ``settings.py`` in the directory ``~/.mopidy/``. Enter
 your Spotify Premium account's username and password into the file, like this::
 
     SPOTIFY_USERNAME = u'myusername'
@@ -68,7 +68,7 @@ Switching backend
 Currently the despotify backend is the default. If you want to use the
 libspotify backend instead, copy the Spotify application key to
 ``mopidy/spotify_appkey.key``, and add the following to
-``mopidy/mopidy/settings/local.py``::
+``~/.mopidy/settings.py``::
 
     BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
 
