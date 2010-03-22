@@ -175,3 +175,5 @@ class DespotifySessionManager(spytify.Spytify):
         if signal == self.DESPOTIFY_END_OF_PLAYLIST:
             logger.debug('Despotify signalled end of playlist')
             self.core_queue.put({'command': 'end_of_track'})
+        elif signal == self.DESPOTIFY_TRACK_PLAY_ERROR:
+            logger.error('Despotify signalled track play error')
