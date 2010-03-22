@@ -1,5 +1,6 @@
 import logging
 from multiprocessing.reduction import reduce_connection
+import os
 import pickle
 
 logger = logging.getLogger('mopidy.utils')
@@ -20,6 +21,13 @@ def get_class(name):
     module = __import__(module_name, globals(), locals(), [class_name], -1)
     class_object = getattr(module, class_name)
     return class_object
+
+def get_or_create_dotdir():
+    dotdir = os.path.expanduser(u'~/.mopidy/')
+    if not os.path.isdir(dotdir):
+        logger.info(u'Creating %s', dotdir)
+        os.mkdir(dotdir, 0755)
+    return dotdir
 
 def indent(string, places=4, linebreak='\n'):
     lines = string.split(linebreak)
