@@ -11,8 +11,6 @@ from __future__ import absolute_import
 import os
 import sys
 
-from mopidy.utils import get_or_create_dotdir
-
 #: List of playback backends to use. Default::
 #:
 #:     BACKENDS = (u'mopidy.backends.despotify.DespotifyBackend',)
@@ -97,7 +95,7 @@ SPOTIFY_USERNAME = u''
 SPOTIFY_PASSWORD = u''
 
 # Import user specific settings
-dotdir = get_or_create_dotdir()
+dotdir = os.path.expanduser(u'~/.mopidy/')
 settings_file = os.path.join(dotdir, u'settings.py')
 if not os.path.isfile(settings_file):
     logger.warning(u'Settings not found: %s', settings_file)

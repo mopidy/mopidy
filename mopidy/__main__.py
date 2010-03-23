@@ -10,13 +10,14 @@ sys.path.insert(0,
 
 from mopidy import get_version, settings, SettingsError
 from mopidy.process import CoreProcess
-from mopidy.utils import get_class
+from mopidy.utils import get_class, get_or_create_dotdir
 
 logger = logging.getLogger('mopidy.main')
 
 def main():
     options, args = _parse_options()
     _setup_logging(options.verbosity_level)
+    get_or_create_dotdir('~/.mopidy/')
     core_queue = multiprocessing.Queue()
     get_class(settings.SERVER)(core_queue)
     core = CoreProcess(core_queue)

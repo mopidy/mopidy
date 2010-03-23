@@ -22,8 +22,8 @@ def get_class(name):
     class_object = getattr(module, class_name)
     return class_object
 
-def get_or_create_dotdir():
-    dotdir = os.path.expanduser(u'~/.mopidy/')
+def get_or_create_dotdir(dotdir):
+    dotdir = os.path.expanduser(dotdir)
     if not os.path.isdir(dotdir):
         logger.info(u'Creating %s', dotdir)
         os.mkdir(dotdir, 0755)
