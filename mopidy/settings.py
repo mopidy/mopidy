@@ -97,8 +97,6 @@ SPOTIFY_PASSWORD = u''
 # Import user specific settings
 dotdir = os.path.expanduser(u'~/.mopidy/')
 settings_file = os.path.join(dotdir, u'settings.py')
-if not os.path.isfile(settings_file):
-    logger.warning(u'Settings not found: %s', settings_file)
-else:
+if os.path.isfile(settings_file):
     sys.path.insert(0, dotdir)
     from settings import *
