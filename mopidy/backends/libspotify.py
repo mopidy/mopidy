@@ -1,5 +1,6 @@
 import datetime as dt
 import logging
+import os
 import multiprocessing
 import threading
 
@@ -7,7 +8,7 @@ from spotify import Link
 from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
 
-from mopidy import settings
+from mopidy import get_version, settings
 from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
@@ -157,6 +158,11 @@ class LibspotifyTranslator(object):
 
 
 class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
+    cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
+    settings_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
+    appkey_file = os.path.expanduser(settings.SPOTIFY_LIB_APPKEY)
+    user_agent = 'Mopidy %s' % get_version()
+
     def __init__(self, username, password, core_queue):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)

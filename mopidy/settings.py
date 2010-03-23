@@ -95,6 +95,12 @@ SPOTIFY_USERNAME = u''
 #: Your Spotify Premium password. Used by all Spotify backends.
 SPOTIFY_PASSWORD = u''
 
+#: Path to your libspotify application key. Used by LibspotifyBackend.
+SPOTIFY_LIB_APPKEY = u'~/.mopidy/spotify_appkey.key'
+
+#: Path to the libspotify cache. Used by LibspotifyBackend.
+SPOTIFY_LIB_CACHE = u'~/.mopidy/libspotify_cache'
+
 # Import user specific settings
 dotdir = os.path.expanduser(u'~/.mopidy/')
 settings_file = os.path.join(dotdir, u'settings.py')
