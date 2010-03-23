@@ -7,17 +7,17 @@ Mopidy itself is a breeze to install, as it just requires a standard Python
 service is far more tricky to get working for the time being. Until
 installation of these libraries are either well documented by their developers,
 or the libraries are packaged for various Linux distributions, we will supply
-our own installation guides here.
-
-.. toctree::
-    :maxdepth: 1
-
-    despotify
-    libspotify
+our own installation guides.
 
 
 Dependencies
 ============
+
+.. toctree::
+    :hidden:
+
+    despotify
+    libspotify
 
 - Python >= 2.6
 - Dependencies for at least one Mopidy mixer:
