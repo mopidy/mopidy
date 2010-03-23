@@ -88,17 +88,6 @@ your Spotify Premium account's username and password into the file, like this::
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
 
-
-Switching backend
-=================
-
-Currently the despotify backend is the default. If you want to use the
-libspotify backend instead, copy the Spotify application key to
-``mopidy/spotify_appkey.key``, and add the following to
-``~/.mopidy/settings.py``::
-
-    BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
-
 For a full list of available settings, see :mod:`mopidy.settings`.
 
 
