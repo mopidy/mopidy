@@ -8,6 +8,5 @@ dist/
 docs/_build
 mopidy/settings/local.py
 pip-log.txt
-spotify_appkey.key
 src/
 tmp/
