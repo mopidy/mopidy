@@ -56,9 +56,15 @@ Or, they can be installed using ``pip``::
 Then, to run all tests, go to the project directory and run::
 
     python tests
+    # or
+    nosetests
 
-For more documentation on testing Mopidy, check out the `nose docs
+For more documentation on testing, check out the `nose docs
 <http://somethingaboutorange.com/mrl/projects/nose/>`_.
+
+The coverage report at http://www.mopidy.com/coverage/ is automatically updated
+within 10 minutes after an update is pushed to ``jodal/mopidy/master`` at
+GitHub.
 
 
 Writing documentation
