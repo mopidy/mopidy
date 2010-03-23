@@ -3,11 +3,11 @@ Installation
 ************
 
 Mopidy itself is a breeze to install, as it just requires a standard Python
-installation. The libraries we depend on to connect to the Spotify service is
-far more tricky to get working for the time being. Until installation of these
-libraries are either well documented by their developers, or the libraries are
-packaged for various Linux distributions, we will supply our own installation
-guides here.
+2.6 or newer installation. The libraries we depend on to connect to the Spotify
+service is far more tricky to get working for the time being. Until
+installation of these libraries are either well documented by their developers,
+or the libraries are packaged for various Linux distributions, we will supply
+our own installation guides here.
 
 .. toctree::
     :maxdepth: 1
@@ -40,16 +40,43 @@ Dependencies
 
     - see :doc:`libspotify`
 
-To install Mopidy itself (i.e. no backend dependencies), on Debian/Ubuntu::
 
-    sudo aptitude install python-alsaaudio git-core
+Install latest release
+======================
+
+To install the currently latest release of Mopidy using ``pip``::
+
+    sudo aptitude install python-pip                # On Ubuntu/Debian
+    sudo brew install pip                           # On OS X
+    sudo pip install Mopidy
+
+To later upgrade to the latest release::
+
+    sudo pip install -U Mopidy
+
+If you for some reason can't use ``pip``, try ``easy_install``.
+
+
+Install development version
+===========================
+
+If you want to follow Mopidy development closer, you may install the
+development version of Mopidy::
+
+    sudo aptitude install git-core                  # On Ubuntu/Debian
+    sudo brew install git                           # On OS X
     git clone git://github.com/jodal/mopidy.git
     cd mopidy/
+    sudo python setup.py install
 
-And on OS X, assuming you allready got git installed, e.g. from Homebrew::
+To later update to the very latest version::
 
-    git clone git://github.com/jodal/mopidy.git
     cd mopidy/
+    git pull
+    sudo python setup.py install
+
+For an introduction to ``git``, please visit `git-scm.com
+<http://git-scm.com/>`_.
 
 
 Spotify settings
@@ -78,9 +105,9 @@ For a full list of available settings, see :mod:`mopidy.settings`.
 Running Mopidy
 ==============
 
-To start Mopidy, go to the root of the Mopidy project, then simply run::
+To start Mopidy, simply open a terminal and run::
 
-    python mopidy
+    mopidy
 
 When Mopidy says ``Please connect to localhost port 6600 using an MPD client.``
 it's ready to accept connections by any MPD client. You can find a list of tons
