@@ -11,7 +11,8 @@ from __future__ import absolute_import
 import os
 import sys
 
-#: List of playback backends to use. Default::
+#: List of playback backends to use. See :mod:`mopidy.backends` for all
+#: available backends. Default::
 #:
 #:     BACKENDS = (u'mopidy.backends.despotify.DespotifyBackend',)
 #:
