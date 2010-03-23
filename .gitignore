@@ -5,8 +5,7 @@
 MANIFEST
 build/
 dist/
-docs/_build
-mopidy/settings/local.py
+docs/_build/
 pip-log.txt
 spotify_appkey.key
 src/
