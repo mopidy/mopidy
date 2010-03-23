@@ -32,9 +32,10 @@ class DespotifyBackend(BaseBackend):
     - r503: Segfaults when looking up playlists, both your own lists and other
       peoples shared lists. To reproduce::
 
-        >>> import spytify
-        >>> s = spytify.Spytify('alice', 'secret')
+        >>> import spytify                                  # doctest: +SKIP
+        >>> s = spytify.Spytify('alice', 'secret')          # doctest: +SKIP
         >>> s.lookup('spotify:user:klette:playlist:5rOGYPwwKqbAcVX8bW4k5V')
+        ...                                                 # doctest: +SKIP
         Segmentation fault
 
     """

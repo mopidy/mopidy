@@ -44,19 +44,21 @@ style guidelines, with a couple of notable exceptions:
 Running tests
 =============
 
-To run tests, you need a couple of dependencies. Some can be installed through
+To run tests, you need a couple of dependencies. They can be installed through
 Debian/Ubuntu package management::
 
-    sudo aptitude install python-coverage
+    sudo aptitude install python-coverage python-nose
 
-The rest (or all dependencies if you want to) can be installed using pip::
+Or, they can be installed using ``pip``::
 
-    sudo aptitude install python-pip python-setuptools bzr
     sudo pip install -r requirements-tests.txt
 
-Then, to run all tests::
+Then, to run all tests, go to the project directory and run::
 
     python tests
+
+For more documentation on testing Mopidy, check out the `nose docs
+<http://somethingaboutorange.com/mrl/projects/nose/>`_.
 
 
 Writing documentation
@@ -66,14 +68,9 @@ To write documentation, we use `Sphinx <http://sphinx.pocoo.org/>`_. See their
 site for lots of documentation on how to use Sphinx. To generate HTML or LaTeX
 from the documentation files, you need some additional dependencies.
 
-You can either install them through Debian/Ubuntu package management::
+You can install them through Debian/Ubuntu package management::
 
     sudo aptitude install python-sphinx python-pygraphviz graphviz
-
-Or, install them using pip::
-
-    sudo aptitude install python-pip python-setuptools graphviz
-    sudo pip install -r requirements-docs.txt
 
 Then, to generate docs::
 

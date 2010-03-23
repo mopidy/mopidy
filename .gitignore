@@ -4,8 +4,10 @@
 .idea
 MANIFEST
 build/
+cover/
 dist/
 docs/_build/
+nosetests.xml
 pip-log.txt
 src/
 tmp/
