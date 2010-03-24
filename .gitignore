@@ -2,6 +2,7 @@
 *.swp
 .coverage
 .idea
+.noseids
 MANIFEST
 build/
 cover/
