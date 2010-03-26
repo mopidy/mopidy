@@ -1,7 +1,7 @@
 from mopidy import settings as raw_settings
 
 def get_version():
-    return u'0.1.0a0.dev0'
+    return u'0.1.0a0'
 
 def get_mpd_protocol_version():
     return u'0.16.0'
