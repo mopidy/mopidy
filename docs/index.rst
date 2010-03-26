@@ -7,9 +7,9 @@ Contents
     :maxdepth: 3
 
     installation/index
+    changes
     development/index
     api/index
-    changes
 
 Indices and tables
 ==================
