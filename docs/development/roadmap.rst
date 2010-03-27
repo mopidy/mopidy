@@ -29,7 +29,8 @@ Stuff we really want to do, but just not right now
   Adamcik.
 - Support multiple backends at the same time. It would be really nice to have
   tracks from local disk and Spotify tracks in the same playlist.
-- Package Mopidy as a `Python package <http://guide.python-distribute.org/>`_.
+- **[Done]** Package Mopidy as a `Python package
+  <http://guide.python-distribute.org/>`_.
 - Get a build server, i.e. `Hudson <http://hudson-ci.org/>`_, up and running
   which runs our test suite on all relevant platforms (Ubuntu, OS X, etc.) and
   creates nightly packages (see next items).
@@ -53,5 +54,5 @@ Crazy stuff we had to write down somewhere
   way.
 - AirPort Express support, like in
   `PulseAudio <http://git.0pointer.de/?p=pulseaudio.git;a=blob;f=src/modules/raop/raop_client.c;hb=HEAD>`_.
-- **Done.** NAD/Denon amplifier mixer through their RS-232 connection.
+- **[Done]** NAD/Denon amplifier mixer through their RS-232 connection.
 - DNLA and/or UPnP support.
