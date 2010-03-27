@@ -10,6 +10,7 @@ Contents
     changes
     development/index
     api/index
+    authors
 
 Indices and tables
 ==================
