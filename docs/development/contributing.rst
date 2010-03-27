@@ -9,8 +9,8 @@ Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
 Code style
 ==========
 
-We generally follow the `PEP-8 <http://www.python.org/dev/peps/pep-0008/>`_
-style guidelines, with a couple of notable exceptions:
+We generally follow the :pep:`8` style guidelines, with a couple of notable
+exceptions:
 
 - We indent continuation lines with four spaces more than the previous line.
   For example::
