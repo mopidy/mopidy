@@ -6,6 +6,7 @@
 MANIFEST
 build/
 cover/
+coverage.xml
 dist/
 docs/_build/
 nosetests.xml
