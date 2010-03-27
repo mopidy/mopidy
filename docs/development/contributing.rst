@@ -131,3 +131,23 @@ Then, to generate docs::
     within 10 minutes after a documentation update is pushed to
     ``jodal/mopidy/master`` at GitHub.
 
+
+Creating releases
+=================
+
+1. Update changelog and commit it.
+
+2. Tag release::
+
+    git tag -a -m "Release v0.1.0a0" v0.1.0a0
+
+3. Push to GitHub::
+
+    git push
+    git push --tags
+
+4. Build package and upload to PyPI::
+
+    python setup.py sdist upload
+
+5. Spread the word.
