@@ -9,36 +9,61 @@ Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
 Code style
 ==========
 
-We generally follow the :pep:`8` style guidelines, with a couple of notable
-exceptions:
+- Follow :pep:`8` unless otherwise noted. `pep8.py
+  <http://pypi.python.org/pypi/pep8/>`_ can be used to check your code against
+  the guidelines, however remember that matching the style of the surrounding
+  code is also important.
 
-- We indent continuation lines with four spaces more than the previous line.
-  For example::
+- Use four spaces for indentation, *never* tabs.
 
-    from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
-        BasePlaybackController, BaseLibraryController,
-        BaseStoredPlaylistsController)
+- Use CamelCase with initial caps for class names::
 
-  And *not*::
+      ClassNameWithCamelCase
 
-    from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
-                                 BasePlaybackController, BaseLibraryController,
-                                 BaseStoredPlaylistsController)
+- Use underscore to split variable, function and method names for
+  readability. Don't use CamelCase.
 
-- An exception to the previous exception: When continuing control flow
-  statements like ``if``, ``for`` and ``while``, we indent with eight spaces
-  more than the previous line. In other words, the line is indented one level
-  further to the right than the following block of code. For example::
+  ::
 
-    if (old_state in (self.PLAYING, self.STOPPED)
-            and new_state == self.PLAYING):
-        self._play_time_start()
+      lower_case_with_underscores
 
-  And *not*::
+- Use the fact that empty strings, lists and tuples are :class:`False` and
+  don't compare boolean values using ``==`` and ``!=``.
 
-    if (old_state in (self.PLAYING, self.STOPPED)
-        and new_state == self.PLAYING):
-        self._play_time_start()
+- Follow whitespace rules as described in :pep:`8`. Good examples::
+
+      spam(ham[1], {eggs: 2})
+      spam(1)
+      dict['key'] = list[index]
+
+- Limit lines to 80 characters and avoid trailing whitespace. However note that
+  wrapped lines should be *one* indentation level in from level above, except
+  for ``if``, ``for``, ``with``, and ``while`` lines which should have two
+  levels of indentation::
+
+      if (foo and bar ...
+              baz and foobar):
+          a = 1
+
+      from foobar import (foo, bar, ...
+          baz)
+
+- For consistency, prefer ``'`` over ``"`` for strings, unless the string
+  contains ``'``.
+
+- Take a look at :pep:`20` for a nice peek into a general mindset useful for
+  Python coding.
+
+
+Commit guidelines
+=================
+
+- Keep commits small and on topic.
+
+- If a commit looks too big you should be working in a feature branch not a
+  single commit.
+
+- Merge feature branches with ``--no-ff`` to keep track of the merge.
 
 
 Running tests
