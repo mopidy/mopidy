@@ -55,4 +55,15 @@ setup(
     license='GPLv2',
     description='MPD server with Spotify support',
     long_description=open('README.rst').read(),
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Environment :: No Input/Output (Daemon)',
+        'Intended Audience :: End Users/Desktop',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Multimedia :: Sound/Audio :: Players',
+    ],
 )
