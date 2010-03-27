@@ -12,5 +12,6 @@ To install Mopidy, check out
 
 * `Documentation <http://www.mopidy.com/>`_
 * `Source code <http://github.com/jodal/mopidy>`_
-* `Presentation of Mopidy <http://www.slideshare.net/jodal/mopidy-3380516>`_
+* `Issue tracker <http://github.com/jodal/mopidy/issues>`_
 * IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
+* `Presentation of Mopidy <http://www.slideshare.net/jodal/mopidy-3380516>`_
