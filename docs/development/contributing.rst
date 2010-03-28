@@ -101,11 +101,19 @@ To run tests with test coverage statistics::
 For more documentation on testing, check out the `nose documentation
 <http://somethingaboutorange.com/mrl/projects/nose/>`_.
 
-.. note::
 
-    The test coverage report at http://www.mopidy.com/coverage/ is
-    automatically updated within 10 minutes after an update is pushed to
-    ``jodal/mopidy/master`` at GitHub.
+Continuous integration server
+=============================
+
+We run a continuous integration server called Hudson at
+http://hudson.mopidy.com/ that runs all test on multiple platforms (Ubuntu, OS
+X, etc.) for every commit we push to GitHub. If the build is broken or fixed,
+Hudson will issue notifications to our IRC channel.
+
+In addition to running tests, Hudson also does coverage statistics and uses
+pylint to check for errors and possible improvements in our code. So, if you're
+out of work, the code coverage and pylint data in Hudson should give you a
+place to start.
 
 
 Writing documentation
