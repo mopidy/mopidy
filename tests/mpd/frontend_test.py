@@ -913,6 +913,10 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'find "somethingelse" "what"')
         self.assert_(u'ACK Unknown command' in result[0])
 
+    def test_find_album_and_artist(self):
+        result = self.h.handle_request(u'find album "album_what" artist "artist_what"')
+        self.assert_(u'OK' in result)
+
     def test_findadd(self):
         result = self.h.handle_request(u'findadd "album" "what"')
         self.assert_(u'OK' in result)
