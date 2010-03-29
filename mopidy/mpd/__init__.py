@@ -1,6 +1,7 @@
-class MpdAckError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
+from mopidy import MopidyException
+
+class MpdAckError(MopidyException):
+    pass
 
 class MpdNotImplemented(MpdAckError):
     def __init__(self):

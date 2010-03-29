@@ -10,10 +10,10 @@ class MpdExceptionsTest(unittest.TestCase):
             except KeyError as e:
                 raise MpdAckError(unicode(e))
         except MpdAckError as e:
-            self.assertEqual(e.msg, u'Track X not found')
+            self.assertEqual(e.message, u'Track X not found')
 
     def test_mpd_not_implemented_is_a_mpd_ack_error(self):
         try:
             raise MpdNotImplemented
         except MpdAckError as e:
-            self.assertEqual(e.msg, u'Not implemented')
+            self.assertEqual(e.message, u'Not implemented')

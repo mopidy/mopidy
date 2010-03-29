@@ -65,7 +65,8 @@ class MpdFrontend(object):
                 try:
                     result = _request_handlers[pattern](self, **groups)
                 except MpdAckError as e:
-                    return self.handle_response(u'ACK %s' % e.msg, add_ok=False)
+                    return self.handle_response(u'ACK %s' % e.message,
+                        add_ok=False)
                 if self.command_list is not False:
                     return None
                 else:

@@ -6,7 +6,20 @@ def get_version():
 def get_mpd_protocol_version():
     return u'0.16.0'
 
-class SettingsError(Exception):
+class MopidyException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    @property
+    def message(self):
+        """Reimplement message field that was deprecated in Python 2.6"""
+        return self._message
+
+    @message.setter
+    def message(self, message):
+        self._message = message
+
+class SettingsError(MopidyException):
     pass
 
 class Settings(object):
