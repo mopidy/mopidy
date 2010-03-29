@@ -6,9 +6,9 @@ class MpdExceptionsTest(unittest.TestCase):
     def test_key_error_wrapped_in_mpd_ack_error(self):
         try:
             try:
-                raise KeyError('Track X not found')
+                raise KeyError(u'Track X not found')
             except KeyError as e:
-                raise MpdAckError(unicode(e))
+                raise MpdAckError(e[0])
         except MpdAckError as e:
             self.assertEqual(e.message, u'Track X not found')
 
