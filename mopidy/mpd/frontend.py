@@ -814,6 +814,7 @@ class MpdFrontend(object):
         return self.backend.playback.play()
 
     @handle_pattern(r'^playid "(?P<songid>\d+)"$')
+    @handle_pattern(r'^playid "(?P<songid>-1)"$')
     def _playback_playid(self, songid):
         """
         *musicpd.org, playback section:*
@@ -821,10 +822,17 @@ class MpdFrontend(object):
             ``playid [SONGID]``
 
             Begins playing the playlist at song ``SONGID``.
+
+        *GMPC:*
+
+        - issues ``playid "-1"`` after playlist replacement.
         """
         songid = int(songid)
         try:
-            track = self.backend.current_playlist.get_by_id(songid)
+            if songid == -1:
+                track = self.backend.current_playlist.playlist.tracks[0]
+            else:
+                track = self.backend.current_playlist.get_by_id(songid)
             return self.backend.playback.play(track)
         except KeyError as e:
             raise MpdAckError(e[0])
