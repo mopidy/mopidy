@@ -64,8 +64,8 @@ class MpdFrontend(object):
                 groups = matches.groupdict()
                 try:
                     result = _request_handlers[pattern](self, **groups)
-                except MpdAckError, e:
-                    return self.handle_response(u'ACK %s' % e, add_ok=False)
+                except MpdAckError as e:
+                    return self.handle_response(u'ACK %s' % e.msg, add_ok=False)
                 if self.command_list is not False:
                     return None
                 else:
@@ -285,7 +285,7 @@ class MpdFrontend(object):
             songpos = int(songpos)
             track = self.backend.current_playlist.playlist.tracks[songpos]
             self.backend.current_playlist.remove(track)
-        except IndexError, e:
+        except IndexError as e:
             raise MpdAckError(u'Position out of bounds')
 
     @handle_pattern(r'^deleteid "(?P<songid>\d+)"$')
@@ -301,7 +301,7 @@ class MpdFrontend(object):
         try:
             track = self.backend.current_playlist.get_by_id(songid)
             return self.backend.current_playlist.remove(track)
-        except KeyError, e:
+        except KeyError as e:
             raise MpdAckError(unicode(e))
 
     @handle_pattern(r'^clear$')
@@ -408,8 +408,8 @@ class MpdFrontend(object):
                 songid = int(songid)
                 track = self.backend.current_playlist.get_by_id(songid)
                 return track.mpd_format()
-            except KeyError, e:
-                raise MpdAckError(e)
+            except KeyError as e:
+                raise MpdAckError(unicode(e))
         else:
             return self.backend.current_playlist.playlist.mpd_format()
 
@@ -821,7 +821,7 @@ class MpdFrontend(object):
         try:
             track = self.backend.current_playlist.get_by_id(songid)
             return self.backend.playback.play(track)
-        except KeyError, e:
+        except KeyError as e:
             raise MpdAckError(unicode(e))
 
     @handle_pattern(r'^play "(?P<songpos>\d+)"$')
@@ -1331,8 +1331,8 @@ class MpdFrontend(object):
         try:
             return ['file: %s' % t.uri
                 for t in self.backend.stored_playlists.get_by_name(name).tracks]
-        except KeyError, e:
-            raise MpdAckError(e)
+        except KeyError as e:
+            raise MpdAckError(unicode(e))
 
     @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
     def _stored_playlists_listplaylistinfo(self, name):
@@ -1351,8 +1351,8 @@ class MpdFrontend(object):
         try:
             return self.backend.stored_playlists.get_by_name(name).mpd_format(
                 search_result=True)
-        except KeyError, e:
-            raise MpdAckError(e)
+        except KeyError as e:
+            raise MpdAckError(unicode(e))
 
     @handle_pattern(r'^listplaylists$')
     def _stored_playlists_listplaylists(self):

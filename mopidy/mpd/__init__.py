@@ -1,6 +1,7 @@
 class MpdAckError(Exception):
-    pass
+    def __init__(self, msg):
+        self.msg = msg
 
 class MpdNotImplemented(MpdAckError):
-    def __init__(self, *args):
-        super(MpdNotImplemented, self).__init__(u'Not implemented', *args)
+    def __init__(self):
+        super(MpdNotImplemented, self).__init__(u'Not implemented')
