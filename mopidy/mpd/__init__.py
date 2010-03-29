@@ -1,6 +1,8 @@
-class MpdAckError(Exception):
+from mopidy import MopidyException
+
+class MpdAckError(MopidyException):
     pass
 
 class MpdNotImplemented(MpdAckError):
-    def __init__(self, *args):
-        super(MpdNotImplemented, self).__init__(u'Not implemented', *args)
+    def __init__(self):
+        super(MpdNotImplemented, self).__init__(u'Not implemented')
