@@ -577,6 +577,8 @@ class MpdFrontend(object):
         r'"(?P<what>[^"]+)"$')
     @handle_pattern(r'^find "(?P<type>(album|artist|title))" '
         r'"(?P<what>[^"]+)"$')
+    @handle_pattern(r'^find (?P<type>(album)) '
+        r'"(?P<what>[^"]+)" artist "([^"]+)"$')
     def _music_db_find(self, type, what):
         """
         *musicpd.org, music database section:*
@@ -589,6 +591,8 @@ class MpdFrontend(object):
         *GMPC:*
 
         - does not add quotes around the type argument.
+        - also uses ``find album "[ALBUM]" artist "[ARTIST]"`` to list album
+          tracks.
 
         *ncmpc:*
 
