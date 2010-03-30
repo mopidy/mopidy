@@ -543,6 +543,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEquals(self.b.current_playlist.playlist.length, 5)
         result = self.h.handle_request(u'clear')
         self.assertEquals(self.b.current_playlist.playlist.length, 0)
+        self.assertEquals(self.b.playback.current_track, None)
         self.assert_(u'OK' in result)
 
     def test_delete_songpos(self):

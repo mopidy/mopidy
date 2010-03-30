@@ -87,6 +87,7 @@ class BaseCurrentPlaylistController(object):
     def clear(self):
         """Clear the current playlist."""
         self.backend.playback.stop()
+        self.backend.playback.current_track = None
         self.playlist = Playlist()
 
     def get_by_id(self, id):
