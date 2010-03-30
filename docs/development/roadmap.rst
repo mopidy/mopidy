@@ -31,9 +31,9 @@ Stuff we really want to do, but just not right now
   tracks from local disk and Spotify tracks in the same playlist.
 - **[Done]** Package Mopidy as a `Python package
   <http://guide.python-distribute.org/>`_.
-- Get a build server, i.e. `Hudson <http://hudson-ci.org/>`_, up and running
-  which runs our test suite on all relevant platforms (Ubuntu, OS X, etc.) and
-  creates nightly packages (see next items).
+- **[Done]** Get a build server, i.e. `Hudson <http://hudson-ci.org/>`_, up and
+  running which runs our test suite on all relevant platforms (Ubuntu, OS X,
+  etc.) and creates nightly packages (see next items).
 - Create `Debian packages <http://www.debian.org/doc/maint-guide/>`_ of all our
   dependencies and Mopidy itself (hosted in our own Debian repo until we get
   stuff into the various distros) to make Debian/Ubuntu installation a breeze.
