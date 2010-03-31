@@ -1,11 +1,13 @@
 import unittest
 
 from mopidy.backends.dummy import DummyBackend, DummyCurrentPlaylistController
+from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 
 class CurrentPlaylistGetTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
         self.c = self.b.current_playlist
 
     def test_get_by_id_returns_unique_match(self):
