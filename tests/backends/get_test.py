@@ -6,8 +6,7 @@ from mopidy.models import Playlist, Track
 
 class CurrentPlaylistGetTest(unittest.TestCase):
     def setUp(self):
-        self.m = DummyMixer()
-        self.b = DummyBackend(mixer=self.m)
+        self.b = DummyBackend(mixer=DummyMixer())
         self.c = self.b.current_playlist
 
     def test_get_by_id_returns_unique_match(self):
@@ -62,3 +61,31 @@ class CurrentPlaylistGetTest(unittest.TestCase):
         track3 = Track(id=2)
         self.c.playlist = Playlist(tracks=[track1, track2, track3])
         self.assertEqual(track1, self.c.get(id=1))
+
+
+class StoredPlaylistsGetTest(unittest.TestCase):
+    def setUp(self):
+        self.b = DummyBackend(mixer=DummyMixer())
+        self.s = self.b.stored_playlists
+
+    def test_get_by_name_returns_unique_match(self):
+        playlist = Playlist(name='b')
+        self.s.playlists = [Playlist(name='a'), playlist]
+        self.assertEqual(playlist, self.s.get_by_name('b'))
+
+    def test_get_by_name_returns_first_of_multiple_matches(self):
+        playlist = Playlist(name='b')
+        self.s.playlists = [playlist, Playlist(name='a'), Playlist(name='b')]
+        try:
+            self.s.get_by_name('b')
+            self.fail(u'Should raise KeyError if multiple matches')
+        except KeyError as e:
+            self.assertEqual(u'Name "b" matched multiple elements', e[0])
+
+    def test_get_by_id_raises_keyerror_if_no_match(self):
+        self.s.playlists = [Playlist(name='a'), Playlist(name='b')]
+        try:
+            self.s.get_by_name('c')
+            self.fail(u'Should raise KeyError if no match')
+        except KeyError as e:
+            self.assertEqual(u'Name "c" not found', e[0])
