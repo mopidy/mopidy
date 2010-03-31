@@ -300,7 +300,7 @@ class MpdFrontend(object):
         """
         songid = int(songid)
         try:
-            track = self.backend.current_playlist.get_by_id(songid)
+            track = self.backend.current_playlist.get(id=songid)
             return self.backend.current_playlist.remove(track)
         except KeyError as e:
             raise MpdAckError(e[0])
@@ -353,7 +353,7 @@ class MpdFrontend(object):
         """
         songid = int(songid)
         to = int(to)
-        track = self.backend.current_playlist.get_by_id(songid)
+        track = self.backend.current_playlist.get(id=songid)
         position = self.backend.current_playlist.playlist.tracks.index(track)
         self.backend.current_playlist.move(position, position + 1, to)
 
@@ -388,7 +388,7 @@ class MpdFrontend(object):
         """
         if tag == 'filename':
             try:
-                track = self.backend.current_playlist.get_by_uri(needle)
+                track = self.backend.current_playlist.get(uri=needle)
                 return track.mpd_format()
             except KeyError:
                 return None
@@ -407,7 +407,7 @@ class MpdFrontend(object):
         if songid is not None:
             try:
                 songid = int(songid)
-                track = self.backend.current_playlist.get_by_id(songid)
+                track = self.backend.current_playlist.get(id=songid)
                 return track.mpd_format()
             except KeyError as e:
                 raise MpdAckError(e[0])
@@ -549,8 +549,8 @@ class MpdFrontend(object):
         """
         songid1 = int(songid1)
         songid2 = int(songid2)
-        song1 = self.backend.current_playlist.get_by_id(songid1)
-        song2 = self.backend.current_playlist.get_by_id(songid2)
+        song1 = self.backend.current_playlist.get(id=songid1)
+        song2 = self.backend.current_playlist.get(id=songid2)
         songpos1 = self.backend.current_playlist.playlist.tracks.index(song1)
         songpos2 = self.backend.current_playlist.playlist.tracks.index(song2)
         self._current_playlist_swap(songpos1, songpos2)
@@ -832,7 +832,7 @@ class MpdFrontend(object):
             if songid == -1:
                 track = self.backend.current_playlist.playlist.tracks[0]
             else:
-                track = self.backend.current_playlist.get_by_id(songid)
+                track = self.backend.current_playlist.get(id=songid)
             return self.backend.playback.play(track)
         except KeyError as e:
             raise MpdAckError(e[0])
