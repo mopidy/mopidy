@@ -71,21 +71,21 @@ class StoredPlaylistsGetTest(unittest.TestCase):
     def test_get_by_name_returns_unique_match(self):
         playlist = Playlist(name='b')
         self.s.playlists = [Playlist(name='a'), playlist]
-        self.assertEqual(playlist, self.s.get_by_name('b'))
+        self.assertEqual(playlist, self.s.get(name='b'))
 
     def test_get_by_name_returns_first_of_multiple_matches(self):
         playlist = Playlist(name='b')
         self.s.playlists = [playlist, Playlist(name='a'), Playlist(name='b')]
         try:
-            self.s.get_by_name('b')
-            self.fail(u'Should raise KeyError if multiple matches')
-        except KeyError as e:
-            self.assertEqual(u'Name "b" matched multiple elements', e[0])
+            self.s.get(name='b')
+            self.fail(u'Should raise LookupError if multiple matches')
+        except LookupError as e:
+            self.assertEqual(u'"name=b" match multiple playlists', e[0])
 
     def test_get_by_id_raises_keyerror_if_no_match(self):
         self.s.playlists = [Playlist(name='a'), Playlist(name='b')]
         try:
-            self.s.get_by_name('c')
-            self.fail(u'Should raise KeyError if no match')
-        except KeyError as e:
-            self.assertEqual(u'Name "c" not found', e[0])
+            self.s.get(name='c')
+            self.fail(u'Should raise LookupError if no match')
+        except LookupError as e:
+            self.assertEqual(u'"name=c" match no playlists', e[0])

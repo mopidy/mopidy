@@ -509,23 +509,33 @@ class BaseStoredPlaylistsController(object):
         """
         raise NotImplementedError
 
-    def get_by_name(self, name):
+    def get(self, **criteria):
         """
-        Get playlist with given name from the set of stored playlists.
+        Get playlist by given criterias from the set of stored playlists.
 
-        Raises :exc:`KeyError` if not a unique match is found.
+        Raises :exc:`LookupError` if a unique match is not found.
 
-        :param name: playlist name
-        :type name: string
+        Examples::
+
+            get(name='a')            # Returns track with name 'a'
+            get(uri='xyz')           # Returns track with URI 'xyz'
+            get(name='a', uri='xyz') # Returns track with name 'a' and URI 'xyz'
+
+        :param criteria: on or more criteria to match by
+        :type criteria: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        matches = filter(lambda p: name == p.name, self._playlists)
+        matches = self._playlists
+        for (key, value) in criteria.iteritems():
+            matches = filter(lambda p: getattr(p, key) == value, matches)
         if len(matches) == 1:
             return matches[0]
-        elif len(matches) == 0:
-            raise KeyError('Name "%s" not found' % name)
+        criteria_string = ', '.join(
+            ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
+        if len(matches) == 0:
+            raise LookupError('"%s" match no playlists' % criteria_string)
         else:
-            raise KeyError('Name "%s" matched multiple elements' % name)
+            raise LookupError('"%s" match multiple playlists' % criteria_string)
 
     def lookup(self, uri):
         """
