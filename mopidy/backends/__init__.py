@@ -92,7 +92,9 @@ class BaseCurrentPlaylistController(object):
 
     def get(self, **criteria):
         """
-        Get track by given criterias. Raises :class:`KeyError` if not found.
+        Get track by given criterias from current playlist.
+
+        Raises :exc:`LookupError` if a unique match is not found.
 
         Examples::
 
@@ -107,12 +109,14 @@ class BaseCurrentPlaylistController(object):
         matches = self._playlist.tracks
         for (key, value) in criteria.iteritems():
             matches = filter(lambda t: getattr(t, key) == value, matches)
-        if matches:
+        if len(matches) == 1:
             return matches[0]
+        criteria_string = ', '.join(
+            ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
+        if len(matches) == 0:
+            raise LookupError(u'"%s" match no tracks' % criteria_string)
         else:
-            criteria_string = ', '.join(
-                ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
-            raise KeyError(u'Track matching "%s" not found' % criteria_string)
+            raise LookupError(u'"%s" match multiple tracks' % criteria_string)
 
     def load(self, playlist):
         """

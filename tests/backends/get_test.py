@@ -14,18 +14,22 @@ class CurrentPlaylistGetTest(unittest.TestCase):
         self.c.playlist = Playlist(tracks=[Track(id=13), track, Track(id=17)])
         self.assertEqual(track, self.c.get(id=1))
 
-    def test_get_by_id_returns_first_of_multiple_matches(self):
+    def test_get_by_id_raises_error_if_multiple_matches(self):
         track = Track(id=1)
         self.c.playlist = Playlist(tracks=[Track(id=13), track, track])
-        self.assertEqual(track, self.c.get(id=1))
+        try:
+            self.c.get(id=1)
+            self.fail(u'Should raise LookupError if multiple matches')
+        except LookupError as e:
+            self.assertEqual(u'"id=1" match multiple tracks', e[0])
 
-    def test_get_by_id_raises_keyerror_if_no_match(self):
+    def test_get_by_id_raises_error_if_no_match(self):
         self.c.playlist = Playlist(tracks=[Track(id=13), Track(id=17)])
         try:
             self.c.get(id=1)
-            self.fail(u'Should raise KeyError if no match')
-        except KeyError:
-            pass
+            self.fail(u'Should raise LookupError if no match')
+        except LookupError as e:
+            self.assertEqual(u'"id=1" match no tracks', e[0])
 
     def test_get_by_uri_returns_unique_match(self):
         track = Track(uri='a')
@@ -33,18 +37,22 @@ class CurrentPlaylistGetTest(unittest.TestCase):
             tracks=[Track(uri='z'), track, Track(uri='y')])
         self.assertEqual(track, self.c.get(uri='a'))
 
-    def test_get_by_uri_returns_first_of_multiple_matches(self):
+    def test_get_by_uri_raises_error_if_multiple_matches(self):
         track = Track(uri='a')
         self.c.playlist = Playlist(tracks=[Track(uri='z'), track, track])
-        self.assertEqual(track, self.c.get(uri='a'))
+        try:
+            self.c.get(uri='a')
+            self.fail(u'Should raise LookupError if multiple matches')
+        except LookupError as e:
+            self.assertEqual(u'"uri=a" match multiple tracks', e[0])
 
-    def test_get_by_uri_raises_keyerror_if_no_match(self):
+    def test_get_by_uri_raises_error_if_no_match(self):
         self.c.playlist = Playlist(tracks=[Track(uri='z'), Track(uri='y')])
         try:
             self.c.get(uri='a')
-            self.fail(u'Should raise KeyError if no match')
-        except KeyError as e:
-            self.assertEqual(u'Track matching "uri=a" not found', e[0])
+            self.fail(u'Should raise LookupError if no match')
+        except LookupError as e:
+            self.assertEqual(u'"uri=a" match no tracks', e[0])
 
     def test_get_by_multiple_criteria_returns_elements_matching_all(self):
         track1 = Track(id=1, uri='a')
