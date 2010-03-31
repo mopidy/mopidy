@@ -476,7 +476,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
     def test_playid_which_does_not_exist(self):
         self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
         result = self.h.handle_request(u'playid "1"')
-        self.assert_(u'ACK Track matching "id=1" not found' in result)
+        self.assert_(u'ACK "id=1" match no tracks' in result)
 
     def test_previous(self):
         result = self.h.handle_request(u'previous')
@@ -598,7 +598,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEquals(self.b.current_playlist.playlist.length, 2)
         result = self.h.handle_request(u'deleteid "0"')
         self.assertEquals(self.b.current_playlist.playlist.length, 2)
-        self.assert_(u'ACK Track matching "id=0" not found' in result)
+        self.assert_(u'ACK "id=0" match no tracks' in result)
 
     def test_move_songpos(self):
         self.b.current_playlist.load(Playlist(tracks=[
@@ -700,7 +700,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.b.current_playlist.load(Playlist(
             tracks=[Track(name='a', id=33), Track(name='b', id=38)]))
         result = self.h.handle_request(u'playlistid "25"')
-        self.assert_(u'ACK Track matching "id=25" not found' in result)
+        self.assert_(u'ACK "id=25" match no tracks' in result)
 
     def test_playlistinfo_without_songpos_or_range(self):
         result = self.h.handle_request(u'playlistinfo')

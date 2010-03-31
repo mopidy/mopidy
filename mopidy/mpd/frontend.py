@@ -302,7 +302,7 @@ class MpdFrontend(object):
         try:
             track = self.backend.current_playlist.get(id=songid)
             return self.backend.current_playlist.remove(track)
-        except KeyError as e:
+        except LookupError as e:
             raise MpdAckError(e[0])
 
     @handle_pattern(r'^clear$')
@@ -390,7 +390,7 @@ class MpdFrontend(object):
             try:
                 track = self.backend.current_playlist.get(uri=needle)
                 return track.mpd_format()
-            except KeyError:
+            except LookupError:
                 return None
         raise MpdNotImplemented # TODO
 
@@ -409,7 +409,7 @@ class MpdFrontend(object):
                 songid = int(songid)
                 track = self.backend.current_playlist.get(id=songid)
                 return track.mpd_format()
-            except KeyError as e:
+            except LookupError as e:
                 raise MpdAckError(e[0])
         else:
             return self.backend.current_playlist.playlist.mpd_format()
@@ -834,7 +834,7 @@ class MpdFrontend(object):
             else:
                 track = self.backend.current_playlist.get(id=songid)
             return self.backend.playback.play(track)
-        except KeyError as e:
+        except LookupError as e:
             raise MpdAckError(e[0])
 
     @handle_pattern(r'^play "(?P<songpos>\d+)"$')
