@@ -1343,8 +1343,8 @@ class MpdFrontend(object):
         """
         try:
             return ['file: %s' % t.uri
-                for t in self.backend.stored_playlists.get_by_name(name).tracks]
-        except KeyError as e:
+                for t in self.backend.stored_playlists.get(name=name).tracks]
+        except LookupError as e:
             raise MpdAckError(e[0])
 
     @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
@@ -1362,9 +1362,9 @@ class MpdFrontend(object):
             Album, Artist, Track
         """
         try:
-            return self.backend.stored_playlists.get_by_name(name).mpd_format(
+            return self.backend.stored_playlists.get(name=name).mpd_format(
                 search_result=True)
-        except KeyError as e:
+        except LookupError as e:
             raise MpdAckError(e[0])
 
     @handle_pattern(r'^listplaylists$')

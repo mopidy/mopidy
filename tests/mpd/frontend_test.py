@@ -824,7 +824,7 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
     def test_listplaylist_fails_if_no_playlist_is_found(self):
         result = self.h.handle_request(u'listplaylist "name"')
-        self.assert_(u'ACK Name "name" not found' in result)
+        self.assert_(u'ACK "name=name" match no playlists' in result)
 
     def test_listplaylistinfo(self):
         self.b.stored_playlists.playlists = [
@@ -837,7 +837,7 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
     def test_listplaylistinfo_fails_if_no_playlist_is_found(self):
         result = self.h.handle_request(u'listplaylistinfo "name"')
-        self.assert_(u'ACK Name "name" not found' in result)
+        self.assert_(u'ACK "name=name" match no playlists' in result)
 
     def test_listplaylists(self):
         last_modified = dt.datetime(2001, 3, 17, 13, 41, 17)
