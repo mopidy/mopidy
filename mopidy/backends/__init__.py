@@ -96,11 +96,12 @@ class BaseCurrentPlaylistController(object):
 
         Examples::
 
-            get(id=1)       # Returns track with ID 1
-            get(uri='xyz')  # Returns track with URI 'xyz'
+            get(id=1)               # Returns track with ID 1
+            get(uri='xyz')          # Returns track with URI 'xyz'
+            get(id=1, uri='xyz')    # Returns track with ID 1 and URI 'xyz'
 
-        :param **criteria: on or more criteria to match by
-        :type **criteria: dict
+        :param criteria: on or more criteria to match by
+        :type criteria: dict
         :rtype: :class:`mopidy.models.Track`
         """
         matches = self._playlist.tracks
