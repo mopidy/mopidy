@@ -90,33 +90,28 @@ class BaseCurrentPlaylistController(object):
         self.backend.playback.current_track = None
         self.playlist = Playlist()
 
-    def get_by_id(self, id):
+    def get(self, **criteria):
         """
-        Get track by ID. Raises :class:`KeyError` if not found.
+        Get track by given criterias. Raises :class:`KeyError` if not found.
 
-        :param id: track ID
-        :type id: int
+        Examples::
+
+            get(id=1)       # Returns track with ID 1
+            get(uri='xyz')  # Returns track with URI 'xyz'
+
+        :param **criteria: on or more criteria to match by
+        :type **criteria: dict
         :rtype: :class:`mopidy.models.Track`
         """
-        matches = filter(lambda t: t.id == id, self._playlist.tracks)
+        matches = self._playlist.tracks
+        for (key, value) in criteria.iteritems():
+            matches = filter(lambda t: getattr(t, key) == value, matches)
         if matches:
             return matches[0]
         else:
-            raise KeyError('Track with ID "%s" not found' % id)
-
-    def get_by_uri(self, uri):
-        """
-        Get track by URI. Raises :class:`KeyError` if not found.
-
-        :param uri: track URI
-        :type uri: string
-        :rtype: :class:`mopidy.models.Track`
-        """
-        matches = filter(lambda t: t.uri == uri, self._playlist.tracks)
-        if matches:
-            return matches[0]
-        else:
-            raise KeyError('Track with URI "%s" not found' % uri)
+            criteria_string = ', '.join(
+                ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
+            raise KeyError(u'Track matching "%s" not found' % criteria_string)
 
     def load(self, playlist):
         """
