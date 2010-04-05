@@ -65,6 +65,10 @@ class GStreamerPlaybackController(BasePlaybackController):
     def _message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
             self.next()
+        elif message.type == gst.MESSAGE_ERROR:
+            self._bin.set_state(gst.STATE_NULL)
+            error, debug = message.parse_error()
+            logger.error('%s %s', error, debug)
 
     def play(self, track=None, position=None):
         playlist = self.backend.current_playlist.playlist
