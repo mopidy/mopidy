@@ -153,6 +153,10 @@ class BaseCurrentPlaylistController(object):
         :type track: :class:`mopidy.models.Track`
         """
         tracks = self.playlist.tracks
+
+        if track not in tracks:
+            return
+
         position = tracks.index(track)
         del tracks[position]
         self.playlist = self.playlist.with_(tracks=tracks)
