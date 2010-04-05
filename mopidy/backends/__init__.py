@@ -78,7 +78,7 @@ class BaseCurrentPlaylistController(object):
         :type at_position: int or :class:`None`
         """
         tracks = self.playlist.tracks
-        if at_position:
+        if at_position is not None:
             tracks.insert(at_position, track)
         else:
             tracks.append(track)
