@@ -4,8 +4,8 @@ import os
 from mopidy.models import Playlist, Track
 from mopidy.backends.gstreamer import GStreamerBackend
 
-from tests.backends.basetests import (BasePlaybackControllerTest,
-                                      BaseCurrentPlaylistControllerTest)
+from tests.backends.base import (BasePlaybackControllerTest,
+                                 BaseCurrentPlaylistControllerTest)
 
 folder = os.path.dirname(__file__)
 folder = os.path.join(folder, '..', 'data')
