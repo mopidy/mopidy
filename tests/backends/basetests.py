@@ -50,20 +50,20 @@ class BaseCurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_get_by_id(self):
         track = self.controller.playlist.tracks[1]
-        self.assertEqual(track, self.controller.get_by_id(track.id))
+        self.assertEqual(track, self.controller.get(id=track.id))
 
     @populate_playlist
     def test_get_by_id_raises_error_for_invalid_id(self):
-        self.assertRaises(KeyError, lambda: self.controller.get_by_id(1337))
+        self.assertRaises(LookupError, lambda: self.controller.get(id=1337))
 
     @populate_playlist
-    def test_get_by_url(self):
+    def test_get_by_uri(self):
         track = self.controller.playlist.tracks[1]
-        self.assertEqual(track, self.controller.get_by_url(track.uri))
+        self.assertEqual(track, self.controller.get(uri=track.uri))
 
     @populate_playlist
-    def test_get_by_url_raises_error_for_invalid_id(self):
-        self.assertRaises(KeyError, lambda: self.controller.get_by_url('foobar'))
+    def test_get_by_uri_raises_error_for_invalid_id(self):
+        self.assertRaises(LookupError, lambda: self.controller.get(uri='foobar'))
 
     @populate_playlist
     def test_clear(self):
