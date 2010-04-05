@@ -138,6 +138,9 @@ class BaseCurrentPlaylistController(object):
         :param to_position: new position for the tracks
         :type to_position: int
         """
+        if start == end:
+            end += 1
+
         tracks = self.playlist.tracks
         new_tracks = tracks[:start] + tracks[end:]
         for track in tracks[start:end]:
