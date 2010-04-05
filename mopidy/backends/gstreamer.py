@@ -17,6 +17,7 @@ class GStreamerMessages(threading.Thread):
         gobject.MainLoop().run()
 GStreamerMessages().start()
 
+
 class GStreamerBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(GStreamerBackend, self).__init__(*args, **kwargs)
