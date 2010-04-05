@@ -4,121 +4,178 @@ import sys
 
 import spytify
 
-from mopidy import config
-from mopidy.backends import BaseBackend
+from mopidy import settings
+from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+    BaseLibraryController, BasePlaybackController,
+    BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
+from mopidy.utils import spotify_uri_to_int
 
-logger = logging.getLogger(u'backends.despotify')
+logger = logging.getLogger('mopidy.backends.despotify')
 
 ENCODING = 'utf-8'
 
 class DespotifyBackend(BaseBackend):
+    """
+    A Spotify backend which uses the open source `despotify library
+    <http://despotify.se/>`_.
+
+    `spytify <http://despotify.svn.sourceforge.net/viewvc/despotify/src/bindings/python/>`_
+    is the Python bindings for the despotify library. It got litle
+    documentation, but a couple of examples are available.
+
+    **Issues**
+
+    - r503: Sometimes segfaults when traversing stored playlists, their tracks,
+      artists, and albums. As it is not predictable, it may be a concurrency
+      issue.
+
+    - r503: Segfaults when looking up playlists, both your own lists and other
+      peoples shared lists. To reproduce::
+
+        >>> import spytify                                  # doctest: +SKIP
+        >>> s = spytify.Spytify('alice', 'secret')          # doctest: +SKIP
+        >>> s.lookup('spotify:user:klette:playlist:5rOGYPwwKqbAcVX8bW4k5V')
+        ...                                                 # doctest: +SKIP
+        Segmentation fault
+
+    """
+
     def __init__(self, *args, **kwargs):
         super(DespotifyBackend, self).__init__(*args, **kwargs)
-        logger.info(u'Connecting to Spotify')
-        self.spotify = spytify.Spytify(
-            config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD)
-        self.cache_stored_playlists()
+        self.current_playlist = DespotifyCurrentPlaylistController(backend=self)
+        self.library = DespotifyLibraryController(backend=self)
+        self.playback = DespotifyPlaybackController(backend=self)
+        self.stored_playlists = DespotifyStoredPlaylistsController(backend=self)
+        self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
+        self.spotify = self._connect()
+        self.stored_playlists.refresh()
 
-    def cache_stored_playlists(self):
+    def _connect(self):
+        logger.info(u'Connecting to Spotify')
+        try:
+            return DespotifySessionManager(
+                settings.SPOTIFY_USERNAME.encode(ENCODING),
+                settings.SPOTIFY_PASSWORD.encode(ENCODING),
+                core_queue=self.core_queue)
+        except spytify.SpytifyError as e:
+            logger.exception(e)
+            sys.exit(1)
+
+
+class DespotifyCurrentPlaylistController(BaseCurrentPlaylistController):
+    pass
+
+
+class DespotifyLibraryController(BaseLibraryController):
+    def lookup(self, uri):
+        track = self.backend.spotify.lookup(uri.encode(ENCODING))
+        return DespotifyTranslator.to_mopidy_track(track)
+
+    def search(self, type, what):
+        if type == u'track':
+            type = u'title'
+        if type == u'any':
+            query = what
+        else:
+            query = u'%s:%s' % (type, what)
+        result = self.backend.spotify.search(query.encode(ENCODING))
+        if (result is None or result.playlist.tracks[0].get_uri() ==
+                'spotify:track:0000000000000000000000'):
+            return Playlist()
+        return DespotifyTranslator.to_mopidy_playlist(result.playlist)
+
+    find_exact = search
+
+
+class DespotifyPlaybackController(BasePlaybackController):
+    def _pause(self):
+        self.backend.spotify.pause()
+        return True
+
+    def _play(self, track):
+        self.backend.spotify.play(self.backend.spotify.lookup(track.uri))
+        return True
+
+    def _resume(self):
+        self.backend.spotify.resume()
+        return True
+
+    def _stop(self):
+        self.backend.spotify.stop()
+        return True
+
+
+class DespotifyStoredPlaylistsController(BaseStoredPlaylistsController):
+    def refresh(self):
         logger.info(u'Caching stored playlists')
         playlists = []
-        for spotify_playlist in self.spotify.stored_playlists:
-            playlists.append(self._to_mopidy_playlist(spotify_playlist))
+        for spotify_playlist in self.backend.spotify.stored_playlists:
+            playlists.append(
+                DespotifyTranslator.to_mopidy_playlist(spotify_playlist))
         self._playlists = playlists
         logger.debug(u'Available playlists: %s',
-            u', '.join([u'<%s>' % p.name for p in self._playlists]))
+            u', '.join([u'<%s>' % p.name for p in self.playlists]))
+        logger.info(u'Done caching stored playlists')
 
-# Model translation
 
-    def _to_mopidy_id(self, spotify_uri):
-        return 0 # TODO
+class DespotifyTranslator(object):
+    @classmethod
+    def to_mopidy_id(cls, spotify_uri):
+        return spotify_uri_to_int(spotify_uri)
 
-    def _to_mopidy_artist(self, spotify_artist):
+    @classmethod
+    def to_mopidy_artist(cls, spotify_artist):
         return Artist(
             uri=spotify_artist.get_uri(),
             name=spotify_artist.name.decode(ENCODING)
         )
 
-    def _to_mopidy_album(self, spotify_album_name):
+    @classmethod
+    def to_mopidy_album(cls, spotify_album_name):
         return Album(name=spotify_album_name.decode(ENCODING))
 
-    def _to_mopidy_track(self, spotify_track):
+    @classmethod
+    def to_mopidy_track(cls, spotify_track):
         if dt.MINYEAR <= int(spotify_track.year) <= dt.MAXYEAR:
             date = dt.date(spotify_track.year, 1, 1)
         else:
             date = None
         return Track(
             uri=spotify_track.get_uri(),
-            title=spotify_track.title.decode(ENCODING),
-            artists=[self._to_mopidy_artist(a) for a in spotify_track.artists],
-            album=self._to_mopidy_album(spotify_track.album),
+            name=spotify_track.title.decode(ENCODING),
+            artists=[cls.to_mopidy_artist(a) for a in spotify_track.artists],
+            album=cls.to_mopidy_album(spotify_track.album),
             track_no=spotify_track.tracknumber,
             date=date,
             length=spotify_track.length,
-            id=self._to_mopidy_id(spotify_track.get_uri()),
+            bitrate=320,
+            id=cls.to_mopidy_id(spotify_track.get_uri()),
         )
 
-    def _to_mopidy_playlist(self, spotify_playlist):
+    @classmethod
+    def to_mopidy_playlist(cls, spotify_playlist):
         return Playlist(
             uri=spotify_playlist.get_uri(),
             name=spotify_playlist.name.decode(ENCODING),
-            tracks=[self._to_mopidy_track(t) for t in spotify_playlist.tracks],
+            tracks=[cls.to_mopidy_track(t) for t in spotify_playlist.tracks],
         )
 
-# Play control
 
-    def _next(self):
-        self._current_song_pos += 1
-        self.spotify.play(self.spotify.lookup(self._current_track.uri))
-        return True
+class DespotifySessionManager(spytify.Spytify):
+    DESPOTIFY_NEW_TRACK = 1
+    DESPOTIFY_TIME_TELL = 2
+    DESPOTIFY_END_OF_PLAYLIST = 3
+    DESPOTIFY_TRACK_PLAY_ERROR = 4
 
-    def _pause(self):
-        self.spotify.pause()
-        return True
+    def __init__(self, *args, **kwargs):
+        kwargs['callback'] = self.callback
+        self.core_queue = kwargs.pop('core_queue')
+        super(DespotifySessionManager, self).__init__(*args, **kwargs)
 
-    def _play(self):
-        if self._current_track is not None:
-            self.spotify.play(self.spotify.lookup(self._current_track.uri))
-            return True
-        else:
-            return False
-
-    def _play_id(self, songid):
-        self._current_song_pos = songid # XXX
-        self.spotify.play(self.spotify.lookup(self._current_track.uri))
-        return True
-
-    def _play_pos(self, songpos):
-        self._current_song_pos = songpos
-        self.spotify.play(self.spotify.lookup(self._current_track.uri))
-        return True
-
-    def _previous(self):
-        self._current_song_pos -= 1
-        self.spotify.play(self.spotify.lookup(self._current_track.uri))
-        return True
-
-    def _resume(self):
-        self.spotify.resume()
-        return True
-
-    def _stop(self):
-        self.spotify.stop()
-        return True
-
-# Status querying
-
-    def status_bitrate(self):
-        return 320
-
-    def url_handlers(self):
-        return [u'spotify:', u'http://open.spotify.com/']
-
-# Music database
-
-    def search(self, type, what):
-        query = u'%s:%s' % (type, what)
-        result = self.spotify.search(query.encode(ENCODING))
-        if result is not None:
-            return self._to_mopidy_playlist(result.playlist).mpd_format()
+    def callback(self, signal, data):
+        if signal == self.DESPOTIFY_END_OF_PLAYLIST:
+            logger.debug('Despotify signalled end of playlist')
+            self.core_queue.put({'command': 'end_of_track'})
+        elif signal == self.DESPOTIFY_TRACK_PLAY_ERROR:
+            logger.error('Despotify signalled track play error')

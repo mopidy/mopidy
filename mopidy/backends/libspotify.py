@@ -1,121 +1,98 @@
-from copy import deepcopy
 import datetime as dt
 import logging
+import os
+import multiprocessing
 import threading
 
 from spotify import Link
 from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
 
-from mopidy import config
-from mopidy.backends import BaseBackend
+from mopidy import get_version, settings
+from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+    BaseLibraryController, BasePlaybackController,
+    BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
+from mopidy.utils import spotify_uri_to_int
 
-logger = logging.getLogger(u'backends.libspotify')
+logger = logging.getLogger('mopidy.backends.libspotify')
 
 ENCODING = 'utf-8'
 
 class LibspotifyBackend(BaseBackend):
+    """
+    A Spotify backend which uses the official `libspotify library
+    <http://developer.spotify.com/en/libspotify/overview/>`_.
+
+    `pyspotify <http://github.com/winjer/pyspotify/>`_ is the Python bindings
+    for libspotify. It got no documentation, but multiple examples are
+    available. Like libspotify, pyspotify's calls are mostly asynchronous.
+
+    This backend should also work with `openspotify
+    <http://github.com/noahwilliamsson/openspotify>`_, but we haven't tested
+    that yet.
+
+    **Issues**
+
+    - libspotify is badly packaged. See
+      http://getsatisfaction.com/spotify/topics/libspotify_please_fix_the_installation_script.
+    """
+
     def __init__(self, *args, **kwargs):
         super(LibspotifyBackend, self).__init__(*args, **kwargs)
-        self._next_id = 0
-        self._id_to_uri_map = {}
-        self._uri_to_id_map = {}
+        self.current_playlist = LibspotifyCurrentPlaylistController(
+            backend=self)
+        self.library = LibspotifyLibraryController(backend=self)
+        self.playback = LibspotifyPlaybackController(backend=self)
+        self.stored_playlists = LibspotifyStoredPlaylistsController(
+            backend=self)
+        self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
+        self.spotify = self._connect()
+
+    def _connect(self):
         logger.info(u'Connecting to Spotify')
-        self.spotify = LibspotifySessionManager(
-            config.SPOTIFY_USERNAME, config.SPOTIFY_PASSWORD, backend=self)
-        self.spotify.start()
+        spotify = LibspotifySessionManager(
+            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
+            core_queue=self.core_queue)
+        spotify.start()
+        return spotify
 
-    def update_stored_playlists(self):
-        logger.info(u'Updating stored playlists')
-        playlists = []
-        for spotify_playlist in self.spotify.playlists:
-            playlists.append(self._to_mopidy_playlist(spotify_playlist))
-        self._playlists = playlists
-        logger.debug(u'Available playlists: %s',
-            u', '.join([u'<%s>' % p.name for p in self._playlists]))
 
-# Model translation
+class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
+    pass
 
-    def _to_mopidy_id(self, spotify_uri):
-        if spotify_uri in self._uri_to_id_map:
-            return self._uri_to_id_map[spotify_uri]
+
+class LibspotifyLibraryController(BaseLibraryController):
+    def search(self, type, what):
+        if type is u'any':
+            query = what
         else:
-            id = self._next_id
-            self._next_id += 1
-            self._id_to_uri_map[id] = spotify_uri
-            self._uri_to_id_map[spotify_uri] = id
-            return id
+            query = u'%s:%s' % (type, what)
+        my_end, other_end = multiprocessing.Pipe()
+        self.backend.spotify.search(query.encode(ENCODING), other_end)
+        my_end.poll(None)
+        logger.debug(u'In search method, receiving search results')
+        playlist = my_end.recv()
+        logger.debug(u'In search method, done receiving search results')
+        logger.debug(['%s' % t.name for t in playlist.tracks])
+        return playlist
 
-    def _to_mopidy_artist(self, spotify_artist):
-        return Artist(
-            uri=str(Link.from_artist(spotify_artist)),
-            name=spotify_artist.name().decode(ENCODING),
-        )
+    find_exact = search
 
-    def _to_mopidy_album(self, spotify_album):
-        # TODO pyspotify got much more data on albums than this
-        return Album(name=spotify_album.name().decode(ENCODING))
 
-    def _to_mopidy_track(self, spotify_track):
-        return Track(
-            uri=str(Link.from_track(spotify_track, 0)),
-            title=spotify_track.name().decode(ENCODING),
-            artists=[self._to_mopidy_artist(a)
-                for a in spotify_track.artists()],
-            album=self._to_mopidy_album(spotify_track.album()),
-            track_no=spotify_track.index(),
-            date=dt.date(spotify_track.album().year(), 1, 1),
-            length=spotify_track.duration(),
-            id=self._to_mopidy_id(str(Link.from_track(spotify_track, 0))),
-        )
-
-    def _to_mopidy_playlist(self, spotify_playlist):
-        return Playlist(
-            uri=str(Link.from_playlist(spotify_playlist)),
-            name=spotify_playlist.name().decode(ENCODING),
-            tracks=[self._to_mopidy_track(t) for t in spotify_playlist],
-        )
-# Playback control
-
-    def _play_current_track(self):
-        self.spotify.session.load(
-            Link.from_string(self._current_track.uri).as_track())
-        self.spotify.session.play(1)
-
-    def _next(self):
-        self._current_song_pos += 1
-        self._play_current_track()
-        return True
-
+class LibspotifyPlaybackController(BasePlaybackController):
     def _pause(self):
         # TODO
         return False
 
-    def _play(self):
-        if self._current_track is not None:
-            self._play_current_track()
-            return True
-        else:
+    def _play(self, track):
+        if self.state == self.PLAYING:
+            self.stop()
+        if track.uri is None:
             return False
-
-    def _play_id(self, songid):
-        matches = filter(lambda t: t.id == songid, self._current_playlist)
-        if matches:
-            self._current_song_pos = self._current_playlist.index(matches[0])
-            self._play_current_track()
-            return True
-        else:
-            return False
-
-    def _play_pos(self, songpos):
-        self._current_song_pos = songpos
-        self._play_current_track()
-        return True
-
-    def _previous(self):
-        self._current_song_pos -= 1
-        self._play_current_track()
+        self.backend.spotify.session.load(
+            Link.from_string(track.uri).as_track())
+        self.backend.spotify.session.play(1)
         return True
 
     def _resume(self):
@@ -123,62 +100,142 @@ class LibspotifyBackend(BaseBackend):
         return False
 
     def _stop(self):
-        self.spotify.session.play(0)
+        self.backend.spotify.session.play(0)
         return True
 
-# Status querying
 
-    def status_bitrate(self):
-        return 320
+class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
+    pass
 
-    def url_handlers(self):
-        return [u'spotify:', u'http://open.spotify.com/']
+
+class LibspotifyTranslator(object):
+    @classmethod
+    def to_mopidy_id(cls, spotify_uri):
+        return spotify_uri_to_int(spotify_uri)
+
+    @classmethod
+    def to_mopidy_artist(cls, spotify_artist):
+        if not spotify_artist.is_loaded():
+            return Artist(name=u'[loading...]')
+        return Artist(
+            uri=str(Link.from_artist(spotify_artist)),
+            name=spotify_artist.name().decode(ENCODING),
+        )
+
+    @classmethod
+    def to_mopidy_album(cls, spotify_album):
+        if not spotify_album.is_loaded():
+            return Album(name=u'[loading...]')
+        # TODO pyspotify got much more data on albums than this
+        return Album(name=spotify_album.name().decode(ENCODING))
+
+    @classmethod
+    def to_mopidy_track(cls, spotify_track):
+        if not spotify_track.is_loaded():
+            return Track(name=u'[loading...]')
+        uri = str(Link.from_track(spotify_track, 0))
+        return Track(
+            uri=uri,
+            name=spotify_track.name().decode(ENCODING),
+            artists=[cls.to_mopidy_artist(a) for a in spotify_track.artists()],
+            album=cls.to_mopidy_album(spotify_track.album()),
+            track_no=spotify_track.index(),
+            date=dt.date(spotify_track.album().year(), 1, 1),
+            length=spotify_track.duration(),
+            bitrate=320,
+            id=cls.to_mopidy_id(uri),
+        )
+
+    @classmethod
+    def to_mopidy_playlist(cls, spotify_playlist):
+        if not spotify_playlist.is_loaded():
+            return Playlist(name=u'[loading...]')
+        return Playlist(
+            uri=str(Link.from_playlist(spotify_playlist)),
+            name=spotify_playlist.name().decode(ENCODING),
+            tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
+        )
 
 
 class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
-    def __init__(self, username, password, backend):
+    cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
+    settings_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
+    appkey_file = os.path.expanduser(settings.SPOTIFY_LIB_APPKEY)
+    user_agent = 'Mopidy %s' % get_version()
+
+    def __init__(self, username, password, core_queue):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)
-        self.backend = backend
+        self.core_queue = core_queue
+        self.connected = threading.Event()
         self.audio = AlsaController()
 
     def run(self):
         self.connect()
 
     def logged_in(self, session, error):
+        """Callback used by pyspotify"""
         logger.info('Logged in')
         self.session = session
-        try:
-            self.playlists = session.playlist_container()
-            logger.debug('Got playlist container')
-        except Exception, e:
-            logger.exception(e)
+        self.connected.set()
 
     def logged_out(self, session):
+        """Callback used by pyspotify"""
         logger.info('Logged out')
 
     def metadata_updated(self, session):
-        logger.debug('Metadata updated')
-        self.backend.update_stored_playlists()
+        """Callback used by pyspotify"""
+        logger.debug('Metadata updated, refreshing stored playlists')
+        playlists = []
+        for spotify_playlist in session.playlist_container():
+            playlists.append(
+                LibspotifyTranslator.to_mopidy_playlist(spotify_playlist))
+        self.core_queue.put({
+            'command': 'set_stored_playlists',
+            'playlists': playlists,
+        })
 
     def connection_error(self, session, error):
+        """Callback used by pyspotify"""
         logger.error('Connection error: %s', error)
 
     def message_to_user(self, session, message):
+        """Callback used by pyspotify"""
         logger.info(message)
 
     def notify_main_thread(self, session):
+        """Callback used by pyspotify"""
         logger.debug('Notify main thread')
 
     def music_delivery(self, *args, **kwargs):
+        """Callback used by pyspotify"""
         self.audio.music_delivery(*args, **kwargs)
 
     def play_token_lost(self, session):
+        """Callback used by pyspotify"""
         logger.debug('Play token lost')
+        self.core_queue.put({'command': 'stop_playback'})
 
     def log_message(self, session, data):
+        """Callback used by pyspotify"""
         logger.debug(data)
 
     def end_of_track(self, session):
+        """Callback used by pyspotify"""
         logger.debug('End of track')
+        self.core_queue.put({'command': 'end_of_track'})
 
+    def search(self, query, connection):
+        """Search method used by Mopidy backend"""
+        self.connected.wait()
+        def callback(results, userdata):
+            logger.debug(u'In search callback, translating search results')
+            logger.debug(results.tracks())
+            # TODO Include results from results.albums(), etc. too
+            playlist = Playlist(tracks=[
+                LibspotifyTranslator.to_mopidy_track(t)
+                for t in results.tracks()])
+            logger.debug(u'In search callback, sending search results')
+            logger.debug(['%s' % t.name for t in playlist.tracks])
+            connection.send(playlist)
+        self.session.search(query, callback)

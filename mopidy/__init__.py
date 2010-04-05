@@ -1,21 +1,34 @@
-from mopidy import settings
-from mopidy.exceptions import ConfigError
+from mopidy import settings as raw_settings
 
 def get_version():
-    return u'0'
+    return u'0.1.0a0'
 
 def get_mpd_protocol_version():
-    return u'0.15.0'
+    return u'0.16.0'
 
-class Config(object):
+class MopidyException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    @property
+    def message(self):
+        """Reimplement message field that was deprecated in Python 2.6"""
+        return self._message
+
+    @message.setter
+    def message(self, message):
+        self._message = message
+
+class SettingsError(MopidyException):
+    pass
+
+class Settings(object):
     def __getattr__(self, attr):
-        if not hasattr(settings, attr):
-            raise ConfigError(u'Setting "%s" is not set.' % attr)
-        value = getattr(settings, attr)
+        if attr.isupper() and not hasattr(raw_settings, attr):
+            raise SettingsError(u'Setting "%s" is not set.' % attr)
+        value = getattr(raw_settings, attr)
         if type(value) != bool and not value:
-            raise ConfigError(u'Setting "%s" is empty.' % attr)
-        if type(value) == unicode:
-            value = value.encode('utf-8')
+            raise SettingsError(u'Setting "%s" is empty.' % attr)
         return value
 
-config = Config()
+settings = Settings()

@@ -1,1 +1,0 @@
--e bzr+http://liw.iki.fi/bzr/coverage-test-runner/trunk/#egg=CoverageTestRunner

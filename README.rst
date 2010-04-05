@@ -7,10 +7,11 @@ Mopidy is an `MPD <http://mpd.wikia.com/>`_ server with a
 can search for music in Spotify's vast archive, manage Spotify play lists and
 play music from Spotify.
 
-Mopidy is currently under development. Unless you want to contribute to the
-development, you should probably wait for our first release before trying out
-Mopidy.
+To install Mopidy, check out
+`the installation docs <http://www.mopidy.com/docs/installation/>`_.
 
-* `Source code <http://github.com/jodal/mopidy>`_
 * `Documentation <http://www.mopidy.com/>`_
+* `Source code <http://github.com/jodal/mopidy>`_
+* `Issue tracker <http://github.com/jodal/mopidy/issues>`_
 * IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
+* `Presentation of Mopidy <http://www.slideshare.net/jodal/mopidy-3380516>`_

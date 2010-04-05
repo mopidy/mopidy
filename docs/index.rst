@@ -6,9 +6,11 @@ Contents
 .. toctree::
     :maxdepth: 3
 
+    installation/index
     changes
-    installation
-    development
+    development/index
+    api/index
+    authors
 
 Indices and tables
 ==================

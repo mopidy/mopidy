@@ -1,22 +1,38 @@
 import asyncore
 import logging
+import multiprocessing
+import optparse
 import os
 import sys
 
 sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
-from mopidy import config
-from mopidy.exceptions import ConfigError
-from mopidy.mpd.server import MpdServer
+from mopidy import get_version, settings, SettingsError
+from mopidy.process import CoreProcess
+from mopidy.utils import get_class, get_or_create_dotdir
 
-logger = logging.getLogger('mopidy')
+logger = logging.getLogger('mopidy.main')
 
 def main():
-    _setup_logging(2)
-    backend = _get_backend(config.BACKEND)
-    MpdServer(backend=backend)
+    options, args = _parse_options()
+    _setup_logging(options.verbosity_level)
+    get_or_create_dotdir('~/.mopidy/')
+    core_queue = multiprocessing.Queue()
+    get_class(settings.SERVER)(core_queue)
+    core = CoreProcess(core_queue)
+    core.start()
     asyncore.loop()
+
+def _parse_options():
+    parser = optparse.OptionParser(version='Mopidy %s' % get_version())
+    parser.add_option('-q', '--quiet',
+        action='store_const', const=0, dest='verbosity_level',
+        help='less output (warning level)')
+    parser.add_option('-v', '--verbose',
+        action='store_const', const=2, dest='verbosity_level',
+        help='more output (debug level)')
+    return parser.parse_args()
 
 def _setup_logging(verbosity_level):
     if verbosity_level == 0:
@@ -25,24 +41,17 @@ def _setup_logging(verbosity_level):
         level = logging.DEBUG
     else:
         level = logging.INFO
-    logging.basicConfig(
-        format=config.CONSOLE_LOG_FORMAT,
-        level=level,
-    )
-
-def _get_backend(name):
-    module_name = name[:name.rindex('.')]
-    class_name = name[name.rindex('.') + 1:]
-    logger.info('Loading: %s from %s', class_name, module_name)
-    module = __import__(module_name, globals(), locals(), [class_name], -1)
-    class_object = getattr(module, class_name)
-    instance = class_object()
-    return instance
+    logging.basicConfig(format=settings.CONSOLE_LOG_FORMAT, level=level)
 
 if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        sys.exit('\nInterrupted by user')
-    except ConfigError, e:
-        sys.exit('%s' % e)
+        logger.info(u'Interrupted by user')
+        sys.exit(0)
+    except SettingsError, e:
+        logger.error(e)
+        sys.exit(1)
+    except SystemExit, e:
+        logger.error(e)
+        sys.exit(1)

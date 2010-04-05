@@ -1,0 +1,37 @@
+Script for use with www.websequencediagrams.com
+===============================================
+
+Main -> Core: create
+activate Core
+note over Core: create NadMixer
+Core -> NadTalker: create
+activate NadTalker
+note over NadTalker: calibrate device
+note over Core: create DespotifyBackend
+Core -> despotify: connect to Spotify
+activate despotify
+note over Core: create MpdFrontend
+Main -> Server: create
+activate Server
+note over Server: open port
+Client -> Server: connect
+note over Server: open session
+Client -> Server: play 1
+Server -> Core: play 1
+Core -> despotify: play first track
+Client -> Server: setvol 50
+Server -> Core: setvol 50
+Core -> NadTalker: volume = 50
+Client -> Server: status
+Server -> Core: status
+Core -> NadTalker: volume?
+NadTalker -> Core: volume = 50
+Core -> Server: status response
+Server -> Client: status response
+despotify -> Core: end of track callback
+Core -> despotify: play second track
+Client -> Server: stop
+Server -> Core: stop
+Core -> despotify: stop
+Client -> Server: disconnect
+note over Server: close session
