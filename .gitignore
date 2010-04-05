@@ -1,7 +1,6 @@
 *.pyc
 *.swp
 .coverage
-.idea
 .noseids
 MANIFEST
 build/
@@ -10,6 +9,3 @@ coverage.xml
 dist/
 docs/_build/
 nosetests.xml
-pip-log.txt
-src/
-tmp/
