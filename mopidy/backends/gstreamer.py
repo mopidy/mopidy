@@ -1,7 +1,9 @@
 import gobject
+gobject.threads_init()
+
 import gst
 import logging
-import thread
+import threading
 
 from mopidy.models import Track, Playlist
 from mopidy.backends import (BaseBackend,
@@ -10,13 +12,10 @@ from mopidy.backends import (BaseBackend,
 
 logger = logging.getLogger(u'backends.gstreamer')
 
-def loop():
-    gobject.threads_init()
-
-    while True:
-        gobject.MainLoop().get_context().iteration(True)
-
-thread.start_new_thread(loop, tuple())
+class GStreamerMessages(threading.Thread):
+    def run(self):
+        gobject.MainLoop().run()
+GStreamerMessages().start()
 
 class GStreamerBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
