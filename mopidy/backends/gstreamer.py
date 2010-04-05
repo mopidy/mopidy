@@ -22,18 +22,7 @@ class GStreamerBackend(BaseBackend):
         super(GStreamerBackend, self).__init__(*args, **kwargs)
 
         self.playback = GStreamerPlaybackController(self)
-        self.current_playlist = GStreamerCurrentPlaylistController(self)
-
-class GStreamerCurrentPlaylistController(BaseCurrentPlaylistController):
-    def add(self, track, at_position=None):
-        tracks = self.playlist.tracks
-
-        if at_position is None:
-            tracks.append(track)
-        else:
-            tracks.insert(at_position, track)
-
-        self.playlist = Playlist(tracks=tracks)
+        self.current_playlist = BaseCurrentPlaylistController(self)
 
 class GStreamerPlaybackController(BasePlaybackController):
     def __init__(self, backend):
