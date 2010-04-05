@@ -24,6 +24,7 @@ class GStreamerBackend(BaseBackend):
         self.playback = GStreamerPlaybackController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
 
+
 class GStreamerPlaybackController(BasePlaybackController):
     def __init__(self, backend):
         super(GStreamerPlaybackController, self).__init__(backend)

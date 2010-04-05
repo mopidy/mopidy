@@ -13,6 +13,7 @@ def populate_playlist(func):
     wrapper.__doc__ = func.__doc__
     return wrapper
 
+
 class BaseCurrentPlaylistControllerTest(object):
     tracks = []
     backend_class = None
@@ -84,7 +85,8 @@ class BaseCurrentPlaylistControllerTest(object):
         new_playlist = Playlist()
         self.assertNotEqual(new_playlist, self.controller.playlist)
         self.controller.load(new_playlist)
-        self.assertEqual(new_playlist, self.controller.playlist)
+        # FIXME how do we test this without going into internals?
+        self.assertEqual(new_playlist, self.controller._playlist)
 
     def test_load_does_not_reset_version(self):
         version = self.controller.version
@@ -187,6 +189,7 @@ class BaseCurrentPlaylistControllerTest(object):
         version = self.controller.version
         self.controller.playlist = Playlist()
         self.assertEqual(version+1, self.controller.version)
+
 
 class BasePlaybackControllerTest(object):
     tracks = []
