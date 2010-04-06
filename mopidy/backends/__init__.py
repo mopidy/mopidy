@@ -345,6 +345,9 @@ class BasePlaybackController(object):
         For normal playback this is the next track in the playlist. If random
         and/or consume is enabled it should return the current track instead.
         """
+        if self.repeat or self.consume or self.random:
+            return self.current_track
+
         if self.current_track is None or self.playlist_position == 0:
             return None
 
