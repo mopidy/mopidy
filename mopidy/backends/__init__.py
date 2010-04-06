@@ -454,6 +454,9 @@ class BasePlaybackController(object):
     def new_playlist_loaded_callback(self):
         """Tell the playback controller that a new playlist has been loaded."""
         self.current_track = None
+        self._first_shuffle = True
+        self._shuffled = []
+
         if self.state == self.PLAYING:
             if self.backend.current_playlist.playlist.length > 0:
                 self.play()
