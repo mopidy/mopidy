@@ -1,6 +1,7 @@
 import random
 import time
 
+from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 
 def populate_playlist(func):
@@ -19,7 +20,7 @@ class BaseCurrentPlaylistControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.backend = self.backend_class()
+        self.backend = self.backend_class(mixer=DummyMixer())
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
@@ -196,7 +197,7 @@ class BasePlaybackControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.backend = self.backend_class()
+        self.backend = self.backend_class(mixer=DummyMixer())
         self.playback = self.backend.playback
 
         assert len(self.tracks) >= 3, \
