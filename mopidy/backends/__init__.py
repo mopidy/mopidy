@@ -453,11 +453,16 @@ class BasePlaybackController(object):
 
     def next(self):
         """Play the next track."""
+        original_track = self.current_track
+
         if self.next_track is not None and self._next(self.next_track):
             self.current_track = self.next_track
             self.state = self.PLAYING
         elif self.next_track is None:
             self.stop()
+
+        if self.consume:
+            self.backend.current_playlist.remove(original_track)
 
     def _next(self, track):
         return self._play(track)
