@@ -507,6 +507,18 @@ class BasePlaybackController(object):
         :param time_position: time position in milliseconds
         :type time_position: int
         """
+        if self.state == self.STOPPED:
+            self.play()
+
+        if time_position < 0:
+            time_position = 0
+        elif self.current_track and time_position > self.current_track.length:
+            self.next()
+            return
+
+        self._seek(time_position)
+
+    def _seek(self, time_position):
         raise NotImplementedError
 
     def stop(self):

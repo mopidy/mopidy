@@ -71,17 +71,7 @@ class GStreamerPlaybackController(BasePlaybackController):
     def _resume(self):
         return self._set_state(gst.STATE_PLAYING)
 
-    # FIXME refactor to _seek ?
-    def seek(self, time_position):
-        if self.state == self.STOPPED:
-            self.play()
-
-        if time_position < 0:
-            time_position = 0
-        elif self.current_track and time_position > self.current_track.length:
-            self.next()
-            return
-
+    def _seek(self, time_position):
         self._bin.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, time_position * gst.MSECOND)
         self._set_state(gst.STATE_PLAYING)
