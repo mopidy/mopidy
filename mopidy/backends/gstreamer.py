@@ -109,14 +109,6 @@ class GStreamerPlaybackController(BasePlaybackController):
         self._set_state(gst.STATE_PLAYING)
 
     @property
-    def volume(self):
-        return int(self._bin.get_property('volume') * 100)
-
-    @volume.setter
-    def volume(self, value):
-        return self._bin.set_property('volume', float(value) / 100)
-
-    @property
     def time_position(self):
         try:
             return self._bin.query_position(gst.FORMAT_TIME)[0] // gst.MSECOND

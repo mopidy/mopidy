@@ -194,7 +194,6 @@ class BaseCurrentPlaylistControllerTest(object):
 class BasePlaybackControllerTest(object):
     tracks = []
     backend_class = None
-    supports_volume = False
 
     def setUp(self):
         self.backend = self.backend_class()
@@ -664,22 +663,23 @@ class BasePlaybackControllerTest(object):
 
         self.assertEqual(first, second)
 
-    def test_volume(self):
-        if not self.supports_volume:
-            self.assertEqual(self.playback.volume, None)
-        else:
-            self.assertEqual(self.playback.volume, 100)
-            self.playback.volume = 50
-            self.assertEqual(self.playback.volume, 50)
-            self.playback.volume = 0
-            self.assertEqual(self.playback.volume, 0)
-
-    def test_volume_is_not_float(self):
-        if not self.supports_volume:
-            return
-
-        self.playback.volume = 1.0 / 3 * 100
-        self.assertEqual(self.playback.volume, 33)
+# FIXME move to mixer tests
+#    def test_volume(self):
+#        if not self.supports_volume:
+#            self.assertEqual(self.playback.volume, None)
+#        else:
+#            self.assertEqual(self.playback.volume, 100)
+#            self.playback.volume = 50
+#            self.assertEqual(self.playback.volume, 50)
+#            self.playback.volume = 0
+#            self.assertEqual(self.playback.volume, 0)
+#
+#    def test_volume_is_not_float(self):
+#        if not self.supports_volume:
+#            return
+#
+#        self.playback.volume = 1.0 / 3 * 100
+#        self.assertEqual(self.playback.volume, 33)
 
     @populate_playlist
     def test_play_with_consume(self):

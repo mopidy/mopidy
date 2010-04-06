@@ -23,7 +23,6 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestC
     tracks = [Track(uri=song % i, id=i, length=4464) for i in range(1, 4)]
 
     backend_class = GStreamerBackend
-    supports_volume = True
 
 if __name__ == '__main__':
     unittest.main()
