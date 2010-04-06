@@ -321,6 +321,9 @@ class BasePlaybackController(object):
         if self.current_track is None:
             return tracks[0]
 
+        if self.repeat:
+            return tracks[(self.playlist_position + 1) % len(tracks)]
+
         try:
             return tracks[self.playlist_position + 1]
         except IndexError:
