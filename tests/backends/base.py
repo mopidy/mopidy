@@ -380,7 +380,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_next_track_at_end_of_playlist(self):
         self.playback.play()
-        for track in self.tracks:
+        for track in self.tracks[1:]:
             self.playback.next()
         self.assertEqual(self.playback.next_track, None)
 
