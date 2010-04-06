@@ -121,7 +121,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         bus.disconnect(self._bus_id)
         bus.remove_signal_watch()
-        bin.get_state(-1)
+        bin.get_state()
         bin.set_state(gst.STATE_NULL)
 
         del bus
