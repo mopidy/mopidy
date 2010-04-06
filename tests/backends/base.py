@@ -294,9 +294,9 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.next(), None)
 
     @populate_playlist
-    def test_next_triggers_playback(self):
+    def test_next_does_not_trigger_playback(self):
         self.playback.next()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
     def test_next_at_end_of_playlist(self):
@@ -339,12 +339,12 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.previous(), None)
 
     @populate_playlist
-    def test_previous_triggers_playback(self):
+    def test_previous_does_not_trigger_playback(self):
         self.playback.play()
         self.playback.next()
         self.playback.stop()
         self.playback.previous()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
     def test_previous_at_start_of_playlist(self):
@@ -372,7 +372,6 @@ class BasePlaybackControllerTest(object):
         self.playback.next()
         self.playback.previous()
         self.assertEqual(self.playback.next_track, self.tracks[1])
-
 
     def test_next_track_empty_playlist(self):
         self.assertEqual(self.playback.next_track, None)
@@ -545,7 +544,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_resume_when_stopped(self):
         self.playback.resume()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
     def test_resume_when_playing(self):
