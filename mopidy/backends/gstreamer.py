@@ -51,7 +51,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 
     def _message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
-            self.next()
+            self.end_of_track_callback()
         elif message.type == gst.MESSAGE_ERROR:
             self._bin.set_state(gst.STATE_NULL)
             error, debug = message.parse_error()
