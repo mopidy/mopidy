@@ -34,6 +34,8 @@ class GStreamerPlaybackController(BasePlaybackController):
         self._bus = self._bin.get_bus()
         sink = gst.element_factory_make("fakesink", "fakesink")
 
+        # FIXME cleanup fakesink?
+
         self._bin.set_property("video-sink", sink)
         self._bus.add_signal_watch()
         self._bus_id = self._bus.connect('message', self._message)
@@ -91,6 +93,7 @@ class GStreamerPlaybackController(BasePlaybackController):
         else:
             self._set_state(gst.STATE_PLAYING)
 
+    # FIXME refactor to _seek ?
     def seek(self, time_position):
         if self.state == self.STOPPED:
             self.play()

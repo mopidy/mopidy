@@ -13,6 +13,7 @@ folder = os.path.abspath(folder)
 song = os.path.join(folder, 'song%s.mp3')
 song = 'file://' + song
 
+# FIXME can be switched to generic test
 class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
     tracks = [Track(uri=song % i, id=i, length=4464) for i in range(1, 4)]
 

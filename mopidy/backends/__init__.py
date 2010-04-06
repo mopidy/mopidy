@@ -349,6 +349,8 @@ class BasePlaybackController(object):
     def state(self, new_state):
         (old_state, self._state) = (self.state, new_state)
         logger.debug(u'Changing state: %s -> %s', old_state, new_state)
+        # FIXME _play_time stuff assumes backend does not have a better way of
+        # handeling this stuff :/
         if (old_state in (self.PLAYING, self.STOPPED)
                 and new_state == self.PLAYING):
             self._play_time_start()
