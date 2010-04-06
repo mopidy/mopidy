@@ -463,10 +463,15 @@ class BasePlaybackController(object):
         :param track: track to play
         :type track: :class:`mopidy.models.Track` or :class:`None`
         """
+        next_track = self.next_track
+
         if self.state == self.PAUSED and track is None:
             self.resume()
         elif track is not None and self._play(track):
             self.current_track = track
+            self.state = self.PLAYING
+        elif next_track is not None and self._play(next_track):
+            self.current_track = next_track
             self.state = self.PLAYING
 
     def _play(self, track):
