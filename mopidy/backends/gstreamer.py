@@ -47,12 +47,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         result, new, old = self._bin.get_state()
 
-        if new == gst.STATE_PLAYING:
-            self.state = self.PLAYING
-        elif new == gst.STATE_READY:
-            self.state = self.STOPPED
-        elif new == gst.STATE_PAUSED:
-            self.state = self.PAUSED
+        return new == state
 
     def _message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
@@ -62,36 +57,19 @@ class GStreamerPlaybackController(BasePlaybackController):
             error, debug = message.parse_error()
             logger.error('%s %s', error, debug)
 
-    def play(self, track=None, position=None):
-        playlist = self.backend.current_playlist.playlist
-
-        if track:
-            self.current_track = track
-        elif not self.current_track:
-            self.current_track = self.next_track
-
-        if not self.current_track:
-            return
-
-        if self.random and self._shuffled:
-            self._shuffled.pop(0)
-
+    def _play(self, track):
         self._bin.set_state(gst.STATE_READY)
-        self._bin.set_property('uri', self.current_track.uri)
-        self._set_state(gst.STATE_PLAYING)
+        self._bin.set_property('uri', track.uri)
+        return self._set_state(gst.STATE_PLAYING)
 
-    def stop(self):
-        self._set_state(gst.STATE_READY)
+    def _stop(self):
+        return self._set_state(gst.STATE_READY)
 
-    def pause(self):
-        if self.state == self.PLAYING:
-            self._set_state(gst.STATE_PAUSED)
+    def _pause(self):
+        return self._set_state(gst.STATE_PAUSED)
 
-    def resume(self):
-        if self.state == self.STOPPED:
-            self.play()
-        else:
-            self._set_state(gst.STATE_PLAYING)
+    def _resume(self):
+        return self._set_state(gst.STATE_PLAYING)
 
     # FIXME refactor to _seek ?
     def seek(self, time_position):
