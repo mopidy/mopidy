@@ -302,6 +302,8 @@ class BasePlaybackController(object):
     def __init__(self, backend):
         self.backend = backend
         self._state = self.STOPPED
+        self._shuffled = []
+        self._first_shuffle = True
 
     @property
     def next_track(self):
@@ -317,6 +319,15 @@ class BasePlaybackController(object):
 
         if not tracks:
             return None
+
+        if self.random and not self._shuffled:
+            if self.repeat or self._first_shuffle:
+                self._shuffled = tracks
+                random.shuffle(self._shuffled)
+                self._first_shuffle = False
+
+        if self._shuffled:
+            return self._shuffled[0]
 
         if self.current_track is None:
             return tracks[0]
