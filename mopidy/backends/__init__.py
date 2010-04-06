@@ -494,6 +494,8 @@ class BasePlaybackController(object):
         """If paused, resume playing the current track."""
         if self.state == self.PAUSED and self._resume():
             self.state = self.PLAYING
+        elif self.state == self.STOPPED:
+            self.play()
 
     def _resume(self):
         raise NotImplementedError
