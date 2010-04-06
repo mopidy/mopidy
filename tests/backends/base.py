@@ -476,6 +476,23 @@ class BasePlaybackControllerTest(object):
         self.assert_(wrapper.called)
 
     @populate_playlist
+    def test_end_of_track_callback_gets_called(self):
+        end_of_track_callback = self.playback.end_of_track_callback
+
+        def wrapper():
+            wrapper.called = True
+            return end_of_track_callback()
+        wrapper.called = False
+
+        self.playback.end_of_track_callback= wrapper
+
+        self.playback.play()
+        self.playback.seek(self.tracks[0].length - 10)
+        time.sleep(0.1)
+
+        self.assert_(wrapper.called)
+
+    @populate_playlist
     def test_new_playlist_loaded_callback_when_playing(self):
         playlist = Playlist(tracks=[self.tracks[2]])
         self.playback.play()
