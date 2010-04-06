@@ -782,6 +782,14 @@ class BasePlaybackControllerTest(object):
         self.assertNotEqual(self.playback.next_track, None)
 
     @populate_playlist
+    def test_next_track_with_random_after_load_playlist(self):
+        random.seed(1)
+        self.playback.random = True
+        self.assertEqual(self.playback.next_track, self.tracks[2])
+        self.backend.current_playlist.load(Playlist(tracks=self.tracks[:1]))
+        self.assertEqual(self.playback.next_track, self.tracks[0])
+
+    @populate_playlist
     def test_played_track_during_random_not_played_again(self):
         self.playback.random = True
         played = []
