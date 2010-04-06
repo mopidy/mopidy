@@ -483,7 +483,7 @@ class BasePlaybackController(object):
         if self.consume:
             self.backend.current_playlist.remove(original_track)
 
-        if self.random:
+        if self.random and self.current_track in self._shuffled:
             self._shuffled.remove(self.current_track)
 
     def _next(self, track):
