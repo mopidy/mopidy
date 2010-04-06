@@ -315,10 +315,12 @@ class BasePlaybackController(object):
         """
         tracks = self.backend.current_playlist.playlist.tracks
 
-        if self.current_track is None:
-            if tracks:
-                return tracks[0]
+        if not tracks:
             return None
+
+        if self.current_track is None:
+            return tracks[0]
+
         try:
             return tracks[self.playlist_position + 1]
         except IndexError:
