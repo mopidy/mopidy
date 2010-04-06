@@ -439,6 +439,8 @@ class BasePlaybackController(object):
                 self.play()
             else:
                 self.stop()
+        elif self.state == self.PAUSED:
+            self.stop()
 
     def next(self):
         """Play the next track."""
