@@ -471,7 +471,9 @@ class BasePlaybackController(object):
         """Play the next track."""
         original_track = self.current_track
 
-        if self.next_track is not None and self._next(self.next_track):
+        if self.state == self.STOPPED:
+            return
+        elif self.next_track is not None and self._next(self.next_track):
             self.current_track = self.next_track
             self.state = self.PLAYING
         elif self.next_track is None:
@@ -517,6 +519,7 @@ class BasePlaybackController(object):
     def previous(self):
         """Play the previous track."""
         if (self.previous_track is not None
+                and self.state != self.STOPPED
                 and self._previous(self.previous_track)):
             self.current_track = self.previous_track
             self.state = self.PLAYING
@@ -528,8 +531,6 @@ class BasePlaybackController(object):
         """If paused, resume playing the current track."""
         if self.state == self.PAUSED and self._resume():
             self.state = self.PLAYING
-        elif self.state == self.STOPPED:
-            self.play()
 
     def _resume(self):
         raise NotImplementedError
