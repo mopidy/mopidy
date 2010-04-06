@@ -447,6 +447,8 @@ class BasePlaybackController(object):
         if self.next_track is not None and self._next(self.next_track):
             self.current_track = self.next_track
             self.state = self.PLAYING
+        elif self.next_track is None:
+            self.stop()
 
     def _next(self, track):
         return self._play(track)
