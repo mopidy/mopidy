@@ -433,6 +433,8 @@ class BasePlaybackController(object):
 
     @property
     def volume(self):
+    # FIXME Shouldn't we just be using the backend mixer directly? ie can we
+    # remove this?
         """
         The audio volume as an int in the range [0, 100].
 
