@@ -388,9 +388,9 @@ class BasePlaybackControllerTest(object):
     def test_next_track_at_end_of_playlist_with_repeat(self):
         self.playback.repeat = True
         self.playback.play()
-        for track in self.tracks:
+        for track in self.tracks[1:]:
             self.playback.next()
-        self.assertEqual(self.playback.next_track, self.tracks[1])
+        self.assertEqual(self.playback.next_track, self.tracks[0])
 
     @populate_playlist
     def test_next_track_with_random(self):
