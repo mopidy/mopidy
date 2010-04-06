@@ -511,6 +511,8 @@ class BasePlaybackController(object):
         """
         if self.state == self.STOPPED:
             self.play()
+        elif self.state == self.PAUSED:
+            self.resume()
 
         if time_position < 0:
             time_position = 0
