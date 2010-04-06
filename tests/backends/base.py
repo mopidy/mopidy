@@ -379,6 +379,7 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_next_track_at_end_of_playlist(self):
+        self.playback.play()
         for track in self.tracks:
             self.playback.next()
         self.assertEqual(self.playback.next_track, None)
@@ -386,9 +387,10 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_next_track_at_end_of_playlist_with_repeat(self):
         self.playback.repeat = True
+        self.playback.play()
         for track in self.tracks:
             self.playback.next()
-        self.assertEqual(self.playback.next_track, self.tracks[0])
+        self.assertEqual(self.playback.next_track, self.tracks[1])
 
     @populate_playlist
     def test_next_track_with_random(self):
