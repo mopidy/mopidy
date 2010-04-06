@@ -1,5 +1,6 @@
 import random
 import time
+import logging
 
 from mopidy.models import Playlist, Track
 
@@ -24,6 +25,9 @@ class BaseCurrentPlaylistControllerTest(object):
         self.playback = self.backend.playback
 
         assert len(self.tracks) >= 3, 'Need at least three tracks to run tests.'
+
+        self.logger = logging.getLogger('tests.backends')
+        self.logger.info('Starting: %s', self)
 
     def tearDown(self):
         self.backend.destroy()
@@ -203,6 +207,9 @@ class BasePlaybackControllerTest(object):
             'Need at least three tracks to run tests.'
         assert self.tracks[0].length >= 2000, \
             'First song needs to be at least 2000 miliseconds'
+
+        self.logger = logging.getLogger('tests.backends')
+        self.logger.info('Starting: %s', self)
 
     def tearDown(self):
         self.backend.destroy()
