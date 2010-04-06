@@ -312,11 +312,14 @@ class BasePlaybackController(object):
         enabled this should be a random track, all tracks should be played once
         before the list repeats.
         """
+        tracks = self.backend.current_playlist.playlist.tracks
+
         if self.current_track is None:
+            if tracks:
+                return tracks[0]
             return None
         try:
-            return self.backend.current_playlist.playlist.tracks[
-                self.playlist_position + 1]
+            return tracks[self.playlist_position + 1]
         except IndexError:
             return None
 
