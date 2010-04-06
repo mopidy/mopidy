@@ -261,17 +261,20 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_play_sets_current_track(self):
-        tracks = self.backend.current_playlist.playlist.tracks
         self.playback.play()
-        self.assertEqual(self.playback.current_track, tracks[0])
+        self.assertEqual(self.playback.current_track, self.tracks[0])
 
     @populate_playlist
     def test_play_track_sets_current_track(self):
         self.playback.play(self.tracks[-1])
         self.assertEqual(self.playback.current_track, self.tracks[-1])
 
+    @populate_playlist
     def test_current_track_after_completed_playlist(self):
-        raise NotImplementedError # design decision needed
+        self.playback.play(self.tracks[-1])
+        self.playback.seek(self.tracks[0].length - 10)
+        time.sleep(0.1)
+        self.assertEqual(self.playback.current_track, None)
 
     @populate_playlist
     def test_next(self):
