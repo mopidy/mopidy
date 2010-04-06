@@ -514,6 +514,9 @@ class BasePlaybackController(object):
             self.current_track = track
             self.state = self.PLAYING
 
+        if self.random and self.current_track in self._shuffled:
+            self._shuffled.remove(self.current_track)
+
     def _play(self, track):
         raise NotImplementedError
 

@@ -805,10 +805,10 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_played_track_during_random_not_played_again(self):
         self.playback.random = True
+        self.playback.play()
         played = []
         for track in self.tracks:
-            self.playback.next()
-            self.assert_(self.playback.current_track not in played,
-                self.playback.current_track)
+            self.assert_(self.playback.current_track not in played)
             played.append(self.playback.current_track)
+            self.playback.next()
         self.assertEqual(self.playback.next_track, None)
