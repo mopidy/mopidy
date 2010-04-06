@@ -779,7 +779,8 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_random_until_end_of_playlist(self):
         self.playback.random = True
-        for track in self.tracks:
+        self.playback.play()
+        for track in self.tracks[1:]:
             self.playback.next()
         self.assertEqual(self.playback.next_track, None)
 
