@@ -461,8 +461,8 @@ class BasePlaybackController(object):
         :type track: :class:`mopidy.models.Track` or :class:`None`
         """
         if self.state == self.PAUSED and track is None:
-            return self.resume()
-        if track is not None and self._play(track):
+            self.resume()
+        elif track is not None and self._play(track):
             self.current_track = track
             self.state = self.PLAYING
 
