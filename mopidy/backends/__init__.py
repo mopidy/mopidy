@@ -435,7 +435,7 @@ class BasePlaybackController(object):
         self.current_track = None
         if self.state == self.PLAYING:
             if self.backend.current_playlist.playlist.length > 0:
-                self.play(self.backend.current_playlist.playlist.tracks[0])
+                self.play()
             else:
                 self.stop()
 
