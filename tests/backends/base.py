@@ -74,6 +74,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_clear_empty_playlist(self):
         self.controller.clear()
+        self.assertEqual(len(self.controller.playlist.tracks), 0)
 
     @populate_playlist
     def test_clear_when_playing(self):
