@@ -41,6 +41,21 @@ class BaseBackend(object):
     #: List of URI prefixes this backend can handle.
     uri_handlers = []
 
+    def destroy(self):
+        if self.current_playlist:
+            self.current_playlist.destroy()
+
+        if self.library:
+            self.library.destroy()
+
+        if self.mixer:
+            self.mixer.destroy()
+
+        if self.playback:
+            self.playback.destroy()
+
+        if self.stored_playlists:
+            self.stored_playlists.destroy()
 
 class BaseCurrentPlaylistController(object):
     """
@@ -181,6 +196,9 @@ class BaseCurrentPlaylistController(object):
         random.shuffle(shuffled)
         self.playlist = self.playlist.with_(tracks=before+shuffled+after)
 
+    def destroy(self):
+        pass
+
 
 class BaseLibraryController(object):
     """
@@ -233,6 +251,9 @@ class BaseLibraryController(object):
         :rtype: :class:`mopidy.models.Playlist`
         """
         raise NotImplementedError
+
+    def destroy(self):
+        pass
 
 
 class BasePlaybackController(object):
@@ -483,6 +504,9 @@ class BasePlaybackController(object):
     def _stop(self):
         raise NotImplementedError
 
+    def destroy(self):
+        pass
+
 
 class BaseStoredPlaylistsController(object):
     """
@@ -594,3 +618,6 @@ class BaseStoredPlaylistsController(object):
         :rtype: list of :class:`mopidy.models.Playlist`
         """
         return filter(lambda p: query in p.name, self._playlists)
+
+    def destroy(self):
+        pass

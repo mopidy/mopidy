@@ -18,6 +18,9 @@ class BaseMixer(object):
             volume = 100
         self._set_volume(volume)
 
+    def destroy(self):
+        pass
+
     def _get_volume(self):
         """
         Return volume as integer in range [0, 100]. :class:`None` if unknown.

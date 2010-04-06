@@ -26,7 +26,7 @@ class BaseCurrentPlaylistControllerTest(object):
         assert len(self.tracks) >= 3, 'Need at least three tracks to run tests.'
 
     def tearDown(self):
-        self.backend.playback.destroy()
+        self.backend.destroy()
 
     def test_add(self):
         for track in self.tracks:
@@ -205,7 +205,7 @@ class BasePlaybackControllerTest(object):
             'First song needs to be at least 2000 miliseconds'
 
     def tearDown(self):
-        self.backend.playback.destroy()
+        self.backend.destroy()
 
     def test_initial_state_is_stopped(self):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
