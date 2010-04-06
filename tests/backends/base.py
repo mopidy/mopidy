@@ -274,6 +274,7 @@ class BasePlaybackControllerTest(object):
         self.playback.play(self.tracks[-1])
         self.playback.seek(self.tracks[0].length - 10)
         time.sleep(0.1)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
     @populate_playlist

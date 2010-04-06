@@ -452,6 +452,7 @@ class BasePlaybackController(object):
             self.next()
         else:
             self.stop()
+            self.current_track = None
 
     def new_playlist_loaded_callback(self):
         """Tell the playback controller that a new playlist has been loaded."""
