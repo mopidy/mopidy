@@ -467,6 +467,9 @@ class BasePlaybackControllerTest(object):
         self.playback.next()
         self.assertEqual(self.playback.playlist_position, 1)
 
+    def test_playlist_position_at_end_of_playlist(self):
+        raise NotImplementedError
+
     def test_new_playlist_loaded_callback_gets_called(self):
         new_playlist_loaded_callback = self.playback.new_playlist_loaded_callback
 
