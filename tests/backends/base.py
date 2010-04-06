@@ -235,15 +235,13 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_play_track_state(self):
-        tracks = self.backend.current_playlist.playlist.tracks
         self.assertEqual(self.playback.state, self.playback.STOPPED)
-        self.playback.play(tracks[-1])
+        self.playback.play(self.tracks[-1])
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
     @populate_playlist
     def test_play_track_return_value(self):
-        tracks = self.backend.current_playlist.playlist.tracks
-        self.assertEqual(self.playback.play(tracks[-1]), None)
+        self.assertEqual(self.playback.play(self.tracks[-1]), None)
 
     @populate_playlist
     def test_play_when_playing(self):
