@@ -343,8 +343,9 @@ class BasePlaybackController(object):
         For normal playback this is the next track in the playlist. If random
         and/or consume is enabled it should return the current track instead.
         """
-        if self.current_track is None:
+        if self.current_track is None or self.playlist_position == 0:
             return None
+
         try:
             return self.backend.current_playlist.playlist.tracks[
                 self.playlist_position - 1]
@@ -468,15 +469,14 @@ class BasePlaybackController(object):
         :param track: track to play
         :type track: :class:`mopidy.models.Track` or :class:`None`
         """
-        next_track = self.next_track
+
+        if not track and not self.current_track:
+            track = self.next_track
 
         if self.state == self.PAUSED and track is None:
             self.resume()
         elif track is not None and self._play(track):
             self.current_track = track
-            self.state = self.PLAYING
-        elif next_track is not None and self._play(next_track):
-            self.current_track = next_track
             self.state = self.PLAYING
 
     def _play(self, track):
