@@ -308,6 +308,7 @@ class BasePlaybackControllerTest(object):
 
     def test_next_for_empty_playlist(self):
         self.playback.next()
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
     def test_previous(self):
