@@ -141,6 +141,7 @@ class BaseCurrentPlaylistController(object):
         :type playlist: :class:`mopidy.models.Playlist`
         """
         self.playlist = playlist
+        self.backend.playback.new_playlist_loaded_callback()
 
     def move(self, start, end, to_position):
         """
