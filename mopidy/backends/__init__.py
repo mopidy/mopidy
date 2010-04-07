@@ -93,6 +93,10 @@ class BaseCurrentPlaylistController(object):
         :type at_position: int or :class:`None`
         """
         tracks = self.playlist.tracks
+
+        assert at_position <= len(tracks), 'at_position can not be greater' \
+            + ' than  playlist length'
+
         if at_position is not None:
             tracks.insert(at_position, track)
         else:
@@ -158,6 +162,13 @@ class BaseCurrentPlaylistController(object):
             end += 1
 
         tracks = self.playlist.tracks
+
+        assert start < end, 'start must be smaller than end'
+        assert start >= 0, 'start must be at least zero'
+        assert end <= len(tracks), 'end can not be larger than playlist length'
+        assert to_position >= 0, 'to_position must be at least zero'
+        assert to_position <= len(tracks), 'to_position can not be larger than playlist length'
+
         new_tracks = tracks[:start] + tracks[end:]
         for track in tracks[start:end]:
             new_tracks.insert(to_position, track)
@@ -173,8 +184,7 @@ class BaseCurrentPlaylistController(object):
         """
         tracks = self.playlist.tracks
 
-        if track not in tracks:
-            return
+        assert track in tracks, 'track must be in playlist'
 
         position = tracks.index(track)
         del tracks[position]
@@ -191,6 +201,16 @@ class BaseCurrentPlaylistController(object):
         :type end: int or :class:`None`
         """
         tracks = self.playlist.tracks
+
+        if start is not None and end is not None:
+            assert start < end, 'start must be smaller than end'
+
+        if start is not None:
+            assert start >= 0, 'start must be at least zero'
+
+        if end is not None:
+            assert end <= len(tracks), 'end can not be larger than playlist length'
+
         before = tracks[:start or 0]
         shuffled = tracks[start:end]
         after = tracks[end or len(tracks):]
