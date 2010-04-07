@@ -296,8 +296,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_current_track_after_completed_playlist(self):
         self.playback.play(self.tracks[-1])
-        self.playback.seek(self.tracks[0].length - 1)
-        time.sleep(0.2)
+        self.playback.end_of_track_callback()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
@@ -540,7 +539,7 @@ class BasePlaybackControllerTest(object):
 
         self.playback.play()
         self.playback.seek(self.tracks[0].length - 1)
-        time.sleep(0.2)
+        time.sleep(0.5)
 
         self.assert_(wrapper.called)
 
@@ -733,6 +732,7 @@ class BasePlaybackControllerTest(object):
         self.playback.play()
         time.sleep(0.2)
         self.playback.pause()
+        time.sleep(0.2)
         first = self.playback.time_position
         second = self.playback.time_position
 
@@ -781,15 +781,13 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_end_of_song_starts_next_track(self):
         self.playback.play()
-        self.playback.seek(self.tracks[0].length - 1)
-        time.sleep(0.2)
+        self.playback.end_of_track_callback()
         self.assertEqual(self.playback.current_track, self.tracks[1])
 
     @populate_playlist
     def test_end_of_playlist_stops(self):
         self.playback.play(self.tracks[-1])
-        self.playback.seek(self.tracks[-1].length - 1)
-        time.sleep(0.2)
+        self.playback.end_of_track_callback()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_repeat_off_by_default(self):
