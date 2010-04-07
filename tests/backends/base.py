@@ -41,8 +41,8 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_add_at_position_outside_of_playlist(self):
-        self.controller.add(self.tracks[0], len(self.tracks)+2)
-        self.assertEqual(self.tracks[0], self.controller.playlist.tracks[-1])
+        test = lambda: self.controller.add(self.tracks[0], len(self.tracks)+2)
+        self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_add_sets_id_property(self):
@@ -135,21 +135,27 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_moving_track_outside_of_playlist(self):
-        tracks = self.controller.playlist.tracks
-
-        self.controller.move(0, 0, len(tracks)+5)
-        tracks = self.controller.playlist.tracks
-        self.assertEqual(tracks[-1], self.tracks[0])
+        tracks = len(self.controller.playlist.tracks)
+        test = lambda: self.controller.move(0, 0, tracks+5)
+        self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_move_group_outside_of_playlist(self):
-        tracks = self.controller.playlist.tracks
+        tracks = len(self.controller.playlist.tracks)
+        test = lambda: self.controller.move(0, 2, tracks+5)
+        self.assertRaises(AssertionError, test)
 
-        self.controller.move(0, 2, len(tracks)+5)
+    @populate_playlist
+    def test_move_group_out_of_range(self):
+        tracks = len(self.controller.playlist.tracks)
+        test = lambda: self.controller.move(tracks+2, tracks+3, 0)
+        self.assertRaises(AssertionError, test)
 
-        tracks = self.controller.playlist.tracks
-        self.assertEqual(tracks[-2], self.tracks[0])
-        self.assertEqual(tracks[-1], self.tracks[1])
+    @populate_playlist
+    def test_move_group_invalid_group(self):
+        tracks = len(self.controller.playlist.tracks)
+        test = lambda: self.controller.move(2, 1, 0)
+        self.assertRaises(AssertionError, test)
 
     def test_playlist_attribute_is_imutable(self):
         raise NotImplementedError # design decision needed
@@ -164,10 +170,12 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_removing_track_that_does_not_exist(self):
-        self.controller.remove(Track())
+        test = lambda: self.controller.remove(Track())
+        self.assertRaises(AssertionError, test)
 
     def test_removing_from_empty_playlist(self):
-        self.controller.remove(Track())
+        test = lambda: self.controller.remove(Track())
+        self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_shuffle(self):
@@ -189,6 +197,20 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertNotEqual(self.tracks, shuffled_tracks)
         self.assertEqual(self.tracks[0], shuffled_tracks[0])
         self.assertEqual(set(self.tracks), set(shuffled_tracks))
+
+    @populate_playlist
+    def test_shuffle_invalid_subset(self):
+        test = lambda: self.controller.shuffle(3, 1)
+        self.assertRaises(AssertionError, test)
+
+    @populate_playlist
+    def test_shuffle_superset(self):
+        tracks = len(self.controller.playlist.tracks)
+        test = lambda: self.controller.shuffle(1, tracks+5)
+        self.assertRaises(AssertionError, test)
+
+    def test_shuffle_open_subset(self):
+        raise NotImplementedError
 
     def test_version(self):
         version = self.controller.version
