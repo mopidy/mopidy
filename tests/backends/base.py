@@ -844,3 +844,6 @@ class BasePlaybackControllerTest(object):
             self.assert_(self.playback.current_track not in played)
             played.append(self.playback.current_track)
             self.playback.next()
+
+    def test_playing_track_with_invalid_uri(self):
+        raise SkipTest
