@@ -516,7 +516,8 @@ class BasePlaybackControllerTest(object):
         playlist = Playlist(tracks=[self.tracks[2]])
         self.backend.current_playlist.load(playlist)
         self.assertEqual(self.playback.state, self.playback.STOPPED)
-        self.assertEqual(self.playback.current_track, self.tracks[2])
+        self.assertEqual(self.playback.current_track, None)
+        self.assertEqual(self.playback.next_track, self.tracks[2])
 
     @populate_playlist
     def test_new_playlist_loaded_callback_when_paused(self):
@@ -525,7 +526,8 @@ class BasePlaybackControllerTest(object):
         self.playback.pause()
         self.backend.current_playlist.load(playlist)
         self.assertEqual(self.playback.state, self.playback.STOPPED)
-        self.assertEqual(self.playback.current_track, self.tracks[2])
+        self.assertEqual(self.playback.current_track, None)
+        self.assertEqual(self.playback.next_track, self.tracks[2])
 
     @populate_playlist
     def test_pause_when_stopped(self):
