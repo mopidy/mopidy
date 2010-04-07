@@ -480,6 +480,7 @@ class BasePlaybackController(object):
         elif self.next_track is None:
             self.stop()
 
+        # FIXME handle in play aswell?
         if self.consume:
             self.backend.current_playlist.remove(original_track)
 
