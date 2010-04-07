@@ -479,6 +479,7 @@ class BasePlaybackController(object):
             self.state = self.PLAYING
         elif self.next_track is None:
             self.stop()
+            self.current_track = None
 
         # FIXME handle in play aswell?
         if self.consume:
