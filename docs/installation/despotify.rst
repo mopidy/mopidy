@@ -75,5 +75,3 @@ The test script should ask for your username and password (which must be for a
 Spotify Premium account), ask for a search query, list all your playlists with
 tracks, play 10s from a random song from the search result, pause for two
 seconds, play for five more seconds, and quit.
-o stop Mopidy, press ``CTRL+C``.
-
