@@ -743,7 +743,7 @@ class BasePlaybackControllerTest(object):
         self.playback.random = True
         self.playback.play()
         self.playback.next()
-        self.assertEqual(self.playback.current_track, self.tracks[2])
+        self.assertEqual(self.playback.current_track, self.tracks[1])
 
     @populate_playlist
     def test_previous_with_random(self):
