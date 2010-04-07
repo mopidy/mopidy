@@ -1,6 +1,7 @@
 import unittest
 
 from mopidy.mixers.denon import DenonMixer
+from tests.mixers.dummy_test import BaseMixerTest
 
 class DenonMixerDeviceMock(object):
     def __init__(self):
@@ -23,26 +24,14 @@ class DenonMixerDeviceMock(object):
     def open(self):
         self._open = True
 
-class DenonMixerTest(unittest.TestCase):
+class DenonMixerTest(BaseMixerTest):
+    ACTUAL_MAX = 99
+
+    INITIAL = 1
+
     def setUp(self):
         self.device = DenonMixerDeviceMock()
         self.mixer = DenonMixer(device=self.device)
-
-    def test_volume_set_to_min(self):
-        self.mixer.volume = 0
-        self.assertEqual(self.mixer.volume, 0)
-
-    def test_volume_set_to_max(self):
-        self.mixer.volume = 100
-        self.assertEqual(self.mixer.volume, 99)
-
-    def test_volume_set_to_below_min_results_in_min(self):
-        self.mixer.volume = -10
-        self.assertEqual(self.mixer.volume, 0)
-
-    def test_volume_set_to_above_max_results_in_max(self):
-        self.mixer.volume = 110
-        self.assertEqual(self.mixer.volume, 99)
 
     def test_reopen_device(self):
         self.device._open = False

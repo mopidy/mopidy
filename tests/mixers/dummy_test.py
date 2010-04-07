@@ -9,11 +9,13 @@ class BaseMixerTest(unittest.TestCase):
     ACTUAL_MIN = MIN
     ACTUAL_MAX = MAX
 
+    INITIAL = None
+
     def setUp(self):
         self.mixer = DummyMixer()
 
-    def test_volume_is_None_initially(self):
-        self.assertEqual(self.mixer.volume, None)
+    def test_initial_volume(self):
+        self.assertEqual(self.mixer.volume, self.INITIAL)
 
     def test_volume_set_to_min(self):
         self.mixer.volume = self.MIN
