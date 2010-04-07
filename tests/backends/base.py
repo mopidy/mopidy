@@ -803,8 +803,15 @@ class BasePlaybackControllerTest(object):
             self.playback.next()
         self.assertEqual(self.playback.next_track, None)
 
+    @populate_playlist
     def test_random_until_end_of_playlist_and_play_from_start(self):
-        raise NotImplementedError
+        self.playback.repeat = True
+        for track in self.tracks:
+            self.playback.next()
+        self.assertNotEqual(self.playback.next_track, None)
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
+        self.playback.play()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
 
     @populate_playlist
     def test_random_until_end_of_playlist_with_repeat(self):
