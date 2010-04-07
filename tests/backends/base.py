@@ -1,6 +1,8 @@
 import random
 import time
 
+from nose.plugins.skip import SkipTest
+
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 
@@ -97,7 +99,7 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(self.controller.version, version+1)
 
     def test_load_appends(self):
-        raise NotImplementedError
+        raise SkipTest
 
     @populate_playlist
     def test_load_preserves_playing_state(self):
@@ -158,7 +160,7 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertRaises(AssertionError, test)
 
     def test_playlist_attribute_is_imutable(self):
-        raise NotImplementedError # design decision needed
+        raise SkipTest # design decision needed
 
     @populate_playlist
     def test_remove(self):
@@ -210,7 +212,7 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertRaises(AssertionError, test)
 
     def test_shuffle_open_subset(self):
-        raise NotImplementedError
+        raise SkipTest
 
     def test_version(self):
         version = self.controller.version
@@ -510,7 +512,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.playlist_position, 1)
 
     def test_playlist_position_at_end_of_playlist(self):
-        raise NotImplementedError
+        raise SkipTest
 
     def test_new_playlist_loaded_callback_gets_called(self):
         new_playlist_loaded_callback = self.playback.new_playlist_loaded_callback
