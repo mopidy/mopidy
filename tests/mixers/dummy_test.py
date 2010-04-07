@@ -32,3 +32,7 @@ class BaseMixerTest(unittest.TestCase):
     def test_volume_set_to_above_max_results_in_max(self):
         self.mixer.volume = self.MAX + 10
         self.assertEqual(self.mixer.volume, self.ACTUAL_MAX)
+
+    def test_volume_is_not_float(self):
+        self.mixer.volume = 1.0 / 3 * 100
+        self.assertEqual(self.mixer.volume, 33)
