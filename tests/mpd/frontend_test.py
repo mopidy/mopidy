@@ -6,6 +6,8 @@ from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track, Playlist
 from mopidy.mpd import frontend
 
+from tests import SkipTest
+
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):
         self.m = DummyMixer()

@@ -1,10 +1,10 @@
 import random
 import time
 
-from nose.plugins.skip import SkipTest
-
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
+
+from tests import SkipTest
 
 def populate_playlist(func):
     def wrapper(self):
