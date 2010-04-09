@@ -849,3 +849,6 @@ class BasePlaybackControllerTest(object):
         self.backend.current_playlist.load(playlist)
         self.playback.play()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
+
+    def test_playing_track_that_isnt_in_playlist(self):
+        raise SkipTest
