@@ -98,9 +98,6 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.load(Playlist())
         self.assertEqual(self.controller.version, version+1)
 
-    def test_load_appends(self):
-        raise SkipTest
-
     @populate_playlist
     def test_load_preserves_playing_state(self):
         tracks = self.controller.playlist.tracks

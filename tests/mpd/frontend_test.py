@@ -854,6 +854,9 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'load "name"')
         self.assert_(u'OK' in result)
 
+    def test_load_appends(self):
+        raise SkipTest
+
     def test_playlistadd(self):
         result = self.h.handle_request(
             u'playlistadd "name" "file:///dev/urandom"')
