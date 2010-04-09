@@ -845,4 +845,7 @@ class BasePlaybackControllerTest(object):
             self.playback.next()
 
     def test_playing_track_with_invalid_uri(self):
-        raise SkipTest
+        playlist = Playlist(tracks=[Track(uri='foobar')])
+        self.backend.current_playlist.load(playlist)
+        self.playback.play()
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
