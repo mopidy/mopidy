@@ -342,6 +342,7 @@ class BasePlaybackController(object):
 
         if self.random and not self._shuffled:
             if self.repeat or self._first_shuffle:
+                logger.debug('Shuffling tracks')
                 self._shuffled = tracks
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
