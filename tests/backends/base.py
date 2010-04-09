@@ -821,6 +821,7 @@ class BasePlaybackControllerTest(object):
     def test_random_until_end_of_playlist_with_repeat(self):
         self.playback.repeat = True
         self.playback.random = True
+        self.playback.play()
         for track in self.tracks:
             self.playback.next()
         self.assertNotEqual(self.playback.next_track, None)
