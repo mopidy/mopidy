@@ -211,8 +211,16 @@ class BaseCurrentPlaylistControllerTest(object):
         test = lambda: self.controller.shuffle(1, tracks+5)
         self.assertRaises(AssertionError, test)
 
+    @populate_playlist
     def test_shuffle_open_subset(self):
-        raise SkipTest
+        random.seed(1)
+        self.controller.shuffle(1)
+
+        shuffled_tracks = self.controller.playlist.tracks
+
+        self.assertNotEqual(self.tracks, shuffled_tracks)
+        self.assertEqual(self.tracks[0], shuffled_tracks[0])
+        self.assertEqual(set(self.tracks), set(shuffled_tracks))
 
     def test_version(self):
         version = self.controller.version
