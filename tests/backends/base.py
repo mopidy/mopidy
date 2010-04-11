@@ -92,8 +92,11 @@ class BaseCurrentPlaylistControllerTest(object):
         # FIXME how do we test this without going into internals?
         self.assertEqual(new_playlist, self.controller._playlist)
 
+    @populate_playlist
     def test_load_replaces_playlist(self):
-        raise SkipTest
+        self.backend.current_playlist.load(Playlist())
+        tracks = self.backend.current_playlist.playlist.tracks
+        self.assertEqual(len(tracks), 0)
 
     def test_load_does_not_reset_version(self):
         version = self.controller.version
