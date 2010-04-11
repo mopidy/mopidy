@@ -868,4 +868,5 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_playing_track_that_isnt_in_playlist(self):
-        raise SkipTest
+        test = lambda: self.playback.play(self.tracks[0])
+        self.assertRaises(AssertionError, test)
