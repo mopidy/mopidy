@@ -162,8 +162,11 @@ class BaseCurrentPlaylistControllerTest(object):
         test = lambda: self.controller.move(2, 1, 0)
         self.assertRaises(AssertionError, test)
 
-    def test_playlist_attribute_is_imutable(self):
-        raise SkipTest # design decision needed
+    def test_playlist_attribute_is_immutable(self):
+        playlist1 = self.controller.playlist
+        playlist2 = self.controller.playlist
+
+        self.assertNotEqual(playlist1, playlist2)
 
     @populate_playlist
     def test_remove(self):
