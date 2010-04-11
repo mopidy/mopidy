@@ -510,8 +510,11 @@ class BasePlaybackControllerTest(object):
         self.playback.next()
         self.assertEqual(self.playback.playlist_position, 1)
 
+    @populate_playlist
     def test_playlist_position_at_end_of_playlist(self):
-        raise SkipTest
+        self.playback.play(self.tracks[-1])
+        self.playback.end_of_track_callback()
+        self.assertEqual(self.playback.playlist_position, None)
 
     def test_new_playlist_loaded_callback_gets_called(self):
         new_playlist_loaded_callback = self.playback.new_playlist_loaded_callback
