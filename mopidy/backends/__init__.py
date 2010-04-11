@@ -528,7 +528,9 @@ class BasePlaybackController(object):
         :type track: :class:`mopidy.models.Track` or :class:`None`
         """
 
-        if not track and not self.current_track:
+        if track:
+            assert track in self.backend.current_playlist.playlist.tracks
+        elif not self.current_track:
             track = self.next_track
 
         if self.state == self.PAUSED and track is None:
