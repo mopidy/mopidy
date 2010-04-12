@@ -5,7 +5,7 @@ from mopidy.models import Playlist, Track
 from mopidy.backends.gstreamer import GStreamerBackend
 
 from tests.backends.base import (BasePlaybackControllerTest,
-                                 BaseCurrentPlaylistControllerTest)
+    BaseCurrentPlaylistControllerTest)
 
 folder = os.path.dirname(__file__)
 folder = os.path.join(folder, '..', 'data')
@@ -14,15 +14,13 @@ song = os.path.join(folder, 'song%s.mp3')
 song = 'file://' + song
 
 # FIXME can be switched to generic test
-class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
+class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest,
+        unittest.TestCase):
     tracks = [Track(uri=song % i, id=i, length=4464) for i in range(1, 4)]
-
     backend_class = GStreamerBackend
 
-class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestCase):
+
+class GStreamerPlaybackControllerTest(BasePlaybackControllerTest,
+        unittest.TestCase):
     tracks = [Track(uri=song % i, id=i, length=4464) for i in range(1, 4)]
-
     backend_class = GStreamerBackend
-
-if __name__ == '__main__':
-    unittest.main()
