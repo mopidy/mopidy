@@ -10,7 +10,7 @@ from tests.backends.base import (BasePlaybackControllerTest,
 folder = os.path.dirname(__file__)
 folder = os.path.join(folder, '..', 'data')
 folder = os.path.abspath(folder)
-song = os.path.join(folder, 'song%s.mp3')
+song = os.path.join(folder, 'song%s.wav')
 song = 'file://' + song
 
 # FIXME can be switched to generic test
