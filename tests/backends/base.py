@@ -1,5 +1,6 @@
 import random
 import time
+import threading
 
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
@@ -546,19 +547,21 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_end_of_track_callback_gets_called(self):
         end_of_track_callback = self.playback.end_of_track_callback
+        event = threading.Event()
 
         def wrapper():
-            wrapper.called = True
-            return end_of_track_callback()
-        wrapper.called = False
+            result = end_of_track_callback()
+            event.set()
+            return result
 
         self.playback.end_of_track_callback= wrapper
 
         self.playback.play()
-        self.playback.seek(self.tracks[0].length - 1)
-        time.sleep(0.5)
+        self.playback.seek(self.tracks[0].length - 10)
 
-        self.assert_(wrapper.called)
+        event.wait(5)
+
+        self.assert_(event.is_set())
 
     @populate_playlist
     def test_new_playlist_loaded_callback_when_playing(self):
