@@ -24,5 +24,25 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestC
 
     backend_class = GStreamerBackend
 
+    def add_track(self, file):
+        uri = 'file://' + os.path.join(folder, file)
+        track = Track(uri=uri, id=1, length=4464)
+        self.backend.current_playlist.add(track)
+
+    def test_play_mp3(self):
+        self.add_track('blank.mp3')
+        self.playback.play()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
+
+    def test_play_ogg(self):
+        self.add_track('blank.ogg')
+        self.playback.play()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
+
+    def test_play_flac(self):
+        self.add_track('blank.flac')
+        self.playback.play()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
+
 if __name__ == '__main__':
     unittest.main()
