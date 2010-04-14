@@ -377,7 +377,7 @@ class BasePlaybackController(object):
         """
         The previous :class:`mopidy.models.Track` in the playlist.
 
-        For normal playback this is the next track in the playlist. If random
+        For normal playback this is the previous track in the playlist. If random
         and/or consume is enabled it should return the current track instead.
         """
         if self.repeat or self.consume or self.random:
