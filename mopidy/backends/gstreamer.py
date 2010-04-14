@@ -17,8 +17,10 @@ logger = logging.getLogger(u'backends.gstreamer')
 class GStreamerMessages(threading.Thread):
     def run(self):
         gobject.MainLoop().run()
-GStreamerMessages().start()
 
+message_thread = GStreamerMessages()
+message_thread.daemon = True
+message_thread.start()
 
 class GStreamerBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
