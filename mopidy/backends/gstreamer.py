@@ -7,7 +7,6 @@ import gst
 import logging
 import threading
 
-from mopidy.models import Track, Playlist
 from mopidy.backends import (BaseBackend,
                              BasePlaybackController,
                              BaseCurrentPlaylistController)
@@ -85,7 +84,7 @@ class GStreamerPlaybackController(BasePlaybackController):
         try:
             return self._bin.query_position(gst.FORMAT_TIME)[0] // gst.MSECOND
         except gst.QueryError, e:
-            logger.error('time_position failed: %s',e )
+            logger.error('time_position failed: %s', e)
             return 0
 
     def destroy(self):
