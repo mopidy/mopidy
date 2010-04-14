@@ -740,9 +740,8 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_time_position_when_playing(self):
         self.playback.play()
-        time.sleep(0.2)
         first = self.playback.time_position
-        time.sleep(0.2)
+        time.sleep(1)
         second = self.playback.time_position
 
         self.assert_(second > first, '%s - %s' % (first, second))
