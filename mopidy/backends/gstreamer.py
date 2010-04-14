@@ -84,7 +84,8 @@ class GStreamerPlaybackController(BasePlaybackController):
     def time_position(self):
         try:
             return self._bin.query_position(gst.FORMAT_TIME)[0] // gst.MSECOND
-        except gst.QueryError:
+        except gst.QueryError, e:
+            logger.error('time_position failed: %s',e )
             return 0
 
     def destroy(self):
