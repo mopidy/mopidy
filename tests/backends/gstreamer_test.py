@@ -1,5 +1,6 @@
 import unittest
 import os
+import urllib
 
 from mopidy.models import Playlist, Track
 from mopidy.backends.gstreamer import GStreamerBackend
@@ -11,21 +12,21 @@ folder = os.path.dirname(__file__)
 folder = os.path.join(folder, '..', 'data')
 folder = os.path.abspath(folder)
 song = os.path.join(folder, 'song%s.wav')
-song = 'file://' + song
+generate_song = lambda i: 'file:' + urllib.pathname2url(song % i)
 
 # FIXME can be switched to generic test
 class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
-    tracks = [Track(uri=song % i, id=i, length=4464) for i in range(1, 4)]
+    tracks = [Track(uri=generate_song(i), id=i, length=4464) for i in range(1, 4)]
 
     backend_class = GStreamerBackend
 
 class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestCase):
-    tracks = [Track(uri=song % i, id=i, length=4464) for i in range(1, 4)]
+    tracks = [Track(uri=generate_song(i), id=i, length=4464) for i in range(1, 4)]
 
     backend_class = GStreamerBackend
 
     def add_track(self, file):
-        uri = 'file://' + os.path.join(folder, file)
+        uri = 'file:' + urllib.pathname2url(os.path.join(folder, file))
         track = Track(uri=uri, id=1, length=4464)
         self.backend.current_playlist.add(track)
 
