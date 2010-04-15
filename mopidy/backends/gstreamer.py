@@ -3,6 +3,9 @@ gobject.threads_init()
 # FIXME make sure we don't get hit by
 # http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html
 
+import pygst
+pygst.require('0.10')
+
 import gst
 import logging
 import threading
