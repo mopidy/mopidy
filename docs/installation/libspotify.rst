@@ -16,11 +16,16 @@ To use the libspotify backend you must install libspotify and
 Installing libspotify
 =====================
 
-As libspotify's installation script at the moment is somewhat broken (see this
-`GetSatisfaction thread <http://getsatisfaction.com/spotify/topics/libspotify_please_fix_the_installation_script>`_
-for details), it is easiest to use the libspotify files bundled with pyspotify.
-The files bundled with pyspotify are for 64-bit, so if you run a 32-bit OS, you
-must get libspotify from https://developer.spotify.com/en/libspotify/.
+Download and install libspotify 0.0.4 for your OS and CPU architecture from
+https://developer.spotify.com/en/libspotify/.
+
+For 64-bit Linux the process is as follows::
+
+    wget http://developer.spotify.com/download/libspotify/libspotify-0.0.4-linux6-x86_64.tar.gz
+    tar zxfv libspotify-0.0.4-linux6-x86_64.tar.gz
+    cd libspotify-0.0.4-linux6-x86_64/
+    sudo make install prefix=/usr/local
+    sudo ldconfig
 
 
 Installing pyspotify
@@ -32,9 +37,8 @@ Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
 Check out the pyspotify code, and install it::
 
-    git clone git://github.com/winjer/pyspotify.git
+    git clone git://github.com/jodal/pyspotify.git
     cd pyspotify
-    export LD_LIBRARY_PATH=$PWD/lib
     sudo python setup.py develop
 
 Apply for an application key at
@@ -48,12 +52,6 @@ Testing the installation
 Test your libspotify setup::
 
     examples/example1.py -u USERNAME -p PASSWORD
-
-.. note::
-
-    Until Spotify fixes their installation script, you'll have to set
-    ``LD_LIBRARY_PATH`` every time you are going to use libspotify (in other
-    words before starting Mopidy).
 
 
 Setting up Mopidy to use libspotify
