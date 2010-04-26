@@ -11,6 +11,7 @@ import logging
 import threading
 
 from mopidy.backends import * 
+from mopidy.models import Playlist
 
 logger = logging.getLogger(u'backends.gstreamer')
 
@@ -27,6 +28,7 @@ class GStreamerBackend(BaseBackend):
         super(GStreamerBackend, self).__init__(*args, **kwargs)
 
         self.playback = GStreamerPlaybackController(self)
+        self.stored_playlists = GStreamerStoredPlaylistsController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
 
 
@@ -99,3 +101,9 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         del bus
         del bin
+
+
+class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
+    def create(self, name):
+        playlist = Playlist(name=name)
+        self._playlists.append(playlist)
