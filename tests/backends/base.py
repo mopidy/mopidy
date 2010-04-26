@@ -948,3 +948,8 @@ class BaseStoredPlaylistsControllerTest(object):
 
     def test_rename_unknown_playlist(self):
         self.stored.rename(Playlist(), 'test2')
+
+    def test_save(self):
+        playlist = Playlist('test')
+        self.stored.save(playlist)
+        self.assert_(playlist in self.stored.playlists)

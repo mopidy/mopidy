@@ -120,3 +120,6 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         renamed = playlist.with_(name=name)
         index = self._playlists.index(playlist)
         self._playlists[index] = renamed
+
+    def save(self, playlist):
+        self._playlists.append(playlist)
