@@ -30,6 +30,7 @@ class GStreamerBackend(BaseBackend):
         self.playback = GStreamerPlaybackController(self)
         self.stored_playlists = GStreamerStoredPlaylistsController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
+        self.uri_handlers = [u'file:']
 
 
 class GStreamerPlaybackController(BasePlaybackController):
