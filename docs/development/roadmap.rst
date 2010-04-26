@@ -24,9 +24,8 @@ Stuff we really want to do, but just not right now
 - Replace libspotify with `openspotify
   <http://github.com/noahwilliamsson/openspotify>`_ for the
   ``LibspotifyBackend``.
-- A backend for playback from local disk. Quite a bit of work on a `gstreamer
-  <http://gstreamer.freedesktop.org/>`_ backend has already been done by Thomas
-  Adamcik.
+- **[WIP]** A backend for playback from local disk. Quite a bit of work on
+  :mod:`mopidy.backends.gstreamer` has already been done by Thomas Adamcik.
 - Support multiple backends at the same time. It would be really nice to have
   tracks from local disk and Spotify tracks in the same playlist.
 - **[Done]** Package Mopidy as a `Python package

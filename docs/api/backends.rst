@@ -62,8 +62,10 @@ Other backends
     :members:
 
 
-GStreamer backend
------------------
+:mod:`mopidy.backends.gstreamer` -- GStreamer backend
+-----------------------------------------------------
 
-``GstreamerBackend`` is pending merge from `adamcik/mopidy/gstreamer
-<http://github.com/adamcik/mopidy/tree/gstreamer>`_.
+.. automodule:: mopidy.backends.gstreamer
+    :synopsis: Backend for playing music from a local music archive using the
+        GStreamer library.
+    :members:

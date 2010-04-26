@@ -134,13 +134,17 @@ class LibspotifyTranslator(object):
         if not spotify_track.is_loaded():
             return Track(name=u'[loading...]')
         uri = str(Link.from_track(spotify_track, 0))
+        if dt.MINYEAR <= int(spotify_track.album().year()) <= dt.MAXYEAR:
+            date = dt.date(spotify_track.album().year(), 1, 1)
+        else:
+            date = None
         return Track(
             uri=uri,
             name=spotify_track.name().decode(ENCODING),
             artists=[cls.to_mopidy_artist(a) for a in spotify_track.artists()],
             album=cls.to_mopidy_album(spotify_track.album()),
             track_no=spotify_track.index(),
-            date=dt.date(spotify_track.album().year(), 1, 1),
+            date=date,
             length=spotify_track.duration(),
             bitrate=320,
             id=cls.to_mopidy_id(uri),

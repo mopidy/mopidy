@@ -39,7 +39,7 @@ in the settings, Mopidy will choose one for you based upon what OS you run. See
 ---------------------------------------
 
 .. automodule:: mopidy.mixers.alsa
-    :synopsis: ALSA mixer
+    :synopsis: ALSA mixer for Linux.
     :members:
 
 .. inheritance-diagram:: mopidy.mixers.alsa.AlsaMixer
@@ -49,7 +49,7 @@ in the settings, Mopidy will choose one for you based upon what OS you run. See
 -----------------------------------------
 
 .. automodule:: mopidy.mixers.dummy
-    :synopsis: Dummy mixer
+    :synopsis: Dummy mixer for testing.
     :members:
 
 .. inheritance-diagram:: mopidy.mixers.dummy
@@ -59,7 +59,7 @@ in the settings, Mopidy will choose one for you based upon what OS you run. See
 -------------------------------------
 
 .. automodule:: mopidy.mixers.osa
-    :synopsis: Osa mixer
+    :synopsis: Osa mixer for OS X.
     :members:
 
 .. inheritance-diagram:: mopidy.mixers.osa
@@ -80,7 +80,7 @@ choose.
 ---------------------------------------------------
 
 .. automodule:: mopidy.mixers.denon
-    :synopsis: Denon amplifier mixer
+    :synopsis: Denon amplifier mixer.
     :members:
 
 .. inheritance-diagram:: mopidy.mixers.denon
@@ -90,7 +90,7 @@ choose.
 -----------------------------------------------
 
 .. automodule:: mopidy.mixers.nad
-    :synopsis: NAD amplifier mixer
+    :synopsis: NAD amplifier mixer.
     :members:
 
 .. inheritance-diagram:: mopidy.mixers.nad

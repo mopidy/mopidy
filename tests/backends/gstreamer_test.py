@@ -25,7 +25,6 @@ class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, uni
 
 class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestCase):
     tracks = [Track(uri=generate_song(i), id=i, length=4464) for i in range(1, 4)]
-
     backend_class = GStreamerBackend
 
     def add_track(self, file):

@@ -7,7 +7,10 @@ This change log is used to track all major changes to Mopidy.
 0.1.0a1 (unreleased)
 ====================
 
-- Changed backend API for get/filter/find_exact/search.
+- Merged the ``gstreamer`` branch from Thomas Adamcik, bringing more than a
+  hundred new tests, several bugfixes and a new backend for playing music from
+  a local music archive.
+- **[WIP]** Changed backend API for get/filter/find_exact/search.
 
 
 0.1.0a0 (2010-03-27)

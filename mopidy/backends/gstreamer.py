@@ -29,6 +29,12 @@ message_thread.daemon = True
 message_thread.start()
 
 class GStreamerBackend(BaseBackend):
+    """
+    A backend for playing music from a local music archive.
+
+    Uses the `GStreamer <http://gstreamer.freedesktop.org/>`_ library.
+    """
+
     def __init__(self, *args, **kwargs):
         super(GStreamerBackend, self).__init__(*args, **kwargs)
 
@@ -104,6 +110,7 @@ class GStreamerPlaybackController(BasePlaybackController):
         bus.remove_signal_watch()
         bin.get_state()
         bin.set_state(gst.STATE_NULL)
+        bus.set_flushing(True)
 
         del bus
         del bin
