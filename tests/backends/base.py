@@ -919,3 +919,18 @@ class BaseStoredPlaylistsControllerTest(object):
         playlist1 = self.stored.create('test')
         playlist2 = self.stored.get(name='test')
         self.assertEqual(playlist1, playlist2)
+
+    def test_search_returns_empty_list(self):
+        self.assertEqual([], self.stored.search('test'))
+
+    def test_search_returns_playlist(self):
+        playlist = self.stored.create('test')
+        playlists = self.stored.search('test')
+        self.assert_(playlist in playlists)
+
+    def test_search_returns_mulitple_playlists(self):
+        playlist1 = self.stored.create('test')
+        playlist2 = self.stored.create('test2')
+        playlists = self.stored.search('test')
+        self.assert_(playlist1 in playlists)
+        self.assert_(playlist2 in playlists)
