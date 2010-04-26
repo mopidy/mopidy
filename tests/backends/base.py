@@ -7,6 +7,10 @@ from mopidy.models import Playlist, Track
 
 from tests import SkipTest
 
+__all__ = ['BaseCurrentPlaylistControllerTest',
+           'BasePlaybackControllerTest',
+           'BaseStoredPlaylistsControllerTest']
+
 def populate_playlist(func):
     def wrapper(self):
         for track in self.tracks:
