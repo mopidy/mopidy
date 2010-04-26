@@ -4,6 +4,7 @@ import urllib
 
 from mopidy.models import Playlist, Track
 from mopidy.backends.gstreamer import GStreamerBackend
+from mopidy import settings
 
 from tests.backends.base import *
 
@@ -53,6 +54,12 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
         unittest.TestCase):
 
     backend_class = GStreamerBackend
+
+    def test_created_playlist_is_persisted(self):
+        self.stored.create('test')
+        playlist = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        self.assert_(os.path.exists(playlist))
+
 
 if __name__ == '__main__':
     unittest.main()
