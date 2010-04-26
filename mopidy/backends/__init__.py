@@ -42,6 +42,11 @@ class BaseBackend(object):
     uri_handlers = []
 
     def destroy(self):
+        '''
+        Call destroy on all sub-components in backend so that they can cleanup
+        after themselves.
+        '''
+
         if self.current_playlist:
             self.current_playlist.destroy()
 
@@ -218,6 +223,7 @@ class BaseCurrentPlaylistController(object):
         self.playlist = self.playlist.with_(tracks=before+shuffled+after)
 
     def destroy(self):
+        '''Cleanup after component'''
         pass
 
 
@@ -274,6 +280,7 @@ class BaseLibraryController(object):
         raise NotImplementedError
 
     def destroy(self):
+        '''Cleanup after component'''
         pass
 
 
@@ -593,6 +600,7 @@ class BasePlaybackController(object):
         raise NotImplementedError
 
     def destroy(self):
+        '''Cleanup after component'''
         pass
 
 
@@ -708,4 +716,5 @@ class BaseStoredPlaylistsController(object):
         return filter(lambda p: query in p.name, self._playlists)
 
     def destroy(self):
+        '''Cleanup after component'''
         pass
