@@ -113,6 +113,10 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def __init__(self, *args):
         super(GStreamerStoredPlaylistsController, self).__init__(*args)
         self._folder = os.path.expanduser(settings.PLAYLIST_FOLDER)
+        self.refresh()
+
+    def refresh(self):
+        playlists = []
 
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
             name = os.path.basename(m3u)[:len('.m3u')]
@@ -122,7 +126,9 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
 
             # FIXME playlist name needs better handling
 
-            self._playlists.append(playlist)
+            playlists.append(playlist)
+
+        self.playlists = playlists
 
     def create(self, name):
         playlist = Playlist(name=name)
