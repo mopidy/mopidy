@@ -142,6 +142,13 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         shutil.move(src, dst)
 
     def save(self, playlist):
-        file = os.path.join(self._folder, playlist.name + '.m3u')
-        open(file, 'w').close()
+        file_path = os.path.join(self._folder, playlist.name + '.m3u')
+
+        with open(file_path, 'w') as file:
+            for track in playlist.tracks:
+                if track.uri.startswith('file:'):
+                    file.write(track.uri[len('file:'):] + '\n')
+                else:
+                    file.write(track.uri + '\n')
+
         self._playlists.append(playlist)

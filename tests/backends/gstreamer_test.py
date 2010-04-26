@@ -7,6 +7,7 @@ from mopidy.backends.gstreamer import GStreamerBackend
 from mopidy import settings
 
 from tests.backends.base import *
+from tests import SkipTest
 
 folder = os.path.dirname(__file__)
 folder = os.path.join(folder, '..', 'data')
@@ -78,6 +79,19 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
         file2 = os.path.join(settings.PLAYLIST_FOLDER, 'test2.m3u')
         self.assert_(not os.path.exists(file1))
         self.assert_(os.path.exists(file2))
+
+    def test_playlist_contents_get_written_to_disk(self):
+        track = Track(uri=generate_song(1))
+        uri = track.uri[len('file:'):]
+        playlist = Playlist(tracks=[track], name='test')
+        file_path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+
+        self.stored.save(playlist)
+
+        with open(file_path) as file:
+            contents = file.read()
+
+        self.assertEqual(uri, contents.strip())
 
     def test_santitising_of_playlist_filenames(self):
         raise SkipTest
