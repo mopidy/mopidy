@@ -97,7 +97,7 @@ def m3u_to_uris(file_path):
     """
     Convert M3U file list of uris
 
-    Example M3U data:
+    Example M3U data::
 
         # This is a comment
         Alternative\Band - Song.mp3

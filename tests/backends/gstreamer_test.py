@@ -2,11 +2,13 @@ import unittest
 import os
 import urllib
 
-from mopidy.models import Playlist, Track
-from mopidy.backends.gstreamer import GStreamerBackend
 from mopidy import settings
+from mopidy.backends.gstreamer import GStreamerBackend
+from mopidy.mixers.dummy import DummyMixer
+from mopidy.models import Playlist, Track
 
 from tests.backends.base import *
+from tests import SkipTest
 
 folder = os.path.dirname(__file__)
 folder = os.path.join(folder, '..', 'data')
@@ -78,6 +80,46 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
         self.assert_(not os.path.exists(file1))
         self.assert_(os.path.exists(file2))
 
+    def test_playlist_contents_get_written_to_disk(self):
+        track = Track(uri=generate_song(1))
+        uri = track.uri[len('file:'):]
+        playlist = Playlist(tracks=[track], name='test')
+        file_path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+
+        self.stored.save(playlist)
+
+        with open(file_path) as file:
+            contents = file.read()
+
+        self.assertEqual(uri, contents.strip())
+
+    def test_playlists_are_loaded_at_startup(self):
+        track = Track(uri=generate_song(1))
+        uri = track.uri[len('file:'):]
+        playlist = Playlist(tracks=[track], name='test')
+        file_path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+
+        self.stored.save(playlist)
+
+        self.backend.destroy()
+        self.backend = self.backend_class(mixer=DummyMixer())
+        self.stored = self.backend.stored_playlists
+
+        self.assert_(self.stored.playlists)
+        self.assertEqual('test', self.stored.playlists[0].name)
+        self.assertEqual(track.uri, self.stored.playlists[0].tracks[0].uri)
+
+    def test_santitising_of_playlist_filenames(self):
+        raise SkipTest
+
+    def test_playlist_folder_is_createad(self):
+        raise SkipTest
+
+    def test_create_sets_playlist_uri(self):
+        raise SkipTest
+
+    def test_save_sets_playlist_uri(self):
+        raise SkipTest
 
 if __name__ == '__main__':
     unittest.main()

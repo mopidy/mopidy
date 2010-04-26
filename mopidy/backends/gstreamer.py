@@ -9,12 +9,14 @@ pygst.require('0.10')
 import gst
 import logging
 import os
+import glob
 import shutil
 import threading
 
 from mopidy.backends import * 
-from mopidy.models import Playlist
+from mopidy.models import Playlist, Track
 from mopidy import settings
+from mopidy.utils import m3u_to_uris
 
 logger = logging.getLogger(u'backends.gstreamer')
 
@@ -117,8 +119,23 @@ class GStreamerPlaybackController(BasePlaybackController):
 class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def __init__(self, *args):
         super(GStreamerStoredPlaylistsController, self).__init__(*args)
-        # FIXME need test that ensures that folder is created
         self._folder = os.path.expanduser(settings.PLAYLIST_FOLDER)
+        self.refresh()
+
+    def refresh(self):
+        playlists = []
+
+        for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
+            name = os.path.basename(m3u)[:len('.m3u')]
+            track_uris = m3u_to_uris(m3u)
+            tracks = map(lambda u: Track(uri=u), track_uris)
+            playlist = Playlist(tracks=tracks, name=name)
+
+            # FIXME playlist name needs better handling
+
+            playlists.append(playlist)
+
+        self.playlists = playlists
 
     def create(self, name):
         playlist = Playlist(name=name)
@@ -149,6 +166,13 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         shutil.move(src, dst)
 
     def save(self, playlist):
-        file = os.path.join(self._folder, playlist.name + '.m3u')
-        open(file, 'w').close()
+        file_path = os.path.join(self._folder, playlist.name + '.m3u')
+
+        with open(file_path, 'w') as file:
+            for track in playlist.tracks:
+                if track.uri.startswith('file:'):
+                    file.write(track.uri[len('file:'):] + '\n')
+                else:
+                    file.write(track.uri + '\n')
+
         self._playlists.append(playlist)
