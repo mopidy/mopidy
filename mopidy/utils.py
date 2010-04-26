@@ -2,6 +2,7 @@ import logging
 from multiprocessing.reduction import reduce_connection
 import os
 import pickle
+import urllib
 
 logger = logging.getLogger('mopidy.utils')
 
@@ -109,7 +110,25 @@ def m3u_to_uris(file_path):
     - Relative paths of songs should be with respect to location of M3U.
     - Paths are normaly platform specific.
     - Lines starting with # should be ignored.
-    - m3u files are latin-1, m3u8 files UTF-8
+    - m3u files are latin-1.
     - This function does not bother with Extended M3U directives.
     """
-    pass
+
+    uris = []
+    folder = os.path.dirname(file_path)
+
+    with open(file_path) as m3u:
+        for line in m3u.readlines():
+            line = line.strip().decode('latin1')
+
+            if line.startswith('#'):
+                continue
+
+            if line.startswith('file:'):
+                uris.append(line)
+            else:
+                file = os.path.join(folder, line)
+                path = urllib.pathname2url(file.encode('utf-8'))
+                uris.append('file:' + path)
+
+    return uris
