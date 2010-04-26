@@ -116,5 +116,11 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
     def test_playlist_folder_is_createad(self):
         raise SkipTest
 
+    def test_create_sets_playlist_uri(self):
+        raise SkipTest
+
+    def test_save_sets_playlist_uri(self):
+        raise SkipTest
+
 if __name__ == '__main__':
     unittest.main()
