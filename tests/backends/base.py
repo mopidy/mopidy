@@ -934,3 +934,9 @@ class BaseStoredPlaylistsControllerTest(object):
         playlists = self.stored.search('test')
         self.assert_(playlist1 in playlists)
         self.assert_(playlist2 in playlists)
+
+    def test_lookup(self):
+        raise SkipTest
+
+    def test_refresh(self):
+        raise SkipTest
