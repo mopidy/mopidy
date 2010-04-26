@@ -959,6 +959,6 @@ class BaseStoredPlaylistsControllerTest(object):
         self.stored.rename(Playlist(), 'test2')
 
     def test_save(self):
-        playlist = Playlist('test')
+        playlist = Playlist(name='test')
         self.stored.save(playlist)
         self.assert_(playlist in self.stored.playlists)
