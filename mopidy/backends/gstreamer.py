@@ -112,3 +112,11 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def delete(self, playlist):
         if playlist in self._playlists:
             self._playlists.remove(playlist)
+
+    def rename(self, playlist, name):
+        if playlist not in self._playlists:
+            return
+
+        renamed = playlist.with_(name=name)
+        index = self._playlists.index(playlist)
+        self._playlists[index] = renamed

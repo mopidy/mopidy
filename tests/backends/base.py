@@ -940,3 +940,11 @@ class BaseStoredPlaylistsControllerTest(object):
 
     def test_refresh(self):
         raise SkipTest
+
+    def test_rename(self):
+        playlist = self.stored.create('test')
+        self.stored.rename(playlist, 'test2')
+        self.stored.get(name='test2')
+
+    def test_rename_unknown_playlist(self):
+        self.stored.rename(Playlist(), 'test2')
