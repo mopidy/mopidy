@@ -91,3 +91,25 @@ def spotify_uri_to_int(uri, output_bits=31):
         compressed_id ^= (full_id & (2 ** output_bits - 1))
         full_id >>= output_bits
     return int(compressed_id)
+
+def m3u_to_uris(file_path):
+    """
+    Convert M3U file list of uris
+
+    Example M3U data:
+
+        # This is a comment
+        Alternative\Band - Song.mp3
+        Classical\Other Band - New Song.mp3
+        Stuff.mp3
+        D:\More Music\Foo.mp3
+        http://www.example.com:8000/Listen.pls
+        http://www.example.com/~user/Mine.mp3
+
+    - Relative paths of songs should be with respect to location of M3U.
+    - Paths are normaly platform specific.
+    - Lines starting with # should be ignored.
+    - m3u files are latin-1, m3u8 files UTF-8
+    - This function does not bother with Extended M3U directives.
+    """
+    pass
