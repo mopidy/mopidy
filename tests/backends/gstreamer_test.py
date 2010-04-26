@@ -79,6 +79,9 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
         self.assert_(not os.path.exists(file1))
         self.assert_(os.path.exists(file2))
 
+    def test_santitising_of_playlist_filenames(self):
+        raise SkipTest
+
 
 if __name__ == '__main__':
     unittest.main()
