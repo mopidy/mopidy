@@ -959,6 +959,7 @@ class BaseStoredPlaylistsControllerTest(object):
         self.stored.rename(Playlist(), 'test2')
 
     def test_save(self):
+        # FIXME should we handle playlists without names?
         playlist = Playlist(name='test')
         self.stored.save(playlist)
         self.assert_(playlist in self.stored.playlists)
