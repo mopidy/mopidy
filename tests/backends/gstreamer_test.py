@@ -96,6 +96,8 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
     def test_santitising_of_playlist_filenames(self):
         raise SkipTest
 
+    def test_playlist_folder_is_createad(self):
+        raise SkipTest
 
 if __name__ == '__main__':
     unittest.main()
