@@ -9,6 +9,10 @@ from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.backends.base')
 
+__all__ = ['BaseBackend', 'BasePlaybackController',
+    'BaseCurrentPlaylistController', 'BaseStoredPlaylistsController',
+    'BaseLibraryController']
+
 class BaseBackend(object):
     def __init__(self, core_queue=None, mixer=None):
         self.core_queue = core_queue
@@ -42,6 +46,11 @@ class BaseBackend(object):
     uri_handlers = []
 
     def destroy(self):
+        '''
+        Call destroy on all sub-components in backend so that they can cleanup
+        after themselves.
+        '''
+
         if self.current_playlist:
             self.current_playlist.destroy()
 
@@ -218,6 +227,7 @@ class BaseCurrentPlaylistController(object):
         self.playlist = self.playlist.with_(tracks=before+shuffled+after)
 
     def destroy(self):
+        '''Cleanup after component'''
         pass
 
 
@@ -274,6 +284,7 @@ class BaseLibraryController(object):
         raise NotImplementedError
 
     def destroy(self):
+        '''Cleanup after component'''
         pass
 
 
@@ -593,6 +604,7 @@ class BasePlaybackController(object):
         raise NotImplementedError
 
     def destroy(self):
+        '''Cleanup after component'''
         pass
 
 
@@ -708,4 +720,5 @@ class BaseStoredPlaylistsController(object):
         return filter(lambda p: query in p.name, self._playlists)
 
     def destroy(self):
+        '''Cleanup after component'''
         pass

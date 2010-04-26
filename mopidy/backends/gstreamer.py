@@ -8,11 +8,13 @@ pygst.require('0.10')
 
 import gst
 import logging
+import os
+import shutil
 import threading
 
-from mopidy.backends import (BaseBackend,
-                             BasePlaybackController,
-                             BaseCurrentPlaylistController)
+from mopidy.backends import * 
+from mopidy.models import Playlist
+from mopidy import settings
 
 logger = logging.getLogger(u'backends.gstreamer')
 
@@ -35,7 +37,9 @@ class GStreamerBackend(BaseBackend):
         super(GStreamerBackend, self).__init__(*args, **kwargs)
 
         self.playback = GStreamerPlaybackController(self)
+        self.stored_playlists = GStreamerStoredPlaylistsController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
+        self.uri_handlers = [u'file:']
 
 
 class GStreamerPlaybackController(BasePlaybackController):
@@ -108,3 +112,43 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         del bus
         del bin
+
+
+class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
+    def __init__(self, *args):
+        super(GStreamerStoredPlaylistsController, self).__init__(*args)
+        # FIXME need test that ensures that folder is created
+        self._folder = os.path.expanduser(settings.PLAYLIST_FOLDER)
+
+    def create(self, name):
+        playlist = Playlist(name=name)
+        self.save(playlist)
+        return playlist
+
+    def delete(self, playlist):
+        if playlist not in self._playlists:
+            return
+
+        self._playlists.remove(playlist)
+        file = os.path.join(self._folder, playlist.name + '.m3u')
+
+        if os.path.exists(file):
+            os.remove(file)
+
+    def rename(self, playlist, name):
+        if playlist not in self._playlists:
+            return
+
+        src = os.path.join(self._folder, playlist.name + '.m3u')
+        dst = os.path.join(self._folder, name + '.m3u')
+
+        renamed = playlist.with_(name=name)
+        index = self._playlists.index(playlist)
+        self._playlists[index] = renamed
+
+        shutil.move(src, dst)
+
+    def save(self, playlist):
+        file = os.path.join(self._folder, playlist.name + '.m3u')
+        open(file, 'w').close()
+        self._playlists.append(playlist)

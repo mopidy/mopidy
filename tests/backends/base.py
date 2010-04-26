@@ -1,11 +1,19 @@
+import os
 import random
-import time
+import shutil
+import tempfile
 import threading
+import time
 
+from mopidy import settings
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 
 from tests import SkipTest
+
+__all__ = ['BaseCurrentPlaylistControllerTest',
+           'BasePlaybackControllerTest',
+           'BaseStoredPlaylistsControllerTest']
 
 def populate_playlist(func):
     def wrapper(self):
@@ -872,3 +880,86 @@ class BasePlaybackControllerTest(object):
     def test_playing_track_that_isnt_in_playlist(self):
         test = lambda: self.playback.play(self.tracks[0])
         self.assertRaises(AssertionError, test)
+
+
+class BaseStoredPlaylistsControllerTest(object):
+    backend_class = None
+
+    def setUp(self):
+        self.original_folder = settings.PLAYLIST_FOLDER
+        settings.PLAYLIST_FOLDER = tempfile.mkdtemp()
+        self.backend = self.backend_class(mixer=DummyMixer())
+        self.stored  = self.backend.stored_playlists
+
+    def tearDown(self):
+        self.backend.destroy()
+        if os.path.exists(settings.PLAYLIST_FOLDER):
+            shutil.rmtree(settings.PLAYLIST_FOLDER)
+        settings.PLAYLIST_FOLDER = self.original_folder
+
+    def test_create(self):
+        playlist = self.stored.create('test')
+        self.assertEqual(playlist.name, 'test')
+
+    def test_create_in_playlists(self):
+        playlist = self.stored.create('test')
+        self.assert_(self.stored.playlists)
+
+    def test_playlists_empty_to_start_with(self):
+        self.assert_(not self.stored.playlists)
+
+    def test_delete_non_existant_playlist(self):
+        self.stored.delete(Playlist())
+
+    def test_delete_playlist(self):
+        playlist = self.stored.create('test')
+        self.stored.delete(playlist)
+        self.assert_(not self.stored.playlists)
+
+    def test_get_without_criteria(self):
+        test = lambda: self.stored.get()
+        self.assertRaises(LookupError, test)
+
+    def test_get_with_wrong_cirteria(self):
+        test = lambda: self.stored.get(name='foo')
+        self.assertRaises(LookupError, test)
+
+    def test_get_with_right_criteria(self):
+        playlist1 = self.stored.create('test')
+        playlist2 = self.stored.get(name='test')
+        self.assertEqual(playlist1, playlist2)
+
+    def test_search_returns_empty_list(self):
+        self.assertEqual([], self.stored.search('test'))
+
+    def test_search_returns_playlist(self):
+        playlist = self.stored.create('test')
+        playlists = self.stored.search('test')
+        self.assert_(playlist in playlists)
+
+    def test_search_returns_mulitple_playlists(self):
+        playlist1 = self.stored.create('test')
+        playlist2 = self.stored.create('test2')
+        playlists = self.stored.search('test')
+        self.assert_(playlist1 in playlists)
+        self.assert_(playlist2 in playlists)
+
+    def test_lookup(self):
+        raise SkipTest
+
+    def test_refresh(self):
+        raise SkipTest
+
+    def test_rename(self):
+        playlist = self.stored.create('test')
+        self.stored.rename(playlist, 'test2')
+        self.stored.get(name='test2')
+
+    def test_rename_unknown_playlist(self):
+        self.stored.rename(Playlist(), 'test2')
+
+    def test_save(self):
+        # FIXME should we handle playlists without names?
+        playlist = Playlist(name='test')
+        self.stored.save(playlist)
+        self.assert_(playlist in self.stored.playlists)
