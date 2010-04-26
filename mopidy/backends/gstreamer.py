@@ -9,12 +9,14 @@ pygst.require('0.10')
 import gst
 import logging
 import os
+import glob
 import shutil
 import threading
 
 from mopidy.backends import * 
-from mopidy.models import Playlist
+from mopidy.models import Playlist, Track
 from mopidy import settings
+from mopidy.utils import m3u_to_uris
 
 logger = logging.getLogger(u'backends.gstreamer')
 
@@ -111,6 +113,16 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def __init__(self, *args):
         super(GStreamerStoredPlaylistsController, self).__init__(*args)
         self._folder = os.path.expanduser(settings.PLAYLIST_FOLDER)
+
+        for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
+            name = os.path.basename(m3u)[:len('.m3u')]
+            track_uris = m3u_to_uris(m3u)
+            tracks = map(lambda u: Track(uri=u), track_uris)
+            playlist = Playlist(tracks=tracks, name=name)
+
+            # FIXME playlist name needs better handling
+
+            self._playlists.append(playlist)
 
     def create(self, name):
         playlist = Playlist(name=name)

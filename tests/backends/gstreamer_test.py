@@ -2,9 +2,10 @@ import unittest
 import os
 import urllib
 
-from mopidy.models import Playlist, Track
-from mopidy.backends.gstreamer import GStreamerBackend
 from mopidy import settings
+from mopidy.backends.gstreamer import GStreamerBackend
+from mopidy.mixers.dummy import DummyMixer
+from mopidy.models import Playlist, Track
 
 from tests.backends.base import *
 from tests import SkipTest
@@ -92,6 +93,22 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
             contents = file.read()
 
         self.assertEqual(uri, contents.strip())
+
+    def test_playlists_are_loaded_at_startup(self):
+        track = Track(uri=generate_song(1))
+        uri = track.uri[len('file:'):]
+        playlist = Playlist(tracks=[track], name='test')
+        file_path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+
+        self.stored.save(playlist)
+
+        self.backend.destroy()
+        self.backend = self.backend_class(mixer=DummyMixer())
+        self.stored = self.backend.stored_playlists
+
+        self.assert_(self.stored.playlists)
+        self.assertEqual('test', self.stored.playlists[0].name)
+        self.assertEqual(track.uri, self.stored.playlists[0].tracks[0].uri)
 
     def test_santitising_of_playlist_filenames(self):
         raise SkipTest
