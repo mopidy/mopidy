@@ -8,10 +8,12 @@ pygst.require('0.10')
 
 import gst
 import logging
+import os
 import threading
 
 from mopidy.backends import * 
 from mopidy.models import Playlist
+from mopidy import settings
 
 logger = logging.getLogger(u'backends.gstreamer')
 
@@ -105,6 +107,10 @@ class GStreamerPlaybackController(BasePlaybackController):
 
 
 class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
+    def __init__(self, *args):
+        super(GStreamerStoredPlaylistsController, self).__init__(*args)
+        self._folder = os.path.expanduser(settings.PLAYLIST_FOLDER)
+
     def create(self, name):
         playlist = Playlist(name=name)
         self.save(playlist)
