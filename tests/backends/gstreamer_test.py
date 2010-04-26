@@ -57,8 +57,19 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
 
     def test_created_playlist_is_persisted(self):
         self.stored.create('test')
-        playlist = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
-        self.assert_(os.path.exists(playlist))
+        file= os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        self.assert_(os.path.exists(file))
+
+    def test_saved_playlist_is_persisted(self):
+        self.stored.save(Playlist(name='test2'))
+        file= os.path.join(settings.PLAYLIST_FOLDER, 'test2.m3u')
+        self.assert_(os.path.exists(file))
+
+    def test_deleted_playlist_get_removed(self):
+        playlist = self.stored.create('test')
+        self.stored.delete(playlist)
+        file= os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        self.assert_(not os.path.exists(file))
 
 
 if __name__ == '__main__':

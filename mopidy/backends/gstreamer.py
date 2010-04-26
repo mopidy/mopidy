@@ -118,8 +118,14 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         return playlist
 
     def delete(self, playlist):
-        if playlist in self._playlists:
-            self._playlists.remove(playlist)
+        if playlist not in self._playlists:
+            return
+
+        self._playlists.remove(playlist)
+        file = os.path.join(self._folder, playlist.name + '.m3u')
+
+        if os.path.exists(file):
+            os.remove(file)
 
     def rename(self, playlist, name):
         if playlist not in self._playlists:
