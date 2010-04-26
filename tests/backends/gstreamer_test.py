@@ -5,8 +5,7 @@ import urllib
 from mopidy.models import Playlist, Track
 from mopidy.backends.gstreamer import GStreamerBackend
 
-from tests.backends.base import (BasePlaybackControllerTest,
-                                 BaseCurrentPlaylistControllerTest)
+from tests.backends.base import *
 
 folder = os.path.dirname(__file__)
 folder = os.path.join(folder, '..', 'data')

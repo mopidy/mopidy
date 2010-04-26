@@ -10,9 +10,7 @@ import gst
 import logging
 import threading
 
-from mopidy.backends import (BaseBackend,
-                             BasePlaybackController,
-                             BaseCurrentPlaylistController)
+from mopidy.backends import * 
 
 logger = logging.getLogger(u'backends.gstreamer')
 
