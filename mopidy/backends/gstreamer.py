@@ -107,7 +107,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def create(self, name):
         playlist = Playlist(name=name)
-        self._playlists.append(playlist)
+        self.save(playlist)
         return playlist
 
     def delete(self, playlist):
