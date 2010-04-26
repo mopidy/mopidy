@@ -906,3 +906,16 @@ class BaseStoredPlaylistsControllerTest(object):
         playlist = self.stored.create('test')
         self.stored.delete(playlist)
         self.assert_(not self.stored.playlists)
+
+    def test_get_without_criteria(self):
+        test = lambda: self.stored.get()
+        self.assertRaises(LookupError, test)
+
+    def test_get_with_wrong_cirteria(self):
+        test = lambda: self.stored.get(name='foo')
+        self.assertRaises(LookupError, test)
+
+    def test_get_with_right_criteria(self):
+        playlist1 = self.stored.create('test')
+        playlist2 = self.stored.get(name='test')
+        self.assertEqual(playlist1, playlist2)
