@@ -108,3 +108,7 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         playlist = Playlist(name=name)
         self._playlists.append(playlist)
         return playlist
+
+    def delete(self, playlist):
+        if playlist in self._playlists:
+            self._playlists.remove(playlist)

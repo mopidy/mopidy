@@ -891,8 +891,15 @@ class BaseStoredPlaylistsControllerTest(object):
 
     def test_create_in_playlists(self):
         playlist = self.stored.create('test')
-        lists = filter(lambda p: p.name == 'test', self.stored.playlists)
-        self.assert_(lists)
+        self.assert_(self.stored.playlists)
 
     def test_playlists_empty_to_start_with(self):
+        self.assert_(not self.stored.playlists)
+
+    def test_delete_non_existant_playlist(self):
+        self.stored.delete(Playlist())
+
+    def test_delete_playlist(self):
+        playlist = self.stored.create('test')
+        self.stored.delete(playlist)
         self.assert_(not self.stored.playlists)
