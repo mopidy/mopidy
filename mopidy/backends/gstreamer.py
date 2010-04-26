@@ -107,3 +107,4 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def create(self, name):
         playlist = Playlist(name=name)
         self._playlists.append(playlist)
+        return playlist

@@ -886,6 +886,10 @@ class BaseStoredPlaylistsControllerTest(object):
         self.stored  = self.backend.stored_playlists
 
     def test_create(self):
-        self.stored.create('test')
-        playlists = filter(lambda p: p.name == 'test', self.stored.playlists)
-        self.assert_(playlists)
+        playlist = self.stored.create('test')
+        self.assertEqual(playlist.name, 'test')
+
+    def test_create_in_playlists(self):
+        playlist = self.stored.create('test')
+        lists = filter(lambda p: p.name == 'test', self.stored.playlists)
+        self.assert_(lists)
