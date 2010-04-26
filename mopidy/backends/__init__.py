@@ -9,6 +9,10 @@ from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.backends.base')
 
+__all__ = ['BaseBackend', 'BasePlaybackController',
+    'BaseCurrentPlaylistController', 'BaseStoredPlaylistsController',
+    'BaseLibraryController']
+
 class BaseBackend(object):
     def __init__(self, core_queue=None, mixer=None):
         self.core_queue = core_queue
