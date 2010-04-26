@@ -1,7 +1,11 @@
+import os
 import random
-import time
+import shutil
+import tempfile
 import threading
+import time
 
+from mopidy import settings
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 
@@ -882,11 +886,16 @@ class BaseStoredPlaylistsControllerTest(object):
     backend_class = None
 
     def setUp(self):
+        self.original_folder = settings.PLAYLIST_FOLDER
+        settings.PLAYLIST_FOLDER = tempfile.mkdtemp()
         self.backend = self.backend_class(mixer=DummyMixer())
         self.stored  = self.backend.stored_playlists
 
     def tearDown(self):
         self.backend.destroy()
+        if os.path.exists(settings.PLAYLIST_FOLDER):
+            shutil.rmtree(settings.PLAYLIST_FOLDER)
+        settings.PLAYLIST_FOLDER = self.original_folder
 
     def test_create(self):
         playlist = self.stored.create('test')
