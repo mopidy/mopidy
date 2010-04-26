@@ -130,4 +130,6 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         self._playlists[index] = renamed
 
     def save(self, playlist):
+        file = os.path.join(self._folder, playlist.name + '.m3u')
+        open(file, 'w').close()
         self._playlists.append(playlist)
