@@ -893,3 +893,6 @@ class BaseStoredPlaylistsControllerTest(object):
         playlist = self.stored.create('test')
         lists = filter(lambda p: p.name == 'test', self.stored.playlists)
         self.assert_(lists)
+
+    def test_playlists_empty_to_start_with(self):
+        self.assert_(not self.stored.playlists)
