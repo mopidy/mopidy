@@ -876,3 +876,16 @@ class BasePlaybackControllerTest(object):
     def test_playing_track_that_isnt_in_playlist(self):
         test = lambda: self.playback.play(self.tracks[0])
         self.assertRaises(AssertionError, test)
+
+
+class BaseStoredPlaylistsControllerTest(object):
+    backend_class = None
+
+    def setUp(self):
+        self.backend = self.backend_class(mixer=DummyMixer())
+        self.stored  = self.backend.stored_playlists
+
+    def test_create(self):
+        self.stored.create('test')
+        playlists = filter(lambda p: p.name == 'test', self.stored.playlists)
+        self.assert_(playlists)

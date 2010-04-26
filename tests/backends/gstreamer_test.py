@@ -19,6 +19,7 @@ class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, uni
 
     backend_class = GStreamerBackend
 
+
 class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestCase):
     tracks = [Track(uri=generate_song(i), id=i, length=4464) for i in range(1, 4)]
 
@@ -43,6 +44,12 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestC
         self.add_track('blank.flac')
         self.playback.play()
         self.assertEqual(self.playback.state, self.playback.PLAYING)
+
+
+class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
+        unittest.TestCase):
+
+    backend_class = GStreamerBackend
 
 if __name__ == '__main__':
     unittest.main()
