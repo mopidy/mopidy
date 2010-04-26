@@ -885,6 +885,9 @@ class BaseStoredPlaylistsControllerTest(object):
         self.backend = self.backend_class(mixer=DummyMixer())
         self.stored  = self.backend.stored_playlists
 
+    def tearDown(self):
+        self.backend.destroy()
+
     def test_create(self):
         playlist = self.stored.create('test')
         self.assertEqual(playlist.name, 'test')
