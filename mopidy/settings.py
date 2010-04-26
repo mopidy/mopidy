@@ -101,6 +101,9 @@ SPOTIFY_LIB_APPKEY = u'~/.mopidy/spotify_appkey.key'
 #: Path to the libspotify cache. Used by LibspotifyBackend.
 SPOTIFY_LIB_CACHE = u'~/.mopidy/libspotify_cache'
 
+#: Path to playlist folder with m3u files.
+PLAYLIST_FOLDER = u'~/.mopidy/playlists'
+
 # Import user specific settings
 dotdir = os.path.expanduser(u'~/.mopidy/')
 settings_file = os.path.join(dotdir, u'settings.py')
