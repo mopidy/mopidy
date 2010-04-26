@@ -9,6 +9,7 @@ pygst.require('0.10')
 import gst
 import logging
 import os
+import shutil
 import threading
 
 from mopidy.backends import * 
@@ -131,9 +132,14 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         if playlist not in self._playlists:
             return
 
+        src = os.path.join(self._folder, playlist.name + '.m3u')
+        dst = os.path.join(self._folder, name + '.m3u')
+
         renamed = playlist.with_(name=name)
         index = self._playlists.index(playlist)
         self._playlists[index] = renamed
+
+        shutil.move(src, dst)
 
     def save(self, playlist):
         file = os.path.join(self._folder, playlist.name + '.m3u')
