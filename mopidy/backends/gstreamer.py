@@ -109,6 +109,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def __init__(self, *args):
         super(GStreamerStoredPlaylistsController, self).__init__(*args)
+        # FIXME need test that ensures that folder is created
         self._folder = os.path.expanduser(settings.PLAYLIST_FOLDER)
 
     def create(self, name):
