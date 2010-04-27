@@ -72,6 +72,58 @@ class AlbumTest(unittest.TestCase):
         self.assertEqual(album.num_tracks, num_tracks)
         self.assertRaises(AttributeError, setattr, album, 'num_tracks', None)
 
+    def test_eq_name(self):
+        album1 = Album(name=u'name')
+        album2 = Album(name=u'name')
+        self.assertEqual(album1, album2) 
+
+    def test_eq_uri(self):
+        album1 = Album(uri=u'uri')
+        album2 = Album(uri=u'uri')
+        self.assertEqual(album1, album2) 
+
+    def test_eq_artists(self):
+        artists = [Artist()]
+        album1 = Album(artists=artists)
+        album2 = Album(artists=artists)
+        self.assertEqual(album1, album2) 
+
+    def test_eq_num_tracks(self):
+        album1 = Album(num_tracks=2)
+        album2 = Album(num_tracks=2)
+        self.assertEqual(album1, album2) 
+
+    def test_eq(self):
+        artists = [Artist()]
+        album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2)
+        album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2)
+        self.assertEqual(album1, album2) 
+
+    def test_ne_name(self):
+        album1 = Album(name=u'name1')
+        album2 = Album(name=u'name2')
+        self.assertNotEqual(album1, album2) 
+
+    def test_ne_uri(self):
+        album1 = Album(uri=u'uri1')
+        album2 = Album(uri=u'uri2')
+        self.assertNotEqual(album1, album2) 
+
+    def test_ne_artists(self):
+        album1 = Album(artists=[Artist(name=u'name1')])
+        album2 = Album(artists=[Artist(name=u'name2')])
+        self.assertNotEqual(album1, album2) 
+
+    def test_ne_num_tracks(self):
+        album1 = Album(num_tracks=1)
+        album2 = Album(num_tracks=2)
+        self.assertNotEqual(album1, album2) 
+
+    def test_ne(self):
+        album1 = Album(name=u'name1', uri=u'uri1', artists=[Artist(name=u'name1')], num_tracks=1)
+        album2 = Album(name=u'name2', uri=u'uri2', artists=[Artist(name=u'name2')], num_tracks=2)
+        self.assertNotEqual(album1, album2) 
+
 
 class TrackTest(unittest.TestCase):
     def test_uri(self):
