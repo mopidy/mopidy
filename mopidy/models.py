@@ -32,6 +32,12 @@ class Artist(ImmutableObject):
     #: The artist name. Read-only.
     name = None
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class Album(ImmutableObject):
     """

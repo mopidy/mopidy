@@ -16,6 +16,36 @@ class ArtistTest(unittest.TestCase):
         self.assertEqual(artist.name, name)
         self.assertRaises(AttributeError, setattr, artist, 'name', None)
 
+    def test_eq_name(self):
+        artist1 = Artist(name=u'name')
+        artist2 = Artist(name=u'name')
+        self.assertEqual(artist1, artist2) 
+
+    def test_eq_uri(self):
+        artist1 = Artist(uri=u'uri')
+        artist2 = Artist(uri=u'uri')
+        self.assertEqual(artist1, artist2) 
+
+    def test_eq(self):
+        artist1 = Artist(uri=u'uri', name=u'name')
+        artist2 = Artist(uri=u'uri', name=u'name')
+        self.assertEqual(artist1, artist2) 
+
+    def test_ne_name(self):
+        artist1 = Artist(name=u'name1')
+        artist2 = Artist(name=u'name2')
+        self.assertNotEqual(artist1, artist2) 
+
+    def test_ne_uri(self):
+        artist1 = Artist(uri=u'uri1')
+        artist2 = Artist(uri=u'uri2')
+        self.assertNotEqual(artist1, artist2) 
+
+    def test_ne(self):
+        artist1 = Artist(uri=u'uri1', name=u'name1')
+        artist2 = Artist(uri=u'uri2', name=u'name2')
+        self.assertNotEqual(artist1, artist2) 
+    
 
 class AlbumTest(unittest.TestCase):
     def test_uri(self):
