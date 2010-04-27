@@ -132,6 +132,7 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
             playlist = Playlist(tracks=tracks, name=name)
 
             # FIXME playlist name needs better handling
+            # FIXME tracks should come from lib. lookup
 
             playlists.append(playlist)
 
