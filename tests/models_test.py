@@ -219,6 +219,119 @@ class TrackTest(unittest.TestCase):
         track = Track(artists=[Artist(name=u'ABBA'), Artist(name=u'Beatles')])
         self.assertEqual(track.mpd_format_artists(), u'ABBA, Beatles')
 
+    def test_eq_uri(self):
+        track1 = Track(uri=u'uri1')
+        track2 = Track(uri=u'uri1')
+        self.assertEqual(track1, track2)
+
+    def test_eq_name(self):
+        track1 = Track(name=u'name1')
+        track2 = Track(name=u'name1')
+        self.assertEqual(track1, track2)
+
+    def test_eq_artists(self):
+        artists = [Artist()]
+        track1 = Track(artists=artists)
+        track2 = Track(artists=artists)
+        self.assertEqual(track1, track2)
+
+    def test_eq_album(self):
+        album = Album()
+        track1 = Track(album=album)
+        track2 = Track(album=album)
+        self.assertEqual(track1, track2)
+
+    def test_eq_track_no(self):
+        track1 = Track(track_no=1)
+        track2 = Track(track_no=1)
+        self.assertEqual(track1, track2)
+
+    def test_eq_date(self):
+        date = dt.date.today()
+        track1 = Track(date=date)
+        track2 = Track(date=date)
+        self.assertEqual(track1, track2)
+
+    def test_eq_length(self):
+        track1 = Track(length=100)
+        track2 = Track(length=100)
+        self.assertEqual(track1, track2)
+
+    def test_eq_bitrate(self):
+        track1 = Track(bitrate=100)
+        track2 = Track(bitrate=100)
+        self.assertEqual(track1, track2)
+
+    def test_eq_id(self):
+        track1 = Track(id=100)
+        track2 = Track(id=100)
+        self.assertEqual(track1, track2)
+
+    def test_eq(self):
+        date = dt.date.today()
+        artists = [Artist()]
+        album = Album() 
+        track1 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
+            track_no=1, date=date, length=100, bitrate=100, id=2)
+        track2 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
+            track_no=1, date=date, length=100, bitrate=100, id=2)
+        self.assertEqual(track1, track2)
+
+    def test_ne_uri(self):
+        track1 = Track(uri=u'uri1')
+        track2 = Track(uri=u'uri2')
+        self.assertNotEqual(track1, track2)
+
+    def test_ne_name(self):
+        track1 = Track(name=u'name1')
+        track2 = Track(name=u'name2')
+        self.assertNotEqual(track1, track2)
+
+    def test_ne_artists(self):
+        track1 = Track(artists=[Artist(name=u'name1')])
+        track2 = Track(artists=[Artist(name=u'name2')])
+        self.assertNotEqual(track1, track2)
+
+    def test_ne_album(self):
+        track1 = Track(album=Album(name=u'name1'))
+        track2 = Track(album=Album(name=u'name2'))
+        self.assertNotEqual(track1, track2)
+
+    def test_ne_track_no(self):
+        track1 = Track(track_no=1)
+        track2 = Track(track_no=2)
+        self.assertNotEqual(track1, track2)
+
+    def test_ne_date(self):
+        track1 = Track(date=dt.date.today())
+        track2 = Track(date=dt.date.today()-dt.timedelta(days=1))
+        self.assertNotEqual(track1, track2)
+
+    def test_ne_length(self):
+        track1 = Track(length=100)
+        track2 = Track(length=200)
+        self.assertNotEqual(track1, track2)
+
+    def test_ne_bitrate(self):
+        track1 = Track(bitrate=100)
+        track2 = Track(bitrate=200)
+        self.assertNotEqual(track1, track2)
+
+    def test_ne_id(self):
+        track1 = Track(id=100)
+        track2 = Track(id=200)
+        self.assertNotEqual(track1, track2)
+
+    def test_ne(self):
+        track1 = Track(uri=u'uri1', name=u'name1',
+            artists=[Artist(name=u'name1')], album=Album(name=u'name1'),
+            track_no=1, date=dt.date.today(), length=100, bitrate=100, id=2)
+        track2 = Track(uri=u'uri2', name=u'name2',
+            artists=[Artist(name=u'name2')], album=Album(name=u'name2'),
+            track_no=2, date=dt.date.today()-dt.timedelta(days=1),
+            length=200, bitrate=200, id=1)
+        self.assertNotEqual(track1, track2)
+
 
 class PlaylistTest(unittest.TestCase):
     def test_uri(self):
