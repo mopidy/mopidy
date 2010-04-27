@@ -17,9 +17,9 @@ def data(name):
 song1_path = data('song1.mp3')
 song2_path = data('song2.mp3')
 encoded_path = data(u'æøå.mp3')
-song1_uri = 'file:' + urllib.pathname2url(song1_path)
-song2_uri = 'file:' + urllib.pathname2url(song2_path)
-encoded_uri = 'file:' + urllib.pathname2url(encoded_path.encode('utf-8'))
+song1_uri = 'file://' + urllib.pathname2url(song1_path)
+song2_uri = 'file://' + urllib.pathname2url(song2_path)
+encoded_uri = 'file://' + urllib.pathname2url(encoded_path.encode('utf-8'))
 
 
 class M3UToUriTest(unittest.TestCase):
@@ -39,9 +39,8 @@ class M3UToUriTest(unittest.TestCase):
         with tempfile.NamedTemporaryFile() as file:
             file.write(song1_path)
             file.flush()
-
             uris = m3u_to_uris(file.name)
-            self.assertEqual([song1_uri], uris)
+        self.assertEqual([song1_uri], uris)
 
     def test_file_with_multiple_absolute_files(self):
         with tempfile.NamedTemporaryFile() as file:
@@ -49,17 +48,15 @@ class M3UToUriTest(unittest.TestCase):
             file.write('# comment \n')
             file.write(song2_path)
             file.flush()
-
             uris = m3u_to_uris(file.name)
-            self.assertEqual([song1_uri, song2_uri], uris)
+        self.assertEqual([song1_uri, song2_uri], uris)
 
     def test_file_with_uri(self):
         with tempfile.NamedTemporaryFile() as file:
             file.write(song1_uri)
             file.flush()
-
             uris = m3u_to_uris(file.name)
-            self.assertEqual([song1_uri], uris)
+        self.assertEqual([song1_uri], uris)
 
     def test_encoding_is_latin1(self):
         uris = m3u_to_uris(data('encoding.m3u'))

@@ -14,7 +14,7 @@ folder = os.path.dirname(__file__)
 folder = os.path.join(folder, '..', 'data')
 folder = os.path.abspath(folder)
 song = os.path.join(folder, 'song%s.wav')
-generate_song = lambda i: 'file:' + urllib.pathname2url(song % i)
+generate_song = lambda i: 'file://' + urllib.pathname2url(song % i)
 
 # FIXME can be switched to generic test
 class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
@@ -28,7 +28,7 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestC
     backend_class = GStreamerBackend
 
     def add_track(self, file):
-        uri = 'file:' + urllib.pathname2url(os.path.join(folder, file))
+        uri = 'file://' + urllib.pathname2url(os.path.join(folder, file))
         track = Track(uri=uri, id=1, length=4464)
         self.backend.current_playlist.add(track)
 
@@ -82,7 +82,7 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
 
     def test_playlist_contents_get_written_to_disk(self):
         track = Track(uri=generate_song(1))
-        uri = track.uri[len('file:'):]
+        uri = track.uri[len('file://'):]
         playlist = Playlist(tracks=[track], name='test')
         file_path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
 
@@ -95,7 +95,7 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
 
     def test_playlists_are_loaded_at_startup(self):
         track = Track(uri=generate_song(1))
-        uri = track.uri[len('file:'):]
+        uri = track.uri[len('file://'):]
         playlist = Playlist(tracks=[track], name='test')
         file_path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
 

@@ -170,8 +170,8 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
 
         with open(file_path, 'w') as file:
             for track in playlist.tracks:
-                if track.uri.startswith('file:'):
-                    file.write(track.uri[len('file:'):] + '\n')
+                if track.uri.startswith('file://'):
+                    file.write(track.uri[len('file://'):] + '\n')
                 else:
                     file.write(track.uri + '\n')
 
