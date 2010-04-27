@@ -64,7 +64,7 @@ class Album(ImmutableObject):
     num_tracks = 0
 
     def __init__(self, *args, **kwargs):
-        self._artists = kwargs.pop('artists', [])
+        self._artists = set(kwargs.pop('artists', []))
         super(Album, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
@@ -79,7 +79,7 @@ class Album(ImmutableObject):
     @property
     def artists(self):
         """List of :class:`Artist` elements. Read-only."""
-        return copy(self._artists)
+        return list(self._artists)
 
 
 class Track(ImmutableObject):
@@ -129,7 +129,7 @@ class Track(ImmutableObject):
     id = None
 
     def __init__(self, *args, **kwargs):
-        self._artists = kwargs.pop('artists', [])
+        self._artists = set(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
@@ -144,7 +144,7 @@ class Track(ImmutableObject):
     @property
     def artists(self):
         """List of :class:`Artist`. Read-only."""
-        return copy(self._artists)
+        return list(self._artists)
 
     def mpd_format(self, position=0, search_result=False):
         """
