@@ -178,7 +178,9 @@ class Track(ImmutableObject):
 
         :rtype: string
         """
-        return u', '.join([a.name for a in self.artists])
+        artists = list(self._artists)
+        artists.sort(key=lambda a: a.name)
+        return u', '.join([a.name for a in artists])
 
 
 class Playlist(ImmutableObject):
