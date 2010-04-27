@@ -5,7 +5,7 @@ import tempfile
 import unittest
 import urllib
 
-from mopidy.utils import m3u_to_uris
+from mopidy.utils import parse_m3u
 
 def data(name):
     folder = os.path.dirname(__file__)
@@ -24,22 +24,22 @@ encoded_uri = 'file://' + urllib.pathname2url(encoded_path.encode('utf-8'))
 
 class M3UToUriTest(unittest.TestCase):
     def test_empty_file(self):
-        uris = m3u_to_uris(data('empty.m3u'))
+        uris = parse_m3u(data('empty.m3u'))
         self.assertEqual([], uris)
 
     def test_basic_file(self):
-        uris = m3u_to_uris(data('one.m3u'))
+        uris = parse_m3u(data('one.m3u'))
         self.assertEqual([song1_uri], uris)
 
     def test_file_with_comment(self):
-        uris = m3u_to_uris(data('comment.m3u'))
+        uris = parse_m3u(data('comment.m3u'))
         self.assertEqual([song1_uri], uris)
 
     def test_file_with_absolute_files(self):
         with tempfile.NamedTemporaryFile() as file:
             file.write(song1_path)
             file.flush()
-            uris = m3u_to_uris(file.name)
+            uris = parse_m3u(file.name)
         self.assertEqual([song1_uri], uris)
 
     def test_file_with_multiple_absolute_files(self):
@@ -48,16 +48,16 @@ class M3UToUriTest(unittest.TestCase):
             file.write('# comment \n')
             file.write(song2_path)
             file.flush()
-            uris = m3u_to_uris(file.name)
+            uris = parse_m3u(file.name)
         self.assertEqual([song1_uri, song2_uri], uris)
 
     def test_file_with_uri(self):
         with tempfile.NamedTemporaryFile() as file:
             file.write(song1_uri)
             file.flush()
-            uris = m3u_to_uris(file.name)
+            uris = parse_m3u(file.name)
         self.assertEqual([song1_uri], uris)
 
     def test_encoding_is_latin1(self):
-        uris = m3u_to_uris(data('encoding.m3u'))
+        uris = parse_m3u(data('encoding.m3u'))
         self.assertEqual([encoded_uri], uris)

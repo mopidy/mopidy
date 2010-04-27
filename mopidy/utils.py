@@ -93,7 +93,7 @@ def spotify_uri_to_int(uri, output_bits=31):
         full_id >>= output_bits
     return int(compressed_id)
 
-def m3u_to_uris(file_path):
+def parse_m3u(file_path):
     """
     Convert M3U file list of uris
 

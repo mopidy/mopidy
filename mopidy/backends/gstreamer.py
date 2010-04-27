@@ -16,7 +16,7 @@ import threading
 from mopidy.backends import * 
 from mopidy.models import Playlist, Track
 from mopidy import settings
-from mopidy.utils import m3u_to_uris
+from mopidy.utils import parse_m3u
 
 logger = logging.getLogger(u'backends.gstreamer')
 
@@ -127,7 +127,7 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
 
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
             name = os.path.basename(m3u)[:len('.m3u')]
-            track_uris = m3u_to_uris(m3u)
+            track_uris = parse_m3u(m3u)
             tracks = map(lambda u: Track(uri=u), track_uris)
             playlist = Playlist(tracks=tracks, name=name)
 
