@@ -33,6 +33,9 @@ class Artist(ImmutableObject):
     name = None
 
     def __eq__(self, other):
+        if other is None:
+            return False
+
         return self.__dict__ == other.__dict__
 
     def __ne__(self, other):
@@ -65,6 +68,9 @@ class Album(ImmutableObject):
         super(Album, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
+        if other is None:
+            return False
+
         return self.__dict__ == other.__dict__
 
     def __ne__(self, other):
