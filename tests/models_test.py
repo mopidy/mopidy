@@ -91,6 +91,13 @@ class AlbumTest(unittest.TestCase):
         album2 = Album(artists=artists)
         self.assertEqual(album1, album2) 
 
+    def test_eq_artists_order(self):
+        artist1 = Artist(name=u'name1')
+        artist2 = Artist(name=u'name2')
+        album1 = Album(artists=[artist1, artist2])
+        album2 = Album(artists=[artist2, artist1])
+        self.assertEqual(album1, album2) 
+
     def test_eq_num_tracks(self):
         album1 = Album(num_tracks=2)
         album2 = Album(num_tracks=2)
@@ -239,6 +246,13 @@ class TrackTest(unittest.TestCase):
         artists = [Artist()]
         track1 = Track(artists=artists)
         track2 = Track(artists=artists)
+        self.assertEqual(track1, track2)
+
+    def test_eq_artists_order(self):
+        artist1 = Artist(name=u'name1')
+        artist2 = Artist(name=u'name2')
+        track1 = Track(artists=[artist1, artist2])
+        track2 = Track(artists=[artist2, artist1])
         self.assertEqual(track1, track2)
 
     def test_eq_album(self):
