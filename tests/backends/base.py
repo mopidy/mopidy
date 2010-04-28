@@ -973,3 +973,42 @@ class BaseLibraryControllerTest(object):
 
     def tearDown(self):
         self.backend.destroy()
+
+    def test_refresh(self):
+        raise SkipTest
+
+    def test_lookup(self):
+        raise SkipTest
+
+    def test_lookup_unknown_track(self):
+        raise SkipTest
+
+    def test_find_exact_no_hits(self):
+        raise SkipTest
+
+    def test_find_exact_artist(self):
+        raise SkipTest
+
+    def test_find_exact_track(self):
+        raise SkipTest
+
+    def test_find_exact_album(self):
+        raise SkipTest
+
+    def test_find_search_no_hits(self):
+        raise SkipTest
+
+    def test_find_search_artist(self):
+        raise SkipTest
+
+    def test_find_search_track(self):
+        raise SkipTest
+
+    def test_find_search_album(self):
+        raise SkipTest
+
+    def test_find_search_uri(self):
+        raise SkipTest
+
+    def test_find_search_any(self):
+        raise SkipTest
