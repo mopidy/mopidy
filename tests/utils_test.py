@@ -106,3 +106,10 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         self.assertEqual(set(expected_tracks), tracks)
         self.assertEqual(set(expected_artists), artists)
         self.assertEqual(set(expected_albums), albums)
+
+    def test_unicode_cache(self):
+        raise SkipTest
+
+    def test_misencoded_cache(self):
+        # FIXME not sure if this can happen
+        raise SkipTest
