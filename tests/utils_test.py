@@ -98,3 +98,11 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         self.assertEqual(expected_tracks[0], list(tracks)[0])
         self.assertEqual(set(expected_artists), artists)
         self.assertEqual(set(expected_albums), albums)
+
+    def test_advanced_cache(self):
+        tracks, artists, albums = parse_mpd_tag_cache(data('advanced_tag_cache'),
+             data(''))
+
+        self.assertEqual(set(expected_tracks), tracks)
+        self.assertEqual(set(expected_artists), artists)
+        self.assertEqual(set(expected_albums), albums)
