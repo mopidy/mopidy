@@ -63,6 +63,10 @@ class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 
 class LibspotifyLibraryController(BaseLibraryController):
+    def lookup(self, uri):
+        spotify_track = Link.from_string(uri).as_track()
+        return LibspotifyTranslator.to_mopidy_track(spotify_track)
+
     def search(self, type, what):
         if type is u'any':
             query = what
