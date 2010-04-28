@@ -20,16 +20,19 @@ class ArtistTest(unittest.TestCase):
         artist1 = Artist(name=u'name')
         artist2 = Artist(name=u'name')
         self.assertEqual(artist1, artist2) 
+        self.assertEqual(hash(artist1), hash(artist2)) 
 
     def test_eq_uri(self):
         artist1 = Artist(uri=u'uri')
         artist2 = Artist(uri=u'uri')
         self.assertEqual(artist1, artist2) 
+        self.assertEqual(hash(artist1), hash(artist2)) 
 
     def test_eq(self):
         artist1 = Artist(uri=u'uri', name=u'name')
         artist2 = Artist(uri=u'uri', name=u'name')
         self.assertEqual(artist1, artist2) 
+        self.assertEqual(hash(artist1), hash(artist2)) 
 
     def test_eq_none(self):
         self.assertNotEqual(Artist(), None)
@@ -38,17 +41,20 @@ class ArtistTest(unittest.TestCase):
         artist1 = Artist(name=u'name1')
         artist2 = Artist(name=u'name2')
         self.assertNotEqual(artist1, artist2) 
+        self.assertNotEqual(hash(artist1), hash(artist2)) 
 
     def test_ne_uri(self):
         artist1 = Artist(uri=u'uri1')
         artist2 = Artist(uri=u'uri2')
         self.assertNotEqual(artist1, artist2) 
+        self.assertNotEqual(hash(artist1), hash(artist2)) 
 
     def test_ne(self):
         artist1 = Artist(uri=u'uri1', name=u'name1')
         artist2 = Artist(uri=u'uri2', name=u'name2')
         self.assertNotEqual(artist1, artist2) 
-    
+        self.assertNotEqual(hash(artist1), hash(artist2)) 
+
 
 class AlbumTest(unittest.TestCase):
     def test_uri(self):
@@ -79,17 +85,20 @@ class AlbumTest(unittest.TestCase):
         album1 = Album(name=u'name')
         album2 = Album(name=u'name')
         self.assertEqual(album1, album2) 
+        self.assertEqual(hash(album1), hash(album2))
 
     def test_eq_uri(self):
         album1 = Album(uri=u'uri')
         album2 = Album(uri=u'uri')
         self.assertEqual(album1, album2) 
+        self.assertEqual(hash(album1), hash(album2))
 
     def test_eq_artists(self):
         artists = [Artist()]
         album1 = Album(artists=artists)
         album2 = Album(artists=artists)
         self.assertEqual(album1, album2) 
+        self.assertEqual(hash(album1), hash(album2))
 
     def test_eq_artists_order(self):
         artist1 = Artist(name=u'name1')
@@ -97,17 +106,20 @@ class AlbumTest(unittest.TestCase):
         album1 = Album(artists=[artist1, artist2])
         album2 = Album(artists=[artist2, artist1])
         self.assertEqual(album1, album2) 
+        self.assertEqual(hash(album1), hash(album2))
 
     def test_eq_num_tracks(self):
         album1 = Album(num_tracks=2)
         album2 = Album(num_tracks=2)
         self.assertEqual(album1, album2) 
+        self.assertEqual(hash(album1), hash(album2))
 
     def test_eq(self):
         artists = [Artist()]
         album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2)
         album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2)
         self.assertEqual(album1, album2) 
+        self.assertEqual(hash(album1), hash(album2))
 
     def test_eq_none(self):
         self.assertNotEqual(Album(), None)
@@ -116,26 +128,31 @@ class AlbumTest(unittest.TestCase):
         album1 = Album(name=u'name1')
         album2 = Album(name=u'name2')
         self.assertNotEqual(album1, album2) 
+        self.assertNotEqual(hash(album1), hash(album2))
 
     def test_ne_uri(self):
         album1 = Album(uri=u'uri1')
         album2 = Album(uri=u'uri2')
         self.assertNotEqual(album1, album2) 
+        self.assertNotEqual(hash(album1), hash(album2))
 
     def test_ne_artists(self):
         album1 = Album(artists=[Artist(name=u'name1')])
         album2 = Album(artists=[Artist(name=u'name2')])
         self.assertNotEqual(album1, album2) 
+        self.assertNotEqual(hash(album1), hash(album2))
 
     def test_ne_num_tracks(self):
         album1 = Album(num_tracks=1)
         album2 = Album(num_tracks=2)
         self.assertNotEqual(album1, album2) 
+        self.assertNotEqual(hash(album1), hash(album2))
 
     def test_ne(self):
         album1 = Album(name=u'name1', uri=u'uri1', artists=[Artist(name=u'name1')], num_tracks=1)
         album2 = Album(name=u'name2', uri=u'uri2', artists=[Artist(name=u'name2')], num_tracks=2)
         self.assertNotEqual(album1, album2) 
+        self.assertNotEqual(hash(album1), hash(album2))
 
 
 class TrackTest(unittest.TestCase):
@@ -236,17 +253,20 @@ class TrackTest(unittest.TestCase):
         track1 = Track(uri=u'uri1')
         track2 = Track(uri=u'uri1')
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_name(self):
         track1 = Track(name=u'name1')
         track2 = Track(name=u'name1')
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_artists(self):
         artists = [Artist()]
         track1 = Track(artists=artists)
         track2 = Track(artists=artists)
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_artists_order(self):
         artist1 = Artist(name=u'name1')
@@ -254,38 +274,45 @@ class TrackTest(unittest.TestCase):
         track1 = Track(artists=[artist1, artist2])
         track2 = Track(artists=[artist2, artist1])
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_album(self):
         album = Album()
         track1 = Track(album=album)
         track2 = Track(album=album)
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_track_no(self):
         track1 = Track(track_no=1)
         track2 = Track(track_no=1)
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_date(self):
         date = dt.date.today()
         track1 = Track(date=date)
         track2 = Track(date=date)
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_length(self):
         track1 = Track(length=100)
         track2 = Track(length=100)
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_bitrate(self):
         track1 = Track(bitrate=100)
         track2 = Track(bitrate=100)
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_id(self):
         track1 = Track(id=100)
         track2 = Track(id=100)
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq(self):
         date = dt.date.today()
@@ -296,6 +323,7 @@ class TrackTest(unittest.TestCase):
         track2 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
             track_no=1, date=date, length=100, bitrate=100, id=2)
         self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_none(self):
         self.assertNotEqual(Track(), None)
@@ -304,46 +332,55 @@ class TrackTest(unittest.TestCase):
         track1 = Track(uri=u'uri1')
         track2 = Track(uri=u'uri2')
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_name(self):
         track1 = Track(name=u'name1')
         track2 = Track(name=u'name2')
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_artists(self):
         track1 = Track(artists=[Artist(name=u'name1')])
         track2 = Track(artists=[Artist(name=u'name2')])
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_album(self):
         track1 = Track(album=Album(name=u'name1'))
         track2 = Track(album=Album(name=u'name2'))
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_track_no(self):
         track1 = Track(track_no=1)
         track2 = Track(track_no=2)
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_date(self):
         track1 = Track(date=dt.date.today())
         track2 = Track(date=dt.date.today()-dt.timedelta(days=1))
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_length(self):
         track1 = Track(length=100)
         track2 = Track(length=200)
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_bitrate(self):
         track1 = Track(bitrate=100)
         track2 = Track(bitrate=200)
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_id(self):
         track1 = Track(id=100)
         track2 = Track(id=200)
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne(self):
         track1 = Track(uri=u'uri1', name=u'name1',
@@ -354,6 +391,7 @@ class TrackTest(unittest.TestCase):
             track_no=2, date=dt.date.today()-dt.timedelta(days=1),
             length=200, bitrate=200, id=1)
         self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
 
 
 class PlaylistTest(unittest.TestCase):
