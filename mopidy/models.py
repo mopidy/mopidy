@@ -23,6 +23,15 @@ class ImmutableObject(object):
             sum += hash(key) + hash(value)
         return sum
 
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class Artist(ImmutableObject):
     """
@@ -37,15 +46,6 @@ class Artist(ImmutableObject):
 
     #: The artist name. Read-only.
     name = None
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-
-        return self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
 
 class Album(ImmutableObject):
@@ -72,15 +72,6 @@ class Album(ImmutableObject):
     def __init__(self, *args, **kwargs):
         self._artists = frozenset(kwargs.pop('artists', []))
         super(Album, self).__init__(*args, **kwargs)
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-
-        return self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     @property
     def artists(self):
@@ -137,15 +128,6 @@ class Track(ImmutableObject):
     def __init__(self, *args, **kwargs):
         self._artists = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-
-        return self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     @property
     def artists(self):
