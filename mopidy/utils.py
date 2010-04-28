@@ -124,6 +124,7 @@ def parse_m3u(file_path):
             if line.startswith('#'):
                 continue
 
+            # FIXME what about other URI types?
             if line.startswith('file://'):
                 uris.append(line)
             else:
