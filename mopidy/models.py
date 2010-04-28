@@ -33,7 +33,7 @@ class Artist(ImmutableObject):
     name = None
 
     def __eq__(self, other):
-        if other is None:
+        if not isinstance(other, self.__class__):
             return False
 
         return self.__dict__ == other.__dict__
@@ -68,7 +68,7 @@ class Album(ImmutableObject):
         super(Album, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
-        if other is None:
+        if not isinstance(other, self.__class__):
             return False
 
         return self.__dict__ == other.__dict__
@@ -133,7 +133,7 @@ class Track(ImmutableObject):
         super(Track, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
-        if other is None:
+        if not isinstance(other, self.__class__):
             return False
 
         return self.__dict__ == other.__dict__
