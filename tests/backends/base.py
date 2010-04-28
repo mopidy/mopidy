@@ -96,7 +96,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_load(self):
         new_playlist = Playlist()
-        self.assertNotEqual(new_playlist, self.controller.playlist)
+        self.assertNotEqual(id(new_playlist), id(self.controller.playlist))
         self.controller.load(new_playlist)
         # FIXME how do we test this without going into internals?
         self.assertEqual(new_playlist, self.controller._playlist)
@@ -175,7 +175,7 @@ class BaseCurrentPlaylistControllerTest(object):
         playlist1 = self.controller.playlist
         playlist2 = self.controller.playlist
 
-        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(id(playlist1), id(playlist2))
 
     @populate_playlist
     def test_remove(self):
