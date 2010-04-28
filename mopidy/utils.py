@@ -175,29 +175,17 @@ def _convert_mpd_data(data, tracks, artists, albums, music_dir):
     if not data:
         return
 
-    match = filter(lambda a: a.name == data['artist'], artists)
-    if match:
-        artist = match[0]
-    else:
-        artist = Artist(name=data['artist'])
-        print 'adding %s' % artist
-        artists.add(artist)
+    num_tracks = int(data['track'].split('/')[1])
+    track_no = int(data['track'].split('/')[0])
+    path = os.path.join(music_dir, data['file'][1:])
+    uri = 'file://' + urllib.pathname2url(path)
 
-    match = filter(lambda a: a.name == data['album'], albums)
-    if match:
-        album = match[0]
-    else:
-        num_tracks = int(data['track'].split('/')[1])
-        album = Album(name=data['album'], artists=[artist], num_tracks=num_tracks)
-        print 'adding %s' % album
-        albums.add(album)
+    artist = Artist(name=data['artist'])
+    artists.add(artist)
 
-    match = filter(lambda t: t.name == data['title'], tracks)
-    if not match:
-        path = os.path.join(music_dir, data['file'][1:])
-        uri = 'file://' + urllib.pathname2url(path)
-        track_no = int(data['track'].split('/')[0])
-        track = Track(name=data['title'], artists=[artist], track_no=track_no,
-            length=int(data['time'])*1000, uri=uri, album=album)
-        print 'adding %s' % track
-        tracks.add(track)
+    album = Album(name=data['album'], artists=[artist], num_tracks=num_tracks)
+    albums.add(album)
+
+    track = Track(name=data['title'], artists=[artist], track_no=track_no,
+        length=int(data['time'])*1000, uri=uri, album=album)
+    tracks.add(track)
