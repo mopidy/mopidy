@@ -37,6 +37,9 @@ class ArtistTest(unittest.TestCase):
     def test_eq_none(self):
         self.assertNotEqual(Artist(), None)
 
+    def test_eq_other(self):
+        self.assertNotEqual(Artist(), 'other')
+
     def test_ne_name(self):
         artist1 = Artist(name=u'name1')
         artist2 = Artist(name=u'name2')
@@ -123,6 +126,9 @@ class AlbumTest(unittest.TestCase):
 
     def test_eq_none(self):
         self.assertNotEqual(Album(), None)
+
+    def test_eq_other(self):
+        self.assertNotEqual(Album(), 'other')
 
     def test_ne_name(self):
         album1 = Album(name=u'name1')
@@ -327,6 +333,9 @@ class TrackTest(unittest.TestCase):
 
     def test_eq_none(self):
         self.assertNotEqual(Track(), None)
+
+    def test_eq_other(self):
+        self.assertNotEqual(Track(), 'other')
 
     def test_ne_uri(self):
         track1 = Track(uri=u'uri1')
