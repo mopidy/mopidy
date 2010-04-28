@@ -177,7 +177,12 @@ def _convert_mpd_data(data, tracks, artists, albums, music_dir):
 
     num_tracks = int(data['track'].split('/')[1])
     track_no = int(data['track'].split('/')[0])
-    path = os.path.join(music_dir, data['file'][1:])
+    path = data['file']
+
+    if path[0] == '/':
+        path = path[1:]
+
+    path = os.path.join(music_dir, path)
     uri = 'file://' + urllib.pathname2url(path)
 
     artist = Artist(name=data['artist'])
