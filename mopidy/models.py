@@ -17,6 +17,12 @@ class ImmutableObject(object):
             return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
 
+    def __hash__(self):
+        sum = 0
+        for key,value in self.__dict__.items():
+            sum += hash(key) + hash(value)
+        return sum
+
 
 class Artist(ImmutableObject):
     """
