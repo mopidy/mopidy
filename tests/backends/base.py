@@ -13,7 +13,8 @@ from tests import SkipTest
 
 __all__ = ['BaseCurrentPlaylistControllerTest',
            'BasePlaybackControllerTest',
-           'BaseStoredPlaylistsControllerTest']
+           'BaseStoredPlaylistsControllerTest',
+           'BaseLibraryControllerTest']
 
 def populate_playlist(func):
     def wrapper(self):
@@ -963,3 +964,12 @@ class BaseStoredPlaylistsControllerTest(object):
         playlist = Playlist(name='test')
         self.stored.save(playlist)
         self.assert_(playlist in self.stored.playlists)
+
+
+class BaseLibraryControllerTest(object):
+    def setUp(self):
+        self.backend = self.backend_class(mixer=DummyMixer())
+        self.controller = self.backend.library
+
+    def tearDown(self):
+        self.backend.destroy()

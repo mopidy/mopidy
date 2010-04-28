@@ -121,5 +121,12 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
     def test_save_sets_playlist_uri(self):
         raise SkipTest
 
+
+class GStreamerBackendLibraryControllerTest(BaseStoredPlaylistsControllerTest,
+        unittest.TestCase):
+
+    backend_class = GStreamerBackend
+
+
 if __name__ == '__main__':
     unittest.main()
