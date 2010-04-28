@@ -3,6 +3,8 @@ import unittest
 
 from mopidy.models import Artist, Album, Track, Playlist
 
+from tests import SkipTest
+
 class ArtistTest(unittest.TestCase):
     def test_uri(self):
         uri = u'an_uri'
@@ -506,3 +508,7 @@ class PlaylistTest(unittest.TestCase):
         self.assertEqual(new_playlist.name, u'a name')
         self.assertEqual(new_playlist.tracks, tracks)
         self.assertEqual(new_playlist.last_modified, new_last_modified)
+
+    def test_eq(self):
+        # FIXME missing all equal and hash tests
+        raise SkipTest
