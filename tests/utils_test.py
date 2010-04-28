@@ -85,22 +85,16 @@ generate_track('subdir1/subsubdir/song9.mp3')
 
 class MPDTagCacheToTracksTest(unittest.TestCase):
     def test_emtpy_cache(self):
-        tracks, artists, albums = parse_mpd_tag_cache(data('empty_tag_cache'), data(''))
+        tracks, artists, albums = parse_mpd_tag_cache(data('empty_tag_cache'),
+            data(''))
         self.assertEqual(set(), tracks)
         self.assertEqual(set(), artists)
         self.assertEqual(set(), albums)
 
     def test_simple_cache(self):
-        tracks, artists, albums = parse_mpd_tag_cache(data('simple_tag_cache'), data(''))
+        tracks, artists, albums = parse_mpd_tag_cache(data('simple_tag_cache'),
+            data(''))
 
-        track1 = expected_tracks[0]
-        track2 = list(tracks)[0]
-
-        self.assertEqual(track1.album._artists, track2.album._artists)
-        self.assertEqual(track1.album.name, track2.album.name)
-        self.assertEqual(track1.album.num_tracks, track2.album.num_tracks)
-        self.assertEqual(track1.artists, track2.artists)
-        self.assertEqual(track1, track2)
-
+        self.assertEqual(expected_tracks[0], list(tracks)[0])
         self.assertEqual(set(expected_artists), artists)
         self.assertEqual(set(expected_albums), albums)
