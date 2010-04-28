@@ -8,6 +8,8 @@ import urllib
 from mopidy.utils import parse_m3u, parse_mpd_tag_cache
 from mopidy.models import Track, Artist, Album
 
+from tests import SkipTest
+
 def data(name):
     folder = os.path.dirname(__file__)
     folder = os.path.join(folder, 'data')

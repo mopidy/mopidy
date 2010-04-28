@@ -104,6 +104,12 @@ SPOTIFY_LIB_CACHE = u'~/.mopidy/libspotify_cache'
 #: Path to playlist folder with m3u files.
 PLAYLIST_FOLDER = u'~/.mopidy/playlists'
 
+#: Path to folder with local music.
+MUSIC_FOLDER = u'~/music'
+
+#: Path to MPD tag_cache for local music
+TAG_CACHE = u'~/.mopidy/tag_cache'
+
 # Import user specific settings
 dotdir = os.path.expanduser(u'~/.mopidy/')
 settings_file = os.path.join(dotdir, u'settings.py')
