@@ -70,7 +70,7 @@ class Album(ImmutableObject):
     num_tracks = 0
 
     def __init__(self, *args, **kwargs):
-        self._artists = set(kwargs.pop('artists', []))
+        self._artists = frozenset(kwargs.pop('artists', []))
         super(Album, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
@@ -135,7 +135,7 @@ class Track(ImmutableObject):
     id = None
 
     def __init__(self, *args, **kwargs):
-        self._artists = set(kwargs.pop('artists', []))
+        self._artists = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
 
     def __eq__(self, other):
