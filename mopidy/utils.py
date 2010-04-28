@@ -6,6 +6,8 @@ import urllib
 
 logger = logging.getLogger('mopidy.utils')
 
+from mopidy.models import Track, Artist, Album
+
 def flatten(the_list):
     result = []
     for element in the_list:
@@ -133,3 +135,69 @@ def parse_m3u(file_path):
                 uris.append('file://' + path)
 
     return uris
+
+def parse_mpd_tag_cache(tag_cache, music_dir=''):
+    """
+    Converts a MPD tag_cache into a lists of tracks, artists and albums.
+    """
+    with open(tag_cache) as library:
+        contents = library.read()
+
+    tracks = set()
+    artists = set()
+    albums = set()
+    current = {}
+    state = None
+
+    for line in contents.split('\n'):
+        if line == 'songList begin':
+            state = 'songs'
+            continue
+        elif line == 'songList end':
+            state = None
+            continue
+        elif not state:
+            continue
+
+        key, value = line.split(': ', 1)
+
+        if key == 'key':
+            _convert_mpd_data(current, tracks, artists, albums, music_dir)
+            current.clear()
+
+        current[key.lower()] = value
+
+    _convert_mpd_data(current, tracks, artists, albums, music_dir)
+
+    return tracks, artists, albums
+
+def _convert_mpd_data(data, tracks, artists, albums, music_dir):
+    if not data:
+        return
+
+    match = filter(lambda a: a.name == data['artist'], artists)
+    if match:
+        artist = match[0]
+    else:
+        artist = Artist(name=data['artist'])
+        print 'adding %s' % artist
+        artists.add(artist)
+
+    match = filter(lambda a: a.name == data['album'], albums)
+    if match:
+        album = match[0]
+    else:
+        num_tracks = int(data['track'].split('/')[1])
+        album = Album(name=data['album'], artists=[artist], num_tracks=num_tracks)
+        print 'adding %s' % album
+        albums.add(album)
+
+    match = filter(lambda t: t.name == data['title'], tracks)
+    if not match:
+        path = os.path.join(music_dir, data['file'][1:])
+        uri = 'file://' + urllib.pathname2url(path)
+        track_no = int(data['track'].split('/')[0])
+        track = Track(name=data['title'], artists=[artist], track_no=track_no,
+            length=int(data['time'])*1000, uri=uri, album=album)
+        print 'adding %s' % track
+        tracks.add(track)

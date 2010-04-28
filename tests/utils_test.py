@@ -5,7 +5,8 @@ import tempfile
 import unittest
 import urllib
 
-from mopidy.utils import parse_m3u
+from mopidy.utils import parse_m3u, parse_mpd_tag_cache
+from mopidy.models import Track, Artist, Album
 
 def data(name):
     folder = os.path.dirname(__file__)
@@ -61,3 +62,45 @@ class M3UToUriTest(unittest.TestCase):
     def test_encoding_is_latin1(self):
         uris = parse_m3u(data('encoding.m3u'))
         self.assertEqual([encoded_uri], uris)
+
+expected_artists = [Artist(name='name')]
+expected_albums = [Album(name='albumname', artists=expected_artists, num_tracks=2)]
+expected_tracks = []
+
+def generate_track(path):
+    uri = 'file://' + urllib.pathname2url(data(path))
+    track = Track(name='trackname', artists=expected_artists, track_no=1,
+        album=expected_albums[0], length=4000, uri=uri)
+    expected_tracks.append(track)
+
+generate_track('song1.mp3')
+generate_track('song2.mp3')
+generate_track('song3.mp3')
+generate_track('subdir1/song4.mp3')
+generate_track('subdir1/song5.mp3')
+generate_track('subdir2/song6.mp3')
+generate_track('subdir2/song7.mp3')
+generate_track('subdir1/subsubdir/song8.mp3')
+generate_track('subdir1/subsubdir/song9.mp3')
+
+class MPDTagCacheToTracksTest(unittest.TestCase):
+    def test_emtpy_cache(self):
+        tracks, artists, albums = parse_mpd_tag_cache(data('empty_tag_cache'), data(''))
+        self.assertEqual(set(), tracks)
+        self.assertEqual(set(), artists)
+        self.assertEqual(set(), albums)
+
+    def test_simple_cache(self):
+        tracks, artists, albums = parse_mpd_tag_cache(data('simple_tag_cache'), data(''))
+
+        track1 = expected_tracks[0]
+        track2 = list(tracks)[0]
+
+        self.assertEqual(track1.album._artists, track2.album._artists)
+        self.assertEqual(track1.album.name, track2.album.name)
+        self.assertEqual(track1.album.num_tracks, track2.album.num_tracks)
+        self.assertEqual(track1.artists, track2.artists)
+        self.assertEqual(track1, track2)
+
+        self.assertEqual(set(expected_artists), artists)
+        self.assertEqual(set(expected_albums), albums)
