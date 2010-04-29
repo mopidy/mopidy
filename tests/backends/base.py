@@ -958,6 +958,8 @@ class BaseStoredPlaylistsControllerTest(object):
 
     def test_rename_unknown_playlist(self):
         self.stored.rename(Playlist(), 'test2')
+        test = lambda: self.stored.get(name='test2')
+        self.assertRaises(LookupError, test)
 
     def test_save(self):
         # FIXME should we handle playlists without names?
