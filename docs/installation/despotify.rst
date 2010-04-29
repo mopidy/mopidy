@@ -30,9 +30,9 @@ Installing despotify
 
     sudo port install libvorbis libtool ncursesw libao
 
-*All OS:* Check out revision 507 of the despotify source code::
+*All OS:* Check out revision 508 of the despotify source code::
 
-    svn checkout https://despotify.svn.sourceforge.net/svnroot/despotify@507
+    svn checkout https://despotify.svn.sourceforge.net/svnroot/despotify@508
 
 *OS X, MacPorts:* Copy ``despotify/src/Makefile.local.mk.dist`` to
 ``despotify/src/Makefile.local.mk`` and uncomment the last two lines of the new
