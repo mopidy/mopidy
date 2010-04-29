@@ -18,6 +18,10 @@ class ArtistTest(unittest.TestCase):
         self.assertEqual(artist.name, name)
         self.assertRaises(AttributeError, setattr, artist, 'name', None)
 
+    def test_invalid_kwarg(self):
+        test = lambda: Artist(foo='baz')
+        self.assertRaises(TypeError, test)
+
     def test_eq_name(self):
         artist1 = Artist(name=u'name')
         artist2 = Artist(name=u'name')
@@ -85,6 +89,10 @@ class AlbumTest(unittest.TestCase):
         album = Album(num_tracks=11)
         self.assertEqual(album.num_tracks, num_tracks)
         self.assertRaises(AttributeError, setattr, album, 'num_tracks', None)
+
+    def test_invalid_kwarg(self):
+        test = lambda: Album(foo='baz')
+        self.assertRaises(TypeError, test)
 
     def test_eq_name(self):
         album1 = Album(name=u'name')
@@ -256,6 +264,10 @@ class TrackTest(unittest.TestCase):
     def test_mpd_format_artists(self):
         track = Track(artists=[Artist(name=u'ABBA'), Artist(name=u'Beatles')])
         self.assertEqual(track.mpd_format_artists(), u'ABBA, Beatles')
+
+    def test_invalid_kwarg(self):
+        test = lambda: Track(foo='baz')
+        self.assertRaises(TypeError, test)
 
     def test_eq_uri(self):
         track1 = Track(uri=u'uri1')
@@ -508,6 +520,10 @@ class PlaylistTest(unittest.TestCase):
         self.assertEqual(new_playlist.name, u'a name')
         self.assertEqual(new_playlist.tracks, tracks)
         self.assertEqual(new_playlist.last_modified, new_last_modified)
+
+    def test_invalid_kwarg(self):
+        test = lambda: Playlist(foo='baz')
+        self.assertRaises(TypeError, test)
 
     def test_eq(self):
         # FIXME missing all equal and hash tests

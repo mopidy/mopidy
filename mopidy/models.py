@@ -10,7 +10,11 @@ class ImmutableObject(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self.__dict__.update(kwargs)
+        for key, value in kwargs.items():
+            if not hasattr(self, key):
+                raise TypeError('__init__() got an unexpected keyword ' + \
+                    'argument \'%s\'' % key)
+            self.__dict__[key] = value
 
     def __setattr__(self, name, value):
         if name.startswith('_'):
