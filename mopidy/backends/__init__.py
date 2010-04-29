@@ -176,7 +176,8 @@ class BaseCurrentPlaylistController(object):
         assert start >= 0, 'start must be at least zero'
         assert end <= len(tracks), 'end can not be larger than playlist length'
         assert to_position >= 0, 'to_position must be at least zero'
-        assert to_position <= len(tracks), 'to_position can not be larger than playlist length'
+        assert to_position <= len(tracks), 'to_position can not be larger ' + \
+            'than playlist length'
 
         new_tracks = tracks[:start] + tracks[end:]
         for track in tracks[start:end]:
@@ -218,7 +219,8 @@ class BaseCurrentPlaylistController(object):
             assert start >= 0, 'start must be at least zero'
 
         if end is not None:
-            assert end <= len(tracks), 'end can not be larger than playlist length'
+            assert end <= len(tracks), 'end can not be larger than ' + \
+                'playlist length'
 
         before = tracks[:start or 0]
         shuffled = tracks[start:end]

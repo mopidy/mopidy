@@ -17,7 +17,7 @@ class OsaMixer(BaseMixer):
             and (int(time.time() - self._last_update) < self.CACHE_TTL))
 
     def _get_volume(self):
-	if not self._valid_cache():
+        if not self._valid_cache():
             try:
                 self._cache = int(Popen(
                     ['osascript', '-e',

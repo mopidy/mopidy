@@ -18,10 +18,10 @@ class ImmutableObject(object):
         raise AttributeError('Object is immutable.')
 
     def __hash__(self):
-        sum = 0
-        for key,value in self.__dict__.items():
-            sum += hash(key) + hash(value)
-        return sum
+        hash_sum = 0
+        for key, value in self.__dict__.items():
+            hash_sum += hash(key) + hash(value)
+        return hash_sum
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):

@@ -130,8 +130,8 @@ def parse_m3u(file_path):
             if line.startswith('file://'):
                 uris.append(line)
             else:
-                file = os.path.join(folder, line)
-                path = urllib.pathname2url(file.encode('utf-8'))
+                path = os.path.join(folder, line)
+                path = urllib.pathname2url(path.encode('utf-8'))
                 uris.append('file://' + path)
 
     return uris

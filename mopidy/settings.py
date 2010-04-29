@@ -26,7 +26,8 @@ BACKENDS = (
 #: The log format used on the console. See
 #: http://docs.python.org/library/logging.html#formatter-objects for details on
 #: the format.
-CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
+CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
+    ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
 #: Protocol frontend to use. Default::
 #:
