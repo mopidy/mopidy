@@ -36,7 +36,7 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
-        assert len(self.tracks) >= 3, 'Need at least three tracks to run tests.'
+        assert len(self.tracks) == 3, 'Need three tracks to run tests.'
 
     def tearDown(self):
         self.backend.destroy()
@@ -977,15 +977,19 @@ class BaseStoredPlaylistsControllerTest(object):
 
 
 class BaseLibraryControllerTest(object):
+    tracks = []
+
     def setUp(self):
         self.backend = self.backend_class(mixer=DummyMixer())
-        self.controller = self.backend.library
+        self.library = self.backend.library
+
+        assert len(self.tracks) == 3, 'Need three tracks to run tests.'
 
     def tearDown(self):
         self.backend.destroy()
 
     def test_refresh(self):
-        raise SkipTest
+        self.library.refresh()
 
     def test_refresh_uri(self):
         raise SkipTest

@@ -125,11 +125,20 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
         raise SkipTest
 
 
-class GStreamerBackendLibraryControllerTest(BaseStoredPlaylistsControllerTest,
+class GStreamerBackendLibraryControllerTest(BaseLibraryControllerTest,
         unittest.TestCase):
 
     backend_class = GStreamerBackend
+    tracks = [Track(), Track(), Track()]
 
+    def setUp(self):
+        self.original_tag_cache = settings.TAG_CACHE
+        settings.TAG_CACHE = ''
+        super(GStreamerBackendLibraryControllerTest, self).setUp()
+
+    def tearDown(self):
+        settings.TAG_CACHE = self.original_tag_cache
+        super(GStreamerBackendLibraryControllerTest, self).tearDown()
 
 if __name__ == '__main__':
     unittest.main()
