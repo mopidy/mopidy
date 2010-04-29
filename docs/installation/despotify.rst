@@ -16,7 +16,7 @@ Installing despotify
 *Linux:* Install despotify's dependencies. At Debian/Ubuntu systems::
 
     sudo aptitude install libssl-dev zlib1g-dev libvorbis-dev \
-        libtool libncursesw5-dev libao-dev
+        libtool libncursesw5-dev libao-dev python-dev
 
 *OS X:* In OS X you need to have `XCode
 <http://developer.apple.com/tools/xcode/>`_ installed, and either `MacPorts
@@ -46,7 +46,6 @@ file so that it reads::
 *All OS:* Build and install despotify::
 
     cd despotify/src/
-    make
     sudo make install
 
 
@@ -59,7 +58,6 @@ Build and install spytify::
 
     cd despotify/src/bindings/python/
     export PKG_CONFIG_PATH=../../lib       # Needed on OS X
-    make
     sudo make install
 
 
