@@ -37,7 +37,7 @@ class DenonMixer(BaseMixer):
         self._lock = Lock()
 
     def _get_volume(self):
-        self._lock.acquire();
+        self._lock.acquire()
         self.ensure_open_device()
         self._device.write('MV?\r')
         vol = str(self._device.readline()[2:4])

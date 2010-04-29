@@ -643,7 +643,7 @@ class MpdFrontend(object):
         - capitalizes the type argument.
         """
         type = type.lower()
-        pass # TODO
+        # TODO
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
     def _music_db_listall(self, uri):

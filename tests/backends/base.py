@@ -13,7 +13,8 @@ from tests import SkipTest
 
 __all__ = ['BaseCurrentPlaylistControllerTest',
            'BasePlaybackControllerTest',
-           'BaseStoredPlaylistsControllerTest']
+           'BaseStoredPlaylistsControllerTest',
+           'BaseLibraryControllerTest']
 
 def populate_playlist(func):
     def wrapper(self):
@@ -96,7 +97,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_load(self):
         new_playlist = Playlist()
-        self.assertNotEqual(new_playlist, self.controller.playlist)
+        self.assertNotEqual(id(new_playlist), id(self.controller.playlist))
         self.controller.load(new_playlist)
         # FIXME how do we test this without going into internals?
         self.assertEqual(new_playlist, self.controller._playlist)
@@ -175,7 +176,7 @@ class BaseCurrentPlaylistControllerTest(object):
         playlist1 = self.controller.playlist
         playlist2 = self.controller.playlist
 
-        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(id(playlist1), id(playlist2))
 
     @populate_playlist
     def test_remove(self):
@@ -965,9 +966,59 @@ class BaseStoredPlaylistsControllerTest(object):
 
     def test_rename_unknown_playlist(self):
         self.stored.rename(Playlist(), 'test2')
+        test = lambda: self.stored.get(name='test2')
+        self.assertRaises(LookupError, test)
 
     def test_save(self):
         # FIXME should we handle playlists without names?
         playlist = Playlist(name='test')
         self.stored.save(playlist)
         self.assert_(playlist in self.stored.playlists)
+
+
+class BaseLibraryControllerTest(object):
+    def setUp(self):
+        self.backend = self.backend_class(mixer=DummyMixer())
+        self.controller = self.backend.library
+
+    def tearDown(self):
+        self.backend.destroy()
+
+    def test_refresh(self):
+        raise SkipTest
+
+    def test_lookup(self):
+        raise SkipTest
+
+    def test_lookup_unknown_track(self):
+        raise SkipTest
+
+    def test_find_exact_no_hits(self):
+        raise SkipTest
+
+    def test_find_exact_artist(self):
+        raise SkipTest
+
+    def test_find_exact_track(self):
+        raise SkipTest
+
+    def test_find_exact_album(self):
+        raise SkipTest
+
+    def test_find_search_no_hits(self):
+        raise SkipTest
+
+    def test_find_search_artist(self):
+        raise SkipTest
+
+    def test_find_search_track(self):
+        raise SkipTest
+
+    def test_find_search_album(self):
+        raise SkipTest
+
+    def test_find_search_uri(self):
+        raise SkipTest
+
+    def test_find_search_any(self):
+        raise SkipTest

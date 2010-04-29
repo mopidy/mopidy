@@ -16,7 +16,7 @@ import threading
 from mopidy.backends import * 
 from mopidy.models import Playlist, Track
 from mopidy import settings
-from mopidy.utils import m3u_to_uris
+from mopidy.utils import parse_m3u
 
 logger = logging.getLogger(u'backends.gstreamer')
 
@@ -41,7 +41,7 @@ class GStreamerBackend(BaseBackend):
         self.playback = GStreamerPlaybackController(self)
         self.stored_playlists = GStreamerStoredPlaylistsController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
-        self.uri_handlers = [u'file:']
+        self.uri_handlers = [u'file://']
 
 
 class GStreamerPlaybackController(BasePlaybackController):
@@ -127,11 +127,12 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
 
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
             name = os.path.basename(m3u)[:len('.m3u')]
-            track_uris = m3u_to_uris(m3u)
+            track_uris = parse_m3u(m3u)
             tracks = map(lambda u: Track(uri=u), track_uris)
             playlist = Playlist(tracks=tracks, name=name)
 
             # FIXME playlist name needs better handling
+            # FIXME tracks should come from lib. lookup
 
             playlists.append(playlist)
 
@@ -170,8 +171,8 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
 
         with open(file_path, 'w') as file:
             for track in playlist.tracks:
-                if track.uri.startswith('file:'):
-                    file.write(track.uri[len('file:'):] + '\n')
+                if track.uri.startswith('file://'):
+                    file.write(track.uri[len('file://'):] + '\n')
                 else:
                     file.write(track.uri + '\n')
 

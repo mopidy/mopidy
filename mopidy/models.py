@@ -10,12 +10,31 @@ class ImmutableObject(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self.__dict__.update(kwargs)
+        for key, value in kwargs.items():
+            if not hasattr(self, key):
+                raise TypeError('__init__() got an unexpected keyword ' + \
+                    'argument \'%s\'' % key)
+            self.__dict__[key] = value
 
     def __setattr__(self, name, value):
         if name.startswith('_'):
             return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
+
+    def __hash__(self):
+        hash_sum = 0
+        for key, value in self.__dict__.items():
+            hash_sum += hash(key) + hash(value)
+        return hash_sum
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class Artist(ImmutableObject):
@@ -55,13 +74,13 @@ class Album(ImmutableObject):
     num_tracks = 0
 
     def __init__(self, *args, **kwargs):
-        self._artists = kwargs.pop('artists', [])
+        self._artists = frozenset(kwargs.pop('artists', []))
         super(Album, self).__init__(*args, **kwargs)
 
     @property
     def artists(self):
         """List of :class:`Artist` elements. Read-only."""
-        return copy(self._artists)
+        return list(self._artists)
 
 
 class Track(ImmutableObject):
@@ -111,13 +130,13 @@ class Track(ImmutableObject):
     id = None
 
     def __init__(self, *args, **kwargs):
-        self._artists = kwargs.pop('artists', [])
+        self._artists = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
 
     @property
     def artists(self):
         """List of :class:`Artist`. Read-only."""
-        return copy(self._artists)
+        return list(self._artists)
 
     def mpd_format(self, position=0, search_result=False):
         """
@@ -151,7 +170,9 @@ class Track(ImmutableObject):
 
         :rtype: string
         """
-        return u', '.join([a.name for a in self.artists])
+        artists = list(self._artists)
+        artists.sort(key=lambda a: a.name)
+        return u', '.join([a.name for a in artists])
 
 
 class Playlist(ImmutableObject):

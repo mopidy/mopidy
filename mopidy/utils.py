@@ -6,6 +6,8 @@ import urllib
 
 logger = logging.getLogger('mopidy.utils')
 
+from mopidy.models import Track, Artist, Album
+
 def flatten(the_list):
     result = []
     for element in the_list:
@@ -93,7 +95,7 @@ def spotify_uri_to_int(uri, output_bits=31):
         full_id >>= output_bits
     return int(compressed_id)
 
-def m3u_to_uris(file_path):
+def parse_m3u(file_path):
     """
     Convert M3U file list of uris
 
@@ -124,11 +126,71 @@ def m3u_to_uris(file_path):
             if line.startswith('#'):
                 continue
 
-            if line.startswith('file:'):
+            # FIXME what about other URI types?
+            if line.startswith('file://'):
                 uris.append(line)
             else:
-                file = os.path.join(folder, line)
-                path = urllib.pathname2url(file.encode('utf-8'))
-                uris.append('file:' + path)
+                path = os.path.join(folder, line)
+                path = urllib.pathname2url(path.encode('utf-8'))
+                uris.append('file://' + path)
 
     return uris
+
+def parse_mpd_tag_cache(tag_cache, music_dir=''):
+    """
+    Converts a MPD tag_cache into a lists of tracks, artists and albums.
+    """
+    with open(tag_cache) as library:
+        contents = library.read()
+
+    tracks = set()
+    artists = set()
+    albums = set()
+    current = {}
+    state = None
+
+    for line in contents.split('\n'):
+        if line == 'songList begin':
+            state = 'songs'
+            continue
+        elif line == 'songList end':
+            state = None
+            continue
+        elif not state:
+            continue
+
+        key, value = line.split(': ', 1)
+
+        if key == 'key':
+            _convert_mpd_data(current, tracks, artists, albums, music_dir)
+            current.clear()
+
+        current[key.lower()] = value
+
+    _convert_mpd_data(current, tracks, artists, albums, music_dir)
+
+    return tracks, artists, albums
+
+def _convert_mpd_data(data, tracks, artists, albums, music_dir):
+    if not data:
+        return
+
+    num_tracks = int(data['track'].split('/')[1])
+    track_no = int(data['track'].split('/')[0])
+    path = data['file']
+
+    if path[0] == '/':
+        path = path[1:]
+
+    path = os.path.join(music_dir, path)
+    uri = 'file://' + urllib.pathname2url(path)
+
+    artist = Artist(name=data['artist'])
+    artists.add(artist)
+
+    album = Album(name=data['album'], artists=[artist], num_tracks=num_tracks)
+    albums.add(album)
+
+    track = Track(name=data['title'], artists=[artist], track_no=track_no,
+        length=int(data['time'])*1000, uri=uri, album=album)
+    tracks.add(track)
