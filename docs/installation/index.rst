@@ -18,6 +18,7 @@ Dependencies
 
     despotify
     libspotify
+    gstreamer
 
 - Python >= 2.6
 - Dependencies for at least one Mopidy mixer:
@@ -36,9 +37,13 @@ Dependencies
 
     - see :doc:`despotify`
 
-  - LibspotifyBackend (Linux only)
+  - LibspotifyBackend (Linux, OS X and Windows)
 
     - see :doc:`libspotify`
+
+  - GstreamerBackend (Linux, OS X and Windows)
+
+    - see :doc:`gstreamer`
 
 
 Install latest release
