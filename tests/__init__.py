@@ -1,3 +1,5 @@
+import os
+
 try: # 2.7
     from unittest.case import SkipTest
 except ImportError:
@@ -6,3 +8,10 @@ except ImportError:
     except ImportError: # Failsafe
         class SkipTest(Exception):
             pass
+
+def data_folder(name):
+    folder = os.path.dirname(__file__)
+    folder = os.path.join(folder, 'data')
+    folder = os.path.abspath(folder)
+    return os.path.join(folder, name)
+
