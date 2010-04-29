@@ -57,14 +57,16 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
     backend_class = GStreamerBackend
 
     def test_created_playlist_is_persisted(self):
+        path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        self.assert_(not os.path.exists(path))
         self.stored.create('test')
-        file = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
-        self.assert_(os.path.exists(file))
+        self.assert_(os.path.exists(path))
 
     def test_saved_playlist_is_persisted(self):
+        path = os.path.join(settings.PLAYLIST_FOLDER, 'test2.m3u')
+        self.assert_(not os.path.exists(path))
         self.stored.save(Playlist(name='test2'))
-        file = os.path.join(settings.PLAYLIST_FOLDER, 'test2.m3u')
-        self.assert_(os.path.exists(file))
+        self.assert_(os.path.exists(path))
 
     def test_deleted_playlist_get_removed(self):
         playlist = self.stored.create('test')
@@ -74,9 +76,10 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
 
     def test_renamed_playlist_gets_moved(self):
         playlist = self.stored.create('test')
-        self.stored.rename(playlist, 'test2')
         file1 = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
         file2 = os.path.join(settings.PLAYLIST_FOLDER, 'test2.m3u')
+        self.assert_(not os.path.exists(file2))
+        self.stored.rename(playlist, 'test2')
         self.assert_(not os.path.exists(file1))
         self.assert_(os.path.exists(file2))
 
