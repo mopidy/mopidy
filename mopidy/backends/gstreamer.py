@@ -41,6 +41,7 @@ class GStreamerBackend(BaseBackend):
         self.playback = GStreamerPlaybackController(self)
         self.stored_playlists = GStreamerStoredPlaylistsController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
+        self.library = GStreamerLibraryController(self)
         self.uri_handlers = [u'file://']
 
 
@@ -177,3 +178,8 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
                     file.write(track.uri + '\n')
 
         self._playlists.append(playlist)
+
+
+class GStreamerLibraryController(BaseLibraryController):
+    def refresh(self, uri=None):
+        pass
