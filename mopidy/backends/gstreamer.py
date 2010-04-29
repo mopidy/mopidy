@@ -170,6 +170,7 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def save(self, playlist):
         file_path = os.path.join(self._folder, playlist.name + '.m3u')
 
+        # FIXME this should be a save_m3u function, not inside save
         with open(file_path, 'w') as file:
             for track in playlist.tracks:
                 if track.uri.startswith('file://'):
