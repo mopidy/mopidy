@@ -4,7 +4,7 @@ import os
 import multiprocessing
 import threading
 
-from spotify import Link
+from spotify import Link, SpotifyError
 from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
 
@@ -63,6 +63,10 @@ class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 
 class LibspotifyLibraryController(BaseLibraryController):
+    def lookup(self, uri):
+        spotify_track = Link.from_string(uri).as_track()
+        return LibspotifyTranslator.to_mopidy_track(spotify_track)
+
     def search(self, type, what):
         if type is u'any':
             query = what
@@ -90,10 +94,14 @@ class LibspotifyPlaybackController(BasePlaybackController):
             self.stop()
         if track.uri is None:
             return False
-        self.backend.spotify.session.load(
-            Link.from_string(track.uri).as_track())
-        self.backend.spotify.session.play(1)
-        return True
+        try:
+            self.backend.spotify.session.load(
+                Link.from_string(track.uri).as_track())
+            self.backend.spotify.session.play(1)
+            return True
+        except SpotifyError as e:
+            logger.warning('Play %s failed: %s', track.uri, e)
+            return False
 
     def _resume(self):
         # TODO

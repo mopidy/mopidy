@@ -549,6 +549,10 @@ class BasePlaybackController(object):
             self.current_track = track
             self.state = self.PLAYING
 
+        # TODO Do something sensible when _play() returns False, like calling
+        # next(). Adding this todo instead of just implementing it as I want a
+        # test case first.
+
         if self.random and self.current_track in self._shuffled:
             self._shuffled.remove(self.current_track)
 

@@ -781,6 +781,14 @@ class BasePlaybackControllerTest(object):
         self.assert_(self.tracks[0] not in tracks)
 
     @populate_playlist
+    def test_playlist_is_empty_after_all_tracks_are_played_with_consume(self):
+        self.playback.consume = True
+        self.playback.play()
+        for i in range(len(self.backend.current_playlist.playlist.tracks)):
+            self.playback.next()
+        self.assertEqual(len(self.backend.current_playlist.playlist.tracks), 0)
+
+    @populate_playlist
     def test_play_with_random(self):
         random.seed(1)
         self.playback.random = True
