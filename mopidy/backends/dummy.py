@@ -36,7 +36,7 @@ class DummyLibraryController(BaseLibraryController):
     find_exact = search
 
 class DummyPlaybackController(BasePlaybackController):
-    def _next(self):
+    def _next(self, track):
         return True
 
     def _pause(self):
@@ -45,7 +45,7 @@ class DummyPlaybackController(BasePlaybackController):
     def _play(self, track):
         return True
 
-    def _previous(self):
+    def _previous(self, track):
         return True
 
     def _resume(self):

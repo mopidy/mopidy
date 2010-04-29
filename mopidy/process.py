@@ -26,6 +26,8 @@ class CoreProcess(BaseProcess):
     def __init__(self, core_queue):
         super(CoreProcess, self).__init__()
         self.core_queue = core_queue
+        self._backend = None
+        self._frontend = None
 
     def _run(self):
         self._setup()

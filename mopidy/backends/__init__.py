@@ -104,7 +104,7 @@ class BaseCurrentPlaylistController(object):
         tracks = self.playlist.tracks
 
         assert at_position <= len(tracks), 'at_position can not be greater' \
-            + ' than  playlist length'
+            + ' than playlist length'
 
         if at_position is not None:
             tracks.insert(at_position, track)
@@ -337,6 +337,8 @@ class BasePlaybackController(object):
         self._state = self.STOPPED
         self._shuffled = []
         self._first_shuffle = True
+        self._play_time_accumulated = 0
+        self._play_time_started = None
 
     @property
     def next_track(self):

@@ -53,6 +53,7 @@ class MpdFrontend(object):
     def __init__(self, backend=None):
         self.backend = backend
         self.command_list = False
+        self.command_list_ok = False
 
     def handle_request(self, request, add_ok=True):
         if self.command_list is not False and request != u'command_list_end':
@@ -286,7 +287,7 @@ class MpdFrontend(object):
             songpos = int(songpos)
             track = self.backend.current_playlist.playlist.tracks[songpos]
             self.backend.current_playlist.remove(track)
-        except IndexError as e:
+        except IndexError:
             raise MpdAckError(u'Position out of bounds')
 
     @handle_pattern(r'^deleteid "(?P<songid>\d+)"$')
