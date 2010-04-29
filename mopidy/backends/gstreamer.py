@@ -13,7 +13,7 @@ import glob
 import shutil
 import threading
 
-from mopidy.backends import * 
+from mopidy.backends import *
 from mopidy.models import Playlist, Track
 from mopidy import settings
 from mopidy.utils import parse_m3u
