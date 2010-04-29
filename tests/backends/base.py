@@ -987,6 +987,12 @@ class BaseLibraryControllerTest(object):
     def test_refresh(self):
         raise SkipTest
 
+    def test_refresh_uri(self):
+        raise SkipTest
+
+    def test_refresh_missing_uri(self):
+        raise SkipTest
+
     def test_lookup(self):
         raise SkipTest
 
