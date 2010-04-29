@@ -14,8 +14,8 @@ class BaseProcess(multiprocessing.Process):
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
             sys.exit(0)
-        except SettingsError, e:
-            logger.error(e)
+        except SettingsError as e:
+            logger.error(e.message)
             sys.exit(1)
 
     def _run(self):
