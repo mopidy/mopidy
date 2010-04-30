@@ -211,7 +211,7 @@ class GStreamerLibraryController(BaseLibraryController):
         elif type == 'artist':
             filter_func = lambda t: filter(lambda a: a.name == query, t.artists)
         else:
-            raise LookupError('Invalid lookup type')
+            raise LookupError('Invalid lookup type: %s' % type)
 
         tracks = filter(filter_func, self._uri_mapping.values())
         return Playlist(tracks=tracks)
