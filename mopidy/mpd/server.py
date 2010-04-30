@@ -67,15 +67,15 @@ class MpdSession(asynchat.async_chat):
     def found_terminator(self):
         data = ''.join(self.input_buffer).strip()
         self.input_buffer = []
-        input = data.decode(ENCODING)
-        logger.debug(u'Input: %s', indent(input))
-        self.handle_request(input)
+        request = data.decode(ENCODING)
+        logger.debug(u'Input: %s', indent(request))
+        self.handle_request(request)
 
-    def handle_request(self, input):
+    def handle_request(self, request):
         my_end, other_end = multiprocessing.Pipe()
         self.core_queue.put({
             'command': 'mpd_request',
-            'request': input,
+            'request': request,
             'reply_to': pickle_connection(other_end),
         })
         my_end.poll(None)

@@ -181,6 +181,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         self.core_queue = core_queue
         self.connected = threading.Event()
         self.audio = AlsaController()
+        self.session = None
 
     def run(self):
         self.connect()
@@ -219,9 +220,11 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         """Callback used by pyspotify"""
         logger.debug('Notify main thread')
 
-    def music_delivery(self, *args, **kwargs):
+    def music_delivery(self, session, frames, frame_size, num_frames,
+            sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
-        self.audio.music_delivery(*args, **kwargs)
+        self.audio.music_delivery(session, frames, frame_size, num_frames,
+            sample_type, sample_rate, channels)
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
