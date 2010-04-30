@@ -140,12 +140,17 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
     """
     Converts a MPD tag_cache into a lists of tracks, artists and albums.
     """
-    with open(tag_cache) as library:
-        contents = library.read()
-
     tracks = set()
     artists = set()
     albums = set()
+
+    try:
+        with open(tag_cache) as library:
+            contents = library.read()
+    except IOError, e:
+        logger.error('Could not tag cache: %s', e)
+        return tracks, artists, albums
+
     current = {}
     state = None
 

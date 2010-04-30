@@ -185,6 +185,7 @@ class GStreamerLibraryController(BaseLibraryController):
     def __init__(self, backend):
         super(GStreamerLibraryController, self).__init__(backend)
         self._uri_mapping = {}
+        self.refresh()
 
     def refresh(self, uri=None):
         tracks, artists, albums = parse_mpd_tag_cache(settings.TAG_CACHE,

@@ -989,7 +989,6 @@ class BaseLibraryControllerTest(object):
     def setUp(self):
         self.backend = self.backend_class(mixer=DummyMixer())
         self.library = self.backend.library
-        self.library.refresh() # FIXME init should call refresh instead
 
     def tearDown(self):
         self.backend.destroy()
