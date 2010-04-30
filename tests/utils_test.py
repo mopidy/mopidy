@@ -58,6 +58,9 @@ class M3UToUriTest(unittest.TestCase):
         uris = parse_m3u(data_folder('encoding.m3u'))
         self.assertEqual([encoded_uri], uris)
 
+class URItoM3UTest(unittest.TestCase):
+    pass
+
 expected_artists = [Artist(name='name')]
 expected_albums = [Album(name='albumname', artists=expected_artists, num_tracks=2)]
 expected_tracks = []
