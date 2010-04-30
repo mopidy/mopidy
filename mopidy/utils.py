@@ -119,20 +119,26 @@ def parse_m3u(file_path):
     uris = []
     folder = os.path.dirname(file_path)
 
-    with open(file_path) as m3u:
-        for line in m3u.readlines():
-            line = line.strip().decode('latin1')
+    try:
+        with open(file_path) as m3u:
+            contents = m3u.readlines()
+    except IOError, e:
+        logger.error('Couldn\'t open m3u: %s', e)
+        return uris
 
-            if line.startswith('#'):
-                continue
+    for line in contents:
+        line = line.strip().decode('latin1')
 
-            # FIXME what about other URI types?
-            if line.startswith('file://'):
-                uris.append(line)
-            else:
-                path = os.path.join(folder, line)
-                path = urllib.pathname2url(path.encode('utf-8'))
-                uris.append('file://' + path)
+        if line.startswith('#'):
+            continue
+
+        # FIXME what about other URI types?
+        if line.startswith('file://'):
+            uris.append(line)
+        else:
+            path = os.path.join(folder, line)
+            path = urllib.pathname2url(path.encode('utf-8'))
+            uris.append('file://' + path)
 
     return uris
 

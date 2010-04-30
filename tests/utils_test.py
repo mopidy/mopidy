@@ -58,6 +58,11 @@ class M3UToUriTest(unittest.TestCase):
         uris = parse_m3u(data_folder('encoding.m3u'))
         self.assertEqual([encoded_uri], uris)
 
+    def test_open_missing_file(self):
+        uris = parse_m3u(data_folder('non-existant.m3u'))
+        self.assertEqual([], uris)
+
+
 class URItoM3UTest(unittest.TestCase):
     pass
 
