@@ -1,0 +1,24 @@
+info_begin
+mpd_version: 0.14.2
+fs_charset: UTF-8
+info_end
+songList begin
+key: uri1
+file: /uri1
+Artist: artist1
+Title: track1
+Album: album1
+Time: 4
+key: uri2
+file: /uri2
+Artist: artist2
+Title: track2
+Album: album2
+Time: 4
+key: uri3
+file: /uri3
+Artist: artist3
+Title: track3
+Album: album3
+Time: 4
+songList end
