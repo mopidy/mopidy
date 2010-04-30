@@ -175,22 +175,35 @@ def _convert_mpd_data(data, tracks, artists, albums, music_dir):
     if not data:
         return
 
-    num_tracks = int(data['track'].split('/')[1])
-    track_no = int(data['track'].split('/')[0])
-    path = data['file']
+    track_kwargs = {}
+    album_kwargs = {}
 
-    if path[0] == '/':
-        path = path[1:]
+    if 'track' in data:
+        album_kwargs['num_tracks'] = int(data['track'].split('/')[1])
+        track_kwargs['track_no'] = int(data['track'].split('/')[0])
 
-    path = os.path.join(music_dir, path)
-    uri = 'file://' + urllib.pathname2url(path)
+    if 'artist' in data:
+        artist = Artist(name=data['artist'])
+        artists.add(artist)
+        track_kwargs['artists'] = [artist]
+        album_kwargs['artists'] = [artist]
 
-    artist = Artist(name=data['artist'])
-    artists.add(artist)
+    if 'album' in data:
+        album_kwargs['name'] = data['album']
+        album = Album(**album_kwargs)
+        albums.add(album)
+        track_kwargs['album'] = album
 
-    album = Album(name=data['album'], artists=[artist], num_tracks=num_tracks)
-    albums.add(album)
+    if 'title' in data:
+        track_kwargs['name'] = data['title']
 
-    track = Track(name=data['title'], artists=[artist], track_no=track_no,
-        length=int(data['time'])*1000, uri=uri, album=album)
+    if data['file'][0] == '/':
+        path = os.path.join(music_dir, data['file'][1:])
+    else:
+        path = os.path.join(music_dir, data['file'])
+
+    track_kwargs['uri'] = 'file://' + urllib.pathname2url(path)
+    track_kwargs['length'] = int(data.get('time', 0)) * 1000
+
+    track = Track(**track_kwargs)
     tracks.add(track)
