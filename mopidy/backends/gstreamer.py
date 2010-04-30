@@ -215,3 +215,32 @@ class GStreamerLibraryController(BaseLibraryController):
 
         tracks = filter(filter_func, self._uri_mapping.values())
         return Playlist(tracks=tracks)
+
+    def search(self, type, query):
+        if not query:
+            raise LookupError('Missing query')
+
+        q = query.strip().lower()
+        library_tracks = self._uri_mapping.values()
+
+        track_filter  = lambda t: q in t.name.lower()
+        album_filter = lambda t: q in getattr(t, 'album', Album()).name.lower()
+        artist_filter = lambda t: filter(lambda a: q in a.name.lower(), t.artists)
+        uri_filter = lambda t: q in t.uri.lower()
+        any_filter = lambda t: track_filter(t) or album_filter(t) or \
+            artist_filter(t) or uri_filter(t)
+
+        if type == 'track':
+            tracks = filter(track_filter, library_tracks)
+        elif type == 'album':
+            tracks = filter(album_filter, library_tracks)
+        elif type == 'artist':
+            tracks = filter(artist_filter, library_tracks)
+        elif type == 'uri':
+            tracks = filter(uri_filter, library_tracks)
+        elif type == 'any':
+            tracks = filter(any_filter, library_tracks)
+        else:
+            raise LookupError('Invalid lookup type: %s' % type)
+
+        return Playlist(tracks=tracks)

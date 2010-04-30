@@ -1056,20 +1056,76 @@ class BaseLibraryControllerTest(object):
         test = lambda: self.library.find_exact('album', '')
         self.assertRaises(LookupError, test)
 
-    def test_find_search_no_hits(self):
-        raise SkipTest
+    def test_search_no_hits(self):
+        result = self.library.search('track', 'unknown track')
+        self.assertEqual(result, Playlist())
 
-    def test_find_search_artist(self):
-        raise SkipTest
+        result = self.library.search('artist', 'unknown artist')
+        self.assertEqual(result, Playlist())
 
-    def test_find_search_track(self):
-        raise SkipTest
+        result = self.library.search('album', 'unknown artist')
+        self.assertEqual(result, Playlist())
 
-    def test_find_search_album(self):
-        raise SkipTest
+        result = self.library.search('uri', 'unknown')
+        self.assertEqual(result, Playlist())
 
-    def test_find_search_uri(self):
-        raise SkipTest
+        result = self.library.search('any', 'unknown')
+        self.assertEqual(result, Playlist())
 
-    def test_find_search_any(self):
-        raise SkipTest
+    def test_search_artist(self):
+        result = self.library.search('artist', 'Tist1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+
+        result = self.library.search('artist', 'Tist2')
+        self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
+
+    def test_search_track(self):
+        result = self.library.search('track', 'Rack1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+
+        result = self.library.search('track', 'Rack2')
+        self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
+
+    def test_search_album(self):
+        result = self.library.search('album', 'Bum1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+
+        result = self.library.search('album', 'Bum2')
+        self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
+
+    def test_search_uri(self):
+        result = self.library.search('uri', 'RI1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+
+        result = self.library.search('uri', 'RI2')
+        self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
+
+    def test_search_any(self):
+        result = self.library.search('any', 'Tist1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+        result = self.library.search('any', 'Rack1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+        result = self.library.search('any', 'Bum1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+        result = self.library.search('any', 'RI1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+
+    def test_search_wrong_type(self):
+        test = lambda: self.library.search('wrong', 'test')
+        self.assertRaises(LookupError, test)
+
+    def test_search_with_empty_query(self):
+        test = lambda: self.library.search('artist', '')
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.search('track', '')
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.search('album', '')
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.search('uri', '')
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.search('any', '')
+        self.assertRaises(LookupError, test)
