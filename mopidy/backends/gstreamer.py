@@ -16,7 +16,7 @@ import threading
 from mopidy.backends import *
 from mopidy.models import Playlist, Track
 from mopidy import settings
-from mopidy.utils import parse_m3u
+from mopidy.utils import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'backends.gstreamer')
 
@@ -182,5 +182,19 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
 
 
 class GStreamerLibraryController(BaseLibraryController):
+    def __init__(self, backend):
+        super(GStreamerLibraryController, self).__init__(backend)
+        self._uri_mapping = {}
+
     def refresh(self, uri=None):
-        pass
+        tracks, artists, albums = parse_mpd_tag_cache(settings.TAG_CACHE,
+            settings.MUSIC_FOLDER)
+
+        for track in tracks:
+            self._uri_mapping[track.uri] = track
+
+    def lookup(self, uri):
+        try:
+            return self._uri_mapping[uri]
+        except KeyError:
+            raise LookupError
