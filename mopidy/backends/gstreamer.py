@@ -14,7 +14,7 @@ import shutil
 import threading
 
 from mopidy.backends import *
-from mopidy.models import Playlist, Track
+from mopidy.models import Playlist, Track, Album
 from mopidy import settings
 from mopidy.utils import parse_m3u, parse_mpd_tag_cache
 
@@ -201,4 +201,17 @@ class GStreamerLibraryController(BaseLibraryController):
             raise LookupError
 
     def find_exact(self, type, query):
-        return Playlist()
+        if not query:
+            raise LookupError('Missing query')
+
+        if type == 'track':
+            filter_func = lambda t: t.name == query
+        elif type == 'album':
+            filter_func = lambda t: getattr(t, 'album', Album()).name == query
+        elif type == 'artist':
+            filter_func = lambda t: filter(lambda a: a.name == query, t.artists)
+        else:
+            raise LookupError('Invalid lookup type')
+
+        tracks = filter(filter_func, self._uri_mapping.values())
+        return Playlist(tracks=tracks)

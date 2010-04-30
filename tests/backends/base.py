@@ -979,12 +979,13 @@ class BaseStoredPlaylistsControllerTest(object):
 class BaseLibraryControllerTest(object):
     tracks = []
 
-    artists = [Artist(name='artist1'), Artist(name='artist2')]
+    artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
     albums = [Album(name='album1', artists=artists[:1]),
-              Album(name='album2', artists=artists[1:])]
+              Album(name='album2', artists=artists[1:2]),
+              Album()]
     tracks = [Track(name='track1', length=4000, artists=artists[:1], album=albums[0], uri='file://' + data_folder('uri1')),
-              Track(name='track2', length=4000, artists=artists[1:], album=albums[1], uri='file://' + data_folder('uri2'))]
-    # FIXME add tracks with partial info
+              Track(name='track2', length=4000, artists=artists[1:2], album=albums[1], uri='file://' + data_folder('uri2')),
+              Track()]
 
     def setUp(self):
         self.backend = self.backend_class(mixer=DummyMixer())
@@ -1014,14 +1015,46 @@ class BaseLibraryControllerTest(object):
         result = self.library.find_exact('track', 'unknown track')
         self.assertEqual(result, Playlist())
 
+        result = self.library.find_exact('artist', 'unknown artist')
+        self.assertEqual(result, Playlist())
+
+        result = self.library.find_exact('album', 'unknown artist')
+        self.assertEqual(result, Playlist())
+
     def test_find_exact_artist(self):
-        raise SkipTest
+        result = self.library.find_exact('artist', 'artist1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+
+        result = self.library.find_exact('artist', 'artist2')
+        self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
 
     def test_find_exact_track(self):
-        raise SkipTest
+        result = self.library.find_exact('track', 'track1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+
+        result = self.library.find_exact('track', 'track2')
+        self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
 
     def test_find_exact_album(self):
-        raise SkipTest
+        result = self.library.find_exact('album', 'album1')
+        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
+
+        result = self.library.find_exact('album', 'album2')
+        self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
+
+    def test_find_exact_wrong_type(self):
+        test = lambda: self.library.find_exact('wrong', 'test')
+        self.assertRaises(LookupError, test)
+
+    def test_find_exact_with_empty_query(self):
+        test = lambda: self.library.find_exact('artist', '')
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.find_exact('track', '')
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.find_exact('album', '')
+        self.assertRaises(LookupError, test)
 
     def test_find_search_no_hits(self):
         raise SkipTest
