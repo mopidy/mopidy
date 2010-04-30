@@ -199,3 +199,6 @@ class GStreamerLibraryController(BaseLibraryController):
             return self._uri_mapping[uri]
         except KeyError:
             raise LookupError
+
+    def find_exact(self, type, query):
+        return Playlist()

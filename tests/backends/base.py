@@ -1011,7 +1011,8 @@ class BaseLibraryControllerTest(object):
         self.assertRaises(LookupError, test)
 
     def test_find_exact_no_hits(self):
-        raise SkipTest
+        result = self.library.find_exact('track', 'unknown track')
+        self.assertEqual(result, Playlist())
 
     def test_find_exact_artist(self):
         raise SkipTest
