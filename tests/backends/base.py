@@ -7,9 +7,9 @@ import time
 
 from mopidy import settings
 from mopidy.mixers.dummy import DummyMixer
-from mopidy.models import Playlist, Track
+from mopidy.models import Playlist, Track, Album, Artist
 
-from tests import SkipTest
+from tests import SkipTest, data_folder
 
 __all__ = ['BaseCurrentPlaylistControllerTest',
            'BasePlaybackControllerTest',
@@ -979,11 +979,17 @@ class BaseStoredPlaylistsControllerTest(object):
 class BaseLibraryControllerTest(object):
     tracks = []
 
+    artists = [Artist(name='artist1'), Artist(name='artist2')]
+    albums = [Album(name='album1', artists=artists[:1]),
+              Album(name='album2', artists=artists[1:])]
+    tracks = [Track(name='track1', length=4000, artists=artists[:1], album=albums[0], uri='file://' + data_folder('uri1')),
+              Track(name='track2', length=4000, artists=artists[1:], album=albums[1], uri='file://' + data_folder('uri2'))]
+    # FIXME add tracks with partial info
+
     def setUp(self):
         self.backend = self.backend_class(mixer=DummyMixer())
         self.library = self.backend.library
-
-        assert len(self.tracks) == 3, 'Need three tracks to run tests.'
+        self.library.refresh() # FIXME init should call refresh instead
 
     def tearDown(self):
         self.backend.destroy()
@@ -998,10 +1004,12 @@ class BaseLibraryControllerTest(object):
         raise SkipTest
 
     def test_lookup(self):
-        raise SkipTest
+        track = self.library.lookup(self.tracks[0].uri)
+        self.assertEqual(track, self.tracks[0])
 
     def test_lookup_unknown_track(self):
-        raise SkipTest
+        test = lambda: self.library.lookup('fake uri')
+        self.assertRaises(LookupError, test)
 
     def test_find_exact_no_hits(self):
         raise SkipTest

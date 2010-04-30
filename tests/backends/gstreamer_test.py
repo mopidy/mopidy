@@ -126,15 +126,17 @@ class GStreamerBackendLibraryControllerTest(BaseLibraryControllerTest,
         unittest.TestCase):
 
     backend_class = GStreamerBackend
-    tracks = [Track(), Track(), Track()]
 
     def setUp(self):
         self.original_tag_cache = settings.TAG_CACHE
-        settings.TAG_CACHE = ''
+        self.original_music_folder = settings.MUSIC_FOLDER
+        settings.TAG_CACHE = data_folder('library_tag_cache')
+        settings.MUSIC_FOLDER = data_folder('')
         super(GStreamerBackendLibraryControllerTest, self).setUp()
 
     def tearDown(self):
         settings.TAG_CACHE = self.original_tag_cache
+        settings.MUSIC_FOLDER= self.original_music_folder
         super(GStreamerBackendLibraryControllerTest, self).tearDown()
 
 if __name__ == '__main__':
