@@ -154,7 +154,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
         with open(tag_cache) as library:
             contents = library.read()
     except IOError, e:
-        logger.error('Could not tag cache: %s', e)
+        logger.error('Could not open tag cache: %s', e)
         return tracks, artists, albums
 
     current = {}
