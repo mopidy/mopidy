@@ -108,3 +108,14 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
     def test_misencoded_cache(self):
         # FIXME not sure if this can happen
         raise SkipTest
+
+    def test_cache_with_blank_track_info(self):
+        tracks, artists, albums = parse_mpd_tag_cache(data_folder('blank_tag_cache'),
+            data_folder(''))
+
+        uri = 'file://' + urllib.pathname2url(data_folder('song1.mp3'))
+
+        self.assertEqual(set([Track(uri=uri, length=4000)]), tracks)
+        self.assertEqual(set(), artists)
+        self.assertEqual(set(), albums)
+
