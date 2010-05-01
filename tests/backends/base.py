@@ -102,6 +102,70 @@ class BaseCurrentPlaylistControllerTest(object):
         # FIXME how do we test this without going into internals?
         self.assertEqual(new_playlist, self.controller._playlist)
 
+    def test_get_by_id_returns_unique_match(self):
+        track = Track(id=1)
+        self.controller.playlist = Playlist(
+            tracks=[Track(id=13), track, Track(id=17)])
+        self.assertEqual(track, self.controller.get(id=1))
+
+    def test_get_by_id_raises_error_if_multiple_matches(self):
+        track = Track(id=1)
+        self.controller.playlist = Playlist(tracks=[Track(id=13), track, track])
+        try:
+            self.controller.get(id=1)
+            self.fail(u'Should raise LookupError if multiple matches')
+        except LookupError as e:
+            self.assertEqual(u'"id=1" match multiple tracks', e[0])
+
+    def test_get_by_id_raises_error_if_no_match(self):
+        self.controller.playlist = Playlist(tracks=[Track(id=13), Track(id=17)])
+        try:
+            self.controller.get(id=1)
+            self.fail(u'Should raise LookupError if no match')
+        except LookupError as e:
+            self.assertEqual(u'"id=1" match no tracks', e[0])
+
+    def test_get_by_uri_returns_unique_match(self):
+        track = Track(uri='a')
+        self.controller.playlist = Playlist(
+            tracks=[Track(uri='z'), track, Track(uri='y')])
+        self.assertEqual(track, self.controller.get(uri='a'))
+
+    def test_get_by_uri_raises_error_if_multiple_matches(self):
+        track = Track(uri='a')
+        self.controller.playlist = Playlist(
+            tracks=[Track(uri='z'), track, track])
+        try:
+            self.controller.get(uri='a')
+            self.fail(u'Should raise LookupError if multiple matches')
+        except LookupError as e:
+            self.assertEqual(u'"uri=a" match multiple tracks', e[0])
+
+    def test_get_by_uri_raises_error_if_no_match(self):
+        self.controller.playlist = Playlist(
+            tracks=[Track(uri='z'), Track(uri='y')])
+        try:
+            self.controller.get(uri='a')
+            self.fail(u'Should raise LookupError if no match')
+        except LookupError as e:
+            self.assertEqual(u'"uri=a" match no tracks', e[0])
+
+    def test_get_by_multiple_criteria_returns_elements_matching_all(self):
+        track1 = Track(id=1, uri='a')
+        track2 = Track(id=1, uri='b')
+        track3 = Track(id=2, uri='b')
+        self.controller.playlist = Playlist(tracks=[track1, track2, track3])
+        self.assertEqual(track1, self.controller.get(id=1, uri='a'))
+        self.assertEqual(track2, self.controller.get(id=1, uri='b'))
+        self.assertEqual(track3, self.controller.get(id=2, uri='b'))
+
+    def test_get_by_criteria_that_is_not_present_in_all_elements(self):
+        track1 = Track(id=1)
+        track2 = Track(uri='b')
+        track3 = Track(id=2)
+        self.controller.playlist = Playlist(tracks=[track1, track2, track3])
+        self.assertEqual(track1, self.controller.get(id=1))
+
     @populate_playlist
     def test_load_replaces_playlist(self):
         self.backend.current_playlist.load(Playlist())
@@ -937,6 +1001,29 @@ class BaseStoredPlaylistsControllerTest(object):
         playlist1 = self.stored.create('test')
         playlist2 = self.stored.get(name='test')
         self.assertEqual(playlist1, playlist2)
+
+    def test_get_by_name_returns_unique_match(self):
+        playlist = Playlist(name='b')
+        self.stored.playlists = [Playlist(name='a'), playlist]
+        self.assertEqual(playlist, self.stored.get(name='b'))
+
+    def test_get_by_name_returns_first_of_multiple_matches(self):
+        playlist = Playlist(name='b')
+        self.stored.playlists = [
+            playlist, Playlist(name='a'), Playlist(name='b')]
+        try:
+            self.stored.get(name='b')
+            self.fail(u'Should raise LookupError if multiple matches')
+        except LookupError as e:
+            self.assertEqual(u'"name=b" match multiple playlists', e[0])
+
+    def test_get_by_id_raises_keyerror_if_no_match(self):
+        self.stored.playlists = [Playlist(name='a'), Playlist(name='b')]
+        try:
+            self.stored.get(name='c')
+            self.fail(u'Should raise LookupError if no match')
+        except LookupError as e:
+            self.assertEqual(u'"name=c" match no playlists', e[0])
 
     def test_search_returns_empty_list(self):
         self.assertEqual([], self.stored.search('test'))
