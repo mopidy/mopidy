@@ -1,5 +1,6 @@
 import unittest
 import os
+import sys
 import urllib
 
 from mopidy import settings
@@ -12,6 +13,9 @@ from tests import SkipTest, data_folder
 
 song = data_folder('song%s.wav')
 generate_song = lambda i: 'file://' + urllib.pathname2url(song % i)
+
+if sys.platform not in ['linux2', 'darwin']:
+    raise SkipTest
 
 # FIXME can be switched to generic test
 class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
