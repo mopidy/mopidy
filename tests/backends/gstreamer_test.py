@@ -52,7 +52,7 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestC
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
 
-class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
+class GStreamerStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
         unittest.TestCase):
 
     backend_class = GStreamerBackend
@@ -126,7 +126,7 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
         raise SkipTest
 
 
-class GStreamerBackendLibraryControllerTest(BaseLibraryControllerTest,
+class GStreamerLibraryControllerTest(BaseLibraryControllerTest,
         unittest.TestCase):
 
     backend_class = GStreamerBackend
@@ -136,12 +136,12 @@ class GStreamerBackendLibraryControllerTest(BaseLibraryControllerTest,
         self.original_music_folder = settings.MUSIC_FOLDER
         settings.TAG_CACHE = data_folder('library_tag_cache')
         settings.MUSIC_FOLDER = data_folder('')
-        super(GStreamerBackendLibraryControllerTest, self).setUp()
+        super(GStreamerLibraryControllerTest, self).setUp()
 
     def tearDown(self):
         settings.TAG_CACHE = self.original_tag_cache
         settings.MUSIC_FOLDER= self.original_music_folder
-        super(GStreamerBackendLibraryControllerTest, self).tearDown()
+        super(GStreamerLibraryControllerTest, self).tearDown()
 
 if __name__ == '__main__':
     unittest.main()
