@@ -12,6 +12,8 @@ To use the libspotify backend you must install libspotify and
     This backend requires a Spotify premium account, and it requires you to get
     an application key from Spotify before use.
 
+**TODO** Test and document installation on OS X.
+
 
 Installing libspotify
 =====================

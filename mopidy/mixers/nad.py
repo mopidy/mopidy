@@ -80,6 +80,7 @@ class NadTalker(BaseProcess):
     def __init__(self, pipe=None):
         super(NadTalker, self).__init__()
         self.pipe = pipe
+        self._device = None
 
     def _run(self):
         self._open_connection()
