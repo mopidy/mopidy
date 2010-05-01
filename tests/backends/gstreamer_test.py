@@ -14,7 +14,7 @@ song = data_folder('song%s.wav')
 generate_song = lambda i: path_to_uri(song % i)
 
 # FIXME can be switched to generic test
-class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
+class GStreamerCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
     tracks = [Track(uri=generate_song(i), id=i, length=4464) for i in range(1, 4)]
 
     backend_class = GStreamerBackend

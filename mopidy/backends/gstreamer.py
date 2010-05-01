@@ -223,6 +223,7 @@ class GStreamerLibraryController(BaseLibraryController):
         q = query.strip().lower()
         library_tracks = self._uri_mapping.values()
 
+        # FIXME this is bound to be slow for large libraries
         track_filter  = lambda t: q in t.name.lower()
         album_filter = lambda t: q in getattr(t, 'album', Album()).name.lower()
         artist_filter = lambda t: filter(lambda a: q in a.name.lower(),
