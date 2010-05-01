@@ -1,4 +1,7 @@
 class BaseMixer(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
     @property
     def volume(self):
         """

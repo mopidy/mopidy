@@ -8,7 +8,8 @@ class AlsaMixer(BaseMixer):
     volume.
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(AlsaMixer, self).__init__(*args, **kwargs)
         self._mixer = alsaaudio.Mixer()
 
     def _get_volume(self):

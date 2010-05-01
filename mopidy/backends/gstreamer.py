@@ -104,17 +104,17 @@ class GStreamerPlaybackController(BasePlaybackController):
             return 0
 
     def destroy(self):
-        bin, self._bin = self._bin, None
+        playbin, self._bin = self._bin, None
         bus, self._bus = self._bus, None
 
         bus.disconnect(self._bus_id)
         bus.remove_signal_watch()
-        bin.get_state()
-        bin.set_state(gst.STATE_NULL)
+        playbin.get_state()
+        playbin.set_state(gst.STATE_NULL)
         bus.set_flushing(True)
 
         del bus
-        del bin
+        del playbin
 
 
 class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):

@@ -26,11 +26,13 @@ class DenonMixer(BaseMixer):
     - :attr:`mopidy.settings.MIXER_EXT_PORT` -- Example: ``/dev/ttyUSB0``
     """
 
-    def __init__(self, device=None):
+    def __init__(self, *args, **kwargs):
         """
         Connects using the serial specifications from Denon's RS-232 Protocol
         specification: 9600bps 8N1.
         """
+        super(DenonMixer, self).__init__(*args, **kwargs)
+        device = kwargs.get('device', None)
         self._device = device or Serial(port=MIXER_EXT_PORT, timeout=0.2)
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0

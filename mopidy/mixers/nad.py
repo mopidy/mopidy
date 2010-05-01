@@ -40,7 +40,8 @@ class NadMixer(BaseMixer):
 
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(NadMixer, self).__init__(*args, **kwargs)
         self._volume = None
         self._pipe, other_end = Pipe()
         NadTalker(pipe=other_end).start()
