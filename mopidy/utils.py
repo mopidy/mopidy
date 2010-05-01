@@ -142,9 +142,8 @@ def parse_m3u(file_path):
         if line.startswith('file://'):
             uris.append(line)
         else:
-            path = os.path.join(folder, line)
-            path = urllib.pathname2url(path.encode('utf-8'))
-            uris.append('file://' + path)
+            path = path_to_uri(folder, line)
+            uris.append(path)
 
     return uris
 
@@ -219,7 +218,7 @@ def _convert_mpd_data(data, tracks, artists, albums, music_dir):
     else:
         path = os.path.join(music_dir, data['file'])
 
-    track_kwargs['uri'] = 'file://' + urllib.pathname2url(path)
+    track_kwargs['uri'] = path_to_uri(path)
     track_kwargs['length'] = int(data.get('time', 0)) * 1000
 
     track = Track(**track_kwargs)

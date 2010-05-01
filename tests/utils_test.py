@@ -48,9 +48,9 @@ class PathToFileURITest(unittest.TestCase):
 song1_path = data_folder('song1.mp3')
 song2_path = data_folder('song2.mp3')
 encoded_path = data_folder(u'æøå.mp3')
-song1_uri = 'file://' + urllib.pathname2url(song1_path)
-song2_uri = 'file://' + urllib.pathname2url(song2_path)
-encoded_uri = 'file://' + urllib.pathname2url(encoded_path.encode('utf-8'))
+song1_uri = path_to_uri(song1_path)
+song2_uri = path_to_uri(song2_path)
+encoded_uri = path_to_uri(encoded_path)
 
 
 class M3UToUriTest(unittest.TestCase):
@@ -106,7 +106,7 @@ expected_albums = [Album(name='albumname', artists=expected_artists, num_tracks=
 expected_tracks = []
 
 def generate_track(path):
-    uri = 'file://' + urllib.pathname2url(data_folder(path))
+    uri = path_to_uri(data_folder(path))
     track = Track(name='trackname', artists=expected_artists, track_no=1,
         album=expected_albums[0], length=4000, uri=uri)
     expected_tracks.append(track)
@@ -156,7 +156,7 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         tracks, artists, albums = parse_mpd_tag_cache(data_folder('blank_tag_cache'),
             data_folder(''))
 
-        uri = 'file://' + urllib.pathname2url(data_folder('song1.mp3'))
+        uri = path_to_uri(data_folder('song1.mp3'))
 
         self.assertEqual(set([Track(uri=uri, length=4000)]), tracks)
         self.assertEqual(set(), artists)
