@@ -200,23 +200,23 @@ class GStreamerLibraryController(BaseLibraryController):
         except KeyError:
             raise LookupError
 
-    def find_exact(self, type, query):
+    def find_exact(self, field, query):
         if not query:
             raise LookupError('Missing query')
 
-        if type == 'track':
+        if field == 'track':
             filter_func = lambda t: t.name == query
-        elif type == 'album':
+        elif field == 'album':
             filter_func = lambda t: getattr(t, 'album', Album()).name == query
-        elif type == 'artist':
+        elif field == 'artist':
             filter_func = lambda t: filter(lambda a: a.name == query, t.artists)
         else:
-            raise LookupError('Invalid lookup type: %s' % type)
+            raise LookupError('Invalid lookup field: %s' % field)
 
         tracks = filter(filter_func, self._uri_mapping.values())
         return Playlist(tracks=tracks)
 
-    def search(self, type, query):
+    def search(self, field, query):
         if not query:
             raise LookupError('Missing query')
 
@@ -225,22 +225,23 @@ class GStreamerLibraryController(BaseLibraryController):
 
         track_filter  = lambda t: q in t.name.lower()
         album_filter = lambda t: q in getattr(t, 'album', Album()).name.lower()
-        artist_filter = lambda t: filter(lambda a: q in a.name.lower(), t.artists)
+        artist_filter = lambda t: filter(lambda a: q in a.name.lower(),
+            t.artists)
         uri_filter = lambda t: q in t.uri.lower()
         any_filter = lambda t: track_filter(t) or album_filter(t) or \
             artist_filter(t) or uri_filter(t)
 
-        if type == 'track':
+        if field == 'track':
             tracks = filter(track_filter, library_tracks)
-        elif type == 'album':
+        elif field == 'album':
             tracks = filter(album_filter, library_tracks)
-        elif type == 'artist':
+        elif field == 'artist':
             tracks = filter(artist_filter, library_tracks)
-        elif type == 'uri':
+        elif field == 'uri':
             tracks = filter(uri_filter, library_tracks)
-        elif type == 'any':
+        elif field == 'any':
             tracks = filter(any_filter, library_tracks)
         else:
-            raise LookupError('Invalid lookup type: %s' % type)
+            raise LookupError('Invalid lookup field: %s' % field)
 
         return Playlist(tracks=tracks)
