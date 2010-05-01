@@ -573,15 +573,13 @@ class MpdFrontend(object):
         """
         return [('songs', 0), ('playtime', 0)] # TODO
 
-    @handle_pattern(r'^find (?P<type>(album|artist|title)) '
+    @handle_pattern(r'^find (?P<field>([Aa]lbum|[Aa]rtist|[Tt]itle)) '
         r'"(?P<what>[^"]+)"$')
-    @handle_pattern(r'^find (?P<type>(Album|Artist|Title)) '
+    @handle_pattern(r'^find "(?P<field>(album|artist|title))" '
         r'"(?P<what>[^"]+)"$')
-    @handle_pattern(r'^find "(?P<type>(album|artist|title))" '
-        r'"(?P<what>[^"]+)"$')
-    @handle_pattern(r'^find (?P<type>(album)) '
+    @handle_pattern(r'^find (?P<field>(album)) '
         r'"(?P<what>[^"]+)" artist "([^"]+)"$')
-    def _music_db_find(self, type, what):
+    def _music_db_find(self, field, what):
         """
         *musicpd.org, music database section:*
 
@@ -592,24 +590,24 @@ class MpdFrontend(object):
 
         *GMPC:*
 
-        - does not add quotes around the type argument.
+        - does not add quotes around the field argument.
         - also uses ``find album "[ALBUM]" artist "[ARTIST]"`` to list album
           tracks.
 
         *ncmpc:*
 
-        - does not add quotes around the type argument.
+        - does not add quotes around the field argument.
         - capitalizes the type argument.
         """
-        type = type.lower()
-        if type == u'title':
-            type = u'track'
-        return self.backend.library.find_exact(type, what).mpd_format(
+        field = field.lower()
+        if field == u'title':
+            field = u'track'
+        return self.backend.library.find_exact(field, what).mpd_format(
             search_result=True)
 
-    @handle_pattern(r'^findadd "(?P<type>(album|artist|title))" '
+    @handle_pattern(r'^findadd "(?P<field>(album|artist|title))" '
         r'"(?P<what>[^"]+)"$')
-    def _music_db_findadd(self, type, what):
+    def _music_db_findadd(self, field, what):
         """
         *musicpd.org, music database section:*
 
@@ -619,14 +617,13 @@ class MpdFrontend(object):
             current playlist. ``TYPE`` can be any tag supported by MPD.
             ``WHAT`` is what to find.
         """
-        result = self._music_db_find(type, what)
+        result = self._music_db_find(field, what)
         # TODO Add result to current playlist
         #return result
 
-    @handle_pattern(r'^list "(?P<type>artist)"$')
-    @handle_pattern(r'^list (?P<type>Artist)$')
-    @handle_pattern(r'^list "(?P<type>album)"( "(?P<artist>[^"]+)")*$')
-    def _music_db_list(self, type, artist=None):
+    @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
+    @handle_pattern(r'^list "(?P<field>album)"( "(?P<artist>[^"]+)")*$')
+    def _music_db_list(self, field, artist=None):
         """
         *musicpd.org, music database section:*
 
@@ -640,10 +637,10 @@ class MpdFrontend(object):
 
         *ncmpc:*
 
-        - does not add quotes around the type argument.
-        - capitalizes the type argument.
+        - does not add quotes around the field argument.
+        - capitalizes the field argument.
         """
-        type = type.lower()
+        field = field.lower()
         # TODO
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
@@ -698,13 +695,12 @@ class MpdFrontend(object):
         """
         return self._music_db_update(uri, rescan_unmodified_files=True)
 
-    @handle_pattern(r'^search (?P<type>(album|artist|filename|title|any)) '
+    @handle_pattern(r'^search '
+        r'(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)) '
         r'"(?P<what>[^"]+)"$')
-    @handle_pattern(r'^search (?P<type>(Album|Artist|Filename|Title|Any)) '
+    @handle_pattern(r'^search "(?P<field>(album|artist|filename|title|any))" '
         r'"(?P<what>[^"]+)"$')
-    @handle_pattern(r'^search "(?P<type>(album|artist|filename|title|any))" '
-        r'"(?P<what>[^"]+)"$')
-    def _music_db_search(self, type, what):
+    def _music_db_search(self, field, what):
         """
         *musicpd.org, music database section:*
 
@@ -716,22 +712,22 @@ class MpdFrontend(object):
 
         *GMPC:*
 
-        - does not add quotes around the type argument.
-        - uses the undocumented type ``any``.
+        - does not add quotes around the field argument.
+        - uses the undocumented field ``any``.
         - searches for multiple words like this::
 
             search any "foo" any "bar" any "baz"
 
         *ncmpc:*
 
-        - does not add quotes around the type argument.
-        - capitalizes the type argument.
+        - does not add quotes around the field argument.
+        - capitalizes the field argument.
         """
         # TODO Support GMPC multi-word search
-        type = type.lower()
-        if type == u'title':
-            type = u'track'
-        return self.backend.library.search(type, what).mpd_format(
+        field = field.lower()
+        if field == u'title':
+            field = u'track'
+        return self.backend.library.search(field, what).mpd_format(
             search_result=True)
 
     @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
@@ -1264,9 +1260,9 @@ class MpdFrontend(object):
     def __status_status_xfade(self):
         return 0 # TODO
 
-    @handle_pattern(r'^sticker delete "(?P<type>[^"]+)" '
+    @handle_pattern(r'^sticker delete "(?P<field>[^"]+)" '
         r'"(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')
-    def _sticker_delete(self, type, uri, name=None):
+    def _sticker_delete(self, field, uri, name=None):
         """
         *musicpd.org, sticker section:*
 
@@ -1277,9 +1273,9 @@ class MpdFrontend(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^sticker find "(?P<type>[^"]+)" "(?P<uri>[^"]+)" '
+    @handle_pattern(r'^sticker find "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
         r'"(?P<name>[^"]+)"$')
-    def _sticker_find(self, type, uri, name):
+    def _sticker_find(self, field, uri, name):
         """
         *musicpd.org, sticker section:*
 
@@ -1291,9 +1287,9 @@ class MpdFrontend(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^sticker get "(?P<type>[^"]+)" "(?P<uri>[^"]+)" '
+    @handle_pattern(r'^sticker get "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
         r'"(?P<name>[^"]+)"$')
-    def _sticker_get(self, type, uri, name):
+    def _sticker_get(self, field, uri, name):
         """
         *musicpd.org, sticker section:*
 
@@ -1303,8 +1299,8 @@ class MpdFrontend(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^sticker list "(?P<type>[^"]+)" "(?P<uri>[^"]+)"$')
-    def _sticker_list(self, type, uri):
+    @handle_pattern(r'^sticker list "(?P<field>[^"]+)" "(?P<uri>[^"]+)"$')
+    def _sticker_list(self, field, uri):
         """
         *musicpd.org, sticker section:*
 
@@ -1314,9 +1310,9 @@ class MpdFrontend(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^sticker set "(?P<type>[^"]+)" "(?P<uri>[^"]+)" '
+    @handle_pattern(r'^sticker set "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
         r'"(?P<name>[^"]+)" "(?P<value>[^"]+)"$')
-    def _sticker_set(self, type, uri, name, value):
+    def _sticker_set(self, field, uri, name, value):
         """
         *musicpd.org, sticker section:*
 

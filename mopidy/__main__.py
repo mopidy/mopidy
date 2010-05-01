@@ -15,7 +15,7 @@ from mopidy.utils import get_class, get_or_create_dotdir
 logger = logging.getLogger('mopidy.main')
 
 def main():
-    options, args = _parse_options()
+    options = _parse_options()
     _setup_logging(options.verbosity_level)
     get_or_create_dotdir('~/.mopidy/')
     core_queue = multiprocessing.Queue()
@@ -32,7 +32,7 @@ def _parse_options():
     parser.add_option('-v', '--verbose',
         action='store_const', const=2, dest='verbosity_level',
         help='more output (debug level)')
-    return parser.parse_args()
+    return parser.parse_args()[0]
 
 def _setup_logging(verbosity_level):
     if verbosity_level == 0:

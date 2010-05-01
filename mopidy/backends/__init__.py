@@ -79,7 +79,7 @@ class BaseCurrentPlaylistController(object):
 
     def __init__(self, backend):
         self.backend = backend
-        self.playlist = Playlist()
+        self._playlist = Playlist()
 
     @property
     def playlist(self):
@@ -242,12 +242,12 @@ class BaseLibraryController(object):
     def __init__(self, backend):
         self.backend = backend
 
-    def find_exact(self, type, query):
+    def find_exact(self, field, query):
         """
-        Find tracks in the library where ``type`` matches ``query`` exactly.
+        Find tracks in the library where ``field`` matches ``query`` exactly.
 
-        :param type: 'track', 'artist', or 'album'
-        :type type: string
+        :param field: 'track', 'artist', or 'album'
+        :type field: string
         :param query: the search query
         :type query: string
         :rtype: :class:`mopidy.models.Playlist`
@@ -273,12 +273,12 @@ class BaseLibraryController(object):
         """
         raise NotImplementedError
 
-    def search(self, type, query):
+    def search(self, field, query):
         """
-        Search the library for tracks where ``type`` contains ``query``.
+        Search the library for tracks where ``field`` contains ``query``.
 
-        :param type: 'track', 'artist', 'album', 'uri', and 'any'
-        :type type: string
+        :param field: 'track', 'artist', 'album', 'uri', and 'any'
+        :type field: string
         :param query: the search query
         :type query: string
         :rtype: :class:`mopidy.models.Playlist`
