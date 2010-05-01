@@ -1,14 +1,29 @@
 #encoding: utf-8
 
 import os
+import sys
 import tempfile
 import unittest
 import urllib
 
-from mopidy.utils import parse_m3u, parse_mpd_tag_cache
+from mopidy.utils import parse_m3u, parse_mpd_tag_cache, path_to_uri
 from mopidy.models import Track, Artist, Album
 
 from tests import SkipTest, data_folder
+
+class PathToFileURITest(unittest.TestCase):
+    def test_windows_paths(self):
+        if sys.platform != 'win32':
+            return
+        result = path_to_uri('c:/WINDOWS/clock.avi')
+        self.assertEqual(result, 'file:///c:/WINDOWS/clock.avi')
+
+    def test_unix_paths(self):
+        if sys.platform == 'win32':
+            return
+        result = path_to_uri('/etc/fstab')
+        self.assertEqual(result, 'file:///etc/fstab')
+
 
 song1_path = data_folder('song1.mp3')
 song2_path = data_folder('song2.mp3')
