@@ -165,8 +165,10 @@ class AlbumTest(unittest.TestCase):
         self.assertNotEqual(hash(album1), hash(album2))
 
     def test_ne(self):
-        album1 = Album(name=u'name1', uri=u'uri1', artists=[Artist(name=u'name1')], num_tracks=1)
-        album2 = Album(name=u'name2', uri=u'uri2', artists=[Artist(name=u'name2')], num_tracks=2)
+        album1 = Album(name=u'name1', uri=u'uri1',
+            artists=[Artist(name=u'name1')], num_tracks=1)
+        album2 = Album(name=u'name2', uri=u'uri2',
+            artists=[Artist(name=u'name2')], num_tracks=2)
         self.assertNotEqual(album1, album2)
         self.assertNotEqual(hash(album1), hash(album2))
 
@@ -221,9 +223,9 @@ class TrackTest(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, track, 'bitrate', None)
 
     def test_id(self):
-        id = 17
-        track = Track(id=id)
-        self.assertEqual(track.id, id)
+        track_id = 17
+        track = Track(id=track_id)
+        self.assertEqual(track.id, track_id)
         self.assertRaises(AttributeError, setattr, track, 'id', None)
 
     def test_mpd_format_for_empty_track(self):

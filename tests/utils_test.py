@@ -95,26 +95,26 @@ class M3UToUriTest(unittest.TestCase):
         self.assertEqual([song1_uri], uris)
 
     def test_file_with_absolute_files(self):
-        with tempfile.NamedTemporaryFile() as file:
-            file.write(song1_path)
-            file.flush()
-            uris = parse_m3u(file.name)
+        with tempfile.NamedTemporaryFile() as tmp:
+            tmp.write(song1_path)
+            tmp.flush()
+            uris = parse_m3u(tmp.name)
         self.assertEqual([song1_uri], uris)
 
     def test_file_with_multiple_absolute_files(self):
-        with tempfile.NamedTemporaryFile() as file:
-            file.write(song1_path+'\n')
-            file.write('# comment \n')
-            file.write(song2_path)
-            file.flush()
-            uris = parse_m3u(file.name)
+        with tempfile.NamedTemporaryFile() as tmp:
+            tmp.write(song1_path+'\n')
+            tmp.write('# comment \n')
+            tmp.write(song2_path)
+            tmp.flush()
+            uris = parse_m3u(tmp.name)
         self.assertEqual([song1_uri, song2_uri], uris)
 
     def test_file_with_uri(self):
-        with tempfile.NamedTemporaryFile() as file:
-            file.write(song1_uri)
-            file.flush()
-            uris = parse_m3u(file.name)
+        with tempfile.NamedTemporaryFile() as tmp:
+            tmp.write(song1_uri)
+            tmp.flush()
+            uris = parse_m3u(tmp.name)
         self.assertEqual([song1_uri], uris)
 
     def test_encoding_is_latin1(self):
@@ -130,7 +130,8 @@ class URItoM3UTest(unittest.TestCase):
     pass
 
 expected_artists = [Artist(name='name')]
-expected_albums = [Album(name='albumname', artists=expected_artists, num_tracks=2)]
+expected_albums = [Album(name='albumname', artists=expected_artists,
+    num_tracks=2)]
 expected_tracks = []
 
 def generate_track(path):

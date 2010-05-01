@@ -77,7 +77,8 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_get_by_uri_raises_error_for_invalid_id(self):
-        self.assertRaises(LookupError, lambda: self.controller.get(uri='foobar'))
+        test = lambda: self.controller.get(uri='foobar')
+        self.assertRaises(LookupError, test)
 
     @populate_playlist
     def test_clear(self):
@@ -232,7 +233,6 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_move_group_invalid_group(self):
-        tracks = len(self.controller.playlist.tracks)
         test = lambda: self.controller.move(2, 1, 0)
         self.assertRaises(AssertionError, test)
 
@@ -605,11 +605,11 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.playlist_position, None)
 
     def test_new_playlist_loaded_callback_gets_called(self):
-        new_playlist_loaded_callback = self.playback.new_playlist_loaded_callback
+        callback = self.playback.new_playlist_loaded_callback
 
         def wrapper():
             wrapper.called = True
-            return new_playlist_loaded_callback()
+            return callback()
         wrapper.called = False
 
         self.playback.new_playlist_loaded_callback = wrapper
@@ -627,7 +627,7 @@ class BasePlaybackControllerTest(object):
             event.set()
             return result
 
-        self.playback.end_of_track_callback= wrapper
+        self.playback.end_of_track_callback = wrapper
 
         self.playback.play()
         self.playback.seek(self.tracks[0].length - 10)
@@ -977,6 +977,7 @@ class BaseStoredPlaylistsControllerTest(object):
     def test_create_in_playlists(self):
         playlist = self.stored.create('test')
         self.assert_(self.stored.playlists)
+        self.assert_(playlist in self.stored.playlists)
 
     def test_playlists_empty_to_start_with(self):
         self.assert_(not self.stored.playlists)
@@ -990,7 +991,7 @@ class BaseStoredPlaylistsControllerTest(object):
         self.assert_(not self.stored.playlists)
 
     def test_get_without_criteria(self):
-        test = lambda: self.stored.get()
+        test = self.stored.get
         self.assertRaises(LookupError, test)
 
     def test_get_with_wrong_cirteria(self):
@@ -1064,15 +1065,15 @@ class BaseStoredPlaylistsControllerTest(object):
 
 
 class BaseLibraryControllerTest(object):
-    tracks = []
-
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
     albums = [Album(name='album1', artists=artists[:1]),
-              Album(name='album2', artists=artists[1:2]),
-              Album()]
-    tracks = [Track(name='track1', length=4000, artists=artists[:1], album=albums[0], uri='file://' + data_folder('uri1')),
-              Track(name='track2', length=4000, artists=artists[1:2], album=albums[1], uri='file://' + data_folder('uri2')),
-              Track()]
+        Album(name='album2', artists=artists[1:2]),
+        Album()]
+    tracks = [Track(name='track1', length=4000, artists=artists[:1],
+            album=albums[0], uri='file://' + data_folder('uri1')),
+        Track(name='track2', length=4000, artists=artists[1:2],
+            album=albums[1], uri='file://' + data_folder('uri2')),
+        Track()]
 
     def setUp(self):
         self.backend = self.backend_class(mixer=DummyMixer())
