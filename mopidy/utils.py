@@ -25,13 +25,12 @@ def get_class(name):
     class_object = getattr(module, class_name)
     return class_object
 
-def get_or_create_dotdir(dotdir):
-    # FIXME get_or_create_folder ...
-    dotdir = os.path.expanduser(dotdir)
-    if not os.path.isdir(dotdir):
-        logger.info(u'Creating %s', dotdir)
-        os.mkdir(dotdir, 0755)
-    return dotdir
+def get_or_create_folder(folder):
+    folder = os.path.expanduser(folder)
+    if not os.path.isdir(folder):
+        logger.info(u'Creating %s', folder)
+        os.mkdir(folder, 0755)
+    return folder
 
 def path_to_uri(*paths):
     path = os.path.join(*paths)

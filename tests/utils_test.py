@@ -2,14 +2,42 @@
 
 import os
 import sys
+import shutil
 import tempfile
 import unittest
 import urllib
 
-from mopidy.utils import parse_m3u, parse_mpd_tag_cache, path_to_uri
+from mopidy.utils import *
 from mopidy.models import Track, Artist, Album
 
 from tests import SkipTest, data_folder
+
+class GetOrCreateFolderTest(unittest.TestCase):
+    def setUp(self):
+        self.parent = tempfile.mkdtemp()
+
+    def tearDown(self):
+        if os.path.isdir(self.parent):
+            shutil.rmtree(self.parent)
+
+    def test_creating_folder(self):
+        folder = os.path.join(self.parent, 'test')
+        self.assert_(not os.path.exists(folder))
+        self.assert_(not os.path.isdir(folder))
+        created = get_or_create_folder(folder)
+        self.assert_(os.path.exists(folder))
+        self.assert_(os.path.isdir(folder))
+        self.assertEqual(created, folder)
+
+    def test_creating_existing_folder(self):
+        created = get_or_create_folder(self.parent)
+        self.assert_(os.path.exists(self.parent))
+        self.assert_(os.path.isdir(self.parent))
+        self.assertEqual(created, self.parent)
+
+    def test_that_userfolder_is_expanded(self):
+        raise SkipTest # Not sure how to safely test this
+
 
 class PathToFileURITest(unittest.TestCase):
     def test_simple_path(self):
