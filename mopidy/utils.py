@@ -151,15 +151,13 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
     Converts a MPD tag_cache into a lists of tracks, artists and albums.
     """
     tracks = set()
-    artists = set()
-    albums = set()
 
     try:
         with open(tag_cache) as library:
             contents = library.read()
     except IOError, e:
         logger.error('Could not open tag cache: %s', e)
-        return tracks, artists, albums
+        return tracks
 
     current = {}
     state = None
@@ -177,16 +175,16 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
         key, value = line.split(': ', 1)
 
         if key == 'key':
-            _convert_mpd_data(current, tracks, artists, albums, music_dir)
+            _convert_mpd_data(current, tracks, music_dir)
             current.clear()
 
         current[key.lower()] = value
 
-    _convert_mpd_data(current, tracks, artists, albums, music_dir)
+    _convert_mpd_data(current, tracks, music_dir)
 
-    return tracks, artists, albums
+    return tracks
 
-def _convert_mpd_data(data, tracks, artists, albums, music_dir):
+def _convert_mpd_data(data, tracks, music_dir):
     if not data:
         return
 
@@ -199,14 +197,12 @@ def _convert_mpd_data(data, tracks, artists, albums, music_dir):
 
     if 'artist' in data:
         artist = Artist(name=data['artist'])
-        artists.add(artist)
         track_kwargs['artists'] = [artist]
         album_kwargs['artists'] = [artist]
 
     if 'album' in data:
         album_kwargs['name'] = data['album']
         album = Album(**album_kwargs)
-        albums.add(album)
         track_kwargs['album'] = album
 
     if 'title' in data:

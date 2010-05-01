@@ -151,27 +151,19 @@ generate_track('subdir1/subsubdir/song9.mp3')
 
 class MPDTagCacheToTracksTest(unittest.TestCase):
     def test_emtpy_cache(self):
-        tracks, artists, albums = parse_mpd_tag_cache(data_folder('empty_tag_cache'),
+        tracks = parse_mpd_tag_cache(data_folder('empty_tag_cache'),
             data_folder(''))
         self.assertEqual(set(), tracks)
-        self.assertEqual(set(), artists)
-        self.assertEqual(set(), albums)
 
     def test_simple_cache(self):
-        tracks, artists, albums = parse_mpd_tag_cache(data_folder('simple_tag_cache'),
+        tracks = parse_mpd_tag_cache(data_folder('simple_tag_cache'),
             data_folder(''))
-
         self.assertEqual(expected_tracks[0], list(tracks)[0])
-        self.assertEqual(set(expected_artists), artists)
-        self.assertEqual(set(expected_albums), albums)
 
     def test_advanced_cache(self):
-        tracks, artists, albums = parse_mpd_tag_cache(data_folder('advanced_tag_cache'),
+        tracks = parse_mpd_tag_cache(data_folder('advanced_tag_cache'),
              data_folder(''))
-
         self.assertEqual(set(expected_tracks), tracks)
-        self.assertEqual(set(expected_artists), artists)
-        self.assertEqual(set(expected_albums), albums)
 
     def test_unicode_cache(self):
         raise SkipTest
@@ -181,12 +173,7 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         raise SkipTest
 
     def test_cache_with_blank_track_info(self):
-        tracks, artists, albums = parse_mpd_tag_cache(data_folder('blank_tag_cache'),
+        tracks = parse_mpd_tag_cache(data_folder('blank_tag_cache'),
             data_folder(''))
-
         uri = path_to_uri(data_folder('song1.mp3'))
-
         self.assertEqual(set([Track(uri=uri, length=4000)]), tracks)
-        self.assertEqual(set(), artists)
-        self.assertEqual(set(), albums)
-

@@ -188,7 +188,7 @@ class GStreamerLibraryController(BaseLibraryController):
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks, artists, albums = parse_mpd_tag_cache(settings.TAG_CACHE,
+        tracks = parse_mpd_tag_cache(settings.TAG_CACHE,
             settings.MUSIC_FOLDER)
 
         for track in tracks:
