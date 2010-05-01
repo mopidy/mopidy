@@ -12,29 +12,37 @@ from mopidy.models import Track, Artist, Album
 from tests import SkipTest, data_folder
 
 class PathToFileURITest(unittest.TestCase):
-    def test_windows_paths(self):
-        if sys.platform != 'win32':
-            return
-        result = path_to_uri('c:/WINDOWS/clock.avi')
-        self.assertEqual(result, 'file:///c:/WINDOWS/clock.avi')
-
-    def test_folder_prefix_unix(self):
-        if sys.platform != 'win32':
-            return
-        result = path_to_uri('c:/WINDOWS/', 'clock.avi')
-        self.assertEqual(result, 'file:///c:/WINDOWS/clock.avi')
-
-    def test_unix_paths(self):
+    def test_simple_path(self):
         if sys.platform == 'win32':
-            return
-        result = path_to_uri('/etc/fstab')
-        self.assertEqual(result, 'file:///etc/fstab')
+            result = path_to_uri(u'c:/WINDOWS/clock.avi')
+            self.assertEqual(result, u'file:///c:/WINDOWS/clock.avi')
+        else:
+            result = path_to_uri(u'/etc/fstab')
+            self.assertEqual(result, u'file:///etc/fstab')
 
-    def test_folder_prefix_unix(self):
+    def test_folder_and_path(self):
         if sys.platform == 'win32':
-            return
-        result = path_to_uri('/etc', 'fstab')
-        self.assertEqual(result, 'file:///etc/fstab')
+            result = path_to_uri(u'c:/WINDOWS/', u'clock.avi')
+            self.assertEqual(result, u'file:///c:/WINDOWS/clock.avi')
+        else:
+            result = path_to_uri(u'/etc', u'fstab')
+            self.assertEqual(result, u'file:///etc/fstab')
+
+    def test_space_in_path(self):
+        if sys.platform == 'win32':
+            result = path_to_uri(u'c:/test this')
+            self.assertEqual(result, u'file:///c:/test%20this')
+        else:
+            result = path_to_uri(u'/tmp/test this')
+            self.assertEqual(result, u'file:///tmp/test%20this')
+
+    def test_unicode_in_path(self):
+        if sys.platform == 'win32':
+            result = path_to_uri(u'c:/æøå')
+            self.assertEqual(result, u'file:///c:/%C3%A6%C3%B8%C3%A5')
+        else:
+            result = path_to_uri(u'/tmp/æøå')
+            self.assertEqual(result, u'file:///tmp/%C3%A6%C3%B8%C3%A5')
 
 
 song1_path = data_folder('song1.mp3')
