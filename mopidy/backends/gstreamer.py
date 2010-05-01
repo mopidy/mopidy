@@ -149,10 +149,10 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
             return
 
         self._playlists.remove(playlist)
-        file = os.path.join(self._folder, playlist.name + '.m3u')
+        filename = os.path.join(self._folder, playlist.name + '.m3u')
 
-        if os.path.exists(file):
-            os.remove(file)
+        if os.path.exists(filename):
+            os.remove(filename)
 
     def rename(self, playlist, name):
         if playlist not in self._playlists:
@@ -171,12 +171,12 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         file_path = os.path.join(self._folder, playlist.name + '.m3u')
 
         # FIXME this should be a save_m3u function, not inside save
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w') as file_handle:
             for track in playlist.tracks:
                 if track.uri.startswith('file://'):
-                    file.write(track.uri[len('file://'):] + '\n')
+                    file_handle.write(track.uri[len('file://'):] + '\n')
                 else:
-                    file.write(track.uri + '\n')
+                    file_handle.write(track.uri + '\n')
 
         self._playlists.append(playlist)
 
