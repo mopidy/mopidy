@@ -33,7 +33,8 @@ def get_or_create_dotdir(dotdir):
         os.mkdir(dotdir, 0755)
     return dotdir
 
-def path_to_uri(path):
+def path_to_uri(*paths):
+    path = os.path.join(*paths)
     return 'file://' + urllib.pathname2url(path)
 
 def indent(string, places=4, linebreak='\n'):

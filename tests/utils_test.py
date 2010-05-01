@@ -18,10 +18,22 @@ class PathToFileURITest(unittest.TestCase):
         result = path_to_uri('c:/WINDOWS/clock.avi')
         self.assertEqual(result, 'file:///c:/WINDOWS/clock.avi')
 
+    def test_folder_prefix_unix(self):
+        if sys.platform != 'win32':
+            return
+        result = path_to_uri('c:/WINDOWS/', 'clock.avi')
+        self.assertEqual(result, 'file:///c:/WINDOWS/clock.avi')
+
     def test_unix_paths(self):
         if sys.platform == 'win32':
             return
         result = path_to_uri('/etc/fstab')
+        self.assertEqual(result, 'file:///etc/fstab')
+
+    def test_folder_prefix_unix(self):
+        if sys.platform == 'win32':
+            return
+        result = path_to_uri('/etc', 'fstab')
         self.assertEqual(result, 'file:///etc/fstab')
 
 
