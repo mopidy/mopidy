@@ -2,6 +2,7 @@ import logging
 from multiprocessing.reduction import reduce_connection
 import os
 import pickle
+import sys
 import urllib
 
 logger = logging.getLogger('mopidy.utils')
@@ -35,6 +36,8 @@ def get_or_create_folder(folder):
 def path_to_uri(*paths):
     path = os.path.join(*paths)
     path = path.encode('utf-8')
+    if sys.platform == 'win32':
+        return 'file:' + urllib.pathname2url(path)
     return 'file://' + urllib.pathname2url(path)
 
 def indent(string, places=4, linebreak='\n'):

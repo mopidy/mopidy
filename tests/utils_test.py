@@ -42,32 +42,32 @@ class GetOrCreateFolderTest(unittest.TestCase):
 class PathToFileURITest(unittest.TestCase):
     def test_simple_path(self):
         if sys.platform == 'win32':
-            result = path_to_uri(u'c:/WINDOWS/clock.avi')
-            self.assertEqual(result, u'file:///c:/WINDOWS/clock.avi')
+            result = path_to_uri(u'C:/WINDOWS/clock.avi')
+            self.assertEqual(result, 'file:///C:/WINDOWS/clock.avi')
         else:
             result = path_to_uri(u'/etc/fstab')
-            self.assertEqual(result, u'file:///etc/fstab')
+            self.assertEqual(result, 'file:///etc/fstab')
 
     def test_folder_and_path(self):
         if sys.platform == 'win32':
-            result = path_to_uri(u'c:/WINDOWS/', u'clock.avi')
-            self.assertEqual(result, u'file:///c:/WINDOWS/clock.avi')
+            result = path_to_uri(u'C:/WINDOWS/', u'clock.avi')
+            self.assertEqual(result, 'file:///C:/WINDOWS/clock.avi')
         else:
             result = path_to_uri(u'/etc', u'fstab')
             self.assertEqual(result, u'file:///etc/fstab')
 
     def test_space_in_path(self):
         if sys.platform == 'win32':
-            result = path_to_uri(u'c:/test this')
-            self.assertEqual(result, u'file:///c:/test%20this')
+            result = path_to_uri(u'C:/test this')
+            self.assertEqual(result, 'file:///C:/test%20this')
         else:
             result = path_to_uri(u'/tmp/test this')
             self.assertEqual(result, u'file:///tmp/test%20this')
 
     def test_unicode_in_path(self):
         if sys.platform == 'win32':
-            result = path_to_uri(u'c:/æøå')
-            self.assertEqual(result, u'file:///c:/%C3%A6%C3%B8%C3%A5')
+            result = path_to_uri(u'C:/æøå')
+            self.assertEqual(result, 'file:///C:/%C3%A6%C3%B8%C3%A5')
         else:
             result = path_to_uri(u'/tmp/æøå')
             self.assertEqual(result, u'file:///tmp/%C3%A6%C3%B8%C3%A5')
