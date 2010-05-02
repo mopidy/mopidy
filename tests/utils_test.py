@@ -95,27 +95,37 @@ class M3UToUriTest(unittest.TestCase):
         self.assertEqual([song1_uri], uris)
 
     def test_file_with_absolute_files(self):
-        with tempfile.NamedTemporaryFile() as tmp:
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(song1_path)
-            tmp.flush()
+        try:
             uris = parse_m3u(tmp.name)
-        self.assertEqual([song1_uri], uris)
+            self.assertEqual([song1_uri], uris)
+        finally:
+            if os.path.exists(tmp.name):
+                os.remove(tmp.name)
 
     def test_file_with_multiple_absolute_files(self):
-        with tempfile.NamedTemporaryFile() as tmp:
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(song1_path+'\n')
             tmp.write('# comment \n')
             tmp.write(song2_path)
-            tmp.flush()
+        try:
             uris = parse_m3u(tmp.name)
-        self.assertEqual([song1_uri, song2_uri], uris)
+            self.assertEqual([song1_uri, song2_uri], uris)
+        finally:
+            if os.path.exists(tmp.name):
+                os.remove(tmp.name)
+
 
     def test_file_with_uri(self):
-        with tempfile.NamedTemporaryFile() as tmp:
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(song1_uri)
-            tmp.flush()
+        try:
             uris = parse_m3u(tmp.name)
-        self.assertEqual([song1_uri], uris)
+            self.assertEqual([song1_uri], uris)
+        finally:
+            if os.path.exists(tmp.name):
+                os.remove(tmp.name)
 
     def test_encoding_is_latin1(self):
         uris = parse_m3u(data_folder('encoding.m3u'))
