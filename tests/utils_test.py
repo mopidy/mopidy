@@ -43,7 +43,7 @@ class PathToFileURITest(unittest.TestCase):
     def test_simple_path(self):
         if sys.platform == 'win32':
             result = path_to_uri(u'C:/WINDOWS/clock.avi')
-            self.assertEqual(result, 'file:///C:/WINDOWS/clock.avi')
+            self.assertEqual(result, 'file:///C://WINDOWS/clock.avi')
         else:
             result = path_to_uri(u'/etc/fstab')
             self.assertEqual(result, 'file:///etc/fstab')
@@ -51,7 +51,7 @@ class PathToFileURITest(unittest.TestCase):
     def test_folder_and_path(self):
         if sys.platform == 'win32':
             result = path_to_uri(u'C:/WINDOWS/', u'clock.avi')
-            self.assertEqual(result, 'file:///C:/WINDOWS/clock.avi')
+            self.assertEqual(result, 'file:///C://WINDOWS/clock.avi')
         else:
             result = path_to_uri(u'/etc', u'fstab')
             self.assertEqual(result, u'file:///etc/fstab')
@@ -59,7 +59,7 @@ class PathToFileURITest(unittest.TestCase):
     def test_space_in_path(self):
         if sys.platform == 'win32':
             result = path_to_uri(u'C:/test this')
-            self.assertEqual(result, 'file:///C:/test%20this')
+            self.assertEqual(result, 'file:///C://test%20this')
         else:
             result = path_to_uri(u'/tmp/test this')
             self.assertEqual(result, u'file:///tmp/test%20this')
@@ -67,7 +67,7 @@ class PathToFileURITest(unittest.TestCase):
     def test_unicode_in_path(self):
         if sys.platform == 'win32':
             result = path_to_uri(u'C:/æøå')
-            self.assertEqual(result, 'file:///C:/%C3%A6%C3%B8%C3%A5')
+            self.assertEqual(result, 'file:///C://%C3%A6%C3%B8%C3%A5')
         else:
             result = path_to_uri(u'/tmp/æøå')
             self.assertEqual(result, u'file:///tmp/%C3%A6%C3%B8%C3%A5')
