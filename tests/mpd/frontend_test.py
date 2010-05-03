@@ -155,7 +155,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['volume']), 0)
 
     def test_status_method_contains_volume(self):
-        self.b.playback.volume = 17
+        self.b.mixer.volume = 17
         result = dict(self.h._status_status())
         self.assert_('volume' in result)
         self.assertEqual(int(result['volume']), 17)
@@ -334,32 +334,32 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
     def test_setvol_below_min(self):
         result = self.h.handle_request(u'setvol "-10"')
         self.assert_(u'OK' in result)
-        self.assertEqual(0, self.b.playback.volume)
+        self.assertEqual(0, self.b.mixer.volume)
 
     def test_setvol_min(self):
         result = self.h.handle_request(u'setvol "0"')
         self.assert_(u'OK' in result)
-        self.assertEqual(0, self.b.playback.volume)
+        self.assertEqual(0, self.b.mixer.volume)
 
     def test_setvol_middle(self):
         result = self.h.handle_request(u'setvol "50"')
         self.assert_(u'OK' in result)
-        self.assertEqual(50, self.b.playback.volume)
+        self.assertEqual(50, self.b.mixer.volume)
 
     def test_setvol_max(self):
         result = self.h.handle_request(u'setvol "100"')
         self.assert_(u'OK' in result)
-        self.assertEqual(100, self.b.playback.volume)
+        self.assertEqual(100, self.b.mixer.volume)
 
     def test_setvol_above_max(self):
         result = self.h.handle_request(u'setvol "110"')
         self.assert_(u'OK' in result)
-        self.assertEqual(100, self.b.playback.volume)
+        self.assertEqual(100, self.b.mixer.volume)
 
     def test_setvol_plus_is_ignored(self):
         result = self.h.handle_request(u'setvol "+10"')
         self.assert_(u'OK' in result)
-        self.assertEqual(10, self.b.playback.volume)
+        self.assertEqual(10, self.b.mixer.volume)
 
     def test_single_off(self):
         result = self.h.handle_request(u'single "0"')

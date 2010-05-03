@@ -954,7 +954,7 @@ class MpdFrontend(object):
             volume = 0
         if volume > 100:
             volume = 100
-        self.backend.playback.volume = volume
+        self.backend.mixer.volume = volume
 
     @handle_pattern(r'^single "(?P<state>[01])"$')
     def _playback_single(self, state):
@@ -1252,8 +1252,8 @@ class MpdFrontend(object):
             return self.backend.playback.current_track.length
 
     def __status_status_volume(self):
-        if self.backend.playback.volume is not None:
-            return self.backend.playback.volume
+        if self.backend.mixer.volume is not None:
+            return self.backend.mixer.volume
         else:
             return 0
 

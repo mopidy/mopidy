@@ -464,23 +464,13 @@ class BasePlaybackController(object):
     def _current_wall_time(self):
         return int(time.time() * 1000)
 
-    @property
-    def volume(self):
-    # FIXME Shouldn't we just be using the backend mixer directly? ie can we
-    # remove this?
-        """
-        The audio volume as an int in the range [0, 100].
-
-        :class:`None` if unknown.
-        """
-        return self.backend.mixer.volume
-
-    @volume.setter
-    def volume(self, volume):
-        self.backend.mixer.volume = volume
-
     def end_of_track_callback(self):
-        """Tell the playback controller that end of track is reached."""
+        """
+        Tell the playback controller that end of track is reached.
+
+        Typically called by :class:`mopidy.process.CoreProcess` after a message
+        from a library thread is received.
+        """
         if self.next_track is not None:
             self.next()
         else:
