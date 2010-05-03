@@ -7,9 +7,6 @@ This change log is used to track all major changes to Mopidy.
 0.1.0a1 (unreleased)
 ====================
 
-- Merged the ``gstreamer`` branch from Thomas Adamcik, bringing more than a
-  hundred new tests, several bugfixes and a new backend for playing music from
-  a local music archive.
 - Backend API changes:
 
     - Removed ``backend.playback.volume`` wrapper. Use ``backend.mixer.volume``
@@ -17,6 +14,12 @@ This change log is used to track all major changes to Mopidy.
     - Renamed ``backend.playback.playlist_position`` to
       ``current_playlist_position`` to match naming of ``current_track``.
     - **[WIP]** Changed API for get/filter/find_exact/search.
+
+- **[WIP]** Merged the ``gstreamer`` branch from Thomas Adamcik, bringing more
+  than a hundred new tests, several bugfixes, and a new backend for playing
+  music from a local music archive.
+- Made :class:`mopidy.mixers.alsa.AlsaMixer` work on machines without a mixer
+  named "Master".
 
 
 0.1.0a0 (2010-03-27)
