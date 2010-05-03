@@ -15,9 +15,13 @@ This change log is used to track all major changes to Mopidy.
       ``current_playlist_position`` to match naming of ``current_track``.
     - **[WIP]** Changed API for get/filter/find_exact/search.
 
-- **[WIP]** Merged the ``gstreamer`` branch from Thomas Adamcik, bringing more
-  than a hundred new tests, several bugfixes, and a new backend for playing
-  music from a local music archive.
+- **[WIP]** Merged the ``gstreamer`` branch from Thomas Adamcik:
+
+    - More than 200 new tests, and thus several bugfixes to existing code.
+    - Several new generic features, like shuffle, consume, and playlist repeat.
+    - A new backend for playing music from a local music archive using the
+      Gstreamer library.
+
 - Made :class:`mopidy.mixers.alsa.AlsaMixer` work on machines without a mixer
   named "Master".
 
