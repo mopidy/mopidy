@@ -1,31 +1,35 @@
 import unittest
 import os
-import urllib
 
 from mopidy import settings
 from mopidy.backends.gstreamer import GStreamerBackend
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
+from mopidy.utils import path_to_uri
 
 from tests.backends.base import *
 from tests import SkipTest, data_folder
 
 song = data_folder('song%s.wav')
-generate_song = lambda i: 'file://' + urllib.pathname2url(song % i)
+generate_song = lambda i: path_to_uri(song % i)
 
 # FIXME can be switched to generic test
-class GStreamerCurrentPlaylistHandlerTest(BaseCurrentPlaylistControllerTest, unittest.TestCase):
-    tracks = [Track(uri=generate_song(i), id=i, length=4464) for i in range(1, 4)]
+class GStreamerCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
+        unittest.TestCase):
+    tracks = [Track(uri=generate_song(i), id=i, length=4464)
+        for i in range(1, 4)]
 
     backend_class = GStreamerBackend
 
 
-class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestCase):
-    tracks = [Track(uri=generate_song(i), id=i, length=4464) for i in range(1, 4)]
+class GStreamerPlaybackControllerTest(BasePlaybackControllerTest,
+        unittest.TestCase):
+    tracks = [Track(uri=generate_song(i), id=i, length=4464)
+        for i in range(1, 4)]
     backend_class = GStreamerBackend
 
-    def add_track(self, file):
-        uri = 'file://' + urllib.pathname2url(data_folder(file))
+    def add_track(self, path):
+        uri = path_to_uri(data_folder(path))
         track = Track(uri=uri, id=1, length=4464)
         self.backend.current_playlist.add(track)
 
@@ -48,7 +52,7 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest, unittest.TestC
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
 
-class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
+class GStreamerStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
         unittest.TestCase):
 
     backend_class = GStreamerBackend
@@ -68,8 +72,8 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
     def test_deleted_playlist_get_removed(self):
         playlist = self.stored.create('test')
         self.stored.delete(playlist)
-        file = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
-        self.assert_(not os.path.exists(file))
+        path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        self.assert_(not os.path.exists(path))
 
     def test_renamed_playlist_gets_moved(self):
         playlist = self.stored.create('test')
@@ -84,20 +88,18 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
         track = Track(uri=generate_song(1))
         uri = track.uri[len('file://'):]
         playlist = Playlist(tracks=[track], name='test')
-        file_path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
 
         self.stored.save(playlist)
 
-        with open(file_path) as file:
-            contents = file.read()
+        with open(path) as playlist_file:
+            contents = playlist_file.read()
 
         self.assertEqual(uri, contents.strip())
 
     def test_playlists_are_loaded_at_startup(self):
         track = Track(uri=generate_song(1))
-        uri = track.uri[len('file://'):]
         playlist = Playlist(tracks=[track], name='test')
-        file_path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
 
         self.stored.save(playlist)
 
@@ -122,7 +124,7 @@ class GStreamerBackendStoredPlaylistsControllerTest(BaseStoredPlaylistsControlle
         raise SkipTest
 
 
-class GStreamerBackendLibraryControllerTest(BaseLibraryControllerTest,
+class GStreamerLibraryControllerTest(BaseLibraryControllerTest,
         unittest.TestCase):
 
     backend_class = GStreamerBackend
@@ -132,12 +134,12 @@ class GStreamerBackendLibraryControllerTest(BaseLibraryControllerTest,
         self.original_music_folder = settings.MUSIC_FOLDER
         settings.TAG_CACHE = data_folder('library_tag_cache')
         settings.MUSIC_FOLDER = data_folder('')
-        super(GStreamerBackendLibraryControllerTest, self).setUp()
+        super(GStreamerLibraryControllerTest, self).setUp()
 
     def tearDown(self):
         settings.TAG_CACHE = self.original_tag_cache
-        settings.MUSIC_FOLDER= self.original_music_folder
-        super(GStreamerBackendLibraryControllerTest, self).tearDown()
+        settings.MUSIC_FOLDER = self.original_music_folder
+        super(GStreamerLibraryControllerTest, self).tearDown()
 
 if __name__ == '__main__':
     unittest.main()

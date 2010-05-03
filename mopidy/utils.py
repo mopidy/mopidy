@@ -2,6 +2,7 @@ import logging
 from multiprocessing.reduction import reduce_connection
 import os
 import pickle
+import sys
 import urllib
 
 logger = logging.getLogger('mopidy.utils')
@@ -25,12 +26,19 @@ def get_class(name):
     class_object = getattr(module, class_name)
     return class_object
 
-def get_or_create_dotdir(dotdir):
-    dotdir = os.path.expanduser(dotdir)
-    if not os.path.isdir(dotdir):
-        logger.info(u'Creating %s', dotdir)
-        os.mkdir(dotdir, 0755)
-    return dotdir
+def get_or_create_folder(folder):
+    folder = os.path.expanduser(folder)
+    if not os.path.isdir(folder):
+        logger.info(u'Creating %s', folder)
+        os.mkdir(folder, 0755)
+    return folder
+
+def path_to_uri(*paths):
+    path = os.path.join(*paths)
+    path = path.encode('utf-8')
+    if sys.platform == 'win32':
+        return 'file:' + urllib.pathname2url(path)
+    return 'file://' + urllib.pathname2url(path)
 
 def indent(string, places=4, linebreak='\n'):
     lines = string.split(linebreak)
@@ -136,9 +144,8 @@ def parse_m3u(file_path):
         if line.startswith('file://'):
             uris.append(line)
         else:
-            path = os.path.join(folder, line)
-            path = urllib.pathname2url(path.encode('utf-8'))
-            uris.append('file://' + path)
+            path = path_to_uri(folder, line)
+            uris.append(path)
 
     return uris
 
@@ -147,15 +154,13 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
     Converts a MPD tag_cache into a lists of tracks, artists and albums.
     """
     tracks = set()
-    artists = set()
-    albums = set()
 
     try:
         with open(tag_cache) as library:
             contents = library.read()
     except IOError, e:
         logger.error('Could not open tag cache: %s', e)
-        return tracks, artists, albums
+        return tracks
 
     current = {}
     state = None
@@ -173,16 +178,16 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
         key, value = line.split(': ', 1)
 
         if key == 'key':
-            _convert_mpd_data(current, tracks, artists, albums, music_dir)
+            _convert_mpd_data(current, tracks, music_dir)
             current.clear()
 
         current[key.lower()] = value
 
-    _convert_mpd_data(current, tracks, artists, albums, music_dir)
+    _convert_mpd_data(current, tracks, music_dir)
 
-    return tracks, artists, albums
+    return tracks
 
-def _convert_mpd_data(data, tracks, artists, albums, music_dir):
+def _convert_mpd_data(data, tracks, music_dir):
     if not data:
         return
 
@@ -195,14 +200,12 @@ def _convert_mpd_data(data, tracks, artists, albums, music_dir):
 
     if 'artist' in data:
         artist = Artist(name=data['artist'])
-        artists.add(artist)
         track_kwargs['artists'] = [artist]
         album_kwargs['artists'] = [artist]
 
     if 'album' in data:
         album_kwargs['name'] = data['album']
         album = Album(**album_kwargs)
-        albums.add(album)
         track_kwargs['album'] = album
 
     if 'title' in data:
@@ -213,7 +216,7 @@ def _convert_mpd_data(data, tracks, artists, albums, music_dir):
     else:
         path = os.path.join(music_dir, data['file'])
 
-    track_kwargs['uri'] = 'file://' + urllib.pathname2url(path)
+    track_kwargs['uri'] = path_to_uri(path)
     track_kwargs['length'] = int(data.get('time', 0)) * 1000
 
     track = Track(**track_kwargs)
