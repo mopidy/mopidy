@@ -14,6 +14,8 @@ This change log is used to track all major changes to Mopidy.
 
     - Removed ``backend.playback.volume`` wrapper. Use ``backend.mixer.volume``
       directly.
+    - Renamed ``backend.playback.playlist_position`` to
+      ``current_playlist_position`` to match naming of ``current_track``.
     - **[WIP]** Changed API for get/filter/find_exact/search.
 
 

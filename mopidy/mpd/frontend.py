@@ -1070,7 +1070,7 @@ class MpdFrontend(object):
         """
         if self.backend.playback.current_track is not None:
             return self.backend.playback.current_track.mpd_format(
-                position=self.backend.playback.playlist_position)
+                position=self.backend.playback.current_playlist_position)
 
     @handle_pattern(r'^idle$')
     @handle_pattern(r'^idle (?P<subsystems>.+)$')
@@ -1226,7 +1226,7 @@ class MpdFrontend(object):
             return self.__status_status_songpos()
 
     def __status_status_songpos(self):
-        return self.backend.playback.playlist_position
+        return self.backend.playback.current_playlist_position
 
     def __status_status_state(self):
         if self.backend.playback.state == self.backend.playback.PLAYING:

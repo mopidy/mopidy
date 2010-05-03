@@ -341,6 +341,17 @@ class BasePlaybackController(object):
         self._play_time_started = None
 
     @property
+    def current_playlist_position(self):
+        """The position of the current track in the current playlist."""
+        if self.current_track is None:
+            return None
+        try:
+            return self.backend.current_playlist.playlist.tracks.index(
+                self.current_track)
+        except ValueError:
+            return None
+
+    @property
     def next_track(self):
         """
         The next :class:`mopidy.models.Track` in the playlist.
@@ -369,22 +380,11 @@ class BasePlaybackController(object):
             return tracks[0]
 
         if self.repeat:
-            return tracks[(self.playlist_position + 1) % len(tracks)]
+            return tracks[(self.current_playlist_position + 1) % len(tracks)]
 
         try:
-            return tracks[self.playlist_position + 1]
+            return tracks[self.current_playlist_position + 1]
         except IndexError:
-            return None
-
-    @property
-    def playlist_position(self):
-        """The position in the current playlist."""
-        if self.current_track is None:
-            return None
-        try:
-            return self.backend.current_playlist.playlist.tracks.index(
-                self.current_track)
-        except ValueError:
             return None
 
     @property
@@ -398,11 +398,11 @@ class BasePlaybackController(object):
         if self.repeat or self.consume or self.random:
             return self.current_track
 
-        if self.current_track is None or self.playlist_position == 0:
+        if self.current_track is None or self.current_playlist_position == 0:
             return None
 
         return self.backend.current_playlist.playlist.tracks[
-            self.playlist_position - 1]
+            self.current_playlist_position - 1]
 
     @property
     def state(self):
