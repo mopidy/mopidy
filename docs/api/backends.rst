@@ -16,6 +16,9 @@ The backend and its controllers
 Backend API
 ===========
 
+.. automodule:: mopidy.backends
+    :synopsis: Backend interface.
+
 .. note::
 
     Currently this only documents the API that is available for use by
@@ -26,8 +29,54 @@ Backend API
     generally just implement or override a few of these methods yourself to
     create a new backend with a complete feature set.
 
-.. automodule:: mopidy.backends
-    :synopsis: Backend interface.
+.. autoclass:: mopidy.backends.BaseBackend
+    :members:
+    :undoc-members:
+
+
+Playback controller
+-------------------
+
+Manages playback, with actions like play, pause, stop, next, previous, and
+seek.
+
+.. autoclass:: mopidy.backends.BasePlaybackController
+    :members:
+    :undoc-members:
+
+
+Mixer controller
+----------------
+
+Manages volume. See :class:`mopidy.mixers.BaseMixer`.
+
+
+Current playlist controller
+---------------------------
+
+Manages everything related to the currently loaded playlist.
+
+.. autoclass:: mopidy.backends.BaseCurrentPlaylistController
+    :members:
+    :undoc-members:
+
+
+Stored playlists controller
+---------------------------
+
+Manages stored playlist.
+
+.. autoclass:: mopidy.backends.BaseStoredPlaylistsController
+    :members:
+    :undoc-members:
+
+
+Library controller
+------------------
+
+Manages the music library, e.g. searching for tracks to be added to a playlist.
+
+.. autoclass:: mopidy.backends.BaseLibraryController
     :members:
     :undoc-members:
 

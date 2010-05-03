@@ -14,6 +14,15 @@ __all__ = ['BaseBackend', 'BasePlaybackController',
     'BaseLibraryController']
 
 class BaseBackend(object):
+    """
+    :param core_queue: a queue for sending messages to
+        :class:`mopidy.process.CoreProcess`
+    :type core_queue: :class:`multiprocessing.Queue`
+    :param mixer: either a mixer instance, or :class:`None` to use the mixer
+        defined in settings
+    :type mixer: :class:`mopidy.mixers.BaseMixer` or :class:`None`
+    """
+
     def __init__(self, core_queue=None, mixer=None):
         self.core_queue = core_queue
         if mixer is not None:
@@ -22,7 +31,8 @@ class BaseBackend(object):
             self.mixer = get_class(settings.MIXER)()
 
     #: A :class:`multiprocessing.Queue` which can be used by e.g. library
-    #: callbacks to send messages to the core.
+    #: callbacks executing in other threads to send messages to the core
+    #: thread, so that action may be taken in the correct thread.
     core_queue = None
 
     #: The current playlist controller. An instance of
@@ -73,13 +83,16 @@ class BaseCurrentPlaylistController(object):
     """
 
     #: The current playlist version. Integer which is increased every time the
-    #: current playlist is changed. Is not reset before the MPD server is
-    #: restarted.
+    #: current playlist is changed. Is not reset before Mopidy is restarted.
     version = 0
 
     def __init__(self, backend):
         self.backend = backend
         self._playlist = Playlist()
+
+    def destroy(self):
+        """Cleanup after component."""
+        pass
 
     @property
     def playlist(self):
@@ -229,7 +242,7 @@ class BaseCurrentPlaylistController(object):
         self.playlist = self.playlist.with_(tracks=before+shuffled+after)
 
     def destroy(self):
-        """Cleanup after component"""
+        """Cleanup after component."""
         pass
 
 
@@ -241,6 +254,10 @@ class BaseLibraryController(object):
 
     def __init__(self, backend):
         self.backend = backend
+
+    def destroy(self):
+        """Cleanup after component."""
+        pass
 
     def find_exact(self, field, query):
         """
@@ -285,10 +302,6 @@ class BaseLibraryController(object):
         """
         raise NotImplementedError
 
-    def destroy(self):
-        """Cleanup after component"""
-        pass
-
 
 class BasePlaybackController(object):
     """
@@ -321,9 +334,10 @@ class BasePlaybackController(object):
     random = False
 
     #: :class:`True`
-    #:     The current track is played repeatedly.
+    #:     The current playlist is played repeatedly. To repeat a single track,
+    #:     select both :attr:`repeat` and :attr:`single`.
     #: :class:`False`
-    #:     The current track is played once.
+    #:     The current playlist is played once.
     repeat = False
 
     #: :class:`True`
@@ -339,6 +353,10 @@ class BasePlaybackController(object):
         self._first_shuffle = True
         self._play_time_accumulated = 0
         self._play_time_started = None
+
+    def destroy(self):
+        """Cleanup after component."""
+        pass
 
     @property
     def current_playlist_position(self):
@@ -392,8 +410,9 @@ class BasePlaybackController(object):
         """
         The previous :class:`mopidy.models.Track` in the playlist.
 
-        For normal playback this is the previous track in the playlist. If random
-        and/or consume is enabled it should return the current track instead.
+        For normal playback this is the previous track in the playlist. If
+        random and/or consume is enabled it should return the current track
+        instead.
         """
         if self.repeat or self.consume or self.random:
             return self.current_track
@@ -478,7 +497,12 @@ class BasePlaybackController(object):
             self.current_track = None
 
     def new_playlist_loaded_callback(self):
-        """Tell the playback controller that a new playlist has been loaded."""
+        """
+        Tell the playback controller that a new playlist has been loaded.
+
+        Typically called by :class:`mopidy.process.CoreProcess` after a message
+        from a library thread is received.
+        """
         self.current_track = None
         self._first_shuffle = True
         self._shuffled = []
@@ -601,10 +625,6 @@ class BasePlaybackController(object):
     def _stop(self):
         raise NotImplementedError
 
-    def destroy(self):
-        """Cleanup after component"""
-        pass
-
 
 class BaseStoredPlaylistsController(object):
     """
@@ -615,6 +635,10 @@ class BaseStoredPlaylistsController(object):
     def __init__(self, backend):
         self.backend = backend
         self._playlists = []
+
+    def destroy(self):
+        """Cleanup after component."""
+        pass
 
     @property
     def playlists(self):
@@ -716,7 +740,3 @@ class BaseStoredPlaylistsController(object):
         :rtype: list of :class:`mopidy.models.Playlist`
         """
         return filter(lambda p: query in p.name, self._playlists)
-
-    def destroy(self):
-        """Cleanup after component"""
-        pass
