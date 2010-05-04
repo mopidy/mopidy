@@ -24,6 +24,8 @@ This change log is used to track all major changes to Mopidy.
 
 - Made :class:`mopidy.mixers.alsa.AlsaMixer` work on machines without a mixer
   named "Master".
+- Make :class:`mopidy.backends.DespotifyBackend` ignore local files in
+  playlists (feature added in Spotify 0.4.3). Reported by Richard Haugen Olsen.
 
 
 0.1.0a0 (2010-03-27)

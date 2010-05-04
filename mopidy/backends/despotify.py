@@ -137,6 +137,8 @@ class DespotifyTranslator(object):
 
     @classmethod
     def to_mopidy_track(cls, spotify_track):
+        if not spotify_track.has_meta_data():
+            return None
         if dt.MINYEAR <= int(spotify_track.year) <= dt.MAXYEAR:
             date = dt.date(spotify_track.year, 1, 1)
         else:
@@ -158,7 +160,7 @@ class DespotifyTranslator(object):
         return Playlist(
             uri=spotify_playlist.get_uri(),
             name=spotify_playlist.name.decode(ENCODING),
-            tracks=[cls.to_mopidy_track(t) for t in spotify_playlist.tracks],
+            tracks=filter(None, [cls.to_mopidy_track(t) for t in spotify_playlist.tracks]),
         )
 
 
