@@ -273,11 +273,11 @@ class BaseLibraryController(object):
 
     def lookup(self, uri):
         """
-        Lookup track with given URI.
+        Lookup track with given URI. Returns :class:`None` if not found.
 
         :param uri: track URI
         :type uri: string
-        :rtype: :class:`mopidy.models.Track`
+        :rtype: :class:`mopidy.models.Track` or :class:`None`
         """
         raise NotImplementedError
 
