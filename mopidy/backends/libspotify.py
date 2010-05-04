@@ -178,12 +178,12 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     appkey_file = os.path.expanduser(settings.SPOTIFY_LIB_APPKEY)
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password, core_queue, audio_controller):
+    def __init__(self, username, password, core_queue, audio_controller_class):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)
         self.core_queue = core_queue
         self.connected = threading.Event()
-        self.audio = audio_controller()
+        self.audio = audio_controller_class()
         self.session = None
 
     def run(self):
