@@ -397,12 +397,13 @@ class BasePlaybackControllerTest(object):
     def test_next(self):
         self.playback.play()
 
-        old_position = self.playback.playlist_position
+        old_position = self.playback.current_playlist_position
         old_uri = self.playback.current_track.uri
 
         self.playback.next()
 
-        self.assertEqual(self.playback.playlist_position, old_position+1)
+        self.assertEqual(self.playback.current_playlist_position,
+            old_position+1)
         self.assertNotEqual(self.playback.current_track.uri, old_uri)
 
     @populate_playlist
@@ -422,7 +423,7 @@ class BasePlaybackControllerTest(object):
         for i, track in enumerate(self.tracks):
             self.assertEqual(self.playback.state, self.playback.PLAYING)
             self.assertEqual(self.playback.current_track, track)
-            self.assertEqual(self.playback.playlist_position, i)
+            self.assertEqual(self.playback.current_playlist_position, i)
 
             self.playback.next()
 
@@ -584,25 +585,25 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.current_track, self.tracks[1])
 
     @populate_playlist
-    def test_initial_playlist_position(self):
-        self.assertEqual(self.playback.playlist_position, None)
+    def test_initial_current_playlist_position(self):
+        self.assertEqual(self.playback.current_playlist_position, None)
 
     @populate_playlist
-    def test_playlist_position_during_play(self):
+    def test_current_playlist_position_during_play(self):
         self.playback.play()
-        self.assertEqual(self.playback.playlist_position, 0)
+        self.assertEqual(self.playback.current_playlist_position, 0)
 
     @populate_playlist
-    def test_playlist_position_after_next(self):
+    def test_current_playlist_position_after_next(self):
         self.playback.play()
         self.playback.next()
-        self.assertEqual(self.playback.playlist_position, 1)
+        self.assertEqual(self.playback.current_playlist_position, 1)
 
     @populate_playlist
-    def test_playlist_position_at_end_of_playlist(self):
+    def test_current_playlist_position_at_end_of_playlist(self):
         self.playback.play(self.tracks[-1])
         self.playback.end_of_track_callback()
-        self.assertEqual(self.playback.playlist_position, None)
+        self.assertEqual(self.playback.current_playlist_position, None)
 
     def test_new_playlist_loaded_callback_gets_called(self):
         callback = self.playback.new_playlist_loaded_callback

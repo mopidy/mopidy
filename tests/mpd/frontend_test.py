@@ -155,7 +155,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['volume']), 0)
 
     def test_status_method_contains_volume(self):
-        self.b.playback.volume = 17
+        self.b.mixer.volume = 17
         result = dict(self.h._status_status())
         self.assert_('volume' in result)
         self.assertEqual(int(result['volume']), 17)
@@ -334,32 +334,32 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
     def test_setvol_below_min(self):
         result = self.h.handle_request(u'setvol "-10"')
         self.assert_(u'OK' in result)
-        self.assertEqual(0, self.b.playback.volume)
+        self.assertEqual(0, self.b.mixer.volume)
 
     def test_setvol_min(self):
         result = self.h.handle_request(u'setvol "0"')
         self.assert_(u'OK' in result)
-        self.assertEqual(0, self.b.playback.volume)
+        self.assertEqual(0, self.b.mixer.volume)
 
     def test_setvol_middle(self):
         result = self.h.handle_request(u'setvol "50"')
         self.assert_(u'OK' in result)
-        self.assertEqual(50, self.b.playback.volume)
+        self.assertEqual(50, self.b.mixer.volume)
 
     def test_setvol_max(self):
         result = self.h.handle_request(u'setvol "100"')
         self.assert_(u'OK' in result)
-        self.assertEqual(100, self.b.playback.volume)
+        self.assertEqual(100, self.b.mixer.volume)
 
     def test_setvol_above_max(self):
         result = self.h.handle_request(u'setvol "110"')
         self.assert_(u'OK' in result)
-        self.assertEqual(100, self.b.playback.volume)
+        self.assertEqual(100, self.b.mixer.volume)
 
     def test_setvol_plus_is_ignored(self):
         result = self.h.handle_request(u'setvol "+10"')
         self.assert_(u'OK' in result)
-        self.assertEqual(10, self.b.playback.volume)
+        self.assertEqual(10, self.b.mixer.volume)
 
     def test_single_off(self):
         result = self.h.handle_request(u'single "0"')
@@ -460,6 +460,14 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'play "0"')
         self.assert_(u'ACK Position out of bounds' in result)
         self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
+
+    def test_play_minus_one_plays_first_in_playlist(self):
+        track = Track(id=0)
+        self.b.current_playlist.load(Playlist(tracks=[track]))
+        result = self.h.handle_request(u'play "-1"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+        self.assertEqual(self.b.playback.current_track, track)
 
     def test_playid(self):
         self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
@@ -964,9 +972,10 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         listplaylists_result = self.h.handle_request(u'listplaylists')
         self.assertEqual(lsinfo_result, listplaylists_result)
 
-    def test_lsinfo_with_path(self):
-        result = self.h.handle_request(u'lsinfo ""')
-        self.assert_(u'ACK Not implemented' in result)
+    def test_lsinfo_with_empty_path_returns_same_as_listplaylists(self):
+        lsinfo_result = self.h.handle_request(u'lsinfo ""')
+        listplaylists_result = self.h.handle_request(u'listplaylists')
+        self.assertEqual(lsinfo_result, listplaylists_result)
 
     def test_lsinfo_for_root_returns_same_as_listplaylists(self):
         lsinfo_result = self.h.handle_request(u'lsinfo "/"')

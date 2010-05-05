@@ -679,8 +679,12 @@ class MpdFrontend(object):
             When listing the root directory, this currently returns the list of
             stored playlists. This behavior is deprecated; use
             ``listplaylists`` instead.
+
+        MPD returns the same result, including both playlists and the files and
+        directories located at the root level, for both ``lsinfo``, ``lsinfo
+        ""``, and ``lsinfo "/"``.
         """
-        if uri == u'/' or uri is None:
+        if uri is None or uri == u'/' or uri == u'':
             return self._stored_playlists_listplaylists()
         raise MpdNotImplemented # TODO
 
@@ -835,6 +839,7 @@ class MpdFrontend(object):
             raise MpdAckError(e[0])
 
     @handle_pattern(r'^play "(?P<songpos>\d+)"$')
+    @handle_pattern(r'^play "(?P<songpos>-1)"$')
     def _playback_playpos(self, songpos):
         """
         *musicpd.org, playback section:*
@@ -842,10 +847,17 @@ class MpdFrontend(object):
             ``play [SONGPOS]``
 
             Begins playing the playlist at song number ``SONGPOS``.
+
+        *MPoD:*
+
+        - issues ``play "-1"`` after playlist replacement.
         """
         songpos = int(songpos)
         try:
-            track = self.backend.current_playlist.playlist.tracks[songpos]
+            if songpos == -1:
+                track = self.backend.current_playlist.playlist.tracks[0]
+            else:
+                track = self.backend.current_playlist.playlist.tracks[songpos]
             return self.backend.playback.play(track)
         except IndexError:
             raise MpdAckError(u'Position out of bounds')
@@ -954,7 +966,7 @@ class MpdFrontend(object):
             volume = 0
         if volume > 100:
             volume = 100
-        self.backend.playback.volume = volume
+        self.backend.mixer.volume = volume
 
     @handle_pattern(r'^single "(?P<state>[01])"$')
     def _playback_single(self, state):
@@ -1070,7 +1082,7 @@ class MpdFrontend(object):
         """
         if self.backend.playback.current_track is not None:
             return self.backend.playback.current_track.mpd_format(
-                position=self.backend.playback.playlist_position)
+                position=self.backend.playback.current_playlist_position)
 
     @handle_pattern(r'^idle$')
     @handle_pattern(r'^idle (?P<subsystems>.+)$')
@@ -1226,7 +1238,7 @@ class MpdFrontend(object):
             return self.__status_status_songpos()
 
     def __status_status_songpos(self):
-        return self.backend.playback.playlist_position
+        return self.backend.playback.current_playlist_position
 
     def __status_status_state(self):
         if self.backend.playback.state == self.backend.playback.PLAYING:
@@ -1252,8 +1264,8 @@ class MpdFrontend(object):
             return self.backend.playback.current_track.length
 
     def __status_status_volume(self):
-        if self.backend.playback.volume is not None:
-            return self.backend.playback.volume
+        if self.backend.mixer.volume is not None:
+            return self.backend.mixer.volume
         else:
             return 0
 

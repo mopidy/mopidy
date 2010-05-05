@@ -47,13 +47,16 @@ class LibspotifyBackend(BaseBackend):
         self.stored_playlists = LibspotifyStoredPlaylistsController(
             backend=self)
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
+        self.audio_controller_class = kwargs.get(
+            'audio_controller_class', AlsaController)
         self.spotify = self._connect()
 
     def _connect(self):
         logger.info(u'Connecting to Spotify')
         spotify = LibspotifySessionManager(
             settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
-            core_queue=self.core_queue)
+            core_queue=self.core_queue,
+            audio_controller_class=self.audio_controller_class)
         spotify.start()
         return spotify
 
@@ -175,12 +178,12 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     appkey_file = os.path.expanduser(settings.SPOTIFY_LIB_APPKEY)
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password, core_queue):
+    def __init__(self, username, password, core_queue, audio_controller_class):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)
         self.core_queue = core_queue
         self.connected = threading.Event()
-        self.audio = AlsaController()
+        self.audio = audio_controller_class()
         self.session = None
 
     def run(self):
