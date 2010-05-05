@@ -29,6 +29,14 @@ BACKENDS = (
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
     ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
+#: The log format used for dump logs. Default::
+#:    DUMP_LOG_FILENAME = CONSOLE_LOG_FORMAT
+DUMP_LOG_FORMAT = CONSOLE_LOG_FORMAT
+
+#: The file to dump debug log data to. Default::
+#:    DUMP_LOG_FILENAME = u'dump.log'
+DUMP_LOG_FILENAME = u'dump.log'
+
 #: Protocol frontend to use. Default::
 #:
 #:     FRONTEND = u'mopidy.mpd.frontend.MpdFrontend'
@@ -52,6 +60,12 @@ if sys.platform == 'linux2':
     MIXER = u'mopidy.mixers.alsa.AlsaMixer'
 elif sys.platform == 'darwin':
     MIXER = u'mopidy.mixers.osa.OsaMixer'
+
+#: ALSA mixer only. What mixer control to use. If set to :class:`False`, first
+#: ``Master`` and then ``PCM`` will be tried.
+#:
+#: Example: ``Master Front``. *Default:* :class:`False`
+MIXER_ALSA_CONTROL = False
 
 #: External mixers only. Which port the mixer is connected to.
 #:

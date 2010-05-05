@@ -68,7 +68,8 @@ class MpdSession(asynchat.async_chat):
         data = ''.join(self.input_buffer).strip()
         self.input_buffer = []
         request = data.decode(ENCODING)
-        logger.debug(u'Input: %s', indent(request))
+        host, port = self.client_address
+        logger.debug(u'Input (%s:%s): %s', host, port, indent(request))
         self.handle_request(request)
 
     def handle_request(self, request):
@@ -87,7 +88,8 @@ class MpdSession(asynchat.async_chat):
         self.send_response(LINE_TERMINATOR.join(response))
 
     def send_response(self, output):
-        logger.debug(u'Output: %s', indent(output))
+        host, port = self.client_address
+        logger.debug(u'Output (%s:%s): %s', host, port, indent(output))
         output = u'%s%s' % (output, LINE_TERMINATOR)
         data = output.encode(ENCODING)
         self.push(data)

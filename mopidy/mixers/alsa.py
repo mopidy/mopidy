@@ -1,6 +1,7 @@
 import alsaaudio
 import logging
 
+from mopidy import settings
 from mopidy.mixers import BaseMixer
 
 logger = logging.getLogger('mopidy.mixers.alsa')
@@ -13,16 +14,29 @@ class AlsaMixer(BaseMixer):
 
     def __init__(self, *args, **kwargs):
         super(AlsaMixer, self).__init__(*args, **kwargs)
-        # A mixer named 'Master' does not always exist, so we fall back to
-        # using 'PCM'. If this turns out to be a bad solution, we should make
-        # it possible to override with a setting.
-        self._mixer = None
-        for mixer_name in (u'Master', u'PCM'):
-            if mixer_name in alsaaudio.mixers():
-                logger.info(u'Mixer in use: %s', mixer_name)
-                self._mixer = alsaaudio.Mixer(mixer_name)
-                break
+        self._mixer = alsaaudio.Mixer(self._get_mixer_control())
         assert self._mixer is not None
+
+    def _get_mixer_control(self):
+        """Returns the first mixer control candidate that is known to ALSA"""
+        candidates = self._get_mixer_control_candidates()
+        for control in candidates:
+            if control in alsaaudio.mixers():
+                logger.info(u'Mixer control in use: %s', control)
+                return control
+            else:
+                logger.debug(u'Mixer control not found, skipping: %s', control)
+        logger.warning(u'No working mixer controls found. Tried: %s', candidates)
+
+    def _get_mixer_control_candidates(self):
+        """
+        A mixer named 'Master' does not always exist, so we fall back to using
+        'PCM'. If this does not work for you, you may set
+        :attr:`mopidy.settings.MIXER_ALSA_CONTROL`.
+        """
+        if settings.MIXER_ALSA_CONTROL:
+            return [settings.MIXER_ALSA_CONTROL]
+        return [u'Master', u'PCM']
 
     def _get_volume(self):
         return self._mixer.getvolume()[0]
