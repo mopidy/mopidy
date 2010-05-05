@@ -255,7 +255,10 @@ class MpdFrontend(object):
         """
         if songpos is not None:
             songpos = int(songpos)
-        track = self.backend.library.lookup(uri)
+        try:
+            track = self.backend.library.lookup(uri)
+        except LookupError:
+            raise MpdAckError(u'[50@0] {add} directory or file not found')
         if track is not None:
             self.backend.current_playlist.add(track, at_position=songpos)
             return ('Id', track.id)
