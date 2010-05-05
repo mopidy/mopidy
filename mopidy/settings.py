@@ -30,11 +30,13 @@ CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
     ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
 #: The log format used for dump logs. Default::
-#:    DUMP_LOG_FILENAME = CONSOLE_LOG_FORMAT
+#:
+#:     DUMP_LOG_FILENAME = CONSOLE_LOG_FORMAT
 DUMP_LOG_FORMAT = CONSOLE_LOG_FORMAT
 
 #: The file to dump debug log data to. Default::
-#:    DUMP_LOG_FILENAME = u'dump.log'
+#:
+#:     DUMP_LOG_FILENAME = u'dump.log'
 DUMP_LOG_FILENAME = u'dump.log'
 
 #: Protocol frontend to use. Default::
@@ -64,28 +66,28 @@ elif sys.platform == 'darwin':
 #: ALSA mixer only. What mixer control to use. If set to :class:`False`, first
 #: ``Master`` and then ``PCM`` will be tried.
 #:
-#: Example: ``Master Front``. *Default:* :class:`False`
+#: Example: ``Master Front``. Default: :class:`False`
 MIXER_ALSA_CONTROL = False
 
 #: External mixers only. Which port the mixer is connected to.
 #:
 #: This must point to the device port like ``/dev/ttyUSB0``.
-#: *Default:* :class:`None`
+#: Default: :class:`None`
 MIXER_EXT_PORT = None
 
 #: External mixers only. What input source the external mixer should use.
 #:
-#: Example: ``Aux``. *Default:* :class:`None`
+#: Example: ``Aux``. Default: :class:`None`
 MIXER_EXT_SOURCE = None
 
 #: External mixers only. What state Speakers A should be in.
 #:
-#: *Default:* :class:`None`.
+#: Default: :class:`None`.
 MIXER_EXT_SPEAKERS_A = None
 
 #: External mixers only. What state Speakers B should be in.
 #:
-#: *Default:* :class:`None`.
+#: Default: :class:`None`.
 MIXER_EXT_SPEAKERS_B = None
 
 #: Server to use. Default::
@@ -96,12 +98,12 @@ SERVER = u'mopidy.mpd.server.MpdServer'
 #: Which address Mopidy should bind to. Examples:
 #:
 #: ``localhost``
-#:     Listens only on the loopback interface. *Default.*
+#:     Listens only on the loopback interface. Default.
 #: ``0.0.0.0``
 #:     Listens on all interfaces.
 SERVER_HOSTNAME = u'localhost'
 
-#: Which TCP port Mopidy should listen to. *Default: 6600*
+#: Which TCP port Mopidy should listen to. Default: 6600
 SERVER_PORT = 6600
 
 #: Your Spotify Premium username. Used by all Spotify backends.
