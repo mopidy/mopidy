@@ -964,9 +964,10 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         listplaylists_result = self.h.handle_request(u'listplaylists')
         self.assertEqual(lsinfo_result, listplaylists_result)
 
-    def test_lsinfo_with_path(self):
-        result = self.h.handle_request(u'lsinfo ""')
-        self.assert_(u'ACK Not implemented' in result)
+    def test_lsinfo_with_empty_path_returns_same_as_listplaylists(self):
+        lsinfo_result = self.h.handle_request(u'lsinfo ""')
+        listplaylists_result = self.h.handle_request(u'listplaylists')
+        self.assertEqual(lsinfo_result, listplaylists_result)
 
     def test_lsinfo_for_root_returns_same_as_listplaylists(self):
         lsinfo_result = self.h.handle_request(u'lsinfo "/"')

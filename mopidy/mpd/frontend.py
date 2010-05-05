@@ -679,8 +679,12 @@ class MpdFrontend(object):
             When listing the root directory, this currently returns the list of
             stored playlists. This behavior is deprecated; use
             ``listplaylists`` instead.
+
+        MPD returns the same result, including both playlists and the files and
+        directories located at the root level, for both ``lsinfo``, ``lsinfo
+        ""``, and ``lsinfo "/"``.
         """
-        if uri == u'/' or uri is None:
+        if uri is None or uri == u'/' or uri == u'':
             return self._stored_playlists_listplaylists()
         raise MpdNotImplemented # TODO
 
