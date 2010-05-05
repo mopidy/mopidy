@@ -58,13 +58,13 @@ class GStreamerStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
     backend_class = GStreamerBackend
 
     def test_created_playlist_is_persisted(self):
-        path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
         self.assert_(not os.path.exists(path))
         self.stored.create('test')
         self.assert_(os.path.exists(path))
 
     def test_saved_playlist_is_persisted(self):
-        path = os.path.join(settings.PLAYLIST_FOLDER, 'test2.m3u')
+        path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test2.m3u')
         self.assert_(not os.path.exists(path))
         self.stored.save(Playlist(name='test2'))
         self.assert_(os.path.exists(path))
@@ -72,13 +72,13 @@ class GStreamerStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
     def test_deleted_playlist_get_removed(self):
         playlist = self.stored.create('test')
         self.stored.delete(playlist)
-        path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
         self.assert_(not os.path.exists(path))
 
     def test_renamed_playlist_gets_moved(self):
         playlist = self.stored.create('test')
-        file1 = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
-        file2 = os.path.join(settings.PLAYLIST_FOLDER, 'test2.m3u')
+        file1 = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
+        file2 = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test2.m3u')
         self.assert_(not os.path.exists(file2))
         self.stored.rename(playlist, 'test2')
         self.assert_(not os.path.exists(file1))
@@ -88,7 +88,7 @@ class GStreamerStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
         track = Track(uri=generate_song(1))
         uri = track.uri[len('file://'):]
         playlist = Playlist(tracks=[track], name='test')
-        path = os.path.join(settings.PLAYLIST_FOLDER, 'test.m3u')
+        path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
 
         self.stored.save(playlist)
 
@@ -130,15 +130,18 @@ class GStreamerLibraryControllerTest(BaseLibraryControllerTest,
     backend_class = GStreamerBackend
 
     def setUp(self):
-        self.original_tag_cache = settings.TAG_CACHE
-        self.original_music_folder = settings.MUSIC_FOLDER
-        settings.TAG_CACHE = data_folder('library_tag_cache')
-        settings.MUSIC_FOLDER = data_folder('')
+        self.original_tag_cache = settings.LOCAL_TAG_CACHE
+        self.original_music_folder = settings.LOCAL_MUSIC_FOLDER
+
+        settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
+        settings.LOCAL_MUSIC_FOLDER = data_folder('')
+
         super(GStreamerLibraryControllerTest, self).setUp()
 
     def tearDown(self):
-        settings.TAG_CACHE = self.original_tag_cache
-        settings.MUSIC_FOLDER = self.original_music_folder
+        settings.LOCAL_TAG_CACHE = self.original_tag_cache
+        settings.LOCAL_MUSIC_FOLDER = self.original_music_folder
+
         super(GStreamerLibraryControllerTest, self).tearDown()
 
 if __name__ == '__main__':

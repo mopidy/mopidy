@@ -120,7 +120,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def __init__(self, *args):
         super(GStreamerStoredPlaylistsController, self).__init__(*args)
-        self._folder = os.path.expanduser(settings.PLAYLIST_FOLDER)
+        self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_FOLDER)
         self.refresh()
 
     def refresh(self):
@@ -191,11 +191,11 @@ class GStreamerLibraryController(BaseLibraryController):
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(settings.TAG_CACHE,
-            settings.MUSIC_FOLDER)
+        tracks = parse_mpd_tag_cache(settings.LOCAL_TAG_CACHE,
+            settings.LOCAL_MUSIC_FOLDER)
 
-        logger.info('Loading songs in %s from %s', settings.MUSIC_FOLDER,
-            settings.TAG_CACHE)
+        logger.info('Loading songs in %s from %s',
+            settings.LOCAL_MUSIC_FOLDER, settings.LOCAL_TAG_CACHE)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
