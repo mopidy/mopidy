@@ -429,11 +429,14 @@ class MpdFrontend(object):
             argument is given, displays information only for the song
             ``SONGPOS`` or the range of songs ``START:END``.
 
-        *ncmpc:*
+        *ncmpc and mpc:*
 
         - uses negative indexes, like ``playlistinfo "-1"``, to request
-          information on the last track in the playlist.
+          the entire playlist
         """
+        if songpos == "-1":
+            songpos = None
+
         if songpos is not None:
             songpos = int(songpos)
             start = songpos
