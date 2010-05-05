@@ -130,8 +130,9 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
 
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
             name = os.path.basename(m3u)[:len('.m3u')]
-            track_uris = parse_m3u(m3u)
-            tracks = map(lambda u: Track(uri=u), track_uris)
+            tracks = []
+            for uri in parse_m3u(m3u):
+                tracks.append(self.backend.library.lookup(uri))
             playlist = Playlist(tracks=tracks, name=name)
 
             # FIXME playlist name needs better handling
