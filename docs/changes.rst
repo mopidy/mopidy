@@ -7,7 +7,12 @@ This change log is used to track all major changes to Mopidy.
 0.1.0a2 (unreleased)
 ====================
 
-- (nothing yet)
+- Improvements to MPD protocol handling, making Mopidy work much better with a
+  group of clients, including ncmpc, MPoD, and Theremin.
+- New command line flag ``--dump`` for dumping debug log to ``dump.log`` in the
+  current directory.
+- New setting :attr:`mopidy.settings.MIXER_ALSA_CONTROL` for forcing what ALSA
+  control :class:`mopidy.mixers.alsa.AlsaMixer` should use.
 
 
 0.1.0a1 (2010-05-04)
