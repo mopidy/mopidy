@@ -1405,7 +1405,7 @@ class MpdFrontend(object):
         matches = self.backend.stored_playlists.search(name)
         if matches:
             self.backend.current_playlist.load(matches[0])
-            self.backend.playback.new_playlist_loaded_callback()
+            self.backend.playback.new_playlist_loaded_callback() # FIXME not needed?
 
     @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
     def _stored_playlist_playlistadd(self, name, uri):

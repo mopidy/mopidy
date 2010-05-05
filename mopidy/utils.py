@@ -35,6 +35,7 @@ def get_or_create_folder(folder):
 
 def path_to_uri(*paths):
     path = os.path.join(*paths)
+    #path = os.path.expanduser(path) # FIXME
     path = path.encode('utf-8')
     if sys.platform == 'win32':
         return 'file:' + urllib.pathname2url(path)
