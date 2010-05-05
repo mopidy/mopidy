@@ -29,11 +29,11 @@ BACKENDS = (
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
     ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
-#: The log format used for debug log dumps.
-DEBUG_LOG_FORMAT = u'%(asctime)s - %(levelname)-5s - %(name)s - %(message)s'
+#: The log format used for dump logs.
+DUMP_LOG_FORMAT = CONSOLE_LOG_FORMAT
 
-#: The file to log debug data to.
-DEBUG_LOG_FILENAME = u'debug.log'
+#: The file to dump debug log data to.
+DUMP_LOG_FILENAME = u'dump.log'
 
 #: Protocol frontend to use. Default::
 #:

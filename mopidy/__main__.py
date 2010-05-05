@@ -33,9 +33,9 @@ def _parse_options():
     parser.add_option('-v', '--verbose',
         action='store_const', const=2, dest='verbosity_level',
         help='more output (debug level)')
-    parser.add_option('-d', '--debug',
-        action='store_true', dest='debug',
-        help='debug logging to file')
+    parser.add_option('--dump',
+        action='store_true', dest='dump',
+        help='dump debug log to file')
     return parser.parse_args()[0]
 
 def _setup_logging(verbosity_level, debug):
@@ -54,10 +54,10 @@ def _setup_logging(verbosity_level, debug):
     root = logging.getLogger('')
     root.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter(settings.DEBUG_LOG_FORMAT)
+    formatter = logging.Formatter(settings.DUMP_LOG_FORMAT)
 
     handler = logging.handlers.RotatingFileHandler(
-        settings.DEBUG_LOG_FILENAME, maxBytes=102400, backupCount=3)
+        settings.DUMP_LOG_FILENAME, maxBytes=102400, backupCount=3)
     handler.setFormatter(formatter)
 
     root.addHandler(handler)
