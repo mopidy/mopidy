@@ -547,6 +547,10 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'Id: 137' in result)
         self.assert_(u'OK' in result)
 
+    def test_add_uri_that_triggers_lookup_error(self):
+        result = self.h.handle_request(u'add "dummy://foo bar baz"')
+        self.assert_(u'ACK [50@0] {add} directory or file not found' in result)
+
     def test_clear(self):
         self.b.current_playlist.playlist = Playlist(
             tracks=[Track(), Track(), Track(), Track(), Track()])
