@@ -461,6 +461,14 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Position out of bounds' in result)
         self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
 
+    def test_play_minus_one_plays_first_in_playlist(self):
+        track = Track(id=0)
+        self.b.current_playlist.load(Playlist(tracks=[track]))
+        result = self.h.handle_request(u'play "-1"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+        self.assertEqual(self.b.playback.current_track, track)
+
     def test_playid(self):
         self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
         result = self.h.handle_request(u'playid "0"')

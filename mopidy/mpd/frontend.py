@@ -839,6 +839,7 @@ class MpdFrontend(object):
             raise MpdAckError(e[0])
 
     @handle_pattern(r'^play "(?P<songpos>\d+)"$')
+    @handle_pattern(r'^play "(?P<songpos>-1)"$')
     def _playback_playpos(self, songpos):
         """
         *musicpd.org, playback section:*
@@ -846,10 +847,17 @@ class MpdFrontend(object):
             ``play [SONGPOS]``
 
             Begins playing the playlist at song number ``SONGPOS``.
+
+        *MPoD:*
+
+        - issues ``play "-1"`` after playlist replacement.
         """
         songpos = int(songpos)
         try:
-            track = self.backend.current_playlist.playlist.tracks[songpos]
+            if songpos == -1:
+                track = self.backend.current_playlist.playlist.tracks[0]
+            else:
+                track = self.backend.current_playlist.playlist.tracks[songpos]
             return self.backend.playback.play(track)
         except IndexError:
             raise MpdAckError(u'Position out of bounds')
