@@ -1,58 +1,50 @@
 **********************
-despotify installation
+Despotify installation
 **********************
 
-To use the `despotify <http://despotify.se/>`_ backend, you first need to
-install despotify and spytify.
+To use the `Despotify <http://despotify.se/>`_ backend, you first need to
+install Despotify and spytify.
 
 .. warning::
 
     This backend requires a Spotify premium account.
 
 
-Installing despotify
-====================
+Installing Despotify on Linux
+=============================
 
-*Linux:* Install despotify's dependencies. At Debian/Ubuntu systems::
+Install Despotify's dependencies. At Debian/Ubuntu systems::
 
     sudo aptitude install libssl-dev zlib1g-dev libvorbis-dev \
         libtool libncursesw5-dev libao-dev python-dev
 
-*OS X:* In OS X you need to have `XCode
-<http://developer.apple.com/tools/xcode/>`_ installed, and either `MacPorts
-<http://www.macports.org/>`_ or `Homebrew <http://mxcl.github.com/homebrew/>`_.
-
-*OS X, Homebrew:* Install dependencies::
-
-    brew install libvorbis ncursesw libao pkg-config
-
-*OS X, MacPorts:* Install dependencies::
-
-    sudo port install libvorbis libtool ncursesw libao
-
-*All OS:* Check out revision 508 of the despotify source code::
+Check out revision 508 of the Despotify source code::
 
     svn checkout https://despotify.svn.sourceforge.net/svnroot/despotify@508
 
-*OS X, MacPorts:* Copy ``despotify/src/Makefile.local.mk.dist`` to
-``despotify/src/Makefile.local.mk`` and uncomment the last two lines of the new
-file so that it reads::
-
-    ## If you're on Mac OS X and have installed libvorbisfile
-    ## via 'port install ..', try uncommenting these lines
-    CFLAGS += -I/opt/local/include
-    LDFLAGS += -L/opt/local/lib
-
-*All OS:* Build and install despotify::
+Build and install Despotify::
 
     cd despotify/src/
     sudo make install
 
 
+Installing Despotify on OS X
+============================
+
+In OS X you need to have `XCode <http://developer.apple.com/tools/xcode/>`_
+installed, and `Homebrew <http://mxcl.github.com/homebrew/>`_. Then, install
+Despotify::
+
+    brew install despotify
+
+
 Installing spytify
 ==================
 
-spytify's source comes bundled with despotify.
+spytify's source comes bundled with despotify. If you haven't already checkout
+out the despotify source, do it now::
+
+    svn checkout https://despotify.svn.sourceforge.net/svnroot/despotify@508
 
 Build and install spytify::
 
