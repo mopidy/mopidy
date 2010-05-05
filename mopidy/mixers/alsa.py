@@ -39,6 +39,7 @@ class AlsaMixer(BaseMixer):
         return [u'Master', u'PCM']
 
     def _get_volume(self):
+        # FIXME does not seem to see external volume changes.
         return self._mixer.getvolume()[0]
 
     def _set_volume(self, volume):
