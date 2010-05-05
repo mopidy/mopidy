@@ -38,10 +38,10 @@ class GStreamerBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(GStreamerBackend, self).__init__(*args, **kwargs)
 
-        self.playback = GStreamerPlaybackController(self)
+        self.library = GStreamerLibraryController(self)
         self.stored_playlists = GStreamerStoredPlaylistsController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
-        self.library = GStreamerLibraryController(self)
+        self.playback = GStreamerPlaybackController(self)
         self.uri_handlers = [u'file://']
 
 
