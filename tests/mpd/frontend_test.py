@@ -713,22 +713,27 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK "id=25" match no tracks' in result)
 
     def test_playlistinfo_without_songpos_or_range(self):
+        # FIXME testing just ok is not enough
         result = self.h.handle_request(u'playlistinfo')
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_songpos(self):
+        # FIXME testing just ok is not enough
         result = self.h.handle_request(u'playlistinfo "5"')
         self.assert_(u'OK' in result)
 
-    def test_playlistinfo_with_negative_songpos(self):
-        result = self.h.handle_request(u'playlistinfo "-1"')
-        self.assert_(u'OK' in result)
+    def test_playlistinfo_with_negative_songpos_same_as_playlistinfo(self):
+        result1 = self.h.handle_request(u'playlistinfo "-1"')
+        result2 = self.h.handle_request(u'playlistinfo')
+        self.assertEqual(result1, result2)
 
     def test_playlistinfo_with_open_range(self):
+        # FIXME testing just ok is not enough
         result = self.h.handle_request(u'playlistinfo "10:"')
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_closed_range(self):
+        # FIXME testing just ok is not enough
         result = self.h.handle_request(u'playlistinfo "10:20"')
         self.assert_(u'OK' in result)
 
