@@ -39,27 +39,26 @@ def _parse_options():
     return parser.parse_args()[0]
 
 def _setup_logging(verbosity_level, dump):
+    _setup_console_logging(verbosity_level)
+    if dump:
+        _setup_dump_logging()
+
+def _setup_console_logging(verbosity_level):
     if verbosity_level == 0:
         level = logging.WARNING
     elif verbosity_level == 2:
         level = logging.DEBUG
     else:
         level = logging.INFO
-
     logging.basicConfig(format=settings.CONSOLE_LOG_FORMAT, level=level)
 
-    if not dump:
-        return
-
+def _setup_dump_logging():
     root = logging.getLogger('')
     root.setLevel(logging.DEBUG)
-
     formatter = logging.Formatter(settings.DUMP_LOG_FORMAT)
-
     handler = logging.handlers.RotatingFileHandler(
         settings.DUMP_LOG_FILENAME, maxBytes=102400, backupCount=3)
     handler.setFormatter(formatter)
-
     root.addHandler(handler)
 
 if __name__ == '__main__':
