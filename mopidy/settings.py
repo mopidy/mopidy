@@ -61,6 +61,12 @@ if sys.platform == 'linux2':
 elif sys.platform == 'darwin':
     MIXER = u'mopidy.mixers.osa.OsaMixer'
 
+#: ALSA mixer only. What mixer control to use. If set to :class:`False`, first
+#: ``Master`` and then ``PCM`` will be tried.
+#:
+#: Example: ``Master Front``. *Default:* :class:`False`
+MIXER_ALSA_CONTROL = False
+
 #: External mixers only. Which port the mixer is connected to.
 #:
 #: This must point to the device port like ``/dev/ttyUSB0``.
