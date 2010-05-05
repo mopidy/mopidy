@@ -126,6 +126,8 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def refresh(self):
         playlists = []
 
+        logger.info('Loading playlists from %s', self._folder)
+
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
             name = os.path.basename(m3u)[:len('.m3u')]
             track_uris = parse_m3u(m3u)
@@ -191,6 +193,9 @@ class GStreamerLibraryController(BaseLibraryController):
         tracks = parse_mpd_tag_cache(settings.TAG_CACHE,
             settings.MUSIC_FOLDER)
 
+        logger.info('Loading songs in %s from %s', settings.MUSIC_FOLDER,
+            settings.TAG_CACHE)
+
         for track in tracks:
             self._uri_mapping[track.uri] = track
 
@@ -198,7 +203,7 @@ class GStreamerLibraryController(BaseLibraryController):
         try:
             return self._uri_mapping[uri]
         except KeyError:
-            raise LookupError
+            raise LookupError('%s not found.' % uri)
 
     def find_exact(self, field, query):
         if not query:
