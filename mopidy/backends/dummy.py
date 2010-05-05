@@ -29,6 +29,7 @@ class DummyLibraryController(BaseLibraryController):
         matches = filter(lambda t: uri == t.uri, self._library)
         if matches:
             return matches[0]
+        raise LookupError
 
     def search(self, field, query):
         return Playlist()
