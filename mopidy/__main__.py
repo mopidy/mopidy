@@ -17,7 +17,7 @@ logger = logging.getLogger('mopidy.main')
 
 def main():
     options = _parse_options()
-    _setup_logging(options.verbosity_level, options.debug)
+    _setup_logging(options.verbosity_level, options.dump)
     get_or_create_folder('~/.mopidy/')
     core_queue = multiprocessing.Queue()
     get_class(settings.SERVER)(core_queue)
@@ -38,7 +38,7 @@ def _parse_options():
         help='dump debug log to file')
     return parser.parse_args()[0]
 
-def _setup_logging(verbosity_level, debug):
+def _setup_logging(verbosity_level, dump):
     if verbosity_level == 0:
         level = logging.WARNING
     elif verbosity_level == 2:
@@ -48,7 +48,7 @@ def _setup_logging(verbosity_level, debug):
 
     logging.basicConfig(format=settings.CONSOLE_LOG_FORMAT, level=level)
 
-    if not debug:
+    if not dump:
         return
 
     root = logging.getLogger('')
