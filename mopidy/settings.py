@@ -29,6 +29,12 @@ BACKENDS = (
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
     ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
+#: The log format used for debug log dumps.
+DEBUG_LOG_FORMAT = u'%(asctime)s - %(levelname)-5s - %(name)s - %(message)s'
+
+#: The file to log debug data to.
+DEBUG_LOG_FILENAME = u'debug.log'
+
 #: Protocol frontend to use. Default::
 #:
 #:     FRONTEND = u'mopidy.mpd.frontend.MpdFrontend'
