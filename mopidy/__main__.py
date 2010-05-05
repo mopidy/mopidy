@@ -1,5 +1,6 @@
 import asyncore
 import logging
+import logging.handlers
 import multiprocessing
 import optparse
 import os
@@ -16,7 +17,7 @@ logger = logging.getLogger('mopidy.main')
 
 def main():
     options = _parse_options()
-    _setup_logging(options.verbosity_level)
+    _setup_logging(options.verbosity_level, options.debug)
     get_or_create_folder('~/.mopidy/')
     core_queue = multiprocessing.Queue()
     get_class(settings.SERVER)(core_queue)
@@ -32,16 +33,34 @@ def _parse_options():
     parser.add_option('-v', '--verbose',
         action='store_const', const=2, dest='verbosity_level',
         help='more output (debug level)')
+    parser.add_option('--dump',
+        action='store_true', dest='dump',
+        help='dump debug log to file')
     return parser.parse_args()[0]
 
-def _setup_logging(verbosity_level):
+def _setup_logging(verbosity_level, debug):
     if verbosity_level == 0:
         level = logging.WARNING
     elif verbosity_level == 2:
         level = logging.DEBUG
     else:
         level = logging.INFO
+
     logging.basicConfig(format=settings.CONSOLE_LOG_FORMAT, level=level)
+
+    if not debug:
+        return
+
+    root = logging.getLogger('')
+    root.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter(settings.DUMP_LOG_FORMAT)
+
+    handler = logging.handlers.RotatingFileHandler(
+        settings.DUMP_LOG_FILENAME, maxBytes=102400, backupCount=3)
+    handler.setFormatter(formatter)
+
+    root.addHandler(handler)
 
 if __name__ == '__main__':
     try:
