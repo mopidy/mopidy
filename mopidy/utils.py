@@ -219,6 +219,7 @@ def _convert_mpd_data(data, tracks, music_dir):
 
     track_kwargs['uri'] = path_to_uri(music_dir, path)
     track_kwargs['length'] = int(data.get('time', 0)) * 1000
+    track_kwargs['id'] = len(tracks)
 
     track = Track(**track_kwargs)
     tracks.add(track)

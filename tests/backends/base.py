@@ -1084,10 +1084,10 @@ class BaseLibraryControllerTest(object):
         Album(name='album2', artists=artists[1:2]),
         Album()]
     tracks = [Track(name='track1', length=4000, artists=artists[:1],
-            album=albums[0], uri='file://' + data_folder('uri1')),
+            album=albums[0], uri='file://' + data_folder('uri1'), id=0),
         Track(name='track2', length=4000, artists=artists[1:2],
-            album=albums[1], uri='file://' + data_folder('uri2')),
-        Track()]
+            album=albums[1], uri='file://' + data_folder('uri2'), id=1),
+        Track(id=3)]
 
     def setUp(self):
         self.backend = self.backend_class(mixer=DummyMixer())

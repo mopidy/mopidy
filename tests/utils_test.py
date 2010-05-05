@@ -144,21 +144,21 @@ expected_albums = [Album(name='albumname', artists=expected_artists,
     num_tracks=2)]
 expected_tracks = []
 
-def generate_track(path):
+def generate_track(path, ident):
     uri = path_to_uri(data_folder(path))
     track = Track(name='trackname', artists=expected_artists, track_no=1,
-        album=expected_albums[0], length=4000, uri=uri)
+        album=expected_albums[0], length=4000, uri=uri, id=ident)
     expected_tracks.append(track)
 
-generate_track('song1.mp3')
-generate_track('song2.mp3')
-generate_track('song3.mp3')
-generate_track('subdir1/song4.mp3')
-generate_track('subdir1/song5.mp3')
-generate_track('subdir2/song6.mp3')
-generate_track('subdir2/song7.mp3')
-generate_track('subdir1/subsubdir/song8.mp3')
-generate_track('subdir1/subsubdir/song9.mp3')
+generate_track('song1.mp3', 6)
+generate_track('song2.mp3', 7)
+generate_track('song3.mp3', 8)
+generate_track('subdir1/song4.mp3', 2)
+generate_track('subdir1/song5.mp3', 3)
+generate_track('subdir2/song6.mp3', 4)
+generate_track('subdir2/song7.mp3', 5)
+generate_track('subdir1/subsubdir/song8.mp3', 0)
+generate_track('subdir1/subsubdir/song9.mp3', 1)
 
 class MPDTagCacheToTracksTest(unittest.TestCase):
     def test_emtpy_cache(self):
@@ -169,7 +169,10 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
     def test_simple_cache(self):
         tracks = parse_mpd_tag_cache(data_folder('simple_tag_cache'),
             data_folder(''))
-        self.assertEqual(expected_tracks[0], list(tracks)[0])
+        uri = path_to_uri(data_folder('song1.mp3'))
+        track = Track(name='trackname', artists=expected_artists, track_no=1,
+            album=expected_albums[0], length=4000, uri=uri, id=0)
+        self.assertEqual(set([track]), tracks)
 
     def test_advanced_cache(self):
         tracks = parse_mpd_tag_cache(data_folder('advanced_tag_cache'),
@@ -187,4 +190,4 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         tracks = parse_mpd_tag_cache(data_folder('blank_tag_cache'),
             data_folder(''))
         uri = path_to_uri(data_folder('song1.mp3'))
-        self.assertEqual(set([Track(uri=uri, length=4000)]), tracks)
+        self.assertEqual(set([Track(uri=uri, length=4000, id=0)]), tracks)
