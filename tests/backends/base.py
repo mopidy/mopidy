@@ -1074,6 +1074,9 @@ class BaseStoredPlaylistsControllerTest(object):
         self.stored.save(playlist)
         self.assert_(playlist in self.stored.playlists)
 
+    def test_playlist_with_unknown_track(self):
+        raise SkipTest
+
 
 class BaseLibraryControllerTest(object):
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]

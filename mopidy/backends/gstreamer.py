@@ -132,7 +132,10 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
             name = os.path.basename(m3u)[:len('.m3u')]
             tracks = []
             for uri in parse_m3u(m3u):
-                tracks.append(self.backend.library.lookup(uri))
+                try:
+                    tracks.append(self.backend.library.lookup(uri))
+                except LookupError, e:
+                    logger.error('Playlist item could not be added: %s', e)
             playlist = Playlist(tracks=tracks, name=name)
 
             # FIXME playlist name needs better handling
