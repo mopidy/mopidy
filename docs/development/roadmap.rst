@@ -59,3 +59,6 @@ Crazy stuff we had to write down somewhere
 - **[Done]** NAD/Denon amplifier mixer through their RS-232 connection.
 - DNLA and/or UPnP support. Maybe using
   `Coherence <http://coherence-project.org/>`_.
+- `Media Player Remote Interfacing Specification
+  <http://en.wikipedia.org/wiki/Media_Player_Remote_Interfacing_Specification>`_
+  support.
