@@ -4,8 +4,13 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-0.1.0a2 (unreleased)
+0.1.0a2 (2010-06-02)
 ====================
+
+It has been a rather slow month for Mopidy, but we would like to keep up with
+the established pace of at least a release per month.
+
+**Changes**
 
 - Improvements to MPD protocol handling, making Mopidy work much better with a
   group of clients, including ncmpc, MPoD, and Theremin.
