@@ -795,6 +795,52 @@ class MpdFrontend(object):
             ``next``
 
             Plays next song in the playlist.
+
+        *MPD's behaviour when affected by repeat/random/single/consume:*
+
+            Given a playlist of three tracks numbered 1, 2, 3, and a currently
+            playing track ``c``. ``next_track`` is defined at the track that
+            will be played upon calls to :meth:`next()`.
+
+            Tests performed on MPD 0.15.4-1ubuntu3.
+
+            ======  ======  ======  =======  =====  =====  =====  =====
+                        Inputs                    next_track      Notes
+            -------------------------------  -------------------  -----
+            repeat  random  single  consume  c = 1  c = 2  c = 3
+            ======  ======  ======  =======  =====  =====  =====  =====
+            T       T       T       T        2      3      EOPL
+            T       T       T       .        Rand   Rand   Rand   1
+            T       T       .       T        Rand   Rand   Rand   4
+            T       T       .       .        Rand   Rand   Rand   4
+            T       .       T       T        2      3      EOPL
+            T       .       T       .        2      3      1
+            T       .       .       T        3      3      EOPL
+            T       .       .       .        2      3      1
+            .       T       T       T        Rand   Rand   Rand   3
+            .       T       T       .        Rand   Rand   Rand   3
+            .       T       .       T        Rand   Rand   Rand   2
+            .       T       .       .        Rand   Rand   Rand   2
+            .       .       T       T        2      3      EOPL
+            .       .       T       .        2      3      EOPL
+            .       .       .       T        2      3      EOPL
+            .       .       .       .        2      3      EOPL
+            ======  ======  ======  =======  =====  =====  =====  =====
+
+            - When end of playlist (EOPL) is reached, the current track is
+              unset.
+            - Note 1: When *random* and *single* is combined, :meth:`next()`
+              selects a track randomly at each invocation, and not just the
+              next track in an internal prerandomized playlist.
+            - Note 2: When *random* is active, :meth:`next()` will skip through
+              all tracks in the playlist in random order, and finally EOPL is
+              reached.
+            - Note 3: *single* has no effect in combination with *random*
+              alone, or *random* and *consume*.
+            - Note 4: When *random* and *repeat* is active, EOPL is never
+              reached, but the playlist is played again, in the same random
+              order as the first time.
+
         """
         return self.backend.playback.next()
 
@@ -876,6 +922,41 @@ class MpdFrontend(object):
             ``previous``
 
             Plays previous song in the playlist.
+
+        *MPD's behaviour when affected by repeat/random/single/consume:*
+
+            Given a playlist of three tracks numbered 1, 2, 3, and a currently
+            playing track ``c``. ``previous_track`` is defined at the track
+            that will be played upon ``previous`` calls.
+
+            Tests performed on MPD 0.15.4-1ubuntu3.
+
+            ======  ======  ======  =======  =====  =====  =====
+                        Inputs                  previous_track
+            -------------------------------  -------------------
+            repeat  random  single  consume  c = 1  c = 2  c = 3
+            ======  ======  ======  =======  =====  =====  =====
+            T       T       T       T        Rand?  Rand?  Rand?
+            T       T       T       .        3      1      2
+            T       T       .       T        Rand?  Rand?  Rand?
+            T       T       .       .        3      1      2
+            T       .       T       T        3      1      2
+            T       .       T       .        3      1      2
+            T       .       .       T        3      1      2
+            T       .       .       .        3      1      2
+            .       T       T       T        c      c      c
+            .       T       T       .        c      c      c
+            .       T       .       T        c      c      c
+            .       T       .       .        c      c      c
+            .       .       T       T        1      1      2
+            .       .       T       .        1      1      2
+            .       .       .       T        1      1      2
+            .       .       .       .        1      1      2
+            ======  ======  ======  =======  =====  =====  =====
+
+            - If :attr:`time_position` of the current track is 15s or more,
+              ``previous`` should do a seek to time position 0.
+
         """
         return self.backend.playback.previous()
 
