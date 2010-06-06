@@ -35,6 +35,7 @@ def get_or_create_folder(folder):
 
 def path_to_uri(*paths):
     path = os.path.join(*paths)
+    #path = os.path.expanduser(path) # FIXME
     path = path.encode('utf-8')
     if sys.platform == 'win32':
         return 'file:' + urllib.pathname2url(path)
@@ -212,12 +213,13 @@ def _convert_mpd_data(data, tracks, music_dir):
         track_kwargs['name'] = data['title']
 
     if data['file'][0] == '/':
-        path = os.path.join(music_dir, data['file'][1:])
+        path = data['file'][1:]
     else:
-        path = os.path.join(music_dir, data['file'])
+        path = data['file']
 
-    track_kwargs['uri'] = path_to_uri(path)
+    track_kwargs['uri'] = path_to_uri(music_dir, path)
     track_kwargs['length'] = int(data.get('time', 0)) * 1000
+    track_kwargs['id'] = len(tracks)
 
     track = Track(**track_kwargs)
     tracks.add(track)

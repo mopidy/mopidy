@@ -38,10 +38,10 @@ class GStreamerBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(GStreamerBackend, self).__init__(*args, **kwargs)
 
-        self.playback = GStreamerPlaybackController(self)
+        self.library = GStreamerLibraryController(self)
         self.stored_playlists = GStreamerStoredPlaylistsController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
-        self.library = GStreamerLibraryController(self)
+        self.playback = GStreamerPlaybackController(self)
         self.uri_handlers = [u'file://']
 
 
@@ -120,16 +120,22 @@ class GStreamerPlaybackController(BasePlaybackController):
 class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
     def __init__(self, *args):
         super(GStreamerStoredPlaylistsController, self).__init__(*args)
-        self._folder = os.path.expanduser(settings.PLAYLIST_FOLDER)
+        self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_FOLDER)
         self.refresh()
 
     def refresh(self):
         playlists = []
 
+        logger.info('Loading playlists from %s', self._folder)
+
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
             name = os.path.basename(m3u)[:len('.m3u')]
-            track_uris = parse_m3u(m3u)
-            tracks = map(lambda u: Track(uri=u), track_uris)
+            tracks = []
+            for uri in parse_m3u(m3u):
+                try:
+                    tracks.append(self.backend.library.lookup(uri))
+                except LookupError, e:
+                    logger.error('Playlist item could not be added: %s', e)
             playlist = Playlist(tracks=tracks, name=name)
 
             # FIXME playlist name needs better handling
@@ -188,8 +194,11 @@ class GStreamerLibraryController(BaseLibraryController):
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(settings.TAG_CACHE,
-            settings.MUSIC_FOLDER)
+        tracks = parse_mpd_tag_cache(settings.LOCAL_TAG_CACHE,
+            settings.LOCAL_MUSIC_FOLDER)
+
+        logger.info('Loading songs in %s from %s',
+            settings.LOCAL_MUSIC_FOLDER, settings.LOCAL_TAG_CACHE)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
@@ -198,7 +207,7 @@ class GStreamerLibraryController(BaseLibraryController):
         try:
             return self._uri_mapping[uri]
         except KeyError:
-            raise LookupError
+            raise LookupError('%s not found.' % uri)
 
     def find_exact(self, field, query):
         if not query:

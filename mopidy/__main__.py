@@ -18,6 +18,7 @@ logger = logging.getLogger('mopidy.main')
 def main():
     options = _parse_options()
     _setup_logging(options.verbosity_level, options.dump)
+    logger.info('-- Starting Mopidy --')
     get_or_create_folder('~/.mopidy/')
     core_queue = multiprocessing.Queue()
     get_class(settings.SERVER)(core_queue)

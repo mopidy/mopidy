@@ -523,6 +523,10 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.current_playlist.playlist.tracks[5], needle)
         self.assert_(u'OK' in result)
 
+    def test_add_with_uri_not_found_in_library_should_ack(self):
+        result = self.h.handle_request(u'add "dummy://foo"')
+        self.assert_(u'ACK No such song' in result)
+
     def test_addid_without_songpos(self):
         needle = Track(uri='dummy://foo', id=137)
         self.b.library._library = [Track(), Track(), needle, Track()]
@@ -557,7 +561,6 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK Position out of bounds' in result)
 
     def test_addid_with_uri_not_found_in_library_should_ack(self):
-        self.b.library._library = [Track(), Track(), Track()]
         result = self.h.handle_request(u'addid "dummy://foo"')
         self.assert_(u'ACK No such song' in result)
 
@@ -727,22 +730,27 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK "id=25" match no tracks' in result)
 
     def test_playlistinfo_without_songpos_or_range(self):
+        # FIXME testing just ok is not enough
         result = self.h.handle_request(u'playlistinfo')
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_songpos(self):
+        # FIXME testing just ok is not enough
         result = self.h.handle_request(u'playlistinfo "5"')
         self.assert_(u'OK' in result)
 
-    def test_playlistinfo_with_negative_songpos(self):
-        result = self.h.handle_request(u'playlistinfo "-1"')
-        self.assert_(u'OK' in result)
+    def test_playlistinfo_with_negative_songpos_same_as_playlistinfo(self):
+        result1 = self.h.handle_request(u'playlistinfo "-1"')
+        result2 = self.h.handle_request(u'playlistinfo')
+        self.assertEqual(result1, result2)
 
     def test_playlistinfo_with_open_range(self):
+        # FIXME testing just ok is not enough
         result = self.h.handle_request(u'playlistinfo "10:"')
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_closed_range(self):
+        # FIXME testing just ok is not enough
         result = self.h.handle_request(u'playlistinfo "10:20"')
         self.assert_(u'OK' in result)
 

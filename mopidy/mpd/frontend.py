@@ -432,11 +432,14 @@ class MpdFrontend(object):
             argument is given, displays information only for the song
             ``SONGPOS`` or the range of songs ``START:END``.
 
-        *ncmpc:*
+        *ncmpc and mpc:*
 
         - uses negative indexes, like ``playlistinfo "-1"``, to request
-          information on the last track in the playlist.
+          the entire playlist
         """
+        if songpos == "-1":
+            songpos = None
+
         if songpos is not None:
             songpos = int(songpos)
             start = songpos
@@ -1420,7 +1423,7 @@ class MpdFrontend(object):
         matches = self.backend.stored_playlists.search(name)
         if matches:
             self.backend.current_playlist.load(matches[0])
-            self.backend.playback.new_playlist_loaded_callback()
+            self.backend.playback.new_playlist_loaded_callback() # FIXME not needed?
 
     @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
     def _stored_playlist_playlistadd(self, name, uri):

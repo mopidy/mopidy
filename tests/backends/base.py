@@ -960,16 +960,26 @@ class BaseStoredPlaylistsControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.original_folder = settings.PLAYLIST_FOLDER
-        settings.PLAYLIST_FOLDER = tempfile.mkdtemp()
+        self.original_playlist_folder = settings.LOCAL_PLAYLIST_FOLDER
+        self.original_tag_cache = settings.LOCAL_TAG_CACHE
+        self.original_music_folder = settings.LOCAL_MUSIC_FOLDER
+
+        settings.LOCAL_PLAYLIST_FOLDER = tempfile.mkdtemp()
+        settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
+        settings.LOCAL_MUSIC_FOLDER = data_folder('')
+
         self.backend = self.backend_class(mixer=DummyMixer())
         self.stored  = self.backend.stored_playlists
 
     def tearDown(self):
         self.backend.destroy()
-        if os.path.exists(settings.PLAYLIST_FOLDER):
-            shutil.rmtree(settings.PLAYLIST_FOLDER)
-        settings.PLAYLIST_FOLDER = self.original_folder
+
+        if os.path.exists(settings.LOCAL_PLAYLIST_FOLDER):
+            shutil.rmtree(settings.LOCAL_PLAYLIST_FOLDER)
+
+        settings.LOCAL_PLAYLIST_FOLDER = self.original_playlist_folder
+        settings.LOCAL_TAG_CACHE = self.original_tag_cache
+        settings.LOCAL_MUSIC_FOLDER = self.original_music_folder
 
     def test_create(self):
         playlist = self.stored.create('test')
@@ -1064,6 +1074,9 @@ class BaseStoredPlaylistsControllerTest(object):
         self.stored.save(playlist)
         self.assert_(playlist in self.stored.playlists)
 
+    def test_playlist_with_unknown_track(self):
+        raise SkipTest
+
 
 class BaseLibraryControllerTest(object):
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
@@ -1071,10 +1084,10 @@ class BaseLibraryControllerTest(object):
         Album(name='album2', artists=artists[1:2]),
         Album()]
     tracks = [Track(name='track1', length=4000, artists=artists[:1],
-            album=albums[0], uri='file://' + data_folder('uri1')),
+            album=albums[0], uri='file://' + data_folder('uri1'), id=0),
         Track(name='track2', length=4000, artists=artists[1:2],
-            album=albums[1], uri='file://' + data_folder('uri2')),
-        Track()]
+            album=albums[1], uri='file://' + data_folder('uri2'), id=1),
+        Track(id=3)]
 
     def setUp(self):
         self.backend = self.backend_class(mixer=DummyMixer())
