@@ -256,9 +256,12 @@ class MpdFrontend(object):
         if songpos is not None:
             songpos = int(songpos)
         track = self.backend.library.lookup(uri)
-        if track is not None:
-            self.backend.current_playlist.add(track, at_position=songpos)
-            return ('Id', track.id)
+        if track is None:
+            raise MpdAckError(u'No such song')
+        if songpos and songpos > self.backend.current_playlist.playlist.length:
+            raise MpdAckError(u'Position out of bounds')
+        self.backend.current_playlist.add(track, at_position=songpos)
+        return ('Id', track.id)
 
     @handle_pattern(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
     def _current_playlist_delete_range(self, start, end=None):

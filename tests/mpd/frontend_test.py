@@ -547,6 +547,20 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'Id: 137' in result)
         self.assert_(u'OK' in result)
 
+    def test_addid_with_songpos_out_of_bounds_should_ack(self):
+        needle = Track(uri='dummy://foo', id=137)
+        self.b.library._library = [Track(), Track(), needle, Track()]
+        self.b.current_playlist.playlist = Playlist(
+            tracks=[Track(), Track(), Track(), Track(), Track()])
+        self.assertEqual(self.b.current_playlist.playlist.length, 5)
+        result = self.h.handle_request(u'addid "dummy://foo" "6"')
+        self.assert_(u'ACK Position out of bounds' in result)
+
+    def test_addid_with_uri_not_found_in_library_should_ack(self):
+        self.b.library._library = [Track(), Track(), Track()]
+        result = self.h.handle_request(u'addid "dummy://foo"')
+        self.assert_(u'ACK No such song' in result)
+
     def test_clear(self):
         self.b.current_playlist.playlist = Playlist(
             tracks=[Track(), Track(), Track(), Track(), Track()])
