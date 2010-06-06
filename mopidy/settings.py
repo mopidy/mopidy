@@ -44,6 +44,21 @@ DUMP_LOG_FILENAME = u'dump.log'
 #:     FRONTEND = u'mopidy.mpd.frontend.MpdFrontend'
 FRONTEND = u'mopidy.mpd.frontend.MpdFrontend'
 
+#: Path to folder with local music. Default::
+#:
+#:    LOCAL_MUSIC_FOLDER = u'~/music'
+LOCAL_MUSIC_FOLDER = u'~/music'
+
+#: Path to playlist folder with m3u files for local music. Default::
+#:
+#:    LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
+LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
+
+#: Path to tag cache for local music. Default::
+#:
+#:    LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
+LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
+
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
 #: Default on Linux::
@@ -117,18 +132,6 @@ SPOTIFY_LIB_APPKEY = u'~/.mopidy/spotify_appkey.key'
 
 #: Path to the libspotify cache. Used by LibspotifyBackend.
 SPOTIFY_LIB_CACHE = u'~/.mopidy/libspotify_cache'
-
-#: Path to playlist folder with m3u files.
-#:    LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
-LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
-
-#: Path to folder with local music.
-#:    LOCAL_MUSIC_FOLDER = u'~/music'
-LOCAL_MUSIC_FOLDER = u'~/music'
-
-#: Path to MPD tag_cache for local music
-#:    LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
-LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
 
 # Import user specific settings
 dotdir = os.path.expanduser(u'~/.mopidy/')
