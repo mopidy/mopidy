@@ -15,7 +15,7 @@ A complete ``~/.mopidy/settings.py`` may look like this::
 
     SERVER_HOSTNAME = u'0.0.0.0'
     SPOTIFY_USERNAME = u'alice'
-    SPOTIFY_USERNAME = u'mysecret'
+    SPOTIFY_PASSWORD = u'mysecret'
 
 
 Available settings
