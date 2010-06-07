@@ -2,9 +2,9 @@
 Mopidy
 ******
 
-Mopidy is an `MPD <http://mpd.wikia.com/>`_ server with a
+Mopidy is an `Music Player Daemon <http://mpd.wikia.com/>`_ (MPD) server with a
 `Spotify <http://www.spotify.com/>`_ backend. Using a standard MPD client you
-can search for music in Spotify's vast archive, manage Spotify play lists and
+can search for music in Spotify's vast archive, manage Spotify playlists and
 play music from Spotify.
 
 To install Mopidy, check out
