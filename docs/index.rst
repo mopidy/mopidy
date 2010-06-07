@@ -1,16 +1,27 @@
 .. include:: ../README.rst
 
-Contents
-========
+User documentation
+==================
 
 .. toctree::
-    :maxdepth: 3
 
     installation/index
     changes
-    development/index
-    api/index
     authors
+
+Reference documentation
+=======================
+
+.. toctree::
+
+    api/index
+
+Development documentation
+=========================
+
+.. toctree::
+
+    development/index
 
 Indices and tables
 ==================
