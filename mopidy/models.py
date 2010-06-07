@@ -144,6 +144,8 @@ class Track(ImmutableObject):
 
         :param position: track's position in playlist
         :type position: integer
+        :param search_result: format for output in search result
+        :type search_result: boolean
         :rtype: list of two-tuples
         """
         result = [
