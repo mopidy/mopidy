@@ -40,7 +40,7 @@ Install pyspotify's dependencies. At Debian/Ubuntu systems::
 Check out the pyspotify code, and install it::
 
     git clone git://github.com/jodal/pyspotify.git
-    cd pyspotify
+    cd pyspotify/pyspotify/
     sudo python setup.py develop
 
 Apply for an application key at
