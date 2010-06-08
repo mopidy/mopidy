@@ -20,7 +20,7 @@ Dependencies
     libspotify
     gstreamer
 
-- Python >= 2.6
+- Python >= 2.6, < 3
 - Dependencies for at least one Mopidy mixer:
 
   - AlsaMixer (Linux only)
