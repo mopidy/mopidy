@@ -39,9 +39,10 @@ class MpdServer(asyncore.dispatcher):
             sys.exit('MPD server startup failed: %s' % e)
 
     def handle_accept(self):
-        (client_socket, client_address) = self.accept()
-        logger.info(u'MPD client connection from [%s]:%s', *client_address)
-        MpdSession(self, client_socket, client_address, self.core_queue)
+        (client_socket, client_socket_address) = self.accept()
+        logger.info(u'MPD client connection from [%s]:%s',
+            client_socket_address[0], client_socket_address[1])
+        MpdSession(self, client_socket, client_socket_address, self.core_queue)
 
     def handle_close(self):
         self.close()
@@ -52,10 +53,12 @@ class MpdSession(asynchat.async_chat):
     The MPD client session. Dispatches MPD requests to the frontend.
     """
 
-    def __init__(self, server, client_socket, client_address, core_queue):
+    def __init__(self, server, client_socket, client_socket_address,
+            core_queue):
         asynchat.async_chat.__init__(self, sock=client_socket)
         self.server = server
-        self.client_address = client_address
+        self.client_address = client_socket_address[0]
+        self.client_port = client_socket_address[1]
         self.core_queue = core_queue
         self.input_buffer = []
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
@@ -68,8 +71,8 @@ class MpdSession(asynchat.async_chat):
         data = ''.join(self.input_buffer).strip()
         self.input_buffer = []
         request = data.decode(ENCODING)
-        host, port = self.client_address
-        logger.debug(u'Input ([%s]:%s): %s', host, port, indent(request))
+        logger.debug(u'Input ([%s]:%s): %s', self.client_address,
+            self.client_port, indent(request))
         self.handle_request(request)
 
     def handle_request(self, request):
@@ -88,8 +91,8 @@ class MpdSession(asynchat.async_chat):
         self.send_response(LINE_TERMINATOR.join(response))
 
     def send_response(self, output):
-        host, port = self.client_address
-        logger.debug(u'Output ([%s]:%s): %s', host, port, indent(output))
+        logger.debug(u'Output ([%s]:%s): %s', self.client_address,
+            self.client_port, indent(output))
         output = u'%s%s' % (output, LINE_TERMINATOR)
         data = output.encode(ENCODING)
         self.push(data)
