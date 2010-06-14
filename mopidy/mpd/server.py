@@ -29,7 +29,7 @@ class MpdServer(asyncore.dispatcher):
         asyncore.dispatcher.__init__(self)
         try:
             self.core_queue = core_queue
-            self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.create_socket(socket.AF_INET6, socket.SOCK_STREAM)
             self.set_reuse_addr()
             self.bind((settings.SERVER_HOSTNAME, settings.SERVER_PORT))
             self.listen(1)
