@@ -61,6 +61,12 @@ class GStreamerPlaybackController(BasePlaybackController):
 
         self.stop()
 
+    def use_fake_sink(self):
+        """For testing. To avoid audio output during testing, and the need for
+        a sound card and a fully working gstreamer installation."""
+        sink = gst.element_factory_make("fakesink", "fakesink")
+        self._bin.set_property("audio-sink", sink)
+
     def _set_state(self, state):
         self._bin.set_state(state)
 

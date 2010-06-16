@@ -28,6 +28,10 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest,
         for i in range(1, 4)]
     backend_class = GStreamerBackend
 
+    def setUp(self):
+        super(GStreamerPlaybackControllerTest, self).setUp()
+        self.backend.playback.use_fake_sink()
+
     def add_track(self, path):
         uri = path_to_uri(data_folder(path))
         track = Track(uri=uri, id=1, length=4464)
