@@ -33,6 +33,8 @@ class GStreamerBackend(BaseBackend):
     A backend for playing music from a local music archive.
 
     Uses the `GStreamer <http://gstreamer.freedesktop.org/>`_ library.
+
+    **Issues:** http://github.com/jodal/mopidy/issues/labels/gstreamer
     """
 
     def __init__(self, *args, **kwargs):

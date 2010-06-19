@@ -24,21 +24,7 @@ class DespotifyBackend(BaseBackend):
     is the Python bindings for the despotify library. It got litle
     documentation, but a couple of examples are available.
 
-    **Issues**
-
-    - r503: Sometimes segfaults when traversing stored playlists, their tracks,
-      artists, and albums. As it is not predictable, it may be a concurrency
-      issue.
-
-    - r503: Segfaults when looking up playlists, both your own lists and other
-      peoples shared lists. To reproduce::
-
-        >>> import spytify                                  # doctest: +SKIP
-        >>> s = spytify.Spytify('alice', 'secret')          # doctest: +SKIP
-        >>> s.lookup('spotify:user:klette:playlist:5rOGYPwwKqbAcVX8bW4k5V')
-        ...                                                 # doctest: +SKIP
-        Segmentation fault
-
+    **Issues:** http://github.com/jodal/mopidy/issues/labels/despotify
     """
 
     def __init__(self, *args, **kwargs):

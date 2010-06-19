@@ -32,10 +32,7 @@ class LibspotifyBackend(BaseBackend):
     <http://github.com/noahwilliamsson/openspotify>`_, but we haven't tested
     that yet.
 
-    **Issues**
-
-    - libspotify is badly packaged. See
-      http://getsatisfaction.com/spotify/topics/libspotify_please_fix_the_installation_script.
+    **Issues:** http://github.com/jodal/mopidy/issues/labels/libspotify
     """
 
     def __init__(self, *args, **kwargs):
