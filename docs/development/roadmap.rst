@@ -3,60 +3,61 @@ Roadmap
 *******
 
 This is the current roadmap and collection of wild ideas for future Mopidy
-development.
+development. This is intended to be a living document and may change at any
+time.
+
+Version 0.1
+===========
+
+- Core MPD server functionality working. Gracefully handle clients' use of
+  non-supported functionality.
+- Read-only support for Spotify through :mod:`mopidy.backends.despotify` and/or
+  :mod:`mopidy.backends.libspotify`.
+- Initial support for local file playback through
+  :mod:`mopidy.backends.gstreamer`. The state of local file playback will not
+  block the release of 0.1.
 
 
-Scope for the first release
-===========================
+Version 0.2 and 0.3
+===================
 
-This was was the plan written down when we started developing Mopidy, and we
-still keep quite close to it:
+0.2 will be released when we reach one of the following two goals. 0.3 will be
+released when we reach the other goal.
 
-    To limit scope, we will start by implementing an MPD server which only
-    supports Spotify, and not playback of files from disk. We will make Mopidy
-    modular, so we can extend it with other backends in the future, like file
-    playback and other online music services such as Last.fm.
+- Write-support for Spotify. I.e. playlist management.
+- Support for using multiple Mopidy backends simultaneously. Should make it
+  possible to have both Spotify tracks and local tracks in the same playlist.
 
 
 Stuff we really want to do, but just not right now
 ==================================================
 
 - Replace libspotify with `openspotify
-  <http://github.com/noahwilliamsson/openspotify>`_ for the
-  ``LibspotifyBackend``.
-- **[WIP]** A backend for playback from local disk. Quite a bit of work on
-  :mod:`mopidy.backends.gstreamer` has already been done by Thomas Adamcik.
-- Support multiple backends at the same time. It would be really nice to have
-  tracks from local disk and Spotify tracks in the same playlist.
-- **[Done]** Package Mopidy as a `Python package
-  <http://guide.python-distribute.org/>`_.
-- **[Done]** Get a build server, i.e. `Hudson <http://hudson-ci.org/>`_, up and
-  running which runs our test suite on all relevant platforms (Ubuntu, OS X,
-  etc.) and creates nightly packages (see next items).
+  <http://github.com/noahwilliamsson/openspotify>`_ for
+  :mod:`mopidy.backends.libspotify`. *Update:* Seems like openspotify
+  development has stalled.
 - Create `Debian packages <http://www.debian.org/doc/maint-guide/>`_ of all our
   dependencies and Mopidy itself (hosted in our own Debian repo until we get
   stuff into the various distros) to make Debian/Ubuntu installation a breeze.
-- Create `Homebrew <http://mxcl.github.com/homebrew/>`_ recipies for all our
-  dependencies and Mopidy itself to make OS X installation a breeze.
+- **[WIP]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_ recipies for
+  all our dependencies and Mopidy itself to make OS X installation a breeze.
 - Run frontend tests against a real MPD server to ensure we are in sync.
-- Start working with MPD-client maintainers to get rid of weird assumptions
-  like only searching for first two letters etc.
+- Start working with MPD client maintainers to get rid of weird assumptions
+  like only searching for first two letters and doing the rest of the filtering
+  locally in the client, etc.
 
 
 Crazy stuff we had to write down somewhere
 ==========================================
 
-- Add or create a new frontend protocol other than MPD. The MPD protocol got
-  quite a bit of legacy and it is badly documented. The amount of available
-  client implementations is MPD's big win.
-- Add support for storing (Spotify) music to disk.
+- Add an `XMMS2 <http://www.xmms2.org/>`_ frontend, so Mopidy can serve XMMS2
+  clients.
 - Add support for serving the music as an `Icecast <http://www.icecast.org/>`_
   stream instead of playing it locally.
 - Integrate with `Squeezebox <http://www.logitechsqueezebox.com/>`_ in some
   way.
 - AirPort Express support, like in
   `PulseAudio <http://git.0pointer.de/?p=pulseaudio.git;a=blob;f=src/modules/raop/raop_client.c;hb=HEAD>`_.
-- **[Done]** NAD/Denon amplifier mixer through their RS-232 connection.
 - DNLA and/or UPnP support. Maybe using
   `Coherence <http://coherence-project.org/>`_.
 - `Media Player Remote Interfacing Specification
