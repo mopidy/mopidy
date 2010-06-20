@@ -1090,8 +1090,16 @@ class MpdFrontend(object):
             ``commands``
 
             Shows which commands the current user has access to.
+
+        As permissions is not implemented, any user has access to all commands.
         """
-        pass # TODO
+        commands = set()
+        for command_pattern in _request_handlers.keys():
+            match = re.search('([a-z_]+)', command_pattern)
+            if match is not None:
+                commands.add(match.group())
+        commands = sorted(list(commands))
+        return [('command', command) for command in commands]
 
     @handle_pattern(r'^decoders$')
     def _reflection_decoders(self):
@@ -1120,8 +1128,10 @@ class MpdFrontend(object):
             ``notcommands``
 
             Shows which commands the current user does not have access to.
+
+        As permissions is not implemented, any user has access to all commands.
         """
-        pass # TODO
+        pass
 
     @handle_pattern(r'^tagtypes$')
     def _reflection_tagtypes(self):

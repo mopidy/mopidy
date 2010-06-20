@@ -1161,16 +1161,20 @@ class ReflectionHandlerTest(unittest.TestCase):
         self.b = DummyBackend(mixer=self.m)
         self.h = frontend.MpdFrontend(backend=self.b)
 
-    def test_commands(self):
+    def test_commands_returns_list_of_all_commands(self):
         result = self.h.handle_request(u'commands')
+        self.assert_(u'command: commands' in result)
+        self.assert_(u'command: play' in result)
+        self.assert_(u'command: status' in result)
         self.assert_(u'OK' in result)
 
     def test_decoders(self):
         result = self.h.handle_request(u'decoders')
         self.assert_(u'ACK Not implemented' in result)
 
-    def test_notcommands(self):
+    def test_notcommands_returns_only_ok(self):
         result = self.h.handle_request(u'notcommands')
+        self.assertEqual(1, len(result))
         self.assert_(u'OK' in result)
 
     def test_tagtypes(self):
