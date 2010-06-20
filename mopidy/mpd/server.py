@@ -47,7 +47,8 @@ class MpdServer(asyncore.dispatcher):
         (client_socket, client_socket_address) = self.accept()
         logger.info(u'MPD client connection from [%s]:%s',
             client_socket_address[0], client_socket_address[1])
-        MpdSession(self, client_socket, client_socket_address, self.core_queue)
+        MpdSession(self, client_socket, client_socket_address,
+            self.core_queue).start()
 
     def handle_close(self):
         self.close()
@@ -72,6 +73,8 @@ class MpdSession(asynchat.async_chat):
         self.core_queue = core_queue
         self.input_buffer = []
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
+
+    def start(self):
         self.send_response(u'OK MPD %s' % get_mpd_protocol_version())
 
     def collect_incoming_data(self, data):
