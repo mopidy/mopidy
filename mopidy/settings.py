@@ -112,11 +112,15 @@ SERVER = u'mopidy.mpd.server.MpdServer'
 
 #: Which address Mopidy should bind to. Examples:
 #:
-#: ``localhost``
-#:     Listens only on the loopback interface. Default.
+#: ``127.0.0.1``
+#:     Listens only on the IPv4 loopback interface. Default.
+#: ``::1``
+#:     Listens only on the IPv6 loopback interface.
 #: ``0.0.0.0``
-#:     Listens on all interfaces.
-SERVER_HOSTNAME = u'localhost'
+#:     Listens on all IPv4 interfaces.
+#: ``::``
+#:     Listens on all interfaces, both IPv4 and IPv6.
+SERVER_HOSTNAME = u'127.0.0.1'
 
 #: Which TCP port Mopidy should listen to. Default: 6600
 SERVER_PORT = 6600
