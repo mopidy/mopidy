@@ -70,10 +70,13 @@ class MpdSession(asynchat.async_chat):
     def found_terminator(self):
         data = ''.join(self.input_buffer).strip()
         self.input_buffer = []
-        request = data.decode(ENCODING)
-        logger.debug(u'Input ([%s]:%s): %s', self.client_address,
-            self.client_port, indent(request))
-        self.handle_request(request)
+        try:
+            request = data.decode(ENCODING)
+            logger.debug(u'Input ([%s]:%s): %s', self.client_address,
+                self.client_port, indent(request))
+            self.handle_request(request)
+        except UnicodeDecodeError as e:
+            logger.warning(u'Received invalid data: %s', e)
 
     def handle_request(self, request):
         my_end, other_end = multiprocessing.Pipe()
