@@ -1,9 +1,16 @@
 import unittest
 
-from mopidy.mpd.server import MpdSession
+from mopidy.mpd.server import MpdServer, MpdSession
 
 class MpdServerTest(unittest.TestCase):
-    pass # TODO
+    def setUp(self):
+        self.server = MpdServer(None)
+
+    def test_format_hostname_prefixes_ipv4_addresses(self):
+        self.assertEqual(self.server._format_hostname('0.0.0.0'),
+            '::ffff:0.0.0.0')
+        self.assertEqual(self.server._format_hostname('127.0.0.1'),
+            '::ffff:127.0.0.1')
 
 class MpdSessionTest(unittest.TestCase):
     def setUp(self):

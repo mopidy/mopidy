@@ -6,6 +6,7 @@ import asynchat
 import asyncore
 import logging
 import multiprocessing
+import re
 import socket
 import sys
 
@@ -27,14 +28,18 @@ class MpdServer(asyncore.dispatcher):
 
     def __init__(self, core_queue):
         asyncore.dispatcher.__init__(self)
+        self.core_queue = core_queue
+
+    def start(self):
         try:
-            self.core_queue = core_queue
             self.create_socket(socket.AF_INET6, socket.SOCK_STREAM)
             self.set_reuse_addr()
-            self.bind((settings.SERVER_HOSTNAME, settings.SERVER_PORT))
+            self.bind((self._format_hostname(settings.SERVER_HOSTNAME),
+                settings.SERVER_PORT))
             self.listen(1)
             logger.info(u'MPD server running at [%s]:%s',
-                settings.SERVER_HOSTNAME, settings.SERVER_PORT)
+                self._format_hostname(settings.SERVER_HOSTNAME),
+                settings.SERVER_PORT)
         except IOError, e:
             sys.exit('MPD server startup failed: %s' % e)
 
@@ -46,6 +51,11 @@ class MpdServer(asyncore.dispatcher):
 
     def handle_close(self):
         self.close()
+
+    def _format_hostname(self, hostname):
+        if re.match('\d+.\d+.\d+.\d+', hostname) is not None:
+            hostname = '::ffff:%s' % hostname
+        return hostname
 
 
 class MpdSession(asynchat.async_chat):

@@ -21,7 +21,7 @@ def main():
     logger.info('-- Starting Mopidy --')
     get_or_create_folder('~/.mopidy/')
     core_queue = multiprocessing.Queue()
-    get_class(settings.SERVER)(core_queue)
+    get_class(settings.SERVER)(core_queue).start()
     core = CoreProcess(core_queue)
     core.start()
     asyncore.loop()
