@@ -85,7 +85,7 @@ class MpdSession(asynchat.async_chat):
         self.input_buffer = []
         try:
             request = data.decode(ENCODING)
-            logger.debug(u'Input ([%s]:%s): %s', self.client_address,
+            logger.debug(u'Input from [%s]:%s: %s', self.client_address,
                 self.client_port, indent(request))
             self.handle_request(request)
         except UnicodeDecodeError as e:
@@ -107,7 +107,7 @@ class MpdSession(asynchat.async_chat):
         self.send_response(LINE_TERMINATOR.join(response))
 
     def send_response(self, output):
-        logger.debug(u'Output ([%s]:%s): %s', self.client_address,
+        logger.debug(u'Output to [%s]:%s: %s', self.client_address,
             self.client_port, indent(output))
         output = u'%s%s' % (output, LINE_TERMINATOR)
         data = output.encode(ENCODING)
