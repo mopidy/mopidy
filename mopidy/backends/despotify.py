@@ -24,7 +24,7 @@ class DespotifyBackend(BaseBackend):
     is the Python bindings for the despotify library. It got litle
     documentation, but a couple of examples are available.
 
-    **Issues:** http://github.com/jodal/mopidy/issues/labels/despotify
+    **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-despotify
     """
 
     def __init__(self, *args, **kwargs):

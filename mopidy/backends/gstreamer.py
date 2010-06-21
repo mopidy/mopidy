@@ -34,7 +34,7 @@ class GStreamerBackend(BaseBackend):
 
     Uses the `GStreamer <http://gstreamer.freedesktop.org/>`_ library.
 
-    **Issues:** http://github.com/jodal/mopidy/issues/labels/gstreamer
+    **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-gstreamer
     """
 
     def __init__(self, *args, **kwargs):

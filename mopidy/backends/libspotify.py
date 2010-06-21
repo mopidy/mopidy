@@ -32,7 +32,7 @@ class LibspotifyBackend(BaseBackend):
     <http://github.com/noahwilliamsson/openspotify>`_, but we haven't tested
     that yet.
 
-    **Issues:** http://github.com/jodal/mopidy/issues/labels/libspotify
+    **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-libspotify
     """
 
     def __init__(self, *args, **kwargs):
