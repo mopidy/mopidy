@@ -7,9 +7,8 @@ def get_mpd_protocol_version():
     return u'0.16.0'
 
 class MopidyException(Exception):
-    def __init__(self, message, *args, **kwargs):
-        super(MopidyException, self).__init__(message, *args, **kwargs)
-        self._message = message
+    def __init__(self, message):
+        self.message = message
 
     @property
     def message(self):

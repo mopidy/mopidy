@@ -4,7 +4,7 @@ import unittest
 from mopidy.backends.dummy import DummyBackend
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track, Playlist
-from mopidy.mpd import frontend
+from mopidy.mpd import frontend, MpdAckError
 
 from tests import SkipTest
 
@@ -23,9 +23,26 @@ class RequestHandlerTest(unittest.TestCase):
         except ValueError:
             pass
 
-    def test_handling_unknown_request_raises_exception(self):
+    def test_finding_handler_for_unknown_command_raises_exception(self):
+        try:
+            self.h.find_handler('an_unknown_command with args')
+            fail('Should raise exception')
+        except MpdAckError as e:
+            self.assertEqual(e.get_mpd_ack(),
+                u'ACK [5@0] {} unknown command "an_unknown_command"')
+
+    def test_finding_handler_for_known_command_returns_handler_and_kwargs(self):
+        expected_handler = lambda x: None
+        frontend._request_handlers['known_command (?P<arg1>.+)'] = \
+            expected_handler
+        (handler, kwargs) = self.h.find_handler('known_command an_arg')
+        self.assertEqual(handler, expected_handler)
+        self.assert_('arg1' in kwargs)
+        self.assertEqual(kwargs['arg1'], 'an_arg')
+
+    def test_handling_unknown_request_yields_error(self):
         result = self.h.handle_request('an unhandled request')
-        self.assert_(u'ACK Unknown command' in result[0])
+        self.assertEqual(result[0], u'ACK [5@0] {} unknown command "an"')
 
     def test_handling_known_request(self):
         expected = 'magic'
@@ -33,6 +50,7 @@ class RequestHandlerTest(unittest.TestCase):
         result = self.h.handle_request('known request')
         self.assert_(u'OK' in result)
         self.assert_(expected in result)
+
 
 class CommandListsTest(unittest.TestCase):
     def setUp(self):
@@ -90,7 +108,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_currentsong(self):
         track = Track()
@@ -122,7 +140,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_noidle(self):
         result = self.h.handle_request(u'noidle')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_stats_command(self):
         result = self.h.handle_request(u'stats')
@@ -309,7 +327,7 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
     def test_crossfade(self):
         result = self.h.handle_request(u'crossfade "10"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_random_off(self):
         result = self.h.handle_request(u'random "0"')
@@ -373,15 +391,15 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
     def test_replay_gain_mode_off(self):
         result = self.h.handle_request(u'replay_gain_mode "off"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_replay_gain_mode_track(self):
         result = self.h.handle_request(u'replay_gain_mode "track"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_replay_gain_mode_album(self):
         result = self.h.handle_request(u'replay_gain_mode "album"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_replay_gain_status_default(self):
         expected = u'off'
@@ -458,7 +476,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
     def test_play_with_pos_out_of_bounds(self):
         self.b.current_playlist.load(Playlist())
         result = self.h.handle_request(u'play "0"')
-        self.assert_(u'ACK Position out of bounds' in result)
+        self.assertEqual(result[0], u'ACK [2@0] {play} Bad song index')
         self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
 
     def test_play_minus_one_plays_first_in_playlist(self):
@@ -486,7 +504,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
     def test_playid_which_does_not_exist(self):
         self.b.current_playlist.load(Playlist(tracks=[Track(id=0)]))
         result = self.h.handle_request(u'playid "1"')
-        self.assert_(u'ACK "id=1" match no tracks' in result)
+        self.assertEqual(result[0], u'ACK [50@0] {playid} No such song')
 
     def test_previous(self):
         result = self.h.handle_request(u'previous')
@@ -494,11 +512,11 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
     def test_seek(self):
         result = self.h.handle_request(u'seek "0" "30"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_seekid(self):
         result = self.h.handle_request(u'seekid "0" "30"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_stop(self):
         result = self.h.handle_request(u'stop')
@@ -525,7 +543,8 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_add_with_uri_not_found_in_library_should_ack(self):
         result = self.h.handle_request(u'add "dummy://foo"')
-        self.assert_(u'ACK No such song' in result)
+        self.assertEqual(result[0],
+            u'ACK [50@0] {add} directory or file not found')
 
     def test_addid_without_songpos(self):
         needle = Track(uri='dummy://foo', id=137)
@@ -558,11 +577,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
             tracks=[Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(self.b.current_playlist.playlist.length, 5)
         result = self.h.handle_request(u'addid "dummy://foo" "6"')
-        self.assert_(u'ACK Position out of bounds' in result)
+        self.assertEqual(result[0], u'ACK [2@0] {addid} Bad song index')
 
     def test_addid_with_uri_not_found_in_library_should_ack(self):
         result = self.h.handle_request(u'addid "dummy://foo"')
-        self.assert_(u'ACK No such song' in result)
+        self.assertEqual(result[0], u'ACK [50@0] {addid} No such song')
 
     def test_clear(self):
         self.b.current_playlist.playlist = Playlist(
@@ -587,7 +606,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.current_playlist.playlist.length, 5)
         result = self.h.handle_request(u'delete "5"')
         self.assertEqual(self.b.current_playlist.playlist.length, 5)
-        self.assert_(u'ACK Position out of bounds' in result)
+        self.assertEqual(result[0], u'ACK [2@0] {delete} Bad song index')
 
     def test_delete_open_range(self):
         self.b.current_playlist.playlist = Playlist(
@@ -611,7 +630,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.current_playlist.playlist.length, 5)
         result = self.h.handle_request(u'delete "5:7"')
         self.assertEqual(self.b.current_playlist.playlist.length, 5)
-        self.assert_(u'ACK Position out of bounds' in result)
+        self.assertEqual(result[0], u'ACK [2@0] {delete} Bad song index')
 
     def test_deleteid(self):
         self.b.current_playlist.load(Playlist(tracks=[Track(id=0), Track()]))
@@ -625,7 +644,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.current_playlist.playlist.length, 2)
         result = self.h.handle_request(u'deleteid "0"')
         self.assertEqual(self.b.current_playlist.playlist.length, 2)
-        self.assert_(u'ACK "id=0" match no tracks' in result)
+        self.assertEqual(result[0], u'ACK [50@0] {deleteid} No such song')
 
     def test_move_songpos(self):
         self.b.current_playlist.load(Playlist(tracks=[
@@ -686,7 +705,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_playlistfind(self):
         result = self.h.handle_request(u'playlistfind "tag" "needle"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_playlistfind_by_filename(self):
         result = self.h.handle_request(u'playlistfind "filename" "file:///dev/null"')
@@ -727,7 +746,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.b.current_playlist.load(Playlist(
             tracks=[Track(name='a', id=33), Track(name='b', id=38)]))
         result = self.h.handle_request(u'playlistid "25"')
-        self.assert_(u'ACK "id=25" match no tracks' in result)
+        self.assertEqual(result[0], u'ACK [50@0] {playlistid} No such song')
 
     def test_playlistinfo_without_songpos_or_range(self):
         # FIXME testing just ok is not enough
@@ -756,7 +775,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_playlistsearch(self):
         result = self.h.handle_request(u'playlistsearch "tag" "needle"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_plchanges(self):
         self.b.current_playlist.load(Playlist(
@@ -856,7 +875,8 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
     def test_listplaylist_fails_if_no_playlist_is_found(self):
         result = self.h.handle_request(u'listplaylist "name"')
-        self.assert_(u'ACK "name=name" match no playlists' in result)
+        self.assertEqual(result[0],
+            u'ACK [50@0] {listplaylist} No such playlist')
 
     def test_listplaylistinfo(self):
         self.b.stored_playlists.playlists = [
@@ -869,7 +889,8 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
     def test_listplaylistinfo_fails_if_no_playlist_is_found(self):
         result = self.h.handle_request(u'listplaylistinfo "name"')
-        self.assert_(u'ACK "name=name" match no playlists' in result)
+        self.assertEqual(result[0],
+            u'ACK [50@0] {listplaylist} No such playlist')
 
     def test_listplaylists(self):
         last_modified = dt.datetime(2001, 3, 17, 13, 41, 17)
@@ -890,31 +911,31 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
     def test_playlistadd(self):
         result = self.h.handle_request(
             u'playlistadd "name" "file:///dev/urandom"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_playlistclear(self):
         result = self.h.handle_request(u'playlistclear "name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_playlistdelete(self):
         result = self.h.handle_request(u'playlistdelete "name" "5"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_playlistmove(self):
         result = self.h.handle_request(u'playlistmove "name" "5" "10"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_rename(self):
         result = self.h.handle_request(u'rename "old_name" "new_name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_rm(self):
         result = self.h.handle_request(u'rm "name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_save(self):
         result = self.h.handle_request(u'save "name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
@@ -955,7 +976,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_find_else_should_fail(self):
         result = self.h.handle_request(u'find "somethingelse" "what"')
-        self.assert_(u'ACK Unknown command' in result[0])
+        self.assertEqual(result[0], u'ACK [2@0] {find} incorrect arguments')
 
     def test_find_album_and_artist(self):
         result = self.h.handle_request(u'find album "album_what" artist "artist_what"')
@@ -971,7 +992,8 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_list_artist_with_artist_should_fail(self):
         result = self.h.handle_request(u'list "artist" "anartist"')
-        self.assert_(u'ACK Unknown command' in result[0])
+        self.assertEqual(result[0],
+            u'ACK [2@0] {list} should be "Album" for 3 arguments')
 
     def test_list_album_without_artist(self):
         result = self.h.handle_request(u'list "album"')
@@ -983,11 +1005,11 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_listall(self):
         result = self.h.handle_request(u'listall "file:///dev/urandom"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_listallinfo(self):
         result = self.h.handle_request(u'listallinfo "file:///dev/urandom"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_lsinfo_without_path_returns_same_as_listplaylists(self):
         lsinfo_result = self.h.handle_request(u'lsinfo')
@@ -1046,7 +1068,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_search_else_should_fail(self):
         result = self.h.handle_request(u'search "sometype" "something"')
-        self.assert_(u'ACK Unknown command' in result[0])
+        self.assertEqual(result[0], u'ACK [2@0] {search} incorrect arguments')
 
     def test_update_without_uri(self):
         result = self.h.handle_request(u'update')
@@ -1078,32 +1100,32 @@ class StickersHandlerTest(unittest.TestCase):
     def test_sticker_get(self):
         result = self.h.handle_request(
             u'sticker get "song" "file:///dev/urandom" "a_name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_sticker_set(self):
         result = self.h.handle_request(
             u'sticker set "song" "file:///dev/urandom" "a_name" "a_value"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_sticker_delete_with_name(self):
         result = self.h.handle_request(
             u'sticker delete "song" "file:///dev/urandom" "a_name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_sticker_delete_without_name(self):
         result = self.h.handle_request(
             u'sticker delete "song" "file:///dev/urandom"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_sticker_list(self):
         result = self.h.handle_request(
             u'sticker list "song" "file:///dev/urandom"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_sticker_find(self):
         result = self.h.handle_request(
             u'sticker find "song" "file:///dev/urandom" "a_name"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
 
 class ConnectionHandlerTest(unittest.TestCase):
@@ -1126,7 +1148,7 @@ class ConnectionHandlerTest(unittest.TestCase):
 
     def test_password(self):
         result = self.h.handle_request(u'password "secret"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_ping(self):
         result = self.h.handle_request(u'ping')
@@ -1141,11 +1163,11 @@ class AudioOutputHandlerTest(unittest.TestCase):
 
     def test_enableoutput(self):
         result = self.h.handle_request(u'enableoutput "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_disableoutput(self):
         result = self.h.handle_request(u'disableoutput "0"')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_outputs(self):
         result = self.h.handle_request(u'outputs')
@@ -1170,7 +1192,7 @@ class ReflectionHandlerTest(unittest.TestCase):
 
     def test_decoders(self):
         result = self.h.handle_request(u'decoders')
-        self.assert_(u'ACK Not implemented' in result)
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_notcommands_returns_only_ok(self):
         result = self.h.handle_request(u'notcommands')

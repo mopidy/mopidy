@@ -14,7 +14,7 @@ import datetime as dt
 import logging
 import re
 
-from mopidy.mpd import MpdAckError, MpdNotImplemented
+from mopidy.mpd import MpdAckError, MpdUnknownCommand, MpdNotImplemented
 from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.mpd.frontend')
@@ -59,20 +59,22 @@ class MpdFrontend(object):
         if self.command_list is not False and request != u'command_list_end':
             self.command_list.append(request)
             return None
+        try:
+            (handler, kwargs) = self.find_handler(request)
+            result = handler(self, **kwargs)
+        except MpdAckError as e:
+            return self.handle_response(e.get_mpd_ack(), add_ok=False)
+        if self.command_list is not False:
+            return None
+        else:
+            return self.handle_response(result, add_ok)
+
+    def find_handler(self, request):
         for pattern in _request_handlers:
             matches = re.match(pattern, request)
             if matches is not None:
-                groups = matches.groupdict()
-                try:
-                    result = _request_handlers[pattern](self, **groups)
-                except MpdAckError as e:
-                    return self.handle_response(u'ACK %s' % e.message,
-                        add_ok=False)
-                if self.command_list is not False:
-                    return None
-                else:
-                    return self.handle_response(result, add_ok)
-        return self.handle_response(u'ACK Unknown command: %s' % request)
+                return (_request_handlers[pattern], matches.groupdict())
+        raise MpdUnknownCommand(command=request.split(' ')[0])
 
     def handle_response(self, result, add_ok=True):
         response = []
