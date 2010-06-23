@@ -20,6 +20,7 @@ from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.mpd.frontend')
 
+_commands = set()
 _request_handlers = {}
 
 def handle_pattern(pattern):
@@ -41,6 +42,9 @@ def handle_pattern(pattern):
     :type pattern: string
     """
     def decorator(func):
+        match = re.search('([a-z_]+)', pattern)
+        if match is not None:
+            _commands.add(match.group())
         if pattern in _request_handlers:
             raise ValueError(u'Tried to redefine handler for %s with %s' % (
                 pattern, func))
@@ -1100,13 +1104,7 @@ class MpdFrontend(object):
 
         As permissions is not implemented, any user has access to all commands.
         """
-        commands = set()
-        for command_pattern in _request_handlers.keys():
-            match = re.search('([a-z_]+)', command_pattern)
-            if match is not None:
-                commands.add(match.group())
-        commands = sorted(list(commands))
-        return [('command', command) for command in commands]
+        return [('command', c) for c in sorted(list(_commands))]
 
     @handle_pattern(r'^decoders$')
     def _reflection_decoders(self):
