@@ -993,8 +993,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
     def test_list_artist_with_artist_should_fail(self):
         result = self.h.handle_request(u'list "artist" "anartist"')
-        self.assertEqual(result[0],
-            u'ACK [2@0] {list} should be "Album" for 3 arguments')
+        self.assertEqual(result[0], u'ACK [2@0] {list} incorrect arguments')
 
     def test_list_album_without_artist(self):
         result = self.h.handle_request(u'list "album"')

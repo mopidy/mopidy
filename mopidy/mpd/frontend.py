@@ -79,7 +79,10 @@ class MpdFrontend(object):
             matches = re.match(pattern, request)
             if matches is not None:
                 return (_request_handlers[pattern], matches.groupdict())
-        raise MpdUnknownCommand(command=request.split(' ')[0])
+        command = request.split(' ')[0]
+        if command in _commands:
+            raise MpdArgError(u'incorrect arguments', command=command)
+        raise MpdUnknownCommand(command=command)
 
     def handle_response(self, result, add_ok=True):
         response = []
