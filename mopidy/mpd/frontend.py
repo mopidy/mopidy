@@ -14,7 +14,8 @@ import datetime as dt
 import logging
 import re
 
-from mopidy.mpd import MpdAckError, MpdUnknownCommand, MpdNotImplemented
+from mopidy.mpd import (MpdAckError, MpdArgError, MpdUnknownCommand,
+    MpdNoExistError, MpdNotImplemented)
 from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.mpd.frontend')
@@ -238,7 +239,11 @@ class MpdFrontend(object):
             Adds the file ``URI`` to the playlist (directories add recursively).
             ``URI`` can also be a single file.
         """
-        self._current_playlist_addid(uri)
+        track = self.backend.library.lookup(uri)
+        if track is None:
+            raise MpdNoExistError(
+                u'directory or file not found', command=u'add')
+        self.backend.current_playlist.add(track)
 
     @handle_pattern(r'^addid "(?P<uri>[^"]*)"( "(?P<songpos>\d+)")*$')
     def _current_playlist_addid(self, uri, songpos=None):
@@ -259,9 +264,9 @@ class MpdFrontend(object):
             songpos = int(songpos)
         track = self.backend.library.lookup(uri)
         if track is None:
-            raise MpdAckError(u'No such song')
+            raise MpdNoExistError(u'No such song', command=u'addid')
         if songpos and songpos > self.backend.current_playlist.playlist.length:
-            raise MpdAckError(u'Position out of bounds')
+            raise MpdArgError(u'Bad song index', command=u'addid')
         self.backend.current_playlist.add(track, at_position=songpos)
         return ('Id', track.id)
 
@@ -281,7 +286,7 @@ class MpdFrontend(object):
             end = self.backend.current_playlist.playlist.length
         tracks = self.backend.current_playlist.playlist.tracks[start:end]
         if not tracks:
-            raise MpdAckError(u'Position out of bounds')
+            raise MpdArgError(u'Bad song index', command=u'delete')
         for track in tracks:
             self.backend.current_playlist.remove(track)
 
@@ -293,7 +298,7 @@ class MpdFrontend(object):
             track = self.backend.current_playlist.playlist.tracks[songpos]
             self.backend.current_playlist.remove(track)
         except IndexError:
-            raise MpdAckError(u'Position out of bounds')
+            raise MpdArgError(u'Bad song index', command=u'delete')
 
     @handle_pattern(r'^deleteid "(?P<songid>\d+)"$')
     def _current_playlist_deleteid(self, songid):
@@ -308,8 +313,8 @@ class MpdFrontend(object):
         try:
             track = self.backend.current_playlist.get(id=songid)
             return self.backend.current_playlist.remove(track)
-        except LookupError as e:
-            raise MpdAckError(e[0])
+        except LookupError:
+            raise MpdNoExistError(u'No such song', command=u'deleteid')
 
     @handle_pattern(r'^clear$')
     def _current_playlist_clear(self):
@@ -415,8 +420,8 @@ class MpdFrontend(object):
                 songid = int(songid)
                 track = self.backend.current_playlist.get(id=songid)
                 return track.mpd_format()
-            except LookupError as e:
-                raise MpdAckError(e[0])
+            except LookupError:
+                raise MpdNoExistError(u'No such song', command=u'playlistid')
         else:
             return self.backend.current_playlist.playlist.mpd_format()
 
@@ -889,8 +894,8 @@ class MpdFrontend(object):
             else:
                 track = self.backend.current_playlist.get(id=songid)
             return self.backend.playback.play(track)
-        except LookupError as e:
-            raise MpdAckError(e[0])
+        except LookupError:
+            raise MpdNoExistError(u'No such song', command=u'playid')
 
     @handle_pattern(r'^play "(?P<songpos>\d+)"$')
     @handle_pattern(r'^play "(?P<songpos>-1)"$')
@@ -914,7 +919,7 @@ class MpdFrontend(object):
                 track = self.backend.current_playlist.playlist.tracks[songpos]
             return self.backend.playback.play(track)
         except IndexError:
-            raise MpdAckError(u'Position out of bounds')
+            raise MpdArgError(u'Bad song index', command=u'play')
 
     @handle_pattern(r'^previous$')
     def _playback_previous(self):
@@ -1452,8 +1457,8 @@ class MpdFrontend(object):
         try:
             return ['file: %s' % t.uri
                 for t in self.backend.stored_playlists.get(name=name).tracks]
-        except LookupError as e:
-            raise MpdAckError(e[0])
+        except LookupError:
+            raise MpdNoExistError(u'No such playlist', command=u'listplaylist')
 
     @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
     def _stored_playlists_listplaylistinfo(self, name):
@@ -1472,8 +1477,9 @@ class MpdFrontend(object):
         try:
             return self.backend.stored_playlists.get(name=name).mpd_format(
                 search_result=True)
-        except LookupError as e:
-            raise MpdAckError(e[0])
+        except LookupError:
+            raise MpdNoExistError(
+                u'No such playlist', command=u'listplaylistinfo')
 
     @handle_pattern(r'^listplaylists$')
     def _stored_playlists_listplaylists(self):

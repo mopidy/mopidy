@@ -33,12 +33,22 @@ class MpdAckError(MopidyException):
         return u'ACK [%i@%i] {%s} %s' % (
             self.error_code, self.position, self.command, self.message)
 
+class MpdArgError(MpdAckError):
+    def __init__(self, *args, **kwargs):
+        super(MpdArgError, self).__init__(*args, **kwargs)
+        self.error_code = 2 # ACK_ERROR_ARG
+
 class MpdUnknownCommand(MpdAckError):
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
         self.message = u'unknown command "%s"' % self.command
         self.command = u''
         self.error_code = 5 # ACK_ERROR_UNKNOWN
+
+class MpdNoExistError(MpdAckError):
+    def __init__(self, *args, **kwargs):
+        super(MpdNoExistError, self).__init__(*args, **kwargs)
+        self.error_code = 50 # ACK_ERROR_NO_EXIST
 
 class MpdNotImplemented(MpdAckError):
     def __init__(self, *args, **kwargs):

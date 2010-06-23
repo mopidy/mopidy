@@ -539,6 +539,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'add "dummy://foo"')
         self.assertEqual(self.b.current_playlist.playlist.length, 6)
         self.assertEqual(self.b.current_playlist.playlist.tracks[5], needle)
+        self.assertEqual(len(result), 1)
         self.assert_(u'OK' in result)
 
     def test_add_with_uri_not_found_in_library_should_ack(self):
@@ -890,7 +891,7 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
     def test_listplaylistinfo_fails_if_no_playlist_is_found(self):
         result = self.h.handle_request(u'listplaylistinfo "name"')
         self.assertEqual(result[0],
-            u'ACK [50@0] {listplaylist} No such playlist')
+            u'ACK [50@0] {listplaylistinfo} No such playlist')
 
     def test_listplaylists(self):
         last_modified = dt.datetime(2001, 3, 17, 13, 41, 17)
