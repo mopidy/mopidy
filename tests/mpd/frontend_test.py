@@ -82,11 +82,12 @@ class CommandListsTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assertEqual(False, self.h.command_list)
 
-    def test_command_list_with_error(self):
+    def test_command_list_with_error_returns_ack_with_correct_index(self):
         self.h.handle_request(u'command_list_begin')
-        self.h.handle_request(u'ack')
+        self.h.handle_request(u'play') # Known command
+        self.h.handle_request(u'paly') # Unknown command
         result = self.h.handle_request(u'command_list_end')
-        self.assert_(u'ACK' in result[-1])
+        self.assertEqual(result[0], u'ACK [5@1] {} unknown command "paly"')
 
     def test_command_list_ok_begin(self):
         result = self.h.handle_request(u'command_list_ok_begin')

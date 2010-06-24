@@ -60,7 +60,7 @@ class MpdFrontend(object):
         self.command_list = False
         self.command_list_ok = False
 
-    def handle_request(self, request, add_ok=True):
+    def handle_request(self, request, command_list_index=None):
         if self.command_list is not False and request != u'command_list_end':
             self.command_list.append(request)
             return None
@@ -68,10 +68,14 @@ class MpdFrontend(object):
             (handler, kwargs) = self.find_handler(request)
             result = handler(self, **kwargs)
         except MpdAckError as e:
+            if command_list_index is not None:
+                e.index = command_list_index
             return self.handle_response(e.get_mpd_ack(), add_ok=False)
         if request in (u'command_list_begin', u'command_list_ok_begin'):
             return None
-        return self.handle_response(result, add_ok)
+        if command_list_index is not None:
+            return self.handle_response(result, add_ok=False)
+        return self.handle_response(result)
 
     def find_handler(self, request):
         for pattern in _request_handlers:
@@ -175,8 +179,8 @@ class MpdFrontend(object):
         (command_list, self.command_list) = (self.command_list, False)
         (command_list_ok, self.command_list_ok) = (self.command_list_ok, False)
         result = []
-        for command in command_list:
-            response = self.handle_request(command, add_ok=False)
+        for i, command in enumerate(command_list):
+            response = self.handle_request(command, command_list_index=i)
             if response is not None:
                 result.append(response)
             if response and response[-1].startswith(u'ACK'):
