@@ -891,7 +891,8 @@ class MpdFrontend(object):
 
         *GMPC:*
 
-        - issues ``playid "-1"`` after playlist replacement.
+        - issues ``playid "-1"`` after playlist replacement to start playback
+          at the first track.
         """
         songid = int(songid)
         try:
