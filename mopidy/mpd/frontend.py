@@ -1575,8 +1575,8 @@ class MpdFrontend(object):
         raise MpdNotImplemented # TODO
 
     @handle_pattern(r'^playlistmove "(?P<name>[^"]+)" '
-        r'"(?P<songid>\d+)" "(?P<songpos>\d+)"$')
-    def _stored_playlist_playlistmove(self, name, songid, songpos):
+        r'"(?P<from_pos>\d+)" "(?P<to_pos>\d+)"$')
+    def _stored_playlist_playlistmove(self, name, from_pos, to_pos):
         """
         *musicpd.org, stored playlists section:*
 
@@ -1584,6 +1584,12 @@ class MpdFrontend(object):
 
             Moves ``SONGID`` in the playlist ``NAME.m3u`` to the position
             ``SONGPOS``.
+
+        *Clarifications:*
+
+            - The second argument is not a ``SONGID`` as used elsewhere in the
+              protocol documentation, but just the ``SONGPOS`` to move *from*,
+              i.e. ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
         """
         raise MpdNotImplemented # TODO
 
