@@ -7,7 +7,7 @@ This change log is used to track all major changes to Mopidy.
 0.1.0a3 (unreleased)
 ====================
 
-We got an updated release roadmap at :doc:`development/roadmap`!
+We got an updated :doc:`release roadmap <development/roadmap>`!
 
 **Changes**
 
@@ -15,11 +15,15 @@ We got an updated release roadmap at :doc:`development/roadmap`!
 
   - Support IPv6.
   - ``addid`` responds properly on errors instead of crashing.
-  - ``commands`` support, which makes ncmpc a bit more happy.
-  - Does no longer crash on invalid data (i.e. non-UTF-8-data).
-  - ACK error messages are now MPD-compliant, which should make clients handle
-    errors from Mopidy better.
-  - Requests with wrong arguments are no longer reported as unknown commands.
+  - ``commands`` support, which makes RelaXXPlayer work with Mopidy. (Fixes:
+    GH-6)
+  - Does no longer crash on invalid data, i.e. non-UTF-8 data.
+  - ``ACK`` error messages are now MPD-compliant, which should make clients
+    handle errors from Mopidy better.
+  - Requests to existing commands with wrong arguments are no longer reported
+    as unknown commands.
+  - ``command_list_end`` before ``command_list_start`` now returns unknown
+    command error instead of crashing.
 
 
 0.1.0a2 (2010-06-02)
