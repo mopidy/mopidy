@@ -1,6 +1,12 @@
 import unittest
 import os
 
+# FIXME Our Windows build server does not support Gstreamer yet
+import sys
+if sys.platform == 'win32':
+    from tests import SkipTest
+    raise SkipTest
+
 from mopidy import settings
 from mopidy.backends.gstreamer import GStreamerBackend
 from mopidy.mixers.dummy import DummyMixer
@@ -12,6 +18,7 @@ from tests import SkipTest, data_folder
 
 song = data_folder('song%s.wav')
 generate_song = lambda i: path_to_uri(song % i)
+
 
 # FIXME can be switched to generic test
 class GStreamerCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
