@@ -7,7 +7,19 @@ This change log is used to track all major changes to Mopidy.
 0.1.0a3 (unreleased)
 ====================
 
-- Support IPv6.
+We got an updated release roadmap at :doc:`development/roadmap`!
+
+**Changes**
+
+- MPD frontend:
+
+  - Support IPv6.
+  - ``addid`` responds properly on errors instead of crashing.
+  - ``commands`` support, which makes ncmpc a bit more happy.
+  - Does no longer crash on invalid data (i.e. non-UTF-8-data).
+  - ACK error messages are now MPD-compliant, which should make clients handle
+    errors from Mopidy better.
+  - Requests with wrong arguments are no longer reported as unknown commands.
 
 
 0.1.0a2 (2010-06-02)
