@@ -294,7 +294,7 @@ class MpdFrontend(object):
         if not tracks:
             raise MpdArgError(u'Bad song index', command=u'delete')
         for track in tracks:
-            self.backend.current_playlist.remove(track)
+            self.backend.current_playlist.remove(cpid=track.cpid)
 
     @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
     def _current_playlist_delete_songpos(self, songpos):
@@ -302,7 +302,7 @@ class MpdFrontend(object):
         try:
             songpos = int(songpos)
             track = self.backend.current_playlist.tracks[songpos]
-            self.backend.current_playlist.remove(track)
+            self.backend.current_playlist.remove(id=track.id)
         except IndexError:
             raise MpdArgError(u'Bad song index', command=u'delete')
 
@@ -315,10 +315,9 @@ class MpdFrontend(object):
 
             Deletes the song ``SONGID`` from the playlist
         """
-        songid = int(songid)
         try:
-            track = self.backend.current_playlist.get(id=songid)
-            return self.backend.current_playlist.remove(track)
+            songid = int(songid)
+            return self.backend.current_playlist.remove(id=songid)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'deleteid')
 
