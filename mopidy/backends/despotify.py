@@ -123,7 +123,7 @@ class DespotifyTranslator(object):
 
     @classmethod
     def to_mopidy_track(cls, spotify_track):
-        if not spotify_track.has_meta_data():
+        if spotify_track is None or not spotify_track.has_meta_data():
             return None
         if dt.MINYEAR <= int(spotify_track.year) <= dt.MAXYEAR:
             date = dt.date(spotify_track.year, 1, 1)
