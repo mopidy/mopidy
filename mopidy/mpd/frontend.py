@@ -106,13 +106,6 @@ class MpdFrontend(object):
             response.append(u'OK')
         return response
 
-    @handle_pattern(r'^ack$')
-    def _ack(self):
-        """
-        Always returns an 'ACK'. Not a part of the MPD protocol.
-        """
-        raise MpdNotImplemented
-
     @handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
     def _audio_output_disableoutput(self, outputid):
         """
@@ -1114,9 +1107,6 @@ class MpdFrontend(object):
         As permissions is not implemented, any user has access to all commands.
         """
         commands = sorted(list(_commands))
-
-        # Added by Mopidy. Not a part of the MPD protocol.
-        commands.remove('ack')
 
         # Not shown by MPD in its command list
         commands.remove('command_list_begin')

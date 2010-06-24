@@ -1197,7 +1197,6 @@ class ReflectionHandlerTest(unittest.TestCase):
         self.assert_(u'command: play' in result)
         self.assert_(u'command: status' in result)
         # Check if the blacklisted commands are not present
-        self.assert_(u'command: ack' not in result)
         self.assert_(u'command: command_list_begin' not in result)
         self.assert_(u'command: command_list_ok_begin' not in result)
         self.assert_(u'command: command_list_end' not in result)
