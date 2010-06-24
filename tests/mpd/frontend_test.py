@@ -1186,9 +1186,18 @@ class ReflectionHandlerTest(unittest.TestCase):
 
     def test_commands_returns_list_of_all_commands(self):
         result = self.h.handle_request(u'commands')
+        # Check if some random commands are included
         self.assert_(u'command: commands' in result)
         self.assert_(u'command: play' in result)
         self.assert_(u'command: status' in result)
+        # Check if the blacklisted commands are not present
+        self.assert_(u'command: ack' not in result)
+        self.assert_(u'command: command_list_begin' not in result)
+        self.assert_(u'command: command_list_ok_begin' not in result)
+        self.assert_(u'command: command_list_end' not in result)
+        self.assert_(u'command: idle' not in result)
+        self.assert_(u'command: noidle' not in result)
+        self.assert_(u'command: sticker' not in result)
         self.assert_(u'OK' in result)
 
     def test_decoders(self):

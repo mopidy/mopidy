@@ -1107,7 +1107,20 @@ class MpdFrontend(object):
 
         As permissions is not implemented, any user has access to all commands.
         """
-        return [('command', c) for c in sorted(list(_commands))]
+        commands = sorted(list(_commands))
+
+        # Added by Mopidy. Not a part of the MPD protocol.
+        commands.remove('ack')
+
+        # Not shown by MPD in its command list
+        commands.remove('command_list_begin')
+        commands.remove('command_list_ok_begin')
+        commands.remove('command_list_end')
+        commands.remove('idle')
+        commands.remove('noidle')
+        commands.remove('sticker')
+
+        return [('command', c) for c in commands]
 
     @handle_pattern(r'^decoders$')
     def _reflection_decoders(self):
