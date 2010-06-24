@@ -894,12 +894,13 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
             u'ACK [50@0] {listplaylistinfo} No such playlist')
 
     def test_listplaylists(self):
-        last_modified = dt.datetime(2001, 3, 17, 13, 41, 17)
+        last_modified = dt.datetime(2001, 3, 17, 13, 41, 17, 12345)
         self.b.stored_playlists.playlists = [Playlist(name='a',
             last_modified=last_modified)]
         result = self.h.handle_request(u'listplaylists')
         self.assert_(u'playlist: a' in result)
-        self.assert_(u'Last-Modified: 2001-03-17T13:41:17' in result)
+        # Date without microseconds and with time zone information
+        self.assert_(u'Last-Modified: 2001-03-17T13:41:17Z' in result)
         self.assert_(u'OK' in result)
 
     def test_load(self):

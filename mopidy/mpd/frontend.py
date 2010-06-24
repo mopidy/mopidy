@@ -1506,9 +1506,14 @@ class MpdFrontend(object):
         result = []
         for playlist in self.backend.stored_playlists.playlists:
             result.append((u'playlist', playlist.name))
-            # TODO Remove microseconds and add time zone information
-            result.append((u'Last-Modified',
-                (playlist.last_modified or dt.datetime.now()).isoformat()))
+            last_modified = (playlist.last_modified or
+                dt.datetime.now()).isoformat()
+            # Remove microseconds
+            last_modified = last_modified.split('.')[0]
+            # Add time zone information
+            # TODO Convert to UTC before adding Z
+            last_modified = last_modified + 'Z'
+            result.append((u'Last-Modified', last_modified))
         return result
 
     @handle_pattern(r'^load "(?P<name>[^"]+)"$')
