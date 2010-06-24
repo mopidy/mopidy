@@ -18,20 +18,20 @@ class MpdAckError(MopidyException):
         ACK_ERROR_EXIST = 56
     """
 
-    def __init__(self, message=u'', error_code=0, position=0, command=u''):
+    def __init__(self, message=u'', error_code=0, index=0, command=u''):
         self.message = message
         self.error_code = error_code
-        self.position = position
+        self.index = index
         self.command = command
 
     def get_mpd_ack(self):
         """
         MPD error code format::
 
-            ACK [%(error_code)i@%(position)i] {%(command)s} description
+            ACK [%(error_code)i@%(index)i] {%(command)s} description
         """
         return u'ACK [%i@%i] {%s} %s' % (
-            self.error_code, self.position, self.command, self.message)
+            self.error_code, self.index, self.command, self.message)
 
 class MpdArgError(MpdAckError):
     def __init__(self, *args, **kwargs):
