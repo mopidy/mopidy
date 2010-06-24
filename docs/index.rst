@@ -4,6 +4,7 @@ User documentation
 ==================
 
 .. toctree::
+    :maxdepth: 3
 
     installation/index
     changes
@@ -13,6 +14,7 @@ Reference documentation
 =======================
 
 .. toctree::
+    :maxdepth: 3
 
     api/index
 
@@ -20,6 +22,7 @@ Development documentation
 =========================
 
 .. toctree::
+    :maxdepth: 3
 
     development/index
 
