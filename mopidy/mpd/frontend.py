@@ -169,6 +169,9 @@ class MpdFrontend(object):
     @handle_pattern(r'^command_list_end$')
     def _command_list_end(self):
         """See :meth:`_command_list_begin`."""
+        if self.command_list is False:
+            # Test for False exactly, and not e.g. empty list
+            raise MpdUnknownCommand(command='command_list_end')
         (command_list, self.command_list) = (self.command_list, False)
         (command_list_ok, self.command_list_ok) = (self.command_list_ok, False)
         result = []

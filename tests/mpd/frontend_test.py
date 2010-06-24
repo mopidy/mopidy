@@ -67,6 +67,11 @@ class CommandListsTest(unittest.TestCase):
         result = self.h.handle_request(u'command_list_end')
         self.assert_(u'OK' in result)
 
+    def test_command_list_end_without_start_first_is_an_unknown_command(self):
+        result = self.h.handle_request(u'command_list_end')
+        self.assertEquals(result[0],
+            u'ACK [5@0] {} unknown command "command_list_end"')
+
     def test_command_list_with_ping(self):
         self.h.handle_request(u'command_list_begin')
         self.assertEqual([], self.h.command_list)
