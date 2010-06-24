@@ -69,10 +69,9 @@ class MpdFrontend(object):
             result = handler(self, **kwargs)
         except MpdAckError as e:
             return self.handle_response(e.get_mpd_ack(), add_ok=False)
-        if self.command_list is not False:
+        if request in (u'command_list_begin', u'command_list_ok_begin'):
             return None
-        else:
-            return self.handle_response(result, add_ok)
+        return self.handle_response(result, add_ok)
 
     def find_handler(self, request):
         for pattern in _request_handlers:
