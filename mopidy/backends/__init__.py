@@ -198,17 +198,19 @@ class BaseCurrentPlaylistController(object):
             to_position += 1
         self.tracks = new_tracks
 
-    def remove(self, track):
+    def remove(self, **criteria):
         """
         Remove the track from the current playlist.
 
-        :param track: track to remove
+        Uses :meth:`get` to lookup the track to remove.
+
+        :param criteria: on or more criteria to match by
+        :type criteria: dict
         :type track: :class:`mopidy.models.Track`
         """
+        track = self.get(**criteria)
         tracks = self.tracks
-
         assert track in tracks, 'track must be in playlist'
-
         position = tracks.index(track)
         del tracks[position]
         self.tracks = tracks
