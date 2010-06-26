@@ -185,6 +185,8 @@ class Playlist(ImmutableObject):
         :type name: string
         :param tracks: playlist's tracks
         :type tracks: list of :class:`Track` elements
+        :param last_modified: playlist's modification time
+        :type last_modified: :class:`datetime.datetime`
     """
 
     #: The playlist URI. Read-only.
@@ -253,6 +255,8 @@ class Playlist(ImmutableObject):
         :type name: string
         :param tracks: playlist's tracks
         :type tracks: list of :class:`Track` elements
+        :param last_modified: playlist's modification time
+        :type last_modified: :class:`datetime.datetime`
         :rtype: :class:`Playlist`
         """
         if uri is None:
