@@ -37,7 +37,8 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest,
 
     def setUp(self):
         super(GStreamerPlaybackControllerTest, self).setUp()
-        self.backend.playback.use_fake_sink()
+        # Two tests does not work at all when using the fake sink
+        #self.backend.playback.use_fake_sink()
 
     def add_track(self, path):
         uri = path_to_uri(data_folder(path))
