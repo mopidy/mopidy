@@ -271,7 +271,7 @@ class MpdFrontend(object):
         track = self.backend.library.lookup(uri)
         if track is None:
             raise MpdNoExistError(u'No such song', command=u'addid')
-        if songpos and songpos > self.backend.current_playlist.playlist.length:
+        if songpos and songpos > len(self.backend.current_playlist.tracks):
             raise MpdArgError(u'Bad song index', command=u'addid')
         self.backend.current_playlist.add(track, at_position=songpos)
         return ('Id', track.id)
@@ -289,8 +289,8 @@ class MpdFrontend(object):
         if end is not None:
             end = int(end)
         else:
-            end = self.backend.current_playlist.playlist.length
-        tracks = self.backend.current_playlist.playlist.tracks[start:end]
+            end = len(self.backend.current_playlist.tracks)
+        tracks = self.backend.current_playlist.tracks[start:end]
         if not tracks:
             raise MpdArgError(u'Bad song index', command=u'delete')
         for track in tracks:
@@ -301,7 +301,7 @@ class MpdFrontend(object):
         """See :meth:`_current_playlist_delete_range`"""
         try:
             songpos = int(songpos)
-            track = self.backend.current_playlist.playlist.tracks[songpos]
+            track = self.backend.current_playlist.tracks[songpos]
             self.backend.current_playlist.remove(track)
         except IndexError:
             raise MpdArgError(u'Bad song index', command=u'delete')
@@ -344,7 +344,7 @@ class MpdFrontend(object):
             ``TO`` in the playlist.
         """
         if end is None:
-            end = self.backend.current_playlist.playlist.length
+            end = len(self.backend.current_playlist.tracks)
         start = int(start)
         end = int(end)
         to = int(to)
@@ -371,7 +371,7 @@ class MpdFrontend(object):
         songid = int(songid)
         to = int(to)
         track = self.backend.current_playlist.get(id=songid)
-        position = self.backend.current_playlist.playlist.tracks.index(track)
+        position = self.backend.current_playlist.tracks.index(track)
         self.backend.current_playlist.move(position, position + 1, to)
 
     @handle_pattern(r'^playlist$')
@@ -429,7 +429,7 @@ class MpdFrontend(object):
             except LookupError:
                 raise MpdNoExistError(u'No such song', command=u'playlistid')
         else:
-            return self.backend.current_playlist.playlist.mpd_format()
+            return self.backend.current_playlist.mpd_format()
 
     @handle_pattern(r'^playlistinfo$')
     @handle_pattern(r'^playlistinfo "(?P<songpos>-?\d+)"$')
@@ -459,15 +459,14 @@ class MpdFrontend(object):
             end = songpos + 1
             if start == -1:
                 end = None
-            return self.backend.current_playlist.playlist.mpd_format(
-                start, end)
+            return self.backend.current_playlist.mpd_format(start, end)
         else:
             if start is None:
                 start = 0
             start = int(start)
             if end is not None:
                 end = int(end)
-            return self.backend.current_playlist.playlist.mpd_format(start, end)
+            return self.backend.current_playlist.mpd_format(start, end)
 
     @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
     def _current_playlist_playlistsearch(self, tag, needle):
@@ -495,7 +494,7 @@ class MpdFrontend(object):
         """
         # XXX Naive implementation that returns all tracks as changed
         if int(version) < self.backend.current_playlist.version:
-            return self.backend.current_playlist.playlist.mpd_format()
+            return self.backend.current_playlist.mpd_format()
 
     @handle_pattern(r'^plchangesposid "(?P<version>\d+)"$')
     def _current_playlist_plchangesposid(self, version):
@@ -515,7 +514,7 @@ class MpdFrontend(object):
         if int(version) != self.backend.current_playlist.version:
             result = []
             for position, track in enumerate(
-                    self.backend.current_playlist.playlist.tracks):
+                    self.backend.current_playlist.tracks):
                 result.append((u'cpos', position))
                 result.append((u'Id', track.id))
             return result
@@ -548,15 +547,14 @@ class MpdFrontend(object):
         """
         songpos1 = int(songpos1)
         songpos2 = int(songpos2)
-        playlist = self.backend.current_playlist.playlist
-        tracks = playlist.tracks
+        tracks = self.backend.current_playlist.tracks
         song1 = tracks[songpos1]
         song2 = tracks[songpos2]
         del tracks[songpos1]
         tracks.insert(songpos1, song2)
         del tracks[songpos2]
         tracks.insert(songpos2, song1)
-        self.backend.current_playlist.load(playlist.with_(tracks=tracks))
+        self.backend.current_playlist.load(tracks)
 
     @handle_pattern(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
     def _current_playlist_swapid(self, songid1, songid2):
@@ -571,8 +569,8 @@ class MpdFrontend(object):
         songid2 = int(songid2)
         song1 = self.backend.current_playlist.get(id=songid1)
         song2 = self.backend.current_playlist.get(id=songid2)
-        songpos1 = self.backend.current_playlist.playlist.tracks.index(song1)
-        songpos2 = self.backend.current_playlist.playlist.tracks.index(song2)
+        songpos1 = self.backend.current_playlist.tracks.index(song1)
+        songpos2 = self.backend.current_playlist.tracks.index(song2)
         self._current_playlist_swap(songpos1, songpos2)
 
     @handle_pattern(r'^$')
@@ -897,7 +895,7 @@ class MpdFrontend(object):
         songid = int(songid)
         try:
             if songid == -1:
-                track = self.backend.current_playlist.playlist.tracks[0]
+                track = self.backend.current_playlist.tracks[0]
             else:
                 track = self.backend.current_playlist.get(id=songid)
             return self.backend.playback.play(track)
@@ -921,9 +919,9 @@ class MpdFrontend(object):
         songpos = int(songpos)
         try:
             if songpos == -1:
-                track = self.backend.current_playlist.playlist.tracks[0]
+                track = self.backend.current_playlist.tracks[0]
             else:
-                track = self.backend.current_playlist.playlist.tracks[songpos]
+                track = self.backend.current_playlist.tracks[songpos]
             return self.backend.playback.play(track)
         except IndexError:
             raise MpdArgError(u'Bad song index', command=u'play')
@@ -1332,7 +1330,7 @@ class MpdFrontend(object):
             return 0
 
     def __status_status_playlist_length(self):
-        return self.backend.current_playlist.playlist.length
+        return len(self.backend.current_playlist.tracks)
 
     def __status_status_playlist_version(self):
         return self.backend.current_playlist.version
@@ -1537,8 +1535,7 @@ class MpdFrontend(object):
         """
         matches = self.backend.stored_playlists.search(name)
         if matches:
-            self.backend.current_playlist.load(matches[0])
-            self.backend.playback.new_playlist_loaded_callback() # FIXME not needed?
+            self.backend.current_playlist.load(matches[0].tracks)
 
     @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
     def _stored_playlist_playlistadd(self, name, uri):

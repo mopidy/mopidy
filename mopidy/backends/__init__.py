@@ -88,20 +88,20 @@ class BaseCurrentPlaylistController(object):
 
     def __init__(self, backend):
         self.backend = backend
-        self._playlist = Playlist()
+        self._tracks = []
 
     def destroy(self):
         """Cleanup after component."""
         pass
 
     @property
-    def playlist(self):
-        """The currently loaded :class:`mopidy.models.Playlist`."""
-        return copy(self._playlist)
+    def tracks(self):
+        """List of :class:`mopidy.model.Track` in the current playlist."""
+        return copy(self._tracks)
 
-    @playlist.setter
-    def playlist(self, new_playlist):
-        self._playlist = new_playlist
+    @tracks.setter
+    def tracks(self, new_tracks):
+        self._tracks = copy(new_tracks)
         self.version += 1
 
     def add(self, track, at_position=None):
@@ -114,7 +114,7 @@ class BaseCurrentPlaylistController(object):
         :param at_position: position in current playlist to add track
         :type at_position: int or :class:`None`
         """
-        tracks = self.playlist.tracks
+        tracks = self.tracks
 
         assert at_position <= len(tracks), 'at_position can not be greater' \
             + ' than playlist length'
@@ -123,13 +123,13 @@ class BaseCurrentPlaylistController(object):
             tracks.insert(at_position, track)
         else:
             tracks.append(track)
-        self.playlist = self.playlist.with_(tracks=tracks)
+        self.tracks = tracks
 
     def clear(self):
         """Clear the current playlist."""
         self.backend.playback.stop()
         self.backend.playback.current_track = None
-        self.playlist = Playlist()
+        self.tracks = []
 
     def get(self, **criteria):
         """
@@ -147,7 +147,7 @@ class BaseCurrentPlaylistController(object):
         :type criteria: dict
         :rtype: :class:`mopidy.models.Track`
         """
-        matches = self._playlist.tracks
+        matches = self.tracks
         for (key, value) in criteria.iteritems():
             matches = filter(lambda t: getattr(t, key) == value, matches)
         if len(matches) == 1:
@@ -159,14 +159,14 @@ class BaseCurrentPlaylistController(object):
         else:
             raise LookupError(u'"%s" match multiple tracks' % criteria_string)
 
-    def load(self, playlist):
+    def load(self, tracks):
         """
-        Replace the current playlist with the given playlist.
+        Replace the tracks in the current playlist with the given tracks.
 
-        :param playlist: playlist to load
-        :type playlist: :class:`mopidy.models.Playlist`
+        :param tracks: tracks to load
+        :type tracks: list of :class:`mopidy.models.Track`
         """
-        self.playlist = playlist
+        self.tracks = tracks
         self.backend.playback.new_playlist_loaded_callback()
 
     def move(self, start, end, to_position):
@@ -183,7 +183,7 @@ class BaseCurrentPlaylistController(object):
         if start == end:
             end += 1
 
-        tracks = self.playlist.tracks
+        tracks = self.tracks
 
         assert start < end, 'start must be smaller than end'
         assert start >= 0, 'start must be at least zero'
@@ -196,7 +196,7 @@ class BaseCurrentPlaylistController(object):
         for track in tracks[start:end]:
             new_tracks.insert(to_position, track)
             to_position += 1
-        self.playlist = self.playlist.with_(tracks=new_tracks)
+        self.tracks = new_tracks
 
     def remove(self, track):
         """
@@ -205,13 +205,13 @@ class BaseCurrentPlaylistController(object):
         :param track: track to remove
         :type track: :class:`mopidy.models.Track`
         """
-        tracks = self.playlist.tracks
+        tracks = self.tracks
 
         assert track in tracks, 'track must be in playlist'
 
         position = tracks.index(track)
         del tracks[position]
-        self.playlist = self.playlist.with_(tracks=tracks)
+        self.tracks = tracks
 
     def shuffle(self, start=None, end=None):
         """
@@ -223,7 +223,7 @@ class BaseCurrentPlaylistController(object):
         :param end: position after last track to shuffle
         :type end: int or :class:`None`
         """
-        tracks = self.playlist.tracks
+        tracks = self.tracks
 
         if start is not None and end is not None:
             assert start < end, 'start must be smaller than end'
@@ -239,11 +239,15 @@ class BaseCurrentPlaylistController(object):
         shuffled = tracks[start:end]
         after = tracks[end or len(tracks):]
         random.shuffle(shuffled)
-        self.playlist = self.playlist.with_(tracks=before+shuffled+after)
+        self.tracks = before + shuffled + after
 
     def destroy(self):
         """Cleanup after component."""
         pass
+
+    def mpd_format(self, *args, **kwargs):
+        # XXX Lazy workaround to make tests pass while refactoring
+        return Playlist(tracks=self.tracks).mpd_format(*args, **kwargs)
 
 
 class BaseLibraryController(object):
@@ -364,7 +368,7 @@ class BasePlaybackController(object):
         if self.current_track is None:
             return None
         try:
-            return self.backend.current_playlist.playlist.tracks.index(
+            return self.backend.current_playlist.tracks.index(
                 self.current_track)
         except ValueError:
             return None
@@ -379,7 +383,7 @@ class BasePlaybackController(object):
         enabled this should be a random track, all tracks should be played once
         before the list repeats.
         """
-        tracks = self.backend.current_playlist.playlist.tracks
+        tracks = self.backend.current_playlist.tracks
 
         if not tracks:
             return None
@@ -420,7 +424,7 @@ class BasePlaybackController(object):
         if self.current_track is None or self.current_playlist_position == 0:
             return None
 
-        return self.backend.current_playlist.playlist.tracks[
+        return self.backend.current_playlist.tracks[
             self.current_playlist_position - 1]
 
     @property
@@ -508,7 +512,7 @@ class BasePlaybackController(object):
         self._shuffled = []
 
         if self.state == self.PLAYING:
-            if self.backend.current_playlist.playlist.length > 0:
+            if len(self.backend.current_playlist.tracks) > 0:
                 self.play()
             else:
                 self.stop()
@@ -555,7 +559,7 @@ class BasePlaybackController(object):
         """
 
         if track:
-            assert track in self.backend.current_playlist.playlist.tracks
+            assert track in self.backend.current_playlist.tracks
         elif not self.current_track:
             track = self.next_track
 

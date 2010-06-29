@@ -25,6 +25,13 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
   - ``command_list_end`` before ``command_list_start`` now returns unknown
     command error instead of crashing.
 
+- Backend API:
+
+  - :meth:`mopidy.backends.BaseCurrentPlaylistController.load()` now accepts
+    lists of :class:`mopidy.models.Track` instead of
+    :class:`mopidy.models.Playlist`, as none of the other fields on the
+    ``Playlist`` model was in use.
+
 
 0.1.0a2 (2010-06-02)
 ====================
