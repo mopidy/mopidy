@@ -170,9 +170,8 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_load_does_not_reset_version(self):
         version = self.controller.version
-
-        self.controller.load(Playlist())
-        self.assertEqual(self.controller.version, version+1)
+        self.controller.load([])
+        self.assertEqual(self.controller.version, version + 1)
 
     @populate_playlist
     def test_load_preserves_playing_state(self):
@@ -608,7 +607,7 @@ class BasePlaybackControllerTest(object):
         wrapper.called = False
 
         self.playback.new_playlist_loaded_callback = wrapper
-        self.backend.current_playlist.load(Playlist())
+        self.backend.current_playlist.load([])
 
         self.assert_(wrapper.called)
 

@@ -166,7 +166,9 @@ class BaseCurrentPlaylistController(object):
         :param tracks: tracks to load
         :type tracks: list of :class:`mopidy.models.Track`
         """
-        self.tracks = tracks
+        self.tracks = []
+        for track in tracks:
+            self.add(track)
         self.backend.playback.new_playlist_loaded_callback()
 
     def move(self, start, end, to_position):

@@ -817,9 +817,9 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
-        self.assertEqual(self.b.current_playlist.version, 1)
+        version = self.b.current_playlist.version
         result = self.h.handle_request(u'shuffle')
-        self.assertEqual(self.b.current_playlist.version, 2)
+        self.assert_(version < self.b.current_playlist.version)
         self.assert_(u'OK' in result)
 
     def test_shuffle_with_open_range(self):
@@ -827,9 +827,9 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
-        self.assertEqual(self.b.current_playlist.version, 1)
+        version = self.b.current_playlist.version
         result = self.h.handle_request(u'shuffle "4:"')
-        self.assertEqual(self.b.current_playlist.version, 2)
+        self.assert_(version < self.b.current_playlist.version)
         self.assertEqual(self.b.current_playlist.tracks[0].name, 'a')
         self.assertEqual(self.b.current_playlist.tracks[1].name, 'b')
         self.assertEqual(self.b.current_playlist.tracks[2].name, 'c')
@@ -841,9 +841,9 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
-        self.assertEqual(self.b.current_playlist.version, 1)
+        version = self.b.current_playlist.version
         result = self.h.handle_request(u'shuffle "1:3"')
-        self.assertEqual(self.b.current_playlist.version, 2)
+        self.assert_(version < self.b.current_playlist.version)
         self.assertEqual(self.b.current_playlist.tracks[0].name, 'a')
         self.assertEqual(self.b.current_playlist.tracks[3].name, 'd')
         self.assertEqual(self.b.current_playlist.tracks[4].name, 'e')
