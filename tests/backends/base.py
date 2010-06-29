@@ -240,18 +240,18 @@ class BaseCurrentPlaylistControllerTest(object):
     def test_remove(self):
         track1 = self.controller.tracks[1]
         track2 = self.controller.tracks[2]
-        self.controller.remove(track1)
+        self.controller.remove(id=track1.id)
         self.assert_(track1 not in self.controller.tracks)
         self.assertEqual(track2, self.controller.tracks[1])
 
     @populate_playlist
     def test_removing_track_that_does_not_exist(self):
-        test = lambda: self.controller.remove(Track())
-        self.assertRaises(AssertionError, test)
+        test = lambda: self.controller.remove(id=12345)
+        self.assertRaises(LookupError, test)
 
     def test_removing_from_empty_playlist(self):
-        test = lambda: self.controller.remove(Track())
-        self.assertRaises(AssertionError, test)
+        test = lambda: self.controller.remove(id=12345)
+        self.assertRaises(LookupError, test)
 
     @populate_playlist
     def test_shuffle(self):

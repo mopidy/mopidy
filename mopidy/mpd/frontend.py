@@ -294,7 +294,7 @@ class MpdFrontend(object):
         if not tracks:
             raise MpdArgError(u'Bad song index', command=u'delete')
         for track in tracks:
-            self.backend.current_playlist.remove(cpid=track.cpid)
+            self.backend.current_playlist.remove(id=track.id)
 
     @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
     def _current_playlist_delete_songpos(self, songpos):

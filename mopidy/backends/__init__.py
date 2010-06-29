@@ -536,7 +536,7 @@ class BasePlaybackController(object):
 
         # FIXME handle in play aswell?
         if self.consume:
-            self.backend.current_playlist.remove(original_track)
+            self.backend.current_playlist.remove(id=original_track.id)
 
         if self.random and self.current_track in self._shuffled:
             self._shuffled.remove(self.current_track)
