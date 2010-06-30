@@ -15,6 +15,8 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
 from mopidy.models import Artist, Album, Track, Playlist
 from mopidy.utils import spotify_uri_to_int
 
+import alsaaudio
+
 logger = logging.getLogger('mopidy.backends.libspotify')
 
 ENCODING = 'utf-8'
@@ -180,7 +182,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         threading.Thread.__init__(self)
         self.core_queue = core_queue
         self.connected = threading.Event()
-        self.audio = audio_controller_class()
+        self.audio = audio_controller_class(alsaaudio.PCM_NORMAL)
         self.session = None
 
     def run(self):
