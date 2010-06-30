@@ -640,7 +640,9 @@ class MpdFrontend(object):
         # TODO Add result to current playlist
         #return result
 
+    @handle_pattern(r'^list (?P<field>[Aa]rtist)$')
     @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
+    @handle_pattern(r'^list (?P<field>album)( "(?P<artist>[^"]+)")*$')
     @handle_pattern(r'^list "(?P<field>album)"( "(?P<artist>[^"]+)")*$')
     def _music_db_list(self, field, artist=None):
         """
@@ -653,6 +655,10 @@ class MpdFrontend(object):
 
             ``ARTIST`` is an optional parameter when type is ``album``, this
             specifies to list albums by an artist.
+
+        *GMPC:*
+
+        - does not add quotes around the field argument.
 
         *ncmpc:*
 
