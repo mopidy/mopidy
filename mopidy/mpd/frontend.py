@@ -306,8 +306,8 @@ class MpdFrontend(object):
         except IndexError:
             raise MpdArgError(u'Bad song index', command=u'delete')
 
-    @handle_pattern(r'^deleteid "(?P<songid>\d+)"$')
-    def _current_playlist_deleteid(self, songid):
+    @handle_pattern(r'^deleteid "(?P<cpid>\d+)"$')
+    def _current_playlist_deleteid(self, cpid):
         """
         *musicpd.org, current playlist section:*
 
@@ -316,8 +316,8 @@ class MpdFrontend(object):
             Deletes the song ``SONGID`` from the playlist
         """
         try:
-            songid = int(songid)
-            return self.backend.current_playlist.remove(id=songid)
+            cpid = int(cpid)
+            return self.backend.current_playlist.remove(id=cpid)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'deleteid')
 
@@ -356,8 +356,8 @@ class MpdFrontend(object):
         to = int(to)
         self.backend.current_playlist.move(songpos, songpos + 1, to)
 
-    @handle_pattern(r'^moveid "(?P<songid>\d+)" "(?P<to>\d+)"$')
-    def _current_playlist_moveid(self, songid, to):
+    @handle_pattern(r'^moveid "(?P<cpid>\d+)" "(?P<to>\d+)"$')
+    def _current_playlist_moveid(self, cpid, to):
         """
         *musicpd.org, current playlist section:*
 
@@ -367,9 +367,9 @@ class MpdFrontend(object):
             the playlist. If ``TO`` is negative, it is relative to the current
             song in the playlist (if there is one).
         """
-        songid = int(songid)
+        cpid = int(cpid)
         to = int(to)
-        track = self.backend.current_playlist.get(id=songid)
+        track = self.backend.current_playlist.get(id=cpid)
         position = self.backend.current_playlist.tracks.index(track)
         self.backend.current_playlist.move(position, position + 1, to)
 
@@ -410,8 +410,8 @@ class MpdFrontend(object):
                 return None
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^playlistid( "(?P<songid>\d+)")*$')
-    def _current_playlist_playlistid(self, songid=None):
+    @handle_pattern(r'^playlistid( "(?P<cpid>\d+)")*$')
+    def _current_playlist_playlistid(self, cpid=None):
         """
         *musicpd.org, current playlist section:*
 
@@ -420,10 +420,10 @@ class MpdFrontend(object):
             Displays a list of songs in the playlist. ``SONGID`` is optional
             and specifies a single song to display info for.
         """
-        if songid is not None:
+        if cpid is not None:
             try:
-                songid = int(songid)
-                track = self.backend.current_playlist.get(id=songid)
+                cpid = int(cpid)
+                track = self.backend.current_playlist.get(id=cpid)
                 return track.mpd_format()
             except LookupError:
                 raise MpdNoExistError(u'No such song', command=u'playlistid')
@@ -555,8 +555,8 @@ class MpdFrontend(object):
         tracks.insert(songpos2, song1)
         self.backend.current_playlist.load(tracks)
 
-    @handle_pattern(r'^swapid "(?P<songid1>\d+)" "(?P<songid2>\d+)"$')
-    def _current_playlist_swapid(self, songid1, songid2):
+    @handle_pattern(r'^swapid "(?P<cpid1>\d+)" "(?P<cpid2>\d+)"$')
+    def _current_playlist_swapid(self, cpid1, cpid2):
         """
         *musicpd.org, current playlist section:*
 
@@ -564,13 +564,13 @@ class MpdFrontend(object):
 
             Swaps the positions of ``SONG1`` and ``SONG2`` (both song ids).
         """
-        songid1 = int(songid1)
-        songid2 = int(songid2)
-        song1 = self.backend.current_playlist.get(id=songid1)
-        song2 = self.backend.current_playlist.get(id=songid2)
-        songpos1 = self.backend.current_playlist.tracks.index(song1)
-        songpos2 = self.backend.current_playlist.tracks.index(song2)
-        self._current_playlist_swap(songpos1, songpos2)
+        cpid1 = int(cpid1)
+        cpid2 = int(cpid2)
+        track1 = self.backend.current_playlist.get(id=cpid1)
+        track2 = self.backend.current_playlist.get(id=cpid2)
+        position1 = self.backend.current_playlist.tracks.index(track1)
+        position2 = self.backend.current_playlist.tracks.index(track2)
+        self._current_playlist_swap(position1, position2)
 
     @handle_pattern(r'^$')
     def _empty(self):
@@ -893,9 +893,9 @@ class MpdFrontend(object):
         """
         return self.backend.playback.play()
 
-    @handle_pattern(r'^playid "(?P<songid>\d+)"$')
-    @handle_pattern(r'^playid "(?P<songid>-1)"$')
-    def _playback_playid(self, songid):
+    @handle_pattern(r'^playid "(?P<cpid>\d+)"$')
+    @handle_pattern(r'^playid "(?P<cpid>-1)"$')
+    def _playback_playid(self, cpid):
         """
         *musicpd.org, playback section:*
 
@@ -908,12 +908,12 @@ class MpdFrontend(object):
         - issues ``playid "-1"`` after playlist replacement to start playback
           at the first track.
         """
-        songid = int(songid)
+        cpid = int(cpid)
         try:
-            if songid == -1:
+            if cpid == -1:
                 track = self.backend.current_playlist.tracks[0]
             else:
-                track = self.backend.current_playlist.get(id=songid)
+                track = self.backend.current_playlist.get(id=cpid)
             return self.backend.playback.play(track)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playid')
@@ -1056,8 +1056,8 @@ class MpdFrontend(object):
         """
         raise MpdNotImplemented # TODO
 
-    @handle_pattern(r'^seekid "(?P<songid>\d+)" "(?P<seconds>\d+)"$')
-    def _playback_seekid(self, songid, seconds):
+    @handle_pattern(r'^seekid "(?P<cpid>\d+)" "(?P<seconds>\d+)"$')
+    def _playback_seekid(self, cpid, seconds):
         """
         *musicpd.org, playback section:*
 
@@ -1361,6 +1361,7 @@ class MpdFrontend(object):
         return int(self.backend.playback.single)
 
     def __status_status_songid(self):
+        # TODO Replace track.id with CPID
         if self.backend.playback.current_track.id is not None:
             return self.backend.playback.current_track.id
         else:
