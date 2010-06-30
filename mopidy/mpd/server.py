@@ -32,7 +32,11 @@ class MpdServer(asyncore.dispatcher):
 
     def start(self):
         try:
-            self.create_socket(socket.AF_INET6, socket.SOCK_STREAM)
+            if socket.has_ipv6:
+                protocol_family = socket.AF_INET6
+            else:
+                protocol_family = socket.AF_INET
+            self.create_socket(protocol_family, socket.SOCK_STREAM)
             self.set_reuse_addr()
             self.bind((self._format_hostname(settings.SERVER_HOSTNAME),
                 settings.SERVER_PORT))
