@@ -241,10 +241,6 @@ class BaseCurrentPlaylistController(object):
         random.shuffle(shuffled)
         self.playlist = self.playlist.with_(tracks=before+shuffled+after)
 
-    def destroy(self):
-        """Cleanup after component."""
-        pass
-
 
 class BaseLibraryController(object):
     """
