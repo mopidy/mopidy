@@ -659,6 +659,9 @@ class MpdFrontend(object):
         *GMPC:*
 
         - does not add quotes around the field argument.
+        - asks for multiple fields, i.e.::
+
+            list album artist "an artist name"
 
         *ncmpc:*
 
