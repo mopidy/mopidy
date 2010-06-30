@@ -663,6 +663,14 @@ class MpdFrontend(object):
 
             list album artist "an artist name"
 
+          returns the albums available for the asked artist::
+
+            list album artist "Tiesto"
+            Album: Radio Trance Vol 4-Promo-CD
+            Album: Ur  A Tear in the Open CDR
+            Album: Simple Trance 2004 Step One
+            Album: In Concert 05-10-2003
+
         *ncmpc:*
 
         - does not add quotes around the field argument.
