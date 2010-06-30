@@ -1017,6 +1017,10 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
     def test_list_album_with_artist(self):
         result = self.h.handle_request(u'list "album" "anartist"')
         self.assert_(u'OK' in result)
+    
+    def test_list_album_artist_with_artist_without_quotes(self):
+        result = self.h.handle_request(u'list album artist "anartist"')
+        self.assert_(u'OK' in result)
 
     def test_listall(self):
         result = self.h.handle_request(u'listall "file:///dev/urandom"')

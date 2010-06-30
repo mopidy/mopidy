@@ -642,8 +642,8 @@ class MpdFrontend(object):
 
     @handle_pattern(r'^list (?P<field>[Aa]rtist)$')
     @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
-    @handle_pattern(r'^list (?P<field>album)( "(?P<artist>[^"]+)")*$')
-    @handle_pattern(r'^list "(?P<field>album)"( "(?P<artist>[^"]+)")*$')
+    @handle_pattern(r'^list (?P<field>album( artist)?)( "(?P<artist>[^"]+)")*$')
+    @handle_pattern(r'^list "(?P<field>album(" "artist)?)"( "(?P<artist>[^"]+)")*$')
     def _music_db_list(self, field, artist=None):
         """
         *musicpd.org, music database section:*
@@ -669,7 +669,7 @@ class MpdFrontend(object):
         - capitalizes the field argument.
         """
         field = field.lower()
-        # TODO
+        pass # TODO
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
     def _music_db_listall(self, uri):
