@@ -33,13 +33,14 @@ class MpdServer(asyncore.dispatcher):
     def start(self):
         try:
             if socket.has_ipv6:
-                protocol_family = socket.AF_INET6
+                self.create_socket(socket.AF_INET6, socket.SOCK_STREAM)
             else:
-                protocol_family = socket.AF_INET
-            self.create_socket(protocol_family, socket.SOCK_STREAM)
+                self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
             self.set_reuse_addr()
-            self.bind((self._format_hostname(settings.SERVER_HOSTNAME),
-                settings.SERVER_PORT))
+            hostname = self._format_hostname(settings.SERVER_HOSTNAME)
+            port = settings.SERVER_PORT
+            logger.debug(u'Binding to [%s]:%s', hostname, port)
+            self.bind((hostname, port))
             self.listen(1)
             logger.info(u'MPD server running at [%s]:%s',
                 self._format_hostname(settings.SERVER_HOSTNAME),
@@ -58,7 +59,8 @@ class MpdServer(asyncore.dispatcher):
         self.close()
 
     def _format_hostname(self, hostname):
-        if re.match('\d+.\d+.\d+.\d+', hostname) is not None:
+        if (socket.has_ipv6
+            and re.match('\d+.\d+.\d+.\d+', hostname) is not None):
             hostname = '::ffff:%s' % hostname
         return hostname
 
