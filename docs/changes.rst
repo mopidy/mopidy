@@ -24,6 +24,8 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
     as unknown commands.
   - ``command_list_end`` before ``command_list_start`` now returns unknown
     command error instead of crashing.
+  - ``list`` accepts field argument without quotes and capitalized, to work
+    with GMPC and ncmpc.
 
 - Backend API:
 

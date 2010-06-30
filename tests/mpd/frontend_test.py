@@ -1010,6 +1010,14 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'list "artist"')
         self.assert_(u'OK' in result)
 
+    def test_list_artist_without_quotes(self):
+        result = self.h.handle_request(u'list artist')
+        self.assert_(u'OK' in result)
+
+    def test_list_artist_without_quotes_and_capitalized(self):
+        result = self.h.handle_request(u'list Artist')
+        self.assert_(u'OK' in result)
+
     def test_list_artist_with_artist_should_fail(self):
         result = self.h.handle_request(u'list "artist" "anartist"')
         self.assertEqual(result[0], u'ACK [2@0] {list} incorrect arguments')
