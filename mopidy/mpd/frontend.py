@@ -642,8 +642,8 @@ class MpdFrontend(object):
 
     @handle_pattern(r'^list (?P<field>[Aa]rtist)$')
     @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
-    @handle_pattern(r'^list (?P<field>album)( "(?P<artist>[^"]+)")*$')
-    @handle_pattern(r'^list "(?P<field>album)"( "(?P<artist>[^"]+)")*$')
+    @handle_pattern(r'^list (?P<field>album( artist)?)( "(?P<artist>[^"]+)")*$')
+    @handle_pattern(r'^list "(?P<field>album(" "artist)?)"( "(?P<artist>[^"]+)")*$')
     def _music_db_list(self, field, artist=None):
         """
         *musicpd.org, music database section:*
@@ -663,13 +663,21 @@ class MpdFrontend(object):
 
             list album artist "an artist name"
 
+          returns the albums available for the asked artist::
+
+            list album artist "Tiesto"
+            Album: Radio Trance Vol 4-Promo-CD
+            Album: Ur  A Tear in the Open CDR
+            Album: Simple Trance 2004 Step One
+            Album: In Concert 05-10-2003
+
         *ncmpc:*
 
         - does not add quotes around the field argument.
         - capitalizes the field argument.
         """
         field = field.lower()
-        # TODO
+        pass # TODO
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
     def _music_db_listall(self, uri):
