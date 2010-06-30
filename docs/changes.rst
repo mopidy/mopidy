@@ -26,6 +26,8 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
     command error instead of crashing.
   - ``list`` accepts field argument without quotes and capitalized, to work
     with GMPC and ncmpc.
+  - ``noidle`` command now returns ``OK`` instead of an error. Should make some
+    clients work a bit better.
 
 - Backend API:
 

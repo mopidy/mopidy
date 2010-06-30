@@ -243,10 +243,6 @@ class BaseCurrentPlaylistController(object):
         self._cp_tracks = before + shuffled + after
         self.version += 1
 
-    def destroy(self):
-        """Cleanup after component."""
-        pass
-
     def mpd_format(self, *args, **kwargs):
         # XXX Lazy workaround to make tests pass while refactoring
         return Playlist(tracks=self.tracks).mpd_format(*args, **kwargs)
