@@ -1248,7 +1248,7 @@ class MpdFrontend(object):
     @handle_pattern(r'^noidle$')
     def _status_noidle(self):
         """See :meth:`_status_idle`."""
-        raise MpdNotImplemented # TODO
+        pass # TODO
 
     @handle_pattern(r'^stats$')
     def _status_stats(self):

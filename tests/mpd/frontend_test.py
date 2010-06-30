@@ -146,7 +146,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_noidle(self):
         result = self.h.handle_request(u'noidle')
-        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+        self.assert_(u'OK' in result)
 
     def test_stats_command(self):
         result = self.h.handle_request(u'stats')
