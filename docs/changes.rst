@@ -29,6 +29,11 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
   - ``noidle`` command now returns ``OK`` instead of an error. Should make some
     clients work a bit better.
 
+- Libspotify backend:
+
+  - Fix choppy playback using the Libspotify backend by using blocking ALSA
+    mode. (Fixes: GH-7)
+
 
 0.1.0a2 (2010-06-02)
 ====================
