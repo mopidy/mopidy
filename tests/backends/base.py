@@ -62,6 +62,12 @@ class BaseCurrentPlaylistControllerTest(object):
             self.assertNotEqual(None, track.id)
 
     @populate_playlist
+    def test_get_by_cpid(self):
+        track = self.controller.tracks[1]
+        cpid = self.controller._cp_tracks[1][0] # XXX Messing in internals
+        self.assertEqual(track, self.controller.get(cpid=cpid))
+
+    @populate_playlist
     def test_get_by_id(self):
         track = self.controller.tracks[1]
         self.assertEqual(track, self.controller.get(id=track.id))

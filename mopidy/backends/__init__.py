@@ -136,6 +136,8 @@ class BaseCurrentPlaylistController(object):
 
         Examples::
 
+            get(cpid=7)             # Returns track with CPID 7
+                                    # (current playlist ID)
             get(id=1)               # Returns track with ID 1
             get(uri='xyz')          # Returns track with URI 'xyz'
             get(id=1, uri='xyz')    # Returns track with ID 1 and URI 'xyz'
@@ -144,11 +146,15 @@ class BaseCurrentPlaylistController(object):
         :type criteria: dict
         :rtype: :class:`mopidy.models.Track`
         """
-        matches = self.tracks
+        matches = self._cp_tracks
         for (key, value) in criteria.iteritems():
-            matches = filter(lambda t: getattr(t, key) == value, matches)
+            if key == 'cpid':
+                matches = filter(lambda ct: ct[0] == value, matches)
+            else:
+                matches = filter(lambda ct: getattr(ct[1], key) == value,
+                    matches)
         if len(matches) == 1:
-            return matches[0]
+            return matches[0][1] # The track part of the only match
         criteria_string = ', '.join(
             ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
         if len(matches) == 0:
