@@ -96,12 +96,23 @@ class BaseCurrentPlaylistController(object):
 
     @property
     def tracks(self):
-        """List of :class:`mopidy.model.Track` in the current playlist."""
+        """
+        List of :class:`mopidy.model.Track` in the current playlist.
+
+        Read-only.
+        """
         return copy(self._tracks)
 
-    @tracks.setter
-    def tracks(self, new_tracks):
-        self._tracks = copy(new_tracks)
+    def __set_tracks(self, tracks):
+        self._tracks = copy(tracks)
+        self.version += 1
+
+    def __clear_tracks(self):
+        self._tracks = []
+        self.version += 1
+
+    def __remove_track(self, position):
+        del self._tracks[position]
         self.version += 1
 
     def add(self, track, at_position=None):
@@ -115,21 +126,19 @@ class BaseCurrentPlaylistController(object):
         :type at_position: int or :class:`None`
         """
         tracks = self.tracks
-
-        assert at_position <= len(tracks), 'at_position can not be greater' \
-            + ' than playlist length'
-
+        assert at_position <= len(tracks), \
+            u'at_position can not be greater than playlist length'
         if at_position is not None:
             tracks.insert(at_position, track)
         else:
             tracks.append(track)
-        self.tracks = tracks
+        self.__set_tracks(tracks)
 
     def clear(self):
         """Clear the current playlist."""
         self.backend.playback.stop()
         self.backend.playback.current_track = None
-        self.tracks = []
+        self.__clear_tracks()
 
     def get(self, **criteria):
         """
@@ -166,7 +175,7 @@ class BaseCurrentPlaylistController(object):
         :param tracks: tracks to load
         :type tracks: list of :class:`mopidy.models.Track`
         """
-        self.tracks = []
+        self.__clear_tracks()
         for track in tracks:
             self.add(track)
         self.backend.playback.new_playlist_loaded_callback()
@@ -198,7 +207,7 @@ class BaseCurrentPlaylistController(object):
         for track in tracks[start:end]:
             new_tracks.insert(to_position, track)
             to_position += 1
-        self.tracks = new_tracks
+        self.__set_tracks(new_tracks)
 
     def remove(self, **criteria):
         """
@@ -211,11 +220,8 @@ class BaseCurrentPlaylistController(object):
         :type track: :class:`mopidy.models.Track`
         """
         track = self.get(**criteria)
-        tracks = self.tracks
-        assert track in tracks, 'track must be in playlist'
-        position = tracks.index(track)
-        del tracks[position]
-        self.tracks = tracks
+        position = self.tracks.index(track)
+        self.__remove_track(position)
 
     def shuffle(self, start=None, end=None):
         """
@@ -243,7 +249,8 @@ class BaseCurrentPlaylistController(object):
         shuffled = tracks[start:end]
         after = tracks[end or len(tracks):]
         random.shuffle(shuffled)
-        self.tracks = before + shuffled + after
+        self.__set_tracks(before + shuffled + after)
+        self.version += 1
 
     def destroy(self):
         """Cleanup after component."""

@@ -297,8 +297,8 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_version(self):
         version = self.controller.version
-        self.controller.tracks = []
-        self.assertEqual(self.controller.version, version + 1)
+        self.controller.load([])
+        self.assert_(version < self.controller.version)
 
 
 class BasePlaybackControllerTest(object):

@@ -33,10 +33,12 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
     lists of :class:`mopidy.models.Track` instead of
     :class:`mopidy.models.Playlist`, as none of the other fields on the
     ``Playlist`` model was in use.
-  - :meth:`mopidy.backends.BaseCurrentPlaylistController.remove()`` now takes
+  - :meth:`mopidy.backends.BaseCurrentPlaylistController.remove()` now takes
     criterias, just like
-    :meth:`mopidy.backends.BaseCurrentPlaylistController.get()``, instead of
+    :meth:`mopidy.backends.BaseCurrentPlaylistController.get()`, instead of
     the track to remove.
+  - :attr:`mopidy.backends.BaseCurrentPlaylistController.tracks` is now
+    read-only. Use the methods to change its contents.
 
 
 0.1.0a2 (2010-06-02)
