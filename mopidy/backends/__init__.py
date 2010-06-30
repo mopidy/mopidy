@@ -88,7 +88,7 @@ class BaseCurrentPlaylistController(object):
 
     def __init__(self, backend):
         self.backend = backend
-        self._tracks = []
+        self._cp_tracks = []
 
     def destroy(self):
         """Cleanup after component."""
@@ -101,19 +101,7 @@ class BaseCurrentPlaylistController(object):
 
         Read-only.
         """
-        return copy(self._tracks)
-
-    def __set_tracks(self, tracks):
-        self._tracks = copy(tracks)
-        self.version += 1
-
-    def __clear_tracks(self):
-        self._tracks = []
-        self.version += 1
-
-    def __remove_track(self, position):
-        del self._tracks[position]
-        self.version += 1
+        return [t[1] for t in self._cp_tracks]
 
     def add(self, track, at_position=None):
         """
@@ -125,20 +113,20 @@ class BaseCurrentPlaylistController(object):
         :param at_position: position in current playlist to add track
         :type at_position: int or :class:`None`
         """
-        tracks = self.tracks
-        assert at_position <= len(tracks), \
+        assert at_position <= len(self._cp_tracks), \
             u'at_position can not be greater than playlist length'
         if at_position is not None:
-            tracks.insert(at_position, track)
+            self._cp_tracks.insert(at_position, (self.version, track))
         else:
-            tracks.append(track)
-        self.__set_tracks(tracks)
+            self._cp_tracks.append((self.version, track))
+        self.version += 1
 
     def clear(self):
         """Clear the current playlist."""
         self.backend.playback.stop()
         self.backend.playback.current_track = None
-        self.__clear_tracks()
+        self._cp_tracks = []
+        self.version += 1
 
     def get(self, **criteria):
         """
@@ -175,7 +163,8 @@ class BaseCurrentPlaylistController(object):
         :param tracks: tracks to load
         :type tracks: list of :class:`mopidy.models.Track`
         """
-        self.__clear_tracks()
+        self._cp_tracks = []
+        self.version += 1
         for track in tracks:
             self.add(track)
         self.backend.playback.new_playlist_loaded_callback()
@@ -194,20 +183,22 @@ class BaseCurrentPlaylistController(object):
         if start == end:
             end += 1
 
-        tracks = self.tracks
+        cp_tracks = self._cp_tracks
 
         assert start < end, 'start must be smaller than end'
         assert start >= 0, 'start must be at least zero'
-        assert end <= len(tracks), 'end can not be larger than playlist length'
+        assert end <= len(cp_tracks), \
+            'end can not be larger than playlist length'
         assert to_position >= 0, 'to_position must be at least zero'
-        assert to_position <= len(tracks), 'to_position can not be larger ' + \
-            'than playlist length'
+        assert to_position <= len(cp_tracks), \
+            'to_position can not be larger than playlist length'
 
-        new_tracks = tracks[:start] + tracks[end:]
-        for track in tracks[start:end]:
-            new_tracks.insert(to_position, track)
+        new_cp_tracks = cp_tracks[:start] + cp_tracks[end:]
+        for cp_track in cp_tracks[start:end]:
+            new_cp_tracks.insert(to_position, cp_track)
             to_position += 1
-        self.__set_tracks(new_tracks)
+        self._cp_tracks = new_cp_tracks
+        self.version += 1
 
     def remove(self, **criteria):
         """
@@ -221,7 +212,7 @@ class BaseCurrentPlaylistController(object):
         """
         track = self.get(**criteria)
         position = self.tracks.index(track)
-        self.__remove_track(position)
+        del self._cp_tracks[position]
 
     def shuffle(self, start=None, end=None):
         """
@@ -233,7 +224,7 @@ class BaseCurrentPlaylistController(object):
         :param end: position after last track to shuffle
         :type end: int or :class:`None`
         """
-        tracks = self.tracks
+        cp_tracks = self._cp_tracks
 
         if start is not None and end is not None:
             assert start < end, 'start must be smaller than end'
@@ -242,14 +233,14 @@ class BaseCurrentPlaylistController(object):
             assert start >= 0, 'start must be at least zero'
 
         if end is not None:
-            assert end <= len(tracks), 'end can not be larger than ' + \
+            assert end <= len(cp_tracks), 'end can not be larger than ' + \
                 'playlist length'
 
-        before = tracks[:start or 0]
-        shuffled = tracks[start:end]
-        after = tracks[end or len(tracks):]
+        before = cp_tracks[:start or 0]
+        shuffled = cp_tracks[start:end]
+        after = cp_tracks[end or len(cp_tracks):]
         random.shuffle(shuffled)
-        self.__set_tracks(before + shuffled + after)
+        self._cp_tracks = before + shuffled + after
         self.version += 1
 
     def destroy(self):
