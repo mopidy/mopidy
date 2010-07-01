@@ -1,5 +1,7 @@
 from copy import copy
 
+from mopidy.mpd import serializer
+
 class ImmutableObject(object):
     """
     Superclass for immutable objects whose fields can only be modified via the
@@ -138,43 +140,8 @@ class Track(ImmutableObject):
         """List of :class:`Artist`. Read-only."""
         return list(self._artists)
 
-    def mpd_format(self, position=0, search_result=False):
-        """
-        Format track for output to MPD client.
-
-        :param position: track's position in playlist
-        :type position: integer
-        :param search_result: format for output in search result
-        :type search_result: boolean
-        :rtype: list of two-tuples
-        """
-        result = [
-            ('file', self.uri or ''),
-            ('Time', self.length and (self.length // 1000) or 0),
-            ('Artist', self.mpd_format_artists()),
-            ('Title', self.name or ''),
-            ('Album', self.album and self.album.name or ''),
-            ('Date', self.date or ''),
-        ]
-        if self.album is not None and self.album.num_tracks != 0:
-            result.append(('Track', '%d/%d' % (
-                self.track_no, self.album.num_tracks)))
-        else:
-            result.append(('Track', self.track_no))
-        if not search_result:
-            result.append(('Pos', position))
-            result.append(('Id', self.id or position))
-        return result
-
-    def mpd_format_artists(self):
-        """
-        Format track artists for output to MPD client.
-
-        :rtype: string
-        """
-        artists = list(self._artists)
-        artists.sort(key=lambda a: a.name)
-        return u', '.join([a.name for a in artists])
+    def mpd_format(self, *args, **kwargs):
+        return serializer.track_to_mpd_format(self, *args, **kwargs)
 
 
 class Playlist(ImmutableObject):
@@ -214,33 +181,8 @@ class Playlist(ImmutableObject):
         """The number of tracks in the playlist. Read-only."""
         return len(self._tracks)
 
-    def mpd_format(self, start=0, end=None, search_result=False):
-        """
-        Format playlist for output to MPD client.
-
-        Optionally limit output to the slice ``[start:end]`` of the playlist.
-
-        :param start: position of first track to include in output
-        :type start: int (positive or negative)
-        :param end: position after last track to include in output
-        :type end: int (positive or negative) or :class:`None` for end of list
-        :rtype: list of lists of two-tuples
-        """
-        if start < 0:
-            range_start = self.length + start
-        else:
-            range_start = start
-        if end is not None and end < 0:
-            range_end = self.length - end
-        elif end is not None and end >= 0:
-            range_end = end
-        else:
-            range_end = self.length
-        tracks = []
-        for track, position in zip(self.tracks[start:end],
-                range(range_start, range_end)):
-            tracks.append(track.mpd_format(position, search_result))
-        return tracks
+    def mpd_format(self, *args, **kwargs):
+        return serializer.playlist_to_mpd_format(self, *args, **kwargs)
 
     def with_(self, uri=None, name=None, tracks=None, last_modified=None):
         """
