@@ -245,7 +245,9 @@ class BaseCurrentPlaylistControllerTest(object):
     def test_remove(self):
         track1 = self.controller.tracks[1]
         track2 = self.controller.tracks[2]
+        version = self.controller.version
         self.controller.remove(id=track1.id)
+        self.assert_(version < self.controller.version)
         self.assert_(track1 not in self.controller.tracks)
         self.assertEqual(track2, self.controller.tracks[1])
 

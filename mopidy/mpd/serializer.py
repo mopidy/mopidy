@@ -1,4 +1,4 @@
-def track_to_mpd_format(track, position=0, search_result=False):
+def track_to_mpd_format(track, position=None, cpid=None):
     """
     Format track for output to MPD client.
 
@@ -6,8 +6,8 @@ def track_to_mpd_format(track, position=0, search_result=False):
     :type track: :class:`mopidy.models.Track`
     :param position: track's position in playlist
     :type position: integer
-    :param search_result: format for output in search result
-    :type search_result: boolean
+    :param cpid: track's CPID (current playlist ID)
+    :type cpid: integer
     :rtype: list of two-tuples
     """
     result = [
@@ -23,9 +23,9 @@ def track_to_mpd_format(track, position=0, search_result=False):
             track.track_no, track.album.num_tracks)))
     else:
         result.append(('Track', track.track_no))
-    if not search_result:
+    if position is not None and cpid is not None:
         result.append(('Pos', position))
-        result.append(('Id', track.id or position))
+        result.append(('Id', cpid))
     return result
 
 def track_artists_to_mpd_format(track):
@@ -40,7 +40,7 @@ def track_artists_to_mpd_format(track):
     artists.sort(key=lambda a: a.name)
     return u', '.join([a.name for a in artists])
 
-def tracks_to_mpd_format(tracks, start=0, end=None, search_result=False):
+def tracks_to_mpd_format(tracks, start=0, end=None, cpids=None):
     """
     Format list of tracks for output to MPD client.
 
@@ -54,20 +54,15 @@ def tracks_to_mpd_format(tracks, start=0, end=None, search_result=False):
     :type end: int (positive or negative) or :class:`None` for end of list
     :rtype: list of lists of two-tuples
     """
-    if start < 0:
-        range_start = len(tracks) + start
-    else:
-        range_start = start
-    if end is not None and end < 0:
-        range_end = len(tracks) - end
-    elif end is not None and end >= 0:
-        range_end = end
-    else:
-        range_end = len(tracks)
+    if end is None:
+        end = len(tracks)
+    tracks = tracks[start:end]
+    positions = range(start, end)
+    cpids = cpids and cpids[start:end] or [None for t in tracks]
+    assert len(tracks) == len(positions) == len(cpids)
     result = []
-    for track, position in zip(tracks[start:end],
-            range(range_start, range_end)):
-        result.append(track.mpd_format(position, search_result))
+    for track, position, cpid in zip(tracks, positions, cpids):
+        result.append(track_to_mpd_format(track, position, cpid))
     return result
 
 def playlist_to_mpd_format(playlist, *args, **kwargs):

@@ -14,8 +14,6 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Album', '') in result)
         self.assert_(('Track', 0) in result)
         self.assert_(('Date', '') in result)
-        self.assert_(('Pos', 0) in result)
-        self.assert_(('Id', 0) in result)
 
     def test_mpd_format_for_nonempty_track(self):
         track = Track(
@@ -26,9 +24,8 @@ class TrackMpdFormatTest(unittest.TestCase):
             track_no=7,
             date=dt.date(1977, 1, 1),
             length=137000,
-            id=122,
         )
-        result = serializer.track_to_mpd_format(track, position=9)
+        result = serializer.track_to_mpd_format(track, position=9, cpid=122)
         self.assert_(('file', 'a uri') in result)
         self.assert_(('Time', 137) in result)
         self.assert_(('Artist', 'an artist') in result)
@@ -56,19 +53,5 @@ class PlaylistMpdFormatTest(unittest.TestCase):
         playlist = Playlist(tracks=[
             Track(track_no=1), Track(track_no=2), Track(track_no=3)])
         result = serializer.playlist_to_mpd_format(playlist, 1, 2)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(dict(result[0])['Track'], 2)
-
-    def test_mpd_format_with_negative_start_and_no_end(self):
-        playlist = Playlist(tracks=[
-            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
-        result = serializer.playlist_to_mpd_format(playlist, -1, None)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(dict(result[0])['Track'], 3)
-
-    def test_mpd_format_with_negative_start_and_end(self):
-        playlist = Playlist(tracks=[
-            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
-        result = serializer.playlist_to_mpd_format(playlist, -2, -1)
         self.assertEqual(len(result), 1)
         self.assertEqual(dict(result[0])['Track'], 2)

@@ -5,6 +5,7 @@ import time
 
 from mopidy import settings
 from mopidy.models import Playlist
+from mopidy.mpd import serializer
 from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.backends.base')
@@ -103,6 +104,23 @@ class BaseCurrentPlaylistController(object):
         """
         return [t[1] for t in self._cp_tracks]
 
+    def _get_cp_track(self, **criteria):
+        matches = self._cp_tracks
+        for (key, value) in criteria.iteritems():
+            if key == 'cpid':
+                matches = filter(lambda ct: ct[0] == value, matches)
+            else:
+                matches = filter(lambda ct: getattr(ct[1], key) == value,
+                    matches)
+        if len(matches) == 1:
+            return matches[0]
+        criteria_string = ', '.join(
+            ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
+        if len(matches) == 0:
+            raise LookupError(u'"%s" match no tracks' % criteria_string)
+        else:
+            raise LookupError(u'"%s" match multiple tracks' % criteria_string)
+
     def add(self, track, at_position=None):
         """
         Add the track to the end of, or at the given position in the current
@@ -146,21 +164,7 @@ class BaseCurrentPlaylistController(object):
         :type criteria: dict
         :rtype: :class:`mopidy.models.Track`
         """
-        matches = self._cp_tracks
-        for (key, value) in criteria.iteritems():
-            if key == 'cpid':
-                matches = filter(lambda ct: ct[0] == value, matches)
-            else:
-                matches = filter(lambda ct: getattr(ct[1], key) == value,
-                    matches)
-        if len(matches) == 1:
-            return matches[0][1] # The track part of the only match
-        criteria_string = ', '.join(
-            ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
-        if len(matches) == 0:
-            raise LookupError(u'"%s" match no tracks' % criteria_string)
-        else:
-            raise LookupError(u'"%s" match multiple tracks' % criteria_string)
+        return self._get_cp_track(**criteria)[1]
 
     def load(self, tracks):
         """
@@ -216,9 +220,10 @@ class BaseCurrentPlaylistController(object):
         :type criteria: dict
         :type track: :class:`mopidy.models.Track`
         """
-        track = self.get(**criteria)
-        position = self.tracks.index(track)
+        cp_track = self._get_cp_track(**criteria)
+        position = self._cp_tracks.index(cp_track)
         del self._cp_tracks[position]
+        self.version += 1
 
     def shuffle(self, start=None, end=None):
         """
@@ -250,8 +255,9 @@ class BaseCurrentPlaylistController(object):
         self.version += 1
 
     def mpd_format(self, *args, **kwargs):
-        # XXX Lazy workaround to make tests pass while refactoring
-        return Playlist(tracks=self.tracks).mpd_format(*args, **kwargs)
+        """Not a part of the generic backend API."""
+        kwargs['cpids'] = [ct[0] for ct in self._cp_tracks]
+        return serializer.tracks_to_mpd_format(self.tracks, *args, **kwargs)
 
 
 class BaseLibraryController(object):
@@ -331,6 +337,9 @@ class BasePlaybackController(object):
     #: :class:`False`
     #:     Tracks are not removed from the playlist.
     consume = False
+
+    #: The CPID (current playlist ID) of :attr:`current_track`.
+    current_cpid = 0 # TODO Get the correct CPID
 
     #: The currently playing or selected :class:`mopidy.models.Track`.
     current_track = None

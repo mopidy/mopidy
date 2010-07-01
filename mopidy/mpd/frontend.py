@@ -317,7 +317,7 @@ class MpdFrontend(object):
         """
         try:
             cpid = int(cpid)
-            return self.backend.current_playlist.remove(id=cpid)
+            return self.backend.current_playlist.remove(cpid=cpid)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'deleteid')
 
@@ -369,7 +369,7 @@ class MpdFrontend(object):
         """
         cpid = int(cpid)
         to = int(to)
-        track = self.backend.current_playlist.get(id=cpid)
+        track = self.backend.current_playlist.get(cpid=cpid)
         position = self.backend.current_playlist.tracks.index(track)
         self.backend.current_playlist.move(position, position + 1, to)
 
@@ -423,8 +423,9 @@ class MpdFrontend(object):
         if cpid is not None:
             try:
                 cpid = int(cpid)
-                track = self.backend.current_playlist.get(id=cpid)
-                return track.mpd_format()
+                track = self.backend.current_playlist.get(cpid=cpid)
+                position = self.backend.current_playlist.tracks.index(track)
+                return track.mpd_format(position=position, cpid=cpid)
             except LookupError:
                 raise MpdNoExistError(u'No such song', command=u'playlistid')
         else:
@@ -463,8 +464,12 @@ class MpdFrontend(object):
             if start is None:
                 start = 0
             start = int(start)
+            if not (0 <= start <= len(self.backend.current_playlist.tracks)):
+                raise MpdArgError(u'Bad song index', command=u'playlistinfo')
             if end is not None:
                 end = int(end)
+                if end > len(self.backend.current_playlist.tracks):
+                    end = None
             return self.backend.current_playlist.mpd_format(start, end)
 
     @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
@@ -566,8 +571,8 @@ class MpdFrontend(object):
         """
         cpid1 = int(cpid1)
         cpid2 = int(cpid2)
-        track1 = self.backend.current_playlist.get(id=cpid1)
-        track2 = self.backend.current_playlist.get(id=cpid2)
+        track1 = self.backend.current_playlist.get(cpid=cpid1)
+        track2 = self.backend.current_playlist.get(cpid=cpid2)
         position1 = self.backend.current_playlist.tracks.index(track1)
         position2 = self.backend.current_playlist.tracks.index(track2)
         self._current_playlist_swap(position1, position2)
@@ -618,8 +623,7 @@ class MpdFrontend(object):
         field = field.lower()
         if field == u'title':
             field = u'track'
-        return self.backend.library.find_exact(field, what).mpd_format(
-            search_result=True)
+        return self.backend.library.find_exact(field, what).mpd_format()
 
     @handle_pattern(r'^findadd "(?P<field>(album|artist|title))" '
         r'"(?P<what>[^"]+)"$')
@@ -764,8 +768,7 @@ class MpdFrontend(object):
         field = field.lower()
         if field == u'title':
             field = u'track'
-        return self.backend.library.search(field, what).mpd_format(
-            search_result=True)
+        return self.backend.library.search(field, what).mpd_format()
 
     @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
     def _music_db_update(self, uri=None, rescan_unmodified_files=False):
@@ -913,7 +916,7 @@ class MpdFrontend(object):
             if cpid == -1:
                 track = self.backend.current_playlist.tracks[0]
             else:
-                track = self.backend.current_playlist.get(id=cpid)
+                track = self.backend.current_playlist.get(cpid=cpid)
             return self.backend.playback.play(track)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playid')
@@ -1211,7 +1214,8 @@ class MpdFrontend(object):
         """
         if self.backend.playback.current_track is not None:
             return self.backend.playback.current_track.mpd_format(
-                position=self.backend.playback.current_playlist_position)
+                position=self.backend.playback.current_playlist_position,
+                cpid=self.backend.playback.current_cpid)
 
     @handle_pattern(r'^idle$')
     @handle_pattern(r'^idle (?P<subsystems>.+)$')
@@ -1501,8 +1505,7 @@ class MpdFrontend(object):
             Album, Artist, Track
         """
         try:
-            return self.backend.stored_playlists.get(name=name).mpd_format(
-                search_result=True)
+            return self.backend.stored_playlists.get(name=name).mpd_format()
         except LookupError:
             raise MpdNoExistError(
                 u'No such playlist', command=u'listplaylistinfo')

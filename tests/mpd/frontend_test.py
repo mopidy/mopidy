@@ -486,7 +486,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
 
     def test_play_minus_one_plays_first_in_playlist(self):
-        track = Track(id=0)
+        track = Track()
         self.b.current_playlist.load([track])
         result = self.h.handle_request(u'play "-1"')
         self.assert_(u'OK' in result)
@@ -494,13 +494,13 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.current_track, track)
 
     def test_playid(self):
-        self.b.current_playlist.load([Track(id=0)])
-        result = self.h.handle_request(u'playid "0"')
+        self.b.current_playlist.load([Track()])
+        result = self.h.handle_request(u'playid "1"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_playid_minus_one_plays_first_in_playlist(self):
-        track = Track(id=0)
+        track = Track()
         self.b.current_playlist.load([track])
         result = self.h.handle_request(u'playid "-1"')
         self.assert_(u'OK' in result)
@@ -508,8 +508,8 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.current_track, track)
 
     def test_playid_which_does_not_exist(self):
-        self.b.current_playlist.load([Track(id=0)])
-        result = self.h.handle_request(u'playid "1"')
+        self.b.current_playlist.load([Track()])
+        result = self.h.handle_request(u'playid "12345"')
         self.assertEqual(result[0], u'ACK [50@0] {playid} No such song')
 
     def test_previous(self):
@@ -640,16 +640,16 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(result[0], u'ACK [2@0] {delete} Bad song index')
 
     def test_deleteid(self):
-        self.b.current_playlist.load([Track(id=0), Track()])
+        self.b.current_playlist.load([Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 2)
-        result = self.h.handle_request(u'deleteid "0"')
+        result = self.h.handle_request(u'deleteid "2"')
         self.assertEqual(len(self.b.current_playlist.tracks), 1)
         self.assert_(u'OK' in result)
 
     def test_deleteid_does_not_exist(self):
-        self.b.current_playlist.load([Track(id=1), Track()])
+        self.b.current_playlist.load([Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 2)
-        result = self.h.handle_request(u'deleteid "0"')
+        result = self.h.handle_request(u'deleteid "12345"')
         self.assertEqual(len(self.b.current_playlist.tracks), 2)
         self.assertEqual(result[0], u'ACK [50@0] {deleteid} No such song')
 
@@ -698,9 +698,9 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
     def test_moveid(self):
         self.b.current_playlist.load([
             Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e', id=137), Track(name='f'),
+            Track(name='d'), Track(name='e'), Track(name='f'),
         ])
-        result = self.h.handle_request(u'moveid "137" "2"')
+        result = self.h.handle_request(u'moveid "5" "2"')
         self.assertEqual(self.b.current_playlist.tracks[0].name, 'a')
         self.assertEqual(self.b.current_playlist.tracks[1].name, 'b')
         self.assertEqual(self.b.current_playlist.tracks[2].name, 'e')
@@ -737,39 +737,52 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_playlistid_without_songid(self):
-        self.b.current_playlist.load(
-            [Track(name='a', id=33), Track(name='b', id=38)])
+        self.b.current_playlist.load([Track(name='a'), Track(name='b')])
         result = self.h.handle_request(u'playlistid')
         self.assert_(u'Title: a' in result)
-        self.assert_(u'Id: 33' in result)
         self.assert_(u'Title: b' in result)
-        self.assert_(u'Id: 38' in result)
         self.assert_(u'OK' in result)
 
     def test_playlistid_with_songid(self):
-        self.b.current_playlist.load(
-            [Track(name='a', id=33), Track(name='b', id=38)])
-        result = self.h.handle_request(u'playlistid "38"')
+        self.b.current_playlist.load([Track(name='a'), Track(name='b')])
+        result = self.h.handle_request(u'playlistid "2"')
         self.assert_(u'Title: a' not in result)
-        self.assert_(u'Id: 33' not in result)
+        self.assert_(u'Id: 1' not in result)
         self.assert_(u'Title: b' in result)
-        self.assert_(u'Id: 38' in result)
+        self.assert_(u'Id: 2' in result)
         self.assert_(u'OK' in result)
 
     def test_playlistid_with_not_existing_songid_fails(self):
-        self.b.current_playlist.load(
-            [Track(name='a', id=33), Track(name='b', id=38)])
+        self.b.current_playlist.load([Track(name='a'), Track(name='b')])
         result = self.h.handle_request(u'playlistid "25"')
         self.assertEqual(result[0], u'ACK [50@0] {playlistid} No such song')
 
     def test_playlistinfo_without_songpos_or_range(self):
-        # FIXME testing just ok is not enough
+        self.b.current_playlist.load([
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e'), Track(name='f'),
+        ])
         result = self.h.handle_request(u'playlistinfo')
+        self.assert_(u'Title: a' in result)
+        self.assert_(u'Title: b' in result)
+        self.assert_(u'Title: c' in result)
+        self.assert_(u'Title: d' in result)
+        self.assert_(u'Title: e' in result)
+        self.assert_(u'Title: f' in result)
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_songpos(self):
-        # FIXME testing just ok is not enough
-        result = self.h.handle_request(u'playlistinfo "5"')
+        self.b.current_playlist.load([
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e'), Track(name='f'),
+        ])
+        result = self.h.handle_request(u'playlistinfo "4"')
+        self.assert_(u'Title: a' not in result)
+        self.assert_(u'Title: b' not in result)
+        self.assert_(u'Title: c' not in result)
+        self.assert_(u'Title: d' not in result)
+        self.assert_(u'Title: e' in result)
+        self.assert_(u'Title: f' not in result)
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_negative_songpos_same_as_playlistinfo(self):
@@ -778,13 +791,39 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(result1, result2)
 
     def test_playlistinfo_with_open_range(self):
-        # FIXME testing just ok is not enough
-        result = self.h.handle_request(u'playlistinfo "10:"')
+        self.b.current_playlist.load([
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e'), Track(name='f'),
+        ])
+        result = self.h.handle_request(u'playlistinfo "2:"')
+        self.assert_(u'Title: a' not in result)
+        self.assert_(u'Title: b' not in result)
+        self.assert_(u'Title: c' in result)
+        self.assert_(u'Title: d' in result)
+        self.assert_(u'Title: e' in result)
+        self.assert_(u'Title: f' in result)
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_closed_range(self):
-        # FIXME testing just ok is not enough
+        self.b.current_playlist.load([
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e'), Track(name='f'),
+        ])
+        result = self.h.handle_request(u'playlistinfo "2:4"')
+        self.assert_(u'Title: a' not in result)
+        self.assert_(u'Title: b' not in result)
+        self.assert_(u'Title: c' in result)
+        self.assert_(u'Title: d' in result)
+        self.assert_(u'Title: e' not in result)
+        self.assert_(u'Title: f' not in result)
+        self.assert_(u'OK' in result)
+
+    def test_playlistinfo_with_too_high_start_of_range_returns_arg_error(self):
         result = self.h.handle_request(u'playlistinfo "10:20"')
+        self.assert_(u'ACK [2@0] {playlistinfo} Bad song index' in result)
+
+    def test_playlistinfo_with_too_high_end_of_range_returns_ok(self):
+        result = self.h.handle_request(u'playlistinfo "0:20"')
         self.assert_(u'OK' in result)
 
     def test_playlistsearch(self):
@@ -866,10 +905,10 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_swapid(self):
         self.b.current_playlist.load([
-            Track(name='a'), Track(name='b', id=13), Track(name='c'),
-            Track(name='d'), Track(name='e', id=29), Track(name='f'),
+            Track(name='a'), Track(name='b'), Track(name='c'),
+            Track(name='d'), Track(name='e'), Track(name='f'),
         ])
-        result = self.h.handle_request(u'swapid "13" "29"')
+        result = self.h.handle_request(u'swapid "2" "5"')
         self.assertEqual(self.b.current_playlist.tracks[0].name, 'a')
         self.assertEqual(self.b.current_playlist.tracks[1].name, 'e')
         self.assertEqual(self.b.current_playlist.tracks[2].name, 'c')
