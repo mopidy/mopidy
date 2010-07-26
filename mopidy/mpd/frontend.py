@@ -651,6 +651,14 @@ class MpdFrontend(object):
                 for artist in track.artists:
                     artists.add(u'Artist: %s' % artist.name)
         return u'\n'.join(artists)
+
+    def _music_db_list_album_artist(self, artist):
+        playlist = self.backend.library.find_exact(u'artist', artist)
+        albums = set()
+        for track in playlist.tracks:
+            albums.add(u'Album: %s' % track.album.name)
+        return u'\n'.join(albums)
+
     @handle_pattern(r'^list (?P<field>[Aa]rtist)$')
     @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
     @handle_pattern(r'^list (?P<field>album( artist)?)( "(?P<artist>[^"]+)")*$')
@@ -691,6 +699,8 @@ class MpdFrontend(object):
         field = field.lower()
         if field == u'artist':
             return self._music_db_list_artist()
+        elif field == u'album artist':
+            return self._music_db_list_album_artist(artist)
         # TODO More to implement
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
