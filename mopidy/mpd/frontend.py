@@ -114,8 +114,8 @@ class MpdFrontend(object):
         query_pattern = r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"'
         query_parts = re.findall(query_pattern, mpd_query)
         query_part_pattern = (
-                r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny))"?\s'
-                r'"(?P<what>[^"]+)"')
+            r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny))"?\s'
+            r'"(?P<what>[^"]+)"')
         query = []
         for query_part in query_parts:
             m = re.match(query_part_pattern, query_part)
