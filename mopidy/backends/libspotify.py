@@ -76,10 +76,10 @@ class LibspotifyLibraryController(BaseLibraryController):
                 spotify_query.append(what)
             else:
                 spotify_query.append(u'%s:"%s"' % (field, what))
-        spotify_query = u' '.join(query)
-        logger.debug(u'In search method, search for: %s' % query)
+        spotify_query = u' '.join(spotify_query)
+        logger.debug(u'In search method, search for: %s' % spotify_query)
         my_end, other_end = multiprocessing.Pipe()
-        self.backend.spotify.search(query.encode(ENCODING), other_end)
+        self.backend.spotify.search(spotify_query.encode(ENCODING), other_end)
         my_end.poll(None)
         logger.debug(u'In search method, receiving search results')
         playlist = my_end.recv()
