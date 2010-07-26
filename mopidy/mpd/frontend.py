@@ -664,8 +664,8 @@ class MpdFrontend(object):
         for playlist in self.backend.stored_playlists.playlists:
             for track in playlist.tracks:
                 for artist in track.artists:
-                    artists.add(u'Artist: %s' % artist.name)
-        return u'\n'.join(artists)
+                    artists.add((u'Artist', artist.name))
+        return artists
 
     def _music_db_list_album_artist(self, artist):
         playlist = self.backend.library.find_exact([(u'artist', artist)])
