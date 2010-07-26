@@ -217,49 +217,54 @@ class GStreamerLibraryController(BaseLibraryController):
         except KeyError:
             raise LookupError('%s not found.' % uri)
 
-    def find_exact(self, field, query):
-        if not query:
-            raise LookupError('Missing query')
+    def find_exact(self, query):
+        for (field, what) in query:
+            if not what:
+                raise LookupError('Missing query')
 
-        if field == 'track':
-            filter_func = lambda t: t.name == query
-        elif field == 'album':
-            filter_func = lambda t: getattr(t, 'album', Album()).name == query
-        elif field == 'artist':
-            filter_func = lambda t: filter(lambda a: a.name == query, t.artists)
-        else:
-            raise LookupError('Invalid lookup field: %s' % field)
+        result_tracks = self._uri_mapping.values()
+        for (field, what) in query:
+            if field == 'track':
+                filter_func = lambda t: t.name == what
+            elif field == 'album':
+                filter_func = lambda t: getattr(t, 'album', Album()).name == what
+            elif field == 'artist':
+                filter_func = lambda t: filter(lambda a: a.name == what, t.artists)
+            else:
+                raise LookupError('Invalid lookup field: %s' % field)
 
-        tracks = filter(filter_func, self._uri_mapping.values())
-        return Playlist(tracks=tracks)
+            result_tracks = filter(filter_func, result_tracks)
+        return Playlist(tracks=result_tracks)
 
-    def search(self, field, query):
-        if not query:
-            raise LookupError('Missing query')
+    def search(self, query):
+        for (field, what) in query:
+            if not what:
+                raise LookupError('Missing query')
 
-        q = query.strip().lower()
-        library_tracks = self._uri_mapping.values()
+        result_tracks = self._uri_mapping.values()
+        for (field, what) in query:
+            q = what.strip().lower()
 
-        # FIXME this is bound to be slow for large libraries
-        track_filter  = lambda t: q in t.name.lower()
-        album_filter = lambda t: q in getattr(t, 'album', Album()).name.lower()
-        artist_filter = lambda t: filter(lambda a: q in a.name.lower(),
-            t.artists)
-        uri_filter = lambda t: q in t.uri.lower()
-        any_filter = lambda t: track_filter(t) or album_filter(t) or \
-            artist_filter(t) or uri_filter(t)
+            # FIXME this is bound to be slow for large libraries
+            track_filter  = lambda t: q in t.name.lower()
+            album_filter = lambda t: q in getattr(t, 'album', Album()).name.lower()
+            artist_filter = lambda t: filter(lambda a: q in a.name.lower(),
+                t.artists)
+            uri_filter = lambda t: q in t.uri.lower()
+            any_filter = lambda t: track_filter(t) or album_filter(t) or \
+                artist_filter(t) or uri_filter(t)
 
-        if field == 'track':
-            tracks = filter(track_filter, library_tracks)
-        elif field == 'album':
-            tracks = filter(album_filter, library_tracks)
-        elif field == 'artist':
-            tracks = filter(artist_filter, library_tracks)
-        elif field == 'uri':
-            tracks = filter(uri_filter, library_tracks)
-        elif field == 'any':
-            tracks = filter(any_filter, library_tracks)
-        else:
-            raise LookupError('Invalid lookup field: %s' % field)
+            if field == 'track':
+                result_tracks = filter(track_filter, result_tracks)
+            elif field == 'album':
+                result_tracks = filter(album_filter, result_tracks)
+            elif field == 'artist':
+                result_tracks = filter(artist_filter, result_tracks)
+            elif field == 'uri':
+                result_tracks = filter(uri_filter, result_tracks)
+            elif field == 'any':
+                result_tracks = filter(any_filter, result_tracks)
+            else:
+                raise LookupError('Invalid lookup field: %s' % field)
 
-        return Playlist(tracks=tracks)
+        return Playlist(tracks=result_tracks)

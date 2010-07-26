@@ -69,11 +69,15 @@ class LibspotifyLibraryController(BaseLibraryController):
         spotify_track = Link.from_string(uri).as_track()
         return LibspotifyTranslator.to_mopidy_track(spotify_track)
 
-    def search(self, field, what):
-        if field is u'any':
-            query = what
-        else:
-            query = u'%s:%s' % (field, what)
+    def search(self, query):
+        spotify_query = []
+        for (field, what) in query:
+            if field is u'any':
+                spotify_query.append(what)
+            else:
+                spotify_query.append(u'%s:"%s"' % (field, what))
+        spotify_query = u' '.join(query)
+        logger.debug(u'In search method, search for: %s' % query)
         my_end, other_end = multiprocessing.Pipe()
         self.backend.spotify.search(query.encode(ENCODING), other_end)
         my_end.poll(None)

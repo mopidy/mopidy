@@ -259,14 +259,12 @@ class BaseLibraryController(object):
         """Cleanup after component."""
         pass
 
-    def find_exact(self, field, query):
+    def find_exact(self, query):
         """
-        Find tracks in the library where ``field`` matches ``query`` exactly.
+        Find tracks in the library where ``field`` matches ``what`` exactly.
 
-        :param field: 'track', 'artist', or 'album'
-        :type field: string
-        :param query: the search query
-        :type query: string
+        :param query: Example: [(u'artist', u'anArtist'), (u'album', u'anAlbum')]
+        :type query: list of (field, what) tuples.
         :rtype: :class:`mopidy.models.Playlist`
         """
         raise NotImplementedError
@@ -290,7 +288,7 @@ class BaseLibraryController(object):
         """
         raise NotImplementedError
 
-    def search(self, field, query):
+    def search(self, query):
         """
         Search the library for tracks where ``field`` contains ``query``.
 

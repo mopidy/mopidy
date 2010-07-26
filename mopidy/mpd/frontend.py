@@ -106,6 +106,26 @@ class MpdFrontend(object):
             response.append(u'OK')
         return response
 
+    def _build_query(self, mpd_query):
+        """
+        Parses a mpd query string and converts the MPD query to a list of
+        (field, what) tuples.
+        """
+        query_pattern = r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"'
+        query_parts = re.findall(query_pattern, mpd_query)
+        query_part_pattern = (
+                r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny))"?\s'
+                r'"(?P<what>[^"]+)"')
+        query = []
+        for query_part in query_parts:
+            m = re.match(query_part_pattern, query_part)
+            field = m.groupdict()['field'].lower()
+            if field == u'title':
+                field = u'track'
+            what = m.groupdict()['what'].lower()
+            query.append((field, what))
+        return query
+
     @handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
     def _audio_output_disableoutput(self, outputid):
         """
@@ -592,13 +612,9 @@ class MpdFrontend(object):
         """
         return [('songs', 0), ('playtime', 0)] # TODO
 
-    @handle_pattern(r'^find (?P<field>([Aa]lbum|[Aa]rtist|[Tt]itle)) '
-        r'"(?P<what>[^"]+)"$')
-    @handle_pattern(r'^find "(?P<field>(album|artist|title))" '
-        r'"(?P<what>[^"]+)"$')
-    @handle_pattern(r'^find (?P<field>(album)) '
-        r'"(?P<what>[^"]+)" artist "([^"]+)"$')
-    def _music_db_find(self, field, what):
+    @handle_pattern(r'^find '
+         r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+    def _music_db_find(self, mpd_query):
         """
         *musicpd.org, music database section:*
 
@@ -618,15 +634,13 @@ class MpdFrontend(object):
         - does not add quotes around the field argument.
         - capitalizes the type argument.
         """
-        field = field.lower()
-        if field == u'title':
-            field = u'track'
-        return self.backend.library.find_exact(field, what).mpd_format(
+        query = self._build_query(mpd_query)
+        return self.backend.library.find_exact(query).mpd_format(
             search_result=True)
 
-    @handle_pattern(r'^findadd "(?P<field>(album|artist|title))" '
-        r'"(?P<what>[^"]+)"$')
-    def _music_db_findadd(self, field, what):
+    @handle_pattern(r'^findadd '
+         r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+    def _music_db_findadd(self, query):
         """
         *musicpd.org, music database section:*
 
@@ -636,7 +650,7 @@ class MpdFrontend(object):
             current playlist. ``TYPE`` can be any tag supported by MPD.
             ``WHAT`` is what to find.
         """
-        result = self._music_db_find(field, what)
+        result = self._music_db_find(query)
         # TODO Add result to current playlist
         #return result
 
@@ -653,7 +667,7 @@ class MpdFrontend(object):
         return u'\n'.join(artists)
 
     def _music_db_list_album_artist(self, artist):
-        playlist = self.backend.library.find_exact(u'artist', artist)
+        playlist = self.backend.library.find_exact([(u'artist', artist)])
         albums = set()
         for track in playlist.tracks:
             albums.add(u'Album: %s' % track.album.name)
@@ -669,11 +683,11 @@ class MpdFrontend(object):
 
             ``list {TYPE} [ARTIST]``
 
-            Lists all tags of the specified type. ``TYPE`` should be ``album``
-            or ``artist``.
+            Lists all tags of the specified type. ``TYPE`` should be ``album``,
+            ``artist``, ``date``, or ``genre``.
 
-            ``ARTIST`` is an optional parameter when type is ``album``, this
-            specifies to list albums by an artist.
+            ``ARTIST`` is an optional parameter when type is ``album``, ``date``, or ``genre``
+            This filters the result list by an artist.
 
         *GMPC:*
 
@@ -760,11 +774,8 @@ class MpdFrontend(object):
         return self._music_db_update(uri, rescan_unmodified_files=True)
 
     @handle_pattern(r'^search '
-        r'(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)) '
-        r'"(?P<what>[^"]+)"$')
-    @handle_pattern(r'^search "(?P<field>(album|artist|filename|title|any))" '
-        r'"(?P<what>[^"]+)"$')
-    def _music_db_search(self, field, what):
+         r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+    def _music_db_search(self, mpd_query):
         """
         *musicpd.org, music database section:*
 
@@ -787,11 +798,8 @@ class MpdFrontend(object):
         - does not add quotes around the field argument.
         - capitalizes the field argument.
         """
-        # TODO Support GMPC multi-word search
-        field = field.lower()
-        if field == u'title':
-            field = u'track'
-        return self.backend.library.search(field, what).mpd_format(
+        query = self._build_query(mpd_query)
+        return self.backend.library.search(query).mpd_format(
             search_result=True)
 
     @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')

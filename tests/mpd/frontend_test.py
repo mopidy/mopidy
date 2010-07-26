@@ -1085,6 +1085,11 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'search any "anything"')
         self.assert_(u'OK' in result)
 
+    def test_search_multi_word(self):
+        result = self.h.handle_request(u'search any "test1" any "test2"')
+        print result
+        self.assert_(u'OK' in result)
+
     def test_search_else_should_fail(self):
         result = self.h.handle_request(u'search "sometype" "something"')
         self.assertEqual(result[0], u'ACK [2@0] {search} incorrect arguments')

@@ -58,14 +58,17 @@ class DespotifyLibraryController(BaseLibraryController):
         track = self.backend.spotify.lookup(uri.encode(ENCODING))
         return DespotifyTranslator.to_mopidy_track(track)
 
-    def search(self, field, what):
-        if field == u'track':
-            field = u'title'
-        if field == u'any':
-            query = what
-        else:
-            query = u'%s:%s' % (field, what)
-        result = self.backend.spotify.search(query.encode(ENCODING))
+    def search(self, query):
+        spotify_query = []
+        for (field, what) in query:
+            if field == u'track':
+                field = u'title'
+            if field is u'any':
+                spotify_query.append(what)
+            else:
+                spotify_query.append(u'%s:"%s"' % (field, what))
+        spotify_query = u' '.join(query)
+        result = self.backend.spotify.search(spotify_query.encode(ENCODING))
         if (result is None or result.playlist.tracks[0].get_uri() ==
                 'spotify:track:0000000000000000000000'):
             return Playlist()
