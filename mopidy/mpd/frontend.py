@@ -693,7 +693,8 @@ class MpdFrontend(object):
         *GMPC:*
 
         - does not add quotes around the field argument.
-        - asks for "list artist" to get available artists and will not query for artist/album information if this is not retrived
+        - asks for "list artist" to get available artists and will not query
+          for artist/album information if this is not retrived
         - asks for multiple fields, i.e.::
 
             list album artist "an artist name"
