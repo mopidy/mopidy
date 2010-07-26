@@ -91,6 +91,8 @@ class MpdFrontend(object):
         response = []
         if result is None:
             result = []
+        elif isinstance(result, set):
+            result = list(result)
         elif not isinstance(result, list):
             result = [result]
         for line in flatten(result):
