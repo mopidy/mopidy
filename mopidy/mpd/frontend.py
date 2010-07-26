@@ -640,6 +640,17 @@ class MpdFrontend(object):
         # TODO Add result to current playlist
         #return result
 
+    def _music_db_list_artist(self):
+        """
+        Since we don't know exactly all available artists, we respond with
+        the artists we know for sure, which is all artists in our stored playlists.
+        """
+        artists = set()
+        for playlist in self.backend.stored_playlists.playlists:
+            for track in playlist.tracks:
+                for artist in track.artists:
+                    artists.add(u'Artist: %s' % artist.name)
+        return u'\n'.join(artists)
     @handle_pattern(r'^list (?P<field>[Aa]rtist)$')
     @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
     @handle_pattern(r'^list (?P<field>album( artist)?)( "(?P<artist>[^"]+)")*$')
@@ -659,6 +670,7 @@ class MpdFrontend(object):
         *GMPC:*
 
         - does not add quotes around the field argument.
+        - asks for "list artist" to get available artists and will not query for artist/album information if this is not retrived
         - asks for multiple fields, i.e.::
 
             list album artist "an artist name"
@@ -677,7 +689,9 @@ class MpdFrontend(object):
         - capitalizes the field argument.
         """
         field = field.lower()
-        pass # TODO
+        if field == u'artist':
+            return self._music_db_list_artist()
+        # TODO More to implement
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
     def _music_db_listall(self, uri):
