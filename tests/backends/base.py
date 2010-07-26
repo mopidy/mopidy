@@ -44,12 +44,12 @@ class BaseCurrentPlaylistControllerTest(object):
     def test_add(self):
         for track in self.tracks:
             self.controller.add(track)
-            self.assertEqual(track, self.controller.playlist.tracks[-1])
+            self.assertEqual(track, self.controller.tracks[-1])
 
     def test_add_at_position(self):
         for track in self.tracks[:-1]:
             self.controller.add(track, 0)
-            self.assertEqual(track, self.controller.playlist.tracks[0])
+            self.assertEqual(track, self.controller.tracks[0])
 
     @populate_playlist
     def test_add_at_position_outside_of_playlist(self):
@@ -58,12 +58,18 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_add_sets_id_property(self):
-        for track in self.controller.playlist.tracks:
+        for track in self.controller.tracks:
             self.assertNotEqual(None, track.id)
 
     @populate_playlist
+    def test_get_by_cpid(self):
+        track = self.controller.tracks[1]
+        cpid = self.controller._cp_tracks[1][0] # XXX Messing in internals
+        self.assertEqual(track, self.controller.get(cpid=cpid))
+
+    @populate_playlist
     def test_get_by_id(self):
-        track = self.controller.playlist.tracks[1]
+        track = self.controller.tracks[1]
         self.assertEqual(track, self.controller.get(id=track.id))
 
     @populate_playlist
@@ -72,7 +78,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_get_by_uri(self):
-        track = self.controller.playlist.tracks[1]
+        track = self.controller.tracks[1]
         self.assertEqual(track, self.controller.get(uri=track.uri))
 
     @populate_playlist
@@ -83,11 +89,11 @@ class BaseCurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_clear(self):
         self.controller.clear()
-        self.assertEqual(len(self.controller.playlist.tracks), 0)
+        self.assertEqual(len(self.controller.tracks), 0)
 
     def test_clear_empty_playlist(self):
         self.controller.clear()
-        self.assertEqual(len(self.controller.playlist.tracks), 0)
+        self.assertEqual(len(self.controller.tracks), 0)
 
     @populate_playlist
     def test_clear_when_playing(self):
@@ -97,21 +103,19 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_load(self):
-        new_playlist = Playlist()
-        self.assertNotEqual(id(new_playlist), id(self.controller.playlist))
-        self.controller.load(new_playlist)
-        # FIXME how do we test this without going into internals?
-        self.assertEqual(new_playlist, self.controller._playlist)
+        tracks = []
+        self.assertNotEqual(id(tracks), id(self.controller.tracks))
+        self.controller.load(tracks)
+        self.assertEqual(tracks, self.controller.tracks)
 
     def test_get_by_id_returns_unique_match(self):
         track = Track(id=1)
-        self.controller.playlist = Playlist(
-            tracks=[Track(id=13), track, Track(id=17)])
+        self.controller.load([Track(id=13), track, Track(id=17)])
         self.assertEqual(track, self.controller.get(id=1))
 
     def test_get_by_id_raises_error_if_multiple_matches(self):
         track = Track(id=1)
-        self.controller.playlist = Playlist(tracks=[Track(id=13), track, track])
+        self.controller.load([Track(id=13), track, track])
         try:
             self.controller.get(id=1)
             self.fail(u'Should raise LookupError if multiple matches')
@@ -128,14 +132,12 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_get_by_uri_returns_unique_match(self):
         track = Track(uri='a')
-        self.controller.playlist = Playlist(
-            tracks=[Track(uri='z'), track, Track(uri='y')])
+        self.controller.load([Track(uri='z'), track, Track(uri='y')])
         self.assertEqual(track, self.controller.get(uri='a'))
 
     def test_get_by_uri_raises_error_if_multiple_matches(self):
         track = Track(uri='a')
-        self.controller.playlist = Playlist(
-            tracks=[Track(uri='z'), track, track])
+        self.controller.load([Track(uri='z'), track, track])
         try:
             self.controller.get(uri='a')
             self.fail(u'Should raise LookupError if multiple matches')
@@ -155,7 +157,7 @@ class BaseCurrentPlaylistControllerTest(object):
         track1 = Track(id=1, uri='a')
         track2 = Track(id=1, uri='b')
         track3 = Track(id=2, uri='b')
-        self.controller.playlist = Playlist(tracks=[track1, track2, track3])
+        self.controller.load([track1, track2, track3])
         self.assertEqual(track1, self.controller.get(id=1, uri='a'))
         self.assertEqual(track2, self.controller.get(id=1, uri='b'))
         self.assertEqual(track3, self.controller.get(id=2, uri='b'))
@@ -164,37 +166,35 @@ class BaseCurrentPlaylistControllerTest(object):
         track1 = Track(id=1)
         track2 = Track(uri='b')
         track3 = Track(id=2)
-        self.controller.playlist = Playlist(tracks=[track1, track2, track3])
+        self.controller.load([track1, track2, track3])
         self.assertEqual(track1, self.controller.get(id=1))
 
     @populate_playlist
     def test_load_replaces_playlist(self):
-        self.backend.current_playlist.load(Playlist())
-        tracks = self.backend.current_playlist.playlist.tracks
-        self.assertEqual(len(tracks), 0)
+        self.backend.current_playlist.load([])
+        self.assertEqual(len(self.backend.current_playlist.tracks), 0)
 
     def test_load_does_not_reset_version(self):
         version = self.controller.version
-
-        self.controller.load(Playlist())
-        self.assertEqual(self.controller.version, version+1)
+        self.controller.load([])
+        self.assertEqual(self.controller.version, version + 1)
 
     @populate_playlist
     def test_load_preserves_playing_state(self):
-        tracks = self.controller.playlist.tracks
+        tracks = self.controller.tracks
         playback = self.playback
 
         self.playback.play()
-        self.controller.load(Playlist(tracks=[tracks[1]]))
+        self.controller.load([tracks[1]])
         self.assertEqual(playback.state, playback.PLAYING)
         self.assertEqual(tracks[1], self.playback.current_track)
 
     @populate_playlist
     def test_load_preserves_stopped_state(self):
-        tracks = self.controller.playlist.tracks
+        tracks = self.controller.tracks
         playback = self.playback
 
-        self.controller.load(Playlist(tracks=[tracks[2]]))
+        self.controller.load([tracks[2]])
         self.assertEqual(playback.state, playback.STOPPED)
         self.assertEqual(None, self.playback.current_track)
 
@@ -202,32 +202,32 @@ class BaseCurrentPlaylistControllerTest(object):
     def test_move_single(self):
         self.controller.move(0, 0, 2)
 
-        tracks = self.controller.playlist.tracks
+        tracks = self.controller.tracks
         self.assertEqual(tracks[2], self.tracks[0])
 
     @populate_playlist
     def test_move_group(self):
         self.controller.move(0, 2, 1)
 
-        tracks = self.controller.playlist.tracks
+        tracks = self.controller.tracks
         self.assertEqual(tracks[1], self.tracks[0])
         self.assertEqual(tracks[2], self.tracks[1])
 
     @populate_playlist
     def test_moving_track_outside_of_playlist(self):
-        tracks = len(self.controller.playlist.tracks)
+        tracks = len(self.controller.tracks)
         test = lambda: self.controller.move(0, 0, tracks+5)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_move_group_outside_of_playlist(self):
-        tracks = len(self.controller.playlist.tracks)
+        tracks = len(self.controller.tracks)
         test = lambda: self.controller.move(0, 2, tracks+5)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_move_group_out_of_range(self):
-        tracks = len(self.controller.playlist.tracks)
+        tracks = len(self.controller.tracks)
         test = lambda: self.controller.move(tracks+2, tracks+3, 0)
         self.assertRaises(AssertionError, test)
 
@@ -236,35 +236,36 @@ class BaseCurrentPlaylistControllerTest(object):
         test = lambda: self.controller.move(2, 1, 0)
         self.assertRaises(AssertionError, test)
 
-    def test_playlist_attribute_is_immutable(self):
-        playlist1 = self.controller.playlist
-        playlist2 = self.controller.playlist
-
-        self.assertNotEqual(id(playlist1), id(playlist2))
+    def test_tracks_attribute_is_immutable(self):
+        tracks1 = self.controller.tracks
+        tracks2 = self.controller.tracks
+        self.assertNotEqual(id(tracks1), id(tracks2))
 
     @populate_playlist
     def test_remove(self):
-        track1 = self.controller.playlist.tracks[1]
-        track2 = self.controller.playlist.tracks[2]
-        self.controller.remove(track1)
-        self.assert_(track1 not in self.controller.playlist.tracks)
-        self.assertEqual(track2, self.controller.playlist.tracks[1])
+        track1 = self.controller.tracks[1]
+        track2 = self.controller.tracks[2]
+        version = self.controller.version
+        self.controller.remove(id=track1.id)
+        self.assert_(version < self.controller.version)
+        self.assert_(track1 not in self.controller.tracks)
+        self.assertEqual(track2, self.controller.tracks[1])
 
     @populate_playlist
     def test_removing_track_that_does_not_exist(self):
-        test = lambda: self.controller.remove(Track())
-        self.assertRaises(AssertionError, test)
+        test = lambda: self.controller.remove(id=12345)
+        self.assertRaises(LookupError, test)
 
     def test_removing_from_empty_playlist(self):
-        test = lambda: self.controller.remove(Track())
-        self.assertRaises(AssertionError, test)
+        test = lambda: self.controller.remove(id=12345)
+        self.assertRaises(LookupError, test)
 
     @populate_playlist
     def test_shuffle(self):
         random.seed(1)
         self.controller.shuffle()
 
-        shuffled_tracks = self.controller.playlist.tracks
+        shuffled_tracks = self.controller.tracks
 
         self.assertNotEqual(self.tracks, shuffled_tracks)
         self.assertEqual(set(self.tracks), set(shuffled_tracks))
@@ -274,7 +275,7 @@ class BaseCurrentPlaylistControllerTest(object):
         random.seed(1)
         self.controller.shuffle(1, 3)
 
-        shuffled_tracks = self.controller.playlist.tracks
+        shuffled_tracks = self.controller.tracks
 
         self.assertNotEqual(self.tracks, shuffled_tracks)
         self.assertEqual(self.tracks[0], shuffled_tracks[0])
@@ -287,7 +288,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_shuffle_superset(self):
-        tracks = len(self.controller.playlist.tracks)
+        tracks = len(self.controller.tracks)
         test = lambda: self.controller.shuffle(1, tracks+5)
         self.assertRaises(AssertionError, test)
 
@@ -296,7 +297,7 @@ class BaseCurrentPlaylistControllerTest(object):
         random.seed(1)
         self.controller.shuffle(1)
 
-        shuffled_tracks = self.controller.playlist.tracks
+        shuffled_tracks = self.controller.tracks
 
         self.assertNotEqual(self.tracks, shuffled_tracks)
         self.assertEqual(self.tracks[0], shuffled_tracks[0])
@@ -304,8 +305,8 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_version(self):
         version = self.controller.version
-        self.controller.playlist = Playlist()
-        self.assertEqual(version+1, self.controller.version)
+        self.controller.load([])
+        self.assert_(version < self.controller.version)
 
 
 class BasePlaybackControllerTest(object):
@@ -614,7 +615,7 @@ class BasePlaybackControllerTest(object):
         wrapper.called = False
 
         self.playback.new_playlist_loaded_callback = wrapper
-        self.backend.current_playlist.load(Playlist())
+        self.backend.current_playlist.load([])
 
         self.assert_(wrapper.called)
 
@@ -639,26 +640,23 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_new_playlist_loaded_callback_when_playing(self):
-        playlist = Playlist(tracks=[self.tracks[2]])
         self.playback.play()
-        self.backend.current_playlist.load(playlist)
+        self.backend.current_playlist.load([self.tracks[2]])
         self.assertEqual(self.playback.state, self.playback.PLAYING)
         self.assertEqual(self.playback.current_track, self.tracks[2])
 
     @populate_playlist
     def test_new_playlist_loaded_callback_when_stopped(self):
-        playlist = Playlist(tracks=[self.tracks[2]])
-        self.backend.current_playlist.load(playlist)
+        self.backend.current_playlist.load([self.tracks[2]])
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
         self.assertEqual(self.playback.next_track, self.tracks[2])
 
     @populate_playlist
     def test_new_playlist_loaded_callback_when_paused(self):
-        playlist = Playlist(tracks=[self.tracks[2]])
         self.playback.play()
         self.playback.pause()
-        self.backend.current_playlist.load(playlist)
+        self.backend.current_playlist.load([self.tracks[2]])
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
         self.assertEqual(self.playback.next_track, self.tracks[2])
@@ -735,7 +733,7 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_playing(self):
-        length = self.backend.current_playlist.playlist.tracks[0].length
+        length = self.backend.current_playlist.tracks[0].length
         self.playback.play()
         self.playback.seek(length - 1000)
         position = self.playback.time_position
@@ -743,7 +741,7 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_paused(self):
-        length = self.backend.current_playlist.playlist.tracks[0].length
+        length = self.backend.current_playlist.tracks[0].length
         self.playback.play()
         self.playback.pause()
         self.playback.seek(length - 1000)
@@ -842,16 +840,15 @@ class BasePlaybackControllerTest(object):
         self.playback.consume = True
         self.playback.play()
         self.playback.next()
-        tracks = self.backend.current_playlist.playlist.tracks
-        self.assert_(self.tracks[0] not in tracks)
+        self.assert_(self.tracks[0] not in self.backend.current_playlist.tracks)
 
     @populate_playlist
     def test_playlist_is_empty_after_all_tracks_are_played_with_consume(self):
         self.playback.consume = True
         self.playback.play()
-        for i in range(len(self.backend.current_playlist.playlist.tracks)):
+        for i in range(len(self.backend.current_playlist.tracks)):
             self.playback.next()
-        self.assertEqual(len(self.backend.current_playlist.playlist.tracks), 0)
+        self.assertEqual(len(self.backend.current_playlist.tracks), 0)
 
     @populate_playlist
     def test_play_with_random(self):
@@ -932,7 +929,7 @@ class BasePlaybackControllerTest(object):
         random.seed(1)
         self.playback.random = True
         self.assertEqual(self.playback.next_track, self.tracks[2])
-        self.backend.current_playlist.load(Playlist(tracks=self.tracks[:1]))
+        self.backend.current_playlist.load(self.tracks[:1])
         self.assertEqual(self.playback.next_track, self.tracks[0])
 
     @populate_playlist
@@ -946,8 +943,7 @@ class BasePlaybackControllerTest(object):
             self.playback.next()
 
     def test_playing_track_with_invalid_uri(self):
-        playlist = Playlist(tracks=[Track(uri='foobar')])
-        self.backend.current_playlist.load(playlist)
+        self.backend.current_playlist.load([Track(uri='foobar')])
         self.playback.play()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 

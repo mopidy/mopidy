@@ -228,45 +228,6 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track.id, track_id)
         self.assertRaises(AttributeError, setattr, track, 'id', None)
 
-    def test_mpd_format_for_empty_track(self):
-        track = Track()
-        result = track.mpd_format()
-        self.assert_(('file', '') in result)
-        self.assert_(('Time', 0) in result)
-        self.assert_(('Artist', '') in result)
-        self.assert_(('Title', '') in result)
-        self.assert_(('Album', '') in result)
-        self.assert_(('Track', 0) in result)
-        self.assert_(('Date', '') in result)
-        self.assert_(('Pos', 0) in result)
-        self.assert_(('Id', 0) in result)
-
-    def test_mpd_format_for_nonempty_track(self):
-        track = Track(
-            uri=u'a uri',
-            artists=[Artist(name=u'an artist')],
-            name=u'a name',
-            album=Album(name=u'an album', num_tracks=13),
-            track_no=7,
-            date=dt.date(1977, 1, 1),
-            length=137000,
-            id=122,
-        )
-        result = track.mpd_format(position=9)
-        self.assert_(('file', 'a uri') in result)
-        self.assert_(('Time', 137) in result)
-        self.assert_(('Artist', 'an artist') in result)
-        self.assert_(('Title', 'a name') in result)
-        self.assert_(('Album', 'an album') in result)
-        self.assert_(('Track', '7/13') in result)
-        self.assert_(('Date', dt.date(1977, 1, 1)) in result)
-        self.assert_(('Pos', 9) in result)
-        self.assert_(('Id', 122) in result)
-
-    def test_mpd_format_artists(self):
-        track = Track(artists=[Artist(name=u'ABBA'), Artist(name=u'Beatles')])
-        self.assertEqual(track.mpd_format_artists(), u'ABBA, Beatles')
-
     def test_invalid_kwarg(self):
         test = lambda: Track(foo='baz')
         self.assertRaises(TypeError, test)
@@ -449,33 +410,6 @@ class PlaylistTest(unittest.TestCase):
         self.assertEqual(playlist.last_modified, last_modified)
         self.assertRaises(AttributeError, setattr, playlist, 'last_modified',
             None)
-
-    def test_mpd_format(self):
-        playlist = Playlist(tracks=[
-            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
-        result = playlist.mpd_format()
-        self.assertEqual(len(result), 3)
-
-    def test_mpd_format_with_range(self):
-        playlist = Playlist(tracks=[
-            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
-        result = playlist.mpd_format(1, 2)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(dict(result[0])['Track'], 2)
-
-    def test_mpd_format_with_negative_start_and_no_end(self):
-        playlist = Playlist(tracks=[
-            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
-        result = playlist.mpd_format(-1, None)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(dict(result[0])['Track'], 3)
-
-    def test_mpd_format_with_negative_start_and_end(self):
-        playlist = Playlist(tracks=[
-            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
-        result = playlist.mpd_format(-2, -1)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(dict(result[0])['Track'], 2)
 
     def test_with_new_uri(self):
         tracks = [Track()]
