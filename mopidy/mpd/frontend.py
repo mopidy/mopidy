@@ -673,8 +673,8 @@ class MpdFrontend(object):
         playlist = self.backend.library.find_exact([(u'artist', artist)])
         albums = set()
         for track in playlist.tracks:
-            albums.add(u'Album: %s' % track.album.name)
-        return u'\n'.join(albums)
+            albums.add((u'Album', track.album.name))
+        return albums
 
     @handle_pattern(r'^list (?P<field>[Aa]rtist)$')
     @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
