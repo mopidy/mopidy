@@ -657,25 +657,6 @@ class MpdFrontend(object):
         # TODO Add result to current playlist
         #return result
 
-    def _music_db_list_artist(self):
-        """
-        Since we don't know exactly all available artists, we respond with
-        the artists we know for sure, which is all artists in our stored playlists.
-        """
-        artists = set()
-        for playlist in self.backend.stored_playlists.playlists:
-            for track in playlist.tracks:
-                for artist in track.artists:
-                    artists.add((u'Artist', artist.name))
-        return artists
-
-    def _music_db_list_album_artist(self, artist):
-        playlist = self.backend.library.find_exact([(u'artist', artist)])
-        albums = set()
-        for track in playlist.tracks:
-            albums.add((u'Album', track.album.name))
-        return albums
-
     @handle_pattern(r'^list (?P<field>[Aa]rtist)$')
     @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
     @handle_pattern(r'^list (?P<field>album( artist)?)( "(?P<artist>[^"]+)")*$')
@@ -720,6 +701,25 @@ class MpdFrontend(object):
         elif field == u'album artist':
             return self._music_db_list_album_artist(artist)
         # TODO More to implement
+
+    def __music_db_list_artist(self):
+        """
+        Since we don't know exactly all available artists, we respond with
+        the artists we know for sure, which is all artists in our stored playlists.
+        """
+        artists = set()
+        for playlist in self.backend.stored_playlists.playlists:
+            for track in playlist.tracks:
+                for artist in track.artists:
+                    artists.add((u'Artist', artist.name))
+        return artists
+
+    def __music_db_list_album_artist(self, artist):
+        playlist = self.backend.library.find_exact([(u'artist', artist)])
+        albums = set()
+        for track in playlist.tracks:
+            albums.add((u'Album', track.album.name))
+        return albums
 
     @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
     def _music_db_listall(self, uri):
