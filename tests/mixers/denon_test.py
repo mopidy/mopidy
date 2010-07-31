@@ -1,7 +1,5 @@
-import unittest
-
 from mopidy.mixers.denon import DenonMixer
-from tests.mixers.dummy_test import BaseMixerTest
+from tests.mixers.base_test import BaseMixerTest
 
 class DenonMixerDeviceMock(object):
     def __init__(self):

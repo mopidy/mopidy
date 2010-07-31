@@ -5,7 +5,6 @@ import sys
 import shutil
 import tempfile
 import unittest
-import urllib
 
 from mopidy.utils import *
 from mopidy.models import Track, Artist, Album
