@@ -200,4 +200,6 @@ latex_documents = [
 #latex_use_modindex = True
 
 
+needs_sphinx = '1.0'
+
 extlinks = {'issue': ('http://github.com/jodal/mopidy/issues#issue/%s', 'GH-')}
