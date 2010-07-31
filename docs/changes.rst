@@ -31,6 +31,10 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
   - Having multiple identical tracks in a playlist is now working properly.
     (CPID refactoring)
 
+- Despotify backend:
+
+  - Catch and log :exc:`spytify.SpytifyError`. (Fixes: :issue:`11`)
+
 - Libspotify backend:
 
   - Fix choppy playback using the Libspotify backend by using blocking ALSA
