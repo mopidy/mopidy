@@ -27,7 +27,7 @@ import mopidy
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'autodoc_private_members',
     'sphinx.ext.graphviz', 'sphinx.ext.inheritance_diagram',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.extlinks', 'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -199,3 +199,5 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_use_modindex = True
 
+
+extlinks = {'issue': ('http://github.com/jodal/mopidy/issues#issue/%s', 'GH-')}
