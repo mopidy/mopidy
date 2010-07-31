@@ -96,6 +96,15 @@ class BaseCurrentPlaylistController(object):
         pass
 
     @property
+    def cp_tracks(self):
+        """
+        List of two-tuples of (CPID integer, :class:`mopidy.models.Track`).
+
+        Read-only.
+        """
+        return [copy(ct) for ct in self._cp_tracks]
+
+    @property
     def tracks(self):
         """
         List of :class:`mopidy.models.Track` in the current playlist.
@@ -103,23 +112,6 @@ class BaseCurrentPlaylistController(object):
         Read-only.
         """
         return [ct[1] for ct in self._cp_tracks]
-
-    def _get_cp_track(self, **criteria):
-        matches = self._cp_tracks
-        for (key, value) in criteria.iteritems():
-            if key == 'cpid':
-                matches = filter(lambda ct: ct[0] == value, matches)
-            else:
-                matches = filter(lambda ct: getattr(ct[1], key) == value,
-                    matches)
-        if len(matches) == 1:
-            return matches[0]
-        criteria_string = ', '.join(
-            ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
-        if len(matches) == 0:
-            raise LookupError(u'"%s" match no tracks' % criteria_string)
-        else:
-            raise LookupError(u'"%s" match multiple tracks' % criteria_string)
 
     def add(self, track, at_position=None):
         """
@@ -142,7 +134,7 @@ class BaseCurrentPlaylistController(object):
     def clear(self):
         """Clear the current playlist."""
         self.backend.playback.stop()
-        self.backend.playback.current_track = None
+        self.backend.playback.current_cp_track = None
         self._cp_tracks = []
         self.version += 1
 
@@ -162,9 +154,23 @@ class BaseCurrentPlaylistController(object):
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
-        :rtype: :class:`mopidy.models.Track`
+        :rtype: two-tuple (CPID integer, :class:`mopidy.models.Track`)
         """
-        return self._get_cp_track(**criteria)[1]
+        matches = self._cp_tracks
+        for (key, value) in criteria.iteritems():
+            if key == 'cpid':
+                matches = filter(lambda ct: ct[0] == value, matches)
+            else:
+                matches = filter(lambda ct: getattr(ct[1], key) == value,
+                    matches)
+        if len(matches) == 1:
+            return matches[0]
+        criteria_string = ', '.join(
+            ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
+        if len(matches) == 0:
+            raise LookupError(u'"%s" match no tracks' % criteria_string)
+        else:
+            raise LookupError(u'"%s" match multiple tracks' % criteria_string)
 
     def load(self, tracks):
         """
@@ -214,13 +220,13 @@ class BaseCurrentPlaylistController(object):
         """
         Remove the track from the current playlist.
 
-        Uses :meth:`get` to lookup the track to remove.
+        Uses :meth:`get()` to lookup the track to remove.
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
         :type track: :class:`mopidy.models.Track`
         """
-        cp_track = self._get_cp_track(**criteria)
+        cp_track = self.get(**criteria)
         position = self._cp_tracks.index(cp_track)
         del self._cp_tracks[position]
         self.version += 1
@@ -338,11 +344,11 @@ class BasePlaybackController(object):
     #:     Tracks are not removed from the playlist.
     consume = False
 
-    #: The CPID (current playlist ID) of :attr:`current_track`.
-    current_cpid = 0 # TODO Get the correct CPID
-
-    #: The currently playing or selected :class:`mopidy.models.Track`.
-    current_track = None
+    #: The currently playing or selected track
+    #:
+    #: A two-tuple of (CPID integer, :class:`mopidy.models.Track`) or
+    #: :class:`None`.
+    current_cp_track = None
 
     #: :class:`True`
     #:     Tracks are selected at random from the playlist.
@@ -376,68 +382,121 @@ class BasePlaybackController(object):
         pass
 
     @property
+    def current_cpid(self):
+        """
+        The CPID (current playlist ID) of :attr:`current_track`.
+
+        Read-only. Extracted from :attr:`current_cp_track` for convenience.
+        """
+        if self.current_cp_track is None:
+            return None
+        return self.current_cp_track[0]
+
+    @property
+    def current_track(self):
+        """
+        The currently playing or selected :class:`mopidy.models.Track`.
+
+        Read-only. Extracted from :attr:`current_cp_track` for convenience.
+        """
+        if self.current_cp_track is None:
+            return None
+        return self.current_cp_track[1]
+
+    @property
     def current_playlist_position(self):
         """The position of the current track in the current playlist."""
-        if self.current_track is None:
+        if self.current_cp_track is None:
             return None
         try:
-            return self.backend.current_playlist.tracks.index(
-                self.current_track)
+            return self.backend.current_playlist.cp_tracks.index(
+                self.current_cp_track)
         except ValueError:
             return None
 
     @property
     def next_track(self):
         """
-        The next :class:`mopidy.models.Track` in the playlist.
+        The next track in the playlist.
+
+        A :class:`mopidy.models.Track` extracted from :attr:`next_cp_track` for
+        convenience.
+        """
+        next_cp_track = self.next_cp_track
+        if next_cp_track is None:
+            return None
+        return next_cp_track[1]
+
+    @property
+    def next_cp_track(self):
+        """
+        The next track in the playlist.
+
+        A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
 
         For normal playback this is the next track in the playlist. If repeat
         is enabled the next track can loop around the playlist. When random is
         enabled this should be a random track, all tracks should be played once
         before the list repeats.
         """
-        tracks = self.backend.current_playlist.tracks
+        cp_tracks = self.backend.current_playlist.cp_tracks
 
-        if not tracks:
+        if not cp_tracks:
             return None
 
         if self.random and not self._shuffled:
             if self.repeat or self._first_shuffle:
                 logger.debug('Shuffling tracks')
-                self._shuffled = tracks
+                self._shuffled = cp_tracks
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
         if self._shuffled:
             return self._shuffled[0]
 
-        if self.current_track is None:
-            return tracks[0]
+        if self.current_cp_track is None:
+            return cp_tracks[0]
 
         if self.repeat:
-            return tracks[(self.current_playlist_position + 1) % len(tracks)]
+            return cp_tracks[
+                (self.current_playlist_position + 1) % len(cp_tracks)]
 
         try:
-            return tracks[self.current_playlist_position + 1]
+            return cp_tracks[self.current_playlist_position + 1]
         except IndexError:
             return None
 
     @property
     def previous_track(self):
         """
-        The previous :class:`mopidy.models.Track` in the playlist.
+        The previous track in the playlist.
+
+        A :class:`mopidy.models.Track` extracted from :attr:`previous_cp_track`
+        for convenience.
+        """
+        previous_cp_track = self.previous_cp_track
+        if previous_cp_track is None:
+            return None
+        return previous_cp_track[1]
+
+    @property
+    def previous_cp_track(self):
+        """
+        The previous track in the playlist.
+
+        A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
 
         For normal playback this is the previous track in the playlist. If
         random and/or consume is enabled it should return the current track
         instead.
         """
         if self.repeat or self.consume or self.random:
-            return self.current_track
+            return self.current_cp_track
 
-        if self.current_track is None or self.current_playlist_position == 0:
+        if self.current_cp_track is None or self.current_playlist_position == 0:
             return None
 
-        return self.backend.current_playlist.tracks[
+        return self.backend.current_playlist.cp_tracks[
             self.current_playlist_position - 1]
 
     @property
@@ -507,11 +566,11 @@ class BasePlaybackController(object):
         Typically called by :class:`mopidy.process.CoreProcess` after a message
         from a library thread is received.
         """
-        if self.next_track is not None:
+        if self.next_cp_track is not None:
             self.next()
         else:
             self.stop()
-            self.current_track = None
+            self.current_cp_track = None
 
     def new_playlist_loaded_callback(self):
         """
@@ -520,7 +579,7 @@ class BasePlaybackController(object):
         Typically called by :class:`mopidy.process.CoreProcess` after a message
         from a library thread is received.
         """
-        self.current_track = None
+        self.current_cp_track = None
         self._first_shuffle = True
         self._shuffled = []
 
@@ -534,23 +593,23 @@ class BasePlaybackController(object):
 
     def next(self):
         """Play the next track."""
-        original_track = self.current_track
+        original_cp_track = self.current_cp_track
 
         if self.state == self.STOPPED:
             return
-        elif self.next_track is not None and self._next(self.next_track):
-            self.current_track = self.next_track
+        elif self.next_cp_track is not None and self._next(self.next_track):
+            self.current_cp_track = self.next_cp_track
             self.state = self.PLAYING
-        elif self.next_track is None:
+        elif self.next_cp_track is None:
             self.stop()
-            self.current_track = None
+            self.current_cp_track = None
 
         # FIXME handle in play aswell?
         if self.consume:
-            self.backend.current_playlist.remove(id=original_track.id)
+            self.backend.current_playlist.remove(cpid=original_cp_track[0])
 
-        if self.random and self.current_track in self._shuffled:
-            self._shuffled.remove(self.current_track)
+        if self.random and self.current_cp_track in self._shuffled:
+            self._shuffled.remove(self.current_cp_track)
 
     def _next(self, track):
         return self._play(track)
@@ -563,41 +622,42 @@ class BasePlaybackController(object):
     def _pause(self):
         raise NotImplementedError
 
-    def play(self, track=None):
+    def play(self, cp_track=None):
         """
         Play the given track or the currently active track.
 
-        :param track: track to play
-        :type track: :class:`mopidy.models.Track` or :class:`None`
+        :param cp_track: track to play
+        :type cp_track: two-tuple (CPID integer, :class:`mopidy.models.Track`)
+            or :class:`None`
         """
 
-        if track:
-            assert track in self.backend.current_playlist.tracks
-        elif not self.current_track:
-            track = self.next_track
+        if cp_track is not None:
+            assert cp_track in self.backend.current_playlist.cp_tracks
+        elif not self.current_cp_track:
+            cp_track = self.next_cp_track
 
-        if self.state == self.PAUSED and track is None:
+        if self.state == self.PAUSED and cp_track is None:
             self.resume()
-        elif track is not None and self._play(track):
-            self.current_track = track
+        elif cp_track is not None and self._play(cp_track[1]):
+            self.current_cp_track = cp_track
             self.state = self.PLAYING
 
         # TODO Do something sensible when _play() returns False, like calling
         # next(). Adding this todo instead of just implementing it as I want a
         # test case first.
 
-        if self.random and self.current_track in self._shuffled:
-            self._shuffled.remove(self.current_track)
+        if self.random and self.current_cp_track in self._shuffled:
+            self._shuffled.remove(self.current_cp_track)
 
     def _play(self, track):
         raise NotImplementedError
 
     def previous(self):
         """Play the previous track."""
-        if (self.previous_track is not None
+        if (self.previous_cp_track is not None
                 and self.state != self.STOPPED
                 and self._previous(self.previous_track)):
-            self.current_track = self.previous_track
+            self.current_cp_track = self.previous_cp_track
             self.state = self.PLAYING
 
     def _previous(self, track):

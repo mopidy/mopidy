@@ -38,16 +38,35 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
 
 - Backend API:
 
+  - A new data structure called ``cp_track`` is now used in the current
+    playlist controller and the playback controller. A ``cp_track`` is a
+    two-tuple of (CPID integer, :class:`mopidy.models.Track`), identifying an
+    instance of a track uniquely within the current playlist.
   - :meth:`mopidy.backends.BaseCurrentPlaylistController.load()` now accepts
     lists of :class:`mopidy.models.Track` instead of
     :class:`mopidy.models.Playlist`, as none of the other fields on the
     ``Playlist`` model was in use.
   - :meth:`mopidy.backends.BaseCurrentPlaylistController.remove()` now takes
     criterias, just like
-    :meth:`mopidy.backends.BaseCurrentPlaylistController.get()`, and not the
-    track to remove.
+    :meth:`mopidy.backends.BaseCurrentPlaylistController.get()`.
+  - :meth:`mopidy.backends.BaseCurrentPlaylistController.get()` now returns a
+    ``cp_track``.
   - :attr:`mopidy.backends.BaseCurrentPlaylistController.tracks` is now
     read-only. Use the methods to change its contents.
+  - :attr:`mopidy.backends.BaseCurrentPlaylistController.cp_tracks` is a
+    read-only list of ``cp_track``. Use the methods to change its contents.
+  - :attr:`mopidy.backends.BasePlaybackController.current_track` is now
+    just for convenience and read-only. To set the current track, assign a
+    ``cp_track`` to
+    :attr:`mopidy.backends.BasePlaybackController.current_cp_track`.
+  - :attr:`mopidy.backends.BasePlaybackController.current_cpid` is the
+    read-only CPID of the current track.
+  - :attr:`mopidy.backends.BasePlaybackController.next_cp_track` is the
+    next ``cp_track`` in the playlist.
+  - :attr:`mopidy.backends.BasePlaybackController.previous_cp_track` is
+    the previous ``cp_track`` in the playlist.
+  - :meth:`mopidy.backends.BasePlaybackController.play()` now takes a
+    ``cp_track``.
 
 
 0.1.0a2 (2010-06-02)
