@@ -98,11 +98,11 @@ class BaseCurrentPlaylistController(object):
     @property
     def tracks(self):
         """
-        List of :class:`mopidy.model.Track` in the current playlist.
+        List of :class:`mopidy.models.Track` in the current playlist.
 
         Read-only.
         """
-        return [t[1] for t in self._cp_tracks]
+        return [ct[1] for ct in self._cp_tracks]
 
     def _get_cp_track(self, **criteria):
         matches = self._cp_tracks
