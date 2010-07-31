@@ -16,7 +16,7 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
   - Support IPv6.
   - ``addid`` responds properly on errors instead of crashing.
   - ``commands`` support, which makes RelaXXPlayer work with Mopidy. (Fixes:
-    GH-6)
+    :issue:`6`)
   - Does no longer crash on invalid data, i.e. non-UTF-8 data.
   - ``ACK`` error messages are now MPD-compliant, which should make clients
     handle errors from Mopidy better.
@@ -34,7 +34,7 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
 - Libspotify backend:
 
   - Fix choppy playback using the Libspotify backend by using blocking ALSA
-    mode. (Fixes: GH-7)
+    mode. (Fixes: :issue:`7`)
 
 - Backend API:
 
@@ -86,19 +86,19 @@ As always, report problems at our IRC channel or our issue tracker. Thanks!
 
 - Backend API changes:
 
-    - Removed ``backend.playback.volume`` wrapper. Use ``backend.mixer.volume``
-      directly.
-    - Renamed ``backend.playback.playlist_position`` to
-      ``current_playlist_position`` to match naming of ``current_track``.
-    - Replaced ``get_by_id()`` with a more flexible ``get(**criteria)``.
+  - Removed ``backend.playback.volume`` wrapper. Use ``backend.mixer.volume``
+    directly.
+  - Renamed ``backend.playback.playlist_position`` to
+    ``current_playlist_position`` to match naming of ``current_track``.
+  - Replaced ``get_by_id()`` with a more flexible ``get(**criteria)``.
 
 - Merged the ``gstreamer`` branch from Thomas Adamcik:
 
-    - More than 200 new tests, and thus several bugfixes to existing code.
-    - Several new generic features, like shuffle, consume, and playlist repeat.
-      (Fixes: GH-3)
-    - **[Work in Progress]** A new backend for playing music from a local music
-      archive using the Gstreamer library.
+  - More than 200 new tests, and thus several bugfixes to existing code.
+  - Several new generic features, like shuffle, consume, and playlist repeat.
+    (Fixes: :issue:`3`)
+  - **[Work in Progress]** A new backend for playing music from a local music
+    archive using the Gstreamer library.
 
 - Made :class:`mopidy.mixers.alsa.AlsaMixer` work on machines without a mixer
   named "Master".
