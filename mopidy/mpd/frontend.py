@@ -518,10 +518,10 @@ class MpdFrontend(object):
         # XXX Naive implementation that returns all tracks as changed
         if int(version) != self.backend.current_playlist.version:
             result = []
-            for position, track in enumerate(
-                    self.backend.current_playlist.tracks):
+            for (position, (cpid, track)) in enumerate(
+                    self.backend.current_playlist.cp_tracks):
                 result.append((u'cpos', position))
-                result.append((u'Id', track.id))
+                result.append((u'Id', cpid))
             return result
 
     @handle_pattern(r'^shuffle$')
