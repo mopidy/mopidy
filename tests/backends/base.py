@@ -43,23 +43,22 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def test_add(self):
         for track in self.tracks:
-            self.controller.add(track)
+            cp_track = self.controller.add(track)
             self.assertEqual(track, self.controller.tracks[-1])
+            self.assertEqual(cp_track, self.controller.cp_tracks[-1])
+            self.assertEqual(track, cp_track[1])
 
     def test_add_at_position(self):
         for track in self.tracks[:-1]:
-            self.controller.add(track, 0)
+            cp_track = self.controller.add(track, 0)
             self.assertEqual(track, self.controller.tracks[0])
+            self.assertEqual(cp_track, self.controller.cp_tracks[0])
+            self.assertEqual(track, cp_track[1])
 
     @populate_playlist
     def test_add_at_position_outside_of_playlist(self):
         test = lambda: self.controller.add(self.tracks[0], len(self.tracks)+2)
         self.assertRaises(AssertionError, test)
-
-    @populate_playlist
-    def test_add_sets_id_property(self):
-        for track in self.controller.tracks:
-            self.assertNotEqual(None, track.id)
 
     @populate_playlist
     def test_get_by_cpid(self):

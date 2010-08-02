@@ -295,8 +295,8 @@ class MpdFrontend(object):
             raise MpdNoExistError(u'No such song', command=u'addid')
         if songpos and songpos > len(self.backend.current_playlist.tracks):
             raise MpdArgError(u'Bad song index', command=u'addid')
-        self.backend.current_playlist.add(track, at_position=songpos)
-        return ('Id', track.id)
+        cp_track = self.backend.current_playlist.add(track, at_position=songpos)
+        return ('Id', cp_track[0])
 
     @handle_pattern(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
     def _current_playlist_delete_range(self, start, end=None):

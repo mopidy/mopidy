@@ -122,14 +122,18 @@ class BaseCurrentPlaylistController(object):
         :type track: :class:`mopidy.models.Track`
         :param at_position: position in current playlist to add track
         :type at_position: int or :class:`None`
+        :rtype: two-tuple of (CPID integer, :class:`mopidy.models.Track`) that
+            was added to the current playlist playlist
         """
         assert at_position <= len(self._cp_tracks), \
             u'at_position can not be greater than playlist length'
+        cp_track = (self.version, track)
         if at_position is not None:
-            self._cp_tracks.insert(at_position, (self.version, track))
+            self._cp_tracks.insert(at_position, cp_track)
         else:
-            self._cp_tracks.append((self.version, track))
+            self._cp_tracks.append(cp_track)
         self.version += 1
+        return cp_track
 
     def clear(self):
         """Clear the current playlist."""
