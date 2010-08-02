@@ -29,7 +29,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
             u'ACK [50@0] {add} directory or file not found')
 
     def test_addid_without_songpos(self):
-        needle = Track(uri='dummy://foo', id=137)
+        needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
         self.b.current_playlist.load(
             [Track(), Track(), Track(), Track(), Track()])
@@ -37,11 +37,12 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'addid "dummy://foo"')
         self.assertEqual(len(self.b.current_playlist.tracks), 6)
         self.assertEqual(self.b.current_playlist.tracks[5], needle)
-        self.assert_(u'Id: 137' in result)
+        self.assert_(u'Id: %d' % self.b.current_playlist.cp_tracks[5][0]
+            in result)
         self.assert_(u'OK' in result)
 
     def test_addid_with_songpos(self):
-        needle = Track(uri='dummy://foo', id=137)
+        needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
         self.b.current_playlist.load(
             [Track(), Track(), Track(), Track(), Track()])
@@ -49,7 +50,8 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'addid "dummy://foo" "3"')
         self.assertEqual(len(self.b.current_playlist.tracks), 6)
         self.assertEqual(self.b.current_playlist.tracks[3], needle)
-        self.assert_(u'Id: 137' in result)
+        self.assert_(u'Id: %d' % self.b.current_playlist.cp_tracks[3][0]
+            in result)
         self.assert_(u'OK' in result)
 
     def test_addid_with_songpos_out_of_bounds_should_ack(self):
