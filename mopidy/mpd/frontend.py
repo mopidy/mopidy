@@ -290,19 +290,19 @@ class MpdFrontend(object):
             end = int(end)
         else:
             end = len(self.backend.current_playlist.tracks)
-        tracks = self.backend.current_playlist.tracks[start:end]
-        if not tracks:
+        cp_tracks = self.backend.current_playlist.cp_tracks[start:end]
+        if not cp_tracks:
             raise MpdArgError(u'Bad song index', command=u'delete')
-        for track in tracks:
-            self.backend.current_playlist.remove(id=track.id)
+        for (cpid, track) in cp_tracks:
+            self.backend.current_playlist.remove(cpid=cpid)
 
     @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
     def _current_playlist_delete_songpos(self, songpos):
         """See :meth:`_current_playlist_delete_range`"""
         try:
             songpos = int(songpos)
-            track = self.backend.current_playlist.tracks[songpos]
-            self.backend.current_playlist.remove(id=track.id)
+            (cpid, track) = self.backend.current_playlist.cp_tracks[songpos]
+            self.backend.current_playlist.remove(cpid=cpid)
         except IndexError:
             raise MpdArgError(u'Bad song index', command=u'delete')
 
