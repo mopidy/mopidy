@@ -50,6 +50,8 @@ We got an updated :doc:`release roadmap <development/roadmap>`!
     lists of :class:`mopidy.models.Track` instead of
     :class:`mopidy.models.Playlist`, as none of the other fields on the
     ``Playlist`` model was in use.
+  - :meth:`mopidy.backends.BaseCurrentPlaylistController.add()` now returns the
+    ``cp_track`` added to the current playlist.
   - :meth:`mopidy.backends.BaseCurrentPlaylistController.remove()` now takes
     criterias, just like
     :meth:`mopidy.backends.BaseCurrentPlaylistController.get()`.
