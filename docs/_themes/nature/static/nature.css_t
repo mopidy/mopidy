@@ -30,7 +30,7 @@ hr{
 }
  
 div.document {
-    background-color: #fafafa;
+    background-color: #eeeeee;
 }
  
 div.body {

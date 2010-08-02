@@ -391,8 +391,8 @@ class MpdFrontend(object):
         """
         cpid = int(cpid)
         to = int(to)
-        track = self.backend.current_playlist.get(cpid=cpid)
-        position = self.backend.current_playlist.tracks.index(track)
+        cp_track = self.backend.current_playlist.get(cpid=cpid)
+        position = self.backend.current_playlist.cp_tracks.index(cp_track)
         self.backend.current_playlist.move(position, position + 1, to)
 
     @handle_pattern(r'^playlist$')
@@ -426,8 +426,8 @@ class MpdFrontend(object):
         """
         if tag == 'filename':
             try:
-                track = self.backend.current_playlist.get(uri=needle)
-                return track.mpd_format()
+                cp_track = self.backend.current_playlist.get(uri=needle)
+                return cp_track[1].mpd_format()
             except LookupError:
                 return None
         raise MpdNotImplemented # TODO
@@ -445,9 +445,10 @@ class MpdFrontend(object):
         if cpid is not None:
             try:
                 cpid = int(cpid)
-                track = self.backend.current_playlist.get(cpid=cpid)
-                position = self.backend.current_playlist.tracks.index(track)
-                return track.mpd_format(position=position, cpid=cpid)
+                cp_track = self.backend.current_playlist.get(cpid=cpid)
+                position = self.backend.current_playlist.cp_tracks.index(
+                    cp_track)
+                return cp_track[1].mpd_format(position=position, cpid=cpid)
             except LookupError:
                 raise MpdNoExistError(u'No such song', command=u'playlistid')
         else:
@@ -593,10 +594,10 @@ class MpdFrontend(object):
         """
         cpid1 = int(cpid1)
         cpid2 = int(cpid2)
-        track1 = self.backend.current_playlist.get(cpid=cpid1)
-        track2 = self.backend.current_playlist.get(cpid=cpid2)
-        position1 = self.backend.current_playlist.tracks.index(track1)
-        position2 = self.backend.current_playlist.tracks.index(track2)
+        cp_track1 = self.backend.current_playlist.get(cpid=cpid1)
+        cp_track2 = self.backend.current_playlist.get(cpid=cpid2)
+        position1 = self.backend.current_playlist.cp_tracks.index(cp_track1)
+        position2 = self.backend.current_playlist.cp_tracks.index(cp_track2)
         self._current_playlist_swap(position1, position2)
 
     @handle_pattern(r'^$')
@@ -949,10 +950,10 @@ class MpdFrontend(object):
         cpid = int(cpid)
         try:
             if cpid == -1:
-                track = self.backend.current_playlist.tracks[0]
+                cp_track = self.backend.current_playlist.cp_tracks[0]
             else:
-                track = self.backend.current_playlist.get(cpid=cpid)
-            return self.backend.playback.play(track)
+                cp_track = self.backend.current_playlist.get(cpid=cpid)
+            return self.backend.playback.play(cp_track)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playid')
 
@@ -968,15 +969,16 @@ class MpdFrontend(object):
 
         *MPoD:*
 
-        - issues ``play "-1"`` after playlist replacement.
+        - issues ``play "-1"`` after playlist replacement to start playback at
+          the first track.
         """
         songpos = int(songpos)
         try:
             if songpos == -1:
-                track = self.backend.current_playlist.tracks[0]
+                cp_track = self.backend.current_playlist.cp_tracks[0]
             else:
-                track = self.backend.current_playlist.tracks[songpos]
-            return self.backend.playback.play(track)
+                cp_track = self.backend.current_playlist.cp_tracks[songpos]
+            return self.backend.playback.play(cp_track)
         except IndexError:
             raise MpdArgError(u'Bad song index', command=u'play')
 
@@ -1400,9 +1402,8 @@ class MpdFrontend(object):
         return int(self.backend.playback.single)
 
     def __status_status_songid(self):
-        # TODO Replace track.id with CPID
-        if self.backend.playback.current_track.id is not None:
-            return self.backend.playback.current_track.id
+        if self.backend.playback.current_cpid is not None:
+            return self.backend.playback.current_cpid
         else:
             return self.__status_status_songpos()
 

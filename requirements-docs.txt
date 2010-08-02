@@ -1,2 +1,2 @@
-Sphinx
+Sphinx >= 1.0
 pygraphviz

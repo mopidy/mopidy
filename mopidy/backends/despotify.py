@@ -79,20 +79,36 @@ class DespotifyLibraryController(BaseLibraryController):
 
 class DespotifyPlaybackController(BasePlaybackController):
     def _pause(self):
-        self.backend.spotify.pause()
-        return True
+        try:
+            self.backend.spotify.pause()
+            return True
+        except spytify.SpytifyError as e:
+            logger.error(e)
+            return False
 
     def _play(self, track):
-        self.backend.spotify.play(self.backend.spotify.lookup(track.uri))
-        return True
+        try:
+            self.backend.spotify.play(self.backend.spotify.lookup(track.uri))
+            return True
+        except spytify.SpytifyError as e:
+            logger.error(e)
+            return False
 
     def _resume(self):
-        self.backend.spotify.resume()
-        return True
+        try:
+            self.backend.spotify.resume()
+            return True
+        except spytify.SpytifyError as e:
+            logger.error(e)
+            return False
 
     def _stop(self):
-        self.backend.spotify.stop()
-        return True
+        try:
+            self.backend.spotify.stop()
+            return True
+        except spytify.SpytifyError as e:
+            logger.error(e)
+            return False
 
 
 class DespotifyStoredPlaylistsController(BaseStoredPlaylistsController):
@@ -149,7 +165,8 @@ class DespotifyTranslator(object):
         return Playlist(
             uri=spotify_playlist.get_uri(),
             name=spotify_playlist.name.decode(ENCODING),
-            tracks=filter(None, [cls.to_mopidy_track(t) for t in spotify_playlist.tracks]),
+            tracks=filter(None,
+                [cls.to_mopidy_track(t) for t in spotify_playlist.tracks]),
         )
 
 
