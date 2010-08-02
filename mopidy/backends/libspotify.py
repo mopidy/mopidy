@@ -69,7 +69,7 @@ class LibspotifyLibraryController(BaseLibraryController):
         return LibspotifyTranslator.to_mopidy_track(spotify_track)
 
     def search(self, field, what):
-        if field is u'any':
+        if field == u'any':
             query = what
         else:
             query = u'%s:%s' % (field, what)
