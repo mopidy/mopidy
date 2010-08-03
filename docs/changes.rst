@@ -4,10 +4,18 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-0.1.0a3 (unreleased)
+
+0.1.0a3 (2010-08-03)
 ====================
 
-We got an updated :doc:`release roadmap <development/roadmap>`!
+In the last two months, Mopidy's MPD frontend has gotten lots of stability
+fixes and error handling improvements, proper support for having the same track
+multiple times in a playlist, and support for IPv6. We have also fixed the
+choppy playback on the libspotify backend. For the road ahead of us, we got an
+updated :doc:`release roadmap <development/roadmap>` with our goals for the 0.1
+to 0.3 releases.
+
+Enjoy the best alpha relase of Mopidy ever :-)
 
 **Changes**
 
