@@ -12,7 +12,7 @@ Another great release.
 
 **Changes**
 
-- None yet.
+- Exit early if not Python >= 2.6, < 3.
 
 
 0.1.0a3 (2010-08-03)

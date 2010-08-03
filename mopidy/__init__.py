@@ -1,3 +1,7 @@
+import sys
+if not (2, 6) <= sys.version_info < (3,):
+    sys.exit(u'Mopidy requires Python >= 2.6, < 3')
+
 from mopidy import settings as raw_settings
 
 def get_version():
