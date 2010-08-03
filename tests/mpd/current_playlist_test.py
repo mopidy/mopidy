@@ -304,7 +304,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_playlistsearch(self):
-        result = self.h.handle_request(u'playlistsearch "tag" "needle"')
+        result = self.h.handle_request(u'playlistsearch "any" "needle"')
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+
+    def test_playlistsearch_without_quotes(self):
+        result = self.h.handle_request(u'playlistsearch any "needle"')
         self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_plchanges(self):

@@ -474,6 +474,7 @@ class MpdFrontend(object):
             return self.backend.current_playlist.mpd_format(start, end)
 
     @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
+    @handle_pattern(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
     def _current_playlist_playlistsearch(self, tag, needle):
         """
         *musicpd.org, current playlist section:*
@@ -482,6 +483,11 @@ class MpdFrontend(object):
 
             Searches case-sensitively for partial matches in the current
             playlist.
+
+        *GMPC:*
+
+        - does not add quotes around the tag
+        - uses ``filename`` and ``any`` as tags
         """
         raise MpdNotImplemented # TODO
 
