@@ -13,6 +13,8 @@ Another great release.
 **Changes**
 
 - Exit early if not Python >= 2.6, < 3.
+- Include Sphinx scripts for building docs, pylintrc, tests and test data in
+  the packages created by ``setup.py`` for i.e. PyPI.
 
 
 0.1.0a3 (2010-08-03)
