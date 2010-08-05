@@ -312,19 +312,19 @@ class MpdFrontend(object):
             end = int(end)
         else:
             end = len(self.backend.current_playlist.tracks)
-        tracks = self.backend.current_playlist.tracks[start:end]
-        if not tracks:
+        cp_tracks = self.backend.current_playlist.cp_tracks[start:end]
+        if not cp_tracks:
             raise MpdArgError(u'Bad song index', command=u'delete')
-        for track in tracks:
-            self.backend.current_playlist.remove(id=track.id)
+        for (cpid, track) in cp_tracks:
+            self.backend.current_playlist.remove(cpid=cpid)
 
     @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
     def _current_playlist_delete_songpos(self, songpos):
         """See :meth:`_current_playlist_delete_range`"""
         try:
             songpos = int(songpos)
-            track = self.backend.current_playlist.tracks[songpos]
-            self.backend.current_playlist.remove(id=track.id)
+            (cpid, track) = self.backend.current_playlist.cp_tracks[songpos]
+            self.backend.current_playlist.remove(cpid=cpid)
         except IndexError:
             raise MpdArgError(u'Bad song index', command=u'delete')
 
@@ -496,6 +496,7 @@ class MpdFrontend(object):
             return self.backend.current_playlist.mpd_format(start, end)
 
     @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
+    @handle_pattern(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
     def _current_playlist_playlistsearch(self, tag, needle):
         """
         *musicpd.org, current playlist section:*
@@ -504,6 +505,11 @@ class MpdFrontend(object):
 
             Searches case-sensitively for partial matches in the current
             playlist.
+
+        *GMPC:*
+
+        - does not add quotes around the tag
+        - uses ``filename`` and ``any`` as tags
         """
         raise MpdNotImplemented # TODO
 
@@ -540,10 +546,10 @@ class MpdFrontend(object):
         # XXX Naive implementation that returns all tracks as changed
         if int(version) != self.backend.current_playlist.version:
             result = []
-            for position, track in enumerate(
-                    self.backend.current_playlist.tracks):
+            for (position, (cpid, track)) in enumerate(
+                    self.backend.current_playlist.cp_tracks):
                 result.append((u'cpos', position))
-                result.append((u'Id', track.id))
+                result.append((u'Id', cpid))
             return result
 
     @handle_pattern(r'^shuffle$')

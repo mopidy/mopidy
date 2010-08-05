@@ -1,7 +1,11 @@
+import sys
+if not (2, 6) <= sys.version_info < (3,):
+    sys.exit(u'Mopidy requires Python >= 2.6, < 3')
+
 from mopidy import settings as raw_settings
 
 def get_version():
-    return u'0.1.0a3'
+    return u'0.1.0a4'
 
 def get_mpd_protocol_version():
     return u'0.16.0'

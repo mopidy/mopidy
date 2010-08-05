@@ -304,7 +304,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_playlistsearch(self):
-        result = self.h.handle_request(u'playlistsearch "tag" "needle"')
+        result = self.h.handle_request(u'playlistsearch "any" "needle"')
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+
+    def test_playlistsearch_without_quotes(self):
+        result = self.h.handle_request(u'playlistsearch any "needle"')
         self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_plchanges(self):
@@ -317,15 +321,17 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_plchangesposid(self):
-        self.b.current_playlist.load(
-            [Track(id=11), Track(id=12), Track(id=13)])
+        self.b.current_playlist.load([Track(), Track(), Track()])
         result = self.h.handle_request(u'plchangesposid "0"')
         self.assert_(u'cpos: 0' in result)
-        self.assert_(u'Id: 11' in result)
+        self.assert_(u'Id: %d' % self.b.current_playlist.cp_tracks[0][0]
+            in result)
         self.assert_(u'cpos: 2' in result)
-        self.assert_(u'Id: 12' in result)
+        self.assert_(u'Id: %d' % self.b.current_playlist.cp_tracks[1][0]
+            in result)
         self.assert_(u'cpos: 2' in result)
-        self.assert_(u'Id: 13' in result)
+        self.assert_(u'Id: %d' % self.b.current_playlist.cp_tracks[2][0]
+            in result)
         self.assert_(u'OK' in result)
 
     def test_shuffle_without_range(self):
