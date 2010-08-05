@@ -704,9 +704,9 @@ class MpdFrontend(object):
         """
         field = field.lower()
         if field == u'artist':
-            return self._music_db_list_artist()
+            return self.__music_db_list_artist()
         elif field == u'album artist':
-            return self._music_db_list_album_artist(artist)
+            return self.__music_db_list_album_artist(artist)
         # TODO More to implement
 
     def __music_db_list_artist(self):
