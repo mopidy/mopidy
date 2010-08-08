@@ -13,7 +13,6 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
-from mopidy.utils import spotify_uri_to_int
 
 import alsaaudio
 
@@ -120,10 +119,6 @@ class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
 
 class LibspotifyTranslator(object):
     @classmethod
-    def to_mopidy_id(cls, spotify_uri):
-        return spotify_uri_to_int(spotify_uri)
-
-    @classmethod
     def to_mopidy_artist(cls, spotify_artist):
         if not spotify_artist.is_loaded():
             return Artist(name=u'[loading...]')
@@ -157,7 +152,6 @@ class LibspotifyTranslator(object):
             date=date,
             length=spotify_track.duration(),
             bitrate=320,
-            id=cls.to_mopidy_id(uri),
         )
 
     @classmethod
