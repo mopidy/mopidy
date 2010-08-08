@@ -75,11 +75,13 @@ class LibspotifyLibraryController(BaseLibraryController):
         else:
             query = u'%s:%s' % (field, what)
         my_end, other_end = multiprocessing.Pipe()
+        logger.debug(u'In Library.search(), sending search query')
         self.backend.spotify.search(query.encode(ENCODING), other_end)
+        logger.debug(u'In Library.search(), waiting for search results')
         my_end.poll(None)
-        logger.debug(u'In search method, receiving search results')
+        logger.debug(u'In Library.search(), receiving search results')
         playlist = my_end.recv()
-        logger.debug(u'In search method, done receiving search results')
+        logger.debug(u'In Library.search(), done receiving search results')
         logger.debug(['%s' % t.name for t in playlist.tracks])
         return playlist
 
@@ -259,15 +261,25 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
-        self.connected.wait()
         def callback(results, userdata):
-            logger.debug(u'In search callback, translating search results')
+            logger.debug(u'In SessionManager.search().callback(), '
+                'translating search results')
             logger.debug(results.tracks())
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
                 LibspotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
-            logger.debug(u'In search callback, sending search results')
+            logger.debug(u'In SessionManager.search().callback(), '
+                'sending search results')
             logger.debug(['%s' % t.name for t in playlist.tracks])
             connection.send(playlist)
+            logger.debug(u'In SessionManager.search().callback(), '
+                'done sending search results')
+        logger.debug(u'In SessionManager.search(), '
+            'waiting for Spotify connection')
+        self.connected.wait()
+        logger.debug(u'In SessionManager.search(), '
+            'sending search query')
         self.session.search(query, callback)
+        logger.debug(u'In SessionManager.search(), '
+            'done sending search query')
