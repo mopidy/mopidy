@@ -38,8 +38,7 @@ class LibspotifyBackend(BaseBackend):
 
     def __init__(self, *args, **kwargs):
         super(LibspotifyBackend, self).__init__(*args, **kwargs)
-        self.current_playlist = LibspotifyCurrentPlaylistController(
-            backend=self)
+        self.current_playlist = BaseCurrentPlaylistController(backend=self)
         self.library = LibspotifyLibraryController(backend=self)
         self.playback = LibspotifyPlaybackController(backend=self)
         self.stored_playlists = LibspotifyStoredPlaylistsController(
@@ -59,14 +58,16 @@ class LibspotifyBackend(BaseBackend):
         return spotify
 
 
-class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
-    pass
-
-
 class LibspotifyLibraryController(BaseLibraryController):
+    def find_exact(self, field, what):
+        return self.search(field, what)
+
     def lookup(self, uri):
         spotify_track = Link.from_string(uri).as_track()
         return LibspotifyTranslator.to_mopidy_track(spotify_track)
+
+    def refresh(self, uri=None):
+        pass # TODO
 
     def search(self, field, what):
         if field == u'any':
@@ -81,8 +82,6 @@ class LibspotifyLibraryController(BaseLibraryController):
         logger.debug(u'In search method, done receiving search results')
         logger.debug(['%s' % t.name for t in playlist.tracks])
         return playlist
-
-    find_exact = search
 
 
 class LibspotifyPlaybackController(BasePlaybackController):
@@ -108,13 +107,35 @@ class LibspotifyPlaybackController(BasePlaybackController):
         # TODO
         return False
 
+    def _seek(self, time_position):
+        pass # TODO
+
     def _stop(self):
         self.backend.spotify.session.play(0)
         return True
 
 
 class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
-    pass
+    def create(self, name):
+        pass # TODO
+
+    def delete(self, playlist):
+        pass # TODO
+
+    def lookup(self, uri):
+        pass # TODO
+
+    def refresh(self):
+        pass # TODO
+
+    def rename(self, playlist, new_name):
+        pass # TODO
+
+    def save(self, playlist):
+        pass # TODO
+
+    def search(self, query):
+        pass # TODO
 
 
 class LibspotifyTranslator(object):
