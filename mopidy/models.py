@@ -103,8 +103,6 @@ class Track(ImmutableObject):
     :type length: integer
     :param bitrate: bitrate in kbit/s
     :type bitrate: integer
-    :param id: track ID (unique and non-changing as long as the process lives)
-    :type id: integer
     """
 
     #: The track URI. Read-only.
@@ -127,9 +125,6 @@ class Track(ImmutableObject):
 
     #: The track's bitrate in kbit/s. Read-only.
     bitrate = None
-
-    #: The track ID. Read-only.
-    id = None
 
     def __init__(self, *args, **kwargs):
         self._artists = frozenset(kwargs.pop('artists', []))

@@ -222,12 +222,6 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track.bitrate, bitrate)
         self.assertRaises(AttributeError, setattr, track, 'bitrate', None)
 
-    def test_id(self):
-        track_id = 17
-        track = Track(id=track_id)
-        self.assertEqual(track.id, track_id)
-        self.assertRaises(AttributeError, setattr, track, 'id', None)
-
     def test_invalid_kwarg(self):
         test = lambda: Track(foo='baz')
         self.assertRaises(TypeError, test)
@@ -291,20 +285,14 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
-    def test_eq_id(self):
-        track1 = Track(id=100)
-        track2 = Track(id=100)
-        self.assertEqual(track1, track2)
-        self.assertEqual(hash(track1), hash(track2))
-
     def test_eq(self):
         date = dt.date.today()
         artists = [Artist()]
         album = Album()
         track1 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
-            track_no=1, date=date, length=100, bitrate=100, id=2)
+            track_no=1, date=date, length=100, bitrate=100)
         track2 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
-            track_no=1, date=date, length=100, bitrate=100, id=2)
+            track_no=1, date=date, length=100, bitrate=100)
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
@@ -362,20 +350,14 @@ class TrackTest(unittest.TestCase):
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 
-    def test_ne_id(self):
-        track1 = Track(id=100)
-        track2 = Track(id=200)
-        self.assertNotEqual(track1, track2)
-        self.assertNotEqual(hash(track1), hash(track2))
-
     def test_ne(self):
         track1 = Track(uri=u'uri1', name=u'name1',
             artists=[Artist(name=u'name1')], album=Album(name=u'name1'),
-            track_no=1, date=dt.date.today(), length=100, bitrate=100, id=2)
+            track_no=1, date=dt.date.today(), length=100, bitrate=100)
         track2 = Track(uri=u'uri2', name=u'name2',
             artists=[Artist(name=u'name2')], album=Album(name=u'name2'),
             track_no=2, date=dt.date.today()-dt.timedelta(days=1),
-            length=200, bitrate=200, id=1)
+            length=200, bitrate=200)
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 
