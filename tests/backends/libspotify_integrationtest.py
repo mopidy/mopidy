@@ -15,13 +15,13 @@ uris = [
 
 class LibspotifyCurrentPlaylistControllerTest(
         BaseCurrentPlaylistControllerTest, unittest.TestCase):
-    tracks = [Track(uri=uri, id=i, length=4464) for i, uri in enumerate(uris)]
+    tracks = [Track(uri=uri, length=4464) for i, uri in enumerate(uris)]
     backend_class = LibspotifyBackend
 
 
 class LibspotifyPlaybackControllerTest(
         BasePlaybackControllerTest, unittest.TestCase):
-    tracks = [Track(uri=uri, id=i, length=4464) for i, uri in enumerate(uris)]
+    tracks = [Track(uri=uri, length=4464) for i, uri in enumerate(uris)]
     backend_class = LibspotifyBackend
 
 
