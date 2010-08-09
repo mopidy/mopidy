@@ -1,9 +1,9 @@
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
+from mopidy.frontends.mpd import frontend
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
-from mopidy.mpd import frontend
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):

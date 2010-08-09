@@ -1,8 +1,8 @@
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
+from mopidy.frontends.mpd import frontend, MpdAckError
 from mopidy.mixers.dummy import DummyMixer
-from mopidy.mpd import frontend, MpdAckError
 
 class RequestHandlerTest(unittest.TestCase):
     def setUp(self):

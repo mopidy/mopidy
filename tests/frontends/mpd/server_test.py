@@ -1,6 +1,6 @@
 import unittest
 
-from mopidy.mpd import server
+from mopidy.frontends.mpd import server
 
 class MpdServerTest(unittest.TestCase):
     def setUp(self):

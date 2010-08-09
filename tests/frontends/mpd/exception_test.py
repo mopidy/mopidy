@@ -1,6 +1,7 @@
 import unittest
 
-from mopidy.mpd import MpdAckError, MpdUnknownCommand, MpdNotImplemented
+from mopidy.frontends.mpd import (MpdAckError, MpdUnknownCommand,
+    MpdNotImplemented)
 
 class MpdExceptionsTest(unittest.TestCase):
     def test_key_error_wrapped_in_mpd_ack_error(self):

@@ -1,11 +1,11 @@
-*****************
-:mod:`mopidy.mpd`
-*****************
+***************************
+:mod:`mopidy.frontends.mpd`
+***************************
 
 MPD protocol implementation
 ===========================
 
-.. automodule:: mopidy.mpd.frontend
+.. automodule:: mopidy.frontends.mpd.frontend
     :synopsis: Our MPD protocol implementation.
     :members:
     :undoc-members:
@@ -14,9 +14,9 @@ MPD protocol implementation
 MPD server implementation
 =========================
 
-.. automodule:: mopidy.mpd.server
+.. automodule:: mopidy.frontends.mpd.server
     :synopsis: Our MPD server implementation.
     :members:
     :undoc-members:
 
-.. inheritance-diagram:: mopidy.mpd.server
+.. inheritance-diagram:: mopidy.frontends.mpd.server

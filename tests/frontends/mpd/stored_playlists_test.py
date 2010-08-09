@@ -2,9 +2,9 @@ import datetime as dt
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
+from mopidy.frontends.mpd import frontend
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track, Playlist
-from mopidy.mpd import frontend
 
 from tests import SkipTest
 

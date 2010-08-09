@@ -1,8 +1,8 @@
 import datetime as dt
 import unittest
 
+from mopidy.frontends.mpd import serializer
 from mopidy.models import Album, Artist, Playlist, Track
-from mopidy.mpd import serializer
 
 class TrackMpdFormatTest(unittest.TestCase):
     def test_mpd_format_for_empty_track(self):

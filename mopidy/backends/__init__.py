@@ -4,8 +4,8 @@ import random
 import time
 
 from mopidy import settings
+from mopidy.frontends.mpd import serializer
 from mopidy.models import Playlist
-from mopidy.mpd import serializer
 from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.backends.base')

@@ -13,7 +13,7 @@ import sys
 from mopidy import get_mpd_protocol_version, settings
 from mopidy.utils import indent, pickle_connection
 
-logger = logging.getLogger('mopidy.mpd.server')
+logger = logging.getLogger('mopidy.frontends.mpd.server')
 
 #: The MPD protocol uses UTF-8 for encoding all data.
 ENCODING = u'utf-8'

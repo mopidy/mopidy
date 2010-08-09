@@ -1,8 +1,8 @@
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
+from mopidy.frontends.mpd import frontend
 from mopidy.mixers.dummy import DummyMixer
-from mopidy.mpd import frontend
 
 class CommandListsTest(unittest.TestCase):
     def setUp(self):

@@ -17,6 +17,7 @@ Another great release.
   the packages created by ``setup.py`` for i.e. PyPI.
 - MPD frontend:
 
+  - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
   - Search improvements, including support for multi-word search.
   - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
 

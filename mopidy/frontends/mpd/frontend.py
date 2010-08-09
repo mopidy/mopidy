@@ -14,11 +14,11 @@ import datetime as dt
 import logging
 import re
 
-from mopidy.mpd import (MpdAckError, MpdArgError, MpdUnknownCommand,
+from mopidy.frontends.mpd import (MpdAckError, MpdArgError, MpdUnknownCommand,
     MpdNoExistError, MpdNotImplemented)
 from mopidy.utils import flatten
 
-logger = logging.getLogger('mopidy.mpd.frontend')
+logger = logging.getLogger('mopidy.frontends.mpd.frontend')
 
 _commands = set()
 _request_handlers = {}
