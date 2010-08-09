@@ -54,7 +54,7 @@ class DespotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 class DespotifyLibraryController(BaseLibraryController):
     def find_exact(self, **query):
-        self.search(**query)
+        return self.search(**query)
 
     def lookup(self, uri):
         track = self.backend.spotify.lookup(uri.encode(ENCODING))
