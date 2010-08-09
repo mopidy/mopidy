@@ -13,7 +13,6 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
-from mopidy.utils import spotify_uri_to_int
 
 import alsaaudio
 
@@ -39,8 +38,7 @@ class LibspotifyBackend(BaseBackend):
 
     def __init__(self, *args, **kwargs):
         super(LibspotifyBackend, self).__init__(*args, **kwargs)
-        self.current_playlist = LibspotifyCurrentPlaylistController(
-            backend=self)
+        self.current_playlist = BaseCurrentPlaylistController(backend=self)
         self.library = LibspotifyLibraryController(backend=self)
         self.playback = LibspotifyPlaybackController(backend=self)
         self.stored_playlists = LibspotifyStoredPlaylistsController(
@@ -60,14 +58,16 @@ class LibspotifyBackend(BaseBackend):
         return spotify
 
 
-class LibspotifyCurrentPlaylistController(BaseCurrentPlaylistController):
-    pass
-
-
 class LibspotifyLibraryController(BaseLibraryController):
+    def find_exact(self, **query):
+        return self.search(**query)
+
     def lookup(self, uri):
         spotify_track = Link.from_string(uri).as_track()
         return LibspotifyTranslator.to_mopidy_track(spotify_track)
+
+    def refresh(self, uri=None):
+        pass # TODO
 
     def search(self, **query):
         spotify_query = []
@@ -85,14 +85,6 @@ class LibspotifyLibraryController(BaseLibraryController):
         logger.debug(u'In search method, search for: %s' % spotify_query)
         my_end, other_end = multiprocessing.Pipe()
         self.backend.spotify.search(spotify_query.encode(ENCODING), other_end)
-        my_end.poll(None)
-        logger.debug(u'In search method, receiving search results')
-        playlist = my_end.recv()
-        logger.debug(u'In search method, done receiving search results')
-        logger.debug(['%s' % t.name for t in playlist.tracks])
-        return playlist
-
-    find_exact = search
 
 
 class LibspotifyPlaybackController(BasePlaybackController):
@@ -118,20 +110,38 @@ class LibspotifyPlaybackController(BasePlaybackController):
         # TODO
         return False
 
+    def _seek(self, time_position):
+        pass # TODO
+
     def _stop(self):
         self.backend.spotify.session.play(0)
         return True
 
 
 class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
-    pass
+    def create(self, name):
+        pass # TODO
+
+    def delete(self, playlist):
+        pass # TODO
+
+    def lookup(self, uri):
+        pass # TODO
+
+    def refresh(self):
+        pass # TODO
+
+    def rename(self, playlist, new_name):
+        pass # TODO
+
+    def save(self, playlist):
+        pass # TODO
+
+    def search(self, query):
+        pass # TODO
 
 
 class LibspotifyTranslator(object):
-    @classmethod
-    def to_mopidy_id(cls, spotify_uri):
-        return spotify_uri_to_int(spotify_uri)
-
     @classmethod
     def to_mopidy_artist(cls, spotify_artist):
         if not spotify_artist.is_loaded():
@@ -166,7 +176,6 @@ class LibspotifyTranslator(object):
             date=date,
             length=spotify_track.duration(),
             bitrate=320,
-            id=cls.to_mopidy_id(uri),
         )
 
     @classmethod
@@ -253,15 +262,25 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
-        self.connected.wait()
         def callback(results, userdata):
-            logger.debug(u'In search callback, translating search results')
+            logger.debug(u'In SessionManager.search().callback(), '
+                'translating search results')
             logger.debug(results.tracks())
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
                 LibspotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
-            logger.debug(u'In search callback, sending search results')
+            logger.debug(u'In SessionManager.search().callback(), '
+                'sending search results')
             logger.debug(['%s' % t.name for t in playlist.tracks])
             connection.send(playlist)
+            logger.debug(u'In SessionManager.search().callback(), '
+                'done sending search results')
+        logger.debug(u'In SessionManager.search(), '
+            'waiting for Spotify connection')
+        self.connected.wait()
+        logger.debug(u'In SessionManager.search(), '
+            'sending search query')
         self.session.search(query, callback)
+        logger.debug(u'In SessionManager.search(), '
+            'done sending search query')

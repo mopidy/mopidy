@@ -9,7 +9,6 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
-from mopidy.utils import spotify_uri_to_int
 
 logger = logging.getLogger('mopidy.backends.despotify')
 
@@ -129,10 +128,6 @@ class DespotifyStoredPlaylistsController(BaseStoredPlaylistsController):
 
 class DespotifyTranslator(object):
     @classmethod
-    def to_mopidy_id(cls, spotify_uri):
-        return spotify_uri_to_int(spotify_uri)
-
-    @classmethod
     def to_mopidy_artist(cls, spotify_artist):
         return Artist(
             uri=spotify_artist.get_uri(),
@@ -160,7 +155,6 @@ class DespotifyTranslator(object):
             date=date,
             length=spotify_track.length,
             bitrate=320,
-            id=cls.to_mopidy_id(spotify_track.get_uri()),
         )
 
     @classmethod

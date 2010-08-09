@@ -23,7 +23,7 @@ generate_song = lambda i: path_to_uri(song % i)
 # FIXME can be switched to generic test
 class GStreamerCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
         unittest.TestCase):
-    tracks = [Track(uri=generate_song(i), id=i, length=4464)
+    tracks = [Track(uri=generate_song(i), length=4464)
         for i in range(1, 4)]
 
     backend_class = GStreamerBackend
@@ -31,7 +31,7 @@ class GStreamerCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
 
 class GStreamerPlaybackControllerTest(BasePlaybackControllerTest,
         unittest.TestCase):
-    tracks = [Track(uri=generate_song(i), id=i, length=4464)
+    tracks = [Track(uri=generate_song(i), length=4464)
         for i in range(1, 4)]
     backend_class = GStreamerBackend
 
@@ -42,7 +42,7 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest,
 
     def add_track(self, path):
         uri = path_to_uri(data_folder(path))
-        track = Track(uri=uri, id=1, length=4464)
+        track = Track(uri=uri, length=4464)
         self.backend.current_playlist.add(track)
 
     def test_uri_handler(self):

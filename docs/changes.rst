@@ -15,6 +15,10 @@ Another great release.
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
+- Backend API:
+
+  - The ``id`` field of :class:`mopidy.models.Track` has been removed, as it is
+    no longer needed after the CPID refactoring.
 
 
 0.1.0a3 (2010-08-03)

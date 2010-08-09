@@ -55,7 +55,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_addid_with_songpos_out_of_bounds_should_ack(self):
-        needle = Track(uri='dummy://foo', id=137)
+        needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
         self.b.current_playlist.load(
             [Track(), Track(), Track(), Track(), Track()])
@@ -78,9 +78,10 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_delete_songpos(self):
         self.b.current_playlist.load(
-            [Track(id=1), Track(id=2), Track(id=3), Track(id=4), Track(id=5)])
+            [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
-        result = self.h.handle_request(u'delete "2"')
+        result = self.h.handle_request(u'delete "%d"' %
+            self.b.current_playlist.cp_tracks[2][0])
         self.assertEqual(len(self.b.current_playlist.tracks), 4)
         self.assert_(u'OK' in result)
 
@@ -94,7 +95,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_delete_open_range(self):
         self.b.current_playlist.load(
-            [Track(id=1), Track(id=2), Track(id=3), Track(id=4), Track(id=5)])
+            [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'delete "1:"')
         self.assertEqual(len(self.b.current_playlist.tracks), 1)
@@ -102,7 +103,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_delete_closed_range(self):
         self.b.current_playlist.load(
-            [Track(id=1), Track(id=2), Track(id=3), Track(id=4), Track(id=5)])
+            [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'delete "1:3"')
         self.assertEqual(len(self.b.current_playlist.tracks), 3)
