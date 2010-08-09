@@ -43,8 +43,7 @@ class LibspotifyBackend(BaseBackend):
         self.stored_playlists = LibspotifyStoredPlaylistsController(
             backend=self)
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
-        self.audio_controller_class = kwargs.get(
-            'audio_controller_class', AlsaController)
+        self.gstreamer_pipeline = gst.Pipeline("spotify_pipeline")
         self.spotify = self._connect()
 
     def _connect(self):
@@ -52,7 +51,7 @@ class LibspotifyBackend(BaseBackend):
         spotify = LibspotifySessionManager(
             settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
             core_queue=self.core_queue,
-            audio_controller_class=self.audio_controller_class)
+            gstreamer_pipeline=self.gstreamer_pipeline)
         spotify.start()
         return spotify
 
@@ -99,6 +98,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
         return False
 
     def _play(self, track):
+        self.backend.gstreamer_pipeline.set_state(gst.STATE_READY)
         if self.state == self.PLAYING:
             self.stop()
         if track.uri is None:
@@ -107,6 +107,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
             self.backend.spotify.session.load(
                 Link.from_string(track.uri).as_track())
             self.backend.spotify.session.play(1)
+            self.backend.gstreamer_pipeline.set_state(gst.STATE_PLAYING)
             return True
         except SpotifyError as e:
             logger.warning('Play %s failed: %s', track.uri, e)
@@ -120,6 +121,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
         pass # TODO
 
     def _stop(self):
+        self.backend.gstreamer_pipeline.set_state(gst.STATE_READY)
         self.backend.spotify.session.play(0)
         return True
 
@@ -201,12 +203,13 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     appkey_file = os.path.expanduser(settings.SPOTIFY_LIB_APPKEY)
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password, core_queue, audio_controller_class):
+    def __init__(self, username, password, core_queue, gstreamer_pipeline):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)
         self.core_queue = core_queue
         self.connected = threading.Event()
         self.session = None
+        self.gstreamer_pipeline = gstreamer_pipeline
 
         cap_string = """audio/x-raw-int,
                 endianness=(int)1234,
@@ -222,12 +225,9 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
         self.gsink = gst.element_factory_make("autoaudiosink", "autosink")
 
-        self.pipeline = gst.Pipeline("spotify_pipeline")
-        self.pipeline.add(self.gsrc, self.gsink)
+        self.gstreamer_pipeline.add(self.gsrc, self.gsink)
 
         gst.element_link_many(self.gsrc, self.gsink)
-
-        self.pipeline.set_state(gst.STATE_PLAYING)
 
     def run(self):
         self.connect()
