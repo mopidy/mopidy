@@ -30,7 +30,7 @@ class DummyLibraryController(BaseLibraryController):
         if matches:
             return matches[0]
 
-    def search(self, query):
+    def search(self, **query):
         return Playlist()
 
     find_exact = search

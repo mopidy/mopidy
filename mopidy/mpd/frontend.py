@@ -118,14 +118,17 @@ class MpdFrontend(object):
         query_part_pattern = (
             r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny))"?\s'
             r'"(?P<what>[^"]+)"')
-        query = []
+        query = {}
         for query_part in query_parts:
             m = re.match(query_part_pattern, query_part)
             field = m.groupdict()['field'].lower()
             if field == u'title':
                 field = u'track'
             what = m.groupdict()['what'].lower()
-            query.append((field, what))
+            if field in query:
+                query[field].append(what)
+            else:
+                query[field] = [what]
         return query
 
     @handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
@@ -646,7 +649,7 @@ class MpdFrontend(object):
         - capitalizes the type argument.
         """
         query = self._build_query(mpd_query)
-        return self.backend.library.find_exact(query).mpd_format()
+        return self.backend.library.find_exact(**query).mpd_format()
 
     @handle_pattern(r'^findadd '
          r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
@@ -722,7 +725,7 @@ class MpdFrontend(object):
         return artists
 
     def __music_db_list_album_artist(self, artist):
-        playlist = self.backend.library.find_exact([(u'artist', artist)])
+        playlist = self.backend.library.find_exact(artist=[artist])
         albums = set()
         for track in playlist.tracks:
             albums.add((u'Album', track.album.name))
@@ -810,7 +813,7 @@ class MpdFrontend(object):
         - capitalizes the field argument.
         """
         query = self._build_query(mpd_query)
-        return self.backend.library.search(query).mpd_format()
+        return self.backend.library.search(**query).mpd_format()
 
     @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
     def _music_db_update(self, uri=None, rescan_unmodified_files=False):

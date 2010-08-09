@@ -312,14 +312,18 @@ class BaseLibraryController(object):
         """
         raise NotImplementedError
 
-    def search(self, query):
+    def search(self, **query):
         """
-        Search the library for tracks where ``field`` contains ``query``.
+        Search the library for tracks where ``field`` contains ``values``.
 
-        :param field: 'track', 'artist', 'album', 'uri', and 'any'
-        :type field: string
-        :param query: the search query
-        :type query: string
+        Examples::
+
+            search(any=['a'])                      # Returns results matching 'a'
+            search(artist=['xyz'])                 # Returns results matching artist 'xyz'
+            search(any=['a', 'b'], artist=['xyz']) # Returns results matching 'a' and 'b' and artist 'xyz'
+
+        :param query: one or more queries to search for
+        :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
         raise NotImplementedError
