@@ -5,7 +5,7 @@ import sys
 import spytify
 
 from mopidy import settings
-from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist

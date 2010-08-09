@@ -18,11 +18,15 @@ def flatten(the_list):
             result.append(element)
     return result
 
+def import_module(name):
+    __import__(name)
+    return sys.modules[name]
+
 def get_class(name):
     module_name = name[:name.rindex('.')]
     class_name = name[name.rindex('.') + 1:]
     logger.debug('Loading: %s', name)
-    module = __import__(module_name, globals(), locals(), [class_name], -1)
+    module = import_module(module_name)
     class_object = getattr(module, class_name)
     return class_object
 

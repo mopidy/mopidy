@@ -23,12 +23,13 @@ Another great release.
 
 - Backend API:
 
+  - Relocate from :mod:`mopidy.backends` to :mod:`mopidy.backends.base`.
   - The ``id`` field of :class:`mopidy.models.Track` has been removed, as it is
     no longer needed after the CPID refactoring.
-  - :meth:`mopidy.backends.BaseLibraryController.find_exact()` now accepts
+  - :meth:`mopidy.backends.base.BaseLibraryController.find_exact()` now accepts
     keyword arguments of the form ``find_exact(artist=['foo'],
     album=['bar'])``.
-  - :meth:`mopidy.backends.BaseLibraryController.search()` now accepts
+  - :meth:`mopidy.backends.base.BaseLibraryController.search()` now accepts
     keyword arguments of the form ``search(artist=['foo', 'fighters'],
     album=['bar', 'grooves'])``.
 

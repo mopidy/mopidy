@@ -9,7 +9,7 @@ from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
 
 from mopidy import get_version, settings
-from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
     BaseLibraryController, BasePlaybackController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist

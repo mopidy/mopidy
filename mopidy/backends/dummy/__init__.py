@@ -1,4 +1,4 @@
-from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
+from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
     BasePlaybackController, BaseLibraryController,
     BaseStoredPlaylistsController)
 from mopidy.models import Playlist
