@@ -113,10 +113,11 @@ class MpdFrontend(object):
         Parses a mpd query string and converts the MPD query to a list of
         (field, what) tuples.
         """
-        query_pattern = r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"'
+        query_pattern = (
+            r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"')
         query_parts = re.findall(query_pattern, mpd_query)
         query_part_pattern = (
-            r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny))"?\s'
+            r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny))"? '
             r'"(?P<what>[^"]+)"')
         query = {}
         for query_part in query_parts:
@@ -124,11 +125,13 @@ class MpdFrontend(object):
             field = m.groupdict()['field'].lower()
             if field == u'title':
                 field = u'track'
+            field = str(field) # Needed for kwargs keys on OS X and Windows
             what = m.groupdict()['what'].lower()
             if field in query:
                 query[field].append(what)
             else:
                 query[field] = [what]
+        logger.debug(u'Search query: %s', query)
         return query
 
     @handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
