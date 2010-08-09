@@ -19,6 +19,7 @@ class MpdAckError(MopidyException):
     """
 
     def __init__(self, message=u'', error_code=0, index=0, command=u''):
+        super(MpdAckError, self).__init__(message, error_code, index, command)
         self.message = message
         self.error_code = error_code
         self.index = index
