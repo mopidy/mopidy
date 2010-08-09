@@ -283,12 +283,21 @@ class BaseLibraryController(object):
         """Cleanup after component."""
         pass
 
-    def find_exact(self, query):
+    def find_exact(self, **query):
         """
-        Find tracks in the library where ``field`` matches ``what`` exactly.
+        Search the library for tracks where ``field`` is ``values``.
 
-        :param query: Example: [(u'artist', u'anArtist'), (u'album', u'anAlbum')]
-        :type query: list of (field, what) tuples.
+        Examples::
+
+            # Returns results matching 'a'
+            find_exact(any=['a'])
+            # Returns results matching artist 'xyz'
+            find_exact(artist=['xyz'])
+            # Returns results matching 'a' and 'b' and artist 'xyz'
+            find_exact(any=['a', 'b'], artist=['xyz'])
+
+        :param query: one or more queries to search for
+        :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
         raise NotImplementedError
@@ -318,9 +327,12 @@ class BaseLibraryController(object):
 
         Examples::
 
-            search(any=['a'])                      # Returns results matching 'a'
-            search(artist=['xyz'])                 # Returns results matching artist 'xyz'
-            search(any=['a', 'b'], artist=['xyz']) # Returns results matching 'a' and 'b' and artist 'xyz'
+            # Returns results matching 'a'
+            search(any=['a'])
+            # Returns results matching artist 'xyz'
+            search(artist=['xyz'])
+            # Returns results matching 'a' and 'b' and artist 'xyz'
+            search(any=['a', 'b'], artist=['xyz'])
 
         :param query: one or more queries to search for
         :type query: dict
