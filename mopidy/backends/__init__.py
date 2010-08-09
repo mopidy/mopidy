@@ -763,7 +763,7 @@ class BaseStoredPlaylistsController(object):
             get(uri='xyz')           # Returns track with URI 'xyz'
             get(name='a', uri='xyz') # Returns track with name 'a' and URI 'xyz'
 
-        :param criteria: on or more criteria to match by
+        :param criteria: one or more criteria to match by
         :type criteria: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
