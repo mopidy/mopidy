@@ -180,6 +180,13 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
         self.assertEqual(self.b.playback.current_track, track)
 
+    def test_play_minus_one_on_empty_playlist_does_not_ack(self):
+        self.b.current_playlist.clear()
+        result = self.h.handle_request(u'play "-1"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
+        self.assertEqual(self.b.playback.current_track, None)
+
     def test_playid(self):
         self.b.current_playlist.load([Track()])
         result = self.h.handle_request(u'playid "1"')
@@ -193,6 +200,13 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
         self.assertEqual(self.b.playback.current_track, track)
+
+    def test_playid_minus_one_on_empty_playlist_does_not_ack(self):
+        self.b.current_playlist.clear()
+        result = self.h.handle_request(u'playid "-1"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
+        self.assertEqual(self.b.playback.current_track, None)
 
     def test_playid_which_does_not_exist(self):
         self.b.current_playlist.load([Track()])

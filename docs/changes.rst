@@ -18,6 +18,7 @@ Another great release.
 - MPD frontend:
 
   - Search improvements, including support for multi-word search.
+  - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
 
 - Backend API:
 

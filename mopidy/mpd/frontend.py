@@ -964,6 +964,8 @@ class MpdFrontend(object):
         cpid = int(cpid)
         try:
             if cpid == -1:
+                if not self.backend.current_playlist.cp_tracks:
+                    return # Fail silently
                 cp_track = self.backend.current_playlist.cp_tracks[0]
             else:
                 cp_track = self.backend.current_playlist.get(cpid=cpid)
@@ -989,6 +991,8 @@ class MpdFrontend(object):
         songpos = int(songpos)
         try:
             if songpos == -1:
+                if not self.backend.current_playlist.cp_tracks:
+                    return # Fail silently
                 cp_track = self.backend.current_playlist.cp_tracks[0]
             else:
                 cp_track = self.backend.current_playlist.cp_tracks[songpos]
