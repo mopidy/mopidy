@@ -2,11 +2,15 @@
 :mod:`mopidy.frontends.mpd`
 ***************************
 
+.. automodule:: mopidy.frontends.mpd
+    :synopsis: MPD frontend
+
+
 MPD protocol implementation
 ===========================
 
 .. automodule:: mopidy.frontends.mpd.frontend
-    :synopsis: Our MPD protocol implementation.
+    :synopsis: MPD protocol implementation
     :members:
     :undoc-members:
 
@@ -15,7 +19,7 @@ MPD server implementation
 =========================
 
 .. automodule:: mopidy.frontends.mpd.server
-    :synopsis: Our MPD server implementation.
+    :synopsis: MPD server implementation
     :members:
     :undoc-members:
 

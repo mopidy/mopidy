@@ -23,6 +23,6 @@ Data model API
 ==============
 
 .. automodule:: mopidy.models
-    :synopsis: Immutable data models.
+    :synopsis: Data model API
     :members:
     :undoc-members:
