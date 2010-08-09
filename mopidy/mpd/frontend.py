@@ -680,7 +680,9 @@ class MpdFrontend(object):
             Lists all tags of the specified type. ``TYPE`` should be ``album``,
             ``artist``, ``date``, or ``genre``.
 
-            ``ARTIST`` is an optional parameter when type is ``album``, ``date``, or ``genre``
+            ``ARTIST`` is an optional parameter when type is ``album``,
+            ``date``, or ``genre``.
+
             This filters the result list by an artist.
 
         *GMPC:*
