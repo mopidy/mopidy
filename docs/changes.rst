@@ -15,10 +15,21 @@ Another great release.
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
+- MPD frontend:
+
+  - Search improvements, including support for multi-word search.
+
 - Backend API:
 
   - The ``id`` field of :class:`mopidy.models.Track` has been removed, as it is
     no longer needed after the CPID refactoring.
+  - :meth:`mopidy.backends.BaseLibraryController.find_exact()` now accepts
+    keyword arguments of the form ``find_exact(artist=['foo'],
+    album=['bar'])``.
+  - :meth:`mopidy.backends.BaseLibraryController.search()` now accepts
+    keyword arguments of the form ``search(artist=['foo', 'fighters'],
+    album=['bar', 'grooves'])``.
+
 
 
 0.1.0a3 (2010-08-03)
