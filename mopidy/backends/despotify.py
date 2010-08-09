@@ -53,6 +53,9 @@ class DespotifyCurrentPlaylistController(BaseCurrentPlaylistController):
 
 
 class DespotifyLibraryController(BaseLibraryController):
+    def find_exact(self, **query):
+        return self.search(**query)
+
     def lookup(self, uri):
         track = self.backend.spotify.lookup(uri.encode(ENCODING))
         return DespotifyTranslator.to_mopidy_track(track)
@@ -75,8 +78,6 @@ class DespotifyLibraryController(BaseLibraryController):
                 'spotify:track:0000000000000000000000'):
             return Playlist()
         return DespotifyTranslator.to_mopidy_playlist(result.playlist)
-
-    find_exact = search
 
 
 class DespotifyPlaybackController(BasePlaybackController):

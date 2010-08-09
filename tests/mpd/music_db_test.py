@@ -45,7 +45,8 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         self.assertEqual(result[0], u'ACK [2@0] {find} incorrect arguments')
 
     def test_find_album_and_artist(self):
-        result = self.h.handle_request(u'find album "album_what" artist "artist_what"')
+        result = self.h.handle_request(
+            u'find album "album_what" artist "artist_what"')
         self.assert_(u'OK' in result)
 
     def test_findadd(self):
@@ -75,7 +76,7 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
     def test_list_album_with_artist(self):
         result = self.h.handle_request(u'list "album" "anartist"')
         self.assert_(u'OK' in result)
-    
+
     def test_list_album_artist_with_artist_without_quotes(self):
         result = self.h.handle_request(u'list album artist "anartist"')
         self.assert_(u'OK' in result)
