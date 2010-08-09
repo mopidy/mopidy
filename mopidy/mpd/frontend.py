@@ -123,8 +123,9 @@ class MpdFrontend(object):
         for query_part in query_parts:
             m = re.match(query_part_pattern, query_part)
             field = m.groupdict()['field'].lower()
-            if field == 'title':
-                field = 'track'
+            if field == u'title':
+                field = u'track'
+            field = str(field) # Needed for kwargs keys on OS X and Windows
             what = m.groupdict()['what'].lower()
             if field in query:
                 query[field].append(what)
