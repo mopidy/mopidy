@@ -1,7 +1,8 @@
 import gobject
 gobject.threads_init()
 # FIXME make sure we don't get hit by
-# http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html
+# http://jameswestby.net/
+#   weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html
 
 import pygst
 pygst.require('0.10')
@@ -71,9 +72,7 @@ class GStreamerPlaybackController(BasePlaybackController):
 
     def _set_state(self, state):
         self._bin.set_state(state)
-
-        result, new, old = self._bin.get_state()
-
+        (_, new, _) = self._bin.get_state()
         return new == state
 
     def _message(self, bus, message):
@@ -130,6 +129,9 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         super(GStreamerStoredPlaylistsController, self).__init__(*args)
         self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_FOLDER)
         self.refresh()
+
+    def lookup(self, uri):
+        pass # TODO
 
     def refresh(self):
         playlists = []
@@ -285,7 +287,7 @@ class GStreamerLibraryController(BaseLibraryController):
         return Playlist(tracks=result_tracks)
 
     def _validate_query(self, query):
-        for (field, values) in query.iteritems():
+        for (_, values) in query.iteritems():
             if not values:
                 raise LookupError('Missing query')
             for value in values:

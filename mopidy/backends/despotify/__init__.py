@@ -60,6 +60,9 @@ class DespotifyLibraryController(BaseLibraryController):
         track = self.backend.spotify.lookup(uri.encode(ENCODING))
         return DespotifyTranslator.to_mopidy_track(track)
 
+    def refresh(self, uri=None):
+        pass # TODO
+
     def search(self, **query):
         spotify_query = []
         for (field, values) in query.iteritems():
@@ -106,6 +109,9 @@ class DespotifyPlaybackController(BasePlaybackController):
             logger.error(e)
             return False
 
+    def _seek(self, time_position):
+        pass # TODO
+
     def _stop(self):
         try:
             self.backend.spotify.stop()
@@ -116,6 +122,15 @@ class DespotifyPlaybackController(BasePlaybackController):
 
 
 class DespotifyStoredPlaylistsController(BaseStoredPlaylistsController):
+    def create(self, name):
+        pass # TODO
+
+    def delete(self, playlist):
+        pass # TODO
+
+    def lookup(self, uri):
+        pass # TODO
+
     def refresh(self):
         logger.info(u'Caching stored playlists')
         playlists = []
@@ -126,6 +141,12 @@ class DespotifyStoredPlaylistsController(BaseStoredPlaylistsController):
         logger.debug(u'Available playlists: %s',
             u', '.join([u'<%s>' % p.name for p in self.playlists]))
         logger.info(u'Done caching stored playlists')
+
+    def rename(self, playlist, new_name):
+        pass # TODO
+
+    def save(self, playlist):
+        pass # TODO
 
 
 class DespotifyTranslator(object):

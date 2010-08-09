@@ -58,7 +58,7 @@ def tracks_to_mpd_format(tracks, start=0, end=None, cpids=None):
         end = len(tracks)
     tracks = tracks[start:end]
     positions = range(start, end)
-    cpids = cpids and cpids[start:end] or [None for t in tracks]
+    cpids = cpids and cpids[start:end] or [None for _ in tracks]
     assert len(tracks) == len(positions) == len(cpids)
     result = []
     for track, position, cpid in zip(tracks, positions, cpids):

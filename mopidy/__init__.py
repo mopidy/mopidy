@@ -12,7 +12,7 @@ def get_mpd_protocol_version():
 
 class MopidyException(Exception):
     def __init__(self, message):
-        self.message = message
+        self._message = message
 
     @property
     def message(self):

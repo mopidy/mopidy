@@ -321,7 +321,7 @@ class MpdFrontend(object):
         cp_tracks = self.backend.current_playlist.cp_tracks[start:end]
         if not cp_tracks:
             raise MpdArgError(u'Bad song index', command=u'delete')
-        for (cpid, track) in cp_tracks:
+        for (cpid, _) in cp_tracks:
             self.backend.current_playlist.remove(cpid=cpid)
 
     @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
@@ -329,7 +329,7 @@ class MpdFrontend(object):
         """See :meth:`_current_playlist_delete_range`"""
         try:
             songpos = int(songpos)
-            (cpid, track) = self.backend.current_playlist.cp_tracks[songpos]
+            (cpid, _) = self.backend.current_playlist.cp_tracks[songpos]
             self.backend.current_playlist.remove(cpid=cpid)
         except IndexError:
             raise MpdArgError(u'Bad song index', command=u'delete')
@@ -552,7 +552,7 @@ class MpdFrontend(object):
         # XXX Naive implementation that returns all tracks as changed
         if int(version) != self.backend.current_playlist.version:
             result = []
-            for (position, (cpid, track)) in enumerate(
+            for (position, (cpid, _)) in enumerate(
                     self.backend.current_playlist.cp_tracks):
                 result.append((u'cpos', position))
                 result.append((u'Id', cpid))
@@ -630,7 +630,8 @@ class MpdFrontend(object):
         return [('songs', 0), ('playtime', 0)] # TODO
 
     @handle_pattern(r'^find '
-         r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+         r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"?'
+         ' "[^"]+"\s?)+)$')
     def _music_db_find(self, mpd_query):
         """
         *musicpd.org, music database section:*
@@ -655,7 +656,8 @@ class MpdFrontend(object):
         return self.backend.library.find_exact(**query).mpd_format()
 
     @handle_pattern(r'^findadd '
-         r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+         r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? '
+         '"[^"]+"\s?)+)$')
     def _music_db_findadd(self, query):
         """
         *musicpd.org, music database section:*
@@ -666,14 +668,15 @@ class MpdFrontend(object):
             current playlist. ``TYPE`` can be any tag supported by MPD.
             ``WHAT`` is what to find.
         """
-        result = self._music_db_find(query)
         # TODO Add result to current playlist
-        #return result
+        #result = self._music_db_find(query)
 
     @handle_pattern(r'^list (?P<field>[Aa]rtist)$')
     @handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
-    @handle_pattern(r'^list (?P<field>album( artist)?)( "(?P<artist>[^"]+)")*$')
-    @handle_pattern(r'^list "(?P<field>album(" "artist)?)"( "(?P<artist>[^"]+)")*$')
+    @handle_pattern(r'^list (?P<field>album( artist)?)'
+        '( "(?P<artist>[^"]+)")*$')
+    @handle_pattern(r'^list "(?P<field>album(" "artist)?)"'
+        '( "(?P<artist>[^"]+)")*$')
     def _music_db_list(self, field, artist=None):
         """
         *musicpd.org, music database section:*
@@ -793,7 +796,8 @@ class MpdFrontend(object):
         return self._music_db_update(uri, rescan_unmodified_files=True)
 
     @handle_pattern(r'^search '
-         r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+         r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"?'
+         ' "[^"]+"\s?)+)$')
     def _music_db_search(self, mpd_query):
         """
         *musicpd.org, music database section:*
