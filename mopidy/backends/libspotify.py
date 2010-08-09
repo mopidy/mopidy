@@ -14,8 +14,7 @@ from mopidy.backends import (BaseBackend, BaseCurrentPlaylistController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
 
-import alsaaudio
-
+import gst
 logger = logging.getLogger('mopidy.backends.libspotify')
 
 ENCODING = 'utf-8'
@@ -200,8 +199,28 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         threading.Thread.__init__(self)
         self.core_queue = core_queue
         self.connected = threading.Event()
-        self.audio = audio_controller_class(alsaaudio.PCM_NORMAL)
         self.session = None
+
+        cap_string = """audio/x-raw-int,
+                endianness=(int)1234,
+                channels=(int)2,
+                width=(int)16,
+                depth=(int)16,
+                signed=True,
+                rate=(int)44100"""
+        caps = gst.caps_from_string(cap_string)
+
+        self.gsrc = gst.element_factory_make("appsrc", "app-source")
+        self.gsrc.set_property('caps', caps)
+
+        self.gsink = gst.element_factory_make("autoaudiosink", "autosink")
+
+        self.pipeline = gst.Pipeline("spotify_pipeline")
+        self.pipeline.add(self.gsrc, self.gsink)
+
+        gst.element_link_many(self.gsrc, self.gsink)
+
+        self.pipeline.set_state(gst.STATE_PLAYING)
 
     def run(self):
         self.connect()
@@ -243,8 +262,17 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     def music_delivery(self, session, frames, frame_size, num_frames,
             sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
-        self.audio.music_delivery(session, frames, frame_size, num_frames,
-            sample_type, sample_rate, channels)
+        cap_string = """audio/x-raw-int,
+                endianness=(int)1234,
+                channels=(int)2,
+                width=(int)16,
+                depth=(int)16,
+                signed=True,
+                rate=(int)44100"""
+        caps = gst.caps_from_string(cap_string)
+        b = gst.Buffer(frames)
+        b.set_caps(caps)
+        self.gsrc.emit('push-buffer', b)
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
