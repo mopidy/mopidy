@@ -68,11 +68,12 @@ class DespotifyLibraryController(BaseLibraryController):
             for value in values:
                 if field == u'track':
                     field = u'title'
-                if field is u'any':
+                if field == u'any':
                     spotify_query.append(value)
                 else:
                     spotify_query.append(u'%s:"%s"' % (field, value))
-        spotify_query = u' '.join(query)
+        spotify_query = u' '.join(spotify_query)
+        logger.debug(u'Spotify search query: %s', spotify_query)
         result = self.backend.spotify.search(spotify_query.encode(ENCODING))
         if (result is None or result.playlist.tracks[0].get_uri() ==
                 'spotify:track:0000000000000000000000'):
