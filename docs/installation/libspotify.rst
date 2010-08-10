@@ -54,14 +54,3 @@ Testing the installation
 Test your libspotify setup::
 
     examples/example1.py -u USERNAME -p PASSWORD
-
-
-Setting up Mopidy to use libspotify
-===================================
-
-Currently :mod:`mopidy.backends.despotify` is the default
-backend. If you want to use :mod:`mopidy.backends.libspotify`
-instead, copy the Spotify application key to ``~/.mopidy/spotify_appkey.key``,
-and add the following to ``~/.mopidy/settings.py``::
-
-    BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)

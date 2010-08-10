@@ -19,38 +19,36 @@ from mopidy.models import Playlist, Track, Album
 from mopidy import settings
 from mopidy.utils import parse_m3u, parse_mpd_tag_cache
 
-logger = logging.getLogger(u'backends.gstreamer')
+logger = logging.getLogger(u'mopidy.backends.local')
 
-class GStreamerMessages(threading.Thread):
+class LocalMessages(threading.Thread):
     def run(self):
         gobject.MainLoop().run()
 
-message_thread = GStreamerMessages()
+message_thread = LocalMessages()
 message_thread.daemon = True
 message_thread.start()
 
-class GStreamerBackend(BaseBackend):
+class LocalBackend(BaseBackend):
     """
     A backend for playing music from a local music archive.
 
-    Uses the `GStreamer <http://gstreamer.freedesktop.org/>`_ library.
-
-    **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-gstreamer
+    **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-local
     """
 
     def __init__(self, *args, **kwargs):
-        super(GStreamerBackend, self).__init__(*args, **kwargs)
+        super(LocalBackend, self).__init__(*args, **kwargs)
 
-        self.library = GStreamerLibraryController(self)
-        self.stored_playlists = GStreamerStoredPlaylistsController(self)
+        self.library = LocalLibraryController(self)
+        self.stored_playlists = LocalStoredPlaylistsController(self)
         self.current_playlist = BaseCurrentPlaylistController(self)
-        self.playback = GStreamerPlaybackController(self)
+        self.playback = LocalPlaybackController(self)
         self.uri_handlers = [u'file://']
 
 
-class GStreamerPlaybackController(BasePlaybackController):
+class LocalPlaybackController(BasePlaybackController):
     def __init__(self, backend):
-        super(GStreamerPlaybackController, self).__init__(backend)
+        super(LocalPlaybackController, self).__init__(backend)
 
         self._bin = gst.element_factory_make("playbin", "player")
         self._bus = self._bin.get_bus()
@@ -63,12 +61,6 @@ class GStreamerPlaybackController(BasePlaybackController):
         self._bus_id = self._bus.connect('message', self._message)
 
         self.stop()
-
-    def use_fake_sink(self):
-        """For testing. To avoid audio output during testing, and the need for
-        a sound card and a fully working gstreamer installation."""
-        sink = gst.element_factory_make("fakesink", "fakesink")
-        self._bin.set_property("audio-sink", sink)
 
     def _set_state(self, state):
         self._bin.set_state(state)
@@ -124,9 +116,9 @@ class GStreamerPlaybackController(BasePlaybackController):
         del playbin
 
 
-class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
+class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
     def __init__(self, *args):
-        super(GStreamerStoredPlaylistsController, self).__init__(*args)
+        super(LocalStoredPlaylistsController, self).__init__(*args)
         self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_FOLDER)
         self.refresh()
 
@@ -197,9 +189,9 @@ class GStreamerStoredPlaylistsController(BaseStoredPlaylistsController):
         self._playlists.append(playlist)
 
 
-class GStreamerLibraryController(BaseLibraryController):
+class LocalLibraryController(BaseLibraryController):
     def __init__(self, backend):
-        super(GStreamerLibraryController, self).__init__(backend)
+        super(LocalLibraryController, self).__init__(backend)
         self._uri_mapping = {}
         self.refresh()
 

@@ -1,14 +1,14 @@
 import unittest
 import os
 
-# FIXME Our Windows build server does not support Gstreamer yet
+# FIXME Our Windows build server does not support GStreamer yet
 import sys
 if sys.platform == 'win32':
     from tests import SkipTest
     raise SkipTest
 
 from mopidy import settings
-from mopidy.backends.gstreamer import GStreamerBackend
+from mopidy.backends.local import LocalBackend
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 from mopidy.utils import path_to_uri
@@ -21,22 +21,22 @@ generate_song = lambda i: path_to_uri(song % i)
 
 
 # FIXME can be switched to generic test
-class GStreamerCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
+class LocalCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
         unittest.TestCase):
     tracks = [Track(uri=generate_song(i), length=4464)
         for i in range(1, 4)]
 
-    backend_class = GStreamerBackend
+    backend_class = LocalBackend
 
 
-class GStreamerPlaybackControllerTest(BasePlaybackControllerTest,
+class LocalPlaybackControllerTest(BasePlaybackControllerTest,
         unittest.TestCase):
     tracks = [Track(uri=generate_song(i), length=4464)
         for i in range(1, 4)]
-    backend_class = GStreamerBackend
+    backend_class = LocalBackend
 
     def setUp(self):
-        super(GStreamerPlaybackControllerTest, self).setUp()
+        super(LocalPlaybackControllerTest, self).setUp()
         # Two tests does not work at all when using the fake sink
         #self.backend.playback.use_fake_sink()
 
@@ -64,10 +64,10 @@ class GStreamerPlaybackControllerTest(BasePlaybackControllerTest,
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
 
-class GStreamerStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
+class LocalStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
         unittest.TestCase):
 
-    backend_class = GStreamerBackend
+    backend_class = LocalBackend
 
     def test_created_playlist_is_persisted(self):
         path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
@@ -136,10 +136,10 @@ class GStreamerStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
         raise SkipTest
 
 
-class GStreamerLibraryControllerTest(BaseLibraryControllerTest,
+class LocalLibraryControllerTest(BaseLibraryControllerTest,
         unittest.TestCase):
 
-    backend_class = GStreamerBackend
+    backend_class = LocalBackend
 
     def setUp(self):
         self.original_tag_cache = settings.LOCAL_TAG_CACHE
@@ -148,13 +148,13 @@ class GStreamerLibraryControllerTest(BaseLibraryControllerTest,
         settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
         settings.LOCAL_MUSIC_FOLDER = data_folder('')
 
-        super(GStreamerLibraryControllerTest, self).setUp()
+        super(LocalLibraryControllerTest, self).setUp()
 
     def tearDown(self):
         settings.LOCAL_TAG_CACHE = self.original_tag_cache
         settings.LOCAL_MUSIC_FOLDER = self.original_music_folder
 
-        super(GStreamerLibraryControllerTest, self).tearDown()
+        super(LocalLibraryControllerTest, self).tearDown()
 
 if __name__ == '__main__':
     unittest.main()

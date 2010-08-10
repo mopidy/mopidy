@@ -15,6 +15,7 @@ Another great release.
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
+- Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.

@@ -29,11 +29,12 @@ To install Gstreamer on OS X using MacPorts::
         gstreamer-plugins-ugly
 
 
-Setting up Mopidy to use the Gstreamer backend
-==============================================
+Testing the installation
+========================
 
-Currently :mod:`mopidy.backends.despotify` is the default
-backend. If you want to use :mod:`mopidy.backends.gstreamer`
-instead, add the following to ``~/.mopidy/settings.py``::
+If you now run the ``gst-inspect-0.10`` command (the version number may vary),
+you should see a long listing of installed plugins, ending in a summary line::
 
-    BACKENDS = (u'mopidy.backends.gstreamer.GstreamerBackend',)
+    $ gst-inspect-0.10
+    ... long list of installed plugins ...
+    Total count: 218 plugins (1 blacklist entry not shown), 1031 features

@@ -35,15 +35,15 @@ Dependencies
 
   - DespotifyBackend (Linux and OS X)
 
-    - see :doc:`despotify`
+    - :doc:`Despotify and spytify <despotify>`
 
-  - LibspotifyBackend (Linux, OS X and Windows)
+  - LibspotifyBackend (Linux, OS X, and Windows)
 
-    - see :doc:`libspotify`
+    - :doc:`libspotify and pyspotify <libspotify>`
 
-  - GstreamerBackend (Linux, OS X and Windows)
+  - LocalBackend (Linux, OS X, and Windows)
 
-    - see :doc:`gstreamer`
+    - :doc:`GStreamer <gstreamer>`
 
 
 Install latest release
@@ -84,14 +84,29 @@ For an introduction to ``git``, please visit `git-scm.com
 <http://git-scm.com/>`_.
 
 
-Spotify settings
-================
+Settings
+========
 
-Create a file named ``settings.py`` in the directory ``~/.mopidy/``. Enter
-your Spotify Premium account's username and password into the file, like this::
+Create a file named ``settings.py`` in the directory ``~/.mopidy/``.
+
+If you are using a Spotify backend, enter your Spotify Premium account's
+username and password into the file, like this::
 
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
+
+Currently :mod:`mopidy.backends.despotify` is the default
+backend.
+
+If you want to use :mod:`mopidy.backends.libspotify`, copy the Spotify
+application key to ``~/.mopidy/spotify_appkey.key``, and add the following
+setting::
+
+    BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
+
+If you want to use :mod:`mopidy.backends.local`, add the following setting::
+
+    BACKENDS = (u'mopidy.backends.local.LocalBackend',)
 
 For a full list of available settings, see :mod:`mopidy.settings`.
 

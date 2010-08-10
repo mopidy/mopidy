@@ -14,7 +14,7 @@ Version 0.1
 - Read-only support for Spotify through :mod:`mopidy.backends.despotify` and/or
   :mod:`mopidy.backends.libspotify`.
 - Initial support for local file playback through
-  :mod:`mopidy.backends.gstreamer`. The state of local file playback will not
+  :mod:`mopidy.backends.local`. The state of local file playback will not
   block the release of 0.1.
 
 
