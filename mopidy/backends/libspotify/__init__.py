@@ -1,4 +1,5 @@
 import datetime as dt
+import gobject
 import logging
 import os
 import multiprocessing
@@ -14,8 +15,7 @@ from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
 
-import alsaaudio
-
+import gst
 logger = logging.getLogger('mopidy.backends.libspotify')
 
 ENCODING = 'utf-8'
@@ -44,8 +44,7 @@ class LibspotifyBackend(BaseBackend):
         self.stored_playlists = LibspotifyStoredPlaylistsController(
             backend=self)
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
-        self.audio_controller_class = kwargs.get(
-            'audio_controller_class', AlsaController)
+        self.gstreamer_pipeline = gst.Pipeline("spotify_pipeline")
         self.spotify = self._connect()
 
     def _connect(self):
@@ -53,7 +52,7 @@ class LibspotifyBackend(BaseBackend):
         spotify = LibspotifySessionManager(
             settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
             core_queue=self.core_queue,
-            audio_controller_class=self.audio_controller_class)
+            gstreamer_pipeline=self.gstreamer_pipeline)
         spotify.start()
         return spotify
 
@@ -96,10 +95,12 @@ class LibspotifyLibraryController(BaseLibraryController):
 
 class LibspotifyPlaybackController(BasePlaybackController):
     def _pause(self):
-        # TODO
-        return False
+        result = self.backend.gstreamer_pipeline.set_state(gst.STATE_PAUSED)
+        logger.debug('Changed gstreamer state to paused. Result was: %s' % result)
+        return result == gst.STATE_CHANGE_SUCCESS
 
     def _play(self, track):
+        self.backend.gstreamer_pipeline.set_state(gst.STATE_READY)
         if self.state == self.PLAYING:
             self.stop()
         if track.uri is None:
@@ -108,19 +109,22 @@ class LibspotifyPlaybackController(BasePlaybackController):
             self.backend.spotify.session.load(
                 Link.from_string(track.uri).as_track())
             self.backend.spotify.session.play(1)
+            self.backend.gstreamer_pipeline.set_state(gst.STATE_PLAYING)
             return True
         except SpotifyError as e:
             logger.warning('Play %s failed: %s', track.uri, e)
             return False
 
     def _resume(self):
-        # TODO
-        return False
+        result = self.backend.gstreamer_pipeline.set_state(gst.STATE_PLAYING)
+        logger.debug('Changed gstreamer state to playing. Result was: %s' % result)
+        return result == gst.STATE_CHANGE_SUCCESS
 
     def _seek(self, time_position):
         pass # TODO
 
     def _stop(self):
+        self.backend.gstreamer_pipeline.set_state(gst.STATE_READY)
         self.backend.spotify.session.play(0)
         return True
 
@@ -195,6 +199,22 @@ class LibspotifyTranslator(object):
             tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
         )
 
+class GstreamerMessageBusProcess(threading.Thread):
+    def __init__(self, core_queue, pipeline):
+        super(GstreamerMessageBusProcess, self).__init__()
+        self.core_queue = core_queue
+        self.bus = pipeline.get_bus()
+
+    def run(self):
+        loop = gobject.MainLoop()
+        gobject.threads_init()
+        context = loop.get_context()
+        while True:
+            message = self.bus.pop_filtered(gst.MESSAGE_EOS)
+            if message is not None:
+                self.core_queue.put({'command': 'end_of_track'})
+                logger.debug('Got and handled Gstreamer message of type: %s' % message.type)
+            context.iteration(True)
 
 class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
@@ -202,13 +222,34 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     appkey_file = os.path.expanduser(settings.SPOTIFY_LIB_APPKEY)
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password, core_queue, audio_controller_class):
+    def __init__(self, username, password, core_queue, gstreamer_pipeline):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)
         self.core_queue = core_queue
         self.connected = threading.Event()
-        self.audio = audio_controller_class(alsaaudio.PCM_NORMAL)
         self.session = None
+        self.gstreamer_pipeline = gstreamer_pipeline
+
+        cap_string = """audio/x-raw-int,
+                endianness=(int)1234,
+                channels=(int)2,
+                width=(int)16,
+                depth=(int)16,
+                signed=True,
+                rate=(int)44100"""
+        caps = gst.caps_from_string(cap_string)
+
+        self.gsrc = gst.element_factory_make("appsrc", "app-source")
+        self.gsrc.set_property('caps', caps)
+
+        self.gsink = gst.element_factory_make("autoaudiosink", "autosink")
+
+        self.gstreamer_pipeline.add(self.gsrc, self.gsink)
+
+        gst.element_link_many(self.gsrc, self.gsink)
+
+        message_process = GstreamerMessageBusProcess(self.core_queue, self.gstreamer_pipeline)
+        message_process.start()
 
     def run(self):
         self.connect()
@@ -250,8 +291,17 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     def music_delivery(self, session, frames, frame_size, num_frames,
             sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
-        self.audio.music_delivery(session, frames, frame_size, num_frames,
-            sample_type, sample_rate, channels)
+        cap_string = """audio/x-raw-int,
+                endianness=(int)1234,
+                channels=(int)2,
+                width=(int)16,
+                depth=(int)16,
+                signed=True,
+                rate=(int)44100"""
+        caps = gst.caps_from_string(cap_string)
+        b = gst.Buffer(frames)
+        b.set_caps(caps)
+        self.gsrc.emit('push-buffer', b)
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
@@ -264,8 +314,9 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def end_of_track(self, session):
         """Callback used by pyspotify"""
-        logger.debug('End of track')
-        self.core_queue.put({'command': 'end_of_track'})
+        logger.debug('End of track.')
+        self.gsrc.emit('end-of-stream')
+        logger.debug('End of stream sent to gstreamer.')
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
