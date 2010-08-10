@@ -3,7 +3,7 @@ import re
 from mopidy.frontends.mpd import handle_pattern, MpdNotImplemented
 from mopidy.frontends.mpd.protocol import stored_playlists
 
-def build_query(mpd_query):
+def _build_query(mpd_query):
     """
     Parses a MPD query string and converts it to the Mopidy query format.
     """
@@ -62,7 +62,7 @@ def find(frontend, mpd_query):
     - does not add quotes around the field argument.
     - capitalizes the type argument.
     """
-    query = build_query(mpd_query)
+    query = _build_query(mpd_query)
     return frontend.backend.library.find_exact(**query).mpd_format()
 
 @handle_pattern(r'^findadd '
@@ -231,7 +231,7 @@ def search(frontend, mpd_query):
     - does not add quotes around the field argument.
     - capitalizes the field argument.
     """
-    query = build_query(mpd_query)
+    query = _build_query(mpd_query)
     return frontend.backend.library.search(**query).mpd_format()
 
 @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')

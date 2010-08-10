@@ -32,7 +32,6 @@ MPD protocol
 .. automodule:: mopidy.frontends.mpd.protocol
     :synopsis: MPD protocol
     :members:
-    :undoc-members:
 
 
 Audio output
@@ -40,7 +39,6 @@ Audio output
 
 .. automodule:: mopidy.frontends.mpd.protocol.audio_output
     :members:
-    :undoc-members:
 
 
 Command list
@@ -48,7 +46,6 @@ Command list
 
 .. automodule:: mopidy.frontends.mpd.protocol.command_list
     :members:
-    :undoc-members:
 
 
 Connection
@@ -56,7 +53,6 @@ Connection
 
 .. automodule:: mopidy.frontends.mpd.protocol.connection
     :members:
-    :undoc-members:
 
 
 Current playlist
@@ -64,14 +60,12 @@ Current playlist
 
 .. automodule:: mopidy.frontends.mpd.protocol.current_playlist
     :members:
-    :undoc-members:
 
 Music database
 --------------
 
 .. automodule:: mopidy.frontends.mpd.protocol.music_db
     :members:
-    :undoc-members:
 
 
 Playback
@@ -79,7 +73,6 @@ Playback
 
 .. automodule:: mopidy.frontends.mpd.protocol.playback
     :members:
-    :undoc-members:
 
 
 Reflection
@@ -87,7 +80,6 @@ Reflection
 
 .. automodule:: mopidy.frontends.mpd.protocol.reflection
     :members:
-    :undoc-members:
 
 
 Status
@@ -95,7 +87,6 @@ Status
 
 .. automodule:: mopidy.frontends.mpd.protocol.status
     :members:
-    :undoc-members:
 
 
 Stickers
@@ -103,7 +94,6 @@ Stickers
 
 .. automodule:: mopidy.frontends.mpd.protocol.stickers
     :members:
-    :undoc-members:
 
 
 Stored playlists
@@ -111,4 +101,3 @@ Stored playlists
 
 .. automodule:: mopidy.frontends.mpd.protocol.stored_playlists
     :members:
-    :undoc-members:
