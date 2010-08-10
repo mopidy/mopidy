@@ -95,8 +95,9 @@ class LibspotifyLibraryController(BaseLibraryController):
 
 class LibspotifyPlaybackController(BasePlaybackController):
     def _pause(self):
-        # TODO
-        return False
+        result = self.backend.gstreamer_pipeline.set_state(gst.STATE_PAUSED)
+        logger.debug('Changed gstreamer state to paused. Result was: %s' % result)
+        return result == gst.STATE_CHANGE_SUCCESS
 
     def _play(self, track):
         self.backend.gstreamer_pipeline.set_state(gst.STATE_READY)
@@ -115,8 +116,9 @@ class LibspotifyPlaybackController(BasePlaybackController):
             return False
 
     def _resume(self):
-        # TODO
-        return False
+        result = self.backend.gstreamer_pipeline.set_state(gst.STATE_PLAYING)
+        logger.debug('Changed gstreamer state to playing. Result was: %s' % result)
+        return result == gst.STATE_CHANGE_SUCCESS
 
     def _seek(self, time_position):
         pass # TODO
