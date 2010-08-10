@@ -1,7 +1,3 @@
-"""
-This is our MPD server implementation.
-"""
-
 import asynchat
 import asyncore
 import logging
@@ -11,15 +7,10 @@ import socket
 import sys
 
 from mopidy import get_mpd_protocol_version, settings
+from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR
 from mopidy.utils import indent, pickle_connection
 
 logger = logging.getLogger('mopidy.frontends.mpd.server')
-
-#: The MPD protocol uses UTF-8 for encoding all data.
-ENCODING = u'utf-8'
-
-#: The MPD protocol uses ``\n`` as line terminator.
-LINE_TERMINATOR = u'\n'
 
 class MpdServer(asyncore.dispatcher):
     """
@@ -31,6 +22,7 @@ class MpdServer(asyncore.dispatcher):
         self.core_queue = core_queue
 
     def start(self):
+        """Start MPD server."""
         try:
             if socket.has_ipv6:
                 self.create_socket(socket.AF_INET6, socket.SOCK_STREAM)
@@ -49,6 +41,7 @@ class MpdServer(asyncore.dispatcher):
             sys.exit('MPD server startup failed: %s' % e)
 
     def handle_accept(self):
+        """Handle new client connection."""
         (client_socket, client_socket_address) = self.accept()
         logger.info(u'MPD client connection from [%s]:%s',
             client_socket_address[0], client_socket_address[1])
@@ -56,6 +49,7 @@ class MpdServer(asyncore.dispatcher):
             self.core_queue).start()
 
     def handle_close(self):
+        """Handle end of client connection."""
         self.close()
 
     def _format_hostname(self, hostname):
@@ -67,7 +61,8 @@ class MpdServer(asyncore.dispatcher):
 
 class MpdSession(asynchat.async_chat):
     """
-    The MPD client session. Dispatches MPD requests to the frontend.
+    The MPD client session. Keeps track of a single client and dispatches its
+    MPD requests to the frontend.
     """
 
     def __init__(self, server, client_socket, client_socket_address,
@@ -81,12 +76,15 @@ class MpdSession(asynchat.async_chat):
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
 
     def start(self):
+        """Start a new client session."""
         self.send_response(u'OK MPD %s' % get_mpd_protocol_version())
 
     def collect_incoming_data(self, data):
+        """Collect incoming data into buffer until a terminator is found."""
         self.input_buffer.append(data)
 
     def found_terminator(self):
+        """Handle request when a terminator is found."""
         data = ''.join(self.input_buffer).strip()
         self.input_buffer = []
         try:
@@ -98,6 +96,7 @@ class MpdSession(asynchat.async_chat):
             logger.warning(u'Received invalid data: %s', e)
 
     def handle_request(self, request):
+        """Handle request by sending it to the MPD frontend."""
         my_end, other_end = multiprocessing.Pipe()
         self.core_queue.put({
             'command': 'mpd_request',
@@ -110,9 +109,11 @@ class MpdSession(asynchat.async_chat):
             self.handle_response(response)
 
     def handle_response(self, response):
+        """Handle response from the MPD frontend."""
         self.send_response(LINE_TERMINATOR.join(response))
 
     def send_response(self, output):
+        """Send a response to the client."""
         logger.debug(u'Output to [%s]:%s: %s', self.client_address,
             self.client_port, indent(output))
         output = u'%s%s' % (output, LINE_TERMINATOR)

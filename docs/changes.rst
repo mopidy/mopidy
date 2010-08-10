@@ -18,6 +18,7 @@ Another great release.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
+  - Split gigantic protocol implementation into eleven modules.
   - Search improvements, including support for multi-word search.
   - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
 

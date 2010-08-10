@@ -52,7 +52,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_stats_method(self):
-        result = self.h._status_stats()
+        result = frontend.status.stats(self.h)
         self.assert_('artists' in result)
         self.assert_(int(result['artists']) >= 0)
         self.assert_('albums' in result)
@@ -73,106 +73,106 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_status_method_contains_volume_which_defaults_to_0(self):
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('volume' in result)
         self.assertEqual(int(result['volume']), 0)
 
     def test_status_method_contains_volume(self):
         self.b.mixer.volume = 17
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('volume' in result)
         self.assertEqual(int(result['volume']), 17)
 
     def test_status_method_contains_repeat_is_0(self):
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('repeat' in result)
         self.assertEqual(int(result['repeat']), 0)
 
     def test_status_method_contains_repeat_is_1(self):
         self.b.playback.repeat = 1
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('repeat' in result)
         self.assertEqual(int(result['repeat']), 1)
 
     def test_status_method_contains_random_is_0(self):
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('random' in result)
         self.assertEqual(int(result['random']), 0)
 
     def test_status_method_contains_random_is_1(self):
         self.b.playback.random = 1
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('random' in result)
         self.assertEqual(int(result['random']), 1)
 
     def test_status_method_contains_single(self):
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('single' in result)
         self.assert_(int(result['single']) in (0, 1))
 
     def test_status_method_contains_consume_is_0(self):
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('consume' in result)
         self.assertEqual(int(result['consume']), 0)
 
     def test_status_method_contains_consume_is_1(self):
         self.b.playback.consume = 1
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('consume' in result)
         self.assertEqual(int(result['consume']), 1)
 
     def test_status_method_contains_playlist(self):
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('playlist' in result)
         self.assert_(int(result['playlist']) in xrange(0, 2**31 - 1))
 
     def test_status_method_contains_playlistlength(self):
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('playlistlength' in result)
         self.assert_(int(result['playlistlength']) >= 0)
 
     def test_status_method_contains_xfade(self):
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('xfade' in result)
         self.assert_(int(result['xfade']) >= 0)
 
     def test_status_method_contains_state_is_play(self):
         self.b.playback.state = self.b.playback.PLAYING
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('state' in result)
         self.assertEqual(result['state'], 'play')
 
     def test_status_method_contains_state_is_stop(self):
         self.b.playback.state = self.b.playback.STOPPED
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('state' in result)
         self.assertEqual(result['state'], 'stop')
 
     def test_status_method_contains_state_is_pause(self):
         self.b.playback.state = self.b.playback.PLAYING
         self.b.playback.state = self.b.playback.PAUSED
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('state' in result)
         self.assertEqual(result['state'], 'pause')
 
     def test_status_method_when_playlist_loaded_contains_song(self):
         self.b.current_playlist.load([Track()])
         self.b.playback.play()
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('song' in result)
         self.assert_(int(result['song']) >= 0)
 
     def test_status_method_when_playlist_loaded_contains_cpid_as_songid(self):
         self.b.current_playlist.load([Track()])
         self.b.playback.play()
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('songid' in result)
         self.assertEqual(int(result['songid']), 1)
 
     def test_status_method_when_playing_contains_time_with_no_length(self):
         self.b.current_playlist.load([Track(length=None)])
         self.b.playback.play()
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('time' in result)
         (position, total) = result['time'].split(':')
         position = int(position)
@@ -182,7 +182,7 @@ class StatusHandlerTest(unittest.TestCase):
     def test_status_method_when_playing_contains_time_with_length(self):
         self.b.current_playlist.load([Track(length=10000)])
         self.b.playback.play()
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('time' in result)
         (position, total) = result['time'].split(':')
         position = int(position)
@@ -192,13 +192,13 @@ class StatusHandlerTest(unittest.TestCase):
     def test_status_method_when_playing_contains_elapsed(self):
         self.b.playback.state = self.b.playback.PAUSED
         self.b.playback._play_time_accumulated = 59123
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('elapsed' in result)
         self.assertEqual(int(result['elapsed']), 59123)
 
     def test_status_method_when_playing_contains_bitrate(self):
         self.b.current_playlist.load([Track(bitrate=320)])
         self.b.playback.play()
-        result = dict(self.h._status_status())
+        result = dict(frontend.status.status(self.h))
         self.assert_('bitrate' in result)
         self.assertEqual(int(result['bitrate']), 320)

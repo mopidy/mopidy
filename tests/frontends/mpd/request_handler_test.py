@@ -29,7 +29,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_finding_handler_for_known_command_returns_handler_and_kwargs(self):
         expected_handler = lambda x: None
-        frontend._request_handlers['known_command (?P<arg1>.+)'] = \
+        frontend.request_handlers['known_command (?P<arg1>.+)'] = \
             expected_handler
         (handler, kwargs) = self.h.find_handler('known_command an_arg')
         self.assertEqual(handler, expected_handler)
@@ -42,7 +42,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_handling_known_request(self):
         expected = 'magic'
-        frontend._request_handlers['known request'] = lambda x: expected
+        frontend.request_handlers['known request'] = lambda x: expected
         result = self.h.handle_request('known request')
         self.assert_(u'OK' in result)
         self.assert_(expected in result)

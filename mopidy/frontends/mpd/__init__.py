@@ -1,3 +1,5 @@
+import re
+
 from mopidy import MopidyException
 
 class MpdAckError(MopidyException):
@@ -55,3 +57,37 @@ class MpdNotImplemented(MpdAckError):
     def __init__(self, *args, **kwargs):
         super(MpdNotImplemented, self).__init__(*args, **kwargs)
         self.message = u'Not implemented'
+
+mpd_commands = set()
+request_handlers = {}
+
+def handle_pattern(pattern):
+    """
+    Decorator for connecting command handlers to command patterns.
+
+    If you use named groups in the pattern, the decorated method will get the
+    groups as keyword arguments. If the group is optional, remember to give the
+    argument a default value.
+
+    For example, if the command is ``do that thing`` the ``what`` argument will
+    be ``this thing``::
+
+        @handle_pattern('^do (?P<what>.+)$')
+        def do(what):
+            ...
+
+    :param pattern: regexp pattern for matching commands
+    :type pattern: string
+    """
+    def decorator(func):
+        match = re.search('([a-z_]+)', pattern)
+        if match is not None:
+            mpd_commands.add(match.group())
+        if pattern in request_handlers:
+            raise ValueError(u'Tried to redefine handler for %s with %s' % (
+                pattern, func))
+        request_handlers[pattern] = func
+        func.__doc__ = '        - **Pattern:** ``%s``\n\n%s' % (
+            pattern, func.__doc__ or '')
+        return func
+    return decorator
