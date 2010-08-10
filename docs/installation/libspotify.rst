@@ -35,13 +35,13 @@ Installing pyspotify
 
 Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
-    sudo aptitude install python-alsaaudio
+    sudo aptitude install python-dev python-alsaaudio
 
 Check out the pyspotify code, and install it::
 
     git clone git://github.com/jodal/pyspotify.git
     cd pyspotify/pyspotify/
-    sudo python setup.py develop
+    sudo python setup.py install
 
 Apply for an application key at
 https://developer.spotify.com/en/libspotify/application-key, download the
