@@ -27,16 +27,22 @@ Build and install Despotify::
     cd despotify/src/
     sudo make install
 
+When Despotify has been installed, continue with :ref:`spytify_installation`.
+
 
 Installing Despotify on OS X
 ============================
 
-In OS X you need to have `XCode <http://developer.apple.com/tools/xcode/>`_
-installed, and `Homebrew <http://mxcl.github.com/homebrew/>`_. Then, install
+In OS X you need to have `XCode <http://developer.apple.com/tools/xcode/>`_ and
+`Homebrew <http://mxcl.github.com/homebrew/>`_ installed. Then, to install
 Despotify::
 
     brew install despotify
 
+When Despotify has been installed, continue with :ref:`spytify_installation`.
+
+
+.. _spytify_installation:
 
 Installing spytify
 ==================

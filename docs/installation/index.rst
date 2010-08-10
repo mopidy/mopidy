@@ -7,11 +7,11 @@ Mopidy itself is a breeze to install, as it just requires a standard Python
 service is far more tricky to get working for the time being. Until
 installation of these libraries are either well documented by their developers,
 or the libraries are packaged for various Linux distributions, we will supply
-our own installation guides.
+our own installation guides, as linked to below.
 
 
-Dependencies
-============
+Install dependencies
+====================
 
 .. toctree::
     :hidden:
@@ -19,6 +19,8 @@ Dependencies
     despotify
     libspotify
     gstreamer
+
+Make sure you got the required dependencies installed.
 
 - Python >= 2.6, < 3
 - Dependencies for at least one Mopidy mixer:
@@ -29,7 +31,7 @@ Dependencies
 
   - OsaMixer (OS X only)
 
-    - Nothing needed.
+    - No additional dependencies.
 
 - Dependencies for at least one Mopidy backend:
 
