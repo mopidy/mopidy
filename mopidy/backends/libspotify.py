@@ -1,4 +1,5 @@
 import datetime as dt
+import gobject
 import logging
 import os
 import multiprocessing
@@ -203,14 +204,15 @@ class GstreamerMessageBusProcess(threading.Thread):
         self.bus = pipeline.get_bus()
 
     def run(self):
+        loop = gobject.MainLoop()
+        gobject.threads_init()
+        context = loop.get_context()
         while True:
-            message = self.bus.pop()
+            message = self.bus.pop_filtered(gst.MESSAGE_EOS)
             if message is not None:
-                logger.debug('Got Gstreamer message of type: %s' % message.type)
-            if message is not None and (
-                    message.type == gst.MESSAGE_EOS
-                    or message.type == gst.MESSAGE_ERROR):
                 self.core_queue.put({'command': 'end_of_track'})
+                logger.debug('Got and handled Gstreamer message of type: %s' % message.type)
+            context.iteration(True)
 
 class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
