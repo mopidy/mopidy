@@ -26,25 +26,33 @@ Make sure you got the required dependencies installed.
 - :doc:`GStreamer <gstreamer>` (>= 0.10 ?) with Python bindings
 - Dependencies for at least one Mopidy mixer:
 
-  - AlsaMixer (Linux only)
+  - :mod:`mopidy.mixers.alsa` (Linux only)
 
     - pyalsaaudio >= 0.2 (Debian/Ubuntu package: python-alsaaudio)
 
-  - OsaMixer (OS X only)
+  - :mod:`mopidy.mixers.denon` (Linux, OS X, and Windows)
+
+    - pyserial (Debian/Ubuntu package: python-serial)
+
+  - :mod:`mopidy.mixers.nad` (Linux, OS X, and Windows)
+
+    - pyserial (Debian/Ubuntu package: python-serial)
+
+  - :mod:`mopidy.mixers.osa` (OS X only)
 
     - No additional dependencies.
 
 - Dependencies for at least one Mopidy backend:
 
-  - DespotifyBackend (Linux and OS X)
+  - :mod:`mopidy.backends.despotify` (Linux and OS X)
 
     - :doc:`Despotify and spytify <despotify>`
 
-  - LibspotifyBackend (Linux, OS X, and Windows)
+  - :mod:`mopidy.backends.libspotify` (Linux, OS X, and Windows)
 
     - :doc:`libspotify and pyspotify <libspotify>`
 
-  - LocalBackend (Linux, OS X, and Windows)
+  - :mod:`mopidy.backends.local` (Linux, OS X, and Windows)
 
     - No additional dependencies.
 
