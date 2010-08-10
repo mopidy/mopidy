@@ -92,7 +92,7 @@ def load(frontend, name):
         frontend.backend.current_playlist.load(matches[0].tracks)
 
 @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
-def _stored_playlist_playlistadd(frontend, name, uri):
+def playlistadd(frontend, name, uri):
     """
     *musicpd.org, stored playlists section:*
 
@@ -105,7 +105,7 @@ def _stored_playlist_playlistadd(frontend, name, uri):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^playlistclear "(?P<name>[^"]+)"$')
-def _stored_playlist_playlistclear(frontend, name):
+def playlistclear(frontend, name):
     """
     *musicpd.org, stored playlists section:*
 
@@ -116,7 +116,7 @@ def _stored_playlist_playlistclear(frontend, name):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^playlistdelete "(?P<name>[^"]+)" "(?P<songpos>\d+)"$')
-def _stored_playlist_playlistdelete(frontend, name, songpos):
+def playlistdelete(frontend, name, songpos):
     """
     *musicpd.org, stored playlists section:*
 
@@ -128,7 +128,7 @@ def _stored_playlist_playlistdelete(frontend, name, songpos):
 
 @handle_pattern(r'^playlistmove "(?P<name>[^"]+)" '
     r'"(?P<from_pos>\d+)" "(?P<to_pos>\d+)"$')
-def _stored_playlist_playlistmove(frontend, name, from_pos, to_pos):
+def playlistmove(frontend, name, from_pos, to_pos):
     """
     *musicpd.org, stored playlists section:*
 
