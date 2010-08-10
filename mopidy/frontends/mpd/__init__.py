@@ -87,7 +87,7 @@ def handle_pattern(pattern):
             raise ValueError(u'Tried to redefine handler for %s with %s' % (
                 pattern, func))
         request_handlers[pattern] = func
-        func.__doc__ = '        - **Pattern:** ``%s``\n\n%s' % (
+        func.__doc__ = '    - *Pattern:* ``%s``\n\n%s' % (
             pattern, func.__doc__ or '')
         return func
     return decorator
