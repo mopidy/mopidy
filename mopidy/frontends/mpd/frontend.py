@@ -1,0 +1,79 @@
+import logging
+import re
+
+from mopidy.frontends.mpd import (mpd_commands, request_handlers,
+    handle_pattern, MpdAckError, MpdArgError, MpdUnknownCommand)
+# Do not remove the following import. The protocol modules must be imported to
+# get them registered as request handlers.
+from mopidy.frontends.mpd.protocol import (audio_output, command_list,
+    connection, current_playlist, music_db, playback, reflection, status,
+    stickers, stored_playlists)
+from mopidy.utils import flatten
+
+logger = logging.getLogger('mopidy.frontends.mpd.frontend')
+
+class MpdFrontend(object):
+    """
+    The MPD frontend dispatches MPD requests to the correct handler.
+    """
+
+    def __init__(self, backend=None):
+        self.backend = backend
+        self.command_list = False
+        self.command_list_ok = False
+
+    def handle_request(self, request, command_list_index=None):
+        """Dispatch incoming requests to the correct handler."""
+        if self.command_list is not False and request != u'command_list_end':
+            self.command_list.append(request)
+            return None
+        try:
+            (handler, kwargs) = self.find_handler(request)
+            result = handler(self, **kwargs)
+        except MpdAckError as e:
+            if command_list_index is not None:
+                e.index = command_list_index
+            return self.handle_response(e.get_mpd_ack(), add_ok=False)
+        if request in (u'command_list_begin', u'command_list_ok_begin'):
+            return None
+        if command_list_index is not None:
+            return self.handle_response(result, add_ok=False)
+        return self.handle_response(result)
+
+    def find_handler(self, request):
+        """Find the correct handler for a request."""
+        for pattern in request_handlers:
+            matches = re.match(pattern, request)
+            if matches is not None:
+                return (request_handlers[pattern], matches.groupdict())
+        command = request.split(' ')[0]
+        if command in mpd_commands:
+            raise MpdArgError(u'incorrect arguments', command=command)
+        raise MpdUnknownCommand(command=command)
+
+    def handle_response(self, result, add_ok=True):
+        """Format the response from a request handler."""
+        response = []
+        if result is None:
+            result = []
+        elif isinstance(result, set):
+            result = list(result)
+        elif not isinstance(result, list):
+            result = [result]
+        for line in flatten(result):
+            if isinstance(line, dict):
+                for (key, value) in line.items():
+                    response.append(u'%s: %s' % (key, value))
+            elif isinstance(line, tuple):
+                (key, value) = line
+                response.append(u'%s: %s' % (key, value))
+            else:
+                response.append(line)
+        if add_ok and (not response or not response[-1].startswith(u'ACK')):
+            response.append(u'OK')
+        return response
+
+@handle_pattern(r'^$')
+def empty(frontend):
+    """The original MPD server returns ``OK`` on an empty request."""
+    pass

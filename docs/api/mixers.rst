@@ -13,6 +13,17 @@ simply instantiate a mixer and read/write to the ``volume`` attribute::
     >>> mixer.volume
     80
 
+Most users will use one of the internal mixers which controls the volume on the
+computer running Mopidy. If you do not specify which mixer you want to use in
+the settings, Mopidy will choose one for you based upon what OS you run. See
+:attr:`mopidy.settings.MIXER` for the defaults.
+
+Mopidy also supports controlling volume on other hardware devices instead of on
+the computer running Mopidy through the use of custom mixer implementations. To
+enable one of the hardware device mixers, you must the set
+:attr:`mopidy.settings.MIXER` setting to point to one of the classes found
+below, and possibly add some extra settings required by the mixer you choose.
+
 
 Mixer API
 =========
@@ -21,76 +32,56 @@ All mixers should subclass :class:`mopidy.mixers.BaseMixer` and override
 methods as described below.
 
 .. automodule:: mopidy.mixers
-    :synopsis: Sound mixer interface.
+    :synopsis: Mixer API
     :members:
     :undoc-members:
 
 
-Internal mixers
-===============
-
-Most users will use one of these internal mixers which controls the volume on
-the computer running Mopidy. If you do not specify which mixer you want to use
-in the settings, Mopidy will choose one for you based upon what OS you run. See
-:attr:`mopidy.settings.MIXER` for the defaults.
-
-
-:mod:`mopidy.mixers.alsa` -- ALSA mixer
----------------------------------------
+:mod:`mopidy.mixers.alsa` -- ALSA mixer for Linux
+=================================================
 
 .. automodule:: mopidy.mixers.alsa
-    :synopsis: ALSA mixer for Linux.
+    :synopsis: ALSA mixer for Linux
     :members:
 
 .. inheritance-diagram:: mopidy.mixers.alsa.AlsaMixer
 
 
-:mod:`mopidy.mixers.dummy` -- Dummy mixer
------------------------------------------
-
-.. automodule:: mopidy.mixers.dummy
-    :synopsis: Dummy mixer for testing.
-    :members:
-
-.. inheritance-diagram:: mopidy.mixers.dummy
-
-
-:mod:`mopidy.mixers.osa` -- Osa mixer
--------------------------------------
-
-.. automodule:: mopidy.mixers.osa
-    :synopsis: Osa mixer for OS X.
-    :members:
-
-.. inheritance-diagram:: mopidy.mixers.osa
-
-
-External device mixers
-======================
-
-Mopidy supports controlling volume on external devices instead of on the
-computer running Mopidy through the use of custom mixer implementations. To
-enable one of the following mixers, you must the set
-:attr:`mopidy.settings.MIXER` setting to point to one of the classes
-found below, and possibly add some extra settings required by the mixer you
-choose.
-
-
-:mod:`mopidy.mixers.denon` -- Denon amplifier mixer
----------------------------------------------------
+:mod:`mopidy.mixers.denon` -- Hardware mixer for Denon amplifiers
+=================================================================
 
 .. automodule:: mopidy.mixers.denon
-    :synopsis: Denon amplifier mixer.
+    :synopsis: Hardware mixer for Denon amplifiers
     :members:
 
 .. inheritance-diagram:: mopidy.mixers.denon
 
 
-:mod:`mopidy.mixers.nad` -- NAD amplifier mixer
------------------------------------------------
+:mod:`mopidy.mixers.dummy` -- Dummy mixer for testing
+=====================================================
+
+.. automodule:: mopidy.mixers.dummy
+    :synopsis: Dummy mixer for testing
+    :members:
+
+.. inheritance-diagram:: mopidy.mixers.dummy
+
+
+:mod:`mopidy.mixers.osa` -- Osa mixer for OS X
+==============================================
+
+.. automodule:: mopidy.mixers.osa
+    :synopsis: Osa mixer for OS X
+    :members:
+
+.. inheritance-diagram:: mopidy.mixers.osa
+
+
+:mod:`mopidy.mixers.nad` -- Hardware mixer for NAD amplifiers
+=============================================================
 
 .. automodule:: mopidy.mixers.nad
-    :synopsis: NAD amplifier mixer.
+    :synopsis: Hardware mixer for NAD amplifiers
     :members:
 
 .. inheritance-diagram:: mopidy.mixers.nad

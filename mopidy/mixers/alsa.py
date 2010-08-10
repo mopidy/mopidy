@@ -26,7 +26,8 @@ class AlsaMixer(BaseMixer):
                 return control
             else:
                 logger.debug(u'Mixer control not found, skipping: %s', control)
-        logger.warning(u'No working mixer controls found. Tried: %s', candidates)
+        logger.warning(u'No working mixer controls found. Tried: %s',
+            candidates)
 
     def _get_mixer_control_candidates(self):
         """

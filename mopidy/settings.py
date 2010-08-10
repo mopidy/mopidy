@@ -41,8 +41,8 @@ DUMP_LOG_FILENAME = u'dump.log'
 
 #: Protocol frontend to use. Default::
 #:
-#:     FRONTEND = u'mopidy.mpd.frontend.MpdFrontend'
-FRONTEND = u'mopidy.mpd.frontend.MpdFrontend'
+#:     FRONTEND = u'mopidy.frontends.mpd.frontend.MpdFrontend'
+FRONTEND = u'mopidy.frontends.mpd.frontend.MpdFrontend'
 
 #: Path to folder with local music. Default::
 #:
@@ -107,8 +107,8 @@ MIXER_EXT_SPEAKERS_B = None
 
 #: Server to use. Default::
 #:
-#:     SERVER = u'mopidy.mpd.server.MpdServer'
-SERVER = u'mopidy.mpd.server.MpdServer'
+#:     SERVER = u'mopidy.frontends.mpd.server.MpdServer'
+SERVER = u'mopidy.frontends.mpd.server.MpdServer'
 
 #: Which address Mopidy should bind to. Examples:
 #:

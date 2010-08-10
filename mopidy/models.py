@@ -1,6 +1,6 @@
 from copy import copy
 
-from mopidy.mpd import serializer
+from mopidy.frontends.mpd import serializer
 
 class ImmutableObject(object):
     """

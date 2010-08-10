@@ -1,0 +1,31 @@
+import unittest
+
+from mopidy.backends.dummy import DummyBackend
+from mopidy.frontends.mpd import frontend
+from mopidy.mixers.dummy import DummyMixer
+
+class ConnectionHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.m = DummyMixer()
+        self.b = DummyBackend(mixer=self.m)
+        self.h = frontend.MpdFrontend(backend=self.b)
+
+    def test_close(self):
+        result = self.h.handle_request(u'close')
+        self.assert_(u'OK' in result)
+
+    def test_empty_request(self):
+        result = self.h.handle_request(u'')
+        self.assert_(u'OK' in result)
+
+    def test_kill(self):
+        result = self.h.handle_request(u'kill')
+        self.assert_(u'OK' in result)
+
+    def test_password(self):
+        result = self.h.handle_request(u'password "secret"')
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+
+    def test_ping(self):
+        result = self.h.handle_request(u'ping')
+        self.assert_(u'OK' in result)
