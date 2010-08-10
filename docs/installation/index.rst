@@ -3,11 +3,11 @@ Installation
 ************
 
 Mopidy itself is a breeze to install, as it just requires a standard Python
-2.6 or newer installation. The libraries we depend on to connect to the Spotify
-service is far more tricky to get working for the time being. Until
-installation of these libraries are either well documented by their developers,
-or the libraries are packaged for various Linux distributions, we will supply
-our own installation guides, as linked to below.
+installation and the GStreamer library. The libraries we depend on to connect
+to the Spotify service is far more tricky to get working for the time being.
+Until installation of these libraries are either well documented by their
+developers, or the libraries are packaged for various Linux distributions, we
+will supply our own installation guides, as linked to below.
 
 
 Install dependencies
@@ -16,13 +16,14 @@ Install dependencies
 .. toctree::
     :hidden:
 
-    despotify
-    libspotify
     gstreamer
+    libspotify
+    despotify
 
 Make sure you got the required dependencies installed.
 
 - Python >= 2.6, < 3
+- :doc:`GStreamer <gstreamer>` (>= 0.10 ?) with Python bindings
 - Dependencies for at least one Mopidy mixer:
 
   - AlsaMixer (Linux only)
@@ -45,7 +46,7 @@ Make sure you got the required dependencies installed.
 
   - LocalBackend (Linux, OS X, and Windows)
 
-    - :doc:`GStreamer <gstreamer>`
+    - No additional dependencies.
 
 
 Install latest release
