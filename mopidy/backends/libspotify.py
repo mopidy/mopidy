@@ -196,6 +196,21 @@ class LibspotifyTranslator(object):
             tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
         )
 
+class GstreamerMessageBusProcess(threading.Thread):
+    def __init__(self, core_queue, pipeline):
+        super(GstreamerMessageBusProcess, self).__init__()
+        self.core_queue = core_queue
+        self.bus = pipeline.get_bus()
+
+    def run(self):
+        while True:
+            message = self.bus.pop()
+            if message is not None:
+                logger.debug('Got Gstreamer message of type: %s' % message.type)
+            if message is not None and (
+                    message.type == gst.MESSAGE_EOS
+                    or message.type == gst.MESSAGE_ERROR):
+                self.core_queue.put({'command': 'end_of_track'})
 
 class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
@@ -228,6 +243,9 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         self.gstreamer_pipeline.add(self.gsrc, self.gsink)
 
         gst.element_link_many(self.gsrc, self.gsink)
+
+        message_process = GstreamerMessageBusProcess(self.core_queue, self.gstreamer_pipeline)
+        message_process.start()
 
     def run(self):
         self.connect()
@@ -292,8 +310,9 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def end_of_track(self, session):
         """Callback used by pyspotify"""
-        logger.debug('End of track')
-        self.core_queue.put({'command': 'end_of_track'})
+        logger.debug('End of track.')
+        self.gsrc.emit('end-of-stream')
+        logger.debug('End of stream sent to gstreamer.')
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
