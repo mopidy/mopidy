@@ -131,8 +131,8 @@ To start Mopidy, simply open a terminal and run::
 
 When Mopidy says ``MPD server running at [localhost]:6600`` it's ready to
 accept connections by any MPD client. You can find a list of tons of MPD
-clients at http://mpd.wikia.com/wiki/Clients. We use Sonata, GMPC, ncmpc, and
-ncmpcpp during development. The first two are GUI clients, while the last two
-are terminal clients.
+clients at http://mpd.wikia.com/wiki/Clients. We use GMPC and
+ncmpcpp during development. The first is a GUI client, and the second is a
+terminal client.
 
 To stop Mopidy, press ``CTRL+C``.
