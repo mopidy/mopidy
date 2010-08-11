@@ -42,7 +42,8 @@ class GStreamerProcess(BaseProcess):
         # Setup bus and message processor
         self.gst_bus = self.gst_pipeline.get_bus()
         self.gst_bus.add_signal_watch()
-        self.gst_bus_id = self.gst_bus.connect('message', self.process_message)
+        self.gst_bus_id = self.gst_bus.connect('message',
+            self.process_gst_message)
 
         # Bin for playing audio URIs
         self.gst_uri_src = gst.element_factory_make('uridecodebin', 'uri_src')
@@ -72,7 +73,12 @@ class GStreamerProcess(BaseProcess):
             # TODO Handle commands
             self.gobject_context.iteration(True)
 
-    def process_message(self, bus, message):
+    def process_core_message(self, message):
+        """Processes messages from the rest of Mopidy."""
+        pass # TODO
+
+    def process_gst_message(self, bus, message):
+        """Processes message from GStreamer."""
         if message.type == gst.MESSAGE_EOS:
             pass # TODO Handle end of track/stream
         elif message.type == gst.MESSAGE_ERROR:
