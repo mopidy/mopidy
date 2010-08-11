@@ -7,8 +7,8 @@ class GStreamerMixer(BaseMixer):
         super(GStreamerMixer, self).__init__(*args, **kwargs)
 
     def _get_volume(self):
-        # TODO Get volume from GStreamerProcess
+        pass # TODO Get volume from GStreamerProcess
 
     def _set_volume(self, volume):
-        # TODO Send volume to GStreamerProcess
+        pass # TODO Send volume to GStreamerProcess
 
