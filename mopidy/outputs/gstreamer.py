@@ -29,8 +29,25 @@ class GStreamerProcess(BaseProcess):
     """
 
     def __init__(self, core_queue):
+        super(GStreamerProcess, self).__init__()
         self.core_queue = core_queue
+        self.gobject_context = None
+        self.gst_pipeline = None
+        self.gst_bus = None
+        self.gst_bus_id = None
+        self.gst_uri_src = None
+        self.gst_data_src = None
+        self.gst_volume = None
+        self.gst_sink = None
 
+    def _run(self):
+        self.setup()
+        while True:
+            message = self.core_queue.get()
+            self.process_core_message(message)
+            self.gobject_context.iteration(True)
+
+    def setup(self):
         # See http://www.jejik.com/articles/2007/01/
         # python-gstreamer_threading_and_the_main_loop/ for details.
         gobject.threads_init()
@@ -67,11 +84,6 @@ class GStreamerProcess(BaseProcess):
         # The audio data chain
         gst.element_link_many(self.gst_data_src, self.gst_volume,
             self.gst_sink)
-
-    def _run(self):
-        while True:
-            # TODO Handle commands
-            self.gobject_context.iteration(True)
 
     def process_core_message(self, message):
         """Processes messages from the rest of Mopidy."""
