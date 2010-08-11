@@ -37,30 +37,30 @@ class CoreProcess(BaseProcess):
     def __init__(self, core_queue):
         super(CoreProcess, self).__init__()
         self.core_queue = core_queue
-        self._backend = None
-        self._frontend = None
+        self.backend = None
+        self.frontend = None
 
     def run_inside_try(self):
-        self._setup()
+        self.setup()
         while True:
             message = self.core_queue.get()
-            self._process_message(message)
+            self.process_message(message)
 
-    def _setup(self):
-        self._backend = get_class(settings.BACKENDS[0])(
+    def setup(self):
+        self.backend = get_class(settings.BACKENDS[0])(
             core_queue=self.core_queue)
-        self._frontend = get_class(settings.FRONTEND)(backend=self._backend)
+        self.frontend = get_class(settings.FRONTEND)(backend=self.backend)
 
-    def _process_message(self, message):
+    def process_message(self, message):
         if message['command'] == 'mpd_request':
-            response = self._frontend.handle_request(message['request'])
+            response = self.frontend.handle_request(message['request'])
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
         elif message['command'] == 'end_of_track':
-            self._backend.playback.end_of_track_callback()
+            self.backend.playback.end_of_track_callback()
         elif message['command'] == 'stop_playback':
-            self._backend.playback.stop()
+            self.backend.playback.stop()
         elif message['command'] == 'set_stored_playlists':
-            self._backend.stored_playlists.playlists = message['playlists']
+            self.backend.stored_playlists.playlists = message['playlists']
         else:
             logger.warning(u'Cannot handle message: %s', message)
