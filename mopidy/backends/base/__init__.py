@@ -23,13 +23,17 @@ class BaseBackend(object):
     :param core_queue: a queue for sending messages to
         :class:`mopidy.process.CoreProcess`
     :type core_queue: :class:`multiprocessing.Queue`
+    :param output_connection: a connection for sending messages to the
+        output process
+    :type output_connection: :class:`multiprocessing.Connection`
     :param mixer: either a mixer instance, or :class:`None` to use the mixer
         defined in settings
     :type mixer: :class:`mopidy.mixers.BaseMixer` or :class:`None`
     """
 
-    def __init__(self, core_queue=None, mixer=None):
+    def __init__(self, core_queue=None, output_connection=None, mixer=None):
         self.core_queue = core_queue
+        self.output_connection = output_connection
         if mixer is not None:
             self.mixer = mixer
         else:

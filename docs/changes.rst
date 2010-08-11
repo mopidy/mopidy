@@ -35,6 +35,9 @@ Another great release.
   - :meth:`mopidy.backends.base.BaseLibraryController.search()` now accepts
     keyword arguments of the form ``search(artist=['foo', 'fighters'],
     album=['bar', 'grooves'])``.
+  - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
+    ``output_connection`` which it can use to send messages (i.e. audio data)
+    to the output process.
 
 
 
