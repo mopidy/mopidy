@@ -107,49 +107,25 @@ class GStreamerProcess(BaseProcess):
 
     def play_uri(self, uri):
         """Play audio at URI"""
-        self.state_ready()
+        self.set_state('READY')
         self.gst_uri_src.set_property('uri', uri)
-        self.state_playing()
+        self.set_state('PLAYING')
         # TODO Return status
 
-    def state_playing(self):
+    def set_state(self, state_name):
         """
-        Set the state to PLAYING.
+        Set the GStreamer state. Returns :class:`True` if successful.
 
-        Previous state should be READY or PAUSED.
+        :param state_name: READY, PLAYING, or PAUSED
+        :type state_name: string
+        :rtype: :class:`True` or :class:`False`
         """
-        result = self.gst_uri_src.set_state(gst.STATE_PLAYING)
+        result = self.gst_uri_src.set_state(getattr(gst, 'STATE_' + state_name)
         if result == gst.STATE_CHANGE_SUCCESS:
-            logger.debug('Setting GStreamer state to PLAYING: OK')
+            logger.debug('Setting GStreamer state to %s: OK', state_name)
             return True
         else:
-            logger.warning('Setting GStreamer state to PLAYING: failed')
-            return False
-
-    def state_paused(self):
-        """
-        Set the state to PAUSED.
-
-        Previous state should be PLAYING.
-        """
-        result = self.gst_uri_src.set_state(gst.STATE_PAUSED)
-        if result == gst.STATE_CHANGE_SUCCESS:
-            logger.debug('Setting GStreamer state to PAUSED: OK')
-            return True
-        else:
-            logger.warning('Setting GStreamer state to PAUSED: failed')
-            return False
-
-    def state_ready(self):
-        """
-        Set the state to READY.
-        """
-        result = self.gst_uri_src.set_state(gst.STATE_READY)
-        if result == gst.STATE_CHANGE_SUCCESS:
-            logger.debug('Setting GStreamer state to READY: OK')
-            return True
-        else:
-            logger.warning('Setting GStreamer state to READY: failed')
+            logger.warning('Setting GStreamer state to %s: failed', state_name)
             return False
 
     def get_volume(self):
