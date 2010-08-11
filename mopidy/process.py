@@ -51,7 +51,8 @@ class CoreProcess(BaseProcess):
     def setup(self):
         (recv_end, self.output_connection) = multiprocessing.Pipe(False)
         self.output = get_class(settings.OUTPUT)(self.core_queue, recv_end)
-        self.backend = get_class(settings.BACKENDS[0])(self.core_queue)
+        self.backend = get_class(settings.BACKENDS[0])(self.core_queue,
+            self.output_connection)
         self.frontend = get_class(settings.FRONTEND)(self.backend)
 
     def process_message(self, message):
