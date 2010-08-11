@@ -6,7 +6,7 @@ pygst.require('0.10')
 import gst
 import logging
 
-from mopidy.process import BaseProcess
+from mopidy.process import BaseProcess, unpickle_connection
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
@@ -25,7 +25,7 @@ class GStreamerProcess(BaseProcess):
     """
     A process for all work related to GStreamer.
 
-    The main loop polls for events from both Mopidy and GStreamer.
+    The main loop processes events from both Mopidy and GStreamer.
     """
 
     def __init__(self, core_queue):
@@ -86,11 +86,24 @@ class GStreamerProcess(BaseProcess):
             self.gst_sink)
 
     def process_core_message(self, message):
-        """Processes messages from the rest of Mopidy."""
-        pass # TODO
+        """Process messages from the rest of Mopidy."""
+        assert message['to'] == 'gstreamer', 'Message must be addressed to us'
+        if message['command'] == 'play_uri':
+            response = self.play_uri(message['uri'])
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
+        elif message['command'] == 'deliver_data':
+            # TODO Do we care about sending responses for every data delivery?
+            self.deliver_data(message['caps'], message['data'])
+        elif message['command'] == 'set_state':
+            response = self.set_state(message['state'])
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
+        else:
+            logger.warning(u'Cannot handle message: %s', message)
 
     def process_gst_message(self, bus, message):
-        """Processes message from GStreamer."""
+        """Process messages from GStreamer."""
         if message.type == gst.MESSAGE_EOS:
             pass # TODO Handle end of track/stream
         elif message.type == gst.MESSAGE_ERROR:
