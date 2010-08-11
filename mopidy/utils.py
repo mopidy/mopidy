@@ -1,7 +1,5 @@
 import logging
-from multiprocessing.reduction import reduce_connection
 import os
-import pickle
 import sys
 import urllib
 
@@ -53,14 +51,6 @@ def indent(string, places=4, linebreak='\n'):
     for line in lines:
         result += linebreak + ' ' * places + line
     return result
-
-def pickle_connection(connection):
-    return pickle.dumps(reduce_connection(connection))
-
-def unpickle_connection(pickled_connection):
-    # From http://stackoverflow.com/questions/1446004
-    (func, args) = pickle.loads(pickled_connection)
-    return func(*args)
 
 def parse_m3u(file_path):
     """

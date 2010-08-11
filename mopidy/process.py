@@ -1,16 +1,27 @@
 import logging
 import multiprocessing
+from multiprocessing.reduction import reduce_connection
+import pickle
 import sys
 
 from mopidy import settings, SettingsError
-from mopidy.utils import get_class, unpickle_connection
+from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.process')
+
+def pickle_connection(connection):
+    return pickle.dumps(reduce_connection(connection))
+
+def unpickle_connection(pickled_connection):
+    # From http://stackoverflow.com/questions/1446004
+    (func, args) = pickle.loads(pickled_connection)
+    return func(*args)
+
 
 class BaseProcess(multiprocessing.Process):
     def run(self):
         try:
-            self._run()
+            self.run_inside_try()
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
             sys.exit(0)
@@ -18,7 +29,7 @@ class BaseProcess(multiprocessing.Process):
             logger.error(e.message)
             sys.exit(1)
 
-    def _run(self):
+    def run_inside_try(self):
         raise NotImplementedError
 
 
@@ -26,30 +37,37 @@ class CoreProcess(BaseProcess):
     def __init__(self, core_queue):
         super(CoreProcess, self).__init__()
         self.core_queue = core_queue
-        self._backend = None
-        self._frontend = None
+        self.output_queue = None
+        self.output = None
+        self.backend = None
+        self.frontend = None
 
-    def _run(self):
-        self._setup()
+    def run_inside_try(self):
+        self.setup()
         while True:
             message = self.core_queue.get()
-            self._process_message(message)
+            self.process_message(message)
 
-    def _setup(self):
-        self._backend = get_class(settings.BACKENDS[0])(
-            core_queue=self.core_queue)
-        self._frontend = get_class(settings.FRONTEND)(backend=self._backend)
+    def setup(self):
+        self.output_queue = multiprocessing.Queue()
+        self.output = get_class(settings.OUTPUT)(self.core_queue,
+            self.output_queue)
+        self.backend = get_class(settings.BACKENDS[0])(self.core_queue,
+            self.output_queue)
+        self.frontend = get_class(settings.FRONTEND)(self.backend)
 
-    def _process_message(self, message):
-        if message['command'] == 'mpd_request':
-            response = self._frontend.handle_request(message['request'])
+    def process_message(self, message):
+        if message.get('to') == 'output':
+            self.output_queue.put(message)
+        elif message['command'] == 'mpd_request':
+            response = self.frontend.handle_request(message['request'])
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
         elif message['command'] == 'end_of_track':
-            self._backend.playback.end_of_track_callback()
+            self.backend.playback.end_of_track_callback()
         elif message['command'] == 'stop_playback':
-            self._backend.playback.stop()
+            self.backend.playback.stop()
         elif message['command'] == 'set_stored_playlists':
-            self._backend.stored_playlists.playlists = message['playlists']
+            self.backend.stored_playlists.playlists = message['playlists']
         else:
             logger.warning(u'Cannot handle message: %s', message)

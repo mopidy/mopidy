@@ -105,6 +105,11 @@ MIXER_EXT_SPEAKERS_A = None
 #: Default: :class:`None`.
 MIXER_EXT_SPEAKERS_B = None
 
+#: Audio output handler to use. Default::
+#:
+#:     OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
+OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
+
 #: Server to use. Default::
 #:
 #:     SERVER = u'mopidy.frontends.mpd.server.MpdServer'
