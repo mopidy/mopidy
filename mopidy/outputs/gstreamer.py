@@ -19,8 +19,8 @@ class GStreamerOutput(object):
     Starts the :class:`GStreamerProcess`.
     """
 
-    def __init__(self, core_queue, input_connection):
-        process = GStreamerProcess(core_queue, input_connection)
+    def __init__(self, core_queue, output_queue):
+        process = GStreamerProcess(core_queue, output_queue)
         process.start()
 
 class GStreamerMessagesThread(threading.Thread):
@@ -39,10 +39,10 @@ class GStreamerProcess(BaseProcess):
     http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html.
     """
 
-    def __init__(self, core_queue, input_connection):
+    def __init__(self, core_queue, output_queue):
         super(GStreamerProcess, self).__init__()
         self.core_queue = core_queue
-        self.input_connection = input_connection
+        self.output_queue = output_queue
         self.gst_pipeline = None
         self.gst_bus = None
         self.gst_bus_id = None
@@ -54,9 +54,8 @@ class GStreamerProcess(BaseProcess):
     def run_inside_try(self):
         self.setup()
         while True:
-            if self.input_connection.poll(None):
-                message = self.input_connection.recv()
-                self.process_mopidy_message(message)
+            message = self.output_queue.get()
+            self.process_mopidy_message(message)
 
     def setup(self):
         logger.debug(u'Setting up GStreamer pipeline')

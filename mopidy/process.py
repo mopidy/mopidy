@@ -37,7 +37,7 @@ class CoreProcess(BaseProcess):
     def __init__(self, core_queue):
         super(CoreProcess, self).__init__()
         self.core_queue = core_queue
-        self.output_connection = None
+        self.output_queue = None
         self.output = None
         self.backend = None
         self.frontend = None
@@ -49,15 +49,16 @@ class CoreProcess(BaseProcess):
             self.process_message(message)
 
     def setup(self):
-        (recv_end, self.output_connection) = multiprocessing.Pipe(False)
-        self.output = get_class(settings.OUTPUT)(self.core_queue, recv_end)
+        self.output_queue = multiprocessing.Queue()
+        self.output = get_class(settings.OUTPUT)(self.core_queue,
+            self.output_queue)
         self.backend = get_class(settings.BACKENDS[0])(self.core_queue,
-            self.output_connection)
+            self.output_queue)
         self.frontend = get_class(settings.FRONTEND)(self.backend)
 
     def process_message(self, message):
         if message.get('to') == 'output':
-            self.output_connection.send(message)
+            self.output_queue.put(message)
         elif message['command'] == 'mpd_request':
             response = self.frontend.handle_request(message['request'])
             connection = unpickle_connection(message['reply_to'])

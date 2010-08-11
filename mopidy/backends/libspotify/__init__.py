@@ -50,7 +50,7 @@ class LibspotifyBackend(BaseBackend):
         spotify = LibspotifySessionManager(
             settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
             core_queue=self.core_queue,
-            output_connection=self.output_connection)
+            output_queue=self.output_queue)
         spotify.start()
         return spotify
 
@@ -95,7 +95,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
     def _set_output_state(self, state_name):
         logger.debug(u'Setting output state to %s ...', state_name)
         (my_end, other_end) = multiprocessing.Pipe()
-        self.backend.output_connection.send({
+        self.backend.output_queue.put({
             'command': 'set_state',
             'state': state_name,
             'reply_to': pickle_connection(other_end),
@@ -210,11 +210,11 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     appkey_file = os.path.expanduser(settings.SPOTIFY_LIB_APPKEY)
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password, core_queue, output_connection):
+    def __init__(self, username, password, core_queue, output_queue):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self)
         self.core_queue = core_queue
-        self.output_connection = output_connection
+        self.output_queue = output_queue
         self.connected = threading.Event()
         self.session = None
 
@@ -268,7 +268,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
             signed=True,
             rate=(int)44100
         """
-        self.output_connection.send({
+        self.output_queue.put({
             'command': 'deliver_data',
             'caps': caps_string,
             'data': bytes(frames),
@@ -286,7 +286,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     def end_of_track(self, session):
         """Callback used by pyspotify"""
         logger.debug('End of data stream.')
-        self.output_connection.send({'command': 'end_of_data_stream'})
+        self.output_queue.put({'command': 'end_of_data_stream'})
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
