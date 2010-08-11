@@ -83,7 +83,7 @@ class NadTalker(BaseProcess):
         self.pipe = pipe
         self._device = None
 
-    def _run(self):
+    def run_inside_try(self):
         self._open_connection()
         self._set_device_to_known_state()
         while self.pipe.poll(None):

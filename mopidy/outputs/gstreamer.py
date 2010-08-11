@@ -40,7 +40,7 @@ class GStreamerProcess(BaseProcess):
         self.gst_volume = None
         self.gst_sink = None
 
-    def _run(self):
+    def run_inside_try(self):
         self.setup()
         while True:
             message = self.core_queue.get()
@@ -133,7 +133,8 @@ class GStreamerProcess(BaseProcess):
         :type state_name: string
         :rtype: :class:`True` or :class:`False`
         """
-        result = self.gst_uri_src.set_state(getattr(gst, 'STATE_' + state_name)
+        result = self.gst_uri_src.set_state(
+            getattr(gst, 'STATE_' + state_name))
         if result == gst.STATE_CHANGE_SUCCESS:
             logger.debug('Setting GStreamer state to %s: OK', state_name)
             return True

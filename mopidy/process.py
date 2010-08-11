@@ -21,7 +21,7 @@ def unpickle_connection(pickled_connection):
 class BaseProcess(multiprocessing.Process):
     def run(self):
         try:
-            self._run()
+            self.run_inside_try()
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
             sys.exit(0)
@@ -29,7 +29,7 @@ class BaseProcess(multiprocessing.Process):
             logger.error(e.message)
             sys.exit(1)
 
-    def _run(self):
+    def run_inside_try(self):
         raise NotImplementedError
 
 
@@ -40,7 +40,7 @@ class CoreProcess(BaseProcess):
         self._backend = None
         self._frontend = None
 
-    def _run(self):
+    def run_inside_try(self):
         self._setup()
         while True:
             message = self.core_queue.get()
