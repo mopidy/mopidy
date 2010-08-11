@@ -95,9 +95,9 @@ class GStreamerProcess(BaseProcess):
 
     def play_uri(self, uri):
         """Play audio at URI"""
-        self.gst_uri_src.set_state(gst.STATE_READY)
+        self.state_ready()
         self.gst_uri_src.set_property('uri', uri)
-        self.gst_uri_src.set_state(gst.STATE_PLAYING)
+        self.state_playing()
         # TODO Return status
 
     def state_playing(self):
@@ -107,7 +107,12 @@ class GStreamerProcess(BaseProcess):
         Previous state should be READY or PAUSED.
         """
         result = self.gst_uri_src.set_state(gst.STATE_PLAYING)
-        return result == gst.STATE_CHANGE_SUCCESS
+        if result == gst.STATE_CHANGE_SUCCESS:
+            logger.debug('Setting GStreamer state to PLAYING: OK')
+            return True
+        else:
+            logger.warning('Setting GStreamer state to PLAYING: failed')
+            return False
 
     def state_paused(self):
         """
@@ -116,14 +121,24 @@ class GStreamerProcess(BaseProcess):
         Previous state should be PLAYING.
         """
         result = self.gst_uri_src.set_state(gst.STATE_PAUSED)
-        return result == gst.STATE_CHANGE_SUCCESS
+        if result == gst.STATE_CHANGE_SUCCESS:
+            logger.debug('Setting GStreamer state to PAUSED: OK')
+            return True
+        else:
+            logger.warning('Setting GStreamer state to PAUSED: failed')
+            return False
 
     def state_ready(self):
         """
         Set the state to READY.
         """
         result = self.gst_uri_src.set_state(gst.STATE_READY)
-        return result == gst.STATE_CHANGE_SUCCESS
+        if result == gst.STATE_CHANGE_SUCCESS:
+            logger.debug('Setting GStreamer state to READY: OK')
+            return True
+        else:
+            logger.warning('Setting GStreamer state to READY: failed')
+            return False
 
     def get_volume(self):
         """Get volume in range [0..100]"""
