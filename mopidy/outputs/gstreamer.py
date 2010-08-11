@@ -48,7 +48,7 @@ class GStreamerProcess(BaseProcess):
             # behaviour first.
             if self.input_connection.poll():
                 message = self.input_connection.recv()
-                self.process_core_message(message)
+                self.process_mopidy_message(message)
             self.gobject_context.iteration(True)
 
     def setup(self):
@@ -102,9 +102,8 @@ class GStreamerProcess(BaseProcess):
         # Link volume filter output to audio sink input
         self.gst_volume.link(self.gst_sink)
 
-    def process_core_message(self, message):
+    def process_mopidy_message(self, message):
         """Process messages from the rest of Mopidy."""
-        assert message['to'] == 'gstreamer', 'Message must be addressed to us'
         if message['command'] == 'play_uri':
             response = self.play_uri(message['uri'])
             connection = unpickle_connection(message['reply_to'])
