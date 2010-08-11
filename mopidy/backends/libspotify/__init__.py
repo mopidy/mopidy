@@ -153,9 +153,6 @@ class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
     def save(self, playlist):
         pass # TODO
 
-    def search(self, query):
-        pass # TODO
-
 
 class LibspotifyTranslator(object):
     @classmethod
