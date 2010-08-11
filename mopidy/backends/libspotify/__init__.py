@@ -5,6 +5,10 @@ import os
 import multiprocessing
 import threading
 
+import pygst
+pygst.require('0.10')
+import gst
+
 from spotify import Link, SpotifyError
 from spotify.manager import SpotifySessionManager
 from spotify.alsahelper import AlsaController
@@ -15,7 +19,6 @@ from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
     BaseStoredPlaylistsController)
 from mopidy.models import Artist, Album, Track, Playlist
 
-import gst
 logger = logging.getLogger('mopidy.backends.libspotify')
 
 ENCODING = 'utf-8'
