@@ -1,11 +1,22 @@
 import logging
 import multiprocessing
+from multiprocessing.reduction import reduce_connection
+import pickle
 import sys
 
 from mopidy import settings, SettingsError
-from mopidy.utils import get_class, unpickle_connection
+from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.process')
+
+def pickle_connection(connection):
+    return pickle.dumps(reduce_connection(connection))
+
+def unpickle_connection(pickled_connection):
+    # From http://stackoverflow.com/questions/1446004
+    (func, args) = pickle.loads(pickled_connection)
+    return func(*args)
+
 
 class BaseProcess(multiprocessing.Process):
     def run(self):
