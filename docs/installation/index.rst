@@ -23,7 +23,7 @@ Install dependencies
 Make sure you got the required dependencies installed.
 
 - Python >= 2.6, < 3
-- :doc:`GStreamer <gstreamer>` (>= 0.10 ?) with Python bindings
+- :doc:`GStreamer <gstreamer>` >= 0.10, with Python bindings
 - Dependencies for at least one Mopidy mixer:
 
   - :mod:`mopidy.mixers.alsa` (Linux only)
