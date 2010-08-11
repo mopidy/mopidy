@@ -3,47 +3,58 @@ Installation
 ************
 
 Mopidy itself is a breeze to install, as it just requires a standard Python
-2.6 or newer installation. The libraries we depend on to connect to the Spotify
-service is far more tricky to get working for the time being. Until
-installation of these libraries are either well documented by their developers,
-or the libraries are packaged for various Linux distributions, we will supply
-our own installation guides.
+installation and the GStreamer library. The libraries we depend on to connect
+to the Spotify service is far more tricky to get working for the time being.
+Until installation of these libraries are either well documented by their
+developers, or the libraries are packaged for various Linux distributions, we
+will supply our own installation guides, as linked to below.
 
 
-Dependencies
-============
+Install dependencies
+====================
 
 .. toctree::
     :hidden:
 
-    despotify
-    libspotify
     gstreamer
+    libspotify
+    despotify
+
+Make sure you got the required dependencies installed.
 
 - Python >= 2.6, < 3
+- :doc:`GStreamer <gstreamer>` (>= 0.10 ?) with Python bindings
 - Dependencies for at least one Mopidy mixer:
 
-  - AlsaMixer (Linux only)
+  - :mod:`mopidy.mixers.alsa` (Linux only)
 
     - pyalsaaudio >= 0.2 (Debian/Ubuntu package: python-alsaaudio)
 
-  - OsaMixer (OS X only)
+  - :mod:`mopidy.mixers.denon` (Linux, OS X, and Windows)
 
-    - Nothing needed.
+    - pyserial (Debian/Ubuntu package: python-serial)
+
+  - :mod:`mopidy.mixers.nad` (Linux, OS X, and Windows)
+
+    - pyserial (Debian/Ubuntu package: python-serial)
+
+  - :mod:`mopidy.mixers.osa` (OS X only)
+
+    - No additional dependencies.
 
 - Dependencies for at least one Mopidy backend:
 
-  - DespotifyBackend (Linux and OS X)
+  - :mod:`mopidy.backends.despotify` (Linux and OS X)
 
-    - see :doc:`despotify`
+    - :doc:`Despotify and spytify <despotify>`
 
-  - LibspotifyBackend (Linux, OS X and Windows)
+  - :mod:`mopidy.backends.libspotify` (Linux, OS X, and Windows)
 
-    - see :doc:`libspotify`
+    - :doc:`libspotify and pyspotify <libspotify>`
 
-  - GstreamerBackend (Linux, OS X and Windows)
+  - :mod:`mopidy.backends.local` (Linux, OS X, and Windows)
 
-    - see :doc:`gstreamer`
+    - No additional dependencies.
 
 
 Install latest release
@@ -84,14 +95,29 @@ For an introduction to ``git``, please visit `git-scm.com
 <http://git-scm.com/>`_.
 
 
-Spotify settings
-================
+Settings
+========
 
-Create a file named ``settings.py`` in the directory ``~/.mopidy/``. Enter
-your Spotify Premium account's username and password into the file, like this::
+Create a file named ``settings.py`` in the directory ``~/.mopidy/``.
+
+If you are using a Spotify backend, enter your Spotify Premium account's
+username and password into the file, like this::
 
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
+
+Currently :mod:`mopidy.backends.despotify` is the default
+backend.
+
+If you want to use :mod:`mopidy.backends.libspotify`, copy the Spotify
+application key to ``~/.mopidy/spotify_appkey.key``, and add the following
+setting::
+
+    BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
+
+If you want to use :mod:`mopidy.backends.local`, add the following setting::
+
+    BACKENDS = (u'mopidy.backends.local.LocalBackend',)
 
 For a full list of available settings, see :mod:`mopidy.settings`.
 
@@ -105,8 +131,8 @@ To start Mopidy, simply open a terminal and run::
 
 When Mopidy says ``MPD server running at [localhost]:6600`` it's ready to
 accept connections by any MPD client. You can find a list of tons of MPD
-clients at http://mpd.wikia.com/wiki/Clients. We use Sonata, GMPC, ncmpc, and
-ncmpcpp during development. The first two are GUI clients, while the last two
-are terminal clients.
+clients at http://mpd.wikia.com/wiki/Clients. We use GMPC and
+ncmpcpp during development. The first is a GUI client, and the second is a
+terminal client.
 
 To stop Mopidy, press ``CTRL+C``.

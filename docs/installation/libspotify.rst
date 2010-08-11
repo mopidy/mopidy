@@ -12,11 +12,9 @@ To use the libspotify backend you must install libspotify and
     This backend requires a Spotify premium account, and it requires you to get
     an application key from Spotify before use.
 
-**TODO** Test and document installation on OS X.
 
-
-Installing libspotify
-=====================
+Installing libspotify on Linux
+==============================
 
 Download and install libspotify 0.0.4 for your OS and CPU architecture from
 https://developer.spotify.com/en/libspotify/.
@@ -29,39 +27,52 @@ For 64-bit Linux the process is as follows::
     sudo make install prefix=/usr/local
     sudo ldconfig
 
+When libspotify has been installed, continue with
+:ref:`pyspotify_installation`.
+
+
+Installing libspotify on OS X
+=============================
+
+In OS X you need to have `XCode <http://developer.apple.com/tools/xcode/>`_ and
+`Homebrew <http://mxcl.github.com/homebrew/>`_ installed. Then, to install
+libspotify::
+
+    brew install libspotify
+
+When libspotify has been installed, continue with
+:ref:`pyspotify_installation`.
+
+
+Install libspotify on Windows
+=============================
+
+**TODO** Test and document installation on Windows.
+
+
+.. _pyspotify_installation:
 
 Installing pyspotify
 ====================
 
 Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
-    sudo aptitude install python-alsaaudio
+    sudo aptitude install python-dev python-alsaaudio
 
 Check out the pyspotify code, and install it::
 
     git clone git://github.com/jodal/pyspotify.git
     cd pyspotify/pyspotify/
-    sudo python setup.py develop
-
-Apply for an application key at
-https://developer.spotify.com/en/libspotify/application-key, download the
-binary version, and place the file at ``pyspotify/spotify_appkey.key``.
+    sudo python setup.py install
 
 
 Testing the installation
 ========================
 
+Apply for an application key at
+https://developer.spotify.com/en/libspotify/application-key, download the
+binary version, and place the file at ``pyspotify/spotify_appkey.key``.
+
 Test your libspotify setup::
 
     examples/example1.py -u USERNAME -p PASSWORD
-
-
-Setting up Mopidy to use libspotify
-===================================
-
-Currently :mod:`mopidy.backends.despotify` is the default
-backend. If you want to use :mod:`mopidy.backends.libspotify`
-instead, copy the Spotify application key to ``~/.mopidy/spotify_appkey.key``,
-and add the following to ``~/.mopidy/settings.py``::
-
-    BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)

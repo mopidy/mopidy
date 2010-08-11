@@ -98,18 +98,17 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
     :members:
 
 
-:mod:`mopidy.backends.gstreamer` -- GStreamer backend
-=====================================================
-
-.. automodule:: mopidy.backends.gstreamer
-    :synopsis: Backend for playing music from a local music archive using the
-        GStreamer library
-    :members:
-
-
 :mod:`mopidy.backends.libspotify` -- Libspotify backend
 =======================================================
 
 .. automodule:: mopidy.backends.libspotify
     :synopsis: Spotify backend using the libspotify library
+    :members:
+
+
+:mod:`mopidy.backends.local` -- Local backend
+=====================================================
+
+.. automodule:: mopidy.backends.local
+    :synopsis: Backend for playing music files on local storage
     :members:
