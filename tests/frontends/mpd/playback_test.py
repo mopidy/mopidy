@@ -175,6 +175,12 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
+    def test_play_with_pos_without_quotes(self):
+        self.b.current_playlist.load([Track()])
+        result = self.h.handle_request(u'play 0')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+
     def test_play_with_pos_out_of_bounds(self):
         self.b.current_playlist.load([])
         result = self.h.handle_request(u'play "0"')
