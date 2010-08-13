@@ -31,11 +31,13 @@ released when we reach the other goal.
 Stuff we really want to do, but just not right now
 ==================================================
 
+- **[PENDING]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_ recipies
+  for all our dependencies and Mopidy itself to make OS X installation a
+  breeze. See `Homebrew's issue #1612
+  <http://github.com/mxcl/homebrew/issues/issue/1612>`_.
 - Create `Debian packages <http://www.debian.org/doc/maint-guide/>`_ of all our
   dependencies and Mopidy itself (hosted in our own Debian repo until we get
   stuff into the various distros) to make Debian/Ubuntu installation a breeze.
-- **[WIP]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_ recipies for
-  all our dependencies and Mopidy itself to make OS X installation a breeze.
 - Run frontend tests against a real MPD server to ensure we are in sync.
 - Start working with MPD client maintainers to get rid of weird assumptions
   like only searching for first two letters and doing the rest of the filtering
