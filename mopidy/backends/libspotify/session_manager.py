@@ -55,7 +55,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def message_to_user(self, session, message):
         """Callback used by pyspotify"""
-        logger.info(message)
+        logger.info(message.strip())
 
     def notify_main_thread(self, session):
         """Callback used by pyspotify"""
@@ -87,7 +87,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def log_message(self, session, data):
         """Callback used by pyspotify"""
-        logger.debug(data)
+        logger.debug(data.strip())
 
     def end_of_track(self, session):
         """Callback used by pyspotify"""
