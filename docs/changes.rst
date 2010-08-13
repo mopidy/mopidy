@@ -19,7 +19,10 @@ Another great release.
   the packages created by ``setup.py`` for i.e. PyPI.
 - Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
 - Changed ``SERVER_HOSTNAME`` and ``SERVER_PORT`` settings to
-  ``MPD_SERVER_HOSTNAME`` and ``MPD_SERVER_PORT``
+  ``MPD_SERVER_HOSTNAME`` and ``MPD_SERVER_PORT``.
+- Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
+  and the Libspotify backend is working much better.
+- :mod:`mopidy.backends.libspotify` is now the default backend.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
@@ -47,8 +50,6 @@ Another great release.
   - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
     ``output_queue`` which it can use to send messages (i.e. audio data)
     to the output process.
-  - Remove Depsotify backend.
-  - Libspotify is now the default backend.
 
 
 
