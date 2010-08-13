@@ -9,6 +9,7 @@ User documentation
     installation/index
     changes
     authors
+    licenses
 
 Reference documentation
 =======================

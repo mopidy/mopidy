@@ -12,11 +12,14 @@ Another great release.
 
 **Changes**
 
+- License changed from GPLv2 to Apache License, version 2.0.
 - GStreamer is now a required dependency.
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
 - Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
+- Changed ``SERVER_HOSTNAME`` and ``SERVER_PORT`` settings to
+  ``MPD_SERVER_HOSTNAME`` and ``MPD_SERVER_PORT``
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
@@ -27,6 +30,8 @@ Another great release.
   - Support ``pause`` without arguments to work better with MPDroid.
   - Support ``plchanges``, ``play``, ``consume``, ``random``, ``repeat``, and
     ``single`` without quotes to work better with BitMPC.
+  - Fixed delete current playing track from playlist, which crashed several
+    clients.
 
 - Backend API:
 

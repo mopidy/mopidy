@@ -83,6 +83,8 @@ def deleteid(frontend, cpid):
     """
     try:
         cpid = int(cpid)
+        if frontend.backend.playback.current_cpid == cpid:
+            frontend.backend.playback.next()
         return frontend.backend.current_playlist.remove(cpid=cpid)
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'deleteid')
