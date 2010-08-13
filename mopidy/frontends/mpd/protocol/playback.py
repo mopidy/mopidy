@@ -86,16 +86,28 @@ def next_(frontend):
     """
     return frontend.backend.playback.next()
 
+@handle_pattern(r'^pause$')
 @handle_pattern(r'^pause "(?P<state>[01])"$')
-def pause(frontend, state):
+def pause(frontend, state=None):
     """
     *musicpd.org, playback section:*
 
         ``pause {PAUSE}``
 
         Toggles pause/resumes playing, ``PAUSE`` is 0 or 1.
+
+    *MPDroid:*
+
+    - Calls ``pause`` without any arguments to toogle pause.
     """
-    if int(state):
+    if state is None:
+        if (frontend.backend.playback.state ==
+                frontend.backend.playback.PLAYING):
+            frontend.backend.playback.pause()
+        elif (frontend.backend.playback.state ==
+                frontend.backend.playback.PAUSED):
+            frontend.backend.playback.resume()
+    elif int(state):
         frontend.backend.playback.pause()
     else:
         frontend.backend.playback.resume()

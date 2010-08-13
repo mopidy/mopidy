@@ -257,7 +257,7 @@ def playlistsearch(frontend, tag, needle):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^plchanges "(?P<version>\d+)"$')
+@handle_pattern(r'^plchanges "(?P<version>-?\d+)"$')
 def plchanges(frontend, version):
     """
     *musicpd.org, current playlist section:*
@@ -268,6 +268,10 @@ def plchanges(frontend, version):
 
         To detect songs that were deleted at the end of the playlist, use
         ``playlistlength`` returned by status command.
+
+    *MPDroid:*
+
+    - Calls ``plchanges "-1"`` two times per second to get the entire playlist.
     """
     # XXX Naive implementation that returns all tracks as changed
     if int(version) < frontend.backend.current_playlist.version:
