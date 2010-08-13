@@ -24,7 +24,10 @@ def get_class(name):
     module_name = name[:name.rindex('.')]
     class_name = name[name.rindex('.') + 1:]
     logger.debug('Loading: %s', name)
-    module = import_module(module_name)
+    try:
+        module = import_module(module_name)
+    except ImportError:
+        raise ImportError("Couldn't load: %s" % name)
     class_object = getattr(module, class_name)
     return class_object
 
