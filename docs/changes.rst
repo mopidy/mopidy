@@ -32,6 +32,8 @@ Another great release.
     ``single`` without quotes to work better with BitMPC.
   - Fixed delete current playing track from playlist, which crashed several
     clients.
+  - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
+    in backends.
 
 - Backend API:
 

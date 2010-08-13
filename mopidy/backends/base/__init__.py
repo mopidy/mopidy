@@ -8,7 +8,7 @@ from mopidy.backends.base.current_playlist import BaseCurrentPlaylistController
 from mopidy.backends.base.library import BaseLibraryController
 from mopidy.backends.base.playback import BasePlaybackController
 from mopidy.backends.base.stored_playlists import BaseStoredPlaylistsController
-from mopidy.frontends.mpd import serializer
+from mopidy.frontends.mpd import translator
 from mopidy.models import Playlist
 from mopidy.utils import get_class
 

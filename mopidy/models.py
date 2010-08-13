@@ -1,6 +1,6 @@
 from copy import copy
 
-from mopidy.frontends.mpd import serializer
+from mopidy.frontends.mpd import translator
 
 class ImmutableObject(object):
     """
@@ -136,7 +136,7 @@ class Track(ImmutableObject):
         return list(self._artists)
 
     def mpd_format(self, *args, **kwargs):
-        return serializer.track_to_mpd_format(self, *args, **kwargs)
+        return translator.track_to_mpd_format(self, *args, **kwargs)
 
 
 class Playlist(ImmutableObject):
@@ -177,7 +177,7 @@ class Playlist(ImmutableObject):
         return len(self._tracks)
 
     def mpd_format(self, *args, **kwargs):
-        return serializer.playlist_to_mpd_format(self, *args, **kwargs)
+        return translator.playlist_to_mpd_format(self, *args, **kwargs)
 
     def with_(self, uri=None, name=None, tracks=None, last_modified=None):
         """
