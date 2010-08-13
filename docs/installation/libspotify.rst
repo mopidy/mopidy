@@ -2,7 +2,7 @@
 libspotify installation
 ***********************
 
-As an alternative to the despotify backend, we are working on a
+We are working on a
 `libspotify <http://developer.spotify.com/en/libspotify/overview/>`_ backend.
 To use the libspotify backend you must install libspotify and
 `pyspotify <http://github.com/winjer/pyspotify>`_.

@@ -14,13 +14,12 @@ import sys
 #: List of playback backends to use. See :mod:`mopidy.backends` for all
 #: available backends. Default::
 #:
-#:     BACKENDS = (u'mopidy.backends.despotify.DespotifyBackend',)
+#:     BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
 #:
 #: .. note::
 #:     Currently only the first backend in the list is used.
 BACKENDS = (
-    u'mopidy.backends.despotify.DespotifyBackend',
-    #u'mopidy.backends.libspotify.LibspotifyBackend',
+    u'mopidy.backends.libspotify.LibspotifyBackend',
 )
 
 #: The log format used on the console. See

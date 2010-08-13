@@ -18,7 +18,6 @@ Install dependencies
 
     gstreamer
     libspotify
-    despotify
 
 Make sure you got the required dependencies installed.
 
@@ -43,10 +42,6 @@ Make sure you got the required dependencies installed.
     - No additional dependencies.
 
 - Dependencies for at least one Mopidy backend:
-
-  - :mod:`mopidy.backends.despotify` (Linux and OS X)
-
-    - :doc:`Despotify and spytify <despotify>`
 
   - :mod:`mopidy.backends.libspotify` (Linux, OS X, and Windows)
 
@@ -106,7 +101,7 @@ username and password into the file, like this::
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
 
-Currently :mod:`mopidy.backends.despotify` is the default
+Currently :mod:`mopidy.backends.libspotify` is the default
 backend.
 
 If you want to use :mod:`mopidy.backends.libspotify`, copy the Spotify

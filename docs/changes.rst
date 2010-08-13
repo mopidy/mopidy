@@ -47,6 +47,8 @@ Another great release.
   - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
     ``output_queue`` which it can use to send messages (i.e. audio data)
     to the output process.
+  - Remove Depsotify backend.
+  - Libspotify is now the default backend.
 
 
 

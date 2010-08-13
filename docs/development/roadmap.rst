@@ -11,8 +11,7 @@ Version 0.1
 
 - Core MPD server functionality working. Gracefully handle clients' use of
   non-supported functionality.
-- Read-only support for Spotify through :mod:`mopidy.backends.despotify` and/or
-  :mod:`mopidy.backends.libspotify`.
+- Read-only support for Spotify through :mod:`mopidy.backends.libspotify`.
 - Initial support for local file playback through
   :mod:`mopidy.backends.local`. The state of local file playback will not
   block the release of 0.1.
