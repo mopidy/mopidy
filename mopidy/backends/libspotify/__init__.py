@@ -79,15 +79,11 @@ class LibspotifyLibraryController(BaseLibraryController):
                 else:
                     spotify_query.append(u'%s:"%s"' % (field, value))
         spotify_query = u' '.join(spotify_query)
-        logger.debug(u'In search method, search for: %s' % spotify_query)
+        logger.debug(u'Spotify search query: %s' % spotify_query)
         my_end, other_end = multiprocessing.Pipe()
         self.backend.spotify.search(spotify_query.encode(ENCODING), other_end)
-        logger.debug(u'In Library.search(), waiting for search results')
         my_end.poll(None)
-        logger.debug(u'In Library.search(), receiving search results')
         playlist = my_end.recv()
-        logger.debug(u'In Library.search(), done receiving search results')
-        logger.debug(['%s' % t.name for t in playlist.tracks])
         return playlist
 
 
@@ -288,24 +284,10 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
         def callback(results, userdata):
-            logger.debug(u'In SessionManager.search().callback(), '
-                'translating search results')
-            logger.debug(results.tracks())
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
                 LibspotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
-            logger.debug(u'In SessionManager.search().callback(), '
-                'sending search results')
-            logger.debug(['%s' % t.name for t in playlist.tracks])
             connection.send(playlist)
-            logger.debug(u'In SessionManager.search().callback(), '
-                'done sending search results')
-        logger.debug(u'In SessionManager.search(), '
-            'waiting for Spotify connection')
         self.connected.wait()
-        logger.debug(u'In SessionManager.search(), '
-            'sending search query')
         self.session.search(query, callback)
-        logger.debug(u'In SessionManager.search(), '
-            'done sending search query')
