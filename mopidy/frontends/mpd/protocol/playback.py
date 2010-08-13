@@ -1,6 +1,7 @@
 from mopidy.frontends.mpd import (handle_pattern, MpdArgError, MpdNoExistError,
     MpdNotImplemented)
 
+@handle_pattern(r'^consume (?P<state>[01])$')
 @handle_pattern(r'^consume "(?P<state>[01])"$')
 def consume(frontend, state):
     """
@@ -224,6 +225,7 @@ def previous(frontend):
     """
     return frontend.backend.playback.previous()
 
+@handle_pattern(r'^random (?P<state>[01])$')
 @handle_pattern(r'^random "(?P<state>[01])"$')
 def random(frontend, state):
     """
@@ -238,6 +240,7 @@ def random(frontend, state):
     else:
         frontend.backend.playback.random = False
 
+@handle_pattern(r'^repeat (?P<state>[01])$')
 @handle_pattern(r'^repeat "(?P<state>[01])"$')
 def repeat(frontend, state):
     """
@@ -319,6 +322,7 @@ def setvol(frontend, volume):
         volume = 100
     frontend.backend.mixer.volume = volume
 
+@handle_pattern(r'^single (?P<state>[01])$')
 @handle_pattern(r'^single "(?P<state>[01])"$')
 def single(frontend, state):
     """
