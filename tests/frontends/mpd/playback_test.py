@@ -16,8 +16,18 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
         self.assertFalse(self.b.playback.consume)
         self.assert_(u'OK' in result)
 
+    def test_consume_off_without_quotes(self):
+        result = self.h.handle_request(u'consume 0')
+        self.assertFalse(self.b.playback.consume)
+        self.assert_(u'OK' in result)
+
     def test_consume_on(self):
         result = self.h.handle_request(u'consume "1"')
+        self.assertTrue(self.b.playback.consume)
+        self.assert_(u'OK' in result)
+
+    def test_consume_on_without_quotes(self):
+        result = self.h.handle_request(u'consume 1')
         self.assertTrue(self.b.playback.consume)
         self.assert_(u'OK' in result)
 
@@ -30,8 +40,18 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
         self.assertFalse(self.b.playback.random)
         self.assert_(u'OK' in result)
 
+    def test_random_off_without_quotes(self):
+        result = self.h.handle_request(u'random 0')
+        self.assertFalse(self.b.playback.random)
+        self.assert_(u'OK' in result)
+
     def test_random_on(self):
         result = self.h.handle_request(u'random "1"')
+        self.assertTrue(self.b.playback.random)
+        self.assert_(u'OK' in result)
+
+    def test_random_on_without_quotes(self):
+        result = self.h.handle_request(u'random 1')
         self.assertTrue(self.b.playback.random)
         self.assert_(u'OK' in result)
 
@@ -40,8 +60,18 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
         self.assertFalse(self.b.playback.repeat)
         self.assert_(u'OK' in result)
 
+    def test_repeat_off_without_quotes(self):
+        result = self.h.handle_request(u'repeat 0')
+        self.assertFalse(self.b.playback.repeat)
+        self.assert_(u'OK' in result)
+
     def test_repeat_on(self):
         result = self.h.handle_request(u'repeat "1"')
+        self.assertTrue(self.b.playback.repeat)
+        self.assert_(u'OK' in result)
+
+    def test_repeat_on_without_quotes(self):
+        result = self.h.handle_request(u'repeat 1')
         self.assertTrue(self.b.playback.repeat)
         self.assert_(u'OK' in result)
 
@@ -80,8 +110,18 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
         self.assertFalse(self.b.playback.single)
         self.assert_(u'OK' in result)
 
+    def test_single_off_without_quotes(self):
+        result = self.h.handle_request(u'single 0')
+        self.assertFalse(self.b.playback.single)
+        self.assert_(u'OK' in result)
+
     def test_single_on(self):
         result = self.h.handle_request(u'single "1"')
+        self.assertTrue(self.b.playback.single)
+        self.assert_(u'OK' in result)
+
+    def test_single_on_without_quotes(self):
+        result = self.h.handle_request(u'single 1')
         self.assertTrue(self.b.playback.single)
         self.assert_(u'OK' in result)
 
