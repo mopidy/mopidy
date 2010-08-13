@@ -23,6 +23,7 @@ Another great release.
   - Split gigantic protocol implementation into eleven modules.
   - Search improvements, including support for multi-word search.
   - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
+  - Support ``plchanges "-1"`` to work better with MPDroid.
 
 - Backend API:
 
