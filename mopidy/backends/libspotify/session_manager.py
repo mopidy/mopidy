@@ -13,7 +13,7 @@ logger = logging.getLogger('mopidy.backends.libspotify.session_manager')
 class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
     settings_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
-    appkey_file = os.path.expanduser(settings.SPOTIFY_LIB_APPKEY)
+    appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
     def __init__(self, username, password, core_queue, output_queue):

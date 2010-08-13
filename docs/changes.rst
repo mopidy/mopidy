@@ -23,6 +23,8 @@ Another great release.
 - Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
   and the Libspotify backend is working much better.
 - :mod:`mopidy.backends.libspotify` is now the default backend.
+- A Spotify application key is now bundled with the source. The
+  ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.

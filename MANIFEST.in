@@ -1,4 +1,5 @@
 include LICENSE pylintrc *.rst *.txt
+include mopidy/backends/libspotify/spotify_appkey.key
 recursive-include docs *
 prune docs/_build
 recursive-include tests *.py

@@ -160,11 +160,6 @@ MPD_SERVER_HOSTNAME = u'127.0.0.1'
 #: Default: 6600
 MPD_SERVER_PORT = 6600
 
-#: Path to your libspotify application key.
-#:
-#: Used by :mod:`mopidy.backends.libspotify`.
-SPOTIFY_LIB_APPKEY = u'~/.mopidy/spotify_appkey.key'
-
 #: Path to the libspotify cache.
 #:
 #: Used by :mod:`mopidy.backends.libspotify`.
