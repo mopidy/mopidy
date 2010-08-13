@@ -22,7 +22,10 @@ def main():
     get_or_create_folder('~/.mopidy/')
     core_queue = multiprocessing.Queue()
     get_class(settings.SERVER)(core_queue).start()
-    core = CoreProcess(core_queue)
+    output_class = get_class(settings.OUTPUT)
+    backend_class = get_class(settings.BACKENDS[0])
+    frontend_class = get_class(settings.FRONTEND)
+    core = CoreProcess(core_queue, output_class, backend_class, frontend_class)
     core.start()
     asyncore.loop()
 
