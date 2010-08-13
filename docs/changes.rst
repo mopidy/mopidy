@@ -24,6 +24,7 @@ Another great release.
   - Search improvements, including support for multi-word search.
   - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
   - Support ``plchanges "-1"`` to work better with MPDroid.
+  - Support ``pause`` without arguments to work better with MPDroid.
 
 - Backend API:
 

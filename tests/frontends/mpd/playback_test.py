@@ -136,8 +136,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_pause_off(self):
-        track = Track()
-        self.b.current_playlist.load([track])
+        self.b.current_playlist.load([Track()])
         self.h.handle_request(u'play "0"')
         self.h.handle_request(u'pause "1"')
         result = self.h.handle_request(u'pause "0"')
@@ -145,16 +144,26 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_pause_on(self):
-        track = Track()
-        self.b.current_playlist.load([track])
+        self.b.current_playlist.load([Track()])
         self.h.handle_request(u'play "0"')
         result = self.h.handle_request(u'pause "1"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PAUSED, self.b.playback.state)
 
+    def test_pause_toggle(self):
+        self.b.current_playlist.load([Track()])
+        result = self.h.handle_request(u'play "0"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+        result = self.h.handle_request(u'pause')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PAUSED, self.b.playback.state)
+        result = self.h.handle_request(u'pause')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+
     def test_play_without_pos(self):
-        track = Track()
-        self.b.current_playlist.load([track])
+        self.b.current_playlist.load([Track()])
         self.b.playback.state = self.b.playback.PAUSED
         result = self.h.handle_request(u'play')
         self.assert_(u'OK' in result)
