@@ -12,6 +12,7 @@ Another great release.
 
 **Changes**
 
+- License changed from GPLv2 to Apache License, version 2.0.
 - GStreamer is now a required dependency.
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
