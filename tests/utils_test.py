@@ -12,8 +12,12 @@ from mopidy.models import Track, Artist, Album
 from tests import SkipTest, data_folder
 
 class GetClassTest(unittest.TestCase):
-    def test_loading_class_that_does_not_exist(self):
+    def test_loading_module_that_does_not_exist(self):
         test = lambda: get_class('foo.bar.Baz')
+        self.assertRaises(ImportError, test)
+
+    def test_loading_class_that_does_not_exist(self):
+        test = lambda: get_class('unittest.FooBarBaz')
         self.assertRaises(ImportError, test)
 
     def test_import_error_message_contains_complete_class_path(self):

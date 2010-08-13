@@ -26,9 +26,9 @@ def get_class(name):
     logger.debug('Loading: %s', name)
     try:
         module = import_module(module_name)
-    except ImportError:
+        class_object = getattr(module, class_name)
+    except (ImportError, AttributeError):
         raise ImportError("Couldn't load: %s" % name)
-    class_object = getattr(module, class_name)
     return class_object
 
 def get_or_create_folder(folder):
