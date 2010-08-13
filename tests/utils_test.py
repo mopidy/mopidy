@@ -11,6 +11,15 @@ from mopidy.models import Track, Artist, Album
 
 from tests import SkipTest, data_folder
 
+class GetClassTest(unittest.TestCase):
+    def test_loading_class_that_does_not_exist(self):
+        test = lambda: get_class('foo.bar.Baz')
+        self.assertRaises(ImportError, test)
+
+    def test_loading_existing_class(self):
+        cls = get_class('unittest.TestCase')
+        self.assertEqual(cls.__name__, 'TestCase')
+
 class GetOrCreateFolderTest(unittest.TestCase):
     def setUp(self):
         self.parent = tempfile.mkdtemp()
