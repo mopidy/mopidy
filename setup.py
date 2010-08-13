@@ -56,7 +56,7 @@ setup(
     description='MPD server with Spotify support',
     long_description=open('README.rst').read(),
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: No Input/Output (Daemon)',
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: Apache Software License',
