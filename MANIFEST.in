@@ -1,4 +1,4 @@
-include COPYING pylintrc *.rst *.txt
+include LICENSE pylintrc *.rst *.txt
 recursive-include docs *
 prune docs/_build
 recursive-include tests *.py
