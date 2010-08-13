@@ -29,6 +29,7 @@ Another great release.
   - Support ``pause`` without arguments to work better with MPDroid.
   - Support ``plchanges``, ``play``, ``consume``, ``random``, ``repeat``, and
     ``single`` without quotes to work better with BitMPC.
+  - Fixed delete current playing track from playlist
 
 - Backend API:
 
