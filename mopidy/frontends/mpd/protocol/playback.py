@@ -147,8 +147,8 @@ def playid(frontend, cpid):
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'playid')
 
-@handle_pattern(r'^play "(?P<songpos>\d+)"$')
-@handle_pattern(r'^play "(?P<songpos>-1)"$')
+@handle_pattern(r'^play (?P<songpos>-?\d+)$')
+@handle_pattern(r'^play "(?P<songpos>-?\d+)"$')
 def playpos(frontend, songpos):
     """
     *musicpd.org, playback section:*
@@ -161,6 +161,10 @@ def playpos(frontend, songpos):
 
     - issues ``play "-1"`` after playlist replacement to start playback at
       the first track.
+
+    *BitMPC:*
+
+    - issues ``play 6`` without quotes around the argument.
     """
     songpos = int(songpos)
     try:

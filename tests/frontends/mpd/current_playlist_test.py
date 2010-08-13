@@ -330,6 +330,15 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'Title: c' in result)
         self.assert_(u'OK' in result)
 
+    def test_plchanges_without_quotes_works(self):
+        self.b.current_playlist.load(
+            [Track(name='a'), Track(name='b'), Track(name='c')])
+        result = self.h.handle_request(u'plchanges 0')
+        self.assert_(u'Title: a' in result)
+        self.assert_(u'Title: b' in result)
+        self.assert_(u'Title: c' in result)
+        self.assert_(u'OK' in result)
+
     def test_plchangesposid(self):
         self.b.current_playlist.load([Track(), Track(), Track()])
         result = self.h.handle_request(u'plchangesposid "0"')
