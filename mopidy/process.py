@@ -28,6 +28,9 @@ class BaseProcess(multiprocessing.Process):
         except SettingsError as e:
             logger.error(e.message)
             sys.exit(1)
+        except ImportError as e:
+            logger.error(e)
+            sys.exit(1)
 
     def run_inside_try(self):
         raise NotImplementedError
