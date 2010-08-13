@@ -120,10 +120,10 @@ SERVER = u'mopidy.frontends.mpd.server.MpdServer'
 #:     Listens on all IPv4 interfaces.
 #: ``::``
 #:     Listens on all interfaces, both IPv4 and IPv6.
-SERVER_HOSTNAME = u'127.0.0.1'
+MPD_SERVER_HOSTNAME = u'127.0.0.1'
 
 #: Which TCP port Mopidy should listen to. Default: 6600
-SERVER_PORT = 6600
+MPD_SERVER_PORT = 6600
 
 #: Your Spotify Premium username. Used by all Spotify backends.
 SPOTIFY_USERNAME = u''
