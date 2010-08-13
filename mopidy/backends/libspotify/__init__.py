@@ -16,15 +16,12 @@ class LibspotifyBackend(BaseBackend):
     for libspotify. It got no documentation, but multiple examples are
     available. Like libspotify, pyspotify's calls are mostly asynchronous.
 
-    This backend should also work with `openspotify
-    <http://github.com/noahwilliamsson/openspotify>`_, but we haven't tested
-    that yet.
-
     **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-libspotify
     """
 
-    # Imports inside methods are to prevent loading of __init__ to fail on
+    # Imports inside methods are to prevent loading of __init__.py to fail on
     # missing spotify dependencies.
+
     def __init__(self, *args, **kwargs):
         from .library import LibspotifyLibraryController
         from .playback import LibspotifyPlaybackController

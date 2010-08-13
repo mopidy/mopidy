@@ -31,10 +31,6 @@ released when we reach the other goal.
 Stuff we really want to do, but just not right now
 ==================================================
 
-- Replace libspotify with `openspotify
-  <http://github.com/noahwilliamsson/openspotify>`_ for
-  :mod:`mopidy.backends.libspotify`. *Update:* Seems like openspotify
-  development has stalled.
 - Create `Debian packages <http://www.debian.org/doc/maint-guide/>`_ of all our
   dependencies and Mopidy itself (hosted in our own Debian repo until we get
   stuff into the various distros) to make Debian/Ubuntu installation a breeze.
