@@ -293,7 +293,7 @@ def seek(frontend, songpos, seconds):
         Seeks to the position ``TIME`` (in seconds) of entry ``SONGPOS`` in
         the playlist.
     """
-    raise MpdNotImplemented # TODO
+    return frontend.backend.playback._seek(seconds)
 
 @handle_pattern(r'^seekid "(?P<cpid>\d+)" "(?P<seconds>\d+)"$')
 def seekid(frontend, cpid, seconds):
