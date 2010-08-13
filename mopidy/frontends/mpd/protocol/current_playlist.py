@@ -257,6 +257,7 @@ def playlistsearch(frontend, tag, needle):
     """
     raise MpdNotImplemented # TODO
 
+@handle_pattern(r'^plchanges (?P<version>-?\d+)$')
 @handle_pattern(r'^plchanges "(?P<version>-?\d+)"$')
 def plchanges(frontend, version):
     """

@@ -25,6 +25,7 @@ Another great release.
   - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
   - Support ``plchanges "-1"`` to work better with MPDroid.
   - Support ``pause`` without arguments to work better with MPDroid.
+  - Support ``plchanges`` without quotes to work better with BitMPC.
 
 - Backend API:
 
