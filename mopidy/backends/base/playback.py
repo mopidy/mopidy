@@ -373,7 +373,9 @@ class BasePlaybackController(object):
         self._seek(time_position)
 
     def _seek(self, time_position):
-        raise NotImplementedError
+        time_position_ms = int(time_position) * 1000
+        self._play_time_started = (self._current_wall_time - time_position_ms)
+        self._play_time_accumulated = time_position_ms
 
     def stop(self):
         """Stop playing."""
