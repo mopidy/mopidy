@@ -4,10 +4,12 @@ import shutil
 import tempfile
 import threading
 import time
+import multiprocessing
 
 from mopidy import settings
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track, Album, Artist
+from mopidy.utils import get_class
 
 from tests import SkipTest, data_folder
 
@@ -32,7 +34,10 @@ class BaseCurrentPlaylistControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.output_queue = multiprocessing.Queue()
+        self.core_queue = multiprocessing.Queue()
+        self.output = get_class(settings.OUTPUT)(self.core_queue, self.output_queue)
+        self.backend = self.backend_class(self.core_queue, self.output_queue, DummyMixer)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
@@ -40,6 +45,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def tearDown(self):
         self.backend.destroy()
+        self.output.destroy()
 
     def test_add(self):
         for track in self.tracks:
@@ -281,7 +287,10 @@ class BasePlaybackControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.output_queue = multiprocessing.Queue()
+        self.core_queue = multiprocessing.Queue()
+        self.output = get_class(settings.OUTPUT)(self.core_queue, self.output_queue)
+        self.backend = self.backend_class(self.core_queue, self.output_queue, DummyMixer)
         self.playback = self.backend.playback
         self.current_playlist = self.backend.current_playlist
 
@@ -292,6 +301,7 @@ class BasePlaybackControllerTest(object):
 
     def tearDown(self):
         self.backend.destroy()
+        self.output.destroy()
 
     def test_initial_state_is_stopped(self):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
