@@ -351,6 +351,17 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(track, self.playback.current_track)
 
     @populate_playlist
+    def test_play_when_pause_after_next(self):
+        self.playback.play()
+        self.playback.next()
+        self.playback.next()
+        track = self.playback.current_track
+        self.playback.pause()
+        self.playback.play()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(track, self.playback.current_track)
+
+    @populate_playlist
     def test_play_sets_current_track(self):
         self.playback.play()
         self.assertEqual(self.playback.current_track, self.tracks[0])
