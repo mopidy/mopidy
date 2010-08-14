@@ -47,6 +47,8 @@ greatly improved MPD client support.
   - Fixed delete current playing track from playlist, which crashed several
     clients.
   - Implement ``seek`` and ``seekid``.
+  - Fix ``playlistfind`` output so the correct song is played when playing
+    songs directly from search results in GMPC.
 
 - Backends:
 
