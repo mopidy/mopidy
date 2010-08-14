@@ -39,7 +39,8 @@ class GStreamerProcess(BaseProcess):
     http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html.
     """
 
-    pipeline_description = 'appsrc name=data ! volume name=volume ! autoaudiosink name=sink'
+    pipeline_description = \
+        'appsrc name=data ! volume name=volume ! autoaudiosink name=sink'
 
     def __init__(self, core_queue, output_queue):
         super(GStreamerProcess, self).__init__()
