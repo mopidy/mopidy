@@ -109,9 +109,45 @@ class BasePlaybackController(object):
         return cp_track_at_next[1]
 
     @property
+    def cp_track_at_eot(self):
+        """
+        The next track in the playlist which should be played when
+        we get an end of track event, such as when a track is finished playing.
+
+        A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
+        """
+        cp_tracks = self.backend.current_playlist.cp_tracks
+
+        if not cp_tracks:
+            return None
+
+        if self.random and not self._shuffled:
+            if self.repeat or self._first_shuffle:
+                logger.debug('Shuffling tracks')
+                self._shuffled = cp_tracks
+                random.shuffle(self._shuffled)
+                self._first_shuffle = False
+
+        if self._shuffled:
+            return self._shuffled[0]
+
+        if self.current_cp_track is None:
+            return cp_tracks[0]
+
+        if self.repeat:
+            return cp_tracks[
+                (self.current_playlist_position + 1) % len(cp_tracks)]
+
+        try:
+            return cp_tracks[self.current_playlist_position + 1]
+        except IndexError:
+            return None
+
+    @property
     def cp_track_at_next(self):
         """
-        The next track in the playlist.
+        The next track in the playlist which should be played when we get a
+        event, such as a user clicking the next button.
 
         A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
 
@@ -247,8 +283,15 @@ class BasePlaybackController(object):
         Typically called by :class:`mopidy.process.CoreProcess` after a message
         from a library thread is received.
         """
-        if self.cp_track_at_next is not None:
-            self.next()
+        if self.cp_track_at_eot is not None:
+            original_cp_track = self.current_cp_track
+            self.current_cp_track = self.cp_track_at_eot
+
+            if self.consume:
+                self.backend.current_playlist.remove(cpid=original_cp_track[0])
+
+            if self.random and self.current_cp_track in self._shuffled:
+                self._shuffled.remove(self.current_cp_track)
         else:
             self.stop()
             self.current_cp_track = None
