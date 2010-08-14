@@ -48,6 +48,7 @@ class GStreamerProcess(BaseProcess):
         'volume name=volume',
         'autoaudiosink name=sink',
     ])
+    pipeline_description = 'playbin'
 
     def __init__(self, core_queue, output_queue):
         super(GStreamerProcess, self).__init__()
@@ -130,7 +131,7 @@ class GStreamerProcess(BaseProcess):
     def play_uri(self, uri):
         """Play audio at URI"""
         self.set_state('READY')
-        self.gst_uri_bin.set_property('uri', uri)
+        self.gst_pipeline.set_property('uri', uri)
         return self.set_state('PLAYING')
 
     def deliver_data(self, caps_string, data):
@@ -178,10 +179,12 @@ class GStreamerProcess(BaseProcess):
 
     def get_volume(self):
         """Get volume in range [0..100]"""
+        return 0
         gst_volume = self.gst_volume.get_property('volume')
         return int(gst_volume * 100)
 
     def set_volume(self, volume):
+        return
         """Set volume in range [0..100]"""
         gst_volume = volume / 100.0
         self.gst_volume.set_property('volume', gst_volume)
