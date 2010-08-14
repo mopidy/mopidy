@@ -42,24 +42,11 @@ class GStreamerProcess(BaseProcess):
     http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html.
     """
 
-    pipeline_description = ' ! '.join([
-        #'appsrc name=src uridecodebin name=uri',
-        'uridecodebin name=uri',
-        'volume name=volume',
-        'autoaudiosink name=sink',
-    ])
-    pipeline_description = 'playbin'
-
     def __init__(self, core_queue, output_queue):
         super(GStreamerProcess, self).__init__()
         self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
-        self.gst_bus = None
-        self.gst_bus_id = None
-        self.gst_uri_bin = None
-        self.gst_data_src = None
-        self.gst_volume = None
 
     def run_inside_try(self):
         self.setup()
@@ -75,16 +62,12 @@ class GStreamerProcess(BaseProcess):
         messages_thread.daemon = True
         messages_thread.start()
 
-        self.gst_pipeline = gst.parse_launch(self.pipeline_description)
-        self.gst_data_src = self.gst_pipeline.get_by_name('src')
-        self.gst_uri_bin = self.gst_pipeline.get_by_name('uri')
-        self.gst_volume = self.gst_pipeline.get_by_name('volume')
+        self.gst_pipeline = gst.parse_launch('playbin')
 
         # Setup bus and message processor
-        self.gst_bus = self.gst_pipeline.get_bus()
-        self.gst_bus.add_signal_watch()
-        self.gst_bus_id = self.gst_bus.connect('message',
-            self.process_gst_message)
+        gst_bus = self.gst_pipeline.get_bus()
+        gst_bus.add_signal_watch()
+        gst_bus.connect('message', self.process_gst_message)
 
     def process_mopidy_message(self, message):
         """Process messages from the rest of Mopidy."""
@@ -136,11 +119,12 @@ class GStreamerProcess(BaseProcess):
 
     def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
+        data_src = self.gst_pipeline.get_by_name('src')
         caps = gst.caps_from_string(caps_string)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
-        self.gst_data_src.set_property('caps', caps)
-        self.gst_data_src.emit('push-buffer', buffer_)
+        data_src.set_property('caps', caps)
+        data_src.emit('push-buffer', buffer_)
 
     def end_of_data_stream(self):
         """
@@ -149,7 +133,7 @@ class GStreamerProcess(BaseProcess):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        self.gst_data_src.emit('end-of-stream')
+        self.gst_pipeline.get_by_name('src').emit('end-of-stream')
 
     def set_state(self, state_name):
         """
@@ -184,14 +168,14 @@ class GStreamerProcess(BaseProcess):
     def get_volume(self):
         """Get volume in range [0..100]"""
         return 0
-        gst_volume = self.gst_volume.get_property('volume')
-        return int(gst_volume * 100)
+        gst_volume = self.gst_pipeline.get_by_name('volume')
+        return int(gst_volume.get_property('volume') * 100)
 
     def set_volume(self, volume):
         return
         """Set volume in range [0..100]"""
-        gst_volume = volume / 100.0
-        self.gst_volume.set_property('volume', gst_volume)
+        gst_volume = self.gst_pipeline.get_by_name('volume')
+        gst_volume.set_property('volume', volume / 100.0)
 
     def set_position(self, position):
         self.gst_pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
