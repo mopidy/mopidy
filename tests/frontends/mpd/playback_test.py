@@ -271,12 +271,18 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_seek(self):
+        self.b.current_playlist.load([Track()])
+        self.h.handle_request(u'seek "0"')
         result = self.h.handle_request(u'seek "0" "30"')
-        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+        self.assert_(u'OK' in result)
+        self.assert_(self.b.playback.time_position > 30000)
 
     def test_seekid(self):
+        self.b.current_playlist.load([Track()])
         result = self.h.handle_request(u'seekid "0" "30"')
-        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+        self.assert_(u'OK' in result)
+        self.assert_(self.b.playback.time_position > 30000)
+
 
     def test_stop(self):
         result = self.h.handle_request(u'stop')

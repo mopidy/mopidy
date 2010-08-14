@@ -46,6 +46,7 @@ greatly improved MPD client support.
     ``single`` without quotes to work better with BitMPC.
   - Fixed delete current playing track from playlist, which crashed several
     clients.
+  - Implement ``seek`` and ``seekid``.
 
 - Backends:
 
