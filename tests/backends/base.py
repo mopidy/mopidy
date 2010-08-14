@@ -346,6 +346,14 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.current_track, self.tracks[-1])
 
     @populate_playlist
+    def test_play_skips_to_next_track_on_failure(self):
+        # If _play() returns False, it is a failure.
+        self.playback._play = lambda track: track != self.tracks[0]
+        self.playback.play()
+        self.assertNotEqual(self.playback.current_track, self.tracks[0])
+        self.assertEqual(self.playback.current_track, self.tracks[1])
+
+    @populate_playlist
     def test_current_track_after_completed_playlist(self):
         self.playback.play(self.current_playlist.cp_tracks[-1])
         self.playback.end_of_track_callback()
@@ -412,6 +420,16 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
+    def test_next_skips_to_next_track_on_failure(self):
+        # If _play() returns False, it is a failure.
+        self.playback._play = lambda track: track != self.tracks[1]
+        self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
+        self.playback.next()
+        self.assertNotEqual(self.playback.current_track, self.tracks[1])
+        self.assertEqual(self.playback.current_track, self.tracks[2])
+
+    @populate_playlist
     def test_previous(self):
         self.playback.play()
         self.playback.next()
@@ -450,6 +468,16 @@ class BasePlaybackControllerTest(object):
         self.playback.previous()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
+
+    @populate_playlist
+    def test_previous_skips_to_previous_track_on_failure(self):
+        # If _play() returns False, it is a failure.
+        self.playback._play = lambda track: track != self.tracks[1]
+        self.playback.play(self.current_playlist.cp_tracks[2])
+        self.assertEqual(self.playback.current_track, self.tracks[2])
+        self.playback.previous()
+        self.assertNotEqual(self.playback.current_track, self.tracks[1])
+        self.assertEqual(self.playback.current_track, self.tracks[0])
 
     @populate_playlist
     def test_next_track_before_play(self):
@@ -906,13 +934,9 @@ class BasePlaybackControllerTest(object):
             played.append(self.playback.current_track)
             self.playback.next()
 
-    def test_playing_track_with_invalid_uri(self):
-        self.backend.current_playlist.load([Track(uri='foobar')])
-        self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.STOPPED)
-
+    @populate_playlist
     def test_playing_track_that_isnt_in_playlist(self):
-        test = lambda: self.playback.play(self.tracks[0])
+        test = lambda: self.playback.play((17, Track()))
         self.assertRaises(AssertionError, test)
 
 

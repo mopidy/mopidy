@@ -272,26 +272,23 @@ class BasePlaybackController(object):
 
     def next(self):
         """Play the next track."""
-        original_cp_track = self.current_cp_track
-
         if self.state == self.STOPPED:
             return
-        elif self.next_cp_track is not None and self._next(self.next_track):
-            self.current_cp_track = self.next_cp_track
-            self.state = self.PLAYING
-        elif self.next_cp_track is None:
+
+        original_cp_track = self.current_cp_track
+        if self.next_cp_track:
+            self.play(self.next_cp_track)
+        else:
             self.stop()
             self.current_cp_track = None
 
-        # FIXME handle in play aswell?
+        # FIXME This should only be applied when reaching end of track, and not
+        # when pressing "next"
         if self.consume:
             self.backend.current_playlist.remove(cpid=original_cp_track[0])
 
         if self.random and self.current_cp_track in self._shuffled:
             self._shuffled.remove(self.current_cp_track)
-
-    def _next(self, track):
-        return self._play(track)
 
     def pause(self):
         """Pause playback."""
@@ -301,13 +298,16 @@ class BasePlaybackController(object):
     def _pause(self):
         raise NotImplementedError
 
-    def play(self, cp_track=None):
+    def play(self, cp_track=None, on_error_step=1):
         """
         Play the given track or the currently active track.
 
         :param cp_track: track to play
         :type cp_track: two-tuple (CPID integer, :class:`mopidy.models.Track`)
             or :class:`None`
+        :param on_error_step: direction to step at play error, 1 for next
+            track (default), -1 for previous track
+        :type on_error_step: int, -1 or 1
         """
 
         if cp_track is not None:
@@ -317,13 +317,14 @@ class BasePlaybackController(object):
 
         if self.state == self.PAUSED and cp_track is None:
             self.resume()
-        elif cp_track is not None and self._play(cp_track[1]):
+        elif cp_track is not None:
             self.current_cp_track = cp_track
             self.state = self.PLAYING
-
-        # TODO Do something sensible when _play() returns False, like calling
-        # next(). Adding this todo instead of just implementing it as I want a
-        # test case first.
+            if not self._play(cp_track[1]):
+                if at_error_step == 1:
+                    self.next()
+                elif at_error_step == -1:
+                    self.previous()
 
         if self.random and self.current_cp_track in self._shuffled:
             self._shuffled.remove(self.current_cp_track)
@@ -333,14 +334,11 @@ class BasePlaybackController(object):
 
     def previous(self):
         """Play the previous track."""
-        if (self.previous_cp_track is not None
-                and self.state != self.STOPPED
-                and self._previous(self.previous_track)):
-            self.current_cp_track = self.previous_cp_track
-            self.state = self.PLAYING
-
-    def _previous(self, track):
-        return self._play(track)
+        if self.previous_cp_track is None:
+            return
+        if self.state == self.STOPPED:
+            return
+        self.play(self.previous_cp_track, on_error_step=-1)
 
     def resume(self):
         """If paused, resume playing the current track."""

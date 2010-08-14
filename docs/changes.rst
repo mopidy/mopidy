@@ -35,6 +35,7 @@ greatly improved MPD client support.
 - Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
   default mixer on all platforms.
 - New setting ``MIXER_MAX_VOLUME`` for capping the maximum output volume.
+- If failing to play a track, playback will skip to the next track.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
