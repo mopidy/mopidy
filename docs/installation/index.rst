@@ -2,12 +2,10 @@
 Installation
 ************
 
-Mopidy itself is a breeze to install, as it just requires a standard Python
-installation and the GStreamer library. The libraries we depend on to connect
-to the Spotify service is far more tricky to get working for the time being.
-Until installation of these libraries are either well documented by their
-developers, or the libraries are packaged for various Linux distributions, we
-will supply our own installation guides, as linked to below.
+To get a basic version of Mopidy running, you need Python and the GStreamer
+library. To use Spotify with Mopidy, you also need :doc:`libspotify and
+pyspotify <libspotify>`. Mopidy itself can either be installed from the Python
+package index, PyPI, or from git.
 
 
 Install dependencies
@@ -18,12 +16,11 @@ Install dependencies
 
     gstreamer
     libspotify
-    despotify
 
 Make sure you got the required dependencies installed.
 
 - Python >= 2.6, < 3
-- :doc:`GStreamer <gstreamer>` (>= 0.10 ?) with Python bindings
+- :doc:`GStreamer <gstreamer>` >= 0.10, with Python bindings
 - Dependencies for at least one Mopidy mixer:
 
   - :mod:`mopidy.mixers.alsa` (Linux only)
@@ -43,10 +40,6 @@ Make sure you got the required dependencies installed.
     - No additional dependencies.
 
 - Dependencies for at least one Mopidy backend:
-
-  - :mod:`mopidy.backends.despotify` (Linux and OS X)
-
-    - :doc:`Despotify and spytify <despotify>`
 
   - :mod:`mopidy.backends.libspotify` (Linux, OS X, and Windows)
 
@@ -106,14 +99,9 @@ username and password into the file, like this::
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
 
-Currently :mod:`mopidy.backends.despotify` is the default
-backend.
-
-If you want to use :mod:`mopidy.backends.libspotify`, copy the Spotify
-application key to ``~/.mopidy/spotify_appkey.key``, and add the following
-setting::
-
-    BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
+Currently :mod:`mopidy.backends.libspotify` is the default
+backend. Before you can use :mod:`mopidy.backends.libspotify`, you must copy
+the Spotify application key to ``~/.mopidy/spotify_appkey.key``.
 
 If you want to use :mod:`mopidy.backends.local`, add the following setting::
 

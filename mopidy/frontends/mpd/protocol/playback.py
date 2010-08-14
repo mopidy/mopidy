@@ -1,6 +1,7 @@
 from mopidy.frontends.mpd import (handle_pattern, MpdArgError, MpdNoExistError,
     MpdNotImplemented)
 
+@handle_pattern(r'^consume (?P<state>[01])$')
 @handle_pattern(r'^consume "(?P<state>[01])"$')
 def consume(frontend, state):
     """
@@ -86,16 +87,28 @@ def next_(frontend):
     """
     return frontend.backend.playback.next()
 
+@handle_pattern(r'^pause$')
 @handle_pattern(r'^pause "(?P<state>[01])"$')
-def pause(frontend, state):
+def pause(frontend, state=None):
     """
     *musicpd.org, playback section:*
 
         ``pause {PAUSE}``
 
         Toggles pause/resumes playing, ``PAUSE`` is 0 or 1.
+
+    *MPDroid:*
+
+    - Calls ``pause`` without any arguments to toogle pause.
     """
-    if int(state):
+    if state is None:
+        if (frontend.backend.playback.state ==
+                frontend.backend.playback.PLAYING):
+            frontend.backend.playback.pause()
+        elif (frontend.backend.playback.state ==
+                frontend.backend.playback.PAUSED):
+            frontend.backend.playback.resume()
+    elif int(state):
         frontend.backend.playback.pause()
     else:
         frontend.backend.playback.resume()
@@ -135,8 +148,8 @@ def playid(frontend, cpid):
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'playid')
 
-@handle_pattern(r'^play "(?P<songpos>\d+)"$')
-@handle_pattern(r'^play "(?P<songpos>-1)"$')
+@handle_pattern(r'^play (?P<songpos>-?\d+)$')
+@handle_pattern(r'^play "(?P<songpos>-?\d+)"$')
 def playpos(frontend, songpos):
     """
     *musicpd.org, playback section:*
@@ -149,6 +162,10 @@ def playpos(frontend, songpos):
 
     - issues ``play "-1"`` after playlist replacement to start playback at
       the first track.
+
+    *BitMPC:*
+
+    - issues ``play 6`` without quotes around the argument.
     """
     songpos = int(songpos)
     try:
@@ -208,6 +225,7 @@ def previous(frontend):
     """
     return frontend.backend.playback.previous()
 
+@handle_pattern(r'^random (?P<state>[01])$')
 @handle_pattern(r'^random "(?P<state>[01])"$')
 def random(frontend, state):
     """
@@ -222,6 +240,7 @@ def random(frontend, state):
     else:
         frontend.backend.playback.random = False
 
+@handle_pattern(r'^repeat (?P<state>[01])$')
 @handle_pattern(r'^repeat "(?P<state>[01])"$')
 def repeat(frontend, state):
     """
@@ -303,6 +322,7 @@ def setvol(frontend, volume):
         volume = 100
     frontend.backend.mixer.volume = volume
 
+@handle_pattern(r'^single (?P<state>[01])$')
 @handle_pattern(r'^single "(?P<state>[01])"$')
 def single(frontend, state):
     """

@@ -2,7 +2,7 @@
 libspotify installation
 ***********************
 
-As an alternative to the despotify backend, we are working on a
+We are working on a
 `libspotify <http://developer.spotify.com/en/libspotify/overview/>`_ backend.
 To use the libspotify backend you must install libspotify and
 `pyspotify <http://github.com/winjer/pyspotify>`_.
@@ -57,22 +57,10 @@ Installing pyspotify
 
 Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
-    sudo aptitude install python-dev python-alsaaudio
+    sudo aptitude install python-dev
 
 Check out the pyspotify code, and install it::
 
     git clone git://github.com/jodal/pyspotify.git
     cd pyspotify/pyspotify/
     sudo python setup.py install
-
-
-Testing the installation
-========================
-
-Apply for an application key at
-https://developer.spotify.com/en/libspotify/application-key, download the
-binary version, and place the file at ``pyspotify/spotify_appkey.key``.
-
-Test your libspotify setup::
-
-    examples/example1.py -u USERNAME -p PASSWORD

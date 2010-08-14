@@ -82,14 +82,6 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
     :undoc-members:
 
 
-:mod:`mopidy.backends.despotify` -- Despotify backend
-=====================================================
-
-.. automodule:: mopidy.backends.despotify
-    :synopsis: Spotify backend using the Despotify library
-    :members:
-
-
 :mod:`mopidy.backends.dummy` -- Dummy backend for testing
 =========================================================
 

@@ -13,7 +13,7 @@ there.
 
 A complete ``~/.mopidy/settings.py`` may look like this::
 
-    SERVER_HOSTNAME = u'0.0.0.0'
+    MPD_SERVER_HOSTNAME = u'::'
     SPOTIFY_USERNAME = u'alice'
     SPOTIFY_PASSWORD = u'mysecret'
 

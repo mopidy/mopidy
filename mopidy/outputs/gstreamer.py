@@ -39,6 +39,8 @@ class GStreamerProcess(BaseProcess):
     http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html.
     """
 
+    pipeline_description = 'appsrc name=data ! volume name=volume ! autoaudiosink name=sink'
+
     def __init__(self, core_queue, output_queue):
         super(GStreamerProcess, self).__init__()
         self.core_queue = core_queue
@@ -65,50 +67,16 @@ class GStreamerProcess(BaseProcess):
         messages_thread.daemon = True
         messages_thread.start()
 
-        # A pipeline consisting of many elements
-        self.gst_pipeline = gst.Pipeline("pipeline")
+        self.gst_pipeline = gst.parse_launch(self.pipeline_description)
+        self.gst_data_src = self.gst_pipeline.get_by_name('data')
+        self.gst_volume = self.gst_pipeline.get_by_name('volume')
+        self.gst_sink = self.gst_pipeline.get_by_name('sink')
 
         # Setup bus and message processor
         self.gst_bus = self.gst_pipeline.get_bus()
         self.gst_bus.add_signal_watch()
         self.gst_bus_id = self.gst_bus.connect('message',
             self.process_gst_message)
-
-        # Bin for playing audio URIs
-        #self.gst_uri_src = gst.element_factory_make('uridecodebin', 'uri_src')
-        #self.gst_pipeline.add(self.gst_uri_src)
-
-        # Bin for playing audio data
-        self.gst_data_src = gst.element_factory_make('appsrc', 'data_src')
-        self.gst_pipeline.add(self.gst_data_src)
-
-        # Volume filter
-        self.gst_volume = gst.element_factory_make('volume', 'volume')
-        self.gst_pipeline.add(self.gst_volume)
-
-        # Audio output sink
-        self.gst_sink = gst.element_factory_make('autoaudiosink', 'sink')
-        self.gst_pipeline.add(self.gst_sink)
-
-        # Add callback that will link uri_src output with volume filter input
-        # when the output pad is ready.
-        # See http://stackoverflow.com/questions/2993777 for details.
-        def on_new_decoded_pad(dbin, pad, is_last):
-            uri_src = pad.get_parent()
-            pipeline = uri_src.get_parent()
-            volume = pipeline.get_by_name('volume')
-            uri_src.link(volume)
-            logger.debug("Linked uri_src's new decoded pad to volume filter")
-        # FIXME uridecodebin got no new-decoded-pad signal, but it's
-        # subcomponent decodebin2 got that signal. Fixing this is postponed
-        # till after data_src is up and running perfectly
-        #self.gst_uri_src.connect('new-decoded-pad', on_new_decoded_pad)
-
-        # Link data source output with volume filter input
-        self.gst_data_src.link(self.gst_volume)
-
-        # Link volume filter output to audio sink input
-        self.gst_volume.link(self.gst_sink)
 
     def process_mopidy_message(self, message):
         """Process messages from the rest of Mopidy."""

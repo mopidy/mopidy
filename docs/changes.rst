@@ -12,17 +12,31 @@ Another great release.
 
 **Changes**
 
+- License changed from GPLv2 to Apache License, version 2.0.
 - GStreamer is now a required dependency.
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
 - Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
+- Changed ``SERVER_HOSTNAME`` and ``SERVER_PORT`` settings to
+  ``MPD_SERVER_HOSTNAME`` and ``MPD_SERVER_PORT``.
+- Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
+  and the Libspotify backend is working much better.
+- :mod:`mopidy.backends.libspotify` is now the default backend.
+- A Spotify application key is now bundled with the source. The
+  ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
   - Split gigantic protocol implementation into eleven modules.
   - Search improvements, including support for multi-word search.
   - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
+  - Support ``plchanges "-1"`` to work better with MPDroid.
+  - Support ``pause`` without arguments to work better with MPDroid.
+  - Support ``plchanges``, ``play``, ``consume``, ``random``, ``repeat``, and
+    ``single`` without quotes to work better with BitMPC.
+  - Fixed delete current playing track from playlist, which crashed several
+    clients.
 
 - Backend API:
 

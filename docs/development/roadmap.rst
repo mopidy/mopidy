@@ -11,8 +11,7 @@ Version 0.1
 
 - Core MPD server functionality working. Gracefully handle clients' use of
   non-supported functionality.
-- Read-only support for Spotify through :mod:`mopidy.backends.despotify` and/or
-  :mod:`mopidy.backends.libspotify`.
+- Read-only support for Spotify through :mod:`mopidy.backends.libspotify`.
 - Initial support for local file playback through
   :mod:`mopidy.backends.local`. The state of local file playback will not
   block the release of 0.1.
@@ -32,15 +31,13 @@ released when we reach the other goal.
 Stuff we really want to do, but just not right now
 ==================================================
 
-- Replace libspotify with `openspotify
-  <http://github.com/noahwilliamsson/openspotify>`_ for
-  :mod:`mopidy.backends.libspotify`. *Update:* Seems like openspotify
-  development has stalled.
+- **[PENDING]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_ recipies
+  for all our dependencies and Mopidy itself to make OS X installation a
+  breeze. See `Homebrew's issue #1612
+  <http://github.com/mxcl/homebrew/issues/issue/1612>`_.
 - Create `Debian packages <http://www.debian.org/doc/maint-guide/>`_ of all our
   dependencies and Mopidy itself (hosted in our own Debian repo until we get
   stuff into the various distros) to make Debian/Ubuntu installation a breeze.
-- **[WIP]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_ recipies for
-  all our dependencies and Mopidy itself to make OS X installation a breeze.
 - Run frontend tests against a real MPD server to ensure we are in sync.
 - Start working with MPD client maintainers to get rid of weird assumptions
   like only searching for first two letters and doing the rest of the filtering

@@ -24,8 +24,11 @@ def get_class(name):
     module_name = name[:name.rindex('.')]
     class_name = name[name.rindex('.') + 1:]
     logger.debug('Loading: %s', name)
-    module = import_module(module_name)
-    class_object = getattr(module, class_name)
+    try:
+        module = import_module(module_name)
+        class_object = getattr(module, class_name)
+    except (ImportError, AttributeError):
+        raise ImportError("Couldn't load: %s" % name)
     return class_object
 
 def get_or_create_folder(folder):

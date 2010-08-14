@@ -3,24 +3,26 @@ Available settings and their default values.
 
 .. warning::
 
-    Do *not* change settings in ``mopidy/settings.py``. Instead, add a file
-    called ``~/.mopidy/settings.py`` and redefine settings there.
+    Do *not* change settings directly in :mod:`mopidy.settings`. Instead, add a
+    file called ``~/.mopidy/settings.py`` and redefine settings there.
 """
 
+# Absolute import needed to import ~/.mopidy/settings.py and not ourselves
 from __future__ import absolute_import
 import os
 import sys
 
 #: List of playback backends to use. See :mod:`mopidy.backends` for all
-#: available backends. Default::
+#: available backends.
 #:
-#:     BACKENDS = (u'mopidy.backends.despotify.DespotifyBackend',)
+#: Default::
+#:
+#:     BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
 #:
 #: .. note::
 #:     Currently only the first backend in the list is used.
 BACKENDS = (
-    u'mopidy.backends.despotify.DespotifyBackend',
-    #u'mopidy.backends.libspotify.LibspotifyBackend',
+    u'mopidy.backends.libspotify.LibspotifyBackend',
 )
 
 #: The log format used on the console. See
@@ -29,32 +31,51 @@ BACKENDS = (
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
     ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
-#: The log format used for dump logs. Default::
+#: The log format used for dump logs.
+#:
+#: Default::
 #:
 #:     DUMP_LOG_FILENAME = CONSOLE_LOG_FORMAT
 DUMP_LOG_FORMAT = CONSOLE_LOG_FORMAT
 
-#: The file to dump debug log data to. Default::
+#: The file to dump debug log data to when Mopidy is run with the
+#: :option:`--dump` option.
+#:
+#: Default::
 #:
 #:     DUMP_LOG_FILENAME = u'dump.log'
 DUMP_LOG_FILENAME = u'dump.log'
 
-#: Protocol frontend to use. Default::
+#: Protocol frontend to use.
+#:
+#: Default::
 #:
 #:     FRONTEND = u'mopidy.frontends.mpd.frontend.MpdFrontend'
 FRONTEND = u'mopidy.frontends.mpd.frontend.MpdFrontend'
 
-#: Path to folder with local music. Default::
+#: Path to folder with local music.
+#:
+#: Used by :mod:`mopidy.backends.local`.
+#:
+#: Default::
 #:
 #:    LOCAL_MUSIC_FOLDER = u'~/music'
 LOCAL_MUSIC_FOLDER = u'~/music'
 
-#: Path to playlist folder with m3u files for local music. Default::
+#: Path to playlist folder with m3u files for local music.
+#:
+#: Used by :mod:`mopidy.backends.local`.
+#:
+#: Default::
 #:
 #:    LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
 LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
 
-#: Path to tag cache for local music. Default::
+#: Path to tag cache for local music.
+#:
+#: Used by :mod:`mopidy.backends.local`.
+#:
+#: Default::
 #:
 #:    LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
 LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
@@ -87,6 +108,7 @@ MIXER_ALSA_CONTROL = False
 #: External mixers only. Which port the mixer is connected to.
 #:
 #: This must point to the device port like ``/dev/ttyUSB0``.
+#:
 #: Default: :class:`None`
 MIXER_EXT_PORT = None
 
@@ -105,17 +127,23 @@ MIXER_EXT_SPEAKERS_A = None
 #: Default: :class:`None`.
 MIXER_EXT_SPEAKERS_B = None
 
-#: Audio output handler to use. Default::
+#: Audio output handler to use.
+#:
+#: Default::
 #:
 #:     OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
 OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
 
-#: Server to use. Default::
+#: Server to use.
+#:
+#: Default::
 #:
 #:     SERVER = u'mopidy.frontends.mpd.server.MpdServer'
 SERVER = u'mopidy.frontends.mpd.server.MpdServer'
 
-#: Which address Mopidy should bind to. Examples:
+#: Which address Mopidy's MPD server should bind to.
+#:
+#:Examples:
 #:
 #: ``127.0.0.1``
 #:     Listens only on the IPv4 loopback interface. Default.
@@ -125,22 +153,27 @@ SERVER = u'mopidy.frontends.mpd.server.MpdServer'
 #:     Listens on all IPv4 interfaces.
 #: ``::``
 #:     Listens on all interfaces, both IPv4 and IPv6.
-SERVER_HOSTNAME = u'127.0.0.1'
+MPD_SERVER_HOSTNAME = u'127.0.0.1'
 
-#: Which TCP port Mopidy should listen to. Default: 6600
-SERVER_PORT = 6600
+#: Which TCP port Mopidy's MPD server should listen to.
+#:
+#: Default: 6600
+MPD_SERVER_PORT = 6600
 
-#: Your Spotify Premium username. Used by all Spotify backends.
+#: Path to the libspotify cache.
+#:
+#: Used by :mod:`mopidy.backends.libspotify`.
+SPOTIFY_LIB_CACHE = u'~/.mopidy/libspotify_cache'
+
+#: Your Spotify Premium username.
+#:
+#: Used by :mod:`mopidy.backends.libspotify`.
 SPOTIFY_USERNAME = u''
 
-#: Your Spotify Premium password. Used by all Spotify backends.
+#: Your Spotify Premium password.
+#:
+#: Used by :mod:`mopidy.backends.libspotify`.
 SPOTIFY_PASSWORD = u''
-
-#: Path to your libspotify application key. Used by LibspotifyBackend.
-SPOTIFY_LIB_APPKEY = u'~/.mopidy/spotify_appkey.key'
-
-#: Path to the libspotify cache. Used by LibspotifyBackend.
-SPOTIFY_LIB_CACHE = u'~/.mopidy/libspotify_cache'
 
 # Import user specific settings
 dotdir = os.path.expanduser(u'~/.mopidy/')
