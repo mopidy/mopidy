@@ -47,7 +47,6 @@ class GStreamerProcess(BaseProcess):
         self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
-        self.gst_decoder = None
 
     def run_inside_try(self):
         self.setup()
