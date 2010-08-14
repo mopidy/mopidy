@@ -34,6 +34,7 @@ greatly improved MPD client support.
   ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
 - Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
   default mixer on all platforms.
+- New setting ``MIXER_MAX_VOLUME`` for capping the maximum output volume.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
