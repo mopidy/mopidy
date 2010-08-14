@@ -43,7 +43,9 @@ class LibspotifyPlaybackController(BasePlaybackController):
         return self._set_output_state('PLAYING')
 
     def _seek(self, time_position):
-        pass # TODO
+        self._set_output_state('READY')
+        result = self.backend.spotify.session.seek(time_position)
+        self._set_output_state('PLAYING')
 
     def _stop(self):
         result = self._set_output_state('READY')
