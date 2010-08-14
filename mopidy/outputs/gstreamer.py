@@ -20,8 +20,11 @@ class GStreamerOutput(object):
     """
 
     def __init__(self, core_queue, output_queue):
-        process = GStreamerProcess(core_queue, output_queue)
-        process.start()
+        self.process = GStreamerProcess(core_queue, output_queue)
+        self.process.start()
+
+    def destroy(self):
+        self.process.terminate()
 
 class GStreamerMessagesThread(threading.Thread):
     def run(self):
@@ -156,10 +159,10 @@ class GStreamerProcess(BaseProcess):
         :type state_name: string
         :rtype: :class:`True` or :class:`False`
         """
-        # XXX Setting state to PLAYING often returns False even if it works
-        result = self.gst_pipeline.set_state(
-            getattr(gst, 'STATE_' + state_name))
-        if result == gst.STATE_CHANGE_SUCCESS:
+        state = getattr(gst, 'STATE_' + state_name)
+        self.gst_pipeline.set_state(state)
+        new_state = self.gst_pipeline.get_state()[1]
+        if new_state == state:
             logger.debug('Setting GStreamer state to %s: OK', state_name)
             return True
         else:
