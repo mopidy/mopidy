@@ -43,7 +43,7 @@ class GStreamerProcess(BaseProcess):
     """
 
     pipeline_description = \
-        'appsrc name=data ! volume name=volume ! autoaudiosink name=sink'
+        'uridecodebin name=uri ! volume name=volume ! autoaudiosink name=sink'
 
     def __init__(self, core_queue, output_queue):
         super(GStreamerProcess, self).__init__()
@@ -52,7 +52,7 @@ class GStreamerProcess(BaseProcess):
         self.gst_pipeline = None
         self.gst_bus = None
         self.gst_bus_id = None
-        self.gst_uri_src = None
+        self.gst_uri_bin = None
         self.gst_data_src = None
         self.gst_volume = None
         self.gst_sink = None
@@ -72,7 +72,7 @@ class GStreamerProcess(BaseProcess):
         messages_thread.start()
 
         self.gst_pipeline = gst.parse_launch(self.pipeline_description)
-        self.gst_data_src = self.gst_pipeline.get_by_name('data')
+        self.gst_uri_bin = self.gst_pipeline.get_by_name('uri')
         self.gst_volume = self.gst_pipeline.get_by_name('volume')
         self.gst_sink = self.gst_pipeline.get_by_name('sink')
 
@@ -121,9 +121,8 @@ class GStreamerProcess(BaseProcess):
     def play_uri(self, uri):
         """Play audio at URI"""
         self.set_state('READY')
-        self.gst_uri_src.set_property('uri', uri)
-        self.set_state('PLAYING')
-        # TODO Return status
+        self.gst_uri_bin.set_property('uri', uri)
+        return self.set_state('PLAYING')
 
     def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
