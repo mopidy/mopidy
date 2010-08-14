@@ -115,6 +115,16 @@ MIXER_EXT_SPEAKERS_A = None
 #: Default: :class:`None`.
 MIXER_EXT_SPEAKERS_B = None
 
+#: The maximum volume. Integer in the range 0 to 100.
+#:
+#: If this settings is set to 80, the mixer will set the actual volume to 80
+#: when asked to set it to 100.
+#:
+#: Default::
+#:
+#:     MIXER_MAX_VOLUME = 100
+MIXER_MAX_VOLUME = 100
+
 #: Audio output handler to use.
 #:
 #: Default::

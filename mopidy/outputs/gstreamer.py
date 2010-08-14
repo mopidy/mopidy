@@ -167,15 +167,14 @@ class GStreamerProcess(BaseProcess):
         :type state_name: string
         :rtype: :class:`True` or :class:`False`
         """
-        state = getattr(gst, 'STATE_' + state_name)
-        self.gst_pipeline.set_state(state)
-        new_state = self.gst_pipeline.get_state()[1]
-        if new_state == state:
-            logger.debug('Setting GStreamer state to %s: OK', state_name)
-            return True
-        else:
+        result = self.gst_pipeline.set_state(
+            getattr(gst, 'STATE_' + state_name))
+        if result == gst.STATE_CHANGE_FAILURE:
             logger.warning('Setting GStreamer state to %s: failed', state_name)
             return False
+        else:
+            logger.debug('Setting GStreamer state to %s: OK', state_name)
+            return True
 
     def get_volume(self):
         """Get volume in range [0..100]"""

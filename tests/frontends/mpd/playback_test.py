@@ -271,18 +271,32 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_seek(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.load([Track(length=40000)])
         self.h.handle_request(u'seek "0"')
         result = self.h.handle_request(u'seek "0" "30"')
         self.assert_(u'OK' in result)
-        self.assert_(self.b.playback.time_position > 30000)
+        self.assert_(self.b.playback.time_position >= 30000)
+
+    def test_seek_with_songpos(self):
+        seek_track = Track(uri='2', length=40000)
+        self.b.current_playlist.load(
+            [Track(uri='1', length=40000), seek_track])
+        result = self.h.handle_request(u'seek "1" "30"')
+        self.assertEqual(self.b.playback.current_track, seek_track)
 
     def test_seekid(self):
-        self.b.current_playlist.load([Track()])
-        result = self.h.handle_request(u'seekid "0" "30"')
+        self.b.current_playlist.load([Track(length=40000)])
+        result = self.h.handle_request(u'seekid "1" "30"')
         self.assert_(u'OK' in result)
-        self.assert_(self.b.playback.time_position > 30000)
+        self.assert_(self.b.playback.time_position >= 30000)
 
+    def test_seekid_with_cpid(self):
+        seek_track = Track(uri='2', length=40000)
+        self.b.current_playlist.load(
+            [Track(length=40000), seek_track])
+        result = self.h.handle_request(u'seekid "2" "30"')
+        self.assertEqual(self.b.playback.current_cpid, 2)
+        self.assertEqual(self.b.playback.current_track, seek_track)
 
     def test_stop(self):
         result = self.h.handle_request(u'stop')
