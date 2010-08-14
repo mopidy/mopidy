@@ -43,7 +43,8 @@ class GStreamerProcess(BaseProcess):
     """
 
     pipeline_description = ' ! '.join([
-        'appsrc name=src uridecodebin name=uri',
+        #'appsrc name=src uridecodebin name=uri',
+        'uridecodebin name=uri',
         'volume name=volume',
         'autoaudiosink name=sink',
     ])
