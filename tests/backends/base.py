@@ -2,7 +2,6 @@ import os
 import random
 import shutil
 import tempfile
-import threading
 import time
 import multiprocessing
 
@@ -600,22 +599,10 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_end_of_track_callback_gets_called(self):
-        end_of_track_callback = self.playback.end_of_track_callback
-        event = threading.Event()
-
-        def wrapper():
-            result = end_of_track_callback()
-            event.set()
-            return result
-
-        self.playback.end_of_track_callback = wrapper
-
         self.playback.play()
         self.playback.seek(self.tracks[0].length - 10)
-
-        event.wait(5)
-
-        self.assert_(event.is_set())
+        message = self.core_queue.get()
+        self.assertEqual('end_of_track', message['command'])
 
     @populate_playlist
     def test_new_playlist_loaded_callback_when_playing(self):
