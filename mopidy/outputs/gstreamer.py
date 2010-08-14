@@ -47,6 +47,7 @@ class GStreamerProcess(BaseProcess):
         self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
+        self.gst_decoder = None
 
     def run_inside_try(self):
         self.setup()
@@ -62,12 +63,25 @@ class GStreamerProcess(BaseProcess):
         messages_thread.daemon = True
         messages_thread.start()
 
-        self.gst_pipeline = gst.parse_launch('playbin')
+        self.gst_pipeline = gst.parse_launch(' ! '.join([
+            'volume name=volume',
+            'autoaudiosink'
+        ]))
+
+        decode_bin = gst.element_factory_make('uridecodebin', 'uri')
+        decode_bin.connect('pad-added', self.process_new_pad, 'volume')
+        app_src = gst.element_factory_make('appsrc', 'src')
+
+        self.gst_pipeline.add(decode_bin)
+        self.gst_pipeline.add(app_src)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
         gst_bus.add_signal_watch()
         gst_bus.connect('message', self.process_gst_message)
+
+    def process_new_pad(self, source, pad, target):
+        pad.link(self.gst_pipeline.get_by_name(target).get_pad('sink'))
 
     def process_mopidy_message(self, message):
         """Process messages from the rest of Mopidy."""
@@ -114,7 +128,7 @@ class GStreamerProcess(BaseProcess):
     def play_uri(self, uri):
         """Play audio at URI"""
         self.set_state('READY')
-        self.gst_pipeline.set_property('uri', uri)
+        self.gst_pipeline.get_by_name('uri').set_property('uri', uri)
         return self.set_state('PLAYING')
 
     def deliver_data(self, caps_string, data):
