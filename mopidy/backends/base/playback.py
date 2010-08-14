@@ -321,9 +321,9 @@ class BasePlaybackController(object):
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self._play(cp_track[1]):
-                if at_error_step == 1:
+                if on_error_step == 1:
                     self.next()
-                elif at_error_step == -1:
+                elif on_error_step == -1:
                     self.previous()
 
         if self.random and self.current_cp_track in self._shuffled:
