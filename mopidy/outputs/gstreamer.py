@@ -105,6 +105,12 @@ class GStreamerProcess(BaseProcess):
             connection.send(volume)
         elif message['command'] == 'set_volume':
             self.set_volume(message['volume'])
+        elif message['command'] == 'set_position':
+            self.set_position(message['position'])
+        elif message['command'] == 'get_position':
+            response = self.get_position()
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
         else:
             logger.warning(u'Cannot handle message: %s', message)
 
@@ -180,3 +186,19 @@ class GStreamerProcess(BaseProcess):
         """Set volume in range [0..100]"""
         gst_volume = volume / 100.0
         self.gst_volume.set_property('volume', gst_volume)
+
+    def set_position(self, position):
+        logger.info('Seeking to %s' % position)
+        self.gst_pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
+            gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
+        self.set_state('PLAYING')
+
+    def get_position(self):
+        try:
+            position = self.gst_pipeline.query_position(gst.FORMAT_TIME)[0]
+            return position // gst.MSECOND
+        except gst.QueryError, e:
+            logger.error('time_position failed: %s', e)
+            return 0
+
+

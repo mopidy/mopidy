@@ -60,11 +60,11 @@ class LocalPlaybackController(BasePlaybackController):
         return self._set_state('PLAYING')
 
     def _seek(self, time_position):
-        pass
+        self._send({'command': 'set_position', 'position': time_position})
 
     @property
     def time_position(self):
-        pass
+        return self._send_recv({'command': 'get_position'})
 
 
 class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
