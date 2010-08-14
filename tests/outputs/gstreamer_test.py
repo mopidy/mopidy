@@ -5,7 +5,7 @@ from mopidy.utils import path_to_uri
 from mopidy.process import pickle_connection
 from mopidy.outputs.gstreamer import GStreamerOutput
 
-from tests import data_folder
+from tests import data_folder, SkipTest
 
 class GStreamerOutputTest(unittest.TestCase):
     def setUp(self):
@@ -50,3 +50,7 @@ class GStreamerOutputTest(unittest.TestCase):
     def test_set_volume_to_one_hundred(self):
         self.send({'command': 'set_volume', 'volume': 100})
         self.assertEqual(100, self.send_recv({'command': 'get_volume'}))
+
+    @SkipTest
+    def test_set_state(self):
+        raise NotImplementedError
