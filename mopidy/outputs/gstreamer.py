@@ -156,6 +156,7 @@ class GStreamerProcess(BaseProcess):
         :type state_name: string
         :rtype: :class:`True` or :class:`False`
         """
+        # XXX Setting state to PLAYING often returns False even if it works
         result = self.gst_pipeline.set_state(
             getattr(gst, 'STATE_' + state_name))
         if result == gst.STATE_CHANGE_SUCCESS:
