@@ -8,21 +8,28 @@ This change log is used to track all major changes to Mopidy.
 0.1.0a4 (in development)
 ========================
 
-Another great release.
+The greatest release ever! We present to you important improvements in search
+functionality, working track position seeking, no known stability issues, and
+greatly improved MPD client support.
 
-**Changes**
+**Important changes**
 
 - License changed from GPLv2 to Apache License, version 2.0.
 - GStreamer is now a required dependency.
+- :mod:`mopidy.backends.libspotify` is now the default backend.
+  :mod:`mopidy.backends.despotify` is no longer available. This means that you
+  need to install the :doc:`dependencies for libspotify
+  <installation/libspotify>`.
+- If you used :mod:`mopidy.backends.libspotify` previously, pyspotify must be
+  updated when updating to this release, to get working seek functionality.
+- The settings ``SERVER_HOSTNAME`` and ``SERVER_PORT`` has been renamed to
+  ``MPD_SERVER_HOSTNAME`` and ``MPD_SERVER_PORT``.
+
+**Changes**
+
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
-- Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
-- Changed ``SERVER_HOSTNAME`` and ``SERVER_PORT`` settings to
-  ``MPD_SERVER_HOSTNAME`` and ``MPD_SERVER_PORT``.
-- Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
-  and the Libspotify backend is working much better.
-- :mod:`mopidy.backends.libspotify` is now the default backend.
 - A Spotify application key is now bundled with the source. The
   ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
 - Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
@@ -39,6 +46,12 @@ Another great release.
     ``single`` without quotes to work better with BitMPC.
   - Fixed delete current playing track from playlist, which crashed several
     clients.
+
+- Backends:
+
+  - Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
+  - Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
+    and the Libspotify backend is working much better.
 
 - Backend API:
 
