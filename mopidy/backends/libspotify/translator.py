@@ -39,7 +39,7 @@ class LibspotifyTranslator(object):
             track_no=spotify_track.index(),
             date=date,
             length=spotify_track.duration(),
-            bitrate=320,
+            bitrate=160,
         )
 
     @classmethod
