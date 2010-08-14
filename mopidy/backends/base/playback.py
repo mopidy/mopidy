@@ -100,16 +100,16 @@ class BasePlaybackController(object):
         """
         The next track in the playlist.
 
-        A :class:`mopidy.models.Track` extracted from :attr:`next_cp_track` for
+        A :class:`mopidy.models.Track` extracted from :attr:`cp_track_at_next` for
         convenience.
         """
-        next_cp_track = self.next_cp_track
-        if next_cp_track is None:
+        cp_track_at_next = self.cp_track_at_next
+        if cp_track_at_next is None:
             return None
-        return next_cp_track[1]
+        return cp_track_at_next[1]
 
     @property
-    def next_cp_track(self):
+    def cp_track_at_next(self):
         """
         The next track in the playlist.
 
@@ -247,7 +247,7 @@ class BasePlaybackController(object):
         Typically called by :class:`mopidy.process.CoreProcess` after a message
         from a library thread is received.
         """
-        if self.next_cp_track is not None:
+        if self.cp_track_at_next is not None:
             self.next()
         else:
             self.stop()
@@ -278,10 +278,10 @@ class BasePlaybackController(object):
 
         if self.state == self.STOPPED:
             return
-        elif self.next_cp_track is not None and self._next(self.next_track):
-            self.current_cp_track = self.next_cp_track
+        elif self.cp_track_at_next is not None and self._next(self.next_track):
+            self.current_cp_track = self.cp_track_at_next
             self.state = self.PLAYING
-        elif self.next_cp_track is None:
+        elif self.cp_track_at_next is None:
             self.stop()
             self.current_cp_track = None
 
@@ -315,7 +315,7 @@ class BasePlaybackController(object):
         if cp_track is not None:
             assert cp_track in self.backend.current_playlist.cp_tracks
         elif not self.current_cp_track:
-            cp_track = self.next_cp_track
+            cp_track = self.cp_track_at_next
 
         if self.state == self.PAUSED and cp_track is None:
             self.resume()
