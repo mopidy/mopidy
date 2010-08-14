@@ -287,9 +287,11 @@ class BasePlaybackController(object):
         Typically called by :class:`mopidy.process.CoreProcess` after a message
         from a library thread is received.
         """
-        if self.cp_track_at_eot is not None:
+        next_cp_track = self.cp_track_at_eot
+        if next_cp_track is not None and self._next(next_cp_track[1]):
             original_cp_track = self.current_cp_track
-            self.current_cp_track = self.cp_track_at_eot
+            self.current_cp_track = next_cp_track
+            self.state = self.PLAYING
 
             if self.consume:
                 self.backend.current_playlist.remove(cpid=original_cp_track[0])
