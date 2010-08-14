@@ -42,8 +42,7 @@ class GStreamerProcess(BaseProcess):
     http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html.
     """
 
-    pipeline_description = \
-        'uridecodebin name=uri ! volume name=volume ! autoaudiosink name=sink'
+    pipeline_description = '(appsrc uridecodebin) ! volume ! autoaudiosink'
 
     def __init__(self, core_queue, output_queue):
         super(GStreamerProcess, self).__init__()
@@ -55,7 +54,6 @@ class GStreamerProcess(BaseProcess):
         self.gst_uri_bin = None
         self.gst_data_src = None
         self.gst_volume = None
-        self.gst_sink = None
 
     def run_inside_try(self):
         self.setup()
@@ -72,9 +70,9 @@ class GStreamerProcess(BaseProcess):
         messages_thread.start()
 
         self.gst_pipeline = gst.parse_launch(self.pipeline_description)
-        self.gst_uri_bin = self.gst_pipeline.get_by_name('uri')
-        self.gst_volume = self.gst_pipeline.get_by_name('volume')
-        self.gst_sink = self.gst_pipeline.get_by_name('sink')
+        self.gst_data_src = self.gst_pipeline.get_by_name('appsrc0')
+        self.gst_uri_bin = self.gst_pipeline.get_by_name('uridecodebin0')
+        self.gst_volume = self.gst_pipeline.get_by_name('volume0')
 
         # Setup bus and message processor
         self.gst_bus = self.gst_pipeline.get_bus()

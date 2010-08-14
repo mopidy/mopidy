@@ -31,4 +31,6 @@ class GStreamerOutputTest(unittest.TestCase):
     def test_play_uri_non_existing_file(self):
         message = {'command': 'play_uri', 'uri': self.song_uri + 'bogus'}
         self.assertEqual(False, self.send(message))
+
+    
            
