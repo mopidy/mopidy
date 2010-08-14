@@ -65,7 +65,7 @@ class GStreamerProcess(BaseProcess):
 
         self.gst_pipeline = gst.parse_launch(' ! '.join([
             'volume name=volume',
-            'autoaudiosink'
+            'alsasink'
         ]))
 
         decode_bin = gst.element_factory_make('uridecodebin', 'uri')
