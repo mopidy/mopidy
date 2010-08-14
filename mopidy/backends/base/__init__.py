@@ -36,7 +36,7 @@ class BaseBackend(object):
         if mixer is not None:
             self.mixer = mixer
         else:
-            self.mixer = get_class(settings.MIXER)()
+            self.mixer = get_class(settings.MIXER)(self)
 
     #: A :class:`multiprocessing.Queue` which can be used by e.g. library
     #: callbacks executing in other threads to send messages to the core

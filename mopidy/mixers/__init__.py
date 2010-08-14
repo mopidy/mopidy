@@ -1,6 +1,11 @@
 class BaseMixer(object):
-    def __init__(self, *args, **kwargs):
-        pass
+    """
+    :param backend: a backend instance
+    :type mixer: :class:`mopidy.backends.base.BaseBackend`
+    """
+
+    def __init__(self, backend, *args, **kwargs):
+        self.backend = backend
 
     @property
     def volume(self):
