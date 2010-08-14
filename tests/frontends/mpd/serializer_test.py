@@ -1,12 +1,12 @@
 import datetime as dt
 import unittest
 
-from mopidy.frontends.mpd import serializer
+from mopidy.frontends.mpd import translator
 from mopidy.models import Album, Artist, Playlist, Track
 
 class TrackMpdFormatTest(unittest.TestCase):
     def test_mpd_format_for_empty_track(self):
-        result = serializer.track_to_mpd_format(Track())
+        result = translator.track_to_mpd_format(Track())
         self.assert_(('file', '') in result)
         self.assert_(('Time', 0) in result)
         self.assert_(('Artist', '') in result)
@@ -25,7 +25,7 @@ class TrackMpdFormatTest(unittest.TestCase):
             date=dt.date(1977, 1, 1),
             length=137000,
         )
-        result = serializer.track_to_mpd_format(track, position=9, cpid=122)
+        result = translator.track_to_mpd_format(track, position=9, cpid=122)
         self.assert_(('file', 'a uri') in result)
         self.assert_(('Time', 137) in result)
         self.assert_(('Artist', 'an artist') in result)
@@ -38,7 +38,7 @@ class TrackMpdFormatTest(unittest.TestCase):
 
     def test_mpd_format_artists(self):
         track = Track(artists=[Artist(name=u'ABBA'), Artist(name=u'Beatles')])
-        self.assertEqual(serializer.track_artists_to_mpd_format(track),
+        self.assertEqual(translator.track_artists_to_mpd_format(track),
             u'ABBA, Beatles')
 
 
@@ -46,12 +46,12 @@ class PlaylistMpdFormatTest(unittest.TestCase):
     def test_mpd_format(self):
         playlist = Playlist(tracks=[
             Track(track_no=1), Track(track_no=2), Track(track_no=3)])
-        result = serializer.playlist_to_mpd_format(playlist)
+        result = translator.playlist_to_mpd_format(playlist)
         self.assertEqual(len(result), 3)
 
     def test_mpd_format_with_range(self):
         playlist = Playlist(tracks=[
             Track(track_no=1), Track(track_no=2), Track(track_no=3)])
-        result = serializer.playlist_to_mpd_format(playlist, 1, 2)
+        result = translator.playlist_to_mpd_format(playlist, 1, 2)
         self.assertEqual(len(result), 1)
         self.assertEqual(dict(result[0])['Track'], 2)
