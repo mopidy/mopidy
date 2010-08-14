@@ -173,7 +173,10 @@ def playlistfind(frontend, tag, needle):
     if tag == 'filename':
         try:
             cp_track = frontend.backend.current_playlist.get(uri=needle)
-            return cp_track[1].mpd_format()
+            (cpid, track) = cp_track
+            position = frontend.backend.current_playlist.cp_tracks.index(
+                cp_track)
+            return track.mpd_format(cpid=cpid, position=position)
         except LookupError:
             return None
     raise MpdNotImplemented # TODO

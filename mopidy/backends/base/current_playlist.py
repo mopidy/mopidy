@@ -2,7 +2,7 @@ from copy import copy
 import logging
 import random
 
-from mopidy.frontends.mpd import serializer
+from mopidy.frontends.mpd import translator
 
 logger = logging.getLogger('mopidy.backends.base')
 
@@ -196,4 +196,4 @@ class BaseCurrentPlaylistController(object):
     def mpd_format(self, *args, **kwargs):
         """Not a part of the generic backend API."""
         kwargs['cpids'] = [ct[0] for ct in self._cp_tracks]
-        return serializer.tracks_to_mpd_format(self.tracks, *args, **kwargs)
+        return translator.tracks_to_mpd_format(self.tracks, *args, **kwargs)

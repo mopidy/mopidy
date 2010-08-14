@@ -195,14 +195,16 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'playlistfind "tag" "needle"')
         self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
-    def test_playlistfind_by_filename(self):
+    def test_playlistfind_by_filename_not_in_current_playlist(self):
         result = self.h.handle_request(
             u'playlistfind "filename" "file:///dev/null"')
+        self.assertEqual(len(result), 1)
         self.assert_(u'OK' in result)
 
     def test_playlistfind_by_filename_without_quotes(self):
         result = self.h.handle_request(
             u'playlistfind filename "file:///dev/null"')
+        self.assertEqual(len(result), 1)
         self.assert_(u'OK' in result)
 
     def test_playlistfind_by_filename_in_current_playlist(self):
@@ -211,6 +213,8 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(
             u'playlistfind filename "file:///exists"')
         self.assert_(u'file: file:///exists' in result)
+        self.assert_(u'Id: 1' in result)
+        self.assert_(u'Pos: 0' in result)
         self.assert_(u'OK' in result)
 
     def test_playlistid_without_songid(self):
