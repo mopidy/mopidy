@@ -17,20 +17,36 @@ class GStreamerOutputTest(unittest.TestCase):
     def tearDown(self):
         self.output.destroy()
 
-    def send(self, message):
+    def send_recv(self, message):
         (my_end, other_end) = multiprocessing.Pipe()
         message.update({'reply_to': pickle_connection(other_end)})
         self.output_queue.put(message)
         my_end.poll(None)
         return my_end.recv()
 
+    def send(self, message):
+        self.output_queue.put(message)
+
     def test_play_uri_existing_file(self):
         message = {'command': 'play_uri', 'uri': self.song_uri}
-        self.assertEqual(True, self.send(message))
+        self.assertEqual(True, self.send_recv(message))
 
     def test_play_uri_non_existing_file(self):
         message = {'command': 'play_uri', 'uri': self.song_uri + 'bogus'}
-        self.assertEqual(False, self.send(message))
+        self.assertEqual(False, self.send_recv(message))
 
-    
-           
+    def test_default_get_volume_result(self):
+        message = {'command': 'get_volume'}
+        self.assertEqual(100, self.send_recv(message))
+
+    def test_set_volume(self):
+        self.send({'command': 'set_volume', 'volume': 50})
+        self.assertEqual(50, self.send_recv({'command': 'get_volume'}))
+
+    def test_set_volume_to_zero(self):
+        self.send({'command': 'set_volume', 'volume': 0})
+        self.assertEqual(0, self.send_recv({'command': 'get_volume'}))
+
+    def test_set_volume_to_one_hundred(self):
+        self.send({'command': 'set_volume', 'volume': 100})
+        self.assertEqual(100, self.send_recv({'command': 'get_volume'}))
