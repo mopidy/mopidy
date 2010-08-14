@@ -283,6 +283,13 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assert_(self.b.playback.time_position >= 30000)
 
+    def test_seekid_with_cpid(self):
+        seek_track = Track(uri='2', length=40000)
+        self.b.current_playlist.load(
+            [Track(length=40000), seek_track])
+        result = self.h.handle_request(u'seekid "2" "30"')
+        self.assertEqual(self.b.playback.current_cpid, 2)
+        self.assertEqual(self.b.playback.current_track, seek_track)
 
     def test_stop(self):
         result = self.h.handle_request(u'stop')
