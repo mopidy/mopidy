@@ -28,16 +28,23 @@ class BaseProcess(multiprocessing.Process):
         except SettingsError as e:
             logger.error(e.message)
             sys.exit(1)
+        except ImportError as e:
+            logger.error(e)
+            sys.exit(1)
 
     def run_inside_try(self):
         raise NotImplementedError
 
 
 class CoreProcess(BaseProcess):
-    def __init__(self, core_queue):
+    def __init__(self, core_queue, output_class, backend_class,
+            frontend_class):
         super(CoreProcess, self).__init__()
         self.core_queue = core_queue
         self.output_queue = None
+        self.output_class = output_class
+        self.backend_class = backend_class
+        self.frontend_class = frontend_class
         self.output = None
         self.backend = None
         self.frontend = None
@@ -50,11 +57,9 @@ class CoreProcess(BaseProcess):
 
     def setup(self):
         self.output_queue = multiprocessing.Queue()
-        self.output = get_class(settings.OUTPUT)(self.core_queue,
-            self.output_queue)
-        self.backend = get_class(settings.BACKENDS[0])(self.core_queue,
-            self.output_queue)
-        self.frontend = get_class(settings.FRONTEND)(self.backend)
+        self.output = self.output_class(self.core_queue, self.output_queue)
+        self.backend = self.backend_class(self.core_queue, self.output_queue)
+        self.frontend = self.frontend_class(self.backend)
 
     def process_message(self, message):
         if message.get('to') == 'output':
