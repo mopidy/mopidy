@@ -93,6 +93,12 @@ class GStreamerProcess(BaseProcess):
             response = self.set_state(message['state'])
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
+        elif message['command'] == 'get_volume':
+            volume = self.get_volume()
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(volume)
+        elif message['command'] == 'set_volume':
+            self.set_volume(message['volume'])
         else:
             logger.warning(u'Cannot handle message: %s', message)
 

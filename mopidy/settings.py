@@ -82,22 +82,10 @@ LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
 
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
-#: Default on Linux::
+#: Default::
 #:
-#:     MIXER = u'mopidy.mixers.alsa.AlsaMixer'
-#:
-#: Default on OS X::
-#:
-#:     MIXER = u'mopidy.mixers.osa.OsaMixer'
-#:
-#: Default on other operating systems::
-#:
-#:     MIXER = u'mopidy.mixers.dummy.DummyMixer'
-MIXER = u'mopidy.mixers.dummy.DummyMixer'
-if sys.platform == 'linux2':
-    MIXER = u'mopidy.mixers.alsa.AlsaMixer'
-elif sys.platform == 'darwin':
-    MIXER = u'mopidy.mixers.osa.OsaMixer'
+#:     MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
+MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
 
 #: ALSA mixer only. What mixer control to use. If set to :class:`False`, first
 #: ``Master`` and then ``PCM`` will be tried.
