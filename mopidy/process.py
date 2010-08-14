@@ -4,8 +4,7 @@ from multiprocessing.reduction import reduce_connection
 import pickle
 import sys
 
-from mopidy import settings, SettingsError
-from mopidy.utils import get_class
+from mopidy import SettingsError
 
 logger = logging.getLogger('mopidy.process')
 

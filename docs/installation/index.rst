@@ -99,11 +99,8 @@ username and password into the file, like this::
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
 
-Currently :mod:`mopidy.backends.libspotify` is the default
-backend. Before you can use :mod:`mopidy.backends.libspotify`, you must copy
-the Spotify application key to ``~/.mopidy/spotify_appkey.key``.
-
-If you want to use :mod:`mopidy.backends.local`, add the following setting::
+Currently :mod:`mopidy.backends.libspotify` is the default backend. If you want
+to use :mod:`mopidy.backends.local`, add the following setting::
 
     BACKENDS = (u'mopidy.backends.local.LocalBackend',)
 

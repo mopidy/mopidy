@@ -25,6 +25,8 @@ Another great release.
 - :mod:`mopidy.backends.libspotify` is now the default backend.
 - A Spotify application key is now bundled with the source. The
   ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
+- Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
+  default mixer on all platforms.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.

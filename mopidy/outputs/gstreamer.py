@@ -39,7 +39,8 @@ class GStreamerProcess(BaseProcess):
     http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html.
     """
 
-    pipeline_description = 'appsrc name=data ! volume name=volume ! autoaudiosink name=sink'
+    pipeline_description = \
+        'appsrc name=data ! volume name=volume ! autoaudiosink name=sink'
 
     def __init__(self, core_queue, output_queue):
         super(GStreamerProcess, self).__init__()
@@ -92,6 +93,12 @@ class GStreamerProcess(BaseProcess):
             response = self.set_state(message['state'])
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
+        elif message['command'] == 'get_volume':
+            volume = self.get_volume()
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(volume)
+        elif message['command'] == 'set_volume':
+            self.set_volume(message['volume'])
         else:
             logger.warning(u'Cannot handle message: %s', message)
 
