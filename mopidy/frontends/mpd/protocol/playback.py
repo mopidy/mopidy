@@ -139,9 +139,7 @@ def playid(frontend, cpid):
     cpid = int(cpid)
     try:
         if cpid == -1:
-            if not frontend.backend.current_playlist.cp_tracks:
-                return # Fail silently
-            cp_track = frontend.backend.current_playlist.cp_tracks[0]
+            cp_track = _get_cp_track_for_play_minus_one(frontend)
         else:
             cp_track = frontend.backend.current_playlist.get(cpid=cpid)
         return frontend.backend.playback.play(cp_track)
@@ -158,10 +156,11 @@ def playpos(frontend, songpos):
 
         Begins playing the playlist at song number ``SONGPOS``.
 
-    *MPoD:*
+    *Many clients:*
 
-    - issues ``play "-1"`` after playlist replacement to start playback at
-      the first track.
+    - issue ``play "-1"`` after playlist replacement to start the current
+      track. If the current track is not set, start playback at the first
+      track.
 
     *BitMPC:*
 
@@ -170,14 +169,20 @@ def playpos(frontend, songpos):
     songpos = int(songpos)
     try:
         if songpos == -1:
-            if not frontend.backend.current_playlist.cp_tracks:
-                return # Fail silently
-            cp_track = frontend.backend.current_playlist.cp_tracks[0]
+            cp_track = _get_cp_track_for_play_minus_one(frontend)
         else:
             cp_track = frontend.backend.current_playlist.cp_tracks[songpos]
         return frontend.backend.playback.play(cp_track)
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'play')
+
+def _get_cp_track_for_play_minus_one(frontend):
+    if not frontend.backend.current_playlist.cp_tracks:
+        return # Fail silently
+    cp_track = frontend.backend.playback.current_cp_track
+    if cp_track is None:
+        cp_track = frontend.backend.current_playlist.cp_tracks[0]
+    return cp_track
 
 @handle_pattern(r'^previous$')
 def previous(frontend):

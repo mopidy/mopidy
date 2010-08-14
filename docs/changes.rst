@@ -40,7 +40,8 @@ greatly improved MPD client support.
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
   - Split gigantic protocol implementation into eleven modules.
   - Search improvements, including support for multi-word search.
-  - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
+  - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty
+    or when a current track is set.
   - Support ``plchanges "-1"`` to work better with MPDroid.
   - Support ``pause`` without arguments to work better with MPDroid.
   - Support ``plchanges``, ``play``, ``consume``, ``random``, ``repeat``, and
