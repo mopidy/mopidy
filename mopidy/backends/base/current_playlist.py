@@ -107,16 +107,15 @@ class BaseCurrentPlaylistController(object):
 
     def load(self, tracks):
         """
-        Replace the tracks in the current playlist with the given tracks.
+        Append the given tracks to the current playlist.
 
         :param tracks: tracks to load
         :type tracks: list of :class:`mopidy.models.Track`
         """
-        self._cp_tracks = []
         self.version += 1
         for track in tracks:
             self.add(track)
-        self.backend.playback.new_playlist_loaded_callback()
+        self.backend.playback.on_current_playlist_change()
 
     def move(self, start, end, to_position):
         """

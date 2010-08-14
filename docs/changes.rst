@@ -50,6 +50,7 @@ greatly improved MPD client support.
   - Implement ``seek`` and ``seekid``.
   - Fix ``playlistfind`` output so the correct song is played when playing
     songs directly from search results in GMPC.
+  - Fix ``load`` so that one can append a playlist to the current playlist.
 
 - Backends:
 
@@ -73,7 +74,10 @@ greatly improved MPD client support.
   - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
     ``output_queue`` which it can use to send messages (i.e. audio data)
     to the output process.
-
+  - :meth:`mopidy.backends.base.BaseCurrentPlaylistController.load()` now
+    appends to the existing playlist. Use
+    :meth:`mopidy.backends.base.BaseCurrentPlaylistController.clear()` if you
+    want to clear it first.
 
 
 0.1.0a3 (2010-08-03)

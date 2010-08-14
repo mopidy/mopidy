@@ -253,23 +253,21 @@ class BasePlaybackController(object):
             self.stop()
             self.current_cp_track = None
 
-    def new_playlist_loaded_callback(self):
+    def on_current_playlist_change(self):
         """
-        Tell the playback controller that a new playlist has been loaded.
+        Tell the playback controller that the current playlist has changed.
 
-        Typically called by :class:`mopidy.process.CoreProcess` after a message
-        from a library thread is received.
+        Used by :class:`mopidy.backends.base.BaseCurrentPlaylistController`.
         """
-        self.current_cp_track = None
         self._first_shuffle = True
         self._shuffled = []
 
-        if self.state == self.PLAYING:
-            if len(self.backend.current_playlist.tracks) > 0:
-                self.play()
-            else:
-                self.stop()
-        elif self.state == self.PAUSED:
+        if not self.backend.current_playlist.cp_tracks:
+            self.stop()
+            self.current_cp_track = None
+        elif (self.current_cp_track not in
+                self.backend.current_playlist.cp_tracks):
+            self.current_cp_track = None
             self.stop()
 
     def next(self):

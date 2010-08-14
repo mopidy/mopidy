@@ -86,6 +86,10 @@ def load(frontend, name):
         ``load {NAME}``
 
         Loads the playlist ``NAME.m3u`` from the playlist directory.
+
+    *Clarifications:*
+
+    - ``load`` appends the given playlist to the current playlist.
     """
     matches = frontend.backend.stored_playlists.search(name)
     if matches:
@@ -139,9 +143,9 @@ def playlistmove(frontend, name, from_pos, to_pos):
 
     *Clarifications:*
 
-        - The second argument is not a ``SONGID`` as used elsewhere in the
-          protocol documentation, but just the ``SONGPOS`` to move *from*,
-          i.e. ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
+    - The second argument is not a ``SONGID`` as used elsewhere in the protocol
+      documentation, but just the ``SONGPOS`` to move *from*, i.e.
+      ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
     """
     raise MpdNotImplemented # TODO
 
