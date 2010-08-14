@@ -18,11 +18,13 @@ class BaseMixer(object):
         Integer in range [0, 100]. :class:`None` if unknown. Values below 0 is
         equal to 0. Values above 100 is equal to 100.
         """
-        return self._get_volume() / self.amplification_factor
+        if self._get_volume() is None:
+            return None
+        return int(self._get_volume() / self.amplification_factor)
 
     @volume.setter
     def volume(self, volume):
-        volume = int(volume) * self.amplification_factor
+        volume = int(int(volume) * self.amplification_factor)
         if volume < 0:
             volume = 0
         elif volume > 100:
