@@ -7,8 +7,7 @@ from mopidy.models import Track
 
 class PlaybackOptionsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.m = DummyMixer()
-        self.b = DummyBackend(mixer=self.m)
+        self.b = DummyBackend(mixer_class=DummyMixer)
         self.h = frontend.MpdFrontend(backend=self.b)
 
     def test_consume_off(self):
@@ -167,8 +166,7 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
 
 class PlaybackControlHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.m = DummyMixer()
-        self.b = DummyBackend(mixer=self.m)
+        self.b = DummyBackend(mixer_class=DummyMixer)
         self.h = frontend.MpdFrontend(backend=self.b)
 
     def test_next(self):

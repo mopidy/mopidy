@@ -12,7 +12,7 @@ class BaseMixerTest(unittest.TestCase):
     INITIAL = None
 
     def setUp(self):
-        self.mixer = DummyMixer()
+        self.mixer = DummyMixer(None)
 
     def test_initial_volume(self):
         self.assertEqual(self.mixer.volume, self.INITIAL)

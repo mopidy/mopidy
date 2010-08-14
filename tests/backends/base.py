@@ -32,7 +32,7 @@ class BaseCurrentPlaylistControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.backend = self.backend_class(mixer=DummyMixer())
+        self.backend = self.backend_class(mixer_class=DummyMixer)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
@@ -281,7 +281,7 @@ class BasePlaybackControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.backend = self.backend_class(mixer=DummyMixer())
+        self.backend = self.backend_class(mixer_class=DummyMixer)
         self.playback = self.backend.playback
         self.current_playlist = self.backend.current_playlist
 
@@ -933,7 +933,7 @@ class BaseStoredPlaylistsControllerTest(object):
         settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
         settings.LOCAL_MUSIC_FOLDER = data_folder('')
 
-        self.backend = self.backend_class(mixer=DummyMixer())
+        self.backend = self.backend_class(mixer_class=DummyMixer)
         self.stored  = self.backend.stored_playlists
 
     def tearDown(self):
@@ -1055,7 +1055,7 @@ class BaseLibraryControllerTest(object):
         Track()]
 
     def setUp(self):
-        self.backend = self.backend_class(mixer=DummyMixer())
+        self.backend = self.backend_class(mixer_class=DummyMixer)
         self.library = self.backend.library
 
     def tearDown(self):

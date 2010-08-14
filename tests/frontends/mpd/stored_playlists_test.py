@@ -10,8 +10,7 @@ from tests import SkipTest
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.m = DummyMixer()
-        self.b = DummyBackend(mixer=self.m)
+        self.b = DummyBackend(mixer_class=DummyMixer)
         self.h = frontend.MpdFrontend(backend=self.b)
 
     def test_listplaylist(self):
