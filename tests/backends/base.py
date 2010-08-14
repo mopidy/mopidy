@@ -812,6 +812,14 @@ class BasePlaybackControllerTest(object):
         self.assert_(self.tracks[0] not in self.backend.current_playlist.tracks)
 
     @populate_playlist
+    def test_next_with_single_and_repeat(self):
+        self.playback.single = True
+        self.playback.repeat = True
+        self.playback.play()
+        self.playback.next()
+        self.assertEqual(self.playback.current_track, self.tracks[1])
+
+    @populate_playlist
     def test_playlist_is_empty_after_all_tracks_are_played_with_consume(self):
         self.playback.consume = True
         self.playback.play()
@@ -850,6 +858,14 @@ class BasePlaybackControllerTest(object):
         self.playback.play()
         self.playback.end_of_track_callback()
         self.assertEqual(self.playback.current_track, self.tracks[1])
+
+    @populate_playlist
+    def test_end_of_song_with_single_and_repeat_starts_same(self):
+        self.playback.single = True
+        self.playback.repeat = True
+        self.playback.play()
+        self.playback.end_of_track_callback()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
 
     @populate_playlist
     def test_end_of_playlist_stops(self):
