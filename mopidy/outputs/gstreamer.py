@@ -63,24 +63,31 @@ class GStreamerProcess(BaseProcess):
         messages_thread.start()
 
         self.gst_pipeline = gst.parse_launch(' ! '.join([
+            'multiqueue name=queue',
             'volume name=volume',
             'alsasink'
         ]))
 
         decode_bin = gst.element_factory_make('uridecodebin', 'uri')
-        decode_bin.connect('pad-added', self.process_new_pad, 'volume')
+        decode_bin.connect('pad-added', self.process_new_pad)
         app_src = gst.element_factory_make('appsrc', 'src')
+        queue = self.gst_pipeline.get_by_name('queue')
 
         self.gst_pipeline.add(decode_bin)
         self.gst_pipeline.add(app_src)
+
+        self.gst_uri_pad = queue.get_request_pad('sink0')
+        self.gst_src_pad = queue.get_request_pad('sink1')
+
+        app_src.get_pad('src').link(self.gst_src_pad)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
         gst_bus.add_signal_watch()
         gst_bus.connect('message', self.process_gst_message)
 
-    def process_new_pad(self, source, pad, target):
-        pad.link(self.gst_pipeline.get_by_name(target).get_pad('sink'))
+    def process_new_pad(self, source, pad):
+        pad.link(self.gst_uri_pad)
 
     def process_mopidy_message(self, message):
         """Process messages from the rest of Mopidy."""
