@@ -20,8 +20,11 @@ class GStreamerOutput(object):
     """
 
     def __init__(self, core_queue, output_queue):
-        process = GStreamerProcess(core_queue, output_queue)
-        process.start()
+        self.process = GStreamerProcess(core_queue, output_queue)
+        self.process.start()
+
+    def destroy(self):
+        self.process.terminate()
 
 class GStreamerMessagesThread(threading.Thread):
     def run(self):
