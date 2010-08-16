@@ -19,6 +19,7 @@ from tests import SkipTest, data_folder
 song = data_folder('song%s.wav')
 generate_song = lambda i: path_to_uri(song % i)
 
+raise SkipTest
 
 # FIXME can be switched to generic test
 class LocalCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,

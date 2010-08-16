@@ -53,12 +53,14 @@ greatly improved MPD client support.
   - Fix ``playlistfind`` output so the correct song is played when playing
     songs directly from search results in GMPC.
   - Fix ``load`` so that one can append a playlist to the current playlist.
+  - Support for single track repeat added. (Fixes: :issue:`4`)
 
 - Backends:
 
   - Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
   - Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
-    and the Libspotify backend is working much better.
+    and the Libspotify backend is working much better. (Fixes: :issue:`9`,
+    :issue:`10`, :issue:`13`)
   - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
     in backends.
 

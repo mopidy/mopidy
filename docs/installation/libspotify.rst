@@ -65,6 +65,8 @@ Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
     sudo aptitude install python-dev
 
+In OS X no additional dependencies are needed.
+
 Check out the pyspotify code, and install it::
 
     git clone git://github.com/jodal/pyspotify.git
