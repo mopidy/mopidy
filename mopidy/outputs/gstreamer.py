@@ -8,6 +8,7 @@ import gst
 import logging
 import threading
 
+from mopidy import settings
 from mopidy.process import BaseProcess, unpickle_connection
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
@@ -47,7 +48,6 @@ class GStreamerProcess(BaseProcess):
         self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
-        self.gst_target = None
 
     def run_inside_try(self):
         self.setup()
@@ -68,19 +68,24 @@ class GStreamerProcess(BaseProcess):
             'alsasink'
         ]))
 
-        self.gst_target = self.gst_pipeline.get_by_name('volume')
+        pad = self.gst_pipeline.get_by_name('volume').get_pad('sink')
 
-        decode_bin = gst.element_factory_make('uridecodebin', 'uri')
-        decode_bin.connect('pad-added', self.process_new_pad)
-        self.gst_pipeline.add(decode_bin)
+        if settings.BACKENDS[0] == 'mopidy.backends.local.LocalBackend':
+            uri_bin = gst.element_factory_make('uridecodebin', 'uri')
+            uri_bin.connect('pad-added', self.process_new_pad, pad)
+            self.gst_pipeline.add(uri_bin)
+        else:
+            app_src = gst.element_factory_make('appsrc', 'src')
+            self.gst_pipeline.add(app_src)
+            app_src.get_pad('src').link(pad)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
         gst_bus.add_signal_watch()
         gst_bus.connect('message', self.process_gst_message)
 
-    def process_new_pad(self, source, pad):
-        pad.link(self.gst_target.get_pad('sink'))
+    def process_new_pad(self, source, pad, target_pad):
+        pad.link(target_pad)
 
     def process_mopidy_message(self, message):
         """Process messages from the rest of Mopidy."""
