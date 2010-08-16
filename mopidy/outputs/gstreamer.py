@@ -43,7 +43,7 @@ class GStreamerProcess(BaseProcess):
     """
 
     pipeline_description = ' ! '.join([
-        'appsrc name=src uridecodebin name=uri',
+        'appsrc name=src',
         'volume name=volume',
         'autoaudiosink name=sink',
     ])
@@ -75,7 +75,7 @@ class GStreamerProcess(BaseProcess):
 
         self.gst_pipeline = gst.parse_launch(self.pipeline_description)
         self.gst_data_src = self.gst_pipeline.get_by_name('src')
-        self.gst_uri_bin = self.gst_pipeline.get_by_name('uri')
+        #self.gst_uri_bin = self.gst_pipeline.get_by_name('uri')
         self.gst_volume = self.gst_pipeline.get_by_name('volume')
 
         # Setup bus and message processor
