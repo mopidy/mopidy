@@ -185,12 +185,10 @@ class GStreamerProcess(BaseProcess):
 
     def get_volume(self):
         """Get volume in range [0..100]"""
-        return 0
         gst_volume = self.gst_pipeline.get_by_name('volume')
         return int(gst_volume.get_property('volume') * 100)
 
     def set_volume(self, volume):
-        return
         """Set volume in range [0..100]"""
         gst_volume = self.gst_pipeline.get_by_name('volume')
         gst_volume.set_property('volume', volume / 100.0)
@@ -207,5 +205,3 @@ class GStreamerProcess(BaseProcess):
         except gst.QueryError, e:
             logger.error('time_position failed: %s', e)
             return 0
-
-
