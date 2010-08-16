@@ -22,8 +22,11 @@ greatly improved MPD client support.
   <installation/libspotify>`.
 - If you used :mod:`mopidy.backends.libspotify` previously, pyspotify must be
   updated when updating to this release, to get working seek functionality.
-- The settings ``SERVER_HOSTNAME`` and ``SERVER_PORT`` has been renamed to
-  ``MPD_SERVER_HOSTNAME`` and ``MPD_SERVER_PORT``.
+- :attr:`mopidy.settings.SERVER_HOSTNAME` and
+  :attr:`mopidy.settings.SERVER_PORT` has been renamed to
+  :attr:`mopidy.settings.MPD_SERVER_HOSTNAME` and
+  :attr:`mopidy.settings.MPD_SERVER_PORT` to allow for multiple frontends in
+  the future.
 
 **Changes**
 
@@ -58,15 +61,16 @@ greatly improved MPD client support.
   - Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
     and the Libspotify backend is working much better. (Fixes: :issue:`9`,
     :issue:`10`, :issue:`13`)
-  - A Spotify application key is now bundled with the source. The
-    ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
+  - A Spotify application key is now bundled with the source.
+    :attr:`mopidy.settings.SPOTIFY_LIB_APPKEY` is thus removed.
   - If failing to play a track, playback will skip to the next track.
 
 - Mixers:
 
-  - Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
-    default mixer on all platforms.
-  - New setting ``MIXER_MAX_VOLUME`` for capping the maximum output volume.
+  - Added new :mod:`mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer`
+    which now is the default mixer on all platforms.
+  - New setting :attr:`mopidy.settings.MIXER_MAX_VOLUME` for capping the
+    maximum output volume.
 
 - Backend API:
 
