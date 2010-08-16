@@ -93,7 +93,7 @@ def load(frontend, name):
     """
     matches = frontend.backend.stored_playlists.search(name)
     if matches:
-        frontend.backend.current_playlist.load(matches[0].tracks)
+        frontend.backend.current_playlist.append(matches[0].tracks)
 
 @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
 def playlistadd(frontend, name, uri):

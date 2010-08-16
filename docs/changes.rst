@@ -81,10 +81,11 @@ greatly improved MPD client support.
   - :meth:`mopidy.backends.base.BaseLibraryController.search()` now accepts
     keyword arguments of the form ``search(artist=['foo', 'fighters'],
     album=['bar', 'grooves'])``.
-  - :meth:`mopidy.backends.base.BaseCurrentPlaylistController.load()` now
-    appends to the existing playlist. Use
+  - :meth:`mopidy.backends.base.BaseCurrentPlaylistController.append()`
+    replaces
+    :meth:`mopidy.backends.base.BaseCurrentPlaylistController.load()`. Use
     :meth:`mopidy.backends.base.BaseCurrentPlaylistController.clear()` if you
-    want to clear it first.
+    want to clear the current playlist.
   - The following fields in
     :class:`mopidy.backends.base.BasePlaybackController` has been renamed to
     reflect their relation to methods called on the controller:

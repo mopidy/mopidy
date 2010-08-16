@@ -16,7 +16,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_currentsong(self):
         track = Track()
-        self.b.current_playlist.load([track])
+        self.b.current_playlist.append([track])
         self.b.playback.play()
         result = self.h.handle_request(u'currentsong')
         self.assert_(u'file: ' in result)
@@ -155,21 +155,21 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(result['state'], 'pause')
 
     def test_status_method_when_playlist_loaded_contains_song(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         self.b.playback.play()
         result = dict(frontend.status.status(self.h))
         self.assert_('song' in result)
         self.assert_(int(result['song']) >= 0)
 
     def test_status_method_when_playlist_loaded_contains_cpid_as_songid(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         self.b.playback.play()
         result = dict(frontend.status.status(self.h))
         self.assert_('songid' in result)
         self.assertEqual(int(result['songid']), 1)
 
     def test_status_method_when_playing_contains_time_with_no_length(self):
-        self.b.current_playlist.load([Track(length=None)])
+        self.b.current_playlist.append([Track(length=None)])
         self.b.playback.play()
         result = dict(frontend.status.status(self.h))
         self.assert_('time' in result)
@@ -179,7 +179,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(position <= total)
 
     def test_status_method_when_playing_contains_time_with_length(self):
-        self.b.current_playlist.load([Track(length=10000)])
+        self.b.current_playlist.append([Track(length=10000)])
         self.b.playback.play()
         result = dict(frontend.status.status(self.h))
         self.assert_('time' in result)
@@ -196,7 +196,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['elapsed']), 59123)
 
     def test_status_method_when_playing_contains_bitrate(self):
-        self.b.current_playlist.load([Track(bitrate=320)])
+        self.b.current_playlist.append([Track(bitrate=320)])
         self.b.playback.play()
         result = dict(frontend.status.status(self.h))
         self.assert_('bitrate' in result)

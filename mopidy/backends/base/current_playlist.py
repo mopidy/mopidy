@@ -64,6 +64,18 @@ class BaseCurrentPlaylistController(object):
         self.version += 1
         return cp_track
 
+    def append(self, tracks):
+        """
+        Append the given tracks to the current playlist.
+
+        :param tracks: tracks to append
+        :type tracks: list of :class:`mopidy.models.Track`
+        """
+        self.version += 1
+        for track in tracks:
+            self.add(track)
+        self.backend.playback.on_current_playlist_change()
+
     def clear(self):
         """Clear the current playlist."""
         self._cp_tracks = []
@@ -103,18 +115,6 @@ class BaseCurrentPlaylistController(object):
             raise LookupError(u'"%s" match no tracks' % criteria_string)
         else:
             raise LookupError(u'"%s" match multiple tracks' % criteria_string)
-
-    def load(self, tracks):
-        """
-        Append the given tracks to the current playlist.
-
-        :param tracks: tracks to load
-        :type tracks: list of :class:`mopidy.models.Track`
-        """
-        self.version += 1
-        for track in tracks:
-            self.add(track)
-        self.backend.playback.on_current_playlist_change()
 
     def move(self, start, end, to_position):
         """
