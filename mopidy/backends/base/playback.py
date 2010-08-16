@@ -25,7 +25,7 @@ class BasePlaybackController(object):
     #:     Tracks are not removed from the playlist.
     consume = False
 
-    #: The currently playing or selected track
+    #: The currently playing or selected track.
     #:
     #: A two-tuple of (CPID integer, :class:`mopidy.models.Track`) or
     #: :class:`None`.
@@ -45,7 +45,8 @@ class BasePlaybackController(object):
     repeat = False
 
     #: :class:`True`
-    #:     Playback is stopped after current song, unless in repeat mode.
+    #:     Playback is stopped after current song, unless in :attr:`repeat`
+    #:     mode.
     #: :class:`False`
     #:     Playback continues after current song.
     single = False
@@ -59,19 +60,32 @@ class BasePlaybackController(object):
         self._play_time_started = None
 
     def destroy(self):
-        """Cleanup after component."""
+        """
+        Cleanup after component.
+
+        May be overridden by subclasses.
+        """
         pass
+
+    def _get_cpid(self, cp_track):
+        if cp_track is None:
+            return None
+        return cp_track[0]
+
+    def _get_track(self, cp_track):
+        if cp_track is None:
+            return None
+        return cp_track[1]
 
     @property
     def current_cpid(self):
         """
-        The CPID (current playlist ID) of :attr:`current_track`.
+        The CPID (current playlist ID) of the currently playing or selected
+        track.
 
         Read-only. Extracted from :attr:`current_cp_track` for convenience.
         """
-        if self.current_cp_track is None:
-            return None
-        return self.current_cp_track[0]
+        return self._get_cpid(self.current_cp_track)
 
     @property
     def current_track(self):
@@ -80,13 +94,15 @@ class BasePlaybackController(object):
 
         Read-only. Extracted from :attr:`current_cp_track` for convenience.
         """
-        if self.current_cp_track is None:
-            return None
-        return self.current_cp_track[1]
+        return self._get_track(self.current_cp_track)
 
     @property
     def current_playlist_position(self):
-        """The position of the current track in the current playlist."""
+        """
+        The position of the current track in the current playlist.
+
+        Read-only.
+        """
         if self.current_cp_track is None:
             return None
         try:
@@ -96,25 +112,23 @@ class BasePlaybackController(object):
             return None
 
     @property
-    def next_track(self):
+    def track_at_eot(self):
         """
-        The next track in the playlist.
+        The track that will be played at the end of the current track.
 
-        A :class:`mopidy.models.Track` extracted from :attr:`cp_track_at_next` for
-        convenience.
+        Read-only. A :class:`mopidy.models.Track` extracted from
+        :attr:`cp_track_at_eot` for convenience.
         """
-        cp_track_at_next = self.cp_track_at_next
-        if cp_track_at_next is None:
-            return None
-        return cp_track_at_next[1]
+        return self._get_track(self.cp_track_at_eot)
 
     @property
     def cp_track_at_eot(self):
         """
-        The next track in the playlist which should be played when
-        we get an end of track event, such as when a track is finished playing.
+        The track that will be played at the end of the current track.
 
-        A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
+        Read-only. A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
+
+        Not necessarily the same track as :attr:`cp_track_at_next`.
         """
         cp_tracks = self.backend.current_playlist.cp_tracks
 
@@ -148,12 +162,21 @@ class BasePlaybackController(object):
             return None
 
     @property
+    def track_at_next(self):
+        """
+        The track that will be played if calling :meth:`next()`.
+
+        Read-only. A :class:`mopidy.models.Track` extracted from
+        :attr:`cp_track_at_next` for convenience.
+        """
+        return self._get_track(self.cp_track_at_next)
+
+    @property
     def cp_track_at_next(self):
         """
-        The next track in the playlist which should be played when we get a
-        event, such as a user clicking the next button.
+        The track that will be played if calling :meth:`next()`.
 
-        A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
+        Read-only. A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
 
         For normal playback this is the next track in the playlist. If repeat
         is enabled the next track can loop around the playlist. When random is
@@ -188,22 +211,19 @@ class BasePlaybackController(object):
             return None
 
     @property
-    def previous_track(self):
+    def track_at_previous(self):
         """
-        The previous track in the playlist.
+        The track that will be played if calling :meth:`previous()`.
 
-        A :class:`mopidy.models.Track` extracted from :attr:`previous_cp_track`
-        for convenience.
+        Read-only. A :class:`mopidy.models.Track` extracted from
+        :attr:`cp_track_at_previous` for convenience.
         """
-        previous_cp_track = self.previous_cp_track
-        if previous_cp_track is None:
-            return None
-        return previous_cp_track[1]
+        return self._get_track(self.cp_track_at_previous)
 
     @property
-    def previous_cp_track(self):
+    def cp_track_at_previous(self):
         """
-        The previous track in the playlist.
+        The track that will be played if calling :meth:`previous()`.
 
         A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
 
@@ -337,11 +357,18 @@ class BasePlaybackController(object):
             self.state = self.PAUSED
 
     def _pause(self):
+        """
+        To be overridden by subclass. Implement your backend's pause
+        functionality here.
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         raise NotImplementedError
 
     def play(self, cp_track=None, on_error_step=1):
         """
-        Play the given track or the currently active track.
+        Play the given track, or if the given track is :class:`None`, play the
+        currently active track.
 
         :param cp_track: track to play
         :type cp_track: two-tuple (CPID integer, :class:`mopidy.models.Track`)
@@ -371,15 +398,24 @@ class BasePlaybackController(object):
             self._shuffled.remove(self.current_cp_track)
 
     def _play(self, track):
+        """
+        To be overridden by subclass. Implement your backend's play
+        functionality here.
+
+        :param track: the track to play
+        :type track: :class:`mopidy.models.Track`
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+
         raise NotImplementedError
 
     def previous(self):
         """Play the previous track."""
-        if self.previous_cp_track is None:
+        if self.cp_track_at_previous is None:
             return
         if self.state == self.STOPPED:
             return
-        self.play(self.previous_cp_track, on_error_step=-1)
+        self.play(self.cp_track_at_previous, on_error_step=-1)
 
     def resume(self):
         """If paused, resume playing the current track."""
@@ -387,6 +423,12 @@ class BasePlaybackController(object):
             self.state = self.PLAYING
 
     def _resume(self):
+        """
+        To be overridden by subclass. Implement your backend's resume
+        functionality here.
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         raise NotImplementedError
 
     def seek(self, time_position):
@@ -413,6 +455,14 @@ class BasePlaybackController(object):
         self._seek(time_position)
 
     def _seek(self, time_position):
+        """
+        To be overridden by subclass. Implement your backend's seek
+        functionality here.
+
+        :param time_position: time position in milliseconds
+        :type time_position: int
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         raise NotImplementedError
 
     def stop(self):
@@ -421,4 +471,10 @@ class BasePlaybackController(object):
             self.state = self.STOPPED
 
     def _stop(self):
+        """
+        To be overridden by subclass. Implement your backend's stop
+        functionality here.
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         raise NotImplementedError

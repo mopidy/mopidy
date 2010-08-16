@@ -72,19 +72,36 @@ greatly improved MPD client support.
   - Relocate from :mod:`mopidy.backends` to :mod:`mopidy.backends.base`.
   - The ``id`` field of :class:`mopidy.models.Track` has been removed, as it is
     no longer needed after the CPID refactoring.
+  - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
+    ``output_queue`` which it can use to send messages (i.e. audio data)
+    to the output process.
   - :meth:`mopidy.backends.base.BaseLibraryController.find_exact()` now accepts
     keyword arguments of the form ``find_exact(artist=['foo'],
     album=['bar'])``.
   - :meth:`mopidy.backends.base.BaseLibraryController.search()` now accepts
     keyword arguments of the form ``search(artist=['foo', 'fighters'],
     album=['bar', 'grooves'])``.
-  - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
-    ``output_queue`` which it can use to send messages (i.e. audio data)
-    to the output process.
   - :meth:`mopidy.backends.base.BaseCurrentPlaylistController.load()` now
     appends to the existing playlist. Use
     :meth:`mopidy.backends.base.BaseCurrentPlaylistController.clear()` if you
     want to clear it first.
+  - The following fields in
+    :class:`mopidy.backends.base.BasePlaybackController` has been renamed to
+    reflect their relation to methods called on the controller:
+
+    - ``next_track`` to ``track_at_next``
+    - ``next_cp_track`` to ``cp_track_at_next``
+    - ``previous_track`` to ``track_at_previous``
+    - ``previous_cp_track`` to ``cp_track_at_previous``
+
+  - :attr:`mopidy.backends.base.BasePlaybackController.track_at_eot` and
+    :attr:`mopidy.backends.base.BasePlaybackController.cp_track_at_eot` has
+    been added to better handle the difference between the user pressing next
+    and the current track ending.
+  - Rename
+    :meth:`mopidy.backends.base.BasePlaybackController.new_playlist_loaded_callback()`
+    to
+    :meth:`mopidy.backends.base.BasePlaybackController.on_current_playlist_change()`.
 
 
 0.1.0a3 (2010-08-03)
