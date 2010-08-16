@@ -65,7 +65,7 @@ class GStreamerProcess(BaseProcess):
 
         self.gst_pipeline = gst.parse_launch(' ! '.join([
             'volume name=volume',
-            'alsasink'
+            'autoaudiosink'
         ]))
 
         pad = self.gst_pipeline.get_by_name('volume').get_pad('sink')
