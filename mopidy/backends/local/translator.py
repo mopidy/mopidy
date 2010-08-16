@@ -3,57 +3,10 @@ import os
 import sys
 import urllib
 
-logger = logging.getLogger('mopidy.utils')
+logger = logging.getLogger('mopidy.backends.local.translator')
 
 from mopidy.models import Track, Artist, Album
-
-def flatten(the_list):
-    result = []
-    for element in the_list:
-        if isinstance(element, list):
-            result.extend(flatten(element))
-        else:
-            result.append(element)
-    return result
-
-def import_module(name):
-    __import__(name)
-    return sys.modules[name]
-
-def get_class(name):
-    module_name = name[:name.rindex('.')]
-    class_name = name[name.rindex('.') + 1:]
-    logger.debug('Loading: %s', name)
-    try:
-        module = import_module(module_name)
-        class_object = getattr(module, class_name)
-    except (ImportError, AttributeError):
-        raise ImportError("Couldn't load: %s" % name)
-    return class_object
-
-def get_or_create_folder(folder):
-    folder = os.path.expanduser(folder)
-    if not os.path.isdir(folder):
-        logger.info(u'Creating %s', folder)
-        os.mkdir(folder, 0755)
-    return folder
-
-def path_to_uri(*paths):
-    path = os.path.join(*paths)
-    #path = os.path.expanduser(path) # FIXME
-    path = path.encode('utf-8')
-    if sys.platform == 'win32':
-        return 'file:' + urllib.pathname2url(path)
-    return 'file://' + urllib.pathname2url(path)
-
-def indent(string, places=4, linebreak='\n'):
-    lines = string.split(linebreak)
-    if len(lines) == 1:
-        return string
-    result = u''
-    for line in lines:
-        result += linebreak + ' ' * places + line
-    return result
+from mopidy.utils.path import path_to_uri
 
 def parse_m3u(file_path):
     """
