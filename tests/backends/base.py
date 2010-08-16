@@ -356,7 +356,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_current_track_after_completed_playlist(self):
         self.playback.play(self.current_playlist.cp_tracks[-1])
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
@@ -558,7 +558,7 @@ class BasePlaybackControllerTest(object):
         old_position = self.playback.current_playlist_position
         old_uri = self.playback.current_track.uri
 
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
 
         self.assertEqual(self.playback.current_playlist_position,
             old_position+1)
@@ -567,11 +567,11 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_end_of_track_return_value(self):
         self.playback.play()
-        self.assertEqual(self.playback.end_of_track_callback(), None)
+        self.assertEqual(self.playback.on_end_of_track(), None)
 
     @populate_playlist
     def test_end_of_track_does_not_trigger_playback(self):
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
@@ -583,7 +583,7 @@ class BasePlaybackControllerTest(object):
             self.assertEqual(self.playback.current_track, track)
             self.assertEqual(self.playback.current_playlist_position, i)
 
-            self.playback.end_of_track_callback()
+            self.playback.on_end_of_track()
 
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
@@ -592,7 +592,7 @@ class BasePlaybackControllerTest(object):
         self.playback.play()
 
         for track in self.tracks:
-            self.playback.end_of_track_callback()
+            self.playback.on_end_of_track()
 
         self.assertEqual(self.playback.current_track, None)
         self.assertEqual(self.playback.state, self.playback.STOPPED)
@@ -602,7 +602,7 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.current_track, self.tracks[0])
 
     def test_end_of_track_for_empty_playlist(self):
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
@@ -611,7 +611,7 @@ class BasePlaybackControllerTest(object):
         self.playback._play = lambda track: track != self.tracks[1]
         self.playback.play()
         self.assertEqual(self.playback.current_track, self.tracks[0])
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertNotEqual(self.playback.current_track, self.tracks[1])
         self.assertEqual(self.playback.current_track, self.tracks[2])
 
@@ -627,7 +627,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_end_of_track_track_after_previous(self):
         self.playback.play()
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.playback.previous()
         self.assertEqual(self.playback.next_track, self.tracks[1])
 
@@ -638,7 +638,7 @@ class BasePlaybackControllerTest(object):
     def test_end_of_track_track_at_end_of_playlist(self):
         self.playback.play()
         for track in self.current_playlist.cp_tracks[1:]:
-            self.playback.end_of_track_callback()
+            self.playback.on_end_of_track()
         self.assertEqual(self.playback.next_track, None)
 
     @populate_playlist
@@ -646,7 +646,7 @@ class BasePlaybackControllerTest(object):
         self.playback.repeat = True
         self.playback.play()
         for track in self.tracks[1:]:
-            self.playback.end_of_track_callback()
+            self.playback.on_end_of_track()
         self.assertEqual(self.playback.next_track, self.tracks[0])
 
     @populate_playlist
@@ -660,7 +660,7 @@ class BasePlaybackControllerTest(object):
     def test_end_of_track_with_consume(self):
         self.playback.consume = True
         self.playback.play()
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assert_(self.tracks[0] not in self.backend.current_playlist.tracks)
 
     @populate_playlist
@@ -668,7 +668,7 @@ class BasePlaybackControllerTest(object):
         self.playback.single = True
         self.playback.repeat = True
         self.playback.play()
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.current_track, self.tracks[1])
 
     @populate_playlist
@@ -677,7 +677,7 @@ class BasePlaybackControllerTest(object):
         random.seed(1)
         self.playback.random = True
         self.playback.play()
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.current_track, self.tracks[1])
 
     @populate_playlist
@@ -763,7 +763,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_current_playlist_position_at_end_of_playlist(self):
         self.playback.play(self.current_playlist.cp_tracks[-1])
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.current_playlist_position, None)
 
     def test_on_current_playlist_change_gets_called(self):
@@ -780,16 +780,16 @@ class BasePlaybackControllerTest(object):
         self.assert_(wrapper.called)
 
     @populate_playlist
-    def test_end_of_track_callback_gets_called(self):
-        end_of_track_callback = self.playback.end_of_track_callback
+    def test_on_end_of_track_gets_called(self):
+        on_end_of_track = self.playback.on_end_of_track
         event = threading.Event()
 
         def wrapper():
-            result = end_of_track_callback()
+            result = on_end_of_track()
             event.set()
             return result
 
-        self.playback.end_of_track_callback = wrapper
+        self.playback.on_end_of_track = wrapper
 
         self.playback.play()
         self.playback.seek(self.tracks[0].length - 10)
@@ -1001,7 +1001,7 @@ class BasePlaybackControllerTest(object):
         self.playback.consume = True
         self.playback.play()
         for i in range(len(self.backend.current_playlist.tracks)):
-            self.playback.end_of_track_callback()
+            self.playback.on_end_of_track()
         self.assertEqual(len(self.backend.current_playlist.tracks), 0)
 
     @populate_playlist
@@ -1024,7 +1024,7 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_end_of_song_starts_next_track(self):
         self.playback.play()
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.current_track, self.tracks[1])
 
     @populate_playlist
@@ -1032,13 +1032,13 @@ class BasePlaybackControllerTest(object):
         self.playback.single = True
         self.playback.repeat = True
         self.playback.play()
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.current_track, self.tracks[0])
 
     @populate_playlist
     def test_end_of_playlist_stops(self):
         self.playback.play(self.current_playlist.cp_tracks[-1])
-        self.playback.end_of_track_callback()
+        self.playback.on_end_of_track()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     def test_repeat_off_by_default(self):
