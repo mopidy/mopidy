@@ -832,6 +832,13 @@ class BasePlaybackControllerTest(object):
         self.playback.consume = True
         self.playback.play()
         self.playback.next()
+        self.assert_(self.tracks[0] in self.backend.current_playlist.tracks)
+
+    @populate_playlist
+    def test_end_of_track_with_consume(self):
+        self.playback.consume = True
+        self.playback.play()
+        self.playback.end_of_track_callback()
         self.assert_(self.tracks[0] not in self.backend.current_playlist.tracks)
 
     @populate_playlist
@@ -847,7 +854,7 @@ class BasePlaybackControllerTest(object):
         self.playback.consume = True
         self.playback.play()
         for i in range(len(self.backend.current_playlist.tracks)):
-            self.playback.next()
+            self.playback.end_of_track_callback()
         self.assertEqual(len(self.backend.current_playlist.tracks), 0)
 
     @populate_playlist
