@@ -91,12 +91,6 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.clear()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
-    def test_load(self):
-        tracks = []
-        self.assertNotEqual(id(tracks), id(self.controller.tracks))
-        self.controller.load(tracks)
-        self.assertEqual(tracks, self.controller.tracks)
-
     def test_get_by_uri_returns_unique_match(self):
         track = Track(uri='a')
         self.controller.load([Track(uri='z'), track, Track(uri='y')])
@@ -136,10 +130,15 @@ class BaseCurrentPlaylistControllerTest(object):
         self.controller.load([track1, track2, track3])
         self.assertEqual(track2, self.controller.get(uri='b')[1])
 
-    @populate_playlist
-    def test_load_replaces_playlist(self):
-        self.backend.current_playlist.load([])
-        self.assertEqual(len(self.backend.current_playlist.tracks), 0)
+    def test_load_appends_to_the_current_playlist(self):
+        self.controller.load([Track(uri='a'), Track(uri='b')])
+        self.assertEqual(len(self.controller.tracks), 2)
+        self.controller.load([Track(uri='c'), Track(uri='d')])
+        self.assertEqual(len(self.controller.tracks), 4)
+        self.assertEqual(self.controller.tracks[0].uri, 'a')
+        self.assertEqual(self.controller.tracks[1].uri, 'b')
+        self.assertEqual(self.controller.tracks[2].uri, 'c')
+        self.assertEqual(self.controller.tracks[3].uri, 'd')
 
     def test_load_does_not_reset_version(self):
         version = self.controller.version
@@ -148,22 +147,17 @@ class BaseCurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_load_preserves_playing_state(self):
-        tracks = self.controller.tracks
-        playback = self.playback
-
         self.playback.play()
-        self.controller.load([tracks[1]])
-        self.assertEqual(playback.state, playback.PLAYING)
-        self.assertEqual(tracks[1], self.playback.current_track)
+        track = self.playback.current_track
+        self.controller.load(self.controller.tracks[1:2])
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.current_track, track)
 
     @populate_playlist
     def test_load_preserves_stopped_state(self):
-        tracks = self.controller.tracks
-        playback = self.playback
-
-        self.controller.load([tracks[2]])
-        self.assertEqual(playback.state, playback.STOPPED)
-        self.assertEqual(None, self.playback.current_track)
+        self.controller.load(self.controller.tracks[1:2])
+        self.assertEqual(self.playback.state, self.playback.STOPPED)
+        self.assertEqual(self.playback.current_track, None)
 
     @populate_playlist
     def test_move_single(self):
@@ -352,6 +346,14 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.current_track, self.tracks[-1])
 
     @populate_playlist
+    def test_play_skips_to_next_track_on_failure(self):
+        # If _play() returns False, it is a failure.
+        self.playback._play = lambda track: track != self.tracks[0]
+        self.playback.play()
+        self.assertNotEqual(self.playback.current_track, self.tracks[0])
+        self.assertEqual(self.playback.current_track, self.tracks[1])
+
+    @populate_playlist
     def test_current_track_after_completed_playlist(self):
         self.playback.play(self.current_playlist.cp_tracks[-1])
         self.playback.end_of_track_callback()
@@ -418,6 +420,16 @@ class BasePlaybackControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
     @populate_playlist
+    def test_next_skips_to_next_track_on_failure(self):
+        # If _play() returns False, it is a failure.
+        self.playback._play = lambda track: track != self.tracks[1]
+        self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
+        self.playback.next()
+        self.assertNotEqual(self.playback.current_track, self.tracks[1])
+        self.assertEqual(self.playback.current_track, self.tracks[2])
+
+    @populate_playlist
     def test_previous(self):
         self.playback.play()
         self.playback.next()
@@ -456,6 +468,16 @@ class BasePlaybackControllerTest(object):
         self.playback.previous()
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
+
+    @populate_playlist
+    def test_previous_skips_to_previous_track_on_failure(self):
+        # If _play() returns False, it is a failure.
+        self.playback._play = lambda track: track != self.tracks[1]
+        self.playback.play(self.current_playlist.cp_tracks[2])
+        self.assertEqual(self.playback.current_track, self.tracks[2])
+        self.playback.previous()
+        self.assertNotEqual(self.playback.current_track, self.tracks[1])
+        self.assertEqual(self.playback.current_track, self.tracks[0])
 
     @populate_playlist
     def test_next_track_before_play(self):
@@ -575,15 +597,15 @@ class BasePlaybackControllerTest(object):
         self.playback.end_of_track_callback()
         self.assertEqual(self.playback.current_playlist_position, None)
 
-    def test_new_playlist_loaded_callback_gets_called(self):
-        callback = self.playback.new_playlist_loaded_callback
+    def test_on_current_playlist_change_gets_called(self):
+        callback = self.playback.on_current_playlist_change
 
         def wrapper():
             wrapper.called = True
             return callback()
         wrapper.called = False
 
-        self.playback.new_playlist_loaded_callback = wrapper
+        self.playback.on_current_playlist_change = wrapper
         self.backend.current_playlist.load([])
 
         self.assert_(wrapper.called)
@@ -608,27 +630,28 @@ class BasePlaybackControllerTest(object):
         self.assert_(event.is_set())
 
     @populate_playlist
-    def test_new_playlist_loaded_callback_when_playing(self):
+    def test_on_current_playlist_change_when_playing(self):
         self.playback.play()
+        current_track = self.playback.current_track
         self.backend.current_playlist.load([self.tracks[2]])
         self.assertEqual(self.playback.state, self.playback.PLAYING)
-        self.assertEqual(self.playback.current_track, self.tracks[2])
+        self.assertEqual(self.playback.current_track, current_track)
 
     @populate_playlist
-    def test_new_playlist_loaded_callback_when_stopped(self):
+    def test_on_current_playlist_change_when_stopped(self):
+        current_track = self.playback.current_track
         self.backend.current_playlist.load([self.tracks[2]])
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
-        self.assertEqual(self.playback.next_track, self.tracks[2])
 
     @populate_playlist
-    def test_new_playlist_loaded_callback_when_paused(self):
+    def test_on_current_playlist_change_when_paused(self):
         self.playback.play()
         self.playback.pause()
+        current_track = self.playback.current_track
         self.backend.current_playlist.load([self.tracks[2]])
-        self.assertEqual(self.playback.state, self.playback.STOPPED)
-        self.assertEqual(self.playback.current_track, None)
-        self.assertEqual(self.playback.next_track, self.tracks[2])
+        self.assertEqual(self.playback.state, self.backend.playback.PAUSED)
+        self.assertEqual(self.playback.current_track, current_track)
 
     @populate_playlist
     def test_pause_when_stopped(self):
@@ -915,7 +938,7 @@ class BasePlaybackControllerTest(object):
         self.playback.random = True
         self.assertEqual(self.playback.next_track, self.tracks[2])
         self.backend.current_playlist.load(self.tracks[:1])
-        self.assertEqual(self.playback.next_track, self.tracks[0])
+        self.assertEqual(self.playback.next_track, self.tracks[1])
 
     @populate_playlist
     def test_played_track_during_random_not_played_again(self):
@@ -927,13 +950,9 @@ class BasePlaybackControllerTest(object):
             played.append(self.playback.current_track)
             self.playback.next()
 
-    def test_playing_track_with_invalid_uri(self):
-        self.backend.current_playlist.load([Track(uri='foobar')])
-        self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.STOPPED)
-
+    @populate_playlist
     def test_playing_track_that_isnt_in_playlist(self):
-        test = lambda: self.playback.play(self.tracks[0])
+        test = lambda: self.playback.play((17, Track()))
         self.assertRaises(AssertionError, test)
 
 

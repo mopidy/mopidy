@@ -35,12 +35,14 @@ greatly improved MPD client support.
 - Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
   default mixer on all platforms.
 - New setting ``MIXER_MAX_VOLUME`` for capping the maximum output volume.
+- If failing to play a track, playback will skip to the next track.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
   - Split gigantic protocol implementation into eleven modules.
   - Search improvements, including support for multi-word search.
-  - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
+  - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty
+    or when a current track is set.
   - Support ``plchanges "-1"`` to work better with MPDroid.
   - Support ``pause`` without arguments to work better with MPDroid.
   - Support ``plchanges``, ``play``, ``consume``, ``random``, ``repeat``, and
@@ -50,6 +52,7 @@ greatly improved MPD client support.
   - Implement ``seek`` and ``seekid``.
   - Fix ``playlistfind`` output so the correct song is played when playing
     songs directly from search results in GMPC.
+  - Fix ``load`` so that one can append a playlist to the current playlist.
 
 - Backends:
 
@@ -73,7 +76,10 @@ greatly improved MPD client support.
   - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
     ``output_queue`` which it can use to send messages (i.e. audio data)
     to the output process.
-
+  - :meth:`mopidy.backends.base.BaseCurrentPlaylistController.load()` now
+    appends to the existing playlist. Use
+    :meth:`mopidy.backends.base.BaseCurrentPlaylistController.clear()` if you
+    want to clear it first.
 
 
 0.1.0a3 (2010-08-03)

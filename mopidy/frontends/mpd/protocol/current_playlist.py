@@ -341,6 +341,7 @@ def swap(frontend, songpos1, songpos2):
     tracks.insert(songpos1, song2)
     del tracks[songpos2]
     tracks.insert(songpos2, song1)
+    frontend.backend.current_playlist.clear()
     frontend.backend.current_playlist.load(tracks)
 
 @handle_pattern(r'^swapid "(?P<cpid1>\d+)" "(?P<cpid2>\d+)"$')
