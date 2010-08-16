@@ -41,12 +41,13 @@ greatly improved MPD client support.
   - Support ``pause`` without arguments to work better with MPDroid.
   - Support ``plchanges``, ``play``, ``consume``, ``random``, ``repeat``, and
     ``single`` without quotes to work better with BitMPC.
-  - Fixed delete current playing track from playlist, which crashed several
-    clients.
+  - Fixed deletion of the currently playing track from the current playlist,
+    which crashed several clients.
   - Implement ``seek`` and ``seekid``.
   - Fix ``playlistfind`` output so the correct song is played when playing
     songs directly from search results in GMPC.
-  - Fix ``load`` so that one can append a playlist to the current playlist.
+  - Fix ``load`` so that one can append a playlist to the current playlist, and
+    make it return the correct error message if the playlist is not found.
   - Support for single track repeat added. (Fixes: :issue:`4`)
   - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
     in backends.

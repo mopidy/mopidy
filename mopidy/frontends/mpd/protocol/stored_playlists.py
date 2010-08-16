@@ -91,9 +91,11 @@ def load(frontend, name):
 
     - ``load`` appends the given playlist to the current playlist.
     """
-    matches = frontend.backend.stored_playlists.search(name)
-    if matches:
-        frontend.backend.current_playlist.append(matches[0].tracks)
+    try:
+        playlist = frontend.backend.stored_playlists.get(name=name)
+        frontend.backend.current_playlist.append(playlist.tracks)
+    except LookupError as e:
+        raise MpdNoExistError(u'No such playlist', command=u'load')
 
 @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
 def playlistadd(frontend, name, uri):
