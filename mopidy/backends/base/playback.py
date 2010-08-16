@@ -100,18 +100,58 @@ class BasePlaybackController(object):
         """
         The next track in the playlist.
 
-        A :class:`mopidy.models.Track` extracted from :attr:`next_cp_track` for
+        A :class:`mopidy.models.Track` extracted from :attr:`cp_track_at_next` for
         convenience.
         """
-        next_cp_track = self.next_cp_track
-        if next_cp_track is None:
+        cp_track_at_next = self.cp_track_at_next
+        if cp_track_at_next is None:
             return None
-        return next_cp_track[1]
+        return cp_track_at_next[1]
 
     @property
-    def next_cp_track(self):
+    def cp_track_at_eot(self):
         """
-        The next track in the playlist.
+        The next track in the playlist which should be played when
+        we get an end of track event, such as when a track is finished playing.
+
+        A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
+        """
+        cp_tracks = self.backend.current_playlist.cp_tracks
+
+        if not cp_tracks:
+            return None
+
+        if self.random and not self._shuffled:
+            if self.repeat or self._first_shuffle:
+                logger.debug('Shuffling tracks')
+                self._shuffled = cp_tracks
+                random.shuffle(self._shuffled)
+                self._first_shuffle = False
+
+        if self._shuffled:
+            return self._shuffled[0]
+
+        if self.current_cp_track is None:
+            return cp_tracks[0]
+
+        if self.repeat and self.single:
+            return cp_tracks[
+                (self.current_playlist_position) % len(cp_tracks)]
+
+        if self.repeat:
+            return cp_tracks[
+                (self.current_playlist_position + 1) % len(cp_tracks)]
+
+        try:
+            return cp_tracks[self.current_playlist_position + 1]
+        except IndexError:
+            return None
+
+    @property
+    def cp_track_at_next(self):
+        """
+        The next track in the playlist which should be played when we get a
+        event, such as a user clicking the next button.
 
         A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
 
@@ -247,8 +287,15 @@ class BasePlaybackController(object):
         Typically called by :class:`mopidy.process.CoreProcess` after a message
         from a library thread is received.
         """
-        if self.next_cp_track is not None:
-            self.next()
+        original_cp_track = self.current_cp_track
+        if self.cp_track_at_eot:
+            self.play(self.cp_track_at_eot)
+
+            if self.consume:
+                self.backend.current_playlist.remove(cpid=original_cp_track[0])
+
+            if self.random and self.current_cp_track in self._shuffled:
+                self._shuffled.remove(self.current_cp_track)
         else:
             self.stop()
             self.current_cp_track = None
@@ -276,8 +323,8 @@ class BasePlaybackController(object):
             return
 
         original_cp_track = self.current_cp_track
-        if self.next_cp_track:
-            self.play(self.next_cp_track)
+        if self.cp_track_at_next:
+            self.play(self.cp_track_at_next)
         else:
             self.stop()
             self.current_cp_track = None
@@ -313,7 +360,7 @@ class BasePlaybackController(object):
         if cp_track is not None:
             assert cp_track in self.backend.current_playlist.cp_tracks
         elif not self.current_cp_track:
-            cp_track = self.next_cp_track
+            cp_track = self.cp_track_at_next
 
         if self.state == self.PAUSED and cp_track is None:
             self.resume()
