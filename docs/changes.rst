@@ -53,6 +53,7 @@ greatly improved MPD client support.
   - Fix ``playlistfind`` output so the correct song is played when playing
     songs directly from search results in GMPC.
   - Fix ``load`` so that one can append a playlist to the current playlist.
+  - Support for single track repeat added. (Fixes: :issue:`4`)
 
 - Backends:
 
