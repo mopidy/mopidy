@@ -49,12 +49,24 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
         self.assert_(u'Last-Modified: 2001-03-17T13:41:17Z' in result)
         self.assert_(u'OK' in result)
 
-    def test_load(self):
-        result = self.h.handle_request(u'load "name"')
+    def test_load_known_playlist_appends_to_current_playlist(self):
+        self.b.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.assertEqual(len(self.b.current_playlist.tracks), 2)
+        self.b.stored_playlists.playlists = [Playlist(name='A-list',
+            tracks=[Track(uri='c'), Track(uri='d'), Track(uri='e')])]
+        result = self.h.handle_request(u'load "A-list"')
         self.assert_(u'OK' in result)
+        self.assertEqual(len(self.b.current_playlist.tracks), 5)
+        self.assertEqual(self.b.current_playlist.tracks[0].uri, 'a')
+        self.assertEqual(self.b.current_playlist.tracks[1].uri, 'b')
+        self.assertEqual(self.b.current_playlist.tracks[2].uri, 'c')
+        self.assertEqual(self.b.current_playlist.tracks[3].uri, 'd')
+        self.assertEqual(self.b.current_playlist.tracks[4].uri, 'e')
 
-    def test_load_appends(self):
-        raise SkipTest
+    def test_load_unknown_playlist_acks(self):
+        result = self.h.handle_request(u'load "unknown playlist"')
+        self.assert_(u'ACK [50@0] {load} No such playlist' in result)
+        self.assertEqual(len(self.b.current_playlist.tracks), 0)
 
     def test_playlistadd(self):
         result = self.h.handle_request(

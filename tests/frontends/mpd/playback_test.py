@@ -174,7 +174,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_pause_off(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         self.h.handle_request(u'play "0"')
         self.h.handle_request(u'pause "1"')
         result = self.h.handle_request(u'pause "0"')
@@ -182,14 +182,14 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_pause_on(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         self.h.handle_request(u'play "0"')
         result = self.h.handle_request(u'pause "1"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PAUSED, self.b.playback.state)
 
     def test_pause_toggle(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         result = self.h.handle_request(u'play "0"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
@@ -201,37 +201,49 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_play_without_pos(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         self.b.playback.state = self.b.playback.PAUSED
         result = self.h.handle_request(u'play')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_play_with_pos(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         result = self.h.handle_request(u'play "0"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_play_with_pos_without_quotes(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         result = self.h.handle_request(u'play 0')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
     def test_play_with_pos_out_of_bounds(self):
-        self.b.current_playlist.load([])
+        self.b.current_playlist.append([])
         result = self.h.handle_request(u'play "0"')
         self.assertEqual(result[0], u'ACK [2@0] {play} Bad song index')
         self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
 
-    def test_play_minus_one_plays_first_in_playlist(self):
-        track = Track()
-        self.b.current_playlist.load([track])
+    def test_play_minus_one_plays_first_in_playlist_if_no_current_track(self):
+        self.assertEqual(self.b.playback.current_track, None)
+        self.b.current_playlist.append([Track(uri='a'), Track(uri='b')])
         result = self.h.handle_request(u'play "-1"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
-        self.assertEqual(self.b.playback.current_track, track)
+        self.assertEqual(self.b.playback.current_track.uri, 'a')
+
+    def test_play_minus_one_plays_current_track_if_current_track_is_set(self):
+        self.b.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.assertEqual(self.b.playback.current_track, None)
+        self.b.playback.play()
+        self.b.playback.next()
+        self.b.playback.stop()
+        self.assertNotEqual(self.b.playback.current_track, None)
+        result = self.h.handle_request(u'play "-1"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+        self.assertEqual(self.b.playback.current_track.uri, 'b')
 
     def test_play_minus_one_on_empty_playlist_does_not_ack(self):
         self.b.current_playlist.clear()
@@ -241,18 +253,30 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.current_track, None)
 
     def test_playid(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         result = self.h.handle_request(u'playid "1"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
-    def test_playid_minus_one_plays_first_in_playlist(self):
-        track = Track()
-        self.b.current_playlist.load([track])
+    def test_playid_minus_one_plays_first_in_playlist_if_no_current_track(self):
+        self.assertEqual(self.b.playback.current_track, None)
+        self.b.current_playlist.append([Track(uri='a'), Track(uri='b')])
         result = self.h.handle_request(u'playid "-1"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
-        self.assertEqual(self.b.playback.current_track, track)
+        self.assertEqual(self.b.playback.current_track.uri, 'a')
+
+    def test_play_minus_one_plays_current_track_if_current_track_is_set(self):
+        self.b.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.assertEqual(self.b.playback.current_track, None)
+        self.b.playback.play()
+        self.b.playback.next()
+        self.b.playback.stop()
+        self.assertNotEqual(self.b.playback.current_track, None)
+        result = self.h.handle_request(u'playid "-1"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+        self.assertEqual(self.b.playback.current_track.uri, 'b')
 
     def test_playid_minus_one_on_empty_playlist_does_not_ack(self):
         self.b.current_playlist.clear()
@@ -262,7 +286,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.current_track, None)
 
     def test_playid_which_does_not_exist(self):
-        self.b.current_playlist.load([Track()])
+        self.b.current_playlist.append([Track()])
         result = self.h.handle_request(u'playid "12345"')
         self.assertEqual(result[0], u'ACK [50@0] {playid} No such song')
 
@@ -271,7 +295,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_seek(self):
-        self.b.current_playlist.load([Track(length=40000)])
+        self.b.current_playlist.append([Track(length=40000)])
         self.h.handle_request(u'seek "0"')
         result = self.h.handle_request(u'seek "0" "30"')
         self.assert_(u'OK' in result)
@@ -279,20 +303,20 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
     def test_seek_with_songpos(self):
         seek_track = Track(uri='2', length=40000)
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(uri='1', length=40000), seek_track])
         result = self.h.handle_request(u'seek "1" "30"')
         self.assertEqual(self.b.playback.current_track, seek_track)
 
     def test_seekid(self):
-        self.b.current_playlist.load([Track(length=40000)])
+        self.b.current_playlist.append([Track(length=40000)])
         result = self.h.handle_request(u'seekid "1" "30"')
         self.assert_(u'OK' in result)
         self.assert_(self.b.playback.time_position >= 30000)
 
     def test_seekid_with_cpid(self):
         seek_track = Track(uri='2', length=40000)
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(length=40000), seek_track])
         result = self.h.handle_request(u'seekid "2" "30"')
         self.assertEqual(self.b.playback.current_cpid, 2)

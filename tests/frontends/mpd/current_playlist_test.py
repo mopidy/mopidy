@@ -13,7 +13,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
     def test_add(self):
         needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'add "dummy://foo"')
@@ -21,6 +21,12 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.current_playlist.tracks[5], needle)
         self.assertEqual(len(result), 1)
         self.assert_(u'OK' in result)
+
+    def test_add_with_uri_not_found_in_library_should_not_call_lookup(self):
+        self.b.library.lookup = lambda uri: self.fail("Shouldn't run")
+        result = self.h.handle_request(u'add "foo"')
+        self.assertEqual(result[0],
+            u'ACK [50@0] {add} directory or file not found')
 
     def test_add_with_uri_not_found_in_library_should_ack(self):
         result = self.h.handle_request(u'add "dummy://foo"')
@@ -30,7 +36,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
     def test_addid_without_songpos(self):
         needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'addid "dummy://foo"')
@@ -43,7 +49,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
     def test_addid_with_songpos(self):
         needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'addid "dummy://foo" "3"')
@@ -56,7 +62,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
     def test_addid_with_songpos_out_of_bounds_should_ack(self):
         needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'addid "dummy://foo" "6"')
@@ -67,7 +73,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(result[0], u'ACK [50@0] {addid} No such song')
 
     def test_clear(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'clear')
@@ -76,7 +82,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_delete_songpos(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'delete "%d"' %
@@ -85,7 +91,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_delete_songpos_out_of_bounds(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'delete "5"')
@@ -93,7 +99,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(result[0], u'ACK [2@0] {delete} Bad song index')
 
     def test_delete_open_range(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'delete "1:"')
@@ -101,7 +107,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_delete_closed_range(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'delete "1:3"')
@@ -109,7 +115,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_delete_range_out_of_bounds(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
         result = self.h.handle_request(u'delete "5:7"')
@@ -117,21 +123,21 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(result[0], u'ACK [2@0] {delete} Bad song index')
 
     def test_deleteid(self):
-        self.b.current_playlist.load([Track(), Track()])
+        self.b.current_playlist.append([Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 2)
         result = self.h.handle_request(u'deleteid "2"')
         self.assertEqual(len(self.b.current_playlist.tracks), 1)
         self.assert_(u'OK' in result)
 
     def test_deleteid_does_not_exist(self):
-        self.b.current_playlist.load([Track(), Track()])
+        self.b.current_playlist.append([Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 2)
         result = self.h.handle_request(u'deleteid "12345"')
         self.assertEqual(len(self.b.current_playlist.tracks), 2)
         self.assertEqual(result[0], u'ACK [50@0] {deleteid} No such song')
 
     def test_move_songpos(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -145,7 +151,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_move_open_range(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -159,7 +165,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_move_closed_range(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -173,7 +179,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_moveid(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -208,7 +214,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_playlistfind_by_filename_in_current_playlist(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(uri='file:///exists')])
         result = self.h.handle_request(
             u'playlistfind filename "file:///exists"')
@@ -218,14 +224,14 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_playlistid_without_songid(self):
-        self.b.current_playlist.load([Track(name='a'), Track(name='b')])
+        self.b.current_playlist.append([Track(name='a'), Track(name='b')])
         result = self.h.handle_request(u'playlistid')
         self.assert_(u'Title: a' in result)
         self.assert_(u'Title: b' in result)
         self.assert_(u'OK' in result)
 
     def test_playlistid_with_songid(self):
-        self.b.current_playlist.load([Track(name='a'), Track(name='b')])
+        self.b.current_playlist.append([Track(name='a'), Track(name='b')])
         result = self.h.handle_request(u'playlistid "2"')
         self.assert_(u'Title: a' not in result)
         self.assert_(u'Id: 1' not in result)
@@ -234,12 +240,12 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_playlistid_with_not_existing_songid_fails(self):
-        self.b.current_playlist.load([Track(name='a'), Track(name='b')])
+        self.b.current_playlist.append([Track(name='a'), Track(name='b')])
         result = self.h.handle_request(u'playlistid "25"')
         self.assertEqual(result[0], u'ACK [50@0] {playlistid} No such song')
 
     def test_playlistinfo_without_songpos_or_range(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -253,7 +259,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_songpos(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -272,7 +278,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(result1, result2)
 
     def test_playlistinfo_with_open_range(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -286,7 +292,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_playlistinfo_with_closed_range(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -316,7 +322,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
     def test_plchanges(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(name='a'), Track(name='b'), Track(name='c')])
         result = self.h.handle_request(u'plchanges "0"')
         self.assert_(u'Title: a' in result)
@@ -325,7 +331,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_plchanges_with_minus_one_returns_entire_playlist(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(name='a'), Track(name='b'), Track(name='c')])
         result = self.h.handle_request(u'plchanges "-1"')
         self.assert_(u'Title: a' in result)
@@ -334,7 +340,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_plchanges_without_quotes_works(self):
-        self.b.current_playlist.load(
+        self.b.current_playlist.append(
             [Track(name='a'), Track(name='b'), Track(name='c')])
         result = self.h.handle_request(u'plchanges 0')
         self.assert_(u'Title: a' in result)
@@ -343,7 +349,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_plchangesposid(self):
-        self.b.current_playlist.load([Track(), Track(), Track()])
+        self.b.current_playlist.append([Track(), Track(), Track()])
         result = self.h.handle_request(u'plchangesposid "0"')
         self.assert_(u'cpos: 0' in result)
         self.assert_(u'Id: %d' % self.b.current_playlist.cp_tracks[0][0]
@@ -357,7 +363,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_shuffle_without_range(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -367,7 +373,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_shuffle_with_open_range(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -381,7 +387,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_shuffle_with_closed_range(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -395,7 +401,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_swap(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -409,7 +415,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
 
     def test_swapid(self):
-        self.b.current_playlist.load([
+        self.b.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])

@@ -22,58 +22,99 @@ greatly improved MPD client support.
   <installation/libspotify>`.
 - If you used :mod:`mopidy.backends.libspotify` previously, pyspotify must be
   updated when updating to this release, to get working seek functionality.
-- The settings ``SERVER_HOSTNAME`` and ``SERVER_PORT`` has been renamed to
-  ``MPD_SERVER_HOSTNAME`` and ``MPD_SERVER_PORT``.
+- :attr:`mopidy.settings.SERVER_HOSTNAME` and
+  :attr:`mopidy.settings.SERVER_PORT` has been renamed to
+  :attr:`mopidy.settings.MPD_SERVER_HOSTNAME` and
+  :attr:`mopidy.settings.MPD_SERVER_PORT` to allow for multiple frontends in
+  the future.
 
 **Changes**
 
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
-- A Spotify application key is now bundled with the source. The
-  ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
-- Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
-  default mixer on all platforms.
-- New setting ``MIXER_MAX_VOLUME`` for capping the maximum output volume.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
   - Split gigantic protocol implementation into eleven modules.
   - Search improvements, including support for multi-word search.
-  - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty.
+  - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty
+    or when a current track is set.
   - Support ``plchanges "-1"`` to work better with MPDroid.
   - Support ``pause`` without arguments to work better with MPDroid.
   - Support ``plchanges``, ``play``, ``consume``, ``random``, ``repeat``, and
     ``single`` without quotes to work better with BitMPC.
-  - Fixed delete current playing track from playlist, which crashed several
-    clients.
+  - Fixed deletion of the currently playing track from the current playlist,
+    which crashed several clients.
   - Implement ``seek`` and ``seekid``.
   - Fix ``playlistfind`` output so the correct song is played when playing
     songs directly from search results in GMPC.
+  - Fix ``load`` so that one can append a playlist to the current playlist, and
+    make it return the correct error message if the playlist is not found.
+  - Support for single track repeat added. (Fixes: :issue:`4`)
+  - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
+    in backends.
 
 - Backends:
 
   - Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
   - Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
-    and the Libspotify backend is working much better.
-  - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
-    in backends.
+    and the Libspotify backend is working much better. (Fixes: :issue:`9`,
+    :issue:`10`, :issue:`13`)
+  - A Spotify application key is now bundled with the source.
+    :attr:`mopidy.settings.SPOTIFY_LIB_APPKEY` is thus removed.
+  - If failing to play a track, playback will skip to the next track.
+
+- Mixers:
+
+  - Added new :mod:`mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer`
+    which now is the default mixer on all platforms.
+  - New setting :attr:`mopidy.settings.MIXER_MAX_VOLUME` for capping the
+    maximum output volume.
 
 - Backend API:
 
   - Relocate from :mod:`mopidy.backends` to :mod:`mopidy.backends.base`.
   - The ``id`` field of :class:`mopidy.models.Track` has been removed, as it is
     no longer needed after the CPID refactoring.
+  - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
+    ``output_queue`` which it can use to send messages (i.e. audio data)
+    to the output process.
   - :meth:`mopidy.backends.base.BaseLibraryController.find_exact()` now accepts
     keyword arguments of the form ``find_exact(artist=['foo'],
     album=['bar'])``.
   - :meth:`mopidy.backends.base.BaseLibraryController.search()` now accepts
     keyword arguments of the form ``search(artist=['foo', 'fighters'],
     album=['bar', 'grooves'])``.
-  - :meth:`mopidy.backends.base.BaseBackend()` now accepts an
-    ``output_queue`` which it can use to send messages (i.e. audio data)
-    to the output process.
+  - :meth:`mopidy.backends.base.BaseCurrentPlaylistController.append()`
+    replaces
+    :meth:`mopidy.backends.base.BaseCurrentPlaylistController.load()`. Use
+    :meth:`mopidy.backends.base.BaseCurrentPlaylistController.clear()` if you
+    want to clear the current playlist.
+  - The following fields in
+    :class:`mopidy.backends.base.BasePlaybackController` has been renamed to
+    reflect their relation to methods called on the controller:
 
+    - ``next_track`` to ``track_at_next``
+    - ``next_cp_track`` to ``cp_track_at_next``
+    - ``previous_track`` to ``track_at_previous``
+    - ``previous_cp_track`` to ``cp_track_at_previous``
+
+  - :attr:`mopidy.backends.base.BasePlaybackController.track_at_eot` and
+    :attr:`mopidy.backends.base.BasePlaybackController.cp_track_at_eot` has
+    been added to better handle the difference between the user pressing next
+    and the current track ending.
+  - Rename
+    :meth:`mopidy.backends.base.BasePlaybackController.new_playlist_loaded_callback()`
+    to
+    :meth:`mopidy.backends.base.BasePlaybackController.on_current_playlist_change()`.
+  - Rename
+    :meth:`mopidy.backends.base.BasePlaybackController.end_of_track_callback()`
+    to :meth:`mopidy.backends.base.BasePlaybackController.on_end_of_track()`.
+  - Remove :meth:`mopidy.backends.base.BaseStoredPlaylistsController.search()`
+    since it was barely used, untested, and we got no use case for non-exact
+    search in stored playlists yet. Use
+    :meth:`mopidy.backends.base.BaseStoredPlaylistsController.get()` instead.
 
 
 0.1.0a3 (2010-08-03)

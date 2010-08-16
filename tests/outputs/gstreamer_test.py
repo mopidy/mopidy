@@ -27,10 +27,12 @@ class GStreamerOutputTest(unittest.TestCase):
     def send(self, message):
         self.output_queue.put(message)
 
+    @SkipTest
     def test_play_uri_existing_file(self):
         message = {'command': 'play_uri', 'uri': self.song_uri}
         self.assertEqual(True, self.send_recv(message))
 
+    @SkipTest
     def test_play_uri_non_existing_file(self):
         message = {'command': 'play_uri', 'uri': self.song_uri + 'bogus'}
         self.assertEqual(False, self.send_recv(message))

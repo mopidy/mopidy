@@ -86,10 +86,16 @@ def load(frontend, name):
         ``load {NAME}``
 
         Loads the playlist ``NAME.m3u`` from the playlist directory.
+
+    *Clarifications:*
+
+    - ``load`` appends the given playlist to the current playlist.
     """
-    matches = frontend.backend.stored_playlists.search(name)
-    if matches:
-        frontend.backend.current_playlist.load(matches[0].tracks)
+    try:
+        playlist = frontend.backend.stored_playlists.get(name=name)
+        frontend.backend.current_playlist.append(playlist.tracks)
+    except LookupError as e:
+        raise MpdNoExistError(u'No such playlist', command=u'load')
 
 @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
 def playlistadd(frontend, name, uri):
@@ -139,9 +145,9 @@ def playlistmove(frontend, name, from_pos, to_pos):
 
     *Clarifications:*
 
-        - The second argument is not a ``SONGID`` as used elsewhere in the
-          protocol documentation, but just the ``SONGPOS`` to move *from*,
-          i.e. ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
+    - The second argument is not a ``SONGID`` as used elsewhere in the protocol
+      documentation, but just the ``SONGPOS`` to move *from*, i.e.
+      ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
     """
     raise MpdNotImplemented # TODO
 

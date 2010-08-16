@@ -2,15 +2,21 @@
 libspotify installation
 ***********************
 
-We are working on a
-`libspotify <http://developer.spotify.com/en/libspotify/overview/>`_ backend.
-To use the libspotify backend you must install libspotify and
-`pyspotify <http://github.com/winjer/pyspotify>`_.
+Mopidy uses `libspotify
+<http://developer.spotify.com/en/libspotify/overview/>`_ for playing music from
+the Spotify music service. To use :mod:`mopidy.backends.libspotify` you must
+install libspotify and `pyspotify <http://github.com/winjer/pyspotify>`_.
 
 .. warning::
 
-    This backend requires a Spotify premium account, and it requires you to get
-    an application key from Spotify before use.
+    This backend requires a `Spotify premium account
+    <http://www.spotify.com/no/get-spotify/premium/>`_.
+
+.. note::
+
+    This product uses SPOTIFY CORE but is not endorsed, certified or otherwise
+    approved in any way by Spotify. Spotify is the registered trade mark of the
+    Spotify Group.
 
 
 Installing libspotify on Linux
@@ -58,6 +64,8 @@ Installing pyspotify
 Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
     sudo aptitude install python-dev
+
+In OS X no additional dependencies are needed.
 
 Check out the pyspotify code, and install it::
 

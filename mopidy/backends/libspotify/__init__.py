@@ -9,14 +9,18 @@ ENCODING = 'utf-8'
 
 class LibspotifyBackend(BaseBackend):
     """
-    A Spotify backend which uses the official `libspotify library
-    <http://developer.spotify.com/en/libspotify/overview/>`_.
-
-    `pyspotify <http://github.com/winjer/pyspotify/>`_ is the Python bindings
-    for libspotify. It got no documentation, but multiple examples are
-    available. Like libspotify, pyspotify's calls are mostly asynchronous.
+    A `Spotify <http://www.spotify.com/>`_ backend which uses the official
+    `libspotify <http://developer.spotify.com/en/libspotify/overview/>`_
+    library and the `pyspotify <http://github.com/winjer/pyspotify/>`_ Python
+    bindings for libspotify.
 
     **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-libspotify
+
+    .. note::
+
+        This product uses SPOTIFY(R) CORE but is not endorsed, certified or
+        otherwise approved in any way by Spotify. Spotify is the registered
+        trade mark of the Spotify Group.
     """
 
     # Imports inside methods are to prevent loading of __init__.py to fail on
@@ -40,6 +44,7 @@ class LibspotifyBackend(BaseBackend):
     def _connect(self):
         from .session_manager import LibspotifySessionManager
 
+        logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         logger.info(u'Connecting to Spotify')
         spotify = LibspotifySessionManager(
             settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,

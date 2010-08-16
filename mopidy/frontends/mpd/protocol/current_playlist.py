@@ -11,11 +11,15 @@ def add(frontend, uri):
         Adds the file ``URI`` to the playlist (directories add recursively).
         ``URI`` can also be a single file.
     """
-    track = frontend.backend.library.lookup(uri)
-    if track is None:
-        raise MpdNoExistError(
-            u'directory or file not found', command=u'add')
-    frontend.backend.current_playlist.add(track)
+    for handler_prefix in frontend.backend.uri_handlers:
+        if uri.startswith(handler_prefix):
+            track = frontend.backend.library.lookup(uri)
+            if track is not None:
+                frontend.backend.current_playlist.add(track)
+                return
+
+    raise MpdNoExistError(
+        u'directory or file not found', command=u'add')
 
 @handle_pattern(r'^addid "(?P<uri>[^"]*)"( "(?P<songpos>\d+)")*$')
 def addid(frontend, uri, songpos=None):
@@ -341,7 +345,8 @@ def swap(frontend, songpos1, songpos2):
     tracks.insert(songpos1, song2)
     del tracks[songpos2]
     tracks.insert(songpos2, song1)
-    frontend.backend.current_playlist.load(tracks)
+    frontend.backend.current_playlist.clear()
+    frontend.backend.current_playlist.append(tracks)
 
 @handle_pattern(r'^swapid "(?P<cpid1>\d+)" "(?P<cpid2>\d+)"$')
 def swapid(frontend, cpid1, cpid2):

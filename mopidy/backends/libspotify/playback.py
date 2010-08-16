@@ -26,7 +26,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
     def _play(self, track):
         self._set_output_state('READY')
         if self.state == self.PLAYING:
-            self.stop()
+            self.backend.spotify.session.play(0)
         if track.uri is None:
             return False
         try:
