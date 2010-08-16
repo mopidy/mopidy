@@ -38,3 +38,8 @@ class ValidateSettingsTest(unittest.TestCase):
             u'Deprecated setting value. ' +
             '"mopidy.backends.despotify.DespotifyBackend" is no longer ' +
             'available.')
+
+    def test_two_errors_are_both_reported(self):
+        result = validate_settings(self.defaults,
+            {'FOO': '', 'BAR': ''})
+        self.assertEquals(len(result), 2)

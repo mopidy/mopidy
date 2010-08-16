@@ -83,17 +83,17 @@ def validate_settings(defaults, settings):
             else:
                 errors[setting] = u'Deprecated setting. Use %s.' % (
                     changed[setting],)
-            break
+            continue
 
         if setting == 'BACKENDS':
             if 'mopidy.backends.despotify.DespotifyBackend' in value:
                 errors[setting] = (u'Deprecated setting value. ' +
                     '"mopidy.backends.despotify.DespotifyBackend" is no ' +
                     'longer available.')
-                break
+                continue
 
         if setting not in defaults:
             errors[setting] = u'Unknown setting. Is it misspelled?'
-            break
+            continue
 
     return errors
