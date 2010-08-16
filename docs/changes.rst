@@ -30,12 +30,6 @@ greatly improved MPD client support.
 - Exit early if not Python >= 2.6, < 3.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
-- A Spotify application key is now bundled with the source. The
-  ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
-- Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
-  default mixer on all platforms.
-- New setting ``MIXER_MAX_VOLUME`` for capping the maximum output volume.
-- If failing to play a track, playback will skip to the next track.
 - MPD frontend:
 
   - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
@@ -54,6 +48,8 @@ greatly improved MPD client support.
     songs directly from search results in GMPC.
   - Fix ``load`` so that one can append a playlist to the current playlist.
   - Support for single track repeat added. (Fixes: :issue:`4`)
+  - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
+    in backends.
 
 - Backends:
 
@@ -61,8 +57,15 @@ greatly improved MPD client support.
   - Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
     and the Libspotify backend is working much better. (Fixes: :issue:`9`,
     :issue:`10`, :issue:`13`)
-  - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
-    in backends.
+  - A Spotify application key is now bundled with the source. The
+    ``SPOTIFY_LIB_APPKEY`` setting is thus removed.
+  - If failing to play a track, playback will skip to the next track.
+
+- Mixers:
+
+  - Added new :mod:`mopidy.mixers.GStreamerSoftwareMixer` which now is the
+    default mixer on all platforms.
+  - New setting ``MIXER_MAX_VOLUME`` for capping the maximum output volume.
 
 - Backend API:
 
