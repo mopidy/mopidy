@@ -59,7 +59,8 @@ greatly improved MPD client support.
 
   - Rename :mod:`mopidy.backends.gstreamer` to :mod:`mopidy.backends.local`.
   - Remove :mod:`mopidy.backends.despotify`, as Despotify is little maintained
-    and the Libspotify backend is working much better.
+    and the Libspotify backend is working much better. (Fixes: :issue:`9`,
+    :issue:`10`, :issue:`13`)
   - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
     in backends.
 
