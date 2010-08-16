@@ -102,6 +102,9 @@ greatly improved MPD client support.
     :meth:`mopidy.backends.base.BasePlaybackController.new_playlist_loaded_callback()`
     to
     :meth:`mopidy.backends.base.BasePlaybackController.on_current_playlist_change()`.
+  - Rename
+    :meth:`mopidy.backends.base.BasePlaybackController.end_of_track_callback()`
+    to :meth:`mopidy.backends.base.BasePlaybackController.on_end_of_track()`.
 
 
 0.1.0a3 (2010-08-03)

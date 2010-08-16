@@ -300,7 +300,7 @@ class BasePlaybackController(object):
     def _current_wall_time(self):
         return int(time.time() * 1000)
 
-    def end_of_track_callback(self):
+    def on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
 

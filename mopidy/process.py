@@ -68,7 +68,7 @@ class CoreProcess(BaseProcess):
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
         elif message['command'] == 'end_of_track':
-            self.backend.playback.end_of_track_callback()
+            self.backend.playback.on_end_of_track()
         elif message['command'] == 'stop_playback':
             self.backend.playback.stop()
         elif message['command'] == 'set_stored_playlists':
