@@ -291,14 +291,14 @@ class BasePlaybackController(object):
         if self.cp_track_at_eot:
             self.play(self.cp_track_at_eot)
 
-            if self.consume:
-                self.backend.current_playlist.remove(cpid=original_cp_track[0])
-
             if self.random and self.current_cp_track in self._shuffled:
                 self._shuffled.remove(self.current_cp_track)
         else:
             self.stop()
             self.current_cp_track = None
+
+        if self.consume:
+            self.backend.current_playlist.remove(cpid=original_cp_track[0])
 
     def on_current_playlist_change(self):
         """
