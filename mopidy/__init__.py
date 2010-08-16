@@ -2,8 +2,6 @@ import sys
 if not (2, 6) <= sys.version_info < (3,):
     sys.exit(u'Mopidy requires Python >= 2.6, < 3')
 
-from mopidy import settings as raw_settings
-
 def get_version():
     return u'0.1.0a4'
 
@@ -27,13 +25,6 @@ class MopidyException(Exception):
 class SettingsError(MopidyException):
     pass
 
-class Settings(object):
-    def __getattr__(self, attr):
-        if attr.isupper() and not hasattr(raw_settings, attr):
-            raise SettingsError(u'Setting "%s" is not set.' % attr)
-        value = getattr(raw_settings, attr)
-        if type(value) != bool and not value:
-            raise SettingsError(u'Setting "%s" is empty.' % attr)
-        return value
-
-settings = Settings()
+from mopidy import settings as default_settings_module
+from mopidy.utils.settings import SettingsProxy
+settings = SettingsProxy(default_settings_module)
