@@ -107,6 +107,10 @@ greatly improved MPD client support.
   - Rename
     :meth:`mopidy.backends.base.BasePlaybackController.end_of_track_callback()`
     to :meth:`mopidy.backends.base.BasePlaybackController.on_end_of_track()`.
+  - Remove :meth:`mopidy.backends.base.BaseStoredPlaylistsController.search()`
+    since it was barely used, untested, and we got no use case for non-exact
+    search in stored playlists yet. Use
+    :meth:`mopidy.backends.base.BaseStoredPlaylistsController.get()` instead.
 
 
 0.1.0a3 (2010-08-03)
