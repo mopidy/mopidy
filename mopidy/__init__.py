@@ -28,4 +28,3 @@ class SettingsError(MopidyException):
 from mopidy import settings as default_settings_module
 from mopidy.utils.settings import SettingsProxy
 settings = SettingsProxy(default_settings_module)
-settings.validate()
