@@ -1,6 +1,7 @@
 # Absolute import needed to import ~/.mopidy/settings.py and not ourselves
 from __future__ import absolute_import
 from copy import copy
+import logging
 import os
 import sys
 
@@ -40,3 +41,59 @@ class SettingsProxy(object):
             raise SettingsError(u'Setting "%s" is empty.' % attr)
         return value
 
+    def validate(self):
+        if self.get_errors():
+            sys.exit(self.get_errors_as_string())
+
+    def get_errors(self):
+        return validate_settings(self.default_settings, self.local_settings)
+
+    def get_errors_as_string(self):
+        lines = [u'Errors:']
+        for (setting, error) in self.get_errors().iteritems():
+            lines.append(u'  %s: %s' % (setting, error))
+        return '\n'.join(lines)
+
+
+def validate_settings(defaults, settings):
+    """
+    Checks the settings for both errors like misspellings and against a set of
+    rules for renamed settings, etc.
+
+    Returns of setting names with associated errors.
+
+    :param defaults: Mopidy's default settings
+    :type defaults: dict
+    :param settings: the user's local settings
+    :type settings: dict
+    :rtype: dict
+    """
+    errors = {}
+
+    changed = {
+        'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
+        'SERVER_PORT': 'MPD_SERVER_PORT',
+        'SPOTIFY_LIB_APPKEY': None,
+    }
+
+    for setting, value in settings.iteritems():
+        if setting in changed:
+            if changed[setting] is None:
+                errors[setting] = u'Deprecated setting. It may be removed.'
+            else:
+                errors[setting] = u'Deprecated setting. Use %s.' % (
+                    changed[setting],)
+            break
+
+        if setting == 'BACKENDS':
+            if 'mopidy.backends.despotify.DespotifyBackend' in value:
+                errors[setting] = (u'Deprecated setting value. ' +
+                    '"mopidy.backends.despotify.DespotifyBackend" is no ' +
+                    'longer available.')
+                break
+
+        if setting not in defaults:
+            errors[setting] = u'Unknown setting. Is it misspelled?'
+            break
+
+    return errors

@@ -31,6 +31,8 @@ greatly improved MPD client support.
 **Changes**
 
 - Exit early if not Python >= 2.6, < 3.
+- Validate settings at startup and print useful error messages if the settings
+  has not been updated or anything is misspelled.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
 - MPD frontend:
