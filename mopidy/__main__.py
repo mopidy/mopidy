@@ -11,7 +11,8 @@ sys.path.insert(0,
 
 from mopidy import get_version, settings, SettingsError
 from mopidy.process import CoreProcess
-from mopidy.utils import get_class, get_or_create_folder
+from mopidy.utils import get_class
+from mopidy.utils.path import get_or_create_folder
 
 logger = logging.getLogger('mopidy.main')
 
