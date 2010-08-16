@@ -22,6 +22,12 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assert_(u'OK' in result)
 
+    def test_add_with_uri_not_found_in_library_should_not_call_lookup(self):
+        self.b.library.lookup = lambda uri: self.fail("Shouldn't run")
+        result = self.h.handle_request(u'add "foo"')
+        self.assertEqual(result[0],
+            u'ACK [50@0] {add} directory or file not found')
+
     def test_add_with_uri_not_found_in_library_should_ack(self):
         result = self.h.handle_request(u'add "dummy://foo"')
         self.assertEqual(result[0],
