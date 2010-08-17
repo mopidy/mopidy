@@ -21,9 +21,10 @@ class SettingsProxy(object):
     def _get_local_settings(self):
         dotdir = os.path.expanduser(u'~/.mopidy/')
         settings_file = os.path.join(dotdir, u'settings.py')
-        if os.path.isfile(settings_file):
-            sys.path.insert(0, dotdir)
-            import settings as local_settings_module
+        if not os.path.isfile(settings_file):
+            return {}
+        sys.path.insert(0, dotdir)
+        import settings as local_settings_module
         return self._get_settings_dict_from_module(local_settings_module)
 
     def _get_settings_dict_from_module(self, module):
