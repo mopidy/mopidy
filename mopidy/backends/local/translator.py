@@ -1,7 +1,5 @@
 import logging
 import os
-import sys
-import urllib
 
 logger = logging.getLogger('mopidy.backends.local.translator')
 
