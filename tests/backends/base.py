@@ -690,18 +690,18 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_previous_track_before_play(self):
-        self.assertEqual(self.playback.previous_track, None)
+        self.assertEqual(self.playback.track_at_previous, None)
 
     @populate_playlist
     def test_previous_track_after_play(self):
         self.playback.play()
-        self.assertEqual(self.playback.previous_track, None)
+        self.assertEqual(self.playback.track_at_previous, None)
 
     @populate_playlist
     def test_previous_track_after_next(self):
         self.playback.play()
         self.playback.next()
-        self.assertEqual(self.playback.previous_track, self.tracks[0])
+        self.assertEqual(self.playback.track_at_previous, self.tracks[0])
 
     @populate_playlist
     def test_previous_track_after_previous(self):
@@ -709,17 +709,17 @@ class BasePlaybackControllerTest(object):
         self.playback.next() # At track 1
         self.playback.next() # At track 2
         self.playback.previous() # At track 1
-        self.assertEqual(self.playback.previous_track, self.tracks[0])
+        self.assertEqual(self.playback.track_at_previous, self.tracks[0])
 
     def test_previous_track_empty_playlist(self):
-        self.assertEqual(self.playback.previous_track, None)
+        self.assertEqual(self.playback.track_at_previous, None)
 
     @populate_playlist
     def test_previous_track_with_consume(self):
         self.playback.consume = True
         for track in self.tracks:
             self.playback.next()
-            self.assertEqual(self.playback.previous_track,
+            self.assertEqual(self.playback.track_at_previous,
                 self.playback.current_track)
 
     @populate_playlist
@@ -727,7 +727,7 @@ class BasePlaybackControllerTest(object):
         self.playback.random = True
         for track in self.tracks:
             self.playback.next()
-            self.assertEqual(self.playback.previous_track,
+            self.assertEqual(self.playback.track_at_previous,
                 self.playback.current_track)
 
     @populate_playlist
