@@ -64,11 +64,12 @@ class GStreamerProcess(BaseProcess):
         messages_thread.start()
 
         self.gst_pipeline = gst.parse_launch(' ! '.join([
+            'audioconvert name=convert',
             'volume name=volume',
             'autoaudiosink'
         ]))
 
-        pad = self.gst_pipeline.get_by_name('volume').get_pad('sink')
+        pad = self.gst_pipeline.get_by_name('convert').get_pad('sink')
 
         if settings.BACKENDS[0] == 'mopidy.backends.local.LocalBackend':
             uri_bin = gst.element_factory_make('uridecodebin', 'uri')
