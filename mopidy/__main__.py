@@ -13,6 +13,7 @@ from mopidy import get_version, settings, SettingsError
 from mopidy.process import CoreProcess
 from mopidy.utils import get_class
 from mopidy.utils.path import get_or_create_folder
+from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.main')
 
@@ -42,6 +43,9 @@ def _parse_options():
     parser.add_option('--dump',
         action='store_true', dest='dump',
         help='dump debug log to file')
+    parser.add_option('--list-settings',
+        action='callback', callback=list_settings_optparse_callback,
+        help='list current settings')
     return parser.parse_args()[0]
 
 def _setup_logging(verbosity_level, dump):

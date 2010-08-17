@@ -102,3 +102,26 @@ def validate_settings(defaults, settings):
             continue
 
     return errors
+
+def list_settings_optparse_callback(*args):
+    """
+    Prints a list of all settings.
+
+    Called by optparse when Mopidy is run with the :option:`--list-settings`
+    option.
+    """
+    from mopidy import settings
+    errors = settings.get_errors()
+    lines = []
+    for (key, value) in sorted(settings.raw_settings.iteritems()):
+        default_value = settings.default_settings.get(key)
+        if key.endswith('PASSWORD'):
+            value = u'********'
+        lines.append(u'%s:' % key)
+        lines.append(u'  Value: %s' % repr(value))
+        if value != default_value and default_value is not None:
+            lines.append(u'  Default: %s' % repr(default_value))
+        if errors.get(key) is not None:
+            lines.append(u'  Error: %s' % errors[key])
+    print u'Settings: %s' % indent('\n'.join(lines), places=2)
+    sys.exit(0)
