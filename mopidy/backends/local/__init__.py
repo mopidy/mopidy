@@ -69,7 +69,7 @@ class LocalPlaybackController(BasePlaybackController):
 
     def _message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
-            self.end_of_track_callback()
+            self.on_end_of_track()
         elif message.type == gst.MESSAGE_ERROR:
             self._bin.set_state(gst.STATE_NULL)
             error, debug = message.parse_error()
