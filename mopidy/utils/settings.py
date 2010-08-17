@@ -6,6 +6,9 @@ import os
 import sys
 
 from mopidy import SettingsError
+from mopidy.utils import indent
+
+logger = logging.getLogger('mopidy.utils.settings')
 
 class SettingsProxy(object):
     def __init__(self, default_settings_module):
@@ -43,15 +46,17 @@ class SettingsProxy(object):
 
     def validate(self):
         if self.get_errors():
-            sys.exit(self.get_errors_as_string())
+            logger.error(u'Settings validation errors: %s',
+                indent(self.get_errors_as_string()))
+            raise SettingsError(u'Settings validation failed.')
 
     def get_errors(self):
         return validate_settings(self.default_settings, self.local_settings)
 
     def get_errors_as_string(self):
-        lines = [u'Errors:']
+        lines = []
         for (setting, error) in self.get_errors().iteritems():
-            lines.append(u'  %s: %s' % (setting, error))
+            lines.append(u'%s: %s' % (setting, error))
         return '\n'.join(lines)
 
 
