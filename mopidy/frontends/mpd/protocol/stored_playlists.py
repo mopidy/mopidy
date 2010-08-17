@@ -94,7 +94,7 @@ def load(frontend, name):
     try:
         playlist = frontend.backend.stored_playlists.get(name=name)
         frontend.backend.current_playlist.append(playlist.tracks)
-    except LookupError as e:
+    except LookupError:
         raise MpdNoExistError(u'No such playlist', command=u'load')
 
 @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')

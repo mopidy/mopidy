@@ -7,11 +7,6 @@ Available settings and their default values.
     file called ``~/.mopidy/settings.py`` and redefine settings there.
 """
 
-# Absolute import needed to import ~/.mopidy/settings.py and not ourselves
-from __future__ import absolute_import
-import os
-import sys
-
 #: List of playback backends to use. See :mod:`mopidy.backends` for all
 #: available backends.
 #:
@@ -172,10 +167,3 @@ SPOTIFY_USERNAME = u''
 #:
 #: Used by :mod:`mopidy.backends.libspotify`.
 SPOTIFY_PASSWORD = u''
-
-# Import user specific settings
-dotdir = os.path.expanduser(u'~/.mopidy/')
-settings_file = os.path.join(dotdir, u'settings.py')
-if os.path.isfile(settings_file):
-    sys.path.insert(0, dotdir)
-    from settings import *

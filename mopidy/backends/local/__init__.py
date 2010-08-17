@@ -4,11 +4,13 @@ import glob
 import shutil
 import multiprocessing
 
+from mopidy import settings
 from mopidy.backends.base import *
 from mopidy.models import Playlist, Track, Album
 from mopidy import settings
-from mopidy.utils import parse_m3u, parse_mpd_tag_cache
 from mopidy.process import pickle_connection
+
+from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
 

@@ -31,6 +31,10 @@ greatly improved MPD client support.
 **Changes**
 
 - Exit early if not Python >= 2.6, < 3.
+- Validate settings at startup and print useful error messages if the settings
+  has not been updated or anything is misspelled.
+- Add command line option :option:`--list-settings` to print the currently
+  active settings.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
 - MPD frontend:
@@ -205,8 +209,8 @@ the established pace of at least a release per month.
 
 - Improvements to MPD protocol handling, making Mopidy work much better with a
   group of clients, including ncmpc, MPoD, and Theremin.
-- New command line flag ``--dump`` for dumping debug log to ``dump.log`` in the
-  current directory.
+- New command line flag :option:`--dump` for dumping debug log to ``dump.log``
+  in the current directory.
 - New setting :attr:`mopidy.settings.MIXER_ALSA_CONTROL` for forcing what ALSA
   control :class:`mopidy.mixers.alsa.AlsaMixer` should use.
 

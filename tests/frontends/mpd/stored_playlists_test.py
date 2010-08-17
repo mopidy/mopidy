@@ -6,8 +6,6 @@ from mopidy.frontends.mpd import frontend
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track, Playlist
 
-from tests import SkipTest
-
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend(mixer_class=DummyMixer)

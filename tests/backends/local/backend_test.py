@@ -11,7 +11,7 @@ from mopidy import settings
 from mopidy.backends.local import LocalBackend
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
-from mopidy.utils import path_to_uri
+from mopidy.utils.path import path_to_uri
 
 from tests.backends.base import *
 from tests import SkipTest, data_folder

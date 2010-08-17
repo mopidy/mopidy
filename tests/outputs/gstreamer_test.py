@@ -1,15 +1,15 @@
 import multiprocessing
 import unittest
 
-from mopidy.utils import path_to_uri
-from mopidy.process import pickle_connection
 from mopidy.outputs.gstreamer import GStreamerOutput
+from mopidy.process import pickle_connection
+from mopidy.utils.path import path_to_uri
 
 from tests import data_folder, SkipTest
 
 class GStreamerOutputTest(unittest.TestCase):
     def setUp(self):
-        self.song_uri = path_to_uri(data_folder('song1.wav')) 
+        self.song_uri = path_to_uri(data_folder('song1.wav'))
         self.output_queue = multiprocessing.Queue()
         self.core_queue = multiprocessing.Queue()
         self.output = GStreamerOutput(self.core_queue, self.output_queue)
