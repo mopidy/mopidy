@@ -58,6 +58,8 @@ Code style
 Commit guidelines
 =================
 
+- We follow the development process described at http://nvie.com/git-model.
+
 - Keep commits small and on topic.
 
 - If a commit looks too big you should be working in a feature branch not a
