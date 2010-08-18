@@ -173,13 +173,13 @@ class GStreamerProcess(BaseProcess):
         """
         result = self.gst_pipeline.set_state(
             getattr(gst, 'STATE_' + state_name))
-        # Block until state change has occured, required for at least the local
-        # backends seek functionality. (Optional solution is to block in set
-        # position to ensure that change occours)
-        self.gst_pipeline.get_state()
         if result == gst.STATE_CHANGE_FAILURE:
             logger.warning('Setting GStreamer state to %s: failed', state_name)
             return False
+        elif result == gst.STATE_CHANGE_ASYNC:
+            # Block until ready
+            self.gst_pipeline.get_state()
+            return True
         else:
             logger.debug('Setting GStreamer state to %s: OK', state_name)
             return True
