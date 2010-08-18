@@ -34,17 +34,17 @@ class SettingsProxy(object):
         return name.isupper()
 
     @property
-    def active(self):
-        active = copy(self.default)
-        active.update(self.local)
-        return active
+    def current(self):
+        current = copy(self.default)
+        current.update(self.local)
+        return current 
 
     def __getattr__(self, attr):
         if not self._is_setting(attr):
             return
-        if attr not in self.active:
+        if attr not in self.current:
             raise SettingsError(u'Setting "%s" is not set.' % attr)
-        value = self.active[attr]
+        value = self.current[attr]
         if type(value) != bool and not value:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
         return value
@@ -118,7 +118,7 @@ def list_settings_optparse_callback(*args):
     from mopidy import settings
     errors = settings.get_errors()
     lines = []
-    for (key, value) in sorted(settings.active.iteritems()):
+    for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
         if key.endswith('PASSWORD'):
             value = u'********'
