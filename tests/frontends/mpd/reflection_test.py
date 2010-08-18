@@ -6,8 +6,7 @@ from mopidy.mixers.dummy import DummyMixer
 
 class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.m = DummyMixer()
-        self.b = DummyBackend(mixer=self.m)
+        self.b = DummyBackend(mixer_class=DummyMixer)
         self.h = frontend.MpdFrontend(backend=self.b)
 
     def test_commands_returns_list_of_all_commands(self):

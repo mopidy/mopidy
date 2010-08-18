@@ -22,10 +22,7 @@ class NadMixer(BaseMixer):
     currently used by this mixer.
 
     Sadly, this means that if you use the remote control to change the volume
-    on the amplifier, Mopidy will no longer report the correct volume. To
-    recalibrate the mixer, set the volume to 0 through Mopidy. This will reset
-    the amplifier to a known state, including powering on the device, selecting
-    the configured speakers and input sources.
+    on the amplifier, Mopidy will no longer report the correct volume.
 
     **Dependencies**
 
@@ -51,8 +48,6 @@ class NadMixer(BaseMixer):
 
     def _set_volume(self, volume):
         self._volume = volume
-        if volume == 0:
-            self._pipe.send({'command': 'reset_device'})
         self._pipe.send({'command': 'set_volume', 'volume': volume})
 
 
@@ -83,7 +78,7 @@ class NadTalker(BaseProcess):
         self.pipe = pipe
         self._device = None
 
-    def _run(self):
+    def run_inside_try(self):
         self._open_connection()
         self._set_device_to_known_state()
         while self.pipe.poll(None):

@@ -2,7 +2,7 @@
 Licenses
 ********
 
-For a list of contributors, see :ref:`authors`. For details on who have
+For a list of contributors, see :doc:`authors`. For details on who have
 contributed what, please refer to our git repository.
 
 Source code license

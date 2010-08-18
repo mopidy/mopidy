@@ -67,6 +67,16 @@ methods as described below.
 .. inheritance-diagram:: mopidy.mixers.dummy
 
 
+:mod:`mopidy.mixers.gstreamer_software` -- Software mixer for all platforms
+===========================================================================
+
+.. automodule:: mopidy.mixers.gstreamer_software
+    :synopsis: Software mixer for all platforms
+    :members:
+
+.. inheritance-diagram:: mopidy.mixers.gstreamer_software
+
+
 :mod:`mopidy.mixers.osa` -- Osa mixer for OS X
 ==============================================
 

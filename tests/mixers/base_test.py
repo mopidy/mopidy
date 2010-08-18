@@ -1,18 +1,16 @@
-import unittest
-
-from mopidy.mixers.dummy import DummyMixer
-
-class BaseMixerTest(unittest.TestCase):
+class BaseMixerTest(object):
     MIN = 0
     MAX = 100
-
     ACTUAL_MIN = MIN
     ACTUAL_MAX = MAX
-
     INITIAL = None
 
+    mixer_class = None
+
     def setUp(self):
-        self.mixer = DummyMixer()
+        assert self.mixer_class is not None, \
+            "mixer_class must be set in subclass"
+        self.mixer = self.mixer_class(None)
 
     def test_initial_volume(self):
         self.assertEqual(self.mixer.volume, self.INITIAL)

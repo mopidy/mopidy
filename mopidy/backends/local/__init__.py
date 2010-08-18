@@ -14,10 +14,10 @@ import glob
 import shutil
 import threading
 
+from mopidy import settings
 from mopidy.backends.base import *
 from mopidy.models import Playlist, Track, Album
-from mopidy import settings
-from mopidy.utils import parse_m3u, parse_mpd_tag_cache
+from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
 
@@ -69,7 +69,7 @@ class LocalPlaybackController(BasePlaybackController):
 
     def _message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
-            self.end_of_track_callback()
+            self.on_end_of_track()
         elif message.type == gst.MESSAGE_ERROR:
             self._bin.set_state(gst.STATE_NULL)
             error, debug = message.parse_error()

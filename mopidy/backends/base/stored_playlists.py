@@ -107,13 +107,3 @@ class BaseStoredPlaylistsController(object):
         :type playlist: :class:`mopidy.models.Playlist`
         """
         raise NotImplementedError
-
-    def search(self, query):
-        """
-        Search for playlists whose name contains ``query``.
-
-        :param query: query to search for
-        :type query: string
-        :rtype: list of :class:`mopidy.models.Playlist`
-        """
-        return filter(lambda p: query in p.name, self._playlists)

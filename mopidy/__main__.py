@@ -11,18 +11,24 @@ sys.path.insert(0,
 
 from mopidy import get_version, settings, SettingsError
 from mopidy.process import CoreProcess
-from mopidy.utils import get_class, get_or_create_folder
+from mopidy.utils import get_class
+from mopidy.utils.path import get_or_create_folder
+from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.main')
 
 def main():
     options = _parse_options()
     _setup_logging(options.verbosity_level, options.dump)
+    settings.validate()
     logger.info('-- Starting Mopidy --')
     get_or_create_folder('~/.mopidy/')
     core_queue = multiprocessing.Queue()
     get_class(settings.SERVER)(core_queue).start()
-    core = CoreProcess(core_queue)
+    output_class = get_class(settings.OUTPUT)
+    backend_class = get_class(settings.BACKENDS[0])
+    frontend_class = get_class(settings.FRONTEND)
+    core = CoreProcess(core_queue, output_class, backend_class, frontend_class)
     core.start()
     asyncore.loop()
 
@@ -37,6 +43,9 @@ def _parse_options():
     parser.add_option('--dump',
         action='store_true', dest='dump',
         help='dump debug log to file')
+    parser.add_option('--list-settings',
+        action='callback', callback=list_settings_optparse_callback,
+        help='list current settings')
     return parser.parse_args()[0]
 
 def _setup_logging(verbosity_level, dump):

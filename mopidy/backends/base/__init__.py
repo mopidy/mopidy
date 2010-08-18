@@ -23,17 +23,20 @@ class BaseBackend(object):
     :param core_queue: a queue for sending messages to
         :class:`mopidy.process.CoreProcess`
     :type core_queue: :class:`multiprocessing.Queue`
-    :param mixer: either a mixer instance, or :class:`None` to use the mixer
+    :param output_queue: a queue for sending messages to the output process
+    :type output_queue: :class:`multiprocessing.Queue`
+    :param mixer_class: either a mixer class, or :class:`None` to use the mixer
         defined in settings
-    :type mixer: :class:`mopidy.mixers.BaseMixer` or :class:`None`
+    :type mixer_class: a subclass of :class:`mopidy.mixers.BaseMixer` or
+        :class:`None`
     """
 
-    def __init__(self, core_queue=None, mixer=None):
+    def __init__(self, core_queue=None, output_queue=None, mixer_class=None):
         self.core_queue = core_queue
-        if mixer is not None:
-            self.mixer = mixer
-        else:
-            self.mixer = get_class(settings.MIXER)()
+        self.output_queue = output_queue
+        if mixer_class is None:
+            mixer_class = get_class(settings.MIXER)
+        self.mixer = mixer_class(self)
 
     #: A :class:`multiprocessing.Queue` which can be used by e.g. library
     #: callbacks executing in other threads to send messages to the core

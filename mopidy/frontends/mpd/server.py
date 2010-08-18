@@ -8,7 +8,8 @@ import sys
 
 from mopidy import get_mpd_protocol_version, settings
 from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR
-from mopidy.utils import indent, pickle_connection
+from mopidy.process import pickle_connection
+from mopidy.utils import indent
 
 logger = logging.getLogger('mopidy.frontends.mpd.server')
 
