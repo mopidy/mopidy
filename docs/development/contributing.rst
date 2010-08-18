@@ -109,8 +109,7 @@ Continuous integration server
 
 We run a continuous integration server called Hudson at
 http://hudson.mopidy.com/ that runs all test on multiple platforms (Ubuntu, OS
-X, etc.) for every commit we push to GitHub. If the build is broken or fixed,
-Hudson will issue notifications to our IRC channel.
+X, etc.) for every commit we push to GitHub.
 
 In addition to running tests, Hudson also does coverage statistics and uses
 pylint to check for errors and possible improvements in our code. So, if you're
