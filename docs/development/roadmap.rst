@@ -57,6 +57,8 @@ Stuff we want to do, but not right now, and maybe never
 
 - Frontends:
 
+  - Publish the server's presence to the network using `Zeroconf
+    <http://en.wikipedia.org/wiki/Zeroconf>`_/Avahi.
   - D-Bus/`MPRIS <http://www.mpris.org/>`_
   - REST/JSON web service with a jQuery client as example application. Maybe
     based upon `Tornado <http://github.com/facebook/tornado>`_ and `jQuery

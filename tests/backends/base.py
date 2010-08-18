@@ -684,14 +684,6 @@ class BasePlaybackControllerTest(object):
         self.assert_(self.tracks[0] not in self.backend.current_playlist.tracks)
 
     @populate_playlist
-    def test_end_of_track_with_single_and_repeat(self):
-        self.playback.single = True
-        self.playback.repeat = True
-        self.playback.play()
-        self.playback.on_end_of_track()
-        self.assertEqual(self.playback.current_track, self.tracks[1])
-
-    @populate_playlist
     def test_end_of_track_with_random(self):
         # FIXME feels very fragile
         random.seed(1)

@@ -12,11 +12,9 @@ logger = logging.getLogger('mopidy.utils.settings')
 
 class SettingsProxy(object):
     def __init__(self, default_settings_module):
-        self.default_settings = self._get_settings_dict_from_module(
+        self.default = self._get_settings_dict_from_module(
             default_settings_module)
-        self.local_settings = self._get_local_settings()
-        self.raw_settings = copy(self.default_settings)
-        self.raw_settings.update(self.local_settings)
+        self.local = self._get_local_settings()
 
     def _get_local_settings(self):
         dotdir = os.path.expanduser(u'~/.mopidy/')
@@ -35,12 +33,18 @@ class SettingsProxy(object):
     def _is_setting(self, name):
         return name.isupper()
 
+    @property
+    def current(self):
+        current = copy(self.default)
+        current.update(self.local)
+        return current 
+
     def __getattr__(self, attr):
         if not self._is_setting(attr):
             return
-        if attr not in self.raw_settings:
+        if attr not in self.current:
             raise SettingsError(u'Setting "%s" is not set.' % attr)
-        value = self.raw_settings[attr]
+        value = self.current[attr]
         if type(value) != bool and not value:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
         return value
@@ -52,7 +56,7 @@ class SettingsProxy(object):
             raise SettingsError(u'Settings validation failed.')
 
     def get_errors(self):
-        return validate_settings(self.default_settings, self.local_settings)
+        return validate_settings(self.default, self.local)
 
     def get_errors_as_string(self):
         lines = []
@@ -114,8 +118,8 @@ def list_settings_optparse_callback(*args):
     from mopidy import settings
     errors = settings.get_errors()
     lines = []
-    for (key, value) in sorted(settings.raw_settings.iteritems()):
-        default_value = settings.default_settings.get(key)
+    for (key, value) in sorted(settings.current.iteritems()):
+        default_value = settings.default.get(key)
         if key.endswith('PASSWORD'):
             value = u'********'
         lines.append(u'%s:' % key)

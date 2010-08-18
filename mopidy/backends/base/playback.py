@@ -307,6 +307,9 @@ class BasePlaybackController(object):
         Typically called by :class:`mopidy.process.CoreProcess` after a message
         from a library thread is received.
         """
+        if self.state == self.STOPPED:
+            return
+
         original_cp_track = self.current_cp_track
         if self.cp_track_at_eot:
             self.play(self.cp_track_at_eot)
