@@ -136,9 +136,16 @@ Then, to generate docs::
 
 .. note::
 
-    The documentation at http://www.mopidy.com/docs/ is automatically updated
-    within 10 minutes after a documentation update is pushed to
-    ``jodal/mopidy/master`` at GitHub.
+    The documentation at http://www.mopidy.com/ is automatically updated when a
+    documentation update is pushed to ``jodal/mopidy`` at GitHub.
+
+    Documentation generated from the ``master`` branch is published at
+    http://www.mopidy.com/docs/master/, and will always be valid for the latest
+    release.
+
+    Documentation generated from the ``develop`` branch is published at
+    http://www.mopidy.com/docs/develop/, and will always be valid for the
+    latest development snapshot.
 
 
 Creating releases
