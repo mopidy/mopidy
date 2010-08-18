@@ -193,8 +193,7 @@ class GStreamerProcess(BaseProcess):
     def set_position(self, position):
         self.gst_pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
-        self.gst_pipeline.get_state() # Block until state change
-        self.set_state('PLAYING')
+        self.gst_pipeline.get_state()
 
     def get_position(self):
         try:
