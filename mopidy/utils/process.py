@@ -19,10 +19,11 @@ def unpickle_connection(pickled_connection):
 
 class BaseProcess(multiprocessing.Process):
     def run(self):
+        logger.debug(u'%s: Starting process', self.name)
         try:
             self.run_inside_try()
         except KeyboardInterrupt:
-            logger.info(u'Interrupted by user')
+            logger.info(u'%s: Interrupted by user', self.name)
             sys.exit(0)
         except SettingsError as e:
             logger.error(e.message)
