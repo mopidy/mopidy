@@ -1,7 +1,7 @@
 import re
 
-from mopidy.frontends.mpd import handle_pattern, MpdNotImplemented
-from mopidy.frontends.mpd.protocol import stored_playlists
+from mopidy.frontends.mpd.protocol import handle_pattern, stored_playlists
+from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
 def _build_query(mpd_query):
     """

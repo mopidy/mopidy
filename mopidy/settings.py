@@ -45,8 +45,8 @@ DUMP_LOG_FILENAME = u'dump.log'
 #:
 #: Default::
 #:
-#:     FRONTEND = u'mopidy.frontends.mpd.frontend.MpdFrontend'
-FRONTEND = u'mopidy.frontends.mpd.frontend.MpdFrontend'
+#:     FRONTEND = u'mopidy.frontends.mpd.dispatcher.MpdDispatcher'
+FRONTEND = u'mopidy.frontends.mpd.dispatcher.MpdDispatcher'
 
 #: Path to folder with local music.
 #:

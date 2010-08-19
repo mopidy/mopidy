@@ -2,14 +2,14 @@ import datetime as dt
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
-from mopidy.frontends.mpd import frontend
+from mopidy.frontends.mpd import dispatcher
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track, Playlist
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = frontend.MpdFrontend(backend=self.b)
+        self.h = dispatcher.MpdDispatcher(backend=self.b)
 
     def test_listplaylist(self):
         self.b.stored_playlists.playlists = [

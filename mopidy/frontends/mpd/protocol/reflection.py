@@ -1,5 +1,5 @@
-from mopidy.frontends.mpd import (handle_pattern, mpd_commands,
-    MpdNotImplemented)
+from mopidy.frontends.mpd.protocol import handle_pattern, mpd_commands
+from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
 @handle_pattern(r'^commands$')
 def commands(frontend):

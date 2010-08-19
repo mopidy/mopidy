@@ -1,4 +1,5 @@
-from mopidy.frontends.mpd import handle_pattern, MpdNotImplemented
+from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
 @handle_pattern(r'^close$')
 def close(frontend):
@@ -9,8 +10,7 @@ def close(frontend):
 
         Closes the connection to MPD.
     """
-    # TODO Does not work after multiprocessing branch merge
-    #frontend.session.do_close()
+    pass # TODO
 
 @handle_pattern(r'^kill$')
 def kill(frontend):
@@ -21,8 +21,7 @@ def kill(frontend):
 
         Kills MPD.
     """
-    # TODO Does not work after multiprocessing branch merge
-    #frontend.session.do_kill()
+    pass # TODO
 
 @handle_pattern(r'^password "(?P<password>[^"]+)"$')
 def password_(frontend, password):
