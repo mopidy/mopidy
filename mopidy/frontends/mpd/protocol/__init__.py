@@ -18,6 +18,9 @@ ENCODING = u'utf-8'
 #: The MPD protocol uses ``\n`` as line terminator.
 LINE_TERMINATOR = u'\n'
 
+#: The MPD protocol version is 0.16.0.
+VERSION = u'0.16.0'
+
 mpd_commands = set()
 request_handlers = {}
 

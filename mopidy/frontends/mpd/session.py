@@ -2,10 +2,9 @@ import asynchat
 import logging
 import multiprocessing
 
-from mopidy import get_mpd_protocol_version
+from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR, VERSION
 from mopidy.process import pickle_connection
 from mopidy.utils import indent
-from .protocol import ENCODING, LINE_TERMINATOR
 
 logger = logging.getLogger('mopidy.frontends.mpd.session')
 
@@ -27,7 +26,7 @@ class MpdSession(asynchat.async_chat):
 
     def start(self):
         """Start a new client session."""
-        self.send_response(u'OK MPD %s' % get_mpd_protocol_version())
+        self.send_response(u'OK MPD %s' % VERSION)
 
     def collect_incoming_data(self, data):
         """Collect incoming data into buffer until a terminator is found."""
