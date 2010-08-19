@@ -1,13 +1,13 @@
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
-from mopidy.frontends.mpd import frontend
+from mopidy.frontends.mpd import dispatcher
 from mopidy.mixers.dummy import DummyMixer
 
 class AudioOutputHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = frontend.MpdFrontend(backend=self.b)
+        self.h = dispatcher.MpdDispatcher(backend=self.b)
 
     def test_enableoutput(self):
         result = self.h.handle_request(u'enableoutput "0"')

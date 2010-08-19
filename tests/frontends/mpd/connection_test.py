@@ -1,13 +1,13 @@
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
-from mopidy.frontends.mpd import frontend
+from mopidy.frontends.mpd import dispatcher
 from mopidy.mixers.dummy import DummyMixer
 
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = frontend.MpdFrontend(backend=self.b)
+        self.h = dispatcher.MpdDispatcher(backend=self.b)
 
     def test_close(self):
         result = self.h.handle_request(u'close')

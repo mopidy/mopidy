@@ -1,6 +1,6 @@
 import unittest
 
-from mopidy.frontends.mpd import (MpdAckError, MpdUnknownCommand,
+from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdUnknownCommand,
     MpdNotImplemented)
 
 class MpdExceptionsTest(unittest.TestCase):

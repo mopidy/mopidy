@@ -1,13 +1,13 @@
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
-from mopidy.frontends.mpd import frontend
+from mopidy.frontends.mpd import dispatcher
 from mopidy.mixers.dummy import DummyMixer
 
 class CommandListsTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = frontend.MpdFrontend(backend=self.b)
+        self.h = dispatcher.MpdDispatcher(backend=self.b)
 
     def test_command_list_begin(self):
         result = self.h.handle_request(u'command_list_begin')

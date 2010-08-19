@@ -39,17 +39,16 @@ class BaseProcess(multiprocessing.Process):
 
 
 class CoreProcess(BaseProcess):
-    def __init__(self, core_queue, output_class, backend_class,
-            frontend_class):
+    def __init__(self, core_queue, output_class, backend_class, frontend):
         super(CoreProcess, self).__init__()
         self.core_queue = core_queue
         self.output_queue = None
         self.output_class = output_class
         self.backend_class = backend_class
-        self.frontend_class = frontend_class
         self.output = None
         self.backend = None
-        self.frontend = None
+        self.frontend = frontend
+        self.dispatcher = None
 
     def run_inside_try(self):
         self.setup()
@@ -61,13 +60,13 @@ class CoreProcess(BaseProcess):
         self.output_queue = multiprocessing.Queue()
         self.output = self.output_class(self.core_queue, self.output_queue)
         self.backend = self.backend_class(self.core_queue, self.output_queue)
-        self.frontend = self.frontend_class(self.backend)
+        self.dispatcher = self.frontend.create_dispatcher(self.backend)
 
     def process_message(self, message):
         if message.get('to') == 'output':
             self.output_queue.put(message)
         elif message['command'] == 'mpd_request':
-            response = self.frontend.handle_request(message['request'])
+            response = self.dispatcher.handle_request(message['request'])
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
         elif message['command'] == 'end_of_track':

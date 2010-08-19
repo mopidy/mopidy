@@ -1,20 +1,18 @@
-import logging
 import re
 
-from mopidy.frontends.mpd import (mpd_commands, request_handlers,
-    handle_pattern, MpdAckError, MpdArgError, MpdUnknownCommand)
+from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
+    MpdUnknownCommand)
+from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
 # get them registered as request handlers.
 from mopidy.frontends.mpd.protocol import (audio_output, command_list,
-    connection, current_playlist, music_db, playback, reflection, status,
-    stickers, stored_playlists)
+    connection, current_playlist, empty, music_db, playback, reflection,
+    status, stickers, stored_playlists)
 from mopidy.utils import flatten
 
-logger = logging.getLogger('mopidy.frontends.mpd.frontend')
-
-class MpdFrontend(object):
+class MpdDispatcher(object):
     """
-    The MPD frontend dispatches MPD requests to the correct handler.
+    Dispatches MPD requests to the correct handler.
     """
 
     def __init__(self, backend=None):
@@ -72,8 +70,3 @@ class MpdFrontend(object):
         if add_ok and (not response or not response[-1].startswith(u'ACK')):
             response.append(u'OK')
         return response
-
-@handle_pattern(r'^$')
-def empty(frontend):
-    """The original MPD server returns ``OK`` on an empty request."""
-    pass

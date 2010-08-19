@@ -5,9 +5,6 @@ if not (2, 6) <= sys.version_info < (3,):
 def get_version():
     return u'0.1.0a4'
 
-def get_mpd_protocol_version():
-    return u'0.16.0'
-
 class MopidyException(Exception):
     def __init__(self, message, *args, **kwargs):
         super(MopidyException, self).__init__(message, *args, **kwargs)
