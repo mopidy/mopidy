@@ -17,11 +17,14 @@ from mopidy.utils.settings import list_settings_optparse_callback
 logger = logging.getLogger('mopidy.main')
 
 def main():
-    options = _parse_options()
+    options = parse_options()
     setup_logging(options.verbosity_level, options.dump)
-    settings.validate()
+
     logger.info('-- Starting Mopidy --')
+
     get_or_create_folder('~/.mopidy/')
+    settings.validate()
+
     core_queue = multiprocessing.Queue()
     output_class = get_class(settings.OUTPUT)
     backend_class = get_class(settings.BACKENDS[0])
@@ -29,9 +32,10 @@ def main():
     frontend.start_server(core_queue)
     core = CoreProcess(core_queue, output_class, backend_class, frontend)
     core.start()
+
     logger.debug('Main done')
 
-def _parse_options():
+def parse_options():
     parser = optparse.OptionParser(version='Mopidy %s' % get_version())
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
