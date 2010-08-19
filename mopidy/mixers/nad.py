@@ -74,7 +74,7 @@ class NadTalker(BaseProcess):
     _nad_volume = None
 
     def __init__(self, pipe=None):
-        super(NadTalker, self).__init__()
+        super(NadTalker, self).__init__(name='NadTalker')
         self.pipe = pipe
         self._device = None
 

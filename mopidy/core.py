@@ -7,7 +7,7 @@ logger = logging.getLogger('mopidy.core')
 
 class CoreProcess(BaseProcess):
     def __init__(self, core_queue, output_class, backend_class, frontend):
-        super(CoreProcess, self).__init__()
+        super(CoreProcess, self).__init__(name='CoreProcess')
         self.core_queue = core_queue
         self.output_queue = None
         self.output_class = output_class

@@ -8,7 +8,7 @@ logger = logging.getLogger('mopidy.frontends.mpd.process')
 
 class MpdProcess(BaseProcess):
     def __init__(self, core_queue):
-        super(MpdProcess, self).__init__()
+        super(MpdProcess, self).__init__(name='MpdProcess')
         self.core_queue = core_queue
 
     def run_inside_try(self):
