@@ -30,6 +30,9 @@ class BaseProcess(multiprocessing.Process):
         except ImportError as e:
             logger.error(e)
             sys.exit(1)
+        except Exception as e:
+            logger.exception(e)
+            raise e
 
     def run_inside_try(self):
         raise NotImplementedError
