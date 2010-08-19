@@ -4,6 +4,8 @@
 
 .. automodule:: mopidy.frontends.mpd
     :synopsis: MPD frontend
+    :members:
+    :undoc-members:
 
 
 MPD server
@@ -17,10 +19,21 @@ MPD server
 .. inheritance-diagram:: mopidy.frontends.mpd.server
 
 
-MPD frontend
-============
+MPD session
+===========
 
-.. automodule:: mopidy.frontends.mpd.frontend
+.. automodule:: mopidy.frontends.mpd.session
+    :synopsis: MPD client session
+    :members:
+    :undoc-members:
+
+.. inheritance-diagram:: mopidy.frontends.mpd.session
+
+
+MPD dispatcher
+==============
+
+.. automodule:: mopidy.frontends.mpd.dispatcher
     :synopsis: MPD request dispatcher
     :members:
     :undoc-members:

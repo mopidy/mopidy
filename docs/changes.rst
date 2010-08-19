@@ -58,6 +58,9 @@ greatly improved MPD client support.
   - Support for single track repeat added. (Fixes: :issue:`4`)
   - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
     in backends.
+  - Remove setting :attr:`mopidy.settings.SERVER` and
+    :attr:`mopidy.settings.FRONTEND` in favour of the new
+    :attr:`mopidy.settings.FRONTENDS`.
 
 - Backends:
 

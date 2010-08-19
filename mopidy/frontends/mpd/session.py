@@ -11,8 +11,8 @@ logger = logging.getLogger('mopidy.frontends.mpd.session')
 
 class MpdSession(asynchat.async_chat):
     """
-    The MPD client session. Keeps track of a single client and dispatches its
-    MPD requests to the frontend.
+    The MPD client session. Keeps track of a single client and passes its
+    MPD requests to the dispatcher.
     """
 
     def __init__(self, server, client_socket, client_socket_address,
