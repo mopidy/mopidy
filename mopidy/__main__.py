@@ -1,6 +1,4 @@
-import asyncore
 import logging
-import logging.handlers
 import multiprocessing
 import optparse
 import os
@@ -12,6 +10,7 @@ sys.path.insert(0,
 from mopidy import get_version, settings, SettingsError
 from mopidy.core import CoreProcess
 from mopidy.utils import get_class
+from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder
 from mopidy.utils.settings import list_settings_optparse_callback
 
@@ -19,7 +18,7 @@ logger = logging.getLogger('mopidy.main')
 
 def main():
     options = _parse_options()
-    _setup_logging(options.verbosity_level, options.dump)
+    setup_logging(options.verbosity_level, options.dump)
     settings.validate()
     logger.info('-- Starting Mopidy --')
     get_or_create_folder('~/.mopidy/')
@@ -30,7 +29,6 @@ def main():
     frontend.start_server(core_queue)
     core = CoreProcess(core_queue, output_class, backend_class, frontend)
     core.start()
-    #asyncore.loop()
     logger.debug('Main done')
 
 def _parse_options():
@@ -48,29 +46,6 @@ def _parse_options():
         action='callback', callback=list_settings_optparse_callback,
         help='list current settings')
     return parser.parse_args()[0]
-
-def _setup_logging(verbosity_level, dump):
-    _setup_console_logging(verbosity_level)
-    if dump:
-        _setup_dump_logging()
-
-def _setup_console_logging(verbosity_level):
-    if verbosity_level == 0:
-        level = logging.WARNING
-    elif verbosity_level == 2:
-        level = logging.DEBUG
-    else:
-        level = logging.INFO
-    logging.basicConfig(format=settings.CONSOLE_LOG_FORMAT, level=level)
-
-def _setup_dump_logging():
-    root = logging.getLogger('')
-    root.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(settings.DUMP_LOG_FORMAT)
-    handler = logging.handlers.RotatingFileHandler(
-        settings.DUMP_LOG_FILENAME, maxBytes=102400, backupCount=3)
-    handler.setFormatter(formatter)
-    root.addHandler(handler)
 
 if __name__ == '__main__':
     try:
