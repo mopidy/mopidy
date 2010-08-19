@@ -8,7 +8,7 @@ import gst
 import logging
 import threading
 
-from mopidy.process import BaseProcess, unpickle_connection
+from mopidy.utils.process import BaseProcess, unpickle_connection
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 

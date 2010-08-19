@@ -3,9 +3,9 @@ from serial import Serial
 from multiprocessing import Pipe
 
 from mopidy.mixers import BaseMixer
-from mopidy.process import BaseProcess
 from mopidy.settings import (MIXER_EXT_PORT, MIXER_EXT_SOURCE,
     MIXER_EXT_SPEAKERS_A, MIXER_EXT_SPEAKERS_B)
+from mopidy.utils.process import BaseProcess
 
 logger = logging.getLogger('mopidy.mixers.nad')
 

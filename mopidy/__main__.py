@@ -10,7 +10,7 @@ sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 from mopidy import get_version, settings, SettingsError
-from mopidy.process import CoreProcess
+from mopidy.core import CoreProcess
 from mopidy.utils import get_class
 from mopidy.utils.path import get_or_create_folder
 from mopidy.utils.settings import list_settings_optparse_callback
