@@ -167,3 +167,8 @@ SPOTIFY_USERNAME = u''
 #:
 #: Used by :mod:`mopidy.backends.libspotify`.
 SPOTIFY_PASSWORD = u''
+
+#: Which GStreamer audio sink to use in output pipeline.
+#:
+#: Default: autoaudiosink
+GSTREAMER_AUDIO_SINK = u'autoaudiosink'

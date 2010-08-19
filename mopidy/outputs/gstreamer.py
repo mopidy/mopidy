@@ -66,7 +66,7 @@ class GStreamerProcess(BaseProcess):
         self.gst_pipeline = gst.parse_launch(' ! '.join([
             'audioconvert name=convert',
             'volume name=volume',
-            'autoaudiosink'
+            settings.GSTREAMER_AUDIO_SINK,
         ]))
 
         pad = self.gst_pipeline.get_by_name('convert').get_pad('sink')
