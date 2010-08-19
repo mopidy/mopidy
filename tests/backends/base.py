@@ -794,7 +794,8 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_end_of_track_callback_gets_called(self):
         self.playback.play()
-        self.playback.seek(self.tracks[0].length - 10)
+        result = self.playback.seek(self.tracks[0].length - 10)
+        self.assert_(result, 'Seek failed')
         message = self.core_queue.get()
         self.assertEqual('end_of_track', message['command'])
 
@@ -879,11 +880,20 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_stopped(self):
+        result = self.playback.seek(1000)
+        self.assert_(result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_when_stopped_updates_position(self):
         self.playback.seek(1000)
         position = self.playback.time_position
         self.assert_(position >= 990, position)
 
     def test_seek_on_empty_playlist(self):
+        result = self.playback.seek(0)
+        self.assert_(not result, 'Seek return value was %s' % result)
+
+    def test_seek_on_empty_playlist_updates_position(self):
         self.playback.seek(0)
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
@@ -894,6 +904,12 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_playing(self):
+        self.playback.play()
+        result = self.playback.seek(self.tracks[0].length - 1000)
+        self.assert_(result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_when_playing_updates_position(self):
         length = self.backend.current_playlist.tracks[0].length
         self.playback.play()
         self.playback.seek(length - 1000)
@@ -902,6 +918,13 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_paused(self):
+        self.playback.play()
+        self.playback.pause()
+        result = self.playback.seek(self.tracks[0].length - 1000)
+        self.assert_(result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_when_paused_updates_position(self):
         length = self.backend.current_playlist.tracks[0].length
         self.playback.play()
         self.playback.pause()
@@ -918,6 +941,13 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_beyond_end_of_song(self):
+        raise SkipTest # FIXME need to decide return value
+        self.playback.play()
+        result = self.playback.seek(self.tracks[0].length*100)
+        self.assert_(not result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_beyond_end_of_song_jumps_to_next_song(self):
         self.playback.play()
         self.playback.seek(self.tracks[0].length*100)
         self.assertEqual(self.playback.current_track, self.tracks[1])
@@ -930,16 +960,18 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_beyond_start_of_song(self):
+        raise SkipTest # FIXME need to decide return value
+        self.playback.play()
+        result = self.playback.seek(-1000)
+        self.assert_(not result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_beyond_start_of_song_update_postion(self):
         self.playback.play()
         self.playback.seek(-1000)
         position = self.playback.time_position
         self.assert_(position >= 0, position)
         self.assertEqual(self.playback.state, self.playback.PLAYING)
-
-    @populate_playlist
-    def test_seek_return_value(self):
-        self.playback.play()
-        self.assertEqual(self.playback.seek(0), None)
 
     @populate_playlist
     def test_stop_when_stopped(self):
