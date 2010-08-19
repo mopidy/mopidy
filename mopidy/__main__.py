@@ -31,9 +31,9 @@ def main():
     frontend = get_class(settings.FRONTENDS[0])()
     frontend.start_server(core_queue)
     core = CoreProcess(core_queue, output_class, backend_class, frontend)
-    core.start()
 
-    logger.debug('Main done')
+    # Explictly call run instead of start, so it runs in this process
+    core.run()
 
 def parse_options():
     parser = optparse.OptionParser(version='Mopidy %s' % get_version())
