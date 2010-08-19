@@ -39,8 +39,6 @@ greatly improved MPD client support.
   the packages created by ``setup.py`` for i.e. PyPI.
 - MPD frontend:
 
-  - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
-  - Split gigantic protocol implementation into eleven modules.
   - Search improvements, including support for multi-word search.
   - Fixed ``play "-1"`` and ``playid "-1"`` behaviour when playlist is empty
     or when a current track is set.
@@ -56,11 +54,14 @@ greatly improved MPD client support.
   - Fix ``load`` so that one can append a playlist to the current playlist, and
     make it return the correct error message if the playlist is not found.
   - Support for single track repeat added. (Fixes: :issue:`4`)
+  - Relocate from :mod:`mopidy.mpd` to :mod:`mopidy.frontends.mpd`.
+  - Split gigantic protocol implementation into eleven modules.
   - Rename ``mopidy.frontends.mpd.{serializer => translator}`` to match naming
     in backends.
   - Remove setting :attr:`mopidy.settings.SERVER` and
     :attr:`mopidy.settings.FRONTEND` in favour of the new
     :attr:`mopidy.settings.FRONTENDS`.
+  - Run MPD server in its own process.
 
 - Backends:
 

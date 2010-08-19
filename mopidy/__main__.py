@@ -30,7 +30,8 @@ def main():
     frontend.start_server(core_queue)
     core = CoreProcess(core_queue, output_class, backend_class, frontend)
     core.start()
-    asyncore.loop()
+    #asyncore.loop()
+    logger.debug('Main done')
 
 def _parse_options():
     parser = optparse.OptionParser(version='Mopidy %s' % get_version())
