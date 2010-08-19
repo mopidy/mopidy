@@ -62,9 +62,8 @@ class LocalPlaybackController(BasePlaybackController):
         return self._set_state('PLAYING')
 
     def _seek(self, time_position):
-        self._send({'command': 'set_position', 'position': time_position})
-        if self.state == self.STOPPED:
-            self._set_state('PLAYING')
+        return self._send_recv({'command': 'set_position',
+            'position': time_position})
 
     @property
     def time_position(self):

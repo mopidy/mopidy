@@ -440,7 +440,10 @@ class BasePlaybackController(object):
 
         :param time_position: time position in milliseconds
         :type time_position: int
+        :rtype: :class:`True` if successful, else :class:`False`
         """
+        # FIXME I think return value is only realy usefull for internal
+        # testing, as such it should probably not be exposed in api.
         if self.state == self.STOPPED:
             self.play()
         elif self.state == self.PAUSED:
@@ -455,7 +458,7 @@ class BasePlaybackController(object):
         self._play_time_started = self._current_wall_time
         self._play_time_accumulated = time_position
 
-        self._seek(time_position)
+        return self._seek(time_position)
 
     def _seek(self, time_position):
         """

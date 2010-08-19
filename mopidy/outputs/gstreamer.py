@@ -109,7 +109,9 @@ class GStreamerProcess(BaseProcess):
         elif message['command'] == 'set_volume':
             self.set_volume(message['volume'])
         elif message['command'] == 'set_position':
-            self.set_position(message['position'])
+            response = self.set_position(message['position'])
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
         elif message['command'] == 'get_position':
             response = self.get_position()
             connection = unpickle_connection(message['reply_to'])
@@ -191,9 +193,11 @@ class GStreamerProcess(BaseProcess):
         gst_volume.set_property('volume', volume / 100.0)
 
     def set_position(self, position):
-        self.gst_pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
+        self.gst_pipeline.get_state() # block until state changes are done
+        handeled= self.gst_pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
-        self.gst_pipeline.get_state()
+        self.gst_pipeline.get_state() # block until seek is done
+        return handeled
 
     def get_position(self):
         try:
