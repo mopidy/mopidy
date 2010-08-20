@@ -24,7 +24,7 @@ def main():
     settings.validate()
 
     # Explictly call run instead of start, so it runs in this process
-    CoreProcess(options).run()
+    CoreProcess().run()
 
 def parse_options():
     parser = optparse.OptionParser(version='Mopidy %s' % get_version())

@@ -8,13 +8,12 @@ from mopidy.utils.process import BaseProcess, unpickle_connection
 logger = logging.getLogger('mopidy.core')
 
 class CoreProcess(BaseProcess):
-    def __init__(self, options):
+    def __init__(self):
         super(CoreProcess, self).__init__(name='CoreProcess')
-        self.options = options
         self.core_queue = multiprocessing.Queue()
         self.output_queue = None
         self.backend = None
-        self.dispatcher = None
+        self.frontend = None
 
     def run_inside_try(self):
         self.setup()
@@ -23,28 +22,29 @@ class CoreProcess(BaseProcess):
             self.process_message(message)
 
     def setup(self):
-        self.setup_output()
-        self.setup_backend()
-        self.setup_frontend()
+        self.output_queue = self.setup_output(self.core_queue)
+        self.backend = self.setup_backend(self.core_queue, self.output_queue)
+        self.frontend = self.setup_frontend(self.core_queue, self.backend)
 
-    def setup_output(self):
-        self.output_queue = multiprocessing.Queue()
-        get_class(settings.OUTPUT)(self.core_queue, self.output_queue)
+    def setup_output(self, core_queue):
+        output_queue = multiprocessing.Queue()
+        get_class(settings.OUTPUT)(core_queue, output_queue)
+        return output_queue
 
-    def setup_backend(self):
-        self.backend = get_class(settings.BACKENDS[0])(
-            self.core_queue, self.output_queue)
+    def setup_backend(self, core_queue, output_queue):
+        return get_class(settings.BACKENDS[0])(core_queue, output_queue)
 
-    def setup_frontend(self):
+    def setup_frontend(self, core_queue, backend):
         frontend = get_class(settings.FRONTENDS[0])()
-        frontend.start_server(self.core_queue)
-        self.dispatcher = frontend.create_dispatcher(self.backend)
+        frontend.start_server(core_queue)
+        frontend.create_dispatcher(backend)
+        return frontend
 
     def process_message(self, message):
         if message.get('to') == 'output':
             self.output_queue.put(message)
         elif message['command'] == 'mpd_request':
-            response = self.dispatcher.handle_request(message['request'])
+            response = self.frontend.dispatcher.handle_request(message['request'])
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
         elif message['command'] == 'end_of_track':
