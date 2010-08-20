@@ -8,7 +8,10 @@ sys.path.insert(0,
 
 from mopidy.core import CoreProcess
 
-if __name__ == '__main__':
+def main():
     # Explictly call run() instead of start(), since we don't need to start
     # another process.
     CoreProcess().run()
+
+if __name__ == '__main__':
+    main()
