@@ -6,7 +6,7 @@ import os
 import sys
 
 from mopidy import SettingsError
-from mopidy.utils import indent
+from mopidy.utils.log import indent
 
 logger = logging.getLogger('mopidy.utils.settings')
 
