@@ -43,14 +43,4 @@ def parse_options():
     return parser.parse_args()[0]
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        logger.info(u'Interrupted by user')
-        sys.exit(0)
-    except SettingsError, e:
-        logger.error(e)
-        sys.exit(1)
-    except SystemExit, e:
-        logger.error(e)
-        sys.exit(1)
+    main()
