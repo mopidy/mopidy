@@ -3,8 +3,8 @@ import logging
 import multiprocessing
 
 from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR, VERSION
-from mopidy.process import pickle_connection
 from mopidy.utils import indent
+from mopidy.utils.process import pickle_connection
 
 logger = logging.getLogger('mopidy.frontends.mpd.session')
 

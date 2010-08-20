@@ -2,8 +2,8 @@ import multiprocessing
 import unittest
 
 from mopidy.outputs.gstreamer import GStreamerOutput
-from mopidy.process import pickle_connection
 from mopidy.utils.path import path_to_uri
+from mopidy.utils.process import pickle_connection
 
 from tests import data_folder, SkipTest
 
