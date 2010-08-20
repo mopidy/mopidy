@@ -7,7 +7,7 @@ class MpdFrontend(object):
     """
 
     def __init__(self):
-        self.server = None
+        self.process = None
         self.dispatcher = None
 
     def start_server(self, core_queue):
