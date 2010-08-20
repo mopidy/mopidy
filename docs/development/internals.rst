@@ -58,6 +58,7 @@ the Spotify service, and the speakers.
     # Frontend
     "CoreProcess" -> "MpdFrontend" [ label="create" ]
     "MpdFrontend" -> "MpdProcess" [ label="create" ]
+    "MpdFrontend" -> "MpdDispatcher" [ label="create" ]
     "MpdProcess" -> "MpdServer" [ label="create" ]
     "MpdServer" -> "MpdSession" [ label="create one\nper client" ]
     "MpdSession" -> "MpdDispatcher" [
