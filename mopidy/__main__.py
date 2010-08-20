@@ -1,5 +1,4 @@
 import logging
-import multiprocessing
 import optparse
 import os
 import sys
@@ -9,7 +8,6 @@ sys.path.insert(0,
 
 from mopidy import get_version, settings, SettingsError
 from mopidy.core import CoreProcess
-from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder
 from mopidy.utils.settings import list_settings_optparse_callback
@@ -25,15 +23,8 @@ def main():
     get_or_create_folder('~/.mopidy/')
     settings.validate()
 
-    core_queue = multiprocessing.Queue()
-    output_class = get_class(settings.OUTPUT)
-    backend_class = get_class(settings.BACKENDS[0])
-    frontend = get_class(settings.FRONTENDS[0])()
-    frontend.start_server(core_queue)
-    core = CoreProcess(core_queue, output_class, backend_class, frontend)
-
     # Explictly call run instead of start, so it runs in this process
-    core.run()
+    CoreProcess(options).run()
 
 def parse_options():
     parser = optparse.OptionParser(version='Mopidy %s' % get_version())

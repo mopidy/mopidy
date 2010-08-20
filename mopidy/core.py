@@ -1,20 +1,19 @@
 import logging
 import multiprocessing
 
+from mopidy import settings
+from mopidy.utils import get_class
 from mopidy.utils.process import BaseProcess, unpickle_connection
 
 logger = logging.getLogger('mopidy.core')
 
 class CoreProcess(BaseProcess):
-    def __init__(self, core_queue, output_class, backend_class, frontend):
+    def __init__(self, options):
         super(CoreProcess, self).__init__(name='CoreProcess')
-        self.core_queue = core_queue
+        self.options = options
+        self.core_queue = multiprocessing.Queue()
         self.output_queue = None
-        self.output_class = output_class
-        self.backend_class = backend_class
-        self.output = None
         self.backend = None
-        self.frontend = frontend
         self.dispatcher = None
 
     def run_inside_try(self):
@@ -24,10 +23,22 @@ class CoreProcess(BaseProcess):
             self.process_message(message)
 
     def setup(self):
+        self.setup_output()
+        self.setup_backend()
+        self.setup_frontend()
+
+    def setup_output(self):
         self.output_queue = multiprocessing.Queue()
-        self.output = self.output_class(self.core_queue, self.output_queue)
-        self.backend = self.backend_class(self.core_queue, self.output_queue)
-        self.dispatcher = self.frontend.create_dispatcher(self.backend)
+        get_class(settings.OUTPUT)(self.core_queue, self.output_queue)
+
+    def setup_backend(self):
+        self.backend = get_class(settings.BACKENDS[0])(
+            self.core_queue, self.output_queue)
+
+    def setup_frontend(self):
+        frontend = get_class(settings.FRONTENDS[0])()
+        frontend.start_server(self.core_queue)
+        self.dispatcher = frontend.create_dispatcher(self.backend)
 
     def process_message(self, message):
         if message.get('to') == 'output':
