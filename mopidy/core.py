@@ -75,7 +75,8 @@ class CoreProcess(BaseProcess):
         if message.get('to') == 'output':
             self.output_queue.put(message)
         elif message['command'] == 'mpd_request':
-            response = self.frontend.dispatcher.handle_request(message['request'])
+            response = self.frontend.dispatcher.handle_request(
+                message['request'])
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
         elif message['command'] == 'end_of_track':
