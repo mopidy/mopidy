@@ -51,6 +51,13 @@ DUMP_LOG_FILENAME = u'dump.log'
 #:     Currently only the first frontend in the list is used.
 FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
 
+#: Which GStreamer audio sink to use in :mod:`mopidy.outputs.gstreamer`.
+#:
+#: Default::
+#:
+#:     GSTREAMER_AUDIO_SINK = u'autoaudiosink'
+GSTREAMER_AUDIO_SINK = u'autoaudiosink'
+
 #: Path to folder with local music.
 #:
 #: Used by :mod:`mopidy.backends.local`.
@@ -163,8 +170,3 @@ SPOTIFY_USERNAME = u''
 #:
 #: Used by :mod:`mopidy.backends.libspotify`.
 SPOTIFY_PASSWORD = u''
-
-#: Which GStreamer audio sink to use in output pipeline.
-#:
-#: Default: autoaudiosink
-GSTREAMER_AUDIO_SINK = u'autoaudiosink'

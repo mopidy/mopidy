@@ -442,8 +442,8 @@ class BasePlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        # FIXME I think return value is only realy usefull for internal
-        # testing, as such it should probably not be exposed in api.
+        # FIXME I think return value is only really useful for internal
+        # testing, as such it should probably not be exposed in API.
         if self.state == self.STOPPED:
             self.play()
         elif self.state == self.PAUSED:

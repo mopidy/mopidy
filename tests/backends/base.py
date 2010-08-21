@@ -1,9 +1,9 @@
+import multiprocessing
 import os
 import random
 import shutil
 import tempfile
 import time
-import multiprocessing
 
 from mopidy import settings
 from mopidy.mixers.dummy import DummyMixer

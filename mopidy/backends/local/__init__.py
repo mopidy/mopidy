@@ -1,14 +1,13 @@
-import logging
-import os
 import glob
-import shutil
+import logging
 import multiprocessing
+import os
+import shutil
 
 from mopidy import settings
 from mopidy.backends.base import *
 from mopidy.models import Playlist, Track, Album
-from mopidy import settings
-from mopidy.process import pickle_connection
+from mopidy.utils.process import pickle_connection
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
