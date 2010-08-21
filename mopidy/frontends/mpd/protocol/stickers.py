@@ -1,4 +1,5 @@
-from mopidy.frontends.mpd import handle_pattern, MpdNotImplemented
+from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
 @handle_pattern(r'^sticker delete "(?P<field>[^"]+)" '
     r'"(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')

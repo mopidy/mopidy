@@ -9,7 +9,7 @@ import logging
 import threading
 
 from mopidy import settings
-from mopidy.process import BaseProcess, unpickle_connection
+from mopidy.utils.process import BaseProcess, unpickle_connection
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
@@ -44,7 +44,7 @@ class GStreamerProcess(BaseProcess):
     """
 
     def __init__(self, core_queue, output_queue):
-        super(GStreamerProcess, self).__init__()
+        super(GStreamerProcess, self).__init__(name='GStreamerProcess')
         self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None

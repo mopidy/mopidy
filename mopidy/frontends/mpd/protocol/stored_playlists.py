@@ -1,7 +1,7 @@
 import datetime as dt
 
-from mopidy.frontends.mpd import (handle_pattern, MpdNoExistError,
-    MpdNotImplemented)
+from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.exceptions import MpdNoExistError, MpdNotImplemented
 
 @handle_pattern(r'^listplaylist "(?P<name>[^"]+)"$')
 def listplaylist(frontend, name):

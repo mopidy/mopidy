@@ -1,4 +1,5 @@
-from mopidy.frontends.mpd import handle_pattern, MpdUnknownCommand
+from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.exceptions import MpdUnknownCommand
 
 @handle_pattern(r'^command_list_begin$')
 def command_list_begin(frontend):

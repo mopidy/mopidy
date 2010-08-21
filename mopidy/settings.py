@@ -41,12 +41,15 @@ DUMP_LOG_FORMAT = CONSOLE_LOG_FORMAT
 #:     DUMP_LOG_FILENAME = u'dump.log'
 DUMP_LOG_FILENAME = u'dump.log'
 
-#: Protocol frontend to use.
+#: List of server frontends to use.
 #:
 #: Default::
 #:
-#:     FRONTEND = u'mopidy.frontends.mpd.frontend.MpdFrontend'
-FRONTEND = u'mopidy.frontends.mpd.frontend.MpdFrontend'
+#:     FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
+#:
+#: .. note::
+#:     Currently only the first frontend in the list is used.
+FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
 
 #: Path to folder with local music.
 #:
@@ -126,13 +129,6 @@ MIXER_MAX_VOLUME = 100
 #:
 #:     OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
 OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
-
-#: Server to use.
-#:
-#: Default::
-#:
-#:     SERVER = u'mopidy.frontends.mpd.server.MpdServer'
-SERVER = u'mopidy.frontends.mpd.server.MpdServer'
 
 #: Which address Mopidy's MPD server should bind to.
 #:
