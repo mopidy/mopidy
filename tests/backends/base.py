@@ -1,13 +1,14 @@
+import multiprocessing
 import os
 import random
 import shutil
 import tempfile
-import threading
 import time
 
 from mopidy import settings
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track, Album, Artist
+from mopidy.utils import get_class
 
 from tests import SkipTest, data_folder
 
@@ -32,7 +33,10 @@ class BaseCurrentPlaylistControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.output_queue = multiprocessing.Queue()
+        self.core_queue = multiprocessing.Queue()
+        self.output = get_class(settings.OUTPUT)(self.core_queue, self.output_queue)
+        self.backend = self.backend_class(self.core_queue, self.output_queue, DummyMixer)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
@@ -40,6 +44,7 @@ class BaseCurrentPlaylistControllerTest(object):
 
     def tearDown(self):
         self.backend.destroy()
+        self.output.destroy()
 
     def test_add(self):
         for track in self.tracks:
@@ -275,7 +280,10 @@ class BasePlaybackControllerTest(object):
     backend_class = None
 
     def setUp(self):
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.output_queue = multiprocessing.Queue()
+        self.core_queue = multiprocessing.Queue()
+        self.output = get_class(settings.OUTPUT)(self.core_queue, self.output_queue)
+        self.backend = self.backend_class(self.core_queue, self.output_queue, DummyMixer)
         self.playback = self.backend.playback
         self.current_playlist = self.backend.current_playlist
 
@@ -286,6 +294,7 @@ class BasePlaybackControllerTest(object):
 
     def tearDown(self):
         self.backend.destroy()
+        self.output.destroy()
 
     def test_initial_state_is_stopped(self):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
@@ -329,6 +338,17 @@ class BasePlaybackControllerTest(object):
     @populate_playlist
     def test_play_when_paused(self):
         self.playback.play()
+        track = self.playback.current_track
+        self.playback.pause()
+        self.playback.play()
+        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(track, self.playback.current_track)
+
+    @populate_playlist
+    def test_play_when_pause_after_next(self):
+        self.playback.play()
+        self.playback.next()
+        self.playback.next()
         track = self.playback.current_track
         self.playback.pause()
         self.playback.play()
@@ -772,23 +792,12 @@ class BasePlaybackControllerTest(object):
         self.assert_(wrapper.called)
 
     @populate_playlist
-    def test_on_end_of_track_gets_called(self):
-        on_end_of_track = self.playback.on_end_of_track
-        event = threading.Event()
-
-        def wrapper():
-            result = on_end_of_track()
-            event.set()
-            return result
-
-        self.playback.on_end_of_track = wrapper
-
+    def test_end_of_track_callback_gets_called(self):
         self.playback.play()
-        self.playback.seek(self.tracks[0].length - 10)
-
-        event.wait(5)
-
-        self.assert_(event.is_set())
+        result = self.playback.seek(self.tracks[0].length - 10)
+        self.assert_(result, 'Seek failed')
+        message = self.core_queue.get()
+        self.assertEqual('end_of_track', message['command'])
 
     @populate_playlist
     def test_on_current_playlist_change_when_playing(self):
@@ -871,11 +880,20 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_stopped(self):
+        result = self.playback.seek(1000)
+        self.assert_(result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_when_stopped_updates_position(self):
         self.playback.seek(1000)
         position = self.playback.time_position
         self.assert_(position >= 990, position)
 
     def test_seek_on_empty_playlist(self):
+        result = self.playback.seek(0)
+        self.assert_(not result, 'Seek return value was %s' % result)
+
+    def test_seek_on_empty_playlist_updates_position(self):
         self.playback.seek(0)
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
@@ -886,6 +904,12 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_playing(self):
+        self.playback.play()
+        result = self.playback.seek(self.tracks[0].length - 1000)
+        self.assert_(result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_when_playing_updates_position(self):
         length = self.backend.current_playlist.tracks[0].length
         self.playback.play()
         self.playback.seek(length - 1000)
@@ -894,6 +918,13 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_when_paused(self):
+        self.playback.play()
+        self.playback.pause()
+        result = self.playback.seek(self.tracks[0].length - 1000)
+        self.assert_(result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_when_paused_updates_position(self):
         length = self.backend.current_playlist.tracks[0].length
         self.playback.play()
         self.playback.pause()
@@ -910,6 +941,13 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_beyond_end_of_song(self):
+        raise SkipTest # FIXME need to decide return value
+        self.playback.play()
+        result = self.playback.seek(self.tracks[0].length*100)
+        self.assert_(not result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_beyond_end_of_song_jumps_to_next_song(self):
         self.playback.play()
         self.playback.seek(self.tracks[0].length*100)
         self.assertEqual(self.playback.current_track, self.tracks[1])
@@ -922,16 +960,18 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_seek_beyond_start_of_song(self):
+        raise SkipTest # FIXME need to decide return value
+        self.playback.play()
+        result = self.playback.seek(-1000)
+        self.assert_(not result, 'Seek return value was %s' % result)
+
+    @populate_playlist
+    def test_seek_beyond_start_of_song_update_postion(self):
         self.playback.play()
         self.playback.seek(-1000)
         position = self.playback.time_position
         self.assert_(position >= 0, position)
         self.assertEqual(self.playback.state, self.playback.PLAYING)
-
-    @populate_playlist
-    def test_seek_return_value(self):
-        self.playback.play()
-        self.assertEqual(self.playback.seek(0), None)
 
     @populate_playlist
     def test_stop_when_stopped(self):

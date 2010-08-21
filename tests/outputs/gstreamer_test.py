@@ -1,6 +1,7 @@
 import multiprocessing
 import unittest
 
+from mopidy import settings
 from mopidy.outputs.gstreamer import GStreamerOutput
 from mopidy.utils.path import path_to_uri
 from mopidy.utils.process import pickle_connection
@@ -9,6 +10,8 @@ from tests import data_folder, SkipTest
 
 class GStreamerOutputTest(unittest.TestCase):
     def setUp(self):
+        self.original_backends = settings.BACKENDS
+        settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         self.song_uri = path_to_uri(data_folder('song1.wav'))
         self.output_queue = multiprocessing.Queue()
         self.core_queue = multiprocessing.Queue()
@@ -16,6 +19,7 @@ class GStreamerOutputTest(unittest.TestCase):
 
     def tearDown(self):
         self.output.destroy()
+        settings.BACKENDS = settings.original_backends
 
     def send_recv(self, message):
         (my_end, other_end) = multiprocessing.Pipe()
@@ -24,15 +28,14 @@ class GStreamerOutputTest(unittest.TestCase):
         my_end.poll(None)
         return my_end.recv()
 
+
     def send(self, message):
         self.output_queue.put(message)
 
-    @SkipTest
     def test_play_uri_existing_file(self):
         message = {'command': 'play_uri', 'uri': self.song_uri}
         self.assertEqual(True, self.send_recv(message))
 
-    @SkipTest
     def test_play_uri_non_existing_file(self):
         message = {'command': 'play_uri', 'uri': self.song_uri + 'bogus'}
         self.assertEqual(False, self.send_recv(message))

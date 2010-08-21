@@ -1,33 +1,17 @@
-import gobject
-gobject.threads_init()
-# FIXME make sure we don't get hit by
-# http://jameswestby.net/
-#   weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html
-
-import pygst
-pygst.require('0.10')
-
-import gst
-import logging
-import os
 import glob
+import logging
+import multiprocessing
+import os
 import shutil
-import threading
 
 from mopidy import settings
 from mopidy.backends.base import *
 from mopidy.models import Playlist, Track, Album
+from mopidy.utils.process import pickle_connection
+
 from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
-
-class LocalMessages(threading.Thread):
-    def run(self):
-        gobject.MainLoop().run()
-
-message_thread = LocalMessages()
-message_thread.daemon = True
-message_thread.start()
 
 class LocalBackend(BaseBackend):
     """
@@ -49,71 +33,40 @@ class LocalBackend(BaseBackend):
 class LocalPlaybackController(BasePlaybackController):
     def __init__(self, backend):
         super(LocalPlaybackController, self).__init__(backend)
-
-        self._bin = gst.element_factory_make("playbin", "player")
-        self._bus = self._bin.get_bus()
-        sink = gst.element_factory_make("fakesink", "fakesink")
-
-        # FIXME cleanup fakesink?
-
-        self._bin.set_property("video-sink", sink)
-        self._bus.add_signal_watch()
-        self._bus_id = self._bus.connect('message', self._message)
-
         self.stop()
 
-    def _set_state(self, state):
-        self._bin.set_state(state)
-        (_, new, _) = self._bin.get_state()
-        return new == state
+    def _send_recv(self, message):
+        (my_end, other_end) = multiprocessing.Pipe()
+        message.update({'reply_to': pickle_connection(other_end)})
+        self.backend.output_queue.put(message)
+        my_end.poll(None)
+        return my_end.recv()
 
-    def _message(self, bus, message):
-        if message.type == gst.MESSAGE_EOS:
-            self.on_end_of_track()
-        elif message.type == gst.MESSAGE_ERROR:
-            self._bin.set_state(gst.STATE_NULL)
-            error, debug = message.parse_error()
-            logger.error('%s %s', error, debug)
+    def _send(self, message):
+        self.backend.output_queue.put(message)
+
+    def _set_state(self, state):
+        return self._send_recv({'command': 'set_state', 'state': state})
 
     def _play(self, track):
-        self._bin.set_state(gst.STATE_READY)
-        self._bin.set_property('uri', track.uri)
-        return self._set_state(gst.STATE_PLAYING)
+        return self._send_recv({'command': 'play_uri', 'uri': track.uri})
 
     def _stop(self):
-        return self._set_state(gst.STATE_READY)
+        return self._set_state('READY')
 
     def _pause(self):
-        return self._set_state(gst.STATE_PAUSED)
+        return self._set_state('PAUSED')
 
     def _resume(self):
-        return self._set_state(gst.STATE_PLAYING)
+        return self._set_state('PLAYING')
 
     def _seek(self, time_position):
-        self._bin.seek_simple(gst.Format(gst.FORMAT_TIME),
-            gst.SEEK_FLAG_FLUSH, time_position * gst.MSECOND)
-        self._set_state(gst.STATE_PLAYING)
+        return self._send_recv({'command': 'set_position',
+            'position': time_position})
 
     @property
     def time_position(self):
-        try:
-            return self._bin.query_position(gst.FORMAT_TIME)[0] // gst.MSECOND
-        except gst.QueryError, e:
-            logger.error('time_position failed: %s', e)
-            return 0
-
-    def destroy(self):
-        playbin, self._bin = self._bin, None
-        bus, self._bus = self._bus, None
-
-        bus.disconnect(self._bus_id)
-        bus.remove_signal_watch()
-        playbin.get_state()
-        playbin.set_state(gst.STATE_NULL)
-        bus.set_flushing(True)
-
-        del bus
-        del playbin
+        return self._send_recv({'command': 'get_position'})
 
 
 class LocalStoredPlaylistsController(BaseStoredPlaylistsController):

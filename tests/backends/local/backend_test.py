@@ -27,6 +27,15 @@ class LocalCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
 
     backend_class = LocalBackend
 
+    def setUp(self):
+        self.original_backends = settings.BACKENDS
+        settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
+        super(LocalCurrentPlaylistControllerTest, self).setUp()
+
+    def tearDown(self):
+        super(LocalCurrentPlaylistControllerTest, self).tearDown()
+        settings.BACKENDS = settings.original_backends
+
 
 class LocalPlaybackControllerTest(BasePlaybackControllerTest,
         unittest.TestCase):
@@ -35,9 +44,16 @@ class LocalPlaybackControllerTest(BasePlaybackControllerTest,
     backend_class = LocalBackend
 
     def setUp(self):
+        self.original_backends = settings.BACKENDS
+        settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
+
         super(LocalPlaybackControllerTest, self).setUp()
         # Two tests does not work at all when using the fake sink
         #self.backend.playback.use_fake_sink()
+
+    def tearDown(self):
+        super(LocalPlaybackControllerTest, self).tearDown()
+        settings.BACKENDS = settings.original_backends
 
     def add_track(self, path):
         uri = path_to_uri(data_folder(path))
