@@ -81,6 +81,9 @@ fixing the OS X issues for a future release. You can track the progress at
   - A Spotify application key is now bundled with the source.
     :attr:`mopidy.settings.SPOTIFY_LIB_APPKEY` is thus removed.
   - If failing to play a track, playback will skip to the next track.
+  - Both :mod:`mopidy.backends.libspotify` and :mod:`mopidy.backends.local`
+    have been rewritten to use the new common GStreamer audio output module,
+    :mod:`mopidy.outputs.gstreamer`.
 
 - Mixers:
 
