@@ -23,7 +23,8 @@ fixing the OS X issues for a future release. You can track the progress at
 **Important changes**
 
 - License changed from GPLv2 to Apache License, version 2.0.
-- GStreamer is now a required dependency.
+- GStreamer is now a required dependency. See our :doc:`GStreamer installation
+  docs <installation/gstreamer>`.
 - :mod:`mopidy.backends.libspotify` is now the default backend.
   :mod:`mopidy.backends.despotify` is no longer available. This means that you
   need to install the :doc:`dependencies for libspotify
