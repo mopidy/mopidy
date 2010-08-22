@@ -13,10 +13,12 @@ the state of Mopidy to remove the alpha label, and do a regular release.
 
 Mopidy 0.1.0 got important improvements in search functionality, working track
 position seeking, no known stability issues, and greatly improved MPD client
-support.
+support. There are lots of changes since 0.1.0a3, and we urge you to at least
+read the *important changes* below.
 
-There are lots of changes since 0.1.0a3, and we urge you to at least read the
-*important changes* below.
+This release does not support OS X. We're sorry about that, and are working on
+fixing the OS X issues for a future release. You can track the progress at
+:issue:`14`.
 
 **Important changes**
 
