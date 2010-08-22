@@ -1,5 +1,5 @@
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
-from mopidy.frontends.mpd.process import MpdProcess
+from mopidy.frontends.mpd.thread import MpdThread
 
 class MpdFrontend(object):
     """
@@ -7,7 +7,7 @@ class MpdFrontend(object):
     """
 
     def __init__(self):
-        self.process = None
+        self.thred = None
         self.dispatcher = None
 
     def start_server(self, core_queue):
@@ -17,8 +17,8 @@ class MpdFrontend(object):
         :param core_queue: the core queue
         :type core_queue: :class:`multiprocessing.Queue`
         """
-        self.process = MpdProcess(core_queue)
-        self.process.start()
+        self.thread = MpdThread(core_queue)
+        self.thread.start()
 
     def create_dispatcher(self, backend):
         """
