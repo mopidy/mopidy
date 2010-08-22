@@ -20,7 +20,7 @@ the Spotify service, and the speakers.
 - Filled red boxes are the key external systems.
 - Gray boxes are external dependencies.
 - Blue circles lives in the ``main`` process, also known as ``CoreProcess``.
-  It processing messages on the core queue.
+  It is processing messages put on the core queue.
 - Purple circles lives in a process named ``MpdProcess``, running an
   :mod:`asyncore` loop.
 - Green circles lives in a process named ``GStreamerProcess``.
