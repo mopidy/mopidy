@@ -10,6 +10,10 @@ class AlsaMixer(BaseMixer):
     """
     Mixer which uses the Advanced Linux Sound Architecture (ALSA) to control
     volume.
+
+    **Settings:**
+
+    - :attr:`mopidy.settings.MIXER_ALSA_CONTROL`
     """
 
     def __init__(self, *args, **kwargs):

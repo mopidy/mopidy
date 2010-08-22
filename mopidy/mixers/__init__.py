@@ -4,6 +4,10 @@ class BaseMixer(object):
     """
     :param backend: a backend instance
     :type mixer: :class:`mopidy.backends.base.BaseBackend`
+
+    **Settings:**
+
+    - :attr:`mopidy.settings.MIXER_MAX_VOLUME`
     """
 
     def __init__(self, backend, *args, **kwargs):

@@ -18,6 +18,10 @@ class GStreamerOutput(object):
     Audio output through GStreamer.
 
     Starts the :class:`GStreamerProcess`.
+
+    **Settings:**
+
+    - :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
     """
 
     def __init__(self, core_queue, output_queue):
