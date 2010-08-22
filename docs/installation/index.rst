@@ -31,6 +31,11 @@ Make sure you got the required dependencies installed.
 
     - pyserial (Debian/Ubuntu package: python-serial)
 
+  - *Default:* :mod:`mopidy.mixers.gstreamer_software` (Linux, OS X, and
+    Windows)
+
+    - No additional dependencies.
+
   - :mod:`mopidy.mixers.nad` (Linux, OS X, and Windows)
 
     - pyserial (Debian/Ubuntu package: python-serial)
@@ -41,7 +46,7 @@ Make sure you got the required dependencies installed.
 
 - Dependencies for at least one Mopidy backend:
 
-  - :mod:`mopidy.backends.libspotify` (Linux, OS X, and Windows)
+  - *Default:* :mod:`mopidy.backends.libspotify` (Linux, OS X, and Windows)
 
     - :doc:`libspotify and pyspotify <libspotify>`
 
