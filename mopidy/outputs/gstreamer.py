@@ -9,7 +9,7 @@ import logging
 import threading
 
 from mopidy import settings
-from mopidy.utils.process import BaseProcess, unpickle_connection
+from mopidy.utils.process import BaseThread, unpickle_connection
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
@@ -17,21 +17,32 @@ class GStreamerOutput(object):
     """
     Audio output through GStreamer.
 
-    Starts the :class:`GStreamerProcess`.
+    Starts :class:`GStreamerMessagesThread` and :class:`GStreamerPlayerThread`.
     """
 
     def __init__(self, core_queue, output_queue):
-        self.process = GStreamerProcess(core_queue, output_queue)
-        self.process.start()
+        # Start a helper thread that can run the gobject.MainLoop
+        self.messages_thread = GStreamerMessagesThread()
+        self.messages_thread.start()
+
+        # Start a helper thread that can process the output_queue
+        self.player_thread = GStreamerPlayerThread(core_queue, output_queue)
+        self.player_thread.start()
 
     def destroy(self):
-        self.process.terminate()
+        self.messages_thread.destroy()
+        self.player_thread.destroy()
 
-class GStreamerMessagesThread(threading.Thread):
-    def run(self):
+class GStreamerMessagesThread(BaseThread):
+    def __init__(self):
+        super(GStreamerMessagesThread, self).__init__()
+        self.name = u'GStreamerMessagesThread'
+        self.daemon = True
+
+    def run_inside_try(self):
         gobject.MainLoop().run()
 
-class GStreamerProcess(BaseProcess):
+class GStreamerPlayerThread(BaseThread):
     """
     A process for all work related to GStreamer.
 
@@ -44,7 +55,9 @@ class GStreamerProcess(BaseProcess):
     """
 
     def __init__(self, core_queue, output_queue):
-        super(GStreamerProcess, self).__init__(name='GStreamerProcess')
+        super(GStreamerPlayerThread, self).__init__()
+        self.name = u'GStreamerPlayerThread'
+        self.daemon = True
         self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
@@ -57,11 +70,6 @@ class GStreamerProcess(BaseProcess):
 
     def setup(self):
         logger.debug(u'Setting up GStreamer pipeline')
-
-        # Start a helper thread that can run the gobject.MainLoop
-        messages_thread = GStreamerMessagesThread()
-        messages_thread.daemon = True
-        messages_thread.start()
 
         self.gst_pipeline = gst.parse_launch(' ! '.join([
             'audioconvert name=convert',
