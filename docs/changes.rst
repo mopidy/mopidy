@@ -5,12 +5,18 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-0.1.0a4 (in development)
-========================
+0.1.0 (2010-08-23)
+==================
 
-The greatest release ever! We present to you important improvements in search
-functionality, working track position seeking, no known stability issues, and
-greatly improved MPD client support.
+After three weeks of long nights and sprints we're finally pleased enough with
+the state of Mopidy to remove the alpha label, and do a regular release.
+
+Mopidy 0.1.0 got important improvements in search functionality, working track
+position seeking, no known stability issues, and greatly improved MPD client
+support.
+
+There are lots of changes since 0.1.0a3, and we urge you to at least read the
+*important changes* below.
 
 **Important changes**
 
