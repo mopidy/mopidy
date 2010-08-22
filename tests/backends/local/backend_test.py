@@ -13,7 +13,7 @@ from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 from mopidy.utils.path import path_to_uri
 
-from tests.backends.base import *
+from tests.backends.base.backend import *
 from tests import SkipTest, data_folder
 
 song = data_folder('song%s.wav')
