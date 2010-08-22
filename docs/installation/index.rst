@@ -91,20 +91,42 @@ For an introduction to ``git``, please visit `git-scm.com
 Settings
 ========
 
-Create a file named ``settings.py`` in the directory ``~/.mopidy/``.
+Mopidy reads settings from the file ``~/.mopidy/settings.py``, where ``~``
+means your *home directory*. If your username is ``alice`` and you are running
+Linux, the settings file should probably be at
+``/home/alice/.mopidy/settings.py``.
 
-If you are using a Spotify backend, enter your Spotify Premium account's
-username and password into the file, like this::
+You can either create this file yourself, or run the ``mopidy`` command, and it
+will create an empty settings file for you.
+
+Music from Spotify
+------------------
+
+If you are using the Spotify backend, which is the default, enter your Spotify
+Premium account's username and password into the file, like this::
 
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
 
-Currently :mod:`mopidy.backends.libspotify` is the default backend. If you want
-to use :mod:`mopidy.backends.local`, add the following setting::
+Music from local storage
+------------------------
+
+If you want use Mopidy to play music you have locally at your machine instead
+of using Spotify, you need to change the backend from the default to
+:mod:`mopidy.backends.local` by adding the following line to your settings
+file::
 
     BACKENDS = (u'mopidy.backends.local.LocalBackend',)
 
-For a full list of available settings, see :mod:`mopidy.settings`.
+You may also want to change some of the ``LOCAL_*`` settings. See
+:mod:`mopidy.settings`, for a full list of available settings.
+
+Connecting from other machines on the network
+---------------------------------------------
+
+As a secure default, Mopidy only accepts connections from ``localhost``. If you
+want to open it for connections from other machines on your network, see
+the documentation for :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`.
 
 
 Running Mopidy
@@ -114,10 +136,9 @@ To start Mopidy, simply open a terminal and run::
 
     mopidy
 
-When Mopidy says ``MPD server running at [localhost]:6600`` it's ready to
-accept connections by any MPD client. You can find a list of tons of MPD
-clients at http://mpd.wikia.com/wiki/Clients. We use GMPC and
-ncmpcpp during development. The first is a GUI client, and the second is a
-terminal client.
+When Mopidy says ``MPD server running at [127.0.0.1]:6600`` it's ready to
+accept connections by any MPD client. You can find tons of MPD clients at
+http://mpd.wikia.com/wiki/Clients. We use GMPC and ncmpcpp during development.
+The first is a GUI client, and the second is a terminal client.
 
 To stop Mopidy, press ``CTRL+C``.
