@@ -39,6 +39,9 @@ class BaseProcess(multiprocessing.Process):
     def run_inside_try(self):
         raise NotImplementedError
 
+    def destroy(self):
+        self.terminate()
+
 
 class BaseThread(multiprocessing.dummy.Process):
     def run(self):
@@ -60,3 +63,6 @@ class BaseThread(multiprocessing.dummy.Process):
 
     def run_inside_try(self):
         raise NotImplementedError
+
+    def destroy(self):
+        pass
