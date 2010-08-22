@@ -2,10 +2,10 @@
 Installation
 ************
 
-To get a basic version of Mopidy running, you need Python and the GStreamer
-library. To use Spotify with Mopidy, you also need :doc:`libspotify and
-pyspotify <libspotify>`. Mopidy itself can either be installed from the Python
-package index, PyPI, or from git.
+To get a basic version of Mopidy running, you need Python and the
+:doc:`GStreamer library <gstreamer>`. To use Spotify with Mopidy, you also need
+:doc:`libspotify and pyspotify <libspotify>`. Mopidy itself can either be
+installed from the Python package index, PyPI, or from git.
 
 
 Install dependencies
