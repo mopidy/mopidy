@@ -5,12 +5,13 @@ import threading
 from spotify.manager import SpotifySessionManager
 
 from mopidy import get_version, settings
-from mopidy.models import Playlist
 from mopidy.backends.libspotify.translator import LibspotifyTranslator
+from mopidy.models import Playlist
+from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.backends.libspotify.session_manager')
 
-class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
+class LibspotifySessionManager(SpotifySessionManager, BaseThread):
     cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
     settings_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
@@ -18,7 +19,8 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def __init__(self, username, password, core_queue, output_queue):
         SpotifySessionManager.__init__(self, username, password)
-        threading.Thread.__init__(self, name='LibspotifySessionManagerThread')
+        BaseThread.__init__(self)
+        self.name = 'LibspotifySessionManagerThread'
         # Run as a daemon thread, so Mopidy won't wait for this thread to exit
         # before Mopidy exits.
         self.daemon = True
@@ -27,7 +29,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
         self.connected = threading.Event()
         self.session = None
 
-    def run(self):
+    def run_inside_try(self):
         self.connect()
 
     def logged_in(self, session, error):
