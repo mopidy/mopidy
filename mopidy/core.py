@@ -5,7 +5,7 @@ import optparse
 from mopidy import get_version, settings
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
-from mopidy.utils.path import get_or_create_folder
+from mopidy.utils.path import get_or_create_folder, get_or_create_file
 from mopidy.utils.process import BaseProcess, unpickle_connection
 from mopidy.utils.settings import list_settings_optparse_callback
 
@@ -55,6 +55,7 @@ class CoreProcess(BaseProcess):
 
     def setup_settings(self):
         get_or_create_folder('~/.mopidy/')
+        get_or_create_file('~/.mopidy/settings.py')
         settings.validate()
 
     def setup_output(self, core_queue):
