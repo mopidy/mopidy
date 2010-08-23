@@ -7,6 +7,8 @@ User documentation
     :maxdepth: 3
 
     installation/index
+    settings
+    running
     clients/index
     changes
     authors
