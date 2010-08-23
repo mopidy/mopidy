@@ -39,6 +39,7 @@ class GStreamerOutputTest(unittest.TestCase):
         return my_end.recv()
 
     def send(self, message):
+        message.update({'to': 'output'})
         self.output.process_message(message)
 
     def test_play_uri_existing_file(self):
