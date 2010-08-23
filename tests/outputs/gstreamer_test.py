@@ -17,7 +17,6 @@ from tests import data_folder
 
 class GStreamerOutputTest(unittest.TestCase):
     def setUp(self):
-        self.original_backends = settings.BACKENDS
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         self.song_uri = path_to_uri(data_folder('song1.wav'))
         self.output_queue = multiprocessing.Queue()
@@ -26,7 +25,7 @@ class GStreamerOutputTest(unittest.TestCase):
 
     def tearDown(self):
         self.output.destroy()
-        settings.BACKENDS = settings.original_backends
+        settings.runtime.clear()
 
     def send_recv(self, message):
         (my_end, other_end) = multiprocessing.Pipe()
@@ -34,7 +33,6 @@ class GStreamerOutputTest(unittest.TestCase):
         self.output_queue.put(message)
         my_end.poll(None)
         return my_end.recv()
-
 
     def send(self, message):
         self.output_queue.put(message)
