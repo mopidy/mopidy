@@ -1,12 +1,19 @@
 import multiprocessing
 import unittest
 
+from tests import SkipTest
+
+# FIXME Our Windows build server does not support GStreamer yet
+import sys
+if sys.platform == 'win32':
+    raise SkipTest
+
 from mopidy import settings
 from mopidy.outputs.gstreamer import GStreamerOutput
 from mopidy.utils.path import path_to_uri
 from mopidy.utils.process import pickle_connection
 
-from tests import data_folder, SkipTest
+from tests import data_folder
 
 class GStreamerOutputTest(unittest.TestCase):
     def setUp(self):
