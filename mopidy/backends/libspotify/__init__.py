@@ -16,6 +16,12 @@ class LibspotifyBackend(BaseBackend):
 
     **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-libspotify
 
+    **Settings:**
+
+    - :attr:`mopidy.settings.SPOTIFY_LIB_CACHE`
+    - :attr:`mopidy.settings.SPOTIFY_USERNAME`
+    - :attr:`mopidy.settings.SPOTIFY_PASSWORD`
+
     .. note::
 
         This product uses SPOTIFY(R) CORE but is not endorsed, certified or

@@ -5,17 +5,26 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-0.1.0a4 (in development)
-========================
+0.1.0 (2010-08-23)
+==================
 
-The greatest release ever! We present to you important improvements in search
-functionality, working track position seeking, no known stability issues, and
-greatly improved MPD client support.
+After three weeks of long nights and sprints we're finally pleased enough with
+the state of Mopidy to remove the alpha label, and do a regular release.
+
+Mopidy 0.1.0 got important improvements in search functionality, working track
+position seeking, no known stability issues, and greatly improved MPD client
+support. There are lots of changes since 0.1.0a3, and we urge you to at least
+read the *important changes* below.
+
+This release does not support OS X. We're sorry about that, and are working on
+fixing the OS X issues for a future release. You can track the progress at
+:issue:`14`.
 
 **Important changes**
 
 - License changed from GPLv2 to Apache License, version 2.0.
-- GStreamer is now a required dependency.
+- GStreamer is now a required dependency. See our :doc:`GStreamer installation
+  docs <installation/gstreamer>`.
 - :mod:`mopidy.backends.libspotify` is now the default backend.
   :mod:`mopidy.backends.despotify` is no longer available. This means that you
   need to install the :doc:`dependencies for libspotify
@@ -72,6 +81,9 @@ greatly improved MPD client support.
   - A Spotify application key is now bundled with the source.
     :attr:`mopidy.settings.SPOTIFY_LIB_APPKEY` is thus removed.
   - If failing to play a track, playback will skip to the next track.
+  - Both :mod:`mopidy.backends.libspotify` and :mod:`mopidy.backends.local`
+    have been rewritten to use the new common GStreamer audio output module,
+    :mod:`mopidy.outputs.gstreamer`.
 
 - Mixers:
 

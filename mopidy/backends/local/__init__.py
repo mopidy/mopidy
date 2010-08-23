@@ -18,6 +18,12 @@ class LocalBackend(BaseBackend):
     A backend for playing music from a local music archive.
 
     **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-local
+
+    **Settings:**
+
+    - :attr:`mopidy.settings.LOCAL_MUSIC_FOLDER`
+    - :attr:`mopidy.settings.LOCAL_PLAYLIST_FOLDER`
+    - :attr:`mopidy.settings.LOCAL_TAG_CACHE`
     """
 
     def __init__(self, *args, **kwargs):
