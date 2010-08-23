@@ -15,6 +15,7 @@ class SettingsProxy(object):
         self.default = self._get_settings_dict_from_module(
             default_settings_module)
         self.local = self._get_local_settings()
+        self.runtime = {}
 
     def _get_local_settings(self):
         dotdir = os.path.expanduser(u'~/.mopidy/')
@@ -37,6 +38,7 @@ class SettingsProxy(object):
     def current(self):
         current = copy(self.default)
         current.update(self.local)
+        current.update(self.runtime)
         return current
 
     def __getattr__(self, attr):
@@ -48,6 +50,12 @@ class SettingsProxy(object):
         if type(value) != bool and not value:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
         return value
+
+    def __setattr__(self, attr, value):
+        if self._is_setting(attr):
+            self.runtime[attr] = value
+        else:
+            super(SettingsProxy, self).__setattr__(attr, value)
 
     def validate(self):
         if self.get_errors():
