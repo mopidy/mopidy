@@ -17,8 +17,21 @@ Possible targets for the next version
 - Reintroduce support for OS X. See :issue:`14` for details.
 - Support for using multiple Mopidy backends simultaneously. Should make it
   possible to have both Spotify tracks and local tracks in the same playlist.
-- Write-support for Spotify, i.e. playlist management.
-- Virtual directories with e.g. starred tracks from Spotify.
+- MPD frontend:
+
+  - ``idle`` support.
+
+- Spotify backend:
+
+  - Write-support for Spotify, i.e. playlist management.
+  - Virtual directories with e.g. starred tracks from Spotify.
+
+- Local backend:
+
+  - Better library support.
+  - A script for creating a tag cache.
+  - An alternative to tag cache for caching metadata, i.e. Sqlite.
+
 - Last.fm scrobbling.
 
 
