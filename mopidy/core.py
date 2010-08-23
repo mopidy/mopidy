@@ -6,7 +6,7 @@ from mopidy import get_version, settings
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import BaseProcess, unpickle_connection
+from mopidy.utils.process import BaseProcess
 from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
@@ -67,19 +67,15 @@ class CoreProcess(BaseProcess):
         return get_class(settings.BACKENDS[0])(core_queue, output_queue)
 
     def setup_frontend(self, core_queue, backend):
-        frontend = get_class(settings.FRONTENDS[0])()
-        frontend.start_server(core_queue)
-        frontend.create_dispatcher(backend)
+        frontend = get_class(settings.FRONTENDS[0])(core_queue, backend)
+        frontend.start()
         return frontend
 
     def process_message(self, message):
         if message.get('to') == 'output':
             self.output_queue.put(message)
-        elif message['command'] == 'mpd_request':
-            response = self.frontend.dispatcher.handle_request(
-                message['request'])
-            connection = unpickle_connection(message['reply_to'])
-            connection.send(response)
+        elif message.get('to') == 'frontend':
+            self.frontend.process_message(message)
         elif message['command'] == 'end_of_track':
             self.backend.playback.on_end_of_track()
         elif message['command'] == 'stop_playback':
