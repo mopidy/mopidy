@@ -10,6 +10,8 @@ from mopidy.utils import get_class
 from tests import SkipTest
 from tests.backends.base import populate_playlist
 
+# TODO Test 'playlist repeat', e.g. repeat=1,single=0
+
 class BasePlaybackControllerTest(object):
     tracks = []
 
