@@ -528,11 +528,12 @@ class BasePlaybackControllerTest(object):
 
         self.assert_(wrapper.called)
 
+    @SkipTest # Blocks for 10ms and does not work with DummyOutput
     @populate_playlist
     def test_end_of_track_callback_gets_called(self):
         self.playback.play()
         result = self.playback.seek(self.tracks[0].length - 10)
-        self.assert_(result, 'Seek failed')
+        self.assertTrue(result, 'Seek failed')
         message = self.core_queue.get(True, 1)
         self.assertEqual('end_of_track', message['command'])
 
