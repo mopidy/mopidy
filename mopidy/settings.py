@@ -58,6 +58,16 @@ FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
 #:     GSTREAMER_AUDIO_SINK = u'autoaudiosink'
 GSTREAMER_AUDIO_SINK = u'autoaudiosink'
 
+#: Your `Last.fm <http://www.last.fm/>`_ username.
+#:
+#: Used by :mod:`mopidy.frontends.lastfm`.
+LASTFM_USERNAME = u''
+
+#: Your `Last.fm <http://www.last.fm/>`_ password.
+#:
+#: Used by :mod:`mopidy.frontends.lastfm`.
+LASTFM_PASSWORD = u''
+
 #: Path to folder with local music.
 #:
 #: Used by :mod:`mopidy.backends.local`.
