@@ -1,4 +1,5 @@
-from mopidy.frontends.mpd import (handle_pattern, MpdArgError, MpdNoExistError,
+from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
 
 @handle_pattern(r'^add "(?P<uri>[^"]*)"$')

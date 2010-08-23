@@ -8,7 +8,8 @@ import gst
 import logging
 import threading
 
-from mopidy.process import BaseProcess, unpickle_connection
+from mopidy import settings
+from mopidy.utils.process import BaseProcess, unpickle_connection
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
@@ -17,6 +18,10 @@ class GStreamerOutput(object):
     Audio output through GStreamer.
 
     Starts the :class:`GStreamerProcess`.
+
+    **Settings:**
+
+    - :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
     """
 
     def __init__(self, core_queue, output_queue):
@@ -42,22 +47,11 @@ class GStreamerProcess(BaseProcess):
     http://jameswestby.net/weblog/tech/14-caution-python-multiprocessing-and-glib-dont-mix.html.
     """
 
-    pipeline_description = ' ! '.join([
-        'appsrc name=src',
-        'volume name=volume',
-        'autoaudiosink name=sink',
-    ])
-
     def __init__(self, core_queue, output_queue):
-        super(GStreamerProcess, self).__init__()
+        super(GStreamerProcess, self).__init__(name='GStreamerProcess')
         self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
-        self.gst_bus = None
-        self.gst_bus_id = None
-        self.gst_uri_bin = None
-        self.gst_data_src = None
-        self.gst_volume = None
 
     def run_inside_try(self):
         self.setup()
@@ -73,16 +67,30 @@ class GStreamerProcess(BaseProcess):
         messages_thread.daemon = True
         messages_thread.start()
 
-        self.gst_pipeline = gst.parse_launch(self.pipeline_description)
-        self.gst_data_src = self.gst_pipeline.get_by_name('src')
-        #self.gst_uri_bin = self.gst_pipeline.get_by_name('uri')
-        self.gst_volume = self.gst_pipeline.get_by_name('volume')
+        self.gst_pipeline = gst.parse_launch(' ! '.join([
+            'audioconvert name=convert',
+            'volume name=volume',
+            settings.GSTREAMER_AUDIO_SINK,
+        ]))
+
+        pad = self.gst_pipeline.get_by_name('convert').get_pad('sink')
+
+        if settings.BACKENDS[0] == 'mopidy.backends.local.LocalBackend':
+            uri_bin = gst.element_factory_make('uridecodebin', 'uri')
+            uri_bin.connect('pad-added', self.process_new_pad, pad)
+            self.gst_pipeline.add(uri_bin)
+        else:
+            app_src = gst.element_factory_make('appsrc', 'src')
+            self.gst_pipeline.add(app_src)
+            app_src.get_pad('src').link(pad)
 
         # Setup bus and message processor
-        self.gst_bus = self.gst_pipeline.get_bus()
-        self.gst_bus.add_signal_watch()
-        self.gst_bus_id = self.gst_bus.connect('message',
-            self.process_gst_message)
+        gst_bus = self.gst_pipeline.get_bus()
+        gst_bus.add_signal_watch()
+        gst_bus.connect('message', self.process_gst_message)
+
+    def process_new_pad(self, source, pad, target_pad):
+        pad.link(target_pad)
 
     def process_mopidy_message(self, message):
         """Process messages from the rest of Mopidy."""
@@ -104,6 +112,14 @@ class GStreamerProcess(BaseProcess):
             connection.send(volume)
         elif message['command'] == 'set_volume':
             self.set_volume(message['volume'])
+        elif message['command'] == 'set_position':
+            response = self.set_position(message['position'])
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
+        elif message['command'] == 'get_position':
+            response = self.get_position()
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
         else:
             logger.warning(u'Cannot handle message: %s', message)
 
@@ -123,16 +139,17 @@ class GStreamerProcess(BaseProcess):
     def play_uri(self, uri):
         """Play audio at URI"""
         self.set_state('READY')
-        self.gst_uri_bin.set_property('uri', uri)
+        self.gst_pipeline.get_by_name('uri').set_property('uri', uri)
         return self.set_state('PLAYING')
 
     def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
+        data_src = self.gst_pipeline.get_by_name('src')
         caps = gst.caps_from_string(caps_string)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
-        self.gst_data_src.set_property('caps', caps)
-        self.gst_data_src.emit('push-buffer', buffer_)
+        data_src.set_property('caps', caps)
+        data_src.emit('push-buffer', buffer_)
 
     def end_of_data_stream(self):
         """
@@ -141,7 +158,7 @@ class GStreamerProcess(BaseProcess):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        self.gst_data_src.emit('end-of-stream')
+        self.gst_pipeline.get_by_name('src').emit('end-of-stream')
 
     def set_state(self, state_name):
         """
@@ -171,10 +188,25 @@ class GStreamerProcess(BaseProcess):
 
     def get_volume(self):
         """Get volume in range [0..100]"""
-        gst_volume = self.gst_volume.get_property('volume')
-        return int(gst_volume * 100)
+        gst_volume = self.gst_pipeline.get_by_name('volume')
+        return int(gst_volume.get_property('volume') * 100)
 
     def set_volume(self, volume):
         """Set volume in range [0..100]"""
-        gst_volume = volume / 100.0
-        self.gst_volume.set_property('volume', gst_volume)
+        gst_volume = self.gst_pipeline.get_by_name('volume')
+        gst_volume.set_property('volume', volume / 100.0)
+
+    def set_position(self, position):
+        self.gst_pipeline.get_state() # block until state changes are done
+        handeled = self.gst_pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
+            gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
+        self.gst_pipeline.get_state() # block until seek is done
+        return handeled
+
+    def get_position(self):
+        try:
+            position = self.gst_pipeline.query_position(gst.FORMAT_TIME)[0]
+            return position // gst.MSECOND
+        except gst.QueryError, e:
+            logger.error('time_position failed: %s', e)
+            return 0

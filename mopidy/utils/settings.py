@@ -6,7 +6,7 @@ import os
 import sys
 
 from mopidy import SettingsError
-from mopidy.utils import indent
+from mopidy.utils.log import indent
 
 logger = logging.getLogger('mopidy.utils.settings')
 
@@ -37,7 +37,7 @@ class SettingsProxy(object):
     def current(self):
         current = copy(self.default)
         current.update(self.local)
-        return current 
+        return current
 
     def __getattr__(self, attr):
         if not self._is_setting(attr):
@@ -81,6 +81,8 @@ def validate_settings(defaults, settings):
     errors = {}
 
     changed = {
+        'FRONTEND': 'FRONTENDS',
+        'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
         'SERVER_PORT': 'MPD_SERVER_PORT',
         'SPOTIFY_LIB_APPKEY': None,

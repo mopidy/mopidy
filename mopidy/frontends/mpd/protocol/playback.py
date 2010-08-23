@@ -1,4 +1,5 @@
-from mopidy.frontends.mpd import (handle_pattern, MpdArgError, MpdNoExistError,
+from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
 
 @handle_pattern(r'^consume (?P<state>[01])$')
@@ -300,7 +301,7 @@ def seek(frontend, songpos, seconds):
     """
     if frontend.backend.playback.current_playlist_position != songpos:
         playpos(frontend, songpos)
-    return frontend.backend.playback.seek(int(seconds) * 1000)
+    frontend.backend.playback.seek(int(seconds) * 1000)
 
 @handle_pattern(r'^seekid "(?P<cpid>\d+)" "(?P<seconds>\d+)"$')
 def seekid(frontend, cpid, seconds):
@@ -313,7 +314,7 @@ def seekid(frontend, cpid, seconds):
     """
     if frontend.backend.playback.current_cpid != cpid:
         playid(frontend, cpid)
-    return frontend.backend.playback.seek(int(seconds) * 1000)
+    frontend.backend.playback.seek(int(seconds) * 1000)
 
 @handle_pattern(r'^setvol "(?P<volume>[-+]*\d+)"$')
 def setvol(frontend, volume):

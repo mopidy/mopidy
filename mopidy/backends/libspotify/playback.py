@@ -4,7 +4,7 @@ import multiprocessing
 from spotify import Link, SpotifyError
 
 from mopidy.backends.base import BasePlaybackController
-from mopidy.process import pickle_connection
+from mopidy.utils.process import pickle_connection
 
 logger = logging.getLogger('mopidy.backends.libspotify.playback')
 

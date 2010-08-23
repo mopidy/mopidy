@@ -1,93 +1,37 @@
-import re
+from mopidy.frontends.mpd.dispatcher import MpdDispatcher
+from mopidy.frontends.mpd.process import MpdProcess
 
-from mopidy import MopidyException
-
-class MpdAckError(MopidyException):
+class MpdFrontend(object):
     """
-    Available MPD error codes::
+    The MPD frontend.
 
-        ACK_ERROR_NOT_LIST = 1
-        ACK_ERROR_ARG = 2
-        ACK_ERROR_PASSWORD = 3
-        ACK_ERROR_PERMISSION = 4
-        ACK_ERROR_UNKNOWN = 5
-        ACK_ERROR_NO_EXIST = 50
-        ACK_ERROR_PLAYLIST_MAX = 51
-        ACK_ERROR_SYSTEM = 52
-        ACK_ERROR_PLAYLIST_LOAD = 53
-        ACK_ERROR_UPDATE_ALREADY = 54
-        ACK_ERROR_PLAYER_SYNC = 55
-        ACK_ERROR_EXIST = 56
+    **Settings:**
+
+    - :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`
+    - :attr:`mopidy.settings.MPD_SERVER_PORT`
     """
 
-    def __init__(self, message=u'', error_code=0, index=0, command=u''):
-        super(MpdAckError, self).__init__(message, error_code, index, command)
-        self.message = message
-        self.error_code = error_code
-        self.index = index
-        self.command = command
+    def __init__(self):
+        self.process = None
+        self.dispatcher = None
 
-    def get_mpd_ack(self):
+    def start_server(self, core_queue):
         """
-        MPD error code format::
+        Starts the MPD server.
 
-            ACK [%(error_code)i@%(index)i] {%(command)s} description
+        :param core_queue: the core queue
+        :type core_queue: :class:`multiprocessing.Queue`
         """
-        return u'ACK [%i@%i] {%s} %s' % (
-            self.error_code, self.index, self.command, self.message)
+        self.process = MpdProcess(core_queue)
+        self.process.start()
 
-class MpdArgError(MpdAckError):
-    def __init__(self, *args, **kwargs):
-        super(MpdArgError, self).__init__(*args, **kwargs)
-        self.error_code = 2 # ACK_ERROR_ARG
+    def create_dispatcher(self, backend):
+        """
+        Creates a dispatcher for MPD requests.
 
-class MpdUnknownCommand(MpdAckError):
-    def __init__(self, *args, **kwargs):
-        super(MpdUnknownCommand, self).__init__(*args, **kwargs)
-        self.message = u'unknown command "%s"' % self.command
-        self.command = u''
-        self.error_code = 5 # ACK_ERROR_UNKNOWN
-
-class MpdNoExistError(MpdAckError):
-    def __init__(self, *args, **kwargs):
-        super(MpdNoExistError, self).__init__(*args, **kwargs)
-        self.error_code = 50 # ACK_ERROR_NO_EXIST
-
-class MpdNotImplemented(MpdAckError):
-    def __init__(self, *args, **kwargs):
-        super(MpdNotImplemented, self).__init__(*args, **kwargs)
-        self.message = u'Not implemented'
-
-mpd_commands = set()
-request_handlers = {}
-
-def handle_pattern(pattern):
-    """
-    Decorator for connecting command handlers to command patterns.
-
-    If you use named groups in the pattern, the decorated method will get the
-    groups as keyword arguments. If the group is optional, remember to give the
-    argument a default value.
-
-    For example, if the command is ``do that thing`` the ``what`` argument will
-    be ``this thing``::
-
-        @handle_pattern('^do (?P<what>.+)$')
-        def do(what):
-            ...
-
-    :param pattern: regexp pattern for matching commands
-    :type pattern: string
-    """
-    def decorator(func):
-        match = re.search('([a-z_]+)', pattern)
-        if match is not None:
-            mpd_commands.add(match.group())
-        if pattern in request_handlers:
-            raise ValueError(u'Tried to redefine handler for %s with %s' % (
-                pattern, func))
-        request_handlers[pattern] = func
-        func.__doc__ = '    - *Pattern:* ``%s``\n\n%s' % (
-            pattern, func.__doc__ or '')
-        return func
-    return decorator
+        :param backend: the backend
+        :type backend: :class:`mopidy.backends.base.BaseBackend`
+        :rtype: :class:`mopidy.frontends.mpd.dispatcher.MpdDispatcher`
+        """
+        self.dispatcher = MpdDispatcher(backend)
+        return self.dispatcher

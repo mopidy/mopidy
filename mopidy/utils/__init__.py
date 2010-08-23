@@ -27,12 +27,3 @@ def get_class(name):
     except (ImportError, AttributeError):
         raise ImportError("Couldn't load: %s" % name)
     return class_object
-
-def indent(string, places=4, linebreak='\n'):
-    lines = string.split(linebreak)
-    if len(lines) == 1:
-        return string
-    result = u''
-    for line in lines:
-        result += linebreak + ' ' * places + line
-    return result

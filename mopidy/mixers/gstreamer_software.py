@@ -1,7 +1,7 @@
 import multiprocessing
 
 from mopidy.mixers import BaseMixer
-from mopidy.process import pickle_connection
+from mopidy.utils.process import pickle_connection
 
 class GStreamerSoftwareMixer(BaseMixer):
     """Mixer which uses GStreamer to control volume in software."""

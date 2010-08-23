@@ -9,6 +9,11 @@ except ImportError:
         class SkipTest(Exception):
             pass
 
+from mopidy import settings
+
+# Nuke any local settings to ensure same test env all over
+settings.local.clear()
+
 def data_folder(name):
     folder = os.path.dirname(__file__)
     folder = os.path.join(folder, 'data')
