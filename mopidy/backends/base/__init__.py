@@ -23,17 +23,17 @@ class BaseBackend(object):
     :param core_queue: a queue for sending messages to
         :class:`mopidy.process.CoreProcess`
     :type core_queue: :class:`multiprocessing.Queue`
-    :param output_queue: a queue for sending messages to the output process
-    :type output_queue: :class:`multiprocessing.Queue`
+    :param output: the audio output
+    :type output: :class:`mopidy.outputs.gstreamer.GStreamerOutput` or similar
     :param mixer_class: either a mixer class, or :class:`None` to use the mixer
         defined in settings
     :type mixer_class: a subclass of :class:`mopidy.mixers.BaseMixer` or
         :class:`None`
     """
 
-    def __init__(self, core_queue=None, output_queue=None, mixer_class=None):
+    def __init__(self, core_queue=None, output=None, mixer_class=None):
         self.core_queue = core_queue
-        self.output_queue = output_queue
+        self.output = output
         if mixer_class is None:
             mixer_class = get_class(settings.MIXER)
         self.mixer = mixer_class(self)

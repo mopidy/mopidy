@@ -4,6 +4,7 @@ import random
 from mopidy import settings
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
+from mopidy.outputs.dummy import DummyOutput
 from mopidy.utils import get_class
 
 from tests.backends.base import populate_playlist
@@ -12,12 +13,10 @@ class BaseCurrentPlaylistControllerTest(object):
     tracks = []
 
     def setUp(self):
-        self.output_queue = multiprocessing.Queue()
         self.core_queue = multiprocessing.Queue()
-        self.output = get_class(settings.OUTPUT)(
-            self.core_queue, self.output_queue)
+        self.output = DummyOutput(self.core_queue)
         self.backend = self.backend_class(
-            self.core_queue, self.output_queue, DummyMixer)
+            self.core_queue, self.output, DummyMixer)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 

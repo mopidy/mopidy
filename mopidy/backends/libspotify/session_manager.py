@@ -16,14 +16,14 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password, core_queue, output_queue):
+    def __init__(self, username, password, core_queue, output):
         SpotifySessionManager.__init__(self, username, password)
         threading.Thread.__init__(self, name='LibspotifySessionManagerThread')
         # Run as a daemon thread, so Mopidy won't wait for this thread to exit
         # before Mopidy exits.
         self.daemon = True
         self.core_queue = core_queue
-        self.output_queue = output_queue
+        self.output = output
         self.connected = threading.Event()
         self.session = None
 
@@ -68,7 +68,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
             sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
         # TODO Base caps_string on arguments
-        caps_string = """
+        capabilites = """
             audio/x-raw-int,
             endianness=(int)1234,
             channels=(int)2,
@@ -77,11 +77,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
             signed=True,
             rate=(int)44100
         """
-        self.output_queue.put({
-            'command': 'deliver_data',
-            'caps': caps_string,
-            'data': bytes(frames),
-        })
+        self.output.deliver_data(capabilites, bytes(frames))
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
@@ -95,7 +91,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     def end_of_track(self, session):
         """Callback used by pyspotify"""
         logger.debug('End of data stream.')
-        self.output_queue.put({'command': 'end_of_data_stream'})
+        self.output.end_of_data_stream()
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""

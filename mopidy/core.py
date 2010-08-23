@@ -16,7 +16,7 @@ class CoreProcess(BaseProcess):
         super(CoreProcess, self).__init__(name='CoreProcess')
         self.core_queue = multiprocessing.Queue()
         self.options = self.parse_options()
-        self.output_queue = None
+        self.output = None
         self.backend = None
         self.frontend = None
 
@@ -46,8 +46,8 @@ class CoreProcess(BaseProcess):
     def setup(self):
         self.setup_logging()
         self.setup_settings()
-        self.output_queue = self.setup_output(self.core_queue)
-        self.backend = self.setup_backend(self.core_queue, self.output_queue)
+        self.output = self.setup_output(self.core_queue)
+        self.backend = self.setup_backend(self.core_queue, self.output)
         self.frontend = self.setup_frontend(self.core_queue, self.backend)
 
     def setup_logging(self):
@@ -59,12 +59,12 @@ class CoreProcess(BaseProcess):
         settings.validate()
 
     def setup_output(self, core_queue):
-        output_queue = multiprocessing.Queue()
-        get_class(settings.OUTPUT)(core_queue, output_queue)
-        return output_queue
+        output = get_class(settings.OUTPUT)(core_queue)
+        output.start()
+        return output
 
-    def setup_backend(self, core_queue, output_queue):
-        return get_class(settings.BACKENDS[0])(core_queue, output_queue)
+    def setup_backend(self, core_queue, output):
+        return get_class(settings.BACKENDS[0])(core_queue, output)
 
     def setup_frontend(self, core_queue, backend):
         frontend = get_class(settings.FRONTENDS[0])(core_queue, backend)
@@ -73,7 +73,7 @@ class CoreProcess(BaseProcess):
 
     def process_message(self, message):
         if message.get('to') == 'output':
-            self.output_queue.put(message)
+            self.output.process_message(message)
         elif message.get('to') == 'frontend':
             self.frontend.process_message(message)
         elif message['command'] == 'end_of_track':
