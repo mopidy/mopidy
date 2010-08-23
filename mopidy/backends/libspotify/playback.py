@@ -1,30 +1,17 @@
 import logging
-import multiprocessing
 
 from spotify import Link, SpotifyError
 
 from mopidy.backends.base import BasePlaybackController
-from mopidy.utils.process import pickle_connection
 
 logger = logging.getLogger('mopidy.backends.libspotify.playback')
 
 class LibspotifyPlaybackController(BasePlaybackController):
-    def _set_output_state(self, state_name):
-        logger.debug(u'Setting output state to %s ...', state_name)
-        (my_end, other_end) = multiprocessing.Pipe()
-        self.backend.output.process_message({
-            'command': 'set_state',
-            'state': state_name,
-            'reply_to': pickle_connection(other_end),
-        })
-        my_end.poll(None)
-        return my_end.recv()
-
     def _pause(self):
-        return self._set_output_state('PAUSED')
+        return self.backend.output.set_state('PAUSED')
 
     def _play(self, track):
-        self._set_output_state('READY')
+        self.backend.output.set_state('READY')
         if self.state == self.PLAYING:
             self.backend.spotify.session.play(0)
         if track.uri is None:
@@ -33,7 +20,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
             self.backend.spotify.session.load(
                 Link.from_string(track.uri).as_track())
             self.backend.spotify.session.play(1)
-            self._set_output_state('PLAYING')
+            self.backend.output.set_state('PLAYING')
             return True
         except SpotifyError as e:
             logger.warning('Play %s failed: %s', track.uri, e)
@@ -43,12 +30,12 @@ class LibspotifyPlaybackController(BasePlaybackController):
         return self._seek(self.time_position)
 
     def _seek(self, time_position):
-        self._set_output_state('READY')
+        self.backend.output.set_state('READY')
         self.backend.spotify.session.seek(time_position)
-        self._set_output_state('PLAYING')
+        self.backend.output.set_state('PLAYING')
         return True
 
     def _stop(self):
-        result = self._set_output_state('READY')
+        result = self.backend.output.set_state('READY')
         self.backend.spotify.session.play(0)
         return result

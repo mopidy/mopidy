@@ -48,7 +48,6 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
             playlists.append(
                 LibspotifyTranslator.to_mopidy_playlist(spotify_playlist))
         self.core_queue.put({
-            'to': 'output',
             'command': 'set_stored_playlists',
             'playlists': playlists,
         })
@@ -69,7 +68,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
             sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
         # TODO Base caps_string on arguments
-        caps_string = """
+        capabilites = """
             audio/x-raw-int,
             endianness=(int)1234,
             channels=(int)2,
@@ -78,12 +77,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
             signed=True,
             rate=(int)44100
         """
-        self.output.process_message({
-            'to': 'output',
-            'command': 'deliver_data',
-            'caps': caps_string,
-            'data': bytes(frames),
-        })
+        self.output.deliver_data(capabilites, bytes(frames))
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
@@ -97,10 +91,7 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
     def end_of_track(self, session):
         """Callback used by pyspotify"""
         logger.debug('End of data stream.')
-        self.output.process_message({
-            'to': 'output',
-            'command': 'end_of_data_stream',
-        })
+        self.output.end_of_data_stream()
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
