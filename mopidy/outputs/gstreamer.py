@@ -11,7 +11,8 @@ import threading
 
 from mopidy import settings
 from mopidy.outputs.base import BaseOutput
-from mopidy.utils.process import BaseProcess, unpickle_connection
+from mopidy.utils.process import (BaseProcess, pickle_connection,
+    unpickle_connection)
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
@@ -38,16 +39,55 @@ class GStreamerOutput(BaseOutput):
         self.process.terminate()
 
     def process_message(self, message):
-        """
-        Processes messages with the GStreamer output as destination.
-        """
         assert message['to'] == 'output', \
             u'Message recipient must be "output".'
         self.output_queue.put(message)
 
+    def _send_recv(self, message):
+        (my_end, other_end) = multiprocessing.Pipe()
+        message['to'] = 'output'
+        message['reply_to'] = pickle_connection(other_end)
+        self.process_message(message)
+        my_end.poll(None)
+        return my_end.recv()
+
+    def _send(self, message):
+        message['to'] = 'output'
+        self.process_message(message)
+
+    def play_uri(self, uri):
+        return self._send_recv({'command': 'play_uri', 'uri': uri})
+
+    def deliver_data(self, capabilities, data):
+        return self._send({
+            'command': 'deliver_data',
+            'caps': capabilities,
+            'data': data,
+        })
+
+    def end_of_data_stream(self):
+        return self._send({'command': 'end_of_data_stream'})
+
+    def get_position(self):
+        return self._send_recv({'command': 'get_position'})
+
+    def set_position(self, position):
+        return self._send_recv({'command': 'set_position'})
+
+    def set_state(self, state):
+        return self._send_recv({'command': 'set_state', 'state': state})
+
+    def get_volume(self):
+        return self._send_recv({'command': 'get_volume'})
+
+    def set_volume(self, volume):
+        return self._send_recv({'command': 'set_volume', 'volume': volume})
+
+
 class GStreamerMessagesThread(threading.Thread):
     def run(self):
         gobject.MainLoop().run()
+
 
 class GStreamerProcess(BaseProcess):
     """

@@ -28,44 +28,39 @@ class GStreamerOutputTest(unittest.TestCase):
         self.output.destroy()
         settings.BACKENDS = settings.original_backends
 
-    def send_recv(self, message):
-        (my_end, other_end) = multiprocessing.Pipe()
-        message.update({
-            'to': 'output',
-            'reply_to': pickle_connection(other_end),
-        })
-        self.output.process_message(message)
-        my_end.poll(None)
-        return my_end.recv()
-
-    def send(self, message):
-        message.update({'to': 'output'})
-        self.output.process_message(message)
-
     def test_play_uri_existing_file(self):
-        message = {'command': 'play_uri', 'uri': self.song_uri}
-        self.assertEqual(True, self.send_recv(message))
+        self.assertTrue(self.output.play_uri(self.song_uri))
 
     def test_play_uri_non_existing_file(self):
-        message = {'command': 'play_uri', 'uri': self.song_uri + 'bogus'}
-        self.assertEqual(False, self.send_recv(message))
+        self.assertFalse(self.output.play_uri(self.song_uri + 'bogus'))
+
+    @SkipTest
+    def test_deliver_data(self):
+        pass # TODO
+
+    @SkipTest
+    def test_end_of_data_stream(self):
+        pass # TODO
 
     def test_default_get_volume_result(self):
-        message = {'command': 'get_volume'}
-        self.assertEqual(100, self.send_recv(message))
+        self.assertEqual(100, self.output.get_volume())
 
     def test_set_volume(self):
-        self.send({'command': 'set_volume', 'volume': 50})
-        self.assertEqual(50, self.send_recv({'command': 'get_volume'}))
+        self.assertTrue(self.output.set_volume(50))
+        self.assertEqual(50, self.output.get_volume())
 
     def test_set_volume_to_zero(self):
-        self.send({'command': 'set_volume', 'volume': 0})
-        self.assertEqual(0, self.send_recv({'command': 'get_volume'}))
+        self.assertTrue(self.output.set_volume(0))
+        self.assertEqual(0, self.output.get_volume())
 
     def test_set_volume_to_one_hundred(self):
-        self.send({'command': 'set_volume', 'volume': 100})
-        self.assertEqual(100, self.send_recv({'command': 'get_volume'}))
+        self.assertTrue(self.output.set_volume(100))
+        self.assertEqual(100, self.output.get_volume())
 
     @SkipTest
     def test_set_state(self):
-        raise NotImplementedError
+        pass # TODO
+
+    @SkipTest
+    def test_set_position(self):
+        pass # TODO
