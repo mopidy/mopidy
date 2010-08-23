@@ -1,5 +1,4 @@
 from mopidy.outputs.base import BaseOutput
-from mopidy.utils.process import unpickle_connection
 
 class DummyOutput(BaseOutput):
     """
