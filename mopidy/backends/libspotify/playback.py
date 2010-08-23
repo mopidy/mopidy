@@ -12,7 +12,7 @@ class LibspotifyPlaybackController(BasePlaybackController):
     def _set_output_state(self, state_name):
         logger.debug(u'Setting output state to %s ...', state_name)
         (my_end, other_end) = multiprocessing.Pipe()
-        self.backend.output_queue.put({
+        self.backend.output.process_message({
             'command': 'set_state',
             'state': state_name,
             'reply_to': pickle_connection(other_end),

@@ -43,13 +43,16 @@ class LocalPlaybackController(BasePlaybackController):
 
     def _send_recv(self, message):
         (my_end, other_end) = multiprocessing.Pipe()
-        message.update({'reply_to': pickle_connection(other_end)})
-        self.backend.output_queue.put(message)
+        message.update({
+            'to': 'output',
+            'reply_to': pickle_connection(other_end),
+        })
+        self.backend.output.process_message(message)
         my_end.poll(None)
         return my_end.recv()
 
     def _send(self, message):
-        self.backend.output_queue.put(message)
+        self.backend.output.process_message(message)
 
     def _set_state(self, state):
         return self._send_recv({'command': 'set_state', 'state': state})

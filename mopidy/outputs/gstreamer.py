@@ -6,14 +6,16 @@ pygst.require('0.10')
 import gst
 
 import logging
+import multiprocessing
 import threading
 
 from mopidy import settings
+from mopidy.outputs.base import BaseOutput
 from mopidy.utils.process import BaseProcess, unpickle_connection
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
-class GStreamerOutput(object):
+class GStreamerOutput(BaseOutput):
     """
     Audio output through GStreamer.
 
@@ -24,12 +26,24 @@ class GStreamerOutput(object):
     - :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
     """
 
-    def __init__(self, core_queue, output_queue):
-        self.process = GStreamerProcess(core_queue, output_queue)
+    def __init__(self, core_queue):
+        super(GStreamerOutput, self).__init__(core_queue)
+        self.output_queue = multiprocessing.Queue()
+        self.process = GStreamerProcess(core_queue, self.output_queue)
+
+    def start(self):
         self.process.start()
 
     def destroy(self):
         self.process.terminate()
+
+    def process_message(self, message):
+        """
+        Processes messages with the GStreamer output as destination.
+        """
+        assert message['to'] == 'output', \
+            u'Message recipient must be "output".'
+        self.output_queue.put(message)
 
 class GStreamerMessagesThread(threading.Thread):
     def run(self):
