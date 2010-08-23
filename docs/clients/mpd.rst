@@ -10,6 +10,12 @@ http://mpd.wikia.com/wiki/Clients.
 Console clients
 ===============
 
+mpc
+---
+
+A command line client. Version 0.14 had some issues with Mopidy (see
+:issue:`5`), but 0.16 seems to work nicely.
+
 ncmpc
 -----
 
