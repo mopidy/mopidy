@@ -7,6 +7,7 @@ User documentation
     :maxdepth: 3
 
     installation/index
+    clients/index
     changes
     authors
     licenses
