@@ -1,4 +1,5 @@
 from mopidy.outputs.base import BaseOutput
+from mopidy.utils.process import unpickle_connection
 
 class DummyOutput(BaseOutput):
     """
@@ -22,3 +23,7 @@ class DummyOutput(BaseOutput):
 
     def process_message(self, message):
         self.messages.append(message)
+        if 'reply_to' in message:
+            connection = unpickle_connection(message['reply_to'])
+            # FIXME This is too simple. Some callers expect something else.
+            connection.send(True)
