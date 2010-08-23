@@ -1,6 +1,7 @@
 import unittest
 
-from mopidy.utils.settings import validate_settings
+from mopidy import settings as default_settings_module
+from mopidy.utils.settings import validate_settings, SettingsProxy
 
 class ValidateSettingsTest(unittest.TestCase):
     def setUp(self):
@@ -43,3 +44,24 @@ class ValidateSettingsTest(unittest.TestCase):
         result = validate_settings(self.defaults,
             {'FOO': '', 'BAR': ''})
         self.assertEquals(len(result), 2)
+
+
+class SettingsProxyTest(unittest.TestCase):
+    def setUp(self):
+        self.settings = SettingsProxy(default_settings_module)
+
+    def test_set_and_get_attr(self):
+        self.settings.TEST = 'test'
+        self.assertEqual(self.settings.TEST, 'test')
+
+    def test_setattr_updates_runtime_settings(self):
+        self.settings.TEST = 'test'
+        self.assert_('TEST' in self.settings.runtime)
+
+    def test_setattr_updates_runtime_with_value(self):
+        self.settings.TEST = 'test'
+        self.assertEqual(self.settings.runtime['TEST'], 'test')
+
+    def test_runtime_value_included_in_current(self):
+        self.settings.TEST = 'test'
+        self.assertEqual(self.settings.current['TEST'], 'test')

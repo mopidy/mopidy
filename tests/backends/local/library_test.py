@@ -17,16 +17,12 @@ class LocalLibraryControllerTest(BaseLibraryControllerTest, unittest.TestCase):
     backend_class = LocalBackend
 
     def setUp(self):
-        self.original_tag_cache = settings.LOCAL_TAG_CACHE
-        self.original_music_folder = settings.LOCAL_MUSIC_FOLDER
-
         settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
         settings.LOCAL_MUSIC_FOLDER = data_folder('')
 
         super(LocalLibraryControllerTest, self).setUp()
 
     def tearDown(self):
-        settings.LOCAL_TAG_CACHE = self.original_tag_cache
-        settings.LOCAL_MUSIC_FOLDER = self.original_music_folder
+        settings.runtime.clear()
 
         super(LocalLibraryControllerTest, self).tearDown()
