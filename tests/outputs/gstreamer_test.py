@@ -20,9 +20,9 @@ class GStreamerOutputTest(unittest.TestCase):
         self.original_backends = settings.BACKENDS
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         self.song_uri = path_to_uri(data_folder('song1.wav'))
-        self.output_queue = multiprocessing.Queue()
         self.core_queue = multiprocessing.Queue()
-        self.output = GStreamerOutput(self.core_queue, self.output_queue)
+        self.output = GStreamerOutput(self.core_queue)
+        self.output.start()
 
     def tearDown(self):
         self.output.destroy()
@@ -30,14 +30,16 @@ class GStreamerOutputTest(unittest.TestCase):
 
     def send_recv(self, message):
         (my_end, other_end) = multiprocessing.Pipe()
-        message.update({'reply_to': pickle_connection(other_end)})
-        self.output_queue.put(message)
+        message.update({
+            'to': 'output',
+            'reply_to': pickle_connection(other_end),
+        })
+        self.output.process_message(message)
         my_end.poll(None)
         return my_end.recv()
 
-
     def send(self, message):
-        self.output_queue.put(message)
+        self.output.process_message(message)
 
     def test_play_uri_existing_file(self):
         message = {'command': 'play_uri', 'uri': self.song_uri}
