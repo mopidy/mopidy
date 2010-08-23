@@ -534,7 +534,7 @@ class BasePlaybackControllerTest(object):
         self.playback.play()
         result = self.playback.seek(self.tracks[0].length - 10)
         self.assert_(result, 'Seek failed')
-        message = self.core_queue.get()
+        message = self.core_queue.get(True, 1)
         self.assertEqual('end_of_track', message['command'])
 
     @populate_playlist
