@@ -125,7 +125,9 @@ class GStreamerProcess(BaseProcess):
             connection = unpickle_connection(message['reply_to'])
             connection.send(volume)
         elif message['command'] == 'set_volume':
-            self.set_volume(message['volume'])
+            response = self.set_volume(message['volume'])
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
         elif message['command'] == 'set_position':
             response = self.set_position(message['position'])
             connection = unpickle_connection(message['reply_to'])
@@ -209,6 +211,7 @@ class GStreamerProcess(BaseProcess):
         """Set volume in range [0..100]"""
         gst_volume = self.gst_pipeline.get_by_name('volume')
         gst_volume.set_property('volume', volume / 100.0)
+        return True
 
     def set_position(self, position):
         self.gst_pipeline.get_state() # block until state changes are done
