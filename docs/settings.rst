@@ -41,17 +41,3 @@ Connecting from other machines on the network
 As a secure default, Mopidy only accepts connections from ``localhost``. If you
 want to open it for connections from other machines on your network, see
 the documentation for :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`.
-
-
-Running Mopidy
-==============
-
-To start Mopidy, simply open a terminal and run::
-
-    mopidy
-
-When Mopidy says ``MPD server running at [127.0.0.1]:6600`` it's ready to
-accept connections by any MPD client. Check out our non-exhaustive
-:doc:`/clients/mpd` list to find recommended clients.
-
-To stop Mopidy, press ``CTRL+C``.
