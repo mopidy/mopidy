@@ -1,10 +1,11 @@
 import unittest
 import os
 
+from tests import SkipTest
+
 # FIXME Our Windows build server does not support GStreamer yet
 import sys
 if sys.platform == 'win32':
-    from tests import SkipTest
     raise SkipTest
 
 from mopidy import settings
@@ -13,71 +14,10 @@ from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 from mopidy.utils.path import path_to_uri
 
-from tests.backends.base import *
-from tests import SkipTest, data_folder
-
-song = data_folder('song%s.wav')
-generate_song = lambda i: path_to_uri(song % i)
-
-# FIXME can be switched to generic test
-class LocalCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
-        unittest.TestCase):
-    tracks = [Track(uri=generate_song(i), length=4464)
-        for i in range(1, 4)]
-
-    backend_class = LocalBackend
-
-    def setUp(self):
-        self.original_backends = settings.BACKENDS
-        settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
-        super(LocalCurrentPlaylistControllerTest, self).setUp()
-
-    def tearDown(self):
-        super(LocalCurrentPlaylistControllerTest, self).tearDown()
-        settings.BACKENDS = settings.original_backends
-
-
-class LocalPlaybackControllerTest(BasePlaybackControllerTest,
-        unittest.TestCase):
-    tracks = [Track(uri=generate_song(i), length=4464)
-        for i in range(1, 4)]
-    backend_class = LocalBackend
-
-    def setUp(self):
-        self.original_backends = settings.BACKENDS
-        settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
-
-        super(LocalPlaybackControllerTest, self).setUp()
-        # Two tests does not work at all when using the fake sink
-        #self.backend.playback.use_fake_sink()
-
-    def tearDown(self):
-        super(LocalPlaybackControllerTest, self).tearDown()
-        settings.BACKENDS = settings.original_backends
-
-    def add_track(self, path):
-        uri = path_to_uri(data_folder(path))
-        track = Track(uri=uri, length=4464)
-        self.backend.current_playlist.add(track)
-
-    def test_uri_handler(self):
-        self.assert_('file://' in self.backend.uri_handlers)
-
-    def test_play_mp3(self):
-        self.add_track('blank.mp3')
-        self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
-
-    def test_play_ogg(self):
-        self.add_track('blank.ogg')
-        self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
-
-    def test_play_flac(self):
-        self.add_track('blank.flac')
-        self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
-
+from tests import data_folder
+from tests.backends.base.stored_playlists import \
+    BaseStoredPlaylistsControllerTest
+from tests.backends.local import generate_song
 
 class LocalStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
         unittest.TestCase):
@@ -149,27 +89,3 @@ class LocalStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
 
     def test_save_sets_playlist_uri(self):
         raise SkipTest
-
-
-class LocalLibraryControllerTest(BaseLibraryControllerTest,
-        unittest.TestCase):
-
-    backend_class = LocalBackend
-
-    def setUp(self):
-        self.original_tag_cache = settings.LOCAL_TAG_CACHE
-        self.original_music_folder = settings.LOCAL_MUSIC_FOLDER
-
-        settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
-        settings.LOCAL_MUSIC_FOLDER = data_folder('')
-
-        super(LocalLibraryControllerTest, self).setUp()
-
-    def tearDown(self):
-        settings.LOCAL_TAG_CACHE = self.original_tag_cache
-        settings.LOCAL_MUSIC_FOLDER = self.original_music_folder
-
-        super(LocalLibraryControllerTest, self).tearDown()
-
-if __name__ == '__main__':
-    unittest.main()

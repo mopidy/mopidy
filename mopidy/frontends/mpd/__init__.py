@@ -4,6 +4,11 @@ from mopidy.frontends.mpd.thread import MpdThread
 class MpdFrontend(object):
     """
     The MPD frontend.
+
+    **Settings:**
+
+    - :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`
+    - :attr:`mopidy.settings.MPD_SERVER_PORT`
     """
 
     def __init__(self):

@@ -15,6 +15,8 @@ class LibspotifyLibraryController(BaseLibraryController):
 
     def lookup(self, uri):
         spotify_track = Link.from_string(uri).as_track()
+        # TODO Block until metadata_updated callback is called. Before that the
+        # track will be unloaded, unless it's already in the stored playlists.
         return LibspotifyTranslator.to_mopidy_track(spotify_track)
 
     def refresh(self, uri=None):

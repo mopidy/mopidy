@@ -2,9 +2,8 @@ import logging
 from serial import Serial
 from multiprocessing import Pipe
 
+from mopidy import settings
 from mopidy.mixers import BaseMixer
-from mopidy.settings import (MIXER_EXT_PORT, MIXER_EXT_SOURCE,
-    MIXER_EXT_SPEAKERS_A, MIXER_EXT_SPEAKERS_B)
 from mopidy.utils.process import BaseProcess
 
 logger = logging.getLogger('mopidy.mixers.nad')
@@ -91,8 +90,9 @@ class NadTalker(BaseProcess):
     def _open_connection(self):
         # Opens serial connection to the device.
         # Communication settings: 115200 bps 8N1
-        logger.info(u'Connecting to serial device "%s"', MIXER_EXT_PORT)
-        self._device = Serial(port=MIXER_EXT_PORT, baudrate=115200,
+        logger.info(u'Connecting to serial device "%s"',
+            settings.MIXER_EXT_PORT)
+        self._device = Serial(port=settings.MIXER_EXT_PORT, baudrate=115200,
             timeout=self.TIMEOUT)
         self._get_device_model()
 
@@ -114,20 +114,27 @@ class NadTalker(BaseProcess):
             self._command_device('Main.Power', 'On')
 
     def _select_speakers(self):
-        if MIXER_EXT_SPEAKERS_A is not None:
-            while self._ask_device('Main.SpeakerA') != MIXER_EXT_SPEAKERS_A:
-                logger.info(u'Setting speakers A "%s"', MIXER_EXT_SPEAKERS_A)
-                self._command_device('Main.SpeakerA', MIXER_EXT_SPEAKERS_A)
-        if MIXER_EXT_SPEAKERS_B is not None:
-            while self._ask_device('Main.SpeakerB') != MIXER_EXT_SPEAKERS_B:
-                logger.info(u'Setting speakers B "%s"', MIXER_EXT_SPEAKERS_B)
-                self._command_device('Main.SpeakerB', MIXER_EXT_SPEAKERS_B)
+        if settings.MIXER_EXT_SPEAKERS_A is not None:
+            while (self._ask_device('Main.SpeakerA')
+                    != settings.MIXER_EXT_SPEAKERS_A):
+                logger.info(u'Setting speakers A "%s"',
+                    settings.MIXER_EXT_SPEAKERS_A)
+                self._command_device('Main.SpeakerA',
+                    settings.MIXER_EXT_SPEAKERS_A)
+        if settings.MIXER_EXT_SPEAKERS_B is not None:
+            while (self._ask_device('Main.SpeakerB') !=
+                    settings.MIXER_EXT_SPEAKERS_B):
+                logger.info(u'Setting speakers B "%s"',
+                    settings.MIXER_EXT_SPEAKERS_B)
+                self._command_device('Main.SpeakerB',
+                    settings.MIXER_EXT_SPEAKERS_B)
 
     def _select_input_source(self):
-        if MIXER_EXT_SOURCE is not None:
-            while self._ask_device('Main.Source') != MIXER_EXT_SOURCE:
-                logger.info(u'Selecting input source "%s"', MIXER_EXT_SOURCE)
-                self._command_device('Main.Source', MIXER_EXT_SOURCE)
+        if settings.MIXER_EXT_SOURCE is not None:
+            while self._ask_device('Main.Source') != settings.MIXER_EXT_SOURCE:
+                logger.info(u'Selecting input source "%s"',
+                    settings.MIXER_EXT_SOURCE)
+                self._command_device('Main.Source', settings.MIXER_EXT_SOURCE)
 
     def _unmute(self):
         while self._ask_device('Main.Mute') != 'Off':
