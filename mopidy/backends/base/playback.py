@@ -442,8 +442,9 @@ class BasePlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        # FIXME I think return value is only really useful for internal
-        # testing, as such it should probably not be exposed in API.
+        if not self.backend.current_playlist.tracks:
+            return False
+
         if self.state == self.STOPPED:
             self.play()
         elif self.state == self.PAUSED:
@@ -451,9 +452,9 @@ class BasePlaybackController(object):
 
         if time_position < 0:
             time_position = 0
-        elif self.current_track and time_position > self.current_track.length:
+        elif time_position > self.current_track.length:
             self.next()
-            return
+            return True
 
         self._play_time_started = self._current_wall_time
         self._play_time_accumulated = time_position
