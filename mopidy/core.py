@@ -28,16 +28,15 @@ class CoreProcess(BaseProcess):
         parser.add_option('-v', '--verbose',
             action='store_const', const=2, dest='verbosity_level',
             help='more output (debug level)')
-        parser.add_option('--dump',
-            action='store_true', dest='dump',
-            help='dump debug log to file')
+        parser.add_option('--save-debug-log',
+            action='store_true', dest='save_debug_log',
+            help='save debug log to "./mopidy.log"')
         parser.add_option('--list-settings',
             action='callback', callback=list_settings_optparse_callback,
             help='list current settings')
         return parser.parse_args()[0]
 
     def run_inside_try(self):
-        logger.info(u'-- Starting Mopidy --')
         self.setup()
         while True:
             message = self.core_queue.get()
@@ -51,7 +50,9 @@ class CoreProcess(BaseProcess):
         self.frontends = self.setup_frontends(self.core_queue, self.backend)
 
     def setup_logging(self):
-        setup_logging(self.options.verbosity_level, self.options.dump)
+        setup_logging(self.options.verbosity_level,
+            self.options.save_debug_log)
+        logger.info(u'-- Starting Mopidy --')
 
     def setup_settings(self):
         get_or_create_folder('~/.mopidy/')

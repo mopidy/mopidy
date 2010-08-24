@@ -89,6 +89,8 @@ def validate_settings(defaults, settings):
     errors = {}
 
     changed = {
+        'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
+        'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
         'FRONTEND': 'FRONTENDS',
         'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',

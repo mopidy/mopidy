@@ -30,16 +30,16 @@ CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
 #:
 #: Default::
 #:
-#:     DUMP_LOG_FILENAME = CONSOLE_LOG_FORMAT
-DUMP_LOG_FORMAT = CONSOLE_LOG_FORMAT
+#:     DEBUG_LOG_FILENAME = CONSOLE_LOG_FORMAT
+DEBUG_LOG_FORMAT = CONSOLE_LOG_FORMAT
 
 #: The file to dump debug log data to when Mopidy is run with the
-#: :option:`--dump` option.
+#: :option:`--save-debug-log` option.
 #:
 #: Default::
 #:
-#:     DUMP_LOG_FILENAME = u'dump.log'
-DUMP_LOG_FILENAME = u'dump.log'
+#:     DEBUG_LOG_FILENAME = u'mopidy.log'
+DEBUG_LOG_FILENAME = u'mopidy.log'
 
 #: List of server frontends to use.
 #:

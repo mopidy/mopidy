@@ -10,9 +10,17 @@ This change log is used to track all major changes to Mopidy.
 
 No description yet.
 
-**Changes**
+**Important changes**
 
 - Added a Last.fm scrobbler. See :mod:`mopidy.frontends.lastfm` for details.
+
+**Changes**
+
+- Rename :option:`--dump` to :option:`--save-debug-log`.
+- Rename setting :attr:`mopidy.settings.DUMP_LOG_FORMAT` to
+  :attr:`mopidy.settings.DEBUG_LOG_FORMAT`.
+- Rename setting :attr:`mopidy.settings.DUMP_LOG_FILENAME` to
+  :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
 
 
 0.1.0 (2010-08-23)

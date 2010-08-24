@@ -3,10 +3,10 @@ import logging.handlers
 
 from mopidy import settings
 
-def setup_logging(verbosity_level, dump):
+def setup_logging(verbosity_level, save_debug_log):
     setup_console_logging(verbosity_level)
-    if dump:
-        setup_dump_logging()
+    if save_debug_log:
+        setup_debug_logging_to_file()
 
 def setup_console_logging(verbosity_level):
     if verbosity_level == 0:
@@ -17,12 +17,12 @@ def setup_console_logging(verbosity_level):
         level = logging.INFO
     logging.basicConfig(format=settings.CONSOLE_LOG_FORMAT, level=level)
 
-def setup_dump_logging():
+def setup_debug_logging_to_file():
     root = logging.getLogger('')
     root.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(settings.DUMP_LOG_FORMAT)
+    formatter = logging.Formatter(settings.DEBUG_LOG_FORMAT)
     handler = logging.handlers.RotatingFileHandler(
-        settings.DUMP_LOG_FILENAME, maxBytes=102400, backupCount=3)
+        settings.DEBUG_LOG_FILENAME, maxBytes=102400, backupCount=3)
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
