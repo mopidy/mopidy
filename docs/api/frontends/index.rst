@@ -21,4 +21,5 @@ Frontend API
 Frontends
 =========
 
+* :mod:`mopidy.frontends.lastfm`
 * :mod:`mopidy.frontends.mpd`
