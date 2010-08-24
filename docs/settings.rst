@@ -47,7 +47,9 @@ Scrobbling tracks to Last.fm
 ============================
 
 If you want to submit the tracks you are playing to your `Last.fm
-<http://www.last.fm/>`_ profile, add the following to your settings file::
+<http://www.last.fm/>`_ profile, make sure you've installed the dependencies
+found at :mod:`mopidy.frontends.lastfm` and add the following to your settings
+file::
 
     LASTFM_USERNAME = u'myusername'
     LASTFM_PASSWORD = u'mysecret'

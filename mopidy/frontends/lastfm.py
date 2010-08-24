@@ -22,7 +22,12 @@ ENCODING = u'utf-8'
 
 class LastfmFrontend(BaseFrontend):
     """
-    Frontend which scrobbles the music you plays to your Last.fm profile.
+    Frontend which scrobbles the music you play to your `Last.fm
+    <http://www.last.fm>`_ profile.
+
+    .. note::
+
+        This frontend requires a free user account at Last.fm.
 
     **Dependencies:**
 
