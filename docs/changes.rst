@@ -16,9 +16,13 @@ No description yet.
 
 **Changes**
 
-- Rename :option:`--dump` to :option:`--save-debug-log`.
+- Simplify the default log format, :attr:`mopidy.settings.CONSOLE_LOG_FORMAT`.
+  From a user's point of view: Less noise, more information.
+- Rename the :option:`--dump` command line option to
+  :option:`--save-debug-log`.
 - Rename setting :attr:`mopidy.settings.DUMP_LOG_FORMAT` to
-  :attr:`mopidy.settings.DEBUG_LOG_FORMAT`.
+  :attr:`mopidy.settings.DEBUG_LOG_FORMAT` and use it for :option:`--verbose`
+  too.
 - Rename setting :attr:`mopidy.settings.DUMP_LOG_FILENAME` to
   :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
 

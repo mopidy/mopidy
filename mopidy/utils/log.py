@@ -10,12 +10,15 @@ def setup_logging(verbosity_level, save_debug_log):
 
 def setup_console_logging(verbosity_level):
     if verbosity_level == 0:
-        level = logging.WARNING
+        log_level = logging.WARNING
+        log_format = settings.CONSOLE_LOG_FORMAT
     elif verbosity_level == 2:
-        level = logging.DEBUG
+        log_level = logging.DEBUG
+        log_format = settings.DEBUG_LOG_FORMAT
     else:
-        level = logging.INFO
-    logging.basicConfig(format=settings.CONSOLE_LOG_FORMAT, level=level)
+        log_level = logging.INFO
+        log_format = settings.CONSOLE_LOG_FORMAT
+    logging.basicConfig(format=log_format, level=log_level)
 
 def setup_debug_logging_to_file():
     root = logging.getLogger('')

@@ -20,18 +20,18 @@ BACKENDS = (
     u'mopidy.backends.libspotify.LibspotifyBackend',
 )
 
-#: The log format used on the console. See
-#: http://docs.python.org/library/logging.html#formatter-objects for details on
-#: the format.
-CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
-    ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
+#: The log format used for informational logging.
+#:
+#: See http://docs.python.org/library/logging.html#formatter-objects for
+#: details on the format.
+CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
-#: The log format used for dump logs.
+#: The log format used for debug logging.
 #:
-#: Default::
-#:
-#:     DEBUG_LOG_FILENAME = CONSOLE_LOG_FORMAT
-DEBUG_LOG_FORMAT = CONSOLE_LOG_FORMAT
+#: See http://docs.python.org/library/logging.html#formatter-objects for
+#: details on the format.
+DEBUG_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
+    ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
 #: The file to dump debug log data to when Mopidy is run with the
 #: :option:`--save-debug-log` option.
