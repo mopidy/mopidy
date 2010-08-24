@@ -54,6 +54,12 @@ Make sure you got the required dependencies installed.
 
     - No additional dependencies.
 
+- Optional dependencies:
+
+  - :mod:`mopidy.frontends.lastfm`
+
+    - pylast >= 4.3.0
+
 
 Install latest release
 ======================
