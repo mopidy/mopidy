@@ -18,7 +18,7 @@ class CoreProcess(BaseProcess):
         self.options = self.parse_options()
         self.output = None
         self.backend = None
-        self.frontend = None
+        self.frontends = []
 
     def parse_options(self):
         parser = optparse.OptionParser(version='Mopidy %s' % get_version())
@@ -48,7 +48,7 @@ class CoreProcess(BaseProcess):
         self.setup_settings()
         self.output = self.setup_output(self.core_queue)
         self.backend = self.setup_backend(self.core_queue, self.output)
-        self.frontend = self.setup_frontend(self.core_queue, self.backend)
+        self.frontends = self.setup_frontends(self.core_queue, self.backend)
 
     def setup_logging(self):
         setup_logging(self.options.verbosity_level, self.options.dump)
@@ -66,16 +66,20 @@ class CoreProcess(BaseProcess):
     def setup_backend(self, core_queue, output):
         return get_class(settings.BACKENDS[0])(core_queue, output)
 
-    def setup_frontend(self, core_queue, backend):
-        frontend = get_class(settings.FRONTENDS[0])(core_queue, backend)
-        frontend.start()
-        return frontend
+    def setup_frontends(self, core_queue, backend):
+        frontends = []
+        for frontend_class_name in settings.FRONTENDS:
+            frontend = get_class(frontend_class_name)(core_queue, backend)
+            frontend.start()
+            frontends.append(frontend)
+        return frontends
 
     def process_message(self, message):
         if message.get('to') == 'output':
             self.output.process_message(message)
         elif message.get('to') == 'frontend':
-            self.frontend.process_message(message)
+            for frontend in self.frontends:
+                frontend.process_message(message)
         elif message['command'] == 'end_of_track':
             self.backend.playback.on_end_of_track()
         elif message['command'] == 'stop_playback':
