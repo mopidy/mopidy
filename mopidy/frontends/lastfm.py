@@ -16,6 +16,10 @@ class LastfmFrontend(BaseFrontend):
     """
     Frontend which scrobbles the music you plays to your Last.fm profile.
 
+    **Dependencies:**
+
+    - `pylast <http://code.google.com/p/pylast/>`_ >= 0.4.30
+
     **Settings:**
 
     - :mod:`mopidy.settings.LASTFM_USERNAME`
@@ -24,6 +28,7 @@ class LastfmFrontend(BaseFrontend):
 
     # TODO Split into own thread/process
     # TODO Add docs
+    # TODO Log nice error message if pylast isn't found
 
     def __init__(self, *args, **kwargs):
         super(LastfmFrontend, self).__init__(*args, **kwargs)
