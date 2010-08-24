@@ -45,4 +45,4 @@ class MpdFrontend(BaseFrontend):
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
         else:
-            logger.warning(u'Cannot handle message: %s', message)
+            pass # Ignore messages for other frontends
