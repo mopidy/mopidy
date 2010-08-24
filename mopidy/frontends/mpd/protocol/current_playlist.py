@@ -11,6 +11,10 @@ def add(frontend, uri):
 
         Adds the file ``URI`` to the playlist (directories add recursively).
         ``URI`` can also be a single file.
+
+    *Clarifications:*
+
+    - ``add ""`` should add all tracks in the library to the current playlist.
     """
     if not uri:
         return
@@ -37,6 +41,10 @@ def addid(frontend, uri, songpos=None):
             addid "foo.mp3"
             Id: 999
             OK
+
+    *Clarifications:*
+
+    - ``addid ""`` should return an error.
     """
     if not uri:
         raise MpdNoExistError(u'No such song', command=u'addid')
