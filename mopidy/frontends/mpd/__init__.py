@@ -1,12 +1,13 @@
 import logging
 
+from mopidy.frontends.base import BaseFrontend
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.process import MpdProcess
 from mopidy.utils.process import unpickle_connection
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
-class MpdFrontend(object):
+class MpdFrontend(BaseFrontend):
     """
     The MPD frontend.
 
@@ -16,15 +17,19 @@ class MpdFrontend(object):
     - :attr:`mopidy.settings.MPD_SERVER_PORT`
     """
 
-    def __init__(self, core_queue, backend):
-        self.core_queue = core_queue
+    def __init__(self, *args, **kwargs):
+        super(MpdFrontend, self).__init__(*args, **kwargs)
         self.process = None
-        self.dispatcher = MpdDispatcher(backend)
+        self.dispatcher = MpdDispatcher(self.backend)
 
     def start(self):
         """Starts the MPD server."""
         self.process = MpdProcess(self.core_queue)
         self.process.start()
+
+    def destroy(self):
+        """Destroys the MPD server."""
+        self.process.destroy()
 
     def process_message(self, message):
         """
@@ -40,4 +45,4 @@ class MpdFrontend(object):
             connection = unpickle_connection(message['reply_to'])
             connection.send(response)
         else:
-            logger.warning(u'Cannot handle message: %s', message)
+            pass # Ignore messages for other frontends

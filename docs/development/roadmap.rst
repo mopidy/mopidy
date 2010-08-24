@@ -33,7 +33,7 @@ Possible targets for the next version
   - A script for creating a tag cache.
   - An alternative to tag cache for caching metadata, i.e. Sqlite.
 
-- Last.fm scrobbling.
+- **[DONE]** Last.fm scrobbling.
 
 
 Stuff we want to do, but not right now, and maybe never

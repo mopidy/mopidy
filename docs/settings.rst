@@ -41,3 +41,15 @@ Connecting from other machines on the network
 As a secure default, Mopidy only accepts connections from ``localhost``. If you
 want to open it for connections from other machines on your network, see
 the documentation for :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`.
+
+
+Scrobbling tracks to Last.fm
+============================
+
+If you want to submit the tracks you are playing to your `Last.fm
+<http://www.last.fm/>`_ profile, make sure you've installed the dependencies
+found at :mod:`mopidy.frontends.lastfm` and add the following to your settings
+file::
+
+    LASTFM_USERNAME = u'myusername'
+    LASTFM_PASSWORD = u'mysecret'

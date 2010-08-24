@@ -22,6 +22,9 @@ class MopidyException(Exception):
 class SettingsError(MopidyException):
     pass
 
+class OptionalDependencyError(MopidyException):
+    pass
+
 from mopidy import settings as default_settings_module
 from mopidy.utils.settings import SettingsProxy
 settings = SettingsProxy(default_settings_module)
