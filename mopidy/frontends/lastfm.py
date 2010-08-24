@@ -105,12 +105,14 @@ class LastfmFrontendProcess(BaseProcess):
             logger.error(u'Last.fm now playing error: %s', e)
 
     def scrobble(self, track):
+        duration = track.length // 1000
         artists = ', '.join([a.name for a in track.artists])
+        if duration < 30:
+            logger.debug(u'Track too short to scrobble.')
+            return
         logger.debug(u'Scrobbling track: %s - %s', artists, track.name)
         # TODO Scrobble if >50% or >240s of a track has been played
-        # TODO Do not scrobble if duration <30s
         # FIXME Get actual time when track started playing
-        duration = track.length // 1000
         time_started = int(time.time()) - duration
         try:
             self.scrobbler.scrobble(
