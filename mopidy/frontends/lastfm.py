@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 import socket
 import time
 
@@ -6,6 +7,7 @@ import pylast
 
 from mopidy import get_version, settings, SettingsError
 from mopidy.frontends.base import BaseFrontend
+from mopidy.utils.process import BaseProcess
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
@@ -31,16 +33,41 @@ class LastfmFrontend(BaseFrontend):
     - :mod:`mopidy.settings.LASTFM_PASSWORD`
     """
 
-    # TODO Split into own thread/process
     # TODO Add docs
     # TODO Log nice error message if pylast isn't found
 
     def __init__(self, *args, **kwargs):
         super(LastfmFrontend, self).__init__(*args, **kwargs)
+        (self.connection, other_end) = multiprocessing.Pipe()
+        self.process = LastfmFrontendProcess(other_end)
+
+    def start(self):
+        self.process.start()
+
+    def destroy(self):
+        self.process.destroy()
+
+    def process_message(self, message):
+        self.connection.send(message)
+
+
+class LastfmFrontendProcess(BaseProcess):
+    def __init__(self, connection):
+        super(LastfmFrontendProcess, self).__init__()
+        self.name = u'LastfmFrontendProcess'
+        self.daemon = True
+        self.connection = connection
         self.lastfm = None
         self.scrobbler = None
 
-    def start(self):
+    def run_inside_try(self):
+        self.setup()
+        while True:
+            self.connection.poll(None)
+            message = self.connection.recv()
+            self.process_message(message)
+
+    def setup(self):
         try:
             username = settings.LASTFM_USERNAME
             password_hash = pylast.md5(settings.LASTFM_PASSWORD)
@@ -54,9 +81,6 @@ class LastfmFrontend(BaseFrontend):
             logger.debug(u'Last.fm settings error: %s', e)
         except (pylast.WSError, socket.error) as e:
             logger.error(u'Last.fm connection error: %s', e)
-
-    def destroy(self):
-        pass
 
     def process_message(self, message):
         if message['command'] == 'now_playing':
