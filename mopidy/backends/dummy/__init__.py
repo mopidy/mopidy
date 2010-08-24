@@ -64,6 +64,12 @@ class DummyPlaybackController(BasePlaybackController):
     def _stop(self):
         return True
 
+    def _trigger_started_playing_event(self):
+        pass # noop
+
+    def _trigger_stopped_playing_event(self):
+        pass # noop
+
 
 class DummyStoredPlaylistsController(BaseStoredPlaylistsController):
     _playlists = []
