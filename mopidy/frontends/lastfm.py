@@ -12,6 +12,11 @@ logger = logging.getLogger('mopidy.frontends.lastfm')
 CLIENT_ID = u'mop'
 CLIENT_VERSION = get_version()
 
+# pylast raises UnicodeEncodeError on conversion from unicode objects to
+# ascii-encoded bytestrings, so we explicitly encode as utf-8 before passing
+# strings to pylast.
+ENCODING = u'utf-8'
+
 class LastfmFrontend(BaseFrontend):
     """
     Frontend which scrobbles the music you plays to your Last.fm profile.
@@ -66,8 +71,11 @@ class LastfmFrontend(BaseFrontend):
         logger.debug(u'Now playing track: %s - %s', artists, track.name)
         duration = track.length // 1000
         try:
-            self.scrobbler.report_now_playing(artists, track.name,
-                album=track.album.name, duration=duration,
+            self.scrobbler.report_now_playing(
+                artists.encode(ENCODING),
+                track.name.encode(ENCODING),
+                album=track.album.name.encode(ENCODING),
+                duration=duration,
                 track_number=track.track_no)
         except (pylast.ScrobblingError, socket.error) as e:
             logger.error(u'Last.fm now playing error: %s', e)
@@ -81,9 +89,14 @@ class LastfmFrontend(BaseFrontend):
         duration = track.length // 1000
         time_started = int(time.time()) - duration
         try:
-            self.scrobbler.scrobble(artists, track.name,
-                time_started=time_started, source=pylast.SCROBBLE_SOURCE_USER,
-                mode=pylast.SCROBBLE_MODE_PLAYED, duration=duration,
-                album=track.album.name, track_number=track.track_no)
+            self.scrobbler.scrobble(
+                artists.encode(ENCODING),
+                track.name.encode(ENCODING),
+                time_started=time_started,
+                source=pylast.SCROBBLE_SOURCE_USER,
+                mode=pylast.SCROBBLE_MODE_PLAYED,
+                duration=duration,
+                album=track.album.name.encode(ENCODING),
+                track_number=track.track_no)
         except (pylast.ScrobblingError, socket.error) as e:
             logger.error(u'Last.fm scrobbling error: %s', e)
