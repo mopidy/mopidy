@@ -3,6 +3,7 @@ import multiprocessing
 import socket
 import time
 
+# TODO Log nice error message if pylast isn't found
 import pylast
 
 from mopidy import get_version, settings, SettingsError
@@ -29,12 +30,9 @@ class LastfmFrontend(BaseFrontend):
 
     **Settings:**
 
-    - :mod:`mopidy.settings.LASTFM_USERNAME`
-    - :mod:`mopidy.settings.LASTFM_PASSWORD`
+    - :attr:`mopidy.settings.LASTFM_USERNAME`
+    - :attr:`mopidy.settings.LASTFM_PASSWORD`
     """
-
-    # TODO Add docs
-    # TODO Log nice error message if pylast isn't found
 
     def __init__(self, *args, **kwargs):
         super(LastfmFrontend, self).__init__(*args, **kwargs)
