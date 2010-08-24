@@ -25,6 +25,7 @@ Possible targets for the next version
 
   - Write-support for Spotify, i.e. playlist management.
   - Virtual directories with e.g. starred tracks from Spotify.
+  - Support for 320 kbps audio.
 
 - Local backend:
 
