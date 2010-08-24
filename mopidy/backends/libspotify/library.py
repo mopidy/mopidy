@@ -1,7 +1,7 @@
 import logging
 import multiprocessing
 
-from spotify import Link
+from spotify import Link, SpotifyError
 
 from mopidy.backends.base import BaseLibraryController
 from mopidy.backends.libspotify import ENCODING
@@ -14,10 +14,15 @@ class LibspotifyLibraryController(BaseLibraryController):
         return self.search(**query)
 
     def lookup(self, uri):
-        spotify_track = Link.from_string(uri).as_track()
-        # TODO Block until metadata_updated callback is called. Before that the
-        # track will be unloaded, unless it's already in the stored playlists.
-        return LibspotifyTranslator.to_mopidy_track(spotify_track)
+        try:
+            spotify_track = Link.from_string(uri).as_track()
+            # TODO Block until metadata_updated callback is called. Before that
+            # the track will be unloaded, unless it's already in the stored
+            # playlists.
+            return LibspotifyTranslator.to_mopidy_track(spotify_track)
+        except SpotifyError as e:
+            logger.warning(u'Failed to lookup: %s', track.uri, e)
+            return None
 
     def refresh(self, uri=None):
         pass # TODO
