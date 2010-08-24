@@ -12,7 +12,7 @@ No description yet.
 
 **Changes**
 
-- None
+- Added a Last.fm scrobbler. See :mod:`mopidy.frontends.lastfm` for details.
 
 
 0.1.0 (2010-08-23)
