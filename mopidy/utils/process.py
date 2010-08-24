@@ -37,3 +37,6 @@ class BaseProcess(multiprocessing.Process):
 
     def run_inside_try(self):
         raise NotImplementedError
+
+    def destroy(self):
+        self.terminate()
