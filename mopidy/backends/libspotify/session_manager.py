@@ -18,7 +18,8 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def __init__(self, username, password, core_queue, output):
         SpotifySessionManager.__init__(self, username, password)
-        threading.Thread.__init__(self, name='LibspotifySessionManagerThread')
+        threading.Thread.__init__(self)
+        self.name = 'LibspotifySMThread'
         # Run as a daemon thread, so Mopidy won't wait for this thread to exit
         # before Mopidy exits.
         self.daemon = True
@@ -32,17 +33,17 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def logged_in(self, session, error):
         """Callback used by pyspotify"""
-        logger.info('Logged in')
+        logger.info(u'Connected to Spotify')
         self.session = session
         self.connected.set()
 
     def logged_out(self, session):
         """Callback used by pyspotify"""
-        logger.info('Logged out')
+        logger.info(u'Disconnected from Spotify')
 
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
-        logger.debug('Metadata updated, refreshing stored playlists')
+        logger.debug(u'Metadata updated, refreshing stored playlists')
         playlists = []
         for spotify_playlist in session.playlist_container():
             playlists.append(
@@ -54,15 +55,15 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def connection_error(self, session, error):
         """Callback used by pyspotify"""
-        logger.error('Connection error: %s', error)
+        logger.error(u'Connection error: %s', error)
 
     def message_to_user(self, session, message):
         """Callback used by pyspotify"""
-        logger.info(message.strip())
+        logger.debug(u'User message: %s', message.strip())
 
     def notify_main_thread(self, session):
         """Callback used by pyspotify"""
-        logger.debug('Notify main thread')
+        logger.debug(u'notify_main_thread() called')
 
     def music_delivery(self, session, frames, frame_size, num_frames,
             sample_type, sample_rate, channels):
@@ -81,16 +82,16 @@ class LibspotifySessionManager(SpotifySessionManager, threading.Thread):
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
-        logger.debug('Play token lost')
+        logger.debug(u'Play token lost')
         self.core_queue.put({'command': 'stop_playback'})
 
     def log_message(self, session, data):
         """Callback used by pyspotify"""
-        logger.debug(data.strip())
+        logger.debug(u'System message: %s' % data.strip())
 
     def end_of_track(self, session):
         """Callback used by pyspotify"""
-        logger.debug('End of data stream.')
+        logger.debug(u'End of data stream reached')
         self.output.end_of_data_stream()
 
     def search(self, query, connection):

@@ -51,7 +51,7 @@ class LibspotifyBackend(BaseBackend):
         from .session_manager import LibspotifySessionManager
 
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
-        logger.info(u'Connecting to Spotify')
+        logger.debug(u'Connecting to Spotify')
         spotify = LibspotifySessionManager(
             settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
             core_queue=self.core_queue,
