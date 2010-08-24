@@ -323,6 +323,13 @@ class BasePlaybackController(object):
         if self.consume:
             self.backend.current_playlist.remove(cpid=original_cp_track[0])
 
+        # Notify frontends of the end_of_track event
+        self.backend.core_queue.put({
+            'to': 'frontend',
+            'command': 'end_of_track',
+            'track': original_cp_track[1],
+        })
+
     def on_current_playlist_change(self):
         """
         Tell the playback controller that the current playlist has changed.
@@ -399,6 +406,13 @@ class BasePlaybackController(object):
 
         if self.random and self.current_cp_track in self._shuffled:
             self._shuffled.remove(self.current_cp_track)
+
+        # Notify frontends of the now_playing event
+        self.backend.core_queue.put({
+            'to': 'frontend',
+            'command': 'now_playing',
+            'track': cp_track[1],
+        })
 
     def _play(self, track):
         """
