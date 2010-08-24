@@ -59,6 +59,7 @@ class LastfmFrontendProcess(BaseProcess):
         self.connection = connection
         self.lastfm = None
         self.scrobbler = None
+        self.last_start_time = None
 
     def run_inside_try(self):
         self.setup()
@@ -83,17 +84,18 @@ class LastfmFrontendProcess(BaseProcess):
             logger.error(u'Last.fm connection error: %s', e)
 
     def process_message(self, message):
-        if message['command'] == 'now_playing':
-            self.report_now_playing(message['track'])
-        elif message['command'] == 'end_of_track':
-            self.scrobble(message['track'])
+        if message['command'] == 'started_playing':
+            self.started_playing(message['track'])
+        elif message['command'] == 'stopped_playing':
+            self.stopped_playing(message['track'], message['stop_position'])
         else:
             pass # Ignore commands for other frontends
 
-    def report_now_playing(self, track):
+    def started_playing(self, track):
         artists = ', '.join([a.name for a in track.artists])
-        logger.debug(u'Now playing track: %s - %s', artists, track.name)
         duration = track.length // 1000
+        self.last_start_time = int(time.time())
+        logger.debug(u'Now playing track: %s - %s', artists, track.name)
         try:
             self.scrobbler.report_now_playing(
                 artists.encode(ENCODING),
@@ -104,21 +106,25 @@ class LastfmFrontendProcess(BaseProcess):
         except (pylast.ScrobblingError, socket.error) as e:
             logger.error(u'Last.fm now playing error: %s', e)
 
-    def scrobble(self, track):
-        duration = track.length // 1000
+    def stopped_playing(self, track, stop_position):
         artists = ', '.join([a.name for a in track.artists])
+        duration = track.length // 1000
+        stop_position = stop_position // 1000
         if duration < 30:
-            logger.debug(u'Track too short to scrobble.')
+            logger.debug(u'Track too short to scrobble. (30s)')
             return
+        if stop_position < duration // 2 and stop_position < 240:
+            logger.debug(
+                u'Track not played long enough to scrobble. (50% or 240s)')
+            return
+        if self.last_start_time is None:
+            self.last_start_time = int(time.time()) - duration
         logger.debug(u'Scrobbling track: %s - %s', artists, track.name)
-        # TODO Scrobble if >50% or >240s of a track has been played
-        # FIXME Get actual time when track started playing
-        time_started = int(time.time()) - duration
         try:
             self.scrobbler.scrobble(
                 artists.encode(ENCODING),
                 track.name.encode(ENCODING),
-                time_started=time_started,
+                time_started=self.last_start_time,
                 source=pylast.SCROBBLE_SOURCE_USER,
                 mode=pylast.SCROBBLE_MODE_PLAYED,
                 duration=duration,
