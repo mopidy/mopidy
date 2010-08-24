@@ -311,6 +311,14 @@ class BasePlaybackController(object):
             return
 
         original_cp_track = self.current_cp_track
+
+        # Notify frontends of the end_of_track event
+        self.backend.core_queue.put({
+            'to': 'frontend',
+            'command': 'end_of_track',
+            'track': original_cp_track[1],
+        })
+
         if self.cp_track_at_eot:
             self.play(self.cp_track_at_eot)
 
@@ -322,13 +330,6 @@ class BasePlaybackController(object):
 
         if self.consume:
             self.backend.current_playlist.remove(cpid=original_cp_track[0])
-
-        # Notify frontends of the end_of_track event
-        self.backend.core_queue.put({
-            'to': 'frontend',
-            'command': 'end_of_track',
-            'track': original_cp_track[1],
-        })
 
     def on_current_playlist_change(self):
         """
