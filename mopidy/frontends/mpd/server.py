@@ -36,7 +36,8 @@ class MpdServer(asyncore.dispatcher):
                 self._format_hostname(settings.MPD_SERVER_HOSTNAME),
                 settings.MPD_SERVER_PORT)
         except IOError, e:
-            sys.exit('MPD server startup failed: %s' % e)
+            logger.error('MPD server startup failed: %s' % e)
+            sys.exit(1)
 
     def handle_accept(self):
         """Handle new client connection."""
