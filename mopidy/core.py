@@ -2,7 +2,7 @@ import logging
 import multiprocessing
 import optparse
 
-from mopidy import get_version, settings
+from mopidy import get_version, settings, OptionalDependencyError
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
@@ -69,9 +69,12 @@ class CoreProcess(BaseProcess):
     def setup_frontends(self, core_queue, backend):
         frontends = []
         for frontend_class_name in settings.FRONTENDS:
-            frontend = get_class(frontend_class_name)(core_queue, backend)
-            frontend.start()
-            frontends.append(frontend)
+            try:
+                frontend = get_class(frontend_class_name)(core_queue, backend)
+                frontend.start()
+                frontends.append(frontend)
+            except OptionalDependencyError as e:
+                logger.info(u'Disabled: %s (%s)', frontend_class_name, e)
         return frontends
 
     def process_message(self, message):

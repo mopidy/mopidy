@@ -3,8 +3,11 @@ import multiprocessing
 import socket
 import time
 
-# TODO Log nice error message if pylast isn't found
-import pylast
+try:
+    import pylast
+except ImportError as e:
+    from mopidy import OptionalDependencyError
+    raise OptionalDependencyError(e)
 
 from mopidy import get_version, settings, SettingsError
 from mopidy.frontends.base import BaseFrontend
