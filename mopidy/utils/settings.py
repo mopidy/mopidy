@@ -130,7 +130,7 @@ def list_settings_optparse_callback(*args):
     lines = []
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
-        if key.endswith('PASSWORD'):
+        if key.endswith('PASSWORD') and len(value):
             value = u'********'
         lines.append(u'%s:' % key)
         lines.append(u'  Value: %s' % repr(value))
