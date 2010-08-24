@@ -45,11 +45,14 @@ DUMP_LOG_FILENAME = u'dump.log'
 #:
 #: Default::
 #:
-#:     FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
-#:
-#: .. note::
-#:     Currently only the first frontend in the list is used.
-FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
+#:     FRONTENDS = (
+#:         u'mopidy.frontends.mpd.MpdFrontend',
+#:         u'mopidy.frontends.lastfm.LastfmFrontend',
+#:     )
+FRONTENDS = (
+    u'mopidy.frontends.mpd.MpdFrontend',
+    u'mopidy.frontends.lastfm.LastfmFrontend',
+)
 
 #: Which GStreamer audio sink to use in :mod:`mopidy.outputs.gstreamer`.
 #:
