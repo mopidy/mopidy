@@ -12,13 +12,14 @@ def add(frontend, uri):
         Adds the file ``URI`` to the playlist (directories add recursively).
         ``URI`` can also be a single file.
     """
+    if not uri:
+        return
     for handler_prefix in frontend.backend.uri_handlers:
         if uri.startswith(handler_prefix):
             track = frontend.backend.library.lookup(uri)
             if track is not None:
                 frontend.backend.current_playlist.add(track)
                 return
-
     raise MpdNoExistError(
         u'directory or file not found', command=u'add')
 
@@ -37,6 +38,8 @@ def addid(frontend, uri, songpos=None):
             Id: 999
             OK
     """
+    if not uri:
+        raise MpdNoExistError(u'No such song', command=u'addid')
     if songpos is not None:
         songpos = int(songpos)
     track = frontend.backend.library.lookup(uri)
@@ -44,7 +47,8 @@ def addid(frontend, uri, songpos=None):
         raise MpdNoExistError(u'No such song', command=u'addid')
     if songpos and songpos > len(frontend.backend.current_playlist.tracks):
         raise MpdArgError(u'Bad song index', command=u'addid')
-    cp_track = frontend.backend.current_playlist.add(track, at_position=songpos)
+    cp_track = frontend.backend.current_playlist.add(track,
+        at_position=songpos)
     return ('Id', cp_track[0])
 
 @handle_pattern(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')

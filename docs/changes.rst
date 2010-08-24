@@ -25,6 +25,9 @@ No description yet.
   too.
 - Rename setting :attr:`mopidy.settings.DUMP_LOG_FILENAME` to
   :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
+- MPD frontend:
+
+  - ``add ""`` and ``addid ""`` now behaves as expected.
 
 
 0.1.0 (2010-08-23)
