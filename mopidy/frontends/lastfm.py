@@ -22,13 +22,15 @@ class LastfmFrontend(BaseFrontend):
     - :mod:`mopidy.settings.LASTFM_PASSWORD`
     """
 
+    # TODO Split into own thread/process
+    # TODO Add docs
+
     def __init__(self, *args, **kwargs):
         super(LastfmFrontend, self).__init__(*args, **kwargs)
         self.lastfm = None
         self.scrobbler = None
 
     def start(self):
-        # TODO Split into own thread/process
         try:
             username = settings.LASTFM_USERNAME
             password_hash = pylast.md5(settings.LASTFM_PASSWORD)
@@ -68,6 +70,8 @@ class LastfmFrontend(BaseFrontend):
     def scrobble(self, track):
         artists = ', '.join([a.name for a in track.artists])
         logger.debug(u'Scrobbling track: %s - %s', artists, track.name)
+        # TODO Scrobble if >50% or >240s of a track has been played
+        # TODO Do not scrobble if duration <30s
         # FIXME Get actual time when track started playing
         duration = track.length // 1000
         time_started = int(time.time()) - duration
