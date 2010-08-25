@@ -72,7 +72,7 @@ class GStreamerOutput(BaseOutput):
         return self._send_recv({'command': 'get_position'})
 
     def set_position(self, position):
-        return self._send_recv({'command': 'set_position'})
+        return self._send_recv({'command': 'set_position', 'position': position})
 
     def set_state(self, state):
         return self._send_recv({'command': 'set_state', 'state': state})
