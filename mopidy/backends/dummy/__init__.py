@@ -59,7 +59,7 @@ class DummyPlaybackController(BasePlaybackController):
         return True
 
     def _seek(self, time_position):
-        pass
+        return True
 
     def _stop(self):
         return True
