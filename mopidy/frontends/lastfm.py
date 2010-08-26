@@ -110,7 +110,7 @@ class LastfmFrontendProcess(BaseProcess):
                 duration=duration,
                 track_number=track.track_no)
         except (pylast.ScrobblingError, socket.error) as e:
-            logger.error(u'Last.fm now playing error: %s', e)
+            logger.warning(u'Last.fm now playing error: %s', e)
 
     def stopped_playing(self, track, stop_position):
         artists = ', '.join([a.name for a in track.artists])
@@ -137,4 +137,4 @@ class LastfmFrontendProcess(BaseProcess):
                 album=track.album.name.encode(ENCODING),
                 track_number=track.track_no)
         except (pylast.ScrobblingError, socket.error) as e:
-            logger.error(u'Last.fm scrobbling error: %s', e)
+            logger.warning(u'Last.fm scrobbling error: %s', e)
