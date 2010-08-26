@@ -7,7 +7,6 @@ import gst
 
 import logging
 import multiprocessing
-import threading
 
 from mopidy import settings
 from mopidy.outputs.base import BaseOutput
