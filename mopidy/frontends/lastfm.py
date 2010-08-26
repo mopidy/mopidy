@@ -11,7 +11,7 @@ except ImportError as e:
 
 from mopidy import get_version, settings, SettingsError
 from mopidy.frontends.base import BaseFrontend
-from mopidy.utils.process import BaseProcess
+from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
@@ -45,22 +45,22 @@ class LastfmFrontend(BaseFrontend):
     def __init__(self, *args, **kwargs):
         super(LastfmFrontend, self).__init__(*args, **kwargs)
         (self.connection, other_end) = multiprocessing.Pipe()
-        self.process = LastfmFrontendProcess(other_end)
+        self.thread = LastfmFrontendThread(other_end)
 
     def start(self):
-        self.process.start()
+        self.thread.start()
 
     def destroy(self):
-        self.process.destroy()
+        self.thread.destroy()
 
     def process_message(self, message):
         self.connection.send(message)
 
 
-class LastfmFrontendProcess(BaseProcess):
+class LastfmFrontendThread(BaseThread):
     def __init__(self, connection):
-        super(LastfmFrontendProcess, self).__init__()
-        self.name = u'LastfmFrontendProcess'
+        super(LastfmFrontendThread, self).__init__()
+        self.name = u'LastfmFrontendThread'
         self.daemon = True
         self.connection = connection
         self.lastfm = None
