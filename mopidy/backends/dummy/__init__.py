@@ -59,10 +59,16 @@ class DummyPlaybackController(BasePlaybackController):
         return True
 
     def _seek(self, time_position):
-        pass
+        return True
 
     def _stop(self):
         return True
+
+    def _trigger_started_playing_event(self):
+        pass # noop
+
+    def _trigger_stopped_playing_event(self):
+        pass # noop
 
 
 class DummyStoredPlaylistsController(BaseStoredPlaylistsController):

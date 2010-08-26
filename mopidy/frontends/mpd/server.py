@@ -29,14 +29,15 @@ class MpdServer(asyncore.dispatcher):
             self.set_reuse_addr()
             hostname = self._format_hostname(settings.MPD_SERVER_HOSTNAME)
             port = settings.MPD_SERVER_PORT
-            logger.debug(u'Binding to [%s]:%s', hostname, port)
+            logger.debug(u'MPD server is binding to [%s]:%s', hostname, port)
             self.bind((hostname, port))
             self.listen(1)
             logger.info(u'MPD server running at [%s]:%s',
                 self._format_hostname(settings.MPD_SERVER_HOSTNAME),
                 settings.MPD_SERVER_PORT)
         except IOError, e:
-            sys.exit('MPD server startup failed: %s' % e)
+            logger.error('MPD server startup failed: %s' % e)
+            sys.exit(1)
 
     def handle_accept(self):
         """Handle new client connection."""

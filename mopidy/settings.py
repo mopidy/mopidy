@@ -20,36 +20,39 @@ BACKENDS = (
     u'mopidy.backends.libspotify.LibspotifyBackend',
 )
 
-#: The log format used on the console. See
-#: http://docs.python.org/library/logging.html#formatter-objects for details on
-#: the format.
-CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
+#: The log format used for informational logging.
+#:
+#: See http://docs.python.org/library/logging.html#formatter-objects for
+#: details on the format.
+CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
+
+#: The log format used for debug logging.
+#:
+#: See http://docs.python.org/library/logging.html#formatter-objects for
+#: details on the format.
+DEBUG_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
     ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
-#: The log format used for dump logs.
-#:
-#: Default::
-#:
-#:     DUMP_LOG_FILENAME = CONSOLE_LOG_FORMAT
-DUMP_LOG_FORMAT = CONSOLE_LOG_FORMAT
-
 #: The file to dump debug log data to when Mopidy is run with the
-#: :option:`--dump` option.
+#: :option:`--save-debug-log` option.
 #:
 #: Default::
 #:
-#:     DUMP_LOG_FILENAME = u'dump.log'
-DUMP_LOG_FILENAME = u'dump.log'
+#:     DEBUG_LOG_FILENAME = u'mopidy.log'
+DEBUG_LOG_FILENAME = u'mopidy.log'
 
 #: List of server frontends to use.
 #:
 #: Default::
 #:
-#:     FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
-#:
-#: .. note::
-#:     Currently only the first frontend in the list is used.
-FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
+#:     FRONTENDS = (
+#:         u'mopidy.frontends.mpd.MpdFrontend',
+#:         u'mopidy.frontends.lastfm.LastfmFrontend',
+#:     )
+FRONTENDS = (
+    u'mopidy.frontends.mpd.MpdFrontend',
+    u'mopidy.frontends.lastfm.LastfmFrontend',
+)
 
 #: Which GStreamer audio sink to use in :mod:`mopidy.outputs.gstreamer`.
 #:
@@ -57,6 +60,16 @@ FRONTENDS = (u'mopidy.frontends.mpd.MpdFrontend',)
 #:
 #:     GSTREAMER_AUDIO_SINK = u'autoaudiosink'
 GSTREAMER_AUDIO_SINK = u'autoaudiosink'
+
+#: Your `Last.fm <http://www.last.fm/>`_ username.
+#:
+#: Used by :mod:`mopidy.frontends.lastfm`.
+LASTFM_USERNAME = u''
+
+#: Your `Last.fm <http://www.last.fm/>`_ password.
+#:
+#: Used by :mod:`mopidy.frontends.lastfm`.
+LASTFM_PASSWORD = u''
 
 #: Path to folder with local music.
 #:

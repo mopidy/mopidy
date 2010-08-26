@@ -10,10 +10,6 @@ from tests import SkipTest, data_folder
 
 class BaseStoredPlaylistsControllerTest(object):
     def setUp(self):
-        self.original_playlist_folder = settings.LOCAL_PLAYLIST_FOLDER
-        self.original_tag_cache = settings.LOCAL_TAG_CACHE
-        self.original_music_folder = settings.LOCAL_MUSIC_FOLDER
-
         settings.LOCAL_PLAYLIST_FOLDER = tempfile.mkdtemp()
         settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
         settings.LOCAL_MUSIC_FOLDER = data_folder('')
@@ -27,9 +23,7 @@ class BaseStoredPlaylistsControllerTest(object):
         if os.path.exists(settings.LOCAL_PLAYLIST_FOLDER):
             shutil.rmtree(settings.LOCAL_PLAYLIST_FOLDER)
 
-        settings.LOCAL_PLAYLIST_FOLDER = self.original_playlist_folder
-        settings.LOCAL_TAG_CACHE = self.original_tag_cache
-        settings.LOCAL_MUSIC_FOLDER = self.original_music_folder
+        settings.runtime.clear()
 
     def test_create(self):
         playlist = self.stored.create('test')

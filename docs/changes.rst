@@ -5,6 +5,31 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+0.2.0 (in development)
+======================
+
+No description yet.
+
+**Important changes**
+
+- Added a Last.fm scrobbler. See :mod:`mopidy.frontends.lastfm` for details.
+
+**Changes**
+
+- Simplify the default log format, :attr:`mopidy.settings.CONSOLE_LOG_FORMAT`.
+  From a user's point of view: Less noise, more information.
+- Rename the :option:`--dump` command line option to
+  :option:`--save-debug-log`.
+- Rename setting :attr:`mopidy.settings.DUMP_LOG_FORMAT` to
+  :attr:`mopidy.settings.DEBUG_LOG_FORMAT` and use it for :option:`--verbose`
+  too.
+- Rename setting :attr:`mopidy.settings.DUMP_LOG_FILENAME` to
+  :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
+- MPD frontend:
+
+  - ``add ""`` and ``addid ""`` now behaves as expected.
+
+
 0.1.0 (2010-08-23)
 ==================
 

@@ -6,14 +6,17 @@ pygst.require('0.10')
 import gst
 
 import logging
+import multiprocessing
 import threading
 
 from mopidy import settings
-from mopidy.utils.process import BaseThread, unpickle_connection
+from mopidy.outputs.base import BaseOutput
+from mopidy.utils.process import (BaseThread, pickle_connection,
+    unpickle_connection)
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
-class GStreamerOutput(object):
+class GStreamerOutput(BaseOutput):
     """
     Audio output through GStreamer.
 
@@ -24,18 +27,69 @@ class GStreamerOutput(object):
     - :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
     """
 
-    def __init__(self, core_queue, output_queue):
+    def __init__(self, *args, **kwargs):
+        super(GStreamerOutput, self).__init__(*args, **kwargs)
         # Start a helper thread that can run the gobject.MainLoop
         self.messages_thread = GStreamerMessagesThread()
-        self.messages_thread.start()
 
         # Start a helper thread that can process the output_queue
-        self.player_thread = GStreamerPlayerThread(core_queue, output_queue)
+        self.output_queue = multiprocessing.Queue()
+        self.player_thread = GStreamerPlayerThread(self.core_queue,
+            self.output_queue)
+
+    def start(self):
+        self.messages_thread.start()
         self.player_thread.start()
 
     def destroy(self):
         self.messages_thread.destroy()
         self.player_thread.destroy()
+
+    def process_message(self, message):
+        assert message['to'] == 'output', \
+            u'Message recipient must be "output".'
+        self.output_queue.put(message)
+
+    def _send_recv(self, message):
+        (my_end, other_end) = multiprocessing.Pipe()
+        message['to'] = 'output'
+        message['reply_to'] = pickle_connection(other_end)
+        self.process_message(message)
+        my_end.poll(None)
+        return my_end.recv()
+
+    def _send(self, message):
+        message['to'] = 'output'
+        self.process_message(message)
+
+    def play_uri(self, uri):
+        return self._send_recv({'command': 'play_uri', 'uri': uri})
+
+    def deliver_data(self, capabilities, data):
+        return self._send({
+            'command': 'deliver_data',
+            'caps': capabilities,
+            'data': data,
+        })
+
+    def end_of_data_stream(self):
+        return self._send({'command': 'end_of_data_stream'})
+
+    def get_position(self):
+        return self._send_recv({'command': 'get_position'})
+
+    def set_position(self, position):
+        return self._send_recv({'command': 'set_position', 'position': position})
+
+    def set_state(self, state):
+        return self._send_recv({'command': 'set_state', 'state': state})
+
+    def get_volume(self):
+        return self._send_recv({'command': 'get_volume'})
+
+    def set_volume(self, volume):
+        return self._send_recv({'command': 'set_volume', 'volume': volume})
+
 
 class GStreamerMessagesThread(BaseThread):
     def __init__(self):
@@ -45,6 +99,7 @@ class GStreamerMessagesThread(BaseThread):
 
     def run_inside_try(self):
         gobject.MainLoop().run()
+
 
 class GStreamerPlayerThread(BaseThread):
     """
@@ -119,7 +174,9 @@ class GStreamerPlayerThread(BaseThread):
             connection = unpickle_connection(message['reply_to'])
             connection.send(volume)
         elif message['command'] == 'set_volume':
-            self.set_volume(message['volume'])
+            response = self.set_volume(message['volume'])
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
         elif message['command'] == 'set_position':
             response = self.set_position(message['position'])
             connection = unpickle_connection(message['reply_to'])
@@ -203,6 +260,7 @@ class GStreamerPlayerThread(BaseThread):
         """Set volume in range [0..100]"""
         gst_volume = self.gst_pipeline.get_by_name('volume')
         gst_volume.set_property('volume', volume / 100.0)
+        return True
 
     def set_position(self, position):
         self.gst_pipeline.get_state() # block until state changes are done

@@ -23,7 +23,6 @@ class LocalPlaybackControllerTest(BasePlaybackControllerTest,
         for i in range(1, 4)]
 
     def setUp(self):
-        self.original_backends = settings.BACKENDS
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
 
         super(LocalPlaybackControllerTest, self).setUp()
@@ -32,7 +31,7 @@ class LocalPlaybackControllerTest(BasePlaybackControllerTest,
 
     def tearDown(self):
         super(LocalPlaybackControllerTest, self).tearDown()
-        settings.BACKENDS = settings.original_backends
+        settings.runtime.clear()
 
     def add_track(self, path):
         uri = path_to_uri(data_folder(path))
