@@ -33,6 +33,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assertEqual(result[0],
             u'ACK [50@0] {add} directory or file not found')
 
+    def test_add_with_empty_uri_should_add_all_known_tracks_and_ok(self):
+        result = self.h.handle_request(u'add ""')
+        # TODO check that we add all tracks (we currently don't)
+        self.assert_(u'OK' in result)
+
     def test_addid_without_songpos(self):
         needle = Track(uri='dummy://foo')
         self.b.library._library = [Track(), Track(), needle, Track()]
@@ -45,6 +50,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         self.assert_(u'Id: %d' % self.b.current_playlist.cp_tracks[5][0]
             in result)
         self.assert_(u'OK' in result)
+
+    def test_addid_with_empty_uri_does_not_lookup_and_acks(self):
+        self.b.library.lookup = lambda uri: self.fail("Shouldn't run")
+        result = self.h.handle_request(u'addid ""')
+        self.assertEqual(result[0], u'ACK [50@0] {addid} No such song')
 
     def test_addid_with_songpos(self):
         needle = Track(uri='dummy://foo')

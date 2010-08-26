@@ -5,6 +5,18 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+0.1.1 (in development)
+======================
+
+No description yet.
+
+**Changes**
+
+- MPD frontend:
+
+  - ``add ""`` and ``addid ""`` now behaves as expected.
+
+
 0.1.0 (2010-08-23)
 ==================
 
