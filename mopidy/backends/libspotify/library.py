@@ -21,7 +21,7 @@ class LibspotifyLibraryController(BaseLibraryController):
             # playlists.
             return LibspotifyTranslator.to_mopidy_track(spotify_track)
         except SpotifyError as e:
-            logger.warning(u'Failed to lookup: %s', track.uri, e)
+            logger.warning(u'Failed to lookup: %s', uri, e)
             return None
 
     def refresh(self, uri=None):
