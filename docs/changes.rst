@@ -25,6 +25,8 @@ No description yet.
   too.
 - Rename setting :attr:`mopidy.settings.DUMP_LOG_FILENAME` to
   :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
+- Switched from using subprocesses to threads. This partly fixes the OS X
+  support. See :issue:`14` for details.
 - MPD frontend:
 
   - ``add ""`` and ``addid ""`` now behaves as expected.
