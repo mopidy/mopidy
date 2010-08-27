@@ -7,11 +7,10 @@ import gst
 
 import logging
 import multiprocessing
-import threading
 
 from mopidy import settings
 from mopidy.outputs.base import BaseOutput
-from mopidy.utils.process import (BaseProcess, pickle_connection,
+from mopidy.utils.process import (BaseThread, pickle_connection,
     unpickle_connection)
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
@@ -20,23 +19,30 @@ class GStreamerOutput(BaseOutput):
     """
     Audio output through GStreamer.
 
-    Starts the :class:`GStreamerProcess`.
+    Starts :class:`GStreamerMessagesThread` and :class:`GStreamerPlayerThread`.
 
     **Settings:**
 
     - :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
     """
 
-    def __init__(self, core_queue):
-        super(GStreamerOutput, self).__init__(core_queue)
+    def __init__(self, *args, **kwargs):
+        super(GStreamerOutput, self).__init__(*args, **kwargs)
+        # Start a helper thread that can run the gobject.MainLoop
+        self.messages_thread = GStreamerMessagesThread()
+
+        # Start a helper thread that can process the output_queue
         self.output_queue = multiprocessing.Queue()
-        self.process = GStreamerProcess(core_queue, self.output_queue)
+        self.player_thread = GStreamerPlayerThread(self.core_queue,
+            self.output_queue)
 
     def start(self):
-        self.process.start()
+        self.messages_thread.start()
+        self.player_thread.start()
 
     def destroy(self):
-        self.process.terminate()
+        self.messages_thread.destroy()
+        self.player_thread.destroy()
 
     def process_message(self, message):
         assert message['to'] == 'output', \
@@ -84,12 +90,17 @@ class GStreamerOutput(BaseOutput):
         return self._send_recv({'command': 'set_volume', 'volume': volume})
 
 
-class GStreamerMessagesThread(threading.Thread):
-    def run(self):
+class GStreamerMessagesThread(BaseThread):
+    def __init__(self):
+        super(GStreamerMessagesThread, self).__init__()
+        self.name = u'GStreamerMessagesThread'
+        self.daemon = True
+
+    def run_inside_try(self):
         gobject.MainLoop().run()
 
 
-class GStreamerProcess(BaseProcess):
+class GStreamerPlayerThread(BaseThread):
     """
     A process for all work related to GStreamer.
 
@@ -102,7 +113,9 @@ class GStreamerProcess(BaseProcess):
     """
 
     def __init__(self, core_queue, output_queue):
-        super(GStreamerProcess, self).__init__(name='GStreamerProcess')
+        super(GStreamerPlayerThread, self).__init__()
+        self.name = u'GStreamerPlayerThread'
+        self.daemon = True
         self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
@@ -115,11 +128,6 @@ class GStreamerProcess(BaseProcess):
 
     def setup(self):
         logger.debug(u'Setting up GStreamer pipeline')
-
-        # Start a helper thread that can run the gobject.MainLoop
-        messages_thread = GStreamerMessagesThread()
-        messages_thread.daemon = True
-        messages_thread.start()
 
         self.gst_pipeline = gst.parse_launch(' ! '.join([
             'audioconvert name=convert',

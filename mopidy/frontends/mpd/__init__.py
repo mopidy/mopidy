@@ -2,7 +2,7 @@ import logging
 
 from mopidy.frontends.base import BaseFrontend
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
-from mopidy.frontends.mpd.process import MpdProcess
+from mopidy.frontends.mpd.thread import MpdThread
 from mopidy.utils.process import unpickle_connection
 
 logger = logging.getLogger('mopidy.frontends.mpd')
@@ -19,17 +19,17 @@ class MpdFrontend(BaseFrontend):
 
     def __init__(self, *args, **kwargs):
         super(MpdFrontend, self).__init__(*args, **kwargs)
-        self.process = None
+        self.thread = None
         self.dispatcher = MpdDispatcher(self.backend)
 
     def start(self):
         """Starts the MPD server."""
-        self.process = MpdProcess(self.core_queue)
-        self.process.start()
+        self.thread = MpdThread(self.core_queue)
+        self.thread.start()
 
     def destroy(self):
         """Destroys the MPD server."""
-        self.process.destroy()
+        self.thread.destroy()
 
     def process_message(self, message):
         """

@@ -1,5 +1,6 @@
 import logging
 import multiprocessing
+import multiprocessing.dummy
 from multiprocessing.reduction import reduce_connection
 import pickle
 import sys
@@ -40,3 +41,28 @@ class BaseProcess(multiprocessing.Process):
 
     def destroy(self):
         self.terminate()
+
+
+class BaseThread(multiprocessing.dummy.Process):
+    def run(self):
+        logger.debug(u'%s: Starting process', self.name)
+        try:
+            self.run_inside_try()
+        except KeyboardInterrupt:
+            logger.info(u'%s: Interrupted by user', self.name)
+            sys.exit(0)
+        except SettingsError as e:
+            logger.error(e.message)
+            sys.exit(1)
+        except ImportError as e:
+            logger.error(e)
+            sys.exit(1)
+        except Exception as e:
+            logger.exception(e)
+            raise e
+
+    def run_inside_try(self):
+        raise NotImplementedError
+
+    def destroy(self):
+        pass
