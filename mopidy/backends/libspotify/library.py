@@ -33,13 +33,18 @@ class LibspotifyLibraryController(BaseLibraryController):
             return Playlist(tracks=tracks)
         spotify_query = []
         for (field, values) in query.iteritems():
+            if field == u'track':
+                field = u'title'
+            if field == u'date':
+                field = u'year'
             if not hasattr(values, '__iter__'):
                 values = [values]
             for value in values:
-                if field == u'track':
-                    field = u'title'
                 if field == u'any':
                     spotify_query.append(value)
+                elif field == u'year':
+                    value = int(value.split('-')[0]) # Extract year
+                    spotify_query.append(u'%s:%d' % (field, value))
                 else:
                     spotify_query.append(u'%s:"%s"' % (field, value))
         spotify_query = u' '.join(spotify_query)
