@@ -15,6 +15,59 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         self.assert_(u'playtime: 0' in result)
         self.assert_(u'OK' in result)
 
+    def test_findadd(self):
+        result = self.h.handle_request(u'findadd "album" "what"')
+        self.assert_(u'OK' in result)
+
+    def test_listall(self):
+        result = self.h.handle_request(u'listall "file:///dev/urandom"')
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+
+    def test_listallinfo(self):
+        result = self.h.handle_request(u'listallinfo "file:///dev/urandom"')
+        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+
+    def test_lsinfo_without_path_returns_same_as_listplaylists(self):
+        lsinfo_result = self.h.handle_request(u'lsinfo')
+        listplaylists_result = self.h.handle_request(u'listplaylists')
+        self.assertEqual(lsinfo_result, listplaylists_result)
+
+    def test_lsinfo_with_empty_path_returns_same_as_listplaylists(self):
+        lsinfo_result = self.h.handle_request(u'lsinfo ""')
+        listplaylists_result = self.h.handle_request(u'listplaylists')
+        self.assertEqual(lsinfo_result, listplaylists_result)
+
+    def test_lsinfo_for_root_returns_same_as_listplaylists(self):
+        lsinfo_result = self.h.handle_request(u'lsinfo "/"')
+        listplaylists_result = self.h.handle_request(u'listplaylists')
+        self.assertEqual(lsinfo_result, listplaylists_result)
+
+    def test_update_without_uri(self):
+        result = self.h.handle_request(u'update')
+        self.assert_(u'OK' in result)
+        self.assert_(u'updating_db: 0' in result)
+
+    def test_update_with_uri(self):
+        result = self.h.handle_request(u'update "file:///dev/urandom"')
+        self.assert_(u'OK' in result)
+        self.assert_(u'updating_db: 0' in result)
+
+    def test_rescan_without_uri(self):
+        result = self.h.handle_request(u'rescan')
+        self.assert_(u'OK' in result)
+        self.assert_(u'updating_db: 0' in result)
+
+    def test_rescan_with_uri(self):
+        result = self.h.handle_request(u'rescan "file:///dev/urandom"')
+        self.assert_(u'OK' in result)
+        self.assert_(u'updating_db: 0' in result)
+
+
+class MusicDatabaseFindTest(unittest.TestCase):
+    def setUp(self):
+        self.b = DummyBackend(mixer_class=DummyMixer)
+        self.h = dispatcher.MpdDispatcher(backend=self.b)
+
     def test_find_album(self):
         result = self.h.handle_request(u'find "album" "what"')
         self.assert_(u'OK' in result)
@@ -48,11 +101,20 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
             u'find album "album_what" artist "artist_what"')
         self.assert_(u'OK' in result)
 
-    def test_findadd(self):
-        result = self.h.handle_request(u'findadd "album" "what"')
-        self.assert_(u'OK' in result)
 
-    def test_list_artist(self):
+class MusicDatabaseListTest(unittest.TestCase):
+    def setUp(self):
+        self.b = DummyBackend(mixer_class=DummyMixer)
+        self.h = dispatcher.MpdDispatcher(backend=self.b)
+
+    def test_list_foo_returns_ack(self):
+        result = self.h.handle_request(u'list "foo"')
+        self.assertEqual(result[0],
+            u'ACK [2@0] {list} incorrect arguments')
+
+    ### Artist
+
+    def test_list_artist_with_quotes(self):
         result = self.h.handle_request(u'list "artist"')
         self.assert_(u'OK' in result)
 
@@ -64,44 +126,85 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'list Artist')
         self.assert_(u'OK' in result)
 
-    def test_list_artist_with_artist_should_fail(self):
+    def test_list_artist_with_query_of_one_token(self):
         result = self.h.handle_request(u'list "artist" "anartist"')
-        self.assertEqual(result[0], u'ACK [2@0] {list} incorrect arguments')
+        self.assertEqual(result[0],
+            u'ACK [2@0] {list} should be "Album" for 3 arguments')
 
-    def test_list_album_without_artist(self):
+    def test_list_artist_with_unknown_field_in_query_returns_ack(self):
+        result = self.h.handle_request(u'list "artist" "foo" "bar"')
+        self.assertEqual(result[0],
+            u'ACK [2@0] {list} not able to parse args')
+
+    ### Album
+
+    def test_list_album_with_quotes(self):
         result = self.h.handle_request(u'list "album"')
         self.assert_(u'OK' in result)
 
-    def test_list_album_with_artist(self):
+    def test_list_album_without_quotes(self):
+        result = self.h.handle_request(u'list album')
+        self.assert_(u'OK' in result)
+
+    def test_list_album_without_quotes_and_capitalized(self):
+        result = self.h.handle_request(u'list Album')
+        self.assert_(u'OK' in result)
+
+    def test_list_album_with_artist_name(self):
         result = self.h.handle_request(u'list "album" "anartist"')
         self.assert_(u'OK' in result)
 
-    def test_list_album_artist_with_artist_without_quotes(self):
-        result = self.h.handle_request(u'list album artist "anartist"')
+    def test_list_album_with_artist_query(self):
+        result = self.h.handle_request(u'list "album" "artist" "anartist"')
         self.assert_(u'OK' in result)
 
-    def test_listall(self):
-        result = self.h.handle_request(u'listall "file:///dev/urandom"')
-        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+    ### Date
 
-    def test_listallinfo(self):
-        result = self.h.handle_request(u'listallinfo "file:///dev/urandom"')
-        self.assert_(u'ACK [0@0] {} Not implemented' in result)
+    def test_list_date_with_quotes(self):
+        result = self.h.handle_request(u'list "date"')
+        self.assert_(u'OK' in result)
 
-    def test_lsinfo_without_path_returns_same_as_listplaylists(self):
-        lsinfo_result = self.h.handle_request(u'lsinfo')
-        listplaylists_result = self.h.handle_request(u'listplaylists')
-        self.assertEqual(lsinfo_result, listplaylists_result)
+    def test_list_date_without_quotes(self):
+        result = self.h.handle_request(u'list date')
+        self.assert_(u'OK' in result)
 
-    def test_lsinfo_with_empty_path_returns_same_as_listplaylists(self):
-        lsinfo_result = self.h.handle_request(u'lsinfo ""')
-        listplaylists_result = self.h.handle_request(u'listplaylists')
-        self.assertEqual(lsinfo_result, listplaylists_result)
+    def test_list_date_without_quotes_and_capitalized(self):
+        result = self.h.handle_request(u'list Date')
+        self.assert_(u'OK' in result)
 
-    def test_lsinfo_for_root_returns_same_as_listplaylists(self):
-        lsinfo_result = self.h.handle_request(u'lsinfo "/"')
-        listplaylists_result = self.h.handle_request(u'listplaylists')
-        self.assertEqual(lsinfo_result, listplaylists_result)
+    def test_list_date_with_query_of_one_token(self):
+        result = self.h.handle_request(u'list "date" "anartist"')
+        self.assertEqual(result[0],
+            u'ACK [2@0] {list} should be "Album" for 3 arguments')
+
+    # TODO Tests for the rest of "list date ..."
+
+    ### Genre
+
+    def test_list_genre_with_quotes(self):
+        result = self.h.handle_request(u'list "genre"')
+        self.assert_(u'OK' in result)
+
+    def test_list_genre_without_quotes(self):
+        result = self.h.handle_request(u'list genre')
+        self.assert_(u'OK' in result)
+
+    def test_list_genre_without_quotes_and_capitalized(self):
+        result = self.h.handle_request(u'list Genre')
+        self.assert_(u'OK' in result)
+
+    def test_list_genre_with_query_of_one_token(self):
+        result = self.h.handle_request(u'list "genre" "anartist"')
+        self.assertEqual(result[0],
+            u'ACK [2@0] {list} should be "Album" for 3 arguments')
+
+    # TODO Tests for the rest of "list genre ..."
+
+
+class MusicDatabaseSearchTest(unittest.TestCase):
+    def setUp(self):
+        self.b = DummyBackend(mixer_class=DummyMixer)
+        self.h = dispatcher.MpdDispatcher(backend=self.b)
 
     def test_search_album(self):
         result = self.h.handle_request(u'search "album" "analbum"')
@@ -147,22 +250,4 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
         result = self.h.handle_request(u'search "sometype" "something"')
         self.assertEqual(result[0], u'ACK [2@0] {search} incorrect arguments')
 
-    def test_update_without_uri(self):
-        result = self.h.handle_request(u'update')
-        self.assert_(u'OK' in result)
-        self.assert_(u'updating_db: 0' in result)
 
-    def test_update_with_uri(self):
-        result = self.h.handle_request(u'update "file:///dev/urandom"')
-        self.assert_(u'OK' in result)
-        self.assert_(u'updating_db: 0' in result)
-
-    def test_rescan_without_uri(self):
-        result = self.h.handle_request(u'rescan')
-        self.assert_(u'OK' in result)
-        self.assert_(u'updating_db: 0' in result)
-
-    def test_rescan_with_uri(self):
-        result = self.h.handle_request(u'rescan "file:///dev/urandom"')
-        self.assert_(u'OK' in result)
-        self.assert_(u'updating_db: 0' in result)

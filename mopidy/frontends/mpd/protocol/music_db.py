@@ -1,7 +1,8 @@
 import re
+import shlex
 
 from mopidy.frontends.mpd.protocol import handle_pattern, stored_playlists
-from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 
 def _build_query(mpd_query):
     """
@@ -81,13 +82,9 @@ def findadd(frontend, query):
     # TODO Add result to current playlist
     #result = frontend.find(query)
 
-@handle_pattern(r'^list (?P<field>[Aa]rtist)$')
-@handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
-@handle_pattern(r'^list (?P<field>album( artist)?)'
-    '( "(?P<artist>[^"]+)")*$')
-@handle_pattern(r'^list "(?P<field>album(" "artist)?)"'
-    '( "(?P<artist>[^"]+)")*$')
-def list_(frontend, field, artist=None):
+@handle_pattern(r'^list "?(?P<field>([Aa]rtist|[Aa]lbum|[Dd]ate|[Gg]enre))"?'
+    '( (?P<mpd_query>.*))?$')
+def list_(frontend, field, mpd_query=None):
     """
     *musicpd.org, music database section:*
 
@@ -172,29 +169,59 @@ def list_(frontend, field, artist=None):
     - capitalizes the field argument.
     """
     field = field.lower()
+    query = _list_build_query(field, mpd_query)
     if field == u'artist':
-        return _list_artist(frontend)
-    elif field == u'album artist':
-        return _list_album_artist(frontend, artist)
-    # TODO More to implement
+        return _list_artist(frontend, query)
+    elif field == u'album':
+        return _list_album(frontend, query)
+    elif field == u'date':
+        pass # TODO
+    elif field == u'genre':
+        pass # TODO
 
-def _list_artist(frontend):
-    """
-    Since we don't know exactly all available artists, we respond with
-    the artists we know for sure, which is all artists in our stored playlists.
-    """
+def _list_build_query(field, mpd_query):
+    """Converts a ``list`` query to a Mopidy query."""
+    if mpd_query is None:
+        return {}
+    # shlex does not seem to be friends with unicode objects
+    tokens = shlex.split(mpd_query.encode('utf-8'))
+    tokens = [t.decode('utf-8') for t in tokens]
+    if len(tokens) == 1:
+        if field == u'album':
+            return {'artist': [tokens[0]]}
+        else:
+            raise MpdArgError(
+                u'should be "Album" for 3 arguments', command=u'list')
+    elif len(tokens) % 2 == 0:
+        query = {}
+        while tokens:
+            key = tokens[0].lower()
+            value = tokens[1]
+            tokens = tokens[2:]
+            if key not in (u'artist', u'album', u'date', u'genre'):
+                raise MpdArgError(u'not able to parse args', command=u'list')
+            if key in query:
+                query[key].append(value)
+            else:
+                query[key] = [value]
+        return query
+    else:
+        raise MpdArgError(u'not able to parse args', command=u'list')
+
+def _list_artist(frontend, query):
     artists = set()
-    for playlist in frontend.backend.stored_playlists.playlists:
-        for track in playlist.tracks:
-            for artist in track.artists:
-                artists.add((u'Artist', artist.name))
+    playlist = frontend.backend.library.find_exact(**query)
+    for track in playlist.tracks:
+        for artist in track.artists:
+            artists.add((u'Artist', artist.name))
     return artists
 
-def _list_album_artist(frontend, artist):
-    playlist = frontend.backend.library.find_exact(artist=[artist])
+def _list_album(frontend, query):
     albums = set()
+    playlist = frontend.backend.library.find_exact(**query)
     for track in playlist.tracks:
-        albums.add((u'Album', track.album.name))
+        if track.album is not None:
+            albums.add((u'Album', track.album.name))
     return albums
 
 @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
