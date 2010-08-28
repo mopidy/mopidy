@@ -136,6 +136,31 @@ class MusicDatabaseListTest(unittest.TestCase):
         self.assertEqual(result[0],
             u'ACK [2@0] {list} not able to parse args')
 
+    def test_list_artist_by_artist(self):
+        result = self.h.handle_request(u'list "artist" "artist" "anartist"')
+        self.assert_(u'OK' in result)
+
+    def test_list_artist_by_album(self):
+        result = self.h.handle_request(u'list "artist" "album" "analbum"')
+        self.assert_(u'OK' in result)
+
+    def test_list_artist_by_full_date(self):
+        result = self.h.handle_request(u'list "artist" "date" "2001-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_list_artist_by_year(self):
+        result = self.h.handle_request(u'list "artist" "date" "2001"')
+        self.assert_(u'OK' in result)
+
+    def test_list_artist_by_genre(self):
+        result = self.h.handle_request(u'list "artist" "genre" "agenre"')
+        self.assert_(u'OK' in result)
+
+    def test_list_artist_by_artist_and_album(self):
+        result = self.h.handle_request(
+            u'list "artist" "artist" "anartist" "album" "analbum"')
+        self.assert_(u'OK' in result)
+
     ### Album
 
     def test_list_album_with_quotes(self):
@@ -154,8 +179,29 @@ class MusicDatabaseListTest(unittest.TestCase):
         result = self.h.handle_request(u'list "album" "anartist"')
         self.assert_(u'OK' in result)
 
-    def test_list_album_with_artist_query(self):
+    def test_list_album_by_artist(self):
         result = self.h.handle_request(u'list "album" "artist" "anartist"')
+        self.assert_(u'OK' in result)
+
+    def test_list_album_by_album(self):
+        result = self.h.handle_request(u'list "album" "album" "analbum"')
+        self.assert_(u'OK' in result)
+
+    def test_list_album_by_full_date(self):
+        result = self.h.handle_request(u'list "album" "date" "2001-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_list_album_by_year(self):
+        result = self.h.handle_request(u'list "album" "date" "2001"')
+        self.assert_(u'OK' in result)
+
+    def test_list_album_by_genre(self):
+        result = self.h.handle_request(u'list "album" "genre" "agenre"')
+        self.assert_(u'OK' in result)
+
+    def test_list_album_by_artist_and_album(self):
+        result = self.h.handle_request(
+            u'list "album" "artist" "anartist" "album" "analbum"')
         self.assert_(u'OK' in result)
 
     ### Date
@@ -177,7 +223,30 @@ class MusicDatabaseListTest(unittest.TestCase):
         self.assertEqual(result[0],
             u'ACK [2@0] {list} should be "Album" for 3 arguments')
 
-    # TODO Tests for the rest of "list date ..."
+    def test_list_date_by_artist(self):
+        result = self.h.handle_request(u'list "date" "artist" "anartist"')
+        self.assert_(u'OK' in result)
+
+    def test_list_date_by_album(self):
+        result = self.h.handle_request(u'list "date" "album" "analbum"')
+        self.assert_(u'OK' in result)
+
+    def test_list_date_by_full_date(self):
+        result = self.h.handle_request(u'list "date" "date" "2001-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_list_date_by_year(self):
+        result = self.h.handle_request(u'list "date" "date" "2001"')
+        self.assert_(u'OK' in result)
+
+    def test_list_date_by_genre(self):
+        result = self.h.handle_request(u'list "date" "genre" "agenre"')
+        self.assert_(u'OK' in result)
+
+    def test_list_date_by_artist_and_album(self):
+        result = self.h.handle_request(
+            u'list "date" "artist" "anartist" "album" "analbum"')
+        self.assert_(u'OK' in result)
 
     ### Genre
 
@@ -198,7 +267,30 @@ class MusicDatabaseListTest(unittest.TestCase):
         self.assertEqual(result[0],
             u'ACK [2@0] {list} should be "Album" for 3 arguments')
 
-    # TODO Tests for the rest of "list genre ..."
+    def test_list_genre_by_artist(self):
+        result = self.h.handle_request(u'list "genre" "artist" "anartist"')
+        self.assert_(u'OK' in result)
+
+    def test_list_genre_by_album(self):
+        result = self.h.handle_request(u'list "genre" "album" "analbum"')
+        self.assert_(u'OK' in result)
+
+    def test_list_genre_by_full_date(self):
+        result = self.h.handle_request(u'list "genre" "date" "2001-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_list_genre_by_year(self):
+        result = self.h.handle_request(u'list "genre" "date" "2001"')
+        self.assert_(u'OK' in result)
+
+    def test_list_genre_by_genre(self):
+        result = self.h.handle_request(u'list "genre" "genre" "agenre"')
+        self.assert_(u'OK' in result)
+
+    def test_list_genre_by_artist_and_album(self):
+        result = self.h.handle_request(
+            u'list "genre" "artist" "anartist" "album" "analbum"')
+        self.assert_(u'OK' in result)
 
 
 class MusicDatabaseSearchTest(unittest.TestCase):
