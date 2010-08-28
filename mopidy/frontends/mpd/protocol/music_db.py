@@ -175,9 +175,9 @@ def list_(frontend, field, mpd_query=None):
     elif field == u'album':
         return _list_album(frontend, query)
     elif field == u'date':
-        pass # TODO
+        return _list_date(frontend, query)
     elif field == u'genre':
-        pass # TODO
+        pass # TODO We don't have genre in our internal data structures yet
 
 def _list_build_query(field, mpd_query):
     """Converts a ``list`` query to a Mopidy query."""
@@ -223,6 +223,14 @@ def _list_album(frontend, query):
         if track.album is not None:
             albums.add((u'Album', track.album.name))
     return albums
+
+def _list_date(frontend, query):
+    dates = set()
+    playlist = frontend.backend.library.find_exact(**query)
+    for track in playlist.tracks:
+        if track.date is not None:
+            dates.add((u'Date', track.date.strftime('%Y-%m-%d')))
+    return dates
 
 @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
 def listall(frontend, uri):
