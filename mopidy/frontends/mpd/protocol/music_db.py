@@ -101,22 +101,70 @@ def list_(frontend, field, artist=None):
 
         This filters the result list by an artist.
 
+    *Clarifications:*
+
+        The musicpd.org documentation for ``list`` is far from complete. The
+        command also supports the following variant:
+
+        ``list {TYPE} {QUERY}``
+
+        Where ``QUERY`` applies to all ``TYPE``. ``QUERY`` is one or more pairs
+        of a field name and a value. If the ``QUERY`` consists of more than one
+        pair, the pairs are AND-ed together to find the result. Examples of
+        valid queries and what they should return:
+
+        ``list "artist" "artist" "ABBA"``
+            List artists where the artist name is "ABBA". Response::
+
+                Artist: ABBA
+                OK
+
+        ``list "album" "artist" "ABBA"``
+            Lists albums where the artist name is "ABBA". Response::
+
+                Album: More ABBA Gold: More ABBA Hits
+                Album: Absolute More Christmas
+                Album: Gold: Greatest Hits
+                OK
+
+        ``list "artist" "album" "Gold: Greatest Hits"``
+            Lists artists where the album name is "Gold: Greatest Hits".
+            Response::
+
+                Artist: ABBA
+                OK
+
+        ``list "artist" "artist" "ABBA" "artist" "TLC"``
+            Lists artists where the artist name is "ABBA" *and* "TLC". Should
+            never match anything. Response::
+
+                OK
+
+        ``list "date" "artist" "ABBA"``
+            Lists dates where artist name is "ABBA". Response::
+
+                Date:
+                Date: 1992
+                Date: 1993
+                OK
+
+        ``list "date" "artist" "ABBA" "album" "Gold: Greatest Hits"``
+            Lists dates where artist name is "ABBA" and album name is "Gold:
+            Greatest Hits". Response::
+
+                Date: 1992
+                OK
+
+        ``list "genre" "artist" "The Rolling Stones"``
+            Lists genres where artist name is "The Rolling Stones". Response::
+
+                Genre:
+                Genre: Rock
+                OK
+
     *GMPC:*
 
     - does not add quotes around the field argument.
-    - asks for "list artist" to get available artists and will not query
-      for artist/album information if this is not retrived
-    - asks for multiple fields, i.e.::
-
-        list album artist "an artist name"
-
-      returns the albums available for the asked artist::
-
-        list album artist "Tiesto"
-        Album: Radio Trance Vol 4-Promo-CD
-        Album: Ur  A Tear in the Open CDR
-        Album: Simple Trance 2004 Step One
-        Album: In Concert 05-10-2003
 
     *ncmpc:*
 
