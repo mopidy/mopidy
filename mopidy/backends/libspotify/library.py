@@ -6,6 +6,7 @@ from spotify import Link
 from mopidy.backends.base import BaseLibraryController
 from mopidy.backends.libspotify import ENCODING
 from mopidy.backends.libspotify.translator import LibspotifyTranslator
+from mopidy.models import Playlist
 
 logger = logging.getLogger('mopidy.backends.libspotify.library')
 
@@ -23,6 +24,13 @@ class LibspotifyLibraryController(BaseLibraryController):
         pass # TODO
 
     def search(self, **query):
+        if not query:
+            # Since we can't search for the entire Spotify library, we return
+            # all tracks in the stored playlists when the query is empty.
+            tracks = []
+            for playlist in self.backend.stored_playlists.playlists:
+                tracks += playlist.tracks
+            return Playlist(tracks=tracks)
         spotify_query = []
         for (field, values) in query.iteritems():
             if not hasattr(values, '__iter__'):
