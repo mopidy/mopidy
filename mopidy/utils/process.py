@@ -45,7 +45,7 @@ class BaseProcess(multiprocessing.Process):
 
 class BaseThread(multiprocessing.dummy.Process):
     def run(self):
-        logger.debug(u'%s: Starting process', self.name)
+        logger.debug(u'%s: Starting thread', self.name)
         try:
             self.run_inside_try()
         except KeyboardInterrupt:
