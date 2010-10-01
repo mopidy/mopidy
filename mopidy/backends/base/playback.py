@@ -501,11 +501,12 @@ class BasePlaybackController(object):
         For internal use only. Should be called by the backend directly after a
         track has started playing.
         """
-        self.backend.core_queue.put({
-            'to': 'frontend',
-            'command': 'started_playing',
-            'track': self.current_track,
-        })
+        if self.current_track is not None:
+            self.backend.core_queue.put({
+                'to': 'frontend',
+                'command': 'started_playing',
+                'track': self.current_track,
+            })
 
     def _trigger_stopped_playing_event(self):
         """
@@ -515,9 +516,10 @@ class BasePlaybackController(object):
         is stopped playing, e.g. at the next, previous, and stop actions and at
         end-of-track.
         """
-        self.backend.core_queue.put({
-            'to': 'frontend',
-            'command': 'stopped_playing',
-            'track': self.current_track,
-            'stop_position': self.time_position,
-        })
+        if self.current_track is not None:
+            self.backend.core_queue.put({
+                'to': 'frontend',
+                'command': 'stopped_playing',
+                'track': self.current_track,
+                'stop_position': self.time_position,
+            })
