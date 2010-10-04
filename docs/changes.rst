@@ -30,6 +30,8 @@ No description yet.
 - MPD frontend:
 
   - ``add ""`` and ``addid ""`` now behaves as expected.
+  - ``list`` now supports queries by artist, album name, and date, as used by
+    e.g. the Ario client. (Fixes: :issue:`20`)
 
 
 0.1.0 (2010-08-23)
