@@ -97,7 +97,7 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
-        def callback(results, userdata):
+        def callback(results, userdata=None):
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
                 LibspotifyTranslator.to_mopidy_track(t)
