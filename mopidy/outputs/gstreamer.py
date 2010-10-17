@@ -142,7 +142,7 @@ class GStreamerPlayerThread(BaseThread):
             uri_bin.connect('pad-added', self.process_new_pad, pad)
             self.gst_pipeline.add(uri_bin)
         else:
-            app_src = gst.element_factory_make('appsrc', 'src')
+            app_src = gst.element_factory_make('appsrc', 'appsrc')
             self.gst_pipeline.add(app_src)
             app_src.get_pad('src').link(pad)
 
@@ -208,12 +208,12 @@ class GStreamerPlayerThread(BaseThread):
 
     def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
-        data_src = self.gst_pipeline.get_by_name('src')
+        app_src = self.gst_pipeline.get_by_name('appsrc')
         caps = gst.caps_from_string(caps_string)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
-        data_src.set_property('caps', caps)
-        data_src.emit('push-buffer', buffer_)
+        app_src.set_property('caps', caps)
+        app_src.emit('push-buffer', buffer_)
 
     def end_of_data_stream(self):
         """
@@ -222,7 +222,7 @@ class GStreamerPlayerThread(BaseThread):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        self.gst_pipeline.get_by_name('src').emit('end-of-stream')
+        self.gst_pipeline.get_by_name('appsrc').emit('end-of-stream')
 
     def set_state(self, state_name):
         """
