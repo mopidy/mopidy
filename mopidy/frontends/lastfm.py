@@ -84,7 +84,7 @@ class LastfmFrontendThread(BaseThread):
                 CLIENT_ID, CLIENT_VERSION)
             logger.info(u'Connected to Last.fm')
         except SettingsError as e:
-            logger.info(u'Last.fm scrobbler did not start.')
+            logger.info(u'Last.fm scrobbler not started')
             logger.debug(u'Last.fm settings error: %s', e)
         except (pylast.WSError, socket.error) as e:
             logger.error(u'Last.fm connection error: %s', e)
