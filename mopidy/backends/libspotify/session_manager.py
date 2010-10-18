@@ -69,16 +69,19 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
     def music_delivery(self, session, frames, frame_size, num_frames,
             sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
-        # TODO Base caps_string on arguments
+        assert sample_type == 0, u'Expects 16-bit signed integer samples'
         capabilites = """
             audio/x-raw-int,
             endianness=(int)1234,
-            channels=(int)2,
+            channels=(int)%(channels)d,
             width=(int)16,
             depth=(int)16,
-            signed=True,
-            rate=(int)44100
-        """
+            signed=(boolean)true,
+            rate=(int)%(sample_rate)d
+        """ % {
+            'sample_rate': sample_rate,
+            'channels': channels,
+        }
         self.output.deliver_data(capabilites, bytes(frames))
 
     def play_token_lost(self, session):
