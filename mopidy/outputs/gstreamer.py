@@ -143,6 +143,15 @@ class GStreamerPlayerThread(BaseThread):
             self.gst_pipeline.add(uri_bin)
         else:
             app_src = gst.element_factory_make('appsrc', 'appsrc')
+            app_src_caps = gst.Caps("""
+                audio/x-raw-int,
+                endianness=(int)1234,
+                channels=(int)2,
+                width=(int)16,
+                depth=(int)16,
+                signed=(boolean)true,
+                rate=(int)44100""")
+            app_src.set_property('caps', app_src_caps)
             self.gst_pipeline.add(app_src)
             app_src.get_pad('src').link(pad)
 
