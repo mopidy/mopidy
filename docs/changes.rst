@@ -16,6 +16,9 @@ No description yet.
 
   - ``add ""`` and ``addid ""`` now behaves as expected.
 
+- Fix wrong behavior on end of track and next after random mode has been used.
+  (Fixes: :issue:`18`)
+
 
 0.1.0 (2010-08-23)
 ==================
