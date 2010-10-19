@@ -1,3 +1,4 @@
+import random
 import unittest
 
 from mopidy.backends.dummy import DummyBackend
@@ -24,6 +25,7 @@ class IssueGH18RegressionTest(unittest.TestCase):
         self.mpd = dispatcher.MpdDispatcher(backend=self.backend)
 
     def test(self):
+        random.seed(1)
         self.mpd.handle_request(u'play')
         self.mpd.handle_request(u'random "1"')
         self.mpd.handle_request(u'next')
