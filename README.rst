@@ -11,8 +11,9 @@ platforms, including Windows, Mac OS X, Linux, and iPhone and Android phones.
 To install Mopidy, check out
 `the installation docs <http://www.mopidy.com/docs/master/installation/>`_.
 
-* `Documentation <http://www.mopidy.com/docs/master/>`_
+* `Documentation (latest release) <http://www.mopidy.com/docs/master/>`_
 * `Documentation (development version) <http://www.mopidy.com/docs/develop/>`_
 * `Source code <http://github.com/jodal/mopidy>`_
 * `Issue tracker <http://github.com/jodal/mopidy/issues>`_
 * IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
+* `Download development snapshot <http://github.com/jodal/mopidy/tarball/develop#egg=mopidy-dev>`_
