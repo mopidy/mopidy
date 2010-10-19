@@ -142,7 +142,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
@@ -195,7 +195,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
