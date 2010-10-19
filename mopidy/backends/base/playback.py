@@ -142,7 +142,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
@@ -195,7 +195,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
@@ -311,11 +311,9 @@ class BasePlaybackController(object):
             return
 
         original_cp_track = self.current_cp_track
+
         if self.cp_track_at_eot:
             self.play(self.cp_track_at_eot)
-
-            if self.random and self.current_cp_track in self._shuffled:
-                self._shuffled.remove(self.current_cp_track)
         else:
             self.stop()
             self.current_cp_track = None
@@ -350,9 +348,6 @@ class BasePlaybackController(object):
         else:
             self.stop()
             self.current_cp_track = None
-
-        if self.random and self.current_cp_track in self._shuffled:
-            self._shuffled.remove(self.current_cp_track)
 
     def pause(self):
         """Pause playback."""
