@@ -6,6 +6,40 @@ from mopidy.frontends.mpd import dispatcher
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
 
+class IssueGH17RegressionTest(unittest.TestCase):
+    """
+    The issue: http://github.com/jodal/mopidy/issues#issue/17
+
+    How to reproduce:
+
+    - Play a playlist where one track cannot be played
+    - Turn on random mode
+    - Press next until you get to the unplayable track
+    """
+
+    def setUp(self):
+        self.backend = DummyBackend(mixer_class=DummyMixer)
+        self.backend.current_playlist.append([
+            Track(uri='a'), Track(uri='b'), None,
+            Track(uri='d'), Track(uri='e'), Track(uri='f')])
+        self.mpd = dispatcher.MpdDispatcher(backend=self.backend)
+
+    def test(self):
+        random.seed(1) # Playlist order: abcfde
+        self.mpd.handle_request(u'play')
+        self.assertEquals('a', self.backend.playback.current_track.uri)
+        self.mpd.handle_request(u'random "1"')
+        self.mpd.handle_request(u'next')
+        self.assertEquals('b', self.backend.playback.current_track.uri)
+        self.mpd.handle_request(u'next')
+        # Should now be at track 'c', but playback fails and it skips ahead
+        self.assertEquals('f', self.backend.playback.current_track.uri)
+        self.mpd.handle_request(u'next')
+        self.assertEquals('d', self.backend.playback.current_track.uri)
+        self.mpd.handle_request(u'next')
+        self.assertEquals('e', self.backend.playback.current_track.uri)
+
+
 class IssueGH18RegressionTest(unittest.TestCase):
     """
     The issue: http://github.com/jodal/mopidy/issues#issue/18
