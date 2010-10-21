@@ -387,6 +387,9 @@ class BasePlaybackController(object):
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self._play(cp_track[1]):
+                # Track is not playable
+                if self.random and self._shuffled:
+                    self._shuffled.remove(cp_track)
                 if on_error_step == 1:
                     self.next()
                 elif on_error_step == -1:
