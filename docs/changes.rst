@@ -35,6 +35,8 @@ No description yet.
   (Fixes: :issue:`18`)
 - Fix infinite recursion loop crash on playback of non-playable tracks when in
   random mode. (Fixes :issue:`17`)
+- Fix assertion error that happened if one removed tracks from the current
+  playlist, while in random mode. (Fixes :issue:`22`)
 
 
 0.1.0 (2010-08-23)
