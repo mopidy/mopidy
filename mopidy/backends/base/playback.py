@@ -331,13 +331,11 @@ class BasePlaybackController(object):
         self._first_shuffle = True
         self._shuffled = []
 
-        if not self.backend.current_playlist.cp_tracks:
-            self.stop()
-            self.current_cp_track = None
-        elif (self.current_cp_track not in
+        if (not self.backend.current_playlist.cp_tracks or
+                self.current_cp_track not in
                 self.backend.current_playlist.cp_tracks):
-            self.current_cp_track = None
             self.stop()
+            self.current_cp_track = None
 
     def next(self):
         """Play the next track."""
