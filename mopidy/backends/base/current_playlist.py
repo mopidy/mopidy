@@ -81,16 +81,13 @@ class BaseCurrentPlaylistController(object):
         :param tracks: tracks to append
         :type tracks: list of :class:`mopidy.models.Track`
         """
-        self.version += 1
         for track in tracks:
             self.add(track)
-        self.backend.playback.on_current_playlist_change()
 
     def clear(self):
         """Clear the current playlist."""
         self._cp_tracks = []
         self.version += 1
-        self.backend.playback.on_current_playlist_change()
 
     def get(self, **criteria):
         """
@@ -156,7 +153,6 @@ class BaseCurrentPlaylistController(object):
             to_position += 1
         self._cp_tracks = new_cp_tracks
         self.version += 1
-        self.backend.playback.on_current_playlist_change()
 
     def remove(self, **criteria):
         """
@@ -201,7 +197,6 @@ class BaseCurrentPlaylistController(object):
         random.shuffle(shuffled)
         self._cp_tracks = before + shuffled + after
         self.version += 1
-        self.backend.playback.on_current_playlist_change()
 
     def mpd_format(self, *args, **kwargs):
         """Not a part of the generic backend API."""
