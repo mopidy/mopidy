@@ -27,11 +27,23 @@ No description yet.
   :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
 - Switched from using subprocesses to threads. This partly fixes the OS X
   support. See :issue:`14` for details.
-- MPD frontend:
+- MPD frontend: ``list`` now supports queries by artist, album name, and date,
+  as used by e.g. the Ario client. (Fixes: :issue:`20`)
 
-  - ``add ""`` and ``addid ""`` now behaves as expected.
-  - ``list`` now supports queries by artist, album name, and date, as used by
-    e.g. the Ario client. (Fixes: :issue:`20`)
+
+0.1.1 (in development)
+======================
+
+No description yet.
+
+**Changes**
+
+- MPD frontend: ``add ""`` and ``addid ""`` now behaves as expected. (Fixes
+  :issue:`16`)
+- Fix wrong behavior on end of track and next after random mode has been used.
+  (Fixes: :issue:`18`)
+- Fix infinite recursion loop crash on playback of non-playable tracks when in
+  random mode. (Fixes :issue:`17`)
 
 
 0.1.0 (2010-08-23)
