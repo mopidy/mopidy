@@ -12,12 +12,12 @@ No description yet.
 
 **Changes**
 
-- MPD frontend:
-
-  - ``add ""`` and ``addid ""`` now behaves as expected.
-
+- MPD frontend: ``add ""`` and ``addid ""`` now behaves as expected. (Fixes
+  :issue:`16`)
 - Fix wrong behavior on end of track and next after random mode has been used.
   (Fixes: :issue:`18`)
+- Fix infinite recursion loop crash on playback of non-playable tracks when in
+  random mode. (Fixes :issue:`17`)
 
 
 0.1.0 (2010-08-23)
