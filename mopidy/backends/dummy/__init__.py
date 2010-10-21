@@ -44,16 +44,19 @@ class DummyLibraryController(BaseLibraryController):
 
 class DummyPlaybackController(BasePlaybackController):
     def _next(self, track):
-        return True
+        """Pass None as track to force failure"""
+        return track is not None
 
     def _pause(self):
         return True
 
     def _play(self, track):
-        return True
+        """Pass None as track to force failure"""
+        return track is not None
 
     def _previous(self, track):
-        return True
+        """Pass None as track to force failure"""
+        return track is not None
 
     def _resume(self):
         return True
