@@ -37,6 +37,10 @@ No description yet.
   random mode. (Fixes :issue:`17`)
 - Fix assertion error that happened if one removed tracks from the current
   playlist, while in random mode. (Fixes :issue:`22`)
+- GStreamerOutput: Set ``caps`` on the ``appsrc`` bin before use. This makes
+  sound output work with GStreamer >= 0.10.29, which includes the versions used
+  in Ubuntu 10.10 and on OS X if using Homebrew. (Fixes: :issue:`21`,
+  :issue:`24`, contributes to :issue:`14`)
 
 
 0.1.0 (2010-08-23)
