@@ -316,8 +316,7 @@ class BasePlaybackController(object):
             self._trigger_stopped_playing_event()
             self.play(self.cp_track_at_eot)
         else:
-            self.stop()
-            self.current_cp_track = None
+            self.stop(clear_current_track=True)
 
         if self.consume:
             self.backend.current_playlist.remove(cpid=original_cp_track[0])
@@ -331,13 +330,10 @@ class BasePlaybackController(object):
         self._first_shuffle = True
         self._shuffled = []
 
-        if not self.backend.current_playlist.cp_tracks:
-            self.stop()
-            self.current_cp_track = None
-        elif (self.current_cp_track not in
+        if (not self.backend.current_playlist.cp_tracks or
+                self.current_cp_track not in
                 self.backend.current_playlist.cp_tracks):
-            self.current_cp_track = None
-            self.stop()
+            self.stop(clear_current_track=True)
 
     def next(self):
         """Play the next track."""
@@ -348,8 +344,7 @@ class BasePlaybackController(object):
             self._trigger_stopped_playing_event()
             self.play(self.cp_track_at_next)
         else:
-            self.stop()
-            self.current_cp_track = None
+            self.stop(clear_current_track=True)
 
     def pause(self):
         """Pause playback."""
@@ -475,13 +470,21 @@ class BasePlaybackController(object):
         """
         raise NotImplementedError
 
-    def stop(self):
-        """Stop playing."""
+    def stop(self, clear_current_track=False):
+        """
+        Stop playing.
+
+        :param clear_current_track: whether to clear the current track _after_
+            stopping
+        :type clear_current_track: boolean
+        """
         if self.state == self.STOPPED:
             return
         self._trigger_stopped_playing_event()
         if self._stop():
             self.state = self.STOPPED
+        if clear_current_track:
+            self.current_cp_track = None
 
     def _stop(self):
         """

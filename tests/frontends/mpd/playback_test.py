@@ -254,7 +254,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
     def test_playid(self):
         self.b.current_playlist.append([Track()])
-        result = self.h.handle_request(u'playid "1"')
+        result = self.h.handle_request(u'playid "0"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
@@ -310,7 +310,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
     def test_seekid(self):
         self.b.current_playlist.append([Track(length=40000)])
-        result = self.h.handle_request(u'seekid "1" "30"')
+        result = self.h.handle_request(u'seekid "0" "30"')
         self.assert_(u'OK' in result)
         self.assert_(self.b.playback.time_position >= 30000)
 
@@ -318,8 +318,8 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         seek_track = Track(uri='2', length=40000)
         self.b.current_playlist.append(
             [Track(length=40000), seek_track])
-        result = self.h.handle_request(u'seekid "2" "30"')
-        self.assertEqual(self.b.playback.current_cpid, 2)
+        result = self.h.handle_request(u'seekid "1" "30"')
+        self.assertEqual(self.b.playback.current_cpid, 1)
         self.assertEqual(self.b.playback.current_track, seek_track)
 
     def test_stop(self):

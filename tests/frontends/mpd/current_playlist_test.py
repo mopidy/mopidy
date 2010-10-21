@@ -135,7 +135,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
     def test_deleteid(self):
         self.b.current_playlist.append([Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 2)
-        result = self.h.handle_request(u'deleteid "2"')
+        result = self.h.handle_request(u'deleteid "1"')
         self.assertEqual(len(self.b.current_playlist.tracks), 1)
         self.assert_(u'OK' in result)
 
@@ -193,7 +193,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
-        result = self.h.handle_request(u'moveid "5" "2"')
+        result = self.h.handle_request(u'moveid "4" "2"')
         self.assertEqual(self.b.current_playlist.tracks[0].name, 'a')
         self.assertEqual(self.b.current_playlist.tracks[1].name, 'b')
         self.assertEqual(self.b.current_playlist.tracks[2].name, 'e')
@@ -229,7 +229,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
         result = self.h.handle_request(
             u'playlistfind filename "file:///exists"')
         self.assert_(u'file: file:///exists' in result)
-        self.assert_(u'Id: 1' in result)
+        self.assert_(u'Id: 0' in result)
         self.assert_(u'Pos: 0' in result)
         self.assert_(u'OK' in result)
 
@@ -242,11 +242,11 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_playlistid_with_songid(self):
         self.b.current_playlist.append([Track(name='a'), Track(name='b')])
-        result = self.h.handle_request(u'playlistid "2"')
+        result = self.h.handle_request(u'playlistid "1"')
         self.assert_(u'Title: a' not in result)
-        self.assert_(u'Id: 1' not in result)
+        self.assert_(u'Id: 0' not in result)
         self.assert_(u'Title: b' in result)
-        self.assert_(u'Id: 2' in result)
+        self.assert_(u'Id: 1' in result)
         self.assert_(u'OK' in result)
 
     def test_playlistid_with_not_existing_songid_fails(self):
@@ -429,7 +429,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
-        result = self.h.handle_request(u'swapid "2" "5"')
+        result = self.h.handle_request(u'swapid "1" "4"')
         self.assertEqual(self.b.current_playlist.tracks[0].name, 'a')
         self.assertEqual(self.b.current_playlist.tracks[1].name, 'e')
         self.assertEqual(self.b.current_playlist.tracks[2].name, 'c')
