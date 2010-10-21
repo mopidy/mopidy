@@ -76,6 +76,7 @@ class IssueGH18RegressionTest(unittest.TestCase):
         self.assertNotEqual(cp_track_1, cp_track_2)
         self.assertNotEqual(cp_track_2, cp_track_3)
 
+
 class IssueGH22RegressionTest(unittest.TestCase):
     """
     The issue: http://github.com/jodal/mopidy/issues/#issue/22
