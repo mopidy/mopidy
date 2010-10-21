@@ -75,3 +75,35 @@ class IssueGH18RegressionTest(unittest.TestCase):
 
         self.assertNotEqual(cp_track_1, cp_track_2)
         self.assertNotEqual(cp_track_2, cp_track_3)
+
+class IssueGH22RegressionTest(unittest.TestCase):
+    """
+    The issue: http://github.com/jodal/mopidy/issues/#issue/22
+
+    How to reproduce:
+
+        Play, random on, remove all tracks from the current playlist (as in
+        "delete" each one, not "clear").
+
+        Alternatively: Play, random on, remove a random track from the current
+        playlist, press next until it crashes.
+    """
+
+    def setUp(self):
+        self.backend = DummyBackend(mixer_class=DummyMixer)
+        self.backend.current_playlist.append([
+            Track(uri='a'), Track(uri='b'), Track(uri='c'),
+            Track(uri='d'), Track(uri='e'), Track(uri='f')])
+        self.mpd = dispatcher.MpdDispatcher(backend=self.backend)
+
+    def test(self):
+        random.seed(1)
+        self.mpd.handle_request(u'play')
+        self.mpd.handle_request(u'random "1"')
+        self.mpd.handle_request(u'deleteid "1"')
+        self.mpd.handle_request(u'deleteid "2"')
+        self.mpd.handle_request(u'deleteid "3"')
+        self.mpd.handle_request(u'deleteid "4"')
+        self.mpd.handle_request(u'deleteid "5"')
+        self.mpd.handle_request(u'deleteid "6"')
+        self.mpd.handle_request(u'status')
