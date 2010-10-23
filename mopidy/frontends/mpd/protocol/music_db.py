@@ -196,6 +196,7 @@ def _list_build_query(field, mpd_query):
         query = {}
         while tokens:
             key = tokens[0].lower()
+            key = str(key) # Needed for kwargs keys on OS X and Windows
             value = tokens[1]
             tokens = tokens[2:]
             if key not in (u'artist', u'album', u'date', u'genre'):
