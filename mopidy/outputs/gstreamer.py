@@ -29,7 +29,7 @@ class GStreamerOutput(BaseOutput):
     def __init__(self, *args, **kwargs):
         super(GStreamerOutput, self).__init__(*args, **kwargs)
         # Start a helper thread that can run the gobject.MainLoop
-        self.messages_thread = GStreamerMessagesThread()
+        self.messages_thread = GStreamerMessagesThread(self.core_queue)
 
         # Start a helper thread that can process the output_queue
         self.output_queue = multiprocessing.Queue()
@@ -91,10 +91,9 @@ class GStreamerOutput(BaseOutput):
 
 
 class GStreamerMessagesThread(BaseThread):
-    def __init__(self):
-        super(GStreamerMessagesThread, self).__init__()
+    def __init__(self, core_queue):
+        super(GStreamerMessagesThread, self).__init__(core_queue)
         self.name = u'GStreamerMessagesThread'
-        self.daemon = True
 
     def run_inside_try(self):
         gobject.MainLoop().run()
@@ -113,10 +112,8 @@ class GStreamerPlayerThread(BaseThread):
     """
 
     def __init__(self, core_queue, output_queue):
-        super(GStreamerPlayerThread, self).__init__()
+        super(GStreamerPlayerThread, self).__init__(core_queue)
         self.name = u'GStreamerPlayerThread'
-        self.daemon = True
-        self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
 

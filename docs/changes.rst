@@ -41,6 +41,8 @@ No description yet.
   sound output work with GStreamer >= 0.10.29, which includes the versions used
   in Ubuntu 10.10 and on OS X if using Homebrew. (Fixes: :issue:`21`,
   :issue:`24`, contributes to :issue:`14`)
+- Improved handling of uncaught exceptions in threads. The entire process
+  should now exit immediately.
 
 
 0.1.0 (2010-08-23)

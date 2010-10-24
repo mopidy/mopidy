@@ -1,20 +1,22 @@
 import logging
 import multiprocessing
 import optparse
+import sys
 
 from mopidy import get_version, settings, OptionalDependencyError
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import BaseProcess
+from mopidy.utils.process import BaseThread
 from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
 
-class CoreProcess(BaseProcess):
+class CoreProcess(BaseThread):
     def __init__(self):
-        super(CoreProcess, self).__init__(name='CoreProcess')
         self.core_queue = multiprocessing.Queue()
+        super(CoreProcess, self).__init__(self.core_queue)
+        self.name = 'CoreProcess'
         self.options = self.parse_options()
         self.output = None
         self.backend = None
@@ -79,7 +81,9 @@ class CoreProcess(BaseProcess):
         return frontends
 
     def process_message(self, message):
-        if message.get('to') == 'output':
+        if message.get('to') == 'core':
+            self.process_message_to_core(message)
+        elif message.get('to') == 'output':
             self.output.process_message(message)
         elif message.get('to') == 'frontend':
             for frontend in self.frontends:
@@ -90,5 +94,14 @@ class CoreProcess(BaseProcess):
             self.backend.playback.stop()
         elif message['command'] == 'set_stored_playlists':
             self.backend.stored_playlists.playlists = message['playlists']
+        else:
+            logger.warning(u'Cannot handle message: %s', message)
+
+    def process_message_to_core(self, message):
+        assert message['to'] == 'core', u'Message recipient must be "core".'
+        if message['command'] == 'exit':
+            if message['reason'] is not None:
+                logger.info(u'Exiting (%s)', message['reason'])
+            sys.exit(message['status'])
         else:
             logger.warning(u'Cannot handle message: %s', message)
