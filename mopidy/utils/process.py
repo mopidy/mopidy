@@ -28,23 +28,28 @@ class BaseProcess(multiprocessing.Process):
         try:
             self.run_inside_try()
         except KeyboardInterrupt:
-            logger.info(u'%s: Interrupted by user', self.name)
-            sys.exit(0)
+            logger.info(u'Interrupted by user')
+            self.exit(0, u'Interrupted by user')
         except SettingsError as e:
             logger.error(e.message)
-            sys.exit(1)
+            self.exit(1, u'Settings error')
         except ImportError as e:
             logger.error(e)
-            sys.exit(1)
+            self.exit(2, u'Import error')
         except Exception as e:
             logger.exception(e)
-            raise e
+            self.exit(3, u'Unknown error')
 
     def run_inside_try(self):
         raise NotImplementedError
 
     def destroy(self):
         self.terminate()
+
+    def exit(self, status=0, reason=None):
+        self.core_queue.put({'to': 'core', 'command': 'exit',
+            'status': status, 'reason': reason})
+        self.destroy()
 
 
 class BaseThread(multiprocessing.dummy.Process):
@@ -57,20 +62,25 @@ class BaseThread(multiprocessing.dummy.Process):
         try:
             self.run_inside_try()
         except KeyboardInterrupt:
-            logger.info(u'%s: Interrupted by user', self.name)
-            sys.exit(0)
+            logger.info(u'Interrupted by user')
+            self.exit(0, u'Interrupted by user')
         except SettingsError as e:
             logger.error(e.message)
-            sys.exit(1)
+            self.exit(1, u'Settings error')
         except ImportError as e:
             logger.error(e)
-            sys.exit(1)
+            self.exit(2, u'Import error')
         except Exception as e:
             logger.exception(e)
-            raise e
+            self.exit(3, u'Unknown error')
 
     def run_inside_try(self):
         raise NotImplementedError
 
     def destroy(self):
         pass
+
+    def exit(self, status=0, reason=None):
+        self.core_queue.put({'to': 'core', 'command': 'exit',
+            'status': status, 'reason': reason})
+        self.destroy()
