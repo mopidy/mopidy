@@ -375,12 +375,15 @@ class BasePlaybackController(object):
 
         if cp_track is not None:
             assert cp_track in self.backend.current_playlist.cp_tracks
-        elif not self.current_cp_track:
+
+        if cp_track is None and self.current_cp_track is None:
             cp_track = self.cp_track_at_next
 
-        if self.state == self.PAUSED and cp_track is None:
+        if cp_track is None and self.state == self.PAUSED:
             self.resume()
-        elif cp_track is not None:
+
+        if cp_track is not None:
+            self.state = self.STOPPED
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self._play(cp_track[1]):

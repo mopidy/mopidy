@@ -43,6 +43,7 @@ No description yet.
   :issue:`24`, contributes to :issue:`14`)
 - Improved handling of uncaught exceptions in threads. The entire process
   should now exit immediately.
+- MPD command ``playid "-1"`` now correctly resumes playback if paused.
 
 
 0.1.0 (2010-08-23)
