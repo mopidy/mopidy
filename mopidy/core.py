@@ -6,12 +6,12 @@ from mopidy import get_version, settings, OptionalDependencyError
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import BaseProcess
+from mopidy.utils.process import BaseThread
 from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
 
-class CoreProcess(BaseProcess):
+class CoreProcess(BaseThread):
     def __init__(self):
         super(CoreProcess, self).__init__(name='CoreProcess')
         self.core_queue = multiprocessing.Queue()
