@@ -5,10 +5,28 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-0.2.0 (in development)
-======================
+0.2.0 (2010-10-24)
+==================
 
-No description yet.
+In Mopidy 0.2.0 we've added a `Last.fm <http://www.last.fm/>`_ scrobbling
+support, which means that Mopidy now can submit meta data about the tracks you
+play to your Last.fm profile. See :mod:`mopidy.frontends.lastfm` for
+details on new dependencies and settings. If you use Mopidy's Last.fm support,
+please join the `Mopidy group at Last.fm <http://www.last.fm/group/Mopidy>`_.
+
+With the exception of the work on the Last.fm scrobbler, there has been a
+couple of quiet months in the Mopidy camp. About the only thing going on, has
+been stabilization work and bug fixing. All bugs reported on GitHub, plus some,
+have been fixed in 0.2.0. Thus, we hope this will be a great release!
+
+We've worked a bit on OS X support, but not all issues are completely solved
+yet. :issue:`25`  is the one that is currently blocking OS X support. Any help
+solving it will be greatly appreciated!
+
+Finally, please :ref:`update your pyspotify installation
+<pyspotify_installation>` when upgrading to Mopidy 0.2.0. The latest pyspotify
+got a fix for the segmentation fault that occurred when playing music and
+searching at the same time, thanks to Valentin David.
 
 **Important changes**
 
@@ -16,34 +34,43 @@ No description yet.
 
 **Changes**
 
-- Simplify the default log format, :attr:`mopidy.settings.CONSOLE_LOG_FORMAT`.
-  From a user's point of view: Less noise, more information.
-- Rename the :option:`--dump` command line option to
-  :option:`--save-debug-log`.
-- Rename setting :attr:`mopidy.settings.DUMP_LOG_FORMAT` to
-  :attr:`mopidy.settings.DEBUG_LOG_FORMAT` and use it for :option:`--verbose`
-  too.
-- Rename setting :attr:`mopidy.settings.DUMP_LOG_FILENAME` to
-  :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
-- Switched from using subprocesses to threads. This partly fixes the OS X
-  support. See :issue:`14` for details.
-- MPD command ``list`` now supports queries by artist, album name, and date, as
-  used by e.g. the Ario client. (Fixes: :issue:`20`)
-- MPD command ``add ""`` and ``addid ""`` now behaves as expected. (Fixes
-  :issue:`16`)
-- Fix wrong behavior on end of track and next after random mode has been used.
-  (Fixes: :issue:`18`)
-- Fix infinite recursion loop crash on playback of non-playable tracks when in
-  random mode. (Fixes :issue:`17`)
-- Fix assertion error that happened if one removed tracks from the current
-  playlist, while in random mode. (Fixes :issue:`22`)
-- GStreamerOutput: Set ``caps`` on the ``appsrc`` bin before use. This makes
-  sound output work with GStreamer >= 0.10.29, which includes the versions used
-  in Ubuntu 10.10 and on OS X if using Homebrew. (Fixes: :issue:`21`,
-  :issue:`24`, contributes to :issue:`14`)
+- Logging and command line options:
+
+  - Simplify the default log format,
+    :attr:`mopidy.settings.CONSOLE_LOG_FORMAT`. From a user's point of view:
+    Less noise, more information.
+  - Rename the :option:`--dump` command line option to
+    :option:`--save-debug-log`.
+  - Rename setting :attr:`mopidy.settings.DUMP_LOG_FORMAT` to
+    :attr:`mopidy.settings.DEBUG_LOG_FORMAT` and use it for :option:`--verbose`
+    too.
+  - Rename setting :attr:`mopidy.settings.DUMP_LOG_FILENAME` to
+    :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
+
+- MPD frontend:
+
+  - MPD command ``list`` now supports queries by artist, album name, and date,
+    as used by e.g. the Ario client. (Fixes: :issue:`20`)
+  - MPD command ``add ""`` and ``addid ""`` now behaves as expected. (Fixes
+    :issue:`16`)
+  - MPD command ``playid "-1"`` now correctly resumes playback if paused.
+
+- Random mode:
+
+  - Fix wrong behavior on end of track and next after random mode has been
+    used. (Fixes: :issue:`18`)
+  - Fix infinite recursion loop crash on playback of non-playable tracks when
+    in random mode. (Fixes :issue:`17`)
+  - Fix assertion error that happened if one removed tracks from the current
+    playlist, while in random mode. (Fixes :issue:`22`)
+
+- Switched from using subprocesses to threads. (Fixes: :issue:`14`)
+- :mod:`mopidy.outputs.gstreamer`: Set ``caps`` on the ``appsrc`` bin before
+  use. This makes sound output work with GStreamer >= 0.10.29, which includes
+  the versions used in Ubuntu 10.10 and on OS X if using Homebrew. (Fixes:
+  :issue:`21`, :issue:`24`, contributes to :issue:`14`)
 - Improved handling of uncaught exceptions in threads. The entire process
   should now exit immediately.
-- MPD command ``playid "-1"`` now correctly resumes playback if paused.
 
 
 0.1.0 (2010-08-23)
