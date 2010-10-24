@@ -19,22 +19,26 @@ def unpickle_connection(pickled_connection):
 
 
 class BaseProcess(multiprocessing.Process):
+    def __init__(self, core_queue):
+        super(BaseProcess, self).__init__()
+        self.core_queue = core_queue
+
     def run(self):
         logger.debug(u'%s: Starting process', self.name)
         try:
             self.run_inside_try()
         except KeyboardInterrupt:
-            logger.info(u'%s: Interrupted by user', self.name)
-            sys.exit(0)
+            logger.info(u'Interrupted by user')
+            self.exit(0, u'Interrupted by user')
         except SettingsError as e:
             logger.error(e.message)
-            sys.exit(1)
+            self.exit(1, u'Settings error')
         except ImportError as e:
             logger.error(e)
-            sys.exit(1)
+            self.exit(2, u'Import error')
         except Exception as e:
             logger.exception(e)
-            raise e
+            self.exit(3, u'Unknown error')
 
     def run_inside_try(self):
         raise NotImplementedError
@@ -42,27 +46,43 @@ class BaseProcess(multiprocessing.Process):
     def destroy(self):
         self.terminate()
 
+    def exit(self, status=0, reason=None):
+        self.core_queue.put({'to': 'core', 'command': 'exit',
+            'status': status, 'reason': reason})
+        self.destroy()
+
 
 class BaseThread(multiprocessing.dummy.Process):
+    def __init__(self, core_queue):
+        super(BaseThread, self).__init__()
+        self.core_queue = core_queue
+        # No thread should block process from exiting
+        self.daemon = True
+
     def run(self):
         logger.debug(u'%s: Starting thread', self.name)
         try:
             self.run_inside_try()
         except KeyboardInterrupt:
-            logger.info(u'%s: Interrupted by user', self.name)
-            sys.exit(0)
+            logger.info(u'Interrupted by user')
+            self.exit(0, u'Interrupted by user')
         except SettingsError as e:
             logger.error(e.message)
-            sys.exit(1)
+            self.exit(1, u'Settings error')
         except ImportError as e:
             logger.error(e)
-            sys.exit(1)
+            self.exit(2, u'Import error')
         except Exception as e:
             logger.exception(e)
-            raise e
+            self.exit(3, u'Unknown error')
 
     def run_inside_try(self):
         raise NotImplementedError
 
     def destroy(self):
         pass
+
+    def exit(self, status=0, reason=None):
+        self.core_queue.put({'to': 'core', 'command': 'exit',
+            'status': status, 'reason': reason})
+        self.destroy()

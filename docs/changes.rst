@@ -27,9 +27,22 @@ No description yet.
   :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
 - Switched from using subprocesses to threads. This partly fixes the OS X
   support. See :issue:`14` for details.
-- MPD frontend:
-
-  - ``add ""`` and ``addid ""`` now behaves as expected.
+- MPD command ``list`` now supports queries by artist, album name, and date, as
+  used by e.g. the Ario client. (Fixes: :issue:`20`)
+- MPD command ``add ""`` and ``addid ""`` now behaves as expected. (Fixes
+  :issue:`16`)
+- Fix wrong behavior on end of track and next after random mode has been used.
+  (Fixes: :issue:`18`)
+- Fix infinite recursion loop crash on playback of non-playable tracks when in
+  random mode. (Fixes :issue:`17`)
+- Fix assertion error that happened if one removed tracks from the current
+  playlist, while in random mode. (Fixes :issue:`22`)
+- GStreamerOutput: Set ``caps`` on the ``appsrc`` bin before use. This makes
+  sound output work with GStreamer >= 0.10.29, which includes the versions used
+  in Ubuntu 10.10 and on OS X if using Homebrew. (Fixes: :issue:`21`,
+  :issue:`24`, contributes to :issue:`14`)
+- Improved handling of uncaught exceptions in threads. The entire process
+  should now exit immediately.
 
 
 0.1.0 (2010-08-23)

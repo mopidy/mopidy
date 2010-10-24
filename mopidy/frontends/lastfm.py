@@ -45,7 +45,7 @@ class LastfmFrontend(BaseFrontend):
     def __init__(self, *args, **kwargs):
         super(LastfmFrontend, self).__init__(*args, **kwargs)
         (self.connection, other_end) = multiprocessing.Pipe()
-        self.thread = LastfmFrontendThread(other_end)
+        self.thread = LastfmFrontendThread(self.core_queue, other_end)
 
     def start(self):
         self.thread.start()
@@ -58,10 +58,9 @@ class LastfmFrontend(BaseFrontend):
 
 
 class LastfmFrontendThread(BaseThread):
-    def __init__(self, connection):
-        super(LastfmFrontendThread, self).__init__()
+    def __init__(self, core_queue, connection):
+        super(LastfmFrontendThread, self).__init__(core_queue)
         self.name = u'LastfmFrontendThread'
-        self.daemon = True
         self.connection = connection
         self.lastfm = None
         self.scrobbler = None
@@ -84,7 +83,7 @@ class LastfmFrontendThread(BaseThread):
                 CLIENT_ID, CLIENT_VERSION)
             logger.info(u'Connected to Last.fm')
         except SettingsError as e:
-            logger.info(u'Last.fm scrobbler did not start.')
+            logger.info(u'Last.fm scrobbler not started')
             logger.debug(u'Last.fm settings error: %s', e)
         except (pylast.WSError, socket.error) as e:
             logger.error(u'Last.fm connection error: %s', e)

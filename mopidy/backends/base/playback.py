@@ -142,7 +142,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
@@ -195,7 +195,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
@@ -315,11 +315,8 @@ class BasePlaybackController(object):
         if self.cp_track_at_eot:
             self._trigger_stopped_playing_event()
             self.play(self.cp_track_at_eot)
-            if self.random and self.current_cp_track in self._shuffled:
-                self._shuffled.remove(self.current_cp_track)
         else:
-            self.stop()
-            self.current_cp_track = None
+            self.stop(clear_current_track=True)
 
         if self.consume:
             self.backend.current_playlist.remove(cpid=original_cp_track[0])
@@ -333,13 +330,10 @@ class BasePlaybackController(object):
         self._first_shuffle = True
         self._shuffled = []
 
-        if not self.backend.current_playlist.cp_tracks:
-            self.stop()
-            self.current_cp_track = None
-        elif (self.current_cp_track not in
+        if (not self.backend.current_playlist.cp_tracks or
+                self.current_cp_track not in
                 self.backend.current_playlist.cp_tracks):
-            self.current_cp_track = None
-            self.stop()
+            self.stop(clear_current_track=True)
 
     def next(self):
         """Play the next track."""
@@ -350,11 +344,7 @@ class BasePlaybackController(object):
             self._trigger_stopped_playing_event()
             self.play(self.cp_track_at_next)
         else:
-            self.stop()
-            self.current_cp_track = None
-
-        if self.random and self.current_cp_track in self._shuffled:
-            self._shuffled.remove(self.current_cp_track)
+            self.stop(clear_current_track=True)
 
     def pause(self):
         """Pause playback."""
@@ -394,6 +384,9 @@ class BasePlaybackController(object):
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self._play(cp_track[1]):
+                # Track is not playable
+                if self.random and self._shuffled:
+                    self._shuffled.remove(cp_track)
                 if on_error_step == 1:
                     self.next()
                 elif on_error_step == -1:
@@ -477,13 +470,21 @@ class BasePlaybackController(object):
         """
         raise NotImplementedError
 
-    def stop(self):
-        """Stop playing."""
+    def stop(self, clear_current_track=False):
+        """
+        Stop playing.
+
+        :param clear_current_track: whether to clear the current track _after_
+            stopping
+        :type clear_current_track: boolean
+        """
         if self.state == self.STOPPED:
             return
         self._trigger_stopped_playing_event()
         if self._stop():
             self.state = self.STOPPED
+        if clear_current_track:
+            self.current_cp_track = None
 
     def _stop(self):
         """

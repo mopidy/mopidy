@@ -19,12 +19,8 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
 
     def __init__(self, username, password, core_queue, output):
         SpotifySessionManager.__init__(self, username, password)
-        BaseThread.__init__(self)
+        BaseThread.__init__(self, core_queue)
         self.name = 'LibspotifySMThread'
-        # Run as a daemon thread, so Mopidy won't wait for this thread to exit
-        # before Mopidy exits.
-        self.daemon = True
-        self.core_queue = core_queue
         self.output = output
         self.connected = threading.Event()
         self.session = None
@@ -69,16 +65,19 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
     def music_delivery(self, session, frames, frame_size, num_frames,
             sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
-        # TODO Base caps_string on arguments
+        assert sample_type == 0, u'Expects 16-bit signed integer samples'
         capabilites = """
             audio/x-raw-int,
             endianness=(int)1234,
-            channels=(int)2,
+            channels=(int)%(channels)d,
             width=(int)16,
             depth=(int)16,
-            signed=True,
-            rate=(int)44100
-        """
+            signed=(boolean)true,
+            rate=(int)%(sample_rate)d
+        """ % {
+            'sample_rate': sample_rate,
+            'channels': channels,
+        }
         self.output.deliver_data(capabilites, bytes(frames))
 
     def play_token_lost(self, session):
@@ -97,7 +96,7 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
-        def callback(results, userdata):
+        def callback(results, userdata=None):
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
                 LibspotifyTranslator.to_mopidy_track(t)
