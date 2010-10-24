@@ -383,6 +383,7 @@ class BasePlaybackController(object):
             self.resume()
 
         if cp_track is not None:
+            self.state = self.STOPPED
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self._play(cp_track[1]):
