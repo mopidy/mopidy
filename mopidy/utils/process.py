@@ -19,6 +19,10 @@ def unpickle_connection(pickled_connection):
 
 
 class BaseProcess(multiprocessing.Process):
+    def __init__(self, core_queue):
+        super(BaseProcess, self).__init__()
+        self.core_queue = core_queue
+
     def run(self):
         logger.debug(u'%s: Starting process', self.name)
         try:
@@ -44,6 +48,10 @@ class BaseProcess(multiprocessing.Process):
 
 
 class BaseThread(multiprocessing.dummy.Process):
+    def __init__(self, core_queue):
+        super(BaseThread, self).__init__()
+        self.core_queue = core_queue
+
     def run(self):
         logger.debug(u'%s: Starting thread', self.name)
         try:

@@ -8,7 +8,7 @@ logger = logging.getLogger('mopidy.frontends.mpd.thread')
 
 class MpdThread(BaseThread):
     def __init__(self, core_queue):
-        super(MpdThread, self).__init__()
+        super(MpdThread, self).__init__(core_queue)
         self.name = u'MpdThread'
         self.daemon = True
         self.core_queue = core_queue

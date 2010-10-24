@@ -13,8 +13,9 @@ logger = logging.getLogger('mopidy.core')
 
 class CoreProcess(BaseThread):
     def __init__(self):
-        super(CoreProcess, self).__init__(name='CoreProcess')
         self.core_queue = multiprocessing.Queue()
+        super(CoreProcess, self).__init__(self.core_queue)
+        self.name = 'CoreProcess'
         self.options = self.parse_options()
         self.output = None
         self.backend = None
