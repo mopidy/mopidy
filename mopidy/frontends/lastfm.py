@@ -61,7 +61,6 @@ class LastfmFrontendThread(BaseThread):
     def __init__(self, core_queue, connection):
         super(LastfmFrontendThread, self).__init__(core_queue)
         self.name = u'LastfmFrontendThread'
-        self.daemon = True
         self.connection = connection
         self.lastfm = None
         self.scrobbler = None

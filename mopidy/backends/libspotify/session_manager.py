@@ -21,10 +21,6 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
         SpotifySessionManager.__init__(self, username, password)
         BaseThread.__init__(self, core_queue)
         self.name = 'LibspotifySMThread'
-        # Run as a daemon thread, so Mopidy won't wait for this thread to exit
-        # before Mopidy exits.
-        self.daemon = True
-        self.core_queue = core_queue
         self.output = output
         self.connected = threading.Event()
         self.session = None

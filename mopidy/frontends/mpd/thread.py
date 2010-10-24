@@ -10,8 +10,6 @@ class MpdThread(BaseThread):
     def __init__(self, core_queue):
         super(MpdThread, self).__init__(core_queue)
         self.name = u'MpdThread'
-        self.daemon = True
-        self.core_queue = core_queue
 
     def run_inside_try(self):
         logger.debug(u'Starting MPD server thread')

@@ -56,6 +56,8 @@ class BaseThread(multiprocessing.dummy.Process):
     def __init__(self, core_queue):
         super(BaseThread, self).__init__()
         self.core_queue = core_queue
+        # No thread should block process from exiting
+        self.daemon = True
 
     def run(self):
         logger.debug(u'%s: Starting thread', self.name)
