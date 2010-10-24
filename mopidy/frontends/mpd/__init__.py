@@ -1,7 +1,13 @@
-from mopidy.frontends.mpd.dispatcher import MpdDispatcher
-from mopidy.frontends.mpd.process import MpdProcess
+import logging
 
-class MpdFrontend(object):
+from mopidy.frontends.base import BaseFrontend
+from mopidy.frontends.mpd.dispatcher import MpdDispatcher
+from mopidy.frontends.mpd.thread import MpdThread
+from mopidy.utils.process import unpickle_connection
+
+logger = logging.getLogger('mopidy.frontends.mpd')
+
+class MpdFrontend(BaseFrontend):
     """
     The MPD frontend.
 
@@ -11,27 +17,32 @@ class MpdFrontend(object):
     - :attr:`mopidy.settings.MPD_SERVER_PORT`
     """
 
-    def __init__(self):
-        self.process = None
-        self.dispatcher = None
+    def __init__(self, *args, **kwargs):
+        super(MpdFrontend, self).__init__(*args, **kwargs)
+        self.thread = None
+        self.dispatcher = MpdDispatcher(self.backend)
 
-    def start_server(self, core_queue):
-        """
-        Starts the MPD server.
+    def start(self):
+        """Starts the MPD server."""
+        self.thread = MpdThread(self.core_queue)
+        self.thread.start()
 
-        :param core_queue: the core queue
-        :type core_queue: :class:`multiprocessing.Queue`
-        """
-        self.process = MpdProcess(core_queue)
-        self.process.start()
+    def destroy(self):
+        """Destroys the MPD server."""
+        self.thread.destroy()
 
-    def create_dispatcher(self, backend):
+    def process_message(self, message):
         """
-        Creates a dispatcher for MPD requests.
+        Processes messages with the MPD frontend as destination.
 
-        :param backend: the backend
-        :type backend: :class:`mopidy.backends.base.BaseBackend`
-        :rtype: :class:`mopidy.frontends.mpd.dispatcher.MpdDispatcher`
+        :param message: the message
+        :type message: dict
         """
-        self.dispatcher = MpdDispatcher(backend)
-        return self.dispatcher
+        assert message['to'] == 'frontend', \
+            u'Message recipient must be "frontend".'
+        if message['command'] == 'mpd_request':
+            response = self.dispatcher.handle_request(message['request'])
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
+        else:
+            pass # Ignore messages for other frontends

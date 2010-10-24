@@ -142,7 +142,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
@@ -195,7 +195,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
@@ -311,14 +311,12 @@ class BasePlaybackController(object):
             return
 
         original_cp_track = self.current_cp_track
-        if self.cp_track_at_eot:
-            self.play(self.cp_track_at_eot)
 
-            if self.random and self.current_cp_track in self._shuffled:
-                self._shuffled.remove(self.current_cp_track)
+        if self.cp_track_at_eot:
+            self._trigger_stopped_playing_event()
+            self.play(self.cp_track_at_eot)
         else:
-            self.stop()
-            self.current_cp_track = None
+            self.stop(clear_current_track=True)
 
         if self.consume:
             self.backend.current_playlist.remove(cpid=original_cp_track[0])
@@ -332,13 +330,10 @@ class BasePlaybackController(object):
         self._first_shuffle = True
         self._shuffled = []
 
-        if not self.backend.current_playlist.cp_tracks:
-            self.stop()
-            self.current_cp_track = None
-        elif (self.current_cp_track not in
+        if (not self.backend.current_playlist.cp_tracks or
+                self.current_cp_track not in
                 self.backend.current_playlist.cp_tracks):
-            self.current_cp_track = None
-            self.stop()
+            self.stop(clear_current_track=True)
 
     def next(self):
         """Play the next track."""
@@ -346,13 +341,10 @@ class BasePlaybackController(object):
             return
 
         if self.cp_track_at_next:
+            self._trigger_stopped_playing_event()
             self.play(self.cp_track_at_next)
         else:
-            self.stop()
-            self.current_cp_track = None
-
-        if self.random and self.current_cp_track in self._shuffled:
-            self._shuffled.remove(self.current_cp_track)
+            self.stop(clear_current_track=True)
 
     def pause(self):
         """Pause playback."""
@@ -383,15 +375,21 @@ class BasePlaybackController(object):
 
         if cp_track is not None:
             assert cp_track in self.backend.current_playlist.cp_tracks
-        elif not self.current_cp_track:
+
+        if cp_track is None and self.current_cp_track is None:
             cp_track = self.cp_track_at_next
 
-        if self.state == self.PAUSED and cp_track is None:
+        if cp_track is None and self.state == self.PAUSED:
             self.resume()
-        elif cp_track is not None:
+
+        if cp_track is not None:
+            self.state = self.STOPPED
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self._play(cp_track[1]):
+                # Track is not playable
+                if self.random and self._shuffled:
+                    self._shuffled.remove(cp_track)
                 if on_error_step == 1:
                     self.next()
                 elif on_error_step == -1:
@@ -399,6 +397,8 @@ class BasePlaybackController(object):
 
         if self.random and self.current_cp_track in self._shuffled:
             self._shuffled.remove(self.current_cp_track)
+
+        self._trigger_started_playing_event()
 
     def _play(self, track):
         """
@@ -418,6 +418,7 @@ class BasePlaybackController(object):
             return
         if self.state == self.STOPPED:
             return
+        self._trigger_stopped_playing_event()
         self.play(self.cp_track_at_previous, on_error_step=-1)
 
     def resume(self):
@@ -442,8 +443,9 @@ class BasePlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        # FIXME I think return value is only really useful for internal
-        # testing, as such it should probably not be exposed in API.
+        if not self.backend.current_playlist.tracks:
+            return False
+
         if self.state == self.STOPPED:
             self.play()
         elif self.state == self.PAUSED:
@@ -451,9 +453,9 @@ class BasePlaybackController(object):
 
         if time_position < 0:
             time_position = 0
-        elif self.current_track and time_position > self.current_track.length:
+        elif time_position > self.current_track.length:
             self.next()
-            return
+            return True
 
         self._play_time_started = self._current_wall_time
         self._play_time_accumulated = time_position
@@ -471,10 +473,21 @@ class BasePlaybackController(object):
         """
         raise NotImplementedError
 
-    def stop(self):
-        """Stop playing."""
-        if self.state != self.STOPPED and self._stop():
+    def stop(self, clear_current_track=False):
+        """
+        Stop playing.
+
+        :param clear_current_track: whether to clear the current track _after_
+            stopping
+        :type clear_current_track: boolean
+        """
+        if self.state == self.STOPPED:
+            return
+        self._trigger_stopped_playing_event()
+        if self._stop():
             self.state = self.STOPPED
+        if clear_current_track:
+            self.current_cp_track = None
 
     def _stop(self):
         """
@@ -484,3 +497,33 @@ class BasePlaybackController(object):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         raise NotImplementedError
+
+    def _trigger_started_playing_event(self):
+        """
+        Notifies frontends that a track has started playing.
+
+        For internal use only. Should be called by the backend directly after a
+        track has started playing.
+        """
+        if self.current_track is not None:
+            self.backend.core_queue.put({
+                'to': 'frontend',
+                'command': 'started_playing',
+                'track': self.current_track,
+            })
+
+    def _trigger_stopped_playing_event(self):
+        """
+        Notifies frontends that a track has stopped playing.
+
+        For internal use only. Should be called by the backend before a track
+        is stopped playing, e.g. at the next, previous, and stop actions and at
+        end-of-track.
+        """
+        if self.current_track is not None:
+            self.backend.core_queue.put({
+                'to': 'frontend',
+                'command': 'stopped_playing',
+                'track': self.current_track,
+                'stop_position': self.time_position,
+            })

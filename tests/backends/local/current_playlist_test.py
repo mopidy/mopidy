@@ -22,10 +22,9 @@ class LocalCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
         for i in range(1, 4)]
 
     def setUp(self):
-        self.original_backends = settings.BACKENDS
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         super(LocalCurrentPlaylistControllerTest, self).setUp()
 
     def tearDown(self):
         super(LocalCurrentPlaylistControllerTest, self).tearDown()
-        settings.BACKENDS = settings.original_backends
+        settings.runtime.clear()

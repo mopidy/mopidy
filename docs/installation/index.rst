@@ -54,6 +54,12 @@ Make sure you got the required dependencies installed.
 
     - No additional dependencies.
 
+- Optional dependencies:
+
+  - :mod:`mopidy.frontends.lastfm`
+
+    - pylast >= 4.3.0
+
 
 Install latest release
 ======================
@@ -69,6 +75,9 @@ To later upgrade to the latest release::
     sudo pip install -U Mopidy
 
 If you for some reason can't use ``pip``, try ``easy_install``.
+
+Next, you need to set a couple of :doc:`settings </settings>`, and then you're
+ready to :doc:`run Mopidy </running>`.
 
 
 Install development version
@@ -92,58 +101,5 @@ To later update to the very latest version::
 For an introduction to ``git``, please visit `git-scm.com
 <http://git-scm.com/>`_.
 
-
-Settings
-========
-
-Mopidy reads settings from the file ``~/.mopidy/settings.py``, where ``~``
-means your *home directory*. If your username is ``alice`` and you are running
-Linux, the settings file should probably be at
-``/home/alice/.mopidy/settings.py``.
-
-You can either create this file yourself, or run the ``mopidy`` command, and it
-will create an empty settings file for you.
-
-Music from Spotify
-------------------
-
-If you are using the Spotify backend, which is the default, enter your Spotify
-Premium account's username and password into the file, like this::
-
-    SPOTIFY_USERNAME = u'myusername'
-    SPOTIFY_PASSWORD = u'mysecret'
-
-Music from local storage
-------------------------
-
-If you want use Mopidy to play music you have locally at your machine instead
-of using Spotify, you need to change the backend from the default to
-:mod:`mopidy.backends.local` by adding the following line to your settings
-file::
-
-    BACKENDS = (u'mopidy.backends.local.LocalBackend',)
-
-You may also want to change some of the ``LOCAL_*`` settings. See
-:mod:`mopidy.settings`, for a full list of available settings.
-
-Connecting from other machines on the network
----------------------------------------------
-
-As a secure default, Mopidy only accepts connections from ``localhost``. If you
-want to open it for connections from other machines on your network, see
-the documentation for :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`.
-
-
-Running Mopidy
-==============
-
-To start Mopidy, simply open a terminal and run::
-
-    mopidy
-
-When Mopidy says ``MPD server running at [127.0.0.1]:6600`` it's ready to
-accept connections by any MPD client. You can find tons of MPD clients at
-http://mpd.wikia.com/wiki/Clients. We use GMPC and ncmpcpp during development.
-The first is a GUI client, and the second is a terminal client.
-
-To stop Mopidy, press ``CTRL+C``.
+Next, you need to set a couple of :doc:`settings </settings>`, and then you're
+ready to :doc:`run Mopidy </running>`.

@@ -41,38 +41,24 @@ class LocalPlaybackController(BasePlaybackController):
         super(LocalPlaybackController, self).__init__(backend)
         self.stop()
 
-    def _send_recv(self, message):
-        (my_end, other_end) = multiprocessing.Pipe()
-        message.update({'reply_to': pickle_connection(other_end)})
-        self.backend.output_queue.put(message)
-        my_end.poll(None)
-        return my_end.recv()
-
-    def _send(self, message):
-        self.backend.output_queue.put(message)
-
-    def _set_state(self, state):
-        return self._send_recv({'command': 'set_state', 'state': state})
-
     def _play(self, track):
-        return self._send_recv({'command': 'play_uri', 'uri': track.uri})
+        return self.backend.output.play_uri(track.uri)
 
     def _stop(self):
-        return self._set_state('READY')
+        return self.backend.output.set_state('READY')
 
     def _pause(self):
-        return self._set_state('PAUSED')
+        return self.backend.output.set_state('PAUSED')
 
     def _resume(self):
-        return self._set_state('PLAYING')
+        return self.backend.output.set_state('PLAYING')
 
     def _seek(self, time_position):
-        return self._send_recv({'command': 'set_position',
-            'position': time_position})
+        return self.backend.output.set_position(time_position)
 
     @property
     def time_position(self):
-        return self._send_recv({'command': 'get_position'})
+        return self.backend.output.get_position()
 
 
 class LocalStoredPlaylistsController(BaseStoredPlaylistsController):

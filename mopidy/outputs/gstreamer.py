@@ -6,36 +6,100 @@ pygst.require('0.10')
 import gst
 
 import logging
-import threading
+import multiprocessing
 
 from mopidy import settings
-from mopidy.utils.process import BaseProcess, unpickle_connection
+from mopidy.outputs.base import BaseOutput
+from mopidy.utils.process import (BaseThread, pickle_connection,
+    unpickle_connection)
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
-class GStreamerOutput(object):
+class GStreamerOutput(BaseOutput):
     """
     Audio output through GStreamer.
 
-    Starts the :class:`GStreamerProcess`.
+    Starts :class:`GStreamerMessagesThread` and :class:`GStreamerPlayerThread`.
 
     **Settings:**
 
     - :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
     """
 
-    def __init__(self, core_queue, output_queue):
-        self.process = GStreamerProcess(core_queue, output_queue)
-        self.process.start()
+    def __init__(self, *args, **kwargs):
+        super(GStreamerOutput, self).__init__(*args, **kwargs)
+        # Start a helper thread that can run the gobject.MainLoop
+        self.messages_thread = GStreamerMessagesThread(self.core_queue)
+
+        # Start a helper thread that can process the output_queue
+        self.output_queue = multiprocessing.Queue()
+        self.player_thread = GStreamerPlayerThread(self.core_queue,
+            self.output_queue)
+
+    def start(self):
+        self.messages_thread.start()
+        self.player_thread.start()
 
     def destroy(self):
-        self.process.terminate()
+        self.messages_thread.destroy()
+        self.player_thread.destroy()
 
-class GStreamerMessagesThread(threading.Thread):
-    def run(self):
+    def process_message(self, message):
+        assert message['to'] == 'output', \
+            u'Message recipient must be "output".'
+        self.output_queue.put(message)
+
+    def _send_recv(self, message):
+        (my_end, other_end) = multiprocessing.Pipe()
+        message['to'] = 'output'
+        message['reply_to'] = pickle_connection(other_end)
+        self.process_message(message)
+        my_end.poll(None)
+        return my_end.recv()
+
+    def _send(self, message):
+        message['to'] = 'output'
+        self.process_message(message)
+
+    def play_uri(self, uri):
+        return self._send_recv({'command': 'play_uri', 'uri': uri})
+
+    def deliver_data(self, capabilities, data):
+        return self._send({
+            'command': 'deliver_data',
+            'caps': capabilities,
+            'data': data,
+        })
+
+    def end_of_data_stream(self):
+        return self._send({'command': 'end_of_data_stream'})
+
+    def get_position(self):
+        return self._send_recv({'command': 'get_position'})
+
+    def set_position(self, position):
+        return self._send_recv({'command': 'set_position', 'position': position})
+
+    def set_state(self, state):
+        return self._send_recv({'command': 'set_state', 'state': state})
+
+    def get_volume(self):
+        return self._send_recv({'command': 'get_volume'})
+
+    def set_volume(self, volume):
+        return self._send_recv({'command': 'set_volume', 'volume': volume})
+
+
+class GStreamerMessagesThread(BaseThread):
+    def __init__(self, core_queue):
+        super(GStreamerMessagesThread, self).__init__(core_queue)
+        self.name = u'GStreamerMessagesThread'
+
+    def run_inside_try(self):
         gobject.MainLoop().run()
 
-class GStreamerProcess(BaseProcess):
+
+class GStreamerPlayerThread(BaseThread):
     """
     A process for all work related to GStreamer.
 
@@ -48,8 +112,8 @@ class GStreamerProcess(BaseProcess):
     """
 
     def __init__(self, core_queue, output_queue):
-        super(GStreamerProcess, self).__init__(name='GStreamerProcess')
-        self.core_queue = core_queue
+        super(GStreamerPlayerThread, self).__init__(core_queue)
+        self.name = u'GStreamerPlayerThread'
         self.output_queue = output_queue
         self.gst_pipeline = None
 
@@ -61,11 +125,6 @@ class GStreamerProcess(BaseProcess):
 
     def setup(self):
         logger.debug(u'Setting up GStreamer pipeline')
-
-        # Start a helper thread that can run the gobject.MainLoop
-        messages_thread = GStreamerMessagesThread()
-        messages_thread.daemon = True
-        messages_thread.start()
 
         self.gst_pipeline = gst.parse_launch(' ! '.join([
             'audioconvert name=convert',
@@ -80,7 +139,16 @@ class GStreamerProcess(BaseProcess):
             uri_bin.connect('pad-added', self.process_new_pad, pad)
             self.gst_pipeline.add(uri_bin)
         else:
-            app_src = gst.element_factory_make('appsrc', 'src')
+            app_src = gst.element_factory_make('appsrc', 'appsrc')
+            app_src_caps = gst.Caps("""
+                audio/x-raw-int,
+                endianness=(int)1234,
+                channels=(int)2,
+                width=(int)16,
+                depth=(int)16,
+                signed=(boolean)true,
+                rate=(int)44100""")
+            app_src.set_property('caps', app_src_caps)
             self.gst_pipeline.add(app_src)
             app_src.get_pad('src').link(pad)
 
@@ -111,7 +179,9 @@ class GStreamerProcess(BaseProcess):
             connection = unpickle_connection(message['reply_to'])
             connection.send(volume)
         elif message['command'] == 'set_volume':
-            self.set_volume(message['volume'])
+            response = self.set_volume(message['volume'])
+            connection = unpickle_connection(message['reply_to'])
+            connection.send(response)
         elif message['command'] == 'set_position':
             response = self.set_position(message['position'])
             connection = unpickle_connection(message['reply_to'])
@@ -144,12 +214,12 @@ class GStreamerProcess(BaseProcess):
 
     def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
-        data_src = self.gst_pipeline.get_by_name('src')
+        app_src = self.gst_pipeline.get_by_name('appsrc')
         caps = gst.caps_from_string(caps_string)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
-        data_src.set_property('caps', caps)
-        data_src.emit('push-buffer', buffer_)
+        app_src.set_property('caps', caps)
+        app_src.emit('push-buffer', buffer_)
 
     def end_of_data_stream(self):
         """
@@ -158,7 +228,7 @@ class GStreamerProcess(BaseProcess):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        self.gst_pipeline.get_by_name('src').emit('end-of-stream')
+        self.gst_pipeline.get_by_name('appsrc').emit('end-of-stream')
 
     def set_state(self, state_name):
         """
@@ -195,6 +265,7 @@ class GStreamerProcess(BaseProcess):
         """Set volume in range [0..100]"""
         gst_volume = self.gst_pipeline.get_by_name('volume')
         gst_volume.set_property('volume', volume / 100.0)
+        return True
 
     def set_position(self, position):
         self.gst_pipeline.get_state() # block until state changes are done

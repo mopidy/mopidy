@@ -6,26 +6,34 @@ This is the current roadmap and collection of wild ideas for future Mopidy
 development. This is intended to be a living document and may change at any
 time.
 
-Version 0.1
-===========
-
-- Core MPD server functionality working. Gracefully handle clients' use of
-  non-supported functionality.
-- Read-only support for Spotify through :mod:`mopidy.backends.libspotify`.
-- Initial support for local file playback through
-  :mod:`mopidy.backends.local`. The state of local file playback will not
-  block the release of 0.1.
+We intend to have about one timeboxed release every month. Thus, the roadmap is
+oriented around "soon" and "later" instead of mapping each feature to a future
+release.
 
 
-Version 0.2 and 0.3
-===================
+Possible targets for the next version
+=====================================
 
-0.2 will be released when we reach one of the following two goals. 0.3 will be
-released when we reach the other goal.
-
-- Write-support for Spotify. I.e. playlist management.
+- Reintroduce support for OS X. See :issue:`14` for details.
 - Support for using multiple Mopidy backends simultaneously. Should make it
   possible to have both Spotify tracks and local tracks in the same playlist.
+- MPD frontend:
+
+  - ``idle`` support.
+
+- Spotify backend:
+
+  - Write-support for Spotify, i.e. playlist management.
+  - Virtual directories with e.g. starred tracks from Spotify.
+  - Support for 320 kbps audio.
+
+- Local backend:
+
+  - Better library support.
+  - A script for creating a tag cache.
+  - An alternative to tag cache for caching metadata, i.e. Sqlite.
+
+- **[DONE]** Last.fm scrobbling.
 
 
 Stuff we want to do, but not right now, and maybe never
@@ -45,15 +53,12 @@ Stuff we want to do, but not right now, and maybe never
 - Compatability:
 
   - Run frontend tests against a real MPD server to ensure we are in sync.
-  - Start working with MPD client maintainers to get rid of weird assumptions
-    like only searching for first two letters and doing the rest of the
-    filtering locally in the client (:issue:`1`), etc.
 
 - Backends:
 
   - `Last.fm <http://www.last.fm/api>`_
   - `WIMP <http://twitter.com/wimp/status/8975885632>`_
-  - DNLA/UPnP to Mopidy can play music from other DNLA MediaServers.
+  - DNLA/UPnP so Mopidy can play music from other DNLA MediaServers.
 
 - Frontends:
 
@@ -63,7 +68,7 @@ Stuff we want to do, but not right now, and maybe never
   - REST/JSON web service with a jQuery client as example application. Maybe
     based upon `Tornado <http://github.com/facebook/tornado>`_ and `jQuery
     Mobile <http://jquerymobile.com/>`_.
-  - DNLA/UPnP to Mopidy can be controlled from i.e. TVs.
+  - DNLA/UPnP so Mopidy can be controlled from i.e. TVs.
   - `XMMS2 <http://www.xmms2.org/>`_
   - LIRC frontend for controlling Mopidy with a remote.
 

@@ -48,6 +48,7 @@ class MpdSession(asynchat.async_chat):
         """Handle request by sending it to the MPD frontend."""
         my_end, other_end = multiprocessing.Pipe()
         self.core_queue.put({
+            'to': 'frontend',
             'command': 'mpd_request',
             'request': request,
             'reply_to': pickle_connection(other_end),
