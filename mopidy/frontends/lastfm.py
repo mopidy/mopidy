@@ -5,9 +5,9 @@ import time
 
 try:
     import pylast
-except ImportError as e:
+except ImportError as import_error:
     from mopidy import OptionalDependencyError
-    raise OptionalDependencyError(e)
+    raise OptionalDependencyError(import_error)
 
 from mopidy import get_version, settings, SettingsError
 from mopidy.frontends.base import BaseFrontend

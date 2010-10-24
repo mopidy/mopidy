@@ -23,7 +23,9 @@ class SettingsProxy(object):
         if not os.path.isfile(settings_file):
             return {}
         sys.path.insert(0, dotdir)
+        # pylint: disable = F0401
         import settings as local_settings_module
+        # pylint: enable = F0401
         return self._get_settings_dict_from_module(local_settings_module)
 
     def _get_settings_dict_from_module(self, module):

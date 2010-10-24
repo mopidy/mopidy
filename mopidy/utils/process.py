@@ -3,7 +3,6 @@ import multiprocessing
 import multiprocessing.dummy
 from multiprocessing.reduction import reduce_connection
 import pickle
-import sys
 
 from mopidy import SettingsError
 
@@ -16,7 +15,6 @@ def unpickle_connection(pickled_connection):
     # From http://stackoverflow.com/questions/1446004
     (func, args) = pickle.loads(pickled_connection)
     return func(*args)
-
 
 class BaseProcess(multiprocessing.Process):
     def __init__(self, core_queue):
