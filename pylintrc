@@ -6,8 +6,11 @@
 # C0103 - Invalid name "%s" (should match %s)
 # C0111 - Missing docstring
 # E0102 - %s already defined line %s
+#   Does not understand @property getters and setters
 # E0202 - An attribute inherited from %s hide this method
+#   Does not understand @property getters and setters
 # E1101 - %s %r has no %r member
+#   Does not understand @property getters and setters
 # R0201 - Method could be a function
 # R0801 - Similar lines in %s files
 # R0903 - Too few public methods (%s/%s)
