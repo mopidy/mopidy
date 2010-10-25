@@ -26,3 +26,9 @@ def path_to_uri(*paths):
     if sys.platform == 'win32':
         return 'file:' + urllib.pathname2url(path)
     return 'file://' + urllib.pathname2url(path)
+
+def find_files(folder):
+    for dirpath, dirnames, filenames in os.walk(folder):
+        for filename in filenames:
+            dirpath = os.path.abspath(dirpath)
+            yield os.path.join(dirpath, filename)
