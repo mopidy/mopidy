@@ -9,11 +9,11 @@ from os.path import abspath
 import sys
 import threading
 
-from mopidy.utils.path import path_to_uri
+from mopidy.utils.path import path_to_uri, find_files
 
 class Scanner(object):
-    def __init__(self, files, callback):
-        self.uris = [path_to_uri(abspath(f)) for f in files]
+    def __init__(self, folder, callback):
+        self.uris = [path_to_uri(f) for f in find_files(folder)]
         self.callback = callback
         self.loop = gobject.MainLoop()
 
