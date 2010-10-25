@@ -29,14 +29,15 @@ class Scanner(object):
 
     def process_tags(self, bus, message):
         data = message.parse_tag()
-        self.data_callback(dict([(k, data[k]) for k in data.keys()]))
+        uri = self.uribin.get_property('uri')
+        self.data_callback(uri, dict([(k, data[k]) for k in data.keys()]))
         self.next_uri()
 
     def process_error(self, bus, message):
         if self.error_callback:
             uri = self.uribin.get_property('uri')
-            error = message.parse_error()
-            self.error_callback(uri, *error)
+            errors = message.parse_error()
+            self.error_callback(uri, errors)
         self.next_uri()
 
     def next_uri(self):
