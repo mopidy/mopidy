@@ -12,12 +12,15 @@ import threading
 from mopidy.utils.path import path_to_uri, find_files
 
 class Scanner(object):
-    def __init__(self, folder, callback):
+    def __init__(self, folder, data_callback, error_callback=None):
         self.uris = [path_to_uri(f) for f in find_files(folder)]
-        self.callback = callback
+        self.data_callback = data_callback
+        self.error_callback = error_callback
         self.loop = gobject.MainLoop()
 
-        self.pipe = gst.element_factory_make('playbin2')
+        self.uribin = gst.element_factory_make('uridecodebin')
+        self.pipe = gst.element_factory_make('pipeline')
+        self.pipe.add(self.uribin)
 
         bus = self.pipe.get_bus()
         bus.add_signal_watch()
@@ -28,18 +31,22 @@ class Scanner(object):
 
     def process_tags(self, bus, message):
         data = message.parse_tag()
-        self.callback(dict([(k, data[k]) for k in data.keys()]))
+        self.data_callback(dict([(k, data[k]) for k in data.keys()]))
         self.next_uri()
 
     def process_error(self, bus, message):
-        print message.parse_error()
+        if self.error_callback:
+            uri = self.uribin.get_property('uri')
+            error = message.parse_error()
+            self.error_callback(uri, *error)
+        self.next_uri()
 
     def next_uri(self):
         if not self.uris:
             return self.stop()
 
         self.pipe.set_state(gst.STATE_NULL)
-        self.pipe.set_property('uri', self.uris.pop())
+        self.uribin.set_property('uri', self.uris.pop())
         self.pipe.set_state(gst.STATE_PAUSED)
 
     def start(self):
