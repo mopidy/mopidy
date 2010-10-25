@@ -21,14 +21,18 @@ class Scanner(object):
 
         bus = self.pipe.get_bus()
         bus.add_signal_watch()
-        bus.connect('message::tag', self.process_message)
+        bus.connect('message::tag', self.process_tags)
+        bus.connect('message::error', self.process_error)
 
         self.next_uri()
 
-    def process_message(self, bus, message):
+    def process_tags(self, bus, message):
         data = message.parse_tag()
         self.callback(dict([(k, data[k]) for k in data.keys()]))
         self.next_uri()
+
+    def process_error(self, bus, message):
+        print message.parse_error()
 
     def next_uri(self):
         if not self.uris:
