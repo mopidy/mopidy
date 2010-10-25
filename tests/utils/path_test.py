@@ -6,9 +6,9 @@ import sys
 import tempfile
 import unittest
 
-from mopidy.utils.path import get_or_create_folder, path_to_uri
+from mopidy.utils.path import get_or_create_folder, path_to_uri, find_files
 
-from tests import SkipTest
+from tests import SkipTest, data_folder
 
 class GetOrCreateFolderTest(unittest.TestCase):
     def setUp(self):
@@ -69,3 +69,19 @@ class PathToFileURITest(unittest.TestCase):
         else:
             result = path_to_uri(u'/tmp/æøå')
             self.assertEqual(result, u'file:///tmp/%C3%A6%C3%B8%C3%A5')
+
+
+class FindFilesTest(unittest.TestCase):
+    def find(self, path):
+        return list(find_files(data_folder(path)))
+
+    def test_basic_folder(self):
+        self.assert_(self.find(''))
+
+    def test_nonexistant_folder(self):
+        self.assertEqual(self.find('does-not-exist'), [])
+
+    def test_file(self):
+        files = self.find('blank.mp3')
+        self.assertEqual(len(files), 1)
+        self.assert_(files[0], data_folder('blank.mp3'))
