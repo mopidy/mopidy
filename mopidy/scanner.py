@@ -12,8 +12,9 @@ import threading
 from mopidy.utils.path import path_to_uri
 
 class Scanner(object):
-    def __init__(self, files):
+    def __init__(self, files, callback):
         self.uris = [path_to_uri(abspath(f)) for f in files]
+        self.callback = callback
 
         self.pipe = gst.element_factory_make('playbin2')
 
@@ -27,10 +28,7 @@ class Scanner(object):
 
     def process_message(self, bus, message):
         data = message.parse_tag()
-        tags = dict([(k, data[k]) for k in data.keys()])
-
-        print tags
-
+        self.callback(dict([(k, data[k]) for k in data.keys()]))
         self.next_uri()
 
     def next_uri(self):
@@ -41,9 +39,11 @@ class Scanner(object):
         self.pipe.set_property('uri', self.uris.pop())
         self.pipe.set_state(gst.STATE_PAUSED)
 
+def debug(data):
+    print data
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         sys.exit(1)
 
-    Scanner(sys.argv[1:])
+    Scanner(sys.argv[1:], debug)
