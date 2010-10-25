@@ -10,6 +10,9 @@ class BasePlaybackController(object):
     :type backend: :class:`BaseBackend`
     """
 
+    # pylint: disable = R0902
+    # Too many instance attributes
+
     #: Constant representing the paused state.
     PAUSED = u'paused'
 
@@ -130,6 +133,9 @@ class BasePlaybackController(object):
 
         Not necessarily the same track as :attr:`cp_track_at_next`.
         """
+        # pylint: disable = R0911
+        # Too many return statements
+
         cp_tracks = self.backend.current_playlist.cp_tracks
 
         if not cp_tracks:

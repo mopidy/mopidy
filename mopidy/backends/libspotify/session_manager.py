@@ -11,6 +11,9 @@ from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.backends.libspotify.session_manager')
 
+# pylint: disable = R0901
+# LibspotifySessionManager: Too many ancestors (9/7)
+
 class LibspotifySessionManager(SpotifySessionManager, BaseThread):
     cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
     settings_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
@@ -65,6 +68,8 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
     def music_delivery(self, session, frames, frame_size, num_frames,
             sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
+        # pylint: disable = R0913
+        # Too many arguments (8/5)
         assert sample_type == 0, u'Expects 16-bit signed integer samples'
         capabilites = """
             audio/x-raw-int,
