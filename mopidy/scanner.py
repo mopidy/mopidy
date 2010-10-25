@@ -4,25 +4,46 @@ gobject.threads_init()
 import pygst
 pygst.require('0.10')
 import gst
+
+from os.path import abspath
 import sys
+import threading
 
-def main(uri):
-    pipeline = gst.element_factory_make('playbin2')
+from mopidy.utils.path import path_to_uri
 
-    bus = pipeline.get_bus()
-    bus.add_signal_watch()
-    bus.connect('message::tag', process_gst_message)
+class Scanner(object):
+    def __init__(self, files):
+        self.uris = [path_to_uri(abspath(f)) for f in files]
 
-    pipeline.set_property('uri', uri)
-    pipeline.set_state(gst.STATE_PAUSED)
+        self.pipe = gst.element_factory_make('playbin2')
 
-    gobject.MainLoop().run()
+        bus = self.pipe.get_bus()
+        bus.add_signal_watch()
+        bus.connect('message::tag', self.process_message)
 
-def process_gst_message(bus, message):
-    data = message.parse_tag()
-    tags = dict([(k, data[k]) for k in data.keys()])
+        self.next_uri()
 
-    print tags
+        gobject.MainLoop().run()
+
+    def process_message(self, bus, message):
+        data = message.parse_tag()
+        tags = dict([(k, data[k]) for k in data.keys()])
+
+        print tags
+
+        self.next_uri()
+
+    def next_uri(self):
+        if not self.uris:
+            sys.exit(0)
+
+        self.pipe.set_state(gst.STATE_NULL)
+        self.pipe.set_property('uri', self.uris.pop())
+        self.pipe.set_state(gst.STATE_PAUSED)
+
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    if len(sys.argv) == 1:
+        sys.exit(1)
+
+    Scanner(sys.argv[1:])
