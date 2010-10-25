@@ -149,10 +149,9 @@ class BasePlaybackController(object):
             return cp_tracks[0]
 
         if self.repeat and self.single:
-            return cp_tracks[
-                (self.current_playlist_position) % len(cp_tracks)]
+            return cp_tracks[self.current_playlist_position]
 
-        if self.repeat:
+        if self.repeat and not self.single:
             return cp_tracks[
                 (self.current_playlist_position + 1) % len(cp_tracks)]
 
