@@ -27,8 +27,6 @@ class Scanner(object):
         bus.connect('message::tag', self.process_tags)
         bus.connect('message::error', self.process_error)
 
-        self.next_uri()
-
     def process_tags(self, bus, message):
         data = message.parse_tag()
         self.data_callback(dict([(k, data[k]) for k in data.keys()]))
@@ -50,6 +48,7 @@ class Scanner(object):
         self.pipe.set_state(gst.STATE_PAUSED)
 
     def start(self):
+        self.next_uri()
         self.loop.run()
 
     def stop(self):
