@@ -16,7 +16,8 @@
 # R0903 - Too few public methods (%s/%s)
 # R0904 - Too many public methods (%s/%s)
 # R0921 - Abstract class not referenced
+# W0141 - Used builtin function '%s'
 # W0142 - Used * or ** magic
 # W0613 - Unused argument %r
 #
-disable = C0103,C0111,E0102,E0202,E1101,R0201,R0801,R0903,R0904,R0921,W0142,W0613
+disable = C0103,C0111,E0102,E0202,E1101,R0201,R0801,R0903,R0904,R0921,W0141,W0142,W0613
