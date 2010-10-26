@@ -46,8 +46,14 @@ class Scanner(object):
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
 
+        fakesink = gst.element_factory_make('fakesink')
+        pad = fakesink.get_pad('sink')
+
         self.uribin = gst.element_factory_make('uridecodebin')
+        self.uribin.connect('pad-added', self.process_new_pad, pad)
+
         self.pipe = gst.element_factory_make('pipeline')
+        self.pipe.add(fakesink)
         self.pipe.add(self.uribin)
 
         bus = self.pipe.get_bus()
@@ -55,7 +61,13 @@ class Scanner(object):
         bus.connect('message::tag', self.process_tags)
         bus.connect('message::error', self.process_error)
 
+    def process_new_pad(self, source, pad, target_pad):
+        pad.link(target_pad)
+
     def process_tags(self, bus, message):
+        # Block for state change so that duration can be safely determined
+        self.pipe.get_state()
+
         data = message.parse_tag()
         data = dict([(k, data[k]) for k in data.keys()])
         data['uri'] = self.uribin.get_property('uri')
