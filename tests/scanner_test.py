@@ -52,8 +52,8 @@ class ScannerTest(unittest.TestCase):
         name = data_folder(name)
         self.assertEqual(self.data[name][key], value)
 
-    def data_callback(self, uri, data):
-        uri = uri[len('file://'):]
+    def data_callback(self, data):
+        uri = data['uri'][len('file://'):]
         self.data[uri] = data
 
     def error_callback(self, uri, errors):
@@ -67,6 +67,11 @@ class ScannerTest(unittest.TestCase):
     def test_errors_is_not_set(self):
         self.scan('scanner/simple')
         self.assert_(not self.errors)
+
+    def test_uri_is_set(self):
+        self.scan('scanner/simple')
+        self.check('scanner/simple/song1.mp3', 'uri', 'file://'
+            + data_folder('scanner/simple/song1.mp3'))
 
     def test_artist_is_set(self):
         self.scan('scanner/simple')

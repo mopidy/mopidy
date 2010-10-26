@@ -57,8 +57,9 @@ class Scanner(object):
 
     def process_tags(self, bus, message):
         data = message.parse_tag()
-        uri = self.uribin.get_property('uri')
-        self.data_callback(uri, dict([(k, data[k]) for k in data.keys()]))
+        data = dict([(k, data[k]) for k in data.keys()])
+        data['uri'] = self.uribin.get_property('uri')
+        self.data_callback(data)
         self.next_uri()
 
     def process_error(self, bus, message):
