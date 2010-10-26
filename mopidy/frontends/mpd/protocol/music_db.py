@@ -1,7 +1,8 @@
 import re
+import shlex
 
 from mopidy.frontends.mpd.protocol import handle_pattern, stored_playlists
-from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 
 def _build_query(mpd_query):
     """
@@ -81,13 +82,9 @@ def findadd(frontend, query):
     # TODO Add result to current playlist
     #result = frontend.find(query)
 
-@handle_pattern(r'^list (?P<field>[Aa]rtist)$')
-@handle_pattern(r'^list "(?P<field>[Aa]rtist)"$')
-@handle_pattern(r'^list (?P<field>album( artist)?)'
-    '( "(?P<artist>[^"]+)")*$')
-@handle_pattern(r'^list "(?P<field>album(" "artist)?)"'
-    '( "(?P<artist>[^"]+)")*$')
-def list_(frontend, field, artist=None):
+@handle_pattern(r'^list "?(?P<field>([Aa]rtist|[Aa]lbum|[Dd]ate|[Gg]enre))"?'
+    '( (?P<mpd_query>.*))?$')
+def list_(frontend, field, mpd_query=None):
     """
     *musicpd.org, music database section:*
 
@@ -101,22 +98,70 @@ def list_(frontend, field, artist=None):
 
         This filters the result list by an artist.
 
+    *Clarifications:*
+
+        The musicpd.org documentation for ``list`` is far from complete. The
+        command also supports the following variant:
+
+        ``list {TYPE} {QUERY}``
+
+        Where ``QUERY`` applies to all ``TYPE``. ``QUERY`` is one or more pairs
+        of a field name and a value. If the ``QUERY`` consists of more than one
+        pair, the pairs are AND-ed together to find the result. Examples of
+        valid queries and what they should return:
+
+        ``list "artist" "artist" "ABBA"``
+            List artists where the artist name is "ABBA". Response::
+
+                Artist: ABBA
+                OK
+
+        ``list "album" "artist" "ABBA"``
+            Lists albums where the artist name is "ABBA". Response::
+
+                Album: More ABBA Gold: More ABBA Hits
+                Album: Absolute More Christmas
+                Album: Gold: Greatest Hits
+                OK
+
+        ``list "artist" "album" "Gold: Greatest Hits"``
+            Lists artists where the album name is "Gold: Greatest Hits".
+            Response::
+
+                Artist: ABBA
+                OK
+
+        ``list "artist" "artist" "ABBA" "artist" "TLC"``
+            Lists artists where the artist name is "ABBA" *and* "TLC". Should
+            never match anything. Response::
+
+                OK
+
+        ``list "date" "artist" "ABBA"``
+            Lists dates where artist name is "ABBA". Response::
+
+                Date:
+                Date: 1992
+                Date: 1993
+                OK
+
+        ``list "date" "artist" "ABBA" "album" "Gold: Greatest Hits"``
+            Lists dates where artist name is "ABBA" and album name is "Gold:
+            Greatest Hits". Response::
+
+                Date: 1992
+                OK
+
+        ``list "genre" "artist" "The Rolling Stones"``
+            Lists genres where artist name is "The Rolling Stones". Response::
+
+                Genre:
+                Genre: Rock
+                OK
+
     *GMPC:*
 
     - does not add quotes around the field argument.
-    - asks for "list artist" to get available artists and will not query
-      for artist/album information if this is not retrived
-    - asks for multiple fields, i.e.::
-
-        list album artist "an artist name"
-
-      returns the albums available for the asked artist::
-
-        list album artist "Tiesto"
-        Album: Radio Trance Vol 4-Promo-CD
-        Album: Ur  A Tear in the Open CDR
-        Album: Simple Trance 2004 Step One
-        Album: In Concert 05-10-2003
 
     *ncmpc:*
 
@@ -124,30 +169,69 @@ def list_(frontend, field, artist=None):
     - capitalizes the field argument.
     """
     field = field.lower()
+    query = _list_build_query(field, mpd_query)
     if field == u'artist':
-        return _list_artist(frontend)
-    elif field == u'album artist':
-        return _list_album_artist(frontend, artist)
-    # TODO More to implement
+        return _list_artist(frontend, query)
+    elif field == u'album':
+        return _list_album(frontend, query)
+    elif field == u'date':
+        return _list_date(frontend, query)
+    elif field == u'genre':
+        pass # TODO We don't have genre in our internal data structures yet
 
-def _list_artist(frontend):
-    """
-    Since we don't know exactly all available artists, we respond with
-    the artists we know for sure, which is all artists in our stored playlists.
-    """
+def _list_build_query(field, mpd_query):
+    """Converts a ``list`` query to a Mopidy query."""
+    if mpd_query is None:
+        return {}
+    # shlex does not seem to be friends with unicode objects
+    tokens = shlex.split(mpd_query.encode('utf-8'))
+    tokens = [t.decode('utf-8') for t in tokens]
+    if len(tokens) == 1:
+        if field == u'album':
+            return {'artist': [tokens[0]]}
+        else:
+            raise MpdArgError(
+                u'should be "Album" for 3 arguments', command=u'list')
+    elif len(tokens) % 2 == 0:
+        query = {}
+        while tokens:
+            key = tokens[0].lower()
+            key = str(key) # Needed for kwargs keys on OS X and Windows
+            value = tokens[1]
+            tokens = tokens[2:]
+            if key not in (u'artist', u'album', u'date', u'genre'):
+                raise MpdArgError(u'not able to parse args', command=u'list')
+            if key in query:
+                query[key].append(value)
+            else:
+                query[key] = [value]
+        return query
+    else:
+        raise MpdArgError(u'not able to parse args', command=u'list')
+
+def _list_artist(frontend, query):
     artists = set()
-    for playlist in frontend.backend.stored_playlists.playlists:
-        for track in playlist.tracks:
-            for artist in track.artists:
-                artists.add((u'Artist', artist.name))
+    playlist = frontend.backend.library.find_exact(**query)
+    for track in playlist.tracks:
+        for artist in track.artists:
+            artists.add((u'Artist', artist.name))
     return artists
 
-def _list_album_artist(frontend, artist):
-    playlist = frontend.backend.library.find_exact(artist=[artist])
+def _list_album(frontend, query):
     albums = set()
+    playlist = frontend.backend.library.find_exact(**query)
     for track in playlist.tracks:
-        albums.add((u'Album', track.album.name))
+        if track.album is not None:
+            albums.add((u'Album', track.album.name))
     return albums
+
+def _list_date(frontend, query):
+    dates = set()
+    playlist = frontend.backend.library.find_exact(**query)
+    for track in playlist.tracks:
+        if track.date is not None:
+            dates.add((u'Date', track.date.strftime('%Y-%m-%d')))
+    return dates
 
 @handle_pattern(r'^listall "(?P<uri>[^"]+)"')
 def listall(frontend, uri):

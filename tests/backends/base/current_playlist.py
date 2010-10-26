@@ -128,7 +128,7 @@ class BaseCurrentPlaylistControllerTest(object):
     def test_append_does_not_reset_version(self):
         version = self.controller.version
         self.controller.append([])
-        self.assertEqual(self.controller.version, version + 1)
+        self.assertEqual(self.controller.version, version)
 
     @populate_playlist
     def test_append_preserves_playing_state(self):
@@ -249,7 +249,12 @@ class BaseCurrentPlaylistControllerTest(object):
         self.assertEqual(self.tracks[0], shuffled_tracks[0])
         self.assertEqual(set(self.tracks), set(shuffled_tracks))
 
-    def test_version(self):
+    def test_version_does_not_change_when_appending_nothing(self):
         version = self.controller.version
         self.controller.append([])
+        self.assertEquals(version, self.controller.version)
+
+    def test_version_increases_when_appending_something(self):
+        version = self.controller.version
+        self.controller.append([Track()])
         self.assert_(version < self.controller.version)

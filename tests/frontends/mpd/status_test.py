@@ -27,7 +27,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(u'Track: 0' in result)
         self.assert_(u'Date: ' in result)
         self.assert_(u'Pos: 0' in result)
-        self.assert_(u'Id: 1' in result)
+        self.assert_(u'Id: 0' in result)
         self.assert_(u'OK' in result)
 
     def test_currentsong_without_song(self):
@@ -166,7 +166,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.b.playback.play()
         result = dict(dispatcher.status.status(self.h))
         self.assert_('songid' in result)
-        self.assertEqual(int(result['songid']), 1)
+        self.assertEqual(int(result['songid']), 0)
 
     def test_status_method_when_playing_contains_time_with_no_length(self):
         self.b.current_playlist.append([Track(length=None)])

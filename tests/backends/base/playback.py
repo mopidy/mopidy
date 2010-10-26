@@ -524,7 +524,7 @@ class BasePlaybackControllerTest(object):
         wrapper.called = False
 
         self.playback.on_current_playlist_change = wrapper
-        self.backend.current_playlist.append([])
+        self.backend.current_playlist.append([Track()])
 
         self.assert_(wrapper.called)
 

@@ -29,7 +29,7 @@ class GStreamerOutput(BaseOutput):
     def __init__(self, *args, **kwargs):
         super(GStreamerOutput, self).__init__(*args, **kwargs)
         # Start a helper thread that can run the gobject.MainLoop
-        self.messages_thread = GStreamerMessagesThread()
+        self.messages_thread = GStreamerMessagesThread(self.core_queue)
 
         # Start a helper thread that can process the output_queue
         self.output_queue = multiprocessing.Queue()
@@ -78,7 +78,8 @@ class GStreamerOutput(BaseOutput):
         return self._send_recv({'command': 'get_position'})
 
     def set_position(self, position):
-        return self._send_recv({'command': 'set_position', 'position': position})
+        return self._send_recv({'command': 'set_position',
+            'position': position})
 
     def set_state(self, state):
         return self._send_recv({'command': 'set_state', 'state': state})
@@ -91,10 +92,9 @@ class GStreamerOutput(BaseOutput):
 
 
 class GStreamerMessagesThread(BaseThread):
-    def __init__(self):
-        super(GStreamerMessagesThread, self).__init__()
+    def __init__(self, core_queue):
+        super(GStreamerMessagesThread, self).__init__(core_queue)
         self.name = u'GStreamerMessagesThread'
-        self.daemon = True
 
     def run_inside_try(self):
         gobject.MainLoop().run()
@@ -113,10 +113,8 @@ class GStreamerPlayerThread(BaseThread):
     """
 
     def __init__(self, core_queue, output_queue):
-        super(GStreamerPlayerThread, self).__init__()
+        super(GStreamerPlayerThread, self).__init__(core_queue)
         self.name = u'GStreamerPlayerThread'
-        self.daemon = True
-        self.core_queue = core_queue
         self.output_queue = output_queue
         self.gst_pipeline = None
 
@@ -142,7 +140,16 @@ class GStreamerPlayerThread(BaseThread):
             uri_bin.connect('pad-added', self.process_new_pad, pad)
             self.gst_pipeline.add(uri_bin)
         else:
-            app_src = gst.element_factory_make('appsrc', 'src')
+            app_src = gst.element_factory_make('appsrc', 'appsrc')
+            app_src_caps = gst.Caps("""
+                audio/x-raw-int,
+                endianness=(int)1234,
+                channels=(int)2,
+                width=(int)16,
+                depth=(int)16,
+                signed=(boolean)true,
+                rate=(int)44100""")
+            app_src.set_property('caps', app_src_caps)
             self.gst_pipeline.add(app_src)
             app_src.get_pad('src').link(pad)
 
@@ -208,12 +215,12 @@ class GStreamerPlayerThread(BaseThread):
 
     def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
-        data_src = self.gst_pipeline.get_by_name('src')
+        app_src = self.gst_pipeline.get_by_name('appsrc')
         caps = gst.caps_from_string(caps_string)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
-        data_src.set_property('caps', caps)
-        data_src.emit('push-buffer', buffer_)
+        app_src.set_property('caps', caps)
+        app_src.emit('push-buffer', buffer_)
 
     def end_of_data_stream(self):
         """
@@ -222,7 +229,7 @@ class GStreamerPlayerThread(BaseThread):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        self.gst_pipeline.get_by_name('src').emit('end-of-stream')
+        self.gst_pipeline.get_by_name('appsrc').emit('end-of-stream')
 
     def set_state(self, state_name):
         """

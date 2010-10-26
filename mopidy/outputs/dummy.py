@@ -5,6 +5,9 @@ class DummyOutput(BaseOutput):
     Audio output used for testing.
     """
 
+    # pylint: disable = R0902
+    # Too many instance attributes (9/7)
+
     #: For testing. :class:`True` if :meth:`start` has been called.
     start_called = False
 

@@ -4,7 +4,7 @@ from multiprocessing import Pipe
 
 from mopidy import settings
 from mopidy.mixers import BaseMixer
-from mopidy.utils.process import BaseProcess
+from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.mixers.nad')
 
@@ -40,7 +40,7 @@ class NadMixer(BaseMixer):
         super(NadMixer, self).__init__(*args, **kwargs)
         self._volume = None
         self._pipe, other_end = Pipe()
-        NadTalker(pipe=other_end).start()
+        NadTalker(self.backend.core_queue, pipe=other_end).start()
 
     def _get_volume(self):
         return self._volume
@@ -50,7 +50,7 @@ class NadMixer(BaseMixer):
         self._pipe.send({'command': 'set_volume', 'volume': volume})
 
 
-class NadTalker(BaseProcess):
+class NadTalker(BaseThread):
     """
     Independent process which does the communication with the NAD device.
 
@@ -72,8 +72,9 @@ class NadTalker(BaseProcess):
     # Volume in range 0..VOLUME_LEVELS. :class:`None` before calibration.
     _nad_volume = None
 
-    def __init__(self, pipe=None):
-        super(NadTalker, self).__init__(name='NadTalker')
+    def __init__(self, core_queue, pipe=None):
+        super(NadTalker, self).__init__(core_queue)
+        self.name = u'NadTalker'
         self.pipe = pipe
         self._device = None
 

@@ -12,13 +12,10 @@ class BaseCurrentPlaylistController(object):
     :type backend: :class:`BaseBackend`
     """
 
-    #: The current playlist version. Integer which is increased every time the
-    #: current playlist is changed. Is not reset before Mopidy is restarted.
-    version = 0
-
     def __init__(self, backend):
         self.backend = backend
         self._cp_tracks = []
+        self._version = 0
 
     def destroy(self):
         """Cleanup after component."""
@@ -41,6 +38,19 @@ class BaseCurrentPlaylistController(object):
         Read-only.
         """
         return [ct[1] for ct in self._cp_tracks]
+
+    @property
+    def version(self):
+        """
+        The current playlist version. Integer which is increased every time the
+        current playlist is changed. Is not reset before Mopidy is restarted.
+        """
+        return self._version
+
+    @version.setter
+    def version(self, version):
+        self._version = version
+        self.backend.playback.on_current_playlist_change()
 
     def add(self, track, at_position=None):
         """
@@ -71,16 +81,13 @@ class BaseCurrentPlaylistController(object):
         :param tracks: tracks to append
         :type tracks: list of :class:`mopidy.models.Track`
         """
-        self.version += 1
         for track in tracks:
             self.add(track)
-        self.backend.playback.on_current_playlist_change()
 
     def clear(self):
         """Clear the current playlist."""
         self._cp_tracks = []
         self.version += 1
-        self.backend.playback.on_current_playlist_change()
 
     def get(self, **criteria):
         """
@@ -146,7 +153,6 @@ class BaseCurrentPlaylistController(object):
             to_position += 1
         self._cp_tracks = new_cp_tracks
         self.version += 1
-        self.backend.playback.on_current_playlist_change()
 
     def remove(self, **criteria):
         """
@@ -191,7 +197,6 @@ class BaseCurrentPlaylistController(object):
         random.shuffle(shuffled)
         self._cp_tracks = before + shuffled + after
         self.version += 1
-        self.backend.playback.on_current_playlist_change()
 
     def mpd_format(self, *args, **kwargs):
         """Not a part of the generic backend API."""

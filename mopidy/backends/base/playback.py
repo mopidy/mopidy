@@ -10,6 +10,9 @@ class BasePlaybackController(object):
     :type backend: :class:`BaseBackend`
     """
 
+    # pylint: disable = R0902
+    # Too many instance attributes
+
     #: Constant representing the paused state.
     PAUSED = u'paused'
 
@@ -130,6 +133,9 @@ class BasePlaybackController(object):
 
         Not necessarily the same track as :attr:`cp_track_at_next`.
         """
+        # pylint: disable = R0911
+        # Too many return statements
+
         cp_tracks = self.backend.current_playlist.cp_tracks
 
         if not cp_tracks:
@@ -142,17 +148,16 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
             return cp_tracks[0]
 
         if self.repeat and self.single:
-            return cp_tracks[
-                (self.current_playlist_position) % len(cp_tracks)]
+            return cp_tracks[self.current_playlist_position]
 
-        if self.repeat:
+        if self.repeat and not self.single:
             return cp_tracks[
                 (self.current_playlist_position + 1) % len(cp_tracks)]
 
@@ -195,7 +200,7 @@ class BasePlaybackController(object):
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
-        if self._shuffled:
+        if self.random and self._shuffled:
             return self._shuffled[0]
 
         if self.current_cp_track is None:
@@ -315,11 +320,8 @@ class BasePlaybackController(object):
         if self.cp_track_at_eot:
             self._trigger_stopped_playing_event()
             self.play(self.cp_track_at_eot)
-            if self.random and self.current_cp_track in self._shuffled:
-                self._shuffled.remove(self.current_cp_track)
         else:
-            self.stop()
-            self.current_cp_track = None
+            self.stop(clear_current_track=True)
 
         if self.consume:
             self.backend.current_playlist.remove(cpid=original_cp_track[0])
@@ -333,13 +335,10 @@ class BasePlaybackController(object):
         self._first_shuffle = True
         self._shuffled = []
 
-        if not self.backend.current_playlist.cp_tracks:
-            self.stop()
-            self.current_cp_track = None
-        elif (self.current_cp_track not in
+        if (not self.backend.current_playlist.cp_tracks or
+                self.current_cp_track not in
                 self.backend.current_playlist.cp_tracks):
-            self.current_cp_track = None
-            self.stop()
+            self.stop(clear_current_track=True)
 
     def next(self):
         """Play the next track."""
@@ -350,11 +349,7 @@ class BasePlaybackController(object):
             self._trigger_stopped_playing_event()
             self.play(self.cp_track_at_next)
         else:
-            self.stop()
-            self.current_cp_track = None
-
-        if self.random and self.current_cp_track in self._shuffled:
-            self._shuffled.remove(self.current_cp_track)
+            self.stop(clear_current_track=True)
 
     def pause(self):
         """Pause playback."""
@@ -385,15 +380,21 @@ class BasePlaybackController(object):
 
         if cp_track is not None:
             assert cp_track in self.backend.current_playlist.cp_tracks
-        elif not self.current_cp_track:
+
+        if cp_track is None and self.current_cp_track is None:
             cp_track = self.cp_track_at_next
 
-        if self.state == self.PAUSED and cp_track is None:
+        if cp_track is None and self.state == self.PAUSED:
             self.resume()
-        elif cp_track is not None:
+
+        if cp_track is not None:
+            self.state = self.STOPPED
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self._play(cp_track[1]):
+                # Track is not playable
+                if self.random and self._shuffled:
+                    self._shuffled.remove(cp_track)
                 if on_error_step == 1:
                     self.next()
                 elif on_error_step == -1:
@@ -477,13 +478,21 @@ class BasePlaybackController(object):
         """
         raise NotImplementedError
 
-    def stop(self):
-        """Stop playing."""
+    def stop(self, clear_current_track=False):
+        """
+        Stop playing.
+
+        :param clear_current_track: whether to clear the current track _after_
+            stopping
+        :type clear_current_track: boolean
+        """
         if self.state == self.STOPPED:
             return
         self._trigger_stopped_playing_event()
         if self._stop():
             self.state = self.STOPPED
+        if clear_current_track:
+            self.current_cp_track = None
 
     def _stop(self):
         """
@@ -501,11 +510,12 @@ class BasePlaybackController(object):
         For internal use only. Should be called by the backend directly after a
         track has started playing.
         """
-        self.backend.core_queue.put({
-            'to': 'frontend',
-            'command': 'started_playing',
-            'track': self.current_track,
-        })
+        if self.current_track is not None:
+            self.backend.core_queue.put({
+                'to': 'frontend',
+                'command': 'started_playing',
+                'track': self.current_track,
+            })
 
     def _trigger_stopped_playing_event(self):
         """
@@ -515,9 +525,10 @@ class BasePlaybackController(object):
         is stopped playing, e.g. at the next, previous, and stop actions and at
         end-of-track.
         """
-        self.backend.core_queue.put({
-            'to': 'frontend',
-            'command': 'stopped_playing',
-            'track': self.current_track,
-            'stop_position': self.time_position,
-        })
+        if self.current_track is not None:
+            self.backend.core_queue.put({
+                'to': 'frontend',
+                'command': 'stopped_playing',
+                'track': self.current_track,
+                'stop_position': self.time_position,
+            })

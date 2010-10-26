@@ -5,7 +5,9 @@ import os
 import shutil
 
 from mopidy import settings
-from mopidy.backends.base import *
+from mopidy.backends.base import (BaseBackend, BaseLibraryController,
+    BaseStoredPlaylistsController, BaseCurrentPlaylistController,
+    BasePlaybackController)
 from mopidy.models import Playlist, Track, Album
 from mopidy.utils.process import pickle_connection
 
