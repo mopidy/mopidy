@@ -15,7 +15,7 @@ from mopidy.utils import get_class
 
 logger = logging.getLogger('mopidy.backends.base')
 
-__all__ = ['BaseBackend', 'BasePlaybackController',
+__all__ = ['BaseBackend', 'BasePlaybackController', 'BasePlaybackProvider',
     'BaseCurrentPlaylistController', 'BaseStoredPlaylistsController',
     'BaseLibraryController']
 
