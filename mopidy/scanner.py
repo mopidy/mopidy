@@ -71,6 +71,7 @@ class Scanner(object):
         data = message.parse_tag()
         data = dict([(k, data[k]) for k in data.keys()])
         data['uri'] = self.uribin.get_property('uri')
+        data['duration'] = self.get_duration()
         self.data_callback(data)
         self.next_uri()
 
@@ -80,6 +81,13 @@ class Scanner(object):
             errors = message.parse_error()
             self.error_callback(uri, errors)
         self.next_uri()
+
+    def get_duration(self):
+        try:
+            return self.pipe.query_duration(
+                gst.FORMAT_TIME, None)[0] // gst.MSECOND
+        except gst.QueryError:
+            return None
 
     def next_uri(self):
         if not self.uris:

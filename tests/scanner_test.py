@@ -73,6 +73,10 @@ class ScannerTest(unittest.TestCase):
         self.check('scanner/simple/song1.mp3', 'uri', 'file://'
             + data_folder('scanner/simple/song1.mp3'))
 
+    def test_duration_is_set(self):
+        self.scan('scanner/simple')
+        self.check('scanner/simple/song1.mp3', 'duration', 4680)
+
     def test_artist_is_set(self):
         self.scan('scanner/simple')
         self.check('scanner/simple/song1.mp3', 'artist', 'name')
