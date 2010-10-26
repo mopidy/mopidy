@@ -6,10 +6,38 @@ pygst.require('0.10')
 import gst
 
 from os.path import abspath
+import datetime
 import sys
 import threading
 
 from mopidy.utils.path import path_to_uri, find_files
+from mopidy.models import Track, Artist, Album
+
+def translator(data):
+    album = Album(
+        name=data['album'],
+        num_tracks=data['track-count'],
+    )
+
+    artist = Artist(
+        name=data['artist'],
+    )
+
+    date = datetime.date(
+        data['date'].year,
+        data['date'].month,
+        data['date'].day,
+    )
+
+    return Track(
+        uri=data['uri'],
+        name=data['title'],
+        album=album,
+        artists=[artist],
+        date=date,
+        track_no=data['track-number'],
+    )
+
 
 class Scanner(object):
     def __init__(self, folder, data_callback, error_callback=None):

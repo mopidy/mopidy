@@ -1,8 +1,44 @@
 import unittest
+from datetime import date
 
-from mopidy.scanner import Scanner
+from mopidy.scanner import Scanner, translator
+from mopidy.models import Track, Artist, Album
 
 from tests import data_folder
+
+class FakeGstDate(object):
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+class TranslatorTest(unittest.TestCase):
+    def test_basic_data(self):
+        data = {
+            'uri': 'uri',
+            'album': u'albumname',
+            'track-number': 1,
+            'artist': u'name',
+            'title': u'trackname',
+            'track-count': 2,
+            'date': FakeGstDate(2006, 1, 1,),
+            'container-format': u'ID3 tag',
+            # length etc?
+        }
+
+        expected = Track(
+            uri='uri',
+            name='trackname',
+            album=Album(name='albumname', num_tracks=2),
+            artists=[Artist(name='name')],
+            date=date(2006, 1, 1),
+            track_no=1,
+        )
+
+        actual = translator(data)
+
+        self.assertEqual(expected, actual)
+
 
 class ScannerTest(unittest.TestCase):
     def setUp(self):
