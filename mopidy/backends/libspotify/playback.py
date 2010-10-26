@@ -2,17 +2,17 @@ import logging
 
 from spotify import Link, SpotifyError
 
-from mopidy.backends.base import BasePlaybackController
+from mopidy.backends.base import BasePlaybackProvider
 
 logger = logging.getLogger('mopidy.backends.libspotify.playback')
 
-class LibspotifyPlaybackController(BasePlaybackController):
-    def _pause(self):
+class LibspotifyPlaybackProvider(BasePlaybackProvider):
+    def pause(self):
         return self.backend.output.set_state('PAUSED')
 
-    def _play(self, track):
+    def play(self, track):
         self.backend.output.set_state('READY')
-        if self.state == self.PLAYING:
+        if self.backend.playback.state == self.backend.playback.PLAYING:
             self.backend.spotify.session.play(0)
         if track.uri is None:
             return False
@@ -26,16 +26,16 @@ class LibspotifyPlaybackController(BasePlaybackController):
             logger.warning('Play %s failed: %s', track.uri, e)
             return False
 
-    def _resume(self):
-        return self._seek(self.time_position)
+    def resume(self):
+        return self.seek(self.backend.playback.time_position)
 
-    def _seek(self, time_position):
+    def seek(self, time_position):
         self.backend.output.set_state('READY')
         self.backend.spotify.session.seek(time_position)
         self.backend.output.set_state('PLAYING')
         return True
 
-    def _stop(self):
+    def stop(self):
         result = self.backend.output.set_state('READY')
         self.backend.spotify.session.play(0)
         return result

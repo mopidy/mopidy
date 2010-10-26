@@ -1,5 +1,5 @@
 from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
-    BasePlaybackController, BaseLibraryController,
+    BasePlaybackController, BasePlaybackProvider, BaseLibraryController,
     BaseStoredPlaylistsController)
 from mopidy.models import Playlist
 
@@ -13,10 +13,17 @@ class DummyBackend(BaseBackend):
 
     def __init__(self, *args, **kwargs):
         super(DummyBackend, self).__init__(*args, **kwargs)
+
         self.current_playlist = DummyCurrentPlaylistController(backend=self)
+
         self.library = DummyLibraryController(backend=self)
-        self.playback = DummyPlaybackController(backend=self)
+
+        playback_provider = DummyPlaybackProvider(backend=self)
+        self.playback = DummyPlaybackController(backend=self,
+            provider=playback_provider)
+
         self.stored_playlists = DummyStoredPlaylistsController(backend=self)
+
         self.uri_handlers = [u'dummy:']
 
 
@@ -43,35 +50,29 @@ class DummyLibraryController(BaseLibraryController):
 
 
 class DummyPlaybackController(BasePlaybackController):
-    def _next(self, track):
-        """Pass None as track to force failure"""
-        return track is not None
-
-    def _pause(self):
-        return True
-
-    def _play(self, track):
-        """Pass None as track to force failure"""
-        return track is not None
-
-    def _previous(self, track):
-        """Pass None as track to force failure"""
-        return track is not None
-
-    def _resume(self):
-        return True
-
-    def _seek(self, time_position):
-        return True
-
-    def _stop(self):
-        return True
-
     def _trigger_started_playing_event(self):
         pass # noop
 
     def _trigger_stopped_playing_event(self):
         pass # noop
+
+
+class DummyPlaybackProvider(BasePlaybackProvider):
+    def pause(self):
+        return True
+
+    def play(self, track):
+        """Pass None as track to force failure"""
+        return track is not None
+
+    def resume(self):
+        return True
+
+    def seek(self, time_position):
+        return True
+
+    def stop(self):
+        return True
 
 
 class DummyStoredPlaylistsController(BaseStoredPlaylistsController):

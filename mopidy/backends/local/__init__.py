@@ -5,9 +5,10 @@ import os
 import shutil
 
 from mopidy import settings
-from mopidy.backends.base import (BaseBackend, BaseLibraryController,
-    BaseStoredPlaylistsController, BaseCurrentPlaylistController,
-    BasePlaybackController)
+from mopidy.backends.base import (BaseBackend,
+    BaseCurrentPlaylistController, BaseLibraryController,
+    BasePlaybackController, BasePlaybackProvider,
+    BaseStoredPlaylistsController)
 from mopidy.models import Playlist, Track, Album
 from mopidy.utils.process import pickle_connection
 
@@ -31,41 +32,51 @@ class LocalBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(LocalBackend, self).__init__(*args, **kwargs)
 
-        self.library = LocalLibraryController(self)
-        self.stored_playlists = LocalStoredPlaylistsController(self)
-        self.current_playlist = BaseCurrentPlaylistController(self)
-        self.playback = LocalPlaybackController(self)
+        self.library = LocalLibraryController(backend=self)
+
+        self.stored_playlists = LocalStoredPlaylistsController(backend=self)
+
+        self.current_playlist = BaseCurrentPlaylistController(backend=self)
+
+        playback_provider = LocalPlaybackProvider(backend=self)
+        self.playback = LocalPlaybackController(backend=self,
+            provider=playback_provider)
+
         self.uri_handlers = [u'file://']
 
 
 class LocalPlaybackController(BasePlaybackController):
-    def __init__(self, backend):
-        super(LocalPlaybackController, self).__init__(backend)
+    def __init__(self, *args, **kwargs):
+        super(LocalPlaybackController, self).__init__(*args, **kwargs)
+
+        # XXX Why do we call stop()? Is it to set GStreamer state to 'READY'?
         self.stop()
-
-    def _play(self, track):
-        return self.backend.output.play_uri(track.uri)
-
-    def _stop(self):
-        return self.backend.output.set_state('READY')
-
-    def _pause(self):
-        return self.backend.output.set_state('PAUSED')
-
-    def _resume(self):
-        return self.backend.output.set_state('PLAYING')
-
-    def _seek(self, time_position):
-        return self.backend.output.set_position(time_position)
 
     @property
     def time_position(self):
         return self.backend.output.get_position()
 
 
+class LocalPlaybackProvider(BasePlaybackProvider):
+    def pause(self):
+        return self.backend.output.set_state('PAUSED')
+
+    def play(self, track):
+        return self.backend.output.play_uri(track.uri)
+
+    def resume(self):
+        return self.backend.output.set_state('PLAYING')
+
+    def seek(self, time_position):
+        return self.backend.output.set_position(time_position)
+
+    def stop(self):
+        return self.backend.output.set_state('READY')
+
+
 class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
-    def __init__(self, *args):
-        super(LocalStoredPlaylistsController, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super(LocalStoredPlaylistsController, self).__init__(*args, **kwargs)
         self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_FOLDER)
         self.refresh()
 
@@ -137,8 +148,8 @@ class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
 
 
 class LocalLibraryController(BaseLibraryController):
-    def __init__(self, backend):
-        super(LocalLibraryController, self).__init__(backend)
+    def __init__(self, *args, **kwargs):
+        super(LocalLibraryController, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
         self.refresh()
 

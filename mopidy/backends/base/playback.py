@@ -6,8 +6,10 @@ logger = logging.getLogger('mopidy.backends.base')
 
 class BasePlaybackController(object):
     """
-    :param backend: backend the controller is a part of
+    :param backend: the backend
     :type backend: :class:`BaseBackend`
+    :param provider: provider the controller should use
+    :type provider: instance of :class:`BasePlaybackProvider`
     """
 
     # pylint: disable = R0902
@@ -54,8 +56,9 @@ class BasePlaybackController(object):
     #:     Playback continues after current song.
     single = False
 
-    def __init__(self, backend):
+    def __init__(self, backend, provider):
         self.backend = backend
+        self.provider = provider
         self._state = self.STOPPED
         self._shuffled = []
         self._first_shuffle = True
@@ -353,17 +356,8 @@ class BasePlaybackController(object):
 
     def pause(self):
         """Pause playback."""
-        if self.state == self.PLAYING and self._pause():
+        if self.state == self.PLAYING and self.provider.pause():
             self.state = self.PAUSED
-
-    def _pause(self):
-        """
-        To be overridden by subclass. Implement your backend's pause
-        functionality here.
-
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        raise NotImplementedError
 
     def play(self, cp_track=None, on_error_step=1):
         """
@@ -391,7 +385,7 @@ class BasePlaybackController(object):
             self.state = self.STOPPED
             self.current_cp_track = cp_track
             self.state = self.PLAYING
-            if not self._play(cp_track[1]):
+            if not self.provider.play(cp_track[1]):
                 # Track is not playable
                 if self.random and self._shuffled:
                     self._shuffled.remove(cp_track)
@@ -405,18 +399,6 @@ class BasePlaybackController(object):
 
         self._trigger_started_playing_event()
 
-    def _play(self, track):
-        """
-        To be overridden by subclass. Implement your backend's play
-        functionality here.
-
-        :param track: the track to play
-        :type track: :class:`mopidy.models.Track`
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-
-        raise NotImplementedError
-
     def previous(self):
         """Play the previous track."""
         if self.cp_track_at_previous is None:
@@ -428,17 +410,8 @@ class BasePlaybackController(object):
 
     def resume(self):
         """If paused, resume playing the current track."""
-        if self.state == self.PAUSED and self._resume():
+        if self.state == self.PAUSED and self.provider.resume():
             self.state = self.PLAYING
-
-    def _resume(self):
-        """
-        To be overridden by subclass. Implement your backend's resume
-        functionality here.
-
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        raise NotImplementedError
 
     def seek(self, time_position):
         """
@@ -465,18 +438,7 @@ class BasePlaybackController(object):
         self._play_time_started = self._current_wall_time
         self._play_time_accumulated = time_position
 
-        return self._seek(time_position)
-
-    def _seek(self, time_position):
-        """
-        To be overridden by subclass. Implement your backend's seek
-        functionality here.
-
-        :param time_position: time position in milliseconds
-        :type time_position: int
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        raise NotImplementedError
+        return self.provider.seek(time_position)
 
     def stop(self, clear_current_track=False):
         """
@@ -489,19 +451,10 @@ class BasePlaybackController(object):
         if self.state == self.STOPPED:
             return
         self._trigger_stopped_playing_event()
-        if self._stop():
+        if self.provider.stop():
             self.state = self.STOPPED
         if clear_current_track:
             self.current_cp_track = None
-
-    def _stop(self):
-        """
-        To be overridden by subclass. Implement your backend's stop
-        functionality here.
-
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        raise NotImplementedError
 
     def _trigger_started_playing_event(self):
         """
@@ -532,3 +485,62 @@ class BasePlaybackController(object):
                 'track': self.current_track,
                 'stop_position': self.time_position,
             })
+
+
+class BasePlaybackProvider(object):
+    """
+    :param backend: the backend
+    :type backend: :class:`BaseBackend`
+    """
+
+    def __init__(self, backend):
+        self.backend = backend
+
+    def pause(self):
+        """
+        To be overridden by subclass. Implement your backend's pause
+        functionality here.
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    def play(self, track):
+        """
+        To be overridden by subclass. Implement your backend's play
+        functionality here.
+
+        :param track: the track to play
+        :type track: :class:`mopidy.models.Track`
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    def resume(self):
+        """
+        To be overridden by subclass. Implement your backend's resume
+        functionality here.
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    def seek(self, time_position):
+        """
+        To be overridden by subclass. Implement your backend's seek
+        functionality here.
+
+        :param time_position: time position in milliseconds
+        :type time_position: int
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    def stop(self):
+        """
+        To be overridden by subclass. Implement your backend's stop
+        functionality here.
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
