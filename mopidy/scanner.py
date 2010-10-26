@@ -36,6 +36,7 @@ def translator(data):
         artists=[artist],
         date=date,
         track_no=data['track-number'],
+        length=data['duration'],
     )
 
 

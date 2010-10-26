@@ -23,7 +23,7 @@ class TranslatorTest(unittest.TestCase):
             'track-count': 2,
             'date': FakeGstDate(2006, 1, 1,),
             'container-format': u'ID3 tag',
-            # length etc?
+            'duration': 4531,
         }
 
     def test_basic_data(self):
@@ -34,6 +34,7 @@ class TranslatorTest(unittest.TestCase):
             artists=[Artist(name='name')],
             date=date(2006, 1, 1),
             track_no=1,
+            length=4531,
         )
         self.assertEqual(expected, translator(self.data))
 
