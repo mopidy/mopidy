@@ -13,8 +13,8 @@ class FakeGstDate(object):
         self.day = day
 
 class TranslatorTest(unittest.TestCase):
-    def test_basic_data(self):
-        data = {
+    def setUp(self):
+        self.data = {
             'uri': 'uri',
             'album': u'albumname',
             'track-number': 1,
@@ -26,6 +26,7 @@ class TranslatorTest(unittest.TestCase):
             # length etc?
         }
 
+    def test_basic_data(self):
         expected = Track(
             uri='uri',
             name='trackname',
@@ -34,10 +35,7 @@ class TranslatorTest(unittest.TestCase):
             date=date(2006, 1, 1),
             track_no=1,
         )
-
-        actual = translator(data)
-
-        self.assertEqual(expected, actual)
+        self.assertEqual(expected, translator(self.data))
 
 
 class ScannerTest(unittest.TestCase):
