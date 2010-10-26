@@ -138,6 +138,10 @@ def playid(frontend, cpid):
       at the first track.
     """
     cpid = int(cpid)
+    paused = (frontend.backend.playback.state ==
+        frontend.backend.playback.PAUSED)
+    if cpid == -1 and paused:
+        return frontend.backend.playback.resume()
     try:
         if cpid == -1:
             cp_track = _get_cp_track_for_play_minus_one(frontend)

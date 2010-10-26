@@ -254,7 +254,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
     def test_playid(self):
         self.b.current_playlist.append([Track()])
-        result = self.h.handle_request(u'playid "1"')
+        result = self.h.handle_request(u'playid "0"')
         self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
 
@@ -285,6 +285,18 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
         self.assertEqual(self.b.playback.current_track, None)
 
+    def test_playid_minus_one_resumes_if_paused(self):
+        self.b.current_playlist.append([Track(length=40000)])
+        self.b.playback.seek(30000)
+        self.assert_(self.b.playback.time_position >= 30000)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
+        self.b.playback.pause()
+        self.assertEquals(self.b.playback.PAUSED, self.b.playback.state)
+        result = self.h.handle_request(u'playid "-1"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+        self.assert_(self.b.playback.time_position >= 30000)
+
     def test_playid_which_does_not_exist(self):
         self.b.current_playlist.append([Track()])
         result = self.h.handle_request(u'playid "12345"')
@@ -310,7 +322,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
 
     def test_seekid(self):
         self.b.current_playlist.append([Track(length=40000)])
-        result = self.h.handle_request(u'seekid "1" "30"')
+        result = self.h.handle_request(u'seekid "0" "30"')
         self.assert_(u'OK' in result)
         self.assert_(self.b.playback.time_position >= 30000)
 
@@ -318,8 +330,8 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         seek_track = Track(uri='2', length=40000)
         self.b.current_playlist.append(
             [Track(length=40000), seek_track])
-        result = self.h.handle_request(u'seekid "2" "30"')
-        self.assertEqual(self.b.playback.current_cpid, 2)
+        result = self.h.handle_request(u'seekid "1" "30"')
+        self.assertEqual(self.b.playback.current_cpid, 1)
         self.assertEqual(self.b.playback.current_track, seek_track)
 
     def test_stop(self):
