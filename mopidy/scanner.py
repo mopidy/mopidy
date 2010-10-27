@@ -101,4 +101,5 @@ class Scanner(object):
         self.loop.run()
 
     def stop(self):
+        self.pipe.set_state(gst.STATE_NULL)
         self.loop.quit()
