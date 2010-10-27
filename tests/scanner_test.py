@@ -26,18 +26,42 @@ class TranslatorTest(unittest.TestCase):
             'duration': 4531,
         }
 
-    def test_basic_data(self):
-        expected = Track(
-            uri='uri',
-            name='trackname',
-            album=Album(name='albumname', num_tracks=2),
-            artists=[Artist(name='name')],
-            date=date(2006, 1, 1),
-            track_no=1,
-            length=4531,
-        )
+        self.album = {
+            'name': 'albumname',
+            'num_tracks': 2,
+        }
+
+        self.artist = {
+            'name': 'name',
+        }
+
+        self.track = {
+            'uri': 'uri',
+            'name': 'trackname',
+            'date': date(2006, 1, 1),
+            'track_no': 1,
+            'length': 4531,
+        }
+
+    def build_track(self):
+        if self.album:
+            self.track['album'] = Album(**self.album)
+        if self.artist:
+            self.track['artists'] = [Artist(**self.artist)]
+        return Track(**self.track)
+
+    def check(self):
+        expected = self.build_track()
+        actual = translator(self.data)
         self.assertEqual(expected, translator(self.data))
 
+    def test_basic_data(self):
+        self.check()
+
+    def test_missing_track_number(self):
+        del self.track['track_no']
+        del self.data['track-number']
+        self.check()
 
 class ScannerTest(unittest.TestCase):
     def setUp(self):
