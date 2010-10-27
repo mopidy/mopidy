@@ -105,9 +105,10 @@ class Scanner(object):
         self.pipe.set_state(gst.STATE_PAUSED)
 
     def start(self):
-        if self.uris:
-            self.next_uri()
-            self.loop.run()
+        if not self.uris:
+            return
+        self.next_uri()
+        self.loop.run()
 
     def stop(self):
         self.pipe.set_state(gst.STATE_NULL)
