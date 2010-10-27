@@ -14,30 +14,29 @@ from mopidy.utils.path import path_to_uri, find_files
 from mopidy.models import Track, Artist, Album
 
 def translator(data):
-    album = Album(
-        name=data['album'],
-        num_tracks=data['track-count'],
-    )
+    album_kwargs = {}
+    album_kwargs['name'] = data['album']
+    album_kwargs['num_tracks'] = data['track-count']
 
-    artist = Artist(
-        name=data['artist'],
-    )
+    artist_kwargs = {}
+    artist_kwargs['name'] =data['artist']
 
-    date = datetime.date(
-        data['date'].year,
-        data['date'].month,
-        data['date'].day,
-    )
+    date = data['date']
+    date = datetime.date(date.year, date.month, date.day)
 
-    return Track(
-        uri=data['uri'],
-        name=data['title'],
-        album=album,
-        artists=[artist],
-        date=date,
-        track_no=data['track-number'],
-        length=data['duration'],
-    )
+    track_kwargs = {}
+    track_kwargs['uri'] = data['uri']
+    track_kwargs['name'] = data['title']
+    track_kwargs['album'] = Album(**album_kwargs)
+    track_kwargs['artists'] = [Artist(**artist_kwargs)]
+    track_kwargs['date'] = date
+
+    if 'track-number' in data:
+        track_kwargs['track_no'] = data['track-number']
+
+    track_kwargs['length'] = data['duration']
+
+    return Track(**track_kwargs)
 
 
 class Scanner(object):
