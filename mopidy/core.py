@@ -100,8 +100,8 @@ class CoreProcess(BaseThread):
     def process_message_to_core(self, message):
         assert message['to'] == 'core', u'Message recipient must be "core".'
         if message['command'] == 'exit':
-            if message['reason'] is not None:
+            if message.get('reason') is not None:
                 logger.info(u'Exiting (%s)', message['reason'])
-            sys.exit(message['status'])
+            sys.exit(message.get('status', 0))
         else:
             logger.warning(u'Cannot handle message: %s', message)
