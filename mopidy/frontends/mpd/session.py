@@ -2,6 +2,7 @@ import asynchat
 import logging
 import multiprocessing
 
+from mopidy import settings
 from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR, VERSION
 from mopidy.utils.log import indent
 from mopidy.utils.process import pickle_connection
@@ -22,6 +23,7 @@ class MpdSession(asynchat.async_chat):
         self.client_port = client_socket_address[1]
         self.core_queue = core_queue
         self.input_buffer = []
+        self.authenticated = False
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
 
     def start(self):
@@ -46,6 +48,9 @@ class MpdSession(asynchat.async_chat):
 
     def handle_request(self, request):
         """Handle request by sending it to the MPD frontend."""
+        if not self.authenticated:
+            self.authenticated = self.check_password(request)
+            return
         my_end, other_end = multiprocessing.Pipe()
         self.core_queue.put({
             'to': 'frontend',
@@ -69,3 +74,15 @@ class MpdSession(asynchat.async_chat):
         output = u'%s%s' % (output, LINE_TERMINATOR)
         data = output.encode(ENCODING)
         self.push(data)
+
+    def check_password(self, request):
+        if not settings.MPD_SERVER_PASSWORD:
+            return True
+        if request == 'password "%s"' % settings.MPD_SERVER_PASSWORD:
+            self.send_response('OK')
+            return True
+        command = request.split(' ')[0]
+        self.send_response(
+            "ACK [4@0] {%s} " % command +
+            "you don't have permission for \"%s\"" % command)
+        return False

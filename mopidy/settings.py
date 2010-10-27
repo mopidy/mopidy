@@ -164,6 +164,11 @@ OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
 #:     Listens on all interfaces, both IPv4 and IPv6.
 MPD_SERVER_HOSTNAME = u'127.0.0.1'
 
+#: Password required for connecting to the MPD server.
+#:
+#: Default: :class:`False`, which means no password required.
+MPD_SERVER_PASSWORD = False
+
 #: Which TCP port Mopidy's MPD server should listen to.
 #:
 #: Default: 6600
