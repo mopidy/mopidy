@@ -90,6 +90,10 @@ class ScannerTest(unittest.TestCase):
         self.scan('scanner/simple')
         self.check('scanner/simple/song1.mp3', 'title', 'trackname')
 
+    def test_nonexistant_folder_does_not_fail(self):
+        self.scan('scanner/does-not-exist')
+        self.assert_(not self.errors)
+
     def test_other_media_is_ignored(self):
         self.scan('scanner/image')
         self.assert_(self.errors)
