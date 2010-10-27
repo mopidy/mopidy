@@ -47,11 +47,13 @@ class Scanner(object):
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
 
+        caps = gst.Caps('audio/x-raw-int')
         fakesink = gst.element_factory_make('fakesink')
         pad = fakesink.get_pad('sink')
 
         self.uribin = gst.element_factory_make('uridecodebin')
         self.uribin.connect('pad-added', self.process_new_pad, pad)
+        self.uribin.set_property('caps', caps)
 
         self.pipe = gst.element_factory_make('pipeline')
         self.pipe.add(fakesink)

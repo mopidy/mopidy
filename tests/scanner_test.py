@@ -89,3 +89,7 @@ class ScannerTest(unittest.TestCase):
     def test_track_is_set(self):
         self.scan('scanner/simple')
         self.check('scanner/simple/song1.mp3', 'title', 'trackname')
+
+    def test_other_media_is_ignored(self):
+        self.scan('scanner/image')
+        self.assert_(self.errors)
