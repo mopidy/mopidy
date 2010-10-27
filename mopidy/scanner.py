@@ -66,9 +66,6 @@ class Scanner(object):
         pad.link(target_pad)
 
     def process_tags(self, bus, message):
-        # Block for state change so that duration can be safely determined
-        self.pipe.get_state()
-
         data = message.parse_tag()
         data = dict([(k, data[k]) for k in data.keys()])
         data['uri'] = self.uribin.get_property('uri')
@@ -84,6 +81,7 @@ class Scanner(object):
         self.next_uri()
 
     def get_duration(self):
+        self.pipe.get_state()
         try:
             return self.pipe.query_duration(
                 gst.FORMAT_TIME, None)[0] // gst.MSECOND
