@@ -15,26 +15,33 @@ from mopidy.models import Track, Artist, Album
 
 def translator(data):
     album_kwargs = {}
-    album_kwargs['name'] = data['album']
-    album_kwargs['num_tracks'] = data['track-count']
-
     artist_kwargs = {}
-    artist_kwargs['name'] =data['artist']
-
-    date = data['date']
-    date = datetime.date(date.year, date.month, date.day)
-
     track_kwargs = {}
-    track_kwargs['uri'] = data['uri']
-    track_kwargs['name'] = data['title']
-    track_kwargs['album'] = Album(**album_kwargs)
-    track_kwargs['artists'] = [Artist(**artist_kwargs)]
-    track_kwargs['date'] = date
+
+    if 'album' in data:
+        album_kwargs['name'] = data['album']
+
+    if 'track-count' in data:
+        album_kwargs['num_tracks'] = data['track-count']
+
+    if 'artist' in data:
+        artist_kwargs['name'] =data['artist']
+
+    if 'date' in data:
+        date = data['date']
+        date = datetime.date(date.year, date.month, date.day)
+        track_kwargs['date'] = date
+
+    if 'title' in data:
+        track_kwargs['name'] = data['title']
 
     if 'track-number' in data:
         track_kwargs['track_no'] = data['track-number']
 
+    track_kwargs['uri'] = data['uri']
     track_kwargs['length'] = data['duration']
+    track_kwargs['album'] = Album(**album_kwargs)
+    track_kwargs['artists'] = [Artist(**artist_kwargs)]
 
     return Track(**track_kwargs)
 

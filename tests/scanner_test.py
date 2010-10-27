@@ -44,10 +44,8 @@ class TranslatorTest(unittest.TestCase):
         }
 
     def build_track(self):
-        if self.album:
-            self.track['album'] = Album(**self.album)
-        if self.artist:
-            self.track['artists'] = [Artist(**self.artist)]
+        self.track['album'] = Album(**self.album)
+        self.track['artists'] = [Artist(**self.artist)]
         return Track(**self.track)
 
     def check(self):
@@ -59,8 +57,33 @@ class TranslatorTest(unittest.TestCase):
         self.check()
 
     def test_missing_track_number(self):
-        del self.track['track_no']
         del self.data['track-number']
+        del self.track['track_no']
+        self.check()
+
+    def test_missing_track_count(self):
+        del self.data['track-count']
+        del self.album['num_tracks']
+        self.check()
+
+    def test_missing_track_name(self):
+        del self.data['title']
+        del self.track['name']
+        self.check()
+
+    def test_missing_album_name(self):
+        del self.data['album']
+        del self.album['name']
+        self.check()
+
+    def test_missing_artist_name(self):
+        del self.data['artist']
+        del self.artist['name']
+        self.check()
+
+    def test_missing_date(self):
+        del self.data['date']
+        del self.track['date']
         self.check()
 
 class ScannerTest(unittest.TestCase):
