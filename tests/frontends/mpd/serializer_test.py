@@ -14,6 +14,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Album', '') in result)
         self.assert_(('Track', 0) in result)
         self.assert_(('Date', '') in result)
+        self.assertEqual(len(result), 7)
 
     def test_mpd_format_for_nonempty_track(self):
         track = Track(
@@ -35,11 +36,12 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Date', dt.date(1977, 1, 1)) in result)
         self.assert_(('Pos', 9) in result)
         self.assert_(('Id', 122) in result)
+        self.assertEqual(len(result), 9)
 
     def test_mpd_format_artists(self):
         track = Track(artists=[Artist(name=u'ABBA'), Artist(name=u'Beatles')])
-        self.assertEqual(translator.track_artists_to_mpd_format(track),
-            u'ABBA, Beatles')
+        translated = translator.track_artists_to_mpd_format(track)
+        self.assertEqual(translated, u'ABBA, Beatles')
 
 
 class PlaylistMpdFormatTest(unittest.TestCase):
