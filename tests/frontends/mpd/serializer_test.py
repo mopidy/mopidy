@@ -173,3 +173,59 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
         self.assertEqual(song_list, formated)
         self.assertEqual(len(result), 0)
+
+
+class TracksToDirectoryTreeTest(unittest.TestCase):
+    def setUp(self):
+        settings.LOCAL_MUSIC_FOLDER = '/'
+
+    def tearDown(self):
+        settings.runtime.clear()
+
+    def test_no_tracks_gives_emtpy_tree(self):
+        tree = translator.tracks_to_directory_tree([])
+        self.assertEqual(tree, ({}, []))
+
+    def test_top_level_files(self):
+        tracks = [
+            Track(uri='file:///file1.mp3'),
+            Track(uri='file:///file2.mp3'),
+            Track(uri='file:///file3.mp3'),
+        ]
+        tree = translator.tracks_to_directory_tree(tracks)
+        self.assertEqual(tree, ({}, tracks))
+
+    def test_single_file_in_subdir(self):
+        tracks = [Track(uri='file:///dir/file1.mp3')]
+        tree = translator.tracks_to_directory_tree(tracks)
+        expected = ({'dir': ({}, tracks)}, [])
+        self.assertEqual(tree, expected)
+
+    def test_single_file_in_sub_subdir(self):
+        tracks = [Track(uri='file:///dir1/dir2/file1.mp3')]
+        tree = translator.tracks_to_directory_tree(tracks)
+        expected = ({'dir1': ({'dir2': ({}, tracks)}, [])}, [])
+        self.assertEqual(tree, expected)
+
+    def test_complex_file_structure(self):
+        tracks = [
+            Track(uri='file:///file1.mp3'),
+            Track(uri='file:///dir1/file2.mp3'),
+            Track(uri='file:///dir1/file3.mp3'),
+            Track(uri='file:///dir2/file4.mp3'),
+            Track(uri='file:///dir2/sub/file5.mp3'),
+        ]
+        tree = translator.tracks_to_directory_tree(tracks)
+        expected = (
+            {
+                'dir1': ({}, [tracks[1], tracks[2]]),
+                'dir2': (
+                    {
+                        'sub': ({}, [tracks[4]])
+                    },
+                    [tracks[3]]
+                ),
+            },
+            [tracks[0]]
+        )
+        self.assertEqual(tree, expected)

@@ -3,7 +3,7 @@ import re
 
 from mopidy import settings
 from mopidy.frontends.mpd import protocol
-from mopidy.utils.path import path_to_uri, uri_to_path
+from mopidy.utils.path import path_to_uri, uri_to_path, split_path
 
 def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False):
     """
@@ -123,3 +123,15 @@ def tracks_to_tag_cache_format(tracks):
     result.append(('songList end',))
 
     return result
+
+def tracks_to_directory_tree(tracks):
+    directories = ({}, [])
+    for track in tracks:
+        folder = os.path.dirname(uri_to_path(track.uri))
+        current = directories
+        for part in split_path(folder):
+            if part not in current[0]:
+                current[0][part] = ({}, [])
+            current = current[0][part]
+        current[1].append(track)
+    return directories
