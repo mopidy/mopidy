@@ -6,7 +6,8 @@ import sys
 import tempfile
 import unittest
 
-from mopidy.utils.path import get_or_create_folder, path_to_uri, find_files
+from mopidy.utils.path import (get_or_create_folder,
+    path_to_uri, uri_to_path, find_files)
 
 from tests import SkipTest, data_folder
 
@@ -69,6 +70,32 @@ class PathToFileURITest(unittest.TestCase):
         else:
             result = path_to_uri(u'/tmp/æøå')
             self.assertEqual(result, u'file:///tmp/%C3%A6%C3%B8%C3%A5')
+
+
+class UriToPathTest(unittest.TestCase):
+    def test_simple_uri(self):
+        if sys.platform == 'win32':
+            result = uri_to_path('file:///C://WINDOWS/clock.avi')
+            self.assertEqual(result, u'C:/WINDOWS/clock.avi')
+        else:
+            result = uri_to_path('file:///etc/fstab')
+            self.assertEqual(result, u'/etc/fstab')
+
+    def test_space_in_uri(self):
+        if sys.platform == 'win32':
+            result = uri_to_path('file:///C://test%20this')
+            self.assertEqual(result, u'C:/test this')
+        else:
+            result = uri_to_path(u'file:///tmp/test%20this')
+            self.assertEqual(result, u'/tmp/test this')
+
+    def test_unicode_in_uri(self):
+        if sys.platform == 'win32':
+            result = uri_to_path( 'file:///C://%C3%A6%C3%B8%C3%A5')
+            self.assertEqual(result, u'C:/æøå')
+        else:
+            result = uri_to_path(u'file:///tmp/%C3%A6%C3%B8%C3%A5')
+            self.assertEqual(result, u'/tmp/æøå')
 
 
 class FindFilesTest(unittest.TestCase):

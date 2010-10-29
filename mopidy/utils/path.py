@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import re
 import urllib
 
 logger = logging.getLogger('mopidy.utils.path')
@@ -26,6 +27,13 @@ def path_to_uri(*paths):
     if sys.platform == 'win32':
         return 'file:' + urllib.pathname2url(path)
     return 'file://' + urllib.pathname2url(path)
+
+def uri_to_path(uri):
+    if sys.platform == 'win32':
+        path = urllib.url2pathname(re.sub('^file:', '', uri))
+    else:
+        path = urllib.url2pathname(re.sub('^file://', '', uri))
+    return path.encode('latin1').decode('utf-8') # Undo double encoding
 
 def find_files(path):
     if os.path.isfile(path):
