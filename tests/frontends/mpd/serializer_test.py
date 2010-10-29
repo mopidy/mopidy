@@ -5,7 +5,7 @@ from mopidy import settings
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
-from tests import data_folder
+from tests import data_folder, SkipTest
 
 class TrackMpdFormatTest(unittest.TestCase):
     def setUp(self):
@@ -188,10 +188,36 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
-        directory, result = self.consume_directory(result)
-        song_list, result = self.consume_song_list(directory)
+        folder, result = self.consume_directory(result)
+        song_list, result = self.consume_song_list(result)
+        self.assertEqual(len(song_list), 0)
+        self.assertEqual(len(result), 0)
 
+        song_list, result = self.consume_song_list(folder)
+        self.assertEqual(len(result), 0)
         self.assertEqual(song_list, formated)
+
+    def test_tag_cache_suports_sub_directories(self):
+        track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
+        formated = translator.track_to_mpd_format(track, key=True)
+        result = translator.tracks_to_tag_cache_format([track])
+
+        result = self.consume_headers(result)
+
+        folder, result = self.consume_directory(result)
+        song_list, result = self.consume_song_list(result)
+        self.assertEqual(len(song_list), 0)
+        self.assertEqual(len(result), 0)
+
+        folder, result = self.consume_directory(folder)
+        song_list, result = self.consume_song_list(result)
+        self.assertEqual(len(result), 0)
+        self.assertEqual(len(song_list), 0)
+
+        song_list, result = self.consume_song_list(folder)
+        self.assertEqual(len(result), 0)
+        self.assertEqual(song_list, formated)
+
 
 class TracksToDirectoryTreeTest(unittest.TestCase):
     def setUp(self):
