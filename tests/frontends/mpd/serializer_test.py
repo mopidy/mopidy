@@ -5,6 +5,8 @@ from mopidy import settings
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
+from tests import data_folder
+
 class TrackMpdFormatTest(unittest.TestCase):
     def setUp(self):
         settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
@@ -40,6 +42,12 @@ class TrackMpdFormatTest(unittest.TestCase):
         track = Track(uri='file:///dir/subdir/file.mp3')
         result = translator.track_to_mpd_format(track, key=True)
         self.assert_(('key', 'file.mp3') in result)
+
+    def test_track_to_mpd_format_with_mtime(self):
+        uri = translator.path_to_uri(data_folder('blank.mp3'))
+        result = translator.track_to_mpd_format(Track(uri=uri), mtime=True)
+        print result
+        self.assert_(('mtime', 1288125516) in result)
 
     def test_track_to_mpd_format_track_uses_uri_to_mpd_relative_path(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
