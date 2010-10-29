@@ -17,7 +17,7 @@ def track_to_mpd_format(track, position=None, cpid=None):
     :rtype: list of two-tuples
     """
     result = [
-        ('file', track.uri or ''),
+        ('file', uri_to_mpd_relative_path(track.uri) or ''),
         ('Time', track.length and (track.length // 1000) or 0),
         ('Artist', track_artists_to_mpd_format(track)),
         ('Title', track.name or ''),
