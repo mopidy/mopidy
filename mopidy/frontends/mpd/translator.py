@@ -15,6 +15,10 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
     :type position: integer
     :param cpid: track's CPID (current playlist ID)
     :type cpid: integer
+    :param key: if we should set key
+    :type key: boolean
+    :param mtime: if we should set mtime
+    :type mtime: boolean
     :rtype: list of two-tuples
     """
     result = [
