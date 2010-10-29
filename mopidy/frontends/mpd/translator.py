@@ -40,7 +40,7 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
         result.append(('Pos', position))
         result.append(('Id', cpid))
     if key and track.uri:
-        result.insert(0, ('key', os.path.basename(track.uri)))
+        result.insert(0, ('key', os.path.basename(uri_to_path(track.uri))))
     if mtime and track.uri:
         mtime = stat(uri_to_path(track.uri)).st_mtime
         result.append(('mtime', int(mtime)))
