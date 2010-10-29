@@ -122,7 +122,10 @@ def tracks_to_tag_cache_format(tracks):
     return result
 
 def _add_to_tag_cache(result, folders, files):
-    for name, entry in folders.items():
+    for path, entry in folders.items():
+        name = os.path.split(path)[1]
+        result.append(('directory', path))
+        result.append(('mtime', stat(name).st_mtime))
         result.append(('begin', name))
         _add_to_tag_cache(result, *entry)
         result.append(('end', name))
@@ -136,11 +139,13 @@ def tracks_to_directory_tree(tracks):
     directories = ({}, [])
     for track in tracks:
         uri = uri_to_mpd_relative_path(track.uri)
-        folder = os.path.dirname(uri_to_path(uri))
+        path = ''
         current = directories
-        for part in split_path(folder):
-            if part not in current[0]:
-                current[0][part] = ({}, [])
-            current = current[0][part]
+        for part in split_path(os.path.dirname(uri_to_path(uri))):
+            path = os.path.join(path, part)
+            print path
+            if path not in current[0]:
+                current[0][path] = ({}, [])
+            current = current[0][path]
         current[1].append(track)
     return directories

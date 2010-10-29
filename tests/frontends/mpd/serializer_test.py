@@ -8,7 +8,7 @@ from mopidy.models import Album, Artist, Playlist, Track
 
 from tests import data_folder, SkipTest
 
-def fake_stat(path):
+def fake_mtime(path):
     class StatResult(object):
         def __getattr__(self, key):
             assert key == 'st_mtime', key
@@ -18,7 +18,7 @@ def fake_stat(path):
 class TrackMpdFormatTest(unittest.TestCase):
     def setUp(self):
         settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
-        translator.stat = fake_stat
+        translator.stat = fake_mtime
 
     def tearDown(self):
         settings.runtime.clear()
@@ -134,7 +134,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def setUp(self):
         settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
-        translator.stat = fake_stat
+        translator.stat = fake_mtime
 
     def tearDown(self):
         settings.runtime.clear()
@@ -155,11 +155,13 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         self.fail("Couldn't find songList end in result")
 
     def consume_directory(self, result):
-        self.assertEqual('begin', result[0][0])
-        directory = result[0][1]
+        self.assertEqual('directory', result[0][0])
+        self.assertEqual(('mtime', fake_mtime('').st_mtime), result[1])
+        self.assertEqual(('begin', os.path.split(result[0][1])[1]), result[2])
+        directory = result[2][1]
         for i, row in enumerate(result):
             if row == ('end', directory):
-                return result[1:i], result[i+1:]
+                return result[3:i], result[i+1:]
         self.fail("Couldn't find end %s in result" % directory)
 
     def test_empty_tag_cache_has_header(self):
@@ -224,6 +226,18 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         song_list, result = self.consume_song_list(folder)
         self.assertEqual(len(result), 0)
         self.assertEqual(song_list, formated)
+
+    def test_tag_cache_diretory_header_is_right(self):
+        track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
+        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
+        result = translator.tracks_to_tag_cache_format([track])
+
+        result = self.consume_headers(result)
+        folder, result = self.consume_directory(result)
+
+        self.assertEqual(('directory', 'folder/sub'), folder[0])
+        self.assertEqual(('mtime', fake_mtime('').st_mtime), folder[1])
+        self.assertEqual(('begin', 'sub'), folder[2])
 
     def test_tag_cache_suports_sub_directories(self):
         track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
@@ -317,7 +331,7 @@ class TracksToDirectoryTreeTest(unittest.TestCase):
     def test_single_file_in_sub_subdir(self):
         tracks = [Track(uri='file:///dir1/dir2/file1.mp3')]
         tree = translator.tracks_to_directory_tree(tracks)
-        expected = ({'dir1': ({'dir2': ({}, tracks)}, [])}, [])
+        expected = ({'dir1': ({'dir1/dir2': ({}, tracks)}, [])}, [])
         self.assertEqual(tree, expected)
 
     def test_complex_file_structure(self):
@@ -334,7 +348,7 @@ class TracksToDirectoryTreeTest(unittest.TestCase):
                 'dir1': ({}, [tracks[1], tracks[2]]),
                 'dir2': (
                     {
-                        'sub': ({}, [tracks[4]])
+                        'dir2/sub': ({}, [tracks[4]])
                     },
                     [tracks[3]]
                 ),
