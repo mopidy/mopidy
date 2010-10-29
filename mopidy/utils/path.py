@@ -35,6 +35,16 @@ def uri_to_path(uri):
         path = urllib.url2pathname(re.sub('^file://', '', uri))
     return path.encode('latin1').decode('utf-8') # Undo double encoding
 
+def split_path(path):
+    parts = []
+    while True:
+        path, part = os.path.split(path)
+        if part:
+            parts.insert(0, part)
+        if not path or path == '/':
+            break
+    return parts
+
 def find_files(path):
     if os.path.isfile(path):
         yield os.path.abspath(path)

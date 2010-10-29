@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from mopidy.utils.path import (get_or_create_folder,
-    path_to_uri, uri_to_path, find_files)
+    path_to_uri, uri_to_path, split_path, find_files)
 
 from tests import SkipTest, data_folder
 
@@ -96,6 +96,26 @@ class UriToPathTest(unittest.TestCase):
         else:
             result = uri_to_path(u'file:///tmp/%C3%A6%C3%B8%C3%A5')
             self.assertEqual(result, u'/tmp/æøå')
+
+
+class SplitPathTest(unittest.TestCase):
+    def test_empty_path(self):
+        self.assertEqual([], split_path(''))
+
+    def test_single_folder(self):
+        self.assertEqual(['foo'], split_path('foo'))
+
+    def test_folders(self):
+        self.assertEqual(['foo', 'bar', 'baz'], split_path('foo/bar/baz'))
+
+    def test_folders(self):
+        self.assertEqual(['foo', 'bar', 'baz'], split_path('foo/bar/baz'))
+
+    def test_initial_slash_is_ignored(self):
+        self.assertEqual(['foo', 'bar', 'baz'], split_path('/foo/bar/baz'))
+
+    def test_only_slash(self):
+        self.assertEqual([], split_path('/'))
 
 
 class FindFilesTest(unittest.TestCase):
