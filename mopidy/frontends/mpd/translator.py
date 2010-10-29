@@ -116,18 +116,25 @@ def tracks_to_tag_cache_format(tracks):
         ('fs_charset', protocol.ENCODING),
         ('info_end',)
     ]
+    _add_to_tag_cache(result, *tracks_to_directory_tree(tracks))
+    return result
+
+def _add_to_tag_cache(result, folders, files):
+    for name, entry in folders.items():
+        result.append(('begin', name))
+        _add_to_tag_cache(result, *entry)
+        result.append(('end', name))
 
     result.append(('songList begin',))
-    for track in tracks:
+    for track in files:
         result.extend(track_to_mpd_format(track, key=True))
     result.append(('songList end',))
-
-    return result
 
 def tracks_to_directory_tree(tracks):
     directories = ({}, [])
     for track in tracks:
-        folder = os.path.dirname(uri_to_path(track.uri))
+        uri = uri_to_mpd_relative_path(track.uri)
+        folder = os.path.dirname(uri_to_path(uri))
         current = directories
         for part in split_path(folder):
             if part not in current[0]:

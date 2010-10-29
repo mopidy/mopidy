@@ -137,6 +137,14 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
                 return result[1:i], result[i+1:]
         self.fail("Couldn't find songList end in result")
 
+    def consume_directory(self, result):
+        self.assertEqual('begin', result[0][0])
+        directory = result[0][1]
+        for i, row in enumerate(result):
+            if row == ('end', directory):
+                return result[1:i], result[i+1:]
+        self.fail("Couldn't find end %s in result" % directory)
+
     def test_empty_tag_cache_has_header(self):
         result = translator.tracks_to_tag_cache_format([])
         result = self.consume_headers(result)
@@ -174,6 +182,16 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         self.assertEqual(song_list, formated)
         self.assertEqual(len(result), 0)
 
+    def test_tag_cache_suports_directories(self):
+        track = Track(uri='file:///dir/subdir/folder/song.mp3')
+        formated = translator.track_to_mpd_format(track, key=True)
+        result = translator.tracks_to_tag_cache_format([track])
+
+        result = self.consume_headers(result)
+        directory, result = self.consume_directory(result)
+        song_list, result = self.consume_song_list(directory)
+
+        self.assertEqual(song_list, formated)
 
 class TracksToDirectoryTreeTest(unittest.TestCase):
     def setUp(self):
