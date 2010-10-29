@@ -5,6 +5,8 @@ from mopidy import settings
 from mopidy.frontends.mpd import protocol
 from mopidy.utils.path import path_to_uri, uri_to_path, split_path
 
+stat = os.stat
+
 def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False):
     """
     Format track for output to MPD client.
@@ -40,7 +42,7 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
     if key and track.uri:
         result.insert(0, ('key', os.path.basename(track.uri)))
     if mtime and track.uri:
-        mtime = os.stat(uri_to_path(track.uri)).st_mtime
+        mtime = stat(uri_to_path(track.uri)).st_mtime
         result.append(('mtime', int(mtime)))
     return result
 
@@ -127,7 +129,7 @@ def _add_to_tag_cache(result, folders, files):
 
     result.append(('songList begin',))
     for track in files:
-        result.extend(track_to_mpd_format(track, key=True))
+        result.extend(track_to_mpd_format(track, key=True, mtime=True))
     result.append(('songList end',))
 
 def tracks_to_directory_tree(tracks):

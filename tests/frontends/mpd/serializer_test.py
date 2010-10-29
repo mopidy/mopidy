@@ -1,4 +1,5 @@
 import datetime as dt
+import os
 import unittest
 
 from mopidy import settings
@@ -7,12 +8,21 @@ from mopidy.models import Album, Artist, Playlist, Track
 
 from tests import data_folder, SkipTest
 
+def fake_stat(path):
+    class StatResult(object):
+        def __getattr__(self, key):
+            assert key == 'st_mtime', key
+            return 1234567
+    return StatResult()
+
 class TrackMpdFormatTest(unittest.TestCase):
     def setUp(self):
         settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
+        translator.stat = fake_stat
 
     def tearDown(self):
         settings.runtime.clear()
+        translator.stat = os.stat
 
     def test_track_to_mpd_format_for_empty_track(self):
         result = translator.track_to_mpd_format(Track())
@@ -46,8 +56,7 @@ class TrackMpdFormatTest(unittest.TestCase):
     def test_track_to_mpd_format_with_mtime(self):
         uri = translator.path_to_uri(data_folder('blank.mp3'))
         result = translator.track_to_mpd_format(Track(uri=uri), mtime=True)
-        print result
-        self.assert_(('mtime', 1288125516) in result)
+        self.assert_(('mtime', 1234567) in result)
 
     def test_track_to_mpd_format_track_uses_uri_to_mpd_relative_path(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
@@ -117,11 +126,14 @@ class UriToMpdRelativePathTest(unittest.TestCase):
 
 
 class TracksToTagCacheFormatTest(unittest.TestCase):
+
     def setUp(self):
         settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
+        translator.stat = fake_stat
 
     def tearDown(self):
         settings.runtime.clear()
+        translator.stat = os.stat
 
     def consume_headers(self, result):
         self.assertEqual(('info_begin',), result[0])
@@ -173,7 +185,18 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_has_formated_track(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
-        formated = translator.track_to_mpd_format(track, key=True)
+        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
+        result = translator.tracks_to_tag_cache_format([track])
+
+        result = self.consume_headers(result)
+        song_list, result = self.consume_song_list(result)
+
+        self.assertEqual(song_list, formated)
+        self.assertEqual(len(result), 0)
+
+    def test_tag_cache_has_formated_track_with_key_and_mtime(self):
+        track = Track(uri='file:///dir/subdir/song.mp3')
+        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
@@ -184,7 +207,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_suports_directories(self):
         track = Track(uri='file:///dir/subdir/folder/song.mp3')
-        formated = translator.track_to_mpd_format(track, key=True)
+        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
@@ -199,7 +222,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_suports_sub_directories(self):
         track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
-        formated = translator.track_to_mpd_format(track, key=True)
+        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
@@ -225,8 +248,8 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         ]
 
         formated = []
-        formated.extend(translator.track_to_mpd_format(tracks[0], key=True))
-        formated.extend(translator.track_to_mpd_format(tracks[1], key=True))
+        formated.extend(translator.track_to_mpd_format(tracks[0], key=True, mtime=True))
+        formated.extend(translator.track_to_mpd_format(tracks[1], key=True, mtime=True))
 
         result = translator.tracks_to_tag_cache_format(tracks)
 
@@ -243,8 +266,8 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         ]
 
         formated = []
-        formated.append(translator.track_to_mpd_format(tracks[0], key=True))
-        formated.append(translator.track_to_mpd_format(tracks[1], key=True))
+        formated.append(translator.track_to_mpd_format(tracks[0], key=True, mtime=True))
+        formated.append(translator.track_to_mpd_format(tracks[1], key=True, mtime=True))
 
         result = translator.tracks_to_tag_cache_format(tracks)
 
