@@ -132,3 +132,6 @@ class FindFilesTest(unittest.TestCase):
         files = self.find('blank.mp3')
         self.assertEqual(len(files), 1)
         self.assert_(files[0], data_folder('blank.mp3'))
+
+    def test_expanduser(self):
+        raise SkipTest

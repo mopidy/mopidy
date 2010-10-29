@@ -46,6 +46,7 @@ def split_path(path):
     return parts
 
 def find_files(path):
+    path = os.path.expanduser(path)
     if os.path.isfile(path):
         yield os.path.abspath(path)
     else:
