@@ -1,4 +1,8 @@
+import re
+
+from mopidy import settings
 from mopidy.frontends.mpd import protocol
+from mopidy.utils.path import path_to_uri
 
 def track_to_mpd_format(track, position=None, cpid=None):
     """
@@ -74,6 +78,10 @@ def playlist_to_mpd_format(playlist, *args, **kwargs):
     Arguments as for :func:`tracks_to_mpd_format`, except the first one.
     """
     return tracks_to_mpd_format(playlist.tracks, *args, **kwargs)
+
+def uri_to_mpd_relative_path(uri):
+    path = path_to_uri(settings.LOCAL_MUSIC_FOLDER)
+    return re.sub('^' + re.escape(path), '', uri)
 
 def tracks_to_tag_cache_format(tracks):
     result = [

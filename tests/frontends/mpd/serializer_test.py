@@ -1,6 +1,7 @@
 import datetime as dt
 import unittest
 
+from mopidy import settings
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
@@ -59,6 +60,19 @@ class PlaylistMpdFormatTest(unittest.TestCase):
         self.assertEqual(dict(result[0])['Track'], 2)
 
 
+class UriToMpdRelativePathTest(unittest.TestCase):
+    def setUp(self):
+        settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
+
+    def tearDown(self):
+        settings.runtime.clear()
+
+    def test_file_gets_stripped(self):
+        uri = 'file:///dir/subdir/music/album/song.mp3'
+        result = translator.uri_to_mpd_relative_path(uri)
+        self.assertEqual('/music/album/song.mp3', result)
+
+
 class TracksToTagCacheFormatTest(unittest.TestCase):
     header_length = 4
 
@@ -75,4 +89,3 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         self.assert_(('songList begin',) in result)
         self.assert_(('songList end',) in result)
         self.assertEqual(len(result), self.header_length+2)
-
