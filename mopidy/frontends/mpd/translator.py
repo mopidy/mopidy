@@ -80,10 +80,24 @@ def playlist_to_mpd_format(playlist, *args, **kwargs):
     return tracks_to_mpd_format(playlist.tracks, *args, **kwargs)
 
 def uri_to_mpd_relative_path(uri):
+    """
+    Strip uri and LOCAL_MUSIC_FOLDER part of uri.
+
+    :param uri: the uri
+    :type uri: string
+    :rtype: string
+    """
     path = path_to_uri(settings.LOCAL_MUSIC_FOLDER)
     return re.sub('^' + re.escape(path), '', uri)
 
 def tracks_to_tag_cache_format(tracks):
+    """
+    Format list of tracks for output to MPD tag cache
+
+    :param tracks: the tracks
+    :type tracks: list of :class:`mopidy.models.Track`
+    :rtype: list of lists of two-tuples
+    """
     result = [
         ('info_begin',),
         ('mpd_version', protocol.VERSION),
