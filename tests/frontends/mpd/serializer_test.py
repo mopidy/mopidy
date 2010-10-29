@@ -36,6 +36,10 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Pos', 1) in result)
         self.assert_(('Id', 2) in result)
 
+    def test_mpd_format_with_key(self):
+        result = translator.track_to_mpd_format(Track(), key='file.mp3')
+        self.assert_(('key', 'file.mp3') in result)
+
     def test_mpd_format_track_uses_uri_to_mpd_relative_path(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
         path = dict(translator.track_to_mpd_format(track))['file']

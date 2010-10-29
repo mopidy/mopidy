@@ -1,10 +1,11 @@
+import os
 import re
 
 from mopidy import settings
 from mopidy.frontends.mpd import protocol
 from mopidy.utils.path import path_to_uri
 
-def track_to_mpd_format(track, position=None, cpid=None):
+def track_to_mpd_format(track, position=None, cpid=None, key=None):
     """
     Format track for output to MPD client.
 
@@ -32,6 +33,8 @@ def track_to_mpd_format(track, position=None, cpid=None):
     if position is not None and cpid is not None:
         result.append(('Pos', position))
         result.append(('Id', cpid))
+    if key is not None:
+        result.insert(0, ('key', key))
     return result
 
 def track_artists_to_mpd_format(track):
