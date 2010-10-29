@@ -115,36 +115,53 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
     def tearDown(self):
         settings.runtime.clear()
 
-    def check_headers(self, result):
-        self.assert_(('info_begin',) in result)
-        self.assert_(('mpd_version', protocol.VERSION) in result)
-        self.assert_(('fs_charset', protocol.ENCODING) in result)
-        self.assert_(('info_end',) in result)
+    def consume_headers(self, result):
+        self.assertEqual(('info_begin',), result[0])
+        self.assertEqual(('mpd_version', protocol.VERSION), result[1])
+        self.assertEqual(('fs_charset', protocol.ENCODING), result[2])
+        self.assertEqual(('info_end',), result[3])
         return result[4:]
 
-    def check_song_list(self, result):
+    def consume_song_list(self, result):
         self.assertEqual(('songList begin',), result[0])
-        self.assertEqual(('songList end',), result[-1])
-        return result[1:-1]
+        for i, row in enumerate(result):
+            if row == ('songList end',):
+                return result[1:i], result[i+1:]
+        self.fail("Couldn't find songList end in result")
 
-    def test_empty_tag_cache(self):
+    def test_empty_tag_cache_has_header(self):
         result = translator.tracks_to_tag_cache_format([])
-        result = self.check_headers(result)
-        result = self.check_song_list(result)
+        result = self.consume_headers(result)
+
+    def test_empty_tag_cache_has_song_list(self):
+        result = translator.tracks_to_tag_cache_format([])
+        result = self.consume_headers(result)
+        song_list, result = self.consume_song_list(result)
+
+        self.assertEqual(len(song_list), 0)
         self.assertEqual(len(result), 0)
 
-    def test_simple_tag_cache_has_header(self):
+    def test_tag_cache_has_header(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
         result = translator.tracks_to_tag_cache_format([track])
-        result = self.check_headers(result)
-        result = self.check_song_list(result)
+        result = self.consume_headers(result)
 
-    def test_simple_tag_cache_has_formated_track(self):
+    def test_tag_cache_has_song_list(self):
+        track = Track(uri='file:///dir/subdir/song.mp3')
+        result = translator.tracks_to_tag_cache_format([track])
+        result = self.consume_headers(result)
+        song_list, result = self.consume_song_list(result)
+
+        self.assert_(song_list)
+        self.assertEqual(len(result), 0)
+
+    def test_tag_cache_has_formated_track(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
         formated = translator.track_to_mpd_format(track, key=True)
-
         result = translator.tracks_to_tag_cache_format([track])
-        result = self.check_headers(result)
-        result = self.check_song_list(result)
 
-        self.assertEqual(result, formated)
+        result = self.consume_headers(result)
+        song_list, result = self.consume_song_list(result)
+
+        self.assertEqual(song_list, formated)
+        self.assertEqual(len(result), 0)
