@@ -87,6 +87,8 @@ def uri_to_mpd_relative_path(uri):
     :type uri: string
     :rtype: string
     """
+    if uri is None:
+        return ''
     path = path_to_uri(settings.LOCAL_MUSIC_FOLDER)
     return re.sub('^' + re.escape(path), '', uri)
 

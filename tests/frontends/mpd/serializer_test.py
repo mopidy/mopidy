@@ -67,6 +67,11 @@ class UriToMpdRelativePathTest(unittest.TestCase):
     def tearDown(self):
         settings.runtime.clear()
 
+    def test_none_file_returns_empty_string(self):
+        uri = 'file:///dir/subdir/music/album/song.mp3'
+        result = translator.uri_to_mpd_relative_path(None)
+        self.assertEqual('', result)
+
     def test_file_gets_stripped(self):
         uri = 'file:///dir/subdir/music/album/song.mp3'
         result = translator.uri_to_mpd_relative_path(uri)
