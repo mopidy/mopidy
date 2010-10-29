@@ -1,3 +1,5 @@
+from mopidy.frontends.mpd import protocol
+
 def track_to_mpd_format(track, position=None, cpid=None):
     """
     Format track for output to MPD client.
@@ -72,3 +74,16 @@ def playlist_to_mpd_format(playlist, *args, **kwargs):
     Arguments as for :func:`tracks_to_mpd_format`, except the first one.
     """
     return tracks_to_mpd_format(playlist.tracks, *args, **kwargs)
+
+def tracks_to_tag_cache_format(tracks):
+    result = [
+        ('info_begin',),
+        ('mpd_version', protocol.VERSION),
+        ('fs_charset', protocol.ENCODING),
+        ('info_end',)
+    ]
+
+    result.append(('songList begin',))
+    result.append(('songList end',))
+
+    return result

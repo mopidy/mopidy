@@ -1,7 +1,7 @@
 import datetime as dt
 import unittest
 
-from mopidy.frontends.mpd import translator
+from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
 class TrackMpdFormatTest(unittest.TestCase):
@@ -57,3 +57,22 @@ class PlaylistMpdFormatTest(unittest.TestCase):
         result = translator.playlist_to_mpd_format(playlist, 1, 2)
         self.assertEqual(len(result), 1)
         self.assertEqual(dict(result[0])['Track'], 2)
+
+
+class TracksToTagCacheFormatTest(unittest.TestCase):
+    header_length = 4
+
+    def check_headers(self, result):
+        self.assert_(('info_begin',) in result)
+        self.assert_(('mpd_version', protocol.VERSION) in result)
+        self.assert_(('fs_charset', protocol.ENCODING) in result)
+        self.assert_(('info_end',) in result)
+
+    def test_empty_tag_cache(self):
+        result = translator.tracks_to_tag_cache_format([])
+        self.check_headers(result)
+
+        self.assert_(('songList begin',) in result)
+        self.assert_(('songList end',) in result)
+        self.assertEqual(len(result), self.header_length+2)
+
