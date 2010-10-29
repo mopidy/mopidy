@@ -33,8 +33,8 @@ def track_to_mpd_format(track, position=None, cpid=None, key=None):
     if position is not None and cpid is not None:
         result.append(('Pos', position))
         result.append(('Id', cpid))
-    if key is not None:
-        result.insert(0, ('key', key))
+    if key and track.uri:
+        result.insert(0, ('key', os.path.basename(track.uri)))
     return result
 
 def track_artists_to_mpd_format(track):
@@ -111,6 +111,8 @@ def tracks_to_tag_cache_format(tracks):
     ]
 
     result.append(('songList begin',))
+    for track in tracks:
+        result.extend(track_to_mpd_format(track, key=True))
     result.append(('songList end',))
 
     return result

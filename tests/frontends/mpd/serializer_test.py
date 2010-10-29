@@ -37,7 +37,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Id', 2) in result)
 
     def test_track_to_mpd_format_with_key(self):
-        result = translator.track_to_mpd_format(Track(), key='file.mp3')
+        track = Track(uri='file:///dir/subdir/file.mp3')
+        result = translator.track_to_mpd_format(track, key=True)
         self.assert_(('key', 'file.mp3') in result)
 
     def test_track_to_mpd_format_track_uses_uri_to_mpd_relative_path(self):
@@ -137,16 +138,13 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         result = translator.tracks_to_tag_cache_format([track])
         result = self.check_headers(result)
         result = self.check_song_list(result)
-        self.assertEqual(len(result), 0)
 
-    def test_simple_tag_cache_has_header(self):
+    def test_simple_tag_cache_has_formated_track(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
-        formated = translator.track_to_mpd_format(track)
-        formated.insert(0, ('key', 'song.mp3'))
+        formated = translator.track_to_mpd_format(track, key=True)
 
         result = translator.tracks_to_tag_cache_format([track])
         result = self.check_headers(result)
         result = self.check_song_list(result)
 
-        for a, b in zip(result, formated):
-            self.assertEqual(a, b)
+        self.assertEqual(result, formated)
