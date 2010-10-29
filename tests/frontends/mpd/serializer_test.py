@@ -23,6 +23,19 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Date', '') in result)
         self.assertEqual(len(result), 7)
 
+    def test_mpd_format_with_position(self):
+        result = translator.track_to_mpd_format(Track(), position=1)
+        self.assert_(('Pos', 1) not in result)
+
+    def test_mpd_format_with_cpid(self):
+        result = translator.track_to_mpd_format(Track(), cpid=1)
+        self.assert_(('Id', 1) not in result)
+
+    def test_mpd_format_with_position_and_cpid(self):
+        result = translator.track_to_mpd_format(Track(), position=1, cpid=2)
+        self.assert_(('Pos', 1) in result)
+        self.assert_(('Id', 2) in result)
+
     def test_mpd_format_track_uses_uri_to_mpd_relative_path(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
         path = dict(translator.track_to_mpd_format(track))['file']
@@ -91,18 +104,45 @@ class UriToMpdRelativePathTest(unittest.TestCase):
 
 
 class TracksToTagCacheFormatTest(unittest.TestCase):
-    header_length = 4
+    def setUp(self):
+        settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
+
+    def tearDown(self):
+        settings.runtime.clear()
 
     def check_headers(self, result):
         self.assert_(('info_begin',) in result)
         self.assert_(('mpd_version', protocol.VERSION) in result)
         self.assert_(('fs_charset', protocol.ENCODING) in result)
         self.assert_(('info_end',) in result)
+        return result[4:]
+
+    def check_song_list(self, result):
+        self.assertEqual(('songList begin',), result[0])
+        self.assertEqual(('songList end',), result[-1])
+        return result[1:-1]
 
     def test_empty_tag_cache(self):
         result = translator.tracks_to_tag_cache_format([])
-        self.check_headers(result)
+        result = self.check_headers(result)
+        result = self.check_song_list(result)
+        self.assertEqual(len(result), 0)
 
-        self.assert_(('songList begin',) in result)
-        self.assert_(('songList end',) in result)
-        self.assertEqual(len(result), self.header_length+2)
+    def test_simple_tag_cache_has_header(self):
+        track = Track(uri='file:///dir/subdir/song.mp3')
+        result = translator.tracks_to_tag_cache_format([track])
+        result = self.check_headers(result)
+        result = self.check_song_list(result)
+        self.assertEqual(len(result), 0)
+
+    def test_simple_tag_cache_has_header(self):
+        track = Track(uri='file:///dir/subdir/song.mp3')
+        formated = translator.track_to_mpd_format(track)
+        formated.insert(0, ('key', 'song.mp3'))
+
+        result = translator.tracks_to_tag_cache_format([track])
+        result = self.check_headers(result)
+        result = self.check_song_list(result)
+
+        for a, b in zip(result, formated):
+            self.assertEqual(a, b)
