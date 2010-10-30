@@ -49,13 +49,17 @@ def find_files(path):
     path = os.path.expanduser(path)
     if os.path.isfile(path):
         filename = os.path.abspath(path)
-        yield filename.decode('utf-8')
+        if not isinstance(filename, unicode):
+            filename = filename.decode('utf-8')
+        yield filename
     else:
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 dirpath = os.path.abspath(dirpath)
                 filename = os.path.join(dirpath, filename)
-                yield filename.decode('utf-8')
+                if not isinstance(filename, unicode):
+                    filename = filename.decode('utf-8')
+                yield filename
 
 class Mtime(object):
     def __init__(self):

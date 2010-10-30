@@ -147,7 +147,7 @@ def _add_to_tag_cache(result, folders, files):
 def tracks_to_directory_tree(tracks):
     directories = ({}, [])
     for track in tracks:
-        path = ''
+        path = u''
         current = directories
 
         local_folder = os.path.expanduser(settings.LOCAL_MUSIC_FOLDER)

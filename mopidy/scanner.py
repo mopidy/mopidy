@@ -83,7 +83,7 @@ class Scanner(object):
     def process_tags(self, bus, message):
         data = message.parse_tag()
         data = dict([(k, data[k]) for k in data.keys()])
-        data['uri'] = self.uribin.get_property('uri')
+        data['uri'] = unicode(self.uribin.get_property('uri'))
         data['duration'] = self.get_duration()
         self.data_callback(data)
         self.next_uri()
