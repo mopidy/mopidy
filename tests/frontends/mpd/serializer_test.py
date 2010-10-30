@@ -74,7 +74,8 @@ class TrackMpdFormatTest(unittest.TestCase):
             uri=u'a uri',
             artists=[Artist(name=u'an artist')],
             name=u'a name',
-            album=Album(name=u'an album', num_tracks=13),
+            album=Album(name=u'an album', num_tracks=13,
+                artists=[Artist(name=u'an other artist')]),
             track_no=7,
             date=dt.date(1977, 1, 1),
             length=137000,
@@ -85,11 +86,12 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Artist', 'an artist') in result)
         self.assert_(('Title', 'a name') in result)
         self.assert_(('Album', 'an album') in result)
+        self.assert_(('AlbumArtist', 'an other artist') in result)
         self.assert_(('Track', '7/13') in result)
         self.assert_(('Date', dt.date(1977, 1, 1)) in result)
         self.assert_(('Pos', 9) in result)
         self.assert_(('Id', 122) in result)
-        self.assertEqual(len(result), 9)
+        self.assertEqual(len(result), 10)
 
     def test_artists_to_mpd_format(self):
         artists = [Artist(name=u'ABBA'), Artist(name=u'Beatles')]

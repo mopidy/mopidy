@@ -36,6 +36,9 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
             track.track_no, track.album.num_tracks)))
     else:
         result.append(('Track', track.track_no))
+    if track.album is not None and track.album.artists:
+        artists = artists_to_mpd_format(track.album.artists)
+        result.append(('AlbumArtist', artists))
     if position is not None and cpid is not None:
         result.append(('Pos', position))
         result.append(('Id', cpid))
