@@ -19,6 +19,7 @@ class TranslatorTest(unittest.TestCase):
             'album': u'albumname',
             'track-number': 1,
             'artist': u'name',
+            'album-artist': 'albumartistname',
             'title': u'trackname',
             'track-count': 2,
             'date': FakeGstDate(2006, 1, 1,),
@@ -35,6 +36,10 @@ class TranslatorTest(unittest.TestCase):
             'name': 'name',
         }
 
+        self.albumartist = {
+            'name': 'albumartistname',
+        }
+
         self.track = {
             'uri': 'uri',
             'name': 'trackname',
@@ -44,6 +49,8 @@ class TranslatorTest(unittest.TestCase):
         }
 
     def build_track(self):
+        if self.albumartist:
+            self.album['artists'] = [Artist(**self.albumartist)]
         self.track['album'] = Album(**self.album)
         self.track['artists'] = [Artist(**self.artist)]
         return Track(**self.track)
@@ -79,6 +86,11 @@ class TranslatorTest(unittest.TestCase):
     def test_missing_artist_name(self):
         del self.data['artist']
         del self.artist['name']
+        self.check()
+
+    def test_missing_album_artist(self):
+        del self.data['album-artist']
+        del self.albumartist['name']
         self.check()
 
     def test_missing_date(self):

@@ -14,6 +14,7 @@ from mopidy.utils.path import path_to_uri, find_files
 from mopidy.models import Track, Artist, Album
 
 def translator(data):
+    albumartist_kwargs = {}
     album_kwargs = {}
     artist_kwargs = {}
     track_kwargs = {}
@@ -37,6 +38,12 @@ def translator(data):
 
     if 'track-number' in data:
         track_kwargs['track_no'] = data['track-number']
+
+    if 'album-artist' in data:
+        albumartist_kwargs['name'] = data['album-artist']
+
+    if albumartist_kwargs:
+        album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
     track_kwargs['uri'] = data['uri']
     track_kwargs['length'] = data['duration']
