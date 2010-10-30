@@ -3,26 +3,20 @@ import os
 import unittest
 
 from mopidy import settings
+from mopidy.utils.path import mtime
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
 from tests import data_folder, SkipTest
 
-def fake_mtime(path):
-    class StatResult(object):
-        def __getattr__(self, key):
-            assert key == 'st_mtime', key
-            return 1234567
-    return StatResult()
-
 class TrackMpdFormatTest(unittest.TestCase):
     def setUp(self):
         settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
-        translator.stat = fake_mtime
+        mtime.set_fake_time(1234567)
 
     def tearDown(self):
         settings.runtime.clear()
-        translator.stat = os.stat
+        mtime.undo_fake()
 
     def test_track_to_mpd_format_for_empty_track(self):
         result = translator.track_to_mpd_format(Track())
@@ -136,11 +130,11 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def setUp(self):
         settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
-        translator.stat = fake_mtime
+        mtime.set_fake_time(1234567)
 
     def tearDown(self):
         settings.runtime.clear()
-        translator.stat = os.stat
+        mtime.undo_fake()
 
     def consume_headers(self, result):
         self.assertEqual(('info_begin',), result[0])
@@ -158,7 +152,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def consume_directory(self, result):
         self.assertEqual('directory', result[0][0])
-        self.assertEqual(('mtime', fake_mtime('').st_mtime), result[1])
+        self.assertEqual(('mtime', mtime('.')), result[1])
         self.assertEqual(('begin', os.path.split(result[0][1])[1]), result[2])
         directory = result[2][1]
         for i, row in enumerate(result):
@@ -238,7 +232,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         folder, result = self.consume_directory(result)
 
         self.assertEqual(('directory', 'folder/sub'), folder[0])
-        self.assertEqual(('mtime', fake_mtime('').st_mtime), folder[1])
+        self.assertEqual(('mtime', mtime('.')), folder[1])
         self.assertEqual(('begin', 'sub'), folder[2])
 
     def test_tag_cache_suports_sub_directories(self):

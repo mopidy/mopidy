@@ -2,10 +2,9 @@ import os
 import re
 
 from mopidy import settings
+from mopidy.utils.path import mtime as get_mtime
 from mopidy.frontends.mpd import protocol
 from mopidy.utils.path import path_to_uri, uri_to_path, split_path
-
-stat = os.stat
 
 def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False):
     """
@@ -45,8 +44,7 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
     if key and track.uri:
         result.insert(0, ('key', os.path.basename(uri_to_path(track.uri))))
     if mtime and track.uri:
-        mtime = stat(uri_to_path(track.uri)).st_mtime
-        result.append(('mtime', int(mtime)))
+        result.append(('mtime', get_mtime(uri_to_path(track.uri))))
     return result
 
 def artists_to_mpd_format(artists):
@@ -127,7 +125,7 @@ def _add_to_tag_cache(result, folders, files):
     for path, entry in folders.items():
         name = os.path.split(path)[1]
         result.append(('directory', path))
-        result.append(('mtime', stat(name).st_mtime))
+        result.append(('mtime', get_mtime(name)))
         result.append(('begin', name))
         _add_to_tag_cache(result, *entry)
         result.append(('end', name))
