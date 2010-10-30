@@ -23,7 +23,7 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
     :rtype: list of two-tuples
     """
     result = [
-        ('file', uri_to_mpd_relative_path(track.uri) or ''),
+        ('file', track.uri or ''),
         ('Time', track.length and (track.length // 1000) or 0),
         ('Artist', artists_to_mpd_format(track.artists)),
         ('Title', track.name or ''),
@@ -91,19 +91,6 @@ def playlist_to_mpd_format(playlist, *args, **kwargs):
     """
     return tracks_to_mpd_format(playlist.tracks, *args, **kwargs)
 
-def uri_to_mpd_relative_path(uri):
-    """
-    Strip uri and LOCAL_MUSIC_FOLDER part of uri.
-
-    :param uri: the uri
-    :type uri: string
-    :rtype: string
-    """
-    if uri is None:
-        return ''
-    path = path_to_uri(settings.LOCAL_MUSIC_FOLDER)
-    return re.sub('^' + re.escape(path), '', uri)
-
 def tracks_to_tag_cache_format(tracks):
     """
     Format list of tracks for output to MPD tag cache
@@ -138,7 +125,7 @@ def _add_to_tag_cache(result, folders, files):
 def tracks_to_directory_tree(tracks):
     directories = ({}, [])
     for track in tracks:
-        uri = uri_to_mpd_relative_path(track.uri)
+        uri = track.uri
         path = ''
         current = directories
         for part in split_path(os.path.dirname(uri_to_path(uri))):

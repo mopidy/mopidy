@@ -57,12 +57,6 @@ class TrackMpdFormatTest(unittest.TestCase):
         result = translator.track_to_mpd_format(Track(uri=uri), mtime=True)
         self.assert_(('mtime', 1234567) in result)
 
-    def test_track_to_mpd_format_track_uses_uri_to_mpd_relative_path(self):
-        track = Track(uri='file:///dir/subdir/song.mp3')
-        path = dict(translator.track_to_mpd_format(track))['file']
-        correct_path = translator.uri_to_mpd_relative_path(track.uri)
-        self.assertEqual(path, correct_path)
-
     def test_track_to_mpd_format_for_nonempty_track(self):
         track = Track(
             uri=u'a uri',
@@ -108,26 +102,7 @@ class PlaylistMpdFormatTest(unittest.TestCase):
         self.assertEqual(dict(result[0])['Track'], 2)
 
 
-class UriToMpdRelativePathTest(unittest.TestCase):
-    def setUp(self):
-        settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
-
-    def tearDown(self):
-        settings.runtime.clear()
-
-    def test_none_file_returns_empty_string(self):
-        uri = 'file:///dir/subdir/music/album/song.mp3'
-        result = translator.uri_to_mpd_relative_path(None)
-        self.assertEqual('', result)
-
-    def test_file_gets_stripped(self):
-        uri = 'file:///dir/subdir/music/album/song.mp3'
-        result = translator.uri_to_mpd_relative_path(uri)
-        self.assertEqual('/music/album/song.mp3', result)
-
-
 class TracksToTagCacheFormatTest(unittest.TestCase):
-
     def setUp(self):
         settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
         mtime.set_fake_time(1234567)
@@ -300,7 +275,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
 class TracksToDirectoryTreeTest(unittest.TestCase):
     def setUp(self):
-        settings.LOCAL_MUSIC_FOLDER = '/'
+        settings.LOCAL_MUSIC_FOLDER = '/root/'
 
     def tearDown(self):
         settings.runtime.clear()
@@ -311,32 +286,32 @@ class TracksToDirectoryTreeTest(unittest.TestCase):
 
     def test_top_level_files(self):
         tracks = [
-            Track(uri='file:///file1.mp3'),
-            Track(uri='file:///file2.mp3'),
-            Track(uri='file:///file3.mp3'),
+            Track(uri='file:///root/file1.mp3'),
+            Track(uri='file:///root/file2.mp3'),
+            Track(uri='file:///root/file3.mp3'),
         ]
         tree = translator.tracks_to_directory_tree(tracks)
         self.assertEqual(tree, ({}, tracks))
 
     def test_single_file_in_subdir(self):
-        tracks = [Track(uri='file:///dir/file1.mp3')]
+        tracks = [Track(uri='file:///root/dir/file1.mp3')]
         tree = translator.tracks_to_directory_tree(tracks)
         expected = ({'dir': ({}, tracks)}, [])
         self.assertEqual(tree, expected)
 
     def test_single_file_in_sub_subdir(self):
-        tracks = [Track(uri='file:///dir1/dir2/file1.mp3')]
+        tracks = [Track(uri='file:///root/dir1/dir2/file1.mp3')]
         tree = translator.tracks_to_directory_tree(tracks)
         expected = ({'dir1': ({'dir1/dir2': ({}, tracks)}, [])}, [])
         self.assertEqual(tree, expected)
 
     def test_complex_file_structure(self):
         tracks = [
-            Track(uri='file:///file1.mp3'),
-            Track(uri='file:///dir1/file2.mp3'),
-            Track(uri='file:///dir1/file3.mp3'),
-            Track(uri='file:///dir2/file4.mp3'),
-            Track(uri='file:///dir2/sub/file5.mp3'),
+            Track(uri='file:///root/file1.mp3'),
+            Track(uri='file:///root/dir1/file2.mp3'),
+            Track(uri='file:///root/dir1/file3.mp3'),
+            Track(uri='file:///root/dir2/file4.mp3'),
+            Track(uri='file:///root/dir2/sub/file5.mp3'),
         ]
         tree = translator.tracks_to_directory_tree(tracks)
         expected = (
