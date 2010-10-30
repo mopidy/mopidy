@@ -1,6 +1,3 @@
-import gobject
-gobject.threads_init()
-
 import logging
 import multiprocessing
 
@@ -49,6 +46,13 @@ class MprisFrontend(BaseFrontend):
 
 
 class MprisFrontendThread(BaseThread):
+    """
+    A process for communicating with MPRIS clients.
+
+    This thread requires :class:`mopidy.utils.process.GObjectEventThread` to be
+    running too. This is not enforced in any way by the code.
+    """
+
     def __init__(self, core_queue, connection):
         super(MprisFrontendThread, self).__init__(core_queue)
         self.name = u'MprisFrontendThread'
@@ -63,10 +67,6 @@ class MprisFrontendThread(BaseThread):
 
     def run_inside_try(self):
         self.setup()
-        # TODO Move to another thread if we need to process messages
-        logger.debug(u'Starting GLib main loop')
-        loop = gobject.MainLoop()
-        loop.run()
         while True:
             self.connection.poll(None)
             message = self.connection.recv()
