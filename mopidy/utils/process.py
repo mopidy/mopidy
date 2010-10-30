@@ -4,6 +4,9 @@ import multiprocessing.dummy
 from multiprocessing.reduction import reduce_connection
 import pickle
 
+import gobject
+gobject.threads_init()
+
 from mopidy import SettingsError
 
 logger = logging.getLogger('mopidy.utils.process')
@@ -84,3 +87,25 @@ class BaseThread(multiprocessing.dummy.Process):
         self.core_queue.put({'to': 'core', 'command': 'exit',
             'status': status, 'reason': reason})
         self.destroy()
+
+
+class GObjectEventThread(BaseThread):
+    """
+    A GObject event loop which is shared by all Mopidy components that uses
+    libraries that need a GObject event loop, like GStreamer and D-Bus.
+
+    Should be started by Mopidy's core and used by
+    :mod:`mopidy.output.gstreamer`, :mod:`mopidy.frontend.mpris`, etc.
+    """
+
+    def __init__(self, core_queue):
+        super(GObjectEventThread, self).__init__(core_queue)
+        self.name = u'GObjectEventThread'
+        self.loop = None
+
+    def run_inside_try(self):
+        self.loop = gobject.MainLoop().run()
+
+    def destroy(self):
+        self.loop.quit()
+        super(GObjectEventThread, self).destroy()
