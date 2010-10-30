@@ -111,8 +111,10 @@ def tracks_to_tag_cache_format(tracks):
 def _add_to_tag_cache(result, folders, files):
     for path, entry in folders.items():
         name = os.path.split(path)[1]
+        music_folder = os.path.expanduser(settings.LOCAL_MUSIC_FOLDER)
+        mtime = get_mtime(os.path.join(music_folder, path))
         result.append(('directory', path))
-        result.append(('mtime', get_mtime(name)))
+        result.append(('mtime', mtime))
         result.append(('begin', name))
         _add_to_tag_cache(result, *entry)
         result.append(('end', name))
