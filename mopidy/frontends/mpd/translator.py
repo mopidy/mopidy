@@ -142,7 +142,6 @@ def tracks_to_directory_tree(tracks):
         current = directories
         for part in split_path(os.path.dirname(uri_to_path(uri))):
             path = os.path.join(path, part)
-            print path
             if path not in current[0]:
                 current[0][path] = ({}, [])
             current = current[0][path]
