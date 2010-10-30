@@ -125,10 +125,15 @@ def _add_to_tag_cache(result, folders, files):
 def tracks_to_directory_tree(tracks):
     directories = ({}, [])
     for track in tracks:
-        uri = track.uri
         path = ''
         current = directories
-        for part in split_path(os.path.dirname(uri_to_path(uri))):
+
+        local_folder = os.path.expanduser(settings.LOCAL_MUSIC_FOLDER)
+        track_path = uri_to_path(track.uri)
+        track_path = re.sub('^' + re.escape(local_folder), '', track_path)
+        track_dir = os.path.dirname(track_path)
+
+        for part in split_path(track_dir):
             path = os.path.join(path, part)
             if path not in current[0]:
                 current[0][path] = ({}, [])
