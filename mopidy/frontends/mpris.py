@@ -173,6 +173,7 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=properties_interface,
         in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
+        logger.debug(u'%s.Get called', self.properties_interface)
         getter, setter = self.properties[interface][prop]
         return getter() if callable(getter) else getter
 
@@ -189,6 +190,7 @@ class MprisObject(dbus.service.Object):
             props = player.GetAll('org.mpris.MediaPlayer2',
                 dbus_interface='org.freedesktop.DBus.Properties')
         """
+        logger.debug(u'%s.GetAll called', self.properties_interface)
         getters = {}
         for key, (getter, setter) in self.properties[interface].iteritems():
             getters[key] = getter() if callable(getter) else getter
@@ -197,6 +199,7 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=properties_interface,
         in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
+        logger.debug(u'%s.Set called', self.properties_interface)
         getter, setter = self.properties[interface][prop]
         if setter is not None:
             setter(value)
@@ -207,6 +210,8 @@ class MprisObject(dbus.service.Object):
             signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed_properties,
         invalidated_properties):
+        logger.debug(u'%s.PropertiesChanged signaled',
+            self.properties_interface)
         pass
 
 
@@ -214,6 +219,7 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=root_interface)
     def Raise(self):
+        logger.debug(u'%s.Raise called', self.root_interface)
         pass # We do not have a GUI
 
     @dbus.service.method(dbus_interface=root_interface)
@@ -227,6 +233,7 @@ class MprisObject(dbus.service.Object):
                 '/org/mpris/MediaPlayer2')
             player.Quit(dbus_interface='org.mpris.MediaPlayer2')
         """
+        logger.debug(u'%s.Quit called', self.root_interface)
         self.core_queue.put({'to': 'core', 'command': 'exit'})
 
 
@@ -234,11 +241,13 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=player_interface)
     def Next(self):
+        logger.debug(u'%s.Next called', self.player_interface)
         # TODO call playback.next(), keep playback.state unchanged
         pass
 
     @dbus.service.method(dbus_interface=player_interface)
     def OpenUri(self, uri):
+        logger.debug(u'%s.OpenUri called', self.player_interface)
         # TODO Pseudo code:
         # if uri.scheme not in SupportedUriSchemes: return
         # if uri.mime_type not in SupportedMimeTypes: return
@@ -249,11 +258,13 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=player_interface)
     def Pause(self):
+        logger.debug(u'%s.Pause called', self.player_interface)
         # TODO call playback.pause()
         pass
 
     @dbus.service.method(dbus_interface=player_interface)
     def Play(self):
+        logger.debug(u'%s.Play called', self.player_interface)
         # TODO Pseudo code:
         # if playback.state == playback.PAUSED: playback.resume()
         # elif playback.state == playback.STOPPED: playback.play()
@@ -261,6 +272,7 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=player_interface)
     def PlayPause(self):
+        logger.debug(u'%s.PlayPause called', self.player_interface)
         # TODO Pseudo code:
         # if playback.state == playback.PLAYING: playback.pause()
         # elif playback.state == playback.PAUSED: playback.resume()
@@ -269,11 +281,13 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=player_interface)
     def Previous(self):
+        logger.debug(u'%s.Previous called', self.player_interface)
         # TODO call playback.previous(), keep playback.state unchanged
         pass
 
     @dbus.service.method(dbus_interface=player_interface)
     def Seek(self, offset):
+        logger.debug(u'%s.Seek called', self.player_interface)
         # TODO Pseudo code:
         # new_position = playback.time_position + offset
         # if new_position > playback.current_track.length:
@@ -285,6 +299,7 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=player_interface)
     def SetPosition(self, track_id, position):
+        logger.debug(u'%s.SetPosition called', self.player_interface)
         # TODO Pseudo code:
         # if track_id != playback.current_track.track_id: return
         # if not 0 <= position <= playback.current_track.length: return
@@ -293,9 +308,11 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=player_interface)
     def Stop(self):
+        logger.debug(u'%s.Stop called', self.player_interface)
         # TODO call playback.stop()
         pass
 
     @dbus.service.signal(dbus_interface=player_interface, signature='x')
     def Seeked(self, position):
+        logger.debug(u'%s.Seeked signaled', self.player_interface)
         pass
