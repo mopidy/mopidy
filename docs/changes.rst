@@ -12,7 +12,8 @@ No description yet.
 
 **Changes**
 
-- None so far.
+- Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
+  application menus.
 
 
 0.2.0 (2010-10-24)

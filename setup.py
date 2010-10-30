@@ -69,6 +69,8 @@ for dirpath, dirnames, filenames in os.walk(project_dir):
         data_files.append([dirpath,
             [os.path.join(dirpath, f) for f in filenames]])
 
+data_files.append(('/usr/local/share/applications', ['data/mopidy.desktop']))
+
 setup(
     name='Mopidy',
     version=get_version(),
