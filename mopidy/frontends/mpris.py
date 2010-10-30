@@ -7,7 +7,8 @@ import multiprocessing
 try:
     import dbus
     import dbus.service
-    from dbus.mainloop.glib import DBusGMainLoop
+    from dbus.mainloop.glib import DBusGMainLoop, threads_init
+    threads_init()
 except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
