@@ -245,6 +245,13 @@ class MprisObject(dbus.service.Object):
         # TODO call playback.next(), keep playback.state unchanged
         pass
 
+        # XXX Proof of concept only. Throw away, write tests, reimplement:
+        self.core_queue.put({
+            'to': 'frontend',
+            'command': 'mpd_request',
+            'request': 'next',
+        })
+
     @dbus.service.method(dbus_interface=player_interface)
     def OpenUri(self, uri):
         logger.debug(u'%s.OpenUri called', self.player_interface)
@@ -273,17 +280,31 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=player_interface)
     def PlayPause(self):
         logger.debug(u'%s.PlayPause called', self.player_interface)
+
         # TODO Pseudo code:
         # if playback.state == playback.PLAYING: playback.pause()
         # elif playback.state == playback.PAUSED: playback.resume()
         # elif playback.state == playback.STOPPED: playback.play()
-        pass
+
+        # XXX Proof of concept only. Throw away, write tests, reimplement:
+        self.core_queue.put({
+            'to': 'frontend',
+            'command': 'mpd_request',
+            'request': 'play',
+        })
 
     @dbus.service.method(dbus_interface=player_interface)
     def Previous(self):
         logger.debug(u'%s.Previous called', self.player_interface)
+
         # TODO call playback.previous(), keep playback.state unchanged
-        pass
+
+        # XXX Proof of concept only. Throw away, write tests, reimplement:
+        self.core_queue.put({
+            'to': 'frontend',
+            'command': 'mpd_request',
+            'request': 'previous',
+        })
 
     @dbus.service.method(dbus_interface=player_interface)
     def Seek(self, offset):
