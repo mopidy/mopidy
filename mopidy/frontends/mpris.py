@@ -53,6 +53,7 @@ class MprisFrontendThread(BaseThread):
         super(MprisFrontendThread, self).__init__(core_queue)
         self.name = u'MprisFrontendThread'
         self.connection = connection
+        self.indicate_server = None
         self.dbus_objects = []
 
     def destroy(self):
@@ -62,6 +63,10 @@ class MprisFrontendThread(BaseThread):
 
     def run_inside_try(self):
         self.setup()
+        # TODO Move to another thread if we need to process messages
+        logger.debug(u'Starting GLib main loop')
+        loop = gobject.MainLoop()
+        loop.run()
         while True:
             self.connection.poll(None)
             message = self.connection.recv()
@@ -69,11 +74,27 @@ class MprisFrontendThread(BaseThread):
 
     def setup(self):
         self.dbus_objects.append(MprisObject(self.core_queue))
+        self.send_startup_notification()
 
-        # TODO Move to another thread if we need to process messages
-        logger.debug(u'Starting GLib main loop')
-        loop = gobject.MainLoop()
-        loop.run()
+    def send_startup_notification(self):
+        """
+        Send startup notification using libindicate to make Mopidy appear in
+        e.g. `Ubuntu's sound menu <https://wiki.ubuntu.com/SoundMenu>`_.
+
+        A reference to the libindicate server is kept for as long as Mopidy is
+        running. When Mopidy exits, the server will be unreferenced and Mopidy
+        will automatically be unregistered from e.g. the sound menu.
+        """
+        try:
+            import indicate
+            self.indicate_server = indicate.Server()
+            self.indicate_server.set_type('music.mopidy')
+            # FIXME Location of .desktop file shouldn't be hardcoded
+            self.indicate_server.set_desktop_file(
+                '/usr/local/share/applications/mopidy.desktop')
+            self.indicate_server.show()
+        except ImportError:
+            pass
 
     def process_message(self, message):
         pass # Ignore commands for other frontends
