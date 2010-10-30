@@ -42,7 +42,8 @@ class MpdFrontend(BaseFrontend):
             u'Message recipient must be "frontend".'
         if message['command'] == 'mpd_request':
             response = self.dispatcher.handle_request(message['request'])
-            connection = unpickle_connection(message['reply_to'])
-            connection.send(response)
+            if 'reply_to' in message:
+                connection = unpickle_connection(message['reply_to'])
+                connection.send(response)
         else:
             pass # Ignore messages for other frontends
