@@ -157,7 +157,7 @@ class MprisObject(dbus.service.Object):
         self.core_queue = core_queue
         logger.debug(u'Prepare the D-Bus main loop before connecting')
         DBusGMainLoop(set_as_default=True)
-        logger.info(u'Connecting to D-Bus')
+        logger.debug(u'Connecting to D-Bus: getting session bus')
         bus = dbus.SessionBus()
         logger.debug(u'Connecting to D-Bus: claiming service name')
         # FIXME We segfault at the next line 80% of the time
@@ -165,7 +165,7 @@ class MprisObject(dbus.service.Object):
         logger.debug(u'Connecting to D-Bus: registering service object')
         super(MprisObject, self).__init__(object_path=self.object_path,
             bus_name=bus_name)
-        logger.debug(u'Connecting to D-Bus: done')
+        logger.info(u'Connected to D-Bus')
 
 
     ### Property interface
