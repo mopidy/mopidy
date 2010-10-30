@@ -84,7 +84,7 @@ class MprisObject(dbus.service.Object):
 
     bus_name = 'org.mpris.MediaPlayer2.mopidy'
     object_path = '/org/mpris/MediaPlayer2'
-    property_interface = 'org.freedesktop.DBus.Properties'
+    properties_interface = 'org.freedesktop.DBus.Properties'
     root_interface = 'org.mpris.MediaPlayer2'
     player_interface = 'org.mpris.MediaPlayer2.Player'
     properties = {
@@ -149,13 +149,13 @@ class MprisObject(dbus.service.Object):
 
     ### Property interface
 
-    @dbus.service.method(dbus_interface=property_interface,
+    @dbus.service.method(dbus_interface=properties_interface,
         in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
         getter, setter = self.properties[interface][prop]
         return getter() if callable(getter) else getter
 
-    @dbus.service.method(dbus_interface=property_interface,
+    @dbus.service.method(dbus_interface=properties_interface,
         in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
         """
@@ -173,12 +173,20 @@ class MprisObject(dbus.service.Object):
             getters[key] = getter() if callable(getter) else getter
         return getters
 
-    @dbus.service.method(dbus_interface=property_interface,
+    @dbus.service.method(dbus_interface=properties_interface,
         in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
         getter, setter = self.properties[interface][prop]
         if setter is not None:
             setter(value)
+            self.PropertiesChanged(interface,
+                {prop: self.Get(interface, prop)}, [])
+
+    @dbus.service.signal(dbus_interface=properties_interface,
+            signature='sa{sv}as')
+    def PropertiesChanged(self, interface, changed_properties,
+        invalidated_properties):
+        pass
 
 
     ### Root interface
