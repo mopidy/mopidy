@@ -28,4 +28,4 @@ if __name__ == '__main__':
         if len(a) == 1:
             print a[0]
         else:
-            print u': '.join([unicode(b) for b in a])
+            print u': '.join([unicode(b) for b in a]).encode('utf-8')
