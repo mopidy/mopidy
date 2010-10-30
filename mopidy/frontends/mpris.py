@@ -94,12 +94,40 @@ class MprisObject(dbus.service.Object):
             'HasTrackList': (False, None),
             'Identity': ('Mopidy', None),
             # TODO Return URI schemes supported by backend configuration
-            'SupportedUriSchemes': (dbus.Array(signature='s'), None),
+            'SupportedUriSchemes': (dbus.Array([], signature='s'), None),
             # TODO Return MIME types supported by local backend if active
-            'SupportedMimeTypes': (dbus.Array(signature='s'), None),
+            'SupportedMimeTypes': (dbus.Array([], signature='s'), None),
         },
         player_interface: {
-            # TODO
+            # TODO Get backend.playback.state
+            'PlaybackStatus': ('Stopped', None),
+            # TODO Get/set loop status
+            'LoopStatus': ('None', None),
+            'Rate': (1.0, None),
+            # TODO Get/set backend.playback.random
+            'Shuffle': (False, None),
+            # TODO Get meta data
+            'Metadata': ({
+                'mpris:trackid': '', # TODO Use (cpid, track.uri)
+            }, None),
+            # TODO Get/set volume
+            'Volume': (1.0, None),
+            # TODO Get backend.playback.time_position
+            'Position': (0, None),
+            'MinimumRate': (1.0, None),
+            'MaximumRate': (1.0, None),
+            # TODO True if CanControl and backend.playback.track_at_next
+            'CanGoNext': (False, None),
+            # TODO True if CanControl and backend.playback.track_at_previous
+            'CanGoPrevious': (False, None),
+            # TODO True if CanControl and backend.playback.current_track
+            'CanPlay': (False, None),
+            # TODO True if CanControl and backend.playback.current_track
+            'CanPause': (False, None),
+            # TODO Set to True when the rest is implemented
+            'CanSeek': (False, None),
+            # TODO Set to True when the rest is implemented
+            'CanControl': (False, None),
         },
     }
 
