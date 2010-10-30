@@ -48,12 +48,14 @@ def split_path(path):
 def find_files(path):
     path = os.path.expanduser(path)
     if os.path.isfile(path):
-        yield os.path.abspath(path)
+        filename = os.path.abspath(path)
+        yield filename.decode('utf-8')
     else:
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 dirpath = os.path.abspath(dirpath)
-                yield os.path.join(dirpath, filename)
+                filename = os.path.join(dirpath, filename)
+                yield filename.decode('utf-8')
 
 class Mtime(object):
     def __init__(self):

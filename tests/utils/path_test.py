@@ -133,6 +133,12 @@ class FindFilesTest(unittest.TestCase):
         self.assertEqual(len(files), 1)
         self.assert_(files[0], data_folder('blank.mp3'))
 
+    def test_names_are_unicode(self):
+        is_unicode = lambda f: isinstance(f, unicode)
+        for name in self.find(''):
+            self.assert_(is_unicode(name),
+                '%s is not unicode object' % repr(name))
+
     def test_expanduser(self):
         raise SkipTest
 
