@@ -53,6 +53,15 @@ MPD_KEY_ORDER = '''
 '''.split()
 
 def order_mpd_track_info(result):
+    """
+    Order results from :func:`mopidy.frontends.mpd.translator.track_to_mpd_format`
+    so that it matches MPD's ordering. Simply a cosmetic fix for easier
+    diffing of tag_caches.
+
+    :param result: the track info
+    :type result: list of tuples
+    :rtype: list of tuples
+    """
     return sorted(result, key=lambda i: MPD_KEY_ORDER.index(i[0]))
 
 def artists_to_mpd_format(artists):
