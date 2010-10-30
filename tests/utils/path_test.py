@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 
-from mopidy.utils.path import (get_or_create_folder,
+from mopidy.utils.path import (get_or_create_folder, mtime,
     path_to_uri, uri_to_path, split_path, find_files)
 
 from tests import SkipTest, data_folder
@@ -135,3 +135,16 @@ class FindFilesTest(unittest.TestCase):
 
     def test_expanduser(self):
         raise SkipTest
+
+
+class MtimeTest(unittest.TestCase):
+    def tearDown(self):
+        mtime.undo_fake()
+
+    def test_mtime_of_current_dir(self):
+        mtime_dir = int(os.stat('.').st_mtime)
+        self.assertEqual(mtime_dir, mtime('.'))
+
+    def test_fake_time_is_returned(self):
+        mtime.set_fake_time(123456)
+        self.assertEqual(mtime('.'), 123456)
