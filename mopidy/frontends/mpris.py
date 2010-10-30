@@ -24,7 +24,8 @@ class MprisFrontend(BaseFrontend):
     Frontend which lets you control Mopidy through the Media Player Remote
     Interfacing Specification (MPRIS) D-Bus interface.
 
-    An example of an MPRIS client is Ubuntu's audio indicator applet.
+    An example of an MPRIS client is `Ubuntu's sound menu
+    <https://wiki.ubuntu.com/SoundMenu>`_.
 
     **Dependencies:**
 
