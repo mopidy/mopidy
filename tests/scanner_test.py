@@ -51,7 +51,7 @@ class TranslatorTest(unittest.TestCase):
     def check(self):
         expected = self.build_track()
         actual = translator(self.data)
-        self.assertEqual(expected, translator(self.data))
+        self.assertEqual(expected, actual)
 
     def test_basic_data(self):
         self.check()
