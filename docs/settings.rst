@@ -31,6 +31,13 @@ file::
 
     BACKENDS = (u'mopidy.backends.local.LocalBackend',)
 
+Previously this backend relied purely on ``tag_cache`` files from MPD, to
+remedy this the command ``mopidy-scan`` has been added. This program will scan
+your current ``LOCAL_MUSIC_FOLDER`` and build a MPD compatible ``tag_cache``.
+Currently the command outputs the ``tag_cache`` to ``stdout``, this means that
+you will need to run ``mopidy-scan > path/to/your/tag_cache`` to actually start
+using your new cache.
+
 You may also want to change some of the ``LOCAL_*`` settings. See
 :mod:`mopidy.settings`, for a full list of available settings.
 

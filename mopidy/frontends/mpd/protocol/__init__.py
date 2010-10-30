@@ -13,7 +13,7 @@ implement our own MPD server which is compatible with the numerous existing
 import re
 
 #: The MPD protocol uses UTF-8 for encoding all data.
-ENCODING = u'utf-8'
+ENCODING = u'UTF-8'
 
 #: The MPD protocol uses ``\n`` as line terminator.
 LINE_TERMINATOR = u'\n'
