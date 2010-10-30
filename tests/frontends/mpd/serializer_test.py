@@ -91,9 +91,9 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Id', 122) in result)
         self.assertEqual(len(result), 9)
 
-    def test_track_artists_to_mpd_format(self):
-        track = Track(artists=[Artist(name=u'ABBA'), Artist(name=u'Beatles')])
-        translated = translator.track_artists_to_mpd_format(track)
+    def test_artists_to_mpd_format(self):
+        artists = [Artist(name=u'ABBA'), Artist(name=u'Beatles')]
+        translated = translator.artists_to_mpd_format(artists)
         self.assertEqual(translated, u'ABBA, Beatles')
 
 

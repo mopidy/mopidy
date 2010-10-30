@@ -26,7 +26,7 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
     result = [
         ('file', uri_to_mpd_relative_path(track.uri) or ''),
         ('Time', track.length and (track.length // 1000) or 0),
-        ('Artist', track_artists_to_mpd_format(track)),
+        ('Artist', artists_to_mpd_format(track.artists)),
         ('Title', track.name or ''),
         ('Album', track.album and track.album.name or ''),
         ('Date', track.date or ''),
@@ -46,15 +46,14 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
         result.append(('mtime', int(mtime)))
     return result
 
-def track_artists_to_mpd_format(track):
+def artists_to_mpd_format(artists):
     """
     Format track artists for output to MPD client.
 
-    :param track: the track
-    :type track: :class:`mopidy.models.Track`
+    :param artists: the artists
+    :type track: array of :class:`mopidy.models.Artist`
     :rtype: string
     """
-    artists = track.artists
     artists.sort(key=lambda a: a.name)
     return u', '.join([a.name for a in artists])
 
