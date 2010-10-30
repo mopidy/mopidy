@@ -47,6 +47,14 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
         result.append(('mtime', get_mtime(uri_to_path(track.uri))))
     return result
 
+MPD_KEY_ORDER = '''
+    key file Time Artist AlbumArtist Title Album Track Date MUSICBRAINZ_ALBUMID
+    MUSICBRAINZ_ALBUMARTISTID MUSICBRAINZ_ARTISTID MUSICBRAINZ_TRACKID mtime
+'''.split()
+
+def order_mpd_track_info(result):
+    return sorted(result, key=lambda i: MPD_KEY_ORDER.index(i[0]))
+
 def artists_to_mpd_format(artists):
     """
     Format track artists for output to MPD client.
@@ -105,6 +113,7 @@ def tracks_to_tag_cache_format(tracks):
         ('fs_charset', protocol.ENCODING),
         ('info_end',)
     ]
+    tracks.sort(key=lambda t: t.uri)
     _add_to_tag_cache(result, *tracks_to_directory_tree(tracks))
     return result
 
@@ -121,7 +130,9 @@ def _add_to_tag_cache(result, folders, files):
 
     result.append(('songList begin',))
     for track in files:
-        result.extend(track_to_mpd_format(track, key=True, mtime=True))
+        track_result = track_to_mpd_format(track, key=True, mtime=True)
+        track_result = order_mpd_track_info(track_result)
+        result.extend(track_result)
     result.append(('songList end',))
 
 def tracks_to_directory_tree(tracks):

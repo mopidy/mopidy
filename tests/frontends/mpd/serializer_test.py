@@ -111,6 +111,10 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         settings.runtime.clear()
         mtime.undo_fake()
 
+    def translate(self, track):
+        result = translator.track_to_mpd_format(track, key=True, mtime=True)
+        return translator.order_mpd_track_info(result)
+
     def consume_headers(self, result):
         self.assertEqual(('info_begin',), result[0])
         self.assertEqual(('mpd_version', protocol.VERSION), result[1])
@@ -163,7 +167,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_has_formated_track(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
-        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
+        formated = self.translate(track)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
@@ -174,7 +178,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_has_formated_track_with_key_and_mtime(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
-        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
+        formated = self.translate(track)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
@@ -185,7 +189,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_suports_directories(self):
         track = Track(uri='file:///dir/subdir/folder/song.mp3')
-        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
+        formated = self.translate(track)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
@@ -200,7 +204,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_diretory_header_is_right(self):
         track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
-        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
+        formated = self.translate(track)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
@@ -212,7 +216,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_suports_sub_directories(self):
         track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
-        formated = translator.track_to_mpd_format(track, key=True, mtime=True)
+        formated = self.translate(track)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)
@@ -238,8 +242,8 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         ]
 
         formated = []
-        formated.extend(translator.track_to_mpd_format(tracks[0], key=True, mtime=True))
-        formated.extend(translator.track_to_mpd_format(tracks[1], key=True, mtime=True))
+        formated.extend(self.translate(tracks[0]))
+        formated.extend(self.translate(tracks[1]))
 
         result = translator.tracks_to_tag_cache_format(tracks)
 
@@ -256,8 +260,8 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         ]
 
         formated = []
-        formated.append(translator.track_to_mpd_format(tracks[0], key=True, mtime=True))
-        formated.append(translator.track_to_mpd_format(tracks[1], key=True, mtime=True))
+        formated.append(self.translate(tracks[0]))
+        formated.append(self.translate(tracks[1]))
 
         result = translator.tracks_to_tag_cache_format(tracks)
 
