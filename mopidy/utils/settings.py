@@ -51,6 +51,9 @@ class SettingsProxy(object):
         value = self.current[attr]
         if type(value) != bool and not value:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
+        if attr.endswith('_PATH'):
+            value = os.path.expanduser(value)
+            value = os.path.abspath(value)
         return value
 
     def __setattr__(self, attr, value):

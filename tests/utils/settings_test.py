@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from mopidy import settings as default_settings_module
@@ -65,3 +66,15 @@ class SettingsProxyTest(unittest.TestCase):
     def test_runtime_value_included_in_current(self):
         self.settings.TEST = 'test'
         self.assertEqual(self.settings.current['TEST'], 'test')
+
+    def test_value_ending_in_path_is_expanded(self):
+        self.settings.TEST_PATH = '~/test'
+        acctual = self.settings.TEST_PATH
+        expected = os.path.expanduser('~/test')
+        self.assertEqual(acctual, expected)
+
+    def test_value_ending_in_path_is_absolute(self):
+        self.settings.TEST_PATH = './test'
+        acctual = self.settings.TEST_PATH
+        expected = os.path.abspath('./test')
+        self.assertEqual(acctual, expected)
