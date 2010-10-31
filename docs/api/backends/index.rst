@@ -82,25 +82,9 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
     :undoc-members:
 
 
-:mod:`mopidy.backends.dummy` -- Dummy backend for testing
-=========================================================
+Backends
+========
 
-.. automodule:: mopidy.backends.dummy
-    :synopsis: Dummy backend used for testing
-    :members:
-
-
-:mod:`mopidy.backends.libspotify` -- Libspotify backend
-=======================================================
-
-.. automodule:: mopidy.backends.libspotify
-    :synopsis: Spotify backend using the libspotify library
-    :members:
-
-
-:mod:`mopidy.backends.local` -- Local backend
-=====================================================
-
-.. automodule:: mopidy.backends.local
-    :synopsis: Backend for playing music files on local storage
-    :members:
+* :mod:`mopidy.backends.dummy`
+* :mod:`mopidy.backends.libspotify`
+* :mod:`mopidy.backends.local`

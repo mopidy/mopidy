@@ -143,11 +143,12 @@ class LocalLibraryController(BaseLibraryController):
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(settings.LOCAL_TAG_CACHE,
-            settings.LOCAL_MUSIC_FOLDER)
+        tag_cache = os.path.expanduser(settings.LOCAL_TAG_CACHE)
+        music_folder = os.path.expanduser(settings.LOCAL_MUSIC_FOLDER)
 
-        logger.info('Loading songs in %s from %s',
-            settings.LOCAL_MUSIC_FOLDER, settings.LOCAL_TAG_CACHE)
+        tracks = parse_mpd_tag_cache(tag_cache, music_folder)
+
+        logger.info('Loading songs in %s from %s', music_folder, tag_cache)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track

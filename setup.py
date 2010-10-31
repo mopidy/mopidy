@@ -69,6 +69,8 @@ for dirpath, dirnames, filenames in os.walk(project_dir):
         data_files.append([dirpath,
             [os.path.join(dirpath, f) for f in filenames]])
 
+data_files.append(('/usr/local/share/applications', ['data/mopidy.desktop']))
+
 setup(
     name='Mopidy',
     version=get_version(),
@@ -78,7 +80,7 @@ setup(
     package_data={'mopidy': ['backends/libspotify/spotify_appkey.key']},
     cmdclass=cmdclasses,
     data_files=data_files,
-    scripts=['bin/mopidy'],
+    scripts=['bin/mopidy', 'bin/mopidy-scan'],
     url='http://www.mopidy.com/',
     license='Apache License, Version 2.0',
     description='MPD server with Spotify support',
