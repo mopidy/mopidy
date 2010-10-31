@@ -21,6 +21,7 @@ Reference documentation
     :maxdepth: 3
 
     api/index
+    modules/index
 
 Development documentation
 =========================

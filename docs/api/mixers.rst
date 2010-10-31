@@ -37,61 +37,12 @@ methods as described below.
     :undoc-members:
 
 
-:mod:`mopidy.mixers.alsa` -- ALSA mixer for Linux
-=================================================
+Mixer implementations
+=====================
 
-.. inheritance-diagram:: mopidy.mixers.alsa
-
-.. automodule:: mopidy.mixers.alsa
-    :synopsis: ALSA mixer for Linux
-    :members:
-
-
-:mod:`mopidy.mixers.denon` -- Hardware mixer for Denon amplifiers
-=================================================================
-
-.. inheritance-diagram:: mopidy.mixers.denon
-
-.. automodule:: mopidy.mixers.denon
-    :synopsis: Hardware mixer for Denon amplifiers
-    :members:
-
-
-:mod:`mopidy.mixers.dummy` -- Dummy mixer for testing
-=====================================================
-
-.. inheritance-diagram:: mopidy.mixers.dummy
-
-.. automodule:: mopidy.mixers.dummy
-    :synopsis: Dummy mixer for testing
-    :members:
-
-
-:mod:`mopidy.mixers.gstreamer_software` -- Software mixer for all platforms
-===========================================================================
-
-.. inheritance-diagram:: mopidy.mixers.gstreamer_software
-
-.. automodule:: mopidy.mixers.gstreamer_software
-    :synopsis: Software mixer for all platforms
-    :members:
-
-
-:mod:`mopidy.mixers.osa` -- Osa mixer for OS X
-==============================================
-
-.. inheritance-diagram:: mopidy.mixers.osa
-
-.. automodule:: mopidy.mixers.osa
-    :synopsis: Osa mixer for OS X
-    :members:
-
-
-:mod:`mopidy.mixers.nad` -- Hardware mixer for NAD amplifiers
-=============================================================
-
-.. inheritance-diagram:: mopidy.mixers.nad
-
-.. automodule:: mopidy.mixers.nad
-    :synopsis: Hardware mixer for NAD amplifiers
-    :members:
+* :mod:`mopidy.mixers.alsa`
+* :mod:`mopidy.mixers.denon`
+* :mod:`mopidy.mixers.dummy`
+* :mod:`mopidy.mixers.gstreamer_software`
+* :mod:`mopidy.mixers.osa`
+* :mod:`mopidy.mixers.nad`
