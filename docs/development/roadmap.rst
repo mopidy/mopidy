@@ -47,10 +47,10 @@ Stuff we want to do, but not right now, and maybe never
     recipies for all our dependencies and Mopidy itself to make OS X
     installation a breeze. See `Homebrew's issue #1612
     <http://github.com/mxcl/homebrew/issues/issue/1612>`_.
-  - Create `Debian packages <http://www.debian.org/doc/maint-guide/>`_ of all
-    our dependencies and Mopidy itself (hosted in our own Debian repo until we
-    get stuff into the various distros) to make Debian/Ubuntu installation a
-    breeze.
+  - **[WIP]** Create `Debian packages
+    <http://www.debian.org/doc/maint-guide/>`_ of all our dependencies and
+    Mopidy itself (hosted in our own Debian repo until we get stuff into the
+    various distros) to make Debian/Ubuntu installation a breeze.
 
 - Compatability:
 
