@@ -14,6 +14,8 @@ No description yet.
 
 - Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
   application menus.
+- Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
+  any help from the original MPD server.
 
 
 0.2.0 (2010-10-24)
