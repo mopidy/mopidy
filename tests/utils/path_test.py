@@ -34,9 +34,6 @@ class GetOrCreateFolderTest(unittest.TestCase):
         self.assert_(os.path.isdir(self.parent))
         self.assertEqual(created, self.parent)
 
-    def test_that_userfolder_is_expanded(self):
-        raise SkipTest # Not sure how to safely test this
-
 
 class PathToFileURITest(unittest.TestCase):
     def test_simple_path(self):
@@ -138,9 +135,6 @@ class FindFilesTest(unittest.TestCase):
         for name in self.find(''):
             self.assert_(is_unicode(name),
                 '%s is not unicode object' % repr(name))
-
-    def test_expanduser(self):
-        raise SkipTest
 
 
 class MtimeTest(unittest.TestCase):
