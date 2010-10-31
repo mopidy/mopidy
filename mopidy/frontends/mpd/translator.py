@@ -129,7 +129,7 @@ def tracks_to_tag_cache_format(tracks):
 def _add_to_tag_cache(result, folders, files):
     for path, entry in folders.items():
         name = os.path.split(path)[1]
-        music_folder = os.path.expanduser(settings.LOCAL_MUSIC_FOLDER)
+        music_folder = os.path.expanduser(settings.LOCAL_MUSIC_PATH)
         mtime = get_mtime(os.path.join(music_folder, path))
         result.append(('directory', path))
         result.append(('mtime', mtime))
@@ -150,7 +150,7 @@ def tracks_to_directory_tree(tracks):
         path = u''
         current = directories
 
-        local_folder = os.path.expanduser(settings.LOCAL_MUSIC_FOLDER)
+        local_folder = os.path.expanduser(settings.LOCAL_MUSIC_PATH)
         track_path = uri_to_path(track.uri)
         track_path = re.sub('^' + re.escape(local_folder), '', track_path)
         track_dir = os.path.dirname(track_path)

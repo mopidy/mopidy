@@ -17,8 +17,8 @@ class LocalLibraryControllerTest(BaseLibraryControllerTest, unittest.TestCase):
     backend_class = LocalBackend
 
     def setUp(self):
-        settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
-        settings.LOCAL_MUSIC_FOLDER = data_folder('')
+        settings.LOCAL_TAG_CACHE_FILE = data_folder('library_tag_cache')
+        settings.LOCAL_MUSIC_PATH = data_folder('')
 
         super(LocalLibraryControllerTest, self).setUp()
 

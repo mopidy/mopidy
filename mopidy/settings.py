@@ -77,8 +77,8 @@ LASTFM_PASSWORD = u''
 #:
 #: Default::
 #:
-#:    LOCAL_MUSIC_FOLDER = u'~/music'
-LOCAL_MUSIC_FOLDER = u'~/music'
+#:    LOCAL_MUSIC_PATH = u'~/music'
+LOCAL_MUSIC_PATH = u'~/music'
 
 #: Path to playlist folder with m3u files for local music.
 #:
@@ -86,8 +86,8 @@ LOCAL_MUSIC_FOLDER = u'~/music'
 #:
 #: Default::
 #:
-#:    LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
-LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
+#:    LOCAL_PLAYLIST_PATH = u'~/.mopidy/playlists'
+LOCAL_PLAYLIST_PATH = u'~/.mopidy/playlists'
 
 #: Path to tag cache for local music.
 #:
@@ -95,8 +95,8 @@ LOCAL_PLAYLIST_FOLDER = u'~/.mopidy/playlists'
 #:
 #: Default::
 #:
-#:    LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
-LOCAL_TAG_CACHE = u'~/.mopidy/tag_cache'
+#:    LOCAL_TAG_CACHE_FILE = u'~/.mopidy/tag_cache'
+LOCAL_TAG_CACHE_FILE = u'~/.mopidy/tag_cache'
 
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
@@ -172,7 +172,7 @@ MPD_SERVER_PORT = 6600
 #: Path to the libspotify cache.
 #:
 #: Used by :mod:`mopidy.backends.libspotify`.
-SPOTIFY_LIB_CACHE = u'~/.mopidy/libspotify_cache'
+SPOTIFY_CACHE_PATH = u'~/.mopidy/libspotify_cache'
 
 #: Your Spotify Premium username.
 #:

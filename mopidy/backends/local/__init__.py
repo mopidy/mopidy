@@ -23,9 +23,9 @@ class LocalBackend(BaseBackend):
 
     **Settings:**
 
-    - :attr:`mopidy.settings.LOCAL_MUSIC_FOLDER`
-    - :attr:`mopidy.settings.LOCAL_PLAYLIST_FOLDER`
-    - :attr:`mopidy.settings.LOCAL_TAG_CACHE`
+    - :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
+    - :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
+    - :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
     """
 
     def __init__(self, *args, **kwargs):
@@ -66,7 +66,7 @@ class LocalPlaybackController(BasePlaybackController):
 class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
     def __init__(self, *args):
         super(LocalStoredPlaylistsController, self).__init__(*args)
-        self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_FOLDER)
+        self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_PATH)
         self.refresh()
 
     def lookup(self, uri):
@@ -143,8 +143,8 @@ class LocalLibraryController(BaseLibraryController):
         self.refresh()
 
     def refresh(self, uri=None):
-        tag_cache = os.path.expanduser(settings.LOCAL_TAG_CACHE)
-        music_folder = os.path.expanduser(settings.LOCAL_MUSIC_FOLDER)
+        tag_cache = os.path.expanduser(settings.LOCAL_TAG_CACHE_FILE)
+        music_folder = os.path.expanduser(settings.LOCAL_MUSIC_PATH)
 
         tracks = parse_mpd_tag_cache(tag_cache, music_folder)
 

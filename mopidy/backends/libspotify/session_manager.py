@@ -15,8 +15,8 @@ logger = logging.getLogger('mopidy.backends.libspotify.session_manager')
 # LibspotifySessionManager: Too many ancestors (9/7)
 
 class LibspotifySessionManager(SpotifySessionManager, BaseThread):
-    cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
-    settings_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
+    cache_location = os.path.expanduser(settings.SPOTIFY_CACHE_PATH)
+    settings_location = os.path.expanduser(settings.SPOTIFY_CACHE_PATH)
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 

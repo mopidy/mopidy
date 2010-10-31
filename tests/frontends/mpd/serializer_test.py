@@ -11,7 +11,7 @@ from tests import data_folder, SkipTest
 
 class TrackMpdFormatTest(unittest.TestCase):
     def setUp(self):
-        settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
+        settings.LOCAL_MUSIC_PATH = '/dir/subdir'
         mtime.set_fake_time(1234567)
 
     def tearDown(self):
@@ -104,7 +104,7 @@ class PlaylistMpdFormatTest(unittest.TestCase):
 
 class TracksToTagCacheFormatTest(unittest.TestCase):
     def setUp(self):
-        settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
+        settings.LOCAL_MUSIC_PATH = '/dir/subdir'
         mtime.set_fake_time(1234567)
 
     def tearDown(self):
@@ -279,7 +279,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
 class TracksToDirectoryTreeTest(unittest.TestCase):
     def setUp(self):
-        settings.LOCAL_MUSIC_FOLDER = '/root/'
+        settings.LOCAL_MUSIC_PATH = '/root/'
 
     def tearDown(self):
         settings.runtime.clear()
