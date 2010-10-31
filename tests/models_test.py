@@ -398,7 +398,7 @@ class PlaylistTest(unittest.TestCase):
         last_modified = dt.datetime.now()
         playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.with_(uri=u'another uri')
+        new_playlist = playlist.copy(uri=u'another uri')
         self.assertEqual(new_playlist.uri, u'another uri')
         self.assertEqual(new_playlist.name, u'a name')
         self.assertEqual(new_playlist.tracks, tracks)
@@ -409,7 +409,7 @@ class PlaylistTest(unittest.TestCase):
         last_modified = dt.datetime.now()
         playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.with_(name=u'another name')
+        new_playlist = playlist.copy(name=u'another name')
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'another name')
         self.assertEqual(new_playlist.tracks, tracks)
@@ -421,7 +421,7 @@ class PlaylistTest(unittest.TestCase):
         playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_tracks = [Track(), Track()]
-        new_playlist = playlist.with_(tracks=new_tracks)
+        new_playlist = playlist.copy(tracks=new_tracks)
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'a name')
         self.assertEqual(new_playlist.tracks, new_tracks)
@@ -433,7 +433,7 @@ class PlaylistTest(unittest.TestCase):
         new_last_modified = last_modified + dt.timedelta(1)
         playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.with_(last_modified=new_last_modified)
+        new_playlist = playlist.copy(last_modified=new_last_modified)
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'a name')
         self.assertEqual(new_playlist.tracks, tracks)

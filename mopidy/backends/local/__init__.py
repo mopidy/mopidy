@@ -116,7 +116,7 @@ class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
         src = os.path.join(self._folder, playlist.name + '.m3u')
         dst = os.path.join(self._folder, name + '.m3u')
 
-        renamed = playlist.with_(name=name)
+        renamed = playlist.copy(name=name)
         index = self._playlists.index(playlist)
         self._playlists[index] = renamed
 
