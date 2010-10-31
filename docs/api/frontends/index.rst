@@ -4,6 +4,10 @@
 
 A frontend is responsible for exposing Mopidy for a type of clients.
 
+.. automodule:: mopidy.frontends
+    :synopsis: Frontend API
+    :members:
+
 
 Frontend API
 ============
