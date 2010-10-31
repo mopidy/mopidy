@@ -68,11 +68,11 @@ To install the currently latest release of Mopidy using ``pip``::
 
     sudo aptitude install python-setuptools python-pip   # On Ubuntu/Debian
     sudo brew install pip                                # On OS X
-    sudo pip install Mopidy
+    sudo pip install mopidy
 
 To later upgrade to the latest release::
 
-    sudo pip install -U Mopidy
+    sudo pip install -U mopidy
 
 If you for some reason can't use ``pip``, try ``easy_install``.
 
@@ -80,26 +80,38 @@ Next, you need to set a couple of :doc:`settings </settings>`, and then you're
 ready to :doc:`run Mopidy </running>`.
 
 
-Install development version
-===========================
+Install development snapshot
+============================
 
-If you want to follow Mopidy development closer, you may install the
-development version of Mopidy::
+If you want to follow Mopidy development closer, you may install a snapshot of
+Mopidy's ``develop`` branch::
+
+    sudo aptitude install python-setuptools python-pip   # On Ubuntu/Debian
+    sudo brew install pip                                # On OS X
+    sudo pip install mopidy==dev
+
+Next, you need to set a couple of :doc:`settings </settings>`, and then you're
+ready to :doc:`run Mopidy </running>`.
+
+
+Run from source code checkout
+=============================
+
+If you may want to contribute to Mopidy, and want access to other branches as
+well, you can checkout the Mopidy source from Git and run it directly from the
+ckeckout::
 
     sudo aptitude install git-core                  # On Ubuntu/Debian
     sudo brew install git                           # On OS X
     git clone git://github.com/jodal/mopidy.git
     cd mopidy/
-    sudo python setup.py install
+    python mopidy                                   # Yes, 'mopidy' is a dir
 
 To later update to the very latest version::
 
     cd mopidy/
     git pull
-    sudo python setup.py install
 
 For an introduction to ``git``, please visit `git-scm.com
-<http://git-scm.com/>`_.
-
-Next, you need to set a couple of :doc:`settings </settings>`, and then you're
-ready to :doc:`run Mopidy </running>`.
+<http://git-scm.com/>`_. Also, please read our :doc:`developer documentation
+</development/index>`.
