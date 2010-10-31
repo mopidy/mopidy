@@ -17,9 +17,9 @@ if __name__ == '__main__':
     def debug(uri, error):
         print >> sys.stderr, 'Failed %s: %s' % (uri, error)
 
-    print >> sys.stderr, 'Scanning %s' % settings.LOCAL_MUSIC_FOLDER
+    print >> sys.stderr, 'Scanning %s' % settings.LOCAL_MUSIC_PATH
 
-    scanner = Scanner(settings.LOCAL_MUSIC_FOLDER, store, debug)
+    scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
     scanner.start()
 
     print >> sys.stderr, 'Done'

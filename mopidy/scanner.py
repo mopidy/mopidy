@@ -5,7 +5,6 @@ import pygst
 pygst.require('0.10')
 import gst
 
-from os.path import abspath
 import datetime
 import sys
 import threading

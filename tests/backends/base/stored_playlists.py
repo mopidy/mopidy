@@ -10,9 +10,9 @@ from tests import SkipTest, data_folder
 
 class BaseStoredPlaylistsControllerTest(object):
     def setUp(self):
-        settings.LOCAL_PLAYLIST_FOLDER = tempfile.mkdtemp()
-        settings.LOCAL_TAG_CACHE = data_folder('library_tag_cache')
-        settings.LOCAL_MUSIC_FOLDER = data_folder('')
+        settings.LOCAL_PLAYLIST_PATH = tempfile.mkdtemp()
+        settings.LOCAL_TAG_CACHE_FILE = data_folder('library_tag_cache')
+        settings.LOCAL_MUSIC_PATH = data_folder('')
 
         self.backend = self.backend_class(mixer_class=DummyMixer)
         self.stored  = self.backend.stored_playlists
@@ -20,8 +20,8 @@ class BaseStoredPlaylistsControllerTest(object):
     def tearDown(self):
         self.backend.destroy()
 
-        if os.path.exists(settings.LOCAL_PLAYLIST_FOLDER):
-            shutil.rmtree(settings.LOCAL_PLAYLIST_FOLDER)
+        if os.path.exists(settings.LOCAL_PLAYLIST_PATH):
+            shutil.rmtree(settings.LOCAL_PLAYLIST_PATH)
 
         settings.runtime.clear()
 

@@ -18,7 +18,7 @@ class LibspotifyBackend(BaseBackend):
 
     **Settings:**
 
-    - :attr:`mopidy.settings.SPOTIFY_LIB_CACHE`
+    - :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
     - :attr:`mopidy.settings.SPOTIFY_USERNAME`
     - :attr:`mopidy.settings.SPOTIFY_PASSWORD`
 
