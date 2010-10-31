@@ -82,8 +82,8 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
     :undoc-members:
 
 
-Backends
-========
+Backend implementations
+=======================
 
 * :mod:`mopidy.backends.dummy`
 * :mod:`mopidy.backends.libspotify`

@@ -1,6 +1,6 @@
-*****************
-API documentation
-*****************
+*************
+API reference
+*************
 
 .. toctree::
     :glob:

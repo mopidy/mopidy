@@ -27,8 +27,8 @@ Frontend API
     :members:
 
 
-Frontends
-=========
+Frontend implementations
+========================
 
 * :mod:`mopidy.frontends.lastfm`
 * :mod:`mopidy.frontends.mpd`
