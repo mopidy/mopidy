@@ -3,6 +3,15 @@ from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
     BaseStoredPlaylistsController, BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist
 
+
+class DummyQueue(object):
+    def __init__(self):
+        self.received_messages = []
+
+    def put(self, message):
+        self.received_messages.append(message)
+
+
 class DummyBackend(BaseBackend):
     """
     A backend which implements the backend API in the simplest way possible.
@@ -14,12 +23,14 @@ class DummyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(DummyBackend, self).__init__(*args, **kwargs)
 
-        self.current_playlist = DummyCurrentPlaylistController(backend=self)
+        self.core_queue = DummyQueue()
+
+        self.current_playlist = BaseCurrentPlaylistController(backend=self)
 
         self.library = DummyLibraryController(backend=self)
 
         playback_provider = DummyPlaybackProvider(backend=self)
-        self.playback = DummyPlaybackController(backend=self,
+        self.playback = BasePlaybackController(backend=self,
             provider=playback_provider)
 
         stored_playlists_provider = DummyStoredPlaylistsProvider(backend=self)
@@ -27,10 +38,6 @@ class DummyBackend(BaseBackend):
             provider=stored_playlists_provider)
 
         self.uri_handlers = [u'dummy:']
-
-
-class DummyCurrentPlaylistController(BaseCurrentPlaylistController):
-    pass
 
 
 class DummyLibraryController(BaseLibraryController):
@@ -49,14 +56,6 @@ class DummyLibraryController(BaseLibraryController):
 
     def search(self, **query):
         return Playlist()
-
-
-class DummyPlaybackController(BasePlaybackController):
-    def _trigger_started_playing_event(self):
-        pass # noop
-
-    def _trigger_stopped_playing_event(self):
-        pass # noop
 
 
 class DummyPlaybackProvider(BasePlaybackProvider):
