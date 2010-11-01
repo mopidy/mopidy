@@ -5,6 +5,50 @@ from mopidy.models import Artist, Album, Track, Playlist
 
 from tests import SkipTest
 
+class GenericCopyTets(unittest.TestCase):
+    def compare(self, orig, other):
+        self.assertEqual(orig, other)
+        self.assertNotEqual(id(orig), id(other))
+
+    def test_copying_track(self):
+        track = Track()
+        self.compare(track, track.copy())
+
+    def test_copying_artist(self):
+        artist = Artist()
+        self.compare(artist, artist.copy())
+
+    def test_copying_album(self):
+        album = Album()
+        self.compare(album, album.copy())
+
+    def test_copying_playlist(self):
+        playlist = Playlist()
+        self.compare(playlist, playlist.copy())
+
+    def test_copying_track_with_basic_values(self):
+        track = Track(name='foo', uri='bar')
+        copy = track.copy(name='baz')
+        self.assertEqual('baz', copy.name)
+        self.assertEqual('bar', copy.uri)
+
+    def test_copying_track_with_missing_values(self):
+        track = Track(uri='bar')
+        copy = track.copy(name='baz')
+        self.assertEqual('baz', copy.name)
+        self.assertEqual('bar', copy.uri)
+
+    def test_copying_track_with_private_internal_value(self):
+        artists1 = [Artist(name='foo')]
+        artists2 = [Artist(name='bar')]
+        track = Track(artists=artists1)
+        copy = track.copy(artists=artists2)
+        self.assertEqual(copy.artists, artists2)
+
+    def test_copying_track_with_invalid_key(self):
+        test = lambda: Track().copy(invalid_key=True)
+        self.assertRaises(TypeError, test)
+
 class ArtistTest(unittest.TestCase):
     def test_uri(self):
         uri = u'an_uri'

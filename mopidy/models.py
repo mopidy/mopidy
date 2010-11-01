@@ -38,6 +38,17 @@ class ImmutableObject(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def copy(self, **kwargs):
+        data = {}
+        for key in self.__dict__.keys():
+            public_key = key.lstrip('_')
+            data[public_key] = kwargs.pop(public_key, self.__dict__[key])
+        for key in kwargs.keys():
+            if hasattr(self, key):
+                data[key] = kwargs.pop(key)
+        if kwargs:
+            raise TypeError("copy() got an unexpected keyword argument '%s'" % key)
+        return self.__class__(**data)
 
 class Artist(ImmutableObject):
     """
@@ -178,31 +189,3 @@ class Playlist(ImmutableObject):
 
     def mpd_format(self, *args, **kwargs):
         return translator.playlist_to_mpd_format(self, *args, **kwargs)
-
-    def copy(self, uri=None, name=None, tracks=None, last_modified=None):
-        """
-        Create a new playlist object with the given values. The values that are
-        not given are taken from the object the method is called on.
-
-        Does not change the object on which it is called.
-
-        :param uri: playlist URI
-        :type uri: string
-        :param name: playlist name
-        :type name: string
-        :param tracks: playlist's tracks
-        :type tracks: list of :class:`Track` elements
-        :param last_modified: playlist's modification time
-        :type last_modified: :class:`datetime.datetime`
-        :rtype: :class:`Playlist`
-        """
-        if uri is None:
-            uri = self.uri
-        if name is None:
-            name = self.name
-        if tracks is None:
-            tracks = self.tracks
-        if last_modified is None:
-            last_modified = self.last_modified
-        return Playlist(uri=uri, name=name, tracks=tracks,
-            last_modified=last_modified)
