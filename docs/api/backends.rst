@@ -3,7 +3,7 @@
 **********************
 
 .. automodule:: mopidy.backends
-    :synopsis: Backend API
+    :synopsis: Backend APIs
 
 
 The backend, controller, and provider concepts
@@ -33,16 +33,16 @@ Providers:
     "Stored\nplaylists\ncontroller" -> "Stored\nplaylist\nproviders"
     Backend -> Mixer
 
-.. _backend-api:
+.. _backend-controller-api:
 
-Backend API
-===========
+Backend controller API
+======================
 
 .. note::
 
-    The backend API is the interface that is used by frontends like
+    The backend controller API is the interface that is used by frontends like
     :mod:`mopidy.frontends.mpd`. If you want to implement your own backend, see
-    the :ref:`provider-api`.
+    the :ref:`backend-provider-api`.
 
 .. autoclass:: mopidy.backends.base.BaseBackend
     :members:
@@ -96,16 +96,16 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
     :undoc-members:
 
 
-.. _provider-api:
+.. _backend-provider-api:
 
-Provider API
-============
+Backend provider API
+====================
 
 .. note::
 
-    The provider API is the interface that must be implemented when you create
-    a backend. If you are working on a frontend and need to access the backend,
-    see the :ref:`backend-api`.
+    The backend provider API is the interface that must be implemented when you
+    create a backend. If you are working on a frontend and need to access the
+    backend, see the :ref:`backend-controller-api`.
 
 
 Playback provider
