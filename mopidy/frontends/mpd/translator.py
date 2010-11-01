@@ -6,7 +6,7 @@ from mopidy.utils.path import mtime as get_mtime
 from mopidy.frontends.mpd import protocol
 from mopidy.utils.path import path_to_uri, uri_to_path, split_path
 
-def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False):
+def track_to_mpd_format(track, position=None, cpid=None):
     """
     Format track for output to MPD client.
 
@@ -41,10 +41,6 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
     if position is not None and cpid is not None:
         result.append(('Pos', position))
         result.append(('Id', cpid))
-    if key and track.uri:
-        result.insert(0, ('key', os.path.basename(uri_to_path(track.uri))))
-    if mtime and track.uri:
-        result.append(('mtime', get_mtime(uri_to_path(track.uri))))
     return result
 
 MPD_KEY_ORDER = '''
@@ -127,9 +123,11 @@ def tracks_to_tag_cache_format(tracks):
     return result
 
 def _add_to_tag_cache(result, folders, files):
+    music_folder = settings.LOCAL_MUSIC_PATH
+    regexp = '^' + re.escape(music_folder).rstrip('/') + '/?'
+
     for path, entry in folders.items():
         name = os.path.split(path)[1]
-        music_folder = settings.LOCAL_MUSIC_PATH
         mtime = get_mtime(os.path.join(music_folder, path))
         result.append(('directory', path))
         result.append(('mtime', mtime))
@@ -139,8 +137,11 @@ def _add_to_tag_cache(result, folders, files):
 
     result.append(('songList begin',))
     for track in files:
-        track_result = track_to_mpd_format(track, key=True, mtime=True)
-        track_result = order_mpd_track_info(track_result)
+        track_result = dict(track_to_mpd_format(track))
+        path = uri_to_path(track_result['file'])
+        track_result['mtime'] = get_mtime(path)
+        track_result['file'] = re.sub(regexp, '', path)
+        track_result = order_mpd_track_info(track_result.items())
         result.extend(track_result)
     result.append(('songList end',))
 

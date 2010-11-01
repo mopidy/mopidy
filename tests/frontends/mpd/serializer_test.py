@@ -3,7 +3,7 @@ import os
 import unittest
 
 from mopidy import settings
-from mopidy.utils.path import mtime
+from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
@@ -41,21 +41,6 @@ class TrackMpdFormatTest(unittest.TestCase):
         result = translator.track_to_mpd_format(Track(), position=1, cpid=2)
         self.assert_(('Pos', 1) in result)
         self.assert_(('Id', 2) in result)
-
-    def test_track_to_mpd_format_with_key(self):
-        track = Track(uri='file:///dir/subdir/file.mp3')
-        result = translator.track_to_mpd_format(track, key=True)
-        self.assert_(('key', 'file.mp3') in result)
-
-    def test_track_to_mpd_format_with_key_not_uri_encoded(self):
-        track = Track(uri='file:///dir/subdir/file%20test.mp3')
-        result = translator.track_to_mpd_format(track, key=True)
-        self.assert_(('key', 'file test.mp3') in result)
-
-    def test_track_to_mpd_format_with_mtime(self):
-        uri = translator.path_to_uri(data_folder('blank.mp3'))
-        result = translator.track_to_mpd_format(Track(uri=uri), mtime=True)
-        self.assert_(('mtime', 1234567) in result)
 
     def test_track_to_mpd_format_for_nonempty_track(self):
         track = Track(
@@ -112,8 +97,12 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         mtime.undo_fake()
 
     def translate(self, track):
-        result = translator.track_to_mpd_format(track, key=True, mtime=True)
-        return translator.order_mpd_track_info(result)
+        folder = settings.LOCAL_MUSIC_PATH
+        result = dict(translator.track_to_mpd_format(track))
+        result['file'] = uri_to_path(result['file'])
+        result['file'] = result['file'][len(folder)+1:]
+        result['mtime'] = mtime('')
+        return translator.order_mpd_track_info(result.items())
 
     def consume_headers(self, result):
         self.assertEqual(('info_begin',), result[0])
