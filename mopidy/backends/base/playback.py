@@ -68,10 +68,8 @@ class BasePlaybackController(object):
     def destroy(self):
         """
         Cleanup after component.
-
-        May be overridden by subclasses.
         """
-        pass
+        self.provider.destroy()
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
@@ -495,6 +493,14 @@ class BasePlaybackProvider(object):
 
     def __init__(self, backend):
         self.backend = backend
+
+    def destroy(self):
+        """
+        Cleanup after component.
+
+        May be overridden by subclasses.
+        """
+        pass
 
     def pause(self):
         """
