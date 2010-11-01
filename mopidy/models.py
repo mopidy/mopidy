@@ -56,6 +56,8 @@ class Artist(ImmutableObject):
     :type uri: string
     :param name: artist name
     :type name: string
+    :param musicbrainz_id: musicbrainz id
+    :type musicbrainz_id: string
     """
 
     #: The artist URI. Read-only.
@@ -63,6 +65,9 @@ class Artist(ImmutableObject):
 
     #: The artist name. Read-only.
     name = None
+
+    #: The musicbrainz id of the artist. Read-only.
+    musicbrainz_id = None
 
 
 class Album(ImmutableObject):
@@ -75,6 +80,8 @@ class Album(ImmutableObject):
     :type artists: list of :class:`Artist`
     :param num_tracks: number of tracks in album
     :type num_tracks: integer
+    :param musicbrainz_id: musicbrainz id
+    :type musicbrainz_id: string
     """
 
     #: The album URI. Read-only.
@@ -85,6 +92,9 @@ class Album(ImmutableObject):
 
     #: The number of tracks in the album. Read-only.
     num_tracks = 0
+
+    #: The musicbrainz id of the album. Read-only.
+    musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
         self._artists = frozenset(kwargs.pop('artists', []))
@@ -114,6 +124,8 @@ class Track(ImmutableObject):
     :type length: integer
     :param bitrate: bitrate in kbit/s
     :type bitrate: integer
+    :param musicbrainz_id: musicbrainz id
+    :type musicbrainz_id: string
     """
 
     #: The track URI. Read-only.
@@ -136,6 +148,9 @@ class Track(ImmutableObject):
 
     #: The track's bitrate in kbit/s. Read-only.
     bitrate = None
+
+    #: The musicbrainz id of the track. Read-only.
+    musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
         self._artists = frozenset(kwargs.pop('artists', []))
