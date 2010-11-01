@@ -2,13 +2,31 @@
 Settings
 ********
 
+Mopidy has lots of settings. Luckily, you only need to change a few, and stay
+ignorant of the rest. Below you can find guides for typical configuration
+changes you may want to do, and a complete listing of available settings.
+
+
+Changing settings
+=================
+
 Mopidy reads settings from the file ``~/.mopidy/settings.py``, where ``~``
 means your *home directory*. If your username is ``alice`` and you are running
 Linux, the settings file should probably be at
 ``/home/alice/.mopidy/settings.py``.
 
-You can either create this file yourself, or run the ``mopidy`` command, and it
-will create an empty settings file for you.
+You can either create the settings file yourself, or run the ``mopidy``
+command, and it will create an empty settings file for you.
+
+When you have created the settings file, open it in a text editor, and add
+settings you want to change. If you want to keep the default value for setting,
+you should *not* redefine it in your own settings file.
+
+A complete ``~/.mopidy/settings.py`` may look as simple as this::
+
+    MPD_SERVER_HOSTNAME = u'::'
+    SPOTIFY_USERNAME = u'alice'
+    SPOTIFY_PASSWORD = u'mysecret'
 
 
 Music from Spotify
@@ -88,3 +106,12 @@ file::
 
     LASTFM_USERNAME = u'myusername'
     LASTFM_PASSWORD = u'mysecret'
+
+
+Available settings
+==================
+
+.. automodule:: mopidy.settings
+    :synopsis: Available settings and their default values
+    :members:
+    :undoc-members:
