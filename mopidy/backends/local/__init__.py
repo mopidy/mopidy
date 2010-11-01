@@ -8,7 +8,7 @@ from mopidy import settings
 from mopidy.backends.base import (BaseBackend,
     BaseCurrentPlaylistController, BaseLibraryController,
     BasePlaybackController, BasePlaybackProvider,
-    BaseStoredPlaylistsController)
+    BaseStoredPlaylistsController, BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
 from mopidy.utils.process import pickle_connection
 
@@ -34,7 +34,9 @@ class LocalBackend(BaseBackend):
 
         self.library = LocalLibraryController(backend=self)
 
-        self.stored_playlists = LocalStoredPlaylistsController(backend=self)
+        stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
+        self.stored_playlists = BaseStoredPlaylistsController(backend=self,
+            provider=stored_playlists_provider)
 
         self.current_playlist = BaseCurrentPlaylistController(backend=self)
 
@@ -74,9 +76,9 @@ class LocalPlaybackProvider(BasePlaybackProvider):
         return self.backend.output.set_state('READY')
 
 
-class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
+class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
     def __init__(self, *args, **kwargs):
-        super(LocalStoredPlaylistsController, self).__init__(*args, **kwargs)
+        super(LocalStoredPlaylistsProvider, self).__init__(*args, **kwargs)
         self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_FOLDER)
         self.refresh()
 

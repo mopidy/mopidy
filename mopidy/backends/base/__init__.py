@@ -4,14 +4,15 @@ import random
 import time
 
 from mopidy import settings
-from mopidy.backends.base.current_playlist import BaseCurrentPlaylistController
-from mopidy.backends.base.library import BaseLibraryController
-from mopidy.backends.base.playback import (BasePlaybackController,
-    BasePlaybackProvider)
-from mopidy.backends.base.stored_playlists import BaseStoredPlaylistsController
 from mopidy.frontends.mpd import translator
 from mopidy.models import Playlist
 from mopidy.utils import get_class
+
+from .current_playlist import BaseCurrentPlaylistController
+from .library import BaseLibraryController
+from .playback import BasePlaybackController, BasePlaybackProvider
+from .stored_playlists import (BaseStoredPlaylistsController,
+    BaseStoredPlaylistsProvider)
 
 logger = logging.getLogger('mopidy.backends.base')
 

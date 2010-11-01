@@ -116,8 +116,16 @@ Playback provider
     :undoc-members:
 
 
-Backend implementations
-=======================
+Stored playlists provider
+-------------------------
+
+.. autoclass:: mopidy.backends.base.BaseStoredPlaylistsProvider
+    :members:
+    :undoc-members:
+
+
+Backend provider implementations
+================================
 
 * :mod:`mopidy.backends.dummy`
 * :mod:`mopidy.backends.libspotify`

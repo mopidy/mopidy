@@ -2,7 +2,7 @@ import logging
 
 from mopidy import settings
 from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
-    BasePlaybackController)
+    BasePlaybackController, BaseStoredPlaylistsController)
 
 logger = logging.getLogger('mopidy.backends.libspotify')
 
@@ -36,7 +36,7 @@ class LibspotifyBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         from .library import LibspotifyLibraryController
         from .playback import LibspotifyPlaybackProvider
-        from .stored_playlists import LibspotifyStoredPlaylistsController
+        from .stored_playlists import LibspotifyStoredPlaylistsProvider
 
         super(LibspotifyBackend, self).__init__(*args, **kwargs)
 
@@ -48,8 +48,10 @@ class LibspotifyBackend(BaseBackend):
         self.playback = BasePlaybackController(backend=self,
             provider=playback_provider)
 
-        self.stored_playlists = LibspotifyStoredPlaylistsController(
+        stored_playlists_provider = LibspotifyStoredPlaylistsProvider(
             backend=self)
+        self.stored_playlists = BaseStoredPlaylistsController(backend=self,
+            provider=stored_playlists_provider)
 
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
 
