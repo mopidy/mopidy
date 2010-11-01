@@ -3,7 +3,7 @@ import os
 import unittest
 
 from mopidy import settings
-from mopidy.utils.path import mtime
+from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
@@ -97,8 +97,12 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         mtime.undo_fake()
 
     def translate(self, track):
-        result = translator.track_to_mpd_format(track, key=True, mtime=True)
-        return translator.order_mpd_track_info(result)
+        folder = settings.LOCAL_MUSIC_PATH
+        result = dict(translator.track_to_mpd_format(track))
+        result['file'] = uri_to_path(result['file'])
+        result['file'] = result['file'][len(folder)+1:]
+        result['mtime'] = mtime('')
+        return translator.order_mpd_track_info(result.items())
 
     def consume_headers(self, result):
         self.assertEqual(('info_begin',), result[0])
