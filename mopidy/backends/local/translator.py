@@ -84,7 +84,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
             _convert_mpd_data(current, tracks, music_dir)
             current.clear()
 
-        current[key.lower()] = value
+        current[key.lower()] = value.decode('utf-8')
 
     _convert_mpd_data(current, tracks, music_dir)
 
