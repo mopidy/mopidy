@@ -18,6 +18,8 @@ def translator(data):
     artist_kwargs = {}
     track_kwargs = {}
 
+    # FIXME replace with data.get('foo', None) ?
+
     if 'album' in data:
         album_kwargs['name'] = data['album']
 
