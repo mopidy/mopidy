@@ -1,0 +1,13 @@
+info_begin
+mpd_version: 0.14.2
+fs_charset: UTF-8
+info_end
+songList begin
+key: song1.mp3
+file: /song1.mp3
+Time: 4
+Artist: æøå
+Title: æøå
+Album: æøå
+mtime: 1272319626
+songList end

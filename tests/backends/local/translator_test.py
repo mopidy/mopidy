@@ -116,7 +116,16 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         self.assertEqual(set(expected_tracks), tracks)
 
     def test_unicode_cache(self):
-        raise SkipTest
+        tracks = parse_mpd_tag_cache(data_folder('utf8_tag_cache'),
+             data_folder(''))
+
+        uri = path_to_uri(data_folder('song1.mp3'))
+        artists = [Artist(name=u'æøå')]
+        album = Album(name=u'æøå', artists=artists)
+        track = Track(uri=uri, name=u'æøå', artists=artists,
+            album=album, length=4000)
+
+        self.assertEqual(track, list(tracks)[0])
 
     def test_misencoded_cache(self):
         # FIXME not sure if this can happen

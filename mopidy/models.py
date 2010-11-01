@@ -179,7 +179,7 @@ class Playlist(ImmutableObject):
     def mpd_format(self, *args, **kwargs):
         return translator.playlist_to_mpd_format(self, *args, **kwargs)
 
-    def with_(self, uri=None, name=None, tracks=None, last_modified=None):
+    def copy(self, uri=None, name=None, tracks=None, last_modified=None):
         """
         Create a new playlist object with the given values. The values that are
         not given are taken from the object the method is called on.

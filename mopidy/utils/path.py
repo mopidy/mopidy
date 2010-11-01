@@ -22,7 +22,6 @@ def get_or_create_file(filename):
 
 def path_to_uri(*paths):
     path = os.path.join(*paths)
-    #path = os.path.expanduser(path) # FIXME Waiting for test case?
     path = path.encode('utf-8')
     if sys.platform == 'win32':
         return 'file:' + urllib.pathname2url(path)
@@ -46,16 +45,13 @@ def split_path(path):
     return parts
 
 def find_files(path):
-    path = os.path.expanduser(path)
     if os.path.isfile(path):
-        filename = os.path.abspath(path)
-        if not isinstance(filename, unicode):
-            filename = filename.decode('utf-8')
-        yield filename
+        if not isinstance(path, unicode):
+            path = path.decode('utf-8')
+        yield path
     else:
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
-                dirpath = os.path.abspath(dirpath)
                 filename = os.path.join(dirpath, filename)
                 if not isinstance(filename, unicode):
                     filename = filename.decode('utf-8')

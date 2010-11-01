@@ -84,7 +84,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
             _convert_mpd_data(current, tracks, music_dir)
             current.clear()
 
-        current[key.lower()] = value
+        current[key.lower()] = value.decode('utf-8')
 
     _convert_mpd_data(current, tracks, music_dir)
 
@@ -106,6 +106,7 @@ def _convert_mpd_data(data, tracks, music_dir):
         track_kwargs['artists'] = [artist]
         album_kwargs['artists'] = [artist]
 
+    # FIXME Newer mpd tag caches support albumartist names
     if 'album' in data:
         album_kwargs['name'] = data['album']
         album = Album(**album_kwargs)
@@ -114,10 +115,14 @@ def _convert_mpd_data(data, tracks, music_dir):
     if 'title' in data:
         track_kwargs['name'] = data['title']
 
+    # FIXME what if file is uri - generated tag cache needs to allways make
+    # LOCAL_MUSIC_PATH relative paths or this code must handle uris
     if data['file'][0] == '/':
         path = data['file'][1:]
     else:
         path = data['file']
+
+    # FIXME newer mpd tag caches provide musicbrainz ids
 
     track_kwargs['uri'] = path_to_uri(music_dir, path)
     track_kwargs['length'] = int(data.get('time', 0)) * 1000

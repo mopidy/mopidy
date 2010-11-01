@@ -93,7 +93,7 @@ class DummyStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
 
     def rename(self, playlist, new_name):
         self._playlists[self._playlists.index(playlist)] = \
-            playlist.with_(name=new_name)
+            playlist.copy(name=new_name)
 
     def save(self, playlist):
         self._playlists.append(playlist)

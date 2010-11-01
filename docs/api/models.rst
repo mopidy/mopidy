@@ -1,6 +1,6 @@
-********************
-:mod:`mopidy.models`
-********************
+***********
+Data models
+***********
 
 These immutable data models are used for all data transfer within the Mopidy
 backends and between the backends and the MPD frontend. All fields are optional
