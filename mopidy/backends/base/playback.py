@@ -504,8 +504,9 @@ class BasePlaybackProvider(object):
 
     def pause(self):
         """
-        To be overridden by subclass. Implement your backend's pause
-        functionality here.
+        To be overridden by subclass.
+
+        Pause playback.
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
@@ -513,8 +514,9 @@ class BasePlaybackProvider(object):
 
     def play(self, track):
         """
-        To be overridden by subclass. Implement your backend's play
-        functionality here.
+        To be overridden by subclass.
+
+        Play given track.
 
         :param track: the track to play
         :type track: :class:`mopidy.models.Track`
@@ -524,8 +526,9 @@ class BasePlaybackProvider(object):
 
     def resume(self):
         """
-        To be overridden by subclass. Implement your backend's resume
-        functionality here.
+        To be overridden by subclass.
+
+        Resume playback at the same time position playback was paused.
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
@@ -533,8 +536,9 @@ class BasePlaybackProvider(object):
 
     def seek(self, time_position):
         """
-        To be overridden by subclass. Implement your backend's seek
-        functionality here.
+        To be overridden by subclass.
+
+        Seek to a given time position.
 
         :param time_position: time position in milliseconds
         :type time_position: int
@@ -544,8 +548,9 @@ class BasePlaybackProvider(object):
 
     def stop(self):
         """
-        To be overridden by subclass. Implement your backend's stop
-        functionality here.
+        To be overridden by subclass.
+
+        Stop playback.
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
