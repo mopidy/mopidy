@@ -69,19 +69,19 @@ class TrackMpdFormatTest(unittest.TestCase):
 
     def test_track_to_mpd_format_musicbrainz_trackid(self):
         track = self.track.copy(musicbrainz_id='foo')
-        result = translator.track_to_mpd_format(self.track)
+        result = translator.track_to_mpd_format(track)
         self.assert_(('MUSICBRAINZ_TRACKID', 'foo') in result)
 
     def test_track_to_mpd_format_musicbrainz_albumid(self):
         album = self.track.album.copy(musicbrainz_id='foo')
         track = self.track.copy(album=album)
-        result = translator.track_to_mpd_format(self.track)
+        result = translator.track_to_mpd_format(track)
         self.assert_(('MUSICBRAINZ_ALBUMID', 'foo') in result)
 
     def test_track_to_mpd_format_musicbrainz_artistid(self):
         artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
         track = self.track.copy(artists=[artist])
-        result = translator.track_to_mpd_format(self.track)
+        result = translator.track_to_mpd_format(track)
         self.assert_(('MUSICBRAINZ_ARTISTID', 'foo') in result)
 
     def test_artists_to_mpd_format(self):
