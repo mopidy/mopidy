@@ -46,6 +46,15 @@ def translator(data):
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
+    if 'musicbrainz-trackid' in data:
+        track_kwargs['musicbrainz_id'] = data['musicbrainz-trackid']
+
+    if 'musicbrainz-artistid' in data:
+        artist_kwargs['musicbrainz_id'] = data['musicbrainz-artistid']
+
+    if 'musicbrainz-albumid' in data:
+        album_kwargs['musicbrainz_id'] = data['musicbrainz-albumid']
+
     track_kwargs['uri'] = data['uri']
     track_kwargs['length'] = data['duration']
     track_kwargs['album'] = Album(**album_kwargs)
