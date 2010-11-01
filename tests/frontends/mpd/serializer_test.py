@@ -10,6 +10,17 @@ from mopidy.models import Album, Artist, Playlist, Track
 from tests import data_folder, SkipTest
 
 class TrackMpdFormatTest(unittest.TestCase):
+    track = Track(
+        uri=u'a uri',
+        artists=[Artist(name=u'an artist')],
+        name=u'a name',
+        album=Album(name=u'an album', num_tracks=13,
+            artists=[Artist(name=u'an other artist')]),
+        track_no=7,
+        date=dt.date(1977, 1, 1),
+        length=137000,
+    )
+
     def setUp(self):
         settings.LOCAL_MUSIC_PATH = '/dir/subdir'
         mtime.set_fake_time(1234567)
@@ -43,17 +54,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Id', 2) in result)
 
     def test_track_to_mpd_format_for_nonempty_track(self):
-        track = Track(
-            uri=u'a uri',
-            artists=[Artist(name=u'an artist')],
-            name=u'a name',
-            album=Album(name=u'an album', num_tracks=13,
-                artists=[Artist(name=u'an other artist')]),
-            track_no=7,
-            date=dt.date(1977, 1, 1),
-            length=137000,
-        )
-        result = translator.track_to_mpd_format(track, position=9, cpid=122)
+        result = translator.track_to_mpd_format(self.track, position=9, cpid=122)
         self.assert_(('file', 'a uri') in result)
         self.assert_(('Time', 137) in result)
         self.assert_(('Artist', 'an artist') in result)
