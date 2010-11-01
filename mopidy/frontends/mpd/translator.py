@@ -141,6 +141,7 @@ def _add_to_tag_cache(result, folders, files):
         path = uri_to_path(track_result['file'])
         track_result['mtime'] = get_mtime(path)
         track_result['file'] = re.sub(regexp, '', path)
+        track_result['key'] = os.path.basename(track_result['file'])
         track_result = order_mpd_track_info(track_result.items())
         result.extend(track_result)
     result.append(('songList end',))

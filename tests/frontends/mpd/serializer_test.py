@@ -101,6 +101,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         result = dict(translator.track_to_mpd_format(track))
         result['file'] = uri_to_path(result['file'])
         result['file'] = result['file'][len(folder)+1:]
+        result['key'] = os.path.basename(result['file'])
         result['mtime'] = mtime('')
         return translator.order_mpd_track_info(result.items())
 
