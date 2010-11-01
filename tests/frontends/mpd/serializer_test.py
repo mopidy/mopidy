@@ -42,21 +42,6 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Pos', 1) in result)
         self.assert_(('Id', 2) in result)
 
-    def test_track_to_mpd_format_with_key(self):
-        track = Track(uri='file:///dir/subdir/file.mp3')
-        result = translator.track_to_mpd_format(track, key=True)
-        self.assert_(('key', 'file.mp3') in result)
-
-    def test_track_to_mpd_format_with_key_not_uri_encoded(self):
-        track = Track(uri='file:///dir/subdir/file%20test.mp3')
-        result = translator.track_to_mpd_format(track, key=True)
-        self.assert_(('key', 'file test.mp3') in result)
-
-    def test_track_to_mpd_format_with_mtime(self):
-        uri = translator.path_to_uri(data_folder('blank.mp3'))
-        result = translator.track_to_mpd_format(Track(uri=uri), mtime=True)
-        self.assert_(('mtime', 1234567) in result)
-
     def test_track_to_mpd_format_for_nonempty_track(self):
         track = Track(
             uri=u'a uri',

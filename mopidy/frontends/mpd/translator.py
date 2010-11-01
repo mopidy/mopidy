@@ -6,7 +6,7 @@ from mopidy.utils.path import mtime as get_mtime
 from mopidy.frontends.mpd import protocol
 from mopidy.utils.path import path_to_uri, uri_to_path, split_path
 
-def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False):
+def track_to_mpd_format(track, position=None, cpid=None):
     """
     Format track for output to MPD client.
 
@@ -41,10 +41,6 @@ def track_to_mpd_format(track, position=None, cpid=None, key=False, mtime=False)
     if position is not None and cpid is not None:
         result.append(('Pos', position))
         result.append(('Id', cpid))
-    if key and track.uri:
-        result.insert(0, ('key', os.path.basename(uri_to_path(track.uri))))
-    if mtime and track.uri:
-        result.append(('mtime', get_mtime(uri_to_path(track.uri))))
     return result
 
 MPD_KEY_ORDER = '''
