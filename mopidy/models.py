@@ -49,9 +49,9 @@ class ImmutableObject(object):
             # Return an album with a new number of tracks
             Album(num_tracks=2).copy(num_tracks=5)
 
-            :param values: the model field to modify
-            :type values: dict
-            :rtype: new instance of the model being copied
+        :param values: the model fields to modify
+        :type values: dict
+        :rtype: new instance of the model being copied
         """
         data = {}
         for key in self.__dict__.keys():
