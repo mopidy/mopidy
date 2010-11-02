@@ -1,4 +1,4 @@
-from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
+from mopidy.backends.base import (BaseBackend, CurrentPlaylistController,
     BasePlaybackController, BasePlaybackProvider, BaseLibraryController,
     BaseLibraryProvider, BaseStoredPlaylistsController,
     BaseStoredPlaylistsProvider)
@@ -26,7 +26,7 @@ class DummyBackend(BaseBackend):
 
         self.core_queue = DummyQueue()
 
-        self.current_playlist = BaseCurrentPlaylistController(backend=self)
+        self.current_playlist = CurrentPlaylistController(backend=self)
 
         library_provider = DummyLibraryProvider(backend=self)
         self.library = BaseLibraryController(backend=self,

@@ -8,7 +8,7 @@ from mopidy.frontends.mpd import translator
 from mopidy.models import Playlist
 from mopidy.utils import get_class
 
-from .current_playlist import BaseCurrentPlaylistController
+from .current_playlist import CurrentPlaylistController
 from .library import BaseLibraryController, BaseLibraryProvider
 from .playback import BasePlaybackController, BasePlaybackProvider
 from .stored_playlists import (BaseStoredPlaylistsController,
@@ -42,7 +42,7 @@ class BaseBackend(object):
     core_queue = None
 
     #: The current playlist controller. An instance of
-    #: :class:`mopidy.backends.base.BaseCurrentPlaylistController`.
+    #: :class:`mopidy.backends.base.CurrentPlaylistController`.
     current_playlist = None
 
     #: The library controller. An instance of

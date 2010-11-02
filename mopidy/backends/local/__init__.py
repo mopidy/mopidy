@@ -5,7 +5,7 @@ import os
 import shutil
 
 from mopidy import settings
-from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
+from mopidy.backends.base import (BaseBackend, CurrentPlaylistController,
     BaseLibraryController, BaseLibraryProvider, BasePlaybackController,
     BasePlaybackProvider, BaseStoredPlaylistsController,
     BaseStoredPlaylistsProvider)
@@ -32,7 +32,7 @@ class LocalBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(LocalBackend, self).__init__(*args, **kwargs)
 
-        self.current_playlist = BaseCurrentPlaylistController(backend=self)
+        self.current_playlist = CurrentPlaylistController(backend=self)
 
         library_provider = LocalLibraryProvider(backend=self)
         self.library = BaseLibraryController(backend=self,

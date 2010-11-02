@@ -40,7 +40,7 @@ Current playlist controller
 
 Manages everything related to the currently loaded playlist.
 
-.. autoclass:: mopidy.backends.base.BaseCurrentPlaylistController
+.. autoclass:: mopidy.backends.base.CurrentPlaylistController
     :members:
     :undoc-members:
 

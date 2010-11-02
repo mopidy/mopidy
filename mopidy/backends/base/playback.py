@@ -331,7 +331,7 @@ class BasePlaybackController(object):
         """
         Tell the playback controller that the current playlist has changed.
 
-        Used by :class:`mopidy.backends.base.BaseCurrentPlaylistController`.
+        Used by :class:`mopidy.backends.base.CurrentPlaylistController`.
         """
         self._first_shuffle = True
         self._shuffled = []
