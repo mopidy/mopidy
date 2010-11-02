@@ -12,6 +12,19 @@ No description yet.
 
 **Changes**
 
+- Settings:
+
+  - Automatically expand ``~`` to the user's home directory in settings with
+    names ending in ``_PATH`` or ``_FILE``.
+  - Rename the following settings. The settings validator will warn you if you
+    need to change your local settings.
+
+      - ``LOCAL_MUSIC_FOLDER`` to :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
+      - ``LOCAL_PLAYLIST_FOLDER`` to
+        :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
+      - ``LOCAL_TAG_CACHE`` to :attr:`mopidy.settings.LOCAL_TAG_CACHE_PATH`
+      - ``SPOTIFY_LIB_CACHE`` to :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
+
 - Packaging and distribution:
 
   - Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
@@ -22,11 +35,14 @@ No description yet.
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
     any help from the original MPD server.
+  - Support UTF-8 encoded tag caches with non-ASCII characters.
 
 - Models:
 
   - Rename and generalize ``Playlist._with(**kwargs)`` to
     :meth:`mopidy.models.ImmutableObject.copy`.
+  - Add ``musicbrainz_id`` field to :class:`mopidy.models.Artist`,
+    :class:`mopidy.models.Album`, and :class:`mopidy.models.Track`.
 
 - Introduce the :ref:`provider concept <backend-concepts>`. Split the backend
   API into a :ref:`backend controller API <backend-controller-api>` (for
