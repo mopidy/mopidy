@@ -28,6 +28,7 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz-trackid': 'mbtrackid',
             'musicbrainz-albumid': 'mbalbumid',
             'musicbrainz-artistid': 'mbartistid',
+            'musicbrainz-albumartistid': 'mbalbumartistid',
         }
 
         self.album = {
@@ -43,6 +44,7 @@ class TranslatorTest(unittest.TestCase):
 
         self.albumartist = {
             'name': 'albumartistname',
+            'musicbrainz_id': 'mbalbumartistid',
         }
 
         self.track = {
@@ -112,6 +114,11 @@ class TranslatorTest(unittest.TestCase):
     def test_missing_album_artist(self):
         del self.data['album-artist']
         del self.albumartist['name']
+        self.check()
+
+    def test_missing_album_artist_musicbrainz_id(self):
+        del self.data['musicbrainz-albumartistid']
+        del self.albumartist['musicbrainz_id']
         self.check()
 
     def test_missing_date(self):
