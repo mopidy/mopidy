@@ -3,7 +3,7 @@ from mopidy.models import Playlist, Track, Album, Artist
 
 from tests import SkipTest, data_folder
 
-class BaseLibraryControllerTest(object):
+class LibraryControllerTest(object):
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
     albums = [Album(name='album1', artists=artists[:1]),
         Album(name='album2', artists=artists[1:2]),

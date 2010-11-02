@@ -9,7 +9,7 @@ from mopidy.models import Playlist
 from mopidy.utils import get_class
 
 from .current_playlist import CurrentPlaylistController
-from .library import BaseLibraryController, BaseLibraryProvider
+from .library import LibraryController, BaseLibraryProvider
 from .playback import BasePlaybackController, BasePlaybackProvider
 from .stored_playlists import (BaseStoredPlaylistsController,
     BaseStoredPlaylistsProvider)
@@ -46,7 +46,7 @@ class BaseBackend(object):
     current_playlist = None
 
     #: The library controller. An instance of
-    # :class:`mopidy.backends.base.BaseLibraryController`.
+    # :class:`mopidy.backends.base.LibraryController`.
     library = None
 
     #: The sound mixer. An instance of :class:`mopidy.mixers.BaseMixer`.

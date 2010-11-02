@@ -2,7 +2,7 @@ import logging
 
 logger = logging.getLogger('mopidy.backends.base')
 
-class BaseLibraryController(object):
+class LibraryController(object):
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`BaseBackend`
@@ -93,7 +93,7 @@ class BaseLibraryProvider(object):
 
     def find_exact(self, **query):
         """
-        See :meth:`mopidy.backends.base.BaseLibraryController.find_exact`.
+        See :meth:`mopidy.backends.base.LibraryController.find_exact`.
 
         *MUST be implemented by subclass.*
         """
@@ -101,7 +101,7 @@ class BaseLibraryProvider(object):
 
     def lookup(self, uri):
         """
-        See :meth:`mopidy.backends.base.BaseLibraryController.lookup`.
+        See :meth:`mopidy.backends.base.LibraryController.lookup`.
 
         *MUST be implemented by subclass.*
         """
@@ -109,7 +109,7 @@ class BaseLibraryProvider(object):
 
     def refresh(self, uri=None):
         """
-        See :meth:`mopidy.backends.base.BaseLibraryController.refresh`.
+        See :meth:`mopidy.backends.base.LibraryController.refresh`.
 
         *MUST be implemented by subclass.*
         """
@@ -117,7 +117,7 @@ class BaseLibraryProvider(object):
 
     def search(self, **query):
         """
-        See :meth:`mopidy.backends.base.BaseLibraryController.search`.
+        See :meth:`mopidy.backends.base.LibraryController.search`.
 
         *MUST be implemented by subclass.*
         """

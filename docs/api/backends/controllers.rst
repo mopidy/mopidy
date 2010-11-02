@@ -60,6 +60,6 @@ Library controller
 
 Manages the music library, e.g. searching for tracks to be added to a playlist.
 
-.. autoclass:: mopidy.backends.base.BaseLibraryController
+.. autoclass:: mopidy.backends.base.LibraryController
     :members:
     :undoc-members:

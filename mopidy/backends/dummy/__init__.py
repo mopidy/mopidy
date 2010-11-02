@@ -1,5 +1,5 @@
 from mopidy.backends.base import (BaseBackend, CurrentPlaylistController,
-    BasePlaybackController, BasePlaybackProvider, BaseLibraryController,
+    BasePlaybackController, BasePlaybackProvider, LibraryController,
     BaseLibraryProvider, BaseStoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist
@@ -29,7 +29,7 @@ class DummyBackend(BaseBackend):
         self.current_playlist = CurrentPlaylistController(backend=self)
 
         library_provider = DummyLibraryProvider(backend=self)
-        self.library = BaseLibraryController(backend=self,
+        self.library = LibraryController(backend=self,
             provider=library_provider)
 
         playback_provider = DummyPlaybackProvider(backend=self)
