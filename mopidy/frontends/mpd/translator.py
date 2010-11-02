@@ -46,9 +46,11 @@ def track_to_mpd_format(track, position=None, cpid=None):
     # FIXME don't use first and best artist?
     # FIXME don't duplicate following code?
     if track.album is not None and track.album.artists:
-        artists = filter(lambda a: a.musicbrainz_id is not None, track.album.artists)
+        artists = filter(lambda a: a.musicbrainz_id is not None,
+            track.album.artists)
         if artists:
-            result.append(('MUSICBRAINZ_ALBUMARTISTID', artists[0].musicbrainz_id))
+            result.append(
+                ('MUSICBRAINZ_ALBUMARTISTID', artists[0].musicbrainz_id))
     if track.artists:
         artists = filter(lambda a: a.musicbrainz_id is not None, track.artists)
         if artists:

@@ -61,7 +61,8 @@ class ImmutableObject(object):
             if hasattr(self, key):
                 data[key] = values.pop(key)
         if values:
-            raise TypeError("copy() got an unexpected keyword argument '%s'" % key)
+            raise TypeError("copy() got an unexpected keyword argument '%s'"
+                % key)
         return self.__class__(**data)
 
 class Artist(ImmutableObject):
