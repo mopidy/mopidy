@@ -9,6 +9,7 @@ Time: 4
 Artist: name
 Title: trackname
 Album: albumname
+AlbumArtist: albumartistname
 Track: 1/2
 Date: 2006
 MUSICBRAINZ_ALBUMID: cb5f1603-d314-4c9c-91e5-e295cfb125d2
