@@ -38,15 +38,29 @@ class ImmutableObject(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def copy(self, **kwargs):
+    def copy(self, **values):
+        """
+        Copy the model with ``field`` updated to new value.
+
+        Examples::
+
+            # Returns a track with a new name
+            Track(name='foo').copy(name='bar')
+            # Return an album with a new number of tracks
+            Album(num_tracks=2).copy(num_tracks=5)
+
+            :param values: the model field to modify
+            :type values: dict
+            :rtype: new instance of the model being copied
+        """
         data = {}
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
-            data[public_key] = kwargs.pop(public_key, self.__dict__[key])
-        for key in kwargs.keys():
+            data[public_key] = values.pop(public_key, self.__dict__[key])
+        for key in values.keys():
             if hasattr(self, key):
-                data[key] = kwargs.pop(key)
-        if kwargs:
+                data[key] = values.pop(key)
+        if values:
             raise TypeError("copy() got an unexpected keyword argument '%s'" % key)
         return self.__class__(**data)
 
@@ -56,7 +70,7 @@ class Artist(ImmutableObject):
     :type uri: string
     :param name: artist name
     :type name: string
-    :param musicbrainz_id: musicbrainz id
+    :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     """
 
@@ -66,7 +80,7 @@ class Artist(ImmutableObject):
     #: The artist name. Read-only.
     name = None
 
-    #: The musicbrainz id of the artist. Read-only.
+    #: The MusicBrainz ID of the artist. Read-only.
     musicbrainz_id = None
 
 
@@ -80,7 +94,7 @@ class Album(ImmutableObject):
     :type artists: list of :class:`Artist`
     :param num_tracks: number of tracks in album
     :type num_tracks: integer
-    :param musicbrainz_id: musicbrainz id
+    :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     """
 
@@ -93,7 +107,7 @@ class Album(ImmutableObject):
     #: The number of tracks in the album. Read-only.
     num_tracks = 0
 
-    #: The musicbrainz id of the album. Read-only.
+    #: The MusicBrainz ID of the album. Read-only.
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
@@ -124,7 +138,7 @@ class Track(ImmutableObject):
     :type length: integer
     :param bitrate: bitrate in kbit/s
     :type bitrate: integer
-    :param musicbrainz_id: musicbrainz id
+    :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     """
 
@@ -149,7 +163,7 @@ class Track(ImmutableObject):
     #: The track's bitrate in kbit/s. Read-only.
     bitrate = None
 
-    #: The musicbrainz id of the track. Read-only.
+    #: The MusicBrainz ID of the track. Read-only.
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
