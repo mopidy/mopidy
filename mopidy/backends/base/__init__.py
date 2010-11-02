@@ -9,7 +9,7 @@ from mopidy.models import Playlist
 from mopidy.utils import get_class
 
 from .current_playlist import BaseCurrentPlaylistController
-from .library import BaseLibraryController
+from .library import BaseLibraryController, BaseLibraryProvider
 from .playback import BasePlaybackController, BasePlaybackProvider
 from .stored_playlists import (BaseStoredPlaylistsController,
     BaseStoredPlaylistsProvider)

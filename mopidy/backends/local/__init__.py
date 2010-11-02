@@ -5,10 +5,10 @@ import os
 import shutil
 
 from mopidy import settings
-from mopidy.backends.base import (BaseBackend,
-    BaseCurrentPlaylistController, BaseLibraryController,
-    BasePlaybackController, BasePlaybackProvider,
-    BaseStoredPlaylistsController, BaseStoredPlaylistsProvider)
+from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
+    BaseLibraryController, BaseLibraryProvider, BasePlaybackController,
+    BasePlaybackProvider, BaseStoredPlaylistsController,
+    BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
 from mopidy.utils.process import pickle_connection
 
@@ -32,17 +32,19 @@ class LocalBackend(BaseBackend):
     def __init__(self, *args, **kwargs):
         super(LocalBackend, self).__init__(*args, **kwargs)
 
-        self.library = LocalLibraryController(backend=self)
-
-        stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
-        self.stored_playlists = BaseStoredPlaylistsController(backend=self,
-            provider=stored_playlists_provider)
-
         self.current_playlist = BaseCurrentPlaylistController(backend=self)
+
+        library_provider = LocalLibraryProvider(backend=self)
+        self.library = BaseLibraryController(backend=self,
+            provider=library_provider)
 
         playback_provider = LocalPlaybackProvider(backend=self)
         self.playback = LocalPlaybackController(backend=self,
             provider=playback_provider)
+
+        stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
+        self.stored_playlists = BaseStoredPlaylistsController(backend=self,
+            provider=stored_playlists_provider)
 
         self.uri_handlers = [u'file://']
 
@@ -149,9 +151,9 @@ class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
         self._playlists.append(playlist)
 
 
-class LocalLibraryController(BaseLibraryController):
+class LocalLibraryProvider(BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
-        super(LocalLibraryController, self).__init__(*args, **kwargs)
+        super(LocalLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
         self.refresh()
 

@@ -1,6 +1,7 @@
 from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
     BasePlaybackController, BasePlaybackProvider, BaseLibraryController,
-    BaseStoredPlaylistsController, BaseStoredPlaylistsProvider)
+    BaseLibraryProvider, BaseStoredPlaylistsController,
+    BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist
 
 
@@ -27,7 +28,9 @@ class DummyBackend(BaseBackend):
 
         self.current_playlist = BaseCurrentPlaylistController(backend=self)
 
-        self.library = DummyLibraryController(backend=self)
+        library_provider = DummyLibraryProvider(backend=self)
+        self.library = BaseLibraryController(backend=self,
+            provider=library_provider)
 
         playback_provider = DummyPlaybackProvider(backend=self)
         self.playback = BasePlaybackController(backend=self,
@@ -40,8 +43,10 @@ class DummyBackend(BaseBackend):
         self.uri_handlers = [u'dummy:']
 
 
-class DummyLibraryController(BaseLibraryController):
-    _library = []
+class DummyLibraryProvider(BaseLibraryProvider):
+    def __init__(self, *args, **kwargs):
+        super(DummyLibraryProvider, self).__init__(*args, **kwargs)
+        self._library = []
 
     def find_exact(self, **query):
         return Playlist()

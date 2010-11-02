@@ -8,12 +8,13 @@ class BaseLibraryController(object):
     :type backend: :class:`BaseBackend`
     """
 
-    def __init__(self, backend):
+    def __init__(self, backend, provider):
         self.backend = backend
+        self.provider = provider
 
     def destroy(self):
         """Cleanup after component."""
-        pass
+        self.provider.destroy()
 
     def find_exact(self, **query):
         """
@@ -32,7 +33,7 @@ class BaseLibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        raise NotImplementedError
+        return self.provider.find_exact(**query)
 
     def lookup(self, uri):
         """
@@ -42,7 +43,7 @@ class BaseLibraryController(object):
         :type uri: string
         :rtype: :class:`mopidy.models.Track` or :class:`None`
         """
-        raise NotImplementedError
+        return self.provider.lookup(uri)
 
     def refresh(self, uri=None):
         """
@@ -51,7 +52,7 @@ class BaseLibraryController(object):
         :param uri: directory or track URI
         :type uri: string
         """
-        raise NotImplementedError
+        return self.provider.refresh(uri)
 
     def search(self, **query):
         """
@@ -69,5 +70,55 @@ class BaseLibraryController(object):
         :param query: one or more queries to search for
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
+        """
+        return self.provider.search(**query)
+
+
+class BaseLibraryProvider(object):
+    """
+    :param backend: backend the controller is a part of
+    :type backend: :class:`BaseBackend`
+    """
+
+    def __init__(self, backend):
+        self.backend = backend
+
+    def destroy(self):
+        """
+        Cleanup after component.
+
+        *MAY be implemented by subclasses.*
+        """
+        pass
+
+    def find_exact(self, **query):
+        """
+        See :meth:`mopidy.backends.base.BaseLibraryController.find_exact`.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def lookup(self, uri):
+        """
+        See :meth:`mopidy.backends.base.BaseLibraryController.lookup`.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def refresh(self, uri=None):
+        """
+        See :meth:`mopidy.backends.base.BaseLibraryController.refresh`.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def search(self, **query):
+        """
+        See :meth:`mopidy.backends.base.BaseLibraryController.search`.
+
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError

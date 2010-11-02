@@ -3,14 +3,14 @@ import multiprocessing
 
 from spotify import Link, SpotifyError
 
-from mopidy.backends.base import BaseLibraryController
+from mopidy.backends.base import BaseLibraryProvider
 from mopidy.backends.libspotify import ENCODING
 from mopidy.backends.libspotify.translator import LibspotifyTranslator
 from mopidy.models import Playlist
 
 logger = logging.getLogger('mopidy.backends.libspotify.library')
 
-class LibspotifyLibraryController(BaseLibraryController):
+class LibspotifyLibraryProvider(BaseLibraryProvider):
     def find_exact(self, **query):
         return self.search(**query)
 

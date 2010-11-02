@@ -25,6 +25,14 @@ Stored playlists provider
     :undoc-members:
 
 
+Library provider
+================
+
+.. autoclass:: mopidy.backends.base.BaseLibraryProvider
+    :members:
+    :undoc-members:
+
+
 Backend provider implementations
 ================================
 
