@@ -1,6 +1,6 @@
-********************
-:mod:`mopidy.mixers`
-********************
+*********
+Mixer API
+*********
 
 Mixers are responsible for controlling volume. Clients of the mixers will
 simply instantiate a mixer and read/write to the ``volume`` attribute::
@@ -23,10 +23,6 @@ the computer running Mopidy through the use of custom mixer implementations. To
 enable one of the hardware device mixers, you must the set
 :attr:`mopidy.settings.MIXER` setting to point to one of the classes found
 below, and possibly add some extra settings required by the mixer you choose.
-
-
-Mixer API
-=========
 
 All mixers should subclass :class:`mopidy.mixers.BaseMixer` and override
 methods as described below.
