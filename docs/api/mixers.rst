@@ -24,10 +24,10 @@ enable one of the hardware device mixers, you must the set
 :attr:`mopidy.settings.MIXER` setting to point to one of the classes found
 below, and possibly add some extra settings required by the mixer you choose.
 
-All mixers should subclass :class:`mopidy.mixers.BaseMixer` and override
+All mixers should subclass :class:`mopidy.mixers.base.BaseMixer` and override
 methods as described below.
 
-.. automodule:: mopidy.mixers
+.. automodule:: mopidy.mixers.base
     :synopsis: Mixer API
     :members:
     :undoc-members:

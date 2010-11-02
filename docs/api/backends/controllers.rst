@@ -32,7 +32,7 @@ seek.
 Mixer controller
 ================
 
-Manages volume. See :class:`mopidy.mixers.BaseMixer`.
+Manages volume. See :class:`mopidy.mixers.base.BaseMixer`.
 
 
 Current playlist controller
