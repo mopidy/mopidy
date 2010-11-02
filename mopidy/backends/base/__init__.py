@@ -16,10 +16,6 @@ from .stored_playlists import (BaseStoredPlaylistsController,
 
 logger = logging.getLogger('mopidy.backends.base')
 
-__all__ = ['BaseBackend', 'BasePlaybackController', 'BasePlaybackProvider',
-    'BaseCurrentPlaylistController', 'BaseStoredPlaylistsController',
-    'BaseLibraryController']
-
 class BaseBackend(object):
     """
     :param core_queue: a queue for sending messages to
