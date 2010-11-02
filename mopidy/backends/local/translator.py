@@ -96,24 +96,30 @@ def _convert_mpd_data(data, tracks, music_dir):
 
     track_kwargs = {}
     album_kwargs = {}
+    artist_kwargs = {}
 
     if 'track' in data:
         album_kwargs['num_tracks'] = int(data['track'].split('/')[1])
         track_kwargs['track_no'] = int(data['track'].split('/')[0])
 
     if 'artist' in data:
-        artist = Artist(name=data['artist'])
-        track_kwargs['artists'] = [artist]
-        album_kwargs['artists'] = [artist]
+        artist_kwargs['name'] = data['artist']
 
     # FIXME Newer mpd tag caches support albumartist names
     if 'album' in data:
         album_kwargs['name'] = data['album']
-        album = Album(**album_kwargs)
-        track_kwargs['album'] = album
 
     if 'title' in data:
         track_kwargs['name'] = data['title']
+
+    if 'musicbrainz_trackid' in data:
+        track_kwargs['musicbrainz_id'] = data['musicbrainz_trackid']
+
+    if 'musicbrainz_albumid' in data:
+        album_kwargs['musicbrainz_id'] = data['musicbrainz_albumid']
+
+    if 'musicbrainz_artistid' in data:
+        artist_kwargs['musicbrainz_id'] = data['musicbrainz_artistid']
 
     # FIXME what if file is uri - generated tag cache needs to allways make
     # LOCAL_MUSIC_PATH relative paths or this code must handle uris
@@ -122,7 +128,14 @@ def _convert_mpd_data(data, tracks, music_dir):
     else:
         path = data['file']
 
-    # FIXME newer mpd tag caches provide musicbrainz ids
+    if artist_kwargs:
+        artist = Artist(**artist_kwargs)
+        album_kwargs['artists'] = [artist]
+        track_kwargs['artists'] = [artist]
+    
+    if album_kwargs:
+        album = Album(**album_kwargs)
+        track_kwargs['album'] = album
 
     track_kwargs['uri'] = path_to_uri(music_dir, path)
     track_kwargs['length'] = int(data.get('time', 0)) * 1000

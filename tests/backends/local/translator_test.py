@@ -138,4 +138,15 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         self.assertEqual(set([Track(uri=uri, length=4000)]), tracks)
 
     def test_musicbrainz_tagcache(self):
+        tracks = parse_mpd_tag_cache(data_folder('musicbrainz_tag_cache'),
+            data_folder(''))
+        artist = list(expected_tracks[0].artists)[0].copy(
+            musicbrainz_id='7364dea6-ca9a-48e3-be01-b44ad0d19897')
+        album = expected_tracks[0].album.copy(artists=[artist],
+            musicbrainz_id='cb5f1603-d314-4c9c-91e5-e295cfb125d2')
+        track = expected_tracks[0].copy(artists=[artist], album=album,
+            musicbrainz_id='90488461-8c1f-4a4e-826b-4c6dc70801f0')
+        self.assertEqual(track, list(tracks)[0])
+
+    def test_albumartist_tag_cache(self):
         raise SkipTest
