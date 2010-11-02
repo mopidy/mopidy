@@ -8,7 +8,7 @@ from mopidy.models import Playlist
 
 from tests import SkipTest, data_folder
 
-class BaseStoredPlaylistsControllerTest(object):
+class StoredPlaylistsControllerTest(object):
     def setUp(self):
         settings.LOCAL_PLAYLIST_PATH = tempfile.mkdtemp()
         settings.LOCAL_TAG_CACHE_FILE = data_folder('library_tag_cache')

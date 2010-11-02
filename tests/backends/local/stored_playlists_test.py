@@ -16,10 +16,10 @@ from mopidy.utils.path import path_to_uri
 
 from tests import data_folder
 from tests.backends.base.stored_playlists import \
-    BaseStoredPlaylistsControllerTest
+    StoredPlaylistsControllerTest
 from tests.backends.local import generate_song
 
-class LocalStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
+class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
         unittest.TestCase):
 
     backend_class = LocalBackend

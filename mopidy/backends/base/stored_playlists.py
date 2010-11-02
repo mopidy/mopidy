@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger('mopidy.backends.base')
 
-class BaseStoredPlaylistsController(object):
+class StoredPlaylistsController(object):
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`BaseBackend`
@@ -94,7 +94,7 @@ class BaseStoredPlaylistsController(object):
     def refresh(self):
         """
         Refresh the stored playlists in
-        :attr:`mopidy.backends.base.BaseStoredPlaylistsController.playlists`.
+        :attr:`mopidy.backends.base.StoredPlaylistsController.playlists`.
         """
         return self.provider.refresh()
 
@@ -152,7 +152,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def create(self, name):
         """
-        See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.create`.
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.create`.
 
         *MUST be implemented by subclass.*
         """
@@ -160,7 +160,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def delete(self, playlist):
         """
-        See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.delete`.
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.delete`.
 
         *MUST be implemented by subclass.*
         """
@@ -168,7 +168,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def lookup(self, uri):
         """
-        See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.lookup`.
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.lookup`.
 
         *MUST be implemented by subclass.*
         """
@@ -176,7 +176,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def refresh(self):
         """
-        See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.refresh`.
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.refresh`.
 
         *MUST be implemented by subclass.*
         """
@@ -184,7 +184,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def rename(self, playlist, new_name):
         """
-        See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.rename`.
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.rename`.
 
         *MUST be implemented by subclass.*
         """
@@ -192,7 +192,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def save(self, playlist):
         """
-        See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.save`.
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.save`.
 
         *MUST be implemented by subclass.*
         """

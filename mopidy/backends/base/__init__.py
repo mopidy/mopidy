@@ -11,7 +11,7 @@ from mopidy.utils import get_class
 from .current_playlist import CurrentPlaylistController
 from .library import LibraryController, BaseLibraryProvider
 from .playback import BasePlaybackController, BasePlaybackProvider
-from .stored_playlists import (BaseStoredPlaylistsController,
+from .stored_playlists import (StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 
 logger = logging.getLogger('mopidy.backends.base')
@@ -57,7 +57,7 @@ class BaseBackend(object):
     playback = None
 
     #: The stored playlists controller. An instance of
-    #: :class:`mopidy.backends.base.BaseStoredPlaylistsController`.
+    #: :class:`mopidy.backends.base.StoredPlaylistsController`.
     stored_playlists = None
 
     #: List of URI prefixes this backend can handle.

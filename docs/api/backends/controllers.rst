@@ -50,7 +50,7 @@ Stored playlists controller
 
 Manages stored playlist.
 
-.. autoclass:: mopidy.backends.base.BaseStoredPlaylistsController
+.. autoclass:: mopidy.backends.base.StoredPlaylistsController
     :members:
     :undoc-members:
 

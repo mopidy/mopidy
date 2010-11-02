@@ -7,7 +7,7 @@ import shutil
 from mopidy import settings
 from mopidy.backends.base import (BaseBackend, CurrentPlaylistController,
     LibraryController, BaseLibraryProvider, BasePlaybackController,
-    BasePlaybackProvider, BaseStoredPlaylistsController,
+    BasePlaybackProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
 from mopidy.utils.process import pickle_connection
@@ -43,7 +43,7 @@ class LocalBackend(BaseBackend):
             provider=playback_provider)
 
         stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
-        self.stored_playlists = BaseStoredPlaylistsController(backend=self,
+        self.stored_playlists = StoredPlaylistsController(backend=self,
             provider=stored_playlists_provider)
 
         self.uri_handlers = [u'file://']
