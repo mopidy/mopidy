@@ -6,6 +6,8 @@ class LibraryController(object):
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`BaseBackend`
+    :param provider: provider the controller should use
+    :type provider: instance of :class:`BaseLibraryProvider`
     """
 
     def __init__(self, backend, provider):
