@@ -96,7 +96,7 @@ class BaseStoredPlaylistsController(object):
         Refresh the stored playlists in
         :attr:`mopidy.backends.base.BaseStoredPlaylistsController.playlists`.
         """
-        return self.provider.refresh(uri)
+        return self.provider.refresh()
 
     def rename(self, playlist, new_name):
         """
