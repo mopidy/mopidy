@@ -97,6 +97,7 @@ def _convert_mpd_data(data, tracks, music_dir):
     track_kwargs = {}
     album_kwargs = {}
     artist_kwargs = {}
+    albumartist_kwargs = {}
 
     if 'track' in data:
         album_kwargs['num_tracks'] = int(data['track'].split('/')[1])
@@ -104,6 +105,10 @@ def _convert_mpd_data(data, tracks, music_dir):
 
     if 'artist' in data:
         artist_kwargs['name'] = data['artist']
+        albumartist_kwargs['name'] = data['artist']
+
+    if 'albumartist' in data:
+        albumartist_kwargs['name'] = data['albumartist']
 
     if 'album' in data:
         album_kwargs['name'] = data['album']
@@ -120,6 +125,9 @@ def _convert_mpd_data(data, tracks, music_dir):
     if 'musicbrainz_artistid' in data:
         artist_kwargs['musicbrainz_id'] = data['musicbrainz_artistid']
 
+    if 'musicbrainz_albumartistid' in data:
+        albumartist_kwargs['musicbrainz_id'] = data['musicbrainz_albumartistid']
+
     if data['file'][0] == '/':
         path = data['file'][1:]
     else:
@@ -127,8 +135,11 @@ def _convert_mpd_data(data, tracks, music_dir):
 
     if artist_kwargs:
         artist = Artist(**artist_kwargs)
-        album_kwargs['artists'] = [artist]
         track_kwargs['artists'] = [artist]
+
+    if albumartist_kwargs:
+        albumartist = Artist(**albumartist_kwargs)
+        album_kwargs['artists'] = [albumartist]
     
     if album_kwargs:
         album = Album(**album_kwargs)

@@ -149,4 +149,11 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         self.assertEqual(track, list(tracks)[0])
 
     def test_albumartist_tag_cache(self):
-        raise SkipTest
+        tracks = parse_mpd_tag_cache(data_folder('albumartist_tag_cache'),
+            data_folder(''))
+        uri = path_to_uri(data_folder('song1.mp3'))
+        artist = Artist(name='albumartistname')
+        album = expected_albums[0].copy(artists=[artist])
+        track = Track(name='trackname', artists=expected_artists, track_no=1,
+            album=album, length=4000, uri=uri)
+        self.assertEqual(track, list(tracks)[0])
