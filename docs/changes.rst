@@ -14,15 +14,15 @@ No description yet.
 
 - Settings:
 
-  - Automatically expand ``~`` to the user's home directory in settings with
-    names ending in ``_PATH`` or ``_FILE``.
+  - Automatically expand ``~`` to the user's home directory and make the path
+    absolute for settings with names ending in ``_PATH`` or ``_FILE``.
   - Rename the following settings. The settings validator will warn you if you
     need to change your local settings.
 
       - ``LOCAL_MUSIC_FOLDER`` to :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
       - ``LOCAL_PLAYLIST_FOLDER`` to
         :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
-      - ``LOCAL_TAG_CACHE`` to :attr:`mopidy.settings.LOCAL_TAG_CACHE_PATH`
+      - ``LOCAL_TAG_CACHE`` to :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
       - ``SPOTIFY_LIB_CACHE`` to :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
 
 - Packaging and distribution:
