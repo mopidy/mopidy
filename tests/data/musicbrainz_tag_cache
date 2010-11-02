@@ -1,0 +1,20 @@
+info_begin
+mpd_version: 0.16.0
+fs_charset: UTF-8
+info_end
+songList begin
+key: song1.mp3
+file: /song1.mp3
+Time: 4
+Artist: name
+Title: trackname
+Album: albumname
+AlbumArtist: albumartistname
+Track: 1/2
+Date: 2006
+MUSICBRAINZ_ALBUMID: cb5f1603-d314-4c9c-91e5-e295cfb125d2
+MUSICBRAINZ_ALBUMARTISTID: 7364dea6-ca9a-48e3-be01-b44ad0d19897
+MUSICBRAINZ_ARTISTID: 7364dea6-ca9a-48e3-be01-b44ad0d19897
+MUSICBRAINZ_TRACKID: 90488461-8c1f-4a4e-826b-4c6dc70801f0
+mtime: 1272319626
+songList end

@@ -25,19 +25,26 @@ class TranslatorTest(unittest.TestCase):
             'date': FakeGstDate(2006, 1, 1,),
             'container-format': u'ID3 tag',
             'duration': 4531,
+            'musicbrainz-trackid': 'mbtrackid',
+            'musicbrainz-albumid': 'mbalbumid',
+            'musicbrainz-artistid': 'mbartistid',
+            'musicbrainz-albumartistid': 'mbalbumartistid',
         }
 
         self.album = {
             'name': 'albumname',
             'num_tracks': 2,
+            'musicbrainz_id': 'mbalbumid',
         }
 
         self.artist = {
             'name': 'name',
+            'musicbrainz_id': 'mbartistid',
         }
 
         self.albumartist = {
             'name': 'albumartistname',
+            'musicbrainz_id': 'mbalbumartistid',
         }
 
         self.track = {
@@ -46,6 +53,7 @@ class TranslatorTest(unittest.TestCase):
             'date': date(2006, 1, 1),
             'track_no': 1,
             'length': 4531,
+            'musicbrainz_id': 'mbtrackid',
         }
 
     def build_track(self):
@@ -78,9 +86,19 @@ class TranslatorTest(unittest.TestCase):
         del self.track['name']
         self.check()
 
+    def test_missing_track_musicbrainz_id(self):
+        del self.data['musicbrainz-trackid']
+        del self.track['musicbrainz_id']
+        self.check()
+
     def test_missing_album_name(self):
         del self.data['album']
         del self.album['name']
+        self.check()
+
+    def test_missing_album_musicbrainz_id(self):
+        del self.data['musicbrainz-albumid']
+        del self.album['musicbrainz_id']
         self.check()
 
     def test_missing_artist_name(self):
@@ -88,9 +106,19 @@ class TranslatorTest(unittest.TestCase):
         del self.artist['name']
         self.check()
 
+    def test_missing_artist_musicbrainz_id(self):
+        del self.data['musicbrainz-artistid']
+        del self.artist['musicbrainz_id']
+        self.check()
+
     def test_missing_album_artist(self):
         del self.data['album-artist']
         del self.albumartist['name']
+        self.check()
+
+    def test_missing_album_artist_musicbrainz_id(self):
+        del self.data['musicbrainz-albumartistid']
+        del self.albumartist['musicbrainz_id']
         self.check()
 
     def test_missing_date(self):

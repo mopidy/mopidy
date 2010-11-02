@@ -18,6 +18,8 @@ def translator(data):
     artist_kwargs = {}
     track_kwargs = {}
 
+    # FIXME replace with data.get('foo', None) ?
+
     if 'album' in data:
         album_kwargs['name'] = data['album']
 
@@ -40,6 +42,18 @@ def translator(data):
 
     if 'album-artist' in data:
         albumartist_kwargs['name'] = data['album-artist']
+
+    if 'musicbrainz-trackid' in data:
+        track_kwargs['musicbrainz_id'] = data['musicbrainz-trackid']
+
+    if 'musicbrainz-artistid' in data:
+        artist_kwargs['musicbrainz_id'] = data['musicbrainz-artistid']
+
+    if 'musicbrainz-albumid' in data:
+        album_kwargs['musicbrainz_id'] = data['musicbrainz-albumid']
+
+    if 'musicbrainz-albumartistid' in data:
+        albumartist_kwargs['musicbrainz_id'] = data['musicbrainz-albumartistid']
 
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]

@@ -62,6 +62,13 @@ class ArtistTest(unittest.TestCase):
         self.assertEqual(artist.name, name)
         self.assertRaises(AttributeError, setattr, artist, 'name', None)
 
+    def test_musicbrainz_id(self):
+        mb_id = u'mb-id'
+        artist = Artist(musicbrainz_id=mb_id)
+        self.assertEqual(artist.musicbrainz_id, mb_id)
+        self.assertRaises(AttributeError, setattr, artist,
+            'musicbrainz_id', None)
+
     def test_invalid_kwarg(self):
         test = lambda: Artist(foo='baz')
         self.assertRaises(TypeError, test)
@@ -78,9 +85,15 @@ class ArtistTest(unittest.TestCase):
         self.assertEqual(artist1, artist2)
         self.assertEqual(hash(artist1), hash(artist2))
 
+    def test_eq_musibrainz_id(self):
+        artist1 = Artist(musicbrainz_id=u'id')
+        artist2 = Artist(musicbrainz_id=u'id')
+        self.assertEqual(artist1, artist2)
+        self.assertEqual(hash(artist1), hash(artist2))
+
     def test_eq(self):
-        artist1 = Artist(uri=u'uri', name=u'name')
-        artist2 = Artist(uri=u'uri', name=u'name')
+        artist1 = Artist(uri=u'uri', name=u'name', musicbrainz_id='id')
+        artist2 = Artist(uri=u'uri', name=u'name', musicbrainz_id='id')
         self.assertEqual(artist1, artist2)
         self.assertEqual(hash(artist1), hash(artist2))
 
@@ -102,9 +115,15 @@ class ArtistTest(unittest.TestCase):
         self.assertNotEqual(artist1, artist2)
         self.assertNotEqual(hash(artist1), hash(artist2))
 
+    def test_ne_musicbrainz_id(self):
+        artist1 = Artist(musicbrainz_id=u'id1')
+        artist2 = Artist(musicbrainz_id=u'id2')
+        self.assertNotEqual(artist1, artist2)
+        self.assertNotEqual(hash(artist1), hash(artist2))
+
     def test_ne(self):
-        artist1 = Artist(uri=u'uri1', name=u'name1')
-        artist2 = Artist(uri=u'uri2', name=u'name2')
+        artist1 = Artist(uri=u'uri1', name=u'name1', musicbrainz_id='id1')
+        artist2 = Artist(uri=u'uri2', name=u'name2', musicbrainz_id='id2')
         self.assertNotEqual(artist1, artist2)
         self.assertNotEqual(hash(artist1), hash(artist2))
 
@@ -133,6 +152,13 @@ class AlbumTest(unittest.TestCase):
         album = Album(num_tracks=11)
         self.assertEqual(album.num_tracks, num_tracks)
         self.assertRaises(AttributeError, setattr, album, 'num_tracks', None)
+
+    def test_musicbrainz_id(self):
+        mb_id = u'mb-id'
+        album = Album(musicbrainz_id=mb_id)
+        self.assertEqual(album.musicbrainz_id, mb_id)
+        self.assertRaises(AttributeError, setattr, album,
+            'musicbrainz_id', None)
 
     def test_invalid_kwarg(self):
         test = lambda: Album(foo='baz')
@@ -171,10 +197,16 @@ class AlbumTest(unittest.TestCase):
         self.assertEqual(album1, album2)
         self.assertEqual(hash(album1), hash(album2))
 
+    def test_eq_musibrainz_id(self):
+        album1 = Album(musicbrainz_id=u'id')
+        album2 = Album(musicbrainz_id=u'id')
+        self.assertEqual(album1, album2)
+        self.assertEqual(hash(album1), hash(album2))
+
     def test_eq(self):
         artists = [Artist()]
-        album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2)
-        album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2)
+        album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2, musicbrainz_id='id')
+        album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2, musicbrainz_id='id')
         self.assertEqual(album1, album2)
         self.assertEqual(hash(album1), hash(album2))
 
@@ -208,11 +240,19 @@ class AlbumTest(unittest.TestCase):
         self.assertNotEqual(album1, album2)
         self.assertNotEqual(hash(album1), hash(album2))
 
+    def test_ne_musicbrainz_id(self):
+        album1 = Album(musicbrainz_id=u'id1')
+        album2 = Album(musicbrainz_id=u'id2')
+        self.assertNotEqual(album1, album2)
+        self.assertNotEqual(hash(album1), hash(album2))
+
     def test_ne(self):
         album1 = Album(name=u'name1', uri=u'uri1',
-            artists=[Artist(name=u'name1')], num_tracks=1)
+            artists=[Artist(name=u'name1')], num_tracks=1,
+            musicbrainz_id='id1')
         album2 = Album(name=u'name2', uri=u'uri2',
-            artists=[Artist(name=u'name2')], num_tracks=2)
+            artists=[Artist(name=u'name2')], num_tracks=2,
+            musicbrainz_id='id2')
         self.assertNotEqual(album1, album2)
         self.assertNotEqual(hash(album1), hash(album2))
 
@@ -265,6 +305,13 @@ class TrackTest(unittest.TestCase):
         track = Track(bitrate=bitrate)
         self.assertEqual(track.bitrate, bitrate)
         self.assertRaises(AttributeError, setattr, track, 'bitrate', None)
+
+    def test_musicbrainz_id(self):
+        mb_id = u'mb-id'
+        track = Track(musicbrainz_id=mb_id)
+        self.assertEqual(track.musicbrainz_id, mb_id)
+        self.assertRaises(AttributeError, setattr, track,
+            'musicbrainz_id', None)
 
     def test_invalid_kwarg(self):
         test = lambda: Track(foo='baz')
@@ -329,14 +376,22 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
+    def test_eq_musibrainz_id(self):
+        track1 = Track(musicbrainz_id=u'id')
+        track2 = Track(musicbrainz_id=u'id')
+        self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
+
     def test_eq(self):
         date = dt.date.today()
         artists = [Artist()]
         album = Album()
         track1 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
-            track_no=1, date=date, length=100, bitrate=100)
+            track_no=1, date=date, length=100, bitrate=100,
+            musicbrainz_id='id')
         track2 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
-            track_no=1, date=date, length=100, bitrate=100)
+            track_no=1, date=date, length=100, bitrate=100,
+            musicbrainz_id='id')
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
@@ -394,14 +449,21 @@ class TrackTest(unittest.TestCase):
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 
+    def test_ne_musicbrainz_id(self):
+        track1 = Track(musicbrainz_id=u'id1')
+        track2 = Track(musicbrainz_id=u'id2')
+        self.assertNotEqual(track1, track2)
+        self.assertNotEqual(hash(track1), hash(track2))
+
     def test_ne(self):
         track1 = Track(uri=u'uri1', name=u'name1',
             artists=[Artist(name=u'name1')], album=Album(name=u'name1'),
-            track_no=1, date=dt.date.today(), length=100, bitrate=100)
+            track_no=1, date=dt.date.today(), length=100, bitrate=100,
+            musicbrainz_id='id1')
         track2 = Track(uri=u'uri2', name=u'name2',
             artists=[Artist(name=u'name2')], album=Album(name=u'name2'),
             track_no=2, date=dt.date.today()-dt.timedelta(days=1),
-            length=200, bitrate=200)
+            length=200, bitrate=200, musicbrainz_id='id2')
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 
