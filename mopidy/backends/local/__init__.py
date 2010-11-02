@@ -6,7 +6,7 @@ import shutil
 
 from mopidy import settings
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
-    LibraryController, BaseLibraryProvider, BasePlaybackController,
+    LibraryController, BaseLibraryProvider, PlaybackController,
     BasePlaybackProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
@@ -49,7 +49,7 @@ class LocalBackend(Backend):
         self.uri_handlers = [u'file://']
 
 
-class LocalPlaybackController(BasePlaybackController):
+class LocalPlaybackController(PlaybackController):
     def __init__(self, *args, **kwargs):
         super(LocalPlaybackController, self).__init__(*args, **kwargs)
 

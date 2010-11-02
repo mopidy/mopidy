@@ -4,7 +4,7 @@ import time
 
 logger = logging.getLogger('mopidy.backends.base')
 
-class BasePlaybackController(object):
+class PlaybackController(object):
     """
     :param backend: the backend
     :type backend: :class:`mopidy.backends.base.Backend`
