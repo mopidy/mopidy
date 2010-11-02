@@ -6,8 +6,6 @@ pygst.require('0.10')
 import gst
 
 import datetime
-import sys
-import threading
 
 from mopidy.utils.path import path_to_uri, find_files
 from mopidy.models import Track, Artist, Album
@@ -25,7 +23,7 @@ def translator(data):
         album_kwargs['num_tracks'] = data['track-count']
 
     if 'artist' in data:
-        artist_kwargs['name'] =data['artist']
+        artist_kwargs['name'] = data['artist']
 
     if 'date' in data:
         date = data['date']

@@ -44,6 +44,8 @@ def split_path(path):
             break
     return parts
 
+# pylint: disable = W0612
+# Unused variable 'dirnames'
 def find_files(path):
     if os.path.isfile(path):
         if not isinstance(path, unicode):
@@ -56,6 +58,7 @@ def find_files(path):
                 if not isinstance(filename, unicode):
                     filename = filename.decode('utf-8')
                 yield filename
+# pylint: enable = W0612
 
 class Mtime(object):
     def __init__(self):
