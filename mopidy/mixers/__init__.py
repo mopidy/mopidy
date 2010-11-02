@@ -42,7 +42,7 @@ class BaseMixer(object):
         """
         Return volume as integer in range [0, 100]. :class:`None` if unknown.
 
-        *Must be implemented by subclass.*
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 
@@ -50,6 +50,6 @@ class BaseMixer(object):
         """
         Set volume as integer in range [0, 100].
 
-        *Must be implemented by subclass.*
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError

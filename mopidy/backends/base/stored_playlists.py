@@ -133,7 +133,7 @@ class BaseStoredPlaylistsProvider(object):
         """
         Cleanup after component.
 
-        May be overridden by subclasses.
+        *MAY be implemented by subclass.*
         """
         pass
 
@@ -152,49 +152,49 @@ class BaseStoredPlaylistsProvider(object):
 
     def create(self, name):
         """
-        To be overridden by subclass.
-
         See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.create`.
+
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 
     def delete(self, playlist):
         """
-        To be overridden by subclass.
-
         See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.delete`.
+
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 
     def lookup(self, uri):
         """
-        To be overridden by subclass.
-
         See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.lookup`.
+
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 
     def refresh(self):
         """
-        To be overridden by subclass.
-
         See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.refresh`.
+
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 
     def rename(self, playlist, new_name):
         """
-        To be overridden by subclass.
-
         See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.rename`.
+
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 
     def save(self, playlist):
         """
-        To be overridden by subclass.
-
         See :meth:`mopidy.backends.base.BaseStoredPlaylistsController.save`.
+
+        *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 

@@ -13,16 +13,26 @@ class BaseFrontend(object):
         self.backend = backend
 
     def start(self):
-        """Start the frontend."""
+        """
+        Start the frontend.
+
+        *MAY be implemented by subclass.*
+        """
         pass
 
     def destroy(self):
-        """Destroy the frontend."""
+        """
+        Destroy the frontend.
+
+        *MAY be implemented by subclass.*
+        """
         pass
 
     def process_message(self, message):
         """
         Process messages for the frontend.
+
+        *MUST be implemented by subclass.*
 
         :param message: the message
         :type message: dict

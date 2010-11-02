@@ -498,15 +498,15 @@ class BasePlaybackProvider(object):
         """
         Cleanup after component.
 
-        May be overridden by subclasses.
+        *MAY be implemented by subclasses.*
         """
         pass
 
     def pause(self):
         """
-        To be overridden by subclass.
-
         Pause playback.
+
+        *MUST be implemented by subclass.*
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
@@ -514,9 +514,9 @@ class BasePlaybackProvider(object):
 
     def play(self, track):
         """
-        To be overridden by subclass.
-
         Play given track.
+
+        *MUST be implemented by subclass.*
 
         :param track: the track to play
         :type track: :class:`mopidy.models.Track`
@@ -526,9 +526,9 @@ class BasePlaybackProvider(object):
 
     def resume(self):
         """
-        To be overridden by subclass.
-
         Resume playback at the same time position playback was paused.
+
+        *MUST be implemented by subclass.*
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
@@ -536,9 +536,9 @@ class BasePlaybackProvider(object):
 
     def seek(self, time_position):
         """
-        To be overridden by subclass.
-
         Seek to a given time position.
+
+        *MUST be implemented by subclass.*
 
         :param time_position: time position in milliseconds
         :type time_position: int
@@ -548,9 +548,9 @@ class BasePlaybackProvider(object):
 
     def stop(self):
         """
-        To be overridden by subclass.
-
         Stop playback.
+
+        *MUST be implemented by subclass.*
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
