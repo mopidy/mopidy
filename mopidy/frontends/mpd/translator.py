@@ -4,7 +4,7 @@ import re
 from mopidy import settings
 from mopidy.utils.path import mtime as get_mtime
 from mopidy.frontends.mpd import protocol
-from mopidy.utils.path import path_to_uri, uri_to_path, split_path
+from mopidy.utils.path import uri_to_path, split_path
 
 def track_to_mpd_format(track, position=None, cpid=None):
     """
