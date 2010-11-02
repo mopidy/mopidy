@@ -5,7 +5,7 @@ logger = logging.getLogger('mopidy.backends.base')
 class LibraryController(object):
     """
     :param backend: backend the controller is a part of
-    :type backend: :class:`BaseBackend`
+    :type backend: :class:`mopidy.backends.base.Backend`
     :param provider: provider the controller should use
     :type provider: instance of :class:`BaseLibraryProvider`
     """
@@ -79,7 +79,7 @@ class LibraryController(object):
 class BaseLibraryProvider(object):
     """
     :param backend: backend the controller is a part of
-    :type backend: :class:`BaseBackend`
+    :type backend: :class:`mopidy.backends.base.Backend`
     """
 
     def __init__(self, backend):

@@ -5,7 +5,7 @@ import os
 import shutil
 
 from mopidy import settings
-from mopidy.backends.base import (BaseBackend, CurrentPlaylistController,
+from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, BaseLibraryProvider, BasePlaybackController,
     BasePlaybackProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
@@ -16,7 +16,7 @@ from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
 
-class LocalBackend(BaseBackend):
+class LocalBackend(Backend):
     """
     A backend for playing music from a local music archive.
 

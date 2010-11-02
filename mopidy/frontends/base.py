@@ -5,7 +5,7 @@ class BaseFrontend(object):
     :param core_queue: queue for messaging the core
     :type core_queue: :class:`multiprocessing.Queue`
     :param backend: the backend
-    :type backend: :class:`mopidy.backends.base.BaseBackend`
+    :type backend: :class:`mopidy.backends.base.Backend`
     """
 
     def __init__(self, core_queue, backend):

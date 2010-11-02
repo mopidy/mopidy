@@ -1,4 +1,4 @@
-from mopidy.backends.base import (BaseBackend, CurrentPlaylistController,
+from mopidy.backends.base import (Backend, CurrentPlaylistController,
     BasePlaybackController, BasePlaybackProvider, LibraryController,
     BaseLibraryProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
@@ -13,7 +13,7 @@ class DummyQueue(object):
         self.received_messages.append(message)
 
 
-class DummyBackend(BaseBackend):
+class DummyBackend(Backend):
     """
     A backend which implements the backend API in the simplest way possible.
     Used in tests of the frontends.

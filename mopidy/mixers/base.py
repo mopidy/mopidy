@@ -3,7 +3,7 @@ from mopidy import settings
 class BaseMixer(object):
     """
     :param backend: a backend instance
-    :type mixer: :class:`mopidy.backends.base.BaseBackend`
+    :type backend: :class:`mopidy.backends.base.Backend`
 
     **Settings:**
 

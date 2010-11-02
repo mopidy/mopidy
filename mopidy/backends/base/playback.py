@@ -7,7 +7,7 @@ logger = logging.getLogger('mopidy.backends.base')
 class BasePlaybackController(object):
     """
     :param backend: the backend
-    :type backend: :class:`BaseBackend`
+    :type backend: :class:`mopidy.backends.base.Backend`
     :param provider: provider the controller should use
     :type provider: instance of :class:`BasePlaybackProvider`
     """
@@ -488,7 +488,7 @@ class BasePlaybackController(object):
 class BasePlaybackProvider(object):
     """
     :param backend: the backend
-    :type backend: :class:`BaseBackend`
+    :type backend: :class:`mopidy.backends.base.Backend`
     """
 
     def __init__(self, backend):

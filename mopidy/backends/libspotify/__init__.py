@@ -1,14 +1,14 @@
 import logging
 
 from mopidy import settings
-from mopidy.backends.base import (BaseBackend, CurrentPlaylistController,
+from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, BasePlaybackController, StoredPlaylistsController)
 
 logger = logging.getLogger('mopidy.backends.libspotify')
 
 ENCODING = 'utf-8'
 
-class LibspotifyBackend(BaseBackend):
+class LibspotifyBackend(Backend):
     """
     A `Spotify <http://www.spotify.com/>`_ backend which uses the official
     `libspotify <http://developer.spotify.com/en/libspotify/overview/>`_

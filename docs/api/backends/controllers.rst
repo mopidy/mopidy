@@ -13,7 +13,7 @@ The backend controller API is the interface that is used by frontends like
 The backend
 ===========
 
-.. autoclass:: mopidy.backends.base.BaseBackend
+.. autoclass:: mopidy.backends.base.Backend
     :members:
     :undoc-members:
 

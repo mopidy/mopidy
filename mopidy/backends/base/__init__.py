@@ -16,7 +16,7 @@ from .stored_playlists import (StoredPlaylistsController,
 
 logger = logging.getLogger('mopidy.backends.base')
 
-class BaseBackend(object):
+class Backend(object):
     """
     :param core_queue: a queue for sending messages to
         :class:`mopidy.process.CoreProcess`
