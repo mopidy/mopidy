@@ -1,4 +1,4 @@
-from mopidy.mixers import BaseMixer
+from mopidy.mixers.base import BaseMixer
 
 class GStreamerSoftwareMixer(BaseMixer):
     """Mixer which uses GStreamer to control volume in software."""

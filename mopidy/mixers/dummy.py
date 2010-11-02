@@ -1,4 +1,4 @@
-from mopidy.mixers import BaseMixer
+from mopidy.mixers.base import BaseMixer
 
 class DummyMixer(BaseMixer):
     """Mixer which just stores and reports the chosen volume."""
