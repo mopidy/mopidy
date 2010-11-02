@@ -136,3 +136,6 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
             data_folder(''))
         uri = path_to_uri(data_folder('song1.mp3'))
         self.assertEqual(set([Track(uri=uri, length=4000)]), tracks)
+
+    def test_musicbrainz_tagcache(self):
+        raise SkipTest
