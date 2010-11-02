@@ -12,7 +12,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_add(self):
         needle = Track(uri='dummy://foo')
-        self.b.library._library = [Track(), Track(), needle, Track()]
+        self.b.library.provider._library = [Track(), Track(), needle, Track()]
         self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
@@ -40,7 +40,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_addid_without_songpos(self):
         needle = Track(uri='dummy://foo')
-        self.b.library._library = [Track(), Track(), needle, Track()]
+        self.b.library.provider._library = [Track(), Track(), needle, Track()]
         self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
@@ -58,7 +58,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_addid_with_songpos(self):
         needle = Track(uri='dummy://foo')
-        self.b.library._library = [Track(), Track(), needle, Track()]
+        self.b.library.provider._library = [Track(), Track(), needle, Track()]
         self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)
@@ -71,7 +71,7 @@ class CurrentPlaylistHandlerTest(unittest.TestCase):
 
     def test_addid_with_songpos_out_of_bounds_should_ack(self):
         needle = Track(uri='dummy://foo')
-        self.b.library._library = [Track(), Track(), needle, Track()]
+        self.b.library.provider._library = [Track(), Track(), needle, Track()]
         self.b.current_playlist.append(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.b.current_playlist.tracks), 5)

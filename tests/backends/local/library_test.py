@@ -10,9 +10,9 @@ from mopidy import settings
 from mopidy.backends.local import LocalBackend
 
 from tests import data_folder
-from tests.backends.base.library import BaseLibraryControllerTest
+from tests.backends.base.library import LibraryControllerTest
 
-class LocalLibraryControllerTest(BaseLibraryControllerTest, unittest.TestCase):
+class LocalLibraryControllerTest(LibraryControllerTest, unittest.TestCase):
 
     backend_class = LocalBackend
 

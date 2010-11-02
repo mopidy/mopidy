@@ -1,13 +1,14 @@
 import logging
 
 from mopidy import settings
-from mopidy.backends.base import BaseBackend, BaseCurrentPlaylistController
+from mopidy.backends.base import (Backend, CurrentPlaylistController,
+    LibraryController, PlaybackController, StoredPlaylistsController)
 
 logger = logging.getLogger('mopidy.backends.libspotify')
 
 ENCODING = 'utf-8'
 
-class LibspotifyBackend(BaseBackend):
+class LibspotifyBackend(Backend):
     """
     A `Spotify <http://www.spotify.com/>`_ backend which uses the official
     `libspotify <http://developer.spotify.com/en/libspotify/overview/>`_
@@ -33,18 +34,29 @@ class LibspotifyBackend(BaseBackend):
     # missing spotify dependencies.
 
     def __init__(self, *args, **kwargs):
-        from .library import LibspotifyLibraryController
-        from .playback import LibspotifyPlaybackController
-        from .stored_playlists import LibspotifyStoredPlaylistsController
+        from .library import LibspotifyLibraryProvider
+        from .playback import LibspotifyPlaybackProvider
+        from .stored_playlists import LibspotifyStoredPlaylistsProvider
 
         super(LibspotifyBackend, self).__init__(*args, **kwargs)
 
-        self.current_playlist = BaseCurrentPlaylistController(backend=self)
-        self.library = LibspotifyLibraryController(backend=self)
-        self.playback = LibspotifyPlaybackController(backend=self)
-        self.stored_playlists = LibspotifyStoredPlaylistsController(
+        self.current_playlist = CurrentPlaylistController(backend=self)
+
+        library_provider = LibspotifyLibraryProvider(backend=self)
+        self.library = LibraryController(backend=self,
+            provider=library_provider)
+
+        playback_provider = LibspotifyPlaybackProvider(backend=self)
+        self.playback = PlaybackController(backend=self,
+            provider=playback_provider)
+
+        stored_playlists_provider = LibspotifyStoredPlaylistsProvider(
             backend=self)
+        self.stored_playlists = StoredPlaylistsController(backend=self,
+            provider=stored_playlists_provider)
+
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
+
         self.spotify = self._connect()
 
     def _connect(self):

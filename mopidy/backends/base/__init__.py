@@ -4,21 +4,19 @@ import random
 import time
 
 from mopidy import settings
-from mopidy.backends.base.current_playlist import BaseCurrentPlaylistController
-from mopidy.backends.base.library import BaseLibraryController
-from mopidy.backends.base.playback import BasePlaybackController
-from mopidy.backends.base.stored_playlists import BaseStoredPlaylistsController
 from mopidy.frontends.mpd import translator
 from mopidy.models import Playlist
 from mopidy.utils import get_class
 
+from .current_playlist import CurrentPlaylistController
+from .library import LibraryController, BaseLibraryProvider
+from .playback import PlaybackController, BasePlaybackProvider
+from .stored_playlists import (StoredPlaylistsController,
+    BaseStoredPlaylistsProvider)
+
 logger = logging.getLogger('mopidy.backends.base')
 
-__all__ = ['BaseBackend', 'BasePlaybackController',
-    'BaseCurrentPlaylistController', 'BaseStoredPlaylistsController',
-    'BaseLibraryController']
-
-class BaseBackend(object):
+class Backend(object):
     """
     :param core_queue: a queue for sending messages to
         :class:`mopidy.process.CoreProcess`
@@ -44,22 +42,22 @@ class BaseBackend(object):
     core_queue = None
 
     #: The current playlist controller. An instance of
-    #: :class:`mopidy.backends.base.BaseCurrentPlaylistController`.
+    #: :class:`mopidy.backends.base.CurrentPlaylistController`.
     current_playlist = None
 
     #: The library controller. An instance of
-    # :class:`mopidy.backends.base.BaseLibraryController`.
+    # :class:`mopidy.backends.base.LibraryController`.
     library = None
 
     #: The sound mixer. An instance of :class:`mopidy.mixers.BaseMixer`.
     mixer = None
 
     #: The playback controller. An instance of
-    #: :class:`mopidy.backends.base.BasePlaybackController`.
+    #: :class:`mopidy.backends.base.PlaybackController`.
     playback = None
 
     #: The stored playlists controller. An instance of
-    #: :class:`mopidy.backends.base.BaseStoredPlaylistsController`.
+    #: :class:`mopidy.backends.base.StoredPlaylistsController`.
     stored_playlists = None
 
     #: List of URI prefixes this backend can handle.

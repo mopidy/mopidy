@@ -2,7 +2,7 @@ import alsaaudio
 import logging
 
 from mopidy import settings
-from mopidy.mixers import BaseMixer
+from mopidy.mixers.base import BaseMixer
 
 logger = logging.getLogger('mopidy.mixers.alsa')
 

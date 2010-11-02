@@ -4,7 +4,7 @@ from threading import Lock
 from serial import Serial
 
 from mopidy import settings
-from mopidy.mixers import BaseMixer
+from mopidy.mixers.base import BaseMixer
 
 logger = logging.getLogger(u'mopidy.mixers.denon')
 
