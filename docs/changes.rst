@@ -12,10 +12,45 @@ No description yet.
 
 **Changes**
 
-- Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
-  application menus.
-- Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
-  any help from the original MPD server.
+- Packaging and distribution:
+
+  - Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
+    application menus.
+  - Create infrastructure for creating Debian packages of Mopidy.
+
+- Local backend:
+
+  - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
+    any help from the original MPD server.
+
+- Models:
+
+  - Rename and generalize ``Playlist._with(**kwargs)`` to
+    :meth:`mopidy.models.ImmutableObject.copy`.
+
+- Introduce the :ref:`provider concept <backend-concepts>`. Split the backend
+  API into a :ref:`backend controller API <backend-controller-api>` (for
+  frontend use) and a :ref:`backend provider API <backend-provider-api>` (for
+  backend implementation use), which includes the following changes:
+
+  - Rename ``BaseBackend`` to :class:`mopidy.backends.base.Backend`.
+  - Rename ``BaseCurrentPlaylistController`` to
+    :class:`mopidy.backends.base.CurrentPlaylistController`.
+  - Split ``BaseLibraryController`` to
+    :class:`mopidy.backends.base.LibraryController` and
+    :class:`mopidy.backends.base.BaseLibraryProvider`.
+  - Split ``BasePlaybackController`` to
+    :class:`mopidy.backends.base.PlaybackController` and
+    :class:`mopidy.backends.base.BasePlaybackProvider`.
+  - Split ``BaseStoredPlaylistsController`` to
+    :class:`mopidy.backends.base.StoredPlaylistsController` and
+    :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`.
+
+- Other API and package structure cleaning:
+
+  - Move ``BaseMixer`` to :class:`mopidy.mixers.base.BaseMixer`.
+  - Add docs for the current non-stable output API,
+    :class:`mopidy.outputs.base.BaseOutput`.
 
 
 0.2.0 (2010-10-24)
