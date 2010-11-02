@@ -105,7 +105,6 @@ def _convert_mpd_data(data, tracks, music_dir):
     if 'artist' in data:
         artist_kwargs['name'] = data['artist']
 
-    # FIXME Newer mpd tag caches support albumartist names
     if 'album' in data:
         album_kwargs['name'] = data['album']
 
@@ -121,8 +120,6 @@ def _convert_mpd_data(data, tracks, music_dir):
     if 'musicbrainz_artistid' in data:
         artist_kwargs['musicbrainz_id'] = data['musicbrainz_artistid']
 
-    # FIXME what if file is uri - generated tag cache needs to allways make
-    # LOCAL_MUSIC_PATH relative paths or this code must handle uris
     if data['file'][0] == '/':
         path = data['file'][1:]
     else:
