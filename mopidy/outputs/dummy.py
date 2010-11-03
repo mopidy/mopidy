@@ -32,7 +32,7 @@ class DummyOutput(BaseOutput):
     end_of_data_stream_called = False
 
     #: For testing. Contains the current position.
-    position = 0
+    position = None
 
     #: For testing. Contains the current state.
     state = 'NULL'
