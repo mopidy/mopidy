@@ -39,7 +39,7 @@ class LocalBackend(Backend):
             provider=library_provider)
 
         playback_provider = LocalPlaybackProvider(backend=self)
-        self.playback = LocalPlaybackController(backend=self,
+        self.playback = PlaybackController(backend=self,
             provider=playback_provider)
 
         stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
@@ -47,12 +47,6 @@ class LocalBackend(Backend):
             provider=stored_playlists_provider)
 
         self.uri_handlers = [u'file://']
-
-
-class LocalPlaybackController(PlaybackController):
-    @property
-    def time_position(self):
-        return self.backend.output.get_position()
 
 
 class LocalPlaybackProvider(BasePlaybackProvider):
