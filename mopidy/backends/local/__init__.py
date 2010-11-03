@@ -50,12 +50,6 @@ class LocalBackend(Backend):
 
 
 class LocalPlaybackController(PlaybackController):
-    def __init__(self, *args, **kwargs):
-        super(LocalPlaybackController, self).__init__(*args, **kwargs)
-
-        # XXX Why do we call stop()? Is it to set GStreamer state to 'READY'?
-        self.stop()
-
     @property
     def time_position(self):
         return self.backend.output.get_position()
