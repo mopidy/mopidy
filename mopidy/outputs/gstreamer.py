@@ -265,5 +265,5 @@ class GStreamerPlayerThread(BaseThread):
             position = self.gst_pipeline.query_position(gst.FORMAT_TIME)[0]
             return position // gst.MSECOND
         except gst.QueryError, e:
-            logger.error('time_position failed: %s', e)
-            return 0
+            logger.debug(u'GStreamer time position: %s', e)
+            return None
