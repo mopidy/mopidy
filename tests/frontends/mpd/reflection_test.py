@@ -2,11 +2,10 @@ import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import dispatcher
-from mopidy.mixers.dummy import DummyMixer
 
 class ReflectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
+        self.b = DummyBackend()
         self.h = dispatcher.MpdDispatcher(backend=self.b)
 
     def test_commands_returns_list_of_all_commands(self):

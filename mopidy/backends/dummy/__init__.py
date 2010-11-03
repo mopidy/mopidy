@@ -2,7 +2,9 @@ from mopidy.backends.base import (Backend, CurrentPlaylistController,
     PlaybackController, BasePlaybackProvider, LibraryController,
     BaseLibraryProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
+from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist
+from mopidy.outputs.dummy import DummyOutput
 
 
 class DummyQueue(object):
@@ -22,9 +24,10 @@ class DummyBackend(Backend):
     """
 
     def __init__(self, *args, **kwargs):
+        kwargs['core_queue'] = DummyQueue()
+        kwargs['output'] = DummyOutput(core_queue=DummyQueue())
+        kwargs['mixer_class'] = DummyMixer
         super(DummyBackend, self).__init__(*args, **kwargs)
-
-        self.core_queue = DummyQueue()
 
         self.current_playlist = CurrentPlaylistController(backend=self)
 

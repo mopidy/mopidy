@@ -3,7 +3,6 @@ import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import dispatcher
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
 
 class IssueGH17RegressionTest(unittest.TestCase):
@@ -18,7 +17,7 @@ class IssueGH17RegressionTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.backend = DummyBackend(mixer_class=DummyMixer)
+        self.backend = DummyBackend()
         self.backend.current_playlist.append([
             Track(uri='a'), Track(uri='b'), None,
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
@@ -52,7 +51,7 @@ class IssueGH18RegressionTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.backend = DummyBackend(mixer_class=DummyMixer)
+        self.backend = DummyBackend()
         self.backend.current_playlist.append([
             Track(uri='a'), Track(uri='b'), Track(uri='c'),
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
@@ -91,7 +90,7 @@ class IssueGH22RegressionTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.backend = DummyBackend(mixer_class=DummyMixer)
+        self.backend = DummyBackend()
         self.backend.current_playlist.append([
             Track(uri='a'), Track(uri='b'), Track(uri='c'),
             Track(uri='d'), Track(uri='e'), Track(uri='f')])

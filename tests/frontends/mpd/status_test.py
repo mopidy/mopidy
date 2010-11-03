@@ -2,12 +2,11 @@ import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import dispatcher
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
+        self.b = DummyBackend()
         self.h = dispatcher.MpdDispatcher(backend=self.b)
 
     def test_clearerror(self):
