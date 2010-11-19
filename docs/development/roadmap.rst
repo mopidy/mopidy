@@ -27,11 +27,11 @@ Possible targets for the next version
 
   - Write-support for Spotify, i.e. playlist management.
   - Virtual directories with e.g. starred tracks from Spotify.
-  - Support for 320 kbps audio.
+  - **[WIP: possibly v0.3]** Support for 320 kbps audio.
 
 - Local backend:
 
-  - Better library support.
+  - Better music library support.
   - **[DONE: v0.3]** A script for creating a tag cache.
   - An alternative to tag cache for caching metadata, i.e. Sqlite.
 
@@ -43,7 +43,7 @@ Stuff we want to do, but not right now, and maybe never
 
 - Packaging and distribution:
 
-  - **[PENDING]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_
+  - **[BLOCKED]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_
     recipies for all our dependencies and Mopidy itself to make OS X
     installation a breeze. See `Homebrew's issue #1612
     <http://github.com/mxcl/homebrew/issues/issue/1612>`_.
@@ -68,8 +68,9 @@ Stuff we want to do, but not right now, and maybe never
   - Publish the server's presence to the network using `Zeroconf
     <http://en.wikipedia.org/wiki/Zeroconf>`_/Avahi.
   - **[WIP: feature/mpris-frontend]** D-Bus/`MPRIS <http://www.mpris.org/>`_
-  - REST/JSON web service with a jQuery client as example application. Maybe
-    based upon `Tornado <http://github.com/facebook/tornado>`_ and `jQuery
+  - **[WIP: feature/http-frontend]** REST/JSON web service with a jQuery client
+    as example application. Maybe based upon `Tornado
+    <http://github.com/facebook/tornado>`_ and `jQuery
     Mobile <http://jquerymobile.com/>`_.
   - DNLA/UPnP so Mopidy can be controlled from i.e. TVs.
   - `XMMS2 <http://www.xmms2.org/>`_
