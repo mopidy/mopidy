@@ -187,4 +187,8 @@ SPOTIFY_PASSWORD = u''
 #: Do you prefer high bitrate (320k)?
 #:
 #: Used by :mod:`mopidy.backends.libspotify`.
+#
+#: Default::
+#:
+#:     SPOTIFY_HIGH_BITRATE = False # 160k
 SPOTIFY_HIGH_BITRATE = False
