@@ -36,6 +36,12 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
         logger.info(u'Connected to Spotify')
         self.session = session
         self.connected.set()
+        if settings.SPOTIFY_HIGH_BITRATE:
+            logger.debug(u'Prefer high bitrate')
+            self.session.set_preferred_bitrate(1)
+        else:
+            logger.debug(u'Prefer normal bitrate')
+            self.session.set_preferred_bitrate(0)
 
     def logged_out(self, session):
         """Callback used by pyspotify"""

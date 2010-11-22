@@ -183,3 +183,8 @@ SPOTIFY_USERNAME = u''
 #:
 #: Used by :mod:`mopidy.backends.libspotify`.
 SPOTIFY_PASSWORD = u''
+
+#: Do you prefer high bitrate (320k)?
+#:
+#: Used by :mod:`mopidy.backends.libspotify`.
+SPOTIFY_HIGH_BITRATE = False
