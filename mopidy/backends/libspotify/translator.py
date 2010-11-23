@@ -2,8 +2,9 @@ import datetime as dt
 
 from spotify import Link
 
-from mopidy.models import Artist, Album, Track, Playlist
+from mopidy import settings
 from mopidy.backends.libspotify import ENCODING
+from mopidy.models import Artist, Album, Track, Playlist
 
 class LibspotifyTranslator(object):
     @classmethod
@@ -39,7 +40,7 @@ class LibspotifyTranslator(object):
             track_no=spotify_track.index(),
             date=date,
             length=spotify_track.duration(),
-            bitrate=160,
+            bitrate=(settings.SPOTIFY_HIGH_BITRATE and 320 or 160),
         )
 
     @classmethod
