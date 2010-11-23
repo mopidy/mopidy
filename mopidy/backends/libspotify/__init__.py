@@ -14,7 +14,8 @@ class LibspotifyBackend(BaseBackend):
     library and the `pyspotify <http://github.com/winjer/pyspotify/>`_ Python
     bindings for libspotify.
 
-    **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-libspotify
+    **Issues:**
+    http://github.com/mopidy/mopidy/issues/labels/backend-libspotify
 
     **Settings:**
 

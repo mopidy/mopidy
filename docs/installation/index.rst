@@ -88,7 +88,7 @@ development version of Mopidy::
 
     sudo aptitude install git-core                  # On Ubuntu/Debian
     sudo brew install git                           # On OS X
-    git clone git://github.com/jodal/mopidy.git
+    git clone git://github.com/mopidy/mopidy.git
     cd mopidy/
     sudo python setup.py install
 
