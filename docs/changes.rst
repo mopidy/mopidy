@@ -10,12 +10,74 @@ This change log is used to track all major changes to Mopidy.
 
 No description yet.
 
+**Important changes**
+
+- If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
+  the latest pyspotify from the Mopidy developers. Follow the instructions at
+  :ref:`/installation/libspotify/`.
+
 **Changes**
 
-- Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
-  application menus.
-- Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
-  any help from the original MPD server.
+- Settings:
+
+  - Automatically expand ``~`` to the user's home directory and make the path
+    absolute for settings with names ending in ``_PATH`` or ``_FILE``.
+  - Rename the following settings. The settings validator will warn you if you
+    need to change your local settings.
+
+      - ``LOCAL_MUSIC_FOLDER`` to :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
+      - ``LOCAL_PLAYLIST_FOLDER`` to
+        :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
+      - ``LOCAL_TAG_CACHE`` to :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
+      - ``SPOTIFY_LIB_CACHE`` to :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
+
+- Packaging and distribution:
+
+  - Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
+    application menus.
+  - Create infrastructure for creating Debian packages of Mopidy.
+
+- Spotify backend:
+
+  - Support high bitrate (320k). See
+    :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
+
+- Local backend:
+
+  - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
+    any help from the original MPD server.
+  - Support UTF-8 encoded tag caches with non-ASCII characters.
+
+- Models:
+
+  - Rename and generalize ``Playlist._with(**kwargs)`` to
+    :meth:`mopidy.models.ImmutableObject.copy`.
+  - Add ``musicbrainz_id`` field to :class:`mopidy.models.Artist`,
+    :class:`mopidy.models.Album`, and :class:`mopidy.models.Track`.
+
+- Introduce the :ref:`provider concept <backend-concepts>`. Split the backend
+  API into a :ref:`backend controller API <backend-controller-api>` (for
+  frontend use) and a :ref:`backend provider API <backend-provider-api>` (for
+  backend implementation use), which includes the following changes:
+
+  - Rename ``BaseBackend`` to :class:`mopidy.backends.base.Backend`.
+  - Rename ``BaseCurrentPlaylistController`` to
+    :class:`mopidy.backends.base.CurrentPlaylistController`.
+  - Split ``BaseLibraryController`` to
+    :class:`mopidy.backends.base.LibraryController` and
+    :class:`mopidy.backends.base.BaseLibraryProvider`.
+  - Split ``BasePlaybackController`` to
+    :class:`mopidy.backends.base.PlaybackController` and
+    :class:`mopidy.backends.base.BasePlaybackProvider`.
+  - Split ``BaseStoredPlaylistsController`` to
+    :class:`mopidy.backends.base.StoredPlaylistsController` and
+    :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`.
+
+- Other API and package structure cleaning:
+
+  - Move ``BaseMixer`` to :class:`mopidy.mixers.base.BaseMixer`.
+  - Add docs for the current non-stable output API,
+    :class:`mopidy.outputs.base.BaseOutput`.
 
 
 0.2.0 (2010-10-24)
