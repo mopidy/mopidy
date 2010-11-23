@@ -202,4 +202,4 @@ latex_documents = [
 
 needs_sphinx = '1.0'
 
-extlinks = {'issue': ('http://github.com/jodal/mopidy/issues#issue/%s', 'GH-')}
+extlinks = {'issue': ('http://github.com/mopidy/mopidy/issues#issue/%s', 'GH-')}
