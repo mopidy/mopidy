@@ -72,7 +72,7 @@ Install pyspotify's dependencies. At Debian/Ubuntu systems::
 
 In OS X no additional dependencies are needed.
 
-Check out the pyspotify code, and install it::
+Get the pyspotify code, and install it::
 
     wget --no-check-certificate -O pyspotify.tar.gz https://github.com/mopidy/pyspotify/tarball/mopidy
     tar zxfv pyspotify.tar.gz
