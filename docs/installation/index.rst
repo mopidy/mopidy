@@ -61,18 +61,16 @@ Make sure you got the required dependencies installed.
     - pylast >= 4.3.0
 
 
-Install latest release
-======================
+Install latest stable release
+=============================
 
-To install the currently latest release of Mopidy using ``pip``::
+To install the currently latest stable release of Mopidy using ``pip``::
 
     sudo aptitude install python-setuptools python-pip   # On Ubuntu/Debian
     sudo brew install pip                                # On OS X
-    sudo pip install mopidy
+    sudo pip install -U Mopidy
 
-To later upgrade to the latest release::
-
-    sudo pip install -U mopidy
+To later upgrade to the latest release, just rerun the last command.
 
 If you for some reason can't use ``pip``, try ``easy_install``.
 
@@ -94,20 +92,21 @@ Next, you need to set a couple of :doc:`settings </settings>`, and then you're
 ready to :doc:`run Mopidy </running>`.
 
 
-Run from source code checkout
-=============================
+Track development using Git
+===========================
 
-If you may want to contribute to Mopidy, and want access to other branches as
-well, you can checkout the Mopidy source from Git and run it directly from the
-ckeckout::
+If you want to contribute to Mopidy, you should install Mopidy using Git::
 
     sudo aptitude install git-core                  # On Ubuntu/Debian
     sudo brew install git                           # On OS X
     git clone git://github.com/mopidy/mopidy.git
-    cd mopidy/
-    python mopidy                                   # Yes, 'mopidy' is a dir
 
-To later update to the very latest version::
+You can then run Mopidy directly from the Git repository::
+
+    cd mopidy/          # Move into the Git repo dir
+    python mopidy       # Run python on the mopidy source code dir
+
+To get the latest changes to Mopidy::
 
     cd mopidy/
     git pull
