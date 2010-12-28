@@ -7,9 +7,9 @@ Mopidy uses `libspotify
 the Spotify music service. To use :mod:`mopidy.backends.libspotify` you must
 install libspotify and `pyspotify <http://github.com/mopidy/pyspotify>`_.
 
-.. warning::
+.. note::
 
-    This backend requires a `Spotify premium account
+    This backend requires a paid `Spotify premium account
     <http://www.spotify.com/no/get-spotify/premium/>`_.
 
 .. note::
@@ -78,3 +78,8 @@ Check out the pyspotify code, and install it::
     tar zxfv pyspotify.tar.gz
     cd pyspotify/pyspotify/
     sudo python setup.py install
+
+It is important that you install pyspotify from the ``mopidy`` branch of the
+``mopidy/pyspotify`` repository, as the upstream repository at
+``winjer/pyspotify`` is not updated with changes needed to support e.g.
+libspotify 0.0.6 and high bitrate audio.
