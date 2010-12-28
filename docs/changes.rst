@@ -12,9 +12,15 @@ No description yet.
 
 **Important changes**
 
-- If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
-  the latest pyspotify from the Mopidy developers. Follow the instructions at
-  :doc:`/installation/libspotify/`.
+- Spotify backend:
+
+  - If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
+    the latest pyspotify from the Mopidy developers. Follow the instructions at
+    :doc:`/installation/libspotify/`.
+
+  - Support high bitrate (320k) audio. See
+    :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
+
 
 **Changes**
 
@@ -36,11 +42,6 @@ No description yet.
   - Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
     application menus.
   - Create infrastructure for creating Debian packages of Mopidy.
-
-- Spotify backend:
-
-  - Support high bitrate (320k). See
-    :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
 
 - Local backend:
 
