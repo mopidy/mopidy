@@ -77,12 +77,4 @@ Check out the pyspotify code, and install it::
     wget --no-check-certificate -O pyspotify.tar.gz https://github.com/mopidy/pyspotify/tarball/mopidy
     tar zxfv pyspotify.tar.gz
     cd pyspotify/pyspotify/
-    sudo rm -rf build/               # If you are upgrading pyspotify
     sudo python setup.py install
-
-.. note::
-
-    The ``sudo rm -rf build/`` step is needed if you are upgrading pyspotify.
-    Simply running ``python setup.py clean`` will *not* clean out the C parts
-    of the ``build/`` directory, and you will thus not get any changes to the C
-    code included in your installation.
