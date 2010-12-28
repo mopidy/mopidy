@@ -46,3 +46,19 @@ you should see a long listing of installed plugins, ending in a summary line::
     $ gst-inspect-0.10
     ... long list of installed plugins ...
     Total count: 218 plugins (1 blacklist entry not shown), 1031 features
+
+You should be able to produce a audible tone by running::
+
+    gst-launch-0.10 audiotestsrc ! autoaudiosink
+
+If you cannot hear any sound when running this command, you won't hear any
+sound from Mopidy either, as Mopidy uses GStreamer's ``autoaudiosink`` to play
+audio. Thus, make this work before you continue installing Mopidy.
+
+
+Using a custom audio sink
+=========================
+
+If you for some reason want to use some other GStreamer audio sink than
+``autoaudiosink``, you can change :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
+in your ``settings.py`` file.
