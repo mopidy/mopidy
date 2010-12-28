@@ -20,45 +20,25 @@ Install dependencies
 Make sure you got the required dependencies installed.
 
 - Python >= 2.6, < 3
-- :doc:`GStreamer <gstreamer>` >= 0.10, with Python bindings
-- Dependencies for at least one Mopidy mixer:
 
-  - :mod:`mopidy.mixers.alsa` (Linux only)
+- GStreamer >= 0.10, with Python bindings. See :doc:`gstreamer`.
 
-    - pyalsaaudio >= 0.2 (Debian/Ubuntu package: python-alsaaudio)
-
-  - :mod:`mopidy.mixers.denon` (Linux, OS X, and Windows)
-
-    - pyserial (Debian/Ubuntu package: python-serial)
-
-  - *Default:* :mod:`mopidy.mixers.gstreamer_software` (Linux, OS X, and
-    Windows)
-
-    - No additional dependencies.
-
-  - :mod:`mopidy.mixers.nad` (Linux, OS X, and Windows)
-
-    - pyserial (Debian/Ubuntu package: python-serial)
-
-  - :mod:`mopidy.mixers.osa` (OS X only)
-
-    - No additional dependencies.
+- Mixer dependencies: The default mixer does not require any additional
+  dependencies. If you use another mixer, see the mixer's docs for any
+  additional requirements.
 
 - Dependencies for at least one Mopidy backend:
 
-  - *Default:* :mod:`mopidy.backends.libspotify` (Linux, OS X, and Windows)
+  - The default backend, :mod:`mopidy.backends.libspotify`, requires libspotify
+    and pyspotify. See :doc:`libspotify`.
 
-    - :doc:`libspotify and pyspotify <libspotify>`
-
-  - :mod:`mopidy.backends.local` (Linux, OS X, and Windows)
-
-    - No additional dependencies.
+  - The local backend, :mod:`mopidy.backends.local`, requires no additional
+    dependencies.
 
 - Optional dependencies:
 
-  - :mod:`mopidy.frontends.lastfm`
-
-    - pylast >= 4.3.0
+  - To use the Last.FM scrobbler, see :mod:`mopidy.frontends.lastfm` for
+    additional requirements.
 
 
 Install latest stable release

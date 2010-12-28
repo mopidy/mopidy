@@ -4,7 +4,18 @@ import time
 from mopidy.mixers.base import BaseMixer
 
 class OsaMixer(BaseMixer):
-    """Mixer which uses ``osascript`` on OS X to control volume."""
+    """
+    Mixer which uses ``osascript`` on OS X to control volume.
+
+    **Dependencies:**
+
+    - None
+
+    **Settings:**
+
+    - None
+
+    """
 
     CACHE_TTL = 30
 
