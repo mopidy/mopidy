@@ -14,7 +14,7 @@ No description yet.
 
 - If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
   the latest pyspotify from the Mopidy developers. Follow the instructions at
-  :ref:`/installation/libspotify/`.
+  :doc:`/installation/libspotify/`.
 
 **Changes**
 
