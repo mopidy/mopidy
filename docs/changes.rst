@@ -81,6 +81,19 @@ No description yet.
     :class:`mopidy.outputs.base.BaseOutput`.
 
 
+0.2.1 (2011-01-07)
+==================
+
+This is a maintenance release without any new features.
+
+**Bugfixes**
+
+- Fix crash in :mod:`mopidy.frontends.lastfm` which occurred at playback if
+  either :mod:`pylast` was not installed or the Last.fm scrobbling was not
+  correctly configured. The scrobbling thread now shuts properly down at
+  failure.
+
+
 0.2.0 (2010-10-24)
 ==================
 

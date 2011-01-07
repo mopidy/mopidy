@@ -54,7 +54,8 @@ class LastfmFrontend(BaseFrontend):
         self.thread.destroy()
 
     def process_message(self, message):
-        self.connection.send(message)
+        if self.thread.is_alive():
+            self.connection.send(message)
 
 
 class LastfmFrontendThread(BaseThread):
@@ -68,7 +69,7 @@ class LastfmFrontendThread(BaseThread):
 
     def run_inside_try(self):
         self.setup()
-        while True:
+        while self.scrobbler is not None:
             self.connection.poll(None)
             message = self.connection.recv()
             self.process_message(message)

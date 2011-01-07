@@ -137,7 +137,7 @@ Then, to generate docs::
 .. note::
 
     The documentation at http://www.mopidy.com/ is automatically updated when a
-    documentation update is pushed to ``jodal/mopidy`` at GitHub.
+    documentation update is pushed to ``mopidy/mopidy`` at GitHub.
 
     Documentation generated from the ``master`` branch is published at
     http://www.mopidy.com/docs/master/, and will always be valid for the latest
