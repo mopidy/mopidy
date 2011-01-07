@@ -55,12 +55,6 @@ When libspotify has been installed, continue with
 :ref:`pyspotify_installation`.
 
 
-Install libspotify on Windows
-=============================
-
-**TODO** Test and document installation on Windows.
-
-
 .. _pyspotify_installation:
 
 Installing pyspotify
