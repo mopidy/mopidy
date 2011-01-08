@@ -15,8 +15,8 @@ from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
-CLIENT_ID = u'mop'
-CLIENT_VERSION = get_version()
+API_KEY = '2236babefa8ebb3d93ea467560d00d04'
+API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
 # pylast raises UnicodeEncodeError on conversion from unicode objects to
 # ascii-encoded bytestrings, so we explicitly encode as utf-8 before passing
@@ -34,7 +34,7 @@ class LastfmFrontend(BaseFrontend):
 
     **Dependencies:**
 
-    - `pylast <http://code.google.com/p/pylast/>`_ >= 0.4.30
+    - `pylast <http://code.google.com/p/pylast/>`_ >= 0.5
 
     **Settings:**
 
@@ -64,12 +64,11 @@ class LastfmFrontendThread(BaseThread):
         self.name = u'LastfmFrontendThread'
         self.connection = connection
         self.lastfm = None
-        self.scrobbler = None
         self.last_start_time = None
 
     def run_inside_try(self):
         self.setup()
-        while self.scrobbler is not None:
+        while self.lastfm is not None:
             self.connection.poll(None)
             message = self.connection.recv()
             self.process_message(message)
@@ -78,10 +77,9 @@ class LastfmFrontendThread(BaseThread):
         try:
             username = settings.LASTFM_USERNAME
             password_hash = pylast.md5(settings.LASTFM_PASSWORD)
-            self.lastfm = pylast.get_lastfm_network(
+            self.lastfm = pylast.LastFMNetwork(
+                api_key=API_KEY, api_secret=API_SECRET,
                 username=username, password_hash=password_hash)
-            self.scrobbler = self.lastfm.get_scrobbler(
-                CLIENT_ID, CLIENT_VERSION)
             logger.info(u'Connected to Last.fm')
         except SettingsError as e:
             logger.info(u'Last.fm scrobbler not started')
@@ -103,12 +101,13 @@ class LastfmFrontendThread(BaseThread):
         self.last_start_time = int(time.time())
         logger.debug(u'Now playing track: %s - %s', artists, track.name)
         try:
-            self.scrobbler.report_now_playing(
+            self.lastfm.update_now_playing(
                 artists.encode(ENCODING),
                 track.name.encode(ENCODING),
                 album=track.album.name.encode(ENCODING),
-                duration=duration,
-                track_number=track.track_no)
+                duration=str(duration),
+                track_number=str(track.track_no),
+                mbid=(track.musicbrainz_id or '').encode(ENCODING))
         except (pylast.ScrobblingError, socket.error) as e:
             logger.warning(u'Last.fm now playing error: %s', e)
 
@@ -127,14 +126,13 @@ class LastfmFrontendThread(BaseThread):
             self.last_start_time = int(time.time()) - duration
         logger.debug(u'Scrobbling track: %s - %s', artists, track.name)
         try:
-            self.scrobbler.scrobble(
+            self.lastfm.scrobble(
                 artists.encode(ENCODING),
                 track.name.encode(ENCODING),
-                time_started=self.last_start_time,
-                source=pylast.SCROBBLE_SOURCE_USER,
-                mode=pylast.SCROBBLE_MODE_PLAYED,
-                duration=duration,
+                str(self.last_start_time),
                 album=track.album.name.encode(ENCODING),
-                track_number=track.track_no)
+                track_number=str(track.track_no),
+                duration=str(duration),
+                mbid=(track.musicbrainz_id or '').encode(ENCODING))
         except (pylast.ScrobblingError, socket.error) as e:
             logger.warning(u'Last.fm scrobbling error: %s', e)

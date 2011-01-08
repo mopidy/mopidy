@@ -21,6 +21,13 @@ No description yet.
   - Support high bitrate (320k) audio. See
     :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
 
+- Last.fm frontend:
+
+  - If you use the Last.fm frontend, you need to upgrade to pylast 0.5.
+
+  - Update to use Last.fm's new Scrobbling 2.0 API, as the old Submissions
+    Protocol 1.2.1 is deprecated. (Fixes: :issue:`33`)
+
 
 **Changes**
 
