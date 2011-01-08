@@ -180,11 +180,18 @@ From AUR on ArchLinux
 If you are running ArchLinux, you can install a development snapshot of Mopidy
 using the package found at http://aur.archlinux.org/packages.php?ID=44026.
 
-To install it, you can use ``packer``, ``yaourt``, or do it by hand like this::
+#. First, you should consider installing any optional dependencies not included
+   by the AUR package, like required for e.g. Last.fm scrobbling.
 
-    wget http://aur.archlinux.org/packages/mopidy-git/mopidy-git.tar.gz
-    tar xf mopidy-git.tar.gz
-    cd mopidy-git/
-    makepkg -si
+#. To install Mopidy with GStreamer, libspotify and pyspotify, you can use
+   ``packer``, ``yaourt``, or do it by hand like this::
 
-To upgrade Mopidy to future releases, just rerun ``makepkg``.
+       wget http://aur.archlinux.org/packages/mopidy-git/mopidy-git.tar.gz
+       tar xf mopidy-git.tar.gz
+       cd mopidy-git/
+       makepkg -si
+
+   To upgrade Mopidy to future releases, just rerun ``makepkg``.
+
+#. Next, you need to set a couple of :doc:`settings </settings>`, and then
+   you're ready to :doc:`run Mopidy </running>`.
