@@ -116,8 +116,8 @@ development version of Mopidy. These are not as stable as the releases, but
 you'll get access to new features earlier and may help us by reporting issues.
 
 
-From snapshot
--------------
+From snapshot using Pip
+-----------------------
 
 If you want to follow Mopidy development closer, you may install a snapshot of
 Mopidy's ``develop`` branch.
@@ -172,3 +172,10 @@ If you want to contribute to Mopidy, you should install Mopidy using Git.
 For an introduction to ``git``, please visit `git-scm.com
 <http://git-scm.com/>`_. Also, please read our :doc:`developer documentation
 </development/index>`.
+
+
+From AUR on ArchLinux
+---------------------
+
+If you are running ArchLinux, you can install a development snapshot of Mopidy
+using the package found at http://aur.archlinux.org/packages.php?ID=44026.
