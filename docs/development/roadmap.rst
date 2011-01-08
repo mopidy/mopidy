@@ -27,7 +27,7 @@ Possible targets for the next version
 
   - Write-support for Spotify, i.e. playlist management.
   - Virtual directories with e.g. starred tracks from Spotify.
-  - **[WIP: possibly v0.3]** Support for 320 kbps audio.
+  - **[DONE: v0.3]** Support for 320 kbps audio.
 
 - Local backend:
 
@@ -47,7 +47,7 @@ Stuff we want to do, but not right now, and maybe never
     recipies for all our dependencies and Mopidy itself to make OS X
     installation a breeze. See `Homebrew's issue #1612
     <http://github.com/mxcl/homebrew/issues/issue/1612>`_.
-  - **[WIP]** Create `Debian packages
+  - **[DONE]** Create `Debian packages
     <http://www.debian.org/doc/maint-guide/>`_ of all our dependencies and
     Mopidy itself (hosted in our own Debian repo until we get stuff into the
     various distros) to make Debian/Ubuntu installation a breeze.
