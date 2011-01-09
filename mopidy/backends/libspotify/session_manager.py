@@ -54,6 +54,7 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
         for spotify_playlist in session.playlist_container():
             playlists.append(
                 LibspotifyTranslator.to_mopidy_playlist(spotify_playlist))
+        playlists = filter(None, playlists)
         self.core_queue.put({
             'command': 'set_stored_playlists',
             'playlists': playlists,

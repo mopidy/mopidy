@@ -21,6 +21,10 @@ No description yet.
   - Support high bitrate (320k) audio. See
     :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
 
+  - Catch and log error caused by playlist folder boundaries being threated as
+    normal playlists. More permanent fix requires support for checking playlist
+    types in pyspotify.
+
 - Last.fm frontend:
 
   - If you use the Last.fm frontend, you need to upgrade to pylast 0.5.

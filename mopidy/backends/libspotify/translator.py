@@ -1,10 +1,13 @@
 import datetime as dt
+import logging
 
-from spotify import Link
+from spotify import Link, SpotifyError
 
 from mopidy import settings
 from mopidy.backends.libspotify import ENCODING
 from mopidy.models import Artist, Album, Track, Playlist
+
+logger = logging.getLogger('mopidy.backends.libspotify.translator')
 
 class LibspotifyTranslator(object):
     @classmethod
@@ -47,8 +50,15 @@ class LibspotifyTranslator(object):
     def to_mopidy_playlist(cls, spotify_playlist):
         if not spotify_playlist.is_loaded():
             return Playlist(name=u'[loading...]')
-        return Playlist(
-            uri=str(Link.from_playlist(spotify_playlist)),
-            name=spotify_playlist.name().decode(ENCODING),
-            tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
-        )
+        # FIXME Replace this try-except with a check on the playlist type,
+        # which is currently not supported by pyspotify, to avoid handling
+        # playlist folder boundaries like normal playlists.
+        try:
+            return Playlist(
+                uri=str(Link.from_playlist(spotify_playlist)),
+                name=spotify_playlist.name().decode(ENCODING),
+                tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
+            )
+        except SpotifyError, e:
+            logger.warning(u'Failed translating Spotify playlist '
+                '(probably a playlist folder boundary): %s', e)
