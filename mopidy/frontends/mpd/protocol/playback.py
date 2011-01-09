@@ -293,6 +293,7 @@ def replay_gain_status(frontend):
     """
     return u'off' # TODO
 
+@handle_pattern(r'^seek (?P<songpos>\d+) (?P<seconds>\d+)$')
 @handle_pattern(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
 def seek(frontend, songpos, seconds):
     """
@@ -302,6 +303,10 @@ def seek(frontend, songpos, seconds):
 
         Seeks to the position ``TIME`` (in seconds) of entry ``SONGPOS`` in
         the playlist.
+
+    *Droid MPD:*
+
+    - issues ``seek 1 120`` without quotes around the arguments.
     """
     if frontend.backend.playback.current_playlist_position != songpos:
         playpos(frontend, songpos)

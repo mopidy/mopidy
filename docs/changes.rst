@@ -58,6 +58,8 @@ No description yet.
 
   - Support ``setvol 50`` without quotes around the argument. Fixes volume
     control in Droid MPD.
+  - Support ``seek 1 120`` without quotes around the arguments. Fixes seek in
+    Droid MPD.
 
 - Local backend:
 
