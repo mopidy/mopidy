@@ -104,6 +104,11 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assertEqual(10, self.b.mixer.volume)
 
+    def test_setvol_without_quotes(self):
+        result = self.h.handle_request(u'setvol 50')
+        self.assert_(u'OK' in result)
+        self.assertEqual(50, self.b.mixer.volume)
+
     def test_single_off(self):
         result = self.h.handle_request(u'single "0"')
         self.assertFalse(self.b.playback.single)

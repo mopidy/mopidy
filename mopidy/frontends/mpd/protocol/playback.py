@@ -320,6 +320,7 @@ def seekid(frontend, cpid, seconds):
         playid(frontend, cpid)
     frontend.backend.playback.seek(int(seconds) * 1000)
 
+@handle_pattern(r'^setvol (?P<volume>[-+]*\d+)$')
 @handle_pattern(r'^setvol "(?P<volume>[-+]*\d+)"$')
 def setvol(frontend, volume):
     """
@@ -328,6 +329,10 @@ def setvol(frontend, volume):
         ``setvol {VOL}``
 
         Sets volume to ``VOL``, the range of volume is 0-100.
+
+    *Droid MPD:*
+
+    - issues ``setvol 50`` without quotes around the argument.
     """
     volume = int(volume)
     if volume < 0:

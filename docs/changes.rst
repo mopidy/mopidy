@@ -54,6 +54,11 @@ No description yet.
     application menus.
   - Create infrastructure for creating Debian packages of Mopidy.
 
+- MPD frontend:
+
+  - Support ``setvol 50`` without quotes around the argument. Fixes volume
+    control in Droid MPD.
+
 - Local backend:
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
