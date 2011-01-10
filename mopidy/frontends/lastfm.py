@@ -18,11 +18,6 @@ logger = logging.getLogger('mopidy.frontends.lastfm')
 API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
-# pylast raises UnicodeEncodeError on conversion from unicode objects to
-# ascii-encoded bytestrings, so we explicitly encode as utf-8 before passing
-# strings to pylast.
-ENCODING = u'utf-8'
-
 class LastfmFrontend(BaseFrontend):
     """
     Frontend which scrobbles the music you play to your `Last.fm
@@ -102,12 +97,12 @@ class LastfmFrontendThread(BaseThread):
         logger.debug(u'Now playing track: %s - %s', artists, track.name)
         try:
             self.lastfm.update_now_playing(
-                artists.encode(ENCODING),
-                track.name.encode(ENCODING),
-                album=track.album.name.encode(ENCODING),
+                artists,
+                track.name,
+                album=track.album.name,
                 duration=str(duration),
                 track_number=str(track.track_no),
-                mbid=(track.musicbrainz_id or '').encode(ENCODING))
+                mbid=(track.musicbrainz_id or ''))
         except (pylast.ScrobblingError, socket.error) as e:
             logger.warning(u'Last.fm now playing error: %s', e)
 
@@ -127,12 +122,12 @@ class LastfmFrontendThread(BaseThread):
         logger.debug(u'Scrobbling track: %s - %s', artists, track.name)
         try:
             self.lastfm.scrobble(
-                artists.encode(ENCODING),
-                track.name.encode(ENCODING),
+                artists,
+                track.name,
                 str(self.last_start_time),
-                album=track.album.name.encode(ENCODING),
+                album=track.album.name,
                 track_number=str(track.track_no),
                 duration=str(duration),
-                mbid=(track.musicbrainz_id or '').encode(ENCODING))
+                mbid=(track.musicbrainz_id or ''))
         except (pylast.ScrobblingError, socket.error) as e:
             logger.warning(u'Last.fm scrobbling error: %s', e)
