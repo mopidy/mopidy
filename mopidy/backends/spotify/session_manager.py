@@ -37,10 +37,10 @@ class SpotifySessionManager(spotify.manager.SpotifySessionManager, BaseThread):
         logger.info(u'Connected to Spotify')
         self.session = session
         if settings.SPOTIFY_HIGH_BITRATE:
-            logger.debug(u'Prefer high bitrate')
+            logger.debug(u'Preferring high bitrate from Spotify')
             self.session.set_preferred_bitrate(1)
         else:
-            logger.debug(u'Prefer normal bitrate')
+            logger.debug(u'Preferring normal bitrate from Spotify')
             self.session.set_preferred_bitrate(0)
         self.connected.set()
 
