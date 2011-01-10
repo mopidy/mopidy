@@ -4,9 +4,9 @@ from spotify import Link, SpotifyError
 
 from mopidy.backends.base import BasePlaybackProvider
 
-logger = logging.getLogger('mopidy.backends.libspotify.playback')
+logger = logging.getLogger('mopidy.backends.spotify.playback')
 
-class LibspotifyPlaybackProvider(BasePlaybackProvider):
+class SpotifyPlaybackProvider(BasePlaybackProvider):
     def pause(self):
         return self.backend.output.set_state('PAUSED')
 

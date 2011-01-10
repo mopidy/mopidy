@@ -21,6 +21,10 @@ No description yet.
   - Support high bitrate (320k) audio. See
     :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
 
+  - Rename :mod:`mopidy.backends.libspotify` to :mod:`mopidy.backends.spotify`.
+    If you have set :attr:`mopidy.settings.BACKENDS` explicitly, you may need
+    to update the setting's value.
+
   - Catch and log error caused by playlist folder boundaries being threated as
     normal playlists. More permanent fix requires support for checking playlist
     types in pyspotify.

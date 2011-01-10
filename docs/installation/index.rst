@@ -31,7 +31,7 @@ Otherwise, make sure you got the required dependencies installed.
 
 - Dependencies for at least one Mopidy backend:
 
-  - The default backend, :mod:`mopidy.backends.libspotify`, requires libspotify
+  - The default backend, :mod:`mopidy.backends.spotify`, requires libspotify
     and pyspotify. See :doc:`libspotify`.
 
   - The local backend, :mod:`mopidy.backends.local`, requires no additional

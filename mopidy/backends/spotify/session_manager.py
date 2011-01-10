@@ -2,28 +2,29 @@ import logging
 import os
 import threading
 
-from spotify.manager import SpotifySessionManager
+import spotify.manager
 
 from mopidy import get_version, settings
-from mopidy.backends.libspotify.translator import LibspotifyTranslator
+from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 from mopidy.utils.process import BaseThread
 
-logger = logging.getLogger('mopidy.backends.libspotify.session_manager')
+logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
 # pylint: disable = R0901
-# LibspotifySessionManager: Too many ancestors (9/7)
+# SpotifySessionManager: Too many ancestors (9/7)
 
-class LibspotifySessionManager(SpotifySessionManager, BaseThread):
+class SpotifySessionManager(spotify.manager.SpotifySessionManager, BaseThread):
     cache_location = settings.SPOTIFY_CACHE_PATH
     settings_location = settings.SPOTIFY_CACHE_PATH
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
     def __init__(self, username, password, core_queue, output):
-        SpotifySessionManager.__init__(self, username, password)
+        spotify.manager.SpotifySessionManager.__init__(
+            self, username, password)
         BaseThread.__init__(self, core_queue)
-        self.name = 'LibspotifySMThread'
+        self.name = 'SpotifySMThread'
         self.output = output
         self.connected = threading.Event()
         self.session = None
@@ -53,7 +54,7 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
         playlists = []
         for spotify_playlist in session.playlist_container():
             playlists.append(
-                LibspotifyTranslator.to_mopidy_playlist(spotify_playlist))
+                SpotifyTranslator.to_mopidy_playlist(spotify_playlist))
         playlists = filter(None, playlists)
         self.core_queue.put({
             'command': 'set_stored_playlists',
@@ -111,7 +112,7 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
         def callback(results, userdata=None):
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
-                LibspotifyTranslator.to_mopidy_track(t)
+                SpotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
             connection.send(playlist)
         self.connected.wait()

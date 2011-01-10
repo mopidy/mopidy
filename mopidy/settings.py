@@ -12,12 +12,12 @@ Available settings and their default values.
 #:
 #: Default::
 #:
-#:     BACKENDS = (u'mopidy.backends.libspotify.LibspotifyBackend',)
+#:     BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
 #:
 #: .. note::
 #:     Currently only the first backend in the list is used.
 BACKENDS = (
-    u'mopidy.backends.libspotify.LibspotifyBackend',
+    u'mopidy.backends.spotify.SpotifyBackend',
 )
 
 #: The log format used for informational logging.
@@ -169,24 +169,24 @@ MPD_SERVER_HOSTNAME = u'127.0.0.1'
 #: Default: 6600
 MPD_SERVER_PORT = 6600
 
-#: Path to the libspotify cache.
+#: Path to the Spotify cache.
 #:
-#: Used by :mod:`mopidy.backends.libspotify`.
-SPOTIFY_CACHE_PATH = u'~/.mopidy/libspotify_cache'
+#: Used by :mod:`mopidy.backends.spotify`.
+SPOTIFY_CACHE_PATH = u'~/.mopidy/spotify_cache'
 
 #: Your Spotify Premium username.
 #:
-#: Used by :mod:`mopidy.backends.libspotify`.
+#: Used by :mod:`mopidy.backends.spotify`.
 SPOTIFY_USERNAME = u''
 
 #: Your Spotify Premium password.
 #:
-#: Used by :mod:`mopidy.backends.libspotify`.
+#: Used by :mod:`mopidy.backends.spotify`.
 SPOTIFY_PASSWORD = u''
 
 #: Do you prefer high bitrate (320k)?
 #:
-#: Used by :mod:`mopidy.backends.libspotify`.
+#: Used by :mod:`mopidy.backends.spotify`.
 #
 #: Default::
 #:

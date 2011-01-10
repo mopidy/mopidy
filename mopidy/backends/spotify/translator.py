@@ -4,12 +4,12 @@ import logging
 from spotify import Link, SpotifyError
 
 from mopidy import settings
-from mopidy.backends.libspotify import ENCODING
+from mopidy.backends.spotify import ENCODING
 from mopidy.models import Artist, Album, Track, Playlist
 
-logger = logging.getLogger('mopidy.backends.libspotify.translator')
+logger = logging.getLogger('mopidy.backends.spotify.translator')
 
-class LibspotifyTranslator(object):
+class SpotifyTranslator(object):
     @classmethod
     def to_mopidy_artist(cls, spotify_artist):
         if not spotify_artist.is_loaded():

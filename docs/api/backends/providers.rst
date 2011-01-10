@@ -37,5 +37,5 @@ Backend provider implementations
 ================================
 
 * :mod:`mopidy.backends.dummy`
-* :mod:`mopidy.backends.libspotify`
+* :mod:`mopidy.backends.spotify`
 * :mod:`mopidy.backends.local`
