@@ -1,8 +1,6 @@
 import logging
 from threading import Lock
 
-from serial import Serial
-
 from mopidy import settings
 from mopidy.mixers.base import BaseMixer
 
@@ -33,8 +31,11 @@ class DenonMixer(BaseMixer):
         """
         super(DenonMixer, self).__init__(*args, **kwargs)
         device = kwargs.get('device', None)
-        self._device = device or Serial(port=settings.MIXER_EXT_PORT,
-            timeout=0.2)
+        if device:
+            self._device = device
+        else:
+            from serial import Serial
+            self._device = Serial(port=settings.MIXER_EXT_PORT, timeout=0.2)
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0
         self._lock = Lock()
