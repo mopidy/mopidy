@@ -20,7 +20,7 @@ class LocalBackend(Backend):
     """
     A backend for playing music from a local music archive.
 
-    **Issues:** http://github.com/jodal/mopidy/issues/labels/backend-local
+    **Issues:** http://github.com/mopidy/mopidy/issues/labels/backend-local
 
     **Settings:**
 

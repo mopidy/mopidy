@@ -103,6 +103,11 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assertEqual(10, self.b.mixer.volume)
 
+    def test_setvol_without_quotes(self):
+        result = self.h.handle_request(u'setvol 50')
+        self.assert_(u'OK' in result)
+        self.assertEqual(50, self.b.mixer.volume)
+
     def test_single_off(self):
         result = self.h.handle_request(u'single "0"')
         self.assertFalse(self.b.playback.single)
@@ -318,6 +323,13 @@ class PlaybackControlHandlerTest(unittest.TestCase):
             [Track(uri='1', length=40000), seek_track])
         result = self.h.handle_request(u'seek "1" "30"')
         self.assertEqual(self.b.playback.current_track, seek_track)
+
+    def test_seek_without_quotes(self):
+        self.b.current_playlist.append([Track(length=40000)])
+        self.h.handle_request(u'seek 0')
+        result = self.h.handle_request(u'seek 0 30')
+        self.assert_(u'OK' in result)
+        self.assert_(self.b.playback.time_position >= 30000)
 
     def test_seekid(self):
         self.b.current_playlist.append([Track(length=40000)])

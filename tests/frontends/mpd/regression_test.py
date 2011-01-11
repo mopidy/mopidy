@@ -7,7 +7,7 @@ from mopidy.models import Track
 
 class IssueGH17RegressionTest(unittest.TestCase):
     """
-    The issue: http://github.com/jodal/mopidy/issues#issue/17
+    The issue: http://github.com/mopidy/mopidy/issues#issue/17
 
     How to reproduce:
 
@@ -41,7 +41,7 @@ class IssueGH17RegressionTest(unittest.TestCase):
 
 class IssueGH18RegressionTest(unittest.TestCase):
     """
-    The issue: http://github.com/jodal/mopidy/issues#issue/18
+    The issue: http://github.com/mopidy/mopidy/issues#issue/18
 
     How to reproduce:
 
@@ -78,7 +78,7 @@ class IssueGH18RegressionTest(unittest.TestCase):
 
 class IssueGH22RegressionTest(unittest.TestCase):
     """
-    The issue: http://github.com/jodal/mopidy/issues/#issue/22
+    The issue: http://github.com/mopidy/mopidy/issues/#issue/22
 
     How to reproduce:
 

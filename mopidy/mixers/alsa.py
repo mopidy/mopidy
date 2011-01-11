@@ -11,6 +11,10 @@ class AlsaMixer(BaseMixer):
     Mixer which uses the Advanced Linux Sound Architecture (ALSA) to control
     volume.
 
+    **Dependencies:**
+
+    - pyalsaaudio >= 0.2 (python-alsaaudio on Debian/Ubuntu)
+
     **Settings:**
 
     - :attr:`mopidy.settings.MIXER_ALSA_CONTROL`

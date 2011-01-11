@@ -12,9 +12,30 @@ No description yet.
 
 **Important changes**
 
-- If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
-  the latest pyspotify from the Mopidy developers. Follow the instructions at
-  :ref:`/installation/libspotify/`.
+- Spotify backend:
+
+  - If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
+    the latest pyspotify from the Mopidy developers. Follow the instructions at
+    :doc:`/installation/libspotify/`.
+
+  - Support high bitrate (320k) audio. See
+    :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
+
+  - Rename :mod:`mopidy.backends.libspotify` to :mod:`mopidy.backends.spotify`.
+    If you have set :attr:`mopidy.settings.BACKENDS` explicitly, you may need
+    to update the setting's value.
+
+  - Catch and log error caused by playlist folder boundaries being threated as
+    normal playlists. More permanent fix requires support for checking playlist
+    types in pyspotify.
+
+- Last.fm frontend:
+
+  - If you use the Last.fm frontend, you need to upgrade to pylast 0.5.
+
+  - Update to use Last.fm's new Scrobbling 2.0 API, as the old Submissions
+    Protocol 1.2.1 is deprecated. (Fixes: :issue:`33`)
+
 
 **Changes**
 
@@ -37,10 +58,12 @@ No description yet.
     application menus.
   - Create infrastructure for creating Debian packages of Mopidy.
 
-- Spotify backend:
+- MPD frontend:
 
-  - Support high bitrate (320k). See
-    :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
+  - Support ``setvol 50`` without quotes around the argument. Fixes volume
+    control in Droid MPD.
+  - Support ``seek 1 120`` without quotes around the arguments. Fixes seek in
+    Droid MPD.
 
 - Local backend:
 
@@ -78,6 +101,19 @@ No description yet.
   - Move ``BaseMixer`` to :class:`mopidy.mixers.base.BaseMixer`.
   - Add docs for the current non-stable output API,
     :class:`mopidy.outputs.base.BaseOutput`.
+
+
+0.2.1 (2011-01-07)
+==================
+
+This is a maintenance release without any new features.
+
+**Bugfixes**
+
+- Fix crash in :mod:`mopidy.frontends.lastfm` which occurred at playback if
+  either :mod:`pylast` was not installed or the Last.fm scrobbling was not
+  correctly configured. The scrobbling thread now shuts properly down at
+  failure.
 
 
 0.2.0 (2010-10-24)
@@ -426,7 +462,7 @@ Mopidy is working and usable. 0.1.0a0 is an alpha release, which basicly means
 we will still change APIs, add features, etc. before the final 0.1.0 release.
 But the software is usable as is, so we release it. Please give it a try and
 give us feedback, either at our IRC channel or through the `issue tracker
-<http://github.com/jodal/mopidy/issues>`_. Thanks!
+<http://github.com/mopidy/mopidy/issues>`_. Thanks!
 
 **Changes**
 
