@@ -50,16 +50,8 @@ class SpotifySessionManager(spotify.manager.SpotifySessionManager, BaseThread):
 
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
-        logger.debug(u'Metadata updated, refreshing stored playlists')
-        playlists = []
-        for spotify_playlist in session.playlist_container():
-            playlists.append(
-                SpotifyTranslator.to_mopidy_playlist(spotify_playlist))
-        playlists = filter(None, playlists)
-        self.core_queue.put({
-            'command': 'set_stored_playlists',
-            'playlists': playlists,
-        })
+        logger.debug(u'Metadata updated')
+        self.refresh_stored_playlists()
 
     def connection_error(self, session, error):
         """Callback used by pyspotify"""
@@ -106,6 +98,20 @@ class SpotifySessionManager(spotify.manager.SpotifySessionManager, BaseThread):
         """Callback used by pyspotify"""
         logger.debug(u'End of data stream reached')
         self.output.end_of_data_stream()
+
+    def refresh_stored_playlists(self):
+        """Refresh the stored playlists in the backend with fresh meta data
+        from Spotify"""
+        playlists = []
+        for spotify_playlist in self.session.playlist_container():
+            playlists.append(
+                SpotifyTranslator.to_mopidy_playlist(spotify_playlist))
+        playlists = filter(None, playlists)
+        self.core_queue.put({
+            'command': 'set_stored_playlists',
+            'playlists': playlists,
+        })
+        logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
 
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
