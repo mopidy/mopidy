@@ -5,10 +5,7 @@ import pygst
 pygst.require('0.10')
 import gst
 
-from os.path import abspath
 import datetime
-import sys
-import threading
 
 from mopidy.utils.path import path_to_uri, find_files
 from mopidy.models import Track, Artist, Album
@@ -19,6 +16,8 @@ def translator(data):
     artist_kwargs = {}
     track_kwargs = {}
 
+    # FIXME replace with data.get('foo', None) ?
+
     if 'album' in data:
         album_kwargs['name'] = data['album']
 
@@ -26,7 +25,7 @@ def translator(data):
         album_kwargs['num_tracks'] = data['track-count']
 
     if 'artist' in data:
-        artist_kwargs['name'] =data['artist']
+        artist_kwargs['name'] = data['artist']
 
     if 'date' in data:
         date = data['date']
@@ -41,6 +40,18 @@ def translator(data):
 
     if 'album-artist' in data:
         albumartist_kwargs['name'] = data['album-artist']
+
+    if 'musicbrainz-trackid' in data:
+        track_kwargs['musicbrainz_id'] = data['musicbrainz-trackid']
+
+    if 'musicbrainz-artistid' in data:
+        artist_kwargs['musicbrainz_id'] = data['musicbrainz-artistid']
+
+    if 'musicbrainz-albumid' in data:
+        album_kwargs['musicbrainz_id'] = data['musicbrainz-albumid']
+
+    if 'musicbrainz-albumartistid' in data:
+        albumartist_kwargs['musicbrainz_id'] = data['musicbrainz-albumartistid']
 
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]

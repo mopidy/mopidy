@@ -16,22 +16,22 @@ from mopidy.utils.path import path_to_uri
 
 from tests import data_folder
 from tests.backends.base.stored_playlists import \
-    BaseStoredPlaylistsControllerTest
+    StoredPlaylistsControllerTest
 from tests.backends.local import generate_song
 
-class LocalStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
+class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
         unittest.TestCase):
 
     backend_class = LocalBackend
 
     def test_created_playlist_is_persisted(self):
-        path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
+        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
         self.assert_(not os.path.exists(path))
         self.stored.create('test')
         self.assert_(os.path.exists(path))
 
     def test_saved_playlist_is_persisted(self):
-        path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test2.m3u')
+        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test2.m3u')
         self.assert_(not os.path.exists(path))
         self.stored.save(Playlist(name='test2'))
         self.assert_(os.path.exists(path))
@@ -39,13 +39,13 @@ class LocalStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
     def test_deleted_playlist_get_removed(self):
         playlist = self.stored.create('test')
         self.stored.delete(playlist)
-        path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
+        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
         self.assert_(not os.path.exists(path))
 
     def test_renamed_playlist_gets_moved(self):
         playlist = self.stored.create('test')
-        file1 = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
-        file2 = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test2.m3u')
+        file1 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
+        file2 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test2.m3u')
         self.assert_(not os.path.exists(file2))
         self.stored.rename(playlist, 'test2')
         self.assert_(not os.path.exists(file1))
@@ -55,7 +55,7 @@ class LocalStoredPlaylistsControllerTest(BaseStoredPlaylistsControllerTest,
         track = Track(uri=generate_song(1))
         uri = track.uri[len('file://'):]
         playlist = Playlist(tracks=[track], name='test')
-        path = os.path.join(settings.LOCAL_PLAYLIST_FOLDER, 'test.m3u')
+        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
 
         self.stored.save(playlist)
 

@@ -13,7 +13,7 @@ from tests.backends.base import populate_playlist
 
 # TODO Test 'playlist repeat', e.g. repeat=1,single=0
 
-class BasePlaybackControllerTest(object):
+class PlaybackControllerTest(object):
     tracks = []
 
     def setUp(self):
@@ -104,8 +104,8 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_play_skips_to_next_track_on_failure(self):
-        # If _play() returns False, it is a failure.
-        self.playback._play = lambda track: track != self.tracks[0]
+        # If provider.play() returns False, it is a failure.
+        self.playback.provider.play = lambda track: track != self.tracks[0]
         self.playback.play()
         self.assertNotEqual(self.playback.current_track, self.tracks[0])
         self.assertEqual(self.playback.current_track, self.tracks[1])
@@ -164,8 +164,8 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_previous_skips_to_previous_track_on_failure(self):
-        # If _play() returns False, it is a failure.
-        self.playback._play = lambda track: track != self.tracks[1]
+        # If provider.play() returns False, it is a failure.
+        self.playback.provider.play = lambda track: track != self.tracks[1]
         self.playback.play(self.current_playlist.cp_tracks[2])
         self.assertEqual(self.playback.current_track, self.tracks[2])
         self.playback.previous()
@@ -228,8 +228,8 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_next_skips_to_next_track_on_failure(self):
-        # If _play() returns False, it is a failure.
-        self.playback._play = lambda track: track != self.tracks[1]
+        # If provider.play() returns False, it is a failure.
+        self.playback.provider.play = lambda track: track != self.tracks[1]
         self.playback.play()
         self.assertEqual(self.playback.current_track, self.tracks[0])
         self.playback.next()
@@ -364,8 +364,8 @@ class BasePlaybackControllerTest(object):
 
     @populate_playlist
     def test_end_of_track_skips_to_next_track_on_failure(self):
-        # If _play() returns False, it is a failure.
-        self.playback._play = lambda track: track != self.tracks[1]
+        # If provider.play() returns False, it is a failure.
+        self.playback.provider.play = lambda track: track != self.tracks[1]
         self.playback.play()
         self.assertEqual(self.playback.current_track, self.tracks[0])
         self.playback.on_end_of_track()

@@ -14,26 +14,28 @@ release.
 Possible targets for the next version
 =====================================
 
-- Reintroduce support for OS X. See :issue:`14` for details.
-- Support for using multiple Mopidy backends simultaneously. Should make it
-  possible to have both Spotify tracks and local tracks in the same playlist.
+- Reintroduce support for OS X. See :issue:`25` for details.
+- **[WIP: feature/multi-backend]** Support for using multiple Mopidy backends
+  simultaneously. Should make it possible to have both Spotify tracks and local
+  tracks in the same playlist.
 - MPD frontend:
 
+  - **[WIP: feature/mpd-password]** Password authentication.
   - ``idle`` support.
 
 - Spotify backend:
 
   - Write-support for Spotify, i.e. playlist management.
   - Virtual directories with e.g. starred tracks from Spotify.
-  - Support for 320 kbps audio.
+  - **[DONE: v0.3]** Support for 320 kbps audio.
 
 - Local backend:
 
-  - Better library support.
-  - A script for creating a tag cache.
+  - Better music library support.
+  - **[DONE: v0.3]** A script for creating a tag cache.
   - An alternative to tag cache for caching metadata, i.e. Sqlite.
 
-- **[DONE]** Last.fm scrobbling.
+- **[DONE: v0.2]** Last.fm scrobbling.
 
 
 Stuff we want to do, but not right now, and maybe never
@@ -41,18 +43,19 @@ Stuff we want to do, but not right now, and maybe never
 
 - Packaging and distribution:
 
-  - **[PENDING]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_
+  - **[BLOCKED]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_
     recipies for all our dependencies and Mopidy itself to make OS X
     installation a breeze. See `Homebrew's issue #1612
     <http://github.com/mxcl/homebrew/issues/issue/1612>`_.
-  - Create `Debian packages <http://www.debian.org/doc/maint-guide/>`_ of all
-    our dependencies and Mopidy itself (hosted in our own Debian repo until we
-    get stuff into the various distros) to make Debian/Ubuntu installation a
-    breeze.
+  - **[DONE]** Create `Debian packages
+    <http://www.debian.org/doc/maint-guide/>`_ of all our dependencies and
+    Mopidy itself (hosted in our own Debian repo until we get stuff into the
+    various distros) to make Debian/Ubuntu installation a breeze.
 
 - Compatability:
 
-  - Run frontend tests against a real MPD server to ensure we are in sync.
+  - **[WIP: feature/blackbox-testing]** Run frontend tests against a real MPD
+    server to ensure we are in sync.
 
 - Backends:
 
@@ -64,9 +67,10 @@ Stuff we want to do, but not right now, and maybe never
 
   - Publish the server's presence to the network using `Zeroconf
     <http://en.wikipedia.org/wiki/Zeroconf>`_/Avahi.
-  - D-Bus/`MPRIS <http://www.mpris.org/>`_
-  - REST/JSON web service with a jQuery client as example application. Maybe
-    based upon `Tornado <http://github.com/facebook/tornado>`_ and `jQuery
+  - **[WIP: feature/mpris-frontend]** D-Bus/`MPRIS <http://www.mpris.org/>`_
+  - **[WIP: feature/http-frontend]** REST/JSON web service with a jQuery client
+    as example application. Maybe based upon `Tornado
+    <http://github.com/facebook/tornado>`_ and `jQuery
     Mobile <http://jquerymobile.com/>`_.
   - DNLA/UPnP so Mopidy can be controlled from i.e. TVs.
   - `XMMS2 <http://www.xmms2.org/>`_

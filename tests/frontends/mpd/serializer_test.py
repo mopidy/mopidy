@@ -3,15 +3,26 @@ import os
 import unittest
 
 from mopidy import settings
-from mopidy.utils.path import mtime
+from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
 from tests import data_folder, SkipTest
 
 class TrackMpdFormatTest(unittest.TestCase):
+    track = Track(
+        uri=u'a uri',
+        artists=[Artist(name=u'an artist')],
+        name=u'a name',
+        album=Album(name=u'an album', num_tracks=13,
+            artists=[Artist(name=u'an other artist')]),
+        track_no=7,
+        date=dt.date(1977, 1, 1),
+        length=137000,
+    )
+
     def setUp(self):
-        settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
+        settings.LOCAL_MUSIC_PATH = '/dir/subdir'
         mtime.set_fake_time(1234567)
 
     def tearDown(self):
@@ -42,33 +53,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Pos', 1) in result)
         self.assert_(('Id', 2) in result)
 
-    def test_track_to_mpd_format_with_key(self):
-        track = Track(uri='file:///dir/subdir/file.mp3')
-        result = translator.track_to_mpd_format(track, key=True)
-        self.assert_(('key', 'file.mp3') in result)
-
-    def test_track_to_mpd_format_with_key_not_uri_encoded(self):
-        track = Track(uri='file:///dir/subdir/file%20test.mp3')
-        result = translator.track_to_mpd_format(track, key=True)
-        self.assert_(('key', 'file test.mp3') in result)
-
-    def test_track_to_mpd_format_with_mtime(self):
-        uri = translator.path_to_uri(data_folder('blank.mp3'))
-        result = translator.track_to_mpd_format(Track(uri=uri), mtime=True)
-        self.assert_(('mtime', 1234567) in result)
-
     def test_track_to_mpd_format_for_nonempty_track(self):
-        track = Track(
-            uri=u'a uri',
-            artists=[Artist(name=u'an artist')],
-            name=u'a name',
-            album=Album(name=u'an album', num_tracks=13,
-                artists=[Artist(name=u'an other artist')]),
-            track_no=7,
-            date=dt.date(1977, 1, 1),
-            length=137000,
-        )
-        result = translator.track_to_mpd_format(track, position=9, cpid=122)
+        result = translator.track_to_mpd_format(self.track, position=9, cpid=122)
         self.assert_(('file', 'a uri') in result)
         self.assert_(('Time', 137) in result)
         self.assert_(('Artist', 'an artist') in result)
@@ -80,6 +66,30 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Pos', 9) in result)
         self.assert_(('Id', 122) in result)
         self.assertEqual(len(result), 10)
+
+    def test_track_to_mpd_format_musicbrainz_trackid(self):
+        track = self.track.copy(musicbrainz_id='foo')
+        result = translator.track_to_mpd_format(track)
+        self.assert_(('MUSICBRAINZ_TRACKID', 'foo') in result)
+
+    def test_track_to_mpd_format_musicbrainz_albumid(self):
+        album = self.track.album.copy(musicbrainz_id='foo')
+        track = self.track.copy(album=album)
+        result = translator.track_to_mpd_format(track)
+        self.assert_(('MUSICBRAINZ_ALBUMID', 'foo') in result)
+
+    def test_track_to_mpd_format_musicbrainz_albumid(self):
+        artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
+        album = self.track.album.copy(artists=[artist])
+        track = self.track.copy(album=album)
+        result = translator.track_to_mpd_format(track)
+        self.assert_(('MUSICBRAINZ_ALBUMARTISTID', 'foo') in result)
+
+    def test_track_to_mpd_format_musicbrainz_artistid(self):
+        artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
+        track = self.track.copy(artists=[artist])
+        result = translator.track_to_mpd_format(track)
+        self.assert_(('MUSICBRAINZ_ARTISTID', 'foo') in result)
 
     def test_artists_to_mpd_format(self):
         artists = [Artist(name=u'ABBA'), Artist(name=u'Beatles')]
@@ -104,7 +114,7 @@ class PlaylistMpdFormatTest(unittest.TestCase):
 
 class TracksToTagCacheFormatTest(unittest.TestCase):
     def setUp(self):
-        settings.LOCAL_MUSIC_FOLDER = '/dir/subdir'
+        settings.LOCAL_MUSIC_PATH = '/dir/subdir'
         mtime.set_fake_time(1234567)
 
     def tearDown(self):
@@ -112,8 +122,13 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         mtime.undo_fake()
 
     def translate(self, track):
-        result = translator.track_to_mpd_format(track, key=True, mtime=True)
-        return translator.order_mpd_track_info(result)
+        folder = settings.LOCAL_MUSIC_PATH
+        result = dict(translator.track_to_mpd_format(track))
+        result['file'] = uri_to_path(result['file'])
+        result['file'] = result['file'][len(folder)+1:]
+        result['key'] = os.path.basename(result['file'])
+        result['mtime'] = mtime('')
+        return translator.order_mpd_track_info(result.items())
 
     def consume_headers(self, result):
         self.assertEqual(('info_begin',), result[0])
@@ -279,7 +294,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
 class TracksToDirectoryTreeTest(unittest.TestCase):
     def setUp(self):
-        settings.LOCAL_MUSIC_FOLDER = '/root/'
+        settings.LOCAL_MUSIC_PATH = '/root/'
 
     def tearDown(self):
         settings.runtime.clear()

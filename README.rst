@@ -13,7 +13,7 @@ To install Mopidy, check out
 
 * `Documentation (latest release) <http://www.mopidy.com/docs/master/>`_
 * `Documentation (development version) <http://www.mopidy.com/docs/develop/>`_
-* `Source code <http://github.com/jodal/mopidy>`_
-* `Issue tracker <http://github.com/jodal/mopidy/issues>`_
+* `Source code <http://github.com/mopidy/mopidy>`_
+* `Issue tracker <http://github.com/mopidy/mopidy/issues>`_
 * IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
-* `Download development snapshot <http://github.com/jodal/mopidy/tarball/develop#egg=mopidy-dev>`_
+* `Download development snapshot <http://github.com/mopidy/mopidy/tarball/develop#egg=mopidy-dev>`_

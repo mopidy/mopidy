@@ -3,7 +3,7 @@ from serial import Serial
 from multiprocessing import Pipe
 
 from mopidy import settings
-from mopidy.mixers import BaseMixer
+from mopidy.mixers.base import BaseMixer
 from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.mixers.nad')

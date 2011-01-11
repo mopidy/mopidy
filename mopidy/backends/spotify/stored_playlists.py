@@ -1,6 +1,6 @@
-from mopidy.backends.base import BaseStoredPlaylistsController
+from mopidy.backends.base import BaseStoredPlaylistsProvider
 
-class LibspotifyStoredPlaylistsController(BaseStoredPlaylistsController):
+class SpotifyStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
     def create(self, name):
         pass # TODO
 

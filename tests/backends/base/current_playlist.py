@@ -9,7 +9,7 @@ from mopidy.utils import get_class
 
 from tests.backends.base import populate_playlist
 
-class BaseCurrentPlaylistControllerTest(object):
+class CurrentPlaylistControllerTest(object):
     tracks = []
 
     def setUp(self):

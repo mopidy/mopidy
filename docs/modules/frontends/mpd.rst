@@ -1,6 +1,6 @@
-***************************
-:mod:`mopidy.frontends.mpd`
-***************************
+*****************************************
+:mod:`mopidy.frontends.mpd` -- MPD server
+*****************************************
 
 .. automodule:: mopidy.frontends.mpd
     :synopsis: MPD frontend

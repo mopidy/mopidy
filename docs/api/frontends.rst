@@ -1,6 +1,6 @@
-***********************
-:mod:`mopidy.frontends`
-***********************
+************
+Frontend API
+************
 
 A frontend may do whatever it wants to, including creating threads, opening TCP
 ports and exposing Mopidy for a type of clients.
@@ -8,14 +8,6 @@ ports and exposing Mopidy for a type of clients.
 Frontends got one main limitation: they are restricted to passing messages
 through the ``core_queue`` for all communication with the rest of Mopidy. Thus,
 the frontend API is very small and reveals little of what a frontend may do.
-
-.. automodule:: mopidy.frontends
-    :synopsis: Frontend API
-    :members:
-
-
-Frontend API
-============
 
 .. warning::
 
@@ -27,8 +19,8 @@ Frontend API
     :members:
 
 
-Frontends
-=========
+Frontend implementations
+========================
 
 * :mod:`mopidy.frontends.lastfm`
 * :mod:`mopidy.frontends.mpd`
