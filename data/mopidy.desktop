@@ -7,5 +7,5 @@ Icon=audio-x-generic
 TryExec=mopidy
 Exec=mopidy
 Terminal=true
-Categories=AudioVideo;Audio;Player;ConsoleOnly
+Categories=AudioVideo;Audio;Player;ConsoleOnly;
 StartupNotify=true

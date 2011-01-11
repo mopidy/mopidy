@@ -18,6 +18,7 @@ class CoreProcess(BaseThread):
         super(CoreProcess, self).__init__(self.core_queue)
         self.name = 'CoreProcess'
         self.options = self.parse_options()
+        self.gobject_loop = None
         self.output = None
         self.backend = None
         self.frontends = []

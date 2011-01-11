@@ -2,28 +2,29 @@ import logging
 import os
 import threading
 
-from spotify.manager import SpotifySessionManager
+import spotify.manager
 
 from mopidy import get_version, settings
-from mopidy.backends.libspotify.translator import LibspotifyTranslator
+from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 from mopidy.utils.process import BaseThread
 
-logger = logging.getLogger('mopidy.backends.libspotify.session_manager')
+logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
 # pylint: disable = R0901
-# LibspotifySessionManager: Too many ancestors (9/7)
+# SpotifySessionManager: Too many ancestors (9/7)
 
-class LibspotifySessionManager(SpotifySessionManager, BaseThread):
-    cache_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
-    settings_location = os.path.expanduser(settings.SPOTIFY_LIB_CACHE)
+class SpotifySessionManager(spotify.manager.SpotifySessionManager, BaseThread):
+    cache_location = settings.SPOTIFY_CACHE_PATH
+    settings_location = settings.SPOTIFY_CACHE_PATH
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
     def __init__(self, username, password, core_queue, output):
-        SpotifySessionManager.__init__(self, username, password)
+        spotify.manager.SpotifySessionManager.__init__(
+            self, username, password)
         BaseThread.__init__(self, core_queue)
-        self.name = 'LibspotifySMThread'
+        self.name = 'SpotifySMThread'
         self.output = output
         self.connected = threading.Event()
         self.session = None
@@ -35,6 +36,12 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
         """Callback used by pyspotify"""
         logger.info(u'Connected to Spotify')
         self.session = session
+        if settings.SPOTIFY_HIGH_BITRATE:
+            logger.debug(u'Preferring high bitrate from Spotify')
+            self.session.set_preferred_bitrate(1)
+        else:
+            logger.debug(u'Preferring normal bitrate from Spotify')
+            self.session.set_preferred_bitrate(0)
         self.connected.set()
 
     def logged_out(self, session):
@@ -43,15 +50,8 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
 
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
-        logger.debug(u'Metadata updated, refreshing stored playlists')
-        playlists = []
-        for spotify_playlist in session.playlist_container():
-            playlists.append(
-                LibspotifyTranslator.to_mopidy_playlist(spotify_playlist))
-        self.core_queue.put({
-            'command': 'set_stored_playlists',
-            'playlists': playlists,
-        })
+        logger.debug(u'Metadata updated')
+        self.refresh_stored_playlists()
 
     def connection_error(self, session, error):
         """Callback used by pyspotify"""
@@ -99,12 +99,26 @@ class LibspotifySessionManager(SpotifySessionManager, BaseThread):
         logger.debug(u'End of data stream reached')
         self.output.end_of_data_stream()
 
+    def refresh_stored_playlists(self):
+        """Refresh the stored playlists in the backend with fresh meta data
+        from Spotify"""
+        playlists = []
+        for spotify_playlist in self.session.playlist_container():
+            playlists.append(
+                SpotifyTranslator.to_mopidy_playlist(spotify_playlist))
+        playlists = filter(None, playlists)
+        self.core_queue.put({
+            'command': 'set_stored_playlists',
+            'playlists': playlists,
+        })
+        logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
+
     def search(self, query, connection):
         """Search method used by Mopidy backend"""
         def callback(results, userdata=None):
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
-                LibspotifyTranslator.to_mopidy_track(t)
+                SpotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
             connection.send(playlist)
         self.connected.wait()

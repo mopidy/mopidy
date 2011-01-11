@@ -7,20 +7,34 @@ class BaseOutput(object):
         self.core_queue = core_queue
 
     def start(self):
-        """Start the output."""
+        """
+        Start the output.
+
+        *MAY be implemented by subclasses.*
+        """
         pass
 
     def destroy(self):
-        """Destroy the output."""
+        """
+        Destroy the output.
+
+        *MAY be implemented by subclasses.*
+        """
         pass
 
     def process_message(self, message):
-        """Process messages with the output as destination."""
+        """
+        Process messages with the output as destination.
+
+        *MUST be implemented by subclass.*
+        """
         raise NotImplementedError
 
     def play_uri(self, uri):
         """
         Play URI.
+
+        *MUST be implemented by subclass.*
 
         :param uri: the URI to play
         :type uri: string
@@ -32,18 +46,26 @@ class BaseOutput(object):
         """
         Deliver audio data to be played.
 
+        *MUST be implemented by subclass.*
+
         :param capabilities: a GStreamer capabilities string
         :type capabilities: string
         """
         raise NotImplementedError
 
     def end_of_data_stream(self):
-        """Signal that the last audio data has been delivered."""
+        """
+        Signal that the last audio data has been delivered.
+
+        *MUST be implemented by subclass.*
+        """
         raise NotImplementedError
 
     def get_position(self):
         """
         Get position in milliseconds.
+
+        *MUST be implemented by subclass.*
 
         :rtype: int
         """
@@ -52,6 +74,8 @@ class BaseOutput(object):
     def set_position(self, position):
         """
         Set position in milliseconds.
+
+        *MUST be implemented by subclass.*
 
         :param position: the position in milliseconds
         :type volume: int
@@ -63,6 +87,8 @@ class BaseOutput(object):
         """
         Set playback state.
 
+        *MUST be implemented by subclass.*
+
         :param state: the state
         :type state: string
         :rtype: :class:`True` if successful, else :class:`False`
@@ -73,6 +99,8 @@ class BaseOutput(object):
         """
         Get volume level for software mixer.
 
+        *MUST be implemented by subclass.*
+
         :rtype: int in range [0..100]
         """
         raise NotImplementedError
@@ -80,6 +108,8 @@ class BaseOutput(object):
     def set_volume(self, volume):
         """
         Set volume level for software mixer.
+
+        *MUST be implemented by subclass.*
 
         :param volume: the volume in the range [0..100]
         :type volume: int

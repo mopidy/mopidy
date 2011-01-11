@@ -6,10 +6,10 @@ from mopidy.frontends.mpd import translator
 
 logger = logging.getLogger('mopidy.backends.base')
 
-class BaseCurrentPlaylistController(object):
+class CurrentPlaylistController(object):
     """
     :param backend: backend the controller is a part of
-    :type backend: :class:`BaseBackend`
+    :type backend: :class:`mopidy.backends.base.Backend`
     """
 
     def __init__(self, backend):

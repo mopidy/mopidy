@@ -12,12 +12,10 @@ from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
 from tests import data_folder
-from tests.backends.base.playback import BasePlaybackControllerTest
+from tests.backends.base.playback import PlaybackControllerTest
 from tests.backends.local import generate_song
 
-class LocalPlaybackControllerTest(BasePlaybackControllerTest,
-        unittest.TestCase):
-
+class LocalPlaybackControllerTest(PlaybackControllerTest, unittest.TestCase):
     backend_class = LocalBackend
     tracks = [Track(uri=generate_song(i), length=4464)
         for i in range(1, 4)]

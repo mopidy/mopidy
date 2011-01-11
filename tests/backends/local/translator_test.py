@@ -116,7 +116,16 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         self.assertEqual(set(expected_tracks), tracks)
 
     def test_unicode_cache(self):
-        raise SkipTest
+        tracks = parse_mpd_tag_cache(data_folder('utf8_tag_cache'),
+             data_folder(''))
+
+        uri = path_to_uri(data_folder('song1.mp3'))
+        artists = [Artist(name=u'æøå')]
+        album = Album(name=u'æøå', artists=artists)
+        track = Track(uri=uri, name=u'æøå', artists=artists,
+            album=album, length=4000)
+
+        self.assertEqual(track, list(tracks)[0])
 
     def test_misencoded_cache(self):
         # FIXME not sure if this can happen
@@ -127,3 +136,28 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
             data_folder(''))
         uri = path_to_uri(data_folder('song1.mp3'))
         self.assertEqual(set([Track(uri=uri, length=4000)]), tracks)
+
+    def test_musicbrainz_tagcache(self):
+        tracks = parse_mpd_tag_cache(data_folder('musicbrainz_tag_cache'),
+            data_folder(''))
+        artist = list(expected_tracks[0].artists)[0].copy(
+            musicbrainz_id='7364dea6-ca9a-48e3-be01-b44ad0d19897')
+        albumartist = list(expected_tracks[0].artists)[0].copy(
+            name='albumartistname',
+            musicbrainz_id='7364dea6-ca9a-48e3-be01-b44ad0d19897')
+        album = expected_tracks[0].album.copy(artists=[albumartist],
+            musicbrainz_id='cb5f1603-d314-4c9c-91e5-e295cfb125d2')
+        track = expected_tracks[0].copy(artists=[artist], album=album,
+            musicbrainz_id='90488461-8c1f-4a4e-826b-4c6dc70801f0')
+
+        self.assertEqual(track, list(tracks)[0])
+
+    def test_albumartist_tag_cache(self):
+        tracks = parse_mpd_tag_cache(data_folder('albumartist_tag_cache'),
+            data_folder(''))
+        uri = path_to_uri(data_folder('song1.mp3'))
+        artist = Artist(name='albumartistname')
+        album = expected_albums[0].copy(artists=[artist])
+        track = Track(name='trackname', artists=expected_artists, track_no=1,
+            album=album, length=4000, uri=uri)
+        self.assertEqual(track, list(tracks)[0])

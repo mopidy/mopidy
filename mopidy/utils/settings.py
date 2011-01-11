@@ -51,6 +51,9 @@ class SettingsProxy(object):
         value = self.current[attr]
         if type(value) != bool and not value:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
+        if attr.endswith('_PATH') or attr.endswith('_FILE'):
+            value = os.path.expanduser(value)
+            value = os.path.abspath(value)
         return value
 
     def __setattr__(self, attr, value):
@@ -94,10 +97,14 @@ def validate_settings(defaults, settings):
         'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
         'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
         'FRONTEND': 'FRONTENDS',
+        'LOCAL_MUSIC_FOLDER': 'LOCAL_MUSIC_PATH',
+        'LOCAL_PLAYLIST_FOLDER': 'LOCAL_PLAYLIST_PATH',
+        'LOCAL_TAG_CACHE': 'LOCAL_TAG_CACHE_FILE',
         'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
         'SERVER_PORT': 'MPD_SERVER_PORT',
         'SPOTIFY_LIB_APPKEY': None,
+        'SPOTIFY_LIB_CACHE': 'SPOTIFY_CACHE_PATH',
     }
 
     for setting, value in settings.iteritems():

@@ -77,7 +77,7 @@ setup(
     author='Stein Magnus Jodal',
     author_email='stein.magnus@jodal.no',
     packages=packages,
-    package_data={'mopidy': ['backends/libspotify/spotify_appkey.key']},
+    package_data={'mopidy': ['backends/spotify/spotify_appkey.key']},
     cmdclass=cmdclasses,
     data_files=data_files,
     scripts=['bin/mopidy', 'bin/mopidy-scan'],

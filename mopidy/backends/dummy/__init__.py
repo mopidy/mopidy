@@ -1,9 +1,19 @@
-from mopidy.backends.base import (BaseBackend, BaseCurrentPlaylistController,
-    BasePlaybackController, BaseLibraryController,
-    BaseStoredPlaylistsController)
+from mopidy.backends.base import (Backend, CurrentPlaylistController,
+    PlaybackController, BasePlaybackProvider, LibraryController,
+    BaseLibraryProvider, StoredPlaylistsController,
+    BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist
 
-class DummyBackend(BaseBackend):
+
+class DummyQueue(object):
+    def __init__(self):
+        self.received_messages = []
+
+    def put(self, message):
+        self.received_messages.append(message)
+
+
+class DummyBackend(Backend):
     """
     A backend which implements the backend API in the simplest way possible.
     Used in tests of the frontends.
@@ -13,19 +23,30 @@ class DummyBackend(BaseBackend):
 
     def __init__(self, *args, **kwargs):
         super(DummyBackend, self).__init__(*args, **kwargs)
-        self.current_playlist = DummyCurrentPlaylistController(backend=self)
-        self.library = DummyLibraryController(backend=self)
-        self.playback = DummyPlaybackController(backend=self)
-        self.stored_playlists = DummyStoredPlaylistsController(backend=self)
+
+        self.core_queue = DummyQueue()
+
+        self.current_playlist = CurrentPlaylistController(backend=self)
+
+        library_provider = DummyLibraryProvider(backend=self)
+        self.library = LibraryController(backend=self,
+            provider=library_provider)
+
+        playback_provider = DummyPlaybackProvider(backend=self)
+        self.playback = PlaybackController(backend=self,
+            provider=playback_provider)
+
+        stored_playlists_provider = DummyStoredPlaylistsProvider(backend=self)
+        self.stored_playlists = StoredPlaylistsController(backend=self,
+            provider=stored_playlists_provider)
+
         self.uri_handlers = [u'dummy:']
 
 
-class DummyCurrentPlaylistController(BaseCurrentPlaylistController):
-    pass
-
-
-class DummyLibraryController(BaseLibraryController):
-    _library = []
+class DummyLibraryProvider(BaseLibraryProvider):
+    def __init__(self, *args, **kwargs):
+        super(DummyLibraryProvider, self).__init__(*args, **kwargs)
+        self._library = []
 
     def find_exact(self, **query):
         return Playlist()
@@ -42,41 +63,25 @@ class DummyLibraryController(BaseLibraryController):
         return Playlist()
 
 
-class DummyPlaybackController(BasePlaybackController):
-    def _next(self, track):
+class DummyPlaybackProvider(BasePlaybackProvider):
+    def pause(self):
+        return True
+
+    def play(self, track):
         """Pass None as track to force failure"""
         return track is not None
 
-    def _pause(self):
+    def resume(self):
         return True
 
-    def _play(self, track):
-        """Pass None as track to force failure"""
-        return track is not None
-
-    def _previous(self, track):
-        """Pass None as track to force failure"""
-        return track is not None
-
-    def _resume(self):
+    def seek(self, time_position):
         return True
 
-    def _seek(self, time_position):
+    def stop(self):
         return True
 
-    def _stop(self):
-        return True
 
-    def _trigger_started_playing_event(self):
-        pass # noop
-
-    def _trigger_stopped_playing_event(self):
-        pass # noop
-
-
-class DummyStoredPlaylistsController(BaseStoredPlaylistsController):
-    _playlists = []
-
+class DummyStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
     def create(self, name):
         playlist = Playlist(name=name)
         self._playlists.append(playlist)
@@ -93,7 +98,7 @@ class DummyStoredPlaylistsController(BaseStoredPlaylistsController):
 
     def rename(self, playlist, new_name):
         self._playlists[self._playlists.index(playlist)] = \
-            playlist.with_(name=new_name)
+            playlist.copy(name=new_name)
 
     def save(self, playlist):
         self._playlists.append(playlist)

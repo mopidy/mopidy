@@ -2,7 +2,7 @@ import alsaaudio
 import logging
 
 from mopidy import settings
-from mopidy.mixers import BaseMixer
+from mopidy.mixers.base import BaseMixer
 
 logger = logging.getLogger('mopidy.mixers.alsa')
 
@@ -10,6 +10,10 @@ class AlsaMixer(BaseMixer):
     """
     Mixer which uses the Advanced Linux Sound Architecture (ALSA) to control
     volume.
+
+    **Dependencies:**
+
+    - pyalsaaudio >= 0.2 (python-alsaaudio on Debian/Ubuntu)
 
     **Settings:**
 

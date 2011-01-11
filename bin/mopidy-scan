@@ -17,15 +17,15 @@ if __name__ == '__main__':
     def debug(uri, error):
         print >> sys.stderr, 'Failed %s: %s' % (uri, error)
 
-    print >> sys.stderr, 'Scanning %s' % settings.LOCAL_MUSIC_FOLDER
+    print >> sys.stderr, 'Scanning %s' % settings.LOCAL_MUSIC_PATH
 
-    scanner = Scanner(settings.LOCAL_MUSIC_FOLDER, store, debug)
+    scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
     scanner.start()
 
     print >> sys.stderr, 'Done'
 
     for a in tracks_to_tag_cache_format(tracks):
         if len(a) == 1:
-            print a[0]
+            print (u'%s' % a).encode('utf-8')
         else:
-            print u': '.join([unicode(b) for b in a]).encode('utf-8')
+            print (u'%s: %s' % a).encode('utf-8')
