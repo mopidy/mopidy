@@ -71,6 +71,11 @@ No description yet.
     any help from the original MPD server.
   - Support UTF-8 encoded tag caches with non-ASCII characters.
 
+- Mixers:
+
+  - Support use of unicode strings for :mod:`mopidy.mixers.nad` specific
+    settings.
+
 - Models:
 
   - Rename and generalize ``Playlist._with(**kwargs)`` to
