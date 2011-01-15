@@ -103,7 +103,7 @@ class LastfmFrontendThread(BaseThread):
                 duration=str(duration),
                 track_number=str(track.track_no),
                 mbid=(track.musicbrainz_id or ''))
-        except (pylast.ScrobblingError, socket.error) as e:
+        except (pylast.ScrobblingError, pylast.WSError, socket.error) as e:
             logger.warning(u'Last.fm now playing error: %s', e)
 
     def stopped_playing(self, track, stop_position):
@@ -129,5 +129,5 @@ class LastfmFrontendThread(BaseThread):
                 track_number=str(track.track_no),
                 duration=str(duration),
                 mbid=(track.musicbrainz_id or ''))
-        except (pylast.ScrobblingError, socket.error) as e:
+        except (pylast.ScrobblingError, pylast.WSError, socket.error) as e:
             logger.warning(u'Last.fm scrobbling error: %s', e)
