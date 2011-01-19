@@ -8,7 +8,17 @@ This change log is used to track all major changes to Mopidy.
 0.3.0 (in development)
 ======================
 
+.. warning:: Known bug in Spotify playlist loading
+
+    There is a known bug in the loading of Spotify playlists. This bug affects
+    both Mopidy 0.2.1 and 0.3.0, given that you use libspotify 0.0.6. To avoid
+    the bug, either use Mopidy 0.2.1 with libspotify 0.0.4, or use either
+    Mopidy version with libspotify 0.0.6 and follow the simple workaround
+    described at :issue:`59`.
+
+
 No description yet.
+
 
 **Important changes**
 
