@@ -40,7 +40,6 @@ If you run Ubuntu 10.04 or older, you can fetch an updated version of ncmpcpp
 from `Launchpad <https://launchpad.net/ubuntu/+source/ncmpcpp>`_.
 
 
-
 Graphical clients
 =================
 
@@ -91,6 +90,14 @@ yet.
 
 iPhone/iPod Touch clients
 =========================
+
+impdclient
+----------
+
+There's an open source MPD client for iOS called `impdclient
+<http://code.google.com/p/impdclient/>`_ which has not seen any updates since
+August 2008. So far, we've not heard of users trying it with Mopidy. Please
+notify us of your successes and/or problems if you do try it out.
 
 MPod
 ----
