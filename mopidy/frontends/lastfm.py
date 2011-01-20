@@ -92,14 +92,14 @@ class LastfmFrontendThread(BaseThread):
 
     def started_playing(self, track):
         artists = ', '.join([a.name for a in track.artists])
-        duration = track.length // 1000
+        duration = track.length and track.length // 1000 or 0
         self.last_start_time = int(time.time())
         logger.debug(u'Now playing track: %s - %s', artists, track.name)
         try:
             self.lastfm.update_now_playing(
                 artists,
-                track.name,
-                album=track.album.name,
+                (track.name or ''),
+                album=(track.album and track.album.name or ''),
                 duration=str(duration),
                 track_number=str(track.track_no),
                 mbid=(track.musicbrainz_id or ''))
@@ -108,7 +108,7 @@ class LastfmFrontendThread(BaseThread):
 
     def stopped_playing(self, track, stop_position):
         artists = ', '.join([a.name for a in track.artists])
-        duration = track.length // 1000
+        duration = track.length and track.length // 1000 or 0
         stop_position = stop_position // 1000
         if duration < 30:
             logger.debug(u'Track too short to scrobble. (30s)')
@@ -123,9 +123,9 @@ class LastfmFrontendThread(BaseThread):
         try:
             self.lastfm.scrobble(
                 artists,
-                track.name,
+                (track.name or ''),
                 str(self.last_start_time),
-                album=track.album.name,
+                album=(track.album and track.album.name or ''),
                 track_number=str(track.track_no),
                 duration=str(duration),
                 mbid=(track.musicbrainz_id or ''))

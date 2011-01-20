@@ -46,6 +46,8 @@ No description yet.
   - Update to use Last.fm's new Scrobbling 2.0 API, as the old Submissions
     Protocol 1.2.1 is deprecated. (Fixes: :issue:`33`)
 
+  - Fix crash when track object does not contain all the expected meta data.
+
 
 **Changes**
 
