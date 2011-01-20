@@ -39,6 +39,11 @@ class MpdArgError(MpdAckError):
         super(MpdArgError, self).__init__(*args, **kwargs)
         self.error_code = 2 # ACK_ERROR_ARG
 
+class MpdPasswordError(MpdAckError):
+    def __init__(self, *args, **kwargs):
+        super(MpdPasswordError, self).__init__(*args, **kwargs)
+        self.error_code = 3 # ACK_ERROR_PASSWORD
+
 class MpdUnknownCommand(MpdAckError):
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
