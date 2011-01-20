@@ -147,6 +147,8 @@ class NadTalker(BaseThread):
         return self._readline().replace('%s=' % key, '')
 
     def _command_device(self, key, value):
+        if type(value) == unicode:
+            value = value.encode('utf-8')
         self._write('%s=%s' % (key, value))
         self._readline()
 

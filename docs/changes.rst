@@ -8,7 +8,17 @@ This change log is used to track all major changes to Mopidy.
 0.3.0 (in development)
 ======================
 
+.. warning:: Known bug in Spotify playlist loading
+
+    There is a known bug in the loading of Spotify playlists. This bug affects
+    both Mopidy 0.2.1 and 0.3.0, given that you use libspotify 0.0.6. To avoid
+    the bug, either use Mopidy 0.2.1 with libspotify 0.0.4, or use either
+    Mopidy version with libspotify 0.0.6 and follow the simple workaround
+    described at :issue:`59`.
+
+
 No description yet.
+
 
 **Important changes**
 
@@ -35,6 +45,8 @@ No description yet.
 
   - Update to use Last.fm's new Scrobbling 2.0 API, as the old Submissions
     Protocol 1.2.1 is deprecated. (Fixes: :issue:`33`)
+
+  - Fix crash when track object does not contain all the expected meta data.
 
 
 **Changes**
@@ -70,6 +82,11 @@ No description yet.
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
     any help from the original MPD server.
   - Support UTF-8 encoded tag caches with non-ASCII characters.
+
+- Mixers:
+
+  - Support use of unicode strings for :mod:`mopidy.mixers.nad` specific
+    settings.
 
 - Models:
 
