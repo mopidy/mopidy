@@ -20,7 +20,8 @@ ncmpc
 -----
 
 A console client. Uses the ``idle`` command heavily, which Mopidy doesn't
-support yet. If you want a console client, use ncmpcpp instead.
+support yet (see :issue:`32`). If you want a console client, use ncmpcpp
+instead.
 
 ncmpcpp
 -------
@@ -46,16 +47,35 @@ Graphical clients
 GMPC
 ----
 
-A GTK+ client which works well with Mopidy, and is regularly used by Mopidy
-developers.
+`GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
+well with Mopidy, and is regularly used by Mopidy developers.
+
+GMPC may sometimes requests a lot of meta data of related albums, artists, etc.
+This takes more time with Mopidy, which needs to query Spotify for the data,
+than with a normal MPD server, which has a local cache of meta data. Thus, GMPC
+may sometimes feel frozen, but usually you just need to give it a bit of slack
+before it will catch up.
 
 Sonata
 ------
 
-A GTK+ client. Generally works well with Mopidy.
+`Sonata <http://sonata.berlios.de/>`_ is a graphical MPD client (GTK+).
+It generally works well with Mopidy, except for search.
 
-Search does not work, because they do most of the search on the client side.
-See :issue:`1` for details.
+When you search in Sonata, it only sends the first to letters of the search
+query to Mopidy, and then does the rest of the filtering itself on the client
+side. Since Spotify has a collection of millions of tracks and they only return
+the first 100 hits for any search query, searching for two-letter combinations
+seldom returns any useful results. See :issue:`1` and the matching `Sonata
+bug`_ for details.
+
+.. _Sonata bug: http://developer.berlios.de/feature/?func=detailfeature&feature_id=5038&group_id=7323
+
+Theremin
+--------
+
+`Theremin <http://theremin.sigterm.eu/>`_ is a graphical MPD client for OS X.
+It generally works well with Mopidy.
 
 
 Android clients
