@@ -1,7 +1,9 @@
+from httplib import HTTPException
 import logging
 import multiprocessing
 import socket
 import time
+from xml.parsers.expat import ExpatError
 
 try:
     import pylast
@@ -9,7 +11,7 @@ except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
-from mopidy import get_version, settings, SettingsError
+from mopidy import settings, SettingsError
 from mopidy.frontends.base import BaseFrontend
 from mopidy.utils.process import BaseThread
 
@@ -54,6 +56,18 @@ class LastfmFrontend(BaseFrontend):
 
 
 class LastfmFrontendThread(BaseThread):
+    # Whenever we call pylast, we catch the following non-pylast exceptions, as
+    # they are not caught and wrapped by pylast.
+    #
+    # socket.error:
+    #   Not reported upstream.
+    # UnicodeDecodeError:
+    #   http://code.google.com/p/pylast/issues/detail?id=55
+    # xml.parsers.expat.ExpatError:
+    #   http://code.google.com/p/pylast/issues/detail?id=58
+    # httplib.HTTPException:
+    #   Not reported upstream.
+
     def __init__(self, core_queue, connection):
         super(LastfmFrontendThread, self).__init__(core_queue)
         self.name = u'LastfmFrontendThread'
@@ -79,7 +93,8 @@ class LastfmFrontendThread(BaseThread):
         except SettingsError as e:
             logger.info(u'Last.fm scrobbler not started')
             logger.debug(u'Last.fm settings error: %s', e)
-        except (pylast.WSError, socket.error) as e:
+        except (pylast.WSError, socket.error, UnicodeDecodeError, ExpatError,
+                HTTPException) as e:
             logger.error(u'Last.fm connection error: %s', e)
 
     def process_message(self, message):
@@ -103,7 +118,8 @@ class LastfmFrontendThread(BaseThread):
                 duration=str(duration),
                 track_number=str(track.track_no),
                 mbid=(track.musicbrainz_id or ''))
-        except (pylast.ScrobblingError, pylast.WSError, socket.error) as e:
+        except (pylast.ScrobblingError, pylast.WSError, socket.error,
+                UnicodeDecodeError, ExpatError, HTTPException) as e:
             logger.warning(u'Last.fm now playing error: %s', e)
 
     def stopped_playing(self, track, stop_position):
@@ -129,5 +145,6 @@ class LastfmFrontendThread(BaseThread):
                 track_number=str(track.track_no),
                 duration=str(duration),
                 mbid=(track.musicbrainz_id or ''))
-        except (pylast.ScrobblingError, pylast.WSError, socket.error) as e:
+        except (pylast.ScrobblingError, pylast.WSError, socket.error,
+                UnicodeDecodeError, ExpatError, HTTPException) as e:
             logger.warning(u'Last.fm scrobbling error: %s', e)

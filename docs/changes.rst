@@ -71,6 +71,13 @@ This change log is used to track all major changes to Mopidy.
 
   - Fix crash when track object does not contain all the expected meta data.
 
+  - Fix crash when response from Last.fm cannot be decoded as UTF-8. (Fixes:
+    :issue:`37`)
+
+  - Fix crash when response from Last.fm contains invalid XML.
+
+  - Fix crash when response from Last.fm has an invalid HTTP status line.
+
 - Mixers:
 
   - Support use of unicode strings for settings specific to
