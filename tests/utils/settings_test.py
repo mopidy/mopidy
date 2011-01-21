@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from mopidy import settings as default_settings_module
+from mopidy import settings as default_settings_module, SettingsError
 from mopidy.utils.settings import validate_settings, SettingsProxy
 
 class ValidateSettingsTest(unittest.TestCase):
@@ -55,6 +55,33 @@ class SettingsProxyTest(unittest.TestCase):
         self.settings.TEST = 'test'
         self.assertEqual(self.settings.TEST, 'test')
 
+    def test_getattr_raises_error_on_missing_setting(self):
+        try:
+            test = self.settings.TEST
+            self.fail(u'Should raise exception')
+        except SettingsError as e:
+            self.assertEqual(u'Setting "TEST" is not set.', e.message)
+
+    def test_getattr_raises_error_on_empty_setting(self):
+        self.settings.TEST = u''
+        try:
+            test = self.settings.TEST
+            self.fail(u'Should raise exception')
+        except SettingsError as e:
+            self.assertEqual(u'Setting "TEST" is empty.', e.message)
+
+    def test_getattr_does_not_raise_error_if_setting_is_false(self):
+        self.settings.TEST = False
+        self.assertEqual(False, self.settings.TEST)
+
+    def test_getattr_does_not_raise_error_if_setting_is_none(self):
+        self.settings.TEST = None
+        self.assertEqual(None, self.settings.TEST)
+
+    def test_getattr_does_not_raise_error_if_setting_is_zero(self):
+        self.settings.TEST = 0
+        self.assertEqual(0, self.settings.TEST)
+
     def test_setattr_updates_runtime_settings(self):
         self.settings.TEST = 'test'
         self.assert_('TEST' in self.settings.runtime)
@@ -69,34 +96,34 @@ class SettingsProxyTest(unittest.TestCase):
 
     def test_value_ending_in_path_is_expanded(self):
         self.settings.TEST_PATH = '~/test'
-        acctual = self.settings.TEST_PATH
+        actual = self.settings.TEST_PATH
         expected = os.path.expanduser('~/test')
-        self.assertEqual(acctual, expected)
+        self.assertEqual(actual, expected)
 
     def test_value_ending_in_path_is_absolute(self):
         self.settings.TEST_PATH = './test'
-        acctual = self.settings.TEST_PATH
+        actual = self.settings.TEST_PATH
         expected = os.path.abspath('./test')
-        self.assertEqual(acctual, expected)
+        self.assertEqual(actual, expected)
 
     def test_value_ending_in_file_is_expanded(self):
         self.settings.TEST_FILE = '~/test'
-        acctual = self.settings.TEST_FILE
+        actual = self.settings.TEST_FILE
         expected = os.path.expanduser('~/test')
-        self.assertEqual(acctual, expected)
+        self.assertEqual(actual, expected)
 
     def test_value_ending_in_file_is_absolute(self):
         self.settings.TEST_FILE = './test'
-        acctual = self.settings.TEST_FILE
+        actual = self.settings.TEST_FILE
         expected = os.path.abspath('./test')
-        self.assertEqual(acctual, expected)
+        self.assertEqual(actual, expected)
 
     def test_value_not_ending_in_path_or_file_is_not_expanded(self):
         self.settings.TEST = '~/test'
-        acctual = self.settings.TEST
-        self.assertEqual(acctual, '~/test')
+        actual = self.settings.TEST
+        self.assertEqual(actual, '~/test')
 
     def test_value_not_ending_in_path_or_file_is_not_absolute(self):
         self.settings.TEST = './test'
-        acctual = self.settings.TEST
-        self.assertEqual(acctual, './test')
+        actual = self.settings.TEST
+        self.assertEqual(actual, './test')
