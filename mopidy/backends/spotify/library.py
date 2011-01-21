@@ -22,7 +22,7 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
             # playlists.
             return SpotifyTranslator.to_mopidy_track(spotify_track)
         except SpotifyError as e:
-            logger.warning(u'Failed to lookup: %s', uri, e)
+            logger.debug(u'Failed to lookup "%s": %s', uri, e)
             return None
 
     def refresh(self, uri=None):

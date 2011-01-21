@@ -53,6 +53,8 @@ to this problem.
     normal playlists. More permanent fix requires support for checking playlist
     types in pyspotify (see :issue:`62`).
 
+  - Fix crash on failed lookup of track by URI. (Fixes: :issue:`60`)
+
 - Local backend:
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
