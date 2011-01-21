@@ -69,34 +69,34 @@ class SettingsProxyTest(unittest.TestCase):
 
     def test_value_ending_in_path_is_expanded(self):
         self.settings.TEST_PATH = '~/test'
-        acctual = self.settings.TEST_PATH
+        actual = self.settings.TEST_PATH
         expected = os.path.expanduser('~/test')
-        self.assertEqual(acctual, expected)
+        self.assertEqual(actual, expected)
 
     def test_value_ending_in_path_is_absolute(self):
         self.settings.TEST_PATH = './test'
-        acctual = self.settings.TEST_PATH
+        actual = self.settings.TEST_PATH
         expected = os.path.abspath('./test')
-        self.assertEqual(acctual, expected)
+        self.assertEqual(actual, expected)
 
     def test_value_ending_in_file_is_expanded(self):
         self.settings.TEST_FILE = '~/test'
-        acctual = self.settings.TEST_FILE
+        actual = self.settings.TEST_FILE
         expected = os.path.expanduser('~/test')
-        self.assertEqual(acctual, expected)
+        self.assertEqual(actual, expected)
 
     def test_value_ending_in_file_is_absolute(self):
         self.settings.TEST_FILE = './test'
-        acctual = self.settings.TEST_FILE
+        actual = self.settings.TEST_FILE
         expected = os.path.abspath('./test')
-        self.assertEqual(acctual, expected)
+        self.assertEqual(actual, expected)
 
     def test_value_not_ending_in_path_or_file_is_not_expanded(self):
         self.settings.TEST = '~/test'
-        acctual = self.settings.TEST
-        self.assertEqual(acctual, '~/test')
+        actual = self.settings.TEST
+        self.assertEqual(actual, '~/test')
 
     def test_value_not_ending_in_path_or_file_is_not_absolute(self):
         self.settings.TEST = './test'
-        acctual = self.settings.TEST
-        self.assertEqual(acctual, './test')
+        actual = self.settings.TEST
+        self.assertEqual(actual, './test')
