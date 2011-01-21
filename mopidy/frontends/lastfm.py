@@ -100,8 +100,8 @@ class LastfmFrontendThread(BaseThread):
                 artists,
                 (track.name or ''),
                 album=(track.album and track.album.name or ''),
-                duration=str(duration),
-                track_number=str(track.track_no),
+                duration=duration,
+                track_number=track.track_no,
                 mbid=(track.musicbrainz_id or ''))
         except (pylast.ScrobblingError, pylast.NetworkError,
                 pylast.MalformedResponseError, pylast.WSError) as e:
@@ -125,10 +125,10 @@ class LastfmFrontendThread(BaseThread):
             self.lastfm.scrobble(
                 artists,
                 (track.name or ''),
-                str(self.last_start_time),
+                self.last_start_time,
                 album=(track.album and track.album.name or ''),
-                track_number=str(track.track_no),
-                duration=str(duration),
+                track_number=track.track_no,
+                duration=duration,
                 mbid=(track.musicbrainz_id or ''))
         except (pylast.ScrobblingError, pylast.NetworkError,
                 pylast.MalformedResponseError, pylast.WSError) as e:
