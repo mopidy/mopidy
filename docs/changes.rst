@@ -33,7 +33,7 @@ to this problem.
   the latest pyspotify from the Mopidy developers. Follow the instructions at
   :doc:`/installation/libspotify/`.
 
-- If you use the Last.fm frontend, you need to upgrade to pylast 0.5. Run
+- If you use the Last.fm frontend, you need to upgrade to pylast 0.5.7. Run
   ``sudp pip install --upgrade pylast`` or install Mopidy from APT.
 
 
