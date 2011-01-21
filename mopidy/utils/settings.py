@@ -49,7 +49,7 @@ class SettingsProxy(object):
         if attr not in self.current:
             raise SettingsError(u'Setting "%s" is not set.' % attr)
         value = self.current[attr]
-        if type(value) != bool and not value:
+        if isinstance(value, basestring) and len(value) == 0:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
         if attr.endswith('_PATH') or attr.endswith('_FILE'):
             value = os.path.expanduser(value)

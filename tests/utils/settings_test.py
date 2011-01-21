@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from mopidy import settings as default_settings_module
+from mopidy import settings as default_settings_module, SettingsError
 from mopidy.utils.settings import validate_settings, SettingsProxy
 
 class ValidateSettingsTest(unittest.TestCase):
@@ -54,6 +54,33 @@ class SettingsProxyTest(unittest.TestCase):
     def test_set_and_get_attr(self):
         self.settings.TEST = 'test'
         self.assertEqual(self.settings.TEST, 'test')
+
+    def test_getattr_raises_error_on_missing_setting(self):
+        try:
+            test = self.settings.TEST
+            self.fail(u'Should raise exception')
+        except SettingsError as e:
+            self.assertEqual(u'Setting "TEST" is not set.', e.message)
+
+    def test_getattr_raises_error_on_empty_setting(self):
+        self.settings.TEST = u''
+        try:
+            test = self.settings.TEST
+            self.fail(u'Should raise exception')
+        except SettingsError as e:
+            self.assertEqual(u'Setting "TEST" is empty.', e.message)
+
+    def test_getattr_does_not_raise_error_if_setting_is_false(self):
+        self.settings.TEST = False
+        self.assertEqual(False, self.settings.TEST)
+
+    def test_getattr_does_not_raise_error_if_setting_is_none(self):
+        self.settings.TEST = None
+        self.assertEqual(None, self.settings.TEST)
+
+    def test_getattr_does_not_raise_error_if_setting_is_zero(self):
+        self.settings.TEST = 0
+        self.assertEqual(0, self.settings.TEST)
 
     def test_setattr_updates_runtime_settings(self):
         self.settings.TEST = 'test'
