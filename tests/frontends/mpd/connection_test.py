@@ -36,7 +36,7 @@ class ConnectionHandlerTest(unittest.TestCase):
         self.assert_(u'ACK [3@0] {password} incorrect password' in result)
 
     def test_any_password_is_not_accepted_when_password_check_turned_off(self):
-        settings.MPD_SERVER_PASSWORD = False
+        settings.MPD_SERVER_PASSWORD = None
         result = self.h.handle_request(u'password "secret"')
         self.assert_(u'ACK [3@0] {password} incorrect password' in result)
 

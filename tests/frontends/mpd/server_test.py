@@ -44,7 +44,7 @@ class MpdSessionTest(unittest.TestCase):
         self.assertEqual(u'ACK [3@0] {password} incorrect password', response)
 
     def test_authentication_with_anything_when_password_check_turned_off(self):
-        settings.MPD_SERVER_PASSWORD = False
+        settings.MPD_SERVER_PASSWORD = None
         authed, response = self.session.check_password(u'any request at all')
         self.assertTrue(authed)
         self.assertEqual(None, response)

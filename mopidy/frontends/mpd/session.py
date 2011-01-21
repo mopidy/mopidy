@@ -85,7 +85,7 @@ class MpdSession(asynchat.async_chat):
             the response_message is :class:`None`, normal processing should
             continue, even though the client may not be authenticated.
         """
-        if not settings.MPD_SERVER_PASSWORD:
+        if settings.MPD_SERVER_PASSWORD is None:
             return (True, None)
         command = request.split(' ')[0]
         if command == 'password':

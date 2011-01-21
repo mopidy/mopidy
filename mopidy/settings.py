@@ -166,8 +166,8 @@ MPD_SERVER_HOSTNAME = u'127.0.0.1'
 
 #: The password required for connecting to the MPD server.
 #:
-#: Default: :class:`False`, which means no password required.
-MPD_SERVER_PASSWORD = False
+#: Default: :class:`None`, which means no password required.
+MPD_SERVER_PASSWORD = None
 
 #: Which TCP port Mopidy's MPD server should listen to.
 #:
