@@ -49,8 +49,10 @@ class MpdSession(asynchat.async_chat):
     def handle_request(self, request):
         """Handle request by sending it to the MPD frontend."""
         if not self.authenticated:
-            self.authenticated = self.check_password(request)
-            return
+            (self.authenticated, response) = self.check_password(request)
+            if response is not None:
+                self.send_response(response)
+                return
         my_end, other_end = multiprocessing.Pipe()
         self.core_queue.put({
             'to': 'frontend',
@@ -76,13 +78,23 @@ class MpdSession(asynchat.async_chat):
         self.push(data)
 
     def check_password(self, request):
+        """
+        Takes any request and tries to authenticate the client using it.
+
+        :rtype: a two-tuple containing (is_authenticated, response_message). If
+            the response_message is :class:`None`, normal processing should
+            continue, even though the client may not be authenticated.
+        """
         if not settings.MPD_SERVER_PASSWORD:
-            return True
-        if request == 'password "%s"' % settings.MPD_SERVER_PASSWORD:
-            self.send_response('OK')
-            return True
+            return (True, None)
         command = request.split(' ')[0]
-        self.send_response(
-            "ACK [4@0] {%s} " % command +
-            "you don't have permission for \"%s\"" % command)
-        return False
+        if command == 'password':
+            if request == 'password "%s"' % settings.MPD_SERVER_PASSWORD:
+                return (True, u'OK')
+            else:
+                return (False, u'ACK [3@0] {password} incorrect password')
+        if command in ('close', 'commands', 'notcommands', 'ping'):
+            return (False, None)
+        else:
+            return (False, "ACK [4@0] {%s} " % command +
+                "you don't have permission for \"%s\"" % command)
