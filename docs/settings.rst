@@ -88,6 +88,8 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 #. Start Mopidy, find the music library in a client, and play some local music!
 
 
+.. _use_mpd_on_a_network:
+
 Connecting from other machines on the network
 =============================================
 

@@ -72,6 +72,9 @@ No description yet.
 
 - MPD frontend:
 
+  - Add support for password authentication. See
+    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` and
+    :ref:`use_mpd_on_a_network` for details on how to use it.
   - Support ``setvol 50`` without quotes around the argument. Fixes volume
     control in Droid MPD.
   - Support ``seek 1 120`` without quotes around the arguments. Fixes seek in
