@@ -96,5 +96,6 @@ class MpdSession(asynchat.async_chat):
         if command in ('close', 'commands', 'notcommands', 'ping'):
             return (False, None)
         else:
-            return (False, "ACK [4@0] {%s} " % command +
-                "you don't have permission for \"%s\"" % command)
+            return (False,
+                u'ACK [4@0] {%(c)s} you don\'t have permission for "%(c)s"' %
+                {'c': command})
