@@ -5,8 +5,8 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-0.3.0 (in development)
-======================
+0.3.0 (2010-01-22)
+==================
 
 Mopidy 0.3.0 brings a bunch of small changes all over the place, but no large
 changes. The main features are support for high bitrate audio from Spotify, and
