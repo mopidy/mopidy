@@ -23,7 +23,9 @@ class SettingsProxy(object):
         if not os.path.isfile(settings_file):
             return {}
         sys.path.insert(0, dotdir)
+        # pylint: disable = F0401
         import settings as local_settings_module
+        # pylint: enable = F0401
         return self._get_settings_dict_from_module(local_settings_module)
 
     def _get_settings_dict_from_module(self, module):
@@ -47,8 +49,11 @@ class SettingsProxy(object):
         if attr not in self.current:
             raise SettingsError(u'Setting "%s" is not set.' % attr)
         value = self.current[attr]
-        if type(value) != bool and not value:
+        if isinstance(value, basestring) and len(value) == 0:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
+        if attr.endswith('_PATH') or attr.endswith('_FILE'):
+            value = os.path.expanduser(value)
+            value = os.path.abspath(value)
         return value
 
     def __setattr__(self, attr, value):
@@ -92,10 +97,14 @@ def validate_settings(defaults, settings):
         'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
         'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
         'FRONTEND': 'FRONTENDS',
+        'LOCAL_MUSIC_FOLDER': 'LOCAL_MUSIC_PATH',
+        'LOCAL_PLAYLIST_FOLDER': 'LOCAL_PLAYLIST_PATH',
+        'LOCAL_TAG_CACHE': 'LOCAL_TAG_CACHE_FILE',
         'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
         'SERVER_PORT': 'MPD_SERVER_PORT',
         'SPOTIFY_LIB_APPKEY': None,
+        'SPOTIFY_LIB_CACHE': 'SPOTIFY_CACHE_PATH',
     }
 
     for setting, value in settings.iteritems():

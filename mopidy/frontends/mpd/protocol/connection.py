@@ -1,5 +1,6 @@
+from mopidy import settings
 from mopidy.frontends.mpd.protocol import handle_pattern
-from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.exceptions import MpdPasswordError
 
 @handle_pattern(r'^close$')
 def close(frontend):
@@ -33,7 +34,11 @@ def password_(frontend, password):
         This is used for authentication with the server. ``PASSWORD`` is
         simply the plaintext password.
     """
-    raise MpdNotImplemented # TODO
+    # You will not get to this code without being authenticated. This is for
+    # when you are already authenticated, and are sending additional 'password'
+    # requests.
+    if settings.MPD_SERVER_PASSWORD != password:
+        raise MpdPasswordError(u'incorrect password', command=u'password')
 
 @handle_pattern(r'^ping$')
 def ping(frontend):

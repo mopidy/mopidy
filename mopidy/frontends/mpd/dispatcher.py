@@ -5,9 +5,11 @@ from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
 # get them registered as request handlers.
+# pylint: disable = W0611
 from mopidy.frontends.mpd.protocol import (audio_output, command_list,
     connection, current_playlist, empty, music_db, playback, reflection,
     status, stickers, stored_playlists)
+# pylint: enable = W0611
 from mopidy.utils import flatten
 
 class MpdDispatcher(object):

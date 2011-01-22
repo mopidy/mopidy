@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import re
 import urllib
 
 logger = logging.getLogger('mopidy.utils.path')
@@ -21,8 +22,57 @@ def get_or_create_file(filename):
 
 def path_to_uri(*paths):
     path = os.path.join(*paths)
-    #path = os.path.expanduser(path) # FIXME Waiting for test case?
     path = path.encode('utf-8')
     if sys.platform == 'win32':
         return 'file:' + urllib.pathname2url(path)
     return 'file://' + urllib.pathname2url(path)
+
+def uri_to_path(uri):
+    if sys.platform == 'win32':
+        path = urllib.url2pathname(re.sub('^file:', '', uri))
+    else:
+        path = urllib.url2pathname(re.sub('^file://', '', uri))
+    return path.encode('latin1').decode('utf-8') # Undo double encoding
+
+def split_path(path):
+    parts = []
+    while True:
+        path, part = os.path.split(path)
+        if part:
+            parts.insert(0, part)
+        if not path or path == '/':
+            break
+    return parts
+
+# pylint: disable = W0612
+# Unused variable 'dirnames'
+def find_files(path):
+    if os.path.isfile(path):
+        if not isinstance(path, unicode):
+            path = path.decode('utf-8')
+        yield path
+    else:
+        for dirpath, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                filename = os.path.join(dirpath, filename)
+                if not isinstance(filename, unicode):
+                    filename = filename.decode('utf-8')
+                yield filename
+# pylint: enable = W0612
+
+class Mtime(object):
+    def __init__(self):
+        self.fake = None
+
+    def __call__(self, path):
+        if self.fake is not None:
+            return self.fake
+        return int(os.stat(path).st_mtime)
+
+    def set_fake_time(self, time):
+        self.fake = time
+
+    def undo_fake(self):
+        self.fake = None
+
+mtime = Mtime()

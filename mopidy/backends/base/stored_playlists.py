@@ -3,28 +3,34 @@ import logging
 
 logger = logging.getLogger('mopidy.backends.base')
 
-class BaseStoredPlaylistsController(object):
+class StoredPlaylistsController(object):
     """
     :param backend: backend the controller is a part of
-    :type backend: :class:`BaseBackend`
+    :type backend: :class:`mopidy.backends.base.Backend`
+    :param provider: provider the controller should use
+    :type provider: instance of :class:`BaseStoredPlaylistsProvider`
     """
 
-    def __init__(self, backend):
+    def __init__(self, backend, provider):
         self.backend = backend
-        self._playlists = []
+        self.provider = provider
 
     def destroy(self):
         """Cleanup after component."""
-        pass
+        self.provider.destroy()
 
     @property
     def playlists(self):
-        """List of :class:`mopidy.models.Playlist`."""
-        return copy(self._playlists)
+        """
+        Currently stored playlists.
+
+        Read/write. List of :class:`mopidy.models.Playlist`.
+        """
+        return self.provider.playlists
 
     @playlists.setter
     def playlists(self, playlists):
-        self._playlists = playlists
+        self.provider.playlists = playlists
 
     def create(self, name):
         """
@@ -34,7 +40,7 @@ class BaseStoredPlaylistsController(object):
         :type name: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        raise NotImplementedError
+        return self.provider.create(name)
 
     def delete(self, playlist):
         """
@@ -43,7 +49,7 @@ class BaseStoredPlaylistsController(object):
         :param playlist: the playlist to delete
         :type playlist: :class:`mopidy.models.Playlist`
         """
-        raise NotImplementedError
+        return self.provider.delete(playlist)
 
     def get(self, **criteria):
         """
@@ -55,13 +61,14 @@ class BaseStoredPlaylistsController(object):
 
             get(name='a')            # Returns track with name 'a'
             get(uri='xyz')           # Returns track with URI 'xyz'
-            get(name='a', uri='xyz') # Returns track with name 'a' and URI 'xyz'
+            get(name='a', uri='xyz') # Returns track with name 'a' and URI
+                                     # 'xyz'
 
         :param criteria: one or more criteria to match by
         :type criteria: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        matches = self._playlists
+        matches = self.playlists
         for (key, value) in criteria.iteritems():
             matches = filter(lambda p: getattr(p, key) == value, matches)
         if len(matches) == 1:
@@ -82,11 +89,14 @@ class BaseStoredPlaylistsController(object):
         :type uri: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        raise NotImplementedError
+        return self.provider.lookup(uri)
 
     def refresh(self):
-        """Refresh stored playlists."""
-        raise NotImplementedError
+        """
+        Refresh the stored playlists in
+        :attr:`mopidy.backends.base.StoredPlaylistsController.playlists`.
+        """
+        return self.provider.refresh()
 
     def rename(self, playlist, new_name):
         """
@@ -97,7 +107,7 @@ class BaseStoredPlaylistsController(object):
         :param new_name: the new name
         :type new_name: string
         """
-        raise NotImplementedError
+        return self.provider.rename(playlist, new_name)
 
     def save(self, playlist):
         """
@@ -106,4 +116,85 @@ class BaseStoredPlaylistsController(object):
         :param playlist: the playlist
         :type playlist: :class:`mopidy.models.Playlist`
         """
+        return self.provider.save(playlist)
+
+
+class BaseStoredPlaylistsProvider(object):
+    """
+    :param backend: backend the controller is a part of
+    :type backend: :class:`mopidy.backends.base.Backend`
+    """
+
+    def __init__(self, backend):
+        self.backend = backend
+        self._playlists = []
+
+    def destroy(self):
+        """
+        Cleanup after component.
+
+        *MAY be implemented by subclass.*
+        """
+        pass
+
+    @property
+    def playlists(self):
+        """
+        Currently stored playlists.
+
+        Read/write. List of :class:`mopidy.models.Playlist`.
+        """
+        return copy(self._playlists)
+
+    @playlists.setter
+    def playlists(self, playlists):
+        self._playlists = playlists
+
+    def create(self, name):
+        """
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.create`.
+
+        *MUST be implemented by subclass.*
+        """
         raise NotImplementedError
+
+    def delete(self, playlist):
+        """
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.delete`.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def lookup(self, uri):
+        """
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.lookup`.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def refresh(self):
+        """
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.refresh`.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def rename(self, playlist, new_name):
+        """
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.rename`.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def save(self, playlist):
+        """
+        See :meth:`mopidy.backends.base.StoredPlaylistsController.save`.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+

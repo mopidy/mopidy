@@ -7,7 +7,7 @@ from mopidy import get_version, settings, OptionalDependencyError
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import BaseThread
+from mopidy.utils.process import BaseThread, GObjectEventThread
 from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
@@ -18,6 +18,7 @@ class CoreProcess(BaseThread):
         super(CoreProcess, self).__init__(self.core_queue)
         self.name = 'CoreProcess'
         self.options = self.parse_options()
+        self.gobject_loop = None
         self.output = None
         self.backend = None
         self.frontends = []
@@ -47,6 +48,7 @@ class CoreProcess(BaseThread):
     def setup(self):
         self.setup_logging()
         self.setup_settings()
+        self.gobject_loop = self.setup_gobject_loop(self.core_queue)
         self.output = self.setup_output(self.core_queue)
         self.backend = self.setup_backend(self.core_queue, self.output)
         self.frontends = self.setup_frontends(self.core_queue, self.backend)
@@ -60,6 +62,11 @@ class CoreProcess(BaseThread):
         get_or_create_folder('~/.mopidy/')
         get_or_create_file('~/.mopidy/settings.py')
         settings.validate()
+
+    def setup_gobject_loop(self, core_queue):
+        gobject_loop = GObjectEventThread(core_queue)
+        gobject_loop.start()
+        return gobject_loop
 
     def setup_output(self, core_queue):
         output = get_class(settings.OUTPUT)(core_queue)

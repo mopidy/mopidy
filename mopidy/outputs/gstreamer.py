@@ -1,6 +1,3 @@
-import gobject
-gobject.threads_init()
-
 import pygst
 pygst.require('0.10')
 import gst
@@ -28,20 +25,14 @@ class GStreamerOutput(BaseOutput):
 
     def __init__(self, *args, **kwargs):
         super(GStreamerOutput, self).__init__(*args, **kwargs)
-        # Start a helper thread that can run the gobject.MainLoop
-        self.messages_thread = GStreamerMessagesThread(self.core_queue)
-
-        # Start a helper thread that can process the output_queue
         self.output_queue = multiprocessing.Queue()
         self.player_thread = GStreamerPlayerThread(self.core_queue,
             self.output_queue)
 
     def start(self):
-        self.messages_thread.start()
         self.player_thread.start()
 
     def destroy(self):
-        self.messages_thread.destroy()
         self.player_thread.destroy()
 
     def process_message(self, message):
@@ -78,7 +69,8 @@ class GStreamerOutput(BaseOutput):
         return self._send_recv({'command': 'get_position'})
 
     def set_position(self, position):
-        return self._send_recv({'command': 'set_position', 'position': position})
+        return self._send_recv({'command': 'set_position',
+            'position': position})
 
     def set_state(self, state):
         return self._send_recv({'command': 'set_state', 'state': state})
@@ -90,20 +82,14 @@ class GStreamerOutput(BaseOutput):
         return self._send_recv({'command': 'set_volume', 'volume': volume})
 
 
-class GStreamerMessagesThread(BaseThread):
-    def __init__(self, core_queue):
-        super(GStreamerMessagesThread, self).__init__(core_queue)
-        self.name = u'GStreamerMessagesThread'
-
-    def run_inside_try(self):
-        gobject.MainLoop().run()
-
-
 class GStreamerPlayerThread(BaseThread):
     """
     A process for all work related to GStreamer.
 
     The main loop processes events from both Mopidy and GStreamer.
+
+    This thread requires :class:`mopidy.utils.process.GObjectEventThread` to be
+    running too. This is not enforced in any way by the code.
 
     Make sure this subprocess is started by the MainThread in the top-most
     parent process, and not some other thread. If not, we can get into the

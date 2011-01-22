@@ -5,7 +5,10 @@ import os
 import shutil
 
 from mopidy import settings
-from mopidy.backends.base import *
+from mopidy.backends.base import (Backend, CurrentPlaylistController,
+    LibraryController, BaseLibraryProvider, PlaybackController,
+    BasePlaybackProvider, StoredPlaylistsController,
+    BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
 from mopidy.utils.process import pickle_connection
 
@@ -13,7 +16,7 @@ from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
 
-class LocalBackend(BaseBackend):
+class LocalBackend(Backend):
     """
     A backend for playing music from a local music archive.
 
@@ -21,50 +24,64 @@ class LocalBackend(BaseBackend):
 
     **Settings:**
 
-    - :attr:`mopidy.settings.LOCAL_MUSIC_FOLDER`
-    - :attr:`mopidy.settings.LOCAL_PLAYLIST_FOLDER`
-    - :attr:`mopidy.settings.LOCAL_TAG_CACHE`
+    - :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
+    - :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
+    - :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
     """
 
     def __init__(self, *args, **kwargs):
         super(LocalBackend, self).__init__(*args, **kwargs)
 
-        self.library = LocalLibraryController(self)
-        self.stored_playlists = LocalStoredPlaylistsController(self)
-        self.current_playlist = BaseCurrentPlaylistController(self)
-        self.playback = LocalPlaybackController(self)
+        self.current_playlist = CurrentPlaylistController(backend=self)
+
+        library_provider = LocalLibraryProvider(backend=self)
+        self.library = LibraryController(backend=self,
+            provider=library_provider)
+
+        playback_provider = LocalPlaybackProvider(backend=self)
+        self.playback = LocalPlaybackController(backend=self,
+            provider=playback_provider)
+
+        stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
+        self.stored_playlists = StoredPlaylistsController(backend=self,
+            provider=stored_playlists_provider)
+
         self.uri_handlers = [u'file://']
 
 
-class LocalPlaybackController(BasePlaybackController):
-    def __init__(self, backend):
-        super(LocalPlaybackController, self).__init__(backend)
+class LocalPlaybackController(PlaybackController):
+    def __init__(self, *args, **kwargs):
+        super(LocalPlaybackController, self).__init__(*args, **kwargs)
+
+        # XXX Why do we call stop()? Is it to set GStreamer state to 'READY'?
         self.stop()
-
-    def _play(self, track):
-        return self.backend.output.play_uri(track.uri)
-
-    def _stop(self):
-        return self.backend.output.set_state('READY')
-
-    def _pause(self):
-        return self.backend.output.set_state('PAUSED')
-
-    def _resume(self):
-        return self.backend.output.set_state('PLAYING')
-
-    def _seek(self, time_position):
-        return self.backend.output.set_position(time_position)
 
     @property
     def time_position(self):
         return self.backend.output.get_position()
 
 
-class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
-    def __init__(self, *args):
-        super(LocalStoredPlaylistsController, self).__init__(*args)
-        self._folder = os.path.expanduser(settings.LOCAL_PLAYLIST_FOLDER)
+class LocalPlaybackProvider(BasePlaybackProvider):
+    def pause(self):
+        return self.backend.output.set_state('PAUSED')
+
+    def play(self, track):
+        return self.backend.output.play_uri(track.uri)
+
+    def resume(self):
+        return self.backend.output.set_state('PLAYING')
+
+    def seek(self, time_position):
+        return self.backend.output.set_position(time_position)
+
+    def stop(self):
+        return self.backend.output.set_state('READY')
+
+
+class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
+    def __init__(self, *args, **kwargs):
+        super(LocalStoredPlaylistsProvider, self).__init__(*args, **kwargs)
+        self._folder = settings.LOCAL_PLAYLIST_PATH
         self.refresh()
 
     def lookup(self, uri):
@@ -114,7 +131,7 @@ class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
         src = os.path.join(self._folder, playlist.name + '.m3u')
         dst = os.path.join(self._folder, name + '.m3u')
 
-        renamed = playlist.with_(name=name)
+        renamed = playlist.copy(name=name)
         index = self._playlists.index(playlist)
         self._playlists[index] = renamed
 
@@ -134,18 +151,19 @@ class LocalStoredPlaylistsController(BaseStoredPlaylistsController):
         self._playlists.append(playlist)
 
 
-class LocalLibraryController(BaseLibraryController):
-    def __init__(self, backend):
-        super(LocalLibraryController, self).__init__(backend)
+class LocalLibraryProvider(BaseLibraryProvider):
+    def __init__(self, *args, **kwargs):
+        super(LocalLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(settings.LOCAL_TAG_CACHE,
-            settings.LOCAL_MUSIC_FOLDER)
+        tag_cache = settings.LOCAL_TAG_CACHE_FILE
+        music_folder = settings.LOCAL_MUSIC_PATH
 
-        logger.info('Loading songs in %s from %s',
-            settings.LOCAL_MUSIC_FOLDER, settings.LOCAL_TAG_CACHE)
+        tracks = parse_mpd_tag_cache(tag_cache, music_folder)
+
+        logger.info('Loading songs in %s from %s', music_folder, tag_cache)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track

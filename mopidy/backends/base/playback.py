@@ -4,11 +4,16 @@ import time
 
 logger = logging.getLogger('mopidy.backends.base')
 
-class BasePlaybackController(object):
+class PlaybackController(object):
     """
-    :param backend: backend the controller is a part of
-    :type backend: :class:`BaseBackend`
+    :param backend: the backend
+    :type backend: :class:`mopidy.backends.base.Backend`
+    :param provider: provider the controller should use
+    :type provider: instance of :class:`BasePlaybackProvider`
     """
+
+    # pylint: disable = R0902
+    # Too many instance attributes
 
     #: Constant representing the paused state.
     PAUSED = u'paused'
@@ -51,8 +56,9 @@ class BasePlaybackController(object):
     #:     Playback continues after current song.
     single = False
 
-    def __init__(self, backend):
+    def __init__(self, backend, provider):
         self.backend = backend
+        self.provider = provider
         self._state = self.STOPPED
         self._shuffled = []
         self._first_shuffle = True
@@ -62,10 +68,8 @@ class BasePlaybackController(object):
     def destroy(self):
         """
         Cleanup after component.
-
-        May be overridden by subclasses.
         """
-        pass
+        self.provider.destroy()
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
@@ -130,6 +134,9 @@ class BasePlaybackController(object):
 
         Not necessarily the same track as :attr:`cp_track_at_next`.
         """
+        # pylint: disable = R0911
+        # Too many return statements
+
         cp_tracks = self.backend.current_playlist.cp_tracks
 
         if not cp_tracks:
@@ -149,10 +156,9 @@ class BasePlaybackController(object):
             return cp_tracks[0]
 
         if self.repeat and self.single:
-            return cp_tracks[
-                (self.current_playlist_position) % len(cp_tracks)]
+            return cp_tracks[self.current_playlist_position]
 
-        if self.repeat:
+        if self.repeat and not self.single:
             return cp_tracks[
                 (self.current_playlist_position + 1) % len(cp_tracks)]
 
@@ -325,7 +331,7 @@ class BasePlaybackController(object):
         """
         Tell the playback controller that the current playlist has changed.
 
-        Used by :class:`mopidy.backends.base.BaseCurrentPlaylistController`.
+        Used by :class:`mopidy.backends.base.CurrentPlaylistController`.
         """
         self._first_shuffle = True
         self._shuffled = []
@@ -348,17 +354,8 @@ class BasePlaybackController(object):
 
     def pause(self):
         """Pause playback."""
-        if self.state == self.PLAYING and self._pause():
+        if self.state == self.PLAYING and self.provider.pause():
             self.state = self.PAUSED
-
-    def _pause(self):
-        """
-        To be overridden by subclass. Implement your backend's pause
-        functionality here.
-
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        raise NotImplementedError
 
     def play(self, cp_track=None, on_error_step=1):
         """
@@ -386,7 +383,7 @@ class BasePlaybackController(object):
             self.state = self.STOPPED
             self.current_cp_track = cp_track
             self.state = self.PLAYING
-            if not self._play(cp_track[1]):
+            if not self.provider.play(cp_track[1]):
                 # Track is not playable
                 if self.random and self._shuffled:
                     self._shuffled.remove(cp_track)
@@ -400,18 +397,6 @@ class BasePlaybackController(object):
 
         self._trigger_started_playing_event()
 
-    def _play(self, track):
-        """
-        To be overridden by subclass. Implement your backend's play
-        functionality here.
-
-        :param track: the track to play
-        :type track: :class:`mopidy.models.Track`
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-
-        raise NotImplementedError
-
     def previous(self):
         """Play the previous track."""
         if self.cp_track_at_previous is None:
@@ -423,17 +408,8 @@ class BasePlaybackController(object):
 
     def resume(self):
         """If paused, resume playing the current track."""
-        if self.state == self.PAUSED and self._resume():
+        if self.state == self.PAUSED and self.provider.resume():
             self.state = self.PLAYING
-
-    def _resume(self):
-        """
-        To be overridden by subclass. Implement your backend's resume
-        functionality here.
-
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        raise NotImplementedError
 
     def seek(self, time_position):
         """
@@ -460,18 +436,7 @@ class BasePlaybackController(object):
         self._play_time_started = self._current_wall_time
         self._play_time_accumulated = time_position
 
-        return self._seek(time_position)
-
-    def _seek(self, time_position):
-        """
-        To be overridden by subclass. Implement your backend's seek
-        functionality here.
-
-        :param time_position: time position in milliseconds
-        :type time_position: int
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        raise NotImplementedError
+        return self.provider.seek(time_position)
 
     def stop(self, clear_current_track=False):
         """
@@ -484,19 +449,10 @@ class BasePlaybackController(object):
         if self.state == self.STOPPED:
             return
         self._trigger_stopped_playing_event()
-        if self._stop():
+        if self.provider.stop():
             self.state = self.STOPPED
         if clear_current_track:
             self.current_cp_track = None
-
-    def _stop(self):
-        """
-        To be overridden by subclass. Implement your backend's stop
-        functionality here.
-
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        raise NotImplementedError
 
     def _trigger_started_playing_event(self):
         """
@@ -527,3 +483,75 @@ class BasePlaybackController(object):
                 'track': self.current_track,
                 'stop_position': self.time_position,
             })
+
+
+class BasePlaybackProvider(object):
+    """
+    :param backend: the backend
+    :type backend: :class:`mopidy.backends.base.Backend`
+    """
+
+    def __init__(self, backend):
+        self.backend = backend
+
+    def destroy(self):
+        """
+        Cleanup after component.
+
+        *MAY be implemented by subclasses.*
+        """
+        pass
+
+    def pause(self):
+        """
+        Pause playback.
+
+        *MUST be implemented by subclass.*
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    def play(self, track):
+        """
+        Play given track.
+
+        *MUST be implemented by subclass.*
+
+        :param track: the track to play
+        :type track: :class:`mopidy.models.Track`
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    def resume(self):
+        """
+        Resume playback at the same time position playback was paused.
+
+        *MUST be implemented by subclass.*
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    def seek(self, time_position):
+        """
+        Seek to a given time position.
+
+        *MUST be implemented by subclass.*
+
+        :param time_position: time position in milliseconds
+        :type time_position: int
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    def stop(self):
+        """
+        Stop playback.
+
+        *MUST be implemented by subclass.*
+
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError

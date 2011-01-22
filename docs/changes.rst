@@ -5,6 +5,161 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+0.3.0 (2010-01-22)
+==================
+
+Mopidy 0.3.0 brings a bunch of small changes all over the place, but no large
+changes. The main features are support for high bitrate audio from Spotify, and
+MPD password authentication.
+
+Regarding the docs, we've improved the :ref:`installation instructions
+<installation>` and done a bit of testing of the available :ref:`Android
+<android_mpd_clients>` and :ref:`iOS clients <ios_mpd_clients>` for MPD.
+
+Please note that 0.3.0 requires some updated dependencies, as listed under
+*Important changes* below. Also, there is a known bug in the Spotify playlist
+loading, as described below. As the bug will take some time to fix and has a
+known workaround, we did not want to delay the release while waiting for a fix
+to this problem.
+
+
+.. warning:: Known bug in Spotify playlist loading
+
+    There is a known bug in the loading of Spotify playlists. This bug affects
+    both Mopidy 0.2.1 and 0.3.0, given that you use libspotify 0.0.6. To avoid
+    the bug, either use Mopidy 0.2.1 with libspotify 0.0.4, or use either
+    Mopidy version with libspotify 0.0.6 and follow the simple workaround
+    described at :issue:`59`.
+
+
+**Important changes**
+
+- If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
+  the latest pyspotify from the Mopidy developers. Follow the instructions at
+  :doc:`/installation/libspotify/`.
+
+- If you use the Last.fm frontend, you need to upgrade to pylast 0.5.7. Run
+  ``sudp pip install --upgrade pylast`` or install Mopidy from APT.
+
+
+**Changes**
+
+- Spotify backend:
+
+  - Support high bitrate (320k) audio. Set the new setting
+    :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` to :class:`True` to switch to
+    high bitrate audio.
+
+  - Rename :mod:`mopidy.backends.libspotify` to :mod:`mopidy.backends.spotify`.
+    If you have set :attr:`mopidy.settings.BACKENDS` explicitly, you may need
+    to update the setting's value.
+
+  - Catch and log error caused by playlist folder boundaries being threated as
+    normal playlists. More permanent fix requires support for checking playlist
+    types in pyspotify (see :issue:`62`).
+
+  - Fix crash on failed lookup of track by URI. (Fixes: :issue:`60`)
+
+- Local backend:
+
+  - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
+    any help from the original MPD server. See :ref:`generating_a_tag_cache`
+    for instructions on how to use it.
+
+  - Fix support for UTF-8 encoding in tag caches.
+
+- MPD frontend:
+
+  - Add support for password authentication. See
+    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` and
+    :ref:`use_mpd_on_a_network` for details on how to use it. (Fixes:
+    :issue:`41`)
+
+  - Support ``setvol 50`` without quotes around the argument. Fixes volume
+    control in Droid MPD.
+
+  - Support ``seek 1 120`` without quotes around the arguments. Fixes seek in
+    Droid MPD.
+
+- Last.fm frontend:
+
+  - Update to use Last.fm's new Scrobbling 2.0 API, as the old Submissions
+    Protocol 1.2.1 is deprecated. (Fixes: :issue:`33`)
+
+  - Fix crash when track object does not contain all the expected meta data.
+
+  - Fix crash when response from Last.fm cannot be decoded as UTF-8. (Fixes:
+    :issue:`37`)
+
+  - Fix crash when response from Last.fm contains invalid XML.
+
+  - Fix crash when response from Last.fm has an invalid HTTP status line.
+
+- Mixers:
+
+  - Support use of unicode strings for settings specific to
+    :mod:`mopidy.mixers.nad`.
+
+- Settings:
+
+  - Automatically expand the "~" characted to the user's home directory and
+    make the path absolute for settings with names ending in ``_PATH`` or
+    ``_FILE``.
+
+  - Rename the following settings. The settings validator will warn you if you
+    need to change your local settings.
+
+    - ``LOCAL_MUSIC_FOLDER`` to :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
+    - ``LOCAL_PLAYLIST_FOLDER`` to
+      :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
+    - ``LOCAL_TAG_CACHE`` to :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
+    - ``SPOTIFY_LIB_CACHE`` to :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
+
+  - Fix bug which made settings set to :class:`None` or 0 cause a
+    :exc:`mopidy.SettingsError` to be raised.
+
+- Packaging and distribution:
+
+  - Setup APT repository and crate Debian packages of Mopidy. See
+    :ref:`installation` for instructions for how to install Mopidy, including
+    all dependencies, from APT.
+
+  - Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
+    application menus.
+
+- API:
+
+  - Rename and generalize ``Playlist._with(**kwargs)`` to
+    :meth:`mopidy.models.ImmutableObject.copy`.
+
+  - Add ``musicbrainz_id`` field to :class:`mopidy.models.Artist`,
+    :class:`mopidy.models.Album`, and :class:`mopidy.models.Track`.
+
+  - Prepare for multi-backend support (see :issue:`40`) by introducing the
+    :ref:`provider concept <backend-concepts>`. Split the backend API into a
+    :ref:`backend controller API <backend-controller-api>` (for frontend use)
+    and a :ref:`backend provider API <backend-provider-api>` (for backend
+    implementation use), which includes the following changes:
+
+    - Rename ``BaseBackend`` to :class:`mopidy.backends.base.Backend`.
+    - Rename ``BaseCurrentPlaylistController`` to
+      :class:`mopidy.backends.base.CurrentPlaylistController`.
+    - Split ``BaseLibraryController`` to
+      :class:`mopidy.backends.base.LibraryController` and
+      :class:`mopidy.backends.base.BaseLibraryProvider`.
+    - Split ``BasePlaybackController`` to
+      :class:`mopidy.backends.base.PlaybackController` and
+      :class:`mopidy.backends.base.BasePlaybackProvider`.
+    - Split ``BaseStoredPlaylistsController`` to
+      :class:`mopidy.backends.base.StoredPlaylistsController` and
+      :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`.
+
+  - Move ``BaseMixer`` to :class:`mopidy.mixers.base.BaseMixer`.
+
+  - Add docs for the current non-stable output API,
+    :class:`mopidy.outputs.base.BaseOutput`.
+
+
 0.2.1 (2011-01-07)
 ==================
 

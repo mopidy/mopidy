@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Mopidy Music Server
+Comment=MPD music server with Spotify support
+Icon=audio-x-generic
+TryExec=mopidy
+Exec=mopidy
+Terminal=true
+Categories=AudioVideo;Audio;Player;ConsoleOnly;

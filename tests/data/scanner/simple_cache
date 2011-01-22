@@ -1,0 +1,15 @@
+info_begin
+mpd_version: 0.15.4
+fs_charset: UTF-8
+info_end
+songList begin
+key: song1.mp3
+file: /song1.mp3
+Time: 5
+Artist: name
+Title: trackname
+Album: albumname
+Track: 01/02
+Date: 2006
+mtime: 1288121370
+songList end

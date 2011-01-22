@@ -293,6 +293,7 @@ def replay_gain_status(frontend):
     """
     return u'off' # TODO
 
+@handle_pattern(r'^seek (?P<songpos>\d+) (?P<seconds>\d+)$')
 @handle_pattern(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
 def seek(frontend, songpos, seconds):
     """
@@ -302,6 +303,10 @@ def seek(frontend, songpos, seconds):
 
         Seeks to the position ``TIME`` (in seconds) of entry ``SONGPOS`` in
         the playlist.
+
+    *Droid MPD:*
+
+    - issues ``seek 1 120`` without quotes around the arguments.
     """
     if frontend.backend.playback.current_playlist_position != songpos:
         playpos(frontend, songpos)
@@ -320,6 +325,7 @@ def seekid(frontend, cpid, seconds):
         playid(frontend, cpid)
     frontend.backend.playback.seek(int(seconds) * 1000)
 
+@handle_pattern(r'^setvol (?P<volume>[-+]*\d+)$')
 @handle_pattern(r'^setvol "(?P<volume>[-+]*\d+)"$')
 def setvol(frontend, volume):
     """
@@ -328,6 +334,10 @@ def setvol(frontend, volume):
         ``setvol {VOL}``
 
         Sets volume to ``VOL``, the range of volume is 0-100.
+
+    *Droid MPD:*
+
+    - issues ``setvol 50`` without quotes around the argument.
     """
     volume = int(volume)
     if volume < 0:

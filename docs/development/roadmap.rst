@@ -2,84 +2,33 @@
 Roadmap
 *******
 
-This is the current roadmap and collection of wild ideas for future Mopidy
-development. This is intended to be a living document and may change at any
-time.
 
-We intend to have about one timeboxed release every month. Thus, the roadmap is
-oriented around "soon" and "later" instead of mapping each feature to a future
-release.
+Release schedule
+================
 
+We intend to have about one timeboxed feature release every month
+in periods of active development. The feature releases are numbered 0.x.0. The
+features added is a mix of what we feel is most important/requested of the
+missing features, and features we develop just because we find them fun to
+make, even though they may be useful for very few users or for a limited use
+case.
 
-Possible targets for the next version
-=====================================
-
-- Reintroduce support for OS X. See :issue:`14` for details.
-- Support for using multiple Mopidy backends simultaneously. Should make it
-  possible to have both Spotify tracks and local tracks in the same playlist.
-- MPD frontend:
-
-  - ``idle`` support.
-
-- Spotify backend:
-
-  - Write-support for Spotify, i.e. playlist management.
-  - Virtual directories with e.g. starred tracks from Spotify.
-  - Support for 320 kbps audio.
-
-- Local backend:
-
-  - Better library support.
-  - A script for creating a tag cache.
-  - An alternative to tag cache for caching metadata, i.e. Sqlite.
-
-- **[DONE]** Last.fm scrobbling.
+Bugfix releases, numbered 0.x.y, will be released whenever we discover bugs
+that are too serious to wait for the next feature release. We will only release
+bugfix releases for the last feature release. E.g. when 0.3.0 is released, we
+will no longer provide bugfix releases for the 0.2 series. In other words,
+there will be just a single supported release at any point in time.
 
 
-Stuff we want to do, but not right now, and maybe never
-=======================================================
+Feature wishlist
+================
 
-- Packaging and distribution:
-
-  - **[PENDING]** Create `Homebrew <http://mxcl.github.com/homebrew/>`_
-    recipies for all our dependencies and Mopidy itself to make OS X
-    installation a breeze. See `Homebrew's issue #1612
-    <http://github.com/mxcl/homebrew/issues/issue/1612>`_.
-  - Create `Debian packages <http://www.debian.org/doc/maint-guide/>`_ of all
-    our dependencies and Mopidy itself (hosted in our own Debian repo until we
-    get stuff into the various distros) to make Debian/Ubuntu installation a
-    breeze.
-
-- Compatability:
-
-  - Run frontend tests against a real MPD server to ensure we are in sync.
-
-- Backends:
-
-  - `Last.fm <http://www.last.fm/api>`_
-  - `WIMP <http://twitter.com/wimp/status/8975885632>`_
-  - DNLA/UPnP so Mopidy can play music from other DNLA MediaServers.
-
-- Frontends:
-
-  - Publish the server's presence to the network using `Zeroconf
-    <http://en.wikipedia.org/wiki/Zeroconf>`_/Avahi.
-  - D-Bus/`MPRIS <http://www.mpris.org/>`_
-  - REST/JSON web service with a jQuery client as example application. Maybe
-    based upon `Tornado <http://github.com/facebook/tornado>`_ and `jQuery
-    Mobile <http://jquerymobile.com/>`_.
-  - DNLA/UPnP so Mopidy can be controlled from i.e. TVs.
-  - `XMMS2 <http://www.xmms2.org/>`_
-  - LIRC frontend for controlling Mopidy with a remote.
-
-- Mixers:
-
-  - LIRC mixer for controlling arbitrary amplifiers remotely.
-
-- Audio streaming:
-
-  - Ogg Vorbis/MP3 audio stream over HTTP, to MPD clients, `Squeezeboxes
-    <http://www.logitechsqueezebox.com/>`_, etc.
-  - Feed audio to an `Icecast <http://www.icecast.org/>`_ server.
-  - Stream to AirPort Express using `RAOP
-    <http://en.wikipedia.org/wiki/Remote_Audio_Output_Protocol>`_.
+We maintain our collection of sane or less sane ideas for future Mopidy
+features as `issues <https://github.com/mopidy/mopidy/issues>`_ at GitHub
+labeled with `the "wishlist" label
+<https://github.com/mopidy/mopidy/issues/labels/wishlist>`_. Feel free to vote
+up any feature you would love to see in Mopidy, but please refrain from adding
+a comment just to say "I want this too!". You are of course free to add
+comments if you have suggestions for how the feature should work or be
+implemented, and you may add new wishlist issues if your ideas are not already
+represented.

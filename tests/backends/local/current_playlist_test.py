@@ -10,11 +10,10 @@ from mopidy import settings
 from mopidy.backends.local import LocalBackend
 from mopidy.models import Track
 
-from tests.backends.base.current_playlist import \
-    BaseCurrentPlaylistControllerTest
+from tests.backends.base.current_playlist import CurrentPlaylistControllerTest
 from tests.backends.local import generate_song
 
-class LocalCurrentPlaylistControllerTest(BaseCurrentPlaylistControllerTest,
+class LocalCurrentPlaylistControllerTest(CurrentPlaylistControllerTest,
         unittest.TestCase):
 
     backend_class = LocalBackend
