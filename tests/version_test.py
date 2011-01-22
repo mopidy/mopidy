@@ -14,5 +14,6 @@ class VersionTest(unittest.TestCase):
         self.assert_(SV('0.1.0a3') < SV('0.1.0'))
         self.assert_(SV('0.1.0') < SV('0.2.0'))
         self.assert_(SV('0.1.0') < SV('1.0.0'))
-        self.assert_(SV('0.2.0') < SV(get_version()))
-        self.assert_(SV(get_version()) < SV('0.3.1'))
+        self.assert_(SV('0.2.0') < SV('0.3.0'))
+        self.assert_(SV('0.3.0') < SV(get_version()))
+        self.assert_(SV(get_version()) < SV('0.3.2'))
