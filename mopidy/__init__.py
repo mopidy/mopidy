@@ -3,7 +3,7 @@ if not (2, 6) <= sys.version_info < (3,):
     sys.exit(u'Mopidy requires Python >= 2.6, < 3')
 
 def get_version():
-    return u'0.3.0'
+    return u'0.3.1'
 
 class MopidyException(Exception):
     def __init__(self, message, *args, **kwargs):

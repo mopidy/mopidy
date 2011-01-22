@@ -5,6 +5,20 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+0.3.1 (2010-01-22)
+==================
+
+A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
+
+**Bugfixes**
+
+- The Spotify application key was missing from the Python package.
+
+- Installation of the Python package as a normal user failed because it did not
+  have permissions to install ``mopidy.desktop``. The file is now only
+  installed if the installation is executed as the root user.
+
+
 0.3.0 (2010-01-22)
 ==================
 
