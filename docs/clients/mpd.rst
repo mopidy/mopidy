@@ -82,6 +82,8 @@ Theremin
 It generally works well with Mopidy.
 
 
+.. _android_mpd_clients:
+
 Android clients
 ===============
 
@@ -241,6 +243,8 @@ time for maintenance. Does not support password authentication.
 
 ThreeMPD froze during startup, so we were not able to test it.
 
+
+.. _ios_mpd_clients:
 
 iPhone/iPod Touch clients
 =========================
