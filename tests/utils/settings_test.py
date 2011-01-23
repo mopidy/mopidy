@@ -57,7 +57,7 @@ class SettingsProxyTest(unittest.TestCase):
 
     def test_getattr_raises_error_on_missing_setting(self):
         try:
-            test = self.settings.TEST
+            _ = self.settings.TEST
             self.fail(u'Should raise exception')
         except SettingsError as e:
             self.assertEqual(u'Setting "TEST" is not set.', e.message)
@@ -65,7 +65,7 @@ class SettingsProxyTest(unittest.TestCase):
     def test_getattr_raises_error_on_empty_setting(self):
         self.settings.TEST = u''
         try:
-            test = self.settings.TEST
+            _ = self.settings.TEST
             self.fail(u'Should raise exception')
         except SettingsError as e:
             self.assertEqual(u'Setting "TEST" is empty.', e.message)

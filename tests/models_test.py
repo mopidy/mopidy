@@ -205,8 +205,10 @@ class AlbumTest(unittest.TestCase):
 
     def test_eq(self):
         artists = [Artist()]
-        album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2, musicbrainz_id='id')
-        album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2, musicbrainz_id='id')
+        album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2,
+            musicbrainz_id='id')
+        album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2,
+            musicbrainz_id='id')
         self.assertEqual(album1, album2)
         self.assertEqual(hash(album1), hash(album2))
 

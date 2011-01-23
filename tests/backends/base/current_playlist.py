@@ -1,11 +1,9 @@
 import multiprocessing
 import random
 
-from mopidy import settings
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 from mopidy.outputs.dummy import DummyOutput
-from mopidy.utils import get_class
 
 from tests.backends.base import populate_playlist
 

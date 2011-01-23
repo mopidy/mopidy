@@ -323,6 +323,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.b.current_playlist.append(
             [Track(uri='1', length=40000), seek_track])
         result = self.h.handle_request(u'seek "1" "30"')
+        self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.current_track, seek_track)
 
     def test_seek_without_quotes(self):
@@ -343,6 +344,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.b.current_playlist.append(
             [Track(length=40000), seek_track])
         result = self.h.handle_request(u'seekid "1" "30"')
+        self.assert_(u'OK' in result)
         self.assertEqual(self.b.playback.current_cpid, 1)
         self.assertEqual(self.b.playback.current_track, seek_track)
 

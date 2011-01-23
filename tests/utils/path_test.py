@@ -9,7 +9,7 @@ import unittest
 from mopidy.utils.path import (get_or_create_folder, mtime,
     path_to_uri, uri_to_path, split_path, find_files)
 
-from tests import SkipTest, data_folder
+from tests import data_folder
 
 class GetOrCreateFolderTest(unittest.TestCase):
     def setUp(self):

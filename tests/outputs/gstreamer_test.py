@@ -11,7 +11,6 @@ if sys.platform == 'win32':
 from mopidy import settings
 from mopidy.outputs.gstreamer import GStreamerOutput
 from mopidy.utils.path import path_to_uri
-from mopidy.utils.process import pickle_connection
 
 from tests import data_folder
 
