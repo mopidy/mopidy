@@ -7,9 +7,9 @@ from subprocess import PIPE, Popen
 VERSION = (0, 4, 0)
 
 def get_git_version():
-    process = Popen(['git', 'describe'], stdout=PIPE)
+    process = Popen(['git', 'describe'], stdout=PIPE, stderr=PIPE)
     if process.wait() != 0:
-        raise Exception|('Execution of "git describe" failed')
+        raise Exception('Execution of "git describe" failed')
     version = process.stdout.read().strip()
     if version.startswith('v'):
         version = version[1:]
