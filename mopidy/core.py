@@ -56,7 +56,7 @@ class CoreProcess(BaseThread):
     def setup_logging(self):
         setup_logging(self.options.verbosity_level,
             self.options.save_debug_log)
-        logger.info(u'-- Starting Mopidy --')
+        logger.info(u'-- Starting Mopidy %s --', get_version())
 
     def setup_settings(self):
         get_or_create_folder('~/.mopidy/')
