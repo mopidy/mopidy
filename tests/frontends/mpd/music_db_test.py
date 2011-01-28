@@ -92,7 +92,20 @@ class MusicDatabaseFindTest(unittest.TestCase):
         result = self.h.handle_request(u'find title "what"')
         self.assert_(u'OK' in result)
 
+    def test_find_date(self):
+        result = self.h.handle_request(u'find "date" "2002-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_find_date_without_quotes(self):
+        result = self.h.handle_request(u'find date "2002-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_find_date_with_capital_d_and_incomplete_date(self):
+        result = self.h.handle_request(u'find Date "2005"')
+        self.assert_(u'OK' in result)
+
     def test_find_else_should_fail(self):
+
         result = self.h.handle_request(u'find "somethingelse" "what"')
         self.assertEqual(result[0], u'ACK [2@0] {find} incorrect arguments')
 
@@ -336,6 +349,18 @@ class MusicDatabaseSearchTest(unittest.TestCase):
 
     def test_search_any_without_quotes(self):
         result = self.h.handle_request(u'search any "anything"')
+        self.assert_(u'OK' in result)
+
+    def test_search_date(self):
+        result = self.h.handle_request(u'search "date" "2002-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_search_date_without_quotes(self):
+        result = self.h.handle_request(u'search date "2002-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_search_date_with_capital_d_and_incomplete_date(self):
+        result = self.h.handle_request(u'search Date "2005"')
         self.assert_(u'OK' in result)
 
     def test_search_else_should_fail(self):

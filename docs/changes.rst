@@ -13,7 +13,11 @@ No description yet.
 
 **Changes**
 
-- No changes yet.
+- MPD frontend:
+
+  - Add support for "date" queries to both the ``find`` and ``search``
+    commands. This makes media library browsing in ncmpcpp work, though very
+    slow due to all the meta data requests to Spotify.
 
 
 0.3.1 (2010-01-22)

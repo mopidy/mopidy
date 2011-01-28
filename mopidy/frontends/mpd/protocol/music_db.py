@@ -41,8 +41,8 @@ def count(frontend, tag, needle):
     return [('songs', 0), ('playtime', 0)] # TODO
 
 @handle_pattern(r'^find '
-     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"?'
-     ' "[^"]+"\s?)+)$')
+     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
+     r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def find(frontend, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -62,6 +62,10 @@ def find(frontend, mpd_query):
 
     - does not add quotes around the field argument.
     - capitalizes the type argument.
+
+    *ncmpcpp:*
+
+    - also uses the search type "date".
     """
     query = _build_query(mpd_query)
     return frontend.backend.library.find_exact(**query).mpd_format()
@@ -290,8 +294,8 @@ def rescan(frontend, uri=None):
     return update(frontend, uri, rescan_unmodified_files=True)
 
 @handle_pattern(r'^search '
-     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"?'
-     ' "[^"]+"\s?)+)$')
+     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
+     r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def search(frontend, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -314,6 +318,10 @@ def search(frontend, mpd_query):
 
     - does not add quotes around the field argument.
     - capitalizes the field argument.
+
+    *ncmpcpp:*
+
+    - also uses the search type "date".
     """
     query = _build_query(mpd_query)
     return frontend.backend.library.search(**query).mpd_format()
