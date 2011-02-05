@@ -107,14 +107,14 @@ For more documentation on testing, check out the `nose documentation
 Continuous integration server
 =============================
 
-We run a continuous integration server called Hudson at
-http://hudson.mopidy.com/ that runs all test on multiple platforms (Ubuntu, OS
-X, etc.) for every commit we push to GitHub.
+We run a continuous integration (CI) server at http://ci.mopidy.com/ that runs
+all test on multiple platforms (Ubuntu, OS X, etc.) for every commit we push to
+GitHub.
 
-In addition to running tests, Hudson also does coverage statistics and uses
-pylint to check for errors and possible improvements in our code. So, if you're
-out of work, the code coverage and pylint data in Hudson should give you a
-place to start.
+In addition to running tests, the CI server also gathers coverage statistics
+and uses pylint to check for errors and possible improvements in our code. So,
+if you're out of work, the code coverage and pylint data at the CI server
+should give you a place to start.
 
 
 Writing documentation
