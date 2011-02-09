@@ -21,8 +21,8 @@ No description yet.
 
 - Settings:
 
-  - Fix crash on ``--list-settings`` on clean installation. (Fixes:
-    :issue:`63`)
+  - Fix crash on ``--list-settings`` on clean installation. Thanks to Martins
+    Grunskis for the bug report and patch. (Fixes: :issue:`63`)
 
 
 0.3.1 (2010-01-22)
