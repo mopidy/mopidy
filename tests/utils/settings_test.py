@@ -3,6 +3,7 @@ import unittest
 
 from mopidy import settings as default_settings_module, SettingsError
 from mopidy.utils.settings import validate_settings, SettingsProxy
+from mopidy.utils.settings import mask_value_if_secret
 
 class ValidateSettingsTest(unittest.TestCase):
     def setUp(self):
@@ -45,6 +46,13 @@ class ValidateSettingsTest(unittest.TestCase):
         result = validate_settings(self.defaults,
             {'FOO': '', 'BAR': ''})
         self.assertEquals(len(result), 2)
+
+    def test_mask_if_secret(self):
+        not_secret = mask_value_if_secret('SPOTIFY_USERNAME', 'foo')
+        self.assertEquals('foo', not_secret)
+
+        secret = mask_value_if_secret('SPOTIFY_PASSWORD', 'bar')
+        self.assertEquals(u'********', secret)
 
 
 class SettingsProxyTest(unittest.TestCase):
