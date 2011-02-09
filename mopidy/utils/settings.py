@@ -129,14 +129,6 @@ def validate_settings(defaults, settings):
 
     return errors
 
-def mask_value_if_secret(key, value):
-    masked_value = value
-    
-    if key.endswith('PASSWORD') and value:
-         masked_value = u'********'
-         
-    return masked_value
-
 def list_settings_optparse_callback(*args):
     """
     Prints a list of all settings.
@@ -158,3 +150,9 @@ def list_settings_optparse_callback(*args):
             lines.append(u'  Error: %s' % errors[key])
     print u'Settings: %s' % indent('\n'.join(lines), places=2)
     sys.exit(0)
+
+def mask_value_if_secret(key, value):
+    if key.endswith('PASSWORD') and value:
+        return u'********'
+    else:
+        return value

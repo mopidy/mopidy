@@ -45,14 +45,19 @@ class ValidateSettingsTest(unittest.TestCase):
     def test_two_errors_are_both_reported(self):
         result = validate_settings(self.defaults,
             {'FOO': '', 'BAR': ''})
-        self.assertEquals(len(result), 2)
+        self.assertEqual(len(result), 2)
 
-    def test_mask_if_secret(self):
-        not_secret = mask_value_if_secret('SPOTIFY_USERNAME', 'foo')
-        self.assertEquals('foo', not_secret)
-
+    def test_masks_value_if_secret(self):
         secret = mask_value_if_secret('SPOTIFY_PASSWORD', 'bar')
-        self.assertEquals(u'********', secret)
+        self.assertEqual(u'********', secret)
+
+    def test_does_not_mask_value_if_not_secret(self):
+        not_secret = mask_value_if_secret('SPOTIFY_USERNAME', 'foo')
+        self.assertEqual('foo', not_secret)
+
+    def test_does_not_mask_value_if_none(self):
+        not_secret = mask_value_if_secret('SPOTIFY_USERNAME', None)
+        self.assertEqual(None, not_secret)
 
 
 class SettingsProxyTest(unittest.TestCase):
