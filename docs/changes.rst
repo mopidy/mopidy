@@ -19,6 +19,11 @@ No description yet.
     commands. This makes media library browsing in ncmpcpp work, though very
     slow due to all the meta data requests to Spotify.
 
+- Settings:
+
+  - Fix crash on ``--list-settings`` on clean installation. (Fixes:
+    :issue:`63`)
+
 
 0.3.1 (2010-01-22)
 ==================
