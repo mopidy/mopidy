@@ -8,5 +8,5 @@ cover/
 coverage.xml
 dist/
 docs/_build/
-mopidy.log
+mopidy.log*
 nosetests.xml
