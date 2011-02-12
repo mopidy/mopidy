@@ -5,6 +5,8 @@ from mopidy.frontends.mpd import dispatcher
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
 
+from tests import SkipTest
+
 class PlaybackOptionsHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend(mixer_class=DummyMixer)
@@ -147,26 +149,29 @@ class PlaybackOptionsHandlerTest(unittest.TestCase):
         self.assert_(u'OK' in result)
         self.assert_(expected in result)
 
-    #def test_replay_gain_status_off(self):
-    #    expected = u'off'
-    #    self.h._replay_gain_mode(expected)
-    #    result = self.h.handle_request(u'replay_gain_status')
-    #    self.assert_(u'OK' in result)
-    #    self.assert_(expected in result)
+    def test_replay_gain_status_off(self):
+        raise SkipTest
+        expected = u'off'
+        self.h._replay_gain_mode(expected)
+        result = self.h.handle_request(u'replay_gain_status')
+        self.assert_(u'OK' in result)
+        self.assert_(expected in result)
 
-    #def test_replay_gain_status_track(self):
-    #    expected = u'track'
-    #    self.h._replay_gain_mode(expected)
-    #    result = self.h.handle_request(u'replay_gain_status')
-    #    self.assert_(u'OK' in result)
-    #    self.assert_(expected in result)
+    def test_replay_gain_status_track(self):
+        raise SkipTest
+        expected = u'track'
+        self.h._replay_gain_mode(expected)
+        result = self.h.handle_request(u'replay_gain_status')
+        self.assert_(u'OK' in result)
+        self.assert_(expected in result)
 
-    #def test_replay_gain_status_album(self):
-    #    expected = u'album'
-    #    self.h._replay_gain_mode(expected)
-    #    result = self.h.handle_request(u'replay_gain_status')
-    #    self.assert_(u'OK' in result)
-    #    self.assert_(expected in result)
+    def test_replay_gain_status_album(self):
+        raise SkipTest
+        expected = u'album'
+        self.h._replay_gain_mode(expected)
+        result = self.h.handle_request(u'replay_gain_status')
+        self.assert_(u'OK' in result)
+        self.assert_(expected in result)
 
 
 class PlaybackControlHandlerTest(unittest.TestCase):
