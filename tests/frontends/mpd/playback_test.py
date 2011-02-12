@@ -257,6 +257,18 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.STOPPED, self.b.playback.state)
         self.assertEqual(self.b.playback.current_track, None)
 
+    def test_play_minus_one_resumes_if_paused(self):
+        self.b.current_playlist.append([Track(length=40000)])
+        self.b.playback.seek(30000)
+        self.assert_(self.b.playback.time_position >= 30000)
+        self.assertEquals(self.b.playback.PLAYING, self.b.playback.state)
+        self.b.playback.pause()
+        self.assertEquals(self.b.playback.PAUSED, self.b.playback.state)
+        result = self.h.handle_request(u'play "-1"')
+        self.assert_(u'OK' in result)
+        self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
+        self.assert_(self.b.playback.time_position >= 30000)
+
     def test_playid(self):
         self.b.current_playlist.append([Track()])
         result = self.h.handle_request(u'playid "0"')

@@ -132,10 +132,13 @@ def playid(frontend, cpid):
 
         Begins playing the playlist at song ``SONGID``.
 
-    *GMPC:*
+    *Clarifications:*
 
-    - issues ``playid "-1"`` after playlist replacement to start playback
-      at the first track.
+    - ``playid "-1"`` when paused resumes playback.
+    - ``playid "-1"`` when stopped with a current track starts playback at the
+      current track.
+    - ``playid "-1"`` when stopped without a current track, e.g. after playlist
+      replacement, starts playback at the first track.
     """
     cpid = int(cpid)
     paused = (frontend.backend.playback.state ==
@@ -161,17 +164,23 @@ def playpos(frontend, songpos):
 
         Begins playing the playlist at song number ``SONGPOS``.
 
-    *Many clients:*
+    *Clarifications:*
 
-    - issue ``play "-1"`` after playlist replacement to start the current
-      track. If the current track is not set, start playback at the first
-      track.
+    - ``playid "-1"`` when paused resumes playback.
+    - ``playid "-1"`` when stopped with a current track starts playback at the
+      current track.
+    - ``playid "-1"`` when stopped without a current track, e.g. after playlist
+      replacement, starts playback at the first track.
 
     *BitMPC:*
 
     - issues ``play 6`` without quotes around the argument.
     """
     songpos = int(songpos)
+    paused = (frontend.backend.playback.state ==
+        frontend.backend.playback.PAUSED)
+    if songpos == -1 and paused:
+        return frontend.backend.playback.resume()
     try:
         if songpos == -1:
             cp_track = _get_cp_track_for_play_minus_one(frontend)

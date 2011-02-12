@@ -19,6 +19,8 @@ No description yet.
     commands. This makes media library browsing in ncmpcpp work, though very
     slow due to all the meta data requests to Spotify.
 
+  - Add support for ``play "-1"``, which fixes resume in MPoD.
+
 - Settings:
 
   - Fix crash on ``--list-settings`` on clean installation. Thanks to Martins
