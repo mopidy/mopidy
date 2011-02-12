@@ -134,6 +134,7 @@ def playid(frontend, cpid):
 
     *Clarifications:*
 
+    - ``playid "-1"`` when playing is ignored.
     - ``playid "-1"`` when paused resumes playback.
     - ``playid "-1"`` when stopped with a current track starts playback at the
       current track.
@@ -141,15 +142,10 @@ def playid(frontend, cpid):
       replacement, starts playback at the first track.
     """
     cpid = int(cpid)
-    paused = (frontend.backend.playback.state ==
-        frontend.backend.playback.PAUSED)
-    if cpid == -1 and paused:
-        return frontend.backend.playback.resume()
+    if cpid == -1:
+        return _play_minus_one(frontend)
     try:
-        if cpid == -1:
-            cp_track = _get_cp_track_for_play_minus_one(frontend)
-        else:
-            cp_track = frontend.backend.current_playlist.get(cpid=cpid)
+        cp_track = frontend.backend.current_playlist.get(cpid=cpid)
         return frontend.backend.playback.play(cp_track)
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'playid')
@@ -166,6 +162,7 @@ def playpos(frontend, songpos):
 
     *Clarifications:*
 
+    - ``playid "-1"`` when playing is ignored.
     - ``playid "-1"`` when paused resumes playback.
     - ``playid "-1"`` when stopped with a current track starts playback at the
       current track.
@@ -177,26 +174,27 @@ def playpos(frontend, songpos):
     - issues ``play 6`` without quotes around the argument.
     """
     songpos = int(songpos)
-    paused = (frontend.backend.playback.state ==
-        frontend.backend.playback.PAUSED)
-    if songpos == -1 and paused:
-        return frontend.backend.playback.resume()
+    if songpos == -1:
+        return _play_minus_one(frontend)
     try:
-        if songpos == -1:
-            cp_track = _get_cp_track_for_play_minus_one(frontend)
-        else:
-            cp_track = frontend.backend.current_playlist.cp_tracks[songpos]
+        cp_track = frontend.backend.current_playlist.cp_tracks[songpos]
         return frontend.backend.playback.play(cp_track)
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'play')
 
-def _get_cp_track_for_play_minus_one(frontend):
-    if not frontend.backend.current_playlist.cp_tracks:
-        return # Fail silently
-    cp_track = frontend.backend.playback.current_cp_track
-    if cp_track is None:
+def _play_minus_one(frontend):
+    if (frontend.backend.playback.state == frontend.backend.playback.PLAYING):
+        return # Nothing to do
+    elif (frontend.backend.playback.state == frontend.backend.playback.PAUSED):
+        return frontend.backend.playback.resume()
+    elif frontend.backend.playback.current_cp_track is not None:
+        cp_track = frontend.backend.playback.current_cp_track
+        return frontend.backend.playback.play(cp_track)
+    elif frontend.backend.current_playlist.cp_tracks:
         cp_track = frontend.backend.current_playlist.cp_tracks[0]
-    return cp_track
+        return frontend.backend.playback.play(cp_track)
+    else:
+        return # Fail silently
 
 @handle_pattern(r'^previous$')
 def previous(frontend):
