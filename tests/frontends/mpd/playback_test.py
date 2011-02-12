@@ -271,7 +271,7 @@ class PlaybackControlHandlerTest(unittest.TestCase):
         self.assertEqual(self.b.playback.PLAYING, self.b.playback.state)
         self.assertEqual(self.b.playback.current_track.uri, 'a')
 
-    def test_play_minus_one_plays_current_track_if_current_track_is_set(self):
+    def test_playid_minus_one_plays_current_track_if_current_track_is_set(self):
         self.b.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.assertEqual(self.b.playback.current_track, None)
         self.b.playback.play()
