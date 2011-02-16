@@ -85,7 +85,7 @@ def artists_to_mpd_format(artists):
     :rtype: string
     """
     artists.sort(key=lambda a: a.name)
-    return u', '.join([a.name for a in artists])
+    return u', '.join([a.name or '' for a in artists])
 
 def tracks_to_mpd_format(tracks, start=0, end=None, cpids=None):
     """
