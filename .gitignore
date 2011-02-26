@@ -2,6 +2,7 @@
 *.swp
 .coverage
 .noseids
+.tox
 MANIFEST
 build/
 cover/
