@@ -14,13 +14,11 @@ class MpdSession(asynchat.async_chat):
     MPD requests to the dispatcher.
     """
 
-    def __init__(self, server, client_socket, client_socket_address,
-            core_queue):
+    def __init__(self, server, client_socket, client_socket_address):
         asynchat.async_chat.__init__(self, sock=client_socket)
         self.server = server
         self.client_address = client_socket_address[0]
         self.client_port = client_socket_address[1]
-        self.core_queue = core_queue
         self.input_buffer = []
         self.authenticated = False
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))

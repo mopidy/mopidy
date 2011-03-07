@@ -37,6 +37,6 @@ class MpdThread(BaseThread):
 
     def run_inside_try(self):
         logger.debug(u'Starting MPD server thread')
-        server = MpdServer(self.core_queue)
+        server = MpdServer()
         server.start()
         asyncore.loop()
