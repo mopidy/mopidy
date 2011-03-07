@@ -12,6 +12,11 @@ from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
 
+def main():
+    # Explictly call run() instead of start(), since we don't need to start
+    # another process.
+    CoreProcess().run()
+
 class CoreProcess(BaseThread):
     def __init__(self):
         self.core_queue = multiprocessing.Queue()
