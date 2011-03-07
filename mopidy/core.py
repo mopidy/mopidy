@@ -64,8 +64,7 @@ def setup_frontends():
     frontends = []
     for frontend_class_name in settings.FRONTENDS:
         try:
-            frontend = get_class(frontend_class_name)()
-            frontend.start()
+            frontend = get_class(frontend_class_name).start_proxy()
             frontends.append(frontend)
         except OptionalDependencyError as e:
             logger.info(u'Disabled: %s (%s)', frontend_class_name, e)

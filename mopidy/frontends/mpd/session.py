@@ -5,7 +5,6 @@ import multiprocessing
 from mopidy import settings
 from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR, VERSION
 from mopidy.utils.log import indent
-from mopidy.utils.process import pickle_connection
 
 logger = logging.getLogger('mopidy.frontends.mpd.session')
 
@@ -53,15 +52,7 @@ class MpdSession(asynchat.async_chat):
             if response is not None:
                 self.send_response(response)
                 return
-        my_end, other_end = multiprocessing.Pipe()
-        self.core_queue.put({
-            'to': 'frontend',
-            'command': 'mpd_request',
-            'request': request,
-            'reply_to': pickle_connection(other_end),
-        })
-        my_end.poll(None)
-        response = my_end.recv()
+        # TODO-PYKKA: Process request using MpdDispatcher/backend
         if response is not None:
             self.handle_response(response)
 
