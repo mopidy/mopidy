@@ -2,7 +2,10 @@ import logging
 import os
 import threading
 
-import spotify.manager
+from spotify.manager import SpotifySessionManager as PyspotifySessionManager
+
+from pykka.registry import ActorRegistry
+from pykka.proxy import ActorProxy
 
 from mopidy import get_version, settings
 from mopidy.backends.spotify.translator import SpotifyTranslator
@@ -14,18 +17,21 @@ logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 # pylint: disable = R0901
 # SpotifySessionManager: Too many ancestors (9/7)
 
-class SpotifySessionManager(spotify.manager.SpotifySessionManager, BaseThread):
+class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     cache_location = settings.SPOTIFY_CACHE_PATH
     settings_location = settings.SPOTIFY_CACHE_PATH
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password, core_queue, output):
-        spotify.manager.SpotifySessionManager.__init__(
-            self, username, password)
-        BaseThread.__init__(self, core_queue)
+    def __init__(self, username, password):
+        PyspotifySessionManager.__init__(self, username, password)
+        BaseThread.__init__(self)
         self.name = 'SpotifySMThread'
-        self.output = output
+
+        # TODO-PYKKA Get reference to output without hardcoding GStreamerOutput
+        output_refs = ActorRegistry.get_by_class_name('GStreamerOutput')
+        self.output = ActorProxy(output_refs[0])
+
         self.connected = threading.Event()
         self.session = None
 
@@ -88,7 +94,7 @@ class SpotifySessionManager(spotify.manager.SpotifySessionManager, BaseThread):
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
         logger.debug(u'Play token lost')
-        self.core_queue.put({'command': 'stop_playback'})
+        # TODO-PYKKA: Send 'stop_playback' to backend
 
     def log_message(self, session, data):
         """Callback used by pyspotify"""
@@ -107,10 +113,7 @@ class SpotifySessionManager(spotify.manager.SpotifySessionManager, BaseThread):
             playlists.append(
                 SpotifyTranslator.to_mopidy_playlist(spotify_playlist))
         playlists = filter(None, playlists)
-        self.core_queue.put({
-            'command': 'set_stored_playlists',
-            'playlists': playlists,
-        })
+        # TODO-PYKKA: Set stored_playlists on backend
         logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
 
     def search(self, query, connection):

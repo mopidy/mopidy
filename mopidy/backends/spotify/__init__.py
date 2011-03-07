@@ -67,8 +67,6 @@ class SpotifyBackend(Backend):
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         logger.debug(u'Connecting to Spotify')
         spotify = SpotifySessionManager(
-            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
-            core_queue=self.core_queue,
-            output=self.output)
+            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD)
         spotify.start()
         return spotify
