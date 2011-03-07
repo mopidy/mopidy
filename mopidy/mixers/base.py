@@ -2,17 +2,12 @@ from mopidy import settings
 
 class BaseMixer(object):
     """
-    :param backend: a backend instance
-    :type backend: :class:`mopidy.backends.base.Backend`
-
     **Settings:**
 
     - :attr:`mopidy.settings.MIXER_MAX_VOLUME`
     """
 
-    def __init__(self, backend, *args, **kwargs):
-        self.backend = backend
-        self.amplification_factor = settings.MIXER_MAX_VOLUME / 100.0
+    amplification_factor = settings.MIXER_MAX_VOLUME / 100.0
 
     @property
     def volume(self):
@@ -34,9 +29,6 @@ class BaseMixer(object):
         elif volume > 100:
             volume = 100
         self._set_volume(volume)
-
-    def destroy(self):
-        pass
 
     def _get_volume(self):
         """

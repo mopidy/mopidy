@@ -1,12 +1,13 @@
 import logging
-from threading import Lock
+
+from pykka.actor import ThreadingActor
 
 from mopidy import settings
 from mopidy.mixers.base import BaseMixer
 
 logger = logging.getLogger(u'mopidy.mixers.denon')
 
-class DenonMixer(BaseMixer):
+class DenonMixer(ThreadingActor, BaseMixer):
     """
     Mixer for controlling Denon amplifiers and receivers using the RS-232
     protocol.
@@ -24,12 +25,12 @@ class DenonMixer(BaseMixer):
     - :attr:`mopidy.settings.MIXER_EXT_PORT` -- Example: ``/dev/ttyUSB0``
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         """
         Connects using the serial specifications from Denon's RS-232 Protocol
         specification: 9600bps 8N1.
         """
-        super(DenonMixer, self).__init__(*args, **kwargs)
+        # XXX Do setup after actor starts?
         device = kwargs.get('device', None)
         if device:
             self._device = device
@@ -38,14 +39,11 @@ class DenonMixer(BaseMixer):
             self._device = Serial(port=settings.MIXER_EXT_PORT, timeout=0.2)
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0
-        self._lock = Lock()
 
     def _get_volume(self):
-        self._lock.acquire()
-        self.ensure_open_device()
+        self._ensure_open_device()
         self._device.write('MV?\r')
         vol = str(self._device.readline()[2:4])
-        self._lock.release()
         logger.debug(u'_get_volume() = %s' % vol)
         return self._levels.index(vol)
 
@@ -53,14 +51,12 @@ class DenonMixer(BaseMixer):
         # Clamp according to Denon-spec
         if volume > 99:
             volume = 99
-        self._lock.acquire()
-        self.ensure_open_device()
+        self._ensure_open_device()
         self._device.write('MV%s\r'% self._levels[volume])
         vol = self._device.readline()[2:4]
-        self._lock.release()
         self._volume = self._levels.index(vol)
 
-    def ensure_open_device(self):
+    def _ensure_open_device(self):
         if not self._device.isOpen():
             logger.debug(u'(re)connecting to Denon device')
             self._device.open()

@@ -20,6 +20,7 @@ def main():
     setup_settings()
     setup_gobject_loop()
     setup_output()
+    setup_mixer()
     setup_backend()
     setup_frontends()
 
@@ -50,11 +51,13 @@ def setup_gobject_loop():
     return gobject_loop
 
 def setup_output():
-    output = get_class(settings.OUTPUT)()
-    output.start()
-    return output
+    return get_class(settings.OUTPUT).start_proxy()
+
+def setup_mixer():
+    return get_class(settings.MIXER).start_proxy()
 
 def setup_backend():
+    # XXX Convert backend to one or more actors?
     return get_class(settings.BACKENDS[0])()
 
 def setup_frontends():

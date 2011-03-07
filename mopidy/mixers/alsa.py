@@ -1,12 +1,14 @@
 import alsaaudio
 import logging
 
+from pykka.actor import ThreadingActor
+
 from mopidy import settings
 from mopidy.mixers.base import BaseMixer
 
 logger = logging.getLogger('mopidy.mixers.alsa')
 
-class AlsaMixer(BaseMixer):
+class AlsaMixer(ThreadingActor, BaseMixer):
     """
     Mixer which uses the Advanced Linux Sound Architecture (ALSA) to control
     volume.
@@ -20,8 +22,8 @@ class AlsaMixer(BaseMixer):
     - :attr:`mopidy.settings.MIXER_ALSA_CONTROL`
     """
 
-    def __init__(self, *args, **kwargs):
-        super(AlsaMixer, self).__init__(*args, **kwargs)
+    def __init__(self):
+        # XXX Do mixer detection after actor starts?
         self._mixer = alsaaudio.Mixer(self._get_mixer_control())
         assert self._mixer is not None
 
