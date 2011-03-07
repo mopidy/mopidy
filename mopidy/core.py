@@ -57,7 +57,7 @@ def setup_mixer():
     return get_class(settings.MIXER).start_proxy()
 
 def setup_backend():
-    # XXX Convert backend to one or more actors?
+    # TODO-PYKKA: Convert backend to one or more actors?
     return get_class(settings.BACKENDS[0])()
 
 def setup_frontends():

@@ -30,7 +30,7 @@ class DenonMixer(ThreadingActor, BaseMixer):
         Connects using the serial specifications from Denon's RS-232 Protocol
         specification: 9600bps 8N1.
         """
-        # XXX Do setup after actor starts?
+        # TODO-PYKKA: Do setup after actor starts?
         device = kwargs.get('device', None)
         if device:
             self._device = device

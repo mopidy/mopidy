@@ -23,7 +23,7 @@ class AlsaMixer(ThreadingActor, BaseMixer):
     """
 
     def __init__(self):
-        # XXX Do mixer detection after actor starts?
+        # PYKKA-TODO: Do mixer detection after actor starts?
         self._mixer = alsaaudio.Mixer(self._get_mixer_control())
         assert self._mixer is not None
 

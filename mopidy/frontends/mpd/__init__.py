@@ -21,7 +21,7 @@ class MpdFrontend(ThreadingActor, BaseFrontend):
     """
 
     def __init__(self):
-        # XXX Do setup after actor starts?
+        # TODO-PYKKA: Do setup after actor starts?
         self._thread = MpdThread()
         self._thread.start()
 

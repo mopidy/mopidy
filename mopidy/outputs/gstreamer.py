@@ -24,7 +24,7 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
     def __init__(self):
         self.gst_pipeline = None
 
-        # XXX Run setup after actor starts?
+        # TODO-PYKKA: Run setup after actor starts?
         self._setup_gstreamer()
 
     def _setup_gstreamer(self):

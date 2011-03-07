@@ -75,7 +75,7 @@ class NadTalker(ThreadingActor):
     def __init__(self):
         self._device = None
 
-        # XXX Do after actor starts?
+        # TODO-PYKKA: Do after actor starts?
         self._setup()
 
     def _setup(self):
