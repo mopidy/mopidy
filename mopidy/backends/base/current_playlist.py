@@ -2,8 +2,6 @@ from copy import copy
 import logging
 import random
 
-from mopidy.frontends.mpd import translator
-
 logger = logging.getLogger('mopidy.backends.base')
 
 class CurrentPlaylistController(object):
@@ -197,8 +195,3 @@ class CurrentPlaylistController(object):
         random.shuffle(shuffled)
         self._cp_tracks = before + shuffled + after
         self.version += 1
-
-    def mpd_format(self, *args, **kwargs):
-        """Not a part of the generic backend API."""
-        kwargs['cpids'] = [ct[0] for ct in self._cp_tracks]
-        return translator.tracks_to_mpd_format(self.tracks, *args, **kwargs)

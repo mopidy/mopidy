@@ -1,6 +1,7 @@
-from mopidy.frontends.mpd.protocol import handle_pattern
 from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
+from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.translator import tracks_to_mpd_format
 
 @handle_pattern(r'^add "(?P<uri>[^"]*)"$')
 def add(frontend, uri):
@@ -218,7 +219,9 @@ def playlistid(frontend, cpid=None):
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playlistid')
     else:
-        return frontend.backend.current_playlist.mpd_format()
+        cpids = [ct[0] for ct in frontend.backend.current_playlist.cp_tracks]
+        return tracks_to_mpd_format(frontend.backend.current_playlist.tracks,
+            cpids=cpids)
 
 @handle_pattern(r'^playlistinfo$')
 @handle_pattern(r'^playlistinfo "(?P<songpos>-?\d+)"$')
@@ -248,7 +251,9 @@ def playlistinfo(frontend, songpos=None,
         end = songpos + 1
         if start == -1:
             end = None
-        return frontend.backend.current_playlist.mpd_format(start, end)
+        cpids = [ct[0] for ct in frontend.backend.current_playlist.cp_tracks]
+        return tracks_to_mpd_format(frontend.backend.current_playlist.tracks,
+            start, end, cpids=cpids)
     else:
         if start is None:
             start = 0
@@ -259,7 +264,9 @@ def playlistinfo(frontend, songpos=None,
             end = int(end)
             if end > len(frontend.backend.current_playlist.tracks):
                 end = None
-        return frontend.backend.current_playlist.mpd_format(start, end)
+        cpids = [ct[0] for ct in frontend.backend.current_playlist.cp_tracks]
+        return tracks_to_mpd_format(frontend.backend.current_playlist.tracks,
+            start, end, cpids=cpids)
 
 @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
 @handle_pattern(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
@@ -298,7 +305,9 @@ def plchanges(frontend, version):
     """
     # XXX Naive implementation that returns all tracks as changed
     if int(version) < frontend.backend.current_playlist.version:
-        return frontend.backend.current_playlist.mpd_format()
+        cpids = [ct[0] for ct in frontend.backend.current_playlist.cp_tracks]
+        return tracks_to_mpd_format(frontend.backend.current_playlist.tracks,
+            cpids=cpids)
 
 @handle_pattern(r'^plchangesposid "(?P<version>\d+)"$')
 def plchangesposid(frontend, version):
