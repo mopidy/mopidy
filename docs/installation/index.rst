@@ -25,6 +25,8 @@ Otherwise, make sure you got the required dependencies installed.
 
 - Python >= 2.6, < 3
 
+- `Pykka <http://jodal.github.com/pykka/>`_ >= 0.9.1
+
 - GStreamer >= 0.10, with Python bindings. See :doc:`gstreamer`.
 
 - Mixer dependencies: The default mixer does not require any additional
