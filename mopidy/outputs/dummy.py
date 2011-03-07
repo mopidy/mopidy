@@ -8,15 +8,6 @@ class DummyOutput(BaseOutput):
     # pylint: disable = R0902
     # Too many instance attributes (9/7)
 
-    #: For testing. :class:`True` if :meth:`start` has been called.
-    start_called = False
-
-    #: For testing. :class:`True` if :meth:`destroy` has been called.
-    destroy_called = False
-
-    #: For testing. Contains all messages :meth:`process_message` has received.
-    messages = []
-
     #: For testing. Contains the last URI passed to :meth:`play_uri`.
     uri = None
 
@@ -39,15 +30,6 @@ class DummyOutput(BaseOutput):
 
     #: For testing. Contains the current volume.
     volume = 100
-
-    def start(self):
-        self.start_called = True
-
-    def destroy(self):
-        self.destroy_called = True
-
-    def process_message(self, message):
-        self.messages.append(message)
 
     def play_uri(self, uri):
         self.uri = uri
