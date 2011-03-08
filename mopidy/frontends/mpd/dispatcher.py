@@ -1,5 +1,8 @@
 import re
 
+from pykka.proxy import ActorProxy
+from pykka.registry import ActorRegistry
+
 from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
     MpdUnknownCommand)
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
@@ -14,11 +17,20 @@ from mopidy.utils import flatten
 
 class MpdDispatcher(object):
     """
-    Dispatches MPD requests to the correct handler.
+    The MPD session feeds the MPD dispatcher with requests. The dispatcher
+    finds the correct handler, processes the request and sends the response
+    back to the MPD session.
     """
 
-    def __init__(self, backend=None):
-        self.backend = backend
+    # XXX Consider merging MpdDispatcher into MpdSession
+
+    def __init__(self, session):
+        self.session = session
+
+        # TODO-PYKKA: Get reference to backend in a more generic way
+        backend_refs = ActorRegistry.get_by_class_name('SpotifyBackend')
+        self.backend = ActorProxy(backend_refs[0])
+
         self.command_list = False
         self.command_list_ok = False
 

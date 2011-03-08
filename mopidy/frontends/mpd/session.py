@@ -3,6 +3,7 @@ import logging
 import multiprocessing
 
 from mopidy import settings
+from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR, VERSION
 from mopidy.utils.log import indent
 
@@ -10,8 +11,8 @@ logger = logging.getLogger('mopidy.frontends.mpd.session')
 
 class MpdSession(asynchat.async_chat):
     """
-    The MPD client session. Keeps track of a single client and passes its
-    MPD requests to the dispatcher.
+    The MPD client session. Keeps track of a single client session. Any
+    requests from the client is passed on to the MPD request dispatcher.
     """
 
     def __init__(self, server, client_socket, client_socket_address):
@@ -22,6 +23,7 @@ class MpdSession(asynchat.async_chat):
         self.input_buffer = []
         self.authenticated = False
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
+        self.dispatcher = MpdDispatcher(self)
 
     def start(self):
         """Start a new client session."""
@@ -50,7 +52,7 @@ class MpdSession(asynchat.async_chat):
             if response is not None:
                 self.send_response(response)
                 return
-        # TODO-PYKKA: Process request using MpdDispatcher/backend
+        response = self.dispatcher.handle_request(request)
         if response is not None:
             self.handle_response(response)
 
