@@ -21,13 +21,11 @@ class MpdFrontend(ThreadingActor, BaseFrontend):
     """
 
     def __init__(self):
-        # TODO-PYKKA: Do setup after actor starts?
+        self._thread = None
+
+    def post_start(self):
         self._thread = MpdThread()
         self._thread.start()
-
-    def destroy(self):
-        """Destroys the MPD server."""
-        self._thread.destroy()
 
 
 class MpdThread(BaseThread):

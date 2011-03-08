@@ -75,10 +75,7 @@ class NadTalker(ThreadingActor):
     def __init__(self):
         self._device = None
 
-        # TODO-PYKKA: Do after actor starts?
-        self._setup()
-
-    def _setup(self):
+    def post_start(self):
         self._open_connection()
         self._set_device_to_known_state()
 

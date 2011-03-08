@@ -25,20 +25,15 @@ class DenonMixer(ThreadingActor, BaseMixer):
     - :attr:`mopidy.settings.MIXER_EXT_PORT` -- Example: ``/dev/ttyUSB0``
     """
 
-    def __init__(self):
-        """
-        Connects using the serial specifications from Denon's RS-232 Protocol
-        specification: 9600bps 8N1.
-        """
-        # TODO-PYKKA: Do setup after actor starts?
-        device = kwargs.get('device', None)
-        if device:
-            self._device = device
-        else:
-            from serial import Serial
-            self._device = Serial(port=settings.MIXER_EXT_PORT, timeout=0.2)
+    def __init__(self, *args, **kwargs):
+        self._device = kwargs.get('device', None)
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0
+
+    def post_start(self):
+        if self._device is None:
+            from serial import Serial
+            self._device = Serial(port=settings.MIXER_EXT_PORT, timeout=0.2)
 
     def _get_volume(self):
         self._ensure_open_device()

@@ -61,7 +61,9 @@ class SpotifyBackend(ThreadingActor, Backend):
 
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
 
-        # TODO-PYKKA: Do setup after actor starts?
+        self.spotify = None
+
+    def post_start(self):
         self.spotify = self._connect()
 
     def _connect(self):
