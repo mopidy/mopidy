@@ -40,7 +40,7 @@ class NadMixer(ThreadingActor, BaseMixer):
 
     def __init__(self):
         self._volume_cache = None
-        self._nad_talker = NadTalker.start_proxy()
+        self._nad_talker = NadTalker.start().proxy()
 
     def _get_volume(self):
         return self._volume_cache

@@ -51,19 +51,19 @@ def setup_gobject_loop():
     return gobject_loop
 
 def setup_output():
-    return get_class(settings.OUTPUT).start_proxy()
+    return get_class(settings.OUTPUT).start().proxy()
 
 def setup_mixer():
-    return get_class(settings.MIXER).start_proxy()
+    return get_class(settings.MIXER).start().proxy()
 
 def setup_backend():
-    return get_class(settings.BACKENDS[0]).start_proxy()
+    return get_class(settings.BACKENDS[0]).start().proxy()
 
 def setup_frontends():
     frontends = []
     for frontend_class_name in settings.FRONTENDS:
         try:
-            frontend = get_class(frontend_class_name).start_proxy()
+            frontend = get_class(frontend_class_name).start().proxy()
             frontends.append(frontend)
         except OptionalDependencyError as e:
             logger.info(u'Disabled: %s (%s)', frontend_class_name, e)
