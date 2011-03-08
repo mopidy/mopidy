@@ -4,6 +4,8 @@ import multiprocessing
 import os
 import shutil
 
+from pykka.actor import ThreadingActor
+
 from mopidy import settings
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, BaseLibraryProvider, PlaybackController,
@@ -16,7 +18,7 @@ from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
 
-class LocalBackend(Backend):
+class LocalBackend(ThreadingActor, Backend):
     """
     A backend for playing music from a local music archive.
 

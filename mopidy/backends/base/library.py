@@ -10,6 +10,8 @@ class LibraryController(object):
     :type provider: instance of :class:`BaseLibraryProvider`
     """
 
+    pykka_traversable = True
+
     def __init__(self, backend, provider):
         self.backend = backend
         self.provider = provider

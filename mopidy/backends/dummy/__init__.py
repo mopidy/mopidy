@@ -1,3 +1,5 @@
+from pykka.actor import ThreadingActor
+
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     PlaybackController, BasePlaybackProvider, LibraryController,
     BaseLibraryProvider, StoredPlaylistsController,
@@ -5,15 +7,7 @@ from mopidy.backends.base import (Backend, CurrentPlaylistController,
 from mopidy.models import Playlist
 
 
-class DummyQueue(object):
-    def __init__(self):
-        self.received_messages = []
-
-    def put(self, message):
-        self.received_messages.append(message)
-
-
-class DummyBackend(Backend):
+class DummyBackend(ThreadingActor, Backend):
     """
     A backend which implements the backend API in the simplest way possible.
     Used in tests of the frontends.
@@ -23,8 +17,6 @@ class DummyBackend(Backend):
 
     def __init__(self, *args, **kwargs):
         super(DummyBackend, self).__init__(*args, **kwargs)
-
-        self.core_queue = DummyQueue()
 
         self.current_playlist = CurrentPlaylistController(backend=self)
 

@@ -15,6 +15,8 @@ class PlaybackController(object):
     # pylint: disable = R0902
     # Too many instance attributes
 
+    pykka_traversable = True
+
     #: Constant representing the paused state.
     PAUSED = u'paused'
 
@@ -461,6 +463,7 @@ class PlaybackController(object):
         For internal use only. Should be called by the backend directly after a
         track has started playing.
         """
+        return # TODO-PYKKA Send started_playing event to interested parties
         if self.current_track is not None:
             self.backend.core_queue.put({
                 'to': 'frontend',
@@ -476,6 +479,7 @@ class PlaybackController(object):
         is stopped playing, e.g. at the next, previous, and stop actions and at
         end-of-track.
         """
+        return # TODO-PYKKA Send stopped_playing event to interested parties
         if self.current_track is not None:
             self.backend.core_queue.put({
                 'to': 'frontend',

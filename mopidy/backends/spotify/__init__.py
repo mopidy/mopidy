@@ -1,5 +1,7 @@
 import logging
 
+from pykka.actor import ThreadingActor
+
 from mopidy import settings
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, PlaybackController, StoredPlaylistsController)
@@ -8,7 +10,7 @@ logger = logging.getLogger('mopidy.backends.spotify')
 
 ENCODING = 'utf-8'
 
-class SpotifyBackend(Backend):
+class SpotifyBackend(ThreadingActor, Backend):
     """
     A backend for playing music from the `Spotify <http://www.spotify.com/>`_
     music streaming service. The backend uses the official `libspotify
@@ -59,6 +61,7 @@ class SpotifyBackend(Backend):
 
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
 
+        # TODO-PYKKA: Do setup after actor starts?
         self.spotify = self._connect()
 
     def _connect(self):
