@@ -7,6 +7,7 @@ from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 from pykka.registry import ActorRegistry
 
 from mopidy import get_version, settings
+from mopidy.backends.base import Backend
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 from mopidy.outputs.base import BaseOutput
@@ -28,15 +29,24 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         BaseThread.__init__(self)
         self.name = 'SpotifySMThread'
 
-        output_refs = ActorRegistry.get_by_class(BaseOutput)
-        assert len(output_refs) == 1, 'Expected exactly one running output.'
-        self.output = output_refs[0].proxy()
+        self.output = None
+        self.backend = None
 
         self.connected = threading.Event()
         self.session = None
 
     def run_inside_try(self):
+        self.setup()
         self.connect()
+
+    def setup(self):
+        output_refs = ActorRegistry.get_by_class(BaseOutput)
+        assert len(output_refs) == 1, 'Expected exactly one running output.'
+        self.output = output_refs[0].proxy()
+
+        backend_refs = ActorRegistry.get_by_class(Backend)
+        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+        self.backend = backend_refs[0].proxy()
 
     def logged_in(self, session, error):
         """Callback used by pyspotify"""
@@ -94,7 +104,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
         logger.debug(u'Play token lost')
-        # TODO-PYKKA: Send 'stop_playback' to backend
+        self.backend.playback.pause()
 
     def log_message(self, session, data):
         """Callback used by pyspotify"""
@@ -113,7 +123,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             playlists.append(
                 SpotifyTranslator.to_mopidy_playlist(spotify_playlist))
         playlists = filter(None, playlists)
-        # TODO-PYKKA: Set stored_playlists on backend
+        self.backend.stored_playlists = playlists
         logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
 
     def search(self, query, connection):
