@@ -2,6 +2,10 @@ import logging
 import random
 import time
 
+from pykka.registry import ActorRegistry
+
+from mopidy.frontends.base import BaseFrontend
+
 logger = logging.getLogger('mopidy.backends.base')
 
 class PlaybackController(object):
@@ -463,10 +467,11 @@ class PlaybackController(object):
         For internal use only. Should be called by the backend directly after a
         track has started playing.
         """
-        return # TODO-PYKKA Send started_playing event to interested parties
-        if self.current_track is not None:
-            self.backend.core_queue.put({
-                'to': 'frontend',
+        if self.current_track is None:
+            return
+        frontend_refs = ActorRegistry.get_by_class(BaseFrontend)
+        for frontend_ref in frontend_refs:
+            frontend_ref.send_one_way({
                 'command': 'started_playing',
                 'track': self.current_track,
             })
@@ -479,10 +484,11 @@ class PlaybackController(object):
         is stopped playing, e.g. at the next, previous, and stop actions and at
         end-of-track.
         """
-        return # TODO-PYKKA Send stopped_playing event to interested parties
-        if self.current_track is not None:
-            self.backend.core_queue.put({
-                'to': 'frontend',
+        if self.current_track is None:
+            return
+        frontend_refs = ActorRegistry.get_by_class(BaseFrontend)
+        for frontend_ref in frontend_refs:
+            frontend_ref.send_one_way({
                 'command': 'stopped_playing',
                 'track': self.current_track,
                 'stop_position': self.time_position,

@@ -58,6 +58,14 @@ class LastfmFrontend(ThreadingActor, BaseFrontend):
             logger.error(u'Error during Last.fm setup: %s', e)
             self.stop()
 
+    def react(self, message):
+        if message.get('command') == 'started_playing':
+            self.started_playing(message['track'])
+        elif message.get('command') == 'stopped_playing':
+            self.stopped_playing(message['track'], message['stop_position'])
+        else:
+            pass # Ignore any other messages
+
     def started_playing(self, track):
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0

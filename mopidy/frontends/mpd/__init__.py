@@ -27,6 +27,9 @@ class MpdFrontend(ThreadingActor, BaseFrontend):
         self._thread = MpdThread()
         self._thread.start()
 
+    def react(self, message):
+        pass # Ignore any messages
+
 
 class MpdThread(BaseThread):
     def __init__(self):
