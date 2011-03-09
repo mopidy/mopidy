@@ -12,7 +12,6 @@ from mopidy.backends.base import (Backend, CurrentPlaylistController,
     BasePlaybackProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
-from mopidy.utils.process import pickle_connection
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
