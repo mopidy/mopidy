@@ -1,16 +1,19 @@
 from pykka.actor import ThreadingActor
-from pykka.proxy import ActorProxy
 from pykka.registry import ActorRegistry
 
 from mopidy.mixers.base import BaseMixer
+from mopidy.outputs.base import BaseOutput
 
 class GStreamerSoftwareMixer(ThreadingActor, BaseMixer):
     """Mixer which uses GStreamer to control volume in software."""
 
     def __init__(self):
-        # TODO-PYKKA Get reference to output without hardcoding GStreamerOutput
-        output_refs = ActorRegistry.get_by_class_name('GStreamerOutput')
-        self.output = ActorProxy(output_refs[0])
+        self.output = None
+
+    def post_start(self):
+        output_refs = ActorRegistry.get_by_class(BaseOutput)
+        assert len(output_refs) == 1, 'Expected exactly one running output.'
+        self.output = output_refs[0].proxy()
 
     def _get_volume(self):
         return self.output.get_volume().get()

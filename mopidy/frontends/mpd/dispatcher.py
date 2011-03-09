@@ -1,8 +1,8 @@
 import re
 
-from pykka.proxy import ActorProxy
 from pykka.registry import ActorRegistry
 
+from mopidy.backends.base import Backend
 from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
     MpdUnknownCommand)
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
@@ -27,9 +27,9 @@ class MpdDispatcher(object):
     def __init__(self, session):
         self.session = session
 
-        # TODO-PYKKA: Get reference to backend in a more generic way
-        backend_refs = ActorRegistry.get_by_class_name('SpotifyBackend')
-        self.backend = ActorProxy(backend_refs[0])
+        backend_refs = ActorRegistry.get_by_class(Backend)
+        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+        self.backend = backend_refs[0].proxy()
 
         self.command_list = False
         self.command_list_ok = False

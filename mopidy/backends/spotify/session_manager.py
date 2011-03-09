@@ -5,11 +5,11 @@ import threading
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from pykka.registry import ActorRegistry
-from pykka.proxy import ActorProxy
 
 from mopidy import get_version, settings
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
+from mopidy.outputs.base import BaseOutput
 from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.backends.spotify.session_manager')
@@ -28,9 +28,9 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         BaseThread.__init__(self)
         self.name = 'SpotifySMThread'
 
-        # TODO-PYKKA Get reference to output without hardcoding GStreamerOutput
-        output_refs = ActorRegistry.get_by_class_name('GStreamerOutput')
-        self.output = ActorProxy(output_refs[0])
+        output_refs = ActorRegistry.get_by_class(BaseOutput)
+        assert len(output_refs) == 1, 'Expected exactly one running output.'
+        self.output = output_refs[0].proxy()
 
         self.connected = threading.Event()
         self.session = None
