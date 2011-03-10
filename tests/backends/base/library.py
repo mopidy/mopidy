@@ -1,4 +1,3 @@
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track, Album, Artist
 
 from tests import SkipTest, data_folder
@@ -15,11 +14,8 @@ class LibraryControllerTest(object):
         Track()]
 
     def setUp(self):
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.backend = self.backend_class()
         self.library = self.backend.library
-
-    def tearDown(self):
-        self.backend.destroy()
 
     def test_refresh(self):
         self.library.refresh()

@@ -74,11 +74,11 @@ Running tests
 To run tests, you need a couple of dependencies. They can be installed through
 Debian/Ubuntu package management::
 
-    sudo aptitude install python-coverage python-nose
+    sudo aptitude install python-coverage python-mock python-nose
 
 Or, they can be installed using ``pip``::
 
-    sudo pip install -r requirements-tests.txt
+    sudo pip install -r requirements/tests.txt
 
 Then, to run all tests, go to the project directory and run::
 

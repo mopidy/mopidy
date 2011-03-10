@@ -5,6 +5,7 @@ import os
 import shutil
 
 from pykka.actor import ThreadingActor
+from pykka.registry import ActorRegistry
 
 from mopidy import settings
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
@@ -12,6 +13,7 @@ from mopidy.backends.base import (Backend, CurrentPlaylistController,
     BasePlaybackProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
+from mopidy.outputs.base import BaseOutput
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
@@ -48,6 +50,13 @@ class LocalBackend(ThreadingActor, Backend):
             provider=stored_playlists_provider)
 
         self.uri_handlers = [u'file://']
+
+        self.output = None
+
+    def post_start(self):
+        output_refs = ActorRegistry.get_by_class(BaseOutput)
+        assert len(output_refs) == 1, 'Expected exactly one running output.'
+        self.output = output_refs[0].proxy()
 
 
 class LocalPlaybackController(PlaybackController):

@@ -1,6 +1,8 @@
+from pykka.actor import ThreadingActor
+
 from mopidy.outputs.base import BaseOutput
 
-class DummyOutput(BaseOutput):
+class DummyOutput(ThreadingActor, BaseOutput):
     """
     Audio output used for testing.
     """

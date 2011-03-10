@@ -1,10 +1,10 @@
+import mock
 import multiprocessing
 import random
 import time
 
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
-from mopidy.outputs.dummy import DummyOutput
+from mopidy.outputs.base import BaseOutput
 
 from tests import SkipTest
 from tests.backends.base import populate_playlist
@@ -15,10 +15,8 @@ class PlaybackControllerTest(object):
     tracks = []
 
     def setUp(self):
-        self.core_queue = multiprocessing.Queue()
-        self.output = DummyOutput(self.core_queue)
-        self.backend = self.backend_class(
-            self.core_queue, self.output, DummyMixer)
+        self.backend = self.backend_class()
+        self.backend.output = mock.Mock(spec=BaseOutput)
         self.playback = self.backend.playback
         self.current_playlist = self.backend.current_playlist
 
@@ -26,10 +24,6 @@ class PlaybackControllerTest(object):
             'Need at least three tracks to run tests.'
         assert self.tracks[0].length >= 2000, \
             'First song needs to be at least 2000 miliseconds'
-
-    def tearDown(self):
-        self.backend.destroy()
-        self.output.destroy()
 
     def test_initial_state_is_stopped(self):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
@@ -733,10 +727,12 @@ class PlaybackControllerTest(object):
         self.assertEqual(self.playback.stop(), None)
 
     def test_time_position_when_stopped(self):
+        self.backend.output.get_position = mock.Mock(return_value=0)
         self.assertEqual(self.playback.time_position, 0)
 
     @populate_playlist
     def test_time_position_when_stopped_with_playlist(self):
+        self.backend.output.get_position = mock.Mock(return_value=0)
         self.assertEqual(self.playback.time_position, 0)
 
     @SkipTest # Uses sleep and does not work with LocalBackend+DummyOutput
