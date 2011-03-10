@@ -11,7 +11,7 @@ class BaseMixerTest(object):
         assert self.mixer_class is not None, \
             "mixer_class must be set in subclass"
         # pylint: disable = E1102
-        self.mixer = self.mixer_class(None)
+        self.mixer = self.mixer_class()
         # pylint: enable = E1102
 
     def test_initial_volume(self):
