@@ -13,6 +13,7 @@ from mopidy.frontends.mpd.protocol import (audio_output, command_list,
     connection, current_playlist, empty, music_db, playback, reflection,
     status, stickers, stored_playlists)
 # pylint: enable = W0611
+from mopidy.mixers.base import BaseMixer
 from mopidy.utils import flatten
 
 class MpdDispatcher(object):
@@ -28,6 +29,10 @@ class MpdDispatcher(object):
         backend_refs = ActorRegistry.get_by_class(Backend)
         assert len(backend_refs) == 1, 'Expected exactly one running backend.'
         self.backend = backend_refs[0].proxy()
+
+        mixer_refs = ActorRegistry.get_by_class(BaseMixer)
+        assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
+        self.mixer = mixer_refs[0].proxy()
 
         self.command_list = False
         self.command_list_ok = False
