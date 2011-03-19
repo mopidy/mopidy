@@ -66,7 +66,7 @@ def listplaylists(frontend):
         Last-Modified: 2010-02-06T02:11:08Z
     """
     result = []
-    for playlist in frontend.backend.stored_playlists.playlists:
+    for playlist in frontend.backend.stored_playlists.playlists.get():
         result.append((u'playlist', playlist.name))
         last_modified = (playlist.last_modified or
             dt.datetime.now()).isoformat()
