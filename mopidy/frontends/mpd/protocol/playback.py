@@ -1,3 +1,4 @@
+from mopidy.backends.base import PlaybackController
 from mopidy.frontends.mpd.protocol import handle_pattern
 from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
@@ -86,7 +87,7 @@ def next_(frontend):
           order as the first time.
 
     """
-    return frontend.backend.playback.next()
+    return frontend.backend.playback.next().get()
 
 @handle_pattern(r'^pause$')
 @handle_pattern(r'^pause "(?P<state>[01])"$')
@@ -103,11 +104,11 @@ def pause(frontend, state=None):
     - Calls ``pause`` without any arguments to toogle pause.
     """
     if state is None:
-        if (frontend.backend.playback.state ==
-                frontend.backend.playback.PLAYING):
+        if (frontend.backend.playback.state.get() ==
+                PlaybackController.PLAYING):
             frontend.backend.playback.pause()
-        elif (frontend.backend.playback.state ==
-                frontend.backend.playback.PAUSED):
+        elif (frontend.backend.playback.state.get() ==
+                PlaybackController.PAUSED):
             frontend.backend.playback.resume()
     elif int(state):
         frontend.backend.playback.pause()
@@ -120,7 +121,7 @@ def play(frontend):
     The original MPD server resumes from the paused state on ``play``
     without arguments.
     """
-    return frontend.backend.playback.play()
+    return frontend.backend.playback.play().get()
 
 @handle_pattern(r'^playid "(?P<cpid>\d+)"$')
 @handle_pattern(r'^playid "(?P<cpid>-1)"$')
@@ -145,8 +146,8 @@ def playid(frontend, cpid):
     if cpid == -1:
         return _play_minus_one(frontend)
     try:
-        cp_track = frontend.backend.current_playlist.get(cpid=cpid)
-        return frontend.backend.playback.play(cp_track)
+        cp_track = frontend.backend.current_playlist.get(cpid=cpid).get()
+        return frontend.backend.playback.play(cp_track).get()
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'playid')
 
@@ -177,22 +178,22 @@ def playpos(frontend, songpos):
     if songpos == -1:
         return _play_minus_one(frontend)
     try:
-        cp_track = frontend.backend.current_playlist.cp_tracks[songpos]
-        return frontend.backend.playback.play(cp_track)
+        cp_track = frontend.backend.current_playlist.cp_tracks.get()[songpos]
+        return frontend.backend.playback.play(cp_track).get()
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'play')
 
 def _play_minus_one(frontend):
-    if (frontend.backend.playback.state == frontend.backend.playback.PLAYING):
+    if (frontend.backend.playback.state.get() == PlaybackController.PLAYING):
         return # Nothing to do
-    elif (frontend.backend.playback.state == frontend.backend.playback.PAUSED):
-        return frontend.backend.playback.resume()
-    elif frontend.backend.playback.current_cp_track is not None:
-        cp_track = frontend.backend.playback.current_cp_track
-        return frontend.backend.playback.play(cp_track)
-    elif frontend.backend.current_playlist.cp_tracks:
-        cp_track = frontend.backend.current_playlist.cp_tracks[0]
-        return frontend.backend.playback.play(cp_track)
+    elif (frontend.backend.playback.state.get() == PlaybackController.PAUSED):
+        return frontend.backend.playback.resume().get()
+    elif frontend.backend.playback.current_cp_track.get() is not None:
+        cp_track = frontend.backend.playback.current_cp_track.get()
+        return frontend.backend.playback.play(cp_track).get()
+    elif frontend.backend.current_playlist.cp_tracks.get():
+        cp_track = frontend.backend.current_playlist.cp_tracks.get()[0]
+        return frontend.backend.playback.play(cp_track).get()
     else:
         return # Fail silently
 
@@ -240,7 +241,7 @@ def previous(frontend):
           ``previous`` should do a seek to time position 0.
 
     """
-    return frontend.backend.playback.previous()
+    return frontend.backend.playback.previous().get()
 
 @handle_pattern(r'^random (?P<state>[01])$')
 @handle_pattern(r'^random "(?P<state>[01])"$')
@@ -351,7 +352,7 @@ def setvol(frontend, volume):
         volume = 0
     if volume > 100:
         volume = 100
-    frontend.backend.mixer.volume = volume
+    frontend.mixer.volume = volume
 
 @handle_pattern(r'^single (?P<state>[01])$')
 @handle_pattern(r'^single "(?P<state>[01])"$')
