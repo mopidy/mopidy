@@ -501,6 +501,8 @@ class BasePlaybackProvider(object):
     :type backend: :class:`mopidy.backends.base.Backend`
     """
 
+    pykka_traversable = True
+
     def __init__(self, backend):
         self.backend = backend
 
