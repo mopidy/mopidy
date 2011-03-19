@@ -17,9 +17,6 @@ class Backend(object):
     # :class:`mopidy.backends.base.LibraryController`.
     library = None
 
-    #: The sound mixer. An instance of :class:`mopidy.mixers.BaseMixer`.
-    mixer = None
-
     #: The playback controller. An instance of
     #: :class:`mopidy.backends.base.PlaybackController`.
     playback = None
