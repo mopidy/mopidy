@@ -24,9 +24,7 @@ class MpdDispatcher(object):
 
     # XXX Consider merging MpdDispatcher into MpdSession
 
-    def __init__(self, session):
-        self.session = session
-
+    def __init__(self):
         backend_refs = ActorRegistry.get_by_class(Backend)
         assert len(backend_refs) == 1, 'Expected exactly one running backend.'
         self.backend = backend_refs[0].proxy()
