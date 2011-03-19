@@ -18,26 +18,31 @@ class IssueGH17RegressionTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.backend = DummyBackend(mixer_class=DummyMixer)
+        self.backend = DummyBackend.start().proxy()
         self.backend.current_playlist.append([
             Track(uri='a'), Track(uri='b'), None,
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
-        self.mpd = dispatcher.MpdDispatcher(backend=self.backend)
+        self.mixer = DummyMixer.start().proxy()
+        self.mpd = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.backend.stop().get()
+        self.mixer.stop().get()
 
     def test(self):
         random.seed(1) # Playlist order: abcfde
         self.mpd.handle_request(u'play')
-        self.assertEquals('a', self.backend.playback.current_track.uri)
+        self.assertEquals('a', self.backend.playback.current_track.get().uri)
         self.mpd.handle_request(u'random "1"')
         self.mpd.handle_request(u'next')
-        self.assertEquals('b', self.backend.playback.current_track.uri)
+        self.assertEquals('b', self.backend.playback.current_track.get().uri)
         self.mpd.handle_request(u'next')
         # Should now be at track 'c', but playback fails and it skips ahead
-        self.assertEquals('f', self.backend.playback.current_track.uri)
+        self.assertEquals('f', self.backend.playback.current_track.get().uri)
         self.mpd.handle_request(u'next')
-        self.assertEquals('d', self.backend.playback.current_track.uri)
+        self.assertEquals('d', self.backend.playback.current_track.get().uri)
         self.mpd.handle_request(u'next')
-        self.assertEquals('e', self.backend.playback.current_track.uri)
+        self.assertEquals('e', self.backend.playback.current_track.get().uri)
 
 
 class IssueGH18RegressionTest(unittest.TestCase):
@@ -52,11 +57,16 @@ class IssueGH18RegressionTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.backend = DummyBackend(mixer_class=DummyMixer)
+        self.backend = DummyBackend.start().proxy()
         self.backend.current_playlist.append([
             Track(uri='a'), Track(uri='b'), Track(uri='c'),
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
-        self.mpd = dispatcher.MpdDispatcher(backend=self.backend)
+        self.mixer = DummyMixer.start().proxy()
+        self.mpd = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.backend.stop().get()
+        self.mixer.stop().get()
 
     def test(self):
         random.seed(1)
@@ -67,11 +77,11 @@ class IssueGH18RegressionTest(unittest.TestCase):
         self.mpd.handle_request(u'next')
 
         self.mpd.handle_request(u'next')
-        cp_track_1 = self.backend.playback.current_cp_track
+        cp_track_1 = self.backend.playback.current_cp_track.get()
         self.mpd.handle_request(u'next')
-        cp_track_2 = self.backend.playback.current_cp_track
+        cp_track_2 = self.backend.playback.current_cp_track.get()
         self.mpd.handle_request(u'next')
-        cp_track_3 = self.backend.playback.current_cp_track
+        cp_track_3 = self.backend.playback.current_cp_track.get()
 
         self.assertNotEqual(cp_track_1, cp_track_2)
         self.assertNotEqual(cp_track_2, cp_track_3)
@@ -91,11 +101,16 @@ class IssueGH22RegressionTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.backend = DummyBackend(mixer_class=DummyMixer)
+        self.backend = DummyBackend.start().proxy()
         self.backend.current_playlist.append([
             Track(uri='a'), Track(uri='b'), Track(uri='c'),
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
-        self.mpd = dispatcher.MpdDispatcher(backend=self.backend)
+        self.mixer = DummyMixer.start().proxy()
+        self.mpd = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.backend.stop().get()
+        self.mixer.stop().get()
 
     def test(self):
         random.seed(1)
