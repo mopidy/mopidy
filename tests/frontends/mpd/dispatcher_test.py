@@ -4,12 +4,14 @@ from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import dispatcher
 from mopidy.frontends.mpd.exceptions import MpdAckError
 from mopidy.frontends.mpd.protocol import request_handlers, handle_pattern
-from mopidy.mixers.dummy import DummyMixer
 
 class MpdDispatcherTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
