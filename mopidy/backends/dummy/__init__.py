@@ -38,13 +38,13 @@ class DummyBackend(ThreadingActor, Backend):
 class DummyLibraryProvider(BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)
-        self._library = []
+        self.dummy_library = []
 
     def find_exact(self, **query):
         return Playlist()
 
     def lookup(self, uri):
-        matches = filter(lambda t: uri == t.uri, self._library)
+        matches = filter(lambda t: uri == t.uri, self.dummy_library)
         if matches:
             return matches[0]
 
