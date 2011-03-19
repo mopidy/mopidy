@@ -1,6 +1,6 @@
+from mopidy.backends.base import PlaybackController
 from mopidy.frontends.mpd.protocol import handle_pattern
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
-from mopidy.backends.base import PlaybackController
 
 @handle_pattern(r'^clearerror$')
 def clearerror(frontend):
@@ -24,10 +24,11 @@ def currentsong(frontend):
         Displays the song info of the current song (same song that is
         identified in status).
     """
-    if frontend.backend.playback.current_track is not None:
-        return frontend.backend.playback.current_track.mpd_format(
-            position=frontend.backend.playback.current_playlist_position,
-            cpid=frontend.backend.playback.current_cpid)
+    current_cp_track = frontend.backend.playback.current_cp_track.get()
+    if current_cp_track is not None:
+        return current_cp_track[1].mpd_format(
+            position=frontend.backend.playback.current_playlist_position.get(),
+            cpid=current_cp_track[0])
 
 @handle_pattern(r'^idle$')
 @handle_pattern(r'^idle (?P<subsystems>.+)$')
@@ -141,19 +142,20 @@ def status(frontend):
         ('xfade', _status_xfade(frontend)),
         ('state', _status_state(frontend)),
     ]
-    if frontend.backend.playback.current_track is not None:
+    if frontend.backend.playback.current_track.get() is not None:
         result.append(('song', _status_songpos(frontend)))
         result.append(('songid', _status_songid(frontend)))
-    if frontend.backend.playback.state in (frontend.backend.playback.PLAYING,
-            frontend.backend.playback.PAUSED):
+    if frontend.backend.playback.state.get() in (PlaybackController.PLAYING,
+            PlaybackController.PAUSED):
         result.append(('time', _status_time(frontend)))
         result.append(('elapsed', _status_time_elapsed(frontend)))
         result.append(('bitrate', _status_bitrate(frontend)))
     return result
 
 def _status_bitrate(frontend):
-    if frontend.backend.playback.current_track is not None:
-        return frontend.backend.playback.current_track.get().bitrate
+    current_track = frontend.backend.playback.current_track.get()
+    if current_track is not None:
+        return current_track.bitrate
 
 def _status_consume(frontend):
     if frontend.backend.playback.consume.get():
@@ -177,8 +179,9 @@ def _status_single(frontend):
     return int(frontend.backend.playback.single.get())
 
 def _status_songid(frontend):
-    if frontend.backend.playback.current_cpid is not None:
-        return frontend.backend.playback.current_cpid
+    current_cpid = frontend.backend.playback.current_cpid.get()
+    if current_cpid is not None:
+        return current_cpid
     else:
         return _status_songpos(frontend)
 
