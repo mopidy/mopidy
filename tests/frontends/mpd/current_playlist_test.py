@@ -2,15 +2,18 @@ import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import dispatcher
+from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
 
 class CurrentPlaylistHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
         self.h = dispatcher.MpdDispatcher()
 
     def tearDown(self):
         self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_add(self):
         needle = Track(uri='dummy://foo')

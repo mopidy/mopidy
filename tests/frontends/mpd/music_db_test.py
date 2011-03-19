@@ -2,14 +2,17 @@ import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import dispatcher
+from mopidy.mixers.dummy import DummyMixer
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
         self.h = dispatcher.MpdDispatcher()
 
     def tearDown(self):
         self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_count(self):
         result = self.h.handle_request(u'count "tag" "needle"')
@@ -68,10 +71,12 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 class MusicDatabaseFindTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
         self.h = dispatcher.MpdDispatcher()
 
     def tearDown(self):
         self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_find_album(self):
         result = self.h.handle_request(u'find "album" "what"')
@@ -123,10 +128,12 @@ class MusicDatabaseFindTest(unittest.TestCase):
 class MusicDatabaseListTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
         self.h = dispatcher.MpdDispatcher()
 
     def tearDown(self):
         self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_list_foo_returns_ack(self):
         result = self.h.handle_request(u'list "foo"')
@@ -317,10 +324,12 @@ class MusicDatabaseListTest(unittest.TestCase):
 class MusicDatabaseSearchTest(unittest.TestCase):
     def setUp(self):
         self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
         self.h = dispatcher.MpdDispatcher()
 
     def tearDown(self):
         self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_search_album(self):
         result = self.h.handle_request(u'search "album" "analbum"')
