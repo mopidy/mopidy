@@ -6,8 +6,13 @@ from mopidy.mixers.dummy import DummyMixer
 
 class CommandListsTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_command_list_begin(self):
         result = self.h.handle_request(u'command_list_begin')
