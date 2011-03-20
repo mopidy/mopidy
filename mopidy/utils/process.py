@@ -1,5 +1,5 @@
 import logging
-import multiprocessing.dummy
+import threading
 
 import gobject
 gobject.threads_init()
@@ -9,7 +9,7 @@ from mopidy import SettingsError
 logger = logging.getLogger('mopidy.utils.process')
 
 
-class BaseThread(multiprocessing.dummy.Process):
+class BaseThread(threading.Thread):
     def __init__(self):
         super(BaseThread, self).__init__()
         # No thread should block process from exiting
