@@ -727,12 +727,18 @@ class PlaybackControllerTest(object):
         self.assertEqual(self.playback.stop(), None)
 
     def test_time_position_when_stopped(self):
-        self.backend.output.get_position = mock.Mock(return_value=0)
+        future = mock.Mock()
+        future.get = mock.Mock(return_value=0)
+        self.backend.output.get_position = mock.Mock(return_value=future)
+
         self.assertEqual(self.playback.time_position, 0)
 
     @populate_playlist
     def test_time_position_when_stopped_with_playlist(self):
-        self.backend.output.get_position = mock.Mock(return_value=0)
+        future = mock.Mock()
+        future.get = mock.Mock(return_value=0)
+        self.backend.output.get_position = mock.Mock(return_value=future)
+
         self.assertEqual(self.playback.time_position, 0)
 
     @SkipTest # Uses sleep and does not work with LocalBackend+DummyOutput
