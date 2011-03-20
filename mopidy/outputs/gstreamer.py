@@ -5,8 +5,10 @@ import gst
 import logging
 
 from pykka.actor import ThreadingActor
+from pykka.registry import ActorRegistry
 
 from mopidy import settings
+from mopidy.backends.base import Backend
 from mopidy.outputs.base import BaseOutput
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
@@ -74,14 +76,19 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         """Process messages from GStreamer."""
         if message.type == gst.MESSAGE_EOS:
             logger.debug(u'GStreamer signalled end-of-stream. '
-                'Sending end_of_track to core_queue ...')
-            self.core_queue.put({'command': 'end_of_track'})
+                'Telling backend ...')
+            self._get_backend().playback.on_end_of_track()
         elif message.type == gst.MESSAGE_ERROR:
             self.set_state('NULL')
             error, debug = message.parse_error()
             logger.error(u'%s %s', error, debug)
             # FIXME Should we send 'stop_playback' to the backend here? Can we
             # differentiate on how serious the error is?
+
+    def _get_backend(self):
+        backend_refs = ActorRegistry.get_by_class(Backend)
+        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+        return backend_refs[0].proxy()
 
     def play_uri(self, uri):
         """Play audio at URI"""
