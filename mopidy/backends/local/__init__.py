@@ -67,24 +67,24 @@ class LocalPlaybackController(PlaybackController):
 
     @property
     def time_position(self):
-        return self.backend.output.get_position()
+        return self.backend.output.get_position().get()
 
 
 class LocalPlaybackProvider(BasePlaybackProvider):
     def pause(self):
-        return self.backend.output.set_state('PAUSED')
+        return self.backend.output.set_state('PAUSED').get()
 
     def play(self, track):
-        return self.backend.output.play_uri(track.uri)
+        return self.backend.output.play_uri(track.uri).get()
 
     def resume(self):
-        return self.backend.output.set_state('PLAYING')
+        return self.backend.output.set_state('PLAYING').get()
 
     def seek(self, time_position):
-        return self.backend.output.set_position(time_position)
+        return self.backend.output.set_position(time_position).get()
 
     def stop(self):
-        return self.backend.output.set_state('READY')
+        return self.backend.output.set_state('READY').get()
 
 
 class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
