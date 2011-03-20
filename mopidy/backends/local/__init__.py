@@ -1,6 +1,5 @@
 import glob
 import logging
-import multiprocessing
 import os
 import shutil
 

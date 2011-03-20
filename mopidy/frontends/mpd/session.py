@@ -1,6 +1,5 @@
 import asynchat
 import logging
-import multiprocessing
 
 from mopidy import settings
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher

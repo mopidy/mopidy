@@ -1,6 +1,5 @@
 import logging
-from serial import Serial
-from multiprocessing import Pipe
+import serial
 
 from pykka.actor import ThreadingActor
 
@@ -84,8 +83,8 @@ class NadTalker(ThreadingActor):
         # Communication settings: 115200 bps 8N1
         logger.info(u'Connecting to serial device "%s"',
             settings.MIXER_EXT_PORT)
-        self._device = Serial(port=settings.MIXER_EXT_PORT, baudrate=115200,
-            timeout=self.TIMEOUT)
+        self._device = serial.Serial(port=settings.MIXER_EXT_PORT,
+            baudrate=115200, timeout=self.TIMEOUT)
         self._get_device_model()
 
     def _set_device_to_known_state(self):

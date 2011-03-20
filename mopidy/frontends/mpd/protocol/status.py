@@ -92,8 +92,7 @@ def stats(frontend):
         'artists': 0, # TODO
         'albums': 0, # TODO
         'songs': 0, # TODO
-        # TODO Does not work after multiprocessing branch merge
-        'uptime': 0, # frontend.session.stats_uptime(),
+        'uptime': 0, # TODO
         'db_playtime': 0, # TODO
         'db_update': 0, # TODO
         'playtime': 0, # TODO
