@@ -5,7 +5,6 @@ from pykka.actor import ThreadingActor
 
 from mopidy import settings
 from mopidy.mixers.base import BaseMixer
-from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.mixers.nad')
 

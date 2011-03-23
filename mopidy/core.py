@@ -1,6 +1,5 @@
 import logging
 import optparse
-import sys
 
 from mopidy import get_version, settings, OptionalDependencyError
 from mopidy.utils import get_class

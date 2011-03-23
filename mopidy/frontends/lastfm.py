@@ -11,7 +11,6 @@ from pykka.actor import ThreadingActor
 
 from mopidy import settings, SettingsError
 from mopidy.frontends.base import BaseFrontend
-from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
