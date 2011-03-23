@@ -2,8 +2,6 @@ import logging
 import optparse
 import sys
 
-from pykka.actor import ThreadingActor
-
 from mopidy import get_version, settings, OptionalDependencyError
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
