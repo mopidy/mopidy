@@ -96,7 +96,7 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         self.gst_pipeline.get_by_name('uri').set_property('uri', uri)
         return self.set_state('PLAYING')
 
-    def deliver_data(self, capabilities, data):
+    def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
         app_src = self.gst_pipeline.get_by_name('appsrc')
         caps = gst.caps_from_string(caps_string)
