@@ -33,7 +33,7 @@ class MpdFrontend(ThreadingActor, BaseFrontend):
 
 class MpdThread(BaseThread):
     def __init__(self):
-        super(BaseThread, self).__init__()
+        super(MpdThread, self).__init__()
         self.name = u'MpdThread'
 
     def run_inside_try(self):
