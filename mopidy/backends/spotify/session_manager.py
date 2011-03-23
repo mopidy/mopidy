@@ -126,13 +126,13 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self.backend.stored_playlists = playlists
         logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
 
-    def search(self, query, connection):
+    def search(self, query, queue):
         """Search method used by Mopidy backend"""
         def callback(results, userdata=None):
             # TODO Include results from results.albums(), etc. too
             playlist = Playlist(tracks=[
                 SpotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
-            connection.send(playlist)
+            queue.put(playlist)
         self.connected.wait()
         self.session.search(query, callback)
