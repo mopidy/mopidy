@@ -123,7 +123,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             playlists.append(
                 SpotifyTranslator.to_mopidy_playlist(spotify_playlist))
         playlists = filter(None, playlists)
-        self.backend.stored_playlists = playlists
+        self.backend.stored_playlists.playlists = playlists
         logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
 
     def search(self, query, queue):
