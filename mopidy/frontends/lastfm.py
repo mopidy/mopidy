@@ -40,7 +40,7 @@ class LastfmFrontend(ThreadingActor, BaseFrontend):
         self.lastfm = None
         self.last_start_time = None
 
-    def post_start(self):
+    def pre_start(self):
         try:
             username = settings.LASTFM_USERNAME
             password_hash = pylast.md5(settings.LASTFM_PASSWORD)

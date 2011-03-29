@@ -73,7 +73,7 @@ class NadTalker(ThreadingActor):
     def __init__(self):
         self._device = None
 
-    def post_start(self):
+    def pre_start(self):
         self._open_connection()
         self._set_device_to_known_state()
 

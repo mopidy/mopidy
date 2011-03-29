@@ -26,7 +26,7 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
     def __init__(self):
         self.gst_pipeline = None
 
-    def post_start(self):
+    def pre_start(self):
         self._setup_gstreamer()
 
     def _setup_gstreamer(self):

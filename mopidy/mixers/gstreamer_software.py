@@ -10,7 +10,7 @@ class GStreamerSoftwareMixer(ThreadingActor, BaseMixer):
     def __init__(self):
         self.output = None
 
-    def post_start(self):
+    def pre_start(self):
         output_refs = ActorRegistry.get_by_class(BaseOutput)
         assert len(output_refs) == 1, 'Expected exactly one running output.'
         self.output = output_refs[0].proxy()

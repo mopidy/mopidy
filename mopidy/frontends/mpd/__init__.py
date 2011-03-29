@@ -23,7 +23,7 @@ class MpdFrontend(ThreadingActor, BaseFrontend):
     def __init__(self):
         self._thread = None
 
-    def post_start(self):
+    def pre_start(self):
         self._thread = MpdThread()
         self._thread.start()
 
