@@ -30,7 +30,7 @@ class DenonMixer(ThreadingActor, BaseMixer):
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0
 
-    def pre_start(self):
+    def on_start(self):
         if self._device is None:
             from serial import Serial
             self._device = Serial(port=settings.MIXER_EXT_PORT, timeout=0.2)

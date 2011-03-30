@@ -40,7 +40,7 @@ class LastfmFrontend(ThreadingActor, BaseFrontend):
         self.lastfm = None
         self.last_start_time = None
 
-    def pre_start(self):
+    def on_start(self):
         try:
             username = settings.LASTFM_USERNAME
             password_hash = pylast.md5(settings.LASTFM_PASSWORD)
@@ -57,7 +57,7 @@ class LastfmFrontend(ThreadingActor, BaseFrontend):
             logger.error(u'Error during Last.fm setup: %s', e)
             self.stop()
 
-    def react(self, message):
+    def on_receive(self, message):
         if message.get('command') == 'started_playing':
             self.started_playing(message['track'])
         elif message.get('command') == 'stopped_playing':

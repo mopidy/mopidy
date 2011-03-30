@@ -25,7 +25,7 @@ class AlsaMixer(ThreadingActor, BaseMixer):
     def __init__(self):
         self._mixer = None
 
-    def pre_start(self):
+    def on_start(self):
         self._mixer = alsaaudio.Mixer(self._get_mixer_control())
         assert self._mixer is not None
 

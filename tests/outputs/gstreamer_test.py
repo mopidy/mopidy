@@ -19,7 +19,7 @@ class GStreamerOutputTest(unittest.TestCase):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         self.song_uri = path_to_uri(data_folder('song1.wav'))
         self.output = GStreamerOutput()
-        self.output.pre_start()
+        self.output.on_start()
 
     def tearDown(self):
         settings.runtime.clear()
