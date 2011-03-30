@@ -26,7 +26,7 @@ No description yet.
     Pierlot-Garcin for patches to Pyspotify.
 
   - Better error messages on wrong login or network problems. Thanks to Antoine
-    Pierlot-Garcin for patches to Mopidy and Pyspotify. (Fixes: :GH:`77`)
+    Pierlot-Garcin for patches to Mopidy and Pyspotify. (Fixes: :issue:`77`)
 
 - MPD frontend:
 
