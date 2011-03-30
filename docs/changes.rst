@@ -11,7 +11,22 @@ This change log is used to track all major changes to Mopidy.
 No description yet.
 
 
+**Important changes**
+
+- If you use the Spotify backend, you *should* upgrade to libspotify 0.0.7 and
+  the latest pyspotify from the Mopidy developers. Follow the instructions at
+  :doc:`/installation/libspotify/`.
+
+
 **Changes**
+
+- Spotify backend:
+
+  - Fixed a segmentation fault due to a bug in Pyspotify. Thanks to Antoine
+    Pierlot-Garcin for patches to Pyspotify.
+
+  - Better error messages on wrong login or network problems. Thanks to Antoine
+    Pierlot-Garcin for patches to Mopidy and Pyspotify.
 
 - MPD frontend:
 
