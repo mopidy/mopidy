@@ -1,5 +1,8 @@
 import logging
 import optparse
+import time
+
+from pykka.registry import ActorRegistry
 
 from mopidy import get_version, settings, OptionalDependencyError
 from mopidy.utils import get_class
@@ -19,6 +22,11 @@ def main():
     setup_mixer()
     setup_backend()
     setup_frontends()
+    try:
+        time.sleep(10000*24*60*60)
+    except KeyboardInterrupt:
+        logger.info(u'Exiting...')
+        ActorRegistry.stop_all()
 
 def parse_options():
     parser = optparse.OptionParser(version='Mopidy %s' % get_version())
