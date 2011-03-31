@@ -31,6 +31,9 @@ ncmpcpp
 A console client that generally works well with Mopidy, and is regularly used
 by Mopidy developers.
 
+Search
+^^^^^^
+
 Search only works for ncmpcpp versions 0.5.1 and higher, and in two of the
 three search modes:
 
@@ -41,6 +44,19 @@ three search modes:
 
 If you run Ubuntu 10.04 or older, you can fetch an updated version of ncmpcpp
 from `Launchpad <https://launchpad.net/ubuntu/+source/ncmpcpp>`_.
+
+Communication mode
+^^^^^^^^^^^^^^^^^^
+
+In newer versions of ncmpcpp, like 0.5.5 shipped with Ubuntu 11.04, ncmcpp
+defaults to "notifications" mode for MPD communications, which Mopidy currently
+does not support. To workaround this limitation in Mopidy, edit the ncmpcpp
+configuration file at ``~/.ncmpcpp/config`` and add the following setting::
+
+    mpd_communication_mode = "polling"
+
+You can track the development of "notifications" mode support in Mopidy in
+:issue:`32`.
 
 
 Graphical clients

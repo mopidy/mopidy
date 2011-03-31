@@ -28,9 +28,9 @@ class SpotifyTranslator(object):
 
     @classmethod
     def to_mopidy_track(cls, spotify_track):
-        if not spotify_track.is_loaded():
-            return Track(name=u'[loading...]')
         uri = str(Link.from_track(spotify_track, 0))
+        if not spotify_track.is_loaded():
+            return Track(uri=uri, name=u'[loading...]')
         if dt.MINYEAR <= int(spotify_track.album().year()) <= dt.MAXYEAR:
             date = dt.date(spotify_track.album().year(), 1, 1)
         else:

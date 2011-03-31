@@ -50,6 +50,9 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
 
     def logged_in(self, session, error):
         """Callback used by pyspotify"""
+        if error:
+            logger.error(u'Spotify login error: %s', error)
+            return
         logger.info(u'Connected to Spotify')
         self.session = session
         if settings.SPOTIFY_HIGH_BITRATE:
@@ -71,7 +74,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
 
     def connection_error(self, session, error):
         """Callback used by pyspotify"""
-        logger.error(u'Connection error: %s', error)
+        logger.error(u'Spotify connection error: %s', error)
 
     def message_to_user(self, session, message):
         """Callback used by pyspotify"""
