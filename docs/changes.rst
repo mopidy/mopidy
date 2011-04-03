@@ -13,12 +13,24 @@ No description yet.
 
 **Important changes**
 
+- Mopidy now depends on `Pykka <http://jodal.github.com/pykka>` >=0.12. If you
+  install from APT, Pykka will automatically be installed. If you are not
+  installing from APT, you may install Pykka from PyPI::
+
+      sudo pip install -U Pykka
+
 - If you use the Spotify backend, you *should* upgrade to libspotify 0.0.7 and
-  the latest pyspotify from the Mopidy developers. Follow the instructions at
+  the latest pyspotify from the Mopidy developers. If you install from APT,
+  libspotify and pyspotify will automatically be upgraded. If you are not
+  installing from APT, follow the instructions at
   :doc:`/installation/libspotify/`.
 
 
 **Changes**
+
+- Mopidy now use Pykka actors for thread management and inter-thread
+  communication. The immediate advantage of this is that Mopidy now works on
+  Python 2.7. (Fixes: :issue:`66`)
 
 - Spotify backend:
 
