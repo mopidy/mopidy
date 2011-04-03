@@ -81,4 +81,4 @@ def urlhandlers(frontend):
 
         Gets a list of available URL handlers.
     """
-    return [(u'handler', uri) for uri in frontend.backend.uri_handlers]
+    return [(u'handler', uri) for uri in frontend.backend.uri_handlers.get()]

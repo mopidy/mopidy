@@ -70,8 +70,7 @@ class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
 
         self.stored.save(playlist)
 
-        self.backend.destroy()
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.backend = self.backend_class()
         self.stored = self.backend.stored_playlists
 
         self.assert_(self.stored.playlists)

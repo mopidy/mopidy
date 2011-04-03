@@ -1,5 +1,8 @@
 import re
 
+from pykka.registry import ActorRegistry
+
+from mopidy.backends.base import Backend
 from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
     MpdUnknownCommand)
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
@@ -10,15 +13,27 @@ from mopidy.frontends.mpd.protocol import (audio_output, command_list,
     connection, current_playlist, empty, music_db, playback, reflection,
     status, stickers, stored_playlists)
 # pylint: enable = W0611
+from mopidy.mixers.base import BaseMixer
 from mopidy.utils import flatten
 
 class MpdDispatcher(object):
     """
-    Dispatches MPD requests to the correct handler.
+    The MPD session feeds the MPD dispatcher with requests. The dispatcher
+    finds the correct handler, processes the request and sends the response
+    back to the MPD session.
     """
 
-    def __init__(self, backend=None):
-        self.backend = backend
+    # XXX Consider merging MpdDispatcher into MpdSession
+
+    def __init__(self):
+        backend_refs = ActorRegistry.get_by_class(Backend)
+        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+        self.backend = backend_refs[0].proxy()
+
+        mixer_refs = ActorRegistry.get_by_class(BaseMixer)
+        assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
+        self.mixer = mixer_refs[0].proxy()
+
         self.command_list = False
         self.command_list_ok = False
 

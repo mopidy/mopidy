@@ -8,8 +8,13 @@ from mopidy.models import Track, Playlist
 
 class StoredPlaylistsHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_listplaylist(self):
         self.b.stored_playlists.playlists = [
@@ -49,22 +54,23 @@ class StoredPlaylistsHandlerTest(unittest.TestCase):
 
     def test_load_known_playlist_appends_to_current_playlist(self):
         self.b.current_playlist.append([Track(uri='a'), Track(uri='b')])
-        self.assertEqual(len(self.b.current_playlist.tracks), 2)
+        self.assertEqual(len(self.b.current_playlist.tracks.get()), 2)
         self.b.stored_playlists.playlists = [Playlist(name='A-list',
             tracks=[Track(uri='c'), Track(uri='d'), Track(uri='e')])]
         result = self.h.handle_request(u'load "A-list"')
         self.assert_(u'OK' in result)
-        self.assertEqual(len(self.b.current_playlist.tracks), 5)
-        self.assertEqual(self.b.current_playlist.tracks[0].uri, 'a')
-        self.assertEqual(self.b.current_playlist.tracks[1].uri, 'b')
-        self.assertEqual(self.b.current_playlist.tracks[2].uri, 'c')
-        self.assertEqual(self.b.current_playlist.tracks[3].uri, 'd')
-        self.assertEqual(self.b.current_playlist.tracks[4].uri, 'e')
+        tracks = self.b.current_playlist.tracks.get()
+        self.assertEqual(len(tracks), 5)
+        self.assertEqual(tracks[0].uri, 'a')
+        self.assertEqual(tracks[1].uri, 'b')
+        self.assertEqual(tracks[2].uri, 'c')
+        self.assertEqual(tracks[3].uri, 'd')
+        self.assertEqual(tracks[4].uri, 'e')
 
     def test_load_unknown_playlist_acks(self):
         result = self.h.handle_request(u'load "unknown playlist"')
         self.assert_(u'ACK [50@0] {load} No such playlist' in result)
-        self.assertEqual(len(self.b.current_playlist.tracks), 0)
+        self.assertEqual(len(self.b.current_playlist.tracks.get()), 0)
 
     def test_playlistadd(self):
         result = self.h.handle_request(

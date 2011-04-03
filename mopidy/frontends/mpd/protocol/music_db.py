@@ -68,7 +68,7 @@ def find(frontend, mpd_query):
     - also uses the search type "date".
     """
     query = _build_query(mpd_query)
-    return frontend.backend.library.find_exact(**query).mpd_format()
+    return frontend.backend.library.find_exact(**query).get().mpd_format()
 
 @handle_pattern(r'^findadd '
      r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? '
@@ -215,7 +215,7 @@ def _list_build_query(field, mpd_query):
 
 def _list_artist(frontend, query):
     artists = set()
-    playlist = frontend.backend.library.find_exact(**query)
+    playlist = frontend.backend.library.find_exact(**query).get()
     for track in playlist.tracks:
         for artist in track.artists:
             artists.add((u'Artist', artist.name))
@@ -223,7 +223,7 @@ def _list_artist(frontend, query):
 
 def _list_album(frontend, query):
     albums = set()
-    playlist = frontend.backend.library.find_exact(**query)
+    playlist = frontend.backend.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.album is not None:
             albums.add((u'Album', track.album.name))
@@ -231,7 +231,7 @@ def _list_album(frontend, query):
 
 def _list_date(frontend, query):
     dates = set()
-    playlist = frontend.backend.library.find_exact(**query)
+    playlist = frontend.backend.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.date is not None:
             dates.add((u'Date', track.date.strftime('%Y-%m-%d')))
@@ -324,7 +324,7 @@ def search(frontend, mpd_query):
     - also uses the search type "date".
     """
     query = _build_query(mpd_query)
-    return frontend.backend.library.search(**query).mpd_format()
+    return frontend.backend.library.search(**query).get().mpd_format()
 
 @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
 def update(frontend, uri=None, rescan_unmodified_files=False):

@@ -2,6 +2,10 @@ import logging
 import random
 import time
 
+from pykka.registry import ActorRegistry
+
+from mopidy.frontends.base import BaseFrontend
+
 logger = logging.getLogger('mopidy.backends.base')
 
 class PlaybackController(object):
@@ -14,6 +18,8 @@ class PlaybackController(object):
 
     # pylint: disable = R0902
     # Too many instance attributes
+
+    pykka_traversable = True
 
     #: Constant representing the paused state.
     PAUSED = u'paused'
@@ -62,8 +68,8 @@ class PlaybackController(object):
         self._state = self.STOPPED
         self._shuffled = []
         self._first_shuffle = True
-        self._play_time_accumulated = 0
-        self._play_time_started = None
+        self.play_time_accumulated = 0
+        self.play_time_started = None
 
     def destroy(self):
         """
@@ -269,7 +275,7 @@ class PlaybackController(object):
     def state(self, new_state):
         (old_state, self._state) = (self.state, new_state)
         logger.debug(u'Changing state: %s -> %s', old_state, new_state)
-        # FIXME _play_time stuff assumes backend does not have a better way of
+        # FIXME play_time stuff assumes backend does not have a better way of
         # handeling this stuff :/
         if (old_state in (self.PLAYING, self.STOPPED)
                 and new_state == self.PLAYING):
@@ -284,23 +290,23 @@ class PlaybackController(object):
         """Time position in milliseconds."""
         if self.state == self.PLAYING:
             time_since_started = (self._current_wall_time -
-                self._play_time_started)
-            return self._play_time_accumulated + time_since_started
+                self.play_time_started)
+            return self.play_time_accumulated + time_since_started
         elif self.state == self.PAUSED:
-            return self._play_time_accumulated
+            return self.play_time_accumulated
         elif self.state == self.STOPPED:
             return 0
 
     def _play_time_start(self):
-        self._play_time_accumulated = 0
-        self._play_time_started = self._current_wall_time
+        self.play_time_accumulated = 0
+        self.play_time_started = self._current_wall_time
 
     def _play_time_pause(self):
-        time_since_started = self._current_wall_time - self._play_time_started
-        self._play_time_accumulated += time_since_started
+        time_since_started = self._current_wall_time - self.play_time_started
+        self.play_time_accumulated += time_since_started
 
     def _play_time_resume(self):
-        self._play_time_started = self._current_wall_time
+        self.play_time_started = self._current_wall_time
 
     @property
     def _current_wall_time(self):
@@ -433,8 +439,8 @@ class PlaybackController(object):
             self.next()
             return True
 
-        self._play_time_started = self._current_wall_time
-        self._play_time_accumulated = time_position
+        self.play_time_started = self._current_wall_time
+        self.play_time_accumulated = time_position
 
         return self.provider.seek(time_position)
 
@@ -461,9 +467,11 @@ class PlaybackController(object):
         For internal use only. Should be called by the backend directly after a
         track has started playing.
         """
-        if self.current_track is not None:
-            self.backend.core_queue.put({
-                'to': 'frontend',
+        if self.current_track is None:
+            return
+        frontend_refs = ActorRegistry.get_by_class(BaseFrontend)
+        for frontend_ref in frontend_refs:
+            frontend_ref.send_one_way({
                 'command': 'started_playing',
                 'track': self.current_track,
             })
@@ -476,9 +484,11 @@ class PlaybackController(object):
         is stopped playing, e.g. at the next, previous, and stop actions and at
         end-of-track.
         """
-        if self.current_track is not None:
-            self.backend.core_queue.put({
-                'to': 'frontend',
+        if self.current_track is None:
+            return
+        frontend_refs = ActorRegistry.get_by_class(BaseFrontend)
+        for frontend_ref in frontend_refs:
+            frontend_ref.send_one_way({
                 'command': 'stopped_playing',
                 'track': self.current_track,
                 'stop_position': self.time_position,
@@ -490,6 +500,8 @@ class BasePlaybackProvider(object):
     :param backend: the backend
     :type backend: :class:`mopidy.backends.base.Backend`
     """
+
+    pykka_traversable = True
 
     def __init__(self, backend):
         self.backend = backend

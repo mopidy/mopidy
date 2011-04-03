@@ -1,9 +1,11 @@
 from subprocess import Popen, PIPE
 import time
 
+from pykka.actor import ThreadingActor
+
 from mopidy.mixers.base import BaseMixer
 
-class OsaMixer(BaseMixer):
+class OsaMixer(ThreadingActor, BaseMixer):
     """
     Mixer which uses ``osascript`` on OS X to control volume.
 
@@ -14,7 +16,6 @@ class OsaMixer(BaseMixer):
     **Settings:**
 
     - None
-
     """
 
     CACHE_TTL = 30

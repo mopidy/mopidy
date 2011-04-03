@@ -1,14 +1,14 @@
 import logging
-from serial import Serial
-from multiprocessing import Pipe
+import serial
+
+from pykka.actor import ThreadingActor
 
 from mopidy import settings
 from mopidy.mixers.base import BaseMixer
-from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.mixers.nad')
 
-class NadMixer(BaseMixer):
+class NadMixer(ThreadingActor, BaseMixer):
     """
     Mixer for controlling NAD amplifiers and receivers using the NAD RS-232
     protocol.
@@ -36,21 +36,19 @@ class NadMixer(BaseMixer):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super(NadMixer, self).__init__(*args, **kwargs)
-        self._volume = None
-        self._pipe, other_end = Pipe()
-        NadTalker(self.backend.core_queue, pipe=other_end).start()
+    def __init__(self):
+        self._volume_cache = None
+        self._nad_talker = NadTalker.start().proxy()
 
     def _get_volume(self):
-        return self._volume
+        return self._volume_cache
 
     def _set_volume(self, volume):
-        self._volume = volume
-        self._pipe.send({'command': 'set_volume', 'volume': volume})
+        self._volume_cache = volume
+        self._nad_talker.set_volume(volume)
 
 
-class NadTalker(BaseThread):
+class NadTalker(ThreadingActor):
     """
     Independent process which does the communication with the NAD device.
 
@@ -72,29 +70,20 @@ class NadTalker(BaseThread):
     # Volume in range 0..VOLUME_LEVELS. :class:`None` before calibration.
     _nad_volume = None
 
-    def __init__(self, core_queue, pipe=None):
-        super(NadTalker, self).__init__(core_queue)
-        self.name = u'NadTalker'
-        self.pipe = pipe
+    def __init__(self):
         self._device = None
 
-    def run_inside_try(self):
+    def on_start(self):
         self._open_connection()
         self._set_device_to_known_state()
-        while self.pipe.poll(None):
-            message = self.pipe.recv()
-            if message['command'] == 'set_volume':
-                self._set_volume(message['volume'])
-            elif message['command'] == 'reset_device':
-                self._set_device_to_known_state()
 
     def _open_connection(self):
         # Opens serial connection to the device.
         # Communication settings: 115200 bps 8N1
         logger.info(u'Connecting to serial device "%s"',
             settings.MIXER_EXT_PORT)
-        self._device = Serial(port=settings.MIXER_EXT_PORT, baudrate=115200,
-            timeout=self.TIMEOUT)
+        self._device = serial.Serial(port=settings.MIXER_EXT_PORT,
+            baudrate=115200, timeout=self.TIMEOUT)
         self._get_device_model()
 
     def _set_device_to_known_state(self):
@@ -164,7 +153,7 @@ class NadTalker(BaseThread):
         self._nad_volume = 0
         logger.info(u'Done calibrating NAD amplifier')
 
-    def _set_volume(self, volume):
+    def set_volume(self, volume):
         # Increase or decrease the amplifier volume until it matches the given
         # target volume.
         logger.debug(u'Setting volume to %d' % volume)

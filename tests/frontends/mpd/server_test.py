@@ -1,11 +1,19 @@
 import unittest
 
 from mopidy import settings
+from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import server
+from mopidy.mixers.dummy import DummyMixer
 
 class MpdServerTest(unittest.TestCase):
     def setUp(self):
-        self.server = server.MpdServer(None)
+        self.backend = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.server = server.MpdServer()
+
+    def tearDown(self):
+        self.backend.stop().get()
+        self.mixer.stop().get()
 
     def test_format_hostname_prefixes_ipv4_addresses_when_ipv6_available(self):
         server.socket.has_ipv6 = True
@@ -20,9 +28,13 @@ class MpdServerTest(unittest.TestCase):
 
 class MpdSessionTest(unittest.TestCase):
     def setUp(self):
-        self.session = server.MpdSession(None, None, (None, None), None)
+        self.backend = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.session = server.MpdSession(None, None, (None, None))
 
     def tearDown(self):
+        self.backend.stop().get()
+        self.mixer.stop().get()
         settings.runtime.clear()
 
     def test_found_terminator_catches_decode_error(self):

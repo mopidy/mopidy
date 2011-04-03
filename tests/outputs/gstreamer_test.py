@@ -18,12 +18,10 @@ class GStreamerOutputTest(unittest.TestCase):
     def setUp(self):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         self.song_uri = path_to_uri(data_folder('song1.wav'))
-        self.core_queue = multiprocessing.Queue()
-        self.output = GStreamerOutput(self.core_queue)
-        self.output.start()
+        self.output = GStreamerOutput()
+        self.output.on_start()
 
     def tearDown(self):
-        self.output.destroy()
         settings.runtime.clear()
 
     def test_play_uri_existing_file(self):
