@@ -13,7 +13,7 @@ No description yet.
 
 **Important changes**
 
-- Mopidy now depends on `Pykka <http://jodal.github.com/pykka>` >=0.12. If you
+- Mopidy now depends on `Pykka <http://jodal.github.com/pykka>`_ >=0.12. If you
   install from APT, Pykka will automatically be installed. If you are not
   installing from APT, you may install Pykka from PyPI::
 
