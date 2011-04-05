@@ -34,7 +34,7 @@ No description yet.
 
 - Spotify backend:
 
-  - Fixed multiple segmentation faults due to bus in Pyspotify. Thanks to
+  - Fixed multiple segmentation faults due to bugs in Pyspotify. Thanks to
     Antoine Pierlot-Garcin and Jamie Kirkpatrick for patches to Pyspotify.
 
   - Better error messages on wrong login or network problems. Thanks to Antoine
