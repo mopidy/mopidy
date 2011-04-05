@@ -42,8 +42,8 @@ No description yet.
 
 - Local backend:
 
-  - Fix crash in :cmd:`mopidy-scan` if a track has no artist name. Thanks to
-    Martins Grunskis for test and patch and "octe" for patch.
+  - Fix crash in :command:`mopidy-scan` if a track has no artist name. Thanks
+    to Martins Grunskis for test and patch and "octe" for patch.
 
   - Fix crash in `tag_cache` parsing if a track has no total number of tracks
     in the album. Thanks to Martins Grunskis for the patch.
