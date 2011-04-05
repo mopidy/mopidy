@@ -40,6 +40,14 @@ No description yet.
   - Better error messages on wrong login or network problems. Thanks to Antoine
     Pierlot-Garcin for patches to Mopidy and Pyspotify. (Fixes: :issue:`77`)
 
+- Local backend:
+
+  - Fix crash in :cmd:`mopidy-scan` if a track has no artist name. Thanks to
+    Martins Grunskis for test and patch and "octe" for patch.
+
+  - Fix crash in `tag_cache` parsing if a track has no total number of tracks
+    in the album. Thanks to Martins Grunskis for the patch.
+
 - MPD frontend:
 
   - Add support for "date" queries to both the ``find`` and ``search``
