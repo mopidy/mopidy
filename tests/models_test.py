@@ -587,6 +587,75 @@ class PlaylistTest(unittest.TestCase):
             "uri='uri')",
             repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
 
+    def test_eq_name(self):
+        playlist1 = Playlist(name=u'name')
+        playlist2 = Playlist(name=u'name')
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
+    def test_eq_uri(self):
+        playlist1 = Playlist(uri=u'uri')
+        playlist2 = Playlist(uri=u'uri')
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
+    def test_eq_tracks(self):
+        tracks = [Track()]
+        playlist1 = Playlist(tracks=tracks)
+        playlist2 = Playlist(tracks=tracks)
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
+    def test_eq_uri(self):
+        playlist1 = Playlist(last_modified=1)
+        playlist2 = Playlist(last_modified=1)
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
     def test_eq(self):
-        # FIXME missing all equal and hash tests
-        raise SkipTest
+        tracks = [Track()]
+        playlist1 = Playlist(uri=u'uri', name=u'name', tracks=tracks,
+            last_modified=1)
+        playlist2 = Playlist(uri=u'uri', name=u'name', tracks=tracks,
+            last_modified=1)
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
+    def test_eq_none(self):
+        self.assertNotEqual(Playlist(), None)
+
+    def test_eq_other(self):
+        self.assertNotEqual(Playlist(), 'other')
+
+    def test_ne_name(self):
+        playlist1 = Playlist(name=u'name1')
+        playlist2 = Playlist(name=u'name2')
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+    def test_ne_uri(self):
+        playlist1 = Playlist(uri=u'uri1')
+        playlist2 = Playlist(uri=u'uri2')
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+    def test_ne_tracks(self):
+        playlist1 = Playlist(tracks=[Track(uri=u'uri1')])
+        playlist2 = Playlist(tracks=[Track(uri=u'uri2')])
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+    def test_ne_uri(self):
+        playlist1 = Playlist(last_modified=1)
+        playlist2 = Playlist(last_modified=2)
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+    def test_ne(self):
+        playlist1 = Playlist(uri=u'uri1', name=u'name2',
+            tracks=[Track(uri=u'uri1')], last_modified=1)
+        playlist2 = Playlist(uri=u'uri2', name=u'name2',
+            tracks=[Track(uri=u'uri2')], last_modified=2)
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
