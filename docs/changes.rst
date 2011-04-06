@@ -58,6 +58,9 @@ No description yet.
     resume and addition of tracks to the current playlist while playing for the
     MPoD client.
 
+  - Fix bug where ``status`` returned ``song: None``, which caused MPDroid to
+    crash. (Fixes: :issue:`69`)
+
 - Settings:
 
   - Fix crash on ``--list-settings`` on clean installation. Thanks to Martins

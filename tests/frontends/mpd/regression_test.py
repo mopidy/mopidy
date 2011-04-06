@@ -123,3 +123,36 @@ class IssueGH22RegressionTest(unittest.TestCase):
         self.mpd.handle_request(u'deleteid "5"')
         self.mpd.handle_request(u'deleteid "6"')
         self.mpd.handle_request(u'status')
+
+
+class IssueGH69RegressionTest(unittest.TestCase):
+    """
+    The issue: https://github.com/mopidy/mopidy/issues#issue/69
+
+    How to reproduce:
+
+        Play track, stop, clear current playlist, load a new playlist, status.
+
+        The status response now contains "song: None".
+    """
+
+    def setUp(self):
+        self.backend = DummyBackend.start().proxy()
+        self.backend.current_playlist.append([
+            Track(uri='a'), Track(uri='b'), Track(uri='c'),
+            Track(uri='d'), Track(uri='e'), Track(uri='f')])
+        self.backend.stored_playlists.create('foo')
+        self.mixer = DummyMixer.start().proxy()
+        self.mpd = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.backend.stop().get()
+        self.mixer.stop().get()
+
+    def test(self):
+        self.mpd.handle_request(u'play')
+        self.mpd.handle_request(u'stop')
+        self.mpd.handle_request(u'clear')
+        self.mpd.handle_request(u'load "foo"')
+        response = self.mpd.handle_request(u'status')
+        self.assert_('song: None' not in response)
