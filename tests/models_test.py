@@ -142,9 +142,9 @@ class AlbumTest(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, album, 'name', None)
 
     def test_artists(self):
-        artists = [Artist()]
-        album = Album(artists=artists)
-        self.assertEqual(album.artists, artists)
+        artist = Artist()
+        album = Album(artists=[artist])
+        self.assert_(artist in album.artists)
         self.assertRaises(AttributeError, setattr, album, 'artists', None)
 
     def test_num_tracks(self):

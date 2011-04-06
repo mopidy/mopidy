@@ -65,6 +65,7 @@ class ImmutableObject(object):
                 % key)
         return self.__class__(**data)
 
+
 class Artist(ImmutableObject):
     """
     :param uri: artist URI
@@ -105,6 +106,9 @@ class Album(ImmutableObject):
     #: The album name. Read-only.
     name = None
 
+    #: A set of album artists. Read-only.
+    artists = frozenset()
+
     #: The number of tracks in the album. Read-only.
     num_tracks = 0
 
@@ -112,13 +116,8 @@ class Album(ImmutableObject):
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
-        self._artists = frozenset(kwargs.pop('artists', []))
+        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
         super(Album, self).__init__(*args, **kwargs)
-
-    @property
-    def artists(self):
-        """List of :class:`Artist` elements. Read-only."""
-        return list(self._artists)
 
 
 class Track(ImmutableObject):
