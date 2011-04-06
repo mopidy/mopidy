@@ -115,7 +115,7 @@ to this problem.
   :doc:`/installation/libspotify/`.
 
 - If you use the Last.fm frontend, you need to upgrade to pylast 0.5.7. Run
-  ``sudp pip install --upgrade pylast`` or install Mopidy from APT.
+  ``sudo pip install --upgrade pylast`` or install Mopidy from APT.
 
 
 **Changes**
