@@ -148,6 +148,9 @@ class Track(ImmutableObject):
     #: The track name. Read-only.
     name = None
 
+    #: A set of track artists. Read-only.
+    artists = frozenset()
+
     #: The track :class:`Album`. Read-only.
     album = None
 
@@ -167,13 +170,8 @@ class Track(ImmutableObject):
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
-        self._artists = frozenset(kwargs.pop('artists', []))
+        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
-
-    @property
-    def artists(self):
-        """List of :class:`Artist`. Read-only."""
-        return list(self._artists)
 
     def mpd_format(self, *args, **kwargs):
         return translator.track_to_mpd_format(self, *args, **kwargs)

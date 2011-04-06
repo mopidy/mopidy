@@ -39,11 +39,11 @@ class GenericCopyTets(unittest.TestCase):
         self.assertEqual('bar', copy.uri)
 
     def test_copying_track_with_private_internal_value(self):
-        artists1 = [Artist(name='foo')]
-        artists2 = [Artist(name='bar')]
-        track = Track(artists=artists1)
-        copy = track.copy(artists=artists2)
-        self.assertEqual(copy.artists, artists2)
+        artist1 = Artist(name='foo')
+        artist2 = Artist(name='bar')
+        track = Track(artists=[artist1])
+        copy = track.copy(artists=[artist2])
+        self.assert_(artist2 in copy.artists)
 
     def test_copying_track_with_invalid_key(self):
         test = lambda: Track().copy(invalid_key=True)
