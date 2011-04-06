@@ -486,7 +486,7 @@ class PlaylistTest(unittest.TestCase):
     def test_tracks(self):
         tracks = [Track(), Track(), Track()]
         playlist = Playlist(tracks=tracks)
-        self.assertEqual(playlist.tracks, tracks)
+        self.assertEqual(list(playlist.tracks), tracks)
         self.assertRaises(AttributeError, setattr, playlist, 'tracks', None)
 
     def test_length(self):
@@ -509,7 +509,7 @@ class PlaylistTest(unittest.TestCase):
         new_playlist = playlist.copy(uri=u'another uri')
         self.assertEqual(new_playlist.uri, u'another uri')
         self.assertEqual(new_playlist.name, u'a name')
-        self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(list(new_playlist.tracks), tracks)
         self.assertEqual(new_playlist.last_modified, last_modified)
 
     def test_with_new_name(self):
@@ -520,7 +520,7 @@ class PlaylistTest(unittest.TestCase):
         new_playlist = playlist.copy(name=u'another name')
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'another name')
-        self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(list(new_playlist.tracks), tracks)
         self.assertEqual(new_playlist.last_modified, last_modified)
 
     def test_with_new_tracks(self):
@@ -532,7 +532,7 @@ class PlaylistTest(unittest.TestCase):
         new_playlist = playlist.copy(tracks=new_tracks)
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'a name')
-        self.assertEqual(new_playlist.tracks, new_tracks)
+        self.assertEqual(list(new_playlist.tracks), new_tracks)
         self.assertEqual(new_playlist.last_modified, last_modified)
 
     def test_with_new_last_modified(self):
@@ -544,7 +544,7 @@ class PlaylistTest(unittest.TestCase):
         new_playlist = playlist.copy(last_modified=new_last_modified)
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'a name')
-        self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(list(new_playlist.tracks), tracks)
         self.assertEqual(new_playlist.last_modified, new_last_modified)
 
     def test_invalid_kwarg(self):

@@ -1,5 +1,3 @@
-from copy import copy
-
 from mopidy.frontends.mpd import translator
 
 class ImmutableObject(object):
@@ -195,24 +193,22 @@ class Playlist(ImmutableObject):
     #: The playlist name. Read-only.
     name = None
 
+    #: The playlist's tracks. Read-only.
+    tracks = tuple()
+
     #: The playlist modification time. Read-only.
     #:
     #: :class:`datetime.datetime`, or :class:`None` if unknown.
     last_modified = None
 
     def __init__(self, *args, **kwargs):
-        self._tracks = kwargs.pop('tracks', [])
+        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
         super(Playlist, self).__init__(*args, **kwargs)
-
-    @property
-    def tracks(self):
-        """List of :class:`Track` elements. Read-only."""
-        return copy(self._tracks)
 
     @property
     def length(self):
         """The number of tracks in the playlist. Read-only."""
-        return len(self._tracks)
+        return len(self.tracks)
 
     def mpd_format(self, *args, **kwargs):
         return translator.playlist_to_mpd_format(self, *args, **kwargs)
