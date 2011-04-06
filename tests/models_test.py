@@ -73,6 +73,11 @@ class ArtistTest(unittest.TestCase):
         test = lambda: Artist(foo='baz')
         self.assertRaises(TypeError, test)
 
+    def test_repr(self):
+        self.assertEquals(
+            "Artist(name='name', uri='uri')",
+            repr(Artist(uri='uri', name='name')))
+
     def test_eq_name(self):
         artist1 = Artist(name=u'name')
         artist2 = Artist(name=u'name')
@@ -163,6 +168,16 @@ class AlbumTest(unittest.TestCase):
     def test_invalid_kwarg(self):
         test = lambda: Album(foo='baz')
         self.assertRaises(TypeError, test)
+
+    def test_repr_without_artists(self):
+        self.assertEquals(
+            "Album(artists=[], name='name', uri='uri')",
+            repr(Album(uri='uri', name='name')))
+
+    def test_repr_with_artists(self):
+        self.assertEquals(
+            "Album(artists=[Artist(name='foo')], name='name', uri='uri')",
+            repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_eq_name(self):
         album1 = Album(name=u'name')
@@ -318,6 +333,16 @@ class TrackTest(unittest.TestCase):
     def test_invalid_kwarg(self):
         test = lambda: Track(foo='baz')
         self.assertRaises(TypeError, test)
+
+    def test_repr_without_artists(self):
+        self.assertEquals(
+            "Track(artists=[], name='name', uri='uri')",
+            repr(Track(uri='uri', name='name')))
+
+    def test_repr_with_artists(self):
+        self.assertEquals(
+            "Track(artists=[Artist(name='foo')], name='name', uri='uri')",
+            repr(Track(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_eq_uri(self):
         track1 = Track(uri=u'uri1')
@@ -550,6 +575,17 @@ class PlaylistTest(unittest.TestCase):
     def test_invalid_kwarg(self):
         test = lambda: Playlist(foo='baz')
         self.assertRaises(TypeError, test)
+
+    def test_repr_without_tracks(self):
+        self.assertEquals(
+            "Playlist(name='name', tracks=[], uri='uri')",
+            repr(Playlist(uri='uri', name='name')))
+
+    def test_repr_with_tracks(self):
+        self.assertEquals(
+            "Playlist(name='name', tracks=[Track(artists=[], name='foo')], "
+            "uri='uri')",
+            repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
 
     def test_eq(self):
         # FIXME missing all equal and hash tests

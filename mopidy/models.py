@@ -21,6 +21,17 @@ class ImmutableObject(object):
             return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
 
+    def __repr__(self):
+        kwarg_pairs = []
+        for (key, value) in sorted(self.__dict__.items()):
+            if isinstance(value, (frozenset, tuple)):
+                value = list(value)
+            kwarg_pairs.append('%s=%s' % (key, repr(value)))
+        return '%(classname)s(%(kwargs)s)' % {
+            'classname': self.__class__.__name__,
+            'kwargs': ', '.join(kwarg_pairs),
+        }
+
     def __hash__(self):
         hash_sum = 0
         for key, value in self.__dict__.items():
