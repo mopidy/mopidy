@@ -12,12 +12,12 @@ from mopidy import settings
 from mopidy.outputs.gstreamer import GStreamerOutput
 from mopidy.utils.path import path_to_uri
 
-from tests import data_folder
+from tests import path_to_data_dir
 
 class GStreamerOutputTest(unittest.TestCase):
     def setUp(self):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
-        self.song_uri = path_to_uri(data_folder('song1.wav'))
+        self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
         self.output = GStreamerOutput()
         self.output.on_start()
 

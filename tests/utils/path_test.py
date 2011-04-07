@@ -9,7 +9,7 @@ import unittest
 from mopidy.utils.path import (get_or_create_folder, mtime,
     path_to_uri, uri_to_path, split_path, find_files)
 
-from tests import data_folder
+from tests import path_to_data_dir
 
 class GetOrCreateFolderTest(unittest.TestCase):
     def setUp(self):
@@ -117,7 +117,7 @@ class SplitPathTest(unittest.TestCase):
 
 class FindFilesTest(unittest.TestCase):
     def find(self, path):
-        return list(find_files(data_folder(path)))
+        return list(find_files(path_to_data_dir(path)))
 
     def test_basic_folder(self):
         self.assert_(self.find(''))
@@ -128,7 +128,7 @@ class FindFilesTest(unittest.TestCase):
     def test_file(self):
         files = self.find('blank.mp3')
         self.assertEqual(len(files), 1)
-        self.assert_(files[0], data_folder('blank.mp3'))
+        self.assert_(files[0], path_to_data_dir('blank.mp3'))
 
     def test_names_are_unicode(self):
         is_unicode = lambda f: isinstance(f, unicode)

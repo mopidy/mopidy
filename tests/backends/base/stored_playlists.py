@@ -5,13 +5,13 @@ import tempfile
 from mopidy import settings
 from mopidy.models import Playlist
 
-from tests import SkipTest, data_folder
+from tests import SkipTest, path_to_data_dir
 
 class StoredPlaylistsControllerTest(object):
     def setUp(self):
         settings.LOCAL_PLAYLIST_PATH = tempfile.mkdtemp()
-        settings.LOCAL_TAG_CACHE_FILE = data_folder('library_tag_cache')
-        settings.LOCAL_MUSIC_PATH = data_folder('')
+        settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('library_tag_cache')
+        settings.LOCAL_MUSIC_PATH = path_to_data_dir('')
 
         self.backend = self.backend_class()
         self.stored  = self.backend.stored_playlists
