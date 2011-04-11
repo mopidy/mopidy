@@ -69,6 +69,11 @@ No description yet.
   - Fix crash on ``--list-settings`` on clean installation. Thanks to Martins
     Grunskis for the bug report and patch. (Fixes: :issue:`63`)
 
+- Packaging:
+
+  - Replace test data symlinks with real files to avoid symlink issues when
+    installing with pip. (Fixes: :issue:`68`)
+
 
 0.3.1 (2010-01-22)
 ==================
