@@ -60,5 +60,5 @@ class SpotifyTranslator(object):
                 tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
             )
         except SpotifyError, e:
-            logger.warning(u'Failed translating Spotify playlist '
+            logger.info(u'Failed translating Spotify playlist '
                 '(probably a playlist folder boundary): %s', e)

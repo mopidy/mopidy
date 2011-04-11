@@ -40,6 +40,9 @@ No description yet.
   - Better error messages on wrong login or network problems. Thanks to Antoine
     Pierlot-Garcin for patches to Mopidy and Pyspotify. (Fixes: :issue:`77`)
 
+  - Reduce log level for trivial log messages from warning to info. (Fixes:
+    :issue:`71`)
+
 - Local backend:
 
   - Fix crash in :command:`mopidy-scan` if a track has no artist name. Thanks
