@@ -1,5 +1,4 @@
 import logging
-import multiprocessing
 
 try:
     import dbus
@@ -10,13 +9,16 @@ except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
+from pykka.actor import ThreadingActor
+from pykka.registry import ActorRegistry
+
+from mopidy.backends.base import Backend
 from mopidy.frontends.base import BaseFrontend
-from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.frontends.mpris')
 
 
-class MprisFrontend(BaseFrontend):
+class MprisFrontend(ThreadingActor, BaseFrontend):
     """
     Frontend which lets you control Mopidy through the Media Player Remote
     Interfacing Specification (MPRIS) D-Bus interface.
@@ -30,51 +32,21 @@ class MprisFrontend(BaseFrontend):
       Ubuntu/Debian.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(MprisFrontend, self).__init__(*args, **kwargs)
-        (self.connection, other_end) = multiprocessing.Pipe()
-        self.thread = MprisFrontendThread(self.core_queue, other_end)
+    # This thread requires :class:`mopidy.utils.process.GObjectEventThread` to be
+    # running too. This is not enforced in any way by the code.
 
-    def start(self):
-        self.thread.start()
-
-    def destroy(self):
-        self.thread.destroy()
-
-    def process_message(self, message):
-        self.connection.send(message)
-
-
-class MprisFrontendThread(BaseThread):
-    """
-    A process for communicating with MPRIS clients.
-
-    This thread requires :class:`mopidy.utils.process.GObjectEventThread` to be
-    running too. This is not enforced in any way by the code.
-    """
-
-    def __init__(self, core_queue, connection):
-        super(MprisFrontendThread, self).__init__(core_queue)
-        self.name = u'MprisFrontendThread'
-        self.connection = connection
+    def __init__(self):
         self.indicate_server = None
         self.dbus_objects = []
 
-    def destroy(self):
+    def on_start(self):
+        self.dbus_objects.append(MprisObject())
+        self.send_startup_notification()
+
+    def on_stop(self):
         for dbus_object in self.dbus_objects:
             dbus_object.remove_from_connection()
         self.dbus_objects = []
-
-    def run_inside_try(self):
-        self.setup()
-        while True:
-            self.connection.poll(None)
-            message = self.connection.recv()
-            self.process_message(message)
-
-    def setup(self):
-        self.dbus_objects.append(MprisObject(self.core_queue))
-        self.send_startup_notification()
 
     def send_startup_notification(self):
         """
@@ -91,13 +63,10 @@ class MprisFrontendThread(BaseThread):
             self.indicate_server.set_type('music.mopidy')
             # FIXME Location of .desktop file shouldn't be hardcoded
             self.indicate_server.set_desktop_file(
-                '/usr/local/share/applications/mopidy.desktop')
+                '/usr/share/applications/mopidy.desktop')
             self.indicate_server.show()
         except ImportError:
             pass
-
-    def process_message(self, message):
-        pass # Ignore commands for other frontends
 
 
 class MprisObject(dbus.service.Object):
@@ -153,8 +122,11 @@ class MprisObject(dbus.service.Object):
         },
     }
 
-    def __init__(self, core_queue):
-        self.core_queue = core_queue
+    def __init__(self):
+        backend_refs = ActorRegistry.get_by_class(Backend)
+        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+        self.backend = backend_refs[0].proxy()
+
         logger.debug(u'Prepare the D-Bus main loop before connecting')
         DBusGMainLoop(set_as_default=True)
         logger.debug(u'Connecting to D-Bus: getting session bus')
@@ -234,7 +206,7 @@ class MprisObject(dbus.service.Object):
             player.Quit(dbus_interface='org.mpris.MediaPlayer2')
         """
         logger.debug(u'%s.Quit called', self.root_interface)
-        self.core_queue.put({'to': 'core', 'command': 'exit'})
+        ActorRegistry.stop_all()
 
 
     ### Player interface
@@ -243,14 +215,8 @@ class MprisObject(dbus.service.Object):
     def Next(self):
         logger.debug(u'%s.Next called', self.player_interface)
         # TODO call playback.next(), keep playback.state unchanged
-        pass
-
-        # XXX Proof of concept only. Throw away, write tests, reimplement:
-        self.core_queue.put({
-            'to': 'frontend',
-            'command': 'mpd_request',
-            'request': 'next',
-        })
+        # XXX Proof of concept only. Throw away, write tests.
+        self.backend.playback.next().get()
 
     @dbus.service.method(dbus_interface=player_interface)
     def OpenUri(self, uri):
@@ -266,8 +232,8 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=player_interface)
     def Pause(self):
         logger.debug(u'%s.Pause called', self.player_interface)
-        # TODO call playback.pause()
-        pass
+        # XXX Proof of concept only. Throw away, write tests.
+        self.backend.playback.pause().get()
 
     @dbus.service.method(dbus_interface=player_interface)
     def Play(self):
@@ -287,24 +253,15 @@ class MprisObject(dbus.service.Object):
         # elif playback.state == playback.STOPPED: playback.play()
 
         # XXX Proof of concept only. Throw away, write tests, reimplement:
-        self.core_queue.put({
-            'to': 'frontend',
-            'command': 'mpd_request',
-            'request': 'play',
-        })
+        self.backend.playback.pause().get()
 
     @dbus.service.method(dbus_interface=player_interface)
     def Previous(self):
         logger.debug(u'%s.Previous called', self.player_interface)
 
         # TODO call playback.previous(), keep playback.state unchanged
-
         # XXX Proof of concept only. Throw away, write tests, reimplement:
-        self.core_queue.put({
-            'to': 'frontend',
-            'command': 'mpd_request',
-            'request': 'previous',
-        })
+        self.backend.playback.previous().get()
 
     @dbus.service.method(dbus_interface=player_interface)
     def Seek(self, offset):
