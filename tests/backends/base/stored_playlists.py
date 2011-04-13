@@ -3,23 +3,20 @@ import shutil
 import tempfile
 
 from mopidy import settings
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist
 
-from tests import SkipTest, data_folder
+from tests import SkipTest, path_to_data_dir
 
 class StoredPlaylistsControllerTest(object):
     def setUp(self):
         settings.LOCAL_PLAYLIST_PATH = tempfile.mkdtemp()
-        settings.LOCAL_TAG_CACHE_FILE = data_folder('library_tag_cache')
-        settings.LOCAL_MUSIC_PATH = data_folder('')
+        settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('library_tag_cache')
+        settings.LOCAL_MUSIC_PATH = path_to_data_dir('')
 
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.backend = self.backend_class()
         self.stored  = self.backend.stored_playlists
 
     def tearDown(self):
-        self.backend.destroy()
-
         if os.path.exists(settings.LOCAL_PLAYLIST_PATH):
             shutil.rmtree(settings.LOCAL_PLAYLIST_PATH)
 

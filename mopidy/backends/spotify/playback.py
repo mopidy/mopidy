@@ -23,7 +23,7 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
             self.backend.output.set_state('PLAYING')
             return True
         except SpotifyError as e:
-            logger.warning('Play %s failed: %s', track.uri, e)
+            logger.info('Playback of %s failed: %s', track.uri, e)
             return False
 
     def resume(self):

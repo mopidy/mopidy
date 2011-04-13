@@ -3,33 +3,6 @@ class BaseOutput(object):
     Base class for audio outputs.
     """
 
-    def __init__(self, core_queue):
-        self.core_queue = core_queue
-
-    def start(self):
-        """
-        Start the output.
-
-        *MAY be implemented by subclasses.*
-        """
-        pass
-
-    def destroy(self):
-        """
-        Destroy the output.
-
-        *MAY be implemented by subclasses.*
-        """
-        pass
-
-    def process_message(self, message):
-        """
-        Process messages with the output as destination.
-
-        *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
     def play_uri(self, uri):
         """
         Play URI.

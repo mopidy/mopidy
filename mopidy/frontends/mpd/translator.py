@@ -84,8 +84,9 @@ def artists_to_mpd_format(artists):
     :type track: array of :class:`mopidy.models.Artist`
     :rtype: string
     """
+    artists = list(artists)
     artists.sort(key=lambda a: a.name)
-    return u', '.join([a.name for a in artists])
+    return u', '.join([a.name for a in artists if a.name])
 
 def tracks_to_mpd_format(tracks, start=0, end=None, cpids=None):
     """

@@ -49,7 +49,7 @@ class SettingsProxy(object):
         if attr not in self.current:
             raise SettingsError(u'Setting "%s" is not set.' % attr)
         value = self.current[attr]
-        if type(value) != bool and not value:
+        if isinstance(value, basestring) and len(value) == 0:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
         if attr.endswith('_PATH') or attr.endswith('_FILE'):
             value = os.path.expanduser(value)
@@ -141,8 +141,7 @@ def list_settings_optparse_callback(*args):
     lines = []
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
-        if key.endswith('PASSWORD') and len(value):
-            value = u'********'
+        value = mask_value_if_secret(key, value)
         lines.append(u'%s:' % key)
         lines.append(u'  Value: %s' % repr(value))
         if value != default_value and default_value is not None:
@@ -151,3 +150,9 @@ def list_settings_optparse_callback(*args):
             lines.append(u'  Error: %s' % errors[key])
     print u'Settings: %s' % indent('\n'.join(lines), places=2)
     sys.exit(0)
+
+def mask_value_if_secret(key, value):
+    if key.endswith('PASSWORD') and value:
+        return u'********'
+    else:
+        return value

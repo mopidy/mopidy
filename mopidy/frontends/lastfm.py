@@ -1,6 +1,4 @@
 import logging
-import multiprocessing
-import socket
 import time
 
 try:
@@ -9,16 +7,17 @@ except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
-from mopidy import get_version, settings, SettingsError
+from pykka.actor import ThreadingActor
+
+from mopidy import settings, SettingsError
 from mopidy.frontends.base import BaseFrontend
-from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
 API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
-class LastfmFrontend(BaseFrontend):
+class LastfmFrontend(ThreadingActor, BaseFrontend):
     """
     Frontend which scrobbles the music you play to your `Last.fm
     <http://www.last.fm>`_ profile.
@@ -29,7 +28,7 @@ class LastfmFrontend(BaseFrontend):
 
     **Dependencies:**
 
-    - `pylast <http://code.google.com/p/pylast/>`_ >= 0.5
+    - `pylast <http://code.google.com/p/pylast/>`_ >= 0.5.7
 
     **Settings:**
 
@@ -37,38 +36,11 @@ class LastfmFrontend(BaseFrontend):
     - :attr:`mopidy.settings.LASTFM_PASSWORD`
     """
 
-    def __init__(self, *args, **kwargs):
-        super(LastfmFrontend, self).__init__(*args, **kwargs)
-        (self.connection, other_end) = multiprocessing.Pipe()
-        self.thread = LastfmFrontendThread(self.core_queue, other_end)
-
-    def start(self):
-        self.thread.start()
-
-    def destroy(self):
-        self.thread.destroy()
-
-    def process_message(self, message):
-        if self.thread.is_alive():
-            self.connection.send(message)
-
-
-class LastfmFrontendThread(BaseThread):
-    def __init__(self, core_queue, connection):
-        super(LastfmFrontendThread, self).__init__(core_queue)
-        self.name = u'LastfmFrontendThread'
-        self.connection = connection
+    def __init__(self):
         self.lastfm = None
         self.last_start_time = None
 
-    def run_inside_try(self):
-        self.setup()
-        while self.lastfm is not None:
-            self.connection.poll(None)
-            message = self.connection.recv()
-            self.process_message(message)
-
-    def setup(self):
+    def on_start(self):
         try:
             username = settings.LASTFM_USERNAME
             password_hash = pylast.md5(settings.LASTFM_PASSWORD)
@@ -79,36 +51,40 @@ class LastfmFrontendThread(BaseThread):
         except SettingsError as e:
             logger.info(u'Last.fm scrobbler not started')
             logger.debug(u'Last.fm settings error: %s', e)
-        except (pylast.WSError, socket.error) as e:
-            logger.error(u'Last.fm connection error: %s', e)
+            self.stop()
+        except (pylast.NetworkError, pylast.MalformedResponseError,
+                pylast.WSError) as e:
+            logger.error(u'Error during Last.fm setup: %s', e)
+            self.stop()
 
-    def process_message(self, message):
-        if message['command'] == 'started_playing':
+    def on_receive(self, message):
+        if message.get('command') == 'started_playing':
             self.started_playing(message['track'])
-        elif message['command'] == 'stopped_playing':
+        elif message.get('command') == 'stopped_playing':
             self.stopped_playing(message['track'], message['stop_position'])
         else:
-            pass # Ignore commands for other frontends
+            pass # Ignore any other messages
 
     def started_playing(self, track):
         artists = ', '.join([a.name for a in track.artists])
-        duration = track.length // 1000
+        duration = track.length and track.length // 1000 or 0
         self.last_start_time = int(time.time())
         logger.debug(u'Now playing track: %s - %s', artists, track.name)
         try:
             self.lastfm.update_now_playing(
                 artists,
-                track.name,
-                album=track.album.name,
+                (track.name or ''),
+                album=(track.album and track.album.name or ''),
                 duration=str(duration),
                 track_number=str(track.track_no),
                 mbid=(track.musicbrainz_id or ''))
-        except (pylast.ScrobblingError, socket.error) as e:
-            logger.warning(u'Last.fm now playing error: %s', e)
+        except (pylast.ScrobblingError, pylast.NetworkError,
+                pylast.MalformedResponseError, pylast.WSError) as e:
+            logger.warning(u'Error submitting playing track to Last.fm: %s', e)
 
     def stopped_playing(self, track, stop_position):
         artists = ', '.join([a.name for a in track.artists])
-        duration = track.length // 1000
+        duration = track.length and track.length // 1000 or 0
         stop_position = stop_position // 1000
         if duration < 30:
             logger.debug(u'Track too short to scrobble. (30s)')
@@ -123,11 +99,12 @@ class LastfmFrontendThread(BaseThread):
         try:
             self.lastfm.scrobble(
                 artists,
-                track.name,
+                (track.name or ''),
                 str(self.last_start_time),
-                album=track.album.name,
+                album=(track.album and track.album.name or ''),
                 track_number=str(track.track_no),
                 duration=str(duration),
                 mbid=(track.musicbrainz_id or ''))
-        except (pylast.ScrobblingError, socket.error) as e:
-            logger.warning(u'Last.fm scrobbling error: %s', e)
+        except (pylast.ScrobblingError, pylast.NetworkError,
+                pylast.MalformedResponseError, pylast.WSError) as e:
+            logger.warning(u'Error submitting played track to Last.fm: %s', e)

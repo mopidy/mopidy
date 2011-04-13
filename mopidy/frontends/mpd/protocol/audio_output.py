@@ -34,6 +34,6 @@ def outputs(frontend):
     """
     return [
         ('outputid', 0),
-        ('outputname', frontend.backend.__class__.__name__),
+        ('outputname', None),
         ('outputenabled', 1),
     ]

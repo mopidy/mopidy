@@ -1,49 +1,43 @@
+import asyncore
 import logging
 
+from pykka.actor import ThreadingActor
+
 from mopidy.frontends.base import BaseFrontend
-from mopidy.frontends.mpd.dispatcher import MpdDispatcher
-from mopidy.frontends.mpd.thread import MpdThread
-from mopidy.utils.process import unpickle_connection
+from mopidy.frontends.mpd.server import MpdServer
+from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
-class MpdFrontend(BaseFrontend):
+class MpdFrontend(ThreadingActor, BaseFrontend):
     """
     The MPD frontend.
 
     **Settings:**
 
     - :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`
+    - :attr:`mopidy.settings.MPD_SERVER_PASSWORD`
     - :attr:`mopidy.settings.MPD_SERVER_PORT`
     """
 
-    def __init__(self, *args, **kwargs):
-        super(MpdFrontend, self).__init__(*args, **kwargs)
-        self.thread = None
-        self.dispatcher = MpdDispatcher(self.backend)
+    def __init__(self):
+        self._thread = None
 
-    def start(self):
-        """Starts the MPD server."""
-        self.thread = MpdThread(self.core_queue)
-        self.thread.start()
+    def on_start(self):
+        self._thread = MpdThread()
+        self._thread.start()
 
-    def destroy(self):
-        """Destroys the MPD server."""
-        self.thread.destroy()
+    def on_receive(self, message):
+        pass # Ignore any messages
 
-    def process_message(self, message):
-        """
-        Processes messages with the MPD frontend as destination.
 
-        :param message: the message
-        :type message: dict
-        """
-        assert message['to'] == 'frontend', \
-            u'Message recipient must be "frontend".'
-        if message['command'] == 'mpd_request':
-            response = self.dispatcher.handle_request(message['request'])
-            if 'reply_to' in message:
-                connection = unpickle_connection(message['reply_to'])
-                connection.send(response)
-        else:
-            pass # Ignore messages for other frontends
+class MpdThread(BaseThread):
+    def __init__(self):
+        super(MpdThread, self).__init__()
+        self.name = u'MpdThread'
+
+    def run_inside_try(self):
+        logger.debug(u'Starting MPD server thread')
+        server = MpdServer()
+        server.start()
+        asyncore.loop()

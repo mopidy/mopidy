@@ -14,7 +14,7 @@ from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 from mopidy.utils.path import path_to_uri
 
-from tests import data_folder
+from tests import path_to_data_dir
 from tests.backends.base.stored_playlists import \
     StoredPlaylistsControllerTest
 from tests.backends.local import generate_song
@@ -65,13 +65,12 @@ class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
         self.assertEqual(uri, contents.strip())
 
     def test_playlists_are_loaded_at_startup(self):
-        track = Track(uri=path_to_uri(data_folder('uri2')))
+        track = Track(uri=path_to_uri(path_to_data_dir('uri2')))
         playlist = Playlist(tracks=[track], name='test')
 
         self.stored.save(playlist)
 
-        self.backend.destroy()
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.backend = self.backend_class()
         self.stored = self.backend.stored_playlists
 
         self.assert_(self.stored.playlists)

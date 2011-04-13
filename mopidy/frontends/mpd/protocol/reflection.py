@@ -9,9 +9,12 @@ def commands(frontend):
         ``commands``
 
         Shows which commands the current user has access to.
-
-    As permissions is not implemented, any user has access to all commands.
     """
+    # FIXME When password auth is turned on and the client is not
+    # authenticated, 'commands' should list only the commands the client does
+    # have access to. To implement this we need access to the session object to
+    # check if the client is authenticated or not.
+
     sorted_commands = sorted(list(mpd_commands))
 
     # Not shown by MPD in its command list
@@ -51,9 +54,11 @@ def notcommands(frontend):
         ``notcommands``
 
         Shows which commands the current user does not have access to.
-
-    As permissions is not implemented, any user has access to all commands.
     """
+    # FIXME When password auth is turned on and the client is not
+    # authenticated, 'notcommands' should list all the commands the client does
+    # not have access to. To implement this we need access to the session
+    # object to check if the client is authenticated or not.
     pass
 
 @handle_pattern(r'^tagtypes$')
@@ -76,4 +81,4 @@ def urlhandlers(frontend):
 
         Gets a list of available URL handlers.
     """
-    return [(u'handler', uri) for uri in frontend.backend.uri_handlers]
+    return [(u'handler', uri) for uri in frontend.backend.uri_handlers.get()]

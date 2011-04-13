@@ -41,8 +41,8 @@ def count(frontend, tag, needle):
     return [('songs', 0), ('playtime', 0)] # TODO
 
 @handle_pattern(r'^find '
-     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"?'
-     ' "[^"]+"\s?)+)$')
+     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
+     r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def find(frontend, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -62,9 +62,13 @@ def find(frontend, mpd_query):
 
     - does not add quotes around the field argument.
     - capitalizes the type argument.
+
+    *ncmpcpp:*
+
+    - also uses the search type "date".
     """
     query = _build_query(mpd_query)
-    return frontend.backend.library.find_exact(**query).mpd_format()
+    return frontend.backend.library.find_exact(**query).get().mpd_format()
 
 @handle_pattern(r'^findadd '
      r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? '
@@ -211,7 +215,7 @@ def _list_build_query(field, mpd_query):
 
 def _list_artist(frontend, query):
     artists = set()
-    playlist = frontend.backend.library.find_exact(**query)
+    playlist = frontend.backend.library.find_exact(**query).get()
     for track in playlist.tracks:
         for artist in track.artists:
             artists.add((u'Artist', artist.name))
@@ -219,7 +223,7 @@ def _list_artist(frontend, query):
 
 def _list_album(frontend, query):
     albums = set()
-    playlist = frontend.backend.library.find_exact(**query)
+    playlist = frontend.backend.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.album is not None:
             albums.add((u'Album', track.album.name))
@@ -227,7 +231,7 @@ def _list_album(frontend, query):
 
 def _list_date(frontend, query):
     dates = set()
-    playlist = frontend.backend.library.find_exact(**query)
+    playlist = frontend.backend.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.date is not None:
             dates.add((u'Date', track.date.strftime('%Y-%m-%d')))
@@ -290,8 +294,8 @@ def rescan(frontend, uri=None):
     return update(frontend, uri, rescan_unmodified_files=True)
 
 @handle_pattern(r'^search '
-     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"?'
-     ' "[^"]+"\s?)+)$')
+     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
+     r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def search(frontend, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -314,9 +318,13 @@ def search(frontend, mpd_query):
 
     - does not add quotes around the field argument.
     - capitalizes the field argument.
+
+    *ncmpcpp:*
+
+    - also uses the search type "date".
     """
     query = _build_query(mpd_query)
-    return frontend.backend.library.search(**query).mpd_format()
+    return frontend.backend.library.search(**query).get().mpd_format()
 
 @handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
 def update(frontend, uri=None, rescan_unmodified_files=False):

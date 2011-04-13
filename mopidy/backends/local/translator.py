@@ -100,8 +100,11 @@ def _convert_mpd_data(data, tracks, music_dir):
     albumartist_kwargs = {}
 
     if 'track' in data:
-        album_kwargs['num_tracks'] = int(data['track'].split('/')[1])
-        track_kwargs['track_no'] = int(data['track'].split('/')[0])
+        if '/' in data['track']:
+            album_kwargs['num_tracks'] = int(data['track'].split('/')[1])
+            track_kwargs['track_no'] = int(data['track'].split('/')[0])
+        else:
+            track_kwargs['track_no'] = int(data['track'])
 
     if 'artist' in data:
         artist_kwargs['name'] = data['artist']
