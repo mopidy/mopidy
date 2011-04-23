@@ -46,21 +46,27 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
 
         self.gst_pipeline = gst.parse_launch(base_pipeline)
 
-        tee = self.gst_pipeline.get_by_name('tee')
-        convert = self.gst_pipeline.get_by_name('convert')
+        self.gst_tee = self.gst_pipeline.get_by_name('tee')
+        self.gst_convert = self.gst_pipeline.get_by_name('convert')
 
         uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
         uridecodebin.connect('pad-added', self._process_new_pad, pad)
         self.gst_pipeline.add(uridecodebin)
 
-        output_bin = gst.parse_bin_from_description('queue ! %s' %
-            settings.GSTREAMER_AUDIO_SINK, True)
-        gst.element_link_many(tee, output_bin)
+        self._add_output(settings.GSTREAMER_AUDIO_SINK)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
         gst_bus.add_signal_watch()
         gst_bus.connect('message', self._process_gstreamer_message)
+
+    def _add_output(self, description):
+        bin = 'queue ! %s' % description
+        logger.debug('Adding output bin to tee: %s', bin)
+        output = gst.parse_bin_from_description(bin, True)
+        self.gst_pipeline.add(output)
+        output.sync_state_with_parent()
+        gst.element_link_many(self.gst_tee, output)
 
     def _process_new_pad(self, source, pad, target_pad):
         pad.link(target_pad)
