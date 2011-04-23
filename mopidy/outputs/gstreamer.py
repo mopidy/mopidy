@@ -35,20 +35,27 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         :class:`mopidy.utils.process.GObjectEventThread` to be running. This is
         not enforced by :class:`GStreamerOutput` itself.
         """
-
-        logger.debug(u'Setting up GStreamer pipeline')
-
-        self.gst_pipeline = gst.parse_launch(' ! '.join([
+        base_pipeline = ' ! '.join([
             'audioconvert name=convert',
             'volume name=volume',
-            settings.GSTREAMER_AUDIO_SINK,
-        ]))
+            'taginject name=tag',
+            'tee name=tee',
+        ])
 
-        pad = self.gst_pipeline.get_by_name('convert').get_pad('sink')
+        logger.debug(u'Setting up base GStreamer pipeline: %s', base_pipeline)
+
+        self.gst_pipeline = gst.parse_launch(base_pipeline)
+
+        tee = self.gst_pipeline.get_by_name('tee')
+        convert = self.gst_pipeline.get_by_name('convert')
 
         uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
         uridecodebin.connect('pad-added', self._process_new_pad, pad)
         self.gst_pipeline.add(uridecodebin)
+
+        output_bin = gst.parse_bin_from_description('queue ! %s' %
+            settings.GSTREAMER_AUDIO_SINK, True)
+        gst.element_link_many(tee, output_bin)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
