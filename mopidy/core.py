@@ -29,7 +29,7 @@ def main():
         ActorRegistry.stop_all()
 
 def parse_options():
-    parser = optparse.OptionParser(version='Mopidy %s' % get_version())
+    parser = optparse.OptionParser(version=u'Mopidy %s' % get_version())
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')

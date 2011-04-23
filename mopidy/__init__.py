@@ -1,3 +1,4 @@
+import platform
 import sys
 if not (2, 6) <= sys.version_info < (3,):
     sys.exit(u'Mopidy requires Python >= 2.6, < 3')
@@ -5,6 +6,12 @@ if not (2, 6) <= sys.version_info < (3,):
 from subprocess import PIPE, Popen
 
 VERSION = (0, 4, 0)
+
+def get_version():
+    try:
+        return get_git_version()
+    except EnvironmentError:
+        return get_plain_version()
 
 def get_git_version():
     process = Popen(['git', 'describe'], stdout=PIPE, stderr=PIPE)
@@ -18,11 +25,13 @@ def get_git_version():
 def get_plain_version():
     return '.'.join(map(str, VERSION))
 
-def get_version():
-    try:
-        return get_git_version()
-    except EnvironmentError:
-        return get_plain_version()
+def get_platform():
+    return platform.platform()
+
+def get_python():
+    implementation = platform.python_implementation()
+    version = platform.python_version()
+    return u' '.join([implementation, version])
 
 class MopidyException(Exception):
     def __init__(self, message, *args, **kwargs):
