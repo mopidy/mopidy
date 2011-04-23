@@ -10,20 +10,22 @@ class MpdServerTest(unittest.TestCase):
         self.backend = DummyBackend.start().proxy()
         self.mixer = DummyMixer.start().proxy()
         self.server = server.MpdServer()
+        self.has_ipv6 = server.has_ipv6
 
     def tearDown(self):
         self.backend.stop().get()
         self.mixer.stop().get()
+        server.has_ipv6 = self.has_ipv6
 
     def test_format_hostname_prefixes_ipv4_addresses_when_ipv6_available(self):
-        server.socket.has_ipv6 = True
+        server.has_ipv6 = True
         self.assertEqual(self.server._format_hostname('0.0.0.0'),
             '::ffff:0.0.0.0')
         self.assertEqual(self.server._format_hostname('127.0.0.1'),
             '::ffff:127.0.0.1')
 
     def test_format_hostname_does_nothing_when_only_ipv4_available(self):
-        server.socket.has_ipv6 = False
+        server.has_ipv6 = False
         self.assertEquals(self.server._format_hostname('0.0.0.0'), '0.0.0.0')
 
 class MpdSessionTest(unittest.TestCase):
