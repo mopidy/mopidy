@@ -55,6 +55,10 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
 
         self._add_output(settings.GSTREAMER_AUDIO_SINK)
 
+        shoutcast_bin = self._build_shoutcast_description()
+        if shoutcast_bin:
+            self._add_output(shoutcast_bin)
+
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
         gst_bus.add_signal_watch()
