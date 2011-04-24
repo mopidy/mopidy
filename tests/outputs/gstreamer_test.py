@@ -77,32 +77,23 @@ class GStreamerOutputTest(unittest.TestCase):
         settings.SHOUTCAST_SERVER = '127.0.0.1'
         settings.SHOUTCAST_MOUNT = '/stream.mp3'
 
-        expected = u'audioconvert ! %s ! ' % settings.SHOUTCAST_ENCODER + \
-            u'shout2send ip="127.0.0.1" mount="/stream.mp3" ' \
-            u'password="hackme" port="8000" username="source"'
-        result = self.output._build_shoutcast_description()
-        self.assertEqual(expected, result)
+        self.check_shoutcast_options(u'ip="127.0.0.1" mount="/stream.mp3" '
+            u'password="hackme" port="8000" username="source"')
 
     def test_build_shoutcast_description_with_user_and_passwod(self):
         settings.SHOUTCAST_SERVER = '127.0.0.1'
         settings.SHOUTCAST_USER = 'john'
         settings.SHOUTCAST_PASSWORD = 'doe'
 
-        expected = u'audioconvert ! %s ! ' % settings.SHOUTCAST_ENCODER + \
-            u'shout2send ip="127.0.0.1" mount="/stream" ' \
-            u'password="doe" port="8000" username="john"'
-        result = self.output._build_shoutcast_description()
-        self.assertEqual(expected, result)
+        self.check_shoutcast_options('ip="127.0.0.1" mount="/stream" '
+            u'password="doe" port="8000" username="john"')
 
     def test_build_shoutcast_description_unset_user_and_pass(self):
         settings.SHOUTCAST_SERVER = '127.0.0.1'
         settings.SHOUTCAST_USER = None
         settings.SHOUTCAST_PASSWORD = None
 
-        expected = u'audioconvert ! %s ! shout2send ' % settings.SHOUTCAST_ENCODER + \
-            u'ip="127.0.0.1" mount="/stream" port="8000"'
-        result = self.output._build_shoutcast_description()
-        self.assertEqual(expected, result)
+        self.check_shoutcast_options(u'ip="127.0.0.1" mount="/stream" port="8000"')
 
     def test_build_shoutcast_description_with_override(self):
         settings.SHOUTCAST_OVERRIDE = 'foobar'
@@ -116,3 +107,10 @@ class GStreamerOutputTest(unittest.TestCase):
 
         result = self.output._build_shoutcast_description()
         self.assertEqual('foobar', result)
+
+    def check_shoutcast_options(self, options):
+        expected  = u'audioconvert ! %s ! shout2send ' % settings.SHOUTCAST_ENCODER
+        expected += options
+
+        result = self.output._build_shoutcast_description()
+        self.assertEqual(expected, result)
