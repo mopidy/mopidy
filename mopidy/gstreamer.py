@@ -198,10 +198,9 @@ class GStreamer(ThreadingActor):
         return True
 
     def set_metadata(self, track):
-        tags = u'artist="%(artist)s",title="%(title)s",album="%(album)s"' % {
+        tags = u'artist="%(artist)s",title="%(title)s"' % {
             'artist': u', '.join([a.name for a in track.artists]),
             'title': track.name,
-            'album': track.album.name,
         }
         logger.debug('Setting tags to: %s', tags)
         self.gst_taginject.set_property('tags', tags)
