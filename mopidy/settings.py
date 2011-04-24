@@ -213,8 +213,8 @@ SHOUTCAST_MOUNT = u'/stream'
 #:
 #: Default::
 #:
-#:     SHOUTCAST_ENCODER = u'vorbisenc ! oggmux'
-SHOUTCAST_ENCODER = u'vorbisenc ! oggmux'
+#:     SHOUTCAST_ENCODER = u'lame mode=stereo bitrate=320'
+SHOUTCAST_ENCODER = u'lame mode=stereo bitrate=320'
 
 #: Overrides to allow advanced setup of shoutcast. Using this settings implies
 #: that all other SHOUTCAST_* settings will be ignored.
