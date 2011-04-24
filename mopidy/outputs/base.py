@@ -89,3 +89,17 @@ class BaseOutput(object):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         raise NotImplementedError
+
+    def set_metadata(self, track):
+        """
+        Set track metadata for currently playing song.
+
+        Only needs to be called by sources such as appsrc which don't already
+        inject tags in pipeline.
+
+        *MUST be implemented by subclass.*
+
+        :param track: Track containing metadata for current song.
+        :type track: :class:`mopidy.modes.Track`
+        """
+        raise NotImplementedError

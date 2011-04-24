@@ -197,3 +197,12 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         """Set volume in range [0..100]"""
         self.gst_volume.set_property('volume', volume / 100.0)
         return True
+
+    def set_metadata(self, track):
+        tags = u'artist="%(artist)s",title="%(title)s",album="%(album)s"' % {
+            'artist': u', '.join([a.name for a in track.artists]),
+            'title': track.name,
+            'album': track.album.name,
+        }
+        logger.debug('Setting tags to: %s', tags)
+        self.gst_taginject.set_property('tags', tags)
