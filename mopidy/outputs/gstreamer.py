@@ -9,11 +9,10 @@ from pykka.registry import ActorRegistry
 
 from mopidy import settings
 from mopidy.backends.base import Backend
-from mopidy.outputs.base import BaseOutput
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
-class GStreamerOutput(ThreadingActor, BaseOutput):
+class GStreamerOutput(ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
 
