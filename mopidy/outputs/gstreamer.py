@@ -79,7 +79,7 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         if not settings.SHOUTCAST_SERVER:
             return None
 
-        description = ['%s ! shout2send' % settings.SHOUTCAST_ENCODER]
+        description = ['audioconvert ! %s ! shout2send' % settings.SHOUTCAST_ENCODER]
         options = {
             u'ip': settings.SHOUTCAST_SERVER,
             u'mount': settings.SHOUTCAST_MOUNT,

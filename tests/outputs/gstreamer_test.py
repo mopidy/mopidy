@@ -67,7 +67,7 @@ class GStreamerOutputTest(unittest.TestCase):
     def test_build_shoutcast_description_with_server(self):
         settings.SHOUTCAST_SERVER = '127.0.0.1'
 
-        expected = u'%s ! ' % settings.SHOUTCAST_ENCODER + \
+        expected = u'audioconvert ! %s ! ' % settings.SHOUTCAST_ENCODER + \
             u'shout2send ip="127.0.0.1" mount="/stream" ' \
             u'password="hackme" port="8000" username="source"'
         result = self.output._build_shoutcast_description()
@@ -77,7 +77,7 @@ class GStreamerOutputTest(unittest.TestCase):
         settings.SHOUTCAST_SERVER = '127.0.0.1'
         settings.SHOUTCAST_MOUNT = '/stream.mp3'
 
-        expected = u'%s ! ' % settings.SHOUTCAST_ENCODER + \
+        expected = u'audioconvert ! %s ! ' % settings.SHOUTCAST_ENCODER + \
             u'shout2send ip="127.0.0.1" mount="/stream.mp3" ' \
             u'password="hackme" port="8000" username="source"'
         result = self.output._build_shoutcast_description()
@@ -88,7 +88,7 @@ class GStreamerOutputTest(unittest.TestCase):
         settings.SHOUTCAST_USER = 'john'
         settings.SHOUTCAST_PASSWORD = 'doe'
 
-        expected = u'%s ! ' % settings.SHOUTCAST_ENCODER + \
+        expected = u'audioconvert ! %s ! ' % settings.SHOUTCAST_ENCODER + \
             u'shout2send ip="127.0.0.1" mount="/stream" ' \
             u'password="doe" port="8000" username="john"'
         result = self.output._build_shoutcast_description()
@@ -99,7 +99,7 @@ class GStreamerOutputTest(unittest.TestCase):
         settings.SHOUTCAST_USER = None
         settings.SHOUTCAST_PASSWORD = None
 
-        expected = u'%s ! shout2send ' % settings.SHOUTCAST_ENCODER + \
+        expected = u'audioconvert ! %s ! shout2send ' % settings.SHOUTCAST_ENCODER + \
             u'ip="127.0.0.1" mount="/stream" port="8000"'
         result = self.output._build_shoutcast_description()
         self.assertEqual(expected, result)
