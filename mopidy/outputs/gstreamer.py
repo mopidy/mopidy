@@ -53,11 +53,16 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         uridecodebin.connect('pad-added', self._process_new_pad, pad)
         self.gst_pipeline.add(uridecodebin)
 
-        self._add_output(settings.GSTREAMER_AUDIO_SINK)
+        localaudio = settings.GSTREAMER_AUDIO_SINK
+        shoutcast = self._build_shoutcast_description()
 
-        shoutcast_bin = self._build_shoutcast_description()
-        if shoutcast_bin:
-            self._add_output(shoutcast_bin)
+        if localaudio:
+            self._add_output(localaudio)
+        if shoutcast:
+            self._add_output(shoutcast)
+        if not localaudio and not shoutcast:
+            logger.error('No proper output channels have been setup.')
+            self._add_output('fakesink')
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
