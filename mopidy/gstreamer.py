@@ -8,9 +8,42 @@ from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
 from mopidy import settings
+from mopidy.utils import get_class
 from mopidy.backends.base import Backend
 
-logger = logging.getLogger('mopidy.outputs.gstreamer')
+logger = logging.getLogger('mopidy.gstreamer')
+
+class BaseOutput(object):
+    def connect_bin(self, pipeline, element_to_link_to):
+        """
+        Connect output bin to pipeline and given element.
+        """
+        description = 'queue ! %s' % self.describe_bin()
+        logger.debug('Adding new output to tee: %s', description)
+
+        output = self.parse_bin(description)
+        self.modify_bin(output)
+
+        pipeline.add(output)
+        output.sync_state_with_parent()
+        gst.element_link_many(element_to_link_to, output)
+
+    def parse_bin(self, description):
+        return gst.parse_bin_from_description(description, True)
+
+    def modify_bin(self, output):
+        """
+        Modifies bin before it is installed if needed
+        """
+        pass
+
+    def describe_bin(self):
+        """
+        Describe bin to be parsed.
+
+        Must be implemented by subclasses.
+        """
+        raise NotImplementedError
 
 class GStreamer(ThreadingActor):
     """
@@ -55,52 +88,14 @@ class GStreamer(ThreadingActor):
             self.gst_convert.get_pad('sink'))
         self.gst_pipeline.add(self.gst_uridecodebin)
 
-        localaudio = settings.GSTREAMER_AUDIO_SINK
-        shoutcast = self._build_shoutcast_description()
-
-        if localaudio:
-            self._add_output(localaudio)
-        if shoutcast:
-            self._add_output(shoutcast)
-        if not localaudio and not shoutcast:
-            logger.error('No proper output channels have been setup.')
-            self._add_output('fakesink')
+        for output in settings.OUTPUTS:
+            output_cls = get_class(output)()
+            output_cls.connect_bin(self.gst_pipeline, self.gst_tee)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
         gst_bus.add_signal_watch()
         gst_bus.connect('message', self._process_gstreamer_message)
-
-    def _add_output(self, description):
-        bin = 'queue ! %s' % description
-        logger.debug('Adding output bin to tee: %s', bin)
-        output = gst.parse_bin_from_description(bin, True)
-        self.gst_pipeline.add(output)
-        output.sync_state_with_parent()
-        gst.element_link_many(self.gst_tee, output)
-
-    def _build_shoutcast_description(self):
-        if settings.SHOUTCAST_OVERRIDE:
-            return settings.SHOUTCAST_OVERRIDE
-
-        if not settings.SHOUTCAST_SERVER:
-            return None
-
-        description = ['audioconvert ! %s ! shout2send' % settings.SHOUTCAST_ENCODER]
-        options = {
-            u'ip': settings.SHOUTCAST_SERVER,
-            u'mount': settings.SHOUTCAST_MOUNT,
-            u'port': settings.SHOUTCAST_PORT,
-            u'username': settings.SHOUTCAST_USER,
-            u'password': settings.SHOUTCAST_PASSWORD,
-        }
-
-        for key, value in sorted(options.items()):
-            if value:
-                description.append('%s="%s"' % (key, value))
-
-        return u' '.join(description)
-
 
     def _process_new_pad(self, source, pad, target_pad):
         pad.link(target_pad)

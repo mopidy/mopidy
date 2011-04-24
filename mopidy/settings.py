@@ -20,6 +20,18 @@ BACKENDS = (
     u'mopidy.backends.spotify.SpotifyBackend',
 )
 
+#: List of outputs to use. See :mod:`mopidy.outputs` for all available
+#: backends
+#:
+#: Default::
+#:
+#:     OUTPUTS = (
+#:         u'mopidy.outputs.LocalAudioOutput',
+#:     )
+OUTPUTS = (
+    u'mopidy.outputs.LocalAudioOutput',
+)
+
 #: The log format used for informational logging.
 #:
 #: See http://docs.python.org/library/logging.html#formatter-objects for
@@ -54,12 +66,12 @@ FRONTENDS = (
     u'mopidy.frontends.lastfm.LastfmFrontend',
 )
 
-#: Which GStreamer audio sink to use in :mod:`mopidy.outputs.gstreamer`.
+#: Which GStreamer bin description to use in :mod:`mopidy.outputs.CustomOutput`.
 #:
 #: Default::
 #:
-#:     GSTREAMER_AUDIO_SINK = u'autoaudiosink'
-GSTREAMER_AUDIO_SINK = u'autoaudiosink'
+#:     CUSTOM_OUTPUT = None
+CUSTOM_OUTPUT= None
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
 #:
