@@ -57,7 +57,9 @@ class SpotifyTranslator(object):
             return Playlist(
                 uri=str(Link.from_playlist(spotify_playlist)),
                 name=spotify_playlist.name().decode(ENCODING),
-                tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
+                # FIXME if check on link is a hackish workaround for is_local
+                tracks=[cls.to_mopidy_track(t) for t in spotify_playlist
+                    if str(Link.from_track(t, 0))],
             )
         except SpotifyError, e:
             logger.warning(u'Failed translating Spotify playlist '
