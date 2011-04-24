@@ -10,7 +10,7 @@ from mopidy import get_version, settings
 from mopidy.backends.base import Backend
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
-from mopidy.outputs.base import BaseOutput
+from mopidy.gstreamer import GStreamer
 from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.backends.spotify.session_manager')
@@ -40,7 +40,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self.connect()
 
     def setup(self):
-        output_refs = ActorRegistry.get_by_class(BaseOutput)
+        output_refs = ActorRegistry.get_by_class(GStreamer)
         assert len(output_refs) == 1, 'Expected exactly one running output.'
         self.output = output_refs[0].proxy()
 

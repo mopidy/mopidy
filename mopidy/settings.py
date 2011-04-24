@@ -143,13 +143,6 @@ MIXER_EXT_SPEAKERS_B = None
 #:     MIXER_MAX_VOLUME = 100
 MIXER_MAX_VOLUME = 100
 
-#: Audio output handler to use.
-#:
-#: Default::
-#:
-#:     OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
-OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
-
 #: Which address Mopidy's MPD server should bind to.
 #:
 #:Examples:

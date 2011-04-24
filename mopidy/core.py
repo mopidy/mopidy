@@ -5,6 +5,7 @@ import time
 from pykka.registry import ActorRegistry
 
 from mopidy import get_version, settings, OptionalDependencyError
+from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
@@ -18,7 +19,7 @@ def main():
     setup_logging(options.verbosity_level, options.save_debug_log)
     setup_settings()
     setup_gobject_loop()
-    setup_output()
+    setup_gstreamer()
     setup_mixer()
     setup_backend()
     setup_frontends()
@@ -54,8 +55,8 @@ def setup_gobject_loop():
     gobject_loop.start()
     return gobject_loop
 
-def setup_output():
-    return get_class(settings.OUTPUT).start().proxy()
+def setup_gstreamer():
+    return GStreamer().start().proxy()
 
 def setup_mixer():
     return get_class(settings.MIXER).start().proxy()
