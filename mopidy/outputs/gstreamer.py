@@ -48,10 +48,13 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
 
         self.gst_tee = self.gst_pipeline.get_by_name('tee')
         self.gst_convert = self.gst_pipeline.get_by_name('convert')
+        self.gst_volume = self.gst_pipeline.get_by_name('volume')
+        self.gst_taginject = self.gst_pipeline.get_by_name('tag')
 
-        uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
-        uridecodebin.connect('pad-added', self._process_new_pad, pad)
-        self.gst_pipeline.add(uridecodebin)
+        self.gst_uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
+        self.gst_uridecodebin.connect('pad-added', self._process_new_pad,
+            self.gst_convert.get_pad('sink'))
+        self.gst_pipeline.add(self.gst_uridecodebin)
 
         localaudio = settings.GSTREAMER_AUDIO_SINK
         shoutcast = self._build_shoutcast_description()
@@ -124,7 +127,7 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
     def play_uri(self, uri):
         """Play audio at URI"""
         self.set_state('READY')
-        self.gst_pipeline.get_by_name('uri').set_property('uri', uri)
+        self.gst_uridecodebin.set_property('uri', uri)
         return self.set_state('PLAYING')
 
     def deliver_data(self, caps_string, data):
@@ -188,11 +191,9 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
 
     def get_volume(self):
         """Get volume in range [0..100]"""
-        gst_volume = self.gst_pipeline.get_by_name('volume')
-        return int(gst_volume.get_property('volume') * 100)
+        return int(self.gst_volume.get_property('volume') * 100)
 
     def set_volume(self, volume):
         """Set volume in range [0..100]"""
-        gst_volume = self.gst_pipeline.get_by_name('volume')
-        gst_volume.set_property('volume', volume / 100.0)
+        self.gst_volume.set_property('volume', volume / 100.0)
         return True
