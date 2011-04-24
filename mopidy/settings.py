@@ -174,6 +174,51 @@ MPD_SERVER_PASSWORD = None
 #: Default: 6600
 MPD_SERVER_PORT = 6600
 
+#: Servar that runs Shoutcast server to send stream to.
+#:
+#: Default: :class:`None`, disables shoutcast if set to :class:`None`
+SHOUTCAST_SERVER = None
+
+#: User to authenticate as against Shoutcast server.
+#:
+#: Default: 'source'
+SHOUTCAST_USER = u'source'
+
+#: Password to authenticate with against Shoutcast server.
+#:
+#: Default: 'hackme'
+SHOUTCAST_PASSWORD = u'hackme'
+
+#: Port to use for streaming to Shoutcast server.
+#:
+#: Default: 8000
+SHOUTCAST_PORT = 8000
+
+#: Mountpoint to use for the stream on the Shoutcast server.
+#:
+#: Default: /stream
+SHOUTCAST_MOUNT = u'/stream'
+
+#: Encoder to use to process audio data before streaming.
+#:
+#: Default: vorbisenc ! oggmux
+SHOUTCAST_ENCODER = u'vorbisenc ! oggmux'
+
+#: Overrides to allow advanced setup of shoutcast. Using this settings implies
+#: that all other SHOUTCAST_* settings will be ignored.
+#:
+#: Examples:
+#:
+#: ``vorbisenc ! oggmux ! shout2send mount=/stream port=8000``
+#:     Encode with vorbis and use ogg mux.
+#: ``lame bitrate=320 ! shout2send mount=/stream port=8000``
+#:     Encode with lame to bitrate=320.
+#:
+#: For all options see gst-inspect-0.10 lame, vorbisenc and shout2send.
+#:
+#: Default: :class:`None`
+SHOUTCAST_OVERRIDE = None
+
 #: Path to the Spotify cache.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.

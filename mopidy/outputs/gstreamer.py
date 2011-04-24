@@ -68,6 +68,29 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         output.sync_state_with_parent()
         gst.element_link_many(self.gst_tee, output)
 
+    def _build_shoutcast_description(self):
+        if settings.SHOUTCAST_OVERRIDE:
+            return settings.SHOUTCAST_OVERRIDE
+
+        if not settings.SHOUTCAST_SERVER:
+            return None
+
+        description = ['%s ! shout2send' % settings.SHOUTCAST_ENCODER]
+        options = {
+            u'ip': settings.SHOUTCAST_SERVER,
+            u'mount': settings.SHOUTCAST_MOUNT,
+            u'port': settings.SHOUTCAST_PORT,
+            u'username': settings.SHOUTCAST_USER,
+            u'password': settings.SHOUTCAST_PASSWORD,
+        }
+
+        for key, value in sorted(options.items()):
+            if value:
+                description.append('%s="%s"' % (key, value))
+
+        return u' '.join(description)
+
+
     def _process_new_pad(self, source, pad, target_pad):
         pad.link(target_pad)
 
