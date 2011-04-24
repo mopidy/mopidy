@@ -183,8 +183,8 @@ MPD_SERVER_PORT = 6600
 #:
 #: Default::
 #:
-#:    SHOUTCAST_SERVER = None # Must be set to enable shoutcase
-SHOUTCAST_SERVER = None
+#:    SHOUTCAST_SERVER = u'127.0.0.1'
+SHOUTCAST_SERVER = u'127.0.0.1'
 
 #: User to authenticate as against Shoutcast server.
 #:

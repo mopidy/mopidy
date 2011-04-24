@@ -18,11 +18,12 @@ class ShoutcastOutput(BaseOutput):
         if settings.SHOUTCAST_OVERRIDE:
             return settings.SHOUTCAST_OVERRIDE
 
-        if not settings.SHOUTCAST_SERVER:
-            return None
+        return 'audioconvert ! %s ! shout2send name=shoutcast' \
+            % settings.SHOUTCAST_ENCODER
 
-        description = ['audioconvert ! %s ! shout2send' % settings.SHOUTCAST_ENCODER]
-        options = {
+    def modify_bin(self, output):
+        shoutcast = output.get_by_name('shoutcast')
+        properties = {
             u'ip': settings.SHOUTCAST_SERVER,
             u'mount': settings.SHOUTCAST_MOUNT,
             u'port': settings.SHOUTCAST_PORT,
@@ -30,8 +31,6 @@ class ShoutcastOutput(BaseOutput):
             u'password': settings.SHOUTCAST_PASSWORD,
         }
 
-        for key, value in sorted(options.items()):
+        for key, value in properties.items():
             if value:
-                description.append('%s="%s"' % (key, value))
-
-        return u' '.join(description)
+                shoutcast.set_property(key, value)
