@@ -9,26 +9,26 @@ if sys.platform == 'win32':
     raise SkipTest
 
 from mopidy import settings
-from mopidy.outputs.gstreamer import GStreamerOutput
+from mopidy.gstreamer import GStreamer
 from mopidy.utils.path import path_to_uri
 
 from tests import path_to_data_dir
 
-class GStreamerOutputTest(unittest.TestCase):
+class GStreamerTest(unittest.TestCase):
     def setUp(self):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.output = GStreamerOutput()
-        self.output.on_start()
+        self.gstreamer = GStreamer()
+        self.gstreamer.on_start()
 
     def tearDown(self):
         settings.runtime.clear()
 
     def test_play_uri_existing_file(self):
-        self.assertTrue(self.output.play_uri(self.song_uri))
+        self.assertTrue(self.gstreamer.play_uri(self.song_uri))
 
     def test_play_uri_non_existing_file(self):
-        self.assertFalse(self.output.play_uri(self.song_uri + 'bogus'))
+        self.assertFalse(self.gstreamer.play_uri(self.song_uri + 'bogus'))
 
     @SkipTest
     def test_deliver_data(self):
@@ -39,19 +39,19 @@ class GStreamerOutputTest(unittest.TestCase):
         pass # TODO
 
     def test_default_get_volume_result(self):
-        self.assertEqual(100, self.output.get_volume())
+        self.assertEqual(100, self.gstreamer.get_volume())
 
     def test_set_volume(self):
-        self.assertTrue(self.output.set_volume(50))
-        self.assertEqual(50, self.output.get_volume())
+        self.assertTrue(self.gstreamer.set_volume(50))
+        self.assertEqual(50, self.gstreamer.get_volume())
 
     def test_set_volume_to_zero(self):
-        self.assertTrue(self.output.set_volume(0))
-        self.assertEqual(0, self.output.get_volume())
+        self.assertTrue(self.gstreamer.set_volume(0))
+        self.assertEqual(0, self.gstreamer.get_volume())
 
     def test_set_volume_to_one_hundred(self):
-        self.assertTrue(self.output.set_volume(100))
-        self.assertEqual(100, self.output.get_volume())
+        self.assertTrue(self.gstreamer.set_volume(100))
+        self.assertEqual(100, self.gstreamer.get_volume())
 
     @SkipTest
     def test_set_state(self):
@@ -62,7 +62,7 @@ class GStreamerOutputTest(unittest.TestCase):
         pass # TODO
 
     def test_build_shoutcast_description_without_server(self):
-        self.assertEqual(None, self.output._build_shoutcast_description())
+        self.assertEqual(None, self.gstreamer._build_shoutcast_description())
 
     def test_build_shoutcast_description_with_server(self):
         settings.SHOUTCAST_SERVER = '127.0.0.1'
@@ -70,7 +70,7 @@ class GStreamerOutputTest(unittest.TestCase):
         expected = u'audioconvert ! %s ! ' % settings.SHOUTCAST_ENCODER + \
             u'shout2send ip="127.0.0.1" mount="/stream" ' \
             u'password="hackme" port="8000" username="source"'
-        result = self.output._build_shoutcast_description()
+        result = self.gstreamer._build_shoutcast_description()
         self.assertEqual(expected, result)
 
     def test_build_shoutcast_description_with_mount(self):
@@ -98,19 +98,19 @@ class GStreamerOutputTest(unittest.TestCase):
     def test_build_shoutcast_description_with_override(self):
         settings.SHOUTCAST_OVERRIDE = 'foobar'
 
-        result = self.output._build_shoutcast_description()
+        result = self.gstreamer._build_shoutcast_description()
         self.assertEqual('foobar', result)
 
     def test_build_shoutcast_description_with_override_and_server(self):
         settings.SHOUTCAST_OVERRIDE = 'foobar'
         settings.SHOUTCAST_SERVER = '127.0.0.1'
 
-        result = self.output._build_shoutcast_description()
+        result = self.gstreamer._build_shoutcast_description()
         self.assertEqual('foobar', result)
 
     def check_shoutcast_options(self, options):
         expected  = u'audioconvert ! %s ! shout2send ' % settings.SHOUTCAST_ENCODER
         expected += options
 
-        result = self.output._build_shoutcast_description()
+        result = self.gstreamer._build_shoutcast_description()
         self.assertEqual(expected, result)

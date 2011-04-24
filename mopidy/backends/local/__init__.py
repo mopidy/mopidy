@@ -12,7 +12,7 @@ from mopidy.backends.base import (Backend, CurrentPlaylistController,
     BasePlaybackProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
-from mopidy.outputs.gstreamer import GStreamerOutput
+from mopidy.gstreamer import GStreamer
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
@@ -53,7 +53,7 @@ class LocalBackend(ThreadingActor, Backend):
         self.output = None
 
     def on_start(self):
-        output_refs = ActorRegistry.get_by_class(GStreamerOutput)
+        output_refs = ActorRegistry.get_by_class(GStreamer)
         assert len(output_refs) == 1, 'Expected exactly one running output.'
         self.output = output_refs[0].proxy()
 

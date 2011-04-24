@@ -12,7 +12,7 @@ from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
-class GStreamerOutput(ThreadingActor):
+class GStreamer(ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
 

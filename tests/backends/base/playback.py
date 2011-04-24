@@ -4,7 +4,7 @@ import random
 import time
 
 from mopidy.models import Track
-from mopidy.outputs.gstreamer import GStreamerOutput
+from mopidy.gstreamer import GStreamer
 
 from tests import SkipTest
 from tests.backends.base import populate_playlist
@@ -16,7 +16,7 @@ class PlaybackControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
-        self.backend.output = mock.Mock(spec=GStreamerOutput)
+        self.backend.output = mock.Mock(spec=GStreamer)
         self.playback = self.backend.playback
         self.current_playlist = self.backend.current_playlist
 
