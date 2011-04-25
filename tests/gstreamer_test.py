@@ -14,6 +14,8 @@ from mopidy.utils.path import path_to_uri
 
 from tests import path_to_data_dir
 
+# TODO BaseOutputTest?
+
 class GStreamerTest(unittest.TestCase):
     def setUp(self):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
@@ -60,57 +62,3 @@ class GStreamerTest(unittest.TestCase):
     @SkipTest
     def test_set_position(self):
         pass # TODO
-
-    def test_build_shoutcast_description_without_server(self):
-        self.assertEqual(None, self.gstreamer._build_shoutcast_description())
-
-    def test_build_shoutcast_description_with_server(self):
-        settings.SHOUTCAST_SERVER = '127.0.0.1'
-
-        expected = u'audioconvert ! %s ! ' % settings.SHOUTCAST_ENCODER + \
-            u'shout2send ip="127.0.0.1" mount="/stream" ' \
-            u'password="hackme" port="8000" username="source"'
-        result = self.gstreamer._build_shoutcast_description()
-        self.assertEqual(expected, result)
-
-    def test_build_shoutcast_description_with_mount(self):
-        settings.SHOUTCAST_SERVER = '127.0.0.1'
-        settings.SHOUTCAST_MOUNT = '/stream.mp3'
-
-        self.check_shoutcast_options(u'ip="127.0.0.1" mount="/stream.mp3" '
-            u'password="hackme" port="8000" username="source"')
-
-    def test_build_shoutcast_description_with_user_and_passwod(self):
-        settings.SHOUTCAST_SERVER = '127.0.0.1'
-        settings.SHOUTCAST_USER = 'john'
-        settings.SHOUTCAST_PASSWORD = 'doe'
-
-        self.check_shoutcast_options('ip="127.0.0.1" mount="/stream" '
-            u'password="doe" port="8000" username="john"')
-
-    def test_build_shoutcast_description_unset_user_and_pass(self):
-        settings.SHOUTCAST_SERVER = '127.0.0.1'
-        settings.SHOUTCAST_USER = None
-        settings.SHOUTCAST_PASSWORD = None
-
-        self.check_shoutcast_options(u'ip="127.0.0.1" mount="/stream" port="8000"')
-
-    def test_build_shoutcast_description_with_override(self):
-        settings.SHOUTCAST_OVERRIDE = 'foobar'
-
-        result = self.gstreamer._build_shoutcast_description()
-        self.assertEqual('foobar', result)
-
-    def test_build_shoutcast_description_with_override_and_server(self):
-        settings.SHOUTCAST_OVERRIDE = 'foobar'
-        settings.SHOUTCAST_SERVER = '127.0.0.1'
-
-        result = self.gstreamer._build_shoutcast_description()
-        self.assertEqual('foobar', result)
-
-    def check_shoutcast_options(self, options):
-        expected  = u'audioconvert ! %s ! shout2send ' % settings.SHOUTCAST_ENCODER
-        expected += options
-
-        result = self.gstreamer._build_shoutcast_description()
-        self.assertEqual(expected, result)
