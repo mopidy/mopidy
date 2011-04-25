@@ -173,7 +173,7 @@ MPD_SERVER_PORT = 6600
 #: Default::
 #:
 #:     OUTPUTS = (
-#:         u'mopidy.outputs.LocalAudioOutput',
+#:         u'mopidy.outputs.LocalOutput',
 #:     )
 OUTPUTS = (
     u'mopidy.outputs.LocalOutput',
