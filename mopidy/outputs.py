@@ -1,13 +1,11 @@
 from mopidy import settings
 from mopidy.gstreamer import BaseOutput
 
-class LocalAudioOutput(BaseOutput):
+class LocalOutput(BaseOutput):
     def describe_bin(self):
+        if settings.LOCALOUTPUT_OVERRIDE:
+            return settings.LOCALOUTPUT_OVERRIDE
         return 'autoaudiosink'
-
-class CustomOutput(BaseOutput):
-    def describe_bin(self):
-        return settings.CUSTOM_OUTPUT
 
 class NullOutput(BaseOutput):
     def describe_bin(self):

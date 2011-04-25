@@ -70,8 +70,8 @@ FRONTENDS = (
 #:
 #: Default::
 #:
-#:     CUSTOM_OUTPUT = None
-CUSTOM_OUTPUT= None
+#:     LOCALOUTPUT_OVERRIDE = None
+LOCALOUTPUT_OVERRIDE = None
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
 #:
