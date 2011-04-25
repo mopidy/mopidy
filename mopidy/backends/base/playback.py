@@ -5,6 +5,7 @@ import time
 from pykka.registry import ActorRegistry
 
 from mopidy.frontends.base import BaseFrontend
+from mopidy.outputs.base import BaseOutput
 
 logger = logging.getLogger('mopidy.backends.base')
 
@@ -288,6 +289,9 @@ class PlaybackController(object):
     @property
     def time_position(self):
         """Time position in milliseconds."""
+        output_position = self._time_position_from_output()
+        if output_position is not None:
+            return output_position
         if self.state == self.PLAYING:
             time_since_started = (self._current_wall_time -
                 self.play_time_started)
@@ -296,6 +300,13 @@ class PlaybackController(object):
             return self.play_time_accumulated
         elif self.state == self.STOPPED:
             return 0
+
+    def _time_position_from_output(self):
+        output_refs = ActorRegistry.get_by_class(BaseOutput)
+        if not output_refs:
+            return None
+        output = output_refs[0].proxy()
+        return output.get_position()
 
     def _play_time_start(self):
         self.play_time_accumulated = 0

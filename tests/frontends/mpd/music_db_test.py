@@ -386,5 +386,3 @@ class MusicDatabaseSearchTest(unittest.TestCase):
     def test_search_else_should_fail(self):
         result = self.h.handle_request(u'search "sometype" "something"')
         self.assertEqual(result[0], u'ACK [2@0] {search} incorrect arguments')
-
-

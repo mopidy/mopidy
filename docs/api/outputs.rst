@@ -17,4 +17,5 @@ Outputs are responsible for playing audio.
 Output implementations
 ======================
 
+* :mod:`mopidy.outputs.dummy`
 * :mod:`mopidy.outputs.gstreamer`
