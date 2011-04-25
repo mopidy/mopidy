@@ -1,11 +1,9 @@
+import mock
 import multiprocessing
 import random
 
-from mopidy import settings
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
-from mopidy.outputs.dummy import DummyOutput
-from mopidy.utils import get_class
+from mopidy.outputs.base import BaseOutput
 
 from tests.backends.base import populate_playlist
 
@@ -13,18 +11,12 @@ class CurrentPlaylistControllerTest(object):
     tracks = []
 
     def setUp(self):
-        self.core_queue = multiprocessing.Queue()
-        self.output = DummyOutput(self.core_queue)
-        self.backend = self.backend_class(
-            self.core_queue, self.output, DummyMixer)
+        self.backend = self.backend_class()
+        self.backend.output = mock.Mock(spec=BaseOutput)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
-
-    def tearDown(self):
-        self.backend.destroy()
-        self.output.destroy()
 
     def test_add(self):
         for track in self.tracks:

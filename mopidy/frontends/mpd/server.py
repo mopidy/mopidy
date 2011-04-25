@@ -15,9 +15,8 @@ class MpdServer(asyncore.dispatcher):
     for each client connection.
     """
 
-    def __init__(self, core_queue):
+    def __init__(self):
         asyncore.dispatcher.__init__(self)
-        self.core_queue = core_queue
 
     def start(self):
         """Start MPD server."""
@@ -47,8 +46,7 @@ class MpdServer(asyncore.dispatcher):
         (client_socket, client_socket_address) = self.accept()
         logger.info(u'MPD client connection from [%s]:%s',
             client_socket_address[0], client_socket_address[1])
-        MpdSession(self, client_socket, client_socket_address,
-            self.core_queue).start()
+        MpdSession(self, client_socket, client_socket_address).start()
 
     def handle_close(self):
         """Handle end of client connection."""

@@ -5,21 +5,134 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-0.3.0 (in development)
+0.4.0 (in development)
 ======================
 
 No description yet.
 
+
 **Important changes**
+
+- Mopidy now depends on `Pykka <http://jodal.github.com/pykka>`_ >=0.12. If you
+  install from APT, Pykka will automatically be installed. If you are not
+  installing from APT, you may install Pykka from PyPI::
+
+      sudo pip install -U Pykka
+
+- If you use the Spotify backend, you *should* upgrade to libspotify 0.0.7 and
+  the latest pyspotify from the Mopidy developers. If you install from APT,
+  libspotify and pyspotify will automatically be upgraded. If you are not
+  installing from APT, follow the instructions at
+  :doc:`/installation/libspotify/`.
+
+
+**Changes**
+
+- Mopidy now use Pykka actors for thread management and inter-thread
+  communication. The immediate advantage of this is that Mopidy now works on
+  Python 2.7. (Fixes: :issue:`66`)
 
 - Spotify backend:
 
-  - If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
-    the latest pyspotify from the Mopidy developers. Follow the instructions at
-    :doc:`/installation/libspotify/`.
+  - Fixed multiple segmentation faults due to bugs in Pyspotify. Thanks to
+    Antoine Pierlot-Garcin and Jamie Kirkpatrick for patches to Pyspotify.
 
-  - Support high bitrate (320k) audio. See
-    :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` for details.
+  - Better error messages on wrong login or network problems. Thanks to Antoine
+    Pierlot-Garcin for patches to Mopidy and Pyspotify. (Fixes: :issue:`77`)
+
+  - Reduce log level for trivial log messages from warning to info. (Fixes:
+    :issue:`71`)
+
+- Local backend:
+
+  - Fix crash in :command:`mopidy-scan` if a track has no artist name. Thanks
+    to Martins Grunskis for test and patch and "octe" for patch.
+
+  - Fix crash in `tag_cache` parsing if a track has no total number of tracks
+    in the album. Thanks to Martins Grunskis for the patch.
+
+- MPD frontend:
+
+  - Add support for "date" queries to both the ``find`` and ``search``
+    commands. This makes media library browsing in ncmpcpp work, though very
+    slow due to all the meta data requests to Spotify.
+
+  - Add support for ``play "-1"`` when in playing or paused state, which fixes
+    resume and addition of tracks to the current playlist while playing for the
+    MPoD client.
+
+  - Fix bug where ``status`` returned ``song: None``, which caused MPDroid to
+    crash. (Fixes: :issue:`69`)
+
+- Settings:
+
+  - Fix crash on ``--list-settings`` on clean installation. Thanks to Martins
+    Grunskis for the bug report and patch. (Fixes: :issue:`63`)
+
+- Packaging:
+
+  - Replace test data symlinks with real files to avoid symlink issues when
+    installing with pip. (Fixes: :issue:`68`)
+
+
+0.3.1 (2010-01-22)
+==================
+
+A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
+
+**Bugfixes**
+
+- The Spotify application key was missing from the Python package.
+
+- Installation of the Python package as a normal user failed because it did not
+  have permissions to install ``mopidy.desktop``. The file is now only
+  installed if the installation is executed as the root user.
+
+
+0.3.0 (2010-01-22)
+==================
+
+Mopidy 0.3.0 brings a bunch of small changes all over the place, but no large
+changes. The main features are support for high bitrate audio from Spotify, and
+MPD password authentication.
+
+Regarding the docs, we've improved the :ref:`installation instructions
+<installation>` and done a bit of testing of the available :ref:`Android
+<android_mpd_clients>` and :ref:`iOS clients <ios_mpd_clients>` for MPD.
+
+Please note that 0.3.0 requires some updated dependencies, as listed under
+*Important changes* below. Also, there is a known bug in the Spotify playlist
+loading, as described below. As the bug will take some time to fix and has a
+known workaround, we did not want to delay the release while waiting for a fix
+to this problem.
+
+
+.. warning:: Known bug in Spotify playlist loading
+
+    There is a known bug in the loading of Spotify playlists. This bug affects
+    both Mopidy 0.2.1 and 0.3.0, given that you use libspotify 0.0.6. To avoid
+    the bug, either use Mopidy 0.2.1 with libspotify 0.0.4, or use either
+    Mopidy version with libspotify 0.0.6 and follow the simple workaround
+    described at :issue:`59`.
+
+
+**Important changes**
+
+- If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
+  the latest pyspotify from the Mopidy developers. Follow the instructions at
+  :doc:`/installation/libspotify/`.
+
+- If you use the Last.fm frontend, you need to upgrade to pylast 0.5.7. Run
+  ``sudo pip install --upgrade pylast`` or install Mopidy from APT.
+
+
+**Changes**
+
+- Spotify backend:
+
+  - Support high bitrate (320k) audio. Set the new setting
+    :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE` to :class:`True` to switch to
+    high bitrate audio.
 
   - Rename :mod:`mopidy.backends.libspotify` to :mod:`mopidy.backends.spotify`.
     If you have set :attr:`mopidy.settings.BACKENDS` explicitly, you may need
@@ -27,78 +140,106 @@ No description yet.
 
   - Catch and log error caused by playlist folder boundaries being threated as
     normal playlists. More permanent fix requires support for checking playlist
-    types in pyspotify.
+    types in pyspotify (see :issue:`62`).
 
-- Last.fm frontend:
-
-  - If you use the Last.fm frontend, you need to upgrade to pylast 0.5.
-
-  - Update to use Last.fm's new Scrobbling 2.0 API, as the old Submissions
-    Protocol 1.2.1 is deprecated. (Fixes: :issue:`33`)
-
-
-**Changes**
-
-- Settings:
-
-  - Automatically expand ``~`` to the user's home directory and make the path
-    absolute for settings with names ending in ``_PATH`` or ``_FILE``.
-  - Rename the following settings. The settings validator will warn you if you
-    need to change your local settings.
-
-      - ``LOCAL_MUSIC_FOLDER`` to :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
-      - ``LOCAL_PLAYLIST_FOLDER`` to
-        :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
-      - ``LOCAL_TAG_CACHE`` to :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
-      - ``SPOTIFY_LIB_CACHE`` to :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
-
-- Packaging and distribution:
-
-  - Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
-    application menus.
-  - Create infrastructure for creating Debian packages of Mopidy.
-
-- MPD frontend:
-
-  - Support ``setvol 50`` without quotes around the argument. Fixes volume
-    control in Droid MPD.
-  - Support ``seek 1 120`` without quotes around the arguments. Fixes seek in
-    Droid MPD.
+  - Fix crash on failed lookup of track by URI. (Fixes: :issue:`60`)
 
 - Local backend:
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
-    any help from the original MPD server.
-  - Support UTF-8 encoded tag caches with non-ASCII characters.
+    any help from the original MPD server. See :ref:`generating_a_tag_cache`
+    for instructions on how to use it.
 
-- Models:
+  - Fix support for UTF-8 encoding in tag caches.
+
+- MPD frontend:
+
+  - Add support for password authentication. See
+    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` and
+    :ref:`use_mpd_on_a_network` for details on how to use it. (Fixes:
+    :issue:`41`)
+
+  - Support ``setvol 50`` without quotes around the argument. Fixes volume
+    control in Droid MPD.
+
+  - Support ``seek 1 120`` without quotes around the arguments. Fixes seek in
+    Droid MPD.
+
+- Last.fm frontend:
+
+  - Update to use Last.fm's new Scrobbling 2.0 API, as the old Submissions
+    Protocol 1.2.1 is deprecated. (Fixes: :issue:`33`)
+
+  - Fix crash when track object does not contain all the expected meta data.
+
+  - Fix crash when response from Last.fm cannot be decoded as UTF-8. (Fixes:
+    :issue:`37`)
+
+  - Fix crash when response from Last.fm contains invalid XML.
+
+  - Fix crash when response from Last.fm has an invalid HTTP status line.
+
+- Mixers:
+
+  - Support use of unicode strings for settings specific to
+    :mod:`mopidy.mixers.nad`.
+
+- Settings:
+
+  - Automatically expand the "~" characted to the user's home directory and
+    make the path absolute for settings with names ending in ``_PATH`` or
+    ``_FILE``.
+
+  - Rename the following settings. The settings validator will warn you if you
+    need to change your local settings.
+
+    - ``LOCAL_MUSIC_FOLDER`` to :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
+    - ``LOCAL_PLAYLIST_FOLDER`` to
+      :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
+    - ``LOCAL_TAG_CACHE`` to :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
+    - ``SPOTIFY_LIB_CACHE`` to :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
+
+  - Fix bug which made settings set to :class:`None` or 0 cause a
+    :exc:`mopidy.SettingsError` to be raised.
+
+- Packaging and distribution:
+
+  - Setup APT repository and crate Debian packages of Mopidy. See
+    :ref:`installation` for instructions for how to install Mopidy, including
+    all dependencies, from APT.
+
+  - Install ``mopidy.desktop`` file that makes Mopidy available from e.g. Gnome
+    application menus.
+
+- API:
 
   - Rename and generalize ``Playlist._with(**kwargs)`` to
     :meth:`mopidy.models.ImmutableObject.copy`.
+
   - Add ``musicbrainz_id`` field to :class:`mopidy.models.Artist`,
     :class:`mopidy.models.Album`, and :class:`mopidy.models.Track`.
 
-- Introduce the :ref:`provider concept <backend-concepts>`. Split the backend
-  API into a :ref:`backend controller API <backend-controller-api>` (for
-  frontend use) and a :ref:`backend provider API <backend-provider-api>` (for
-  backend implementation use), which includes the following changes:
+  - Prepare for multi-backend support (see :issue:`40`) by introducing the
+    :ref:`provider concept <backend-concepts>`. Split the backend API into a
+    :ref:`backend controller API <backend-controller-api>` (for frontend use)
+    and a :ref:`backend provider API <backend-provider-api>` (for backend
+    implementation use), which includes the following changes:
 
-  - Rename ``BaseBackend`` to :class:`mopidy.backends.base.Backend`.
-  - Rename ``BaseCurrentPlaylistController`` to
-    :class:`mopidy.backends.base.CurrentPlaylistController`.
-  - Split ``BaseLibraryController`` to
-    :class:`mopidy.backends.base.LibraryController` and
-    :class:`mopidy.backends.base.BaseLibraryProvider`.
-  - Split ``BasePlaybackController`` to
-    :class:`mopidy.backends.base.PlaybackController` and
-    :class:`mopidy.backends.base.BasePlaybackProvider`.
-  - Split ``BaseStoredPlaylistsController`` to
-    :class:`mopidy.backends.base.StoredPlaylistsController` and
-    :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`.
-
-- Other API and package structure cleaning:
+    - Rename ``BaseBackend`` to :class:`mopidy.backends.base.Backend`.
+    - Rename ``BaseCurrentPlaylistController`` to
+      :class:`mopidy.backends.base.CurrentPlaylistController`.
+    - Split ``BaseLibraryController`` to
+      :class:`mopidy.backends.base.LibraryController` and
+      :class:`mopidy.backends.base.BaseLibraryProvider`.
+    - Split ``BasePlaybackController`` to
+      :class:`mopidy.backends.base.PlaybackController` and
+      :class:`mopidy.backends.base.BasePlaybackProvider`.
+    - Split ``BaseStoredPlaylistsController`` to
+      :class:`mopidy.backends.base.StoredPlaylistsController` and
+      :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`.
 
   - Move ``BaseMixer`` to :class:`mopidy.mixers.base.BaseMixer`.
+
   - Add docs for the current non-stable output API,
     :class:`mopidy.outputs.base.BaseOutput`.
 

@@ -2,11 +2,17 @@ import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import dispatcher
+from mopidy.mixers.dummy import DummyMixer
 
 class StickersHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_sticker_get(self):
         result = self.h.handle_request(

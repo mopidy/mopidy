@@ -11,7 +11,7 @@ from mopidy.backends.local import LocalBackend
 from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
-from tests import data_folder
+from tests import path_to_data_dir
 from tests.backends.base.playback import PlaybackControllerTest
 from tests.backends.local import generate_song
 
@@ -32,7 +32,7 @@ class LocalPlaybackControllerTest(PlaybackControllerTest, unittest.TestCase):
         settings.runtime.clear()
 
     def add_track(self, path):
-        uri = path_to_uri(data_folder(path))
+        uri = path_to_uri(path_to_data_dir(path))
         track = Track(uri=uri, length=4464)
         self.backend.current_playlist.add(track)
 

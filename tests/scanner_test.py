@@ -4,7 +4,7 @@ from datetime import date
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
 
-from tests import data_folder
+from tests import path_to_data_dir
 
 class FakeGstDate(object):
     def __init__(self, year, month, day):
@@ -132,12 +132,12 @@ class ScannerTest(unittest.TestCase):
         self.data = {}
 
     def scan(self, path):
-        scanner = Scanner(data_folder(path),
+        scanner = Scanner(path_to_data_dir(path),
             self.data_callback, self.error_callback)
         scanner.start()
 
     def check(self, name, key, value):
-        name = data_folder(name)
+        name = path_to_data_dir(name)
         self.assertEqual(self.data[name][key], value)
 
     def data_callback(self, data):
@@ -159,7 +159,7 @@ class ScannerTest(unittest.TestCase):
     def test_uri_is_set(self):
         self.scan('scanner/simple')
         self.check('scanner/simple/song1.mp3', 'uri', 'file://'
-            + data_folder('scanner/simple/song1.mp3'))
+            + path_to_data_dir('scanner/simple/song1.mp3'))
 
     def test_duration_is_set(self):
         self.scan('scanner/simple')

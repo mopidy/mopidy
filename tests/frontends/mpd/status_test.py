@@ -1,13 +1,24 @@
 import unittest
 
+from mopidy.backends.base import PlaybackController
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd import dispatcher
+from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
+
+PAUSED = PlaybackController.PAUSED
+PLAYING = PlaybackController.PLAYING
+STOPPED = PlaybackController.STOPPED
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend()
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_clearerror(self):
         result = self.h.handle_request(u'clearerror')
@@ -76,7 +87,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['volume']), 0)
 
     def test_status_method_contains_volume(self):
-        self.b.mixer.volume = 17
+        self.mixer.volume = 17
         result = dict(dispatcher.status.status(self.h))
         self.assert_('volume' in result)
         self.assertEqual(int(result['volume']), 17)
@@ -135,20 +146,20 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(int(result['xfade']) >= 0)
 
     def test_status_method_contains_state_is_play(self):
-        self.b.playback.state = self.b.playback.PLAYING
+        self.b.playback.state = PLAYING
         result = dict(dispatcher.status.status(self.h))
         self.assert_('state' in result)
         self.assertEqual(result['state'], 'play')
 
     def test_status_method_contains_state_is_stop(self):
-        self.b.playback.state = self.b.playback.STOPPED
+        self.b.playback.state = STOPPED
         result = dict(dispatcher.status.status(self.h))
         self.assert_('state' in result)
         self.assertEqual(result['state'], 'stop')
 
     def test_status_method_contains_state_is_pause(self):
-        self.b.playback.state = self.b.playback.PLAYING
-        self.b.playback.state = self.b.playback.PAUSED
+        self.b.playback.state = PLAYING
+        self.b.playback.state = PAUSED
         result = dict(dispatcher.status.status(self.h))
         self.assert_('state' in result)
         self.assertEqual(result['state'], 'pause')
@@ -188,8 +199,8 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(position <= total)
 
     def test_status_method_when_playing_contains_elapsed(self):
-        self.b.playback.state = self.b.playback.PAUSED
-        self.b.playback._play_time_accumulated = 59123
+        self.b.playback.state = PAUSED
+        self.b.playback.play_time_accumulated = 59123
         result = dict(dispatcher.status.status(self.h))
         self.assert_('elapsed' in result)
         self.assertEqual(int(result['elapsed']), 59123)

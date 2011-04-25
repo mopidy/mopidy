@@ -28,9 +28,9 @@ class SpotifyTranslator(object):
 
     @classmethod
     def to_mopidy_track(cls, spotify_track):
-        if not spotify_track.is_loaded():
-            return Track(name=u'[loading...]')
         uri = str(Link.from_track(spotify_track, 0))
+        if not spotify_track.is_loaded():
+            return Track(uri=uri, name=u'[loading...]')
         if dt.MINYEAR <= int(spotify_track.album().year()) <= dt.MAXYEAR:
             date = dt.date(spotify_track.album().year(), 1, 1)
         else:
@@ -60,5 +60,5 @@ class SpotifyTranslator(object):
                 tracks=[cls.to_mopidy_track(t) for t in spotify_playlist],
             )
         except SpotifyError, e:
-            logger.warning(u'Failed translating Spotify playlist '
+            logger.info(u'Failed translating Spotify playlist '
                 '(probably a playlist folder boundary): %s', e)

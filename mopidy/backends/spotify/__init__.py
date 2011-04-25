@@ -1,14 +1,18 @@
 import logging
 
+from pykka.actor import ThreadingActor
+from pykka.registry import ActorRegistry
+
 from mopidy import settings
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, PlaybackController, StoredPlaylistsController)
+from mopidy.outputs.base import BaseOutput
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
 ENCODING = 'utf-8'
 
-class SpotifyBackend(Backend):
+class SpotifyBackend(ThreadingActor, Backend):
     """
     A backend for playing music from the `Spotify <http://www.spotify.com/>`_
     music streaming service. The backend uses the official `libspotify
@@ -59,6 +63,14 @@ class SpotifyBackend(Backend):
 
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
 
+        self.output = None
+        self.spotify = None
+
+    def on_start(self):
+        output_refs = ActorRegistry.get_by_class(BaseOutput)
+        assert len(output_refs) == 1, 'Expected exactly one running output.'
+        self.output = output_refs[0].proxy()
+
         self.spotify = self._connect()
 
     def _connect(self):
@@ -67,8 +79,6 @@ class SpotifyBackend(Backend):
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         logger.debug(u'Connecting to Spotify')
         spotify = SpotifySessionManager(
-            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD,
-            core_queue=self.core_queue,
-            output=self.output)
+            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD)
         spotify.start()
         return spotify

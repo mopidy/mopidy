@@ -10,6 +10,8 @@ class LibraryController(object):
     :type provider: instance of :class:`BaseLibraryProvider`
     """
 
+    pykka_traversable = True
+
     def __init__(self, backend, provider):
         self.backend = backend
         self.provider = provider
@@ -81,6 +83,8 @@ class BaseLibraryProvider(object):
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backends.base.Backend`
     """
+
+    pykka_traversable = True
 
     def __init__(self, backend):
         self.backend = backend

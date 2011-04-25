@@ -1,8 +1,10 @@
 import glob
 import logging
-import multiprocessing
 import os
 import shutil
+
+from pykka.actor import ThreadingActor
+from pykka.registry import ActorRegistry
 
 from mopidy import settings
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
@@ -10,13 +12,13 @@ from mopidy.backends.base import (Backend, CurrentPlaylistController,
     BasePlaybackProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
-from mopidy.utils.process import pickle_connection
+from mopidy.outputs.base import BaseOutput
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
 
-class LocalBackend(Backend):
+class LocalBackend(ThreadingActor, Backend):
     """
     A backend for playing music from a local music archive.
 
@@ -48,22 +50,29 @@ class LocalBackend(Backend):
 
         self.uri_handlers = [u'file://']
 
+        self.output = None
+
+    def on_start(self):
+        output_refs = ActorRegistry.get_by_class(BaseOutput)
+        assert len(output_refs) == 1, 'Expected exactly one running output.'
+        self.output = output_refs[0].proxy()
+
 
 class LocalPlaybackProvider(BasePlaybackProvider):
     def pause(self):
-        return self.backend.output.set_state('PAUSED')
+        return self.backend.output.set_state('PAUSED').get()
 
     def play(self, track):
-        return self.backend.output.play_uri(track.uri)
+        return self.backend.output.play_uri(track.uri).get()
 
     def resume(self):
-        return self.backend.output.set_state('PLAYING')
+        return self.backend.output.set_state('PLAYING').get()
 
     def seek(self, time_position):
-        return self.backend.output.set_position(time_position)
+        return self.backend.output.set_position(time_position).get()
 
     def stop(self):
-        return self.backend.output.set_state('READY')
+        return self.backend.output.set_state('READY').get()
 
 
 class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
