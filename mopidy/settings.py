@@ -70,8 +70,8 @@ FRONTENDS = (
 #:
 #: Default::
 #:
-#:     LOCALOUTPUT_OVERRIDE = None
-LOCALOUTPUT_OVERRIDE = None
+#:     LOCAL_OUTPUT_OVERRIDE = None
+LOCAL_OUTPUT_OVERRIDE = None
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
 #:
@@ -183,46 +183,46 @@ MPD_SERVER_PORT = 6600
 #:
 #: Default::
 #:
-#:    SHOUTCAST_SERVER = u'127.0.0.1'
-SHOUTCAST_SERVER = u'127.0.0.1'
+#:    SHOUTCAST_OUTPUT_SERVER = u'127.0.0.1'
+SHOUTCAST_OUTPUT_SERVER = u'127.0.0.1'
 
 #: User to authenticate as against Shoutcast server.
 #:
 #: Default::
 #:
-#:    SHOUTCAST_USER = u'source'
-SHOUTCAST_USER = u'source'
+#:    SHOUTCAST_OUTPUT_USER = u'source'
+SHOUTCAST_OUTPUT_USER = u'source'
 
 #: Password to authenticate with against Shoutcast server.
 #:
 #: Default::
 #:
-#:    SHOUTCAST_PASSWORD = u'hackme'
-SHOUTCAST_PASSWORD = u'hackme'
+#:    SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
+SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
 
 #: Port to use for streaming to Shoutcast server.
 #:
 #: Default::
 #:
-#:    SHOUTCAST_PORT = 8000
-SHOUTCAST_PORT = 8000
+#:    SHOUTCAST_OUTPUT_PORT = 8000
+SHOUTCAST_OUTPUT_PORT = 8000
 
 #: Mountpoint to use for the stream on the Shoutcast server.
 #:
 #: Default::
 #:
-#:    SHOUTCAST_MOUNT = u'/stream'
-SHOUTCAST_MOUNT = u'/stream'
+#:    SHOUTCAST_OUTPUT_MOUNT = u'/stream'
+SHOUTCAST_OUTPUT_MOUNT = u'/stream'
 
 #: Encoder to use to process audio data before streaming.
 #:
 #: Default::
 #:
-#:     SHOUTCAST_ENCODER = u'lame mode=stereo bitrate=320'
-SHOUTCAST_ENCODER = u'lame mode=stereo bitrate=320'
+#:     SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
+SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
 
 #: Overrides to allow advanced setup of shoutcast. Using this settings implies
-#: that all other SHOUTCAST_* settings will be ignored.
+#: that all other SHOUTCAST_OUTPUT_* settings will be ignored.
 #:
 #: Examples:
 #:
@@ -235,8 +235,8 @@ SHOUTCAST_ENCODER = u'lame mode=stereo bitrate=320'
 #:
 #: Default::
 #:
-#:     SHOUTCAST_OVERRIDE = None
-SHOUTCAST_OVERRIDE = None
+#:     SHOUTCAST_OUTPUT_OVERRIDE = None
+SHOUTCAST_OUTPUT_OVERRIDE = None
 
 #: Path to the Spotify cache.
 #:
