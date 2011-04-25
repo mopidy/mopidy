@@ -45,6 +45,15 @@ class BaseOutput(object):
         """
         raise NotImplementedError
 
+    def set_properties(self, element, properties):
+        """
+        Set properties on element if they have a value.
+        """
+        for key, value in properties.items():
+            if value:
+                element.set_property(key, value)
+
+
 class GStreamer(ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
