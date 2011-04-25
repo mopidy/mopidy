@@ -20,18 +20,6 @@ BACKENDS = (
     u'mopidy.backends.spotify.SpotifyBackend',
 )
 
-#: List of outputs to use. See :mod:`mopidy.outputs` for all available
-#: backends
-#:
-#: Default::
-#:
-#:     OUTPUTS = (
-#:         u'mopidy.outputs.LocalAudioOutput',
-#:     )
-OUTPUTS = (
-    u'mopidy.outputs.LocalAudioOutput',
-)
-
 #: The log format used for informational logging.
 #:
 #: See http://docs.python.org/library/logging.html#formatter-objects for
@@ -178,6 +166,18 @@ MPD_SERVER_PASSWORD = None
 #:
 #: Default: 6600
 MPD_SERVER_PORT = 6600
+
+#: List of outputs to use. See :mod:`mopidy.outputs` for all available
+#: backends
+#:
+#: Default::
+#:
+#:     OUTPUTS = (
+#:         u'mopidy.outputs.LocalAudioOutput',
+#:     )
+OUTPUTS = (
+    u'mopidy.outputs.LocalOutput',
+)
 
 #: Servar that runs Shoutcast server to send stream to.
 #:
