@@ -26,6 +26,6 @@ class ShoutcastOutput(BaseOutput):
             u'ip': settings.SHOUTCAST_OUTPUT_SERVER,
             u'mount': settings.SHOUTCAST_OUTPUT_MOUNT,
             u'port': settings.SHOUTCAST_OUTPUT_PORT,
-            u'username': settings.SHOUTCAST_OUTPUT_USER,
+            u'username': settings.SHOUTCAST_OUTPUT_USERNAME,
             u'password': settings.SHOUTCAST_OUTPUT_PASSWORD,
         })

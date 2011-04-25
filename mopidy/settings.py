@@ -190,8 +190,8 @@ SHOUTCAST_OUTPUT_SERVER = u'127.0.0.1'
 #:
 #: Default::
 #:
-#:    SHOUTCAST_OUTPUT_USER = u'source'
-SHOUTCAST_OUTPUT_USER = u'source'
+#:    SHOUTCAST_OUTPUT_USERNAME = u'source'
+SHOUTCAST_OUTPUT_USERNAME = u'source'
 
 #: Password to authenticate with against Shoutcast server.
 #:
