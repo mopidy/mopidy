@@ -25,7 +25,7 @@ class DummyOutput(ThreadingActor, BaseOutput):
     end_of_data_stream_called = False
 
     #: For testing. Contains the current position.
-    position = None
+    position = 0
 
     #: For testing. Contains the current state.
     state = 'NULL'

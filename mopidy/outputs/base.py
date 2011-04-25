@@ -40,7 +40,7 @@ class BaseOutput(object):
 
         *MUST be implemented by subclass.*
 
-        :rtype: int or :class:`None` if unknown
+        :rtype: int
         """
         raise NotImplementedError
 

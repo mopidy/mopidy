@@ -41,7 +41,7 @@ class LocalBackend(ThreadingActor, Backend):
             provider=library_provider)
 
         playback_provider = LocalPlaybackProvider(backend=self)
-        self.playback = PlaybackController(backend=self,
+        self.playback = LocalPlaybackController(backend=self,
             provider=playback_provider)
 
         stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
@@ -56,6 +56,18 @@ class LocalBackend(ThreadingActor, Backend):
         output_refs = ActorRegistry.get_by_class(BaseOutput)
         assert len(output_refs) == 1, 'Expected exactly one running output.'
         self.output = output_refs[0].proxy()
+
+
+class LocalPlaybackController(PlaybackController):
+    def __init__(self, *args, **kwargs):
+        super(LocalPlaybackController, self).__init__(*args, **kwargs)
+
+        # XXX Why do we call stop()? Is it to set GStreamer state to 'READY'?
+        self.stop()
+
+    @property
+    def time_position(self):
+        return self.backend.output.get_position().get()
 
 
 class LocalPlaybackProvider(BasePlaybackProvider):
