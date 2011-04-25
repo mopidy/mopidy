@@ -12,7 +12,7 @@ class CurrentPlaylistControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
-        self.backend.output = mock.Mock(spec=GStreamer)
+        self.backend.gstreamer = mock.Mock(spec=GStreamer)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
