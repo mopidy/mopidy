@@ -40,6 +40,9 @@ No description yet.
   - Better error messages on wrong login or network problems. Thanks to Antoine
     Pierlot-Garcin for patches to Mopidy and Pyspotify. (Fixes: :issue:`77`)
 
+  - Reduce log level for trivial log messages from warning to info. (Fixes:
+    :issue:`71`)
+
 - Local backend:
 
   - Fix crash in :command:`mopidy-scan` if a track has no artist name. Thanks
@@ -65,6 +68,11 @@ No description yet.
 
   - Fix crash on ``--list-settings`` on clean installation. Thanks to Martins
     Grunskis for the bug report and patch. (Fixes: :issue:`63`)
+
+- Packaging:
+
+  - Replace test data symlinks with real files to avoid symlink issues when
+    installing with pip. (Fixes: :issue:`68`)
 
 
 0.3.1 (2010-01-22)
