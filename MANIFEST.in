@@ -1,4 +1,4 @@
-include LICENSE pylintrc *.rst data/mopidy.desktop
+include LICENSE pylintrc *.rst *.ini data/mopidy.desktop
 include mopidy/backends/spotify/spotify_appkey.key
 recursive-include docs *
 prune docs/_build
