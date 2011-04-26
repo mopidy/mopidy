@@ -20,7 +20,7 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
             self.backend.spotify.session.load(
                 Link.from_string(track.uri).as_track())
             self.backend.spotify.session.play(1)
-            self.backend.output.set_state('PLAYING')
+            self.backend.output.play_uri('appsrc://')
             return True
         except SpotifyError as e:
             logger.info('Playback of %s failed: %s', track.uri, e)

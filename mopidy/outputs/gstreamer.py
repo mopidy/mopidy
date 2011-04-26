@@ -46,23 +46,9 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
 
         pad = self.gst_pipeline.get_by_name('convert').get_pad('sink')
 
-        if settings.BACKENDS[0] == 'mopidy.backends.local.LocalBackend':
-            uri_bin = gst.element_factory_make('uridecodebin', 'uri')
-            uri_bin.connect('pad-added', self._process_new_pad, pad)
-            self.gst_pipeline.add(uri_bin)
-        else:
-            app_src = gst.element_factory_make('appsrc', 'appsrc')
-            app_src_caps = gst.Caps("""
-                audio/x-raw-int,
-                endianness=(int)1234,
-                channels=(int)2,
-                width=(int)16,
-                depth=(int)16,
-                signed=(boolean)true,
-                rate=(int)44100""")
-            app_src.set_property('caps', app_src_caps)
-            self.gst_pipeline.add(app_src)
-            app_src.get_pad('src').link(pad)
+        uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
+        uridecodebin.connect('pad-added', self._process_new_pad, pad)
+        self.gst_pipeline.add(uridecodebin)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
@@ -98,12 +84,12 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
 
     def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
-        app_src = self.gst_pipeline.get_by_name('appsrc')
+        source = self.gst_pipeline.get_by_name('source')
         caps = gst.caps_from_string(caps_string)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
-        app_src.set_property('caps', caps)
-        app_src.emit('push-buffer', buffer_)
+        source.set_property('caps', caps)
+        source.emit('push-buffer', buffer_)
 
     def end_of_data_stream(self):
         """
@@ -112,7 +98,7 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        self.gst_pipeline.get_by_name('appsrc').emit('end-of-stream')
+        self.gst_pipeline.get_by_name('source').emit('end-of-stream')
 
     def get_position(self):
         try:

@@ -23,13 +23,15 @@ def main():
     setup_backend()
     setup_frontends()
     try:
-        time.sleep(10000*24*60*60)
+        while ActorRegistry.get_all():
+            time.sleep(1)
+        logger.info(u'No actors left. Exiting...')
     except KeyboardInterrupt:
-        logger.info(u'Exiting...')
+        logger.info(u'User interrupt. Exiting...')
         ActorRegistry.stop_all()
 
 def parse_options():
-    parser = optparse.OptionParser(version='Mopidy %s' % get_version())
+    parser = optparse.OptionParser(version=u'Mopidy %s' % get_version())
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')

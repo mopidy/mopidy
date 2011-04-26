@@ -9,6 +9,20 @@ from .session import MpdSession
 
 logger = logging.getLogger('mopidy.frontends.mpd.server')
 
+def _try_ipv6_socket():
+    """Determine if system really supports IPv6"""
+    if not socket.has_ipv6:
+        return False
+    try:
+        socket.socket(socket.AF_INET6).close()
+        return True
+    except IOError, e:
+        logger.debug(u'Platform supports IPv6, but socket '
+            'creation failed, disabling: %s', e)
+    return False
+
+has_ipv6 = _try_ipv6_socket()
+
 class MpdServer(asyncore.dispatcher):
     """
     The MPD server. Creates a :class:`mopidy.frontends.mpd.session.MpdSession`
@@ -21,7 +35,7 @@ class MpdServer(asyncore.dispatcher):
     def start(self):
         """Start MPD server."""
         try:
-            if socket.has_ipv6:
+            if has_ipv6:
                 self.create_socket(socket.AF_INET6, socket.SOCK_STREAM)
                 # Explicitly configure socket to work for both IPv4 and IPv6
                 self.socket.setsockopt(
@@ -53,7 +67,7 @@ class MpdServer(asyncore.dispatcher):
         self.close()
 
     def _format_hostname(self, hostname):
-        if (socket.has_ipv6
+        if (has_ipv6
             and re.match('\d+.\d+.\d+.\d+', hostname) is not None):
             hostname = '::ffff:%s' % hostname
         return hostname
