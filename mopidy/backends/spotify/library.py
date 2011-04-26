@@ -1,5 +1,5 @@
 import logging
-import multiprocessing
+import Queue
 
 from spotify import Link, SpotifyError
 
@@ -54,8 +54,9 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
                     spotify_query.append(u'%s:"%s"' % (field, value))
         spotify_query = u' '.join(spotify_query)
         logger.debug(u'Spotify search query: %s' % spotify_query)
-        my_end, other_end = multiprocessing.Pipe()
-        self.backend.spotify.search(spotify_query.encode(ENCODING), other_end)
-        my_end.poll(None)
-        playlist = my_end.recv()
-        return playlist
+        queue = Queue.Queue()
+        self.backend.spotify.search(spotify_query.encode(ENCODING), queue)
+        try:
+            return queue.get(timeout=3) # XXX What is an reasonable timeout?
+        except Queue.Empty:
+            return Playlist(tracks=[])

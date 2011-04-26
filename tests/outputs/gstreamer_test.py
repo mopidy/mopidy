@@ -11,20 +11,17 @@ if sys.platform == 'win32':
 from mopidy import settings
 from mopidy.outputs.gstreamer import GStreamerOutput
 from mopidy.utils.path import path_to_uri
-from mopidy.utils.process import pickle_connection
 
-from tests import data_folder
+from tests import path_to_data_dir
 
 class GStreamerOutputTest(unittest.TestCase):
     def setUp(self):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
-        self.song_uri = path_to_uri(data_folder('song1.wav'))
-        self.core_queue = multiprocessing.Queue()
-        self.output = GStreamerOutput(self.core_queue)
-        self.output.start()
+        self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
+        self.output = GStreamerOutput()
+        self.output.on_start()
 
     def tearDown(self):
-        self.output.destroy()
         settings.runtime.clear()
 
     def test_play_uri_existing_file(self):

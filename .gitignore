@@ -2,11 +2,12 @@
 *.swp
 .coverage
 .noseids
+.tox
 MANIFEST
 build/
 cover/
 coverage.xml
 dist/
 docs/_build/
-mopidy.log
+mopidy.log*
 nosetests.xml

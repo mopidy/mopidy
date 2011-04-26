@@ -1,5 +1,4 @@
 import logging
-import multiprocessing
 import time
 
 try:
@@ -8,16 +7,17 @@ except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
+from pykka.actor import ThreadingActor
+
 from mopidy import settings, SettingsError
 from mopidy.frontends.base import BaseFrontend
-from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
 API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
-class LastfmFrontend(BaseFrontend):
+class LastfmFrontend(ThreadingActor, BaseFrontend):
     """
     Frontend which scrobbles the music you play to your `Last.fm
     <http://www.last.fm>`_ profile.
@@ -36,38 +36,11 @@ class LastfmFrontend(BaseFrontend):
     - :attr:`mopidy.settings.LASTFM_PASSWORD`
     """
 
-    def __init__(self, *args, **kwargs):
-        super(LastfmFrontend, self).__init__(*args, **kwargs)
-        (self.connection, other_end) = multiprocessing.Pipe()
-        self.thread = LastfmFrontendThread(self.core_queue, other_end)
-
-    def start(self):
-        self.thread.start()
-
-    def destroy(self):
-        self.thread.destroy()
-
-    def process_message(self, message):
-        if self.thread.is_alive():
-            self.connection.send(message)
-
-
-class LastfmFrontendThread(BaseThread):
-    def __init__(self, core_queue, connection):
-        super(LastfmFrontendThread, self).__init__(core_queue)
-        self.name = u'LastfmFrontendThread'
-        self.connection = connection
+    def __init__(self):
         self.lastfm = None
         self.last_start_time = None
 
-    def run_inside_try(self):
-        self.setup()
-        while self.lastfm is not None:
-            self.connection.poll(None)
-            message = self.connection.recv()
-            self.process_message(message)
-
-    def setup(self):
+    def on_start(self):
         try:
             username = settings.LASTFM_USERNAME
             password_hash = pylast.md5(settings.LASTFM_PASSWORD)
@@ -78,17 +51,19 @@ class LastfmFrontendThread(BaseThread):
         except SettingsError as e:
             logger.info(u'Last.fm scrobbler not started')
             logger.debug(u'Last.fm settings error: %s', e)
+            self.stop()
         except (pylast.NetworkError, pylast.MalformedResponseError,
                 pylast.WSError) as e:
             logger.error(u'Error during Last.fm setup: %s', e)
+            self.stop()
 
-    def process_message(self, message):
-        if message['command'] == 'started_playing':
+    def on_receive(self, message):
+        if message.get('command') == 'started_playing':
             self.started_playing(message['track'])
-        elif message['command'] == 'stopped_playing':
+        elif message.get('command') == 'stopped_playing':
             self.stopped_playing(message['track'], message['stop_position'])
         else:
-            pass # Ignore commands for other frontends
+            pass # Ignore any other messages
 
     def started_playing(self, track):
         artists = ', '.join([a.name for a in track.artists])

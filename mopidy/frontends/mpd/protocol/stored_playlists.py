@@ -19,8 +19,8 @@ def listplaylist(frontend, name):
         file: relative/path/to/file3.mp3
     """
     try:
-        return ['file: %s' % t.uri
-            for t in frontend.backend.stored_playlists.get(name=name).tracks]
+        playlist = frontend.backend.stored_playlists.get(name=name).get()
+        return ['file: %s' % t.uri for t in playlist.tracks]
     except LookupError:
         raise MpdNoExistError(u'No such playlist', command=u'listplaylist')
 
@@ -39,7 +39,8 @@ def listplaylistinfo(frontend, name):
         Album, Artist, Track
     """
     try:
-        return frontend.backend.stored_playlists.get(name=name).mpd_format()
+        playlist = frontend.backend.stored_playlists.get(name=name).get()
+        return playlist.mpd_format()
     except LookupError:
         raise MpdNoExistError(
             u'No such playlist', command=u'listplaylistinfo')
@@ -66,7 +67,7 @@ def listplaylists(frontend):
         Last-Modified: 2010-02-06T02:11:08Z
     """
     result = []
-    for playlist in frontend.backend.stored_playlists.playlists:
+    for playlist in frontend.backend.stored_playlists.playlists.get():
         result.append((u'playlist', playlist.name))
         last_modified = (playlist.last_modified or
             dt.datetime.now()).isoformat()
@@ -92,7 +93,7 @@ def load(frontend, name):
     - ``load`` appends the given playlist to the current playlist.
     """
     try:
-        playlist = frontend.backend.stored_playlists.get(name=name)
+        playlist = frontend.backend.stored_playlists.get(name=name).get()
         frontend.backend.current_playlist.append(playlist.tracks)
     except LookupError:
         raise MpdNoExistError(u'No such playlist', command=u'load')

@@ -7,10 +7,13 @@ from mopidy.mixers.dummy import DummyMixer
 
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
 
     def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
         settings.runtime.clear()
 
     def test_close(self):

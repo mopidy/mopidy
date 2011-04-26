@@ -39,11 +39,11 @@ class GenericCopyTets(unittest.TestCase):
         self.assertEqual('bar', copy.uri)
 
     def test_copying_track_with_private_internal_value(self):
-        artists1 = [Artist(name='foo')]
-        artists2 = [Artist(name='bar')]
-        track = Track(artists=artists1)
-        copy = track.copy(artists=artists2)
-        self.assertEqual(copy.artists, artists2)
+        artist1 = Artist(name='foo')
+        artist2 = Artist(name='bar')
+        track = Track(artists=[artist1])
+        copy = track.copy(artists=[artist2])
+        self.assert_(artist2 in copy.artists)
 
     def test_copying_track_with_invalid_key(self):
         test = lambda: Track().copy(invalid_key=True)
@@ -72,6 +72,11 @@ class ArtistTest(unittest.TestCase):
     def test_invalid_kwarg(self):
         test = lambda: Artist(foo='baz')
         self.assertRaises(TypeError, test)
+
+    def test_repr(self):
+        self.assertEquals(
+            "Artist(name='name', uri='uri')",
+            repr(Artist(uri='uri', name='name')))
 
     def test_eq_name(self):
         artist1 = Artist(name=u'name')
@@ -142,9 +147,9 @@ class AlbumTest(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, album, 'name', None)
 
     def test_artists(self):
-        artists = [Artist()]
-        album = Album(artists=artists)
-        self.assertEqual(album.artists, artists)
+        artist = Artist()
+        album = Album(artists=[artist])
+        self.assert_(artist in album.artists)
         self.assertRaises(AttributeError, setattr, album, 'artists', None)
 
     def test_num_tracks(self):
@@ -163,6 +168,16 @@ class AlbumTest(unittest.TestCase):
     def test_invalid_kwarg(self):
         test = lambda: Album(foo='baz')
         self.assertRaises(TypeError, test)
+
+    def test_repr_without_artists(self):
+        self.assertEquals(
+            "Album(artists=[], name='name', uri='uri')",
+            repr(Album(uri='uri', name='name')))
+
+    def test_repr_with_artists(self):
+        self.assertEquals(
+            "Album(artists=[Artist(name='foo')], name='name', uri='uri')",
+            repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_eq_name(self):
         album1 = Album(name=u'name')
@@ -205,8 +220,10 @@ class AlbumTest(unittest.TestCase):
 
     def test_eq(self):
         artists = [Artist()]
-        album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2, musicbrainz_id='id')
-        album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2, musicbrainz_id='id')
+        album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2,
+            musicbrainz_id='id')
+        album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2,
+            musicbrainz_id='id')
         self.assertEqual(album1, album2)
         self.assertEqual(hash(album1), hash(album2))
 
@@ -316,6 +333,16 @@ class TrackTest(unittest.TestCase):
     def test_invalid_kwarg(self):
         test = lambda: Track(foo='baz')
         self.assertRaises(TypeError, test)
+
+    def test_repr_without_artists(self):
+        self.assertEquals(
+            "Track(artists=[], name='name', uri='uri')",
+            repr(Track(uri='uri', name='name')))
+
+    def test_repr_with_artists(self):
+        self.assertEquals(
+            "Track(artists=[Artist(name='foo')], name='name', uri='uri')",
+            repr(Track(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_eq_uri(self):
         track1 = Track(uri=u'uri1')
@@ -484,7 +511,7 @@ class PlaylistTest(unittest.TestCase):
     def test_tracks(self):
         tracks = [Track(), Track(), Track()]
         playlist = Playlist(tracks=tracks)
-        self.assertEqual(playlist.tracks, tracks)
+        self.assertEqual(list(playlist.tracks), tracks)
         self.assertRaises(AttributeError, setattr, playlist, 'tracks', None)
 
     def test_length(self):
@@ -507,7 +534,7 @@ class PlaylistTest(unittest.TestCase):
         new_playlist = playlist.copy(uri=u'another uri')
         self.assertEqual(new_playlist.uri, u'another uri')
         self.assertEqual(new_playlist.name, u'a name')
-        self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(list(new_playlist.tracks), tracks)
         self.assertEqual(new_playlist.last_modified, last_modified)
 
     def test_with_new_name(self):
@@ -518,7 +545,7 @@ class PlaylistTest(unittest.TestCase):
         new_playlist = playlist.copy(name=u'another name')
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'another name')
-        self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(list(new_playlist.tracks), tracks)
         self.assertEqual(new_playlist.last_modified, last_modified)
 
     def test_with_new_tracks(self):
@@ -530,7 +557,7 @@ class PlaylistTest(unittest.TestCase):
         new_playlist = playlist.copy(tracks=new_tracks)
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'a name')
-        self.assertEqual(new_playlist.tracks, new_tracks)
+        self.assertEqual(list(new_playlist.tracks), new_tracks)
         self.assertEqual(new_playlist.last_modified, last_modified)
 
     def test_with_new_last_modified(self):
@@ -542,13 +569,93 @@ class PlaylistTest(unittest.TestCase):
         new_playlist = playlist.copy(last_modified=new_last_modified)
         self.assertEqual(new_playlist.uri, u'an uri')
         self.assertEqual(new_playlist.name, u'a name')
-        self.assertEqual(new_playlist.tracks, tracks)
+        self.assertEqual(list(new_playlist.tracks), tracks)
         self.assertEqual(new_playlist.last_modified, new_last_modified)
 
     def test_invalid_kwarg(self):
         test = lambda: Playlist(foo='baz')
         self.assertRaises(TypeError, test)
 
+    def test_repr_without_tracks(self):
+        self.assertEquals(
+            "Playlist(name='name', tracks=[], uri='uri')",
+            repr(Playlist(uri='uri', name='name')))
+
+    def test_repr_with_tracks(self):
+        self.assertEquals(
+            "Playlist(name='name', tracks=[Track(artists=[], name='foo')], "
+            "uri='uri')",
+            repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
+
+    def test_eq_name(self):
+        playlist1 = Playlist(name=u'name')
+        playlist2 = Playlist(name=u'name')
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
+    def test_eq_uri(self):
+        playlist1 = Playlist(uri=u'uri')
+        playlist2 = Playlist(uri=u'uri')
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
+    def test_eq_tracks(self):
+        tracks = [Track()]
+        playlist1 = Playlist(tracks=tracks)
+        playlist2 = Playlist(tracks=tracks)
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
+    def test_eq_uri(self):
+        playlist1 = Playlist(last_modified=1)
+        playlist2 = Playlist(last_modified=1)
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
     def test_eq(self):
-        # FIXME missing all equal and hash tests
-        raise SkipTest
+        tracks = [Track()]
+        playlist1 = Playlist(uri=u'uri', name=u'name', tracks=tracks,
+            last_modified=1)
+        playlist2 = Playlist(uri=u'uri', name=u'name', tracks=tracks,
+            last_modified=1)
+        self.assertEqual(playlist1, playlist2)
+        self.assertEqual(hash(playlist1), hash(playlist2))
+
+    def test_eq_none(self):
+        self.assertNotEqual(Playlist(), None)
+
+    def test_eq_other(self):
+        self.assertNotEqual(Playlist(), 'other')
+
+    def test_ne_name(self):
+        playlist1 = Playlist(name=u'name1')
+        playlist2 = Playlist(name=u'name2')
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+    def test_ne_uri(self):
+        playlist1 = Playlist(uri=u'uri1')
+        playlist2 = Playlist(uri=u'uri2')
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+    def test_ne_tracks(self):
+        playlist1 = Playlist(tracks=[Track(uri=u'uri1')])
+        playlist2 = Playlist(tracks=[Track(uri=u'uri2')])
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+    def test_ne_uri(self):
+        playlist1 = Playlist(last_modified=1)
+        playlist2 = Playlist(last_modified=2)
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+    def test_ne(self):
+        playlist1 = Playlist(uri=u'uri1', name=u'name2',
+            tracks=[Track(uri=u'uri1')], last_modified=1)
+        playlist2 = Playlist(uri=u'uri2', name=u'name2',
+            tracks=[Track(uri=u'uri2')], last_modified=2)
+        self.assertNotEqual(playlist1, playlist2)
+        self.assertNotEqual(hash(playlist1), hash(playlist2))
+

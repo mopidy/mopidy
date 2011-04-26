@@ -6,8 +6,13 @@ from mopidy.mixers.dummy import DummyMixer
 
 class MusicDatabaseHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_count(self):
         result = self.h.handle_request(u'count "tag" "needle"')
@@ -65,8 +70,13 @@ class MusicDatabaseHandlerTest(unittest.TestCase):
 
 class MusicDatabaseFindTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_find_album(self):
         result = self.h.handle_request(u'find "album" "what"')
@@ -92,7 +102,20 @@ class MusicDatabaseFindTest(unittest.TestCase):
         result = self.h.handle_request(u'find title "what"')
         self.assert_(u'OK' in result)
 
+    def test_find_date(self):
+        result = self.h.handle_request(u'find "date" "2002-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_find_date_without_quotes(self):
+        result = self.h.handle_request(u'find date "2002-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_find_date_with_capital_d_and_incomplete_date(self):
+        result = self.h.handle_request(u'find Date "2005"')
+        self.assert_(u'OK' in result)
+
     def test_find_else_should_fail(self):
+
         result = self.h.handle_request(u'find "somethingelse" "what"')
         self.assertEqual(result[0], u'ACK [2@0] {find} incorrect arguments')
 
@@ -104,8 +127,13 @@ class MusicDatabaseFindTest(unittest.TestCase):
 
 class MusicDatabaseListTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_list_foo_returns_ack(self):
         result = self.h.handle_request(u'list "foo"')
@@ -295,8 +323,13 @@ class MusicDatabaseListTest(unittest.TestCase):
 
 class MusicDatabaseSearchTest(unittest.TestCase):
     def setUp(self):
-        self.b = DummyBackend(mixer_class=DummyMixer)
-        self.h = dispatcher.MpdDispatcher(backend=self.b)
+        self.b = DummyBackend.start().proxy()
+        self.mixer = DummyMixer.start().proxy()
+        self.h = dispatcher.MpdDispatcher()
+
+    def tearDown(self):
+        self.b.stop().get()
+        self.mixer.stop().get()
 
     def test_search_album(self):
         result = self.h.handle_request(u'search "album" "analbum"')
@@ -336,6 +369,18 @@ class MusicDatabaseSearchTest(unittest.TestCase):
 
     def test_search_any_without_quotes(self):
         result = self.h.handle_request(u'search any "anything"')
+        self.assert_(u'OK' in result)
+
+    def test_search_date(self):
+        result = self.h.handle_request(u'search "date" "2002-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_search_date_without_quotes(self):
+        result = self.h.handle_request(u'search date "2002-01-01"')
+        self.assert_(u'OK' in result)
+
+    def test_search_date_with_capital_d_and_incomplete_date(self):
+        result = self.h.handle_request(u'search Date "2005"')
         self.assert_(u'OK' in result)
 
     def test_search_else_should_fail(self):

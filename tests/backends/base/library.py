@@ -1,7 +1,6 @@
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track, Album, Artist
 
-from tests import SkipTest, data_folder
+from tests import SkipTest, path_to_data_dir
 
 class LibraryControllerTest(object):
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
@@ -9,17 +8,14 @@ class LibraryControllerTest(object):
         Album(name='album2', artists=artists[1:2]),
         Album()]
     tracks = [Track(name='track1', length=4000, artists=artists[:1],
-            album=albums[0], uri='file://' + data_folder('uri1')),
+            album=albums[0], uri='file://' + path_to_data_dir('uri1')),
         Track(name='track2', length=4000, artists=artists[1:2],
-            album=albums[1], uri='file://' + data_folder('uri2')),
+            album=albums[1], uri='file://' + path_to_data_dir('uri2')),
         Track()]
 
     def setUp(self):
-        self.backend = self.backend_class(mixer_class=DummyMixer)
+        self.backend = self.backend_class()
         self.library = self.backend.library
-
-    def tearDown(self):
-        self.backend.destroy()
 
     def test_refresh(self):
         self.library.refresh()

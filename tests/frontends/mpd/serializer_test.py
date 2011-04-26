@@ -7,8 +7,6 @@ from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
 
-from tests import data_folder, SkipTest
-
 class TrackMpdFormatTest(unittest.TestCase):
     track = Track(
         uri=u'a uri',
@@ -54,7 +52,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Id', 2) in result)
 
     def test_track_to_mpd_format_for_nonempty_track(self):
-        result = translator.track_to_mpd_format(self.track, position=9, cpid=122)
+        result = translator.track_to_mpd_format(
+            self.track, position=9, cpid=122)
         self.assert_(('file', 'a uri') in result)
         self.assert_(('Time', 137) in result)
         self.assert_(('Artist', 'an artist') in result)
@@ -95,6 +94,11 @@ class TrackMpdFormatTest(unittest.TestCase):
         artists = [Artist(name=u'ABBA'), Artist(name=u'Beatles')]
         translated = translator.artists_to_mpd_format(artists)
         self.assertEqual(translated, u'ABBA, Beatles')
+
+    def test_artists_to_mpd_format_artist_with_no_name(self):
+        artists = [Artist(name=None)]
+        translated = translator.artists_to_mpd_format(artists)
+        self.assertEqual(translated, u'')
 
 
 class PlaylistMpdFormatTest(unittest.TestCase):
@@ -219,7 +223,6 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_diretory_header_is_right(self):
         track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
-        formated = self.translate(track)
         result = translator.tracks_to_tag_cache_format([track])
 
         result = self.consume_headers(result)

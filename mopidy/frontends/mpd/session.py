@@ -1,30 +1,28 @@
 import asynchat
 import logging
-import multiprocessing
 
 from mopidy import settings
+from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR, VERSION
 from mopidy.utils.log import indent
-from mopidy.utils.process import pickle_connection
 
 logger = logging.getLogger('mopidy.frontends.mpd.session')
 
 class MpdSession(asynchat.async_chat):
     """
-    The MPD client session. Keeps track of a single client and passes its
-    MPD requests to the dispatcher.
+    The MPD client session. Keeps track of a single client session. Any
+    requests from the client is passed on to the MPD request dispatcher.
     """
 
-    def __init__(self, server, client_socket, client_socket_address,
-            core_queue):
+    def __init__(self, server, client_socket, client_socket_address):
         asynchat.async_chat.__init__(self, sock=client_socket)
         self.server = server
         self.client_address = client_socket_address[0]
         self.client_port = client_socket_address[1]
-        self.core_queue = core_queue
         self.input_buffer = []
         self.authenticated = False
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
+        self.dispatcher = MpdDispatcher()
 
     def start(self):
         """Start a new client session."""
@@ -53,15 +51,7 @@ class MpdSession(asynchat.async_chat):
             if response is not None:
                 self.send_response(response)
                 return
-        my_end, other_end = multiprocessing.Pipe()
-        self.core_queue.put({
-            'to': 'frontend',
-            'command': 'mpd_request',
-            'request': request,
-            'reply_to': pickle_connection(other_end),
-        })
-        my_end.poll(None)
-        response = my_end.recv()
+        response = self.dispatcher.handle_request(request)
         if response is not None:
             self.handle_response(response)
 

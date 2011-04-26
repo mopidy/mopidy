@@ -141,8 +141,7 @@ def list_settings_optparse_callback(*args):
     lines = []
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
-        if key.endswith('PASSWORD') and len(value):
-            value = u'********'
+        value = mask_value_if_secret(key, value)
         lines.append(u'%s:' % key)
         lines.append(u'  Value: %s' % repr(value))
         if value != default_value and default_value is not None:
@@ -151,3 +150,9 @@ def list_settings_optparse_callback(*args):
             lines.append(u'  Error: %s' % errors[key])
     print u'Settings: %s' % indent('\n'.join(lines), places=2)
     sys.exit(0)
+
+def mask_value_if_secret(key, value):
+    if key.endswith('PASSWORD') and value:
+        return u'********'
+    else:
+        return value

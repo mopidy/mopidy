@@ -1,5 +1,3 @@
-from copy import copy
-
 from mopidy.frontends.mpd import translator
 
 class ImmutableObject(object):
@@ -22,6 +20,17 @@ class ImmutableObject(object):
         if name.startswith('_'):
             return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
+
+    def __repr__(self):
+        kwarg_pairs = []
+        for (key, value) in sorted(self.__dict__.items()):
+            if isinstance(value, (frozenset, tuple)):
+                value = list(value)
+            kwarg_pairs.append('%s=%s' % (key, repr(value)))
+        return '%(classname)s(%(kwargs)s)' % {
+            'classname': self.__class__.__name__,
+            'kwargs': ', '.join(kwarg_pairs),
+        }
 
     def __hash__(self):
         hash_sum = 0
@@ -65,6 +74,7 @@ class ImmutableObject(object):
                 % key)
         return self.__class__(**data)
 
+
 class Artist(ImmutableObject):
     """
     :param uri: artist URI
@@ -105,6 +115,9 @@ class Album(ImmutableObject):
     #: The album name. Read-only.
     name = None
 
+    #: A set of album artists. Read-only.
+    artists = frozenset()
+
     #: The number of tracks in the album. Read-only.
     num_tracks = 0
 
@@ -112,13 +125,8 @@ class Album(ImmutableObject):
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
-        self._artists = frozenset(kwargs.pop('artists', []))
+        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
         super(Album, self).__init__(*args, **kwargs)
-
-    @property
-    def artists(self):
-        """List of :class:`Artist` elements. Read-only."""
-        return list(self._artists)
 
 
 class Track(ImmutableObject):
@@ -149,6 +157,9 @@ class Track(ImmutableObject):
     #: The track name. Read-only.
     name = None
 
+    #: A set of track artists. Read-only.
+    artists = frozenset()
+
     #: The track :class:`Album`. Read-only.
     album = None
 
@@ -168,13 +179,8 @@ class Track(ImmutableObject):
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
-        self._artists = frozenset(kwargs.pop('artists', []))
+        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
-
-    @property
-    def artists(self):
-        """List of :class:`Artist`. Read-only."""
-        return list(self._artists)
 
     def mpd_format(self, *args, **kwargs):
         return translator.track_to_mpd_format(self, *args, **kwargs)
@@ -198,24 +204,22 @@ class Playlist(ImmutableObject):
     #: The playlist name. Read-only.
     name = None
 
+    #: The playlist's tracks. Read-only.
+    tracks = tuple()
+
     #: The playlist modification time. Read-only.
     #:
     #: :class:`datetime.datetime`, or :class:`None` if unknown.
     last_modified = None
 
     def __init__(self, *args, **kwargs):
-        self._tracks = kwargs.pop('tracks', [])
+        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
         super(Playlist, self).__init__(*args, **kwargs)
-
-    @property
-    def tracks(self):
-        """List of :class:`Track` elements. Read-only."""
-        return copy(self._tracks)
 
     @property
     def length(self):
         """The number of tracks in the playlist. Read-only."""
-        return len(self._tracks)
+        return len(self.tracks)
 
     def mpd_format(self, *args, **kwargs):
         return translator.playlist_to_mpd_format(self, *args, **kwargs)

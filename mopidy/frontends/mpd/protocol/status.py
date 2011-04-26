@@ -1,3 +1,4 @@
+from mopidy.backends.base import PlaybackController
 from mopidy.frontends.mpd.protocol import handle_pattern
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
@@ -23,10 +24,11 @@ def currentsong(frontend):
         Displays the song info of the current song (same song that is
         identified in status).
     """
-    if frontend.backend.playback.current_track is not None:
-        return frontend.backend.playback.current_track.mpd_format(
-            position=frontend.backend.playback.current_playlist_position,
-            cpid=frontend.backend.playback.current_cpid)
+    current_cp_track = frontend.backend.playback.current_cp_track.get()
+    if current_cp_track is not None:
+        return current_cp_track[1].mpd_format(
+            position=frontend.backend.playback.current_playlist_position.get(),
+            cpid=current_cp_track[0])
 
 @handle_pattern(r'^idle$')
 @handle_pattern(r'^idle (?P<subsystems>.+)$')
@@ -90,8 +92,7 @@ def stats(frontend):
         'artists': 0, # TODO
         'albums': 0, # TODO
         'songs': 0, # TODO
-        # TODO Does not work after multiprocessing branch merge
-        'uptime': 0, # frontend.session.stats_uptime(),
+        'uptime': 0, # TODO
         'db_playtime': 0, # TODO
         'db_update': 0, # TODO
         'playtime': 0, # TODO
@@ -140,56 +141,59 @@ def status(frontend):
         ('xfade', _status_xfade(frontend)),
         ('state', _status_state(frontend)),
     ]
-    if frontend.backend.playback.current_track is not None:
+    if frontend.backend.playback.current_track.get() is not None:
         result.append(('song', _status_songpos(frontend)))
         result.append(('songid', _status_songid(frontend)))
-    if frontend.backend.playback.state in (frontend.backend.playback.PLAYING,
-            frontend.backend.playback.PAUSED):
+    if frontend.backend.playback.state.get() in (PlaybackController.PLAYING,
+            PlaybackController.PAUSED):
         result.append(('time', _status_time(frontend)))
         result.append(('elapsed', _status_time_elapsed(frontend)))
         result.append(('bitrate', _status_bitrate(frontend)))
     return result
 
 def _status_bitrate(frontend):
-    if frontend.backend.playback.current_track is not None:
-        return frontend.backend.playback.current_track.bitrate
+    current_track = frontend.backend.playback.current_track.get()
+    if current_track is not None:
+        return current_track.bitrate
 
 def _status_consume(frontend):
-    if frontend.backend.playback.consume:
+    if frontend.backend.playback.consume.get():
         return 1
     else:
         return 0
 
 def _status_playlist_length(frontend):
-    return len(frontend.backend.current_playlist.tracks)
+    return len(frontend.backend.current_playlist.tracks.get())
 
 def _status_playlist_version(frontend):
-    return frontend.backend.current_playlist.version
+    return frontend.backend.current_playlist.version.get()
 
 def _status_random(frontend):
-    return int(frontend.backend.playback.random)
+    return int(frontend.backend.playback.random.get())
 
 def _status_repeat(frontend):
-    return int(frontend.backend.playback.repeat)
+    return int(frontend.backend.playback.repeat.get())
 
 def _status_single(frontend):
-    return int(frontend.backend.playback.single)
+    return int(frontend.backend.playback.single.get())
 
 def _status_songid(frontend):
-    if frontend.backend.playback.current_cpid is not None:
-        return frontend.backend.playback.current_cpid
+    current_cpid = frontend.backend.playback.current_cpid.get()
+    if current_cpid is not None:
+        return current_cpid
     else:
         return _status_songpos(frontend)
 
 def _status_songpos(frontend):
-    return frontend.backend.playback.current_playlist_position
+    return frontend.backend.playback.current_playlist_position.get()
 
 def _status_state(frontend):
-    if frontend.backend.playback.state == frontend.backend.playback.PLAYING:
+    state = frontend.backend.playback.state.get()
+    if state == PlaybackController.PLAYING:
         return u'play'
-    elif frontend.backend.playback.state == frontend.backend.playback.STOPPED:
+    elif state == PlaybackController.STOPPED:
         return u'stop'
-    elif frontend.backend.playback.state == frontend.backend.playback.PAUSED:
+    elif state == PlaybackController.PAUSED:
         return u'pause'
 
 def _status_time(frontend):
@@ -197,19 +201,21 @@ def _status_time(frontend):
         _status_time_total(frontend) // 1000)
 
 def _status_time_elapsed(frontend):
-    return frontend.backend.playback.time_position
+    return frontend.backend.playback.time_position.get()
 
 def _status_time_total(frontend):
-    if frontend.backend.playback.current_track is None:
+    current_track = frontend.backend.playback.current_track.get()
+    if current_track is None:
         return 0
-    elif frontend.backend.playback.current_track.length is None:
+    elif current_track.length is None:
         return 0
     else:
-        return frontend.backend.playback.current_track.length
+        return current_track.length
 
 def _status_volume(frontend):
-    if frontend.backend.mixer.volume is not None:
-        return frontend.backend.mixer.volume
+    volume = frontend.mixer.volume.get()
+    if volume is not None:
+        return volume
     else:
         return 0
 
