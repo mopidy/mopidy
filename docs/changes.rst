@@ -5,10 +5,24 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-0.4.0 (in development)
-======================
+0.4.0 (2011-04-27)
+==================
 
-No description yet.
+Mopidy 0.4.0 is another release without major feature additions. In 0.4.0 we've
+fixed a bunch of issues and bugs, with the help of several new contributors
+who are credited in the changelog below. The major change of 0.4.0 is an
+internal refactoring which clears way for future features, and which also make
+Mopidy work on Python 2.7. In other words, Mopidy 0.4.0 works on Ubuntu 11.04
+and Arch Linux.
+
+Please note that 0.4.0 requires some updated dependencies, as listed under
+*Important changes* below. Also, the known bug in the Spotify playlist
+loading from Mopidy 0.3.0 is still present.
+
+.. warning:: Known bug in Spotify playlist loading
+
+    There is a known bug in the loading of Spotify playlists. To avoid the bug,
+    follow the simple workaround described at :issue:`59`.
 
 
 **Important changes**
