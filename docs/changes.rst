@@ -43,6 +43,8 @@ No description yet.
   - Reduce log level for trivial log messages from warning to info. (Fixes:
     :issue:`71`)
 
+  - Pause playback on network connection errors. (Fixes: :issue:`65`)
+
 - Local backend:
 
   - Fix crash in :command:`mopidy-scan` if a track has no artist name. Thanks
