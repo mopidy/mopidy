@@ -13,6 +13,15 @@ from mopidy.outputs.base import BaseOutput
 
 logger = logging.getLogger('mopidy.outputs.gstreamer')
 
+default_caps = gst.Caps("""
+    audio/x-raw-int,
+    endianness=(int)1234,
+    channels=(int)2,
+    width=(int)16,
+    depth=(int)16,
+    signed=(boolean)true,
+    rate=(int)44100""")
+
 class GStreamerOutput(ThreadingActor, BaseOutput):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
@@ -48,12 +57,20 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
 
         uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
         uridecodebin.connect('pad-added', self._process_new_pad, pad)
+        uridecodebin.connect('notify::source', self._process_new_source)
         self.gst_pipeline.add(uridecodebin)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
         gst_bus.add_signal_watch()
         gst_bus.connect('message', self._process_gstreamer_message)
+
+    def _process_new_source(self, element, pad):
+        source = element.get_by_name('source')
+        try:
+            source.set_property('caps', default_caps)
+        except TypeError:
+            pass
 
     def _process_new_pad(self, source, pad, target_pad):
         pad.link(target_pad)
