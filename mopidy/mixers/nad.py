@@ -190,7 +190,7 @@ class NadTalker(ThreadingActor):
         # trailing whitespace.
         if not self._device.isOpen():
             self._device.open()
-        result = self._device.readline(eol='\n').strip()
+        result = self._device.readline().strip()
         if result:
             logger.debug('Read: %s', result)
         return result
