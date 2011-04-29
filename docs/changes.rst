@@ -10,6 +10,10 @@ This change log is used to track all major changes to Mopidy.
 
 **Bugfixes**
 
+- Fix broken audio on at least GStreamer 0.10.30, which affects Ubuntu 10.10.
+  The GStreamer `appsrc` bin wasn't being linked due to lack of default caps.
+  (Fixes: :issue:`85`)
+
 - Fix crash in :mod:`mopidy.mixers.nad` that occures at startup when the
   :mod:`io` module is available. We used an `eol` keyword argument which is
   supported by :meth:`serial.FileLike.readline`, but not by
