@@ -5,6 +5,18 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+0.4.1 (in development)
+======================
+
+**Bugfixes**
+
+- Fix crash in :mod:`mopidy.mixers.nad` that occures at startup when the
+  :mod:`io` module is available. We used an `eol` keyword argument which is
+  supported by :meth:`serial.FileLike.readline`, but not by
+  :meth:`io.RawBaseIO.readline`.  When the :mod:`io` module is available, it is
+  used by PySerial instead of the `FileLike` implementation.
+
+
 0.4.0 (2011-04-27)
 ==================
 
