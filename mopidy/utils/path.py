@@ -21,8 +21,8 @@ def get_or_create_file(filename):
     return filename
 
 def path_to_uri(*paths):
-    path = os.path.join(*paths)
-    path = path.encode('utf-8')
+    f = lambda p: p.decode('latin1').encode('utf8')
+    path = os.path.join(*map(f, paths))
     if sys.platform == 'win32':
         return 'file:' + urllib.pathname2url(path)
     return 'file://' + urllib.pathname2url(path)
@@ -47,16 +47,14 @@ def split_path(path):
 # pylint: disable = W0612
 # Unused variable 'dirnames'
 def find_files(path):
+    path = path.decode('latin1').encode('utf-8')
     if os.path.isfile(path):
-        if not isinstance(path, unicode):
-            path = path.decode('utf-8')
         yield path
     else:
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 filename = os.path.join(dirpath, filename)
-                if not isinstance(filename, unicode):
-                    filename = filename.decode('utf-8')
+                filename.decode('latin1').encode('utf-8')
                 yield filename
 # pylint: enable = W0612
 
