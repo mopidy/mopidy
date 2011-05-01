@@ -24,7 +24,7 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
             self.backend.gstreamer.set_metadata(track)
             return True
         except SpotifyError as e:
-            logger.warning('Play %s failed: %s', track.uri, e)
+            logger.info('Playback of %s failed: %s', track.uri, e)
             return False
 
     def resume(self):

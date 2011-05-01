@@ -13,6 +13,15 @@ from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
 
+default_caps = gst.Caps("""
+    audio/x-raw-int,
+    endianness=(int)1234,
+    channels=(int)2,
+    width=(int)16,
+    depth=(int)16,
+    signed=(boolean)true,
+    rate=(int)44100""")
+
 class BaseOutput(object):
     def connect_bin(self, pipeline, element_to_link_to):
         """
@@ -92,10 +101,11 @@ class GStreamer(ThreadingActor):
         self.gst_volume = self.gst_pipeline.get_by_name('volume')
         self.gst_taginject = self.gst_pipeline.get_by_name('tag')
 
-        self.gst_uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
-        self.gst_uridecodebin.connect('pad-added', self._process_new_pad,
+        uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
+        uridecodebin.connect('notify::source', self._process_new_source)
+        uridecodebin.connect('pad-added', self._process_new_pad,
             self.gst_convert.get_pad('sink'))
-        self.gst_pipeline.add(self.gst_uridecodebin)
+        self.gst_pipeline.add(uridecodebin)
 
         for output in settings.OUTPUTS:
             output_cls = get_class(output)()
@@ -105,6 +115,13 @@ class GStreamer(ThreadingActor):
         gst_bus = self.gst_pipeline.get_bus()
         gst_bus.add_signal_watch()
         gst_bus.connect('message', self._process_gstreamer_message)
+
+    def _process_new_source(self, element, pad):
+        source = element.get_by_name('source')
+        try:
+            source.set_property('caps', default_caps)
+        except TypeError:
+            pass
 
     def _process_new_pad(self, source, pad, target_pad):
         pad.link(target_pad)

@@ -74,7 +74,11 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
 
     def connection_error(self, session, error):
         """Callback used by pyspotify"""
-        logger.error(u'Spotify connection error: %s', error)
+        if error is None:
+            logger.info(u'Spotify connection error resolved')
+        else:
+            logger.error(u'Spotify connection error: %s', error)
+            self.backend.playback.pause()
 
     def message_to_user(self, session, message):
         """Callback used by pyspotify"""

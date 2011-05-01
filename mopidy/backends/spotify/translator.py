@@ -62,5 +62,5 @@ class SpotifyTranslator(object):
                     if str(Link.from_track(t, 0))],
             )
         except SpotifyError, e:
-            logger.warning(u'Failed translating Spotify playlist '
+            logger.info(u'Failed translating Spotify playlist '
                 '(probably a playlist folder boundary): %s', e)

@@ -24,9 +24,11 @@ def main():
     setup_backend()
     setup_frontends()
     try:
-        time.sleep(10000*24*60*60)
+        while ActorRegistry.get_all():
+            time.sleep(1)
+        logger.info(u'No actors left. Exiting...')
     except KeyboardInterrupt:
-        logger.info(u'Exiting...')
+        logger.info(u'User interrupt. Exiting...')
         ActorRegistry.stop_all()
 
 def parse_options():
