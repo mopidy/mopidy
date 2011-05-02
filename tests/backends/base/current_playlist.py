@@ -3,7 +3,7 @@ import multiprocessing
 import random
 
 from mopidy.models import Playlist, Track
-from mopidy.outputs.base import BaseOutput
+from mopidy.gstreamer import GStreamer
 
 from tests.backends.base import populate_playlist
 
@@ -12,7 +12,7 @@ class CurrentPlaylistControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
-        self.backend.output = mock.Mock(spec=BaseOutput)
+        self.backend.gstreamer = mock.Mock(spec=GStreamer)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 

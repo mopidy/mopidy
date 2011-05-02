@@ -8,10 +8,10 @@ from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
 from mopidy import settings
+from mopidy.utils import get_class
 from mopidy.backends.base import Backend
-from mopidy.outputs.base import BaseOutput
 
-logger = logging.getLogger('mopidy.outputs.gstreamer')
+logger = logging.getLogger('mopidy.gstreamer')
 
 default_caps = gst.Caps("""
     audio/x-raw-int,
@@ -22,7 +22,48 @@ default_caps = gst.Caps("""
     signed=(boolean)true,
     rate=(int)44100""")
 
-class GStreamerOutput(ThreadingActor, BaseOutput):
+class BaseOutput(object):
+    def connect_bin(self, pipeline, element_to_link_to):
+        """
+        Connect output bin to pipeline and given element.
+        """
+        description = 'queue ! %s' % self.describe_bin()
+        logger.debug('Adding new output to tee: %s', description)
+
+        output = self.parse_bin(description)
+        self.modify_bin(output)
+
+        pipeline.add(output)
+        output.sync_state_with_parent()
+        gst.element_link_many(element_to_link_to, output)
+
+    def parse_bin(self, description):
+        return gst.parse_bin_from_description(description, True)
+
+    def modify_bin(self, output):
+        """
+        Modifies bin before it is installed if needed
+        """
+        pass
+
+    def describe_bin(self):
+        """
+        Describe bin to be parsed.
+
+        Must be implemented by subclasses.
+        """
+        raise NotImplementedError
+
+    def set_properties(self, element, properties):
+        """
+        Set properties on element if they have a value.
+        """
+        for key, value in properties.items():
+            if value:
+                element.set_property(key, value)
+
+
+class GStreamer(ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
 
@@ -44,21 +85,31 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
         :class:`mopidy.utils.process.GObjectEventThread` to be running. This is
         not enforced by :class:`GStreamerOutput` itself.
         """
-
-        logger.debug(u'Setting up GStreamer pipeline')
-
-        self.gst_pipeline = gst.parse_launch(' ! '.join([
+        base_pipeline = ' ! '.join([
             'audioconvert name=convert',
             'volume name=volume',
-            settings.GSTREAMER_AUDIO_SINK,
-        ]))
+            'taginject name=tag',
+            'tee name=tee',
+        ])
 
-        pad = self.gst_pipeline.get_by_name('convert').get_pad('sink')
+        logger.debug(u'Setting up base GStreamer pipeline: %s', base_pipeline)
+
+        self.gst_pipeline = gst.parse_launch(base_pipeline)
+
+        self.gst_tee = self.gst_pipeline.get_by_name('tee')
+        self.gst_convert = self.gst_pipeline.get_by_name('convert')
+        self.gst_volume = self.gst_pipeline.get_by_name('volume')
+        self.gst_taginject = self.gst_pipeline.get_by_name('tag')
 
         uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
-        uridecodebin.connect('pad-added', self._process_new_pad, pad)
         uridecodebin.connect('notify::source', self._process_new_source)
+        uridecodebin.connect('pad-added', self._process_new_pad,
+            self.gst_convert.get_pad('sink'))
         self.gst_pipeline.add(uridecodebin)
+
+        for output in settings.OUTPUTS:
+            output_cls = get_class(output)()
+            output_cls.connect_bin(self.gst_pipeline, self.gst_tee)
 
         # Setup bus and message processor
         gst_bus = self.gst_pipeline.get_bus()
@@ -96,7 +147,7 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
     def play_uri(self, uri):
         """Play audio at URI"""
         self.set_state('READY')
-        self.gst_pipeline.get_by_name('uri').set_property('uri', uri)
+        self.gst_uridecodebin.set_property('uri', uri)
         return self.set_state('PLAYING')
 
     def deliver_data(self, caps_string, data):
@@ -160,11 +211,17 @@ class GStreamerOutput(ThreadingActor, BaseOutput):
 
     def get_volume(self):
         """Get volume in range [0..100]"""
-        gst_volume = self.gst_pipeline.get_by_name('volume')
-        return int(gst_volume.get_property('volume') * 100)
+        return int(self.gst_volume.get_property('volume') * 100)
 
     def set_volume(self, volume):
         """Set volume in range [0..100]"""
-        gst_volume = self.gst_pipeline.get_by_name('volume')
-        gst_volume.set_property('volume', volume / 100.0)
+        self.gst_volume.set_property('volume', volume / 100.0)
         return True
+
+    def set_metadata(self, track):
+        tags = u'artist="%(artist)s",title="%(title)s"' % {
+            'artist': u', '.join([a.name for a in track.artists]),
+            'title': track.name,
+        }
+        logger.debug('Setting tags to: %s', tags)
+        self.gst_taginject.set_property('tags', tags)
