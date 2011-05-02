@@ -169,6 +169,8 @@ class GStreamer(ThreadingActor):
         self.gst_pipeline.get_by_name('source').emit('end-of-stream')
 
     def get_position(self):
+        if self.gst_pipeline.get_state()[1] == gst.STATE_NULL:
+            return 0
         try:
             position = self.gst_pipeline.query_position(gst.FORMAT_TIME)[0]
             return position // gst.MSECOND
