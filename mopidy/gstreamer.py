@@ -101,11 +101,11 @@ class GStreamer(ThreadingActor):
         self.gst_volume = self.gst_pipeline.get_by_name('volume')
         self.gst_taginject = self.gst_pipeline.get_by_name('tag')
 
-        uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
-        uridecodebin.connect('notify::source', self._process_new_source)
-        uridecodebin.connect('pad-added', self._process_new_pad,
+        self.gst_uridecodebin = gst.element_factory_make('uridecodebin', 'uri')
+        self.gst_uridecodebin.connect('notify::source', self._process_new_source)
+        self.gst_uridecodebin.connect('pad-added', self._process_new_pad,
             self.gst_convert.get_pad('sink'))
-        self.gst_pipeline.add(uridecodebin)
+        self.gst_pipeline.add(self.gst_uridecodebin)
 
         for output in settings.OUTPUTS:
             output_cls = get_class(output)()
