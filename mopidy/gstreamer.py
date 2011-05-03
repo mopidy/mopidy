@@ -41,9 +41,9 @@ class GStreamer(ThreadingActor):
 
     def _setup_gstreamer(self):
         """
-        **Warning:** :class:`GStreamerOutput` requires
+        **Warning:** :class:`GStreamer` requires
         :class:`mopidy.utils.process.GObjectEventThread` to be running. This is
-        not enforced by :class:`GStreamerOutput` itself.
+        not enforced by :class:`GStreamer` itself.
         """
         base_pipeline = ' ! '.join([
             'audioconvert name=convert',
