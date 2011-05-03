@@ -29,7 +29,7 @@ class GStreamer(ThreadingActor):
 
     **Settings:**
 
-    - :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
+    - :attr:`mopidy.settings.OUTPUTS`
 
     """
 
@@ -105,15 +105,27 @@ class GStreamer(ThreadingActor):
         return backend_refs[0].proxy()
 
     def play_uri(self, uri):
-        """Play audio at URI"""
+        """
+        Play audio at URI
+
+        :param uri: the URI to play
+        :type uri: string
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         self.set_state('READY')
         self.gst_uridecodebin.set_property('uri', uri)
         return self.set_state('PLAYING')
 
-    def deliver_data(self, caps_string, data):
-        """Deliver audio data to be played"""
+    def deliver_data(self, capabilities, data):
+        """
+        Deliver audio data to be played
+
+        :param capabilities: a GStreamer capabilities string
+        :type capabilities: string
+        :param data: raw audio data to be played
+        """
         source = self.gst_pipeline.get_by_name('source')
-        caps = gst.caps_from_string(caps_string)
+        caps = gst.caps_from_string(capabilities)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
         source.set_property('caps', caps)
@@ -129,6 +141,11 @@ class GStreamer(ThreadingActor):
         self.gst_pipeline.get_by_name('source').emit('end-of-stream')
 
     def get_position(self):
+        """
+        Get position in milliseconds.
+
+        :rtype: int
+        """
         if self.gst_pipeline.get_state()[1] == gst.STATE_NULL:
             return 0
         try:
@@ -139,6 +156,13 @@ class GStreamer(ThreadingActor):
             return 0
 
     def set_position(self, position):
+        """
+        Set position in milliseconds.
+
+        :param position: the position in milliseconds
+        :type volume: int
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         self.gst_pipeline.get_state() # block until state changes are done
         handeled = self.gst_pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
@@ -172,15 +196,35 @@ class GStreamer(ThreadingActor):
             return True
 
     def get_volume(self):
-        """Get volume in range [0..100]"""
+        """
+        Get volume level for software mixer.
+
+        :rtype: int in range [0..100]
+        """
         return int(self.gst_volume.get_property('volume') * 100)
 
     def set_volume(self, volume):
-        """Set volume in range [0..100]"""
+        """
+        Set volume level for software mixer.
+
+        :param volume: the volume in the range [0..100]
+        :type volume: int
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         self.gst_volume.set_property('volume', volume / 100.0)
         return True
 
     def set_metadata(self, track):
+        """
+        Set track metadata for currently playing song.
+
+        Only needs to be called by sources such as appsrc which don't already
+        inject tags in pipeline.
+
+        :param track: Track containing metadata for current song.
+        :type track: :class:`mopidy.modes.Track`
+        """
+        # FIXME what if we want to unset taginject tags?
         tags = u'artist="%(artist)s",title="%(title)s"' % {
             'artist': u', '.join([a.name for a in track.artists]),
             'title': track.name,
