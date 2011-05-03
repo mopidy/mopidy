@@ -56,7 +56,7 @@ class GStreamerTest(unittest.TestCase):
         self.assertEqual(100, self.gstreamer.get_volume())
 
     @SkipTest
-    def test_set_state(self):
+    def test_set_state_encapsulation(self):
         pass # TODO
 
     @SkipTest

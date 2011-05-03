@@ -184,18 +184,18 @@ class GStreamer(ThreadingActor):
         return handeled
 
     def start_playback(self):
-        return self.set_state(gst.STATE_PLAYING)
+        return self._set_state(gst.STATE_PLAYING)
 
     def pause_playback(self):
-        return self.set_state(gst.STATE_PAUSE)
+        return self._set_state(gst.STATE_PAUSE)
 
     def prepare_playback(self):
-        return self.set_state(gst.STATE_READY)
+        return self._set_state(gst.STATE_READY)
 
     def stop_playback(self):
-        return self.set_state(gst.STATE_NULL)
+        return self._set_state(gst.STATE_NULL)
 
-    def set_state(self, state):
+    def _set_state(self, state):
         """
         Set the GStreamer state. Returns :class:`True` if successful.
 
