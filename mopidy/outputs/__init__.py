@@ -76,7 +76,21 @@ class BaseOutput(object):
 
 
 class LocalOutput(BaseOutput):
-    """TODO adamcik"""
+    """
+    Basic output to local audio sink.
+
+    This output will normally tell GStreamer to choose whatever it thinks is
+    best for your system. In other words this is usually a sane choice.
+
+    Advanced:
+
+    However, there are chases when you want to explicitly set what GStreamer
+    should use. This can be achieved by setting `settings.LOCAL_OUTPUT_OVERRIDE`
+    to the sink you want to use. Some of the possible values are: alsasink,
+    esdsink, jackaudiosink, oss4sink and osssink. Exact values that will work
+    on your system will depend on your sound setup and installed GStreamer
+    plugins. Run `gst-inspect0.10` for list of all available plugins.
+    """
 
     def describe_bin(self):
         if settings.LOCAL_OUTPUT_OVERRIDE:
@@ -85,14 +99,35 @@ class LocalOutput(BaseOutput):
 
 
 class NullOutput(BaseOutput):
-    """TODO adamcik"""
+    """
+    Fall-back null output.
+
+    This output will not output anything. It is intended as a fall-back for
+    when setup of all other outputs have failed and should not be used by end
+    users. Inserting this output in such a case ensures that the pipeline does
+    not crash.
+    """
 
     def describe_bin(self):
         return 'fakesink'
 
 
 class ShoutcastOutput(BaseOutput):
-    """TODO adamcik"""
+    """
+    Shoutcast streaming output.
+
+    This output allows for streaming to an icecast server or anything else that
+    supports Shoutcast. The output supports setting for: server address, port,
+    mount point, user, password and encoder to use. Please see
+    :class:`mopidy.settings` for details about settings.
+
+    Advanced:
+
+    If you need to do something special that this output has not taken into
+    account the setting `settings.SHOUTCAST_OUTPUT_OVERRIDE` has been provided
+    to allow for manual setup of the bin using a gst-launch string. If this
+    setting is set all other shoutcast settings will be ignored.
+    """
 
     def describe_bin(self):
         if settings.SHOUTCAST_OUTPUT_OVERRIDE:
