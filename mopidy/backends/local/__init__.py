@@ -72,19 +72,21 @@ class LocalPlaybackController(PlaybackController):
 
 class LocalPlaybackProvider(BasePlaybackProvider):
     def pause(self):
-        return self.backend.gstreamer.set_state('PAUSED').get()
+        return self.backend.gstreamer.pause_playback().get()
 
     def play(self, track):
-        return self.backend.gstreamer.play_uri(track.uri).get()
+        self.backend.gstreamer.prepare_playback()
+        self.backend.gstreamer.set_uri(track.uri).get()
+        return self.backend.gstreamer.start_playback().get()
 
     def resume(self):
-        return self.backend.gstreamer.set_state('PLAYING').get()
+        return self.backend.gstreamer.start_playback().get()
 
     def seek(self, time_position):
         return self.backend.gstreamer.set_position(time_position).get()
 
     def stop(self):
-        return self.backend.gstreamer.set_state('READY').get()
+        return self.backend.gstreamer.stop_playback().get()
 
 
 class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):

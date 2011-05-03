@@ -133,7 +133,7 @@ class GStreamer(ThreadingActor):
                 'Telling backend ...')
             self._get_backend().playback.on_end_of_track()
         elif message.type == gst.MESSAGE_ERROR:
-            self.set_state('NULL')
+            self.stop_playback()
             error, debug = message.parse_error()
             logger.error(u'%s %s', error, debug)
             # FIXME Should we send 'stop_playback' to the backend here? Can we
@@ -144,11 +144,9 @@ class GStreamer(ThreadingActor):
         assert len(backend_refs) == 1, 'Expected exactly one running backend.'
         return backend_refs[0].proxy()
 
-    def play_uri(self, uri):
+    def set_uri(self, uri):
         """Play audio at URI"""
-        self.set_state('READY')
         self.gst_uridecodebin.set_property('uri', uri)
-        return self.set_state('PLAYING')
 
     def deliver_data(self, caps_string, data):
         """Deliver audio data to be played"""
@@ -185,7 +183,19 @@ class GStreamer(ThreadingActor):
         self.gst_pipeline.get_state() # block until seek is done
         return handeled
 
-    def set_state(self, state_name):
+    def start_playback(self):
+        return self.set_state(gst.STATE_PLAYING)
+
+    def pause_playback(self):
+        return self.set_state(gst.STATE_PAUSE)
+
+    def prepare_playback(self):
+        return self.set_state(gst.STATE_READY)
+
+    def stop_playback(self):
+        return self.set_state(gst.STATE_NULL)
+
+    def set_state(self, state):
         """
         Set the GStreamer state. Returns :class:`True` if successful.
 
@@ -202,13 +212,14 @@ class GStreamer(ThreadingActor):
         :type state_name: string
         :rtype: :class:`True` or :class:`False`
         """
-        result = self.gst_pipeline.set_state(
-            getattr(gst, 'STATE_' + state_name))
+        result = self.gst_pipeline.set_state(state)
         if result == gst.STATE_CHANGE_FAILURE:
-            logger.warning('Setting GStreamer state to %s: failed', state_name)
+            logger.warning('Setting GStreamer state to %s: failed',
+                state.value_name)
             return False
         else:
-            logger.debug('Setting GStreamer state to %s: OK', state_name)
+            logger.debug('Setting GStreamer state to %s: OK',
+                state.value_name)
             return True
 
     def get_volume(self):
