@@ -22,46 +22,6 @@ default_caps = gst.Caps("""
     signed=(boolean)true,
     rate=(int)44100""")
 
-class BaseOutput(object):
-    def connect_bin(self, pipeline, element_to_link_to):
-        """
-        Connect output bin to pipeline and given element.
-        """
-        description = 'queue ! %s' % self.describe_bin()
-        logger.debug('Adding new output to tee: %s', description)
-
-        output = self.parse_bin(description)
-        self.modify_bin(output)
-
-        pipeline.add(output)
-        output.sync_state_with_parent()
-        gst.element_link_many(element_to_link_to, output)
-
-    def parse_bin(self, description):
-        return gst.parse_bin_from_description(description, True)
-
-    def modify_bin(self, output):
-        """
-        Modifies bin before it is installed if needed
-        """
-        pass
-
-    def describe_bin(self):
-        """
-        Describe bin to be parsed.
-
-        Must be implemented by subclasses.
-        """
-        raise NotImplementedError
-
-    def set_properties(self, element, properties):
-        """
-        Set properties on element if they have a value.
-        """
-        for key, value in properties.items():
-            if value:
-                element.set_property(key, value)
-
 
 class GStreamer(ThreadingActor):
     """
