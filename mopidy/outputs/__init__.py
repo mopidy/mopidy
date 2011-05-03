@@ -43,6 +43,9 @@ class BaseOutput(object):
         Overriding this method allows for outputs to modify the constructed bin
         before it is installed. This can for instance be a good place to call
         `set_properties` on elements that need to be configured.
+
+        :param output: gst.Bin to modify in some way.
+        :type output: :class:`gst.Bin`
         """
         pass
 
@@ -68,7 +71,7 @@ class BaseOutput(object):
         :param element: gst.Element to set properties on.
         :type element: :class:`gst.Element`
         :param properties: Dictionary of properties to set on element.
-        :type element: dict
+        :type properties: dict
         """
         for key, value in properties.items():
             if value is not None:
