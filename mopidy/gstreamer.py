@@ -187,7 +187,7 @@ class GStreamer(ThreadingActor):
         return self._set_state(gst.STATE_PLAYING)
 
     def pause_playback(self):
-        return self._set_state(gst.STATE_PAUSE)
+        return self._set_state(gst.STATE_PAUSED)
 
     def prepare_playback(self):
         return self._set_state(gst.STATE_READY)
