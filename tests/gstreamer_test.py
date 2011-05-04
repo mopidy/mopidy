@@ -23,18 +23,30 @@ class GStreamerTest(unittest.TestCase):
         self.gstreamer = GStreamer()
         self.gstreamer.on_start()
 
+    def prepare_uri(self, uri):
+        self.gstreamer.prepare_playback()
+        self.gstreamer.set_uri(uri)
+
     def tearDown(self):
         settings.runtime.clear()
 
-    def test_set_uri_existing_file(self):
-        self.gstreamer.prepare_playback()
-        self.gstreamer.set_uri(self.song_uri)
+    def test_start_playback_existing_file(self):
+        self.prepare_uri(self.song_uri)
         self.assertTrue(self.gstreamer.start_playback())
 
-    def test_set_uri_non_existing_file(self):
-        self.gstreamer.prepare_playback()
-        self.gstreamer.set_uri(self.song_uri + 'bogus')
+    def test_start_playback_non_existing_file(self):
+        self.prepare_uri(self.song_uri + 'bogus')
         self.assertFalse(self.gstreamer.start_playback())
+
+    def test_pause_playback_while_playing(self):
+        self.prepare_uri(self.song_uri)
+        self.gstreamer.start_playback()
+        self.assertTrue(self.gstreamer.pause_playback())
+
+    def test_stop_playback_while_playing(self):
+        self.prepare_uri(self.song_uri)
+        self.gstreamer.start_playback()
+        self.assertTrue(self.gstreamer.stop_playback())
 
     @SkipTest
     def test_deliver_data(self):
