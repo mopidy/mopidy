@@ -90,9 +90,10 @@ class LocalOutput(BaseOutput):
     However, there are chases when you want to explicitly set what GStreamer
     should use. This can be achieved by setting `settings.LOCAL_OUTPUT_OVERRIDE`
     to the sink you want to use. Some of the possible values are: alsasink,
-    esdsink, jackaudiosink, oss4sink and osssink. Exact values that will work
-    on your system will depend on your sound setup and installed GStreamer
-    plugins. Run `gst-inspect0.10` for list of all available plugins.
+    esdsink, jackaudiosink, oss4sink, osssink and pulsesink. Exact values that
+    will work on your system will depend on your sound setup and installed
+    GStreamer plugins. Run `gst-inspect0.10` for list of all available plugins.
+    Also note that this accepts properties and bins in `gst-launch` format.
     """
 
     def describe_bin(self):
