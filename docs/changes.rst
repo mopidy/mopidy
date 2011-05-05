@@ -20,7 +20,8 @@ This change log is used to track all major changes to Mopidy.
   :meth:`io.RawBaseIO.readline`.  When the :mod:`io` module is available, it is
   used by PySerial instead of the `FileLike` implementation.
 
-- Fix UnicodeDecodeError in MPD frontend on non-english locale.
+- Fix UnicodeDecodeError in MPD frontend on non-english locale. Thanks to
+  Antoine Pierlot-Garcin for the patch. (Fixes: :issue:`88`)
 
 - Do not create Pykka proxies that are not going to be used in
   :mod:`mopidy.core`. The underlying actor may already intentionally be dead,
