@@ -22,6 +22,10 @@ This change log is used to track all major changes to Mopidy.
 
 - Fix UnicodeDecodeError in MPD frontend on non-english locale.
 
+- Do not create Pykka proxies that are not going to be used in
+  :mod:`mopidy.core`. The underlying actor may already intentionally be dead,
+  and thus the program may crash on creating a proxy it doesn't need.
+
 
 0.4.0 (2011-04-27)
 ==================
