@@ -53,25 +53,20 @@ def setup_settings():
     settings.validate()
 
 def setup_gobject_loop():
-    gobject_loop = GObjectEventThread()
-    gobject_loop.start()
-    return gobject_loop
+    GObjectEventThread().start()
 
 def setup_gstreamer():
-    return GStreamer.start().proxy()
+    GStreamer.start()
 
 def setup_mixer():
-    return get_class(settings.MIXER).start().proxy()
+    get_class(settings.MIXER).start()
 
 def setup_backend():
-    return get_class(settings.BACKENDS[0]).start().proxy()
+    get_class(settings.BACKENDS[0]).start()
 
 def setup_frontends():
-    frontends = []
     for frontend_class_name in settings.FRONTENDS:
         try:
-            frontend = get_class(frontend_class_name).start().proxy()
-            frontends.append(frontend)
+            get_class(frontend_class_name).start()
         except OptionalDependencyError as e:
             logger.info(u'Disabled: %s (%s)', frontend_class_name, e)
-    return frontends
