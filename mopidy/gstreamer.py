@@ -101,6 +101,9 @@ class GStreamer(ThreadingActor):
             logger.error(u'%s %s', error, debug)
             # FIXME Should we send 'stop_playback' to the backend here? Can we
             # differentiate on how serious the error is?
+        elif message.type == gst.MESSAGE_WARNING:
+            error, debug = message.parse_warning()
+            logger.warning(u'%s %s', error, debug)
 
     def _get_backend(self):
         backend_refs = ActorRegistry.get_by_class(Backend)
