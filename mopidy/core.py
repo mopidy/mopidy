@@ -58,7 +58,7 @@ def setup_gobject_loop():
     return gobject_loop
 
 def setup_gstreamer():
-    return GStreamer().start().proxy()
+    return GStreamer.start().proxy()
 
 def setup_mixer():
     return get_class(settings.MIXER).start().proxy()
