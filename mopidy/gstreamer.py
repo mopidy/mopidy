@@ -214,6 +214,10 @@ class GStreamer(ThreadingActor):
             logger.warning('Setting GStreamer state to %s: failed',
                 state.value_name)
             return False
+        elif result == gst.STATE_CHANGE_ASYNC:
+            logger.debug('Setting GStreamer state to %s: async',
+                state.value_name)
+            return True
         else:
             logger.debug('Setting GStreamer state to %s: OK',
                 state.value_name)
