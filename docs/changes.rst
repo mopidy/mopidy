@@ -5,8 +5,12 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-0.4.1 (in development)
-======================
+0.4.1 (2011-05-06)
+==================
+
+This is a bug fix release fixing audio problems on older GStreamer and some
+minor bugs.
+
 
 **Bugfixes**
 
@@ -25,7 +29,10 @@ This change log is used to track all major changes to Mopidy.
 
 - Do not create Pykka proxies that are not going to be used in
   :mod:`mopidy.core`. The underlying actor may already intentionally be dead,
-  and thus the program may crash on creating a proxy it doesn't need.
+  and thus the program may crash on creating a proxy it doesn't need. Combined
+  with the Pykka 0.12.2 release this fixes a crash in the Last.fm frontend
+  which may occur when all dependencies are installed, but the frontend isn't
+  configured. (Fixes: :issue:`84`)
 
 
 0.4.0 (2011-04-27)
