@@ -20,6 +20,8 @@ This change log is used to track all major changes to Mopidy.
   :meth:`io.RawBaseIO.readline`.  When the :mod:`io` module is available, it is
   used by PySerial instead of the `FileLike` implementation.
 
+- Fix UnicodeDecodeError in MPD frontend on non-english locale.
+
 
 0.4.0 (2011-04-27)
 ==================
