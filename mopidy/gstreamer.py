@@ -184,15 +184,24 @@ class GStreamer(ThreadingActor):
         return handeled
 
     def start_playback(self):
+        """Notify GStreamer that it should start playback"""
         return self._set_state(gst.STATE_PLAYING)
 
     def pause_playback(self):
+        """Notify GStreamer that it should pause playback"""
         return self._set_state(gst.STATE_PAUSED)
 
     def prepare_change(self):
+        """
+        Notify GStreamer that we are about to change state of playback.
+
+        This function always needs to be called before changing URIS or doing
+        changes like updating data that is being pushed.
+        """
         return self._set_state(gst.STATE_READY)
 
     def stop_playback(self):
+        """Notify GStreamer that is should stop playback"""
         return self._set_state(gst.STATE_NULL)
 
     def _set_state(self, state):
