@@ -205,8 +205,9 @@ class GStreamer(ThreadingActor):
             "READY" -> "NULL"
             "READY" -> "PAUSED"
 
-        :param state_name: NULL, READY, PAUSED, or PLAYING
-        :type state_name: string
+        :param state: State to set pipeline to. One of: `gst.STATE_NULL`,
+            `gst.STATE_READY`, `gst.STATE_PAUSED` and `gst.STATE_PLAYING`.
+        :type state: :class:`gst.State`
         :rtype: :class:`True` or :class:`False`
         """
         result = self._pipeline.set_state(state)
