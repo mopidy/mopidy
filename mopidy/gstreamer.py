@@ -22,46 +22,6 @@ default_caps = gst.Caps("""
     signed=(boolean)true,
     rate=(int)44100""")
 
-class BaseOutput(object):
-    def connect_bin(self, pipeline, element_to_link_to):
-        """
-        Connect output bin to pipeline and given element.
-        """
-        description = 'queue ! %s' % self.describe_bin()
-        logger.debug('Adding new output to tee: %s', description)
-
-        output = self.parse_bin(description)
-        self.modify_bin(output)
-
-        pipeline.add(output)
-        output.sync_state_with_parent()
-        gst.element_link_many(element_to_link_to, output)
-
-    def parse_bin(self, description):
-        return gst.parse_bin_from_description(description, True)
-
-    def modify_bin(self, output):
-        """
-        Modifies bin before it is installed if needed
-        """
-        pass
-
-    def describe_bin(self):
-        """
-        Describe bin to be parsed.
-
-        Must be implemented by subclasses.
-        """
-        raise NotImplementedError
-
-    def set_properties(self, element, properties):
-        """
-        Set properties on element if they have a value.
-        """
-        for key, value in properties.items():
-            if value:
-                element.set_property(key, value)
-
 
 class GStreamer(ThreadingActor):
     """
@@ -69,7 +29,7 @@ class GStreamer(ThreadingActor):
 
     **Settings:**
 
-    - :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
+    - :attr:`mopidy.settings.OUTPUTS`
 
     """
 
@@ -81,9 +41,9 @@ class GStreamer(ThreadingActor):
 
     def _setup_gstreamer(self):
         """
-        **Warning:** :class:`GStreamerOutput` requires
+        **Warning:** :class:`GStreamer` requires
         :class:`mopidy.utils.process.GObjectEventThread` to be running. This is
-        not enforced by :class:`GStreamerOutput` itself.
+        not enforced by :class:`GStreamer` itself.
         """
         base_pipeline = ' ! '.join([
             'audioconvert name=convert',
@@ -145,13 +105,19 @@ class GStreamer(ThreadingActor):
         return backend_refs[0].proxy()
 
     def set_uri(self, uri):
-        """Play audio at URI"""
+        """Change internal uridecodebin's URI"""
         self.gst_uridecodebin.set_property('uri', uri)
 
-    def deliver_data(self, caps_string, data):
-        """Deliver audio data to be played"""
+    def deliver_data(self, capabilities, data):
+        """
+        Deliver audio data to be played
+
+        :param capabilities: a GStreamer capabilities string
+        :type capabilities: string
+        :param data: raw audio data to be played
+        """
         source = self.gst_pipeline.get_by_name('source')
-        caps = gst.caps_from_string(caps_string)
+        caps = gst.caps_from_string(capabilities)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
         source.set_property('caps', caps)
@@ -167,6 +133,11 @@ class GStreamer(ThreadingActor):
         self.gst_pipeline.get_by_name('source').emit('end-of-stream')
 
     def get_position(self):
+        """
+        Get position in milliseconds.
+
+        :rtype: int
+        """
         if self.gst_pipeline.get_state()[1] == gst.STATE_NULL:
             return 0
         try:
@@ -177,6 +148,13 @@ class GStreamer(ThreadingActor):
             return 0
 
     def set_position(self, position):
+        """
+        Set position in milliseconds.
+
+        :param position: the position in milliseconds
+        :type volume: int
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         self.gst_pipeline.get_state() # block until state changes are done
         handeled = self.gst_pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
@@ -232,15 +210,35 @@ class GStreamer(ThreadingActor):
             return True
 
     def get_volume(self):
-        """Get volume in range [0..100]"""
+        """
+        Get volume level for software mixer.
+
+        :rtype: int in range [0..100]
+        """
         return int(self.gst_volume.get_property('volume') * 100)
 
     def set_volume(self, volume):
-        """Set volume in range [0..100]"""
+        """
+        Set volume level for software mixer.
+
+        :param volume: the volume in the range [0..100]
+        :type volume: int
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
         self.gst_volume.set_property('volume', volume / 100.0)
         return True
 
     def set_metadata(self, track):
+        """
+        Set track metadata for currently playing song.
+
+        Only needs to be called by sources such as appsrc which don't already
+        inject tags in pipeline.
+
+        :param track: Track containing metadata for current song.
+        :type track: :class:`mopidy.modes.Track`
+        """
+        # FIXME what if we want to unset taginject tags?
         tags = u'artist="%(artist)s",title="%(title)s"' % {
             'artist': u', '.join([a.name for a in track.artists]),
             'title': track.name,

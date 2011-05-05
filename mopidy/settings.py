@@ -54,7 +54,7 @@ FRONTENDS = (
     u'mopidy.frontends.lastfm.LastfmFrontend',
 )
 
-#: Which GStreamer bin description to use in :mod:`mopidy.outputs.CustomOutput`.
+#: Which GStreamer bin description to use in :class:`mopidy.outputs.LocalOutput`.
 #:
 #: Default::
 #:

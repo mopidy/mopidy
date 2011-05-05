@@ -10,9 +10,16 @@ This change log is used to track all major changes to Mopidy.
 
 No description yet.
 
+**Important changes**
+
+- Mopidy now supports running with 1-n outputs at the same time. This feature
+  was mainly added to facilitate Shoutcast support, which Mopidy has also
+  gained. In its current state outputs can not be toggled during runtime.
+
 **Changes**
 
-No changes yet.
+- Fix local backend time query errors that where coming from stopped pipeline.
+  (Fixes: :issue:`87`)
 
 
 0.4.0 (2011-04-27)
