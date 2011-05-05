@@ -5,6 +5,36 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+0.4.1 (2011-05-06)
+==================
+
+This is a bug fix release fixing audio problems on older GStreamer and some
+minor bugs.
+
+
+**Bugfixes**
+
+- Fix broken audio on at least GStreamer 0.10.30, which affects Ubuntu 10.10.
+  The GStreamer `appsrc` bin wasn't being linked due to lack of default caps.
+  (Fixes: :issue:`85`)
+
+- Fix crash in :mod:`mopidy.mixers.nad` that occures at startup when the
+  :mod:`io` module is available. We used an `eol` keyword argument which is
+  supported by :meth:`serial.FileLike.readline`, but not by
+  :meth:`io.RawBaseIO.readline`.  When the :mod:`io` module is available, it is
+  used by PySerial instead of the `FileLike` implementation.
+
+- Fix UnicodeDecodeError in MPD frontend on non-english locale. Thanks to
+  Antoine Pierlot-Garcin for the patch. (Fixes: :issue:`88`)
+
+- Do not create Pykka proxies that are not going to be used in
+  :mod:`mopidy.core`. The underlying actor may already intentionally be dead,
+  and thus the program may crash on creating a proxy it doesn't need. Combined
+  with the Pykka 0.12.2 release this fixes a crash in the Last.fm frontend
+  which may occur when all dependencies are installed, but the frontend isn't
+  configured. (Fixes: :issue:`84`)
+
+
 0.4.0 (2011-04-27)
 ==================
 
