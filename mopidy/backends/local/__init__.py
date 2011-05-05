@@ -75,7 +75,7 @@ class LocalPlaybackProvider(BasePlaybackProvider):
         return self.backend.gstreamer.pause_playback().get()
 
     def play(self, track):
-        self.backend.gstreamer.prepare_playback()
+        self.backend.gstreamer.prepare_change()
         self.backend.gstreamer.set_uri(track.uri).get()
         return self.backend.gstreamer.start_playback().get()
 

@@ -24,7 +24,7 @@ class GStreamerTest(unittest.TestCase):
         self.gstreamer.on_start()
 
     def prepare_uri(self, uri):
-        self.gstreamer.prepare_playback()
+        self.gstreamer.prepare_change()
         self.gstreamer.set_uri(uri)
 
     def tearDown(self):

@@ -19,7 +19,7 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
             self.backend.spotify.session.load(
                 Link.from_string(track.uri).as_track())
             self.backend.spotify.session.play(1)
-            self.backend.gstreamer.prepare_playback()
+            self.backend.gstreamer.prepare_change()
             self.backend.gstreamer.set_uri('appsrc://')
             self.backend.gstreamer.start_playback()
             self.backend.gstreamer.set_metadata(track)
@@ -32,7 +32,7 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
         return self.seek(self.backend.playback.time_position)
 
     def seek(self, time_position):
-        self.backend.gstreamer.prepare_playback()
+        self.backend.gstreamer.prepare_change()
         self.backend.spotify.session.seek(time_position)
         self.backend.gstreamer.start_playback()
         return True
