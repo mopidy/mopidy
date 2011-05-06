@@ -26,6 +26,13 @@ BACKENDS = (
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
+#: Which GStreamer bin description to use in :class:`mopidy.outputs.CustomOutput`.
+#:
+#: Default::
+#:
+#:     CUSTOM_OUTPUT = u'fakesink'
+CUSTOM_OUTPUT = u'fakesink'
+
 #: The log format used for debug logging.
 #:
 #: See http://docs.python.org/library/logging.html#formatter-objects for
@@ -53,13 +60,6 @@ FRONTENDS = (
     u'mopidy.frontends.mpd.MpdFrontend',
     u'mopidy.frontends.lastfm.LastfmFrontend',
 )
-
-#: Which GStreamer bin description to use in :class:`mopidy.outputs.LocalOutput`.
-#:
-#: Default::
-#:
-#:     LOCAL_OUTPUT_OVERRIDE = None
-LOCAL_OUTPUT_OVERRIDE = None
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
 #:
@@ -220,23 +220,6 @@ SHOUTCAST_OUTPUT_MOUNT = u'/stream'
 #:
 #:     SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
 SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
-
-#: Overrides to allow advanced setup of shoutcast. Using this settings implies
-#: that all other SHOUTCAST_OUTPUT_* settings will be ignored.
-#:
-#: Examples:
-#:
-#: ``vorbisenc ! oggmux ! shout2send mount=/stream port=8000``
-#:     Encode with vorbis and use ogg mux.
-#: ``lame bitrate=320 ! shout2send mount=/stream port=8000``
-#:     Encode with lame to bitrate=320.
-#:
-#: For all options see gst-inspect-0.10 lame, vorbisenc and shout2send.
-#:
-#: Default::
-#:
-#:     SHOUTCAST_OUTPUT_OVERRIDE = None
-SHOUTCAST_OUTPUT_OVERRIDE = None
 
 #: Path to the Spotify cache.
 #:

@@ -78,27 +78,40 @@ class BaseOutput(object):
                 element.set_property(key, value)
 
 
+class CustomOutput(BaseOutput):
+    """
+    Custom output for using alternate setups.
+
+    This output is intended to handle to main cases:
+
+    1. Simple things like switching which sink to use. Say :class:`LocalOutput`
+       doesn't work for you and you want to switch to ALSA, simple. Set
+       `CUSTOM_OUTPUT` to `alsasink` and you are good to go. Some possible
+       sinks include:
+
+       - alsasink
+       - osssink
+       - pulsesink
+       - ...and many more
+
+    2. Advanced setups that require complete control of the output bin. For
+       these cases setup `CUSTOM_OUTPUT` with a `gst-launch` compatible string
+       describing the target setup.
+
+    """
+    def describe_bin(self):
+        return settings.CUSTOM_OUTPUT
+
+
 class LocalOutput(BaseOutput):
     """
     Basic output to local audio sink.
 
     This output will normally tell GStreamer to choose whatever it thinks is
     best for your system. In other words this is usually a sane choice.
-
-    Advanced:
-
-    However, there are chases when you want to explicitly set what GStreamer
-    should use. This can be achieved by setting `settings.LOCAL_OUTPUT_OVERRIDE`
-    to the sink you want to use. Some of the possible values are: alsasink,
-    esdsink, jackaudiosink, oss4sink, osssink and pulsesink. Exact values that
-    will work on your system will depend on your sound setup and installed
-    GStreamer plugins. Run `gst-inspect0.10` for list of all available plugins.
-    Also note that this accepts properties and bins in `gst-launch` format.
     """
 
     def describe_bin(self):
-        if settings.LOCAL_OUTPUT_OVERRIDE:
-            return settings.LOCAL_OUTPUT_OVERRIDE
         return 'autoaudiosink'
 
 
@@ -124,25 +137,13 @@ class ShoutcastOutput(BaseOutput):
     supports Shoutcast. The output supports setting for: server address, port,
     mount point, user, password and encoder to use. Please see
     :class:`mopidy.settings` for details about settings.
-
-    Advanced:
-
-    If you need to do something special that this output has not taken into
-    account the setting `settings.SHOUTCAST_OUTPUT_OVERRIDE` has been provided
-    to allow for manual setup of the bin using a gst-launch string. If this
-    setting is set all other shoutcast settings will be ignored.
     """
 
     def describe_bin(self):
-        if settings.SHOUTCAST_OUTPUT_OVERRIDE:
-            return settings.SHOUTCAST_OUTPUT_OVERRIDE
         return 'audioconvert ! %s ! shout2send name=shoutcast' \
             % settings.SHOUTCAST_OUTPUT_ENCODER
 
     def modify_bin(self, output):
-        if settings.SHOUTCAST_OUTPUT_OVERRIDE:
-            return
-
         self.set_properties(output.get_by_name('shoutcast'), {
             u'ip': settings.SHOUTCAST_OUTPUT_SERVER,
             u'mount': settings.SHOUTCAST_OUTPUT_MOUNT,
