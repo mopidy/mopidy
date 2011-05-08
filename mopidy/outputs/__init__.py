@@ -82,12 +82,12 @@ class CustomOutput(BaseOutput):
     """
     Custom output for using alternate setups.
 
-    This output is intended to handle to main cases:
+    This output is intended to handle two main cases:
 
     1. Simple things like switching which sink to use. Say :class:`LocalOutput`
        doesn't work for you and you want to switch to ALSA, simple. Set
-       `CUSTOM_OUTPUT` to `alsasink` and you are good to go. Some possible
-       sinks include:
+       :attr:`mopidy.settings.CUSTOM_OUTPUT` to ``alsasink`` and you are good
+       to go. Some possible sinks include:
 
        - alsasink
        - osssink
@@ -95,8 +95,8 @@ class CustomOutput(BaseOutput):
        - ...and many more
 
     2. Advanced setups that require complete control of the output bin. For
-       these cases setup `CUSTOM_OUTPUT` with a `gst-launch` compatible string
-       describing the target setup.
+       these cases setup :attr:`mopidy.settings.CUSTOM_OUTPUT` with a
+       :cmd:`gst-launch` compatible string describing the target setup.
 
     """
     def describe_bin(self):
