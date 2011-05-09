@@ -21,6 +21,9 @@ No description yet.
 - Fix local backend time query errors that where coming from stopped pipeline.
   (Fixes: :issue:`87`)
 
+- Support passing options to GStreamer. See :option:`--help-gst` for a list of
+  available options. (Fixes: :issue:`95`)
+
 
 0.4.1 (2011-05-06)
 ==================
