@@ -1,6 +1,18 @@
 import logging
 import optparse
+import sys
 import time
+
+# Extract any non-GStreamer arguments, and leave the GStreamer arguments for
+# processing by GStreamer. This needs to be done before GStreamer is imported,
+# so that GStreamer doesn't hijack e.g. ``--help``.
+# NOTE This naive fix does not support values like ``bar`` in
+# ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
+def is_gst_arg(arg):
+    return arg.startswith('--gst') or arg == '--help-gst'
+gstreamer_args = [arg for arg in sys.argv[1:] if is_gst_arg(arg)]
+mopidy_args = [arg for arg in sys.argv[1:] if not is_gst_arg(arg)]
+sys.argv[1:] = gstreamer_args
 
 from pykka.registry import ActorRegistry
 
@@ -33,6 +45,9 @@ def main():
 
 def parse_options():
     parser = optparse.OptionParser(version=u'Mopidy %s' % get_version())
+    parser.add_option('--help-gst',
+        action='store_true', dest='help_gst',
+        help='show GStreamer help options')
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
@@ -45,7 +60,7 @@ def parse_options():
     parser.add_option('--list-settings',
         action='callback', callback=list_settings_optparse_callback,
         help='list current settings')
-    return parser.parse_args()[0]
+    return parser.parse_args(args=mopidy_args)[0]
 
 def setup_settings():
     get_or_create_folder('~/.mopidy/')
