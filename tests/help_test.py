@@ -17,3 +17,10 @@ class HelpTest(unittest.TestCase):
         self.assert_('--verbose' in output)
         self.assert_('--save-debug-log' in output)
         self.assert_('--list-settings' in output)
+
+    def test_help_gst_has_gstreamer_options(self):
+        mopidy_dir = os.path.dirname(mopidy.__file__)
+        args = [sys.executable, mopidy_dir, '--help-gst']
+        process = subprocess.Popen(args, stdout=subprocess.PIPE)
+        output = process.communicate()[0]
+        self.assert_('--gst-version' in output)
