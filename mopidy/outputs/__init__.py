@@ -96,7 +96,7 @@ class CustomOutput(BaseOutput):
 
     2. Advanced setups that require complete control of the output bin. For
        these cases setup :attr:`mopidy.settings.CUSTOM_OUTPUT` with a
-       :cmd:`gst-launch` compatible string describing the target setup.
+       :command:`gst-launch` compatible string describing the target setup.
 
     """
     def describe_bin(self):
