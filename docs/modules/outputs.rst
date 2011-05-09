@@ -2,8 +2,14 @@
 :mod:`mopidy.outputs` -- GStreamer audio outputs
 ************************************************
 
+The following GStreamer audio outputs implements the :ref:`output-api`.
+
 .. inheritance-diagram:: mopidy.outputs
 
-.. automodule:: mopidy.outputs
-    :synopsis: GStreamer audio outputs
-    :members:
+.. autoclass:: mopidy.outputs.CustomOutput
+
+.. autoclass:: mopidy.outputs.LocalOutput
+
+.. autoclass:: mopidy.outputs.NullOutput
+
+.. autoclass:: mopidy.outputs.ShoutcastOutput
