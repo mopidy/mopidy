@@ -45,6 +45,9 @@ def main():
 
 def parse_options():
     parser = optparse.OptionParser(version=u'Mopidy %s' % get_version())
+    parser.add_option('--help-gst',
+        action='store_true', dest='help_gst',
+        help='show GStreamer help options')
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')

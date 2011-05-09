@@ -13,6 +13,7 @@ class HelpTest(unittest.TestCase):
         output = process.communicate()[0]
         self.assert_('--version' in output)
         self.assert_('--help' in output)
+        self.assert_('--help-gst' in output)
         self.assert_('--quiet' in output)
         self.assert_('--verbose' in output)
         self.assert_('--save-debug-log' in output)
