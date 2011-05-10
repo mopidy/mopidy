@@ -184,7 +184,9 @@ class GStreamer(ThreadingActor):
         Notify GStreamer that we are about to change state of playback.
 
         This function always needs to be called before changing URIS or doing
-        changes like updating data that is being pushed.
+        changes like updating data that is being pushed. The reason for this
+        is that GStreamer will reset all its state when it changes to
+        :attr:`gst.STATE_READY`.
         """
         return self._set_state(gst.STATE_READY)
 
