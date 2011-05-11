@@ -2,9 +2,9 @@ import logging
 
 try:
     import dbus
+    import dbus.mainloop.glib
     import dbus.service
-    from dbus.mainloop.glib import DBusGMainLoop, threads_init
-    threads_init()
+    import gobject
 except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
@@ -16,6 +16,11 @@ from mopidy.backends.base import Backend
 from mopidy.frontends.base import BaseFrontend
 
 logger = logging.getLogger('mopidy.frontends.mpris')
+
+# Must be done before dbus.SessionBus() is called
+gobject.threads_init()
+dbus.mainloop.glib.threads_init()
+dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 
 class MprisFrontend(ThreadingActor, BaseFrontend):
@@ -129,16 +134,9 @@ class MprisObject(dbus.service.Object):
         assert len(backend_refs) == 1, 'Expected exactly one running backend.'
         self.backend = backend_refs[0].proxy()
 
-        logger.debug(u'Prepare the D-Bus main loop before connecting')
-        DBusGMainLoop(set_as_default=True)
-        logger.debug(u'Connecting to D-Bus: getting session bus')
-        bus = dbus.SessionBus()
-        logger.debug(u'Connecting to D-Bus: claiming service name')
-        # FIXME We segfault at the next line 80% of the time
-        bus_name = dbus.service.BusName(self.bus_name, bus)
-        logger.debug(u'Connecting to D-Bus: registering service object')
-        super(MprisObject, self).__init__(object_path=self.object_path,
-            bus_name=bus_name)
+        logger.debug(u'Connecting to D-Bus...')
+        bus_name = dbus.service.BusName(self.bus_name, dbus.SessionBus())
+        super(MprisObject, self).__init__(bus_name, self.object_path)
         logger.info(u'Connected to D-Bus')
 
 
