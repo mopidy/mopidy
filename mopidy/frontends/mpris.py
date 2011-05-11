@@ -30,6 +30,9 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
 
     - ``dbus`` Python bindings. The package is named ``python-dbus`` in
       Ubuntu/Debian.
+    - ``libindicate`` Python bindings is needed to expose Mopidy in e.g. the
+      Ubuntu Sound Menu. The package is named ``python-indicate`` in
+      Ubuntu/Debian.
     """
 
     # This thread requires :class:`mopidy.utils.process.GObjectEventThread` to be
