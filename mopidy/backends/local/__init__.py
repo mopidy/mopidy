@@ -12,7 +12,7 @@ from mopidy.backends.base import (Backend, CurrentPlaylistController,
     BasePlaybackProvider, StoredPlaylistsController,
     BaseStoredPlaylistsProvider)
 from mopidy.models import Playlist, Track, Album
-from mopidy.outputs.base import BaseOutput
+from mopidy.gstreamer import GStreamer
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
@@ -50,12 +50,12 @@ class LocalBackend(ThreadingActor, Backend):
 
         self.uri_handlers = [u'file://']
 
-        self.output = None
+        self.gstreamer = None
 
     def on_start(self):
-        output_refs = ActorRegistry.get_by_class(BaseOutput)
-        assert len(output_refs) == 1, 'Expected exactly one running output.'
-        self.output = output_refs[0].proxy()
+        gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
+        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        self.gstreamer = gstreamer_refs[0].proxy()
 
 
 class LocalPlaybackController(PlaybackController):
@@ -67,24 +67,26 @@ class LocalPlaybackController(PlaybackController):
 
     @property
     def time_position(self):
-        return self.backend.output.get_position().get()
+        return self.backend.gstreamer.get_position().get()
 
 
 class LocalPlaybackProvider(BasePlaybackProvider):
     def pause(self):
-        return self.backend.output.set_state('PAUSED').get()
+        return self.backend.gstreamer.pause_playback().get()
 
     def play(self, track):
-        return self.backend.output.play_uri(track.uri).get()
+        self.backend.gstreamer.prepare_change()
+        self.backend.gstreamer.set_uri(track.uri).get()
+        return self.backend.gstreamer.start_playback().get()
 
     def resume(self):
-        return self.backend.output.set_state('PLAYING').get()
+        return self.backend.gstreamer.start_playback().get()
 
     def seek(self, time_position):
-        return self.backend.output.set_position(time_position).get()
+        return self.backend.gstreamer.set_position(time_position).get()
 
     def stop(self):
-        return self.backend.output.set_state('READY').get()
+        return self.backend.gstreamer.stop_playback().get()
 
 
 class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):

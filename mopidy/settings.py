@@ -26,6 +26,13 @@ BACKENDS = (
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
+#: Which GStreamer bin description to use in :class:`mopidy.outputs.CustomOutput`.
+#:
+#: Default::
+#:
+#:     CUSTOM_OUTPUT = u'fakesink'
+CUSTOM_OUTPUT = u'fakesink'
+
 #: The log format used for debug logging.
 #:
 #: See http://docs.python.org/library/logging.html#formatter-objects for
@@ -54,13 +61,6 @@ FRONTENDS = (
     u'mopidy.frontends.lastfm.LastfmFrontend',
     u'mopidy.frontends.mpris.MprisFrontend',
 )
-
-#: Which GStreamer audio sink to use in :mod:`mopidy.outputs.gstreamer`.
-#:
-#: Default::
-#:
-#:     GSTREAMER_AUDIO_SINK = u'autoaudiosink'
-GSTREAMER_AUDIO_SINK = u'autoaudiosink'
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
 #:
@@ -144,13 +144,6 @@ MIXER_EXT_SPEAKERS_B = None
 #:     MIXER_MAX_VOLUME = 100
 MIXER_MAX_VOLUME = 100
 
-#: Audio output handler to use.
-#:
-#: Default::
-#:
-#:     OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
-OUTPUT = u'mopidy.outputs.gstreamer.GStreamerOutput'
-
 #: Which address Mopidy's MPD server should bind to.
 #:
 #:Examples:
@@ -174,6 +167,60 @@ MPD_SERVER_PASSWORD = None
 #:
 #: Default: 6600
 MPD_SERVER_PORT = 6600
+
+#: List of outputs to use. See :mod:`mopidy.outputs` for all available
+#: backends
+#:
+#: Default::
+#:
+#:     OUTPUTS = (
+#:         u'mopidy.outputs.LocalOutput',
+#:     )
+OUTPUTS = (
+    u'mopidy.outputs.LocalOutput',
+)
+
+#: Servar that runs Shoutcast server to send stream to.
+#:
+#: Default::
+#:
+#:    SHOUTCAST_OUTPUT_SERVER = u'127.0.0.1'
+SHOUTCAST_OUTPUT_SERVER = u'127.0.0.1'
+
+#: User to authenticate as against Shoutcast server.
+#:
+#: Default::
+#:
+#:    SHOUTCAST_OUTPUT_USERNAME = u'source'
+SHOUTCAST_OUTPUT_USERNAME = u'source'
+
+#: Password to authenticate with against Shoutcast server.
+#:
+#: Default::
+#:
+#:    SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
+SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
+
+#: Port to use for streaming to Shoutcast server.
+#:
+#: Default::
+#:
+#:    SHOUTCAST_OUTPUT_PORT = 8000
+SHOUTCAST_OUTPUT_PORT = 8000
+
+#: Mountpoint to use for the stream on the Shoutcast server.
+#:
+#: Default::
+#:
+#:    SHOUTCAST_OUTPUT_MOUNT = u'/stream'
+SHOUTCAST_OUTPUT_MOUNT = u'/stream'
+
+#: Encoder to use to process audio data before streaming.
+#:
+#: Default::
+#:
+#:     SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
+SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
 
 #: Path to the Spotify cache.
 #:

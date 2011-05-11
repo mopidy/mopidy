@@ -16,48 +16,34 @@ def translator(data):
     artist_kwargs = {}
     track_kwargs = {}
 
-    # FIXME replace with data.get('foo', None) ?
+    def _retrieve(source_key, target_key, target):
+        if source_key in data:
+            target[target_key] = data[source_key]
 
-    if 'album' in data:
-        album_kwargs['name'] = data['album']
+    _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
+    _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
+    _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
 
-    if 'track-count' in data:
-        album_kwargs['num_tracks'] = data['track-count']
-
-    if 'artist' in data:
-        artist_kwargs['name'] = data['artist']
-
-    if 'date' in data:
-        date = data['date']
+    if gst.TAG_DATE in data:
+        date = data[gst.TAG_DATE]
         date = datetime.date(date.year, date.month, date.day)
         track_kwargs['date'] = date
 
-    if 'title' in data:
-        track_kwargs['name'] = data['title']
+    _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
+    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
 
-    if 'track-number' in data:
-        track_kwargs['track_no'] = data['track-number']
-
-    if 'album-artist' in data:
-        albumartist_kwargs['name'] = data['album-artist']
-
-    if 'musicbrainz-trackid' in data:
-        track_kwargs['musicbrainz_id'] = data['musicbrainz-trackid']
-
-    if 'musicbrainz-artistid' in data:
-        artist_kwargs['musicbrainz_id'] = data['musicbrainz-artistid']
-
-    if 'musicbrainz-albumid' in data:
-        album_kwargs['musicbrainz_id'] = data['musicbrainz-albumid']
-
-    if 'musicbrainz-albumartistid' in data:
-        albumartist_kwargs['musicbrainz_id'] = data['musicbrainz-albumartistid']
+    # Following keys don't seem to have TAG_* constant.
+    _retrieve('album-artist', 'name', albumartist_kwargs)
+    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
+    _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
+    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
+    _retrieve('musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
     track_kwargs['uri'] = data['uri']
-    track_kwargs['length'] = data['duration']
+    track_kwargs['length'] = data[gst.TAG_DURATION]
     track_kwargs['album'] = Album(**album_kwargs)
     track_kwargs['artists'] = [Artist(**artist_kwargs)]
 

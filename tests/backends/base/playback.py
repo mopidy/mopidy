@@ -4,7 +4,7 @@ import random
 import time
 
 from mopidy.models import Track
-from mopidy.outputs.base import BaseOutput
+from mopidy.gstreamer import GStreamer
 
 from tests import SkipTest
 from tests.backends.base import populate_playlist
@@ -16,7 +16,7 @@ class PlaybackControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
-        self.backend.output = mock.Mock(spec=BaseOutput)
+        self.backend.gstreamer = mock.Mock(spec=GStreamer)
         self.playback = self.backend.playback
         self.current_playlist = self.backend.current_playlist
 
@@ -520,7 +520,7 @@ class PlaybackControllerTest(object):
 
         self.assert_(wrapper.called)
 
-    @SkipTest # Blocks for 10ms and does not work with DummyOutput
+    @SkipTest # Blocks for 10ms
     @populate_playlist
     def test_end_of_track_callback_gets_called(self):
         self.playback.play()
@@ -599,7 +599,7 @@ class PlaybackControllerTest(object):
         self.playback.pause()
         self.assertEqual(self.playback.resume(), None)
 
-    @SkipTest # Uses sleep and does not work with DummyOutput+LocalBackend
+    @SkipTest # Uses sleep and might not work with LocalBackend
     @populate_playlist
     def test_resume_continues_from_right_position(self):
         self.playback.play()
@@ -729,7 +729,7 @@ class PlaybackControllerTest(object):
     def test_time_position_when_stopped(self):
         future = mock.Mock()
         future.get = mock.Mock(return_value=0)
-        self.backend.output.get_position = mock.Mock(return_value=future)
+        self.backend.gstreamer.get_position = mock.Mock(return_value=future)
 
         self.assertEqual(self.playback.time_position, 0)
 
@@ -737,11 +737,11 @@ class PlaybackControllerTest(object):
     def test_time_position_when_stopped_with_playlist(self):
         future = mock.Mock()
         future.get = mock.Mock(return_value=0)
-        self.backend.output.get_position = mock.Mock(return_value=future)
+        self.backend.gstreamer.get_position = mock.Mock(return_value=future)
 
         self.assertEqual(self.playback.time_position, 0)
 
-    @SkipTest # Uses sleep and does not work with LocalBackend+DummyOutput
+    @SkipTest # Uses sleep and does might not work with LocalBackend
     @populate_playlist
     def test_time_position_when_playing(self):
         self.playback.play()

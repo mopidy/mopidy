@@ -6,7 +6,7 @@ from pykka.registry import ActorRegistry
 from mopidy import settings
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, PlaybackController, StoredPlaylistsController)
-from mopidy.outputs.base import BaseOutput
+from mopidy.gstreamer import GStreamer
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
@@ -63,13 +63,13 @@ class SpotifyBackend(ThreadingActor, Backend):
 
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
 
-        self.output = None
+        self.gstreamer = None
         self.spotify = None
 
     def on_start(self):
-        output_refs = ActorRegistry.get_by_class(BaseOutput)
-        assert len(output_refs) == 1, 'Expected exactly one running output.'
-        self.output = output_refs[0].proxy()
+        gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
+        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        self.gstreamer = gstreamer_refs[0].proxy()
 
         self.spotify = self._connect()
 
