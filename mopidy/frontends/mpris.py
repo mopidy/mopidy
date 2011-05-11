@@ -68,8 +68,8 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
             self.indicate_server.set_desktop_file(
                 '/usr/share/applications/mopidy.desktop')
             self.indicate_server.show()
-        except ImportError:
-            pass
+        except ImportError as e:
+            logger.debug(u'Startup notification was not sent. (%s)', e)
 
 
 class MprisObject(dbus.service.Object):
