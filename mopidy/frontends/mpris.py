@@ -77,7 +77,6 @@ class MprisObject(dbus.service.Object):
 
     bus_name = 'org.mpris.MediaPlayer2.mopidy'
     object_path = '/org/mpris/MediaPlayer2'
-    properties_interface = 'org.freedesktop.DBus.Properties'
     root_interface = 'org.mpris.MediaPlayer2'
     player_interface = 'org.mpris.MediaPlayer2.Player'
     properties = {
@@ -145,14 +144,14 @@ class MprisObject(dbus.service.Object):
 
     ### Property interface
 
-    @dbus.service.method(dbus_interface=properties_interface,
+    @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
         in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
-        logger.debug(u'%s.Get called', self.properties_interface)
+        logger.debug(u'%s.Get called', dbus.dbus.PROPERTIES_IFACE)
         getter, setter = self.properties[interface][prop]
         return getter() if callable(getter) else getter
 
-    @dbus.service.method(dbus_interface=properties_interface,
+    @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
         in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
         """
@@ -165,28 +164,27 @@ class MprisObject(dbus.service.Object):
             props = player.GetAll('org.mpris.MediaPlayer2',
                 dbus_interface='org.freedesktop.DBus.Properties')
         """
-        logger.debug(u'%s.GetAll called', self.properties_interface)
+        logger.debug(u'%s.GetAll called', dbus.PROPERTIES_IFACE)
         getters = {}
         for key, (getter, setter) in self.properties[interface].iteritems():
             getters[key] = getter() if callable(getter) else getter
         return getters
 
-    @dbus.service.method(dbus_interface=properties_interface,
+    @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
         in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
-        logger.debug(u'%s.Set called', self.properties_interface)
+        logger.debug(u'%s.Set called', dbus.PROPERTIES_IFACE)
         getter, setter = self.properties[interface][prop]
         if setter is not None:
             setter(value)
             self.PropertiesChanged(interface,
                 {prop: self.Get(interface, prop)}, [])
 
-    @dbus.service.signal(dbus_interface=properties_interface,
+    @dbus.service.signal(dbus_interface=dbus.PROPERTIES_IFACE,
             signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed_properties,
         invalidated_properties):
-        logger.debug(u'%s.PropertiesChanged signaled',
-            self.properties_interface)
+        logger.debug(u'%s.PropertiesChanged signaled', dbus.PROPERTIES_IFACE)
         pass
 
 
