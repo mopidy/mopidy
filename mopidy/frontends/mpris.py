@@ -22,6 +22,11 @@ gobject.threads_init()
 dbus.mainloop.glib.threads_init()
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
+BUS_NAME = 'org.mpris.MediaPlayer2.mopidy'
+OBJECT_PATH = '/org/mpris/MediaPlayer2'
+ROOT_IFACE = 'org.mpris.MediaPlayer2'
+PLAYER_IFACE = 'org.mpris.MediaPlayer2.Player'
+
 
 class MprisFrontend(ThreadingActor, BaseFrontend):
     """
@@ -80,12 +85,8 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
 class MprisObject(dbus.service.Object):
     """Implements http://www.mpris.org/2.0/spec/"""
 
-    bus_name = 'org.mpris.MediaPlayer2.mopidy'
-    object_path = '/org/mpris/MediaPlayer2'
-    root_interface = 'org.mpris.MediaPlayer2'
-    player_interface = 'org.mpris.MediaPlayer2.Player'
     properties = {
-        root_interface: {
+        ROOT_IFACE: {
             'CanQuit': (True, None),
             'CanRaise': (False, None),
             # TODO Add track list support
@@ -96,7 +97,7 @@ class MprisObject(dbus.service.Object):
             # TODO Return MIME types supported by local backend if active
             'SupportedMimeTypes': (dbus.Array([], signature='s'), None),
         },
-        player_interface: {
+        PLAYER_IFACE: {
             # TODO Get backend.playback.state
             'PlaybackStatus': ('Stopped', None),
             # TODO Get/set loop status
@@ -135,8 +136,8 @@ class MprisObject(dbus.service.Object):
         self.backend = backend_refs[0].proxy()
 
         logger.debug(u'Connecting to D-Bus...')
-        bus_name = dbus.service.BusName(self.bus_name, dbus.SessionBus())
-        super(MprisObject, self).__init__(bus_name, self.object_path)
+        bus_name = dbus.service.BusName(BUS_NAME, dbus.SessionBus())
+        super(MprisObject, self).__init__(bus_name, OBJECT_PATH)
         logger.info(u'Connected to D-Bus')
 
 
@@ -188,12 +189,12 @@ class MprisObject(dbus.service.Object):
 
     ### Root interface
 
-    @dbus.service.method(dbus_interface=root_interface)
+    @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Raise(self):
-        logger.debug(u'%s.Raise called', self.root_interface)
+        logger.debug(u'%s.Raise called', ROOT_IFACE)
         pass # We do not have a GUI
 
-    @dbus.service.method(dbus_interface=root_interface)
+    @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Quit(self):
         """
         To test, start Mopidy and then run the following in a Python shell::
@@ -204,22 +205,22 @@ class MprisObject(dbus.service.Object):
                 '/org/mpris/MediaPlayer2')
             player.Quit(dbus_interface='org.mpris.MediaPlayer2')
         """
-        logger.debug(u'%s.Quit called', self.root_interface)
+        logger.debug(u'%s.Quit called', ROOT_IFACE)
         ActorRegistry.stop_all()
 
 
     ### Player interface
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Next(self):
-        logger.debug(u'%s.Next called', self.player_interface)
+        logger.debug(u'%s.Next called', PLAYER_IFACE)
         # TODO call playback.next(), keep playback.state unchanged
         # XXX Proof of concept only. Throw away, write tests.
         self.backend.playback.next().get()
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def OpenUri(self, uri):
-        logger.debug(u'%s.OpenUri called', self.player_interface)
+        logger.debug(u'%s.OpenUri called', PLAYER_IFACE)
         # TODO Pseudo code:
         # if uri.scheme not in SupportedUriSchemes: return
         # if uri.mime_type not in SupportedMimeTypes: return
@@ -228,23 +229,23 @@ class MprisObject(dbus.service.Object):
         # playback.play(cp_track)
         pass
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Pause(self):
-        logger.debug(u'%s.Pause called', self.player_interface)
+        logger.debug(u'%s.Pause called', PLAYER_IFACE)
         # XXX Proof of concept only. Throw away, write tests.
         self.backend.playback.pause().get()
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Play(self):
-        logger.debug(u'%s.Play called', self.player_interface)
+        logger.debug(u'%s.Play called', PLAYER_IFACE)
         # TODO Pseudo code:
         # if playback.state == playback.PAUSED: playback.resume()
         # elif playback.state == playback.STOPPED: playback.play()
         pass
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def PlayPause(self):
-        logger.debug(u'%s.PlayPause called', self.player_interface)
+        logger.debug(u'%s.PlayPause called', PLAYER_IFACE)
 
         # TODO Pseudo code:
         # if playback.state == playback.PLAYING: playback.pause()
@@ -254,17 +255,17 @@ class MprisObject(dbus.service.Object):
         # XXX Proof of concept only. Throw away, write tests, reimplement:
         self.backend.playback.pause().get()
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Previous(self):
-        logger.debug(u'%s.Previous called', self.player_interface)
+        logger.debug(u'%s.Previous called', PLAYER_IFACE)
 
         # TODO call playback.previous(), keep playback.state unchanged
         # XXX Proof of concept only. Throw away, write tests, reimplement:
         self.backend.playback.previous().get()
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Seek(self, offset):
-        logger.debug(u'%s.Seek called', self.player_interface)
+        logger.debug(u'%s.Seek called', PLAYER_IFACE)
         # TODO Pseudo code:
         # new_position = playback.time_position + offset
         # if new_position > playback.current_track.length:
@@ -274,22 +275,22 @@ class MprisObject(dbus.service.Object):
         # playback.seek(new_position)
         pass
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def SetPosition(self, track_id, position):
-        logger.debug(u'%s.SetPosition called', self.player_interface)
+        logger.debug(u'%s.SetPosition called', PLAYER_IFACE)
         # TODO Pseudo code:
         # if track_id != playback.current_track.track_id: return
         # if not 0 <= position <= playback.current_track.length: return
         # playback.seek(position)
         pass
 
-    @dbus.service.method(dbus_interface=player_interface)
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Stop(self):
-        logger.debug(u'%s.Stop called', self.player_interface)
+        logger.debug(u'%s.Stop called', PLAYER_IFACE)
         # TODO call playback.stop()
         pass
 
-    @dbus.service.signal(dbus_interface=player_interface, signature='x')
+    @dbus.service.signal(dbus_interface=PLAYER_IFACE, signature='x')
     def Seeked(self, position):
-        logger.debug(u'%s.Seeked signaled', self.player_interface)
+        logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
         pass
