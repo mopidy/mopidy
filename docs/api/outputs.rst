@@ -13,7 +13,7 @@ Outputs are used by :mod:`mopidy.gstreamer` to output audio in some way.
 Output implementations
 ======================
 
-* :class:`mopidy.outputs.CustomOutput`
-* :class:`mopidy.outputs.LocalOutput`
-* :class:`mopidy.outputs.NullOutput`
-* :class:`mopidy.outputs.ShoutcastOutput`
+* :class:`mopidy.outputs.custom.CustomOutput`
+* :class:`mopidy.outputs.local.LocalOutput`
+* :class:`mopidy.outputs.null.NullOutput`
+* :class:`mopidy.outputs.shoutcast.ShoutcastOutput`

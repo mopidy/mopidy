@@ -4,8 +4,6 @@ import pygst
 pygst.require('0.10')
 import gst
 
-from mopidy import settings
-
 logger = logging.getLogger('mopidy.outputs')
 
 
@@ -76,78 +74,3 @@ class BaseOutput(object):
         for key, value in properties.items():
             if value is not None:
                 element.set_property(key, value)
-
-
-class CustomOutput(BaseOutput):
-    """
-    Custom output for using alternate setups.
-
-    This output is intended to handle two main cases:
-
-    1. Simple things like switching which sink to use. Say :class:`LocalOutput`
-       doesn't work for you and you want to switch to ALSA, simple. Set
-       :attr:`mopidy.settings.CUSTOM_OUTPUT` to ``alsasink`` and you are good
-       to go. Some possible sinks include:
-
-       - alsasink
-       - osssink
-       - pulsesink
-       - ...and many more
-
-    2. Advanced setups that require complete control of the output bin. For
-       these cases setup :attr:`mopidy.settings.CUSTOM_OUTPUT` with a
-       :command:`gst-launch` compatible string describing the target setup.
-
-    """
-    def describe_bin(self):
-        return settings.CUSTOM_OUTPUT
-
-
-class LocalOutput(BaseOutput):
-    """
-    Basic output to local audio sink.
-
-    This output will normally tell GStreamer to choose whatever it thinks is
-    best for your system. In other words this is usually a sane choice.
-    """
-
-    def describe_bin(self):
-        return 'autoaudiosink'
-
-
-class NullOutput(BaseOutput):
-    """
-    Fall-back null output.
-
-    This output will not output anything. It is intended as a fall-back for
-    when setup of all other outputs have failed and should not be used by end
-    users. Inserting this output in such a case ensures that the pipeline does
-    not crash.
-    """
-
-    def describe_bin(self):
-        return 'fakesink'
-
-
-class ShoutcastOutput(BaseOutput):
-    """
-    Shoutcast streaming output.
-
-    This output allows for streaming to an icecast server or anything else that
-    supports Shoutcast. The output supports setting for: server address, port,
-    mount point, user, password and encoder to use. Please see
-    :class:`mopidy.settings` for details about settings.
-    """
-
-    def describe_bin(self):
-        return 'audioconvert ! %s ! shout2send name=shoutcast' \
-            % settings.SHOUTCAST_OUTPUT_ENCODER
-
-    def modify_bin(self, output):
-        self.set_properties(output.get_by_name('shoutcast'), {
-            u'ip': settings.SHOUTCAST_OUTPUT_SERVER,
-            u'mount': settings.SHOUTCAST_OUTPUT_MOUNT,
-            u'port': settings.SHOUTCAST_OUTPUT_PORT,
-            u'username': settings.SHOUTCAST_OUTPUT_USERNAME,
-            u'password': settings.SHOUTCAST_OUTPUT_PASSWORD,
-        })
