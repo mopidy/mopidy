@@ -70,8 +70,7 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
         for output in settings.OUTPUTS:
-            output_cls = get_class(output)()
-            output_cls.connect_bin(self._pipeline, self._tee)
+            self.connect_output(get_class(output))
 
         # Setup bus and message processor
         bus = self._pipeline.get_bus()
@@ -262,3 +261,16 @@ class GStreamer(ThreadingActor):
         }
         logger.debug('Setting tags to: %s', tags)
         self._taginject.set_property('tags', tags)
+
+    def connect_output(self, cls):
+        """
+        Connect output to pipeline.
+
+        :param output: output to connect to our pipeline.
+        :type output: :class:`BaseOutput`
+        """
+        output = cls().get_bin()
+
+        self._pipeline.add(output)
+        output.sync_state_with_parent() # Required to add to running pipe
+        gst.element_link_many(self._tee, output)
