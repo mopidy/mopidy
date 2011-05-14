@@ -40,6 +40,7 @@ class GStreamer(ThreadingActor):
         self._tee = None
         self._uridecodebin = None
         self._volume = None
+        self._outputs = {}
 
     def on_start(self):
         self._setup_gstreamer()
@@ -274,3 +275,8 @@ class GStreamer(ThreadingActor):
         self._pipeline.add(output)
         output.sync_state_with_parent() # Required to add to running pipe
         gst.element_link_many(self._tee, output)
+
+        self._outputs[output.get_name()] = output
+
+    def list_outputs(self):
+        return self._outputs.keys()

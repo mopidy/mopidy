@@ -17,6 +17,7 @@ class BaseOutput(object):
         logger.debug('Creating new output: %s', description)
 
         output = gst.parse_bin_from_description(description, True)
+        output.set_name(self.__class__.__name__)
         self.modify_bin(output)
 
         return output
