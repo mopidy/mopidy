@@ -17,10 +17,18 @@ class BaseOutput(object):
         logger.debug('Creating new output: %s', description)
 
         output = gst.parse_bin_from_description(description, True)
-        output.set_name(self.__class__.__name__)
+        output.set_name(self.get_name())
         self.modify_bin(output)
 
         return output
+
+    def get_name(self):
+        """
+        Return name of output in gstreamer context.
+
+        Defaults to class name, can be overriden by sub classes if required.
+        """
+        return self.__class__.__name__
 
     def modify_bin(self, output):
         """
