@@ -96,11 +96,9 @@ class GStreamer(ThreadingActor):
                 'Telling backend ...')
             self._get_backend().playback.on_end_of_track()
         elif message.type == gst.MESSAGE_ERROR:
-            self.stop_playback()
             error, debug = message.parse_error()
             logger.error(u'%s %s', error, debug)
-            # FIXME Should we send 'stop_playback' to the backend here? Can we
-            # differentiate on how serious the error is?
+            self.stop_playback()
         elif message.type == gst.MESSAGE_WARNING:
             error, debug = message.parse_warning()
             logger.warning(u'%s %s', error, debug)
