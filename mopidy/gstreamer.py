@@ -283,17 +283,18 @@ class GStreamer(ThreadingActor):
         return [output.get_name() for output in self._outputs]
 
     def remove_output(self, output):
-        logger.debug('Trying to remove %s', output.get_name())
         if output not in self._outputs:
             return # FIXME raise mopidy exception of some sort?
-        src = self._taginject.get_pad('src')
+        src = output.get_pad('sink').get_peer()
         src.set_blocked_async(True, self._blocked_callback, output)
 
     def _blocked_callback(self, pad, blocked, output):
         gst.element_unlink_many(self._tee, output)
+        pad.set_blocked_async(False, self._unblocked_callback, output)
+
+    def _unblocked_callback(self, pad, blocked, output):
         output.set_state(gst.STATE_NULL)
         self._pipeline.remove(output)
-        pad.set_blocked(False)
         self._outputs.remove(output)
         logger.warning(u'Removed %s', output.get_name())
 
