@@ -280,7 +280,7 @@ class GStreamer(ThreadingActor):
         logger.info('Added %s', output.get_name())
 
     def list_outputs(self):
-        return self._outputs.keys()
+        return [output.get_name() for output in self._outputs]
 
     def remove_output(self, output):
         logger.debug('Trying to remove %s', output.get_name())
