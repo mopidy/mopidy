@@ -30,12 +30,20 @@ class BaseOutput(object):
         return gst.parse_bin_from_description(description, True)
 
     def connect(self):
-        """Convenience wrapper to attach output to GStreamer pipeline"""
-        self.gstreamer.connect_output(self.bin)
+        """Attach output to GStreamer pipeline"""
+        self.gstreamer.connect_output(self)
+        self.on_connect()
+
+    def on_connect(self):
+        pass
 
     def remove(self):
-        """Convenience wrapper to remove output from GStreamer pipeline"""
-        self.gstreamer.remove_output(self.bin)
+        """Remove output from GStreamer pipeline"""
+        self.gstreamer.remove_output(self)
+        self.on_remove()
+
+    def on_remove(self):
+        pass
 
     def get_name(self):
         """
