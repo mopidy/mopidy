@@ -41,6 +41,7 @@ class GStreamer(ThreadingActor):
         self._uridecodebin = None
         self._volume = None
         self._outputs = []
+        self._handlers = {}
 
     def on_start(self):
         self._setup_gstreamer()
@@ -292,3 +293,9 @@ class GStreamer(ThreadingActor):
         pad.set_blocked(False)
 
         logger.warning(u'Removed %s', output.get_name())
+
+    def connect_message_handler(self, element, handler):
+        self._handlers[element] = handler
+
+    def remove_message_handler(self, element):
+        self._handlers.pop(element, None)
