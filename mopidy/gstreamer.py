@@ -285,18 +285,38 @@ class GStreamer(ThreadingActor):
     def remove_output(self, output):
         if output not in self._outputs:
             return # FIXME raise mopidy exception of some sort?
-        src = output.get_pad('sink').get_peer()
-        src.set_blocked_async(True, self._blocked_callback, output)
+        teesrc = output.get_pad('sink').get_peer()
+        handler = teesrc.add_event_probe(self._handle_event_probe)
 
-    def _blocked_callback(self, pad, blocked, output):
-        gst.element_unlink_many(self._tee, output)
-        pad.set_blocked_async(False, self._unblocked_callback, output)
+        struct = gst.Structure('mopidy-unlink-tee')
+        struct.set_value('handler', handler)
 
-    def _unblocked_callback(self, pad, blocked, output):
-        output.set_state(gst.STATE_NULL)
-        self._pipeline.remove(output)
-        self._outputs.remove(output)
-        logger.warning(u'Removed %s', output.get_name())
+        event = gst.event_new_custom(gst.EVENT_CUSTOM_DOWNSTREAM, struct)
+        self._tee.send_event(event)
+
+    def _handle_event_probe(self, teesrc, event):
+        if event.type == gst.EVENT_CUSTOM_DOWNSTREAM and event.has_name('mopidy-unlink-tee'):
+            data = self._get_structure_data(event.get_structure())
+
+            output = teesrc.get_peer().get_parent()
+
+            teesrc.unlink(teesrc.get_peer())
+            teesrc.remove_event_probe(data['handler'])
+
+            output.set_state(gst.STATE_NULL)
+            self._pipeline.remove(output)
+
+            logger.warning('Removed %s', output.get_name())
+            return False
+        return True
+
+    def _get_structure_data(self, struct):
+        # Ugly hack to get around missing get_value in pygst bindings :/
+        data = {}
+        def get_data(key, value):
+            data[key] = value
+        struct.foreach(get_data)
+        return data
 
     def connect_message_handler(self, element, handler):
         self._handlers[element] = handler
