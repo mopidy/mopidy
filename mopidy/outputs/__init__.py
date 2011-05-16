@@ -9,18 +9,29 @@ logger = logging.getLogger('mopidy.outputs')
 class BaseOutput(object):
     """Base class for providing support for multiple pluggable outputs."""
 
-    def get_bin(self):
+    def __init__(self, gstreamer):
+        self.gstreamer = gstreamer
+        self.bin = self.build_bin()
+        self.bin.set_name(self.get_name())
+
+        self.modify_bin()
+
+    def build_bin(self):
         """
         Build output bin that will attached to pipeline.
         """
         description = 'queue ! %s' % self.describe_bin()
         logger.debug('Creating new output: %s', description)
 
-        output = gst.parse_bin_from_description(description, True)
-        output.set_name(self.get_name())
-        self.modify_bin(output)
+        return gst.parse_bin_from_description(description, True)
 
-        return output
+    def connect(self):
+        """Convenience wrapper to attach output to GStreamer pipeline"""
+        self.gstreamer.connect_output(self.bin)
+
+    def remove(self):
+        """Convenience wrapper to remove output from GStreamer pipeline"""
+        self.gstreamer.remove_output(self.bin)
 
     def get_name(self):
         """
@@ -30,16 +41,13 @@ class BaseOutput(object):
         """
         return self.__class__.__name__
 
-    def modify_bin(self, output):
+    def modify_bin(self):
         """
-        Modifies bin before it is installed if needed.
+        Modifies ``self.bin`` before it is installed if needed.
 
         Overriding this method allows for outputs to modify the constructed bin
         before it is installed. This can for instance be a good place to call
         `set_properties` on elements that need to be configured.
-
-        :param output: gst.Bin to modify in some way.
-        :type output: :class:`gst.Bin`
         """
         pass
 

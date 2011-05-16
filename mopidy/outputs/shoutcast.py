@@ -15,8 +15,9 @@ class ShoutcastOutput(BaseOutput):
         return 'audioconvert ! %s ! shout2send name=shoutcast' \
             % settings.SHOUTCAST_OUTPUT_ENCODER
 
-    def modify_bin(self, output):
-        self.set_properties(output.get_by_name('shoutcast'), {
+    def modify_bin(self):
+        shoutcast = self.bin.get_by_name('shoutcast')
+        self.set_properties(shoutcast, {
             u'ip': settings.SHOUTCAST_OUTPUT_SERVER,
             u'mount': settings.SHOUTCAST_OUTPUT_MOUNT,
             u'port': settings.SHOUTCAST_OUTPUT_PORT,

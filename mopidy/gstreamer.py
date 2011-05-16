@@ -40,7 +40,7 @@ class GStreamer(ThreadingActor):
         self._tee = None
         self._uridecodebin = None
         self._volume = None
-        self._outputs = {}
+        self._outputs = []
 
     def on_start(self):
         self._setup_gstreamer()
@@ -71,7 +71,7 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
         for output in settings.OUTPUTS:
-            self.connect_output(get_class(output))
+            get_class(output)(self).connect()
 
         # Setup bus and message processor
         bus = self._pipeline.get_bus()
@@ -263,37 +263,34 @@ class GStreamer(ThreadingActor):
         logger.debug('Setting tags to: %s', tags)
         self._taginject.set_property('tags', tags)
 
-    def connect_output(self, cls):
+    def connect_output(self, output):
         """
         Connect output to pipeline.
 
         :param output: output to connect to our pipeline.
-        :type output: :class:`BaseOutput`
+        :type output: :class:`gst.Bin`
         """
-        output = cls().get_bin()
-
         self._pipeline.add(output)
         output.sync_state_with_parent() # Required to add to running pipe
         gst.element_link_many(self._tee, output)
-
-        self._outputs[output.get_name()] = output
-
+        self._outputs.append(output)
         logger.info('Added %s', output.get_name())
 
     def list_outputs(self):
         return self._outputs.keys()
 
-    def remove_output(self, name):
+    def remove_output(self, output):
+        logger.debug('Trying to remove %s', output.get_name())
         if name not in self._outputs:
             return # FIXME raise mopidy exception of some sort?
         src = self._taginject.get_pad('src')
-        src.set_blocked_async(True, self._blocked_callback, name)
+        src.set_blocked_async(True, self._blocked_callback, output)
 
-    def _blocked_callback(self, pad, blocked, name):
-        output = self._outputs.pop(name)
+    def _blocked_callback(self, pad, blocked, output):
         gst.element_unlink_many(self._tee, output)
         output.set_state(gst.STATE_NULL)
         self._pipeline.remove(output)
+        self._outputs.remove(output)
         pad.set_blocked(False)
 
-        logger.warning(u'Removed %s', name)
+        logger.warning(u'Removed %s', output.get_name())
