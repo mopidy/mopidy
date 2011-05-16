@@ -31,7 +31,7 @@ class BaseOutput(object):
 
     def connect(self):
         """Attach output to GStreamer pipeline"""
-        self.gstreamer.connect_output(self)
+        self.gstreamer.connect_output(self.bin)
         self.on_connect()
 
     def on_connect(self):
@@ -39,7 +39,7 @@ class BaseOutput(object):
 
     def remove(self):
         """Remove output from GStreamer pipeline"""
-        self.gstreamer.remove_output(self)
+        self.gstreamer.remove_output(self.bin)
         self.on_remove()
 
     def on_remove(self):
