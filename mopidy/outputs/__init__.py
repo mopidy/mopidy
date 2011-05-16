@@ -9,6 +9,10 @@ logger = logging.getLogger('mopidy.outputs')
 class BaseOutput(object):
     """Base class for providing support for multiple pluggable outputs."""
 
+    MESSAGE_EOS = gst.MESSAGE_EOS
+    MESSAGE_ERROR = gst.MESSAGE_ERROR
+    MESSAGE_WARNING = gst.MESSAGE_WARNING
+
     def __init__(self, gstreamer):
         self.gstreamer = gstreamer
         self.bin = self.build_bin()
