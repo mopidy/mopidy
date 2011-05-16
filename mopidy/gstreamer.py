@@ -92,6 +92,10 @@ class GStreamer(ThreadingActor):
 
     def _process_gstreamer_message(self, bus, message):
         """Process messages from GStreamer."""
+        if message.src in self._handlers:
+            if self._handlers[message.src](message):
+                return # Message was handeled by output
+
         if message.type == gst.MESSAGE_EOS:
             logger.debug(u'GStreamer signalled end-of-stream. '
                 'Telling backend ...')
