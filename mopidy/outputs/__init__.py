@@ -35,6 +35,7 @@ class BaseOutput(object):
         self.on_connect()
 
     def on_connect(self):
+        """Called after output has been connected to GStreamer pipeline"""
         pass
 
     def remove(self):
@@ -43,6 +44,7 @@ class BaseOutput(object):
         self.on_remove()
 
     def on_remove(self):
+        """Called after output has been remove from GStreamer pipeline"""
         pass
 
     def get_name(self):

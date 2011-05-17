@@ -283,6 +283,12 @@ class GStreamer(ThreadingActor):
         return [output.get_name() for output in self._outputs]
 
     def remove_output(self, output):
+        """
+        Remove output from our pipeline.
+
+        :param output: output to remove from our pipeline.
+        :type output: :class:`gst.Bin`
+        """
         if output not in self._outputs:
             return # FIXME raise mopidy exception of some sort?
         teesrc = output.get_pad('sink').get_peer()
@@ -319,7 +325,34 @@ class GStreamer(ThreadingActor):
         return data
 
     def connect_message_handler(self, element, handler):
+        """
+        Attach custom message handler for given element.
+
+        Hook to allow outputs (or other code) to register custom message
+        handlers for all message comming from the element in question.
+
+        In the case of outputs ``on_connect`` should be used to attach such
+        handlers and care should be taken to remove them in ``on_remove``.
+
+        The handler callback will only be given the message in question, and
+        is free to ignore the message. However, if the handler wants to prevent
+        the default handling of the message it should return ``True`` indicating
+        that the message has been handeled.
+
+        (Note that there can only be on handler per element)
+
+        :param element: element to watch messages from.
+        :type element: :class:`gst.Element`
+        :param handler: function that expects `gst.Message`, should return
+            ``True`` if message has been handeled.
+        """
         self._handlers[element] = handler
 
     def remove_message_handler(self, element):
+        """
+        Remove custom message handler.
+
+        :param element: element to remove message handling from.
+        :type element: :class:`gst.Element`
+        """
         self._handlers.pop(element, None)
