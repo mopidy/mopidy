@@ -290,7 +290,8 @@ class GStreamer(ThreadingActor):
         :type output: :class:`gst.Bin`
         """
         if output not in self._outputs:
-            return # FIXME raise mopidy exception of some sort?
+            raise LookupError('Ouput %s not present in pipeline'
+                % output.get_name)
         teesrc = output.get_pad('sink').get_peer()
         handler = teesrc.add_event_probe(self._handle_event_probe)
 
@@ -329,19 +330,20 @@ class GStreamer(ThreadingActor):
         Attach custom message handler for given element.
 
         Hook to allow outputs (or other code) to register custom message
-        handlers for all message comming from the element in question.
+        handlers for all messages coming from the element in question.
 
-        In the case of outputs ``on_connect`` should be used to attach such
-        handlers and care should be taken to remove them in ``on_remove``.
+        In the case of outputs :meth:`mopidy.outputs.BaseOuptut.on_connect`
+        should be used to attach such handlers and care should be taken to
+        remove them in :meth:`mopidy.outputs.BaseOuptut.on_remove`.
 
         The handler callback will only be given the message in question, and
         is free to ignore the message. However, if the handler wants to prevent
-        the default handling of the message it should return ``True`` indicating
-        that the message has been handeled.
+        the default handling of the message it should return :class:`True`
+        indicating that the message has been handled.
 
         (Note that there can only be on handler per element)
 
-        :param element: element to watch messages from.
+        :param element: element to watch messages from
         :type element: :class:`gst.Element`
         :param handler: function that expects `gst.Message`, should return
             ``True`` if message has been handeled.

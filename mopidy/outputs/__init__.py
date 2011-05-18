@@ -51,7 +51,7 @@ class BaseOutput(object):
         """
         Return name of output in gstreamer context.
 
-        Defaults to class name, can be overriden by sub classes if required.
+        Defaults to class name, can be overriden by subclasses if required.
         """
         return self.__class__.__name__
 
