@@ -1,49 +1,67 @@
-import logging
-
 import pygst
 pygst.require('0.10')
 import gst
 
-logger = logging.getLogger('mopidy.outputs')
+import logging
 
+logger = logging.getLogger('mopidy.outputs')
 
 class BaseOutput(object):
     """Base class for providing support for multiple pluggable outputs."""
 
-    def connect_bin(self, pipeline, element):
+    MESSAGE_EOS = gst.MESSAGE_EOS
+    MESSAGE_ERROR = gst.MESSAGE_ERROR
+    MESSAGE_WARNING = gst.MESSAGE_WARNING
+
+    def __init__(self, gstreamer):
+        self.gstreamer = gstreamer
+        self.bin = self.build_bin()
+        self.bin.set_name(self.get_name())
+
+        self.modify_bin()
+
+    def build_bin(self):
         """
-        Connect output bin to pipeline and given element.
-
-        In normal cases the element will probably be a `tee`,
-        thus allowing us to connect any number of outputs. This
-        however is why each bin is forced to have its own `queue`
-        after the `tee`.
-
-        :param pipeline: gst.Pipeline to add output to.
-        :type pipeline: :class:`gst.Pipeline`
-        :param element: gst.Element in pipeline to connect output to.
-        :type element: :class:`gst.Element`
+        Build output bin that will attached to pipeline.
         """
         description = 'queue ! %s' % self.describe_bin()
-        logger.debug('Adding new output to tee: %s', description)
+        logger.debug('Creating new output: %s', description)
 
-        output = gst.parse_bin_from_description(description, True)
-        self.modify_bin(output)
+        return gst.parse_bin_from_description(description, True)
 
-        pipeline.add(output)
-        output.sync_state_with_parent() # Required to add to running pipe
-        gst.element_link_many(element, output)
+    def connect(self):
+        """Attach output to GStreamer pipeline"""
+        self.gstreamer.connect_output(self.bin)
+        self.on_connect()
 
-    def modify_bin(self, output):
+    def on_connect(self):
+        """Called after output has been connected to GStreamer pipeline"""
+        pass
+
+    def remove(self):
+        """Remove output from GStreamer pipeline"""
+        self.gstreamer.remove_output(self.bin)
+        self.on_remove()
+
+    def on_remove(self):
+        """Called after output has been remove from GStreamer pipeline"""
+        pass
+
+    def get_name(self):
         """
-        Modifies bin before it is installed if needed.
+        Return name of output in gstreamer context.
+
+        Defaults to class name, can be overriden by subclasses if required.
+        """
+        return self.__class__.__name__
+
+    def modify_bin(self):
+        """
+        Modifies ``self.bin`` before it is installed if needed.
 
         Overriding this method allows for outputs to modify the constructed bin
         before it is installed. This can for instance be a good place to call
         `set_properties` on elements that need to be configured.
-
-        :param output: gst.Bin to modify in some way.
-        :type output: :class:`gst.Bin`
         """
         pass
 
