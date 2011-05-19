@@ -40,6 +40,8 @@ class GStreamer(ThreadingActor):
         self._tee = None
         self._uridecodebin = None
         self._volume = None
+        self._outputs = []
+        self._handlers = {}
 
     def on_start(self):
         self._setup_gstreamer()
@@ -70,8 +72,7 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
         for output in settings.OUTPUTS:
-            output_cls = get_class(output)()
-            output_cls.connect_bin(self._pipeline, self._tee)
+            get_class(output)(self).connect()
 
         # Setup bus and message processor
         bus = self._pipeline.get_bus()
@@ -91,16 +92,18 @@ class GStreamer(ThreadingActor):
 
     def _process_gstreamer_message(self, bus, message):
         """Process messages from GStreamer."""
+        if message.src in self._handlers:
+            if self._handlers[message.src](message):
+                return # Message was handeled by output
+
         if message.type == gst.MESSAGE_EOS:
             logger.debug(u'GStreamer signalled end-of-stream. '
                 'Telling backend ...')
             self._get_backend().playback.on_end_of_track()
         elif message.type == gst.MESSAGE_ERROR:
-            self.stop_playback()
             error, debug = message.parse_error()
             logger.error(u'%s %s', error, debug)
-            # FIXME Should we send 'stop_playback' to the backend here? Can we
-            # differentiate on how serious the error is?
+            self.stop_playback()
         elif message.type == gst.MESSAGE_WARNING:
             error, debug = message.parse_warning()
             logger.warning(u'%s %s', error, debug)
@@ -262,3 +265,96 @@ class GStreamer(ThreadingActor):
         }
         logger.debug('Setting tags to: %s', tags)
         self._taginject.set_property('tags', tags)
+
+    def connect_output(self, output):
+        """
+        Connect output to pipeline.
+
+        :param output: output to connect to our pipeline.
+        :type output: :class:`gst.Bin`
+        """
+        self._pipeline.add(output)
+        output.sync_state_with_parent() # Required to add to running pipe
+        gst.element_link_many(self._tee, output)
+        self._outputs.append(output)
+        logger.info('Added %s', output.get_name())
+
+    def list_outputs(self):
+        return [output.get_name() for output in self._outputs]
+
+    def remove_output(self, output):
+        """
+        Remove output from our pipeline.
+
+        :param output: output to remove from our pipeline.
+        :type output: :class:`gst.Bin`
+        """
+        if output not in self._outputs:
+            raise LookupError('Ouput %s not present in pipeline'
+                % output.get_name)
+        teesrc = output.get_pad('sink').get_peer()
+        handler = teesrc.add_event_probe(self._handle_event_probe)
+
+        struct = gst.Structure('mopidy-unlink-tee')
+        struct.set_value('handler', handler)
+
+        event = gst.event_new_custom(gst.EVENT_CUSTOM_DOWNSTREAM, struct)
+        self._tee.send_event(event)
+
+    def _handle_event_probe(self, teesrc, event):
+        if event.type == gst.EVENT_CUSTOM_DOWNSTREAM and event.has_name('mopidy-unlink-tee'):
+            data = self._get_structure_data(event.get_structure())
+
+            output = teesrc.get_peer().get_parent()
+
+            teesrc.unlink(teesrc.get_peer())
+            teesrc.remove_event_probe(data['handler'])
+
+            output.set_state(gst.STATE_NULL)
+            self._pipeline.remove(output)
+
+            logger.warning('Removed %s', output.get_name())
+            return False
+        return True
+
+    def _get_structure_data(self, struct):
+        # Ugly hack to get around missing get_value in pygst bindings :/
+        data = {}
+        def get_data(key, value):
+            data[key] = value
+        struct.foreach(get_data)
+        return data
+
+    def connect_message_handler(self, element, handler):
+        """
+        Attach custom message handler for given element.
+
+        Hook to allow outputs (or other code) to register custom message
+        handlers for all messages coming from the element in question.
+
+        In the case of outputs :meth:`mopidy.outputs.BaseOuptut.on_connect`
+        should be used to attach such handlers and care should be taken to
+        remove them in :meth:`mopidy.outputs.BaseOuptut.on_remove`.
+
+        The handler callback will only be given the message in question, and
+        is free to ignore the message. However, if the handler wants to prevent
+        the default handling of the message it should return :class:`True`
+        indicating that the message has been handled.
+
+        (Note that there can only be on handler per element)
+
+        :param element: element to watch messages from
+        :type element: :class:`gst.Element`
+        :param handler: function that expects `gst.Message`, should return
+            ``True`` if message has been handeled.
+        """
+        self._handlers[element] = handler
+
+    def remove_message_handler(self, element):
+        """
+        Remove custom message handler.
+
+        :param element: element to remove message handling from.
+        :type element: :class:`gst.Element`
+        """
+        self._handlers.pop(element, None)
