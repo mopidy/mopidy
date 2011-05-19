@@ -5,8 +5,8 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-0.5.0 (in development)
-======================
+v0.5.0 (in development)
+=======================
 
 No description yet.
 
@@ -27,8 +27,8 @@ No description yet.
 - Improve :option:`--list-settings` output. (Fixes: :issue:`91`)
 
 
-0.4.1 (2011-05-06)
-==================
+v0.4.1 (2011-05-06)
+===================
 
 This is a bug fix release fixing audio problems on older GStreamer and some
 minor bugs.
@@ -57,8 +57,8 @@ minor bugs.
   configured. (Fixes: :issue:`84`)
 
 
-0.4.0 (2011-04-27)
-==================
+v0.4.0 (2011-04-27)
+===================
 
 Mopidy 0.4.0 is another release without major feature additions. In 0.4.0 we've
 fixed a bunch of issues and bugs, with the help of several new contributors
@@ -156,8 +156,8 @@ loading from Mopidy 0.3.0 is still present.
     the debug log, to ease debugging of issues with attached debug logs.
 
 
-0.3.1 (2010-01-22)
-==================
+v0.3.1 (2010-01-22)
+===================
 
 A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
 
@@ -170,8 +170,8 @@ A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
   installed if the installation is executed as the root user.
 
 
-0.3.0 (2010-01-22)
-==================
+v0.3.0 (2010-01-22)
+===================
 
 Mopidy 0.3.0 brings a bunch of small changes all over the place, but no large
 changes. The main features are support for high bitrate audio from Spotify, and
@@ -325,8 +325,8 @@ to this problem.
     :class:`mopidy.outputs.base.BaseOutput`.
 
 
-0.2.1 (2011-01-07)
-==================
+v0.2.1 (2011-01-07)
+===================
 
 This is a maintenance release without any new features.
 
@@ -338,8 +338,8 @@ This is a maintenance release without any new features.
   failure.
 
 
-0.2.0 (2010-10-24)
-==================
+v0.2.0 (2010-10-24)
+===================
 
 In Mopidy 0.2.0 we've added a `Last.fm <http://www.last.fm/>`_ scrobbling
 support, which means that Mopidy now can submit meta data about the tracks you
@@ -406,8 +406,8 @@ searching at the same time, thanks to Valentin David.
   should now exit immediately.
 
 
-0.1.0 (2010-08-23)
-==================
+v0.1.0 (2010-08-23)
+===================
 
 After three weeks of long nights and sprints we're finally pleased enough with
 the state of Mopidy to remove the alpha label, and do a regular release.
@@ -538,8 +538,8 @@ fixing the OS X issues for a future release. You can track the progress at
     :meth:`mopidy.backends.base.BaseStoredPlaylistsController.get()` instead.
 
 
-0.1.0a3 (2010-08-03)
-====================
+v0.1.0a3 (2010-08-03)
+=====================
 
 In the last two months, Mopidy's MPD frontend has gotten lots of stability
 fixes and error handling improvements, proper support for having the same track
@@ -616,8 +616,8 @@ Enjoy the best alpha relase of Mopidy ever :-)
     ``cp_track``.
 
 
-0.1.0a2 (2010-06-02)
-====================
+v0.1.0a2 (2010-06-02)
+=====================
 
 It has been a rather slow month for Mopidy, but we would like to keep up with
 the established pace of at least a release per month.
@@ -632,8 +632,8 @@ the established pace of at least a release per month.
   control :class:`mopidy.mixers.alsa.AlsaMixer` should use.
 
 
-0.1.0a1 (2010-05-04)
-====================
+v0.1.0a1 (2010-05-04)
+=====================
 
 Since the previous release Mopidy has seen about 300 commits, more than 200 new
 tests, a libspotify release, and major feature additions to Spotify. The new
@@ -673,8 +673,8 @@ As always, report problems at our IRC channel or our issue tracker. Thanks!
 - And much more.
 
 
-0.1.0a0 (2010-03-27)
-====================
+v0.1.0a0 (2010-03-27)
+=====================
 
 "*Release early. Release often. Listen to your customers.*" wrote Eric S.
 Raymond in *The Cathedral and the Bazaar*.
