@@ -154,35 +154,34 @@ class FormatSettingListTest(unittest.TestCase):
     def test_repr_of_a_string_value(self):
         self.settings.TEST = u'test'
         result = format_settings_list(self.settings)
-        self.assert_("Value: u'test'" in result, result)
+        self.assert_("TEST: u'test'" in result, result)
 
     def test_repr_of_an_int_value(self):
         self.settings.TEST = 123
         result = format_settings_list(self.settings)
-        self.assert_("Value: 123" in result, result)
+        self.assert_("TEST: 123" in result, result)
 
     def test_repr_of_a_tuple_value(self):
         self.settings.TEST = (123, u'abc')
         result = format_settings_list(self.settings)
-        self.assert_("Value: (123, u'abc')" in result, result)
+        self.assert_("TEST: (123, u'abc')" in result, result)
 
     def test_passwords_are_masked(self):
         self.settings.TEST_PASSWORD = u'secret'
         result = format_settings_list(self.settings)
-        self.assert_("Value: u'secret'" not in result, result)
-        self.assert_("Value: u'********'" in result, result)
+        self.assert_("TEST_PASSWORD: u'secret'" not in result, result)
+        self.assert_("TEST_PASSWORD: u'********'" in result, result)
 
     def test_short_values_are_not_pretty_printed(self):
         self.settings.FRONTEND = (u'mopidy.frontends.mpd.MpdFrontend',)
         result = format_settings_list(self.settings)
-        self.assert_("Value: (u'mopidy.frontends.mpd.MpdFrontend',)" in result,
+        self.assert_("FRONTEND: (u'mopidy.frontends.mpd.MpdFrontend',)" in result,
             result)
 
     def test_long_values_are_pretty_printed(self):
         self.settings.FRONTEND = (u'mopidy.frontends.mpd.MpdFrontend',
             u'mopidy.frontends.lastfm.LastfmFrontend')
         result = format_settings_list(self.settings)
-        self.assert_("""FRONTEND:
-  Value: 
-    (u'mopidy.frontends.mpd.MpdFrontend',
-     u'mopidy.frontends.lastfm.LastfmFrontend')""" in result, result)
+        self.assert_("""FRONTEND: 
+  (u'mopidy.frontends.mpd.MpdFrontend',
+   u'mopidy.frontends.lastfm.LastfmFrontend')""" in result, result)
