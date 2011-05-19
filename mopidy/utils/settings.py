@@ -149,8 +149,8 @@ def format_settings_list(settings):
     lines = []
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
-        value = mask_value_if_secret(key, value)
-        lines.append(u'%s: %s' % (key, indent(pformat(value), places=2)))
+        masked_value = mask_value_if_secret(key, value)
+        lines.append(u'%s: %s' % (key, indent(pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
             lines.append(u'  Default: %s' %
                 indent(pformat(default_value), places=4))
