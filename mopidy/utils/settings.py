@@ -140,6 +140,10 @@ def list_settings_optparse_callback(*args):
     option.
     """
     from mopidy import settings
+    print u'Settings: %s' % indent(format_settings_list(settings), places=2)
+    sys.exit(0)
+
+def format_settings_list(settings):
     errors = settings.get_errors()
     lines = []
     for (key, value) in sorted(settings.current.iteritems()):
@@ -151,8 +155,7 @@ def list_settings_optparse_callback(*args):
             lines.append(u'  Default: %s' % repr(default_value))
         if errors.get(key) is not None:
             lines.append(u'  Error: %s' % errors[key])
-    print u'Settings: %s' % indent('\n'.join(lines), places=2)
-    sys.exit(0)
+    return '\n'.join(lines)
 
 def mask_value_if_secret(key, value):
     if key.endswith('PASSWORD') and value:

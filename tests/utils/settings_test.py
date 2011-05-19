@@ -2,8 +2,8 @@ import os
 import unittest
 
 from mopidy import settings as default_settings_module, SettingsError
-from mopidy.utils.settings import validate_settings, SettingsProxy
-from mopidy.utils.settings import mask_value_if_secret
+from mopidy.utils.settings import (format_settings_list, mask_value_if_secret,
+    SettingsProxy, validate_settings)
 
 class ValidateSettingsTest(unittest.TestCase):
     def setUp(self):
@@ -140,3 +140,34 @@ class SettingsProxyTest(unittest.TestCase):
         self.settings.TEST = './test'
         actual = self.settings.TEST
         self.assertEqual(actual, './test')
+
+
+class FormatSettingListTest(unittest.TestCase):
+    def setUp(self):
+        self.settings = SettingsProxy(default_settings_module)
+
+    def test_contains_the_setting_name(self):
+        self.settings.TEST = u'test'
+        result = format_settings_list(self.settings)
+        self.assert_('TEST:' in result, result)
+
+    def test_repr_of_a_string_value(self):
+        self.settings.TEST = u'test'
+        result = format_settings_list(self.settings)
+        self.assert_("Value: u'test'" in result, result)
+
+    def test_repr_of_an_int_value(self):
+        self.settings.TEST = 123
+        result = format_settings_list(self.settings)
+        self.assert_("Value: 123" in result, result)
+
+    def test_repr_of_a_tuple_value(self):
+        self.settings.TEST = (123, u'abc')
+        result = format_settings_list(self.settings)
+        self.assert_("Value: (123, u'abc')" in result, result)
+
+    def test_passwords_are_masked(self):
+        self.settings.TEST_PASSWORD = u'secret'
+        result = format_settings_list(self.settings)
+        self.assert_("Value: u'secret'" not in result, result)
+        self.assert_("Value: u'********'" in result, result)
