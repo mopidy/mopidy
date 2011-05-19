@@ -24,6 +24,8 @@ No description yet.
 - Support passing options to GStreamer. See :option:`--help-gst` for a list of
   available options. (Fixes: :issue:`95`)
 
+- Improve :option:`--list-settings` output. (Fixes: :issue:`91`)
+
 
 0.4.1 (2011-05-06)
 ==================
