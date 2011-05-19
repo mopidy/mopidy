@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from copy import copy
 import logging
 import os
+from pprint import pformat
 import sys
 
 from mopidy import SettingsError
@@ -150,9 +151,9 @@ def format_settings_list(settings):
         default_value = settings.default.get(key)
         value = mask_value_if_secret(key, value)
         lines.append(u'%s:' % key)
-        lines.append(u'  Value: %s' % repr(value))
+        lines.append(u'  Value: %s' % indent(pformat(value)))
         if value != default_value and default_value is not None:
-            lines.append(u'  Default: %s' % repr(default_value))
+            lines.append(u'  Default: %s' % indent(pformat(default_value)))
         if errors.get(key) is not None:
             lines.append(u'  Error: %s' % errors[key])
     return '\n'.join(lines)
