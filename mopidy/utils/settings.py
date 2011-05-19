@@ -141,7 +141,7 @@ def list_settings_optparse_callback(*args):
     option.
     """
     from mopidy import settings
-    print u'Settings: %s' % indent(format_settings_list(settings), places=2)
+    print format_settings_list(settings)
     sys.exit(0)
 
 def format_settings_list(settings):
