@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from copy import copy
 import logging
 import os
+from pprint import pformat
 import sys
 
 from mopidy import SettingsError
@@ -140,19 +141,22 @@ def list_settings_optparse_callback(*args):
     option.
     """
     from mopidy import settings
+    print format_settings_list(settings)
+    sys.exit(0)
+
+def format_settings_list(settings):
     errors = settings.get_errors()
     lines = []
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
-        value = mask_value_if_secret(key, value)
-        lines.append(u'%s:' % key)
-        lines.append(u'  Value: %s' % repr(value))
+        masked_value = mask_value_if_secret(key, value)
+        lines.append(u'%s: %s' % (key, indent(pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
-            lines.append(u'  Default: %s' % repr(default_value))
+            lines.append(u'  Default: %s' %
+                indent(pformat(default_value), places=4))
         if errors.get(key) is not None:
             lines.append(u'  Error: %s' % errors[key])
-    print u'Settings: %s' % indent('\n'.join(lines), places=2)
-    sys.exit(0)
+    return '\n'.join(lines)
 
 def mask_value_if_secret(key, value):
     if key.endswith('PASSWORD') and value:
