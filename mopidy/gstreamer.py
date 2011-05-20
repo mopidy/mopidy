@@ -36,7 +36,6 @@ class GStreamer(ThreadingActor):
     def __init__(self):
         self._pipeline = None
         self._source = None
-        self._taginject = None
         self._tee = None
         self._uridecodebin = None
         self._volume = None
@@ -56,13 +55,11 @@ class GStreamer(ThreadingActor):
             'uridecodebin name=uri',
             'audioconvert name=convert',
             'volume name=volume',
-            'taginject name=inject',
             'tee name=tee'])
 
         logger.debug(u'Setting up base GStreamer pipeline: %s', description)
 
         self._pipeline = gst.parse_launch(description)
-        self._taginject = self._pipeline.get_by_name('inject')
         self._tee = self._pipeline.get_by_name('tee')
         self._volume = self._pipeline.get_by_name('volume')
         self._uridecodebin = self._pipeline.get_by_name('uri')
@@ -277,13 +274,19 @@ class GStreamer(ThreadingActor):
         :param track: the current track
         :type track: :class:`mopidy.modes.Track`
         """
-        # FIXME what if we want to unset taginject tags?
-        tags = u'artist="%(artist)s",title="%(title)s"' % {
-            'artist': u', '.join([a.name for a in track.artists]),
-            'title': track.name,
-        }
-        logger.debug('Setting tags to: %s', tags)
-        self._taginject.set_property('tags', tags)
+        taglist = gst.TagList()
+        artists = [a for a in (track.artists or []) if a.name]
+
+        if artists:
+            taglist[gst.TAG_ARTIST] = u', '.join([a.name for a in artists])
+        if track.name:
+            taglist[gst.TAG_TITLE] = track.name
+        if track.album and track.album.name:
+            taglist[gst.TAG_ALBUM] = track.album.name
+
+        event = gst.event_new_tag(taglist)
+        self._pipeline.send_event(event)
+        logger.debug('Setting tags to: %s', taglist)
 
     def connect_output(self, output):
         """
