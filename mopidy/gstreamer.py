@@ -81,7 +81,7 @@ class GStreamer(ThreadingActor):
         bus.connect('message', self._on_message)
 
     def _on_new_source(self, element, pad):
-        self._source = element.get_by_name('source')
+        self._source = element.get_property('source')
         try:
             self._source.set_property('caps', default_caps)
         except TypeError:
