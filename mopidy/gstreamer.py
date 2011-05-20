@@ -286,7 +286,6 @@ class GStreamer(ThreadingActor):
 
         event = gst.event_new_tag(taglist)
         self._pipeline.send_event(event)
-        logger.debug('Setting tags to: %s', taglist)
 
     def connect_output(self, output):
         """
