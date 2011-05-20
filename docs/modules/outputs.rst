@@ -10,6 +10,4 @@ The following GStreamer audio outputs implements the :ref:`output-api`.
 
 .. autoclass:: mopidy.outputs.local.LocalOutput
 
-.. autoclass:: mopidy.outputs.null.NullOutput
-
 .. autoclass:: mopidy.outputs.shoutcast.ShoutcastOutput
