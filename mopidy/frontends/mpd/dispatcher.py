@@ -1,10 +1,12 @@
+import logging
 import re
 
+from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
 from mopidy.backends.base import Backend
 from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
-    MpdUnknownCommand)
+    MpdUnknownCommand, MpdSystemError)
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
 # get them registered as request handlers.
@@ -15,6 +17,8 @@ from mopidy.frontends.mpd.protocol import (audio_output, command_list,
 # pylint: enable = W0611
 from mopidy.mixers.base import BaseMixer
 from mopidy.utils import flatten
+
+logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
 
 class MpdDispatcher(object):
     """
@@ -49,6 +53,10 @@ class MpdDispatcher(object):
             if command_list_index is not None:
                 e.index = command_list_index
             return self.handle_response(e.get_mpd_ack(), add_ok=False)
+        except ActorDeadError as e:
+            logger.warning(u'Tried to communicate with dead actor.')
+            mpd_error = MpdSystemError(e.message)
+            return self.handle_response(mpd_error.get_mpd_ack(), add_ok=False)
         if request in (u'command_list_begin', u'command_list_ok_begin'):
             return None
         if command_list_index is not None:
