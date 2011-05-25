@@ -4,6 +4,8 @@ import threading
 import gobject
 gobject.threads_init()
 
+from pykka import ActorDeadError
+
 from mopidy import SettingsError
 
 logger = logging.getLogger('mopidy.utils.process')
@@ -25,6 +27,8 @@ class BaseThread(threading.Thread):
             logger.error(e.message)
         except ImportError as e:
             logger.error(e)
+        except ActorDeadError as e:
+            logger.warning(e)
         except Exception as e:
             logger.exception(e)
         logger.debug(u'%s: Exiting thread', self.name)
