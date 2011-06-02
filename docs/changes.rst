@@ -26,6 +26,9 @@ No description yet.
 
 - Improve :option:`--list-settings` output. (Fixes: :issue:`91`)
 
+- Replace not decodable characters returned from Spotify instead of throwing an
+  exception, as we won't try to figure out the encoding of non-UTF-8-data.
+
 
 v0.4.1 (2011-05-06)
 ===================
