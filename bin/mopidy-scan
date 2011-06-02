@@ -20,7 +20,10 @@ if __name__ == '__main__':
     print >> sys.stderr, 'Scanning %s' % settings.LOCAL_MUSIC_PATH
 
     scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
-    scanner.start()
+    try:
+        scanner.start()
+    except KeyboardInterrupt:
+        scanner.stop()
 
     print >> sys.stderr, 'Done'
 

@@ -82,8 +82,11 @@ class Scanner(object):
         data = dict([(k, data[k]) for k in data.keys()])
         data['uri'] = unicode(self.uribin.get_property('uri'))
         data['duration'] = self.get_duration()
-        self.data_callback(data)
-        self.next_uri()
+        try:
+            self.data_callback(data)
+            self.next_uri()
+        except KeyboardInterrupt:
+            self.stop()
 
     def process_error(self, bus, message):
         if self.error_callback:
