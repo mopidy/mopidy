@@ -57,17 +57,16 @@ class Scanner(object):
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
 
-        caps = gst.Caps('audio/x-raw-int')
         fakesink = gst.element_factory_make('fakesink')
-        pad = fakesink.get_pad('sink')
 
         self.uribin = gst.element_factory_make('uridecodebin')
-        self.uribin.connect('pad-added', self.process_new_pad, pad)
-        self.uribin.set_property('caps', caps)
+        self.uribin.set_property('caps', gst.Caps('audio/x-raw-int'))
+        self.uribin.connect('pad-added', self.process_new_pad,
+            fakesink.get_pad('sink'))
 
         self.pipe = gst.element_factory_make('pipeline')
-        self.pipe.add(fakesink)
         self.pipe.add(self.uribin)
+        self.pipe.add(fakesink)
 
         bus = self.pipe.get_bus()
         bus.add_signal_watch()
