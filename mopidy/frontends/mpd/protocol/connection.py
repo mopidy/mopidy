@@ -22,7 +22,9 @@ def kill(context):
 
         Kills MPD.
     """
-    pass # TODO
+    # TODO We do not want to allow remote killing of Mopidy. We should throw an
+    # MPD exception here. Maybe using ACK_ERROR_PERMISSION.
+    pass
 
 @handle_pattern(r'^password "(?P<password>[^"]+)"$')
 def password_(context, password):
