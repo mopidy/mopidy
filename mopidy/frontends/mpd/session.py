@@ -45,7 +45,7 @@ class MpdSession(asynchat.async_chat):
             logger.warning(u'Received invalid data: %s', e)
 
     def handle_request(self, request):
-        """Handle request by sending it to the MPD frontend."""
+        """Handle request using the MPD command handlers."""
         if not self.authenticated:
             (self.authenticated, response) = self.check_password(request)
             if response is not None:
@@ -56,7 +56,7 @@ class MpdSession(asynchat.async_chat):
             self.handle_response(response)
 
     def handle_response(self, response):
-        """Handle response from the MPD frontend."""
+        """Handle response from the MPD command handlers."""
         self.send_response(LINE_TERMINATOR.join(response))
 
     def send_response(self, output):
