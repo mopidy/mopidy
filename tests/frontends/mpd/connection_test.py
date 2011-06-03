@@ -1,23 +1,28 @@
+import mock
 import unittest
 
 from mopidy import settings
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
+from mopidy.frontends.mpd.session import MpdSession
 from mopidy.mixers.dummy import DummyMixer
 
 class ConnectionHandlerTest(unittest.TestCase):
     def setUp(self):
         self.backend = DummyBackend.start().proxy()
         self.mixer = DummyMixer.start().proxy()
-        self.dispatcher = MpdDispatcher()
+        self.session = mock.Mock(spec=MpdSession)
+        self.dispatcher = MpdDispatcher(session=self.session)
 
     def tearDown(self):
         self.backend.stop().get()
         self.mixer.stop().get()
         settings.runtime.clear()
 
-    def test_close(self):
+    def test_close_closes_the_client_connection(self):
         result = self.dispatcher.handle_request(u'close')
+        self.assert_(self.session.close.called,
+            u'Should call close() on MpdSession')
         self.assert_(u'OK' in result)
 
     def test_empty_request(self):

@@ -11,7 +11,7 @@ def close(context):
 
         Closes the connection to MPD.
     """
-    pass # TODO
+    context.session.close()
 
 @handle_pattern(r'^kill$')
 def kill(context):
