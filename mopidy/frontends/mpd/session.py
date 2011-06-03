@@ -25,39 +25,35 @@ class MpdSession(asynchat.async_chat):
         self.dispatcher = MpdDispatcher(session=self)
 
     def start(self):
-        """Start a new client session."""
-        self.send_response(u'OK MPD %s' % VERSION)
+        """Called by asynchat when a new client connects."""
+        self.send_response([u'OK MPD %s' % VERSION])
 
     def collect_incoming_data(self, data):
-        """Collect incoming data into buffer until a terminator is found."""
+        """Called by asynchat when new data arrives."""
         self.input_buffer.append(data)
 
     def found_terminator(self):
-        """Handle request when a terminator is found."""
+        """Called by asynchat when a terminator is found in incoming data."""
         data = ''.join(self.input_buffer).strip()
         self.input_buffer = []
         try:
-            request = data.decode(ENCODING)
-            logger.debug(u'Input from [%s]:%s: %s', self.client_address,
-                self.client_port, indent(request))
-            self.handle_request(request)
+            self.send_response(self.handle_request(data))
         except UnicodeDecodeError as e:
             logger.warning(u'Received invalid data: %s', e)
 
     def handle_request(self, request):
-        """Handle request using the MPD command handlers."""
-        response = self.dispatcher.handle_request(request)
+        """Handle the request using the MPD command handlers."""
+        request = request.decode(ENCODING)
+        logger.debug(u'Request from [%s]:%s: %s', self.client_address,
+            self.client_port, indent(request))
+        return self.dispatcher.handle_request(request)
+
+    def send_response(self, response):
+        """Format a response from the MPD command handlers and send it to the client."""
         if response is not None:
-            self.handle_response(response)
-
-    def handle_response(self, response):
-        """Handle response from the MPD command handlers."""
-        self.send_response(LINE_TERMINATOR.join(response))
-
-    def send_response(self, output):
-        """Send a response to the client."""
-        logger.debug(u'Output to [%s]:%s: %s', self.client_address,
-            self.client_port, indent(output))
-        output = u'%s%s' % (output, LINE_TERMINATOR)
-        data = output.encode(ENCODING)
-        self.push(data)
+            response = LINE_TERMINATOR.join(response)
+            logger.debug(u'Response to [%s]:%s: %s', self.client_address,
+                self.client_port, indent(response))
+            response = u'%s%s' % (response, LINE_TERMINATOR)
+            data = response.encode(ENCODING)
+            self.push(data)
