@@ -25,10 +25,10 @@ class MpdDispatcher(object):
 
     # XXX Consider merging MpdDispatcher into MpdSession
 
-    def __init__(self):
+    def __init__(self, session=None):
         self.command_list = False
         self.command_list_ok = False
-        self.context = MpdContext(self)
+        self.context = MpdContext(self, session=session)
 
     def handle_request(self, request, command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -91,8 +91,12 @@ class MpdContext(object):
     #: The current :class:`MpdDispatcher`.
     dispatcher = None
 
-    def __init__(self, dispatcher):
+    #: The current :class:`mopidy.frontends.mpd.session.MpdSession`.
+    session = None
+
+    def __init__(self, dispatcher, session=None):
         self.dispatcher = dispatcher
+        self.session = session
         self._backend = None
         self._mixer = None
 

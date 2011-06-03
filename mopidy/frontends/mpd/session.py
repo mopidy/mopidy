@@ -22,7 +22,7 @@ class MpdSession(asynchat.async_chat):
         self.input_buffer = []
         self.authenticated = False
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
-        self.dispatcher = MpdDispatcher()
+        self.dispatcher = MpdDispatcher(session=self)
 
     def start(self):
         """Start a new client session."""
