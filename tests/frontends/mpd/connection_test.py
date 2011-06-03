@@ -31,7 +31,7 @@ class ConnectionHandlerTest(unittest.TestCase):
 
     def test_kill(self):
         result = self.dispatcher.handle_request(u'kill')
-        self.assert_(u'OK' in result)
+        self.assert_(u'ACK [4@0] {kill} you don\'t have permission for "kill"' in result)
 
     def test_valid_password_is_accepted(self):
         settings.MPD_SERVER_PASSWORD = u'topsecret'

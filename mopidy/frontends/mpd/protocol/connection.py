@@ -1,6 +1,7 @@
 from mopidy import settings
 from mopidy.frontends.mpd.protocol import handle_pattern
-from mopidy.frontends.mpd.exceptions import MpdPasswordError
+from mopidy.frontends.mpd.exceptions import (MpdPasswordError,
+    MpdPermissionError)
 
 @handle_pattern(r'^close$')
 def close(context):
@@ -22,9 +23,7 @@ def kill(context):
 
         Kills MPD.
     """
-    # TODO We do not want to allow remote killing of Mopidy. We should throw an
-    # MPD exception here. Maybe using ACK_ERROR_PERMISSION.
-    pass
+    raise MpdPermissionError(command=u'kill')
 
 @handle_pattern(r'^password "(?P<password>[^"]+)"$')
 def password_(context, password):
