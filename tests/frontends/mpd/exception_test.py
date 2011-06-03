@@ -1,7 +1,7 @@
 import unittest
 
 from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdUnknownCommand,
-    MpdNotImplemented)
+    MpdSystemError, MpdNotImplemented)
 
 class MpdExceptionsTest(unittest.TestCase):
     def test_key_error_wrapped_in_mpd_ack_error(self):
@@ -36,3 +36,10 @@ class MpdExceptionsTest(unittest.TestCase):
         except MpdAckError as e:
             self.assertEqual(e.get_mpd_ack(),
                 u'ACK [5@0] {} unknown command "play"')
+
+    def test_mpd_system_error(self):
+        try:
+            raise MpdSystemError('foo')
+        except MpdSystemError as e:
+            self.assertEqual(e.get_mpd_ack(),
+                u'ACK [52@0] {} foo')
