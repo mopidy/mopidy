@@ -17,6 +17,9 @@ def commands(context):
 
     sorted_commands = sorted(list(mpd_commands))
 
+    # No permission to use
+    sorted_commands.remove('kill')
+
     # Not shown by MPD in its command list
     sorted_commands.remove('command_list_begin')
     sorted_commands.remove('command_list_ok_begin')
@@ -59,7 +62,13 @@ def notcommands(context):
     # authenticated, 'notcommands' should list all the commands the client does
     # not have access to. To implement this we need access to the session
     # object to check if the client is authenticated or not.
-    pass
+
+    commands = []
+
+    # No permission to use
+    commands.append('kill')
+
+    return [('command', c) for c in sorted(commands)]
 
 @handle_pattern(r'^tagtypes$')
 def tagtypes(context):

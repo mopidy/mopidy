@@ -20,6 +20,8 @@ class ReflectionHandlerTest(unittest.TestCase):
         self.assert_(u'command: commands' in result)
         self.assert_(u'command: play' in result)
         self.assert_(u'command: status' in result)
+        # Check if commands you do not have access to are not present
+        self.assert_(u'command: kill' not in result)
         # Check if the blacklisted commands are not present
         self.assert_(u'command: command_list_begin' not in result)
         self.assert_(u'command: command_list_ok_begin' not in result)
@@ -33,9 +35,10 @@ class ReflectionHandlerTest(unittest.TestCase):
         result = self.dispatcher.handle_request(u'decoders')
         self.assert_(u'ACK [0@0] {} Not implemented' in result)
 
-    def test_notcommands_returns_only_ok(self):
+    def test_notcommands_returns_only_kill_and_ok(self):
         result = self.dispatcher.handle_request(u'notcommands')
-        self.assertEqual(1, len(result))
+        self.assertEqual(2, len(result))
+        self.assert_(u'command: kill' in result)
         self.assert_(u'OK' in result)
 
     def test_tagtypes(self):
