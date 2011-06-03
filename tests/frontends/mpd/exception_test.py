@@ -1,7 +1,7 @@
 import unittest
 
-from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdUnknownCommand,
-    MpdSystemError, MpdNotImplemented)
+from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdPermissionError,
+    MpdUnknownCommand, MpdSystemError, MpdNotImplemented)
 
 class MpdExceptionsTest(unittest.TestCase):
     def test_key_error_wrapped_in_mpd_ack_error(self):
@@ -43,3 +43,10 @@ class MpdExceptionsTest(unittest.TestCase):
         except MpdSystemError as e:
             self.assertEqual(e.get_mpd_ack(),
                 u'ACK [52@0] {} foo')
+
+    def test_mpd_permission_error(self):
+        try:
+            raise MpdPermissionError(command='foo')
+        except MpdPermissionError as e:
+            self.assertEqual(e.get_mpd_ack(),
+                u'ACK [4@0] {foo} you don\'t have permission for "foo"')

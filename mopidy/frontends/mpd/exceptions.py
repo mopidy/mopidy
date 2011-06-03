@@ -42,6 +42,12 @@ class MpdPasswordError(MpdAckError):
         super(MpdPasswordError, self).__init__(*args, **kwargs)
         self.error_code = MpdAckError.ACK_ERROR_PASSWORD
 
+class MpdPermissionError(MpdAckError):
+    def __init__(self, *args, **kwargs):
+        super(MpdPermissionError, self).__init__(*args, **kwargs)
+        self.message = u'you don\'t have permission for "%s"' % self.command
+        self.error_code = MpdAckError.ACK_ERROR_PERMISSION
+
 class MpdUnknownCommand(MpdAckError):
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
