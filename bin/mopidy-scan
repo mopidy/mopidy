@@ -15,12 +15,12 @@ tracks = []
 def store(data):
     track = translator(data)
     tracks.append(track)
-    logging.debug('Added %s', track.uri)
+    logging.debug(u'Added %s', track.uri)
 
-def debug(uri, error):
-    logging.error('Failed %s: %s', uri, error)
+def debug(uri, error, debug):
+    logging.error(u'Failed %s: %s - %s', uri, error, debug)
 
-logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+logging.info(u'Scanning %s', settings.LOCAL_MUSIC_PATH)
 
 scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
 try:
@@ -28,7 +28,7 @@ try:
 except KeyboardInterrupt:
     scanner.stop()
 
-logging.info('Done')
+logging.info(u'Done')
 
 for a in tracks_to_tag_cache_format(tracks):
     if len(a) == 1:

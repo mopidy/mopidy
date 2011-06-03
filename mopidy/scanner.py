@@ -90,8 +90,8 @@ class Scanner(object):
     def process_error(self, bus, message):
         if self.error_callback:
             uri = self.uribin.get_property('uri')
-            errors = message.parse_error()
-            self.error_callback(uri, errors)
+            error, debug = message.parse_error()
+            self.error_callback(uri, error, debug)
         self.next_uri()
 
     def get_duration(self):

@@ -144,9 +144,9 @@ class ScannerTest(unittest.TestCase):
         uri = data['uri'][len('file://'):]
         self.data[uri] = data
 
-    def error_callback(self, uri, errors):
+    def error_callback(self, uri, error, debug):
         uri = uri[len('file://'):]
-        self.errors[uri] = errors
+        self.errors[uri] = (error, debug)
 
     def test_data_is_set(self):
         self.scan('scanner/simple')
