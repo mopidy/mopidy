@@ -27,8 +27,6 @@ class MpdDispatcher(object):
     back to the MPD session.
     """
 
-    # XXX Consider merging MpdDispatcher into MpdSession
-
     def __init__(self, session=None):
         self.command_list = False
         self.command_list_ok = False
@@ -40,24 +38,26 @@ class MpdDispatcher(object):
             self.command_list.append(request)
             return None
         try:
-            (handler, kwargs) = self.find_handler(request)
-            result = handler(self.context, **kwargs)
+            result = self._call_handler(request)
         except MpdAckError as e:
             if command_list_index is not None:
                 e.index = command_list_index
-            return self.handle_response(e.get_mpd_ack(), add_ok=False)
+            return self._format_response(e.get_mpd_ack(), add_ok=False)
         except ActorDeadError as e:
             logger.warning(u'Tried to communicate with dead actor.')
             mpd_error = MpdSystemError(e.message)
-            return self.handle_response(mpd_error.get_mpd_ack(), add_ok=False)
+            return self._format_response(mpd_error.get_mpd_ack(), add_ok=False)
         if request in (u'command_list_begin', u'command_list_ok_begin'):
             return None
         if command_list_index is not None:
-            return self.handle_response(result, add_ok=False)
-        return self.handle_response(result)
+            return self._format_response(result, add_ok=False)
+        return self._format_response(result)
 
-    def find_handler(self, request):
-        """Find the correct handler for a request."""
+    def _call_handler(self, request):
+        (handler, kwargs) = self._find_handler(request)
+        return handler(self.context, **kwargs)
+
+    def _find_handler(self, request):
         for pattern in request_handlers:
             matches = re.match(pattern, request)
             if matches is not None:
@@ -67,27 +67,33 @@ class MpdDispatcher(object):
             raise MpdArgError(u'incorrect arguments', command=command)
         raise MpdUnknownCommand(command=command)
 
-    def handle_response(self, result, add_ok=True):
-        """Format the response from a request handler."""
+    def _format_response(self, result, add_ok=True):
         response = []
-        if result is None:
-            result = []
-        elif isinstance(result, set):
-            result = list(result)
-        elif not isinstance(result, list):
-            result = [result]
-        for line in flatten(result):
-            if isinstance(line, dict):
-                for (key, value) in line.items():
-                    response.append(u'%s: %s' % (key, value))
-            elif isinstance(line, tuple):
-                (key, value) = line
-                response.append(u'%s: %s' % (key, value))
-            else:
-                response.append(line)
-        if add_ok and (not response or not response[-1].startswith(u'ACK')):
+        for element in self._listify_result(result):
+            response.extend(self._format_lines(element))
+        if add_ok and (not response or not self._has_error(response)):
             response.append(u'OK')
         return response
+
+    def _listify_result(self, result):
+        if result is None:
+            return []
+        if isinstance(result, set):
+            return flatten(list(result))
+        if not isinstance(result, list):
+            return [result]
+        return flatten(result)
+
+    def _format_lines(self, line):
+        if isinstance(line, dict):
+            return [u'%s: %s' % (key, value) for (key, value) in line.items()]
+        if isinstance(line, tuple):
+            (key, value) = line
+            return [u'%s: %s' % (key, value)]
+        return [line]
+
+    def _has_error(self, response):
+        return bool(response) and response[-1].startswith(u'ACK')
 
 
 class MpdContext(object):
