@@ -81,7 +81,7 @@ class Scanner(object):
         data = message.parse_tag()
         data = dict([(k, data[k]) for k in data.keys()])
         data['uri'] = unicode(self.uribin.get_property('uri'))
-        data['duration'] = self.get_duration()
+        data[gst.TAG_DURATION] = self.get_duration()
         try:
             self.data_callback(data)
             self.next_uri()
