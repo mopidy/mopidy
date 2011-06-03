@@ -4,6 +4,7 @@ import re
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
+from mopidy import settings
 from mopidy.backends.base import Backend
 from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
     MpdUnknownCommand, MpdSystemError)
@@ -28,12 +29,18 @@ class MpdDispatcher(object):
     """
 
     def __init__(self, session=None):
+        self.authenticated = False
         self.command_list = False
         self.command_list_ok = False
         self.context = MpdContext(self, session=session)
 
     def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
+        if not self.authenticated:
+            (self.authenticated, result) = self._check_password(request)
+            if result:
+                return result
+
         if self._is_receiving_command_list(request):
             self.command_list.append(request)
             return None
@@ -54,6 +61,29 @@ class MpdDispatcher(object):
             return self._format_response(result, add_ok=False)
 
         return self._format_response(result)
+
+    def _check_password(self, request):
+        """
+        Takes any request and tries to authenticate the client using it.
+
+        :rtype: a two-tuple containing (is_authenticated, response_message). If
+            the response_message is :class:`None`, normal processing should
+            continue, even though the client may not be authenticated.
+        """
+        if settings.MPD_SERVER_PASSWORD is None:
+            return (True, None)
+        command = request.split(' ')[0]
+        if command == 'password':
+            if request == 'password "%s"' % settings.MPD_SERVER_PASSWORD:
+                return (True, [u'OK'])
+            else:
+                return (False, [u'ACK [3@0] {password} incorrect password'])
+        if command in ('close', 'commands', 'notcommands', 'ping'):
+            return (False, None)
+        else:
+            return (False,
+                [u'ACK [4@0] {%(c)s} you don\'t have permission for "%(c)s"' %
+                {'c': command}])
 
     def _is_receiving_command_list(self, request):
         return (self.command_list is not False
