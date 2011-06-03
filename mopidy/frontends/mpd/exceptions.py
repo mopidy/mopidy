@@ -54,6 +54,11 @@ class MpdNoExistError(MpdAckError):
         super(MpdNoExistError, self).__init__(*args, **kwargs)
         self.error_code = MpdAckError.ACK_ERROR_NO_EXIST
 
+class MpdSystemError(MpdAckError):
+    def __init__(self, *args, **kwargs):
+        super(MpdSystemError, self).__init__(*args, **kwargs)
+        self.error_code = MpdAckError.ACK_ERROR_SYSTEM
+
 class MpdNotImplemented(MpdAckError):
     def __init__(self, *args, **kwargs):
         super(MpdNotImplemented, self).__init__(*args, **kwargs)
