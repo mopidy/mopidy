@@ -18,21 +18,23 @@ def command_list_begin(context):
         returned. If ``command_list_ok_begin`` is used, ``list_OK`` is
         returned for each successful command executed in the command list.
     """
-    context.command_list = []
-    context.command_list_ok = False
+    context.dispatcher.command_list = []
+    context.dispatcher.command_list_ok = False
 
 @handle_pattern(r'^command_list_end$')
 def command_list_end(context):
     """See :meth:`command_list_begin()`."""
-    if context.command_list is False:
+    if context.dispatcher.command_list is False:
         # Test for False exactly, and not e.g. empty list
         raise MpdUnknownCommand(command='command_list_end')
-    (command_list, context.command_list) = (context.command_list, False)
-    (command_list_ok, context.command_list_ok) = (
-        context.command_list_ok, False)
+    (command_list, context.dispatcher.command_list) = (
+        context.dispatcher.command_list, False)
+    (command_list_ok, context.dispatcher.command_list_ok) = (
+        context.dispatcher.command_list_ok, False)
     result = []
     for i, command in enumerate(command_list):
-        response = context.handle_request(command, command_list_index=i)
+        response = context.dispatcher.handle_request(
+            command, command_list_index=i)
         if response is not None:
             result.append(response)
         if response and response[-1].startswith(u'ACK'):
@@ -44,5 +46,5 @@ def command_list_end(context):
 @handle_pattern(r'^command_list_ok_begin$')
 def command_list_ok_begin(context):
     """See :meth:`command_list_begin()`."""
-    context.command_list = []
-    context.command_list_ok = True
+    context.dispatcher.command_list = []
+    context.dispatcher.command_list_ok = True

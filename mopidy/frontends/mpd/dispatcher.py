@@ -26,16 +26,9 @@ class MpdDispatcher(object):
     # XXX Consider merging MpdDispatcher into MpdSession
 
     def __init__(self):
-        backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        self.backend = backend_refs[0].proxy()
-
-        mixer_refs = ActorRegistry.get_by_class(BaseMixer)
-        assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
-        self.mixer = mixer_refs[0].proxy()
-
         self.command_list = False
         self.command_list_ok = False
+        self.context = MpdContext(self)
 
     def handle_request(self, request, command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -44,7 +37,7 @@ class MpdDispatcher(object):
             return None
         try:
             (handler, kwargs) = self.find_handler(request)
-            result = handler(self, **kwargs)
+            result = handler(self.context, **kwargs)
         except MpdAckError as e:
             if command_list_index is not None:
                 e.index = command_list_index
@@ -87,3 +80,34 @@ class MpdDispatcher(object):
         if add_ok and (not response or not response[-1].startswith(u'ACK')):
             response.append(u'OK')
         return response
+
+
+class MpdContext(object):
+    """
+    This object is passed as the first argument to all MPD command handlers to
+    give the command handlers access to important parts of Mopidy.
+    """
+
+    #: The current :class:`MpdDispatcher`.
+    dispatcher = None
+
+    #: The backend. An instance of :class:`mopidy.backends.base.Backend`.
+    backend = None
+
+    #: The mixer. An instance of :class:`mopidy.mixers.base.BaseMixer`.
+    mixer = None
+
+    def __init__(self, dispatcher):
+        self.dispatcher = dispatcher
+        self.backend = self._get_backend()
+        self.mixer = self._get_mixer()
+
+    def _get_backend(self):
+        backend_refs = ActorRegistry.get_by_class(Backend)
+        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+        return backend_refs[0].proxy()
+
+    def _get_mixer(self):
+        mixer_refs = ActorRegistry.get_by_class(BaseMixer)
+        assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
+        return mixer_refs[0].proxy()
