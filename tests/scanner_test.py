@@ -4,7 +4,7 @@ from datetime import date
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
 
-from tests import path_to_data_dir
+from tests import path_to_data_dir, SkipTest
 
 class FakeGstDate(object):
     def __init__(self, year, month, day):
@@ -184,3 +184,7 @@ class ScannerTest(unittest.TestCase):
     def test_other_media_is_ignored(self):
         self.scan('scanner/image')
         self.assert_(self.errors)
+
+    @SkipTest
+    def test_song_without_time_is_handeled(self):
+        pass
