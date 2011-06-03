@@ -91,23 +91,31 @@ class MpdContext(object):
     #: The current :class:`MpdDispatcher`.
     dispatcher = None
 
-    #: The backend. An instance of :class:`mopidy.backends.base.Backend`.
-    backend = None
-
-    #: The mixer. An instance of :class:`mopidy.mixers.base.BaseMixer`.
-    mixer = None
-
     def __init__(self, dispatcher):
         self.dispatcher = dispatcher
-        self.backend = self._get_backend()
-        self.mixer = self._get_mixer()
+        self._backend = None
+        self._mixer = None
 
-    def _get_backend(self):
+    @property
+    def backend(self):
+        """
+        The backend. An instance of :class:`mopidy.backends.base.Backend`.
+        """
+        if self._backend is not None:
+            return self._backend
         backend_refs = ActorRegistry.get_by_class(Backend)
         assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        return backend_refs[0].proxy()
+        self._backend = backend_refs[0].proxy()
+        return self._backend
 
-    def _get_mixer(self):
+    @property
+    def mixer(self):
+        """
+        The mixer. An instance of :class:`mopidy.mixers.base.BaseMixer`.
+        """
+        if self._mixer is not None:
+            return self._mixer
         mixer_refs = ActorRegistry.get_by_class(BaseMixer)
         assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
-        return mixer_refs[0].proxy()
+        self._mixer = mixer_refs[0].proxy()
+        return self._mixer
