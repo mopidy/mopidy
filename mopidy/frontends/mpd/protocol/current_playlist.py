@@ -4,7 +4,7 @@ from mopidy.frontends.mpd.protocol import handle_pattern
 from mopidy.frontends.mpd.translator import tracks_to_mpd_format
 
 @handle_pattern(r'^add "(?P<uri>[^"]*)"$')
-def add(frontend, uri):
+def add(context, uri):
     """
     *musicpd.org, current playlist section:*
 
@@ -19,17 +19,17 @@ def add(frontend, uri):
     """
     if not uri:
         return
-    for handler_prefix in frontend.backend.uri_handlers.get():
+    for handler_prefix in context.backend.uri_handlers.get():
         if uri.startswith(handler_prefix):
-            track = frontend.backend.library.lookup(uri).get()
+            track = context.backend.library.lookup(uri).get()
             if track is not None:
-                frontend.backend.current_playlist.add(track)
+                context.backend.current_playlist.add(track)
                 return
     raise MpdNoExistError(
         u'directory or file not found', command=u'add')
 
 @handle_pattern(r'^addid "(?P<uri>[^"]*)"( "(?P<songpos>\d+)")*$')
-def addid(frontend, uri, songpos=None):
+def addid(context, uri, songpos=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -51,18 +51,18 @@ def addid(frontend, uri, songpos=None):
         raise MpdNoExistError(u'No such song', command=u'addid')
     if songpos is not None:
         songpos = int(songpos)
-    track = frontend.backend.library.lookup(uri).get()
+    track = context.backend.library.lookup(uri).get()
     if track is None:
         raise MpdNoExistError(u'No such song', command=u'addid')
     if songpos and songpos > len(
-            frontend.backend.current_playlist.tracks.get()):
+            context.backend.current_playlist.tracks.get()):
         raise MpdArgError(u'Bad song index', command=u'addid')
-    cp_track = frontend.backend.current_playlist.add(track,
+    cp_track = context.backend.current_playlist.add(track,
         at_position=songpos).get()
     return ('Id', cp_track[0])
 
 @handle_pattern(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
-def delete_range(frontend, start, end=None):
+def delete_range(context, start, end=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -74,25 +74,25 @@ def delete_range(frontend, start, end=None):
     if end is not None:
         end = int(end)
     else:
-        end = len(frontend.backend.current_playlist.tracks.get())
-    cp_tracks = frontend.backend.current_playlist.cp_tracks.get()[start:end]
+        end = len(context.backend.current_playlist.tracks.get())
+    cp_tracks = context.backend.current_playlist.cp_tracks.get()[start:end]
     if not cp_tracks:
         raise MpdArgError(u'Bad song index', command=u'delete')
     for (cpid, _) in cp_tracks:
-        frontend.backend.current_playlist.remove(cpid=cpid)
+        context.backend.current_playlist.remove(cpid=cpid)
 
 @handle_pattern(r'^delete "(?P<songpos>\d+)"$')
-def delete_songpos(frontend, songpos):
+def delete_songpos(context, songpos):
     """See :meth:`delete_range`"""
     try:
         songpos = int(songpos)
-        (cpid, _) = frontend.backend.current_playlist.cp_tracks.get()[songpos]
-        frontend.backend.current_playlist.remove(cpid=cpid)
+        (cpid, _) = context.backend.current_playlist.cp_tracks.get()[songpos]
+        context.backend.current_playlist.remove(cpid=cpid)
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'delete')
 
 @handle_pattern(r'^deleteid "(?P<cpid>\d+)"$')
-def deleteid(frontend, cpid):
+def deleteid(context, cpid):
     """
     *musicpd.org, current playlist section:*
 
@@ -102,14 +102,14 @@ def deleteid(frontend, cpid):
     """
     try:
         cpid = int(cpid)
-        if frontend.backend.playback.current_cpid.get() == cpid:
-            frontend.backend.playback.next()
-        return frontend.backend.current_playlist.remove(cpid=cpid).get()
+        if context.backend.playback.current_cpid.get() == cpid:
+            context.backend.playback.next()
+        return context.backend.current_playlist.remove(cpid=cpid).get()
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'deleteid')
 
 @handle_pattern(r'^clear$')
-def clear(frontend):
+def clear(context):
     """
     *musicpd.org, current playlist section:*
 
@@ -117,10 +117,10 @@ def clear(frontend):
 
         Clears the current playlist.
     """
-    frontend.backend.current_playlist.clear()
+    context.backend.current_playlist.clear()
 
 @handle_pattern(r'^move "(?P<start>\d+):(?P<end>\d+)*" "(?P<to>\d+)"$')
-def move_range(frontend, start, to, end=None):
+def move_range(context, start, to, end=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -130,21 +130,21 @@ def move_range(frontend, start, to, end=None):
         ``TO`` in the playlist.
     """
     if end is None:
-        end = len(frontend.backend.current_playlist.tracks.get())
+        end = len(context.backend.current_playlist.tracks.get())
     start = int(start)
     end = int(end)
     to = int(to)
-    frontend.backend.current_playlist.move(start, end, to)
+    context.backend.current_playlist.move(start, end, to)
 
 @handle_pattern(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
-def move_songpos(frontend, songpos, to):
+def move_songpos(context, songpos, to):
     """See :meth:`move_range`."""
     songpos = int(songpos)
     to = int(to)
-    frontend.backend.current_playlist.move(songpos, songpos + 1, to)
+    context.backend.current_playlist.move(songpos, songpos + 1, to)
 
 @handle_pattern(r'^moveid "(?P<cpid>\d+)" "(?P<to>\d+)"$')
-def moveid(frontend, cpid, to):
+def moveid(context, cpid, to):
     """
     *musicpd.org, current playlist section:*
 
@@ -156,13 +156,13 @@ def moveid(frontend, cpid, to):
     """
     cpid = int(cpid)
     to = int(to)
-    cp_track = frontend.backend.current_playlist.get(cpid=cpid).get()
-    position = frontend.backend.current_playlist.cp_tracks.get().index(
+    cp_track = context.backend.current_playlist.get(cpid=cpid).get()
+    position = context.backend.current_playlist.cp_tracks.get().index(
         cp_track)
-    frontend.backend.current_playlist.move(position, position + 1, to)
+    context.backend.current_playlist.move(position, position + 1, to)
 
 @handle_pattern(r'^playlist$')
-def playlist(frontend):
+def playlist(context):
     """
     *musicpd.org, current playlist section:*
 
@@ -174,11 +174,11 @@ def playlist(frontend):
 
             Do not use this, instead use ``playlistinfo``.
     """
-    return playlistinfo(frontend)
+    return playlistinfo(context)
 
 @handle_pattern(r'^playlistfind (?P<tag>[^"]+) "(?P<needle>[^"]+)"$')
 @handle_pattern(r'^playlistfind "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
-def playlistfind(frontend, tag, needle):
+def playlistfind(context, tag, needle):
     """
     *musicpd.org, current playlist section:*
 
@@ -192,9 +192,9 @@ def playlistfind(frontend, tag, needle):
     """
     if tag == 'filename':
         try:
-            cp_track = frontend.backend.current_playlist.get(uri=needle).get()
+            cp_track = context.backend.current_playlist.get(uri=needle).get()
             (cpid, track) = cp_track
-            position = frontend.backend.current_playlist.cp_tracks.get().index(
+            position = context.backend.current_playlist.cp_tracks.get().index(
                 cp_track)
             return track.mpd_format(cpid=cpid, position=position)
         except LookupError:
@@ -202,7 +202,7 @@ def playlistfind(frontend, tag, needle):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^playlistid( "(?P<cpid>\d+)")*$')
-def playlistid(frontend, cpid=None):
+def playlistid(context, cpid=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -214,22 +214,22 @@ def playlistid(frontend, cpid=None):
     if cpid is not None:
         try:
             cpid = int(cpid)
-            cp_track = frontend.backend.current_playlist.get(cpid=cpid).get()
-            position = frontend.backend.current_playlist.cp_tracks.get().index(
+            cp_track = context.backend.current_playlist.get(cpid=cpid).get()
+            position = context.backend.current_playlist.cp_tracks.get().index(
                 cp_track)
             return cp_track[1].mpd_format(position=position, cpid=cpid)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playlistid')
     else:
         cpids = [ct[0] for ct in
-            frontend.backend.current_playlist.cp_tracks.get()]
+            context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(
-            frontend.backend.current_playlist.tracks.get(), cpids=cpids)
+            context.backend.current_playlist.tracks.get(), cpids=cpids)
 
 @handle_pattern(r'^playlistinfo$')
 @handle_pattern(r'^playlistinfo "(?P<songpos>-?\d+)"$')
 @handle_pattern(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
-def playlistinfo(frontend, songpos=None,
+def playlistinfo(context, songpos=None,
         start=None, end=None):
     """
     *musicpd.org, current playlist section:*
@@ -255,30 +255,30 @@ def playlistinfo(frontend, songpos=None,
         if start == -1:
             end = None
         cpids = [ct[0] for ct in
-            frontend.backend.current_playlist.cp_tracks.get()]
+            context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(
-            frontend.backend.current_playlist.tracks.get(),
+            context.backend.current_playlist.tracks.get(),
             start, end, cpids=cpids)
     else:
         if start is None:
             start = 0
         start = int(start)
         if not (0 <= start <= len(
-                frontend.backend.current_playlist.tracks.get())):
+                context.backend.current_playlist.tracks.get())):
             raise MpdArgError(u'Bad song index', command=u'playlistinfo')
         if end is not None:
             end = int(end)
-            if end > len(frontend.backend.current_playlist.tracks.get()):
+            if end > len(context.backend.current_playlist.tracks.get()):
                 end = None
         cpids = [ct[0] for ct in
-            frontend.backend.current_playlist.cp_tracks.get()]
+            context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(
-            frontend.backend.current_playlist.tracks.get(),
+            context.backend.current_playlist.tracks.get(),
             start, end, cpids=cpids)
 
 @handle_pattern(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
 @handle_pattern(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
-def playlistsearch(frontend, tag, needle):
+def playlistsearch(context, tag, needle):
     """
     *musicpd.org, current playlist section:*
 
@@ -296,7 +296,7 @@ def playlistsearch(frontend, tag, needle):
 
 @handle_pattern(r'^plchanges (?P<version>-?\d+)$')
 @handle_pattern(r'^plchanges "(?P<version>-?\d+)"$')
-def plchanges(frontend, version):
+def plchanges(context, version):
     """
     *musicpd.org, current playlist section:*
 
@@ -312,14 +312,14 @@ def plchanges(frontend, version):
     - Calls ``plchanges "-1"`` two times per second to get the entire playlist.
     """
     # XXX Naive implementation that returns all tracks as changed
-    if int(version) < frontend.backend.current_playlist.version:
+    if int(version) < context.backend.current_playlist.version:
         cpids = [ct[0] for ct in
-            frontend.backend.current_playlist.cp_tracks.get()]
+            context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(
-            frontend.backend.current_playlist.tracks.get(), cpids=cpids)
+            context.backend.current_playlist.tracks.get(), cpids=cpids)
 
 @handle_pattern(r'^plchangesposid "(?P<version>\d+)"$')
-def plchangesposid(frontend, version):
+def plchangesposid(context, version):
     """
     *musicpd.org, current playlist section:*
 
@@ -333,17 +333,17 @@ def plchangesposid(frontend, version):
         ``playlistlength`` returned by status command.
     """
     # XXX Naive implementation that returns all tracks as changed
-    if int(version) != frontend.backend.current_playlist.version.get():
+    if int(version) != context.backend.current_playlist.version.get():
         result = []
         for (position, (cpid, _)) in enumerate(
-                frontend.backend.current_playlist.cp_tracks.get()):
+                context.backend.current_playlist.cp_tracks.get()):
             result.append((u'cpos', position))
             result.append((u'Id', cpid))
         return result
 
 @handle_pattern(r'^shuffle$')
 @handle_pattern(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')
-def shuffle(frontend, start=None, end=None):
+def shuffle(context, start=None, end=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -356,10 +356,10 @@ def shuffle(frontend, start=None, end=None):
         start = int(start)
     if end is not None:
         end = int(end)
-    frontend.backend.current_playlist.shuffle(start, end)
+    context.backend.current_playlist.shuffle(start, end)
 
 @handle_pattern(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
-def swap(frontend, songpos1, songpos2):
+def swap(context, songpos1, songpos2):
     """
     *musicpd.org, current playlist section:*
 
@@ -369,18 +369,18 @@ def swap(frontend, songpos1, songpos2):
     """
     songpos1 = int(songpos1)
     songpos2 = int(songpos2)
-    tracks = frontend.backend.current_playlist.tracks.get()
+    tracks = context.backend.current_playlist.tracks.get()
     song1 = tracks[songpos1]
     song2 = tracks[songpos2]
     del tracks[songpos1]
     tracks.insert(songpos1, song2)
     del tracks[songpos2]
     tracks.insert(songpos2, song1)
-    frontend.backend.current_playlist.clear()
-    frontend.backend.current_playlist.append(tracks)
+    context.backend.current_playlist.clear()
+    context.backend.current_playlist.append(tracks)
 
 @handle_pattern(r'^swapid "(?P<cpid1>\d+)" "(?P<cpid2>\d+)"$')
-def swapid(frontend, cpid1, cpid2):
+def swapid(context, cpid1, cpid2):
     """
     *musicpd.org, current playlist section:*
 
@@ -390,9 +390,9 @@ def swapid(frontend, cpid1, cpid2):
     """
     cpid1 = int(cpid1)
     cpid2 = int(cpid2)
-    cp_track1 = frontend.backend.current_playlist.get(cpid=cpid1).get()
-    cp_track2 = frontend.backend.current_playlist.get(cpid=cpid2).get()
-    cp_tracks = frontend.backend.current_playlist.cp_tracks.get()
+    cp_track1 = context.backend.current_playlist.get(cpid=cpid1).get()
+    cp_track2 = context.backend.current_playlist.get(cpid=cpid2).get()
+    cp_tracks = context.backend.current_playlist.cp_tracks.get()
     position1 = cp_tracks.index(cp_track1)
     position2 = cp_tracks.index(cp_track2)
-    swap(frontend, position1, position2)
+    swap(context, position1, position2)

@@ -3,7 +3,7 @@ from mopidy.frontends.mpd.protocol import handle_pattern
 from mopidy.frontends.mpd.exceptions import MpdPasswordError
 
 @handle_pattern(r'^close$')
-def close(frontend):
+def close(context):
     """
     *musicpd.org, connection section:*
 
@@ -14,7 +14,7 @@ def close(frontend):
     pass # TODO
 
 @handle_pattern(r'^kill$')
-def kill(frontend):
+def kill(context):
     """
     *musicpd.org, connection section:*
 
@@ -25,7 +25,7 @@ def kill(frontend):
     pass # TODO
 
 @handle_pattern(r'^password "(?P<password>[^"]+)"$')
-def password_(frontend, password):
+def password_(context, password):
     """
     *musicpd.org, connection section:*
 
@@ -41,7 +41,7 @@ def password_(frontend, password):
         raise MpdPasswordError(u'incorrect password', command=u'password')
 
 @handle_pattern(r'^ping$')
-def ping(frontend):
+def ping(context):
     """
     *musicpd.org, connection section:*
 

@@ -2,7 +2,7 @@ from mopidy.frontends.mpd.protocol import handle_pattern
 from mopidy.frontends.mpd.exceptions import MpdUnknownCommand
 
 @handle_pattern(r'^command_list_begin$')
-def command_list_begin(frontend):
+def command_list_begin(context):
     """
     *musicpd.org, command list section:*
 
@@ -18,21 +18,21 @@ def command_list_begin(frontend):
         returned. If ``command_list_ok_begin`` is used, ``list_OK`` is
         returned for each successful command executed in the command list.
     """
-    frontend.command_list = []
-    frontend.command_list_ok = False
+    context.command_list = []
+    context.command_list_ok = False
 
 @handle_pattern(r'^command_list_end$')
-def command_list_end(frontend):
+def command_list_end(context):
     """See :meth:`command_list_begin()`."""
-    if frontend.command_list is False:
+    if context.command_list is False:
         # Test for False exactly, and not e.g. empty list
         raise MpdUnknownCommand(command='command_list_end')
-    (command_list, frontend.command_list) = (frontend.command_list, False)
-    (command_list_ok, frontend.command_list_ok) = (
-        frontend.command_list_ok, False)
+    (command_list, context.command_list) = (context.command_list, False)
+    (command_list_ok, context.command_list_ok) = (
+        context.command_list_ok, False)
     result = []
     for i, command in enumerate(command_list):
-        response = frontend.handle_request(command, command_list_index=i)
+        response = context.handle_request(command, command_list_index=i)
         if response is not None:
             result.append(response)
         if response and response[-1].startswith(u'ACK'):
@@ -42,7 +42,7 @@ def command_list_end(frontend):
     return result
 
 @handle_pattern(r'^command_list_ok_begin$')
-def command_list_ok_begin(frontend):
+def command_list_ok_begin(context):
     """See :meth:`command_list_begin()`."""
-    frontend.command_list = []
-    frontend.command_list_ok = True
+    context.command_list = []
+    context.command_list_ok = True

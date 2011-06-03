@@ -2,7 +2,7 @@ from mopidy.frontends.mpd.protocol import handle_pattern, mpd_commands
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
 @handle_pattern(r'^commands$')
-def commands(frontend):
+def commands(context):
     """
     *musicpd.org, reflection section:*
 
@@ -28,7 +28,7 @@ def commands(frontend):
     return [('command', c) for c in sorted_commands]
 
 @handle_pattern(r'^decoders$')
-def decoders(frontend):
+def decoders(context):
     """
     *musicpd.org, reflection section:*
 
@@ -47,7 +47,7 @@ def decoders(frontend):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^notcommands$')
-def notcommands(frontend):
+def notcommands(context):
     """
     *musicpd.org, reflection section:*
 
@@ -62,7 +62,7 @@ def notcommands(frontend):
     pass
 
 @handle_pattern(r'^tagtypes$')
-def tagtypes(frontend):
+def tagtypes(context):
     """
     *musicpd.org, reflection section:*
 
@@ -73,7 +73,7 @@ def tagtypes(frontend):
     pass # TODO
 
 @handle_pattern(r'^urlhandlers$')
-def urlhandlers(frontend):
+def urlhandlers(context):
     """
     *musicpd.org, reflection section:*
 
@@ -81,4 +81,4 @@ def urlhandlers(frontend):
 
         Gets a list of available URL handlers.
     """
-    return [(u'handler', uri) for uri in frontend.backend.uri_handlers.get()]
+    return [(u'handler', uri) for uri in context.backend.uri_handlers.get()]

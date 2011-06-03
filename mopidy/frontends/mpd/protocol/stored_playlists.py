@@ -4,7 +4,7 @@ from mopidy.frontends.mpd.protocol import handle_pattern
 from mopidy.frontends.mpd.exceptions import MpdNoExistError, MpdNotImplemented
 
 @handle_pattern(r'^listplaylist "(?P<name>[^"]+)"$')
-def listplaylist(frontend, name):
+def listplaylist(context, name):
     """
     *musicpd.org, stored playlists section:*
 
@@ -19,13 +19,13 @@ def listplaylist(frontend, name):
         file: relative/path/to/file3.mp3
     """
     try:
-        playlist = frontend.backend.stored_playlists.get(name=name).get()
+        playlist = context.backend.stored_playlists.get(name=name).get()
         return ['file: %s' % t.uri for t in playlist.tracks]
     except LookupError:
         raise MpdNoExistError(u'No such playlist', command=u'listplaylist')
 
 @handle_pattern(r'^listplaylistinfo "(?P<name>[^"]+)"$')
-def listplaylistinfo(frontend, name):
+def listplaylistinfo(context, name):
     """
     *musicpd.org, stored playlists section:*
 
@@ -39,14 +39,14 @@ def listplaylistinfo(frontend, name):
         Album, Artist, Track
     """
     try:
-        playlist = frontend.backend.stored_playlists.get(name=name).get()
+        playlist = context.backend.stored_playlists.get(name=name).get()
         return playlist.mpd_format()
     except LookupError:
         raise MpdNoExistError(
             u'No such playlist', command=u'listplaylistinfo')
 
 @handle_pattern(r'^listplaylists$')
-def listplaylists(frontend):
+def listplaylists(context):
     """
     *musicpd.org, stored playlists section:*
 
@@ -67,7 +67,7 @@ def listplaylists(frontend):
         Last-Modified: 2010-02-06T02:11:08Z
     """
     result = []
-    for playlist in frontend.backend.stored_playlists.playlists.get():
+    for playlist in context.backend.stored_playlists.playlists.get():
         result.append((u'playlist', playlist.name))
         last_modified = (playlist.last_modified or
             dt.datetime.now()).isoformat()
@@ -80,7 +80,7 @@ def listplaylists(frontend):
     return result
 
 @handle_pattern(r'^load "(?P<name>[^"]+)"$')
-def load(frontend, name):
+def load(context, name):
     """
     *musicpd.org, stored playlists section:*
 
@@ -93,13 +93,13 @@ def load(frontend, name):
     - ``load`` appends the given playlist to the current playlist.
     """
     try:
-        playlist = frontend.backend.stored_playlists.get(name=name).get()
-        frontend.backend.current_playlist.append(playlist.tracks)
+        playlist = context.backend.stored_playlists.get(name=name).get()
+        context.backend.current_playlist.append(playlist.tracks)
     except LookupError:
         raise MpdNoExistError(u'No such playlist', command=u'load')
 
 @handle_pattern(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
-def playlistadd(frontend, name, uri):
+def playlistadd(context, name, uri):
     """
     *musicpd.org, stored playlists section:*
 
@@ -112,7 +112,7 @@ def playlistadd(frontend, name, uri):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^playlistclear "(?P<name>[^"]+)"$')
-def playlistclear(frontend, name):
+def playlistclear(context, name):
     """
     *musicpd.org, stored playlists section:*
 
@@ -123,7 +123,7 @@ def playlistclear(frontend, name):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^playlistdelete "(?P<name>[^"]+)" "(?P<songpos>\d+)"$')
-def playlistdelete(frontend, name, songpos):
+def playlistdelete(context, name, songpos):
     """
     *musicpd.org, stored playlists section:*
 
@@ -135,7 +135,7 @@ def playlistdelete(frontend, name, songpos):
 
 @handle_pattern(r'^playlistmove "(?P<name>[^"]+)" '
     r'"(?P<from_pos>\d+)" "(?P<to_pos>\d+)"$')
-def playlistmove(frontend, name, from_pos, to_pos):
+def playlistmove(context, name, from_pos, to_pos):
     """
     *musicpd.org, stored playlists section:*
 
@@ -153,7 +153,7 @@ def playlistmove(frontend, name, from_pos, to_pos):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^rename "(?P<old_name>[^"]+)" "(?P<new_name>[^"]+)"$')
-def rename(frontend, old_name, new_name):
+def rename(context, old_name, new_name):
     """
     *musicpd.org, stored playlists section:*
 
@@ -164,7 +164,7 @@ def rename(frontend, old_name, new_name):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^rm "(?P<name>[^"]+)"$')
-def rm(frontend, name):
+def rm(context, name):
     """
     *musicpd.org, stored playlists section:*
 
@@ -175,7 +175,7 @@ def rm(frontend, name):
     raise MpdNotImplemented # TODO
 
 @handle_pattern(r'^save "(?P<name>[^"]+)"$')
-def save(frontend, name):
+def save(context, name):
     """
     *musicpd.org, stored playlists section:*
 
