@@ -16,7 +16,7 @@ class CommandListsTest(unittest.TestCase):
 
     def test_command_list_begin(self):
         result = self.dispatcher.handle_request(u'command_list_begin')
-        self.assert_(result is None)
+        self.assertEquals(result, [])
 
     def test_command_list_end(self):
         self.dispatcher.handle_request(u'command_list_begin')
@@ -47,7 +47,7 @@ class CommandListsTest(unittest.TestCase):
 
     def test_command_list_ok_begin(self):
         result = self.dispatcher.handle_request(u'command_list_ok_begin')
-        self.assert_(result is None)
+        self.assertEquals(result, [])
 
     def test_command_list_ok_with_ping(self):
         self.dispatcher.handle_request(u'command_list_ok_begin')

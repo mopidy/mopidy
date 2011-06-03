@@ -32,26 +32,32 @@ class MpdDispatcher(object):
         self.command_list_ok = False
         self.context = MpdContext(self, session=session)
 
-    def handle_request(self, request, command_list_index=None):
+    def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
-        if self.command_list is not False and request != u'command_list_end':
+        if self._is_receiving_command_list(request):
             self.command_list.append(request)
             return None
+
         try:
-            result = self._call_handler(request)
+            try:
+                result = self._call_handler(request)
+            except ActorDeadError as e:
+                logger.warning(u'Tried to communicate with dead actor.')
+                raise MpdSystemError(e.message)
         except MpdAckError as e:
-            if command_list_index is not None:
-                e.index = command_list_index
+            if current_command_list_index is not None:
+                e.index = current_command_list_index
             return self._format_response(e.get_mpd_ack(), add_ok=False)
-        except ActorDeadError as e:
-            logger.warning(u'Tried to communicate with dead actor.')
-            mpd_error = MpdSystemError(e.message)
-            return self._format_response(mpd_error.get_mpd_ack(), add_ok=False)
-        if request in (u'command_list_begin', u'command_list_ok_begin'):
-            return None
-        if command_list_index is not None:
+
+        if (request in (u'command_list_begin', u'command_list_ok_begin')
+                or current_command_list_index is not None):
             return self._format_response(result, add_ok=False)
+
         return self._format_response(result)
+
+    def _is_receiving_command_list(self, request):
+        return (self.command_list is not False
+            and request != u'command_list_end')
 
     def _call_handler(self, request):
         (handler, kwargs) = self._find_handler(request)

@@ -32,9 +32,9 @@ def command_list_end(context):
     (command_list_ok, context.dispatcher.command_list_ok) = (
         context.dispatcher.command_list_ok, False)
     result = []
-    for i, command in enumerate(command_list):
+    for index, command in enumerate(command_list):
         response = context.dispatcher.handle_request(
-            command, command_list_index=i)
+            command, current_command_list_index=index)
         if response is not None:
             result.append(response)
         if response and response[-1].startswith(u'ACK'):
