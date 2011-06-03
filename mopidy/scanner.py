@@ -24,7 +24,7 @@ def translator(data):
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
     _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
 
-    if gst.TAG_DATE in data:
+    if gst.TAG_DATE in data and data[gst.TAG_DATE]:
         date = data[gst.TAG_DATE]
         date = datetime.date(date.year, date.month, date.day)
         track_kwargs['date'] = date
