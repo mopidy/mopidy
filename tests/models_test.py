@@ -1,7 +1,7 @@
 import datetime as dt
 import unittest
 
-from mopidy.models import Artist, Album, Track, Playlist
+from mopidy.models import Artist, Album, CpTrack, Track, Playlist
 
 from tests import SkipTest
 
@@ -272,6 +272,21 @@ class AlbumTest(unittest.TestCase):
             musicbrainz_id='id2')
         self.assertNotEqual(album1, album2)
         self.assertNotEqual(hash(album1), hash(album2))
+
+
+class CpTrackTest(unittest.TestCase):
+    def setUp(self):
+        self.cpid = 123
+        self.track = Track()
+        self.cp_track = CpTrack(self.cpid, self.track)
+
+    def test_cp_track_can_be_accessed_as_a_tuple(self):
+        self.assertEqual(self.cpid, self.cp_track[0])
+        self.assertEqual(self.track, self.cp_track[1])
+
+    def test_cp_track_can_be_accessed_by_attribute_names(self):
+        self.assertEqual(self.cpid, self.cp_track.cpid)
+        self.assertEqual(self.track, self.cp_track.track)
 
 
 class TrackTest(unittest.TestCase):

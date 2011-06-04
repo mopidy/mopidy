@@ -28,9 +28,9 @@ def currentsong(context):
     """
     current_cp_track = context.backend.playback.current_cp_track.get()
     if current_cp_track is not None:
-        return current_cp_track[1].mpd_format(
+        return current_cp_track.track.mpd_format(
             position=context.backend.playback.current_playlist_position.get(),
-            cpid=current_cp_track[0])
+            cpid=current_cp_track.cpid)
 
 @handle_request(r'^idle$')
 @handle_request(r'^idle (?P<subsystems>.+)$')
@@ -171,7 +171,7 @@ def status(context):
 def _status_bitrate(futures):
     current_cp_track = futures['playback.current_cp_track'].get()
     if current_cp_track is not None:
-        return current_cp_track[1].bitrate
+        return current_cp_track.track.bitrate
 
 def _status_consume(futures):
     if futures['playback.consume'].get():
@@ -197,7 +197,7 @@ def _status_single(futures):
 def _status_songid(futures):
     current_cp_track = futures['playback.current_cp_track'].get()
     if current_cp_track is not None:
-        return current_cp_track[0]
+        return current_cp_track.cpid
     else:
         return _status_songpos(futures)
 
@@ -224,10 +224,10 @@ def _status_time_total(futures):
     current_cp_track = futures['playback.current_cp_track'].get()
     if current_cp_track is None:
         return 0
-    elif current_cp_track[1].length is None:
+    elif current_cp_track.track.length is None:
         return 0
     else:
-        return current_cp_track[1].length
+        return current_cp_track.track.length
 
 def _status_volume(futures):
     volume = futures['mixer.volume'].get()

@@ -59,7 +59,7 @@ def addid(context, uri, songpos=None):
         raise MpdArgError(u'Bad song index', command=u'addid')
     cp_track = context.backend.current_playlist.add(track,
         at_position=songpos).get()
-    return ('Id', cp_track[0])
+    return ('Id', cp_track.cpid)
 
 @handle_request(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
 def delete_range(context, start, end=None):
@@ -217,7 +217,7 @@ def playlistid(context, cpid=None):
             cp_track = context.backend.current_playlist.get(cpid=cpid).get()
             position = context.backend.current_playlist.cp_tracks.get().index(
                 cp_track)
-            return cp_track[1].mpd_format(position=position, cpid=cpid)
+            return cp_track.track.mpd_format(position=position, cpid=cpid)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playlistid')
     else:
