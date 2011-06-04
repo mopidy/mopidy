@@ -22,11 +22,11 @@ LINE_TERMINATOR = u'\n'
 #: The MPD protocol version is 0.16.0.
 VERSION = u'0.16.0'
 
-MpdCommand = namedtuple('MpdCommand', ['name'])
+MpdCommand = namedtuple('MpdCommand', ['name', 'auth_required'])
 mpd_commands = set()
 request_handlers = {}
 
-def handle_request(pattern):
+def handle_request(pattern, auth_required=True):
     """
     Decorator for connecting command handlers to command requests.
 
@@ -47,7 +47,8 @@ def handle_request(pattern):
     def decorator(func):
         match = re.search('([a-z_]+)', pattern)
         if match is not None:
-            mpd_commands.add(MpdCommand(name=match.group()))
+            mpd_commands.add(
+                MpdCommand(name=match.group(), auth_required=auth_required))
         if pattern in request_handlers:
             raise ValueError(u'Tried to redefine handler for %s with %s' % (
                 pattern, func))
