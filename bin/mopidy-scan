@@ -4,10 +4,11 @@ import sys
 import logging
 
 from mopidy import settings
-from mopidy.utils.log import setup_console_logging
+from mopidy.utils.log import setup_console_logging, setup_root_logger
 from mopidy.scanner import Scanner, translator
 from mopidy.frontends.mpd.translator import tracks_to_tag_cache_format
 
+setup_root_logger()
 setup_console_logging(2)
 
 tracks = []

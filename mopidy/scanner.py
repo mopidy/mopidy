@@ -77,10 +77,21 @@ class Scanner(object):
         pad.link(target_pad)
 
     def process_tags(self, bus, message):
-        data = message.parse_tag()
-        data = dict([(k, data[k]) for k in data.keys()])
-        data['uri'] = unicode(self.uribin.get_property('uri'))
-        data[gst.TAG_DURATION] = self.get_duration()
+        taglist = message.parse_tag()
+        data = {
+            'uri': unicode(self.uribin.get_property('uri')),
+            gst.TAG_DURATION: self.get_duration(),
+        }
+
+        for key in taglist.keys():
+            # XXX: For some crazy reason some wma files spit out lists here,
+            # not sure if this is due to better data in headers or wma being
+            # stupid. So ugly hack for now :/
+            if type(taglist[key]) is list:
+                data[key] = taglist[key][0]
+            else:
+                data[key] = taglist[key]
+
         try:
             self.data_callback(data)
             self.next_uri()
