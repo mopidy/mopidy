@@ -70,7 +70,10 @@ class MpdDispatcher(object):
     ### Filter: authenticate
 
     def _authenticate_filter(self, request, response, filter_chain):
-        if self.authenticated or settings.MPD_SERVER_PASSWORD is None:
+        if self.authenticated:
+            return self._call_next_filter(request, response, filter_chain)
+        elif  settings.MPD_SERVER_PASSWORD is None:
+            self.authenticated = True
             return self._call_next_filter(request, response, filter_chain)
         else:
             command = request.split(' ')[0]
