@@ -10,23 +10,29 @@ def commands(context):
 
         Shows which commands the current user has access to.
     """
-    # FIXME When password auth is turned on and the client is not
-    # authenticated, 'commands' should list only the commands the client does
-    # have access to. To implement this we need access to the session object to
-    # check if the client is authenticated or not.
-
-    command_names = [command.name for command in mpd_commands]
+    if context.dispatcher.authenticated:
+        command_names = [command.name for command in mpd_commands]
+    else:
+        command_names = [command.name for command in mpd_commands
+            if not command.auth_required]
 
     # No permission to use
-    command_names.remove('kill')
+    if 'kill' in command_names:
+        command_names.remove('kill')
 
     # Not shown by MPD in its command list
-    command_names.remove('command_list_begin')
-    command_names.remove('command_list_ok_begin')
-    command_names.remove('command_list_end')
-    command_names.remove('idle')
-    command_names.remove('noidle')
-    command_names.remove('sticker')
+    if 'command_list_begin' in command_names:
+        command_names.remove('command_list_begin')
+    if 'command_list_ok_begin' in command_names:
+        command_names.remove('command_list_ok_begin')
+    if 'command_list_end' in command_names:
+        command_names.remove('command_list_end')
+    if 'idle' in command_names:
+        command_names.remove('idle')
+    if 'noidle' in command_names:
+        command_names.remove('noidle')
+    if 'sticker' in command_names:
+        command_names.remove('sticker')
 
     return [('command', command_name) for command_name in sorted(command_names)]
 
@@ -58,12 +64,11 @@ def notcommands(context):
 
         Shows which commands the current user does not have access to.
     """
-    # FIXME When password auth is turned on and the client is not
-    # authenticated, 'notcommands' should list all the commands the client does
-    # not have access to. To implement this we need access to the session
-    # object to check if the client is authenticated or not.
-
-    command_names = []
+    if context.dispatcher.authenticated:
+        command_names = []
+    else:
+        command_names = [command.name for command in mpd_commands
+            if command.auth_required]
 
     # No permission to use
     command_names.append('kill')

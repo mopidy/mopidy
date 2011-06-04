@@ -40,6 +40,10 @@ No description yet.
 
   - Do not allow access to the command ``kill``.
 
+  - ``commands`` and ``notcommands`` now have correct output if password
+    authentication is turned on, but the connected user has not been
+    authenticated yet.
+
 
 v0.4.1 (2011-05-06)
 ===================
