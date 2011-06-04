@@ -48,6 +48,15 @@ class MpdDispatcher(object):
         ]
         return self._call_next_filter(request, response, filter_chain)
 
+    def _call_next_filter(self, request, response, filter_chain):
+        if filter_chain:
+            next_filter = filter_chain.pop(0)
+            return next_filter(request, response, filter_chain)
+        else:
+            return response
+
+
+    ### Filter: catch MPD ACK errors
 
     def _catch_mpd_ack_errors_filter(self, request, response, filter_chain):
         try:
@@ -57,6 +66,8 @@ class MpdDispatcher(object):
                 mpd_ack_error.index = self.command_list_index
             return [mpd_ack_error.get_mpd_ack()]
 
+
+    ### Filter: authenticate
 
     def _authenticate_filter(self, request, response, filter_chain):
         if self.authenticated or settings.MPD_SERVER_PASSWORD is None:
@@ -68,6 +79,8 @@ class MpdDispatcher(object):
             else:
                 raise MpdPermissionError(command=command)
 
+
+    ### Filter: command list
 
     def _command_list_filter(self, request, response, filter_chain):
         if self._is_receiving_command_list(request):
@@ -90,6 +103,8 @@ class MpdDispatcher(object):
             and request != u'command_list_end')
 
 
+    ### Filter: add OK
+
     def _add_ok_filter(self, request, response, filter_chain):
         response = self._call_next_filter(request, response, filter_chain)
         if not self._has_error(response):
@@ -99,6 +114,8 @@ class MpdDispatcher(object):
     def _has_error(self, response):
         return response and response[-1].startswith(u'ACK')
 
+
+    ### Filter: call handler
 
     def _call_handler_filter(self, request, response, filter_chain):
         try:
@@ -121,14 +138,6 @@ class MpdDispatcher(object):
         if command in mpd_commands:
             raise MpdArgError(u'incorrect arguments', command=command)
         raise MpdUnknownCommand(command=command)
-
-
-    def _call_next_filter(self, request, response, filter_chain):
-        if filter_chain:
-            next_filter = filter_chain.pop(0)
-            return next_filter(request, response, filter_chain)
-        else:
-            return response
 
     def _format_response(self, response):
         formatted_response = []
