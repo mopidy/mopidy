@@ -52,7 +52,8 @@ class MpdServer(asyncore.dispatcher):
                 self._format_hostname(settings.MPD_SERVER_HOSTNAME),
                 settings.MPD_SERVER_PORT)
         except IOError, e:
-            logger.error(u'MPD server startup failed: %s' % str(e).decode('utf-8'))
+            logger.error(u'MPD server startup failed: %s' %
+                str(e).decode('utf-8'))
             sys.exit(1)
 
     def handle_accept(self):

@@ -1,7 +1,6 @@
 import asynchat
 import logging
 
-from mopidy import settings
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.protocol import ENCODING, LINE_TERMINATOR, VERSION
 from mopidy.utils.log import indent
@@ -46,7 +45,10 @@ class MpdSession(asynchat.async_chat):
         return self.dispatcher.handle_request(request)
 
     def send_response(self, response):
-        """Format a response from the MPD command handlers and send it to the client."""
+        """
+        Format a response from the MPD command handlers and send it to the
+        client.
+        """
         if response is not None:
             response = LINE_TERMINATOR.join(response)
             logger.debug(u'Response to [%s]:%s: %s', self.client_address,

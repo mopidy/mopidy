@@ -36,7 +36,8 @@ def command_list_end(context):
         response = context.dispatcher.handle_request(
             command, current_command_list_index=index)
         command_list_response.extend(response)
-        if command_list_response and command_list_response[-1].startswith(u'ACK'):
+        if (command_list_response and
+                command_list_response[-1].startswith(u'ACK')):
             return command_list_response
         if command_list_ok:
             command_list_response.append(u'list_OK')

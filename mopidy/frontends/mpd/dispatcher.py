@@ -7,7 +7,7 @@ from pykka.registry import ActorRegistry
 from mopidy import settings
 from mopidy.backends.base import Backend
 from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
-    MpdPermissionError, MpdPasswordError, MpdSystemError, MpdUnknownCommand)
+    MpdPermissionError, MpdSystemError, MpdUnknownCommand)
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
 # get them registered as request handlers.
@@ -74,7 +74,8 @@ class MpdDispatcher(object):
             return self._call_next_filter(request, response, filter_chain)
         else:
             command = request.split(' ')[0]
-            if command in ('close', 'commands', 'notcommands', 'password', 'ping'):
+            if command in (
+                    'close', 'commands', 'notcommands', 'password', 'ping'):
                 return self._call_next_filter(request, response, filter_chain)
             else:
                 raise MpdPermissionError(command=command)
@@ -142,7 +143,7 @@ class MpdDispatcher(object):
     def _format_response(self, response):
         formatted_response = []
         for element in self._listify_result(response):
-           formatted_response.extend(self._format_lines(element))
+            formatted_response.extend(self._format_lines(element))
         return formatted_response
 
     def _listify_result(self, result):
