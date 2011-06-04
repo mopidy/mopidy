@@ -92,6 +92,7 @@ class MprisObject(dbus.service.Object):
             # TODO Add track list support
             'HasTrackList': (False, None),
             'Identity': ('Mopidy', None),
+            'DesktopEntry': ('mopidy', None),
             # TODO Return URI schemes supported by backend configuration
             'SupportedUriSchemes': (dbus.Array([], signature='s'), None),
             # TODO Return MIME types supported by local backend if active

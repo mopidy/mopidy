@@ -37,6 +37,10 @@ class RootInterfaceTest(unittest.TestCase):
         result = self.mpris_object.Get(mpris.ROOT_IFACE, 'Identity')
         self.assertEquals('Mopidy', result)
 
+    def test_desktop_entry_is_mopidy(self):
+        result = self.mpris_object.Get(mpris.ROOT_IFACE, 'DesktopEntry')
+        self.assertEquals('mopidy', result)
+
     def test_supported_uri_schemes_is_empty(self):
         result = self.mpris_object.Get(mpris.ROOT_IFACE, 'SupportedUriSchemes')
         self.assertEquals(0, len(result))
