@@ -23,7 +23,10 @@ LINE_TERMINATOR = u'\n'
 VERSION = u'0.16.0'
 
 MpdCommand = namedtuple('MpdCommand', ['name', 'auth_required'])
+
+#: List of all available commands, represented as :class:`MpdCommand` objects.
 mpd_commands = set()
+
 request_handlers = {}
 
 def handle_request(pattern, auth_required=True):
