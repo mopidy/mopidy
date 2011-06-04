@@ -26,9 +26,9 @@ MpdCommand = namedtuple('MpdCommand', ['name'])
 mpd_commands = set()
 request_handlers = {}
 
-def handle_pattern(pattern):
+def handle_request(pattern):
     """
-    Decorator for connecting command handlers to command patterns.
+    Decorator for connecting command handlers to command requests.
 
     If you use named groups in the pattern, the decorated method will get the
     groups as keyword arguments. If the group is optional, remember to give the
@@ -37,7 +37,7 @@ def handle_pattern(pattern):
     For example, if the command is ``do that thing`` the ``what`` argument will
     be ``this thing``::
 
-        @handle_pattern('^do (?P<what>.+)$')
+        @handle_request('^do (?P<what>.+)$')
         def do(what):
             ...
 

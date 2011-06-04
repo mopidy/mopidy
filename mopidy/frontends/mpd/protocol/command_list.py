@@ -1,7 +1,7 @@
-from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdUnknownCommand
 
-@handle_pattern(r'^command_list_begin$')
+@handle_request(r'^command_list_begin$')
 def command_list_begin(context):
     """
     *musicpd.org, command list section:*
@@ -21,7 +21,7 @@ def command_list_begin(context):
     context.dispatcher.command_list = []
     context.dispatcher.command_list_ok = False
 
-@handle_pattern(r'^command_list_end$')
+@handle_request(r'^command_list_end$')
 def command_list_end(context):
     """See :meth:`command_list_begin()`."""
     if context.dispatcher.command_list is False:
@@ -43,7 +43,7 @@ def command_list_end(context):
             command_list_response.append(u'list_OK')
     return command_list_response
 
-@handle_pattern(r'^command_list_ok_begin$')
+@handle_request(r'^command_list_ok_begin$')
 def command_list_ok_begin(context):
     """See :meth:`command_list_begin()`."""
     context.dispatcher.command_list = []

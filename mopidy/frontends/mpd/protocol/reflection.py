@@ -1,7 +1,7 @@
-from mopidy.frontends.mpd.protocol import handle_pattern, mpd_commands
+from mopidy.frontends.mpd.protocol import handle_request, mpd_commands
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
-@handle_pattern(r'^commands$')
+@handle_request(r'^commands$')
 def commands(context):
     """
     *musicpd.org, reflection section:*
@@ -30,7 +30,7 @@ def commands(context):
 
     return [('command', command_name) for command_name in sorted(command_names)]
 
-@handle_pattern(r'^decoders$')
+@handle_request(r'^decoders$')
 def decoders(context):
     """
     *musicpd.org, reflection section:*
@@ -49,7 +49,7 @@ def decoders(context):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^notcommands$')
+@handle_request(r'^notcommands$')
 def notcommands(context):
     """
     *musicpd.org, reflection section:*
@@ -70,7 +70,7 @@ def notcommands(context):
 
     return [('command', command_name) for command_name in sorted(command_names)]
 
-@handle_pattern(r'^tagtypes$')
+@handle_request(r'^tagtypes$')
 def tagtypes(context):
     """
     *musicpd.org, reflection section:*
@@ -81,7 +81,7 @@ def tagtypes(context):
     """
     pass # TODO
 
-@handle_pattern(r'^urlhandlers$')
+@handle_request(r'^urlhandlers$')
 def urlhandlers(context):
     """
     *musicpd.org, reflection section:*

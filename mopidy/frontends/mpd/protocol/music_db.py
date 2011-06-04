@@ -1,7 +1,7 @@
 import re
 import shlex
 
-from mopidy.frontends.mpd.protocol import handle_pattern, stored_playlists
+from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 
 def _build_query(mpd_query):
@@ -28,7 +28,7 @@ def _build_query(mpd_query):
             query[field] = [what]
     return query
 
-@handle_pattern(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
+@handle_request(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
 def count(context, tag, needle):
     """
     *musicpd.org, music database section:*
@@ -40,7 +40,7 @@ def count(context, tag, needle):
     """
     return [('songs', 0), ('playtime', 0)] # TODO
 
-@handle_pattern(r'^find '
+@handle_request(r'^find '
      r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
      r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def find(context, mpd_query):
@@ -70,7 +70,7 @@ def find(context, mpd_query):
     query = _build_query(mpd_query)
     return context.backend.library.find_exact(**query).get().mpd_format()
 
-@handle_pattern(r'^findadd '
+@handle_request(r'^findadd '
      r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? '
      '"[^"]+"\s?)+)$')
 def findadd(context, query):
@@ -86,7 +86,7 @@ def findadd(context, query):
     # TODO Add result to current playlist
     #result = context.find(query)
 
-@handle_pattern(r'^list "?(?P<field>([Aa]rtist|[Aa]lbum|[Dd]ate|[Gg]enre))"?'
+@handle_request(r'^list "?(?P<field>([Aa]rtist|[Aa]lbum|[Dd]ate|[Gg]enre))"?'
     '( (?P<mpd_query>.*))?$')
 def list_(context, field, mpd_query=None):
     """
@@ -237,7 +237,7 @@ def _list_date(context, query):
             dates.add((u'Date', track.date.strftime('%Y-%m-%d')))
     return dates
 
-@handle_pattern(r'^listall "(?P<uri>[^"]+)"')
+@handle_request(r'^listall "(?P<uri>[^"]+)"')
 def listall(context, uri):
     """
     *musicpd.org, music database section:*
@@ -248,7 +248,7 @@ def listall(context, uri):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^listallinfo "(?P<uri>[^"]+)"')
+@handle_request(r'^listallinfo "(?P<uri>[^"]+)"')
 def listallinfo(context, uri):
     """
     *musicpd.org, music database section:*
@@ -260,8 +260,8 @@ def listallinfo(context, uri):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^lsinfo$')
-@handle_pattern(r'^lsinfo "(?P<uri>[^"]*)"$')
+@handle_request(r'^lsinfo$')
+@handle_request(r'^lsinfo "(?P<uri>[^"]*)"$')
 def lsinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -282,7 +282,7 @@ def lsinfo(context, uri=None):
         return stored_playlists.listplaylists(context)
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^rescan( "(?P<uri>[^"]+)")*$')
+@handle_request(r'^rescan( "(?P<uri>[^"]+)")*$')
 def rescan(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -293,7 +293,7 @@ def rescan(context, uri=None):
     """
     return update(context, uri, rescan_unmodified_files=True)
 
-@handle_pattern(r'^search '
+@handle_request(r'^search '
      r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
      r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def search(context, mpd_query):
@@ -326,7 +326,7 @@ def search(context, mpd_query):
     query = _build_query(mpd_query)
     return context.backend.library.search(**query).get().mpd_format()
 
-@handle_pattern(r'^update( "(?P<uri>[^"]+)")*$')
+@handle_request(r'^update( "(?P<uri>[^"]+)")*$')
 def update(context, uri=None, rescan_unmodified_files=False):
     """
     *musicpd.org, music database section:*

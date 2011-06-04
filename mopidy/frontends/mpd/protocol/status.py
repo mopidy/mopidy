@@ -1,8 +1,8 @@
 from mopidy.backends.base import PlaybackController
-from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
-@handle_pattern(r'^clearerror$')
+@handle_request(r'^clearerror$')
 def clearerror(context):
     """
     *musicpd.org, status section:*
@@ -14,7 +14,7 @@ def clearerror(context):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^currentsong$')
+@handle_request(r'^currentsong$')
 def currentsong(context):
     """
     *musicpd.org, status section:*
@@ -30,8 +30,8 @@ def currentsong(context):
             position=context.backend.playback.current_playlist_position.get(),
             cpid=current_cp_track[0])
 
-@handle_pattern(r'^idle$')
-@handle_pattern(r'^idle (?P<subsystems>.+)$')
+@handle_request(r'^idle$')
+@handle_request(r'^idle (?P<subsystems>.+)$')
 def idle(context, subsystems=None):
     """
     *musicpd.org, status section:*
@@ -67,12 +67,12 @@ def idle(context, subsystems=None):
     """
     pass # TODO
 
-@handle_pattern(r'^noidle$')
+@handle_request(r'^noidle$')
 def noidle(context):
     """See :meth:`_status_idle`."""
     pass # TODO
 
-@handle_pattern(r'^stats$')
+@handle_request(r'^stats$')
 def stats(context):
     """
     *musicpd.org, status section:*
@@ -98,7 +98,7 @@ def stats(context):
         'playtime': 0, # TODO
     }
 
-@handle_pattern(r'^status$')
+@handle_request(r'^status$')
 def status(context):
     """
     *musicpd.org, status section:*

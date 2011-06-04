@@ -3,7 +3,7 @@ import unittest
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.exceptions import MpdAckError
-from mopidy.frontends.mpd.protocol import request_handlers, handle_pattern
+from mopidy.frontends.mpd.protocol import request_handlers, handle_request
 from mopidy.mixers.dummy import DummyMixer
 
 class MpdDispatcherTest(unittest.TestCase):
@@ -19,8 +19,8 @@ class MpdDispatcherTest(unittest.TestCase):
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
         try:
-            handle_pattern('a pattern')(func)
-            handle_pattern('a pattern')(func)
+            handle_request('a pattern')(func)
+            handle_request('a pattern')(func)
             self.fail('Registering a pattern twice shoulde raise ValueError')
         except ValueError:
             pass
