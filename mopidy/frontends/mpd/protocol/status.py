@@ -1,3 +1,5 @@
+import pykka.future
+
 from mopidy.backends.base import PlaybackController
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
@@ -130,65 +132,80 @@ def status(context):
         - ``updatings_db``: job id
         - ``error``: if there is an error, returns message here
     """
+    futures = {
+        'current_playlist.tracks': context.backend.current_playlist.tracks,
+        'current_playlist.version': context.backend.current_playlist.version,
+        'mixer.volume': context.mixer.volume,
+        'playback.consume': context.backend.playback.consume,
+        'playback.random': context.backend.playback.random,
+        'playback.repeat': context.backend.playback.repeat,
+        'playback.single': context.backend.playback.single,
+        'playback.state': context.backend.playback.state,
+        'playback.current_cp_track': context.backend.playback.current_cp_track,
+        'playback.current_playlist_position':
+            context.backend.playback.current_playlist_position,
+        'playback.time_position': context.backend.playback.time_position,
+    }
+    pykka.future.get_all(futures.values())
     result = [
-        ('volume', _status_volume(context)),
-        ('repeat', _status_repeat(context)),
-        ('random', _status_random(context)),
-        ('single', _status_single(context)),
-        ('consume', _status_consume(context)),
-        ('playlist', _status_playlist_version(context)),
-        ('playlistlength', _status_playlist_length(context)),
-        ('xfade', _status_xfade(context)),
-        ('state', _status_state(context)),
+        ('volume', _status_volume(futures)),
+        ('repeat', _status_repeat(futures)),
+        ('random', _status_random(futures)),
+        ('single', _status_single(futures)),
+        ('consume', _status_consume(futures)),
+        ('playlist', _status_playlist_version(futures)),
+        ('playlistlength', _status_playlist_length(futures)),
+        ('xfade', _status_xfade(futures)),
+        ('state', _status_state(futures)),
     ]
-    if context.backend.playback.current_track.get() is not None:
-        result.append(('song', _status_songpos(context)))
-        result.append(('songid', _status_songid(context)))
-    if context.backend.playback.state.get() in (PlaybackController.PLAYING,
+    if futures['playback.current_cp_track'].get() is not None:
+        result.append(('song', _status_songpos(futures)))
+        result.append(('songid', _status_songid(futures)))
+    if futures['playback.state'].get() in (PlaybackController.PLAYING,
             PlaybackController.PAUSED):
-        result.append(('time', _status_time(context)))
-        result.append(('elapsed', _status_time_elapsed(context)))
-        result.append(('bitrate', _status_bitrate(context)))
+        result.append(('time', _status_time(futures)))
+        result.append(('elapsed', _status_time_elapsed(futures)))
+        result.append(('bitrate', _status_bitrate(futures)))
     return result
 
-def _status_bitrate(context):
-    current_track = context.backend.playback.current_track.get()
-    if current_track is not None:
-        return current_track.bitrate
+def _status_bitrate(futures):
+    current_cp_track = futures['playback.current_cp_track'].get()
+    if current_cp_track is not None:
+        return current_cp_track[1].bitrate
 
-def _status_consume(context):
-    if context.backend.playback.consume.get():
+def _status_consume(futures):
+    if futures['playback.consume'].get():
         return 1
     else:
         return 0
 
-def _status_playlist_length(context):
-    return len(context.backend.current_playlist.tracks.get())
+def _status_playlist_length(futures):
+    return len(futures['current_playlist.tracks'].get())
 
-def _status_playlist_version(context):
-    return context.backend.current_playlist.version.get()
+def _status_playlist_version(futures):
+    return futures['current_playlist.version'].get()
 
-def _status_random(context):
-    return int(context.backend.playback.random.get())
+def _status_random(futures):
+    return int(futures['playback.random'].get())
 
-def _status_repeat(context):
-    return int(context.backend.playback.repeat.get())
+def _status_repeat(futures):
+    return int(futures['playback.repeat'].get())
 
-def _status_single(context):
-    return int(context.backend.playback.single.get())
+def _status_single(futures):
+    return int(futures['playback.single'].get())
 
-def _status_songid(context):
-    current_cpid = context.backend.playback.current_cpid.get()
-    if current_cpid is not None:
-        return current_cpid
+def _status_songid(futures):
+    current_cp_track = futures['playback.current_cp_track'].get()
+    if current_cp_track is not None:
+        return current_cp_track[0]
     else:
-        return _status_songpos(context)
+        return _status_songpos(futures)
 
-def _status_songpos(context):
-    return context.backend.playback.current_playlist_position.get()
+def _status_songpos(futures):
+    return futures['playback.current_playlist_position'].get()
 
-def _status_state(context):
-    state = context.backend.playback.state.get()
+def _status_state(futures):
+    state = futures['playback.state'].get()
     if state == PlaybackController.PLAYING:
         return u'play'
     elif state == PlaybackController.STOPPED:
@@ -196,28 +213,28 @@ def _status_state(context):
     elif state == PlaybackController.PAUSED:
         return u'pause'
 
-def _status_time(context):
-    return u'%s:%s' % (_status_time_elapsed(context) // 1000,
-        _status_time_total(context) // 1000)
+def _status_time(futures):
+    return u'%s:%s' % (_status_time_elapsed(futures) // 1000,
+        _status_time_total(futures) // 1000)
 
-def _status_time_elapsed(context):
-    return context.backend.playback.time_position.get()
+def _status_time_elapsed(futures):
+    return futures['playback.time_position'].get()
 
-def _status_time_total(context):
-    current_track = context.backend.playback.current_track.get()
-    if current_track is None:
+def _status_time_total(futures):
+    current_cp_track = futures['playback.current_cp_track'].get()
+    if current_cp_track is None:
         return 0
-    elif current_track.length is None:
+    elif current_cp_track[1].length is None:
         return 0
     else:
-        return current_track.length
+        return current_cp_track[1].length
 
-def _status_volume(context):
-    volume = context.mixer.volume.get()
+def _status_volume(futures):
+    volume = futures['mixer.volume'].get()
     if volume is not None:
         return volume
     else:
         return 0
 
-def _status_xfade(context):
-    return 0 # TODO
+def _status_xfade(futures):
+    return 0 # Not supported
