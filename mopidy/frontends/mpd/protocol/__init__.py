@@ -10,6 +10,7 @@ implement our own MPD server which is compatible with the numerous existing
 `MPD clients <http://mpd.wikia.com/wiki/Clients>`_.
 """
 
+from collections import namedtuple
 import re
 
 #: The MPD protocol uses UTF-8 for encoding all data.
@@ -21,6 +22,7 @@ LINE_TERMINATOR = u'\n'
 #: The MPD protocol version is 0.16.0.
 VERSION = u'0.16.0'
 
+MpdCommand = namedtuple('MpdCommand', ['name'])
 mpd_commands = set()
 request_handlers = {}
 
@@ -45,7 +47,7 @@ def handle_pattern(pattern):
     def decorator(func):
         match = re.search('([a-z_]+)', pattern)
         if match is not None:
-            mpd_commands.add(match.group())
+            mpd_commands.add(MpdCommand(name=match.group()))
         if pattern in request_handlers:
             raise ValueError(u'Tried to redefine handler for %s with %s' % (
                 pattern, func))

@@ -15,20 +15,20 @@ def commands(context):
     # have access to. To implement this we need access to the session object to
     # check if the client is authenticated or not.
 
-    sorted_commands = sorted(list(mpd_commands))
+    command_names = [command.name for command in mpd_commands]
 
     # No permission to use
-    sorted_commands.remove('kill')
+    command_names.remove('kill')
 
     # Not shown by MPD in its command list
-    sorted_commands.remove('command_list_begin')
-    sorted_commands.remove('command_list_ok_begin')
-    sorted_commands.remove('command_list_end')
-    sorted_commands.remove('idle')
-    sorted_commands.remove('noidle')
-    sorted_commands.remove('sticker')
+    command_names.remove('command_list_begin')
+    command_names.remove('command_list_ok_begin')
+    command_names.remove('command_list_end')
+    command_names.remove('idle')
+    command_names.remove('noidle')
+    command_names.remove('sticker')
 
-    return [('command', c) for c in sorted_commands]
+    return [('command', command_name) for command_name in sorted(command_names)]
 
 @handle_pattern(r'^decoders$')
 def decoders(context):
@@ -63,12 +63,12 @@ def notcommands(context):
     # not have access to. To implement this we need access to the session
     # object to check if the client is authenticated or not.
 
-    commands = []
+    command_names = []
 
     # No permission to use
-    commands.append('kill')
+    command_names.append('kill')
 
-    return [('command', c) for c in sorted(commands)]
+    return [('command', command_name) for command_name in sorted(command_names)]
 
 @handle_pattern(r'^tagtypes$')
 def tagtypes(context):

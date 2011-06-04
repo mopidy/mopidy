@@ -135,10 +135,10 @@ class MpdDispatcher(object):
             matches = re.match(pattern, request)
             if matches is not None:
                 return (request_handlers[pattern], matches.groupdict())
-        command = request.split(' ')[0]
-        if command in mpd_commands:
-            raise MpdArgError(u'incorrect arguments', command=command)
-        raise MpdUnknownCommand(command=command)
+        command_name = request.split(' ')[0]
+        if command_name in [command.name for command in mpd_commands]:
+            raise MpdArgError(u'incorrect arguments', command=command_name)
+        raise MpdUnknownCommand(command=command_name)
 
     def _format_response(self, response):
         formatted_response = []
