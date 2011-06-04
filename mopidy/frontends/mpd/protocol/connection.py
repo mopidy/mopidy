@@ -3,7 +3,7 @@ from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import (MpdPasswordError,
     MpdPermissionError)
 
-@handle_request(r'^close$')
+@handle_request(r'^close$', auth_required=False)
 def close(context):
     """
     *musicpd.org, connection section:*
@@ -25,7 +25,7 @@ def kill(context):
     """
     raise MpdPermissionError(command=u'kill')
 
-@handle_request(r'^password "(?P<password>[^"]+)"$')
+@handle_request(r'^password "(?P<password>[^"]+)"$', auth_required=False)
 def password_(context, password):
     """
     *musicpd.org, connection section:*
@@ -40,7 +40,7 @@ def password_(context, password):
     else:
         raise MpdPasswordError(u'incorrect password', command=u'password')
 
-@handle_request(r'^ping$')
+@handle_request(r'^ping$', auth_required=False)
 def ping(context):
     """
     *musicpd.org, connection section:*

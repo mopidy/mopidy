@@ -76,12 +76,14 @@ class MpdDispatcher(object):
             self.authenticated = True
             return self._call_next_filter(request, response, filter_chain)
         else:
-            command = request.split(' ')[0]
-            if command in (
-                    'close', 'commands', 'notcommands', 'password', 'ping'):
+            command_name = request.split(' ')[0]
+            command_names_not_requiring_auth = [
+                command.name for command in mpd_commands
+                if not command.auth_required]
+            if command_name in command_names_not_requiring_auth:
                 return self._call_next_filter(request, response, filter_chain)
             else:
-                raise MpdPermissionError(command=command)
+                raise MpdPermissionError(command=command_name)
 
 
     ### Filter: command list

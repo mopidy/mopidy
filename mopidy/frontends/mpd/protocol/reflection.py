@@ -1,7 +1,7 @@
 from mopidy.frontends.mpd.protocol import handle_request, mpd_commands
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
-@handle_request(r'^commands$')
+@handle_request(r'^commands$', auth_required=False)
 def commands(context):
     """
     *musicpd.org, reflection section:*
@@ -49,7 +49,7 @@ def decoders(context):
     """
     raise MpdNotImplemented # TODO
 
-@handle_request(r'^notcommands$')
+@handle_request(r'^notcommands$', auth_required=False)
 def notcommands(context):
     """
     *musicpd.org, reflection section:*
