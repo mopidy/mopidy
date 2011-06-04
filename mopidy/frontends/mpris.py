@@ -155,7 +155,7 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
         in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
-        logger.debug(u'%s.Get called', dbus.dbus.PROPERTIES_IFACE)
+        logger.debug(u'%s.Get called', dbus.PROPERTIES_IFACE)
         getter, setter = self.properties[interface][prop]
         return getter() if callable(getter) else getter
 
