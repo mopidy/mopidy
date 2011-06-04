@@ -35,10 +35,9 @@ def password_(context, password):
         This is used for authentication with the server. ``PASSWORD`` is
         simply the plaintext password.
     """
-    # You will not get to this code without being authenticated. This is for
-    # when you are already authenticated, and are sending additional 'password'
-    # requests.
-    if settings.MPD_SERVER_PASSWORD != password:
+    if password == settings.MPD_SERVER_PASSWORD:
+        context.dispatcher.authenticated = True
+    else:
         raise MpdPasswordError(u'incorrect password', command=u'password')
 
 @handle_pattern(r'^ping$')

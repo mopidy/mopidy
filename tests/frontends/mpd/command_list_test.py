@@ -43,6 +43,7 @@ class CommandListsTest(unittest.TestCase):
         self.dispatcher.handle_request(u'play') # Known command
         self.dispatcher.handle_request(u'paly') # Unknown command
         result = self.dispatcher.handle_request(u'command_list_end')
+        self.assertEqual(len(result), 1, result)
         self.assertEqual(result[0], u'ACK [5@1] {} unknown command "paly"')
 
     def test_command_list_ok_begin(self):

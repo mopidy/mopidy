@@ -28,7 +28,7 @@ class AuthenticationTest(unittest.TestCase):
     def test_authentication_with_anything_when_password_check_turned_off(self):
         settings.MPD_SERVER_PASSWORD = None
         response = self.dispatcher.handle_request(u'any request at all')
-        self.assertTrue(self.dispatcher.authenticated)
+        self.assertFalse(self.dispatcher.authenticated)
         self.assert_('ACK [5@0] {} unknown command "any"' in response)
 
     def test_anything_when_not_authenticated_should_fail(self):

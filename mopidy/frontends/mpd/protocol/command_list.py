@@ -31,17 +31,16 @@ def command_list_end(context):
         context.dispatcher.command_list, False)
     (command_list_ok, context.dispatcher.command_list_ok) = (
         context.dispatcher.command_list_ok, False)
-    result = []
+    command_list_response = []
     for index, command in enumerate(command_list):
         response = context.dispatcher.handle_request(
             command, current_command_list_index=index)
-        if response is not None:
-            result.append(response)
-        if response and response[-1].startswith(u'ACK'):
-            return result
+        command_list_response.extend(response)
+        if command_list_response and command_list_response[-1].startswith(u'ACK'):
+            return command_list_response
         if command_list_ok:
-            response.append(u'list_OK')
-    return result
+            command_list_response.append(u'list_OK')
+    return command_list_response
 
 @handle_pattern(r'^command_list_ok_begin$')
 def command_list_ok_begin(context):
