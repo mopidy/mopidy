@@ -131,17 +131,26 @@ class MprisObject(dbus.service.Object):
     }
 
     def __init__(self):
-        backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        self.backend = backend_refs[0].proxy()
+        self._backend = None
+        bus_name = self._connect_to_dbus()
+        super(MprisObject, self).__init__(bus_name, OBJECT_PATH)
 
+    def _connect_to_dbus(self):
         logger.debug(u'Connecting to D-Bus...')
         bus_name = dbus.service.BusName(BUS_NAME, dbus.SessionBus())
-        super(MprisObject, self).__init__(bus_name, OBJECT_PATH)
         logger.info(u'Connected to D-Bus')
+        return bus_name
+
+    @property
+    def backend(self):
+        if self._backend is None:
+            backend_refs = ActorRegistry.get_by_class(Backend)
+            assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+            self._backend = backend_refs[0].proxy()
+        return self._backend
 
 
-    ### Property interface
+    ### Properties interface
 
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
         in_signature='ss', out_signature='v')
@@ -214,8 +223,7 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Next(self):
         logger.debug(u'%s.Next called', PLAYER_IFACE)
-        # TODO call playback.next(), keep playback.state unchanged
-        # XXX Proof of concept only. Throw away, write tests.
+        # TODO keep playback.state unchanged
         self.backend.playback.next().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
@@ -232,7 +240,6 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Pause(self):
         logger.debug(u'%s.Pause called', PLAYER_IFACE)
-        # XXX Proof of concept only. Throw away, write tests.
         self.backend.playback.pause().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
@@ -258,9 +265,7 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Previous(self):
         logger.debug(u'%s.Previous called', PLAYER_IFACE)
-
-        # TODO call playback.previous(), keep playback.state unchanged
-        # XXX Proof of concept only. Throw away, write tests, reimplement:
+        # TODO keep playback.state unchanged
         self.backend.playback.previous().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
@@ -287,10 +292,10 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Stop(self):
         logger.debug(u'%s.Stop called', PLAYER_IFACE)
-        # TODO call playback.stop()
-        pass
+        self.backend.playback.stop().get()
 
     @dbus.service.signal(dbus_interface=PLAYER_IFACE, signature='x')
     def Seeked(self, position):
         logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
+        # TODO What should we do here?
         pass
