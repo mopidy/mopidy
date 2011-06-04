@@ -60,7 +60,7 @@ class MpdServer(asyncore.dispatcher):
         (client_socket, client_socket_address) = self.accept()
         logger.info(u'MPD client connection from [%s]:%s',
             client_socket_address[0], client_socket_address[1])
-        MpdSession(self, client_socket, client_socket_address).start()
+        MpdSession(self, client_socket, client_socket_address)
 
     def handle_close(self):
         """Handle end of client connection."""

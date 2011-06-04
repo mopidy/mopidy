@@ -23,9 +23,6 @@ class MpdSession(asynchat.async_chat):
         self.authenticated = False
         self.set_terminator(LINE_TERMINATOR.encode(ENCODING))
         self.dispatcher = MpdDispatcher(session=self)
-
-    def start(self):
-        """Called by asynchat when a new client connects."""
         self.send_response([u'OK MPD %s' % VERSION])
 
     def collect_incoming_data(self, data):
