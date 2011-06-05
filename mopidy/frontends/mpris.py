@@ -206,7 +206,7 @@ class MprisObject(dbus.service.Object):
         pass
 
 
-    ### Root interface
+    ### Root interface methods
 
     @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Raise(self):
@@ -228,7 +228,91 @@ class MprisObject(dbus.service.Object):
         ActorRegistry.stop_all()
 
 
-    ### Player interface
+    ### Player interface methods
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def Next(self):
+        logger.debug(u'%s.Next called', PLAYER_IFACE)
+        self.backend.playback.next().get()
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def Previous(self):
+        logger.debug(u'%s.Previous called', PLAYER_IFACE)
+        self.backend.playback.previous().get()
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def Pause(self):
+        logger.debug(u'%s.Pause called', PLAYER_IFACE)
+        self.backend.playback.pause().get()
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def PlayPause(self):
+        logger.debug(u'%s.PlayPause called', PLAYER_IFACE)
+
+        # TODO Pseudo code:
+        # if playback.state == playback.PLAYING: playback.pause()
+        # elif playback.state == playback.PAUSED: playback.resume()
+        # elif playback.state == playback.STOPPED: playback.play()
+
+        # XXX Proof of concept only. Throw away, write tests, reimplement:
+        self.backend.playback.pause().get()
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def Stop(self):
+        logger.debug(u'%s.Stop called', PLAYER_IFACE)
+        self.backend.playback.stop().get()
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def Play(self):
+        logger.debug(u'%s.Play called', PLAYER_IFACE)
+        # TODO Pseudo code:
+        # if playback.state == playback.PAUSED: playback.resume()
+        # elif playback.state == playback.STOPPED: playback.play()
+        pass
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def Seek(self, offset):
+        logger.debug(u'%s.Seek called', PLAYER_IFACE)
+        # TODO Pseudo code:
+        # new_position = playback.time_position + offset
+        # if new_position > playback.current_track.length:
+        #     playback.next()
+        #     return
+        # if new_position < 0: new_position = 0
+        # playback.seek(new_position)
+        pass
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def SetPosition(self, track_id, position):
+        logger.debug(u'%s.SetPosition called', PLAYER_IFACE)
+        # TODO Pseudo code:
+        # if track_id != playback.current_track.track_id: return
+        # if not 0 <= position <= playback.current_track.length: return
+        # playback.seek(position)
+        pass
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def OpenUri(self, uri):
+        logger.debug(u'%s.OpenUri called', PLAYER_IFACE)
+        # TODO Pseudo code:
+        # if uri.scheme not in SupportedUriSchemes: return
+        # if uri.mime_type not in SupportedMimeTypes: return
+        # track = library.lookup(uri)
+        # cp_track = current_playlist.add(track)
+        # playback.play(cp_track)
+        pass
+
+
+    ### Player interface signals
+
+    @dbus.service.signal(dbus_interface=PLAYER_IFACE, signature='x')
+    def Seeked(self, position):
+        logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
+        # TODO What should we do here?
+        pass
+
+
+    ### Player interface properties
 
     def get_PlaybackStatus(self):
         state = self.backend.playback.state.get()
@@ -260,81 +344,3 @@ class MprisObject(dbus.service.Object):
         elif value == 'Playlist':
             self.backend.playback.repeat = True
             self.backend.playback.single = False
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def Next(self):
-        logger.debug(u'%s.Next called', PLAYER_IFACE)
-        self.backend.playback.next().get()
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def Previous(self):
-        logger.debug(u'%s.Previous called', PLAYER_IFACE)
-        self.backend.playback.previous().get()
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def OpenUri(self, uri):
-        logger.debug(u'%s.OpenUri called', PLAYER_IFACE)
-        # TODO Pseudo code:
-        # if uri.scheme not in SupportedUriSchemes: return
-        # if uri.mime_type not in SupportedMimeTypes: return
-        # track = library.lookup(uri)
-        # cp_track = current_playlist.add(track)
-        # playback.play(cp_track)
-        pass
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def Pause(self):
-        logger.debug(u'%s.Pause called', PLAYER_IFACE)
-        self.backend.playback.pause().get()
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def Play(self):
-        logger.debug(u'%s.Play called', PLAYER_IFACE)
-        # TODO Pseudo code:
-        # if playback.state == playback.PAUSED: playback.resume()
-        # elif playback.state == playback.STOPPED: playback.play()
-        pass
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def PlayPause(self):
-        logger.debug(u'%s.PlayPause called', PLAYER_IFACE)
-
-        # TODO Pseudo code:
-        # if playback.state == playback.PLAYING: playback.pause()
-        # elif playback.state == playback.PAUSED: playback.resume()
-        # elif playback.state == playback.STOPPED: playback.play()
-
-        # XXX Proof of concept only. Throw away, write tests, reimplement:
-        self.backend.playback.pause().get()
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def Seek(self, offset):
-        logger.debug(u'%s.Seek called', PLAYER_IFACE)
-        # TODO Pseudo code:
-        # new_position = playback.time_position + offset
-        # if new_position > playback.current_track.length:
-        #     playback.next()
-        #     return
-        # if new_position < 0: new_position = 0
-        # playback.seek(new_position)
-        pass
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def SetPosition(self, track_id, position):
-        logger.debug(u'%s.SetPosition called', PLAYER_IFACE)
-        # TODO Pseudo code:
-        # if track_id != playback.current_track.track_id: return
-        # if not 0 <= position <= playback.current_track.length: return
-        # playback.seek(position)
-        pass
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def Stop(self):
-        logger.debug(u'%s.Stop called', PLAYER_IFACE)
-        self.backend.playback.stop().get()
-
-    @dbus.service.signal(dbus_interface=PLAYER_IFACE, signature='x')
-    def Seeked(self, position):
-        logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
-        # TODO What should we do here?
-        pass
