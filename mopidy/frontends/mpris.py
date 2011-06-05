@@ -264,7 +264,6 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Next(self):
         logger.debug(u'%s.Next called', PLAYER_IFACE)
-        # TODO keep playback.state unchanged
         self.backend.playback.next().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
