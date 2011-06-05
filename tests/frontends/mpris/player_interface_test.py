@@ -30,6 +30,24 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris_object.Get(mpris.PLAYER_IFACE, 'PlaybackStatus')
         self.assertEqual('Stopped', result)
 
+    def test_loop_status_is_none_when_not_looping(self):
+        self.backend.playback.repeat.get.return_value = False
+        self.backend.playback.single.get.return_value = False
+        result = self.mpris_object.Get(mpris.PLAYER_IFACE, 'LoopStatus')
+        self.assertEqual('None', result)
+
+    def test_loop_status_is_track_when_looping_a_single_track(self):
+        self.backend.playback.repeat.get.return_value = True
+        self.backend.playback.single.get.return_value = True
+        result = self.mpris_object.Get(mpris.PLAYER_IFACE, 'LoopStatus')
+        self.assertEqual('Track', result)
+
+    def test_loop_status_is_playlist_when_looping_the_current_playlist(self):
+        self.backend.playback.repeat.get.return_value = True
+        self.backend.playback.single.get.return_value = False
+        result = self.mpris_object.Get(mpris.PLAYER_IFACE, 'LoopStatus')
+        self.assertEqual('Playlist', result)
+
     def test_next_should_call_next_on_backend(self):
         self.mpris_object.Next()
         self.assert_(self.backend.playback.next.called)
