@@ -109,13 +109,6 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.current_track.get().uri, 'b')
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
 
-    def test_pause_when_playing_should_pause_playback(self):
-        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
-        self.backend.playback.play()
-        self.assertEquals(self.backend.playback.state.get(), PLAYING)
-        self.mpris.Pause()
-        self.assertEquals(self.backend.playback.state.get(), PAUSED)
-
     def test_previous_when_playing_should_skip_to_prev_track_and_keep_playing(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
@@ -125,6 +118,43 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Previous()
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
+    def test_previous_when_at_start_of_list_should_stop_playback(self):
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.mpris.Previous()
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
+
+    def test_previous_when_paused_should_skip_to_previous_track_and_stay_paused(self):
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.backend.playback.next()
+        self.backend.playback.pause()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'b')
+        self.assertEquals(self.backend.playback.state.get(), PAUSED)
+        self.mpris.Previous()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+        self.assertEquals(self.backend.playback.state.get(), PAUSED)
+
+    def test_previous_when_stopped_should_skip_to_previous_track_and_stay_stopped(self):
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.backend.playback.next()
+        self.backend.playback.stop()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'b')
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
+        self.mpris.Previous()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
+
+    def test_pause_when_playing_should_pause_playback(self):
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.mpris.Pause()
+        self.assertEquals(self.backend.playback.state.get(), PAUSED)
 
     def test_stop_when_playing_should_stop_playback(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])

@@ -267,6 +267,11 @@ class MprisObject(dbus.service.Object):
         self.backend.playback.next().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
+    def Previous(self):
+        logger.debug(u'%s.Previous called', PLAYER_IFACE)
+        self.backend.playback.previous().get()
+
+    @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def OpenUri(self, uri):
         logger.debug(u'%s.OpenUri called', PLAYER_IFACE)
         # TODO Pseudo code:
@@ -301,12 +306,6 @@ class MprisObject(dbus.service.Object):
 
         # XXX Proof of concept only. Throw away, write tests, reimplement:
         self.backend.playback.pause().get()
-
-    @dbus.service.method(dbus_interface=PLAYER_IFACE)
-    def Previous(self):
-        logger.debug(u'%s.Previous called', PLAYER_IFACE)
-        # TODO keep playback.state unchanged
-        self.backend.playback.previous().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Seek(self, offset):
