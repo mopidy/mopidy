@@ -13,6 +13,7 @@ from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
 from mopidy.backends.base import Backend
+from mopidy.backends.base.playback import PlaybackController
 from mopidy.frontends.base import BaseFrontend
 
 logger = logging.getLogger('mopidy.frontends.mpris')
@@ -85,8 +86,19 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
 class MprisObject(dbus.service.Object):
     """Implements http://www.mpris.org/2.0/spec/"""
 
-    properties = {
-        ROOT_IFACE: {
+    properties = None
+
+    def __init__(self):
+        self._backend = None
+        self.properties = {
+            ROOT_IFACE: self._get_root_iface_properties(),
+            PLAYER_IFACE: self._get_player_iface_properties(),
+        }
+        bus_name = self._connect_to_dbus()
+        super(MprisObject, self).__init__(bus_name, OBJECT_PATH)
+
+    def _get_root_iface_properties(self):
+        return {
             'CanQuit': (True, None),
             'CanRaise': (False, None),
             # TODO Add track list support
@@ -97,10 +109,11 @@ class MprisObject(dbus.service.Object):
             'SupportedUriSchemes': (dbus.Array([], signature='s'), None),
             # TODO Return MIME types supported by local backend if active
             'SupportedMimeTypes': (dbus.Array([], signature='s'), None),
-        },
-        PLAYER_IFACE: {
-            # TODO Get backend.playback.state
-            'PlaybackStatus': ('Stopped', None),
+        }
+
+    def _get_player_iface_properties(self):
+        return {
+            'PlaybackStatus': (self.get_PlaybackStatus, None),
             # TODO Get/set loop status
             'LoopStatus': ('None', None),
             'Rate': (1.0, None),
@@ -128,13 +141,7 @@ class MprisObject(dbus.service.Object):
             'CanSeek': (False, None),
             # TODO Set to True when the rest is implemented
             'CanControl': (False, None),
-        },
-    }
-
-    def __init__(self):
-        self._backend = None
-        bus_name = self._connect_to_dbus()
-        super(MprisObject, self).__init__(bus_name, OBJECT_PATH)
+        }
 
     def _connect_to_dbus(self):
         logger.debug(u'Connecting to D-Bus...')
@@ -156,8 +163,9 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
         in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
-        logger.debug(u'%s.Get called', dbus.PROPERTIES_IFACE)
-        getter, setter = self.properties[interface][prop]
+        logger.debug(u'%s.Get(%s, %s) called',
+            dbus.PROPERTIES_IFACE, repr(interface), repr(prop))
+        (getter, setter) = self.properties[interface][prop]
         return getter() if callable(getter) else getter
 
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
@@ -173,7 +181,8 @@ class MprisObject(dbus.service.Object):
             props = player.GetAll('org.mpris.MediaPlayer2',
                 dbus_interface='org.freedesktop.DBus.Properties')
         """
-        logger.debug(u'%s.GetAll called', dbus.PROPERTIES_IFACE)
+        logger.debug(u'%s.GetAll(%s) called',
+            dbus.PROPERTIES_IFACE, repr(interface))
         getters = {}
         for key, (getter, setter) in self.properties[interface].iteritems():
             getters[key] = getter() if callable(getter) else getter
@@ -182,7 +191,8 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
         in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
-        logger.debug(u'%s.Set called', dbus.PROPERTIES_IFACE)
+        logger.debug(u'%s.Set(%s, %s, %s) called',
+            dbus.PROPERTIES_IFACE, repr(interface), repr(prop), repr(value))
         getter, setter = self.properties[interface][prop]
         if setter is not None:
             setter(value)
@@ -220,6 +230,15 @@ class MprisObject(dbus.service.Object):
 
 
     ### Player interface
+
+    def get_PlaybackStatus(self):
+        state = self.backend.playback.state.get()
+        if state == PlaybackController.PLAYING:
+            return 'Playing'
+        elif state == PlaybackController.PAUSED:
+            return 'Paused'
+        elif state == PlaybackController.STOPPED:
+            return 'Stopped'
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Next(self):
