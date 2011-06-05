@@ -114,8 +114,7 @@ class MprisObject(dbus.service.Object):
     def _get_player_iface_properties(self):
         return {
             'PlaybackStatus': (self.get_PlaybackStatus, None),
-            # TODO Set loop status
-            'LoopStatus': (self.get_LoopStatus, None),
+            'LoopStatus': (self.get_LoopStatus, self.set_LoopStatus),
             'Rate': (1.0, None),
             # TODO Get/set backend.playback.random
             'Shuffle': (False, None),
@@ -241,8 +240,8 @@ class MprisObject(dbus.service.Object):
             return 'Stopped'
 
     def get_LoopStatus(self):
-        single = self.backend.playback.single.get()
         repeat = self.backend.playback.repeat.get()
+        single = self.backend.playback.single.get()
         if not repeat:
             return 'None'
         else:
@@ -250,6 +249,17 @@ class MprisObject(dbus.service.Object):
                 return 'Track'
             else:
                 return 'Playlist'
+
+    def set_LoopStatus(self, value):
+        if value == 'None':
+            self.backend.playback.repeat = False
+            self.backend.playback.single = False
+        elif value == 'Track':
+            self.backend.playback.repeat = True
+            self.backend.playback.single = True
+        elif value == 'Playlist':
+            self.backend.playback.repeat = True
+            self.backend.playback.single = False
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Next(self):

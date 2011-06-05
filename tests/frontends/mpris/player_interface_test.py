@@ -56,6 +56,21 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris_object.Get(mpris.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('Playlist', result)
 
+    def test_set_loop_status_to_none_unsets_repeat_and_single(self):
+        self.mpris_object.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'None')
+        self.assertEquals(self.backend.playback.repeat.get(), False)
+        self.assertEquals(self.backend.playback.single.get(), False)
+
+    def test_set_loop_status_to_track_sets_repeat_and_single(self):
+        self.mpris_object.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'Track')
+        self.assertEquals(self.backend.playback.repeat.get(), True)
+        self.assertEquals(self.backend.playback.single.get(), True)
+
+    def test_set_loop_status_to_playlists_sets_repeat_and_not_single(self):
+        self.mpris_object.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'Playlist')
+        self.assertEquals(self.backend.playback.repeat.get(), True)
+        self.assertEquals(self.backend.playback.single.get(), False)
+
     def test_next_when_playing_should_skip_to_next_track_and_keep_playing(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
