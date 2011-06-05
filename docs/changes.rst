@@ -24,6 +24,18 @@ No description yet.
 - Support passing options to GStreamer. See :option:`--help-gst` for a list of
   available options. (Fixes: :issue:`95`)
 
+- Backends:
+
+  - Calling on :meth:`mopidy.backends.base.playback.PlaybackController.next`
+    and :meth:`mopidy.backends.base.playback.PlaybackController.previous` no
+    longer implies that playback should be started. The playback state--whether
+    playing, paused or stopped--will now be kept.
+
+  - The method
+    :meth:`mopidy.backends.base.playback.PlaybackController.change_track`
+    has been added. Like ``next()``, and ``prev()``, it changes the current
+    track without changing the playback state.
+
 
 0.4.1 (2011-05-06)
 ==================

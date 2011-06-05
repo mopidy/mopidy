@@ -312,6 +312,26 @@ class PlaybackController(object):
     def _current_wall_time(self):
         return int(time.time() * 1000)
 
+    def change_track(self, cp_track, on_error_step=1):
+        """
+        Change to the given track, keeping the current playback state.
+
+        :param cp_track: track to change to
+        :type cp_track: two-tuple (CPID integer, :class:`mopidy.models.Track`)
+            or :class:`None`
+        :param on_error_step: direction to step at play error, 1 for next
+            track (default), -1 for previous track
+        :type on_error_step: int, -1 or 1
+
+        """
+        old_state = self.state
+        self.stop()
+        self.current_cp_track = cp_track
+        if old_state == self.PLAYING:
+            self.play(on_error_step=on_error_step)
+        elif old_state == self.PAUSED:
+            self.pause()
+
     def on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
@@ -325,7 +345,6 @@ class PlaybackController(object):
         original_cp_track = self.current_cp_track
 
         if self.cp_track_at_eot:
-            self._trigger_stopped_playing_event()
             self.play(self.cp_track_at_eot)
         else:
             self.stop(clear_current_track=True)
@@ -348,13 +367,14 @@ class PlaybackController(object):
             self.stop(clear_current_track=True)
 
     def next(self):
-        """Play the next track."""
-        if self.state == self.STOPPED:
-            return
+        """
+        Change to the next track.
 
+        The current playback state will be kept. If it was playing, playing
+        will continue. If it was paused, it will still be paused, etc.
+        """
         if self.cp_track_at_next:
-            self._trigger_stopped_playing_event()
-            self.play(self.cp_track_at_next)
+            self.change_track(self.cp_track_at_next)
         else:
             self.stop(clear_current_track=True)
 
@@ -378,15 +398,16 @@ class PlaybackController(object):
 
         if cp_track is not None:
             assert cp_track in self.backend.current_playlist.cp_tracks
-
-        if cp_track is None and self.current_cp_track is None:
-            cp_track = self.cp_track_at_next
-
-        if cp_track is None and self.state == self.PAUSED:
-            self.resume()
+        elif cp_track is None:
+            if self.state == self.PAUSED:
+                return self.resume()
+            elif self.current_cp_track is not None:
+                cp_track = self.current_cp_track
+            elif self.current_cp_track is None:
+                cp_track = self.cp_track_at_next
 
         if cp_track is not None:
-            self.state = self.STOPPED
+            self.stop()
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self.provider.play(cp_track[1]):
@@ -404,13 +425,17 @@ class PlaybackController(object):
         self._trigger_started_playing_event()
 
     def previous(self):
-        """Play the previous track."""
+        """
+        Change to the previous track.
+
+        The current playback state will be kept. If it was playing, playing
+        will continue. If it was paused, it will still be paused, etc.
+        """
         if self.cp_track_at_previous is None:
             return
         if self.state == self.STOPPED:
             return
-        self._trigger_stopped_playing_event()
-        self.play(self.cp_track_at_previous, on_error_step=-1)
+        self.change_track(self.cp_track_at_previous, on_error_step=-1)
 
     def resume(self):
         """If paused, resume playing the current track."""
