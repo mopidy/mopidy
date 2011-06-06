@@ -248,14 +248,13 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def PlayPause(self):
         logger.debug(u'%s.PlayPause called', PLAYER_IFACE)
-
-        # TODO Pseudo code:
-        # if playback.state == playback.PLAYING: playback.pause()
-        # elif playback.state == playback.PAUSED: playback.resume()
-        # elif playback.state == playback.STOPPED: playback.play()
-
-        # XXX Proof of concept only. Throw away, write tests, reimplement:
-        self.backend.playback.pause().get()
+        state = self.backend.playback.state.get()
+        if state == PlaybackController.PLAYING:
+            self.backend.playback.pause().get()
+        elif state == PlaybackController.PAUSED:
+            self.backend.playback.resume().get()
+        elif state == PlaybackController.STOPPED:
+            self.backend.playback.play().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Stop(self):
