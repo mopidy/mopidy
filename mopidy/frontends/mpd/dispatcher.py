@@ -6,8 +6,7 @@ from pykka.registry import ActorRegistry
 
 from mopidy import settings
 from mopidy.backends.base import Backend
-from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
-    MpdPermissionError, MpdSystemError, MpdUnknownCommand)
+from mopidy.frontends.mpd import exceptions
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
 # get them registered as request handlers.
@@ -61,7 +60,7 @@ class MpdDispatcher(object):
     def _catch_mpd_ack_errors_filter(self, request, response, filter_chain):
         try:
             return self._call_next_filter(request, response, filter_chain)
-        except MpdAckError as mpd_ack_error:
+        except exceptions.MpdAckError as mpd_ack_error:
             if self.command_list_index is not None:
                 mpd_ack_error.index = self.command_list_index
             return [mpd_ack_error.get_mpd_ack()]
@@ -83,7 +82,7 @@ class MpdDispatcher(object):
             if command_name in command_names_not_requiring_auth:
                 return self._call_next_filter(request, response, filter_chain)
             else:
-                raise MpdPermissionError(command=command_name)
+                raise exceptions.MpdPermissionError(command=command_name)
 
 
     ### Filter: command list
@@ -129,7 +128,7 @@ class MpdDispatcher(object):
             return self._call_next_filter(request, response, filter_chain)
         except ActorDeadError as e:
             logger.warning(u'Tried to communicate with dead actor.')
-            raise MpdSystemError(e.message)
+            raise exceptions.MpdSystemError(e.message)
 
     def _call_handler(self, request):
         (handler, kwargs) = self._find_handler(request)
@@ -142,8 +141,9 @@ class MpdDispatcher(object):
                 return (request_handlers[pattern], matches.groupdict())
         command_name = request.split(' ')[0]
         if command_name in [command.name for command in mpd_commands]:
-            raise MpdArgError(u'incorrect arguments', command=command_name)
-        raise MpdUnknownCommand(command=command_name)
+            raise exceptions.MpdArgError(u'incorrect arguments',
+                command=command_name)
+        raise exceptions.MpdUnknownCommand(command=command_name)
 
     def _format_response(self, response):
         formatted_response = []
