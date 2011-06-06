@@ -380,7 +380,7 @@ class PlaybackController(object):
 
     def pause(self):
         """Pause playback."""
-        if self.state == self.PLAYING and self.provider.pause():
+        if self.provider.pause():
             self.state = self.PAUSED
 
     def play(self, cp_track=None, on_error_step=1):
@@ -432,10 +432,9 @@ class PlaybackController(object):
         will continue. If it was paused, it will still be paused, etc.
         """
         if self.cp_track_at_previous is None:
-            return
-        if self.state == self.STOPPED:
-            return
-        self.change_track(self.cp_track_at_previous, on_error_step=-1)
+            self.stop()
+        else:
+            self.change_track(self.cp_track_at_previous, on_error_step=-1)
 
     def resume(self):
         """If paused, resume playing the current track."""
