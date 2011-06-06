@@ -1,8 +1,6 @@
 import mock
 import unittest
 
-from pykka.registry import ActorRegistry
-
 from mopidy.backends.dummy import DummyBackend
 from mopidy.backends.base.playback import PlaybackController
 from mopidy.frontends import mpris
@@ -14,7 +12,6 @@ STOPPED = PlaybackController.STOPPED
 
 class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):
-        mpris.ActorRegistry = mock.Mock(spec=ActorRegistry)
         mpris.MprisObject._connect_to_dbus = mock.Mock()
         self.backend = DummyBackend.start().proxy()
         self.mpris = mpris.MprisObject()
