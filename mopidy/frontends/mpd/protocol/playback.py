@@ -1,11 +1,11 @@
 from mopidy.backends.base import PlaybackController
-from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
 
-@handle_pattern(r'^consume (?P<state>[01])$')
-@handle_pattern(r'^consume "(?P<state>[01])"$')
-def consume(frontend, state):
+@handle_request(r'^consume (?P<state>[01])$')
+@handle_request(r'^consume "(?P<state>[01])"$')
+def consume(context, state):
     """
     *musicpd.org, playback section:*
 
@@ -16,12 +16,12 @@ def consume(frontend, state):
         playlist.
     """
     if int(state):
-        frontend.backend.playback.consume = True
+        context.backend.playback.consume = True
     else:
-        frontend.backend.playback.consume = False
+        context.backend.playback.consume = False
 
-@handle_pattern(r'^crossfade "(?P<seconds>\d+)"$')
-def crossfade(frontend, seconds):
+@handle_request(r'^crossfade "(?P<seconds>\d+)"$')
+def crossfade(context, seconds):
     """
     *musicpd.org, playback section:*
 
@@ -32,8 +32,8 @@ def crossfade(frontend, seconds):
     seconds = int(seconds)
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^next$')
-def next_(frontend):
+@handle_request(r'^next$')
+def next_(context):
     """
     *musicpd.org, playback section:*
 
@@ -87,11 +87,11 @@ def next_(frontend):
           order as the first time.
 
     """
-    return frontend.backend.playback.next().get()
+    return context.backend.playback.next().get()
 
-@handle_pattern(r'^pause$')
-@handle_pattern(r'^pause "(?P<state>[01])"$')
-def pause(frontend, state=None):
+@handle_request(r'^pause$')
+@handle_request(r'^pause "(?P<state>[01])"$')
+def pause(context, state=None):
     """
     *musicpd.org, playback section:*
 
@@ -104,28 +104,28 @@ def pause(frontend, state=None):
     - Calls ``pause`` without any arguments to toogle pause.
     """
     if state is None:
-        if (frontend.backend.playback.state.get() ==
+        if (context.backend.playback.state.get() ==
                 PlaybackController.PLAYING):
-            frontend.backend.playback.pause()
-        elif (frontend.backend.playback.state.get() ==
+            context.backend.playback.pause()
+        elif (context.backend.playback.state.get() ==
                 PlaybackController.PAUSED):
-            frontend.backend.playback.resume()
+            context.backend.playback.resume()
     elif int(state):
-        frontend.backend.playback.pause()
+        context.backend.playback.pause()
     else:
-        frontend.backend.playback.resume()
+        context.backend.playback.resume()
 
-@handle_pattern(r'^play$')
-def play(frontend):
+@handle_request(r'^play$')
+def play(context):
     """
     The original MPD server resumes from the paused state on ``play``
     without arguments.
     """
-    return frontend.backend.playback.play().get()
+    return context.backend.playback.play().get()
 
-@handle_pattern(r'^playid "(?P<cpid>\d+)"$')
-@handle_pattern(r'^playid "(?P<cpid>-1)"$')
-def playid(frontend, cpid):
+@handle_request(r'^playid "(?P<cpid>\d+)"$')
+@handle_request(r'^playid "(?P<cpid>-1)"$')
+def playid(context, cpid):
     """
     *musicpd.org, playback section:*
 
@@ -144,16 +144,16 @@ def playid(frontend, cpid):
     """
     cpid = int(cpid)
     if cpid == -1:
-        return _play_minus_one(frontend)
+        return _play_minus_one(context)
     try:
-        cp_track = frontend.backend.current_playlist.get(cpid=cpid).get()
-        return frontend.backend.playback.play(cp_track).get()
+        cp_track = context.backend.current_playlist.get(cpid=cpid).get()
+        return context.backend.playback.play(cp_track).get()
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'playid')
 
-@handle_pattern(r'^play (?P<songpos>-?\d+)$')
-@handle_pattern(r'^play "(?P<songpos>-?\d+)"$')
-def playpos(frontend, songpos):
+@handle_request(r'^play (?P<songpos>-?\d+)$')
+@handle_request(r'^play "(?P<songpos>-?\d+)"$')
+def playpos(context, songpos):
     """
     *musicpd.org, playback section:*
 
@@ -176,29 +176,29 @@ def playpos(frontend, songpos):
     """
     songpos = int(songpos)
     if songpos == -1:
-        return _play_minus_one(frontend)
+        return _play_minus_one(context)
     try:
-        cp_track = frontend.backend.current_playlist.cp_tracks.get()[songpos]
-        return frontend.backend.playback.play(cp_track).get()
+        cp_track = context.backend.current_playlist.cp_tracks.get()[songpos]
+        return context.backend.playback.play(cp_track).get()
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'play')
 
-def _play_minus_one(frontend):
-    if (frontend.backend.playback.state.get() == PlaybackController.PLAYING):
+def _play_minus_one(context):
+    if (context.backend.playback.state.get() == PlaybackController.PLAYING):
         return # Nothing to do
-    elif (frontend.backend.playback.state.get() == PlaybackController.PAUSED):
-        return frontend.backend.playback.resume().get()
-    elif frontend.backend.playback.current_cp_track.get() is not None:
-        cp_track = frontend.backend.playback.current_cp_track.get()
-        return frontend.backend.playback.play(cp_track).get()
-    elif frontend.backend.current_playlist.cp_tracks.get():
-        cp_track = frontend.backend.current_playlist.cp_tracks.get()[0]
-        return frontend.backend.playback.play(cp_track).get()
+    elif (context.backend.playback.state.get() == PlaybackController.PAUSED):
+        return context.backend.playback.resume().get()
+    elif context.backend.playback.current_cp_track.get() is not None:
+        cp_track = context.backend.playback.current_cp_track.get()
+        return context.backend.playback.play(cp_track).get()
+    elif context.backend.current_playlist.cp_tracks.get():
+        cp_track = context.backend.current_playlist.cp_tracks.get()[0]
+        return context.backend.playback.play(cp_track).get()
     else:
         return # Fail silently
 
-@handle_pattern(r'^previous$')
-def previous(frontend):
+@handle_request(r'^previous$')
+def previous(context):
     """
     *musicpd.org, playback section:*
 
@@ -241,11 +241,11 @@ def previous(frontend):
           ``previous`` should do a seek to time position 0.
 
     """
-    return frontend.backend.playback.previous().get()
+    return context.backend.playback.previous().get()
 
-@handle_pattern(r'^random (?P<state>[01])$')
-@handle_pattern(r'^random "(?P<state>[01])"$')
-def random(frontend, state):
+@handle_request(r'^random (?P<state>[01])$')
+@handle_request(r'^random "(?P<state>[01])"$')
+def random(context, state):
     """
     *musicpd.org, playback section:*
 
@@ -254,13 +254,13 @@ def random(frontend, state):
         Sets random state to ``STATE``, ``STATE`` should be 0 or 1.
     """
     if int(state):
-        frontend.backend.playback.random = True
+        context.backend.playback.random = True
     else:
-        frontend.backend.playback.random = False
+        context.backend.playback.random = False
 
-@handle_pattern(r'^repeat (?P<state>[01])$')
-@handle_pattern(r'^repeat "(?P<state>[01])"$')
-def repeat(frontend, state):
+@handle_request(r'^repeat (?P<state>[01])$')
+@handle_request(r'^repeat "(?P<state>[01])"$')
+def repeat(context, state):
     """
     *musicpd.org, playback section:*
 
@@ -269,12 +269,12 @@ def repeat(frontend, state):
         Sets repeat state to ``STATE``, ``STATE`` should be 0 or 1.
     """
     if int(state):
-        frontend.backend.playback.repeat = True
+        context.backend.playback.repeat = True
     else:
-        frontend.backend.playback.repeat = False
+        context.backend.playback.repeat = False
 
-@handle_pattern(r'^replay_gain_mode "(?P<mode>(off|track|album))"$')
-def replay_gain_mode(frontend, mode):
+@handle_request(r'^replay_gain_mode "(?P<mode>(off|track|album))"$')
+def replay_gain_mode(context, mode):
     """
     *musicpd.org, playback section:*
 
@@ -289,8 +289,8 @@ def replay_gain_mode(frontend, mode):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^replay_gain_status$')
-def replay_gain_status(frontend):
+@handle_request(r'^replay_gain_status$')
+def replay_gain_status(context):
     """
     *musicpd.org, playback section:*
 
@@ -301,9 +301,9 @@ def replay_gain_status(frontend):
     """
     return u'off' # TODO
 
-@handle_pattern(r'^seek (?P<songpos>\d+) (?P<seconds>\d+)$')
-@handle_pattern(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
-def seek(frontend, songpos, seconds):
+@handle_request(r'^seek (?P<songpos>\d+) (?P<seconds>\d+)$')
+@handle_request(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
+def seek(context, songpos, seconds):
     """
     *musicpd.org, playback section:*
 
@@ -316,12 +316,12 @@ def seek(frontend, songpos, seconds):
 
     - issues ``seek 1 120`` without quotes around the arguments.
     """
-    if frontend.backend.playback.current_playlist_position != songpos:
-        playpos(frontend, songpos)
-    frontend.backend.playback.seek(int(seconds) * 1000)
+    if context.backend.playback.current_playlist_position != songpos:
+        playpos(context, songpos)
+    context.backend.playback.seek(int(seconds) * 1000)
 
-@handle_pattern(r'^seekid "(?P<cpid>\d+)" "(?P<seconds>\d+)"$')
-def seekid(frontend, cpid, seconds):
+@handle_request(r'^seekid "(?P<cpid>\d+)" "(?P<seconds>\d+)"$')
+def seekid(context, cpid, seconds):
     """
     *musicpd.org, playback section:*
 
@@ -329,13 +329,13 @@ def seekid(frontend, cpid, seconds):
 
         Seeks to the position ``TIME`` (in seconds) of song ``SONGID``.
     """
-    if frontend.backend.playback.current_cpid != cpid:
-        playid(frontend, cpid)
-    frontend.backend.playback.seek(int(seconds) * 1000)
+    if context.backend.playback.current_cpid != cpid:
+        playid(context, cpid)
+    context.backend.playback.seek(int(seconds) * 1000)
 
-@handle_pattern(r'^setvol (?P<volume>[-+]*\d+)$')
-@handle_pattern(r'^setvol "(?P<volume>[-+]*\d+)"$')
-def setvol(frontend, volume):
+@handle_request(r'^setvol (?P<volume>[-+]*\d+)$')
+@handle_request(r'^setvol "(?P<volume>[-+]*\d+)"$')
+def setvol(context, volume):
     """
     *musicpd.org, playback section:*
 
@@ -352,11 +352,11 @@ def setvol(frontend, volume):
         volume = 0
     if volume > 100:
         volume = 100
-    frontend.mixer.volume = volume
+    context.mixer.volume = volume
 
-@handle_pattern(r'^single (?P<state>[01])$')
-@handle_pattern(r'^single "(?P<state>[01])"$')
-def single(frontend, state):
+@handle_request(r'^single (?P<state>[01])$')
+@handle_request(r'^single "(?P<state>[01])"$')
+def single(context, state):
     """
     *musicpd.org, playback section:*
 
@@ -367,12 +367,12 @@ def single(frontend, state):
         song is repeated if the ``repeat`` mode is enabled.
     """
     if int(state):
-        frontend.backend.playback.single = True
+        context.backend.playback.single = True
     else:
-        frontend.backend.playback.single = False
+        context.backend.playback.single = False
 
-@handle_pattern(r'^stop$')
-def stop(frontend):
+@handle_request(r'^stop$')
+def stop(context):
     """
     *musicpd.org, playback section:*
 
@@ -380,4 +380,4 @@ def stop(frontend):
 
         Stops playing.
     """
-    frontend.backend.playback.stop()
+    context.backend.playback.stop()

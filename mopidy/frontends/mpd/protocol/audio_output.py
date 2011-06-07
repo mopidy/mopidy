@@ -1,8 +1,8 @@
-from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
-@handle_pattern(r'^disableoutput "(?P<outputid>\d+)"$')
-def disableoutput(frontend, outputid):
+@handle_request(r'^disableoutput "(?P<outputid>\d+)"$')
+def disableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
 
@@ -12,8 +12,8 @@ def disableoutput(frontend, outputid):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^enableoutput "(?P<outputid>\d+)"$')
-def enableoutput(frontend, outputid):
+@handle_request(r'^enableoutput "(?P<outputid>\d+)"$')
+def enableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
 
@@ -23,8 +23,8 @@ def enableoutput(frontend, outputid):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^outputs$')
-def outputs(frontend):
+@handle_request(r'^outputs$')
+def outputs(context):
     """
     *musicpd.org, audio output section:*
 
