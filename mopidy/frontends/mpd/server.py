@@ -21,7 +21,6 @@ class MpdServer(asyncore.dispatcher):
         """Start MPD server."""
         try:
             self.socket = network.create_socket()
-            self.set_reuse_addr()
             hostname = network.format_hostname(settings.MPD_SERVER_HOSTNAME)
             port = settings.MPD_SERVER_PORT
             logger.debug(u'MPD server is binding to [%s]:%s', hostname, port)
