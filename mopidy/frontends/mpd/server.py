@@ -39,7 +39,3 @@ class MpdServer(asyncore.dispatcher):
         logger.info(u'MPD client connection from [%s]:%s',
             client_socket_address[0], client_socket_address[1])
         MpdSession(self, client_socket, client_socket_address)
-
-    def handle_close(self):
-        """Called by asyncore when the socket is closed."""
-        self.close()
