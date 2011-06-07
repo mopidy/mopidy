@@ -25,10 +25,9 @@ class MpdExceptionsTest(unittest.TestCase):
 
     def test_get_mpd_ack_with_values(self):
         try:
-            raise MpdAckError('A description', error_code=6, index=7,
-                command='foo')
+            raise MpdAckError('A description', index=7, command='foo')
         except MpdAckError as e:
-            self.assertEqual(e.get_mpd_ack(), u'ACK [6@7] {foo} A description')
+            self.assertEqual(e.get_mpd_ack(), u'ACK [0@7] {foo} A description')
 
     def test_mpd_unknown_command(self):
         try:
