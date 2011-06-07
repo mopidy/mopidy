@@ -16,10 +16,11 @@ class MpdAckError(MopidyException):
     ACK_ERROR_PLAYER_SYNC = 55
     ACK_ERROR_EXIST = 56
 
-    def __init__(self, message=u'', error_code=0, index=0, command=u''):
-        super(MpdAckError, self).__init__(message, error_code, index, command)
+    error_code = 0
+
+    def __init__(self, message=u'', index=0, command=u''):
+        super(MpdAckError, self).__init__(message, index, command)
         self.message = message
-        self.error_code = error_code
         self.index = index
         self.command = command
 
@@ -30,36 +31,38 @@ class MpdAckError(MopidyException):
             ACK [%(error_code)i@%(index)i] {%(command)s} description
         """
         return u'ACK [%i@%i] {%s} %s' % (
-            self.error_code, self.index, self.command, self.message)
+            self.__class__.error_code, self.index, self.command, self.message)
 
 class MpdArgError(MpdAckError):
-    def __init__(self, *args, **kwargs):
-        super(MpdArgError, self).__init__(*args, **kwargs)
-        self.error_code = MpdAckError.ACK_ERROR_ARG
+    error_code = MpdAckError.ACK_ERROR_ARG
 
 class MpdPasswordError(MpdAckError):
+    error_code = MpdAckError.ACK_ERROR_PASSWORD
+
+class MpdPermissionError(MpdAckError):
+    error_code = MpdAckError.ACK_ERROR_PERMISSION
+
     def __init__(self, *args, **kwargs):
-        super(MpdPasswordError, self).__init__(*args, **kwargs)
-        self.error_code = MpdAckError.ACK_ERROR_PASSWORD
+        super(MpdPermissionError, self).__init__(*args, **kwargs)
+        self.message = u'you don\'t have permission for "%s"' % self.command
 
 class MpdUnknownCommand(MpdAckError):
+    error_code = MpdAckError.ACK_ERROR_UNKNOWN
+
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
         self.message = u'unknown command "%s"' % self.command
         self.command = u''
-        self.error_code = MpdAckError.ACK_ERROR_UNKNOWN
 
 class MpdNoExistError(MpdAckError):
-    def __init__(self, *args, **kwargs):
-        super(MpdNoExistError, self).__init__(*args, **kwargs)
-        self.error_code = MpdAckError.ACK_ERROR_NO_EXIST
+    error_code = MpdAckError.ACK_ERROR_NO_EXIST
 
 class MpdSystemError(MpdAckError):
-    def __init__(self, *args, **kwargs):
-        super(MpdSystemError, self).__init__(*args, **kwargs)
-        self.error_code = MpdAckError.ACK_ERROR_SYSTEM
+    error_code = MpdAckError.ACK_ERROR_SYSTEM
 
 class MpdNotImplemented(MpdAckError):
+    error_code = 0
+
     def __init__(self, *args, **kwargs):
         super(MpdNotImplemented, self).__init__(*args, **kwargs)
         self.message = u'Not implemented'

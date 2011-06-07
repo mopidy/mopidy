@@ -28,7 +28,7 @@ class OsaMixer(ThreadingActor, BaseMixer):
             and self._last_update is not None
             and (int(time.time() - self._last_update) < self.CACHE_TTL))
 
-    def _get_volume(self):
+    def get_volume(self):
         if not self._valid_cache():
             try:
                 self._cache = int(Popen(
@@ -40,7 +40,7 @@ class OsaMixer(ThreadingActor, BaseMixer):
             self._last_update = int(time.time())
         return self._cache
 
-    def _set_volume(self, volume):
+    def set_volume(self, volume):
         Popen(['osascript', '-e', 'set volume output volume %d' % volume])
         self._cache = volume
         self._last_update = int(time.time())
