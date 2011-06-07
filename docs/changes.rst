@@ -10,7 +10,15 @@ v0.5.0 (in development)
 
 No description yet.
 
+Please note that 0.5.0 requires some updated dependencies, as listed under
+*Important changes* below.
+
 **Important changes**
+
+- If you use the Spotify backend, you *must* upgrade to libspotify 0.0.8 and
+  pyspotify 1.2. If you install from APT, libspotify and pyspotify will
+  automatically be upgraded. If you are not installing from APT, follow the
+  instructions at :doc:`/installation/libspotify/`.
 
 - Mopidy now supports running with 1-n outputs at the same time. This feature
   was mainly added to facilitate Shoutcast support, which Mopidy has also
