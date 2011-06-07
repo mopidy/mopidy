@@ -174,10 +174,10 @@ MPD_SERVER_PORT = 6600
 #: Default::
 #:
 #:     OUTPUTS = (
-#:         u'mopidy.outputs.LocalOutput',
+#:         u'mopidy.outputs.local.LocalOutput',
 #:     )
 OUTPUTS = (
-    u'mopidy.outputs.LocalOutput',
+    u'mopidy.outputs.local.LocalOutput',
 )
 
 #: Servar that runs Shoutcast server to send stream to.

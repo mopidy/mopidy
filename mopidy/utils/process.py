@@ -4,6 +4,8 @@ import threading
 import gobject
 gobject.threads_init()
 
+from pykka import ActorDeadError
+
 from mopidy import SettingsError
 
 logger = logging.getLogger('mopidy.utils.process')
@@ -21,25 +23,18 @@ class BaseThread(threading.Thread):
             self.run_inside_try()
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
-            self.exit(0, u'Interrupted by user')
         except SettingsError as e:
             logger.error(e.message)
-            self.exit(1, u'Settings error')
         except ImportError as e:
             logger.error(e)
-            self.exit(2, u'Import error')
+        except ActorDeadError as e:
+            logger.warning(e)
         except Exception as e:
             logger.exception(e)
-            self.exit(3, u'Unknown error')
+        logger.debug(u'%s: Exiting thread', self.name)
 
     def run_inside_try(self):
         raise NotImplementedError
-
-    def destroy(self):
-        pass
-
-    def exit(self, status=0, reason=None):
-        self.destroy()
 
 
 class GObjectEventThread(BaseThread):

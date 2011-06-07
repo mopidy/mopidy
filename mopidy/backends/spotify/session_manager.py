@@ -106,7 +106,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             'sample_rate': sample_rate,
             'channels': channels,
         }
-        self.gstreamer.deliver_data(capabilites, bytes(frames))
+        self.gstreamer.emit_data(capabilites, bytes(frames))
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
@@ -120,7 +120,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def end_of_track(self, session):
         """Callback used by pyspotify"""
         logger.debug(u'End of data stream reached')
-        self.gstreamer.end_of_data_stream()
+        self.gstreamer.emit_end_of_stream()
 
     def refresh_stored_playlists(self):
         """Refresh the stored playlists in the backend with fresh meta data

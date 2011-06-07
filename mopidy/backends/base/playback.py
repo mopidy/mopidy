@@ -80,12 +80,12 @@ class PlaybackController(object):
     def _get_cpid(self, cp_track):
         if cp_track is None:
             return None
-        return cp_track[0]
+        return cp_track.cpid
 
     def _get_track(self, cp_track):
         if cp_track is None:
             return None
-        return cp_track[1]
+        return cp_track.track
 
     @property
     def current_cpid(self):
@@ -350,7 +350,7 @@ class PlaybackController(object):
             self.stop(clear_current_track=True)
 
         if self.consume:
-            self.backend.current_playlist.remove(cpid=original_cp_track[0])
+            self.backend.current_playlist.remove(cpid=original_cp_track.cpid)
 
     def on_current_playlist_change(self):
         """
@@ -410,7 +410,7 @@ class PlaybackController(object):
             self.stop()
             self.current_cp_track = cp_track
             self.state = self.PLAYING
-            if not self.provider.play(cp_track[1]):
+            if not self.provider.play(cp_track.track):
                 # Track is not playable
                 if self.random and self._shuffled:
                     self._shuffled.remove(cp_track)
