@@ -29,6 +29,13 @@ No description yet.
 - Replace not decodable characters returned from Spotify instead of throwing an
   exception, as we won't try to figure out the encoding of non-UTF-8-data.
 
+- Spotify backend:
+
+  - Thanks to Antoine Pierlot-Garcin's recent work on updating and improving
+    pyspotify, stored playlists will again load when Mopidy starts. The
+    workaround of searching and reconnecting to make the playlists appear are
+    no longer necessary. (Fixes: :issue:`59`)
+
 - MPD frontend:
 
   - Refactoring and cleanup. Most notably, all request handlers now get an
