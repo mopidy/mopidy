@@ -35,14 +35,14 @@ class DenonMixer(ThreadingActor, BaseMixer):
             from serial import Serial
             self._device = Serial(port=settings.MIXER_EXT_PORT, timeout=0.2)
 
-    def _get_volume(self):
+    def get_volume(self):
         self._ensure_open_device()
         self._device.write('MV?\r')
         vol = str(self._device.readline()[2:4])
         logger.debug(u'_get_volume() = %s' % vol)
         return self._levels.index(vol)
 
-    def _set_volume(self, volume):
+    def set_volume(self, volume):
         # Clamp according to Denon-spec
         if volume > 99:
             volume = 99

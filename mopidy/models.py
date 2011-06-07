@@ -1,4 +1,4 @@
-from mopidy.frontends.mpd import translator
+from collections import namedtuple
 
 class ImmutableObject(object):
     """
@@ -129,6 +129,9 @@ class Album(ImmutableObject):
         super(Album, self).__init__(*args, **kwargs)
 
 
+CpTrack = namedtuple('CpTrack', ['cpid', 'track'])
+
+
 class Track(ImmutableObject):
     """
     :param uri: track URI
@@ -183,6 +186,7 @@ class Track(ImmutableObject):
         super(Track, self).__init__(*args, **kwargs)
 
     def mpd_format(self, *args, **kwargs):
+        from mopidy.frontends.mpd import translator
         return translator.track_to_mpd_format(self, *args, **kwargs)
 
 
@@ -222,4 +226,5 @@ class Playlist(ImmutableObject):
         return len(self.tracks)
 
     def mpd_format(self, *args, **kwargs):
+        from mopidy.frontends.mpd import translator
         return translator.playlist_to_mpd_format(self, *args, **kwargs)

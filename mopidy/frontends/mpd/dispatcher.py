@@ -4,9 +4,9 @@ import re
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
+from mopidy import settings
 from mopidy.backends.base import Backend
-from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdArgError,
-    MpdUnknownCommand, MpdSystemError)
+from mopidy.frontends.mpd import exceptions
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
 # get them registered as request handlers.
@@ -27,71 +27,186 @@ class MpdDispatcher(object):
     back to the MPD session.
     """
 
-    # XXX Consider merging MpdDispatcher into MpdSession
-
-    def __init__(self):
-        backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        self.backend = backend_refs[0].proxy()
-
-        mixer_refs = ActorRegistry.get_by_class(BaseMixer)
-        assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
-        self.mixer = mixer_refs[0].proxy()
-
+    def __init__(self, session=None):
+        self.authenticated = False
         self.command_list = False
         self.command_list_ok = False
+        self.command_list_index = None
+        self.context = MpdContext(self, session=session)
 
-    def handle_request(self, request, command_list_index=None):
+    def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
-        if self.command_list is not False and request != u'command_list_end':
-            self.command_list.append(request)
-            return None
+        self.command_list_index = current_command_list_index
+        response = []
+        filter_chain = [
+            self._catch_mpd_ack_errors_filter,
+            self._authenticate_filter,
+            self._command_list_filter,
+            self._add_ok_filter,
+            self._call_handler_filter,
+        ]
+        return self._call_next_filter(request, response, filter_chain)
+
+    def _call_next_filter(self, request, response, filter_chain):
+        if filter_chain:
+            next_filter = filter_chain.pop(0)
+            return next_filter(request, response, filter_chain)
+        else:
+            return response
+
+
+    ### Filter: catch MPD ACK errors
+
+    def _catch_mpd_ack_errors_filter(self, request, response, filter_chain):
         try:
-            (handler, kwargs) = self.find_handler(request)
-            result = handler(self, **kwargs)
-        except MpdAckError as e:
-            if command_list_index is not None:
-                e.index = command_list_index
-            return self.handle_response(e.get_mpd_ack(), add_ok=False)
+            return self._call_next_filter(request, response, filter_chain)
+        except exceptions.MpdAckError as mpd_ack_error:
+            if self.command_list_index is not None:
+                mpd_ack_error.index = self.command_list_index
+            return [mpd_ack_error.get_mpd_ack()]
+
+
+    ### Filter: authenticate
+
+    def _authenticate_filter(self, request, response, filter_chain):
+        if self.authenticated:
+            return self._call_next_filter(request, response, filter_chain)
+        elif  settings.MPD_SERVER_PASSWORD is None:
+            self.authenticated = True
+            return self._call_next_filter(request, response, filter_chain)
+        else:
+            command_name = request.split(' ')[0]
+            command_names_not_requiring_auth = [
+                command.name for command in mpd_commands
+                if not command.auth_required]
+            if command_name in command_names_not_requiring_auth:
+                return self._call_next_filter(request, response, filter_chain)
+            else:
+                raise exceptions.MpdPermissionError(command=command_name)
+
+
+    ### Filter: command list
+
+    def _command_list_filter(self, request, response, filter_chain):
+        if self._is_receiving_command_list(request):
+            self.command_list.append(request)
+            return []
+        else:
+            response = self._call_next_filter(request, response, filter_chain)
+            if (self._is_receiving_command_list(request) or
+                    self._is_processing_command_list(request)):
+                if response and response[-1] == u'OK':
+                    response = response[:-1]
+            return response
+
+    def _is_receiving_command_list(self, request):
+        return (self.command_list is not False
+            and request != u'command_list_end')
+
+    def _is_processing_command_list(self, request):
+        return (self.command_list_index is not None
+            and request != u'command_list_end')
+
+
+    ### Filter: add OK
+
+    def _add_ok_filter(self, request, response, filter_chain):
+        response = self._call_next_filter(request, response, filter_chain)
+        if not self._has_error(response):
+            response.append(u'OK')
+        return response
+
+    def _has_error(self, response):
+        return response and response[-1].startswith(u'ACK')
+
+
+    ### Filter: call handler
+
+    def _call_handler_filter(self, request, response, filter_chain):
+        try:
+            response = self._format_response(self._call_handler(request))
+            return self._call_next_filter(request, response, filter_chain)
         except ActorDeadError as e:
             logger.warning(u'Tried to communicate with dead actor.')
-            mpd_error = MpdSystemError(e.message)
-            return self.handle_response(mpd_error.get_mpd_ack(), add_ok=False)
-        if request in (u'command_list_begin', u'command_list_ok_begin'):
-            return None
-        if command_list_index is not None:
-            return self.handle_response(result, add_ok=False)
-        return self.handle_response(result)
+            raise exceptions.MpdSystemError(e.message)
 
-    def find_handler(self, request):
-        """Find the correct handler for a request."""
+    def _call_handler(self, request):
+        (handler, kwargs) = self._find_handler(request)
+        return handler(self.context, **kwargs)
+
+    def _find_handler(self, request):
         for pattern in request_handlers:
             matches = re.match(pattern, request)
             if matches is not None:
                 return (request_handlers[pattern], matches.groupdict())
-        command = request.split(' ')[0]
-        if command in mpd_commands:
-            raise MpdArgError(u'incorrect arguments', command=command)
-        raise MpdUnknownCommand(command=command)
+        command_name = request.split(' ')[0]
+        if command_name in [command.name for command in mpd_commands]:
+            raise exceptions.MpdArgError(u'incorrect arguments',
+                command=command_name)
+        raise exceptions.MpdUnknownCommand(command=command_name)
 
-    def handle_response(self, result, add_ok=True):
-        """Format the response from a request handler."""
-        response = []
+    def _format_response(self, response):
+        formatted_response = []
+        for element in self._listify_result(response):
+            formatted_response.extend(self._format_lines(element))
+        return formatted_response
+
+    def _listify_result(self, result):
         if result is None:
-            result = []
-        elif isinstance(result, set):
-            result = list(result)
-        elif not isinstance(result, list):
-            result = [result]
-        for line in flatten(result):
-            if isinstance(line, dict):
-                for (key, value) in line.items():
-                    response.append(u'%s: %s' % (key, value))
-            elif isinstance(line, tuple):
-                (key, value) = line
-                response.append(u'%s: %s' % (key, value))
-            else:
-                response.append(line)
-        if add_ok and (not response or not response[-1].startswith(u'ACK')):
-            response.append(u'OK')
-        return response
+            return []
+        if isinstance(result, set):
+            return flatten(list(result))
+        if not isinstance(result, list):
+            return [result]
+        return flatten(result)
+
+    def _format_lines(self, line):
+        if isinstance(line, dict):
+            return [u'%s: %s' % (key, value) for (key, value) in line.items()]
+        if isinstance(line, tuple):
+            (key, value) = line
+            return [u'%s: %s' % (key, value)]
+        return [line]
+
+
+class MpdContext(object):
+    """
+    This object is passed as the first argument to all MPD command handlers to
+    give the command handlers access to important parts of Mopidy.
+    """
+
+    #: The current :class:`MpdDispatcher`.
+    dispatcher = None
+
+    #: The current :class:`mopidy.frontends.mpd.session.MpdSession`.
+    session = None
+
+    def __init__(self, dispatcher, session=None):
+        self.dispatcher = dispatcher
+        self.session = session
+        self._backend = None
+        self._mixer = None
+
+    @property
+    def backend(self):
+        """
+        The backend. An instance of :class:`mopidy.backends.base.Backend`.
+        """
+        if self._backend is not None:
+            return self._backend
+        backend_refs = ActorRegistry.get_by_class(Backend)
+        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+        self._backend = backend_refs[0].proxy()
+        return self._backend
+
+    @property
+    def mixer(self):
+        """
+        The mixer. An instance of :class:`mopidy.mixers.base.BaseMixer`.
+        """
+        if self._mixer is not None:
+            return self._mixer
+        mixer_refs = ActorRegistry.get_by_class(BaseMixer)
+        assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
+        self._mixer = mixer_refs[0].proxy()
+        return self._mixer

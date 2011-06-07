@@ -29,6 +29,21 @@ No description yet.
 - Replace not decodable characters returned from Spotify instead of throwing an
   exception, as we won't try to figure out the encoding of non-UTF-8-data.
 
+- MPD frontend:
+
+  - Refactoring and cleanup. Most notably, all request handlers now get an
+    instance of :class:`mopidy.frontends.mpd.dispatcher.MpdContext` as the
+    first argument. The new class contains reference to any object in Mopidy
+    the MPD protocol implementation should need access to.
+
+  - Close the client connection when the command ``close`` is received.
+
+  - Do not allow access to the command ``kill``.
+
+  - ``commands`` and ``notcommands`` now have correct output if password
+    authentication is turned on, but the connected user has not been
+    authenticated yet.
+
 
 v0.4.1 (2011-05-06)
 ===================

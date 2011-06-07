@@ -15,8 +15,8 @@ class GStreamerSoftwareMixer(ThreadingActor, BaseMixer):
         assert len(output_refs) == 1, 'Expected exactly one running output.'
         self.output = output_refs[0].proxy()
 
-    def _get_volume(self):
+    def get_volume(self):
         return self.output.get_volume().get()
 
-    def _set_volume(self, volume):
+    def set_volume(self, volume):
         self.output.set_volume(volume).get()
