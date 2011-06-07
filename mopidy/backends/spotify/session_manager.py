@@ -12,6 +12,7 @@ from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 from mopidy.gstreamer import GStreamer
 from mopidy.utils.process import BaseThread
+from mopidy.backends.spotify.container_manager import SpotifyContainerManager
 
 logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
@@ -34,6 +35,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
 
         self.connected = threading.Event()
         self.session = None
+
+        self.container_manager = None
 
     def run_inside_try(self):
         self.setup()
@@ -61,6 +64,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         else:
             logger.debug(u'Preferring normal bitrate from Spotify')
             self.session.set_preferred_bitrate(0)
+        self.container_manager = SpotifyContainerManager(self)
+        self.container_manager.watch(self.session.playlist_container())
         self.connected.set()
 
     def logged_out(self, session):
