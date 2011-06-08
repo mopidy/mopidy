@@ -14,9 +14,6 @@ class MpdServer(asyncore.dispatcher):
     for each client connection.
     """
 
-    def __init__(self):
-        asyncore.dispatcher.__init__(self)
-
     def start(self):
         """Start MPD server."""
         try:
