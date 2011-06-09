@@ -26,7 +26,7 @@ Feature wishlist
 We maintain our collection of sane or less sane ideas for future Mopidy
 features as `issues <https://github.com/mopidy/mopidy/issues>`_ at GitHub
 labeled with `the "wishlist" label
-<https://github.com/mopidy/mopidy/issues/labels/wishlist>`_. Feel free to vote
+<https://github.com/mopidy/mopidy/issues?labels=wishlist>`_. Feel free to vote
 up any feature you would love to see in Mopidy, but please refrain from adding
 a comment just to say "I want this too!". You are of course free to add
 comments if you have suggestions for how the feature should work or be
