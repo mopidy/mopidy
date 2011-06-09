@@ -73,5 +73,12 @@ Using a custom audio sink
 =========================
 
 If you for some reason want to use some other GStreamer audio sink than
-``autoaudiosink``, you can change :attr:`mopidy.settings.GSTREAMER_AUDIO_SINK`
-in your ``settings.py`` file.
+``autoaudiosink``, you can add ``mopidy.outputs.custom.CustomOutput`` to the
+:attr:`mopidy.settings.OUTPUTS` setting, and set the
+:attr:`mopidy.settings.CUSTOM_OUTPUT` setting to a partial GStreamer pipeline
+description describing the GStreamer sink you want to use.
+
+Example of ``settings.py`` for OSS4::
+
+    OUTPUTS = (u'mopidy.outputs.custom.CustomOutput',)
+    CUSTOM_OUTPUT = u'oss4sink'
