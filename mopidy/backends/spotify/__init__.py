@@ -11,6 +11,7 @@ from mopidy.gstreamer import GStreamer
 logger = logging.getLogger('mopidy.backends.spotify')
 
 ENCODING = 'utf-8'
+BITRATES = {96: 2, 160: 0, 320: 1}
 
 class SpotifyBackend(ThreadingActor, Backend):
     """

@@ -8,6 +8,7 @@ from pykka.registry import ActorRegistry
 
 from mopidy import get_version, settings
 from mopidy.backends.base import Backend
+from mopidy.backends.spotify import BITRATES
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 from mopidy.gstreamer import GStreamer
@@ -58,12 +59,10 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             return
         logger.info(u'Connected to Spotify')
         self.session = session
-        if settings.SPOTIFY_HIGH_BITRATE:
-            logger.debug(u'Preferring high bitrate from Spotify')
-            self.session.set_preferred_bitrate(1)
-        else:
-            logger.debug(u'Preferring normal bitrate from Spotify')
-            self.session.set_preferred_bitrate(0)
+
+        logger.debug(u'Preferred Spotify bitrate is %s kbps.', settings.SPOTIFY_BITRATE)
+        self.session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
+
         self.container_manager = SpotifyContainerManager(self)
         self.container_manager.watch(self.session.playlist_container())
         self.connected.set()

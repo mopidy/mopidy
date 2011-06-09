@@ -10,6 +10,7 @@ class ValidateSettingsTest(unittest.TestCase):
         self.defaults = {
             'MPD_SERVER_HOSTNAME': '::',
             'MPD_SERVER_PORT': 6600,
+            'SPOTIFY_BITRATE': 160,
         }
 
     def test_no_errors_yields_empty_dict(self):
@@ -41,6 +42,13 @@ class ValidateSettingsTest(unittest.TestCase):
             u'Deprecated setting value. ' +
             '"mopidy.backends.despotify.DespotifyBackend" is no longer ' +
             'available.')
+
+    def test_unavailable_bitrate_setting_returns_error(self):
+        result = validate_settings(self.defaults,
+            {'SPOTIFY_BITRATE': 50})
+        self.assertEqual(result['SPOTIFY_BITRATE'],
+            u'Unavailable Spotify bitrate. ' +
+            u'Available bitrates are 96, 160, and 320.')
 
     def test_two_errors_are_both_reported(self):
         result = validate_settings(self.defaults,
