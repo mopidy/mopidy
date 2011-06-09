@@ -16,7 +16,8 @@ sys.argv[1:] = gstreamer_args
 
 from pykka.registry import ActorRegistry
 
-from mopidy import get_version, settings, OptionalDependencyError
+from mopidy import (get_version, settings, OptionalDependencyError,
+    SettingsError)
 from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
@@ -65,7 +66,11 @@ def parse_options():
 def setup_settings():
     get_or_create_folder('~/.mopidy/')
     get_or_create_file('~/.mopidy/settings.py')
-    settings.validate()
+    try:
+        settings.validate()
+    except SettingsError, e:
+        logger.error(e.message)
+        sys.exit(1)
 
 def setup_gobject_loop():
     GObjectEventThread().start()
