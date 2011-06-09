@@ -8,7 +8,9 @@ This change log is used to track all major changes to Mopidy.
 v0.5.0 (in development)
 =======================
 
-No description yet.
+Since last time we've added support for audio streaming to SHOUTcast servers
+and fixed the longstanding playlist loading issue in the Spotify backend. As
+always the release has a bunch of bug fixes.
 
 Please note that 0.5.0 requires some updated dependencies, as listed under
 *Important changes* below.
@@ -20,22 +22,16 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
   automatically be upgraded. If you are not installing from APT, follow the
   instructions at :doc:`/installation/libspotify/`.
 
-- Mopidy now supports running with 1-n outputs at the same time. This feature
-  was mainly added to facilitate Shoutcast support, which Mopidy has also
+- Mopidy now supports running with 1 to N outputs at the same time. This feature
+  was mainly added to facilitate SHOUTcast support, which Mopidy has also
   gained. In its current state outputs can not be toggled during runtime.
 
 **Changes**
 
-- Fix local backend time query errors that where coming from stopped pipeline.
-  (Fixes: :issue:`87`)
+- Local backend:
 
-- Support passing options to GStreamer. See :option:`--help-gst` for a list of
-  available options. (Fixes: :issue:`95`)
-
-- Improve :option:`--list-settings` output. (Fixes: :issue:`91`)
-
-- Replace not decodable characters returned from Spotify instead of throwing an
-  exception, as we won't try to figure out the encoding of non-UTF-8-data.
+  - Fix local backend time query errors that where coming from stopped
+    pipeline. (Fixes: :issue:`87`)
 
 - Spotify backend:
 
@@ -43,6 +39,9 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
     pyspotify, stored playlists will again load when Mopidy starts. The
     workaround of searching and reconnecting to make the playlists appear are
     no longer necessary. (Fixes: :issue:`59`)
+
+  - Replace not decodable characters returned from Spotify instead of throwing
+    an exception, as we won't try to figure out the encoding of non-UTF-8-data.
 
 - MPD frontend:
 
@@ -59,16 +58,22 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
     authentication is turned on, but the connected user has not been
     authenticated yet.
 
+- Command line usage:
+
+  - Support passing options to GStreamer. See :option:`--help-gst` for a list
+    of available options. (Fixes: :issue:`95`)
+
+  - Improve :option:`--list-settings` output. (Fixes: :issue:`91`)
+
 - Tag cache generator:
 
-  - Made it possible to CTRL^c mopidy-scan.
+  - Made it possible to abort :command:`mopidy-scan` with CTRL+C.
 
-  - Fixed bug with bad dates.
+  - Fixed bug regarding handling of bad dates.
 
-  - Use logging not print statements.
+  - Use :mod:`logging` instead of ``print`` statements.
 
-  - Found and worked around strange WMA metadata behaviour, should be fixed
-    properly.
+  - Found and worked around strange WMA metadata behaviour.
 
 
 v0.4.1 (2011-05-06)
