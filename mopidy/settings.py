@@ -183,8 +183,8 @@ OUTPUTS = (
 #:
 #: Default::
 #:
-#:    SHOUTCAST_OUTPUT_SERVER = u'127.0.0.1'
-SHOUTCAST_OUTPUT_SERVER = u'127.0.0.1'
+#:    SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
+SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
 
 #: User to authenticate as against Shoutcast server.
 #:

@@ -21,9 +21,9 @@ class ShoutcastOutput(BaseOutput):
 
     def modify_bin(self):
         self.set_properties(self.bin.get_by_name('shoutcast'), {
-            u'ip': settings.SHOUTCAST_OUTPUT_SERVER,
-            u'mount': settings.SHOUTCAST_OUTPUT_MOUNT,
+            u'ip': settings.SHOUTCAST_OUTPUT_HOSTNAME,
             u'port': settings.SHOUTCAST_OUTPUT_PORT,
+            u'mount': settings.SHOUTCAST_OUTPUT_MOUNT,
             u'username': settings.SHOUTCAST_OUTPUT_USERNAME,
             u'password': settings.SHOUTCAST_OUTPUT_PASSWORD,
         })
