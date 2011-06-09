@@ -8,7 +8,6 @@ import sys
 
 from mopidy import SettingsError
 from mopidy.utils.log import indent
-from mopidy.backends.spotify import BITRATES as SPOTIFY_BITRATES
 
 logger = logging.getLogger('mopidy.utils.settings')
 
@@ -130,7 +129,7 @@ def validate_settings(defaults, settings):
                 continue
 
         if setting == 'SPOTIFY_BITRATE':
-            if value not in SPOTIFY_BITRATES.keys():
+            if value not in (96, 160, 320):
                 errors[setting] = (u'Unavailable Spotify bitrate. ' +
                     u'Available bitrates are 96, 160, and 320.')
 
