@@ -44,6 +44,17 @@ No description yet.
     authentication is turned on, but the connected user has not been
     authenticated yet.
 
+- Tag cache generator:
+
+  - Made it possible to CTRL^c mopidy-scan.
+
+  - Fixed bug with bad dates.
+
+  - Use logging not print statements.
+
+  - Found and worked around strange WMA metadata behaviour, should be fixed
+    properly.
+
 
 v0.4.1 (2011-05-06)
 ===================
