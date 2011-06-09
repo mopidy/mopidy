@@ -1,31 +1,38 @@
 #!/usr/bin/env python
 
-if __name__ == '__main__':
-    import sys
+import sys
+import logging
 
-    from mopidy import settings
-    from mopidy.scanner import Scanner, translator
-    from mopidy.frontends.mpd.translator import tracks_to_tag_cache_format
+from mopidy import settings
+from mopidy.utils.log import setup_console_logging, setup_root_logger
+from mopidy.scanner import Scanner, translator
+from mopidy.frontends.mpd.translator import tracks_to_tag_cache_format
 
-    tracks = []
+setup_root_logger()
+setup_console_logging(2)
 
-    def store(data):
-        track = translator(data)
-        tracks.append(track)
-        print >> sys.stderr, 'Added %s' % track.uri
+tracks = []
 
-    def debug(uri, error):
-        print >> sys.stderr, 'Failed %s: %s' % (uri, error)
+def store(data):
+    track = translator(data)
+    tracks.append(track)
+    logging.debug(u'Added %s', track.uri)
 
-    print >> sys.stderr, 'Scanning %s' % settings.LOCAL_MUSIC_PATH
+def debug(uri, error, debug):
+    logging.error(u'Failed %s: %s - %s', uri, error, debug)
 
-    scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
+logging.info(u'Scanning %s', settings.LOCAL_MUSIC_PATH)
+
+scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
+try:
     scanner.start()
+except KeyboardInterrupt:
+    scanner.stop()
 
-    print >> sys.stderr, 'Done'
+logging.info(u'Done')
 
-    for a in tracks_to_tag_cache_format(tracks):
-        if len(a) == 1:
-            print (u'%s' % a).encode('utf-8')
-        else:
-            print (u'%s: %s' % a).encode('utf-8')
+for a in tracks_to_tag_cache_format(tracks):
+    if len(a) == 1:
+        print (u'%s' % a).encode('utf-8')
+    else:
+        print (u'%s: %s' % a).encode('utf-8')
