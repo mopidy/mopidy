@@ -92,6 +92,7 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 
 .. _use_mpd_on_a_network:
 
+
 Connecting from other machines on the network
 =============================================
 
@@ -117,6 +118,31 @@ file::
 
     LASTFM_USERNAME = u'myusername'
     LASTFM_PASSWORD = u'mysecret'
+
+
+Streaming audio through a SHOUTcast/Icecast server
+==================================================
+
+If you want to play the audio on another computer than the one running Mopidy,
+you can stream the audio from Mopidy through an SHOUTcast or Icecast audio
+streaming server. Multiple media players can then be connected to the streaming
+server simultaneously. To use the SHOUTcast output, do the following:
+
+#. Install, configure and start the Icecast server. It can be found in the
+   ``icecast2`` package in Debian/Ubuntu.
+
+#. Add ``mopidy.outputs.shoutcast.ShoutcastOutput`` output to the
+   :attr:`mopidy.settings.OUTPUTS` setting.
+
+#. Check the default values for the following settings, and alter them to match
+   your Icecast setup if needed:
+
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_HOSTNAME`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PORT`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_USERNAME`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PASSWORD`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_MOUNT`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_ENCODER`
 
 
 Available settings

@@ -157,15 +157,15 @@ MIXER_MAX_VOLUME = 100
 #:     Listens on all interfaces, both IPv4 and IPv6.
 MPD_SERVER_HOSTNAME = u'127.0.0.1'
 
-#: The password required for connecting to the MPD server.
-#:
-#: Default: :class:`None`, which means no password required.
-MPD_SERVER_PASSWORD = None
-
 #: Which TCP port Mopidy's MPD server should listen to.
 #:
 #: Default: 6600
 MPD_SERVER_PORT = 6600
+
+#: The password required for connecting to the MPD server.
+#:
+#: Default: :class:`None`, which means no password required.
+MPD_SERVER_PASSWORD = None
 
 #: List of outputs to use. See :mod:`mopidy.outputs` for all available
 #: backends
@@ -179,42 +179,54 @@ OUTPUTS = (
     u'mopidy.outputs.local.LocalOutput',
 )
 
-#: Servar that runs Shoutcast server to send stream to.
+#: Hostname of the SHOUTcast server which Mopidy should stream audio to.
+#:
+#: Used by :mod:`mopidy.outputs.shoutcast`.
 #:
 #: Default::
 #:
 #:    SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
 SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
 
-#: User to authenticate as against Shoutcast server.
+#: Port of the SHOUTcast server.
 #:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_USERNAME = u'source'
-SHOUTCAST_OUTPUT_USERNAME = u'source'
-
-#: Password to authenticate with against Shoutcast server.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
-SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
-
-#: Port to use for streaming to Shoutcast server.
+#: Used by :mod:`mopidy.outputs.shoutcast`.
 #:
 #: Default::
 #:
 #:    SHOUTCAST_OUTPUT_PORT = 8000
 SHOUTCAST_OUTPUT_PORT = 8000
 
-#: Mountpoint to use for the stream on the Shoutcast server.
+#: User to authenticate as against SHOUTcast server.
+#:
+#: Used by :mod:`mopidy.outputs.shoutcast`.
+#:
+#: Default::
+#:
+#:    SHOUTCAST_OUTPUT_USERNAME = u'source'
+SHOUTCAST_OUTPUT_USERNAME = u'source'
+
+#: Password to authenticate with against SHOUTcast server.
+#:
+#: Used by :mod:`mopidy.outputs.shoutcast`.
+#:
+#: Default::
+#:
+#:    SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
+SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
+
+#: Mountpoint to use for the stream on the SHOUTcast server.
+#:
+#: Used by :mod:`mopidy.outputs.shoutcast`.
 #:
 #: Default::
 #:
 #:    SHOUTCAST_OUTPUT_MOUNT = u'/stream'
 SHOUTCAST_OUTPUT_MOUNT = u'/stream'
 
-#: Encoder to use to process audio data before streaming.
+#: Encoder to use to process audio data before streaming to SHOUTcast server.
+#:
+#: Used by :mod:`mopidy.outputs.shoutcast`.
 #:
 #: Default::
 #:
