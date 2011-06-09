@@ -80,7 +80,7 @@ class SettingsProxy(object):
     def _read_from_stdin(self, prompt):
         if u'_PASSWORD' in prompt:
             return (getpass.getpass(prompt)
-                .decode(getpass.sys.stdin.encoding, 'ignore'))
+                .decode(sys.stdin.encoding, 'ignore'))
         else:
             sys.stdout.write(prompt)
             return (sys.stdin.readline().strip()
