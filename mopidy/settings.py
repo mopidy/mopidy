@@ -248,11 +248,13 @@ SPOTIFY_USERNAME = u''
 #: Used by :mod:`mopidy.backends.spotify`.
 SPOTIFY_PASSWORD = u''
 
-#: Do you prefer high bitrate (320k)?
+#: Spotify preferred bitrate.
+#:
+#: Available values are 96, 160, and 320.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
 #
 #: Default::
 #:
-#:     SPOTIFY_HIGH_BITRATE = False # 160k
-SPOTIFY_HIGH_BITRATE = False
+#:     SPOTIFY_BITRATE = 160
+SPOTIFY_BITRATE = 160

@@ -107,6 +107,7 @@ def validate_settings(defaults, settings):
         'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
         'SERVER_PORT': 'MPD_SERVER_PORT',
+        'SPOTIFY_HIGH_BITRATE': 'SPOTIFY_BITRATE',
         'SPOTIFY_LIB_APPKEY': None,
         'SPOTIFY_LIB_CACHE': 'SPOTIFY_CACHE_PATH',
     }
@@ -126,6 +127,11 @@ def validate_settings(defaults, settings):
                     '"mopidy.backends.despotify.DespotifyBackend" is no ' +
                     'longer available.')
                 continue
+
+        if setting == 'SPOTIFY_BITRATE':
+            if value not in (96, 160, 320):
+                errors[setting] = (u'Unavailable Spotify bitrate. ' +
+                    u'Available bitrates are 96, 160, and 320.')
 
         if setting not in defaults:
             errors[setting] = u'Unknown setting. Is it misspelled?'
