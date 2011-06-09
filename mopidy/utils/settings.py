@@ -19,20 +19,6 @@ class SettingsProxy(object):
         self.local = self._get_local_settings()
         self.runtime = {}
 
-    def _read_missing_settings_from_stdin(self, default, local):
-        for setting, value in default.iteritems():
-            if isinstance(value, basestring) and len(value) == 0:
-                local[setting] = self._read_from_stdin(setting + u': ')
-
-    def _read_from_stdin(self, prompt):
-        if u'_PASSWORD' in prompt:
-            return (getpass.getpass(prompt)
-                .decode(getpass.sys.stdin.encoding, 'ignore'))
-        else:
-            sys.stdout.write(prompt)
-            return (sys.stdin.readline().strip()
-                .decode(sys.stdin.encoding, 'ignore'))
-
     def _get_local_settings(self):
         dotdir = os.path.expanduser(u'~/.mopidy/')
         settings_file = os.path.join(dotdir, u'settings.py')
@@ -85,6 +71,20 @@ class SettingsProxy(object):
             logger.error(u'Settings validation errors: %s',
                 indent(self.get_errors_as_string()))
             raise SettingsError(u'Settings validation failed.')
+
+    def _read_missing_settings_from_stdin(self, default, local):
+        for setting, value in default.iteritems():
+            if isinstance(value, basestring) and len(value) == 0:
+                local[setting] = self._read_from_stdin(setting + u': ')
+
+    def _read_from_stdin(self, prompt):
+        if u'_PASSWORD' in prompt:
+            return (getpass.getpass(prompt)
+                .decode(getpass.sys.stdin.encoding, 'ignore'))
+        else:
+            sys.stdout.write(prompt)
+            return (sys.stdin.readline().strip()
+                .decode(sys.stdin.encoding, 'ignore'))
 
     def get_errors(self):
         return validate_settings(self.default, self.local)
