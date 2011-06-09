@@ -106,7 +106,7 @@ class Scanner(object):
         self.next_uri()
 
     def get_duration(self):
-        self.pipe.get_state() # Block untill state change is done.
+        self.pipe.get_state() # Block until state change is done.
         try:
             return self.pipe.query_duration(
                 gst.FORMAT_TIME, None)[0] // gst.MSECOND
