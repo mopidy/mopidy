@@ -263,6 +263,7 @@ class PlaybackController(object):
         .. digraph:: state_transitions
 
             "STOPPED" -> "PLAYING" [ label="play" ]
+            "STOPPED" -> "PAUSED" [ label="pause" ]
             "PLAYING" -> "STOPPED" [ label="stop" ]
             "PLAYING" -> "PAUSED" [ label="pause" ]
             "PLAYING" -> "PLAYING" [ label="play" ]
