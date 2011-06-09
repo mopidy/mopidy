@@ -70,6 +70,9 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
 
   - Improve :option:`--list-settings` output. (Fixes: :issue:`91`)
 
+  - Added :option:`--interactive` for reading missing local settings from
+    ``stdin``. (Fixes: :issue:`96`)
+
 - Tag cache generator:
 
   - Made it possible to abort :command:`mopidy-scan` with CTRL+C.
