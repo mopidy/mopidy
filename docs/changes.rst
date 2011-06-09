@@ -22,9 +22,14 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
   automatically be upgraded. If you are not installing from APT, follow the
   instructions at :doc:`/installation/libspotify/`.
 
-- Mopidy now supports running with 1 to N outputs at the same time. This feature
-  was mainly added to facilitate SHOUTcast support, which Mopidy has also
-  gained. In its current state outputs can not be toggled during runtime.
+- If you have explicitly set the :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE`
+  setting, you must update your settings file. The new setting is named
+  :attr:`mopidy.settings.SPOTIFY_BITRATE` and accepts the integer values 96,
+  160, and 320.
+
+- Mopidy now supports running with 1 to N outputs at the same time. This
+  feature was mainly added to facilitate SHOUTcast support, which Mopidy has
+  also gained. In its current state outputs can not be toggled during runtime.
 
 **Changes**
 
