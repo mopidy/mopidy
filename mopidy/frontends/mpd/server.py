@@ -52,18 +52,19 @@ class MpdServer(asyncore.dispatcher):
                 self._format_hostname(settings.MPD_SERVER_HOSTNAME),
                 settings.MPD_SERVER_PORT)
         except IOError, e:
-            logger.error(u'MPD server startup failed: %s' % str(e).decode('utf-8'))
+            logger.error(u'MPD server startup failed: %s' %
+                str(e).decode('utf-8'))
             sys.exit(1)
 
     def handle_accept(self):
-        """Handle new client connection."""
+        """Called by asyncore when a new client connects."""
         (client_socket, client_socket_address) = self.accept()
         logger.info(u'MPD client connection from [%s]:%s',
             client_socket_address[0], client_socket_address[1])
-        MpdSession(self, client_socket, client_socket_address).start()
+        MpdSession(self, client_socket, client_socket_address)
 
     def handle_close(self):
-        """Handle end of client connection."""
+        """Called by asyncore when the socket is closed."""
         self.close()
 
     def _format_hostname(self, hostname):

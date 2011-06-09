@@ -1,8 +1,8 @@
-from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdUnknownCommand
 
-@handle_pattern(r'^command_list_begin$')
-def command_list_begin(frontend):
+@handle_request(r'^command_list_begin$')
+def command_list_begin(context):
     """
     *musicpd.org, command list section:*
 
@@ -18,31 +18,33 @@ def command_list_begin(frontend):
         returned. If ``command_list_ok_begin`` is used, ``list_OK`` is
         returned for each successful command executed in the command list.
     """
-    frontend.command_list = []
-    frontend.command_list_ok = False
+    context.dispatcher.command_list = []
+    context.dispatcher.command_list_ok = False
 
-@handle_pattern(r'^command_list_end$')
-def command_list_end(frontend):
+@handle_request(r'^command_list_end$')
+def command_list_end(context):
     """See :meth:`command_list_begin()`."""
-    if frontend.command_list is False:
+    if context.dispatcher.command_list is False:
         # Test for False exactly, and not e.g. empty list
         raise MpdUnknownCommand(command='command_list_end')
-    (command_list, frontend.command_list) = (frontend.command_list, False)
-    (command_list_ok, frontend.command_list_ok) = (
-        frontend.command_list_ok, False)
-    result = []
-    for i, command in enumerate(command_list):
-        response = frontend.handle_request(command, command_list_index=i)
-        if response is not None:
-            result.append(response)
-        if response and response[-1].startswith(u'ACK'):
-            return result
+    (command_list, context.dispatcher.command_list) = (
+        context.dispatcher.command_list, False)
+    (command_list_ok, context.dispatcher.command_list_ok) = (
+        context.dispatcher.command_list_ok, False)
+    command_list_response = []
+    for index, command in enumerate(command_list):
+        response = context.dispatcher.handle_request(
+            command, current_command_list_index=index)
+        command_list_response.extend(response)
+        if (command_list_response and
+                command_list_response[-1].startswith(u'ACK')):
+            return command_list_response
         if command_list_ok:
-            response.append(u'list_OK')
-    return result
+            command_list_response.append(u'list_OK')
+    return command_list_response
 
-@handle_pattern(r'^command_list_ok_begin$')
-def command_list_ok_begin(frontend):
+@handle_request(r'^command_list_ok_begin$')
+def command_list_ok_begin(context):
     """See :meth:`command_list_begin()`."""
-    frontend.command_list = []
-    frontend.command_list_ok = True
+    context.dispatcher.command_list = []
+    context.dispatcher.command_list_ok = True
