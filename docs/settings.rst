@@ -56,7 +56,7 @@ You may also want to change some of the ``LOCAL_*`` settings. See
 
     Currently, Mopidy supports using Spotify *or* local storage as a music
     source. We're working on using both sources simultaneously, and will
-    hopefully have support for this in the 0.3 release.
+    hopefully have support for this in the 0.6 release.
 
 
 .. _generating_a_tag_cache:
