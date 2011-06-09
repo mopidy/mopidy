@@ -22,7 +22,11 @@ class LocalBackend(ThreadingActor, Backend):
     """
     A backend for playing music from a local music archive.
 
-    **Issues:** http://github.com/mopidy/mopidy/issues/labels/backend-local
+    **Issues:** https://github.com/mopidy/mopidy/issues?labels=backend-local
+
+    **Dependencies:**
+
+    - None
 
     **Settings:**
 

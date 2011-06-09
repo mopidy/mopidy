@@ -28,7 +28,12 @@ class SpotifyBackend(ThreadingActor, Backend):
         trade mark of the Spotify Group.
 
     **Issues:**
-    http://github.com/mopidy/mopidy/issues/labels/backend-spotify
+    https://github.com/mopidy/mopidy/issues?labels=backend-spotify
+
+    **Dependencies:**
+
+    - libspotify == 0.0.8 (libspotify8 package from apt.mopidy.com)
+    - pyspotify == 1.2 (python-spotify package from apt.mopidy.com)
 
     **Settings:**
 

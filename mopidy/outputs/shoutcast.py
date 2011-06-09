@@ -13,6 +13,19 @@ class ShoutcastOutput(BaseOutput):
     supports Shoutcast. The output supports setting for: server address, port,
     mount point, user, password and encoder to use. Please see
     :class:`mopidy.settings` for details about settings.
+
+    **Dependencies:**
+
+    - A SHOUTcast/Icecast server
+
+    **Settings:**
+
+    - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_HOSTNAME`
+    - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PORT`
+    - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_USERNAME`
+    - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PASSWORD`
+    - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_MOUNT`
+    - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_ENCODER`
     """
 
     def describe_bin(self):
