@@ -28,15 +28,15 @@ from mopidy.utils.settings import list_settings_optparse_callback
 logger = logging.getLogger('mopidy.core')
 
 def main():
-    options = parse_options()
-    setup_logging(options.verbosity_level, options.save_debug_log)
-    setup_settings()
-    setup_gobject_loop()
-    setup_gstreamer()
-    setup_mixer()
-    setup_backend()
-    setup_frontends()
     try:
+        options = parse_options()
+        setup_logging(options.verbosity_level, options.save_debug_log)
+        setup_settings(options.interactive)
+        setup_gobject_loop()
+        setup_gstreamer()
+        setup_mixer()
+        setup_backend()
+        setup_frontends()
         while ActorRegistry.get_all():
             time.sleep(1)
         logger.info(u'No actors left. Exiting...')
@@ -49,6 +49,9 @@ def parse_options():
     parser.add_option('--help-gst',
         action='store_true', dest='help_gst',
         help='show GStreamer help options')
+    parser.add_option('-i', '--interactive',
+        action='store_true', dest='interactive',
+        help='ask interactively for required settings which is missing')
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
@@ -63,11 +66,11 @@ def parse_options():
         help='list current settings')
     return parser.parse_args(args=mopidy_args)[0]
 
-def setup_settings():
+def setup_settings(interactive):
     get_or_create_folder('~/.mopidy/')
     get_or_create_file('~/.mopidy/settings.py')
     try:
-        settings.validate()
+        settings.validate(interactive)
     except SettingsError, e:
         logger.error(e.message)
         sys.exit(1)

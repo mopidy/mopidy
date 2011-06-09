@@ -149,6 +149,12 @@ class SettingsProxyTest(unittest.TestCase):
         actual = self.settings.TEST
         self.assertEqual(actual, './test')
 
+    def test_interactive_input_of_missing_defaults(self):
+        self.settings.default['TEST'] = ''
+        interactive_input = 'input'
+        self.settings._read_from_stdin = lambda _: interactive_input
+        self.settings.validate(interactive=True)
+        self.assertEqual(interactive_input, self.settings.TEST)
 
 class FormatSettingListTest(unittest.TestCase):
     def setUp(self):

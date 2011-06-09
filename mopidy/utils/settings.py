@@ -1,6 +1,7 @@
 # Absolute import needed to import ~/.mopidy/settings.py and not ourselves
 from __future__ import absolute_import
 from copy import copy
+import getpass
 import logging
 import os
 from pprint import pformat
@@ -63,11 +64,27 @@ class SettingsProxy(object):
         else:
             super(SettingsProxy, self).__setattr__(attr, value)
 
-    def validate(self):
+    def validate(self, interactive):
+        if interactive:
+            self._read_missing_settings_from_stdin(self.default, self.local)
         if self.get_errors():
             logger.error(u'Settings validation errors: %s',
                 indent(self.get_errors_as_string()))
             raise SettingsError(u'Settings validation failed.')
+
+    def _read_missing_settings_from_stdin(self, default, local):
+        for setting, value in default.iteritems():
+            if isinstance(value, basestring) and len(value) == 0:
+                local[setting] = self._read_from_stdin(setting + u': ')
+
+    def _read_from_stdin(self, prompt):
+        if u'_PASSWORD' in prompt:
+            return (getpass.getpass(prompt)
+                .decode(sys.stdin.encoding, 'ignore'))
+        else:
+            sys.stdout.write(prompt)
+            return (sys.stdin.readline().strip()
+                .decode(sys.stdin.encoding, 'ignore'))
 
     def get_errors(self):
         return validate_settings(self.default, self.local)
