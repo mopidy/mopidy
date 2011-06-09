@@ -28,15 +28,15 @@ from mopidy.utils.settings import list_settings_optparse_callback
 logger = logging.getLogger('mopidy.core')
 
 def main():
-    options = parse_options()
-    setup_logging(options.verbosity_level, options.save_debug_log)
-    setup_settings(options.interactive)
-    setup_gobject_loop()
-    setup_gstreamer()
-    setup_mixer()
-    setup_backend()
-    setup_frontends()
     try:
+        options = parse_options()
+        setup_logging(options.verbosity_level, options.save_debug_log)
+        setup_settings(options.interactive)
+        setup_gobject_loop()
+        setup_gstreamer()
+        setup_mixer()
+        setup_backend()
+        setup_frontends()
         while ActorRegistry.get_all():
             time.sleep(1)
         logger.info(u'No actors left. Exiting...')
