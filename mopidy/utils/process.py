@@ -5,11 +5,18 @@ import gobject
 gobject.threads_init()
 
 from pykka import ActorDeadError
+from pykka.registry import ActorRegistry
 
 from mopidy import SettingsError
 
 logger = logging.getLogger('mopidy.utils.process')
 
+def stop_all_actors():
+    num_actors = len(ActorRegistry.get_all())
+    while num_actors:
+        logger.debug(u'Stopping %d actor(s)...', num_actors)
+        ActorRegistry.stop_all()
+        num_actors = len(ActorRegistry.get_all())
 
 class BaseThread(threading.Thread):
     def __init__(self):

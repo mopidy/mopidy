@@ -22,7 +22,7 @@ from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import GObjectEventThread
+from mopidy.utils.process import GObjectEventThread, stop_all_actors
 from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
@@ -42,7 +42,7 @@ def main():
         logger.info(u'No actors left. Exiting...')
     except KeyboardInterrupt:
         logger.info(u'User interrupt. Exiting...')
-        ActorRegistry.stop_all()
+        stop_all_actors()
 
 def parse_options():
     parser = optparse.OptionParser(version=u'Mopidy %s' % get_version())
