@@ -17,7 +17,6 @@ class SettingsProxy(object):
         self.default = self._get_settings_dict_from_module(
             default_settings_module)
         self.local = self._get_local_settings()
-        self._read_missing_settings_from_stdin(self.default, self.local)
         self.runtime = {}
 
     def _read_missing_settings_from_stdin(self, default, local):
@@ -79,7 +78,9 @@ class SettingsProxy(object):
         else:
             super(SettingsProxy, self).__setattr__(attr, value)
 
-    def validate(self):
+    def validate(self, interactive):
+        if interactive:
+            self._read_missing_settings_from_stdin(self.default, self.local)
         if self.get_errors():
             logger.error(u'Settings validation errors: %s',
                 indent(self.get_errors_as_string()))
