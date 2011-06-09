@@ -1,6 +1,7 @@
 # Absolute import needed to import ~/.mopidy/settings.py and not ourselves
 from __future__ import absolute_import
 from copy import copy
+import getpass
 import logging
 import os
 from pprint import pformat
@@ -16,7 +17,22 @@ class SettingsProxy(object):
         self.default = self._get_settings_dict_from_module(
             default_settings_module)
         self.local = self._get_local_settings()
+        self._read_missing_settings_from_stdin(self.default, self.local)
         self.runtime = {}
+
+    def _read_missing_settings_from_stdin(self, default, local):
+        for setting, value in default.iteritems():
+            if isinstance(value, basestring) and len(value) == 0:
+                local[setting] = self._read_from_stdin(setting + u': ')
+
+    def _read_from_stdin(self, prompt):
+        if u'_PASSWORD' in prompt:
+            return (getpass.getpass(prompt)
+                .decode(getpass.sys.stdin.encoding, 'ignore'))
+        else:
+            sys.stdout.write(prompt)
+            return (sys.stdin.readline().strip()
+                .decode(sys.stdin.encoding, 'ignore'))
 
     def _get_local_settings(self):
         dotdir = os.path.expanduser(u'~/.mopidy/')
