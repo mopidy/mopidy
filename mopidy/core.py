@@ -44,6 +44,9 @@ def main():
             time.sleep(1)
     except KeyboardInterrupt:
         logger.info(u'Interrupted. Exiting...')
+    except Exception as e:
+        logger.exception(e)
+    finally:
         stop_all_actors()
 
 def parse_options():
