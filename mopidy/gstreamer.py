@@ -298,7 +298,7 @@ class GStreamer(ThreadingActor):
         output.sync_state_with_parent() # Required to add to running pipe
         gst.element_link_many(self._tee, output)
         self._outputs.append(output)
-        logger.info('Added %s', output.get_name())
+        logger.debug('GStreamer added %s', output.get_name())
 
     def list_outputs(self):
         """
