@@ -71,6 +71,7 @@ class ValidateSettingsTest(unittest.TestCase):
 class SettingsProxyTest(unittest.TestCase):
     def setUp(self):
         self.settings = SettingsProxy(default_settings_module)
+        self.settings.local.clear()
 
     def test_set_and_get_attr(self):
         self.settings.TEST = 'test'
@@ -155,6 +156,7 @@ class SettingsProxyTest(unittest.TestCase):
         self.settings._read_from_stdin = lambda _: interactive_input
         self.settings.validate(interactive=True)
         self.assertEqual(interactive_input, self.settings.TEST)
+
 
 class FormatSettingListTest(unittest.TestCase):
     def setUp(self):
