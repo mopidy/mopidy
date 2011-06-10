@@ -22,9 +22,13 @@ def exit_handler(signum, frame):
 def stop_all_actors():
     num_actors = len(ActorRegistry.get_all())
     while num_actors:
+        logger.debug(u'Seeing %d actor and %d non-actor thread(s): %s',
+            num_actors, threading.active_count() - num_actors,
+            ', '.join([t.name for t in threading.enumerate()]))
         logger.debug(u'Stopping %d actor(s)...', num_actors)
         ActorRegistry.stop_all()
         num_actors = len(ActorRegistry.get_all())
+    logger.debug(u'All actors stopped.')
 
 class BaseThread(threading.Thread):
     def __init__(self):
