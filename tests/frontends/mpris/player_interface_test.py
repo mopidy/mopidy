@@ -4,6 +4,7 @@ import unittest
 from mopidy.backends.dummy import DummyBackend
 from mopidy.backends.base.playback import PlaybackController
 from mopidy.frontends import mpris
+from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Track
 
 PLAYING = PlaybackController.PLAYING
@@ -13,12 +14,14 @@ STOPPED = PlaybackController.STOPPED
 class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):
         mpris.MprisObject._connect_to_dbus = mock.Mock()
+        self.mixer = DummyMixer.start().proxy()
         self.backend = DummyBackend.start().proxy()
         self.mpris = mpris.MprisObject()
         self.mpris._backend = self.backend
 
     def tearDown(self):
         self.backend.stop()
+        self.mixer.stop()
 
     def test_get_playback_status_is_playing_when_playing(self):
         self.backend.playback.state = PLAYING
@@ -106,6 +109,32 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertTrue(self.backend.playback.shuffle.get())
         result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', False)
         self.assertFalse(self.backend.playback.shuffle.get())
+
+    def test_get_volume_should_return_volume_between_zero_and_one(self):
+        self.mixer.volume = 0
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Volume')
+        self.assertEquals(result, 0)
+
+        self.mixer.volume = 50
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Volume')
+        self.assertEquals(result, 0.5)
+
+        self.mixer.volume = 100
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Volume')
+        self.assertEquals(result, 1)
+
+    def test_set_volume_to_one_should_set_mixer_volume_to_100(self):
+        self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', 1.0)
+        self.assertEquals(self.mixer.volume.get(), 100)
+
+    def test_set_volume_to_anything_above_one_should_set_mixer_volume_to_100(self):
+        self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', 2.0)
+        self.assertEquals(self.mixer.volume.get(), 100)
+
+    def test_set_volume_to_anything_not_a_number_does_not_change_volume(self):
+        self.mixer.volume = 10
+        self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', None)
+        self.assertEquals(self.mixer.volume.get(), 10)
 
     def test_get_minimum_rate_is_one_or_less(self):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'MinimumRate')

@@ -15,6 +15,7 @@ from pykka.registry import ActorRegistry
 from mopidy.backends.base import Backend
 from mopidy.backends.base.playback import PlaybackController
 from mopidy.frontends.base import BaseFrontend
+from mopidy.mixers.base import BaseMixer
 
 logger = logging.getLogger('mopidy.frontends.mpris')
 
@@ -90,6 +91,7 @@ class MprisObject(dbus.service.Object):
 
     def __init__(self):
         self._backend = None
+        self._mixer = None
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
             PLAYER_IFACE: self._get_player_iface_properties(),
@@ -121,8 +123,7 @@ class MprisObject(dbus.service.Object):
             'Metadata': ({
                 'mpris:trackid': '', # TODO Use (cpid, track.uri)
             }, None),
-            # TODO Get/set volume
-            'Volume': (1.0, None),
+            'Volume': (self.get_Volume, self.set_Volume),
             # TODO Get backend.playback.time_position
             'Position': (0, None),
             'MinimumRate': (1.0, None),
@@ -154,6 +155,14 @@ class MprisObject(dbus.service.Object):
             assert len(backend_refs) == 1, 'Expected exactly one running backend.'
             self._backend = backend_refs[0].proxy()
         return self._backend
+
+    @property
+    def mixer(self):
+        if self._mixer is None:
+            mixer_refs = ActorRegistry.get_by_class(BaseMixer)
+            assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
+            self._mixer = mixer_refs[0].proxy()
+        return self._mixer
 
 
     ### Properties interface
@@ -359,3 +368,18 @@ class MprisObject(dbus.service.Object):
             self.backend.playback.shuffle = True
         else:
             self.backend.playback.shuffle = False
+
+    def get_Volume(self):
+        volume = self.mixer.volume.get()
+        if volume is not None:
+            return volume / 100.0
+
+    def set_Volume(self, value):
+        if value is None:
+            return
+        elif value < 0:
+            self.mixer.volume = 0
+        elif value > 1:
+            self.mixer.volume = 100
+        elif 0 <= value <= 1:
+            self.mixer.volume = int(value * 100)
