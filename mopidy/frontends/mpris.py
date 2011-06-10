@@ -124,8 +124,7 @@ class MprisObject(dbus.service.Object):
                 'mpris:trackid': '', # TODO Use (cpid, track.uri)
             }, None),
             'Volume': (self.get_Volume, self.set_Volume),
-            # TODO Get backend.playback.time_position
-            'Position': (0, None),
+            'Position': (self.get_Position, None),
             'MinimumRate': (1.0, None),
             'MaximumRate': (1.0, None),
             # TODO True if CanControl and backend.playback.track_at_next
@@ -383,3 +382,6 @@ class MprisObject(dbus.service.Object):
             self.mixer.volume = 100
         elif 0 <= value <= 1:
             self.mixer.volume = int(value * 100)
+
+    def get_Position(self):
+        return self.backend.playback.time_position.get() * 1000

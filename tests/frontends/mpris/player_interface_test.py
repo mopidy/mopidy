@@ -136,6 +136,19 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', None)
         self.assertEquals(self.mixer.volume.get(), 10)
 
+    def test_get_position_returns_time_position_in_microseconds(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+        self.backend.playback.seek(10000)
+        result_in_microseconds = self.mpris.Get(mpris.PLAYER_IFACE, 'Position')
+        result_in_milliseconds = result_in_microseconds // 1000
+        self.assert_(result_in_milliseconds >= 10000)
+
+    def test_get_position_when_no_current_track_should_be_zero(self):
+        result_in_microseconds = self.mpris.Get(mpris.PLAYER_IFACE, 'Position')
+        result_in_milliseconds = result_in_microseconds // 1000
+        self.assertEquals(result_in_milliseconds, 0)
+
     def test_get_minimum_rate_is_one_or_less(self):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'MinimumRate')
         self.assert_(result <= 1.0)
