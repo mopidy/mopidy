@@ -281,11 +281,18 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def SetPosition(self, track_id, position):
         logger.debug(u'%s.SetPosition called', PLAYER_IFACE)
-        # TODO Pseudo code:
-        # if track_id != playback.current_track.track_id: return
-        # if not 0 <= position <= playback.current_track.length: return
-        # playback.seek(position)
-        pass
+        position = position // 1000
+        current_track = self.backend.playback.current_track.get()
+        # TODO Currently the ID is assumed to be the URI of the track. This
+        # should be changed to a D-Bus object ID than can be mapped to the CPID
+        # and URI of the track.
+        if current_track and current_track.uri != track_id:
+            return
+        if position < 0:
+            return
+        if current_track and current_track.length < position:
+            return
+        self.backend.playback.seek(position)
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def OpenUri(self, uri):

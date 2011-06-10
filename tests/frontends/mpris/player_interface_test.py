@@ -311,3 +311,92 @@ class PlayerInterfaceTest(unittest.TestCase):
         after_seek = self.backend.playback.time_position.get()
         self.assert_(after_seek >= 0)
         self.assert_(after_seek < before_seek)
+
+    def test_set_position_sets_the_current_track_position_in_microsecs(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+
+        before_set_position = self.backend.playback.time_position.get()
+        self.assert_(before_set_position <= 5000)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
+        track_id = 'a'
+
+        position_to_set_in_milliseconds = 20000
+        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+
+        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
+        after_set_position = self.backend.playback.time_position.get()
+        self.assert_(after_set_position >= position_to_set_in_milliseconds)
+
+    def test_set_position_does_nothing_if_the_position_is_negative(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+        self.backend.playback.seek(20000)
+
+        before_set_position = self.backend.playback.time_position.get()
+        self.assert_(before_set_position >= 20000)
+        self.assert_(before_set_position <= 25000)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+        track_id = 'a'
+
+        position_to_set_in_milliseconds = -1000
+        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+
+        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+
+        after_set_position = self.backend.playback.time_position.get()
+        self.assert_(after_set_position >= before_set_position)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+    def test_set_position_does_nothing_if_position_is_larger_than_track_length(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+        self.backend.playback.seek(20000)
+
+        before_set_position = self.backend.playback.time_position.get()
+        self.assert_(before_set_position >= 20000)
+        self.assert_(before_set_position <= 25000)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+        track_id = 'a'
+
+        position_to_set_in_milliseconds = 50000
+        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+
+        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+
+        after_set_position = self.backend.playback.time_position.get()
+        self.assert_(after_set_position >= before_set_position)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+    def test_set_position_does_nothing_if_track_id_does_not_match_current_track(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+        self.backend.playback.seek(20000)
+
+        before_set_position = self.backend.playback.time_position.get()
+        self.assert_(before_set_position >= 20000)
+        self.assert_(before_set_position <= 25000)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+        track_id = 'b'
+
+        position_to_set_in_milliseconds = 0
+        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+
+        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+
+        after_set_position = self.backend.playback.time_position.get()
+        self.assert_(after_set_position >= before_set_position)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
