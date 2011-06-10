@@ -264,10 +264,11 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Play(self):
         logger.debug(u'%s.Play called', PLAYER_IFACE)
-        # TODO Pseudo code:
-        # if playback.state == playback.PAUSED: playback.resume()
-        # elif playback.state == playback.STOPPED: playback.play()
-        pass
+        state = self.backend.playback.state.get()
+        if state == PlaybackController.PAUSED:
+            self.backend.playback.resume().get()
+        else:
+            self.backend.playback.play().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Seek(self, offset):

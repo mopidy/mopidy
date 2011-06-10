@@ -204,6 +204,12 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Stop()
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
 
+    def test_play_when_stopped_starts_playback(self):
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
+        self.mpris.Play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
     def test_play_after_pause_resumes_from_same_position(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
         self.backend.playback.play()
@@ -212,9 +218,17 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assert_(before_pause >= 0)
 
         self.mpris.Pause()
+        self.assertEquals(self.backend.playback.state.get(), PAUSED)
         at_pause = self.backend.playback.time_position.get()
         self.assert_(at_pause >= before_pause)
 
         self.mpris.Play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
         after_pause = self.backend.playback.time_position.get()
         self.assert_(after_pause >= at_pause)
+
+    def test_play_when_there_is_no_track_has_no_effect(self):
+        self.backend.current_playlist.clear()
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
+        self.mpris.Play()
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
