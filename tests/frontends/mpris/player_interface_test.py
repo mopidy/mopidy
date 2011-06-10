@@ -232,3 +232,82 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
         self.mpris.Play()
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
+
+    def test_seek_seeks_given_microseconds_forward_in_the_current_track(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+
+        before_seek = self.backend.playback.time_position.get()
+        self.assert_(before_seek >= 0)
+
+        milliseconds_to_seek = 10000
+        microseconds_to_seek = milliseconds_to_seek * 1000
+
+        self.mpris.Seek(microseconds_to_seek)
+
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
+        after_seek = self.backend.playback.time_position.get()
+        self.assert_(after_seek >= (before_seek + milliseconds_to_seek))
+
+    def test_seek_seeks_given_microseconds_backward_if_negative(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+        self.backend.playback.seek(20000)
+
+        before_seek = self.backend.playback.time_position.get()
+        self.assert_(before_seek >= 20000)
+
+        milliseconds_to_seek = -10000
+        microseconds_to_seek = milliseconds_to_seek * 1000
+
+        self.mpris.Seek(microseconds_to_seek)
+
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
+        after_seek = self.backend.playback.time_position.get()
+        self.assert_(after_seek >= (before_seek + milliseconds_to_seek))
+        self.assert_(after_seek < before_seek)
+
+    def test_seek_seeks_to_start_of_track_if_new_position_is_negative(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+        self.backend.playback.seek(20000)
+
+        before_seek = self.backend.playback.time_position.get()
+        self.assert_(before_seek >= 20000)
+
+        milliseconds_to_seek = -30000
+        microseconds_to_seek = milliseconds_to_seek * 1000
+
+        self.mpris.Seek(microseconds_to_seek)
+
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
+        after_seek = self.backend.playback.time_position.get()
+        self.assert_(after_seek >= (before_seek + milliseconds_to_seek))
+        self.assert_(after_seek < before_seek)
+        self.assert_(after_seek >= 0)
+
+    def test_seek_skips_to_next_track_if_new_position_larger_than_track_length(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000),
+            Track(uri='b')])
+        self.backend.playback.play()
+        self.backend.playback.seek(20000)
+
+        before_seek = self.backend.playback.time_position.get()
+        self.assert_(before_seek >= 20000)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+        milliseconds_to_seek = 50000
+        microseconds_to_seek = milliseconds_to_seek * 1000
+
+        self.mpris.Seek(microseconds_to_seek)
+
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'b')
+
+        after_seek = self.backend.playback.time_position.get()
+        self.assert_(after_seek >= 0)
+        self.assert_(after_seek < before_seek)

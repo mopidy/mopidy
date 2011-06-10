@@ -273,14 +273,10 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Seek(self, offset):
         logger.debug(u'%s.Seek called', PLAYER_IFACE)
-        # TODO Pseudo code:
-        # new_position = playback.time_position + offset
-        # if new_position > playback.current_track.length:
-        #     playback.next()
-        #     return
-        # if new_position < 0: new_position = 0
-        # playback.seek(new_position)
-        pass
+        offset_in_milliseconds = offset // 1000
+        current_position = self.backend.playback.time_position.get()
+        new_position = current_position + offset_in_milliseconds
+        self.backend.playback.seek(new_position)
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def SetPosition(self, track_id, position):
