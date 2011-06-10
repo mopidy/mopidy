@@ -74,7 +74,6 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
         logger.debug(u'Metadata updated')
-        self.refresh_stored_playlists()
 
     def connection_error(self, session, error):
         """Callback used by pyspotify"""
