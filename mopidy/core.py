@@ -42,6 +42,8 @@ def main():
         setup_frontends()
         while True:
             time.sleep(1)
+    except SettingsError as e:
+        logger.error(e.message)
     except KeyboardInterrupt:
         logger.info(u'Interrupted. Exiting...')
     except Exception as e:
