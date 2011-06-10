@@ -68,6 +68,31 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.repeat.get(), True)
         self.assertEquals(self.backend.playback.single.get(), False)
 
+    def test_get_rate_is_greater_or_equal_than_minimum_rate(self):
+        rate = self.mpris.Get(mpris.PLAYER_IFACE, 'Rate')
+        minimum_rate = self.mpris.Get(mpris.PLAYER_IFACE, 'MinimumRate')
+        self.assert_(rate >= minimum_rate)
+
+    def test_get_rate_is_less_or_equal_than_maximum_rate(self):
+        rate = self.mpris.Get(mpris.PLAYER_IFACE, 'Rate')
+        maximum_rate = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
+        self.assert_(rate >= maximum_rate)
+
+    def test_set_rate_to_zero_pauses_playback(self):
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.mpris.Set(mpris.PLAYER_IFACE, 'Rate', 0)
+        self.assertEquals(self.backend.playback.state.get(), PAUSED)
+
+    def test_get_minimum_rate_is_one_or_less(self):
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'MinimumRate')
+        self.assert_(result <= 1.0)
+
+    def test_get_maximum_rate_is_one_or_more(self):
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
+        self.assert_(result >= 1.0)
+
     def test_next_when_playing_should_skip_to_next_track_and_keep_playing(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()

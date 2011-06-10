@@ -115,7 +115,7 @@ class MprisObject(dbus.service.Object):
         return {
             'PlaybackStatus': (self.get_PlaybackStatus, None),
             'LoopStatus': (self.get_LoopStatus, self.set_LoopStatus),
-            'Rate': (1.0, None),
+            'Rate': (1.0, self.set_Rate),
             # TODO Get/set backend.playback.random
             'Shuffle': (False, None),
             # TODO Get meta data
@@ -347,3 +347,7 @@ class MprisObject(dbus.service.Object):
         elif value == 'Playlist':
             self.backend.playback.repeat = True
             self.backend.playback.single = False
+
+    def set_Rate(self, value):
+        if value == 0:
+            self.Pause()
