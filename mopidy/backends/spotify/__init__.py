@@ -11,6 +11,7 @@ from mopidy.gstreamer import GStreamer
 logger = logging.getLogger('mopidy.backends.spotify')
 
 ENCODING = 'utf-8'
+BITRATES = {96: 2, 160: 0, 320: 1}
 
 class SpotifyBackend(ThreadingActor, Backend):
     """
@@ -27,7 +28,12 @@ class SpotifyBackend(ThreadingActor, Backend):
         trade mark of the Spotify Group.
 
     **Issues:**
-    http://github.com/mopidy/mopidy/issues/labels/backend-spotify
+    https://github.com/mopidy/mopidy/issues?labels=backend-spotify
+
+    **Dependencies:**
+
+    - libspotify == 0.0.8 (libspotify8 package from apt.mopidy.com)
+    - pyspotify == 1.2 (python-spotify package from apt.mopidy.com)
 
     **Settings:**
 

@@ -9,8 +9,8 @@ setup and whether you want to use stable releases or less stable development
 versions.
 
 
-Install dependencies
-====================
+Requirements
+============
 
 .. toctree::
     :hidden:

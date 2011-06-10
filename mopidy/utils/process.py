@@ -1,15 +1,30 @@
 import logging
+import signal
 import threading
 
 import gobject
 gobject.threads_init()
 
 from pykka import ActorDeadError
+from pykka.registry import ActorRegistry
 
 from mopidy import SettingsError
 
 logger = logging.getLogger('mopidy.utils.process')
 
+def exit_handler(signum, frame):
+    """A :mod:`signal` handler which will exit the program on signal."""
+    signals = dict((k, v) for v, k in signal.__dict__.iteritems()
+        if v.startswith('SIG') and not v.startswith('SIG_'))
+    logger.info(u'Got %s. Exiting...', signals[signum])
+    stop_all_actors()
+
+def stop_all_actors():
+    num_actors = len(ActorRegistry.get_all())
+    while num_actors:
+        logger.debug(u'Stopping %d actor(s)...', num_actors)
+        ActorRegistry.stop_all()
+        num_actors = len(ActorRegistry.get_all())
 
 class BaseThread(threading.Thread):
     def __init__(self):

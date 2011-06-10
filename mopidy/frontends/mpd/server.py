@@ -14,13 +14,10 @@ class MpdServer(asyncore.dispatcher):
     for each client connection.
     """
 
-    def __init__(self):
-        asyncore.dispatcher.__init__(self)
-
     def start(self):
         """Start MPD server."""
         try:
-            self.socket = network.create_socket()
+            self.set_socket(network.create_socket())
             self.set_reuse_addr()
             hostname = network.format_hostname(settings.MPD_SERVER_HOSTNAME)
             port = settings.MPD_SERVER_PORT
@@ -39,7 +36,3 @@ class MpdServer(asyncore.dispatcher):
         logger.info(u'MPD client connection from [%s]:%s',
             client_socket_address[0], client_socket_address[1])
         MpdSession(self, client_socket, client_socket_address)
-
-    def handle_close(self):
-        """Called by asyncore when the socket is closed."""
-        self.close()

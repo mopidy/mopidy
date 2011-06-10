@@ -10,6 +10,7 @@ class ValidateSettingsTest(unittest.TestCase):
         self.defaults = {
             'MPD_SERVER_HOSTNAME': '::',
             'MPD_SERVER_PORT': 6600,
+            'SPOTIFY_BITRATE': 160,
         }
 
     def test_no_errors_yields_empty_dict(self):
@@ -42,6 +43,13 @@ class ValidateSettingsTest(unittest.TestCase):
             '"mopidy.backends.despotify.DespotifyBackend" is no longer ' +
             'available.')
 
+    def test_unavailable_bitrate_setting_returns_error(self):
+        result = validate_settings(self.defaults,
+            {'SPOTIFY_BITRATE': 50})
+        self.assertEqual(result['SPOTIFY_BITRATE'],
+            u'Unavailable Spotify bitrate. ' +
+            u'Available bitrates are 96, 160, and 320.')
+
     def test_two_errors_are_both_reported(self):
         result = validate_settings(self.defaults,
             {'FOO': '', 'BAR': ''})
@@ -63,6 +71,7 @@ class ValidateSettingsTest(unittest.TestCase):
 class SettingsProxyTest(unittest.TestCase):
     def setUp(self):
         self.settings = SettingsProxy(default_settings_module)
+        self.settings.local.clear()
 
     def test_set_and_get_attr(self):
         self.settings.TEST = 'test'
@@ -140,6 +149,20 @@ class SettingsProxyTest(unittest.TestCase):
         self.settings.TEST = './test'
         actual = self.settings.TEST
         self.assertEqual(actual, './test')
+
+    def test_interactive_input_of_missing_defaults(self):
+        self.settings.default['TEST'] = ''
+        interactive_input = 'input'
+        self.settings._read_from_stdin = lambda _: interactive_input
+        self.settings.validate(interactive=True)
+        self.assertEqual(interactive_input, self.settings.TEST)
+
+    def test_interactive_input_not_needed_when_setting_is_set_locally(self):
+        self.settings.default['TEST'] = ''
+        self.settings.local['TEST'] = 'test'
+        self.settings._read_from_stdin = lambda _: self.fail(
+            'Should not read from stdin')
+        self.settings.validate(interactive=True)
 
 
 class FormatSettingListTest(unittest.TestCase):

@@ -24,7 +24,7 @@ def translator(data):
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
     _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
 
-    if gst.TAG_DATE in data:
+    if gst.TAG_DATE in data and data[gst.TAG_DATE]:
         date = data[gst.TAG_DATE]
         date = datetime.date(date.year, date.month, date.day)
         track_kwargs['date'] = date
@@ -57,17 +57,16 @@ class Scanner(object):
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
 
-        caps = gst.Caps('audio/x-raw-int')
         fakesink = gst.element_factory_make('fakesink')
-        pad = fakesink.get_pad('sink')
 
         self.uribin = gst.element_factory_make('uridecodebin')
-        self.uribin.connect('pad-added', self.process_new_pad, pad)
-        self.uribin.set_property('caps', caps)
+        self.uribin.set_property('caps', gst.Caps('audio/x-raw-int'))
+        self.uribin.connect('pad-added', self.process_new_pad,
+            fakesink.get_pad('sink'))
 
         self.pipe = gst.element_factory_make('pipeline')
-        self.pipe.add(fakesink)
         self.pipe.add(self.uribin)
+        self.pipe.add(fakesink)
 
         bus = self.pipe.get_bus()
         bus.add_signal_watch()
@@ -78,22 +77,36 @@ class Scanner(object):
         pad.link(target_pad)
 
     def process_tags(self, bus, message):
-        data = message.parse_tag()
-        data = dict([(k, data[k]) for k in data.keys()])
-        data['uri'] = unicode(self.uribin.get_property('uri'))
-        data['duration'] = self.get_duration()
-        self.data_callback(data)
-        self.next_uri()
+        taglist = message.parse_tag()
+        data = {
+            'uri': unicode(self.uribin.get_property('uri')),
+            gst.TAG_DURATION: self.get_duration(),
+        }
+
+        for key in taglist.keys():
+            # XXX: For some crazy reason some wma files spit out lists here,
+            # not sure if this is due to better data in headers or wma being
+            # stupid. So ugly hack for now :/
+            if type(taglist[key]) is list:
+                data[key] = taglist[key][0]
+            else:
+                data[key] = taglist[key]
+
+        try:
+            self.data_callback(data)
+            self.next_uri()
+        except KeyboardInterrupt:
+            self.stop()
 
     def process_error(self, bus, message):
         if self.error_callback:
             uri = self.uribin.get_property('uri')
-            errors = message.parse_error()
-            self.error_callback(uri, errors)
+            error, debug = message.parse_error()
+            self.error_callback(uri, error, debug)
         self.next_uri()
 
     def get_duration(self):
-        self.pipe.get_state()
+        self.pipe.get_state() # Block until state change is done.
         try:
             return self.pipe.query_duration(
                 gst.FORMAT_TIME, None)[0] // gst.MSECOND
