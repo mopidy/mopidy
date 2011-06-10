@@ -116,8 +116,7 @@ class MprisObject(dbus.service.Object):
             'PlaybackStatus': (self.get_PlaybackStatus, None),
             'LoopStatus': (self.get_LoopStatus, self.set_LoopStatus),
             'Rate': (1.0, self.set_Rate),
-            # TODO Get/set backend.playback.random
-            'Shuffle': (False, None),
+            'Shuffle': (self.get_Shuffle, self.set_Shuffle),
             # TODO Get meta data
             'Metadata': ({
                 'mpris:trackid': '', # TODO Use (cpid, track.uri)
@@ -351,3 +350,12 @@ class MprisObject(dbus.service.Object):
     def set_Rate(self, value):
         if value == 0:
             self.Pause()
+
+    def get_Shuffle(self):
+        return self.backend.playback.shuffle.get()
+
+    def set_Shuffle(self, value):
+        if value:
+            self.backend.playback.shuffle = True
+        else:
+            self.backend.playback.shuffle = False

@@ -85,6 +85,28 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Set(mpris.PLAYER_IFACE, 'Rate', 0)
         self.assertEquals(self.backend.playback.state.get(), PAUSED)
 
+    def test_get_shuffle_returns_true_if_shuffle_is_active(self):
+        self.backend.playback.shuffle = True
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Shuffle')
+        self.assertTrue(result)
+
+    def test_get_shuffle_returns_false_if_shuffle_is_inactive(self):
+        self.backend.playback.shuffle = False
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Shuffle')
+        self.assertFalse(result)
+
+    def test_set_shuffle_to_true_activates_shuffle_mode(self):
+        self.backend.playback.shuffle = False
+        self.assertFalse(self.backend.playback.shuffle.get())
+        result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', True)
+        self.assertTrue(self.backend.playback.shuffle.get())
+
+    def test_set_shuffle_to_false_deactivates_shuffle_mode(self):
+        self.backend.playback.shuffle = True
+        self.assertTrue(self.backend.playback.shuffle.get())
+        result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', False)
+        self.assertFalse(self.backend.playback.shuffle.get())
+
     def test_get_minimum_rate_is_one_or_less(self):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'MinimumRate')
         self.assert_(result <= 1.0)
