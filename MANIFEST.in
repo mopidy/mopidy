@@ -1,5 +1,10 @@
-include LICENSE pylintrc *.rst *.ini data/mopidy.desktop
+include *.ini
+include *.rst
+include LICENSE
+include MANIFEST.in
+include data/mopidy.desktop
 include mopidy/backends/spotify/spotify_appkey.key
+include pylintrc
 recursive-include docs *
 prune docs/_build
 recursive-include requirements *
