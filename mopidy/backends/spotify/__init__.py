@@ -72,19 +72,22 @@ class SpotifyBackend(ThreadingActor, Backend):
         self.gstreamer = None
         self.spotify = None
 
+        # Fail early if settings are not present
+        self.username = settings.SPOTIFY_USERNAME
+        self.password = settings.SPOTIFY_PASSWORD
+
     def on_start(self):
         gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
         assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
         self.gstreamer = gstreamer_refs[0].proxy()
 
+        logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         self.spotify = self._connect()
 
     def _connect(self):
         from .session_manager import SpotifySessionManager
 
-        logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         logger.debug(u'Connecting to Spotify')
-        spotify = SpotifySessionManager(
-            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD)
+        spotify = SpotifySessionManager(self.username, self.password)
         spotify.start()
         return spotify

@@ -1,5 +1,6 @@
 import logging
 import signal
+import thread
 import threading
 
 import gobject
@@ -12,19 +13,28 @@ from mopidy import SettingsError
 
 logger = logging.getLogger('mopidy.utils.process')
 
+def exit_process():
+    logger.debug(u'Interrupting main...')
+    thread.interrupt_main()
+    logger.debug(u'Interrupted main')
+
 def exit_handler(signum, frame):
     """A :mod:`signal` handler which will exit the program on signal."""
     signals = dict((k, v) for v, k in signal.__dict__.iteritems()
         if v.startswith('SIG') and not v.startswith('SIG_'))
-    logger.info(u'Got %s. Exiting...', signals[signum])
-    stop_all_actors()
+    logger.info(u'Got %s signal', signals[signum])
+    exit_process()
 
 def stop_all_actors():
     num_actors = len(ActorRegistry.get_all())
     while num_actors:
+        logger.debug(u'Seeing %d actor and %d non-actor thread(s): %s',
+            num_actors, threading.active_count() - num_actors,
+            ', '.join([t.name for t in threading.enumerate()]))
         logger.debug(u'Stopping %d actor(s)...', num_actors)
         ActorRegistry.stop_all()
         num_actors = len(ActorRegistry.get_all())
+    logger.debug(u'All actors stopped.')
 
 class BaseThread(threading.Thread):
     def __init__(self):
