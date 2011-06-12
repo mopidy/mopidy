@@ -18,7 +18,7 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
 **Important changes**
 
 - If you use the Spotify backend, you *must* upgrade to libspotify 0.0.8 and
-  pyspotify 1.2. If you install from APT, libspotify and pyspotify will
+  pyspotify 1.3. If you install from APT, libspotify and pyspotify will
   automatically be upgraded. If you are not installing from APT, follow the
   instructions at :doc:`/installation/libspotify/`.
 
