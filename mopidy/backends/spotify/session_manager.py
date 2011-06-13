@@ -29,7 +29,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def __init__(self, username, password):
         PyspotifySessionManager.__init__(self, username, password)
         BaseThread.__init__(self)
-        self.name = 'SpotifySMThread'
+        self.name = 'SpotifyThread'
 
         self.gstreamer = None
         self.backend = None
