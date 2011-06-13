@@ -18,12 +18,13 @@ class SpotifyContainerManager(PyspotifyContainerManager):
         playlist_container = self.session_manager.session.playlist_container()
         for playlist in playlist_container:
             self.session_manager.playlist_manager.watch(playlist)
-        logger.debug(u'Watching %d playlist(s) for changes', len(playlist_container))
+        logger.debug(u'Watching %d playlist(s) for changes',
+            len(playlist_container))
 
     def playlist_added(self, container, playlist, position, userdata):
         """Callback used by pyspotify"""
-        logger.debug(u'Callback called: playlist "%s" added at position %d',
-            playlist.name(), position)
+        logger.debug(u'Callback called: playlist added at position %d',
+            position)
         # container_loaded() is called after this callback, so we do not need
         # to handle this callback.
 
