@@ -40,11 +40,15 @@ def main():
         setup_mixer()
         setup_backend()
         setup_frontends()
-        while ActorRegistry.get_all():
+        while True:
             time.sleep(1)
-        logger.info(u'No actors left. Exiting...')
+    except SettingsError as e:
+        logger.error(e.message)
     except KeyboardInterrupt:
-        logger.info(u'User interrupt. Exiting...')
+        logger.info(u'Interrupted. Exiting...')
+    except Exception as e:
+        logger.exception(e)
+    finally:
         stop_all_actors()
 
 def parse_options():
