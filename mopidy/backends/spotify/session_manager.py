@@ -45,7 +45,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
 
     def setup(self):
         gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        assert len(gstreamer_refs) == 1, \
+            'Expected exactly one running gstreamer.'
         self.gstreamer = gstreamer_refs[0].proxy()
 
         backend_refs = ActorRegistry.get_by_class(Backend)
@@ -57,14 +58,17 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         if error:
             logger.error(u'Spotify login error: %s', error)
             return
+
         logger.info(u'Connected to Spotify')
         self.session = session
 
-        logger.debug(u'Preferred Spotify bitrate is %s kbps.', settings.SPOTIFY_BITRATE)
+        logger.debug(u'Preferred Spotify bitrate is %s kbps',
+            settings.SPOTIFY_BITRATE)
         self.session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
 
         self.container_manager = SpotifyContainerManager(self)
         self.container_manager.watch(self.session.playlist_container())
+
         self.connected.set()
 
     def logged_out(self, session):
