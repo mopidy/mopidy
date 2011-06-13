@@ -11,6 +11,30 @@ class SpotifyContainerManager(PyspotifyContainerManager):
         self.session_manager = session_manager
 
     def container_loaded(self, container, userdata):
-        """Callback used by pyspotify."""
-        logger.debug(u'Container loaded')
+        """Callback used by pyspotify"""
+        logger.debug(u'Callback called: playlist container loaded')
         self.session_manager.refresh_stored_playlists()
+
+    def playlist_added(self, container, playlist, position, userdata):
+        """Callback used by pyspotify"""
+        logger.debug(u'Callback called: playlist "%s" added at position %d',
+            playlist.name(), position)
+        # container_loaded() is called after this callback, so we do not need
+        # to handle this callback.
+
+    def playlist_moved(self, container, playlist, old_position, new_position,
+            userdata):
+        """Callback used by pyspotify"""
+        logger.debug(
+            u'Callback called: playlist "%s" moved from position %d to %d',
+            playlist.name(), old_position, new_position)
+        # container_loaded() is called after this callback, so we do not need
+        # to handle this callback.
+
+    def playlist_removed(self, container, playlist, position, userdata):
+        """Callback used by pyspotify"""
+        logger.debug(
+            u'Callback called: playlist "%s" removed from position %d',
+            playlist.name(), position)
+        # container_loaded() is called after this callback, so we do not need
+        # to handle this callback.
