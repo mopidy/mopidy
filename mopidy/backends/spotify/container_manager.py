@@ -15,6 +15,11 @@ class SpotifyContainerManager(PyspotifyContainerManager):
         logger.debug(u'Callback called: playlist container loaded')
         self.session_manager.refresh_stored_playlists()
 
+        playlist_container = self.session_manager.session.playlist_container()
+        for playlist in playlist_container:
+            self.session_manager.playlist_manager.watch(playlist)
+        logger.debug(u'Watching %d playlist(s) for changes', len(playlist_container))
+
     def playlist_added(self, container, playlist, position, userdata):
         """Callback used by pyspotify"""
         logger.debug(u'Callback called: playlist "%s" added at position %d',

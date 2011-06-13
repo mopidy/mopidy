@@ -9,11 +9,12 @@ from pykka.registry import ActorRegistry
 from mopidy import get_version, settings
 from mopidy.backends.base import Backend
 from mopidy.backends.spotify import BITRATES
+from mopidy.backends.spotify.container_manager import SpotifyContainerManager
+from mopidy.backends.spotify.playlist_manager import SpotifyPlaylistManager
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 from mopidy.gstreamer import GStreamer
 from mopidy.utils.process import BaseThread
-from mopidy.backends.spotify.container_manager import SpotifyContainerManager
 
 logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
@@ -38,6 +39,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self.session = None
 
         self.container_manager = None
+        self.playlist_manager = None
 
     def run_inside_try(self):
         self.setup()
@@ -67,6 +69,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self.session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
 
         self.container_manager = SpotifyContainerManager(self)
+        self.playlist_manager = SpotifyPlaylistManager(self)
+
         self.container_manager.watch(self.session.playlist_container())
 
         self.connected.set()
@@ -77,7 +81,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
 
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
-        logger.debug(u'Metadata updated')
+        logger.debug(u'Callback called: Metadata updated')
 
     def connection_error(self, session, error):
         """Callback used by pyspotify"""
