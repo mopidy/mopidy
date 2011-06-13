@@ -56,7 +56,7 @@ You may also want to change some of the ``LOCAL_*`` settings. See
 
     Currently, Mopidy supports using Spotify *or* local storage as a music
     source. We're working on using both sources simultaneously, and will
-    hopefully have support for this in the 0.3 release.
+    hopefully have support for this in the 0.6 release.
 
 
 .. _generating_a_tag_cache:
@@ -92,6 +92,7 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 
 .. _use_mpd_on_a_network:
 
+
 Connecting from other machines on the network
 =============================================
 
@@ -117,6 +118,31 @@ file::
 
     LASTFM_USERNAME = u'myusername'
     LASTFM_PASSWORD = u'mysecret'
+
+
+Streaming audio through a SHOUTcast/Icecast server
+==================================================
+
+If you want to play the audio on another computer than the one running Mopidy,
+you can stream the audio from Mopidy through an SHOUTcast or Icecast audio
+streaming server. Multiple media players can then be connected to the streaming
+server simultaneously. To use the SHOUTcast output, do the following:
+
+#. Install, configure and start the Icecast server. It can be found in the
+   ``icecast2`` package in Debian/Ubuntu.
+
+#. Add ``mopidy.outputs.shoutcast.ShoutcastOutput`` output to the
+   :attr:`mopidy.settings.OUTPUTS` setting.
+
+#. Check the default values for the following settings, and alter them to match
+   your Icecast setup if needed:
+
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_HOSTNAME`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PORT`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_USERNAME`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PASSWORD`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_MOUNT`
+   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_ENCODER`
 
 
 Available settings

@@ -21,6 +21,14 @@ class CustomOutput(BaseOutput):
        these cases setup :attr:`mopidy.settings.CUSTOM_OUTPUT` with a
        :command:`gst-launch` compatible string describing the target setup.
 
+    **Dependencies:**
+
+    - None
+
+    **Settings:**
+
+    - :attr:`mopidy.settings.CUSTOM_OUTPUT`
     """
+
     def describe_bin(self):
         return settings.CUSTOM_OUTPUT

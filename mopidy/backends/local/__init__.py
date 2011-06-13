@@ -22,7 +22,11 @@ class LocalBackend(ThreadingActor, Backend):
     """
     A backend for playing music from a local music archive.
 
-    **Issues:** http://github.com/mopidy/mopidy/issues/labels/backend-local
+    **Issues:** https://github.com/mopidy/mopidy/issues?labels=backend-local
+
+    **Dependencies:**
+
+    - None
 
     **Settings:**
 
@@ -174,7 +178,7 @@ class LocalLibraryProvider(BaseLibraryProvider):
 
         tracks = parse_mpd_tag_cache(tag_cache, music_folder)
 
-        logger.info('Loading songs in %s from %s', music_folder, tag_cache)
+        logger.info('Loading tracks in %s from %s', music_folder, tag_cache)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
