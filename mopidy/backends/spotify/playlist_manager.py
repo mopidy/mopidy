@@ -15,26 +15,26 @@ class SpotifyPlaylistManager(PyspotifyPlaylistManager):
         logger.debug(u'Callback called: '
             u'%d track(s) added to position %d in playlist "%s"',
             len(tracks), position, playlist.name())
-        # TODO Partially update stored playlists?
+        self.session_manager.refresh_stored_playlists()
 
     def tracks_moved(self, playlist, tracks, new_position, userdata):
         """Callback used by pyspotify"""
         logger.debug(u'Callback called: '
             u'%d track(s) moved to position %d in playlist "%s"',
             len(tracks), new_position, playlist.name())
-        # TODO Partially update stored playlists?
+        self.session_manager.refresh_stored_playlists()
 
     def tracks_removed(self, playlist, tracks, userdata):
         """Callback used by pyspotify"""
         logger.debug(u'Callback called: '
             u'%d track(s) removed from playlist "%s"', len(tracks), playlist.name())
-        # TODO Partially update stored playlists?
+        self.session_manager.refresh_stored_playlists()
 
     def playlist_renamed(self, playlist, userdata):
         """Callback used by pyspotify"""
         logger.debug(u'Callback called: Playlist renamed to "%s"',
             playlist.name())
-        # TODO Partially update stored playlists?
+        self.session_manager.refresh_stored_playlists()
 
     def playlist_state_changed(self, playlist, userdata):
         """Callback used by pyspotify"""
@@ -54,7 +54,6 @@ class SpotifyPlaylistManager(PyspotifyPlaylistManager):
         """Callback used by pyspotify"""
         logger.debug(u'Callback called: Metadata updated for playlist "%s"',
             playlist.name())
-        # TODO Update stored playlists?
 
     def track_created_changed(self, playlist, position, user, when, userdata):
         """Callback used by pyspotify"""
