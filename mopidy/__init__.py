@@ -5,7 +5,7 @@ if not (2, 6) <= sys.version_info < (3,):
 
 from subprocess import PIPE, Popen
 
-VERSION = (0, 5, 0)
+VERSION = (0, 6, 0)
 
 def get_version():
     try:

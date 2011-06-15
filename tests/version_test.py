@@ -19,8 +19,9 @@ class VersionTest(unittest.TestCase):
         self.assert_(SV('0.3.0') < SV('0.3.1'))
         self.assert_(SV('0.3.1') < SV('0.4.0'))
         self.assert_(SV('0.4.0') < SV('0.4.1'))
-        self.assert_(SV('0.4.1') < SV(get_plain_version()))
-        self.assert_(SV(get_plain_version()) < SV('0.5.1'))
+        self.assert_(SV('0.4.1') < SV('0.5.0'))
+        self.assert_(SV('0.5.0') < SV(get_plain_version()))
+        self.assert_(SV(get_plain_version()) < SV('0.6.1'))
 
     def test_get_platform_contains_platform(self):
         self.assert_(platform.platform() in get_platform())
