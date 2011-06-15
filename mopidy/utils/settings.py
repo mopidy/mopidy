@@ -73,7 +73,7 @@ class SettingsProxy(object):
             raise SettingsError(u'Settings validation failed.')
 
     def _read_missing_settings_from_stdin(self, current, runtime):
-        for setting, value in current.iteritems():
+        for setting, value in sorted(current.iteritems()):
             if isinstance(value, basestring) and len(value) == 0:
                 runtime[setting] = self._read_from_stdin(setting + u': ')
 
