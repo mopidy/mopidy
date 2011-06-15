@@ -5,12 +5,20 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.5.0 (in development)
+v0.6.0 (in development)
 =======================
+
+**Changes**
+
+- None yet
+
+
+v0.5.0 (2011-06-15)
+===================
 
 Since last time we've added support for audio streaming to SHOUTcast servers
 and fixed the longstanding playlist loading issue in the Spotify backend. As
-always the release has a bunch of bug fixes.
+always the release has a bunch of bug fixes and minor improvements.
 
 Please note that 0.5.0 requires some updated dependencies, as listed under
 *Important changes* below.
@@ -18,7 +26,7 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
 **Important changes**
 
 - If you use the Spotify backend, you *must* upgrade to libspotify 0.0.8 and
-  pyspotify 1.2. If you install from APT, libspotify and pyspotify will
+  pyspotify 1.3. If you install from APT, libspotify and pyspotify will
   automatically be upgraded. If you are not installing from APT, follow the
   instructions at :doc:`/installation/libspotify/`.
 
@@ -45,8 +53,9 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
     workaround of searching and reconnecting to make the playlists appear are
     no longer necessary. (Fixes: :issue:`59`)
 
-  - Replace not decodable characters returned from Spotify instead of throwing
-    an exception, as we won't try to figure out the encoding of non-UTF-8-data.
+  - Track's that are no longer available in Spotify's archives are now
+    "autolinked" to corresponding tracks in other albums, just like the
+    official Spotify clients do. (Fixes: :issue:`34`)
 
 - MPD frontend:
 
@@ -72,6 +81,9 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
 
   - Added :option:`--interactive` for reading missing local settings from
     ``stdin``. (Fixes: :issue:`96`)
+
+  - Improve shutdown procedure at CTRL+C. Add signal handler for ``SIGTERM``,
+    which initiates the same shutdown procedure as CTRL+C does.
 
 - Tag cache generator:
 

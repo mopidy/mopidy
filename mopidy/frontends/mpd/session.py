@@ -49,7 +49,7 @@ class MpdSession(asynchat.async_chat):
         Format a response from the MPD command handlers and send it to the
         client.
         """
-        if response is not None:
+        if response:
             response = LINE_TERMINATOR.join(response)
             logger.debug(u'Response to [%s]:%s: %s', self.client_address,
                 self.client_port, indent(response))
