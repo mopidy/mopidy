@@ -74,6 +74,9 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
   - Added :option:`--interactive` for reading missing local settings from
     ``stdin``. (Fixes: :issue:`96`)
 
+  - Improve shutdown procedure at CTRL+C. Add signal handler for ``SIGTERM``,
+    which initiates the same shutdown procedure as CTRL+C does.
+
 - Tag cache generator:
 
   - Made it possible to abort :command:`mopidy-scan` with CTRL+C.
