@@ -1,9 +1,10 @@
 from mopidy import settings
-from mopidy.frontends.mpd.protocol import handle_pattern
-from mopidy.frontends.mpd.exceptions import MpdPasswordError
+from mopidy.frontends.mpd.protocol import handle_request
+from mopidy.frontends.mpd.exceptions import (MpdPasswordError,
+    MpdPermissionError)
 
-@handle_pattern(r'^close$')
-def close(frontend):
+@handle_request(r'^close$', auth_required=False)
+def close(context):
     """
     *musicpd.org, connection section:*
 
@@ -11,10 +12,10 @@ def close(frontend):
 
         Closes the connection to MPD.
     """
-    pass # TODO
+    context.session.close()
 
-@handle_pattern(r'^kill$')
-def kill(frontend):
+@handle_request(r'^kill$')
+def kill(context):
     """
     *musicpd.org, connection section:*
 
@@ -22,10 +23,10 @@ def kill(frontend):
 
         Kills MPD.
     """
-    pass # TODO
+    raise MpdPermissionError(command=u'kill')
 
-@handle_pattern(r'^password "(?P<password>[^"]+)"$')
-def password_(frontend, password):
+@handle_request(r'^password "(?P<password>[^"]+)"$', auth_required=False)
+def password_(context, password):
     """
     *musicpd.org, connection section:*
 
@@ -34,14 +35,13 @@ def password_(frontend, password):
         This is used for authentication with the server. ``PASSWORD`` is
         simply the plaintext password.
     """
-    # You will not get to this code without being authenticated. This is for
-    # when you are already authenticated, and are sending additional 'password'
-    # requests.
-    if settings.MPD_SERVER_PASSWORD != password:
+    if password == settings.MPD_SERVER_PASSWORD:
+        context.dispatcher.authenticated = True
+    else:
         raise MpdPasswordError(u'incorrect password', command=u'password')
 
-@handle_pattern(r'^ping$')
-def ping(frontend):
+@handle_request(r'^ping$', auth_required=False)
+def ping(context):
     """
     *musicpd.org, connection section:*
 

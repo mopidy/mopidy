@@ -17,9 +17,10 @@ class BaseMixer(object):
         Integer in range [0, 100]. :class:`None` if unknown. Values below 0 is
         equal to 0. Values above 100 is equal to 100.
         """
-        if self._get_volume() is None:
+        volume = self.get_volume()
+        if volume is None:
             return None
-        return int(self._get_volume() / self.amplification_factor)
+        return int(volume / self.amplification_factor)
 
     @volume.setter
     def volume(self, volume):
@@ -28,9 +29,9 @@ class BaseMixer(object):
             volume = 0
         elif volume > 100:
             volume = 100
-        self._set_volume(volume)
+        self.set_volume(volume)
 
-    def _get_volume(self):
+    def get_volume(self):
         """
         Return volume as integer in range [0, 100]. :class:`None` if unknown.
 
@@ -38,7 +39,7 @@ class BaseMixer(object):
         """
         raise NotImplementedError
 
-    def _set_volume(self, volume):
+    def set_volume(self, volume):
         """
         Set volume as integer in range [0, 100].
 

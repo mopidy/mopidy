@@ -1,8 +1,10 @@
 # Absolute import needed to import ~/.mopidy/settings.py and not ourselves
 from __future__ import absolute_import
 from copy import copy
+import getpass
 import logging
 import os
+from pprint import pformat
 import sys
 
 from mopidy import SettingsError
@@ -62,11 +64,27 @@ class SettingsProxy(object):
         else:
             super(SettingsProxy, self).__setattr__(attr, value)
 
-    def validate(self):
+    def validate(self, interactive):
+        if interactive:
+            self._read_missing_settings_from_stdin(self.current, self.runtime)
         if self.get_errors():
             logger.error(u'Settings validation errors: %s',
                 indent(self.get_errors_as_string()))
             raise SettingsError(u'Settings validation failed.')
+
+    def _read_missing_settings_from_stdin(self, current, runtime):
+        for setting, value in sorted(current.iteritems()):
+            if isinstance(value, basestring) and len(value) == 0:
+                runtime[setting] = self._read_from_stdin(setting + u': ')
+
+    def _read_from_stdin(self, prompt):
+        if u'_PASSWORD' in prompt:
+            return (getpass.getpass(prompt)
+                .decode(sys.stdin.encoding, 'ignore'))
+        else:
+            sys.stdout.write(prompt)
+            return (sys.stdin.readline().strip()
+                .decode(sys.stdin.encoding, 'ignore'))
 
     def get_errors(self):
         return validate_settings(self.default, self.local)
@@ -97,12 +115,16 @@ def validate_settings(defaults, settings):
         'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
         'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
         'FRONTEND': 'FRONTENDS',
+        'GSTREAMER_AUDIO_SINK': 'CUSTOM_OUTPUT',
         'LOCAL_MUSIC_FOLDER': 'LOCAL_MUSIC_PATH',
+        'LOCAL_OUTPUT_OVERRIDE': 'CUSTOM_OUTPUT',
         'LOCAL_PLAYLIST_FOLDER': 'LOCAL_PLAYLIST_PATH',
         'LOCAL_TAG_CACHE': 'LOCAL_TAG_CACHE_FILE',
+        'OUTPUT': None,
         'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
         'SERVER_PORT': 'MPD_SERVER_PORT',
+        'SPOTIFY_HIGH_BITRATE': 'SPOTIFY_BITRATE',
         'SPOTIFY_LIB_APPKEY': None,
         'SPOTIFY_LIB_CACHE': 'SPOTIFY_CACHE_PATH',
     }
@@ -123,6 +145,11 @@ def validate_settings(defaults, settings):
                     'longer available.')
                 continue
 
+        if setting == 'SPOTIFY_BITRATE':
+            if value not in (96, 160, 320):
+                errors[setting] = (u'Unavailable Spotify bitrate. ' +
+                    u'Available bitrates are 96, 160, and 320.')
+
         if setting not in defaults:
             errors[setting] = u'Unknown setting. Is it misspelled?'
             continue
@@ -137,19 +164,22 @@ def list_settings_optparse_callback(*args):
     option.
     """
     from mopidy import settings
+    print format_settings_list(settings)
+    sys.exit(0)
+
+def format_settings_list(settings):
     errors = settings.get_errors()
     lines = []
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
-        value = mask_value_if_secret(key, value)
-        lines.append(u'%s:' % key)
-        lines.append(u'  Value: %s' % repr(value))
+        masked_value = mask_value_if_secret(key, value)
+        lines.append(u'%s: %s' % (key, indent(pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
-            lines.append(u'  Default: %s' % repr(default_value))
+            lines.append(u'  Default: %s' %
+                indent(pformat(default_value), places=4))
         if errors.get(key) is not None:
             lines.append(u'  Error: %s' % errors[key])
-    print u'Settings: %s' % indent('\n'.join(lines), places=2)
-    sys.exit(0)
+    return '\n'.join(lines)
 
 def mask_value_if_secret(key, value):
     if key.endswith('PASSWORD') and value:

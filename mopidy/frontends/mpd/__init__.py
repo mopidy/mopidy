@@ -13,11 +13,15 @@ class MpdFrontend(ThreadingActor, BaseFrontend):
     """
     The MPD frontend.
 
+    **Dependencies:**
+
+    - None
+
     **Settings:**
 
     - :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`
-    - :attr:`mopidy.settings.MPD_SERVER_PASSWORD`
     - :attr:`mopidy.settings.MPD_SERVER_PORT`
+    - :attr:`mopidy.settings.MPD_SERVER_PASSWORD`
     """
 
     def __init__(self):

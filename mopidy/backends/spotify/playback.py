@@ -8,10 +8,9 @@ logger = logging.getLogger('mopidy.backends.spotify.playback')
 
 class SpotifyPlaybackProvider(BasePlaybackProvider):
     def pause(self):
-        return self.backend.output.set_state('PAUSED')
+        return self.backend.gstreamer.pause_playback()
 
     def play(self, track):
-        self.backend.output.set_state('READY')
         if self.backend.playback.state == self.backend.playback.PLAYING:
             self.backend.spotify.session.play(0)
         if track.uri is None:
@@ -20,7 +19,10 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
             self.backend.spotify.session.load(
                 Link.from_string(track.uri).as_track())
             self.backend.spotify.session.play(1)
-            self.backend.output.play_uri('appsrc://')
+            self.backend.gstreamer.prepare_change()
+            self.backend.gstreamer.set_uri('appsrc://')
+            self.backend.gstreamer.start_playback()
+            self.backend.gstreamer.set_metadata(track)
             return True
         except SpotifyError as e:
             logger.info('Playback of %s failed: %s', track.uri, e)
@@ -30,12 +32,12 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
         return self.seek(self.backend.playback.time_position)
 
     def seek(self, time_position):
-        self.backend.output.set_state('READY')
+        self.backend.gstreamer.prepare_change()
         self.backend.spotify.session.seek(time_position)
-        self.backend.output.set_state('PLAYING')
+        self.backend.gstreamer.start_playback()
         return True
 
     def stop(self):
-        result = self.backend.output.set_state('READY')
+        result = self.backend.gstreamer.stop_playback()
         self.backend.spotify.session.play(0)
         return result

@@ -1,8 +1,8 @@
-from mopidy.frontends.mpd.protocol import handle_pattern, mpd_commands
+from mopidy.frontends.mpd.protocol import handle_request, mpd_commands
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
-@handle_pattern(r'^commands$')
-def commands(frontend):
+@handle_request(r'^commands$', auth_required=False)
+def commands(context):
     """
     *musicpd.org, reflection section:*
 
@@ -10,25 +10,34 @@ def commands(frontend):
 
         Shows which commands the current user has access to.
     """
-    # FIXME When password auth is turned on and the client is not
-    # authenticated, 'commands' should list only the commands the client does
-    # have access to. To implement this we need access to the session object to
-    # check if the client is authenticated or not.
+    if context.dispatcher.authenticated:
+        command_names = [command.name for command in mpd_commands]
+    else:
+        command_names = [command.name for command in mpd_commands
+            if not command.auth_required]
 
-    sorted_commands = sorted(list(mpd_commands))
+    # No permission to use
+    if 'kill' in command_names:
+        command_names.remove('kill')
 
     # Not shown by MPD in its command list
-    sorted_commands.remove('command_list_begin')
-    sorted_commands.remove('command_list_ok_begin')
-    sorted_commands.remove('command_list_end')
-    sorted_commands.remove('idle')
-    sorted_commands.remove('noidle')
-    sorted_commands.remove('sticker')
+    if 'command_list_begin' in command_names:
+        command_names.remove('command_list_begin')
+    if 'command_list_ok_begin' in command_names:
+        command_names.remove('command_list_ok_begin')
+    if 'command_list_end' in command_names:
+        command_names.remove('command_list_end')
+    if 'idle' in command_names:
+        command_names.remove('idle')
+    if 'noidle' in command_names:
+        command_names.remove('noidle')
+    if 'sticker' in command_names:
+        command_names.remove('sticker')
 
-    return [('command', c) for c in sorted_commands]
+    return [('command', command_name) for command_name in sorted(command_names)]
 
-@handle_pattern(r'^decoders$')
-def decoders(frontend):
+@handle_request(r'^decoders$')
+def decoders(context):
     """
     *musicpd.org, reflection section:*
 
@@ -46,8 +55,8 @@ def decoders(frontend):
     """
     raise MpdNotImplemented # TODO
 
-@handle_pattern(r'^notcommands$')
-def notcommands(frontend):
+@handle_request(r'^notcommands$', auth_required=False)
+def notcommands(context):
     """
     *musicpd.org, reflection section:*
 
@@ -55,14 +64,19 @@ def notcommands(frontend):
 
         Shows which commands the current user does not have access to.
     """
-    # FIXME When password auth is turned on and the client is not
-    # authenticated, 'notcommands' should list all the commands the client does
-    # not have access to. To implement this we need access to the session
-    # object to check if the client is authenticated or not.
-    pass
+    if context.dispatcher.authenticated:
+        command_names = []
+    else:
+        command_names = [command.name for command in mpd_commands
+            if command.auth_required]
 
-@handle_pattern(r'^tagtypes$')
-def tagtypes(frontend):
+    # No permission to use
+    command_names.append('kill')
+
+    return [('command', command_name) for command_name in sorted(command_names)]
+
+@handle_request(r'^tagtypes$')
+def tagtypes(context):
     """
     *musicpd.org, reflection section:*
 
@@ -72,8 +86,8 @@ def tagtypes(frontend):
     """
     pass # TODO
 
-@handle_pattern(r'^urlhandlers$')
-def urlhandlers(frontend):
+@handle_request(r'^urlhandlers$')
+def urlhandlers(context):
     """
     *musicpd.org, reflection section:*
 
@@ -81,4 +95,4 @@ def urlhandlers(frontend):
 
         Gets a list of available URL handlers.
     """
-    return [(u'handler', uri) for uri in frontend.backend.uri_handlers.get()]
+    return [(u'handler', uri) for uri in context.backend.uri_handlers.get()]

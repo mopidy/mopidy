@@ -6,11 +6,12 @@ from pykka.registry import ActorRegistry
 from mopidy import settings
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, PlaybackController, StoredPlaylistsController)
-from mopidy.outputs.base import BaseOutput
+from mopidy.gstreamer import GStreamer
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
 ENCODING = 'utf-8'
+BITRATES = {96: 2, 160: 0, 320: 1}
 
 class SpotifyBackend(ThreadingActor, Backend):
     """
@@ -27,7 +28,12 @@ class SpotifyBackend(ThreadingActor, Backend):
         trade mark of the Spotify Group.
 
     **Issues:**
-    http://github.com/mopidy/mopidy/issues/labels/backend-spotify
+    https://github.com/mopidy/mopidy/issues?labels=backend-spotify
+
+    **Dependencies:**
+
+    - libspotify == 0.0.8 (libspotify8 package from apt.mopidy.com)
+    - pyspotify == 1.3 (python-spotify package from apt.mopidy.com)
 
     **Settings:**
 
@@ -63,22 +69,25 @@ class SpotifyBackend(ThreadingActor, Backend):
 
         self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
 
-        self.output = None
+        self.gstreamer = None
         self.spotify = None
 
-    def on_start(self):
-        output_refs = ActorRegistry.get_by_class(BaseOutput)
-        assert len(output_refs) == 1, 'Expected exactly one running output.'
-        self.output = output_refs[0].proxy()
+        # Fail early if settings are not present
+        self.username = settings.SPOTIFY_USERNAME
+        self.password = settings.SPOTIFY_PASSWORD
 
+    def on_start(self):
+        gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
+        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        self.gstreamer = gstreamer_refs[0].proxy()
+
+        logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         self.spotify = self._connect()
 
     def _connect(self):
         from .session_manager import SpotifySessionManager
 
-        logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         logger.debug(u'Connecting to Spotify')
-        spotify = SpotifySessionManager(
-            settings.SPOTIFY_USERNAME, settings.SPOTIFY_PASSWORD)
+        spotify = SpotifySessionManager(self.username, self.password)
         spotify.start()
         return spotify

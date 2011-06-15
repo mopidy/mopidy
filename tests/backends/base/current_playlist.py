@@ -3,7 +3,7 @@ import multiprocessing
 import random
 
 from mopidy.models import Playlist, Track
-from mopidy.outputs.base import BaseOutput
+from mopidy.gstreamer import GStreamer
 
 from tests.backends.base import populate_playlist
 
@@ -12,7 +12,7 @@ class CurrentPlaylistControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
-        self.backend.output = mock.Mock(spec=BaseOutput)
+        self.backend.gstreamer = mock.Mock(spec=GStreamer)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
@@ -23,14 +23,14 @@ class CurrentPlaylistControllerTest(object):
             cp_track = self.controller.add(track)
             self.assertEqual(track, self.controller.tracks[-1])
             self.assertEqual(cp_track, self.controller.cp_tracks[-1])
-            self.assertEqual(track, cp_track[1])
+            self.assertEqual(track, cp_track.track)
 
     def test_add_at_position(self):
         for track in self.tracks[:-1]:
             cp_track = self.controller.add(track, 0)
             self.assertEqual(track, self.controller.tracks[0])
             self.assertEqual(cp_track, self.controller.cp_tracks[0])
-            self.assertEqual(track, cp_track[1])
+            self.assertEqual(track, cp_track.track)
 
     @populate_playlist
     def test_add_at_position_outside_of_playlist(self):
@@ -40,12 +40,12 @@ class CurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_get_by_cpid(self):
         cp_track = self.controller.cp_tracks[1]
-        self.assertEqual(cp_track, self.controller.get(cpid=cp_track[0]))
+        self.assertEqual(cp_track, self.controller.get(cpid=cp_track.cpid))
 
     @populate_playlist
     def test_get_by_uri(self):
         cp_track = self.controller.cp_tracks[1]
-        self.assertEqual(cp_track, self.controller.get(uri=cp_track[1].uri))
+        self.assertEqual(cp_track, self.controller.get(uri=cp_track.track.uri))
 
     @populate_playlist
     def test_get_by_uri_raises_error_for_invalid_uri(self):

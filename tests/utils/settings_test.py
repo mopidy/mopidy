@@ -2,14 +2,15 @@ import os
 import unittest
 
 from mopidy import settings as default_settings_module, SettingsError
-from mopidy.utils.settings import validate_settings, SettingsProxy
-from mopidy.utils.settings import mask_value_if_secret
+from mopidy.utils.settings import (format_settings_list, mask_value_if_secret,
+    SettingsProxy, validate_settings)
 
 class ValidateSettingsTest(unittest.TestCase):
     def setUp(self):
         self.defaults = {
             'MPD_SERVER_HOSTNAME': '::',
             'MPD_SERVER_PORT': 6600,
+            'SPOTIFY_BITRATE': 160,
         }
 
     def test_no_errors_yields_empty_dict(self):
@@ -42,6 +43,13 @@ class ValidateSettingsTest(unittest.TestCase):
             '"mopidy.backends.despotify.DespotifyBackend" is no longer ' +
             'available.')
 
+    def test_unavailable_bitrate_setting_returns_error(self):
+        result = validate_settings(self.defaults,
+            {'SPOTIFY_BITRATE': 50})
+        self.assertEqual(result['SPOTIFY_BITRATE'],
+            u'Unavailable Spotify bitrate. ' +
+            u'Available bitrates are 96, 160, and 320.')
+
     def test_two_errors_are_both_reported(self):
         result = validate_settings(self.defaults,
             {'FOO': '', 'BAR': ''})
@@ -63,6 +71,7 @@ class ValidateSettingsTest(unittest.TestCase):
 class SettingsProxyTest(unittest.TestCase):
     def setUp(self):
         self.settings = SettingsProxy(default_settings_module)
+        self.settings.local.clear()
 
     def test_set_and_get_attr(self):
         self.settings.TEST = 'test'
@@ -140,3 +149,62 @@ class SettingsProxyTest(unittest.TestCase):
         self.settings.TEST = './test'
         actual = self.settings.TEST
         self.assertEqual(actual, './test')
+
+    def test_interactive_input_of_missing_defaults(self):
+        self.settings.default['TEST'] = ''
+        interactive_input = 'input'
+        self.settings._read_from_stdin = lambda _: interactive_input
+        self.settings.validate(interactive=True)
+        self.assertEqual(interactive_input, self.settings.TEST)
+
+    def test_interactive_input_not_needed_when_setting_is_set_locally(self):
+        self.settings.default['TEST'] = ''
+        self.settings.local['TEST'] = 'test'
+        self.settings._read_from_stdin = lambda _: self.fail(
+            'Should not read from stdin')
+        self.settings.validate(interactive=True)
+
+
+class FormatSettingListTest(unittest.TestCase):
+    def setUp(self):
+        self.settings = SettingsProxy(default_settings_module)
+
+    def test_contains_the_setting_name(self):
+        self.settings.TEST = u'test'
+        result = format_settings_list(self.settings)
+        self.assert_('TEST:' in result, result)
+
+    def test_repr_of_a_string_value(self):
+        self.settings.TEST = u'test'
+        result = format_settings_list(self.settings)
+        self.assert_("TEST: u'test'" in result, result)
+
+    def test_repr_of_an_int_value(self):
+        self.settings.TEST = 123
+        result = format_settings_list(self.settings)
+        self.assert_("TEST: 123" in result, result)
+
+    def test_repr_of_a_tuple_value(self):
+        self.settings.TEST = (123, u'abc')
+        result = format_settings_list(self.settings)
+        self.assert_("TEST: (123, u'abc')" in result, result)
+
+    def test_passwords_are_masked(self):
+        self.settings.TEST_PASSWORD = u'secret'
+        result = format_settings_list(self.settings)
+        self.assert_("TEST_PASSWORD: u'secret'" not in result, result)
+        self.assert_("TEST_PASSWORD: u'********'" in result, result)
+
+    def test_short_values_are_not_pretty_printed(self):
+        self.settings.FRONTEND = (u'mopidy.frontends.mpd.MpdFrontend',)
+        result = format_settings_list(self.settings)
+        self.assert_("FRONTEND: (u'mopidy.frontends.mpd.MpdFrontend',)" in result,
+            result)
+
+    def test_long_values_are_pretty_printed(self):
+        self.settings.FRONTEND = (u'mopidy.frontends.mpd.MpdFrontend',
+            u'mopidy.frontends.lastfm.LastfmFrontend')
+        result = format_settings_list(self.settings)
+        self.assert_("""FRONTEND: 
+  (u'mopidy.frontends.mpd.MpdFrontend',
+   u'mopidy.frontends.lastfm.LastfmFrontend')""" in result, result)

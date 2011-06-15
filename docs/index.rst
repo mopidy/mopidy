@@ -33,13 +33,13 @@ User documentation
 .. toctree::
     :maxdepth: 3
 
-    changes
     installation/index
     settings
     running
     clients/index
     authors
     licenses
+    changes
 
 Reference documentation
 =======================

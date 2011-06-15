@@ -7,4 +7,3 @@ Development
 
     roadmap
     contributing
-    internals

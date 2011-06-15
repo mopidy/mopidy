@@ -1,6 +1,6 @@
-from mopidy.frontends.mpd.protocol import handle_pattern
+from mopidy.frontends.mpd.protocol import handle_request
 
-@handle_pattern(r'^$')
-def empty(frontend):
+@handle_request(r'^$')
+def empty(context):
     """The original MPD server returns ``OK`` on an empty request."""
     pass

@@ -2,6 +2,8 @@ from copy import copy
 import logging
 import random
 
+from mopidy.models import CpTrack
+
 logger = logging.getLogger('mopidy.backends.base')
 
 class CurrentPlaylistController(object):
@@ -66,7 +68,7 @@ class CurrentPlaylistController(object):
         """
         assert at_position <= len(self._cp_tracks), \
             u'at_position can not be greater than playlist length'
-        cp_track = (self.version, track)
+        cp_track = CpTrack(self.version, track)
         if at_position is not None:
             self._cp_tracks.insert(at_position, cp_track)
         else:

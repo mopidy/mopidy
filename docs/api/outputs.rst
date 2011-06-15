@@ -1,20 +1,18 @@
+.. _output-api:
+
 **********
 Output API
 **********
 
-Outputs are responsible for playing audio.
+Outputs are used by :mod:`mopidy.gstreamer` to output audio in some way.
 
-.. warning::
-
-    A stable output API is not available yet, as we've only implemented a
-    single output module.
-
-.. automodule:: mopidy.outputs.base
-    :synopsis: Base class for outputs
+.. autoclass:: mopidy.outputs.BaseOutput
     :members:
 
 
 Output implementations
 ======================
 
-* :mod:`mopidy.outputs.gstreamer`
+* :class:`mopidy.outputs.custom.CustomOutput`
+* :class:`mopidy.outputs.local.LocalOutput`
+* :class:`mopidy.outputs.shoutcast.ShoutcastOutput`

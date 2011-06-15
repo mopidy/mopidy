@@ -1,6 +1,5 @@
 import logging
 import logging.handlers
-import platform
 
 from mopidy import get_version, get_platform, get_python, settings
 

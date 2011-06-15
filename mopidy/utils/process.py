@@ -1,13 +1,40 @@
 import logging
+import signal
+import thread
 import threading
 
 import gobject
 gobject.threads_init()
 
+from pykka import ActorDeadError
+from pykka.registry import ActorRegistry
+
 from mopidy import SettingsError
 
 logger = logging.getLogger('mopidy.utils.process')
 
+def exit_process():
+    logger.debug(u'Interrupting main...')
+    thread.interrupt_main()
+    logger.debug(u'Interrupted main')
+
+def exit_handler(signum, frame):
+    """A :mod:`signal` handler which will exit the program on signal."""
+    signals = dict((k, v) for v, k in signal.__dict__.iteritems()
+        if v.startswith('SIG') and not v.startswith('SIG_'))
+    logger.info(u'Got %s signal', signals[signum])
+    exit_process()
+
+def stop_all_actors():
+    num_actors = len(ActorRegistry.get_all())
+    while num_actors:
+        logger.debug(u'Seeing %d actor and %d non-actor thread(s): %s',
+            num_actors, threading.active_count() - num_actors,
+            ', '.join([t.name for t in threading.enumerate()]))
+        logger.debug(u'Stopping %d actor(s)...', num_actors)
+        ActorRegistry.stop_all()
+        num_actors = len(ActorRegistry.get_all())
+    logger.debug(u'All actors stopped.')
 
 class BaseThread(threading.Thread):
     def __init__(self):
@@ -21,25 +48,18 @@ class BaseThread(threading.Thread):
             self.run_inside_try()
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
-            self.exit(0, u'Interrupted by user')
         except SettingsError as e:
             logger.error(e.message)
-            self.exit(1, u'Settings error')
         except ImportError as e:
             logger.error(e)
-            self.exit(2, u'Import error')
+        except ActorDeadError as e:
+            logger.warning(e)
         except Exception as e:
             logger.exception(e)
-            self.exit(3, u'Unknown error')
+        logger.debug(u'%s: Exiting thread', self.name)
 
     def run_inside_try(self):
         raise NotImplementedError
-
-    def destroy(self):
-        pass
-
-    def exit(self, status=0, reason=None):
-        self.destroy()
 
 
 class GObjectEventThread(BaseThread):
