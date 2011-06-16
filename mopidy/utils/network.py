@@ -39,15 +39,15 @@ def format_hostname(hostname):
 
 class Listener(object):
     """Setup listener and register it with gobject loop."""
-    def __init__(self, addr, session):
+    def __init__(self, host, port, session):
         self.session = session
         self.sock = create_socket()
         self.sock.setblocking(0)
-        self.sock.bind(addr)
+        self.sock.bind((host, port))
         self.sock.listen(5)
 
         gobject.io_add_watch(self.sock.fileno(), gobject.IO_IN, self.handle)
-        logger.debug('Listening on %s using %s', addr, self.session)
+        logger.debug('Listening on [%s]:%s using %s', host, port, self.session)
 
     def handle(self, fd, flags):
         sock, addr = self.sock.accept()

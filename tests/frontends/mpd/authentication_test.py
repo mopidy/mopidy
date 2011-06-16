@@ -3,7 +3,7 @@ import unittest
 
 from mopidy import settings
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
-from mopidy.frontends.mpd.session import MpdSession
+from mopidy.frontends.mpd import MpdSession
 
 class AuthenticationTest(unittest.TestCase):
     def setUp(self):
