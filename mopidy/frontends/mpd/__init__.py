@@ -44,4 +44,3 @@ class MpdThread(BaseThread):
         logger.debug(u'Starting MPD server thread')
         server = MpdServer()
         server.start()
-        asyncore.loop()
