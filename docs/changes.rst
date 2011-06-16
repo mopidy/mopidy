@@ -5,12 +5,20 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.5.0 (in development)
+v0.6.0 (in development)
 =======================
+
+**Changes**
+
+- None yet
+
+
+v0.5.0 (2011-06-15)
+===================
 
 Since last time we've added support for audio streaming to SHOUTcast servers
 and fixed the longstanding playlist loading issue in the Spotify backend. As
-always the release has a bunch of bug fixes.
+always the release has a bunch of bug fixes and minor improvements.
 
 Please note that 0.5.0 requires some updated dependencies, as listed under
 *Important changes* below.
@@ -73,6 +81,9 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
 
   - Added :option:`--interactive` for reading missing local settings from
     ``stdin``. (Fixes: :issue:`96`)
+
+  - Improve shutdown procedure at CTRL+C. Add signal handler for ``SIGTERM``,
+    which initiates the same shutdown procedure as CTRL+C does.
 
 - Tag cache generator:
 
