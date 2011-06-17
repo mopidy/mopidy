@@ -4,7 +4,7 @@ import logging
 from spotify import Link, SpotifyError
 
 from mopidy import settings
-from mopidy.backends.spotify import ENCODING, BITRATES
+from mopidy.backends.spotify import ENCODING
 from mopidy.models import Artist, Album, Track, Playlist
 
 logger = logging.getLogger('mopidy.backends.spotify.translator')
@@ -44,7 +44,7 @@ class SpotifyTranslator(object):
             track_no=spotify_track.index(),
             date=date,
             length=spotify_track.duration(),
-            bitrate=BITRATES[settings.SPOTIFY_BITRATE],
+            bitrate=settings.SPOTIFY_BITRATE,
         )
 
     @classmethod
