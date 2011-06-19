@@ -45,6 +45,26 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
     - ``libindicate`` Python bindings is needed to expose Mopidy in e.g. the
       Ubuntu Sound Menu. The package is named ``python-indicate`` in
       Ubuntu/Debian.
+
+    **Testing the frontend**
+
+    To test, start Mopidy, and then run the following in a Python shell::
+
+        import dbus
+        bus = dbus.SessionBus()
+        player = bus.get_object('org.mpris.MediaPlayer2.mopidy',
+            '/org/mpris/MediaPlayer2')
+
+    Now you can control Mopidy through the player object. Examples:
+
+    - To get some properties from Mopidy, run::
+
+        props = player.GetAll('org.mpris.MediaPlayer2',
+            dbus_interface='org.freedesktop.DBus.Properties')
+
+    - To quit Mopidy through D-Bus, run::
+
+        player.Quit(dbus_interface='org.mpris.MediaPlayer2')
     """
 
     # This thread requires :class:`mopidy.utils.process.GObjectEventThread` to be
@@ -177,16 +197,6 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
         in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
-        """
-        To test, start Mopidy and then run the following in a Python shell::
-
-            import dbus
-            bus = dbus.SessionBus()
-            player = bus.get_object('org.mpris.MediaPlayer2.mopidy',
-                '/org/mpris/MediaPlayer2')
-            props = player.GetAll('org.mpris.MediaPlayer2',
-                dbus_interface='org.freedesktop.DBus.Properties')
-        """
         logger.debug(u'%s.GetAll(%s) called',
             dbus.PROPERTIES_IFACE, repr(interface))
         getters = {}
@@ -222,15 +232,6 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Quit(self):
-        """
-        To test, start Mopidy and then run the following in a Python shell::
-
-            import dbus
-            bus = dbus.SessionBus()
-            player = bus.get_object('org.mpris.MediaPlayer2.mopidy',
-                '/org/mpris/MediaPlayer2')
-            player.Quit(dbus_interface='org.mpris.MediaPlayer2')
-        """
         logger.debug(u'%s.Quit called', ROOT_IFACE)
         ActorRegistry.stop_all()
 
