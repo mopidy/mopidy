@@ -305,13 +305,13 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def OpenUri(self, uri):
         logger.debug(u'%s.OpenUri called', PLAYER_IFACE)
-        # TODO Pseudo code:
-        # if uri.scheme not in SupportedUriSchemes: return
-        # if uri.mime_type not in SupportedMimeTypes: return
-        # track = library.lookup(uri)
-        # cp_track = current_playlist.add(track)
-        # playback.play(cp_track)
-        pass
+        # TODO Check if URI is known scheme and has known MIME type.
+        track = self.backend.library.lookup(uri).get()
+        if track is not None:
+            cp_track = self.backend.current_playlist.add(track).get()
+            self.backend.playback.play(cp_track)
+        else:
+            logger.debug(u'Track with URI "%s" not found in library.', uri)
 
 
     ### Player interface signals

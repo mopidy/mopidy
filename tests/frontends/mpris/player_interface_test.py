@@ -489,3 +489,51 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assert_(after_set_position >= before_set_position)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+    def test_open_uri_adds_uri_to_current_playlist(self):
+        self.backend.library.provider.dummy_library = [
+            Track(uri='dummy:/test/uri')]
+        self.mpris.OpenUri('dummy:/test/uri')
+        self.assertEquals(self.backend.current_playlist.tracks.get()[0].uri,
+            'dummy:/test/uri')
+
+    def test_open_uri_starts_playback_of_new_track_if_stopped(self):
+        self.backend.library.provider.dummy_library = [
+            Track(uri='dummy:/test/uri')]
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
+
+        self.mpris.OpenUri('dummy:/test/uri')
+
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri,
+            'dummy:/test/uri')
+
+    def test_open_uri_starts_playback_of_new_track_if_paused(self):
+        self.backend.library.provider.dummy_library = [
+            Track(uri='dummy:/test/uri')]
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.backend.playback.pause()
+        self.assertEquals(self.backend.playback.state.get(), PAUSED)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+        self.mpris.OpenUri('dummy:/test/uri')
+
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri,
+            'dummy:/test/uri')
+
+    def test_open_uri_starts_playback_of_new_track_if_playing(self):
+        self.backend.library.provider.dummy_library = [
+            Track(uri='dummy:/test/uri')]
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
+        self.mpris.OpenUri('dummy:/test/uri')
+
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.assertEquals(self.backend.playback.current_track.get().uri,
+            'dummy:/test/uri')
