@@ -157,8 +157,7 @@ class MprisObject(dbus.service.Object):
             'CanPause': (False, None),
             # TODO Set to True when the rest is implemented
             'CanSeek': (False, None),
-            # TODO Set to True when the rest is implemented
-            'CanControl': (False, None),
+            'CanControl': (self.get_CanControl, None),
         }
 
     def _connect_to_dbus(self):
@@ -386,3 +385,7 @@ class MprisObject(dbus.service.Object):
 
     def get_Position(self):
         return self.backend.playback.time_position.get() * 1000
+
+    def get_CanControl(self):
+        # TODO This could be a setting for the end user to change.
+        return True

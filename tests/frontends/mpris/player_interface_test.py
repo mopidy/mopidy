@@ -157,6 +157,10 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
         self.assert_(result >= 1.0)
 
+    def test_can_control_is_true(self):
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanControl')
+        self.assertTrue(result)
+
     def test_next_when_playing_should_skip_to_next_track_and_keep_playing(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
