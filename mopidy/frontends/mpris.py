@@ -105,7 +105,7 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
 
 
 class MprisObject(dbus.service.Object):
-    """Implements http://www.mpris.org/2.0/spec/"""
+    """Implements http://www.mpris.org/2.1/spec/"""
 
     properties = None
 
