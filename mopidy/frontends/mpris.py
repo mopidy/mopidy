@@ -282,6 +282,9 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Seek(self, offset):
         logger.debug(u'%s.Seek called', PLAYER_IFACE)
+        if not self.get_CanSeek():
+            logger.debug(u'%s.Seek not allowed', PLAYER_IFACE)
+            return
         offset_in_milliseconds = offset // 1000
         current_position = self.backend.playback.time_position.get()
         new_position = current_position + offset_in_milliseconds
@@ -290,6 +293,9 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def SetPosition(self, track_id, position):
         logger.debug(u'%s.SetPosition called', PLAYER_IFACE)
+        if not self.get_CanSeek():
+            logger.debug(u'%s.SetPosition not allowed', PLAYER_IFACE)
+            return
         position = position // 1000
         current_track = self.backend.playback.current_track.get()
         # TODO Currently the ID is assumed to be the URI of the track. This

@@ -364,6 +364,23 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Play()
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
 
+    def test_seek_is_ignored_if_can_seek_is_false(self):
+        self.mpris.get_CanSeek = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+
+        before_seek = self.backend.playback.time_position.get()
+        self.assert_(before_seek >= 0)
+
+        milliseconds_to_seek = 10000
+        microseconds_to_seek = milliseconds_to_seek * 1000
+
+        self.mpris.Seek(microseconds_to_seek)
+
+        after_seek = self.backend.playback.time_position.get()
+        self.assert_(before_seek <= after_seek < (
+            before_seek + milliseconds_to_seek))
+
     def test_seek_seeks_given_microseconds_forward_in_the_current_track(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
         self.backend.playback.play()
@@ -442,6 +459,25 @@ class PlayerInterfaceTest(unittest.TestCase):
         after_seek = self.backend.playback.time_position.get()
         self.assert_(after_seek >= 0)
         self.assert_(after_seek < before_seek)
+
+    def test_set_position_is_ignored_if_can_seek_is_false(self):
+        self.mpris.get_CanSeek = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+
+        before_set_position = self.backend.playback.time_position.get()
+        self.assert_(before_set_position <= 5000)
+
+        track_id = 'a'
+
+        position_to_set_in_milliseconds = 20000
+        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+
+        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+
+        after_set_position = self.backend.playback.time_position.get()
+        self.assert_(before_set_position <= after_set_position <
+            position_to_set_in_milliseconds)
 
     def test_set_position_sets_the_current_track_position_in_microsecs(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
