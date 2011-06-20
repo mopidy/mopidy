@@ -151,8 +151,7 @@ class MprisObject(dbus.service.Object):
             'CanGoNext': (False, None),
             # TODO True if CanControl and backend.playback.track_at_previous
             'CanGoPrevious': (False, None),
-            # TODO True if CanControl and backend.playback.current_track
-            'CanPlay': (False, None),
+            'CanPlay': (self.get_CanPlay, None),
             'CanPause': (self.get_CanPause, None),
             'CanSeek': (self.get_CanSeek, None),
             'CanControl': (self.get_CanControl, None),
@@ -407,6 +406,12 @@ class MprisObject(dbus.service.Object):
 
     def get_Position(self):
         return self.backend.playback.time_position.get() * 1000
+
+    def get_CanPlay(self):
+        if not self.get_CanControl():
+            return False
+        return (self.backend.playback.current_track.get() is not None
+            or self.backend.playback.track_at_next.get() is not None)
 
     def get_CanPause(self):
         if not self.get_CanControl():

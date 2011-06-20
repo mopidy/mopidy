@@ -177,6 +177,25 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
         self.assert_(result >= 1.0)
 
+    def test_can_play_is_true_if_can_control_and_current_track(self):
+        self.mpris.get_CanControl = lambda *_: True
+        self.backend.current_playlist.append([Track(uri='a')])
+        self.backend.playback.play()
+        self.assertTrue(self.backend.playback.current_track.get())
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPlay')
+        self.assertTrue(result)
+
+    def test_can_play_is_false_if_no_current_track(self):
+        self.mpris.get_CanControl = lambda *_: True
+        self.assertFalse(self.backend.playback.current_track.get())
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPlay')
+        self.assertFalse(result)
+
+    def test_can_play_if_false_if_can_control_is_false(self):
+        self.mpris.get_CanControl = lambda *_: False
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPlay')
+        self.assertFalse(result)
+
     def test_can_pause_is_true_if_can_control_and_track_can_be_paused(self):
         self.mpris.get_CanControl = lambda *_: True
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPause')
