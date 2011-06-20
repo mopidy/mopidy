@@ -340,7 +340,6 @@ class MprisObject(dbus.service.Object):
     @dbus.service.signal(dbus_interface=PLAYER_IFACE, signature='x')
     def Seeked(self, position):
         logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
-        # TODO What should we do here?
         pass
 
 
