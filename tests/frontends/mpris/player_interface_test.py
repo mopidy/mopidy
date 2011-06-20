@@ -380,6 +380,13 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Stop()
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
 
+    def test_play_is_ignored_if_can_play_is_false(self):
+        self.mpris.get_CanPlay = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
+        self.mpris.Play()
+        self.assertEquals(self.backend.playback.state.get(), STOPPED)
+
     def test_play_when_stopped_starts_playback(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
