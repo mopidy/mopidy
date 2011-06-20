@@ -78,6 +78,9 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
         self.dbus_objects.append(MprisObject())
         self.send_startup_notification()
 
+    def on_receive(self, message):
+        pass # Ignore incoming messages for know
+
     def on_stop(self):
         for dbus_object in self.dbus_objects:
             dbus_object.remove_from_connection()
