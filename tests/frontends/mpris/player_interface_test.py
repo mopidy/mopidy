@@ -177,6 +177,28 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
         self.assert_(result >= 1.0)
 
+    def test_can_go_next_is_true_if_can_control_and_other_next_track(self):
+        self.mpris.get_CanControl = lambda *_: True
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoNext')
+        self.assertTrue(result)
+
+    def test_can_go_next_is_false_if_next_track_is_the_same(self):
+        self.mpris.get_CanControl = lambda *_: True
+        self.backend.current_playlist.append([Track(uri='a')])
+        self.backend.playback.repeat = True
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoNext')
+        self.assertFalse(result)
+
+    def test_can_go_next_is_false_if_can_control_is_false(self):
+        self.mpris.get_CanControl = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoNext')
+        self.assertFalse(result)
+
     def test_can_go_previous_is_true_if_can_control_and_other_previous_track(self):
         self.mpris.get_CanControl = lambda *_: True
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
