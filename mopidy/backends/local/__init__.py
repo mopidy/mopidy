@@ -52,7 +52,7 @@ class LocalBackend(ThreadingActor, Backend):
         self.stored_playlists = StoredPlaylistsController(backend=self,
             provider=stored_playlists_provider)
 
-        self.uri_handlers = [u'file://']
+        self.uri_schemes = [u'file']
 
         self.gstreamer = None
 
