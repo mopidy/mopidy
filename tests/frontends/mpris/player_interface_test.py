@@ -279,6 +279,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
 
+    def test_pause_is_ignored_if_can_pause_is_false(self):
+        self.mpris.get_CanPause = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.mpris.Pause()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
     def test_pause_when_playing_should_pause_playback(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
@@ -293,6 +301,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.state.get(), PAUSED)
         self.mpris.Pause()
         self.assertEquals(self.backend.playback.state.get(), PAUSED)
+
+    def test_playpause_is_ignored_if_can_pause_is_false(self):
+        self.mpris.get_CanPause = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.mpris.PlayPause()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
     def test_playpause_when_playing_should_pause_playback(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])

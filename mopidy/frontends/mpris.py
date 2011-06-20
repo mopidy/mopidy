@@ -248,11 +248,17 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Pause(self):
         logger.debug(u'%s.Pause called', PLAYER_IFACE)
+        if not self.get_CanPause():
+            logger.debug(u'%s.Pause not allowed', PLAYER_IFACE)
+            return
         self.backend.playback.pause().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def PlayPause(self):
         logger.debug(u'%s.PlayPause called', PLAYER_IFACE)
+        if not self.get_CanPause():
+            logger.debug(u'%s.PlayPause not allowed', PLAYER_IFACE)
+            return # TODO Raise error
         state = self.backend.playback.state.get()
         if state == PlaybackController.PLAYING:
             self.backend.playback.pause().get()
