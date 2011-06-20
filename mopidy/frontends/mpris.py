@@ -155,8 +155,7 @@ class MprisObject(dbus.service.Object):
             'CanPlay': (False, None),
             # TODO True if CanControl and backend.playback.current_track
             'CanPause': (False, None),
-            # TODO Set to True when the rest is implemented
-            'CanSeek': (False, None),
+            'CanSeek': (self.get_CanSeek, None),
             'CanControl': (self.get_CanControl, None),
         }
 
@@ -397,6 +396,13 @@ class MprisObject(dbus.service.Object):
 
     def get_Position(self):
         return self.backend.playback.time_position.get() * 1000
+
+    def get_CanSeek(self):
+        if not self.get_CanControl():
+            return False
+        # XXX Should be changed to vary based on capabilities of the current
+        # track if Mopidy starts supporting non-seekable media, like streams.
+        return True
 
     def get_CanControl(self):
         # TODO This could be a setting for the end user to change.

@@ -177,6 +177,16 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
         self.assert_(result >= 1.0)
 
+    def test_can_seek_is_true_if_can_control_is_true(self):
+        self.mpris.get_CanControl = lambda *_: True
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanSeek')
+        self.assertTrue(result)
+
+    def test_can_seek_is_false_if_can_control_is_false(self):
+        self.mpris.get_CanControl = lambda *_: False
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanSeek')
+        self.assertFalse(result)
+
     def test_can_control_is_true(self):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanControl')
         self.assertTrue(result)
