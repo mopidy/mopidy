@@ -67,8 +67,8 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
         player.Quit(dbus_interface='org.mpris.MediaPlayer2')
     """
 
-    # This thread requires :class:`mopidy.utils.process.GObjectEventThread` to be
-    # running too. This is not enforced in any way by the code.
+    # This thread requires :class:`mopidy.utils.process.GObjectEventThread` to
+    # be running too. This is not enforced in any way by the code.
 
     def __init__(self):
         self.indicate_server = None
