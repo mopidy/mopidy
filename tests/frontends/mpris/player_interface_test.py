@@ -266,6 +266,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanControl')
         self.assertTrue(result)
 
+    def test_next_is_ignored_if_can_go_next_is_false(self):
+        self.mpris.get_CanGoNext = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+        self.mpris.Next()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
+
     def test_next_when_playing_should_skip_to_next_track_and_keep_playing(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()

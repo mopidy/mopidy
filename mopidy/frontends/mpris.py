@@ -235,6 +235,9 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Next(self):
         logger.debug(u'%s.Next called', PLAYER_IFACE)
+        if not self.get_CanGoNext():
+            logger.debug(u'%s.Next not allowed', PLAYER_IFACE)
+            return
         self.backend.playback.next().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
