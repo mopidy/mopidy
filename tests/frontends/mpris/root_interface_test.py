@@ -1,13 +1,11 @@
 import mock
 import unittest
 
-from pykka.registry import ActorRegistry
-
 from mopidy.frontends import mpris
 
 class RootInterfaceTest(unittest.TestCase):
     def setUp(self):
-        mpris.ActorRegistry = mock.Mock(spec=ActorRegistry)
+        mpris.exit_process = mock.Mock()
         mpris.MprisObject._connect_to_dbus = mock.Mock()
         self.mpris = mpris.MprisObject()
 
@@ -27,7 +25,7 @@ class RootInterfaceTest(unittest.TestCase):
 
     def test_quit_should_stop_all_actors(self):
         self.mpris.Quit()
-        self.assert_(mpris.ActorRegistry.stop_all.called)
+        self.assert_(mpris.exit_process.called)
 
     def test_has_track_list_returns_false(self):
         result = self.mpris.Get(mpris.ROOT_IFACE, 'HasTrackList')

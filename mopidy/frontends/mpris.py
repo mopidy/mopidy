@@ -16,6 +16,7 @@ from mopidy.backends.base import Backend
 from mopidy.backends.base.playback import PlaybackController
 from mopidy.frontends.base import BaseFrontend
 from mopidy.mixers.base import BaseMixer
+from mopidy.utils.process import exit_process
 
 logger = logging.getLogger('mopidy.frontends.mpris')
 
@@ -230,7 +231,7 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Quit(self):
         logger.debug(u'%s.Quit called', ROOT_IFACE)
-        ActorRegistry.stop_all()
+        exit_process()
 
 
     ### Player interface methods
