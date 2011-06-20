@@ -282,6 +282,15 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.current_track.get().uri, 'b')
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
 
+    def test_previous_is_ignored_if_can_go_previous_is_false(self):
+        self.mpris.get_CanGoPrevious = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.backend.playback.next()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'b')
+        self.mpris.Previous()
+        self.assertEquals(self.backend.playback.current_track.get().uri, 'b')
+
     def test_previous_when_playing_should_skip_to_prev_track_and_keep_playing(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()

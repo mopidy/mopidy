@@ -241,6 +241,9 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Previous(self):
         logger.debug(u'%s.Previous called', PLAYER_IFACE)
+        if not self.get_CanGoPrevious():
+            logger.debug(u'%s.Previous not allowed', PLAYER_IFACE)
+            return
         self.backend.playback.previous().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
