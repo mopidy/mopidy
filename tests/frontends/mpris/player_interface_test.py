@@ -56,6 +56,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('Playlist', result)
 
+    def test_set_loop_status_is_ignored_if_can_control_is_false(self):
+        self.mpris.get_CanControl = lambda *_: False
+        self.backend.playback.repeat = True
+        self.backend.playback.single = True
+        self.mpris.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'None')
+        self.assertEquals(self.backend.playback.repeat.get(), True)
+        self.assertEquals(self.backend.playback.single.get(), True)
+
     def test_set_loop_status_to_none_unsets_repeat_and_single(self):
         self.mpris.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'None')
         self.assertEquals(self.backend.playback.repeat.get(), False)
@@ -98,6 +106,12 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'Shuffle')
         self.assertFalse(result)
 
+    def test_set_shuffle_is_ignored_if_can_control_is_false(self):
+        self.mpris.get_CanControl = lambda *_: False
+        self.backend.playback.shuffle = False
+        result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', True)
+        self.assertFalse(self.backend.playback.shuffle.get())
+
     def test_set_shuffle_to_true_activates_shuffle_mode(self):
         self.backend.playback.shuffle = False
         self.assertFalse(self.backend.playback.shuffle.get())
@@ -122,6 +136,12 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mixer.volume = 100
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'Volume')
         self.assertEquals(result, 1)
+
+    def test_set_volume_is_ignored_if_can_control_is_false(self):
+        self.mpris.get_CanControl = lambda *_: False
+        self.mixer.volume = 0
+        self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', 1.0)
+        self.assertEquals(self.mixer.volume.get(), 0)
 
     def test_set_volume_to_one_should_set_mixer_volume_to_100(self):
         self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', 1.0)
@@ -280,6 +300,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.assertEquals(self.backend.playback.state.get(), STOPPED)
         self.mpris.PlayPause()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
+    def test_stop_is_ignored_if_can_control_is_false(self):
+        self.mpris.get_CanControl = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.mpris.Stop()
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
     def test_stop_when_playing_should_stop_playback(self):

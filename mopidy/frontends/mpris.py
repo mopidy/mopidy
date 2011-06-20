@@ -266,6 +266,9 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Stop(self):
         logger.debug(u'%s.Stop called', PLAYER_IFACE)
+        if not self.get_CanControl():
+            logger.debug(u'%s.Stop not allowed', PLAYER_IFACE)
+            return # TODO Raise error
         self.backend.playback.stop().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
@@ -345,6 +348,9 @@ class MprisObject(dbus.service.Object):
                 return 'Playlist'
 
     def set_LoopStatus(self, value):
+        if not self.get_CanControl():
+            logger.debug(u'Setting %s.LoopStatus not allowed', PLAYER_IFACE)
+            return # TODO Raise error
         if value == 'None':
             self.backend.playback.repeat = False
             self.backend.playback.single = False
@@ -363,6 +369,9 @@ class MprisObject(dbus.service.Object):
         return self.backend.playback.shuffle.get()
 
     def set_Shuffle(self, value):
+        if not self.get_CanControl():
+            logger.debug(u'Setting %s.Shuffle not allowed', PLAYER_IFACE)
+            return # TODO Raise error
         if value:
             self.backend.playback.shuffle = True
         else:
@@ -374,6 +383,9 @@ class MprisObject(dbus.service.Object):
             return volume / 100.0
 
     def set_Volume(self, value):
+        if not self.get_CanControl():
+            logger.debug(u'Setting %s.Volume not allowed', PLAYER_IFACE)
+            return # TODO Raise error
         if value is None:
             return
         elif value < 0:
