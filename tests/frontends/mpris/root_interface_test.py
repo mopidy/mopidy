@@ -1,13 +1,18 @@
 import mock
 import unittest
 
+from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends import mpris
 
 class RootInterfaceTest(unittest.TestCase):
     def setUp(self):
         mpris.exit_process = mock.Mock()
         mpris.MprisObject._connect_to_dbus = mock.Mock()
+        self.backend = DummyBackend.start().proxy()
         self.mpris = mpris.MprisObject()
+
+    def tearDown(self):
+        self.backend.stop()
 
     def test_constructor_connects_to_dbus(self):
         self.assert_(self.mpris._connect_to_dbus.called)
@@ -33,16 +38,17 @@ class RootInterfaceTest(unittest.TestCase):
 
     def test_identify_is_mopidy(self):
         result = self.mpris.Get(mpris.ROOT_IFACE, 'Identity')
-        self.assertEquals('Mopidy', result)
+        self.assertEquals(result, 'Mopidy')
 
     def test_desktop_entry_is_mopidy(self):
         result = self.mpris.Get(mpris.ROOT_IFACE, 'DesktopEntry')
-        self.assertEquals('mopidy', result)
+        self.assertEquals(result, 'mopidy')
 
     def test_supported_uri_schemes_is_empty(self):
         result = self.mpris.Get(mpris.ROOT_IFACE, 'SupportedUriSchemes')
-        self.assertEquals(0, len(result))
+        self.assertEquals(len(result), 1)
+        self.assertEquals(result[0], 'dummy')
 
     def test_supported_mime_types_is_empty(self):
         result = self.mpris.Get(mpris.ROOT_IFACE, 'SupportedMimeTypes')
-        self.assertEquals(0, len(result))
+        self.assertEquals(len(result), 0)

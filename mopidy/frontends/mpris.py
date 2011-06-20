@@ -131,8 +131,7 @@ class MprisObject(dbus.service.Object):
             'HasTrackList': (False, None),
             'Identity': ('Mopidy', None),
             'DesktopEntry': ('mopidy', None),
-            # TODO Return URI schemes supported by backend configuration
-            'SupportedUriSchemes': (dbus.Array([], signature='s'), None),
+            'SupportedUriSchemes': (self.get_SupportedUriSchemes, None),
             # TODO Return MIME types supported by local backend if active
             'SupportedMimeTypes': (dbus.Array([], signature='s'), None),
         }
@@ -232,6 +231,12 @@ class MprisObject(dbus.service.Object):
     def Quit(self):
         logger.debug(u'%s.Quit called', ROOT_IFACE)
         exit_process()
+
+
+    ### Root interface properties
+
+    def get_SupportedUriSchemes(self):
+        return dbus.Array(self.backend.uri_schemes.get(), signature='s')
 
 
     ### Player interface methods
