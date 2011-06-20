@@ -381,6 +381,11 @@ class MprisObject(dbus.service.Object):
             self.backend.playback.single = False
 
     def set_Rate(self, value):
+        if not self.get_CanControl():
+            # NOTE The spec does not explictly require this check, but it was
+            # added to be consistent with all the other property setters.
+            logger.debug(u'Setting %s.Rate not allowed', PLAYER_IFACE)
+            return # TODO Raise error
         if value == 0:
             self.Pause()
 

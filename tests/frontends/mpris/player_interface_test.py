@@ -89,6 +89,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         maximum_rate = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
         self.assert_(rate >= maximum_rate)
 
+    def test_set_rate_is_ignored_if_can_control_is_false(self):
+        self.mpris.get_CanControl = lambda *_: False
+        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.backend.playback.play()
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+        self.mpris.Set(mpris.PLAYER_IFACE, 'Rate', 0)
+        self.assertEquals(self.backend.playback.state.get(), PLAYING)
+
     def test_set_rate_to_zero_pauses_playback(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
