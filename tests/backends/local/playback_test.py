@@ -36,8 +36,8 @@ class LocalPlaybackControllerTest(PlaybackControllerTest, unittest.TestCase):
         track = Track(uri=uri, length=4464)
         self.backend.current_playlist.add(track)
 
-    def test_uri_handler(self):
-        self.assert_('file://' in self.backend.uri_handlers)
+    def test_uri_scheme(self):
+        self.assertIn('file', self.backend.uri_schemes)
 
     def test_play_mp3(self):
         self.add_track('blank.mp3')

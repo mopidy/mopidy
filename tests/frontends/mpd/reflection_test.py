@@ -76,4 +76,4 @@ class ReflectionHandlerTest(unittest.TestCase):
     def test_urlhandlers(self):
         result = self.dispatcher.handle_request(u'urlhandlers')
         self.assert_(u'OK' in result)
-        self.assert_(u'handler: dummy:' in result)
+        self.assert_(u'handler: dummy' in result)

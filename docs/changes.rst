@@ -10,7 +10,9 @@ v0.6.0 (in development)
 
 **Changes**
 
-- None yet
+- Replace :attr:`mopidy.backends.base.Backend.uri_handlers` with
+  :attr:`mopidy.backends.base.Backend.uri_schemes`, which just takes the part
+  up to the colon of an URI, and not any prefix.
 
 
 v0.5.0 (2011-06-15)
