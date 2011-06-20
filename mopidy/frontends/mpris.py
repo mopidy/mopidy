@@ -327,6 +327,11 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def OpenUri(self, uri):
         logger.debug(u'%s.OpenUri called', PLAYER_IFACE)
+        if not self.get_CanPlay():
+            # NOTE The spec does not explictly require this check, but guarding
+            # the other methods doesn't help much if OpenUri is open for use.
+            logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
+            return
         # TODO Check if URI is known scheme and has known MIME type.
         track = self.backend.library.lookup(uri).get()
         if track is not None:
