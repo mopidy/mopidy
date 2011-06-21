@@ -675,7 +675,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assert_(before_set_position <= 5000)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
-        track_id = 'a'
+        track_id = '/com/mopidy/track/0'
 
         position_to_set_in_milliseconds = 20000
         position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
@@ -698,7 +698,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
 
-        track_id = 'a'
+        track_id = '/com/mopidy/track/0'
 
         position_to_set_in_milliseconds = -1000
         position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000

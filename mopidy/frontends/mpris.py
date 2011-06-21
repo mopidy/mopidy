@@ -177,6 +177,12 @@ class MprisObject(dbus.service.Object):
             self._mixer = mixer_refs[0].proxy()
         return self._mixer
 
+    def _get_track_id(self, cp_track):
+        return '/com/mopidy/track/%d' % cp_track.cpid
+
+    def _get_cpid(self, track_id):
+        assert track_id.startswith('/com/mopidy/track/')
+        return track_id.split('/')[-1]
 
     ### Properties interface
 
@@ -314,15 +320,14 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.SetPosition not allowed', PLAYER_IFACE)
             return
         position = position // 1000
-        current_track = self.backend.playback.current_track.get()
-        # TODO Currently the ID is assumed to be the URI of the track. This
-        # should be changed to a D-Bus object ID than can be mapped to the CPID
-        # and URI of the track.
-        if current_track and current_track.uri != track_id:
+        current_cp_track = self.backend.playback.current_cp_track.get()
+        if current_cp_track is None:
+            return
+        if track_id != self._get_track_id(current_cp_track):
             return
         if position < 0:
             return
-        if current_track and current_track.length < position:
+        if current_cp_track.track.length < position:
             return
         self.backend.playback.seek(position)
 
@@ -414,7 +419,7 @@ class MprisObject(dbus.service.Object):
             return {'mpris:trackid': ''}
         else:
             (cpid, track) = current_cp_track
-            metadata = {'mpris:trackid': '/com/mopidy/track/%d' % cpid}
+            metadata = {'mpris:trackid': self._get_track_id(current_cp_track)}
             if track.length:
                 metadata['mpris:length'] = track.length * 1000
             if track.uri:
