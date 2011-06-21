@@ -127,7 +127,7 @@ class MprisObject(dbus.service.Object):
         return {
             'CanQuit': (True, None),
             'CanRaise': (False, None),
-            # TODO Add track list support
+            # NOTE Change if adding optional track list support
             'HasTrackList': (False, None),
             'Identity': ('Mopidy', None),
             'DesktopEntry': ('mopidy', None),
@@ -484,17 +484,17 @@ class MprisObject(dbus.service.Object):
     def get_CanPause(self):
         if not self.get_CanControl():
             return False
-        # XXX Should be changed to vary based on capabilities of the current
+        # NOTE Should be changed to vary based on capabilities of the current
         # track if Mopidy starts supporting non-seekable media, like streams.
         return True
 
     def get_CanSeek(self):
         if not self.get_CanControl():
             return False
-        # XXX Should be changed to vary based on capabilities of the current
+        # NOTE Should be changed to vary based on capabilities of the current
         # track if Mopidy starts supporting non-seekable media, like streams.
         return True
 
     def get_CanControl(self):
-        # TODO This could be a setting for the end user to change.
+        # NOTE This could be a setting for the end user to change.
         return True
