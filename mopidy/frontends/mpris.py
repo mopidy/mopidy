@@ -142,10 +142,7 @@ class MprisObject(dbus.service.Object):
             'LoopStatus': (self.get_LoopStatus, self.set_LoopStatus),
             'Rate': (1.0, self.set_Rate),
             'Shuffle': (self.get_Shuffle, self.set_Shuffle),
-            # TODO Get meta data
-            'Metadata': ({
-                'mpris:trackid': '', # TODO Use (cpid, track.uri)
-            }, None),
+            'Metadata': (self.get_Metadata, None),
             'Volume': (self.get_Volume, self.set_Volume),
             'Position': (self.get_Position, None),
             'MinimumRate': (1.0, None),
@@ -410,6 +407,35 @@ class MprisObject(dbus.service.Object):
             self.backend.playback.shuffle = True
         else:
             self.backend.playback.shuffle = False
+
+    def get_Metadata(self):
+        current_cp_track = self.backend.playback.current_cp_track.get()
+        if current_cp_track is None:
+            return {'mpris:trackid': ''}
+        else:
+            (cpid, track) = current_cp_track
+            metadata = {'mpris:trackid': '/com/mopidy/track/%d' % cpid}
+            if track.length:
+                metadata['mpris:length'] = track.length * 1000
+            if track.uri:
+                metadata['xesam:url'] = track.uri
+            if track.name:
+                metadata['xesam:title'] = track.name
+            if track.artists:
+                artists = list(track.artists)
+                artists.sort(key=lambda a: a.name)
+                metadata['xesam:artist'] = dbus.Array(
+                    [a.name for a in artists if a.name], signature='s')
+            if track.album and track.album.name:
+                metadata['xesam:album'] = track.album.name
+            if track.album and track.album.artists:
+                artists = list(track.album.artists)
+                artists.sort(key=lambda a: a.name)
+                metadata['xesam:albumArtist'] = dbus.Array(
+                    [a.name for a in artists if a.name], signature='s')
+            if track.track_no:
+                metadata['xesam:trackNumber'] = track.track_no
+            return dbus.Dictionary(metadata, signature='sv')
 
     def get_Volume(self):
         volume = self.mixer.volume.get()

@@ -5,7 +5,7 @@ from mopidy.backends.dummy import DummyBackend
 from mopidy.backends.base.playback import PlaybackController
 from mopidy.frontends import mpris
 from mopidy.mixers.dummy import DummyMixer
-from mopidy.models import Track
+from mopidy.models import Album, Artist, Track
 
 PLAYING = PlaybackController.PLAYING
 PAUSED = PlaybackController.PAUSED
@@ -131,6 +131,71 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertTrue(self.backend.playback.shuffle.get())
         result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', False)
         self.assertFalse(self.backend.playback.shuffle.get())
+
+    def test_get_metadata_has_trackid_even_when_no_current_track(self):
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assert_('mpris:trackid' in result.keys())
+        self.assertEquals(result['mpris:trackid'], '')
+
+    def test_get_metadata_has_trackid_based_on_cpid(self):
+        self.backend.current_playlist.append([Track(uri='a')])
+        self.backend.playback.play()
+        (cpid, track) = self.backend.playback.current_cp_track.get()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assertIn('mpris:trackid', result.keys())
+        self.assertEquals(result['mpris:trackid'],
+            '/com/mopidy/track/%d' % cpid)
+
+    def test_get_metadata_has_track_length(self):
+        self.backend.current_playlist.append([Track(uri='a', length=40000)])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assertIn('mpris:length', result.keys())
+        self.assertEquals(result['mpris:length'], 40000000)
+
+    def test_get_metadata_has_track_uri(self):
+        self.backend.current_playlist.append([Track(uri='a')])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assertIn('xesam:url', result.keys())
+        self.assertEquals(result['xesam:url'], 'a')
+
+    def test_get_metadata_has_track_title(self):
+        self.backend.current_playlist.append([Track(name='a')])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assertIn('xesam:title', result.keys())
+        self.assertEquals(result['xesam:title'], 'a')
+
+    def test_get_metadata_has_track_artists(self):
+        self.backend.current_playlist.append([Track(artists=[
+            Artist(name='a'), Artist(name='b'), Artist(name=None)])])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assertIn('xesam:artist', result.keys())
+        self.assertEquals(result['xesam:artist'], ['a', 'b'])
+
+    def test_get_metadata_has_track_album(self):
+        self.backend.current_playlist.append([Track(album=Album(name='a'))])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assertIn('xesam:album', result.keys())
+        self.assertEquals(result['xesam:album'], 'a')
+
+    def test_get_metadata_has_track_album_artists(self):
+        self.backend.current_playlist.append([Track(album=Album(artists=[
+            Artist(name='a'), Artist(name='b'), Artist(name=None)]))])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assertIn('xesam:albumArtist', result.keys())
+        self.assertEquals(result['xesam:albumArtist'], ['a', 'b'])
+
+    def test_get_metadata_has_track_number_in_album(self):
+        self.backend.current_playlist.append([Track(track_no=7)])
+        self.backend.playback.play()
+        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        self.assertIn('xesam:trackNumber', result.keys())
+        self.assertEquals(result['xesam:trackNumber'], 7)
 
     def test_get_volume_should_return_volume_between_zero_and_one(self):
         self.mixer.volume = 0
