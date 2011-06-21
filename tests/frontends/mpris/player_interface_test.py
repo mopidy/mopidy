@@ -763,6 +763,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.OpenUri('dummy:/test/uri')
         self.assertEquals(len(self.backend.current_playlist.tracks.get()), 0)
 
+    def test_open_uri_ignores_uris_with_unknown_uri_scheme(self):
+        self.assertListEqual(self.backend.uri_schemes.get(), ['dummy'])
+        self.mpris.get_CanPlay = lambda *_: True
+        self.backend.library.provider.dummy_library = [
+            Track(uri='notdummy:/test/uri')]
+        self.mpris.OpenUri('notdummy:/test/uri')
+        self.assertEquals(len(self.backend.current_playlist.tracks.get()), 0)
+
     def test_open_uri_adds_uri_to_current_playlist(self):
         self.mpris.get_CanPlay = lambda *_: True
         self.backend.library.provider.dummy_library = [

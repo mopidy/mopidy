@@ -339,7 +339,10 @@ class MprisObject(dbus.service.Object):
             # the other methods doesn't help much if OpenUri is open for use.
             logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
             return
-        # TODO Check if URI is known scheme and has known MIME type.
+        # TODO Check if URI has known MIME type.
+        uri_schemes = self.backend.uri_schemes.get()
+        if not any([uri.startswith(uri_scheme) for uri_scheme in uri_schemes]):
+            return
         track = self.backend.library.lookup(uri).get()
         if track is not None:
             cp_track = self.backend.current_playlist.add(track).get()
