@@ -104,33 +104,33 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Set(mpris.PLAYER_IFACE, 'Rate', 0)
         self.assertEquals(self.backend.playback.state.get(), PAUSED)
 
-    def test_get_shuffle_returns_true_if_shuffle_is_active(self):
-        self.backend.playback.shuffle = True
+    def test_get_shuffle_returns_true_if_random_is_active(self):
+        self.backend.playback.random = True
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'Shuffle')
         self.assertTrue(result)
 
-    def test_get_shuffle_returns_false_if_shuffle_is_inactive(self):
-        self.backend.playback.shuffle = False
+    def test_get_shuffle_returns_false_if_random_is_inactive(self):
+        self.backend.playback.random = False
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'Shuffle')
         self.assertFalse(result)
 
     def test_set_shuffle_is_ignored_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
-        self.backend.playback.shuffle = False
+        self.backend.playback.random = False
         result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', True)
-        self.assertFalse(self.backend.playback.shuffle.get())
+        self.assertFalse(self.backend.playback.random.get())
 
-    def test_set_shuffle_to_true_activates_shuffle_mode(self):
-        self.backend.playback.shuffle = False
-        self.assertFalse(self.backend.playback.shuffle.get())
+    def test_set_shuffle_to_true_activates_random_mode(self):
+        self.backend.playback.random = False
+        self.assertFalse(self.backend.playback.random.get())
         result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', True)
-        self.assertTrue(self.backend.playback.shuffle.get())
+        self.assertTrue(self.backend.playback.random.get())
 
-    def test_set_shuffle_to_false_deactivates_shuffle_mode(self):
-        self.backend.playback.shuffle = True
-        self.assertTrue(self.backend.playback.shuffle.get())
+    def test_set_shuffle_to_false_deactivates_random_mode(self):
+        self.backend.playback.random = True
+        self.assertTrue(self.backend.playback.random.get())
         result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', False)
-        self.assertFalse(self.backend.playback.shuffle.get())
+        self.assertFalse(self.backend.playback.random.get())
 
     def test_get_metadata_has_trackid_even_when_no_current_track(self):
         result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')

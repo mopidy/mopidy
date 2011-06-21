@@ -397,16 +397,16 @@ class MprisObject(dbus.service.Object):
             self.Pause()
 
     def get_Shuffle(self):
-        return self.backend.playback.shuffle.get()
+        return self.backend.playback.random.get()
 
     def set_Shuffle(self, value):
         if not self.get_CanControl():
             logger.debug(u'Setting %s.Shuffle not allowed', PLAYER_IFACE)
             return # TODO Raise error
         if value:
-            self.backend.playback.shuffle = True
+            self.backend.playback.random = True
         else:
-            self.backend.playback.shuffle = False
+            self.backend.playback.random = False
 
     def get_Metadata(self):
         current_cp_track = self.backend.playback.current_cp_track.get()
