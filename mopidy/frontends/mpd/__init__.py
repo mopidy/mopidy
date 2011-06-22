@@ -58,3 +58,6 @@ class MpdSession(network.LineProtocol):
 
     def on_line_recieved(self, line):
         self.send_lines(self.dispatcher.handle_request(line))
+
+    def close(self):
+        self.stop()
