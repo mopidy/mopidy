@@ -39,6 +39,9 @@ class MpdFrontend(ThreadingActor, BaseFrontend):
 
         logger.info(u'MPD server running at [%s]:%s', hostname, port)
 
+    def on_receive(self, message):
+        pass # Ignore state info that is sent to frontend.
+
 
 class MpdSession(network.LineProtocol):
     """
