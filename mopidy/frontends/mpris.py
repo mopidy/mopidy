@@ -84,8 +84,10 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
 
     def on_stop(self):
         for dbus_object in self.dbus_objects:
+            logger.debug(u'Removing %s from connection...', dbus_object)
             dbus_object.remove_from_connection()
         self.dbus_objects = []
+        logger.debug(u'Removed all D-Bus objects from connection')
 
     def send_startup_notification(self):
         """
@@ -98,14 +100,16 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
         """
         try:
             import indicate
+            logger.debug(u'Sending startup notification...')
             self.indicate_server = indicate.Server()
             self.indicate_server.set_type('music.mopidy')
             # FIXME Location of .desktop file shouldn't be hardcoded
             self.indicate_server.set_desktop_file(
                 '/usr/share/applications/mopidy.desktop')
             self.indicate_server.show()
+            logger.debug(u'Startup notification sent')
         except ImportError as e:
-            logger.debug(u'Startup notification was not sent. (%s)', e)
+            logger.debug(u'Startup notification was not sent (%s)', e)
 
 
 class MprisObject(dbus.service.Object):
