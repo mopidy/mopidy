@@ -3,13 +3,12 @@ import logging
 
 from pykka.actor import ThreadingActor
 
-from mopidy.frontends.base import BaseFrontend
 from mopidy.frontends.mpd.server import MpdServer
 from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
-class MpdFrontend(ThreadingActor, BaseFrontend):
+class MpdFrontend(ThreadingActor):
     """
     The MPD frontend.
 
