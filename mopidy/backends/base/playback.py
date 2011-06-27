@@ -4,7 +4,7 @@ import time
 
 from pykka.registry import ActorRegistry
 
-from mopidy.frontends.base import BaseFrontend
+from mopidy.listeners import BackendListener
 
 logger = logging.getLogger('mopidy.backends.base')
 
@@ -462,23 +462,21 @@ class PlaybackController(object):
 
     def _trigger_started_playing_event(self):
         """
-        Notifies frontends that a track has started playing.
+        Notifies implementors of :class:`mopidy.listeners.BackendListener` that
+        a track has started playing.
 
         For internal use only. Should be called by the backend directly after a
         track has started playing.
         """
         if self.current_track is None:
             return
-        frontend_refs = ActorRegistry.get_by_class(BaseFrontend)
-        for frontend_ref in frontend_refs:
-            frontend_ref.send_one_way({
-                'command': 'started_playing',
-                'track': self.current_track,
-            })
+        for listener_ref in ActorRegistry.get_by_class(BackendListener):
+            listener_ref.proxy().started_playing(track=self.current_track)
 
     def _trigger_stopped_playing_event(self):
         """
-        Notifies frontends that a track has stopped playing.
+        Notifies implementors of :class:`mopidy.listeners.BackendListener` that
+        a track has stopped playing.
 
         For internal use only. Should be called by the backend before a track
         is stopped playing, e.g. at the next, previous, and stop actions and at
@@ -486,13 +484,9 @@ class PlaybackController(object):
         """
         if self.current_track is None:
             return
-        frontend_refs = ActorRegistry.get_by_class(BaseFrontend)
-        for frontend_ref in frontend_refs:
-            frontend_ref.send_one_way({
-                'command': 'stopped_playing',
-                'track': self.current_track,
-                'stop_position': self.time_position,
-            })
+        for listener_ref in ActorRegistry.get_by_class(BackendListener):
+            listener_ref.proxy().stopped_playing(
+                track=self.current_track, stop_position=self.time_position)
 
 
 class BasePlaybackProvider(object):
