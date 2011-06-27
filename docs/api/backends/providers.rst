@@ -14,7 +14,6 @@ Playback provider
 
 .. autoclass:: mopidy.backends.base.BasePlaybackProvider
     :members:
-    :undoc-members:
 
 
 Stored playlists provider
@@ -22,7 +21,6 @@ Stored playlists provider
 
 .. autoclass:: mopidy.backends.base.BaseStoredPlaylistsProvider
     :members:
-    :undoc-members:
 
 
 Library provider
@@ -30,7 +28,6 @@ Library provider
 
 .. autoclass:: mopidy.backends.base.BaseLibraryProvider
     :members:
-    :undoc-members:
 
 
 Backend provider implementations
