@@ -30,7 +30,6 @@ methods as described below.
 .. automodule:: mopidy.mixers.base
     :synopsis: Mixer API
     :members:
-    :undoc-members:
 
 
 Mixer implementations

@@ -10,14 +10,14 @@ except ImportError as import_error:
 from pykka.actor import ThreadingActor
 
 from mopidy import settings, SettingsError
-from mopidy.frontends.base import BaseFrontend
+from mopidy.listeners import BackendListener
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
 API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
-class LastfmFrontend(ThreadingActor, BaseFrontend):
+class LastfmFrontend(ThreadingActor, BackendListener):
     """
     Frontend which scrobbles the music you play to your `Last.fm
     <http://www.last.fm>`_ profile.
@@ -56,14 +56,6 @@ class LastfmFrontend(ThreadingActor, BaseFrontend):
                 pylast.WSError) as e:
             logger.error(u'Error during Last.fm setup: %s', e)
             self.stop()
-
-    def on_receive(self, message):
-        if message.get('command') == 'started_playing':
-            self.started_playing(message['track'])
-        elif message.get('command') == 'stopped_playing':
-            self.stopped_playing(message['track'], message['stop_position'])
-        else:
-            pass # Ignore any other messages
 
     def started_playing(self, track):
         artists = ', '.join([a.name for a in track.artists])

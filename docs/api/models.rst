@@ -25,4 +25,3 @@ Data model API
 .. automodule:: mopidy.models
     :synopsis: Data model API
     :members:
-    :undoc-members:
