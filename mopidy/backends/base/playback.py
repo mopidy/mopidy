@@ -472,7 +472,7 @@ class PlaybackController(object):
             return
         for listener_ref in ActorRegistry.get_by_class(BackendListener):
             listener_ref.proxy().stopped_playing(
-                track=self.current_track, stop_position=self.time_position)
+                track=self.current_track, time_position=self.time_position)
 
 
 class BasePlaybackProvider(object):
