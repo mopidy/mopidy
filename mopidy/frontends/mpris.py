@@ -73,18 +73,17 @@ class MprisFrontend(ThreadingActor, BackendListener):
 
     def __init__(self):
         self.indicate_server = None
-        self.dbus_objects = []
+        self.mpris_object = None
 
     def on_start(self):
-        self.dbus_objects.append(MprisObject())
+        self.mpris_object = MprisObject()
         self.send_startup_notification()
 
     def on_stop(self):
-        for dbus_object in self.dbus_objects:
-            logger.debug(u'Removing %s from connection...', dbus_object)
-            dbus_object.remove_from_connection()
-        self.dbus_objects = []
-        logger.debug(u'Removed all D-Bus objects from connection')
+        logger.debug(u'Removing MPRIS object from D-Bus connection...')
+        self.mpris_object.remove_from_connection()
+        self.mpris_object = None
+        logger.debug(u'Removed MPRIS object from D-Bus connection')
 
     def send_startup_notification(self):
         """
@@ -107,6 +106,38 @@ class MprisFrontend(ThreadingActor, BackendListener):
             logger.debug(u'Startup notification sent')
         except ImportError as e:
             logger.debug(u'Startup notification was not sent (%s)', e)
+
+    def paused_playing(self, track, time_position):
+        if self.mpris_object is None:
+            return
+        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
+            'PlaybackStatus':
+                self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
+        }, [])
+
+    def resumed_playing(self, track, time_position):
+        if self.mpris_object is None:
+            return
+        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
+            'PlaybackStatus':
+                self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
+        }, [])
+
+    def started_playing(self, track):
+        if self.mpris_object is None:
+            return
+        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
+            'PlaybackStatus':
+                self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
+        }, [])
+
+    def stopped_playing(self, track, time_position):
+        if self.mpris_object is None:
+            return
+        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
+            'PlaybackStatus':
+                self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
+        }, [])
 
 
 class MprisObject(dbus.service.Object):
@@ -219,9 +250,10 @@ class MprisObject(dbus.service.Object):
     @dbus.service.signal(dbus_interface=dbus.PROPERTIES_IFACE,
             signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed_properties,
-        invalidated_properties):
-        logger.debug(u'%s.PropertiesChanged signaled', dbus.PROPERTIES_IFACE)
-        pass
+            invalidated_properties):
+        logger.debug(u'%s.PropertiesChanged(%s, %s, %s) signaled',
+            dbus.PROPERTIES_IFACE, interface, changed_properties,
+            invalidated_properties)
 
 
     ### Root interface methods
