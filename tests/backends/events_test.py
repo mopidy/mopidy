@@ -41,5 +41,5 @@ class DummyBackendListener(ThreadingActor, BackendListener):
     def started_playing(self, track):
         self.events['started_playing'].set()
 
-    def stopped_playing(self, track, stop_position):
+    def stopped_playing(self, track, time_position):
         self.events['stopped_playing'].set()
