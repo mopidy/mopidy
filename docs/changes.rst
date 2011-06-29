@@ -13,6 +13,9 @@ v0.6.0 (in development)
 - Replace :attr:`mopidy.backends.base.Backend.uri_handlers` with
   :attr:`mopidy.backends.base.Backend.uri_schemes`, which just takes the part
   up to the colon of an URI, and not any prefix.
+- Add Listener API, :mod:`mopidy.listeners`, to be implemented by actors
+  wanting to receive events from the backend. This is a formalization of the
+  ad hoc events the Last.fm scrobbler has already been using for some time.
 
 
 v0.5.0 (2011-06-15)
