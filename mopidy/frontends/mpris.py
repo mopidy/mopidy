@@ -14,7 +14,7 @@ from pykka.registry import ActorRegistry
 
 from mopidy.backends.base import Backend
 from mopidy.backends.base.playback import PlaybackController
-from mopidy.frontends.base import BaseFrontend
+from mopidy.listeners import BackendListener
 from mopidy.mixers.base import BaseMixer
 from mopidy.utils.process import exit_process
 
@@ -31,7 +31,7 @@ ROOT_IFACE = 'org.mpris.MediaPlayer2'
 PLAYER_IFACE = 'org.mpris.MediaPlayer2.Player'
 
 
-class MprisFrontend(ThreadingActor, BaseFrontend):
+class MprisFrontend(ThreadingActor, BackendListener):
     """
     Frontend which lets you control Mopidy through the Media Player Remote
     Interfacing Specification (MPRIS) D-Bus interface.
@@ -78,9 +78,6 @@ class MprisFrontend(ThreadingActor, BaseFrontend):
     def on_start(self):
         self.dbus_objects.append(MprisObject())
         self.send_startup_notification()
-
-    def on_receive(self, message):
-        pass # Ignore incoming messages for know
 
     def on_stop(self):
         for dbus_object in self.dbus_objects:
