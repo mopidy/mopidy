@@ -485,27 +485,13 @@ class PlaybackController(object):
             self.current_cp_track = None
 
     def _trigger_started_playing_event(self):
-        """
-        Notifies implementors of :class:`mopidy.listeners.BackendListener` that
-        a track has started playing.
-
-        For internal use only. Should be called by the backend directly after a
-        track has started playing.
-        """
         if self.current_track is None:
             return
         for listener_ref in ActorRegistry.get_by_class(BackendListener):
             listener_ref.proxy().started_playing(track=self.current_track)
 
     def _trigger_stopped_playing_event(self):
-        """
-        Notifies implementors of :class:`mopidy.listeners.BackendListener` that
-        a track has stopped playing.
-
-        For internal use only. Should be called by the backend before a track
-        is stopped playing, e.g. at the next, previous, and stop actions and at
-        end-of-track.
-        """
+        # TODO Test that this is called on next/prev/end-of-track
         if self.current_track is None:
             return
         for listener_ref in ActorRegistry.get_by_class(BackendListener):
