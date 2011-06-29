@@ -20,7 +20,7 @@ class BackendListener(object):
         """
         pass
 
-    def stopped_playing(self, track, stop_position):
+    def stopped_playing(self, track, time_position):
         """
         Called whenever playback is stopped.
 
@@ -28,7 +28,7 @@ class BackendListener(object):
 
         :param track: the track that was played before playback stopped
         :type track: :class:`mopidy.models.Track`
-        :param stop_position: the time position when stopped in milliseconds
-        :type stop_position: int
+        :param time_position: the time position in milliseconds
+        :type time_position: int
         """
         pass
