@@ -383,6 +383,7 @@ class PlaybackController(object):
         """Pause playback."""
         if self.provider.pause():
             self.state = self.PAUSED
+            self._trigger_paused_playing_event()
 
     def play(self, cp_track=None, on_error_step=1):
         """
@@ -441,6 +442,7 @@ class PlaybackController(object):
         """If paused, resume playing the current track."""
         if self.state == self.PAUSED and self.provider.resume():
             self.state = self.PLAYING
+            self._trigger_resumed_playing_event()
 
     def seek(self, time_position):
         """
@@ -483,6 +485,20 @@ class PlaybackController(object):
                 self.state = self.STOPPED
         if clear_current_track:
             self.current_cp_track = None
+
+    def _trigger_paused_playing_event(self):
+        if self.current_track is None:
+            return
+        for listener_ref in ActorRegistry.get_by_class(BackendListener):
+            listener_ref.proxy().paused_playing(
+                track=self.current_track, time_position=self.time_position)
+
+    def _trigger_resumed_playing_event(self):
+        if self.current_track is None:
+            return
+        for listener_ref in ActorRegistry.get_by_class(BackendListener):
+            listener_ref.proxy().resumed_playing(
+                track=self.current_track, time_position=self.time_position)
 
     def _trigger_started_playing_event(self):
         if self.current_track is None:

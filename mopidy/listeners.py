@@ -9,6 +9,33 @@ class BackendListener(object):
     interested in all events.
     """
 
+    def paused_playing(self, track, time_position):
+        """
+        Called whenever playback is paused.
+
+        *MAY* be implemented by actor.
+
+        :param track: the track that was playing when playback paused
+        :type track: :class:`mopidy.models.Track`
+        :param time_position: the time position in milliseconds
+        :type time_position: int
+        """
+        pass
+
+    def resumed_playing(self, track, time_position):
+        """
+        Called whenever playback is resumed.
+
+        *MAY* be implemented by actor.
+
+        :param track: the track that was playing when playback resumed
+        :type track: :class:`mopidy.models.Track`
+        :param time_position: the time position in milliseconds
+        :type time_position: int
+        """
+        pass
+
+
     def started_playing(self, track):
         """
         Called whenever a new track starts playing.
