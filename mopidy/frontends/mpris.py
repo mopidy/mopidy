@@ -108,6 +108,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
             logger.debug(u'Startup notification was not sent (%s)', e)
 
     def paused_playing(self, track, time_position):
+        logger.debug(u'Received paused playing event')
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
@@ -116,6 +117,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
         }, [])
 
     def resumed_playing(self, track, time_position):
+        logger.debug(u'Received resumed playing event')
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
@@ -124,6 +126,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
         }, [])
 
     def started_playing(self, track):
+        logger.debug(u'Received started playing event')
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
@@ -133,6 +136,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
         }, [])
 
     def stopped_playing(self, track, time_position):
+        logger.debug(u'Received stopped playing event')
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
