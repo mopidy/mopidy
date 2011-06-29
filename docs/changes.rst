@@ -8,6 +8,10 @@ This change log is used to track all major changes to Mopidy.
 v0.6.0 (in development)
 =======================
 
+**Important changes**
+
+- Pykka 0.12.3 or greater is required.
+
 **Changes**
 
 - Replace :attr:`mopidy.backends.base.Backend.uri_handlers` with
