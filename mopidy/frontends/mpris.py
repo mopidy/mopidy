@@ -127,6 +127,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
+            'Metadata': self.mpris_object.Get(PLAYER_IFACE, 'Metadata'),
             'PlaybackStatus':
                 self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
         }, [])
@@ -135,6 +136,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
+            'Metadata': self.mpris_object.Get(PLAYER_IFACE, 'Metadata'),
             'PlaybackStatus':
                 self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
         }, [])

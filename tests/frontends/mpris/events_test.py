@@ -13,31 +13,37 @@ class BackendEventsTest(unittest.TestCase):
     def test_paused_playing_event_changes_playback_status(self):
         self.mpris_object.Get.return_value = 'Paused'
         self.mpris_frontend.paused_playing(Track(), 0)
-        self.mpris_object.Get.assert_called_with(
-            PLAYER_IFACE, 'PlaybackStatus')
+        self.assertListEqual(self.mpris_object.Get.call_args_list, [
+            ((PLAYER_IFACE, 'PlaybackStatus'), {}),
+        ])
         self.mpris_object.PropertiesChanged.assert_called_with(
             PLAYER_IFACE, {'PlaybackStatus': 'Paused'}, [])
 
     def test_resumed_playing_event_changes_playback_status(self):
         self.mpris_object.Get.return_value = 'Playing'
         self.mpris_frontend.resumed_playing(Track(), 0)
-        self.mpris_object.Get.assert_called_with(
-            PLAYER_IFACE, 'PlaybackStatus')
+        self.assertListEqual(self.mpris_object.Get.call_args_list, [
+            ((PLAYER_IFACE, 'PlaybackStatus'), {}),
+        ])
         self.mpris_object.PropertiesChanged.assert_called_with(
             PLAYER_IFACE, {'PlaybackStatus': 'Playing'}, [])
 
-    def test_started_playing_event_changes_playback_status(self):
-        self.mpris_object.Get.return_value = 'Playing'
+    def test_started_playing_event_changes_playback_status_and_metadata(self):
+        self.mpris_object.Get.return_value = '...'
         self.mpris_frontend.started_playing(Track())
-        self.mpris_object.Get.assert_called_with(
-            PLAYER_IFACE, 'PlaybackStatus')
+        self.assertListEqual(self.mpris_object.Get.call_args_list, [
+            ((PLAYER_IFACE, 'Metadata'), {}),
+            ((PLAYER_IFACE, 'PlaybackStatus'), {}),
+        ])
         self.mpris_object.PropertiesChanged.assert_called_with(
-            PLAYER_IFACE, {'PlaybackStatus': 'Playing'}, [])
+            PLAYER_IFACE, {'Metadata': '...', 'PlaybackStatus': '...'}, [])
 
-    def test_stopped_playing_event_changes_playback_status(self):
-        self.mpris_object.Get.return_value = 'Stopped'
+    def test_stopped_playing_event_changes_playback_status_and_metadata(self):
+        self.mpris_object.Get.return_value = '...'
         self.mpris_frontend.stopped_playing(Track(), 0)
-        self.mpris_object.Get.assert_called_with(
-            PLAYER_IFACE, 'PlaybackStatus')
+        self.assertListEqual(self.mpris_object.Get.call_args_list, [
+            ((PLAYER_IFACE, 'Metadata'), {}),
+            ((PLAYER_IFACE, 'PlaybackStatus'), {}),
+        ])
         self.mpris_object.PropertiesChanged.assert_called_with(
-            PLAYER_IFACE, {'PlaybackStatus': 'Stopped'}, [])
+            PLAYER_IFACE, {'Metadata': '...', 'PlaybackStatus': '...'}, [])
