@@ -5,6 +5,7 @@ from pykka.actor import ThreadingActor
 
 from mopidy import settings
 from mopidy.utils import network
+from mopidy.utils.process import stop_actors_by_class
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.protocol import ENCODING, VERSION, LINE_TERMINATOR
 
@@ -39,6 +40,9 @@ class MpdFrontend(ThreadingActor):
 
     def on_receive(self, message):
         pass # Ignore state info that is sent to frontend.
+
+    def on_stop(self):
+        stop_actors_by_class(MpdSession)
 
 
 class MpdSession(network.LineProtocol):
