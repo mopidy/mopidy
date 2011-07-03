@@ -4,10 +4,10 @@ import sys
 from pykka.actor import ThreadingActor
 
 from mopidy import settings
-from mopidy.utils import network
-from mopidy.utils.process import stop_actors_by_class
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.protocol import ENCODING, VERSION, LINE_TERMINATOR
+from mopidy.utils import network
+from mopidy.utils.process import stop_actors_by_class
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
