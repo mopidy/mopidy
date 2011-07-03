@@ -96,6 +96,9 @@ class LineProtocol(ThreadingActor):
         if 'recvieved' not in message:
             return
 
+        logger.debug('Got %s from event-loop in %s',
+            repr(message['recvieved']), self.actor_urn)
+
         for line in self.parse_lines(message['recvieved']):
             line = self.encode(line)
             self.log_request(line)
@@ -115,12 +118,12 @@ class LineProtocol(ThreadingActor):
             yield line
 
     def log_request(self, request):
-        logger.debug(u'Request from [%s]:%s: %s',
-            self.host, self.port, indent(request))
+        logger.debug(u'Request from [%s]:%s %s: %s',
+            self.host, self.port, self.actor_urn, indent(request))
 
     def log_response(self, response):
-        logger.debug(u'Response to [%s]:%s: %s',
-            self.host, self.port, indent(response))
+        logger.debug(u'Response to [%s]:%s %s: %s',
+            self.host, self.port, self.actor_urn, indent(response))
 
     def encode(self, line):
         if self.encoding:
