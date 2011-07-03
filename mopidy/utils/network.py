@@ -86,7 +86,7 @@ class LineProtocol(ThreadingActor):
 
     def __init__(self, sock, addr):
         self.sock = sock
-        self.host, self.port = addr
+        self.host, self.port = addr[:2]
         self.recv_buffer = ''
 
     def on_line_recieved(self, line):
