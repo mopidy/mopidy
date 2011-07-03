@@ -19,8 +19,8 @@ def add(context, uri):
     """
     if not uri:
         return
-    for handler_prefix in context.backend.uri_handlers.get():
-        if uri.startswith(handler_prefix):
+    for uri_scheme in context.backend.uri_schemes.get():
+        if uri.startswith(uri_scheme):
             track = context.backend.library.lookup(uri).get()
             if track is not None:
                 context.backend.current_playlist.add(track)

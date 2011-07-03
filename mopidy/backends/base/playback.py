@@ -4,7 +4,7 @@ import time
 
 from pykka.registry import ActorRegistry
 
-from mopidy.frontends.base import BaseFrontend
+from mopidy.listeners import BackendListener
 
 logger = logging.getLogger('mopidy.backends.base')
 
@@ -461,38 +461,30 @@ class PlaybackController(object):
             self.current_cp_track = None
 
     def _trigger_started_playing_event(self):
-        """
-        Notifies frontends that a track has started playing.
-
-        For internal use only. Should be called by the backend directly after a
-        track has started playing.
-        """
+        logger.debug(u'Triggering started playing event')
         if self.current_track is None:
             return
-        frontend_refs = ActorRegistry.get_by_class(BaseFrontend)
-        for frontend_ref in frontend_refs:
-            frontend_ref.send_one_way({
-                'command': 'started_playing',
-                'track': self.current_track,
-            })
+        ActorRegistry.broadcast({
+            'command': 'pykka_call',
+            'attr_path': ('started_playing',),
+            'args': [],
+            'kwargs': {'track': self.current_track},
+        }, target_class=BackendListener)
 
     def _trigger_stopped_playing_event(self):
-        """
-        Notifies frontends that a track has stopped playing.
-
-        For internal use only. Should be called by the backend before a track
-        is stopped playing, e.g. at the next, previous, and stop actions and at
-        end-of-track.
-        """
+        # TODO Test that this is called on next/prev/end-of-track
+        logger.debug(u'Triggering stopped playing event')
         if self.current_track is None:
             return
-        frontend_refs = ActorRegistry.get_by_class(BaseFrontend)
-        for frontend_ref in frontend_refs:
-            frontend_ref.send_one_way({
-                'command': 'stopped_playing',
+        ActorRegistry.broadcast({
+            'command': 'pykka_call',
+            'attr_path': ('stopped_playing',),
+            'args': [],
+            'kwargs': {
                 'track': self.current_track,
-                'stop_position': self.time_position,
-            })
+                'time_position': self.time_position,
+            },
+        }, target_class=BackendListener)
 
 
 class BasePlaybackProvider(object):

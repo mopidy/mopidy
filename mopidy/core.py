@@ -25,7 +25,8 @@ from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import exit_handler, stop_all_actors
+from mopidy.utils.process import (exit_handler, stop_remaining_actors,
+    stop_actors_by_class)
 from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
@@ -50,7 +51,11 @@ def main():
         logger.exception(e)
     finally:
         loop.quit()
-        stop_all_actors()
+        stop_frontends()
+        stop_backend()
+        stop_mixer()
+        stop_gstreamer()
+        stop_remaining_actors()
 
 def parse_options():
     parser = optparse.OptionParser(version=u'Mopidy %s' % get_version())
@@ -59,7 +64,7 @@ def parse_options():
         help='show GStreamer help options')
     parser.add_option('-i', '--interactive',
         action='store_true', dest='interactive',
-        help='ask interactively for required settings which is missing')
+        help='ask interactively for required settings which are missing')
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
@@ -86,11 +91,20 @@ def setup_settings(interactive):
 def setup_gstreamer():
     GStreamer.start()
 
+def stop_gstreamer():
+    stop_actors_by_class(GStreamer)
+
 def setup_mixer():
     get_class(settings.MIXER).start()
 
+def stop_mixer():
+    stop_actors_by_class(get_class(settings.MIXER))
+
 def setup_backend():
     get_class(settings.BACKENDS[0]).start()
+
+def stop_backend():
+    stop_actors_by_class(get_class(settings.BACKENDS[0]))
 
 def setup_frontends():
     for frontend_class_name in settings.FRONTENDS:
@@ -98,3 +112,10 @@ def setup_frontends():
             get_class(frontend_class_name).start()
         except OptionalDependencyError as e:
             logger.info(u'Disabled: %s (%s)', frontend_class_name, e)
+
+def stop_frontends():
+    for frontend_class_name in settings.FRONTENDS:
+        try:
+            stop_actors_by_class(get_class(frontend_class_name))
+        except OptionalDependencyError:
+            pass

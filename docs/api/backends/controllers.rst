@@ -15,7 +15,6 @@ The backend
 
 .. autoclass:: mopidy.backends.base.Backend
     :members:
-    :undoc-members:
 
 
 Playback controller
@@ -26,7 +25,6 @@ seek.
 
 .. autoclass:: mopidy.backends.base.PlaybackController
     :members:
-    :undoc-members:
 
 
 Mixer controller
@@ -42,7 +40,6 @@ Manages everything related to the currently loaded playlist.
 
 .. autoclass:: mopidy.backends.base.CurrentPlaylistController
     :members:
-    :undoc-members:
 
 
 Stored playlists controller
@@ -52,7 +49,6 @@ Manages stored playlist.
 
 .. autoclass:: mopidy.backends.base.StoredPlaylistsController
     :members:
-    :undoc-members:
 
 
 Library controller
@@ -62,4 +58,3 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
 
 .. autoclass:: mopidy.backends.base.LibraryController
     :members:
-    :undoc-members:

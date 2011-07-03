@@ -3,7 +3,6 @@ import sys
 
 from pykka.actor import ThreadingActor
 
-from mopidy.frontends.base import BaseFrontend
 from mopidy import settings
 from mopidy.utils import network
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
@@ -11,8 +10,7 @@ from mopidy.frontends.mpd.protocol import ENCODING, VERSION, LINE_TERMINATOR
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
-# FIXME no real need for frontend to be threading actor
-class MpdFrontend(ThreadingActor, BaseFrontend):
+class MpdFrontend(ThreadingActor):
     """
     The MPD frontend.
 

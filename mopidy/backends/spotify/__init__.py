@@ -67,7 +67,7 @@ class SpotifyBackend(ThreadingActor, Backend):
         self.stored_playlists = StoredPlaylistsController(backend=self,
             provider=stored_playlists_provider)
 
-        self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
+        self.uri_schemes = [u'spotify']
 
         self.gstreamer = None
         self.spotify = None

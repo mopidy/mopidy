@@ -25,5 +25,5 @@ class Backend(object):
     #: :class:`mopidy.backends.base.StoredPlaylistsController`.
     stored_playlists = None
 
-    #: List of URI prefixes this backend can handle.
-    uri_handlers = []
+    #: List of URI schemes this backend can handle.
+    uri_schemes = []
