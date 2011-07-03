@@ -37,9 +37,6 @@ class MpdFrontend(ThreadingActor):
 
         logger.info(u'MPD server running at [%s]:%s', hostname, port)
 
-    def on_receive(self, message):
-        pass # Ignore state info that is sent to frontend.
-
     def on_stop(self):
         process.stop_actors_by_class(MpdSession)
 
