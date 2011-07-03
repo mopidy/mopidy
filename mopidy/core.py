@@ -58,7 +58,7 @@ def parse_options():
         help='show GStreamer help options')
     parser.add_option('-i', '--interactive',
         action='store_true', dest='interactive',
-        help='ask interactively for required settings which is missing')
+        help='ask interactively for required settings which are missing')
     parser.add_option('-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
