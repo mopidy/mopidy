@@ -118,5 +118,5 @@ def stop_frontends():
     for frontend_class_name in settings.FRONTENDS:
         try:
             stop_actors_by_class(get_class(frontend_class_name))
-        except OptionalDependencyError as e:
+        except OptionalDependencyError:
             pass

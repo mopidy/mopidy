@@ -27,7 +27,7 @@ def exit_handler(signum, frame):
 
 def stop_actors_by_class(klass):
     actors = ActorRegistry.get_by_class(klass)
-    logger.debug('Stopping %d instance(s) of %s', len(actors), klass.__name__)
+    logger.debug(u'Stopping %d instance(s) of %s', len(actors), klass.__name__)
     for actor in actors:
         actor.stop()
 
