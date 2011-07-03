@@ -6,8 +6,7 @@ from pykka.actor import ThreadingActor
 from mopidy import settings
 from mopidy.frontends.mpd import dispatcher
 from mopidy.frontends.mpd import protocol
-from mopidy.utils import network
-from mopidy.utils import process
+from mopidy.utils import network, process
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
