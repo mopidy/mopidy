@@ -25,9 +25,17 @@ def exit_handler(signum, frame):
     logger.info(u'Got %s signal', signals[signum])
     exit_process()
 
-def stop_all_actors():
+def stop_actors_by_class(klass):
+    actors = ActorRegistry.get_by_class(klass)
+    logger.debug('Stopping %d instance(s) of %s', len(actors), klass.__name__)
+    for actor in actors:
+        actor.stop()
+
+def stop_remaining_actors():
     num_actors = len(ActorRegistry.get_all())
     while num_actors:
+        logger.error(
+            u'There are actor threads still running, this is probably a bug')
         logger.debug(u'Seeing %d actor and %d non-actor thread(s): %s',
             num_actors, threading.active_count() - num_actors,
             ', '.join([t.name for t in threading.enumerate()]))
