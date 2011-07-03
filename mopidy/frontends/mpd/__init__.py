@@ -4,10 +4,10 @@ import sys
 from pykka.actor import ThreadingActor
 
 from mopidy import settings
-from mopidy.frontends.mpd.dispatcher import MpdDispatcher
-from mopidy.frontends.mpd.protocol import ENCODING, VERSION, LINE_TERMINATOR
+from mopidy.frontends.mpd import dispatcher
+from mopidy.frontends.mpd import protocol
 from mopidy.utils import network
-from mopidy.utils.process import stop_actors_by_class
+from mopidy.utils import process
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
@@ -42,7 +42,7 @@ class MpdFrontend(ThreadingActor):
         pass # Ignore state info that is sent to frontend.
 
     def on_stop(self):
-        stop_actors_by_class(MpdSession)
+        process.stop_actors_by_class(MpdSession)
 
 
 class MpdSession(network.LineProtocol):
@@ -51,15 +51,15 @@ class MpdSession(network.LineProtocol):
     requests from the client is passed on to the MPD request dispatcher.
     """
 
-    terminator = LINE_TERMINATOR
-    encoding = ENCODING
+    terminator = protocol.LINE_TERMINATOR
+    encoding = protocol.ENCODING
 
     def __init__(self, sock, addr):
         super(MpdSession, self).__init__(sock, addr)
-        self.dispatcher = MpdDispatcher(self)
+        self.dispatcher = dispatcher.MpdDispatcher(self)
 
     def on_start(self):
-        self.send_lines([u'OK MPD %s' % VERSION])
+        self.send_lines([u'OK MPD %s' % protocol.VERSION])
 
     def on_line_recieved(self, line):
         self.send_lines(self.dispatcher.handle_request(line))
