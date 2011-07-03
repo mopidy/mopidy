@@ -74,14 +74,14 @@ class LastfmFrontend(ThreadingActor, BackendListener):
                 pylast.MalformedResponseError, pylast.WSError) as e:
             logger.warning(u'Error submitting playing track to Last.fm: %s', e)
 
-    def stopped_playing(self, track, stop_position):
+    def stopped_playing(self, track, time_position):
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
-        stop_position = stop_position // 1000
+        time_position = time_position // 1000
         if duration < 30:
             logger.debug(u'Track too short to scrobble. (30s)')
             return
-        if stop_position < duration // 2 and stop_position < 240:
+        if time_position < duration // 2 and time_position < 240:
             logger.debug(
                 u'Track not played long enough to scrobble. (50% or 240s)')
             return
