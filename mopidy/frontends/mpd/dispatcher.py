@@ -178,7 +178,7 @@ class MpdContext(object):
     #: The current :class:`MpdDispatcher`.
     dispatcher = None
 
-    #: The current :class:`mopidy.frontends.mpd.session.MpdSession`.
+    #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
     def __init__(self, dispatcher, session=None):
