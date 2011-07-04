@@ -122,7 +122,7 @@ class LineProtocol(ThreadingActor):
             self.host, self.port, self.actor_urn, indent(request))
 
     def log_response(self, response):
-        logger.debug(u'Response to [%s]:%s %s: from %s',
+        logger.debug(u'Response to [%s]:%s from %s: %s',
             self.host, self.port, self.actor_urn, indent(response))
 
     def encode(self, line):
