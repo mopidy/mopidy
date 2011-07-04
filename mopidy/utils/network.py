@@ -57,7 +57,7 @@ class Listener(object):
             host, port, self.protocol.__name__)
 
     def handle_accept(self, fd, flags):
-        sock, addr = self.listener.accept()
+        sock, addr = self.listener.accept() # FIXME this might fail is some rare cases.
         sock.setblocking(False)
 
         actor_ref = self.protocol.start(sock, addr)
@@ -67,10 +67,16 @@ class Listener(object):
         return True
 
     def handle_client(self, fd, flags, sock, actor_ref):
+        """
+        Read client data when possible.
+
+        Returns false when reading failed in order to deregister with the event
+        loop.
+        """
         if flags & (gobject.IO_ERR | gobject.IO_HUP):
             data = ''
         else:
-            data = sock.recv(1024)
+            data = sock.recv(1024) # FIXME there are cases where this might fail.
 
         if not data:
             actor_ref.stop()
@@ -81,6 +87,16 @@ class Listener(object):
 
 
 class LineProtocol(ThreadingActor):
+    """
+    Base class for handling line based protocols.
+
+    Takes care of receiving new data from listener's client code, decoding and
+    then splitting data along line boundaries.
+
+    Attributes ``terminator``and ``encoding`` can be set in case subclasses
+    want to split by another terminator or use another encoding.
+    """
+
     terminator = '\n'
     encoding = 'utf-8'
 
@@ -90,13 +106,19 @@ class LineProtocol(ThreadingActor):
         self.recv_buffer = ''
 
     def on_line_received(self, line):
+        """
+        Called whenever a new line is found.
+
+        Should be implemented by subclasses.
+        """
         raise NotImplemented
 
     def on_receive(self, message):
+        """Handle messages with new data from listener."""
         if 'received' not in message:
             return
 
-        logger.debug(u'Got %s from eventloop in %s',
+        logger.debug(u'Got %s from event loop in %s',
             repr(message['received']), self.actor_urn)
 
         for line in self.parse_lines(message['received']):
@@ -105,12 +127,14 @@ class LineProtocol(ThreadingActor):
             self.on_line_received(line)
 
     def on_stop(self):
+        """Ensure that socket is closed when actor stops."""
         try:
             self.sock.close()
         except socket.error:
             pass
 
     def parse_lines(self, new_data=None):
+        """Consume new data and yield any lines found."""
         if new_data:
             self.recv_buffer += new_data
         while self.terminator in self.recv_buffer:
@@ -118,24 +142,50 @@ class LineProtocol(ThreadingActor):
             yield line
 
     def log_request(self, request):
+        """
+        Log request for debug purposes.
+
+        Can be overridden by subclasses to change logging behaviour.
+        """
         logger.debug(u'Request from [%s]:%s to %s: %s',
             self.host, self.port, self.actor_urn, indent(request))
 
     def log_response(self, response):
+        """
+        Log response for debug purposes.
+
+        Can be overridden by subclasses to change logging behaviour.
+        """
         logger.debug(u'Response to [%s]:%s from %s: %s',
             self.host, self.port, self.actor_urn, indent(response))
 
     def encode(self, line):
+        """
+        Handle encoding of line.
+
+        Can be overridden by subclasses to change encoding behaviour.
+        """
         if self.encoding:
             return line.encode(self.encoding)
         return line
 
     def decode(self, line):
+        """
+        Handle decoding of line.
+
+        Can be overridden by subclasses to change decoding behaviour.
+        """
         if self.encoding:
             return line.decode(self.encoding)
         return line
 
     def send_lines(self, lines):
+        """
+        Send array of lines to client.
+
+        Join lines using the terminator that is set for this class, encode it
+        and send it to the client.
+        """
         if not lines:
             return
 
@@ -144,11 +194,12 @@ class LineProtocol(ThreadingActor):
         self.send_raw(self.encode(data + self.terminator))
 
     def send_raw(self, data):
+        """Send data to client exactly as is."""
         try:
             sent = self.sock.send(data)
             # FIXME we are assuming that sock send will not fail as the OS send
             # buffer is big enough compared to our need. This can of course
-            # fail and will be caught and handeled fairly poorly with the
+            # fail and will be caught and handled fairly poorly with the
             # following assert.
             #
             # Safer, and more complex way of handling this would be to ensure
@@ -162,8 +213,8 @@ class LineProtocol(ThreadingActor):
             # prevent an inf. loop.
             assert len(data) == sent, u'All data was not sent'
         except socket.error as e:
-            # FIXME should this be handeled in a better maner, for instance
-            # retry? For instance would block errors and interupted system call
+            # FIXME should this be handled in a better manner, for instance
+            # retry? For instance would block errors and interrupted system call
             # errors would warrant a retry.
             logger.debug(u'send() failed with: %s', e)
             self.stop()
