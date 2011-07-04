@@ -100,7 +100,7 @@ class LineProtocol(ThreadingActor):
             repr(message['received']), self.actor_urn)
 
         for line in self.parse_lines(message['received']):
-            line = self.encode(line)
+            line = self.decode(line)
             self.log_request(line)
             self.on_line_recieved(line)
 
