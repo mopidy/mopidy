@@ -89,7 +89,7 @@ class LineProtocol(ThreadingActor):
         self.host, self.port = addr[:2]
         self.recv_buffer = ''
 
-    def on_line_recieved(self, line):
+    def on_line_received(self, line):
         raise NotImplemented
 
     def on_receive(self, message):
@@ -102,7 +102,7 @@ class LineProtocol(ThreadingActor):
         for line in self.parse_lines(message['received']):
             line = self.decode(line)
             self.log_request(line)
-            self.on_line_recieved(line)
+            self.on_line_received(line)
 
     def on_stop(self):
         try:

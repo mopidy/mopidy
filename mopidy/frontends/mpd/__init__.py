@@ -56,7 +56,7 @@ class MpdSession(network.LineProtocol):
     def on_start(self):
         self.send_lines([u'OK MPD %s' % protocol.VERSION])
 
-    def on_line_recieved(self, line):
+    def on_line_received(self, line):
         self.send_lines(self.dispatcher.handle_request(line))
 
     def close(self):
