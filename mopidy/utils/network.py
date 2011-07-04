@@ -118,8 +118,7 @@ class LineProtocol(ThreadingActor):
         if 'received' not in message:
             return
 
-        logger.debug(u'Got %s from event loop in %s',
-            repr(message['received']), self.actor_urn)
+        self.log_raw_data(message['received'])
 
         for line in self.parse_lines(message['received']):
             line = self.decode(line)
@@ -140,6 +139,15 @@ class LineProtocol(ThreadingActor):
         while self.terminator in self.recv_buffer:
             line, self.recv_buffer = self.recv_buffer.split(self.terminator, 1)
             yield line
+
+    def log_raw_data(self, data):
+        """
+        Log raw data from event loopfor debug purposes.
+
+        Can be overridden by subclasses to change logging behaviour.
+        """
+        logger.debug(u'Got %s from event loop in %s',
+            repr(data), self.actor_urn)
 
     def log_request(self, request):
         """
