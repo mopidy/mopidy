@@ -44,8 +44,8 @@ def format_hostname(hostname):
 class Listener(object):
     """Setup listener and register it with gobject loop."""
 
-    def __init__(self, host, port, protcol):
-        self.protcol = protcol
+    def __init__(self, host, port, protocol):
+        self.protocol = protocol
         self.listener = create_socket()
         self.listener.setblocking(False)
         self.listener.bind((host, port))
@@ -53,14 +53,14 @@ class Listener(object):
 
         gobject.io_add_watch(
             self.listener.fileno(), gobject.IO_IN, self.handle_accept)
-        logger.debug('Listening on [%s]:%s using %s as protcol handler',
-            host, port, self.protcol.__name__)
+        logger.debug(u'Listening on [%s]:%s using %s as protocol handler',
+            host, port, self.protocol.__name__)
 
     def handle_accept(self, fd, flags):
         sock, addr = self.listener.accept()
         sock.setblocking(False)
 
-        actor_ref = self.protcol.start(sock, addr)
+        actor_ref = self.protocol.start(sock, addr)
         gobject.io_add_watch(sock.fileno(), gobject.IO_IN | gobject.IO_ERR |
             gobject.IO_HUP, self.handle_client, sock, actor_ref)
 
@@ -76,7 +76,7 @@ class Listener(object):
             actor_ref.stop()
             return False
 
-        actor_ref.send_one_way({'recvieved': data})
+        actor_ref.send_one_way({'received': data})
         return True
 
 
@@ -93,13 +93,13 @@ class LineProtocol(ThreadingActor):
         raise NotImplemented
 
     def on_receive(self, message):
-        if 'recvieved' not in message:
+        if 'received' not in message:
             return
 
-        logger.debug('Got %s from event-loop in %s',
-            repr(message['recvieved']), self.actor_urn)
+        logger.debug(u'Got %s from eventloop in %s',
+            repr(message['received']), self.actor_urn)
 
-        for line in self.parse_lines(message['recvieved']):
+        for line in self.parse_lines(message['received']):
             line = self.encode(line)
             self.log_request(line)
             self.on_line_recieved(line)
@@ -107,7 +107,7 @@ class LineProtocol(ThreadingActor):
     def on_stop(self):
         try:
             self.sock.close()
-        except socket.error as e:
+        except socket.error:
             pass
 
     def parse_lines(self, new_data=None):
@@ -118,11 +118,11 @@ class LineProtocol(ThreadingActor):
             yield line
 
     def log_request(self, request):
-        logger.debug(u'Request from [%s]:%s %s: %s',
+        logger.debug(u'Request from [%s]:%s to %s: %s',
             self.host, self.port, self.actor_urn, indent(request))
 
     def log_response(self, response):
-        logger.debug(u'Response to [%s]:%s %s: %s',
+        logger.debug(u'Response to [%s]:%s %s: from %s',
             self.host, self.port, self.actor_urn, indent(response))
 
     def encode(self, line):
@@ -146,7 +146,24 @@ class LineProtocol(ThreadingActor):
     def send_raw(self, data):
         try:
             sent = self.sock.send(data)
-            assert len(data) == sent, 'All data was not sent' # FIXME
-        except socket.error as e: # FIXME
-            logger.debug('send() failed with: %s', e)
+            # FIXME we are assuming that sock send will not fail as the OS send
+            # buffer is big enough compared to our need. This can of course
+            # fail and will be caught and handeled fairly poorly with the
+            # following assert.
+            #
+            # Safer, and more complex way of handling this would be to ensure
+            # that data can be send by putting a data sender in the event loop
+            # and appending to its buffer. Once the buffer is empty the sender
+            # must be removed from the loop. This option is doable, but adds
+            # extra complexity.
+            #
+            # The other simpler option would be to try and recall raw_send with
+            # remaining data. Probably with a decrementing retry counter to
+            # prevent an inf. loop.
+            assert len(data) == sent, u'All data was not sent'
+        except socket.error as e:
+            # FIXME should this be handeled in a better maner, for instance
+            # retry? For instance would block errors and interupted system call
+            # errors would warrant a retry.
+            logger.debug(u'send() failed with: %s', e)
             self.stop()
