@@ -29,7 +29,7 @@ class MpdFrontend(ThreadingActor):
         port = settings.MPD_SERVER_PORT
 
         try:
-            network.Listener(hostname, port, MpdSession)
+            network.Server(hostname, port, protocol=MpdSession)
         except IOError, e:
             logger.error(u'MPD server startup failed: %s', e)
             sys.exit(1)

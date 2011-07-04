@@ -41,7 +41,7 @@ def format_hostname(hostname):
         hostname = '::ffff:%s' % hostname
     return hostname
 
-class Listener(object):
+class Server(object):
     """Setup listener and register it with gobject loop."""
 
     def __init__(self, host, port, protocol):
