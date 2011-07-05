@@ -57,7 +57,13 @@ class Server(object):
             host, port, self.protocol.__name__)
 
     def handle_accept(self, fd, flags):
-        sock, addr = self.listener.accept() # FIXME this might fail is some rare cases.
+        try:
+            sock, addr = self.listener.accept()
+        except socket.error as e:
+            if e.errno in (errno.EAGAIN, errno.EINTR):
+                return True # i.e. retry
+            raise
+
         sock.setblocking(False)
 
         actor_ref = self.protocol.start(sock, addr)
