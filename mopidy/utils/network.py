@@ -80,9 +80,16 @@ class Server(object):
         loop.
         """
         if flags & (gobject.IO_ERR | gobject.IO_HUP):
-            data = ''
-        else:
-            data = sock.recv(1024) # FIXME there are cases where this might fail.
+            actor_ref.stop()
+            return False
+
+        try:
+            data = sock.recv(4096)
+        except socket.error as e:
+            if e.errno in (errno.EWOULDBLOCK, errno.EAGAIN):
+                return True
+            actor_ref.stop()
+            return False
 
         if not data:
             actor_ref.stop()
@@ -148,7 +155,7 @@ class LineProtocol(ThreadingActor):
 
     def log_raw_data(self, data):
         """
-        Log raw data from event loopfor debug purposes.
+        Log raw data from event loop for debug purposes.
 
         Can be overridden by subclasses to change logging behaviour.
         """
