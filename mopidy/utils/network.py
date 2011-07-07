@@ -106,12 +106,12 @@ class LineProtocol(ThreadingActor):
 
     Takes care of receiving new data from listener's client code, decoding and
     then splitting data along line boundaries.
-
-    Attributes ``terminator``and ``encoding`` can be set in case subclasses
-    want to split by another terminator or use another encoding.
     """
 
+    #: What terminator to use to split lines.
     terminator = '\n'
+
+    #: What encoding to expect incomming data to be in, can be :class:`None`.
     encoding = 'utf-8'
 
     def __init__(self, sock, addr):
