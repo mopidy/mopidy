@@ -185,6 +185,15 @@ class LineProtocol(ThreadingActor):
         logger.debug(u'Response to [%s]:%s from %s: %s',
             self.host, self.port, self.actor_urn, indent(response))
 
+    def log_error(self, error):
+        """
+        Log error for debug purposes.
+
+        Can be overridden by subclasses to change logging behaviour.
+        """
+        logger.warning('Problem with connection to [%s]:%s in %s: %s',
+            self.host, self.port, self.actor_urn, error)
+
     def encode(self, line):
         """
         Handle encoding of line.
@@ -247,6 +256,7 @@ class LineProtocol(ThreadingActor):
         except socket.error as e:
             if e.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
                 return True
+            self.log_error(e)
             self.actor_ref.stop()
             return False
         finally:
