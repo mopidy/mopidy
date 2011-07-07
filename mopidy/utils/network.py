@@ -120,6 +120,7 @@ class LineProtocol(ThreadingActor):
         self.send_lock = threading.Lock()
         self.recv_buffer = ''
         self.send_buffer = ''
+        self.terminator_re = re.compile(self.terminator)
 
     def on_line_received(self, line):
         """
@@ -152,8 +153,9 @@ class LineProtocol(ThreadingActor):
         """Consume new data and yield any lines found."""
         if new_data:
             self.recv_buffer += new_data
-        while self.terminator in self.recv_buffer:
-            line, self.recv_buffer = self.recv_buffer.split(self.terminator, 1)
+        while self.terminator_re.search(self.recv_buffer):
+            line, self.recv_buffer = self.terminator_re.split(
+                self.recv_buffer, 1)
             yield line
 
     def log_raw_data(self, data):
