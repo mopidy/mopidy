@@ -1,3 +1,4 @@
+import errno
 import gobject
 import logging
 import re
