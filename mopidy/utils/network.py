@@ -43,7 +43,7 @@ def format_hostname(hostname):
     return hostname
 
 class Server(object):
-    """Setup listener and register it with gobject loop."""
+    """Setup listener and register it with gobject's event loop."""
 
     def __init__(self, host, port, protocol):
         self.protocol = protocol
@@ -104,7 +104,7 @@ class LineProtocol(ThreadingActor):
     """
     Base class for handling line based protocols.
 
-    Takes care of receiving new data from listener's client code, decoding and
+    Takes care of receiving new data from server's client code, decoding and
     then splitting data along line boundaries.
     """
 
@@ -131,7 +131,7 @@ class LineProtocol(ThreadingActor):
         raise NotImplemented
 
     def on_receive(self, message):
-        """Handle messages with new data from listener."""
+        """Handle messages with new data from server."""
         if 'received' not in message:
             return
 
