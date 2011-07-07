@@ -6,6 +6,7 @@ import socket
 import threading
 
 from pykka.actor import ThreadingActor
+from pykka.registry import ActorRegistry
 
 from mopidy.utils.log import indent
 
@@ -46,8 +47,9 @@ def format_hostname(hostname):
 class Server(object):
     """Setup listener and register it with gobject's event loop."""
 
-    def __init__(self, host, port, protocol):
+    def __init__(self, host, port, protocol, max_connections=15):
         self.protocol = protocol
+        self.max_connections = max_connections
         self.listener = create_socket()
         self.listener.setblocking(False)
         self.listener.bind((host, port))
@@ -65,6 +67,15 @@ class Server(object):
             if e.errno in (errno.EAGAIN, errno.EINTR):
                 return True # i.e. retry
             raise
+
+        num_connections = len(ActorRegistry.get_by_class(self.protocol))
+        if self.max_connections and num_connections >= self.max_connections:
+            logger.warning(u'Rejected connection from [%s]:%s', addr[0], addr[1])
+            try:
+                sock.close()
+            except socket.error:
+                pass
+            return True
 
         sock.setblocking(False)
 
@@ -192,7 +203,7 @@ class LineProtocol(ThreadingActor):
 
         Can be overridden by subclasses to change logging behaviour.
         """
-        logger.warning('Problem with connection to [%s]:%s in %s: %s',
+        logger.warning(u'Problem with connection to [%s]:%s in %s: %s',
             self.host, self.port, self.actor_urn, error)
 
     def encode(self, line):
