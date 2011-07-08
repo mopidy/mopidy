@@ -127,8 +127,8 @@ class LineProtocol(ThreadingActor):
     encoding = 'utf-8'
 
     #: How long to wait before disconnecting client due to inactivity in
-    #: milliseconds.
-    timeout = 30000
+    #: seconds.
+    timeout = 30
 
     def __init__(self, sock, addr):
         self.sock = sock
@@ -180,7 +180,8 @@ class LineProtocol(ThreadingActor):
     def enable_timeout(self):
         """Reactivate timeout mechanism."""
         self.disable_timeout()
-        self.timeout_id = gobject.timeout_add(self.timeout, self._timeout)
+        self.timeout_id = gobject.timeout_add_seconds(self.timeout,
+            self._timeout)
 
     def parse_lines(self, new_data=None):
         """Consume new data and yield any lines found."""
