@@ -192,3 +192,17 @@ class ServerTest(unittest.TestCase):
         network.Connection.assert_called_once_with(sentinel.protocol,
             sentinel.sock, sentinel.addr, sentinel.timeout)
 
+    def test_reject_connection(self):
+        sock = Mock(spec=socket.SocketType)
+
+        network.Server.reject_connection(self.mock, sock,
+            (sentinel.host, sentinel.port))
+        sock.close.assert_called_once_with()
+
+    def test_reject_connection_error(self):
+        sock = Mock(spec=socket.SocketType)
+        sock.close.side_effect = socket.error()
+
+        network.Server.reject_connection(self.mock, sock,
+            (sentinel.host, sentinel.port))
+        sock.close.assert_called_once_with()
