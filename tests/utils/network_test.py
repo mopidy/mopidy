@@ -24,19 +24,19 @@ class FormatHostnameTest(unittest.TestCase):
 class TryIPv6SocketTest(unittest.TestCase):
     @patch('socket.has_ipv6', False)
     def test_system_that_claims_no_ipv6_support(self):
-        self.assertFalse(network._try_ipv6_socket())
+        self.assertFalse(network.try_ipv6_socket())
 
     @patch('socket.has_ipv6', True)
     @patch('socket.socket')
     def test_system_with_broken_ipv6(self, socket_mock):
         socket_mock.side_effect = IOError()
-        self.assertFalse(network._try_ipv6_socket())
+        self.assertFalse(network.try_ipv6_socket())
 
     @patch('socket.has_ipv6', True)
     @patch('socket.socket')
     def test_with_working_ipv6(self, socket_mock):
         socket_mock.return_value = Mock()
-        self.assertTrue(network._try_ipv6_socket())
+        self.assertTrue(network.try_ipv6_socket())
 
 
 class CreateSocketTest(unittest.TestCase):
@@ -84,7 +84,8 @@ class ServerTest(unittest.TestCase):
         sock = server.create_server_socket.return_value
         fileno = sock.fileno.return_value
 
-        server.create_server_socket.assert_called_once_with(self.host, self.port)
+        server.create_server_socket.assert_called_once_with(
+            self.host, self.port)
         server.register_server_socket.assert_called_once_with(fileno)
 
     @patch.object(network, 'create_socket', spec=socket.SocketType)
@@ -151,7 +152,8 @@ class ServerTest(unittest.TestCase):
 
         server.accept_connection.assert_called_once_with()
         server.maximum_connections_exceeded.assert_called_once_with()
-        server.reject_connection.assert_called_once_with(sentinel.sock, self.addr)
+        server.reject_connection.assert_called_once_with(
+            sentinel.sock, self.addr)
         self.assertEquals(0, server.init_connection.call_count)
 
     def test_accept_connection(self):
@@ -159,17 +161,20 @@ class ServerTest(unittest.TestCase):
         sock = server.create_server_socket.return_value
         sock.accept.return_value = (sentinel.sock, self.addr)
 
-        self.assertEquals((sentinel.sock, self.addr), server.accept_connection())
+        self.assertEquals((sentinel.sock, self.addr),
+            server.accept_connection())
 
     def test_accept_connection_recoverable_error(self):
         server = self.create_server()
         sock = server.create_server_socket.return_value
 
         sock.accept.side_effect = socket.error(errno.EAGAIN, '')
-        self.assertRaises(network.ShouldRetrySocketCall, server.accept_connection)
+        self.assertRaises(network.ShouldRetrySocketCall,
+            server.accept_connection)
 
         sock.accept.side_effect = socket.error(errno.EINTR, '')
-        self.assertRaises(network.ShouldRetrySocketCall, server.accept_connection)
+        self.assertRaises(network.ShouldRetrySocketCall,
+            server.accept_connection)
 
     def test_accept_connection_recoverable_error(self):
         server = self.create_server()
@@ -207,4 +212,6 @@ class ServerTest(unittest.TestCase):
         server = self.create_server()
         server.init_connection(sentinel.sock, self.addr)
 
-        network.Connection.assert_called_once_with(server.protocol, sentinel.sock, self.addr, server.timeout)
+        network.Connection.assert_called_once_with(server.protocol,
+            sentinel.sock, self.addr, server.timeout)
+

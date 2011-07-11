@@ -15,7 +15,7 @@ logger = logging.getLogger('mopidy.utils.server')
 class ShouldRetrySocketCall(Exception):
     """Indicate that attempted socket call should be retried"""
 
-def _try_ipv6_socket():
+def try_ipv6_socket():
     """Determine if system really supports IPv6"""
     if not socket.has_ipv6:
         return False
@@ -28,7 +28,7 @@ def _try_ipv6_socket():
     return False
 
 #: Boolean value that indicates if creating an IPv6 socket will succeed.
-has_ipv6 = _try_ipv6_socket()
+has_ipv6 = try_ipv6_socket()
 
 def create_socket():
     """Create a TCP socket with or without IPv6 depending on system support"""
@@ -168,7 +168,8 @@ class Connection(object):
     def enable_recv(self):
         if self.recv_id is None:
             self.recv_id = gobject.io_add_watch(self.sock.fileno(),
-                gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP, self.recv_callback)
+                gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP, 
+                self.recv_callback)
 
     def disable_recv(self):
         if self.recv_id is not None:
@@ -254,7 +255,7 @@ class LineProtocol(ThreadingActor):
 
         Should be implemented by subclasses.
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def on_receive(self, message):
         """Handle messages with new data from server."""
@@ -299,8 +300,8 @@ class LineProtocol(ThreadingActor):
 
         Can be overridden by subclasses to change logging behaviour.
         """
-        logger.debug(u'Request from %s to %s: %s', self.connection, self.actor_urn,
-            indent(request))
+        logger.debug(u'Request from %s to %s: %s', self.connection,
+            self.actor_urn, indent(request))
 
     def log_response(self, response):
         """
