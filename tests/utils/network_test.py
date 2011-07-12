@@ -206,3 +206,192 @@ class ServerTest(unittest.TestCase):
         network.Server.reject_connection(self.mock, sock,
             (sentinel.host, sentinel.port))
         sock.close.assert_called_once_with()
+
+class ConnectionTest(unittest.TestCase):
+    def setUp(self):
+        self.mock = Mock(spec=network.Connection)
+
+    def test_init_ensure_nonblocking_io(self):
+        sock = Mock(spec=socket.SocketType)
+
+        network.Connection.__init__(self.mock, Mock(), sock,
+            (sentinel.host, sentinel.port), sentinel.timeout)
+        sock.setblocking.assert_called_once_with(False)
+
+    def test_init_starts_actor(self):
+        protocol = Mock(spec=network.LineProtocol)
+
+        network.Connection.__init__(self.mock, protocol, Mock(),
+            (sentinel.host, sentinel.port), sentinel.timeout)
+        protocol.start.assert_called_once_with(self.mock)
+
+    def test_init_enables_recv_and_timeout(self):
+        network.Connection.__init__(self.mock, Mock(), Mock(),
+            (sentinel.host, sentinel.port), sentinel.timeout)
+        self.mock.enable_recv.assert_called_once_with()
+        self.mock.enable_timeout.assert_called_once_with()
+
+    def test_init_stores_values_in_attributes(self):
+        protocol = Mock(spec=network.LineProtocol)
+        sock = Mock(spec=socket.SocketType)
+
+        network.Connection.__init__(self.mock, protocol, sock,
+            (sentinel.host, sentinel.port), sentinel.timeout)
+        self.assertEqual(sock, self.mock.sock)
+        self.assertEqual(protocol, self.mock.protocol)
+        self.assertEqual(sentinel.timeout, self.mock.timeout)
+        self.assertEqual(sentinel.host, self.mock.host)
+        self.assertEqual(sentinel.port, self.mock.port)
+
+    def test_stop_disables_recv_send_and_timeout(self):
+        network.Connection.stop(self.mock)
+        self.mock.disable_timeout.assert_called_once_with()
+        self.mock.disable_recv.assert_called_once_with()
+        self.mock.disable_timeout.assert_called_once_with()
+
+    def test_stop_closes_socket(self):
+        sock = Mock(spec=socket.SocketType)
+        self.mock.sock = sock
+
+        network.Connection.stop(self.mock)
+        sock.close.assert_called_once_with()
+
+    def test_stop_closes_socket_error(self):
+        sock = Mock(spec=socket.SocketType)
+        sock.close.side_effect = socket.error()
+        self.mock.sock = sock
+
+        network.Connection.stop(self.mock)
+        sock.close.assert_called_once_with()
+
+    def test_stop_return_false(self):
+        self.assertFalse(network.Connection.stop(self.mock))
+
+    @patch.object(gobject, 'io_add_watch', new=Mock())
+    def test_enable_recv_registers_with_gobject(self):
+        self.mock.recv_id = None
+        self.mock.sock.fileno.return_value = sentinel.fileno
+        gobject.io_add_watch.return_value = sentinel.tag
+
+        network.Connection.enable_recv(self.mock)
+        gobject.io_add_watch.assert_called_once_with(sentinel.fileno,
+            gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
+            self.mock.recv_callback)
+        self.assertEqual(sentinel.tag, self.mock.recv_id)
+
+    @patch.object(gobject, 'io_add_watch', new=Mock())
+    def test_enable_recv_already_registered(self):
+        self.mock.recv_id = sentinel.tag
+
+        network.Connection.enable_recv(self.mock)
+        self.assertEqual(0, gobject.io_add_watch.call_count)
+
+    @patch.object(gobject, 'source_remove', new=Mock())
+    def test_disable_recv_deregisters(self):
+        self.mock.recv_id = sentinel.tag
+
+        network.Connection.disable_recv(self.mock)
+        gobject.source_remove.assert_called_once_with(sentinel.tag)
+        self.assertEqual(None, self.mock.recv_id)
+
+    @patch.object(gobject, 'source_remove', new=Mock())
+    def test_disable_recv_already_deregistered(self):
+        self.mock.recv_id = None
+
+        network.Connection.disable_recv(self.mock)
+        self.assertEqual(0, gobject.source_remove.call_count)
+        self.assertEqual(None, self.mock.recv_id)
+
+    @patch.object(gobject, 'io_add_watch', new=Mock())
+    def test_enable_send_registers_with_gobject(self):
+        self.mock.send_id = None
+        self.mock.sock.fileno.return_value = sentinel.fileno
+        gobject.io_add_watch.return_value = sentinel.tag
+
+        network.Connection.enable_send(self.mock)
+        gobject.io_add_watch.assert_called_once_with(sentinel.fileno,
+            gobject.IO_OUT | gobject.IO_ERR | gobject.IO_HUP,
+            self.mock.send_callback)
+        self.assertEqual(sentinel.tag, self.mock.send_id)
+
+    @patch.object(gobject, 'io_add_watch', new=Mock())
+    def test_enable_send_already_registered(self):
+        self.mock.send_id = sentinel.tag
+
+        network.Connection.enable_send(self.mock)
+        self.assertEqual(0, gobject.io_add_watch.call_count)
+
+    @patch.object(gobject, 'source_remove', new=Mock())
+    def test_disable_send_deregisters(self):
+        self.mock.send_id = sentinel.tag
+
+        network.Connection.disable_send(self.mock)
+        gobject.source_remove.assert_called_once_with(sentinel.tag)
+        self.assertEqual(None, self.mock.send_id)
+
+    @patch.object(gobject, 'source_remove', new=Mock())
+    def test_disable_send_already_deregistered(self):
+        self.mock.send_id = None
+
+        network.Connection.disable_send(self.mock)
+        self.assertEqual(0, gobject.source_remove.call_count)
+        self.assertEqual(None, self.mock.send_id)
+
+    @patch.object(gobject, 'timeout_add_seconds', new=Mock())
+    def test_enable_timeout_clears_existing_timeouts(self):
+        self.mock.timeout = 10
+
+        network.Connection.enable_timeout(self.mock)
+        self.mock.disable_timeout.assert_called_once_with()
+
+    @patch.object(gobject, 'timeout_add_seconds', new=Mock())
+    def test_enable_timeout_add_gobject_timeout(self):
+        self.mock.timeout = 10
+        gobject.timeout_add_seconds.return_value = sentinel.tag
+
+        network.Connection.enable_timeout(self.mock)
+        gobject.timeout_add_seconds.assert_called_once_with(10,
+            self.mock.timeout_callback)
+        self.assertEqual(sentinel.tag, self.mock.timeout_id)
+
+    @patch.object(gobject, 'timeout_add_seconds', new=Mock())
+    def test_enable_timeout_does_not_add_timeout(self):
+        self.mock.timeout = 0
+        network.Connection.enable_timeout(self.mock)
+        self.assertEqual(0, gobject.timeout_add_seconds.call_count)
+
+        self.mock.timeout = -1
+        network.Connection.enable_timeout(self.mock)
+        self.assertEqual(0, gobject.timeout_add_seconds.call_count)
+
+        self.mock.timeout = None
+        network.Connection.enable_timeout(self.mock)
+        self.assertEqual(0, gobject.timeout_add_seconds.call_count)
+
+    @patch.object(gobject, 'source_remove', new=Mock())
+    def test_disable_timeout_deregisters(self):
+        self.mock.timeout_id = sentinel.tag
+
+        network.Connection.disable_timeout(self.mock)
+        gobject.source_remove.assert_called_once_with(sentinel.tag)
+        self.assertEqual(None, self.mock.timeout_id)
+
+    @patch.object(gobject, 'source_remove', new=Mock())
+    def test_disable_timeout_already_deregistered(self):
+        self.mock.timeout_id = None
+
+        network.Connection.disable_timeout(self.mock)
+        self.assertEqual(0, gobject.source_remove.call_count)
+        self.assertEqual(None, self.mock.timeout_id)
+
+    @SkipTest
+    def test_recv_callback(self):
+        pass
+
+    @SkipTest
+    def test_send_callback(self):
+        pass
+
+    @SkipTest
+    def test_timeout_callback(self):
+        pass
