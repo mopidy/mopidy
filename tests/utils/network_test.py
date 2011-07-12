@@ -419,17 +419,17 @@ class ConnectionTest(unittest.TestCase):
         self.mock.enable_send.assert_called_once_with()
 
     def test_recv_callback_respects_io_err(self):
-        self.assertFalse(network.Connection.recv_callback(self.mock,
+        self.assertTrue(network.Connection.recv_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_ERR))
         self.mock.stop.assert_called_once_with()
 
     def test_recv_callback_respects_io_hup(self):
-        self.assertFalse(network.Connection.recv_callback(self.mock,
+        self.assertTrue(network.Connection.recv_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_HUP))
         self.mock.stop.assert_called_once_with()
 
     def test_recv_callback_respects_io_hup_and_io_err(self):
-        self.assertFalse(network.Connection.recv_callback(self.mock,
+        self.assertTrue(network.Connection.recv_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_HUP | gobject.IO_ERR))
         self.mock.stop.assert_called_once_with()
 
@@ -447,7 +447,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.recv.return_value = ''
 
-        self.assertFalse(network.Connection.recv_callback(
+        self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
         self.mock.stop.assert_called_once_with()
 
@@ -463,7 +463,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.recv.side_effect = socket.error()
 
-        self.assertFalse(network.Connection.recv_callback(
+        self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
         self.mock.stop.assert_called_once_with()
 

@@ -189,21 +189,19 @@ class Connection(object):
     def recv_callback(self, fd, flags):
         if flags & (gobject.IO_ERR | gobject.IO_HUP):
             self.stop()
-            return False
+            return True
 
         try:
             data = self.sock.recv(4096)
         except socket.error as e:
-            if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
-                return True
-            self.stop()
-            return False
+            if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
+                self.stop()
+            return True
 
         if not data:
             self.stop()
-            return False
-
-        self.actor_ref.send_one_way({'received': data})
+        else:
+            self.actor_ref.send_one_way({'received': data})
         return True
 
     def send_callback(self, fd, flags):
