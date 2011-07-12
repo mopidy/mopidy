@@ -143,7 +143,6 @@ class Connection(object):
             self.sock.close()
         except socket.error:
             pass
-        return False
 
     def send(self, data):
         """Send data to client exactly as is."""
@@ -189,17 +188,20 @@ class Connection(object):
 
     def recv_callback(self, fd, flags):
         if flags & (gobject.IO_ERR | gobject.IO_HUP):
-            return self.stop()
+            self.stop()
+            return False
 
         try:
             data = self.sock.recv(4096)
         except socket.error as e:
-            if e.errno in (errno.EWOULDBLOCK, errno.EAGAIN):
+            if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return True
-            return self.stop()
+            self.stop()
+            return False
 
         if not data:
-            return self.stop()
+            self.stop()
+            return False
 
         self.actor_ref.send_one_way({'received': data})
         return True
@@ -216,9 +218,9 @@ class Connection(object):
             if not self.send_buffer:
                 self.disable_send()
         except socket.error as e:
-            if e.errno not in (errno.EAGAIN, errno.EWOULDBLOCK):
+            if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
                 #self.log_error(e) # FIXME log error
-                return self.stop()
+                self.stop()
         finally:
             self.send_lock.release()
 
