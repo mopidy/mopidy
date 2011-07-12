@@ -10,6 +10,7 @@ from pykka.registry import ActorRegistry
 
 from mopidy.utils.log import indent
 
+# FIXME setup logger with extra={...}
 logger = logging.getLogger('mopidy.utils.server')
 
 class ShouldRetrySocketCall(Exception):
@@ -134,11 +135,14 @@ class Connection(object):
         self.enable_recv()
         self.enable_timeout()
 
-    def stop(self):
+    def stop(self, reason, level=logging.DEBUG):
+        logger.log(level, reason)
+
         self.actor_ref.stop()
         self.disable_timeout()
         self.disable_recv()
         self.disable_send()
+
         try:
             self.sock.close()
         except socket.error:
@@ -188,18 +192,18 @@ class Connection(object):
 
     def recv_callback(self, fd, flags):
         if flags & (gobject.IO_ERR | gobject.IO_HUP):
-            self.stop()
+            self.stop(u'Bad client flags: %s' % flags)
             return True
 
         try:
             data = self.sock.recv(4096)
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
-                self.stop()
+                self.stop(u'Unexpected client error: %s' % e)
             return True
 
         if not data:
-            self.stop()
+            self.stop(u'Client most likely disconnected.')
         else:
             self.actor_ref.send_one_way({'received': data})
         return True
@@ -217,16 +221,14 @@ class Connection(object):
                 self.disable_send()
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
-                #self.log_error(e) # FIXME log error
-                self.stop()
+                self.stop(u'Unexpected client error: %s' % e)
         finally:
             self.send_lock.release()
 
         return True
 
     def timeout_callback(self):
-        #self.log_timeout() # FIXME log this
-        return self.stop()
+        return self.stop(u'Client timeout out after %s seconds' % self.timeout)
 
 
 class LineProtocol(ThreadingActor):

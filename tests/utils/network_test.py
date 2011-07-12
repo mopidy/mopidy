@@ -2,6 +2,7 @@ import errno
 import gobject
 import socket
 import unittest
+import logging
 from mock import patch, sentinel, Mock
 
 from mopidy.utils import network
@@ -244,7 +245,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 
-        network.Connection.stop(self.mock)
+        network.Connection.stop(self.mock, sentinel.reason)
         self.mock.disable_timeout.assert_called_once_with()
         self.mock.disable_recv.assert_called_once_with()
         self.mock.disable_timeout.assert_called_once_with()
@@ -253,7 +254,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 
-        network.Connection.stop(self.mock)
+        network.Connection.stop(self.mock, sentinel.reason)
         self.mock.sock.close.assert_called_once_with()
 
     def test_stop_closes_socket_error(self):
@@ -261,15 +262,34 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.close.side_effect = socket.error()
 
-        network.Connection.stop(self.mock)
+        network.Connection.stop(self.mock, sentinel.reason)
         self.mock.sock.close.assert_called_once_with()
 
     def test_stop_stops_actor(self):
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 
-        network.Connection.stop(self.mock)
+        network.Connection.stop(self.mock, sentinel.reason)
         self.mock.actor_ref.stop.assert_called_once_with()
+
+    @patch.object(network.logger, 'log', new=Mock())
+    def test_stop_logs_reason(self):
+        self.mock.actor_ref = Mock()
+        self.mock.sock = Mock(spec=socket.SocketType)
+
+        network.Connection.stop(self.mock, sentinel.reason)
+        network.logger.log.assert_called_once_with(
+            logging.DEBUG, sentinel.reason)
+
+    @patch.object(network.logger, 'log', new=Mock())
+    def test_stop_logs_reason_with_level(self):
+        self.mock.actor_ref = Mock()
+        self.mock.sock = Mock(spec=socket.SocketType)
+
+        network.Connection.stop(self.mock, sentinel.reason,
+            level=sentinel.level)
+        network.logger.log.assert_called_once_with(
+            sentinel.level, sentinel.reason)
 
     @patch.object(gobject, 'io_add_watch', new=Mock())
     def test_enable_recv_registers_with_gobject(self):
@@ -421,17 +441,17 @@ class ConnectionTest(unittest.TestCase):
     def test_recv_callback_respects_io_err(self):
         self.assertTrue(network.Connection.recv_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_ERR))
-        self.mock.stop.assert_called_once_with()
+        self.assertEqual(1, self.mock.stop.call_count)
 
     def test_recv_callback_respects_io_hup(self):
         self.assertTrue(network.Connection.recv_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_HUP))
-        self.mock.stop.assert_called_once_with()
+        self.assertEqual(1, self.mock.stop.call_count)
 
     def test_recv_callback_respects_io_hup_and_io_err(self):
         self.assertTrue(network.Connection.recv_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_HUP | gobject.IO_ERR))
-        self.mock.stop.assert_called_once_with()
+        self.assertEqual(1, self.mock.stop.call_count)
 
     def test_recv_callback_gets_data(self):
         self.mock.sock = Mock(spec=socket.SocketType)
@@ -449,7 +469,7 @@ class ConnectionTest(unittest.TestCase):
 
         self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
-        self.mock.stop.assert_called_once_with()
+        self.assertEqual(1, self.mock.stop.call_count)
 
     def test_recv_callback_recoverable_error(self):
         self.mock.sock = Mock(spec=socket.SocketType)
@@ -465,7 +485,7 @@ class ConnectionTest(unittest.TestCase):
 
         self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
-        self.mock.stop.assert_called_once_with()
+        self.assertEqual(1, self.mock.stop.call_count)
 
     @SkipTest
     def test_send_callback_respects_flags(self):
@@ -537,8 +557,10 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock.send.side_effect = socket.error()
         self.assertTrue(network.Connection.send_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
-        self.mock.stop.assert_called_once_with()
+        self.assertEqual(1, self.mock.stop.call_count)
 
     def test_timeout_callback(self):
+        self.mock.timeout = 10
+
         network.Connection.timeout_callback(self.mock)
-        self.mock.stop.assert_called_once_with()
+        self.assertEqual(1, self.mock.stop.call_count)
