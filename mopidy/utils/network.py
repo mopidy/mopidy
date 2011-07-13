@@ -276,7 +276,7 @@ class LineProtocol(ThreadingActor):
 
     def on_stop(self):
         """Ensure that cleanup when actor stops."""
-        self.connection.stop()
+        self.connection.stop(u'Actor is shuting down.')
 
     def parse_lines(self, new_data=None):
         """Consume new data and yield any lines found."""
