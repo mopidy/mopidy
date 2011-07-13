@@ -5,6 +5,7 @@ import re
 import socket
 import threading
 
+from pykka import ActorDeadError
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
@@ -138,7 +139,11 @@ class Connection(object):
     def stop(self, reason, level=logging.DEBUG):
         logger.log(level, reason)
 
-        self.actor_ref.stop()
+        try:
+            self.actor_ref.stop()
+        except ActorDeadError:
+            pass
+
         self.disable_timeout()
         self.disable_recv()
         self.disable_send()
@@ -169,10 +174,15 @@ class Connection(object):
             self.timeout_id = None
 
     def enable_recv(self):
-        if self.recv_id is None:
+        if self.recv_id is not None:
+            return
+
+        try:
             self.recv_id = gobject.io_add_watch(self.sock.fileno(),
                 gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP, 
                 self.recv_callback)
+        except socket.error as e:
+            self.stop(u'Problem with connection: %s' % e)
 
     def disable_recv(self):
         if self.recv_id is not None:
@@ -180,10 +190,15 @@ class Connection(object):
             self.recv_id = None
 
     def enable_send(self):
-        if self.send_id is None:
+        if self.send_id is not None:
+            return
+
+        try:
             self.send_id = gobject.io_add_watch(self.sock.fileno(),
                 gobject.IO_OUT | gobject.IO_ERR | gobject.IO_HUP,
                 self.send_callback)
+        except socket.error as e:
+            self.stop(u'Problem with connection: %s' % e)
 
     def disable_send(self):
         if self.send_id is not None:
@@ -204,8 +219,13 @@ class Connection(object):
 
         if not data:
             self.stop(u'Client most likely disconnected.')
-        else:
+            return True
+
+        try:
             self.actor_ref.send_one_way({'received': data})
+        except ActorDeadError:
+            self.stop(u'Actor is dead.')
+
         return True
 
     def send_callback(self, fd, flags):

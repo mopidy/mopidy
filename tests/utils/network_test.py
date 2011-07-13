@@ -1,12 +1,13 @@
 import errno
 import gobject
+import logging
+import pykka
 import socket
 import unittest
-import logging
-from mock import patch, sentinel, Mock
 
 from mopidy.utils import network
 
+from mock import patch, sentinel, Mock
 from tests import SkipTest, any_int, any_unicode
 
 class FormatHostnameTest(unittest.TestCase):
@@ -58,6 +59,7 @@ class CreateSocketTest(unittest.TestCase):
     @SkipTest
     def test_ipv6_only_is_set(self):
         pass
+
 
 class ServerTest(unittest.TestCase):
     def setUp(self):
@@ -205,6 +207,7 @@ class ServerTest(unittest.TestCase):
             (sentinel.host, sentinel.port))
         sock.close.assert_called_once_with()
 
+
 class ConnectionTest(unittest.TestCase):
     def setUp(self):
         self.mock = Mock(spec=network.Connection)
@@ -272,6 +275,13 @@ class ConnectionTest(unittest.TestCase):
         network.Connection.stop(self.mock, sentinel.reason)
         self.mock.actor_ref.stop.assert_called_once_with()
 
+    def test_stop_handles_actor_already_being_stopped(self):
+        self.mock.actor_ref = Mock()
+        self.mock.actor_ref.stop.side_effect = pykka.ActorDeadError()
+        self.mock.sock = Mock(spec=socket.SocketType)
+
+        network.Connection.stop(self.mock, sentinel.reason)
+
     @patch.object(network.logger, 'log', new=Mock())
     def test_stop_logs_reason(self):
         self.mock.actor_ref = Mock()
@@ -327,6 +337,15 @@ class ConnectionTest(unittest.TestCase):
         self.assertEqual(0, gobject.source_remove.call_count)
         self.assertEqual(None, self.mock.recv_id)
 
+    def test_enable_recv_on_closed_socket(self):
+        self.mock.recv_id = None
+        self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.fileno.side_effect = socket.error(errno.EBADF, '')
+
+        network.Connection.enable_recv(self.mock)
+        self.mock.stop.assert_called_once_with(any_unicode)
+        self.assertEqual(None, self.mock.recv_id)
+
     @patch.object(gobject, 'io_add_watch', new=Mock())
     def test_enable_send_registers_with_gobject(self):
         self.mock.send_id = None
@@ -361,6 +380,14 @@ class ConnectionTest(unittest.TestCase):
 
         network.Connection.disable_send(self.mock)
         self.assertEqual(0, gobject.source_remove.call_count)
+        self.assertEqual(None, self.mock.send_id)
+
+    def test_enable_send_on_closed_socket(self):
+        self.mock.send_id = None
+        self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.fileno.side_effect = socket.error(errno.EBADF, '')
+
+        network.Connection.enable_send(self.mock)
         self.assertEqual(None, self.mock.send_id)
 
     @patch.object(gobject, 'timeout_add_seconds', new=Mock())
@@ -453,7 +480,7 @@ class ConnectionTest(unittest.TestCase):
             sentinel.fd, gobject.IO_IN | gobject.IO_HUP | gobject.IO_ERR))
         self.mock.stop.assert_called_once_with(any_unicode)
 
-    def test_recv_callback_gets_data(self):
+    def test_recv_callback_sends_data_to_actor(self):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.recv.return_value = 'data'
         self.mock.actor_ref = Mock()
@@ -462,6 +489,16 @@ class ConnectionTest(unittest.TestCase):
             self.mock, sentinel.fd, gobject.IO_IN))
         self.mock.actor_ref.send_one_way.assert_called_once_with(
             {'received': 'data'})
+
+    def test_recv_callback_handles_dead_actors(self):
+        self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.recv.return_value = 'data'
+        self.mock.actor_ref = Mock()
+        self.mock.actor_ref.send_one_way.side_effect = pykka.ActorDeadError()
+
+        self.assertTrue(network.Connection.recv_callback(
+            self.mock, sentinel.fd, gobject.IO_IN))
+        self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_recv_callback_gets_no_data(self):
         self.mock.sock = Mock(spec=socket.SocketType)
