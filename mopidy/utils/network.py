@@ -275,9 +275,7 @@ class LineProtocol(ThreadingActor):
 
     def __init__(self, connection):
         self.connection = connection
-
         self.recv_buffer = ''
-        self.terminator_re = re.compile(self.terminator)
 
     def on_line_received(self, line):
         """
@@ -294,8 +292,9 @@ class LineProtocol(ThreadingActor):
 
         self.connection.disable_timeout()
         self.log_raw_data(message['received'])
+        self.recv_buffer += message['received']
 
-        for line in self.parse_lines(message['received']):
+        for line in self.parse_lines():
             line = self.decode(line)
             self.log_request(line)
             self.on_line_received(line)
@@ -306,12 +305,10 @@ class LineProtocol(ThreadingActor):
         """Ensure that cleanup when actor stops."""
         self.connection.stop(u'Actor is shuting down.')
 
-    def parse_lines(self, new_data=None):
+    def parse_lines(self):
         """Consume new data and yield any lines found."""
-        if new_data:
-            self.recv_buffer += new_data
-        while self.terminator_re.search(self.recv_buffer):
-            line, self.recv_buffer = self.terminator_re.split(
+        while re.search(self.terminator, self.recv_buffer):
+            line, self.recv_buffer = re.split(self.terminator,
                 self.recv_buffer, 1)
             yield line
 
@@ -366,9 +363,7 @@ class LineProtocol(ThreadingActor):
 
         Can be overridden by subclasses to change encoding behaviour.
         """
-        if self.encoding:
-            return line.encode(self.encoding)
-        return line
+        return line.encode(self.encoding)
 
     def decode(self, line):
         """
@@ -376,9 +371,12 @@ class LineProtocol(ThreadingActor):
 
         Can be overridden by subclasses to change decoding behaviour.
         """
-        if self.encoding:
-            return line.decode(self.encoding)
-        return line
+        return line.decode(self.encoding)
+
+    def join_lines(self, lines):
+        if not lines:
+            return u''
+        return self.terminator.join(lines) + self.terminator
 
     def send_lines(self, lines):
         """
@@ -390,6 +388,6 @@ class LineProtocol(ThreadingActor):
         if not lines:
             return
 
-        data = self.terminator.join(lines)
+        data = self.join_lines(lines)
         self.log_response(data)
-        self.connection.send(self.encode(data + self.terminator))
+        self.connection.send(self.encode(data))
