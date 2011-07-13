@@ -837,3 +837,11 @@ class LineProtocolTest(unittest.TestCase):
         string.encode.side_effect = UnicodeError
 
         network.LineProtocol.encode(self.mock, string)
+
+    @SkipTest
+    def test_host_property(self):
+        pass
+
+    @SkipTest(self):
+    def test_port_property
+        pass

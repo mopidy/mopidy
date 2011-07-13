@@ -5,7 +5,7 @@ from pykka.actor import ThreadingActor
 
 from mopidy import settings
 from mopidy.frontends.mpd import dispatcher, protocol
-from mopidy.utils import network, process
+from mopidy.utils import network, process, log
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
@@ -54,10 +54,21 @@ class MpdSession(network.LineProtocol):
         self.dispatcher = dispatcher.MpdDispatcher(self)
 
     def on_start(self):
+        logger.info(u'New connection from [%s]:%s', self.host, self.port)
         self.send_lines([u'OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):
-        self.send_lines(self.dispatcher.handle_request(line))
+        logger.debug(u'Request from [%s]:%s to %s: %s', self.host, self.port,
+            self.actor_urn, line)
+
+        response = self.dispatcher.handle_request(line)
+        if not response:
+            return
+
+        logger.debug(u'Response to [%s]:%s from %s: %s', self.host, self.port,
+            self.actor_urn, log.indent(self.terminator.join(response)))
+            
+        self.send_lines(response)
 
     def close(self):
         self.stop()

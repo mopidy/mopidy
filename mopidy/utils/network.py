@@ -60,9 +60,6 @@ class Server(object):
 
         self.register_server_socket(self.server_socket.fileno())
 
-        logger.debug(u'Listening on [%s]:%s using %s as protocol handler',
-            host, port, self.protocol)
-
     def create_server_socket(self, host, port):
         sock = create_socket()
         sock.setblocking(False)
@@ -277,6 +274,14 @@ class LineProtocol(ThreadingActor):
         self.connection = connection
         self.recv_buffer = ''
 
+    @property
+    def host(self):
+        return self.connection.host
+
+    @property
+    def port(self):
+        return self.connection.port
+
     def on_line_received(self, line):
         """
         Called whenever a new line is found.
@@ -291,12 +296,10 @@ class LineProtocol(ThreadingActor):
             return
 
         self.connection.disable_timeout()
-        self.log_raw_data(message['received'])
         self.recv_buffer += message['received']
 
         for line in self.parse_lines():
             line = self.decode(line)
-            self.log_request(line)
             self.on_line_received(line)
 
         self.connection.enable_timeout()
@@ -311,51 +314,6 @@ class LineProtocol(ThreadingActor):
             line, self.recv_buffer = re.split(self.terminator,
                 self.recv_buffer, 1)
             yield line
-
-    def log_raw_data(self, data):
-        """
-        Log raw data from event loop for debug purposes.
-
-        Can be overridden by subclasses to change logging behaviour.
-        """
-        logger.debug(u'Got %s from event loop in %s', repr(data),
-            self.actor_urn)
-
-    def log_request(self, request):
-        """
-        Log request for debug purposes.
-
-        Can be overridden by subclasses to change logging behaviour.
-        """
-        logger.debug(u'Request from %s to %s: %s', self.connection,
-            self.actor_urn, indent(request))
-
-    def log_response(self, response):
-        """
-        Log response for debug purposes.
-
-        Can be overridden by subclasses to change logging behaviour.
-        """
-        logger.debug(u'Response to %s from %s: %s', self.connection,
-            self.actor_urn, indent(response))
-
-    def log_error(self, error):
-        """
-        Log error for debug purposes.
-
-        Can be overridden by subclasses to change logging behaviour.
-        """
-        logger.warning(u'Problem with connection to %s in %s: %s',
-            self.connection, self.actor_urn, error)
-
-    def log_timeout(self):
-        """
-        Log timeout for debug purposes.
-
-        Can be overridden by subclasses to change logging behaviour.
-        """
-        logger.debug(u'Closing connection to %s in %s due to timeout.',
-            self.connection, self.actor_urn)
 
     def encode(self, line):
         """
@@ -389,5 +347,4 @@ class LineProtocol(ThreadingActor):
             return
 
         data = self.join_lines(lines)
-        self.log_response(data)
         self.connection.send(self.encode(data))
