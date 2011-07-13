@@ -245,6 +245,7 @@ class ConnectionTest(unittest.TestCase):
         self.assertEqual(sentinel.port, self.mock.port)
 
     def test_stop_disables_recv_send_and_timeout(self):
+        self.mock.stopping = False
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 
@@ -254,6 +255,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.disable_timeout.assert_called_once_with()
 
     def test_stop_closes_socket(self):
+        self.mock.stopping = False
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 
@@ -261,6 +263,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock.close.assert_called_once_with()
 
     def test_stop_closes_socket_error(self):
+        self.mock.stopping = False
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.close.side_effect = socket.error()
@@ -269,6 +272,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock.close.assert_called_once_with()
 
     def test_stop_stops_actor(self):
+        self.mock.stopping = False
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 
@@ -276,14 +280,42 @@ class ConnectionTest(unittest.TestCase):
         self.mock.actor_ref.stop.assert_called_once_with()
 
     def test_stop_handles_actor_already_being_stopped(self):
+        self.mock.stopping = False
         self.mock.actor_ref = Mock()
         self.mock.actor_ref.stop.side_effect = pykka.ActorDeadError()
         self.mock.sock = Mock(spec=socket.SocketType)
 
         network.Connection.stop(self.mock, sentinel.reason)
 
+    def test_stop_sets_stopping_to_true(self):
+        self.mock.stopping = False
+        self.mock.actor_ref = Mock()
+        self.mock.sock = Mock(spec=socket.SocketType)
+
+        network.Connection.stop(self.mock, sentinel.reason)
+        self.assertEqual(True, self.mock.stopping)
+
+    def test_stop_does_not_proceed_when_already_stopping(self):
+        self.mock.stopping = True
+        self.mock.actor_ref = Mock()
+        self.mock.sock = Mock(spec=socket.SocketType)
+
+        network.Connection.stop(self.mock, sentinel.reason)
+        self.assertEqual(0, self.mock.actor_ref.stop.call_count)
+        self.assertEqual(0, self.mock.sock.close.call_count)
+
+    @patch.object(network.logger, 'log', new=Mock())
+    def test_stop_logs_that_it_is_calling_itself(self):
+        self.mock.stopping = True
+        self.mock.actor_ref = Mock()
+        self.mock.sock = Mock(spec=socket.SocketType)
+
+        network.Connection.stop(self.mock, sentinel.reason)
+        network.logger.log(any_int, any_unicode)
+
     @patch.object(network.logger, 'log', new=Mock())
     def test_stop_logs_reason(self):
+        self.mock.stopping = False
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 
@@ -293,6 +325,7 @@ class ConnectionTest(unittest.TestCase):
 
     @patch.object(network.logger, 'log', new=Mock())
     def test_stop_logs_reason_with_level(self):
+        self.mock.stopping = False
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 

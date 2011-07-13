@@ -127,6 +127,8 @@ class Connection(object):
         self.send_lock = threading.Lock()
         self.send_buffer = ''
 
+        self.stopping = False
+
         self.recv_id = None
         self.send_id = None
         self.timeout_id = None
@@ -137,6 +139,12 @@ class Connection(object):
         self.enable_timeout()
 
     def stop(self, reason, level=logging.DEBUG):
+        if self.stopping:
+            logger.log(level, 'Already stopping: %s' % reason)
+            return
+        else:
+            self.stopping = True
+
         logger.log(level, reason)
 
         try:
