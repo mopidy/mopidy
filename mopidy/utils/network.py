@@ -110,6 +110,10 @@ class Connection(object):
     # NOTE: the callback code is _not_ run in the actor's thread, but in the
     # same one as the event loop. If code in the callbacks blocks, the rest of
     # gobject code will likely be blocked as well...
+    #
+    # Also note that source_remove() return values are ignored on purpose, a
+    # false return value would only tell us that what we thought was registered
+    # is already gone, there is really nothing more we can do.
 
     def __init__(self, protocol, sock, addr, timeout):
         sock.setblocking(False)
