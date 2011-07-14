@@ -9,8 +9,6 @@ from pykka import ActorDeadError
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy.utils.log import indent
-
 # FIXME setup logger with extra={...}
 logger = logging.getLogger('mopidy.utils.server')
 

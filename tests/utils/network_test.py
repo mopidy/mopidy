@@ -842,6 +842,6 @@ class LineProtocolTest(unittest.TestCase):
     def test_host_property(self):
         pass
 
-    @SkipTest(self):
-    def test_port_property
+    @SkipTest
+    def test_port_property(self):
         pass
