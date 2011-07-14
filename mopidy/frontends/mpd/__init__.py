@@ -54,7 +54,7 @@ class MpdSession(network.LineProtocol):
         self.dispatcher = dispatcher.MpdDispatcher(self)
 
     def on_start(self):
-        logger.info(u'New connection from [%s]:%s', self.host, self.port)
+        logger.info(u'New MPD connection from [%s]:%s', self.host, self.port)
         self.send_lines([u'OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):
