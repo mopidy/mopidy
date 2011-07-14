@@ -80,7 +80,16 @@ class ServerTest(unittest.TestCase):
 
         network.Server.__init__(self.mock, sentinel.host,
             sentinel.port, sentinel.protocol)
-        self.mock.register_server_socket.assert_called_once_with(sentinel.fileno)
+        self. mock.register_server_socket.assert_called_once_with(sentinel.fileno)
+
+    @SkipTest
+    def test_init_fails_on_fileno_call(self):
+        sock = Mock(spec=socket.SocketType)
+        sock.fileno.side_effect = socket.error
+        self.mock.create_server_socket.return_value = sock
+
+        network.Server.__init__(self.mock, sentinel.host,
+            sentinel.port, sentinel.protocol)
 
     def test_init_stores_values_in_attributes(self):
         sock = Mock(spec=socket.SocketType)
@@ -105,10 +114,11 @@ class ServerTest(unittest.TestCase):
         sock.listen.assert_called_once_with(any_int)
 
     @SkipTest
+    @patch.object(network, 'create_socket')
     def test_create_server_socket_fails(self):
-        # FIXME define what should happen in this case, let the error propegate
-        # or do something else?
-        pass
+        create_socket.side_effect = socket.error
+        network.Server.create_server_socket(self.mock,
+            sentinel.host, sentinel.port)
 
     @patch.object(gobject, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):
@@ -157,12 +167,10 @@ class ServerTest(unittest.TestCase):
     def test_accept_connection_unrecoverable_error(self):
         sock = Mock(spec=socket.SocketType)
         self.mock.server_socket = sock
-
         sock.accept.side_effect = socket.error()
         self.assertRaises(socket.error,
             network.Server.accept_connection, self.mock)
 
-    @patch.object(network.Server, 'number_of_connections', new=Mock())
     def test_maximum_connections_exceeded(self):
         self.mock.max_connections = 10
 
@@ -755,8 +763,8 @@ class LineProtocolTest(unittest.TestCase):
         lines = network.LineProtocol.parse_lines(self.mock)
         self.assertRaises(StopIteration, lines.next)
         self.assertEqual('data', self.mock.recv_buffer)
-
         self.mock.recv_buffer += '\n'
+
         lines = network.LineProtocol.parse_lines(self.mock)
         self.assertEqual('data', lines.next())
         self.assertRaises(StopIteration, lines.next)
