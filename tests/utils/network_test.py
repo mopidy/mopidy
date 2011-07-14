@@ -80,7 +80,8 @@ class ServerTest(unittest.TestCase):
 
         network.Server.__init__(self.mock, sentinel.host,
             sentinel.port, sentinel.protocol)
-        self. mock.register_server_socket.assert_called_once_with(sentinel.fileno)
+        self.mock.register_server_socket.assert_called_once_with(
+            sentinel.fileno)
 
     @SkipTest
     def test_init_fails_on_fileno_call(self):
@@ -116,7 +117,7 @@ class ServerTest(unittest.TestCase):
     @SkipTest
     @patch.object(network, 'create_socket')
     def test_create_server_socket_fails(self):
-        create_socket.side_effect = socket.error
+        network.create_socket.side_effect = socket.error
         network.Server.create_server_socket(self.mock,
             sentinel.host, sentinel.port)
 
@@ -127,23 +128,29 @@ class ServerTest(unittest.TestCase):
             gobject.IO_IN, self.mock.handle_connection)
 
     def test_handle_connection(self):
-        self.mock.accept_connection.return_value = (sentinel.sock, sentinel.addr)
+        self.mock.accept_connection.return_value = (
+            sentinel.sock, sentinel.addr)
         self.mock.maximum_connections_exceeded.return_value = False
 
-        network.Server.handle_connection(self.mock, sentinel.fileno, gobject.IO_IN)
+        network.Server.handle_connection(
+            self.mock, sentinel.fileno, gobject.IO_IN)
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
-        self.mock.init_connection.assert_called_once_with(sentinel.sock, sentinel.addr)
+        self.mock.init_connection.assert_called_once_with(
+            sentinel.sock, sentinel.addr)
         self.assertEqual(0, self.mock.reject_connection.call_count)
 
     def test_handle_connection_exceeded_connections(self):
-        self.mock.accept_connection.return_value = (sentinel.sock, sentinel.addr)
+        self.mock.accept_connection.return_value = (
+            sentinel.sock, sentinel.addr)
         self.mock.maximum_connections_exceeded.return_value = True
 
-        network.Server.handle_connection(self.mock, sentinel.fileno, gobject.IO_IN)
+        network.Server.handle_connection(
+            self.mock, sentinel.fileno, gobject.IO_IN)
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
-        self.mock.reject_connection.assert_called_once_with(sentinel.sock, sentinel.addr)
+        self.mock.reject_connection.assert_called_once_with(
+            sentinel.sock, sentinel.addr)
         self.assertEqual(0, self.mock.init_connection.call_count)
 
     def test_accept_connection(self):

@@ -9,7 +9,6 @@ from pykka import ActorDeadError
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-# FIXME setup logger with extra={...}
 logger = logging.getLogger('mopidy.utils.server')
 
 class ShouldRetrySocketCall(Exception):
