@@ -95,6 +95,7 @@ class Server(object):
         return len(ActorRegistry.get_by_class(self.protocol))
 
     def reject_connection(self, sock, addr):
+        # FIXME provide more context in logging?
         logger.warning(u'Rejected connection from [%s]:%s', addr[0], addr[1])
         try:
             sock.close()
@@ -103,6 +104,7 @@ class Server(object):
 
     def init_connection(self, sock, addr):
         Connection(self.protocol, sock, addr, self.timeout)
+
 
 class Connection(object):
     # NOTE: the callback code is _not_ run in the actor's thread, but in the
@@ -164,16 +166,19 @@ class Connection(object):
 
     def enable_timeout(self):
         """Reactivate timeout mechanism."""
+        if self.timeout <= 0:
+            return
+
         self.disable_timeout()
-        if self.timeout > 0:
-            self.timeout_id = gobject.timeout_add_seconds(
-                self.timeout, self.timeout_callback)
+        self.timeout_id = gobject.timeout_add_seconds(
+            self.timeout, self.timeout_callback)
 
     def disable_timeout(self):
         """Deactivate timeout mechanism."""
-        if self.timeout_id is not None:
-            gobject.source_remove(self.timeout_id)
-            self.timeout_id = None
+        if self.timeout_id is None:
+            return
+        gobject.source_remove(self.timeout_id)
+        self.timeout_id = None
 
     def enable_recv(self):
         if self.recv_id is not None:
@@ -181,15 +186,16 @@ class Connection(object):
 
         try:
             self.recv_id = gobject.io_add_watch(self.sock.fileno(),
-                gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP, 
+                gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
             self.stop(u'Problem with connection: %s' % e)
 
     def disable_recv(self):
-        if self.recv_id is not None:
-            gobject.source_remove(self.recv_id)
-            self.recv_id = None
+        if self.recv_id is None:
+            return
+        gobject.source_remove(self.recv_id)
+        self.recv_id = None
 
     def enable_send(self):
         if self.send_id is not None:
@@ -203,9 +209,11 @@ class Connection(object):
             self.stop(u'Problem with connection: %s' % e)
 
     def disable_send(self):
-        if self.send_id is not None:
-            gobject.source_remove(self.send_id)
-            self.send_id = None
+        if self.send_id is None:
+            return
+
+        gobject.source_remove(self.send_id)
+        self.send_id = None
 
     def recv_callback(self, fd, flags):
         if flags & (gobject.IO_ERR | gobject.IO_HUP):
@@ -250,7 +258,8 @@ class Connection(object):
         return True
 
     def timeout_callback(self):
-        return self.stop(u'Client timeout out after %s seconds' % self.timeout)
+        self.stop(u'Client timeout out after %s seconds' % self.timeout)
+        return False
 
 
 class LineProtocol(ThreadingActor):
