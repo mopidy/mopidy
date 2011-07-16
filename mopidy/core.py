@@ -1,5 +1,6 @@
 import logging
 import optparse
+import os
 import signal
 import sys
 import time
@@ -34,6 +35,7 @@ def main():
     try:
         options = parse_options()
         setup_logging(options.verbosity_level, options.save_debug_log)
+        check_old_folders()
         setup_settings(options.interactive)
         setup_gobject_loop()
         setup_gstreamer()
@@ -76,6 +78,16 @@ def parse_options():
         action='callback', callback=list_settings_optparse_callback,
         help='list current settings')
     return parser.parse_args(args=mopidy_args)[0]
+
+def check_old_folders():
+    old_settings_folder = os.path.expanduser(u'~/.mopidy')
+
+    if not os.path.isdir(old_settings_folder):
+        return
+
+    logger.warning(u'Old settings folder found at %s, settings.py should be '
+        'moved to %s, any cache data should be deleted.', old_settings_folder,
+        SETTINGS_FOLDER)
 
 def setup_settings(interactive):
     get_or_create_folder(SETTINGS_FOLDER)
