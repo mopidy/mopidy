@@ -217,10 +217,16 @@ class LineProtocolTest(unittest.TestCase):
 
         network.LineProtocol.encode(self.mock, string)
 
-    @SkipTest
     def test_host_property(self):
-        pass
+        mock = Mock(spec=network.Connection)
+        mock.host = sentinel.host
 
-    @SkipTest
+        lineprotocol = network.LineProtocol(mock)
+        self.assertEqual(sentinel.host, lineprotocol.host)
+
     def test_port_property(self):
-        pass
+        mock = Mock(spec=network.Connection)
+        mock.port = sentinel.port
+
+        lineprotocol = network.LineProtocol(mock)
+        self.assertEqual(sentinel.port, lineprotocol.port)
