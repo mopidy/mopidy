@@ -18,7 +18,7 @@ sys.argv[1:] = gstreamer_args
 from pykka.registry import ActorRegistry
 
 from mopidy import (get_version, settings, OptionalDependencyError,
-    SettingsError)
+    SettingsError, SETTINGS_FOLDER, SETTINGS_FILE)
 from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
@@ -78,8 +78,8 @@ def parse_options():
     return parser.parse_args(args=mopidy_args)[0]
 
 def setup_settings(interactive):
-    get_or_create_folder('~/.mopidy/')
-    get_or_create_file('~/.mopidy/settings.py')
+    get_or_create_folder(SETTINGS_FOLDER)
+    get_or_create_file(SETTINGS_FILE)
     try:
         settings.validate(interactive)
     except SettingsError, e:

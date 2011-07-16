@@ -3,9 +3,15 @@ import sys
 if not (2, 6) <= sys.version_info < (3,):
     sys.exit(u'Mopidy requires Python >= 2.6, < 3')
 
+import glib
+import os
+
 from subprocess import PIPE, Popen
 
 VERSION = (0, 6, 0)
+
+SETTINGS_FOLDER = os.path.join(glib.get_user_config_dir(), 'mopidy')
+SETTINGS_FILE = os.path.join(SETTINGS_FOLDER, 'settings.py')
 
 def get_version():
     try:
