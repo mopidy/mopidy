@@ -8,7 +8,7 @@ import unittest
 from mopidy.utils import network
 
 from mock import patch, sentinel, Mock
-from tests import SkipTest, any_int, any_unicode
+from tests import any_int, any_unicode
 
 class ConnectionTest(unittest.TestCase):
     def setUp(self):
@@ -412,28 +412,34 @@ class ConnectionTest(unittest.TestCase):
             self.mock, sentinel.fd, gobject.IO_IN))
         self.mock.stop.assert_called_once_with(any_unicode)
 
-    @SkipTest  # FIXME decide behaviour
     def test_send_callback_respects_io_err(self):
         self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.send.return_value = 1
+        self.mock.send_lock = Mock()
         self.mock.actor_ref = Mock()
+        self.mock.send_buffer = ''
 
         self.assertTrue(network.Connection.send_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_ERR))
         self.mock.stop.assert_called_once_with(any_unicode)
 
-    @SkipTest  # FIXME decide behaviour
     def test_send_callback_respects_io_hup(self):
         self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.send.return_value = 1
+        self.mock.send_lock = Mock()
         self.mock.actor_ref = Mock()
+        self.mock.send_buffer = ''
 
         self.assertTrue(network.Connection.send_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_HUP))
         self.mock.stop.assert_called_once_with(any_unicode)
 
-    @SkipTest  # FIXME decide behaviour
     def test_send_callback_respects_io_hup_and_io_err(self):
         self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.send.return_value = 1
+        self.mock.send_lock = Mock()
         self.mock.actor_ref = Mock()
+        self.mock.send_buffer = ''
 
         self.assertTrue(network.Connection.send_callback(self.mock,
             sentinel.fd, gobject.IO_IN | gobject.IO_HUP | gobject.IO_ERR))

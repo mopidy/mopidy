@@ -243,6 +243,10 @@ class Connection(object):
         return True
 
     def send_callback(self, fd, flags):
+        if flags & (gobject.IO_ERR | gobject.IO_HUP):
+            self.stop(u'Bad client flags: %s' % flags)
+            return True
+
         # If with can't get the lock, simply try again next time socket is
         # ready for sending.
         if not self.send_lock.acquire(False):
