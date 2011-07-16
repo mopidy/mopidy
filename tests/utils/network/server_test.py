@@ -6,7 +6,7 @@ import unittest
 from mopidy.utils import network
 
 from mock import patch, sentinel, Mock
-from tests import SkipTest, any_int
+from tests import any_int
 
 class ServerTest(unittest.TestCase):
     def setUp(self):
@@ -28,14 +28,13 @@ class ServerTest(unittest.TestCase):
         self.mock.register_server_socket.assert_called_once_with(
             sentinel.fileno)
 
-    @SkipTest
     def test_init_fails_on_fileno_call(self):
         sock = Mock(spec=socket.SocketType)
         sock.fileno.side_effect = socket.error
         self.mock.create_server_socket.return_value = sock
 
-        network.Server.__init__(self.mock, sentinel.host,
-            sentinel.port, sentinel.protocol)
+        self.assertRaises(socket.error, network.Server.__init__,
+            self.mock, sentinel.host, sentinel.port, sentinel.protocol)
 
     def test_init_stores_values_in_attributes(self):
         # This need to be a mock and no a sentinel as fileno() is called on it
@@ -60,30 +59,27 @@ class ServerTest(unittest.TestCase):
         sock.bind.assert_called_once_with((sentinel.host, sentinel.port))
         sock.listen.assert_called_once_with(any_int)
 
-    @SkipTest  # FIXME decide behaviour
-    @patch.object(network, 'create_socket')
+    @patch.object(network, 'create_socket', new=Mock())
     def test_create_server_socket_fails(self):
         network.create_socket.side_effect = socket.error
-        network.Server.create_server_socket(self.mock,
-            sentinel.host, sentinel.port)
+        self.assertRaises(socket.error, network.Server.create_server_socket,
+            self.mock, sentinel.host, sentinel.port)
 
-    @SkipTest  # FIXME decide behaviour
-    @patch.object(network, 'create_socket', spec=socket.SocketType)
+    @patch.object(network, 'create_socket', new=Mock())
     def test_create_server_bind_fails(self):
-        sock = create_socket.return_value
+        sock = network.create_socket.return_value
         sock.bind.side_effect = socket.error
 
-        network.Server.create_server_socket(self.mock,
-            sentinel.host, sentinel.port)
+        self.assertRaises(socket.error, network.Server.create_server_socket,
+            self.mock, sentinel.host, sentinel.port)
 
-    @SkipTest  # FIXME decide behaviour
-    @patch.object(network, 'create_socket', spec=socket.SocketType)
+    @patch.object(network, 'create_socket', new=Mock())
     def test_create_server_listen_fails(self):
-        sock = create_socket.return_value
+        sock = network.create_socket.return_value
         sock.listen.side_effect = socket.error
 
-        network.Server.create_server_socket(self.mock,
-            sentinel.host, sentinel.port)
+        self.assertRaises(socket.error, network.Server.create_server_socket,
+            self.mock, sentinel.host, sentinel.port)
 
     @patch.object(gobject, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):
