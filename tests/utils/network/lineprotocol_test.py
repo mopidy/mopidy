@@ -28,7 +28,7 @@ class LineProtocolTest(unittest.TestCase):
         self.mock.parse_lines.assert_called_once_with()
         self.assertEqual(0, self.mock.on_line_received.call_count)
 
-    def test_on_receive_no_new_lines_toggles_timeout(self):
+    def test_on_receive_toggles_timeout(self):
         self.mock.connection = Mock(spec=network.Connection)
         self.mock.recv_buffer = ''
         self.mock.parse_lines.return_value = []
@@ -129,17 +129,18 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual('jkl', self.mock.recv_buffer)
 
     def test_parse_lines_multiple_calls(self):
-        self.mock.recv_buffer = 'data'
+        self.mock.recv_buffer = 'data1'
 
         lines = network.LineProtocol.parse_lines(self.mock)
         self.assertRaises(StopIteration, lines.next)
-        self.assertEqual('data', self.mock.recv_buffer)
-        self.mock.recv_buffer += '\n'
+        self.assertEqual('data1', self.mock.recv_buffer)
+
+        self.mock.recv_buffer += '\ndata2'
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data', lines.next())
+        self.assertEqual('data1', lines.next())
         self.assertRaises(StopIteration, lines.next)
-        self.assertEqual('', self.mock.recv_buffer)
+        self.assertEqual('data2', self.mock.recv_buffer)
 
     def test_send_lines_called_with_no_lines(self):
         self.mock.connection = Mock(spec=network.Connection)
@@ -184,11 +185,15 @@ class LineProtocolTest(unittest.TestCase):
         string.decode.assert_called_once_with(self.mock.encoding)
 
     def test_decode_plain_ascii(self):
-        self.assertEqual(u'abc', network.LineProtocol.decode(self.mock, 'abc'))
+        result = network.LineProtocol.decode(self.mock, 'abc')
+        self.assertEqual(u'abc', result)
+        self.assertEqual(unicode, type(result))
 
     def test_decode_utf8(self):
-        self.assertEqual(u'æøå', network.LineProtocol.decode(
-            self.mock, u'æøå'.encode('utf-8')))
+        result = network.LineProtocol.decode(
+            self.mock, u'æøå'.encode('utf-8'))
+        self.assertEqual(u'æøå', result)
+        self.assertEqual(unicode, type(result))
 
     @SkipTest  # FIXME decide behaviour
     def test_decode_invalid_data(self):
@@ -204,11 +209,14 @@ class LineProtocolTest(unittest.TestCase):
         string.encode.assert_called_once_with(self.mock.encoding)
 
     def test_encode_plain_ascii(self):
-        self.assertEqual('abc', network.LineProtocol.encode(self.mock, u'abc'))
+        result = network.LineProtocol.encode(self.mock, u'abc')
+        self.assertEqual('abc', result)
+        self.assertEqual(str, type(result))
 
     def test_encode_utf8(self):
-        self.assertEqual(u'æøå'.encode('utf-8'),
-            network.LineProtocol.encode(self.mock, u'æøå'))
+        result = network.LineProtocol.encode(self.mock, u'æøå')
+        self.assertEqual(u'æøå'.encode('utf-8'), result)
+        self.assertEqual(str, type(result))
 
     @SkipTest  # FIXME decide behaviour
     def test_encode_invalid_data(self):
