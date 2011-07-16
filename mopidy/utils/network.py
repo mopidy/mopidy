@@ -331,7 +331,10 @@ class LineProtocol(ThreadingActor):
 
         Can be overridden by subclasses to change encoding behaviour.
         """
-        return line.encode(self.encoding)
+        try:
+            return line.encode(self.encoding)
+        except UnicodeError:  # FIXME log this?
+            self.stop()
 
     def decode(self, line):
         """
@@ -339,7 +342,10 @@ class LineProtocol(ThreadingActor):
 
         Can be overridden by subclasses to change decoding behaviour.
         """
-        return line.decode(self.encoding)
+        try:
+            return line.decode(self.encoding)
+        except UnicodeError:  # FIXME log this?
+            self.stop()
 
     def join_lines(self, lines):
         if not lines:

@@ -5,7 +5,6 @@ import unittest
 from mopidy.utils import network
 
 from mock import sentinel, Mock
-from tests import SkipTest
 
 class LineProtocolTest(unittest.TestCase):
     def setUp(self):
@@ -195,12 +194,12 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual(u'æøå', result)
         self.assertEqual(unicode, type(result))
 
-    @SkipTest  # FIXME decide behaviour
     def test_decode_invalid_data(self):
         string = Mock()
         string.decode.side_effect = UnicodeError
 
         network.LineProtocol.decode(self.mock, string)
+        self.mock.stop.assert_called_once_with()
 
     def test_encode_calls_encode_on_string(self):
         string = Mock()
@@ -218,12 +217,12 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual(u'æøå'.encode('utf-8'), result)
         self.assertEqual(str, type(result))
 
-    @SkipTest  # FIXME decide behaviour
     def test_encode_invalid_data(self):
         string = Mock()
         string.encode.side_effect = UnicodeError
 
         network.LineProtocol.encode(self.mock, string)
+        self.mock.stop.assert_called_once_with()
 
     def test_host_property(self):
         mock = Mock(spec=network.Connection)
