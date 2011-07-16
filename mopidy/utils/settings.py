@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 from copy import copy
 import getpass
+import glib
 import logging
 import os
 from pprint import pformat
@@ -20,7 +21,7 @@ class SettingsProxy(object):
         self.runtime = {}
 
     def _get_local_settings(self):
-        dotdir = os.path.expanduser(u'~/.mopidy/')
+        dotdir = os.path.join(glib.get_user_config_dir(), 'mopidy')
         settings_file = os.path.join(dotdir, u'settings.py')
         if not os.path.isfile(settings_file):
             return {}
