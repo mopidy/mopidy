@@ -131,7 +131,7 @@ server simultaneously. To use the SHOUTcast output, do the following:
 #. Install, configure and start the Icecast server. It can be found in the
    ``icecast2`` package in Debian/Ubuntu.
 
-#. Add ``mopidy.outputs.shoutcast.ShoutcastOutput`` output to the
+#. Set ``mopidy.outputs.shoutcast.ShoutcastOutput`` as the first output in the
    :attr:`mopidy.settings.OUTPUTS` setting.
 
 #. Check the default values for the following settings, and alter them to match

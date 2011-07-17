@@ -13,8 +13,7 @@ class BaseOutput(object):
     MESSAGE_ERROR = gst.MESSAGE_ERROR
     MESSAGE_WARNING = gst.MESSAGE_WARNING
 
-    def __init__(self, gstreamer):
-        self.gstreamer = gstreamer
+    def __init__(self):
         self.bin = self._build_bin()
         self.bin.set_name(self.get_name())
 
@@ -24,32 +23,6 @@ class BaseOutput(object):
         description = self.describe_bin()
         logger.debug('Creating new output: %s', description)
         return gst.parse_bin_from_description(description, True)
-
-    def connect(self):
-        """Attach output to GStreamer pipeline."""
-        self.gstreamer.connect_output(self.bin)
-        self.on_connect()
-
-    def on_connect(self):
-        """
-        Called after output has been connected to GStreamer pipeline.
-
-        *MAY be implemented by subclass.*
-        """
-        pass
-
-    def remove(self):
-        """Remove output from GStreamer pipeline."""
-        self.gstreamer.remove_output(self.bin)
-        self.on_remove()
-
-    def on_remove(self):
-        """
-        Called after output has been removed from GStreamer pipeline.
-
-        *MAY be implemented by subclass.*
-        """
-        pass
 
     def get_name(self):
         """

@@ -29,7 +29,7 @@ class GStreamer(ThreadingActor):
 
     **Settings:**
 
-    - :attr:`mopidy.settings.OUTPUTS`
+    - :attr:`mopidy.settings.OUTPUT`
 
     """
 
@@ -66,9 +66,9 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
     def _setup_outputs(self):
-        for output in settings.OUTPUTS:
-            self._outputs.append(get_class(output)(self))
-        self._outputs[0].connect()
+        for klass in settings.OUTPUTS:
+            self._outputs.append(get_class(klass)())
+        self.connect_output(self._outputs[0].bin)
 
     def _setup_message_processor(self):
         bus = self._pipeline.get_bus()
@@ -87,10 +87,6 @@ class GStreamer(ThreadingActor):
             pad.link(target_pad)
 
     def _on_message(self, bus, message):
-        if message.src in self._handlers:
-            if self._handlers[message.src](message):
-                return # Message was handeled by output
-
         if message.type == gst.MESSAGE_EOS:
             logger.debug(u'GStreamer signalled end-of-stream. '
                 'Telling backend ...')
@@ -305,86 +301,4 @@ class GStreamer(ThreadingActor):
         gst.element_link_many(self._volume, output)
         logger.debug('Output set to %s', output.get_name())
 
-    def list_outputs(self):
-        """
-        Get list with the name of all active outputs.
-
-        :rtype: list of strings
-        """
-        return [output.get_name() for output in self._outputs]
-
-    def remove_output(self, output):
-        """
-        Remove output from our pipeline.
-
-        :param output: output to remove from the pipeline
-        :type output: :class:`gst.Bin`
-        """
-        peersrc = output.get_pad('sink').get_peer()
-        handler = peersrc.add_event_probe(self._handle_event_probe)
-
-        struct = gst.Structure('mopidy-unlink')
-        struct.set_value('handler', handler)
-
-        event = gst.event_new_custom(gst.EVENT_CUSTOM_DOWNSTREAM, struct)
-        self._volume.send_event(event)
-
-    def _handle_event_probe(self, srcpad, event):
-        if event.type == gst.EVENT_CUSTOM_DOWNSTREAM and event.has_name('mopidy-unlink'):
-            data = self._get_structure_data(event.get_structure())
-
-            output = srcpad.get_peer().get_parent()
-
-            srcpad.unlink(srcpad.get_peer())
-            srcpad.remove_event_probe(data['handler'])
-
-            output.set_state(gst.STATE_NULL)
-            self._pipeline.remove(output)
-
-            logger.warning('Removed %s', output.get_name())
-            return False
-        return True
-
-    def _get_structure_data(self, struct):
-        # Ugly hack to get around missing get_value in pygst bindings :/
-        data = {}
-        def get_data(key, value):
-            data[key] = value
-        struct.foreach(get_data)
-        return data
-
-    def connect_message_handler(self, element, handler):
-        """
-        Attach custom message handler for given element.
-
-        Hook to allow outputs (or other code) to register custom message
-        handlers for all messages coming from the element in question.
-
-        In the case of outputs, :meth:`mopidy.outputs.BaseOutput.on_connect`
-        should be used to attach such handlers and care should be taken to
-        remove them in :meth:`mopidy.outputs.BaseOutput.on_remove` using
-        :meth:`remove_message_handler`.
-
-        The handler callback will only be given the message in question, and
-        is free to ignore the message. However, if the handler wants to prevent
-        the default handling of the message it should return :class:`True`
-        indicating that the message has been handled.
-
-        Note that there can only be one handler per element.
-
-        :param element: element to watch messages from
-        :type element: :class:`gst.Element`
-        :param handler: callable that takes :class:`gst.Message` and returns
-            :class:`True` if the message has been handeled
-        :type handler: callable
-        """
-        self._handlers[element] = handler
-
-    def remove_message_handler(self, element):
-        """
-        Remove custom message handler.
-
-        :param element: element to remove message handling from.
-        :type element: :class:`gst.Element`
-        """
-        self._handlers.pop(element, None)
+    # FIXME re-add disconnect / swap output code?

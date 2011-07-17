@@ -40,19 +40,3 @@ class ShoutcastOutput(BaseOutput):
             u'username': settings.SHOUTCAST_OUTPUT_USERNAME,
             u'password': settings.SHOUTCAST_OUTPUT_PASSWORD,
         })
-
-    def on_connect(self):
-        self.gstreamer.connect_message_handler(
-            self.bin.get_by_name('shoutcast'), self.message_handler)
-
-    def on_remove(self):
-        self.gstreamer.remove_message_handler(
-            self.bin.get_by_name('shoutcast'))
-
-    def message_handler(self, message):
-        if message.type != self.MESSAGE_ERROR:
-            return False
-        error, debug = message.parse_error()
-        logger.warning('%s (%s)', error, debug)
-        self.remove()
-        return True

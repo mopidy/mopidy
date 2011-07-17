@@ -17,10 +17,17 @@ v0.6.0 (in development)
 - Replace :attr:`mopidy.backends.base.Backend.uri_handlers` with
   :attr:`mopidy.backends.base.Backend.uri_schemes`, which just takes the part
   up to the colon of an URI, and not any prefix.
+
 - Add Listener API, :mod:`mopidy.listeners`, to be implemented by actors
   wanting to receive events from the backend. This is a formalization of the
   ad hoc events the Last.fm scrobbler has already been using for some time.
-- Fix metadata update in Shoutcast streaming (Fixes: :issue:`122`) 
+
+- Fix metadata update in Shoutcast streaming (Fixes: :issue:`122`)
+
+- Multiple simultaneously playing outputs was considered more trouble than what
+  it is worth maintnance wise. Thus, this feature has been axed for now.
+  Switching outputs is still posible, but only one can be active at a time, and
+  it is still the case that switching during playback does not funtion.
 
 
 v0.5.0 (2011-06-15)

@@ -173,12 +173,8 @@ MPD_SERVER_PASSWORD = None
 #:
 #: Default::
 #:
-#:     OUTPUTS = (
-#:         u'mopidy.outputs.local.LocalOutput',
-#:     )
-OUTPUTS = (
-    u'mopidy.outputs.local.LocalOutput',
-)
+#:     OUTPUTS = (u'mopidy.outputs.local.LocalOutput',)
+OUTPUTS = (u'mopidy.outputs.local.LocalOutput',)
 
 #: Hostname of the SHOUTcast server which Mopidy should stream audio to.
 #:
