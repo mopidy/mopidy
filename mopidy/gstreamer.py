@@ -36,7 +36,6 @@ class GStreamer(ThreadingActor):
     def __init__(self):
         self._pipeline = None
         self._source = None
-        self._tee = None
         self._uridecodebin = None
         self._volume = None
         self._outputs = []
@@ -54,13 +53,11 @@ class GStreamer(ThreadingActor):
         description = ' ! '.join([
             'uridecodebin name=uri',
             'audioconvert name=convert',
-            'volume name=volume',
-            'tee name=tee'])
+            'volume name=volume'])
 
         logger.debug(u'Setting up base GStreamer pipeline: %s', description)
 
         self._pipeline = gst.parse_launch(description)
-        self._tee = self._pipeline.get_by_name('tee')
         self._volume = self._pipeline.get_by_name('volume')
         self._uridecodebin = self._pipeline.get_by_name('uri')
 
@@ -70,7 +67,8 @@ class GStreamer(ThreadingActor):
 
     def _setup_outputs(self):
         for output in settings.OUTPUTS:
-            get_class(output)(self).connect()
+            self._outputs.append(get_class(output)(self))
+        self._outputs[0].connect()
 
     def _setup_message_processor(self):
         bus = self._pipeline.get_bus()
@@ -304,9 +302,8 @@ class GStreamer(ThreadingActor):
         """
         self._pipeline.add(output)
         output.sync_state_with_parent() # Required to add to running pipe
-        gst.element_link_many(self._tee, output)
-        self._outputs.append(output)
-        logger.debug('GStreamer added %s', output.get_name())
+        gst.element_link_many(self._volume, output)
+        logger.debug('Output set to %s', output.get_name())
 
     def list_outputs(self):
         """
@@ -323,26 +320,23 @@ class GStreamer(ThreadingActor):
         :param output: output to remove from the pipeline
         :type output: :class:`gst.Bin`
         """
-        if output not in self._outputs:
-            raise LookupError('Ouput %s not present in pipeline'
-                % output.get_name)
-        teesrc = output.get_pad('sink').get_peer()
-        handler = teesrc.add_event_probe(self._handle_event_probe)
+        peersrc = output.get_pad('sink').get_peer()
+        handler = peersrc.add_event_probe(self._handle_event_probe)
 
-        struct = gst.Structure('mopidy-unlink-tee')
+        struct = gst.Structure('mopidy-unlink')
         struct.set_value('handler', handler)
 
         event = gst.event_new_custom(gst.EVENT_CUSTOM_DOWNSTREAM, struct)
-        self._tee.send_event(event)
+        self._volume.send_event(event)
 
-    def _handle_event_probe(self, teesrc, event):
-        if event.type == gst.EVENT_CUSTOM_DOWNSTREAM and event.has_name('mopidy-unlink-tee'):
+    def _handle_event_probe(self, srcpad, event):
+        if event.type == gst.EVENT_CUSTOM_DOWNSTREAM and event.has_name('mopidy-unlink'):
             data = self._get_structure_data(event.get_structure())
 
-            output = teesrc.get_peer().get_parent()
+            output = srcpad.get_peer().get_parent()
 
-            teesrc.unlink(teesrc.get_peer())
-            teesrc.remove_event_probe(data['handler'])
+            srcpad.unlink(srcpad.get_peer())
+            srcpad.remove_event_probe(data['handler'])
 
             output.set_state(gst.STATE_NULL)
             self._pipeline.remove(output)

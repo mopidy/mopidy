@@ -21,7 +21,7 @@ class BaseOutput(object):
         self.modify_bin()
 
     def _build_bin(self):
-        description = 'queue ! %s' % self.describe_bin()
+        description = self.describe_bin()
         logger.debug('Creating new output: %s', description)
         return gst.parse_bin_from_description(description, True)
 
