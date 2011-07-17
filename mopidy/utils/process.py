@@ -3,9 +3,6 @@ import signal
 import thread
 import threading
 
-import gobject
-gobject.threads_init()
-
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
@@ -68,25 +65,3 @@ class BaseThread(threading.Thread):
 
     def run_inside_try(self):
         raise NotImplementedError
-
-
-class GObjectEventThread(BaseThread):
-    """
-    A GObject event loop which is shared by all Mopidy components that uses
-    libraries that need a GObject event loop, like GStreamer and D-Bus.
-
-    Should be started by Mopidy's core and used by
-    :mod:`mopidy.output.gstreamer`, :mod:`mopidy.frontend.mpris`, etc.
-    """
-
-    def __init__(self):
-        super(GObjectEventThread, self).__init__()
-        self.name = u'GObjectEventThread'
-        self.loop = None
-
-    def run_inside_try(self):
-        self.loop = gobject.MainLoop().run()
-
-    def destroy(self):
-        self.loop.quit()
-        super(GObjectEventThread, self).destroy()

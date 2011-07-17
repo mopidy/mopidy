@@ -43,9 +43,6 @@ class GStreamer(ThreadingActor):
         self._handlers = {}
 
     def on_start(self):
-        # **Warning:** :class:`GStreamer` requires
-        # :class:`mopidy.utils.process.GObjectEventThread` to be running. This
-        # is not enforced by :class:`GStreamer` itself.
         self._setup_pipeline()
         self._setup_outputs()
         self._setup_message_processor()
