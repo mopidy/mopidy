@@ -20,6 +20,9 @@ v0.6.0 (in development)
 - Add Listener API, :mod:`mopidy.listeners`, to be implemented by actors
   wanting to receive events from the backend. This is a formalization of the
   ad hoc events the Last.fm scrobbler has already been using for some time.
+- Replaced all of the MPD network code that was provided by asyncore with
+  custom stack. This change was made to facilitate the future support of the
+  `idle` command, and to reduce the number of event loops being used.
 
 
 v0.5.0 (2011-06-15)
