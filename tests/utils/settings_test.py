@@ -150,6 +150,14 @@ class SettingsProxyTest(unittest.TestCase):
         actual = self.settings.TEST
         self.assertEqual(actual, './test')
 
+    def test_value_ending_in_file_can_be_none(self):
+        self.settings.TEST_FILE = None
+        self.assertEqual(self.settings.TEST_FILE, None)
+
+    def test_value_ending_in_path_can_be_none(self):
+        self.settings.TEST_PATH = None
+        self.assertEqual(self.settings.TEST_PATH, None)
+
     def test_interactive_input_of_missing_defaults(self):
         self.settings.default['TEST'] = ''
         interactive_input = 'input'

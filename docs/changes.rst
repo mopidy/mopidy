@@ -23,6 +23,7 @@ v0.6.0 (in development)
 - Replaced all of the MPD network code that was provided by asyncore with
   custom stack. This change was made to facilitate the future support of the
   `idle` command, and to reduce the number of event loops being used.
+- Fix metadata update in Shoutcast streaming (Fixes: :issue:`122`)
 
 
 v0.5.0 (2011-06-15)
