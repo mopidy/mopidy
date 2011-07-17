@@ -78,8 +78,9 @@ LASTFM_PASSWORD = u''
 #:
 #: Default::
 #:
-#:    LOCAL_MUSIC_PATH = u'~/music'
-LOCAL_MUSIC_PATH = u'~/music'
+#:    # Defaults to asking glib where music is stored, fallback is ~/music
+#:    LOCAL_MUSIC_PATH = None
+LOCAL_MUSIC_PATH = None
 
 #: Path to playlist folder with m3u files for local music.
 #:

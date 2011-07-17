@@ -1,4 +1,5 @@
 import glob
+import glib
 import logging
 import os
 import shutil
@@ -20,6 +21,11 @@ logger = logging.getLogger(u'mopidy.backends.local')
 
 DEFAULT_PLAYLIST_PATH = os.path.join(DATA_FOLDER, 'playlists')
 DEFAULT_TAG_CACHE_FILE = os.path.join(DATA_FOLDER, 'tag_cache')
+DEFAULT_MUSIC_PATH = glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC)
+
+if not DEFAULT_MUSIC_PATH or DEFAULT_MUSIC_PATH == os.path.expanduser(u'~'):
+    DEFAULT_MUSIC_PATH = os.path.expanduser(u'~/music')
+
 
 class LocalBackend(ThreadingActor, Backend):
     """
@@ -177,7 +183,7 @@ class LocalLibraryProvider(BaseLibraryProvider):
 
     def refresh(self, uri=None):
         tag_cache = settings.LOCAL_TAG_CACHE_FILE or DEFAULT_TAG_CACHE_FILE
-        music_folder = settings.LOCAL_MUSIC_PATH
+        music_folder = settings.LOCAL_MUSIC_PATH or DEFAULT_MUSIC_PATH
 
         tracks = parse_mpd_tag_cache(tag_cache, music_folder)
 
