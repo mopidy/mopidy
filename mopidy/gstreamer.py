@@ -43,9 +43,6 @@ class GStreamer(ThreadingActor):
         self._handlers = {}
 
     def on_start(self):
-        # **Warning:** :class:`GStreamer` requires
-        # :class:`mopidy.utils.process.GObjectEventThread` to be running. This
-        # is not enforced by :class:`GStreamer` itself.
         self._setup_pipeline()
         self._setup_outputs()
         self._setup_message_processor()
@@ -277,10 +274,18 @@ class GStreamer(ThreadingActor):
         taglist = gst.TagList()
         artists = [a for a in (track.artists or []) if a.name]
 
+        # Default to blank data to trick shoutcast into clearing any previous
+        # values it might have.
+        taglist[gst.TAG_ARTIST] = u' '
+        taglist[gst.TAG_TITLE] = u' '
+        taglist[gst.TAG_ALBUM] = u' '
+
         if artists:
             taglist[gst.TAG_ARTIST] = u', '.join([a.name for a in artists])
+
         if track.name:
             taglist[gst.TAG_TITLE] = track.name
+
         if track.album and track.album.name:
             taglist[gst.TAG_ALBUM] = track.album.name
 

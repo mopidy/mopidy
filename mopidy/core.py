@@ -3,7 +3,9 @@ import optparse
 import os
 import signal
 import sys
-import time
+
+import gobject
+gobject.threads_init()
 
 # Extract any non-GStreamer arguments, and leave the GStreamer arguments for
 # processing by GStreamer. This needs to be done before GStreamer is imported,
@@ -24,26 +26,25 @@ from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import (GObjectEventThread, exit_handler,
-    stop_remaining_actors, stop_actors_by_class)
+from mopidy.utils.process import (exit_handler, stop_remaining_actors,
+    stop_actors_by_class)
 from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
 
 def main():
     signal.signal(signal.SIGTERM, exit_handler)
+    loop = gobject.MainLoop()
     try:
         options = parse_options()
         setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
-        setup_gobject_loop()
         setup_gstreamer()
         setup_mixer()
         setup_backend()
         setup_frontends()
-        while True:
-            time.sleep(1)
+        loop.run()
     except SettingsError as e:
         logger.error(e.message)
     except KeyboardInterrupt:
@@ -51,6 +52,7 @@ def main():
     except Exception as e:
         logger.exception(e)
     finally:
+        loop.quit()
         stop_frontends()
         stop_backend()
         stop_mixer()
@@ -98,9 +100,6 @@ def setup_settings(interactive):
     except SettingsError, e:
         logger.error(e.message)
         sys.exit(1)
-
-def setup_gobject_loop():
-    GObjectEventThread().start()
 
 def setup_gstreamer():
     GStreamer.start()
