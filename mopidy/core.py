@@ -86,8 +86,8 @@ def check_old_folders():
         return
 
     logger.warning(u'Old settings folder found at %s, settings.py should be '
-        'moved to %s, any cache data should be deleted.', old_settings_folder,
-        SETTINGS_FOLDER)
+        'moved to %s, any cache data should be deleted. See release notes '
+        'for further instructions.', old_settings_folder, SETTINGS_FOLDER)
 
 def setup_settings(interactive):
     get_or_create_folder(SETTINGS_FOLDER)
