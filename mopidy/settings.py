@@ -26,7 +26,8 @@ BACKENDS = (
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
-#: Which GStreamer bin description to use in :class:`mopidy.outputs.CustomOutput`.
+#: Which GStreamer bin description to use in
+#: :class:`mopidy.outputs.custom.CustomOutput`.
 #:
 #: Default::
 #:
