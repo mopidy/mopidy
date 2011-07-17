@@ -320,7 +320,7 @@ class LineProtocol(ThreadingActor):
 
     def on_stop(self):
         """Ensure that cleanup when actor stops."""
-        self.connection.stop(u'Actor is shuting down.')
+        self.connection.stop(u'Actor is shutting down.')
 
     def parse_lines(self):
         """Consume new data and yield any lines found."""
@@ -337,7 +337,9 @@ class LineProtocol(ThreadingActor):
         """
         try:
             return line.encode(self.encoding)
-        except UnicodeError:  # FIXME log this?
+        except UnicodeError:
+            logger.warning(u'Stoping actor due to encode problem, data '
+                'supplied by client was not valid %s', self.encoding)
             self.stop()
 
     def decode(self, line):
@@ -348,7 +350,9 @@ class LineProtocol(ThreadingActor):
         """
         try:
             return line.decode(self.encoding)
-        except UnicodeError:  # FIXME log this?
+        except UnicodeError:
+            logger.warning(u'Stoping actor due to decode problem, data '
+                'supplied by client was not valid %s', self.encoding)
             self.stop()
 
     def join_lines(self, lines):
