@@ -338,7 +338,7 @@ class LineProtocol(ThreadingActor):
         try:
             return line.encode(self.encoding)
         except UnicodeError:
-            logger.warning(u'Stoping actor due to encode problem, data '
+            logger.warning(u'Stopping actor due to encode problem, data '
                 'supplied by client was not valid %s', self.encoding)
             self.stop()
 
@@ -351,7 +351,7 @@ class LineProtocol(ThreadingActor):
         try:
             return line.decode(self.encoding)
         except UnicodeError:
-            logger.warning(u'Stoping actor due to decode problem, data '
+            logger.warning(u'Stopping actor due to decode problem, data '
                 'supplied by client was not valid %s', self.encoding)
             self.stop()
 
