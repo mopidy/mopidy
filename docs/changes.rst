@@ -20,6 +20,7 @@ v0.6.0 (in development)
 - Add Listener API, :mod:`mopidy.listeners`, to be implemented by actors
   wanting to receive events from the backend. This is a formalization of the
   ad hoc events the Last.fm scrobbler has already been using for some time.
+- Fix metadata update in Shoutcast streaming (Fixes: :issue:`122`) 
 
 
 v0.5.0 (2011-06-15)
