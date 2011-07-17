@@ -18,9 +18,11 @@ def import_module(name):
     return sys.modules[name]
 
 def get_class(name):
+    logger.debug('Loading: %s', name)
+    if '.' not in name:
+        raise ImportError("Couldn't load: %s" % name)
     module_name = name[:name.rindex('.')]
     class_name = name[name.rindex('.') + 1:]
-    logger.debug('Loading: %s', name)
     try:
         module = import_module(module_name)
         class_object = getattr(module, class_name)

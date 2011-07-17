@@ -128,7 +128,7 @@ class MpdDispatcher(object):
             return self._call_next_filter(request, response, filter_chain)
         except ActorDeadError as e:
             logger.warning(u'Tried to communicate with dead actor.')
-            raise exceptions.MpdSystemError(e.message)
+            raise exceptions.MpdSystemError(e)
 
     def _call_handler(self, request):
         (handler, kwargs) = self._find_handler(request)
@@ -178,7 +178,7 @@ class MpdContext(object):
     #: The current :class:`MpdDispatcher`.
     dispatcher = None
 
-    #: The current :class:`mopidy.frontends.mpd.session.MpdSession`.
+    #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
     def __init__(self, dispatcher, session=None):

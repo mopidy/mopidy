@@ -118,6 +118,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             'channels': channels,
         }
         self.gstreamer.emit_data(capabilites, bytes(frames))
+        return num_frames
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
