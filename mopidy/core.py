@@ -21,7 +21,7 @@ sys.argv[1:] = gstreamer_args
 from pykka.registry import ActorRegistry
 
 from mopidy import (get_version, settings, OptionalDependencyError,
-    SettingsError, DATA_FOLDER, SETTINGS_FOLDER, SETTINGS_FILE)
+    SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
 from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
@@ -89,11 +89,11 @@ def check_old_folders():
 
     logger.warning(u'Old settings folder found at %s, settings.py should be '
         'moved to %s, any cache data should be deleted. See release notes '
-        'for further instructions.', old_settings_folder, SETTINGS_FOLDER)
+        'for further instructions.', old_settings_folder, SETTINGS_PATH)
 
 def setup_settings(interactive):
-    get_or_create_folder(SETTINGS_FOLDER)
-    get_or_create_folder(DATA_FOLDER)
+    get_or_create_folder(SETTINGS_PATH)
+    get_or_create_folder(DATA_PATH)
     get_or_create_file(SETTINGS_FILE)
     try:
         settings.validate(interactive)

@@ -7,7 +7,7 @@ import shutil
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings, DATA_FOLDER
+from mopidy import settings, DATA_PATH
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, BaseLibraryProvider, PlaybackController,
     BasePlaybackProvider, StoredPlaylistsController,
@@ -19,8 +19,8 @@ from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
 
-DEFAULT_PLAYLIST_PATH = os.path.join(DATA_FOLDER, 'playlists')
-DEFAULT_TAG_CACHE_FILE = os.path.join(DATA_FOLDER, 'tag_cache')
+DEFAULT_PLAYLIST_PATH = os.path.join(DATA_PATH, 'playlists')
+DEFAULT_TAG_CACHE_FILE = os.path.join(DATA_PATH, 'tag_cache')
 DEFAULT_MUSIC_PATH = glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC)
 
 if not DEFAULT_MUSIC_PATH or DEFAULT_MUSIC_PATH == os.path.expanduser(u'~'):

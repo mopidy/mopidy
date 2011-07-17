@@ -8,7 +8,7 @@ import os
 from pprint import pformat
 import sys
 
-from mopidy import SettingsError, SETTINGS_FOLDER, SETTINGS_FILE
+from mopidy import SettingsError, SETTINGS_PATH, SETTINGS_FILE
 from mopidy.utils.log import indent
 
 logger = logging.getLogger('mopidy.utils.settings')
@@ -23,7 +23,7 @@ class SettingsProxy(object):
     def _get_local_settings(self):
         if not os.path.isfile(SETTINGS_FILE):
             return {}
-        sys.path.insert(0, SETTINGS_FOLDER)
+        sys.path.insert(0, SETTINGS_PATH)
         # pylint: disable = F0401
         import settings as local_settings_module
         # pylint: enable = F0401
