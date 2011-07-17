@@ -6,7 +6,7 @@ import shutil
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
+from mopidy import settings, DATA_FOLDER
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, BaseLibraryProvider, PlaybackController,
     BasePlaybackProvider, StoredPlaylistsController,
@@ -17,6 +17,9 @@ from mopidy.gstreamer import GStreamer
 from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
+
+DEFAULT_PLAYLIST_PATH = os.path.join(DATA_FOLDER, 'playlists')
+DEFAULT_TAG_CACHE_FILE = os.path.join(DATA_FOLDER, 'tag_cache')
 
 class LocalBackend(ThreadingActor, Backend):
     """
@@ -96,7 +99,7 @@ class LocalPlaybackProvider(BasePlaybackProvider):
 class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
     def __init__(self, *args, **kwargs):
         super(LocalStoredPlaylistsProvider, self).__init__(*args, **kwargs)
-        self._folder = settings.LOCAL_PLAYLIST_PATH
+        self._folder = settings.LOCAL_PLAYLIST_PATH or DEFAULT_PLAYLIST_PATH
         self.refresh()
 
     def lookup(self, uri):
@@ -173,7 +176,7 @@ class LocalLibraryProvider(BaseLibraryProvider):
         self.refresh()
 
     def refresh(self, uri=None):
-        tag_cache = settings.LOCAL_TAG_CACHE_FILE
+        tag_cache = settings.LOCAL_TAG_CACHE_FILE or DEFAULT_TAG_CACHE_FILE
         music_folder = settings.LOCAL_MUSIC_PATH
 
         tracks = parse_mpd_tag_cache(tag_cache, music_folder)

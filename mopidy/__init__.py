@@ -10,6 +10,7 @@ from subprocess import PIPE, Popen
 
 VERSION = (0, 6, 0)
 
+DATA_FOLDER = os.path.join(glib.get_user_data_dir(), 'mopidy')
 SETTINGS_FOLDER = os.path.join(glib.get_user_config_dir(), 'mopidy')
 SETTINGS_FILE = os.path.join(SETTINGS_FOLDER, 'settings.py')
 
