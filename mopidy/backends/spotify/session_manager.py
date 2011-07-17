@@ -20,13 +20,14 @@ from mopidy.utils.process import BaseThread
 logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
 DEFAULT_CACHE_LOCATION = os.path.join(glib.get_user_cache_dir(), 'spotify')
+DEFAULT_SETTINGS_LOCATION = DEFAULT_CACHE_LOCATION
 
 # pylint: disable = R0901
 # SpotifySessionManager: Too many ancestors (9/7)
 
 
 class SpotifySessionManager(BaseThread, PyspotifySessionManager):
-    cache_location = settings.SPOTIFY_CACHE_PATH
+    cache_location = settings.SPOTIFY_CACHE_PATH or DEFAULT_SETTINGS_LOCATION
     settings_location = settings.SPOTIFY_CACHE_PATH or DEFAULT_CACHE_LOCATION
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()

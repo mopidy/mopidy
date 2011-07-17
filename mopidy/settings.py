@@ -237,7 +237,7 @@ SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
 #: Path to the Spotify cache.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-SPOTIFY_CACHE_PATH = u''
+SPOTIFY_CACHE_PATH = None
 
 #: Your Spotify Premium username.
 #:
