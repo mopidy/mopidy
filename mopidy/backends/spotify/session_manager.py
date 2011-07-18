@@ -1,3 +1,4 @@
+import glib
 import logging
 import os
 import threading
@@ -6,7 +7,7 @@ from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from pykka.registry import ActorRegistry
 
-from mopidy import get_version, settings
+from mopidy import get_version, settings, CACHE_PATH
 from mopidy.backends.base import Backend
 from mopidy.backends.spotify import BITRATES
 from mopidy.backends.spotify.container_manager import SpotifyContainerManager
@@ -21,9 +22,10 @@ logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 # pylint: disable = R0901
 # SpotifySessionManager: Too many ancestors (9/7)
 
+
 class SpotifySessionManager(BaseThread, PyspotifySessionManager):
-    cache_location = settings.SPOTIFY_CACHE_PATH
-    settings_location = settings.SPOTIFY_CACHE_PATH
+    cache_location = settings.SPOTIFY_CACHE_PATH or CACHE_PATH
+    settings_location = settings.SPOTIFY_CACHE_PATH or CACHE_PATH
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 

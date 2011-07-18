@@ -4,7 +4,7 @@ Available settings and their default values.
 .. warning::
 
     Do *not* change settings directly in :mod:`mopidy.settings`. Instead, add a
-    file called ``~/.mopidy/settings.py`` and redefine settings there.
+    file called ``~/.config/mopidy/settings.py`` and redefine settings there.
 """
 
 #: List of playback backends to use. See :mod:`mopidy.backends` for all
@@ -78,8 +78,9 @@ LASTFM_PASSWORD = u''
 #:
 #: Default::
 #:
-#:    LOCAL_MUSIC_PATH = u'~/music'
-LOCAL_MUSIC_PATH = u'~/music'
+#:    # Defaults to asking glib where music is stored, fallback is ~/music
+#:    LOCAL_MUSIC_PATH = None
+LOCAL_MUSIC_PATH = None
 
 #: Path to playlist folder with m3u files for local music.
 #:
@@ -87,8 +88,8 @@ LOCAL_MUSIC_PATH = u'~/music'
 #:
 #: Default::
 #:
-#:    LOCAL_PLAYLIST_PATH = u'~/.mopidy/playlists'
-LOCAL_PLAYLIST_PATH = u'~/.mopidy/playlists'
+#:    LOCAL_PLAYLIST_PATH = None # Implies $XDG_DATA_DIR/mopidy/playlists
+LOCAL_PLAYLIST_PATH = None
 
 #: Path to tag cache for local music.
 #:
@@ -96,8 +97,8 @@ LOCAL_PLAYLIST_PATH = u'~/.mopidy/playlists'
 #:
 #: Default::
 #:
-#:    LOCAL_TAG_CACHE_FILE = u'~/.mopidy/tag_cache'
-LOCAL_TAG_CACHE_FILE = u'~/.mopidy/tag_cache'
+#:    LOCAL_TAG_CACHE_FILE = None # Implies $XDG_DATA_DIR/mopidy/tag_cache
+LOCAL_TAG_CACHE_FILE = None
 
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
@@ -237,7 +238,7 @@ SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
 #: Path to the Spotify cache.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-SPOTIFY_CACHE_PATH = u'~/.mopidy/spotify_cache'
+SPOTIFY_CACHE_PATH = None
 
 #: Your Spotify Premium username.
 #:
