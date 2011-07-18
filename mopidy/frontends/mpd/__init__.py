@@ -67,7 +67,7 @@ class MpdSession(network.LineProtocol):
 
         logger.debug(u'Response to [%s]:%s from %s: %s', self.host, self.port,
             self.actor_urn, log.indent(self.terminator.join(response)))
-            
+
         self.send_lines(response)
 
     def close(self):

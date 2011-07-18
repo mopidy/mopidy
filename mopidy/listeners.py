@@ -1,3 +1,5 @@
+from pykka import registry
+
 class BackendListener(object):
     """
     Marker interface for recipients of events sent by the backend.
@@ -8,6 +10,16 @@ class BackendListener(object):
     and for providing default implementations for those listeners that are not
     interested in all events.
     """
+
+    @staticmethod
+    def send(event, **kwargs):
+        """Helper to allow calling of backend listener events"""
+        registry.ActorRegistry.broadcast({
+            'command': 'pykka_call',
+            'attr_path': (event,),
+            'args': [],
+            'kwargs': kwargs
+        }, target_class=BackendListener)
 
     def started_playing(self, track):
         """

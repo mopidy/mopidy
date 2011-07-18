@@ -464,27 +464,17 @@ class PlaybackController(object):
         logger.debug(u'Triggering started playing event')
         if self.current_track is None:
             return
-        ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': ('started_playing',),
-            'args': [],
-            'kwargs': {'track': self.current_track},
-        }, target_class=BackendListener)
+        BackendListener.send('started_playing',
+            track=self.current_track)
 
     def _trigger_stopped_playing_event(self):
         # TODO Test that this is called on next/prev/end-of-track
         logger.debug(u'Triggering stopped playing event')
         if self.current_track is None:
             return
-        ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': ('stopped_playing',),
-            'args': [],
-            'kwargs': {
-                'track': self.current_track,
-                'time_position': self.time_position,
-            },
-        }, target_class=BackendListener)
+        BackendListener.send('stopped_playing',
+            track=self.current_track,
+            time_position=self.time_position)
 
 
 class BasePlaybackProvider(object):
