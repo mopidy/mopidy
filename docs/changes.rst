@@ -15,14 +15,15 @@ v0.6.0 (in development)
 - All config, data, and cache locations are now based on the XDG spec.
 
   - This means that your settings file will need to be moved from
-    `~/.mopidy/settings.py` to `~/.config/mopidy/settings.py`.
-  - Your Spotify cache will now be stored in `~/.cache/mopidy` instead of
-    `~/.mopidy/spotify_cache`, this matches Spotify's own behaviour for their
+    ``~/.mopidy/settings.py`` to ``~/.config/mopidy/settings.py``.
+  - Your Spotify cache will now be stored in ``~/.cache/mopidy`` instead of
+    ``~/.mopidy/spotify_cache``, this matches Spotify's own behaviour for their
     Linux client.
-  - The local backend's `tag_cache` should now be in `~/.local/share/mopidy/tag_cache`,
-    likewise your playlists will be in `~/.local/share/mopidy/playlists`.
+  - The local backend's ``tag_cache`` should now be in
+    ``~/.local/share/mopidy/tag_cache``, likewise your playlists will be in
+    ``~/.local/share/mopidy/playlists``.
   - The local client now tries to lookup where your music is via XDG, it will
-    fall-back to `~/music` or use whatever setting you set manually.
+    fall-back to ``~/music`` or use whatever setting you set manually.
 
 **Changes**
 
@@ -34,7 +35,7 @@ v0.6.0 (in development)
   ad hoc events the Last.fm scrobbler has already been using for some time.
 - Replaced all of the MPD network code that was provided by asyncore with
   custom stack. This change was made to facilitate the future support of the
-  `idle` command, and to reduce the number of event loops being used.
+  ``idle`` command, and to reduce the number of event loops being used.
 - Fix metadata update in Shoutcast streaming (Fixes: :issue:`122`)
 
 
