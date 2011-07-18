@@ -12,6 +12,18 @@ v0.6.0 (in development)
 
 - Pykka 0.12.3 or greater is required.
 
+- All config, data, and cache locations are now based on the XDG spec.
+
+  - This means that your settings file will need to be moved from
+    `~/.mopidy/settings.py` to `~/.config/mopidy/settings.py`.
+  - Your Spotify cache will now be stored in `~/.cache/mopidy` instead of
+    `~/.mopidy/spotify_cache`, this matches Spotify's own behaviour for their
+    Linux client.
+  - The local backend's `tag_cache` should now be in `~/.local/share/mopidy/tag_cache`,
+    likewise your playlists will be in `~/.local/share/mopidy/playlists`.
+  - The local client now tries to lookup where your music is via XDG, it will
+    fall-back to `~/music` or use whatever setting you set manually.
+
 **Changes**
 
 - Replace :attr:`mopidy.backends.base.Backend.uri_handlers` with
