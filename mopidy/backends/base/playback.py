@@ -326,7 +326,7 @@ class PlaybackController(object):
         original_cp_track = self.current_cp_track
 
         if self.cp_track_at_eot:
-            self._trigger_stopped_playing_event()
+            self._trigger_track_playback_ended()
             self.play(self.cp_track_at_eot)
         else:
             self.stop(clear_current_track=True)
@@ -354,7 +354,7 @@ class PlaybackController(object):
             return
 
         if self.cp_track_at_next:
-            self._trigger_stopped_playing_event()
+            self._trigger_track_playback_ended()
             self.play(self.cp_track_at_next)
         else:
             self.stop(clear_current_track=True)
@@ -402,7 +402,7 @@ class PlaybackController(object):
         if self.random and self.current_cp_track in self._shuffled:
             self._shuffled.remove(self.current_cp_track)
 
-        self._trigger_started_playing_event()
+        self._trigger_track_playback_started()
 
     def previous(self):
         """Play the previous track."""
@@ -410,7 +410,7 @@ class PlaybackController(object):
             return
         if self.state == self.STOPPED:
             return
-        self._trigger_stopped_playing_event()
+        self._trigger_track_playback_ended()
         self.play(self.cp_track_at_previous, on_error_step=-1)
 
     def resume(self):
@@ -454,25 +454,24 @@ class PlaybackController(object):
         :type clear_current_track: boolean
         """
         if self.state != self.STOPPED:
-            self._trigger_stopped_playing_event()
             if self.provider.stop():
+                self._trigger_track_playback_ended()
                 self.state = self.STOPPED
         if clear_current_track:
             self.current_cp_track = None
 
-    def _trigger_started_playing_event(self):
-        logger.debug(u'Triggering started playing event')
+    def _trigger_track_playback_started(self):
+        logger.debug(u'Triggering track playback started event')
         if self.current_track is None:
             return
-        BackendListener.send('started_playing',
+        BackendListener.send('track_playback_started',
             track=self.current_track)
 
-    def _trigger_stopped_playing_event(self):
-        # TODO Test that this is called on next/prev/end-of-track
-        logger.debug(u'Triggering stopped playing event')
+    def _trigger_track_playback_ended(self):
+        logger.debug(u'Triggering track playback ended event')
         if self.current_track is None:
             return
-        BackendListener.send('stopped_playing',
+        BackendListener.send('track_playback_ended',
             track=self.current_track,
             time_position=self.time_position)
 

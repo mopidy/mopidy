@@ -21,7 +21,7 @@ class BackendListener(object):
             'kwargs': kwargs
         }, target_class=BackendListener)
 
-    def started_playing(self, track):
+    def track_playback_started(self, track):
         """
         Called whenever a new track starts playing.
 
@@ -32,9 +32,9 @@ class BackendListener(object):
         """
         pass
 
-    def stopped_playing(self, track, time_position):
+    def track_playback_ended(self, track, time_position):
         """
-        Called whenever playback is stopped.
+        Called whenever playback of a track ends.
 
         *MAY* be implemented by actor.
 
