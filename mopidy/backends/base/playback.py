@@ -8,6 +8,17 @@ from mopidy.listeners import BackendListener
 
 logger = logging.getLogger('mopidy.backends.base')
 
+
+def option_wrapper(name, default):
+    def get_option(self):
+        return getattr(self, name, default)
+    def set_option(self, value):
+        if getattr(self, name, default) != value:
+            self._trigger_options_changed()
+        return setattr(self, name, value)
+    return property(get_option, set_option)
+
+
 class PlaybackController(object):
     """
     :param backend: the backend
@@ -34,7 +45,7 @@ class PlaybackController(object):
     #:     Tracks are removed from the playlist when they have been played.
     #: :class:`False`
     #:     Tracks are not removed from the playlist.
-    consume = False
+    consume = option_wrapper('_consume', False)
 
     #: The currently playing or selected track.
     #:
@@ -46,21 +57,21 @@ class PlaybackController(object):
     #:     Tracks are selected at random from the playlist.
     #: :class:`False`
     #:     Tracks are played in the order of the playlist.
-    random = False
+    random = option_wrapper('_random', False)
 
     #: :class:`True`
     #:     The current playlist is played repeatedly. To repeat a single track,
     #:     select both :attr:`repeat` and :attr:`single`.
     #: :class:`False`
     #:     The current playlist is played once.
-    repeat = False
+    repeat = option_wrapper('_repeat', False)
 
     #: :class:`True`
     #:     Playback is stopped after current song, unless in :attr:`repeat`
     #:     mode.
     #: :class:`False`
     #:     Playback continues after current song.
-    single = False
+    single = option_wrapper('_single', False)
 
     def __init__(self, backend, provider):
         self.backend = backend
@@ -480,6 +491,10 @@ class PlaybackController(object):
     def _trigger_playback_state_changed(self):
         logger.debug(u'Triggering playback state change event')
         BackendListener.send('playback_state_changed')
+
+    def _trigger_options_changed(self):
+        logger.debug(u'Triggering options changed event')
+        BackendListener.send('options_changed')
 
 
 class BasePlaybackProvider(object):

@@ -60,3 +60,11 @@ class BackendListener(object):
         *MAY* be implemented by actor.
         """
         pass
+
+    def options_changed(self):
+        """
+        Called whenever an option is changed.
+
+        *MAY* be implemented by actor.
+        """
+        pass
