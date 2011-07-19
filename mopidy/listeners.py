@@ -70,3 +70,11 @@ class BackendListener(object):
         *MAY* be implemented by actor.
         """
         pass
+
+    def volume_changed(self):
+        """
+        Called whenever the volume is changed.
+
+        *MAY* be implemented by actor.
+        """
+        pass

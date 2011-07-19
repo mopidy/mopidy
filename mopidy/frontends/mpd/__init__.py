@@ -58,6 +58,9 @@ class MpdFrontend(actor.ThreadingActor, listeners.BackendListener):
     def options_changed(self):
         self.send_idle('options')
 
+    def volume_changed(self):
+        self.send_idle('mixer')
+
 
 class MpdSession(network.LineProtocol):
     """
