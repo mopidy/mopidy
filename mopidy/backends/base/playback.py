@@ -276,6 +276,9 @@ class PlaybackController(object):
     def state(self, new_state):
         (old_state, self._state) = (self.state, new_state)
         logger.debug(u'Changing state: %s -> %s', old_state, new_state)
+
+        self._trigger_playback_state_changed()
+
         # FIXME play_time stuff assumes backend does not have a better way of
         # handeling this stuff :/
         if (old_state in (self.PLAYING, self.STOPPED)
@@ -387,7 +390,6 @@ class PlaybackController(object):
             self.resume()
 
         if cp_track is not None:
-            self.state = self.STOPPED
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self.provider.play(cp_track.track):
@@ -474,6 +476,10 @@ class PlaybackController(object):
         BackendListener.send('track_playback_ended',
             track=self.current_track,
             time_position=self.time_position)
+
+    def _trigger_playback_state_changed(self):
+        logger.debug(u'Triggering playback state change event')
+        BackendListener.send('playback_state_changed')
 
 
 class BasePlaybackProvider(object):

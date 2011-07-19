@@ -44,3 +44,11 @@ class BackendListener(object):
         :type time_position: int
         """
         pass
+
+    def playback_state_changed(self):
+        """
+        Called whenever playback state is changed.
+
+        *MAY* be implemented by actor.
+        """
+        pass
