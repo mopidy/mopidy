@@ -52,3 +52,11 @@ class BackendListener(object):
         *MAY* be implemented by actor.
         """
         pass
+
+    def playlist_changed(self):
+        """
+        Called whenever a playlist is changed.
+
+        *MAY* be implemented by actor.
+        """
+        pass
