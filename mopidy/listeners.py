@@ -14,11 +14,13 @@ class BackendListener(object):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of backend listener events"""
+        # FIXME this should be updated once pykka supports non-blocking calls
+        # on proxies or some similar solution
         registry.ActorRegistry.broadcast({
             'command': 'pykka_call',
             'attr_path': (event,),
             'args': [],
-            'kwargs': kwargs
+            'kwargs': kwargs,
         }, target_class=BackendListener)
 
     def track_playback_started(self, track):

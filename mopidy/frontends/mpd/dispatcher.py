@@ -47,6 +47,9 @@ class MpdDispatcher(object):
         ]
         return self._call_next_filter(request, response, filter_chain)
 
+    def handle_idle(self, subsystem):
+        logger.debug(u'Got idle event for %s', subsystem)
+
     def _call_next_filter(self, request, response, filter_chain):
         if filter_chain:
             next_filter = filter_chain.pop(0)
