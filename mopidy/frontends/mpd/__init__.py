@@ -49,8 +49,8 @@ class MpdSession(network.LineProtocol):
     terminator = protocol.LINE_TERMINATOR
     encoding = protocol.ENCODING
 
-    def __init__(self, client):
-        super(MpdSession, self).__init__(client)
+    def __init__(self, connection):
+        super(MpdSession, self).__init__(connection)
         self.dispatcher = dispatcher.MpdDispatcher(self)
 
     def on_start(self):
@@ -67,7 +67,7 @@ class MpdSession(network.LineProtocol):
 
         logger.debug(u'Response to [%s]:%s from %s: %s', self.host, self.port,
             self.actor_urn, log.indent(self.terminator.join(response)))
-            
+
         self.send_lines(response)
 
     def close(self):

@@ -1,66 +1,28 @@
 import unittest
 
-from mopidy.backends.base import PlaybackController
-from mopidy.backends.dummy import DummyBackend
-from mopidy.frontends.mpd.dispatcher import MpdDispatcher
+from mopidy.backends import dummy as backend
+from mopidy.frontends.mpd import dispatcher
 from mopidy.frontends.mpd.protocol import status
-from mopidy.mixers.dummy import DummyMixer
+from mopidy.mixers import dummy as mixer
 from mopidy.models import Track
 
-PAUSED = PlaybackController.PAUSED
-PLAYING = PlaybackController.PLAYING
-STOPPED = PlaybackController.STOPPED
+PAUSED = backend.PlaybackController.PAUSED
+PLAYING = backend.PlaybackController.PLAYING
+STOPPED = backend.PlaybackController.STOPPED
+
+# FIXME migrate to using protocol.BaseTestCase instead of status.stats
+# directly?
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.backend = DummyBackend.start().proxy()
-        self.mixer = DummyMixer.start().proxy()
-        self.dispatcher = MpdDispatcher()
+        self.backend = backend.DummyBackend.start().proxy()
+        self.mixer = mixer.DummyMixer.start().proxy()
+        self.dispatcher = dispatcher.MpdDispatcher()
         self.context = self.dispatcher.context
 
     def tearDown(self):
         self.backend.stop().get()
         self.mixer.stop().get()
-
-    def test_clearerror(self):
-        result = self.dispatcher.handle_request(u'clearerror')
-        self.assert_(u'ACK [0@0] {} Not implemented' in result)
-
-    def test_currentsong(self):
-        track = Track()
-        self.backend.current_playlist.append([track])
-        self.backend.playback.play()
-        result = self.dispatcher.handle_request(u'currentsong')
-        self.assert_(u'file: ' in result)
-        self.assert_(u'Time: 0' in result)
-        self.assert_(u'Artist: ' in result)
-        self.assert_(u'Title: ' in result)
-        self.assert_(u'Album: ' in result)
-        self.assert_(u'Track: 0' in result)
-        self.assert_(u'Date: ' in result)
-        self.assert_(u'Pos: 0' in result)
-        self.assert_(u'Id: 0' in result)
-        self.assert_(u'OK' in result)
-
-    def test_currentsong_without_song(self):
-        result = self.dispatcher.handle_request(u'currentsong')
-        self.assert_(u'OK' in result)
-
-    def test_idle_without_subsystems(self):
-        result = self.dispatcher.handle_request(u'idle')
-        self.assert_(u'OK' in result)
-
-    def test_idle_with_subsystems(self):
-        result = self.dispatcher.handle_request(u'idle database playlist')
-        self.assert_(u'OK' in result)
-
-    def test_noidle(self):
-        result = self.dispatcher.handle_request(u'noidle')
-        self.assert_(u'OK' in result)
-
-    def test_stats_command(self):
-        result = self.dispatcher.handle_request(u'stats')
-        self.assert_(u'OK' in result)
 
     def test_stats_method(self):
         result = status.stats(self.context)
@@ -78,10 +40,6 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_(int(result['db_update']) >= 0)
         self.assert_('playtime' in result)
         self.assert_(int(result['playtime']) >= 0)
-
-    def test_status_command(self):
-        result = self.dispatcher.handle_request(u'status')
-        self.assert_(u'OK' in result)
 
     def test_status_method_contains_volume_which_defaults_to_0(self):
         result = dict(status.status(self.context))
