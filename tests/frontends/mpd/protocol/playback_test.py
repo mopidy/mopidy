@@ -1,12 +1,12 @@
-from mopidy.backends.base import PlaybackController
+from mopidy.backends import base as backend
 from mopidy.models import Track
 
 from tests import SkipTest
 from tests.frontends.mpd import protocol
 
-PAUSED = PlaybackController.PAUSED
-PLAYING = PlaybackController.PLAYING
-STOPPED = PlaybackController.STOPPED
+PAUSED = backend.PlaybackController.PAUSED
+PLAYING = backend.PlaybackController.PLAYING
+STOPPED = backend.PlaybackController.STOPPED
 
 
 class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
