@@ -16,7 +16,8 @@ class MockConnetion(mock.Mock):
         self.response = []
 
     def send(self, data):
-        self.response.extend(data.split('\n'))
+        lines = (line for line in data.split('\n') if line)
+        self.response.extend(lines)
 
 
 class BaseTestCase(unittest.TestCase):
@@ -35,7 +36,16 @@ class BaseTestCase(unittest.TestCase):
     def sendRequest(self, request, clear=False):
         self.connection.response = []
         self.session.on_line_received(request)
+        return self.connection.response
 
     def assertInResponse(self, value):
         self.assert_(value in self.connection.response, u'Did not find %s '
             'in %s' % (repr(value), repr(self.connection.response)))
+
+    def assertNotInResponse(self, value):
+        self.assert_(value not in self.connection.response, u'Found %s in %s' %
+            (repr(value), repr(self.connection.response)))
+
+    def assertEqualResponse(self, value):
+        self.assertEqual(1, len(self.connection.response))
+        self.assertEqual(value, self.connection.response[0])
