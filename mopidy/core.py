@@ -1,5 +1,6 @@
 import logging
 import optparse
+import os
 import signal
 import sys
 
@@ -20,7 +21,7 @@ sys.argv[1:] = gstreamer_args
 from pykka.registry import ActorRegistry
 
 from mopidy import (get_version, settings, OptionalDependencyError,
-    SettingsError)
+    SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
 from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
@@ -37,6 +38,7 @@ def main():
     try:
         options = parse_options()
         setup_logging(options.verbosity_level, options.save_debug_log)
+        check_old_folders()
         setup_settings(options.interactive)
         setup_gstreamer()
         setup_mixer()
@@ -79,9 +81,20 @@ def parse_options():
         help='list current settings')
     return parser.parse_args(args=mopidy_args)[0]
 
+def check_old_folders():
+    old_settings_folder = os.path.expanduser(u'~/.mopidy')
+
+    if not os.path.isdir(old_settings_folder):
+        return
+
+    logger.warning(u'Old settings folder found at %s, settings.py should be '
+        'moved to %s, any cache data should be deleted. See release notes '
+        'for further instructions.', old_settings_folder, SETTINGS_PATH)
+
 def setup_settings(interactive):
-    get_or_create_folder('~/.mopidy/')
-    get_or_create_file('~/.mopidy/settings.py')
+    get_or_create_folder(SETTINGS_PATH)
+    get_or_create_folder(DATA_PATH)
+    get_or_create_file(SETTINGS_FILE)
     try:
         settings.validate(interactive)
     except SettingsError, e:

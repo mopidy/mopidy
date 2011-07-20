@@ -71,8 +71,8 @@ class MpdSession(network.LineProtocol):
     terminator = protocol.LINE_TERMINATOR
     encoding = protocol.ENCODING
 
-    def __init__(self, client):
-        super(MpdSession, self).__init__(client)
+    def __init__(self, connection):
+        super(MpdSession, self).__init__(connection)
         self.dispatcher = dispatcher.MpdDispatcher(self)
 
     def on_start(self):
