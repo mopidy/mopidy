@@ -1,6 +1,7 @@
 import unittest
 import mock
 
+from mopidy import settings
 from mopidy.backends import dummy as backend
 from mopidy.frontends import mpd
 from mopidy.frontends.mpd import dispatcher
@@ -32,6 +33,7 @@ class BaseTestCase(unittest.TestCase):
     def tearDown(self):
         self.backend.stop().get()
         self.mixer.stop().get()
+        settings.runtime.clear()
 
     def sendRequest(self, request, clear=False):
         self.connection.response = []
