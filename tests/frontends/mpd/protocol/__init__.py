@@ -36,8 +36,6 @@ class BaseTestCase(unittest.TestCase):
         self.connection.response = []
         self.session.on_line_received(request)
 
-    def assertResponse(self, value, index=None):
-        if index is not None:
-            self.assertEqual(value, self.connection.response[index])
-        else:
-            self.assert_(value in self.connection.response)
+    def assertInResponse(self, value):
+        self.assert_(value in self.connection.response, u'Did not find %s '
+            'in %s' % (repr(value), repr(self.connection.response)))
