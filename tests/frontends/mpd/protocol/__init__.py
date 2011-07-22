@@ -27,6 +27,7 @@ class BaseTestCase(unittest.TestCase):
         self.connection = MockConnetion()
         self.session = mpd.MpdSession(self.connection)
         self.dispatcher = self.session.dispatcher
+        self.context = self.dispatcher.context
 
     def tearDown(self):
         self.backend.stop().get()
@@ -37,6 +38,9 @@ class BaseTestCase(unittest.TestCase):
         self.connection.response = []
         self.session.on_line_received(request)
         return self.connection.response
+
+    def assertNoResponse(self):
+        self.assertEqual([], self.connection.response)
 
     def assertInResponse(self, value):
         self.assert_(value in self.connection.response, u'Did not find %s '

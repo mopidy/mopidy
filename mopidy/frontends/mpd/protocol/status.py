@@ -32,8 +32,8 @@ def currentsong(context):
             position=context.backend.playback.current_playlist_position.get(),
             cpid=current_cp_track.cpid)
 
-@handle_request(r'^idle$')
-@handle_request(r'^idle (?P<subsystems>.+)$')
+#@handle_request(r'^idle$')
+#@handle_request(r'^idle (?P<subsystems>.+)$')
 def idle(context, subsystems=None):
     """
     *musicpd.org, status section:*
@@ -69,7 +69,7 @@ def idle(context, subsystems=None):
     """
     pass # TODO
 
-@handle_request(r'^noidle$')
+#@handle_request(r'^noidle$')
 def noidle(context):
     """See :meth:`_status_idle`."""
     pass # TODO

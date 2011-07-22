@@ -20,6 +20,10 @@ from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
 
+#: Subsystems that can be registered with idle command.
+SUBSYSTEMS = ['database', 'mixer', 'options', 'output',
+    'player', 'playlist', 'stored_playlist', 'update', ]
+
 class MpdDispatcher(object):
     """
     The MPD session feeds the MPD dispatcher with requests. The dispatcher
@@ -32,6 +36,8 @@ class MpdDispatcher(object):
         self.command_list = False
         self.command_list_ok = False
         self.command_list_index = None
+        self.subscriptions = set()
+        self.events = set()
         self.context = MpdContext(self, session=session)
 
     def handle_request(self, request, current_command_list_index=None):
@@ -42,13 +48,26 @@ class MpdDispatcher(object):
             self._catch_mpd_ack_errors_filter,
             self._authenticate_filter,
             self._command_list_filter,
+            self._idle_filter,
             self._add_ok_filter,
             self._call_handler_filter,
         ]
         return self._call_next_filter(request, response, filter_chain)
 
     def handle_idle(self, subsystem):
-        logger.debug(u'Got idle event for %s', subsystem)
+        self.events.add(subsystem)
+
+        subsystems = self.subscriptions.intersection(self.events)
+        if not subsystems:
+            return
+
+        response = []
+        for subsystem in subsystems:
+            response.append(u'changed: %s' % subsystem)
+        response.append(u'OK')
+        self.subscriptions = set()
+        self.events = set()
+        self.context.session.send_lines(response)
 
     def _call_next_filter(self, request, response, filter_chain):
         if filter_chain:
@@ -111,16 +130,59 @@ class MpdDispatcher(object):
             and request != u'command_list_end')
 
 
+    ### Filter: idle
+
+    def _idle_filter(self, request, response, filter_chain):
+        if re.match(r'^noidle$', request):
+            if not self.subscriptions:
+                return []
+            self.subscriptions = set()
+            self.events = set()
+            self.context.session.connection.enable_timeout()
+            return [u'OK']
+
+        if self.subscriptions:
+            self.context.session.close()
+            return []
+
+        if re.match(r'^idle( .+)?$', request):
+            for subsystem in self._extract_subsystems(request):
+                self.subscriptions.add(subsystem)
+
+            subsystems = self.subscriptions.intersection(self.events)
+            if subsystems:
+                for subsystem in subsystems:
+                    response.append(u'changed: %s' % subsystem)
+                self.events = set()
+                self.subscriptions = set()
+                response.append(u'OK')
+                return response
+            else:
+                self.context.session.connection.disable_timeout()
+                return []
+
+        return self._call_next_filter(request, response, filter_chain)
+
+    def _extract_subsystems(self, request):
+        match = re.match(r'^idle (?P<subsystems>.+)$', request)
+        if not match:
+            return SUBSYSTEMS
+        return match.groupdict()['subsystems'].split(' ')
+
+
     ### Filter: add OK
 
     def _add_ok_filter(self, request, response, filter_chain):
         response = self._call_next_filter(request, response, filter_chain)
-        if not self._has_error(response):
+        if not self._has_error(response) and not self._is_idle(request):
             response.append(u'OK')
         return response
 
     def _has_error(self, response):
         return response and response[-1].startswith(u'ACK')
+
+    def _is_idle(self, request):
+        return request.startswith('idle')
 
 
     ### Filter: call handler
