@@ -46,6 +46,11 @@ class BaseTestCase(unittest.TestCase):
         self.assert_(value in self.connection.response, u'Did not find %s '
             'in %s' % (repr(value), repr(self.connection.response)))
 
+    def assertOnceInResponse(self, value):
+        matched = len([r for r in self.connection.response if r == value])
+        self.assertEqual(1, matched, 'Expected to find %s once in %s' %
+            (repr(value), repr(self.connection.response)))
+
     def assertNotInResponse(self, value):
         self.assert_(value not in self.connection.response, u'Found %s in %s' %
             (repr(value), repr(self.connection.response)))

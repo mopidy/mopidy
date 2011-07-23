@@ -91,8 +91,6 @@ def idle(context, subsystems=None):
 
     for subsystem in active:
         response.append(u'changed: %s' % subsystem)
-    response.append(u'OK')
-
     return response
 
 @handle_request(r'^noidle$')

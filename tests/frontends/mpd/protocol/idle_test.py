@@ -63,7 +63,7 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'noidle')
         self.assertNoSubscriptions()
         self.assertNoEvents()
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'OK')
 
     def test_idle_then_noidle_enables_timeout(self):
         self.sendRequest(u'idle')
@@ -93,39 +93,39 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.idleEvent(u'player')
         self.assertNoSubscriptions()
         self.assertNoEvents()
-        self.assertInResponse(u'changed: player')
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'changed: player')
+        self.assertOnceInResponse(u'OK')
 
     def test_idle_player_then_event_player(self):
         self.sendRequest(u'idle player')
         self.idleEvent(u'player')
         self.assertNoSubscriptions()
         self.assertNoEvents()
-        self.assertInResponse(u'changed: player')
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'changed: player')
+        self.assertOnceInResponse(u'OK')
 
     def test_idle_player_then_noidle(self):
         self.sendRequest(u'idle player')
         self.sendRequest(u'noidle')
         self.assertNoSubscriptions()
         self.assertNoEvents()
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'OK')
 
     def test_idle_player_playlist_then_noidle(self):
         self.sendRequest(u'idle player playlist')
         self.sendRequest(u'noidle')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'OK')
 
     def test_idle_player_playlist_then_player(self):
         self.sendRequest(u'idle player playlist')
         self.idleEvent(u'player')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertInResponse(u'changed: player')
+        self.assertOnceInResponse(u'changed: player')
         self.assertNotInResponse(u'changed: playlist')
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'OK')
 
     def test_idle_playlist_then_player(self):
         self.sendRequest(u'idle playlist')
@@ -141,8 +141,8 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.assertNoEvents()
         self.assertNoSubscriptions()
         self.assertNotInResponse(u'changed: player')
-        self.assertInResponse(u'changed: playlist')
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'changed: playlist')
+        self.assertOnceInResponse(u'OK')
 
     def test_player(self):
         self.idleEvent(u'player')
@@ -155,9 +155,9 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'idle player')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertInResponse(u'changed: player')
+        self.assertOnceInResponse(u'changed: player')
         self.assertNotInResponse(u'changed: playlist')
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'OK')
 
     def test_player_then_playlist(self):
         self.idleEvent(u'player')
@@ -171,8 +171,8 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'idle')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertInResponse(u'changed: player')
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'changed: player')
+        self.assertOnceInResponse(u'OK')
 
     def test_player_then_playlist_then_idle(self):
         self.idleEvent(u'player')
@@ -180,9 +180,9 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'idle')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertInResponse(u'changed: player')
-        self.assertInResponse(u'changed: playlist')
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'changed: player')
+        self.assertOnceInResponse(u'changed: playlist')
+        self.assertOnceInResponse(u'OK')
 
     def test_player_then_idle_playlist(self):
         self.idleEvent(u'player')
@@ -197,7 +197,7 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'noidle')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'OK')
 
     def test_player_then_playlist_then_idle_playlist(self):
         self.idleEvent(u'player')
@@ -206,5 +206,5 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.assertNoEvents()
         self.assertNoSubscriptions()
         self.assertNotInResponse(u'changed: player')
-        self.assertInResponse(u'changed: playlist')
-        self.assertInResponse(u'OK')
+        self.assertOnceInResponse(u'changed: playlist')
+        self.assertOnceInResponse(u'OK')
