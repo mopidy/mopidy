@@ -42,10 +42,6 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.assertNoEvents()
         self.assertNoResponse()
 
-    def test_noidle_does_not_call_enable_timeout(self):
-        self.sendRequest(u'noidle')
-        self.assertEqual(0, self.connection.enable_timeout.call_count)
-
     def test_idle_player(self):
         self.sendRequest(u'idle player')
         self.assertEqualSubscriptions(['player'])

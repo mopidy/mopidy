@@ -82,7 +82,7 @@ def idle(context, subsystems=None):
 
     active = context.subscriptions.intersection(context.events)
     if not active:
-        context.session.connection.disable_timeout()
+        context.session.prevent_timeout = True
         return
 
     response = []
@@ -100,7 +100,7 @@ def noidle(context):
         return
     context.subscriptions = set()
     context.events = set()
-    context.session.connection.enable_timeout()
+    context.session.prevent_timeout = False
 
 @handle_request(r'^stats$')
 def stats(context):
