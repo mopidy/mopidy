@@ -135,7 +135,7 @@ class MpdDispatcher(object):
             return []
 
         if not self._is_currently_idle() and self._is_noidle(request):
-            return []
+            return [] # noidle was called before idle
 
         response = self._call_next_filter(request, response, filter_chain)
 
