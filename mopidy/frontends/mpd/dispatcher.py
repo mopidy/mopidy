@@ -20,10 +20,6 @@ from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
 
-#: Subsystems that can be registered with idle command.
-SUBSYSTEMS = ['database', 'mixer', 'options', 'output',
-    'player', 'playlist', 'stored_playlist', 'update', ]
-
 class MpdDispatcher(object):
     """
     The MPD session feeds the MPD dispatcher with requests. The dispatcher
@@ -132,58 +128,39 @@ class MpdDispatcher(object):
     ### Filter: idle
 
     def _idle_filter(self, request, response, filter_chain):
-        if re.match(r'^noidle$', request):
-            if not self.context.subscriptions:
-                return []
-            self.context.subscriptions = set()
-            self.context.events = set()
-            self.context.session.connection.enable_timeout()
-            return [u'OK']
-
-        if self.context.subscriptions:
+        if self._is_currently_idle() and not self._is_noidle(request):
+            logger.debug(u'Client send us %s, only %s is allowed while in '
+                'the idle state', repr(request), repr('noidle'))
             self.context.session.close()
             return []
 
-        if re.match(r'^idle( .+)?$', request):
-            for subsystem in self._extract_subsystems(request):
-                self.context.subscriptions.add(subsystem)
+        if not self._is_currently_idle() and self._is_noidle(request):
+            return []
 
-            subsystems = self.context.subscriptions.intersection(
-                self.context.events)
-            if subsystems:
-                for subsystem in subsystems:
-                    response.append(u'changed: %s' % subsystem)
-                self.context.events = set()
-                self.context.subscriptions = set()
-                response.append(u'OK')
-                return response
-            else:
-                self.context.session.connection.disable_timeout()
-                return []
+        response = self._call_next_filter(request, response, filter_chain)
 
-        return self._call_next_filter(request, response, filter_chain)
+        if self._is_currently_idle():
+            return []
+        else:
+            return response
 
-    def _extract_subsystems(self, request):
-        match = re.match(r'^idle (?P<subsystems>.+)$', request)
-        if not match:
-            return SUBSYSTEMS
-        return match.groupdict()['subsystems'].split(' ')
+    def _is_currently_idle(self):
+        return bool(self.context.subscriptions)
+
+    def _is_noidle(self, request):
+        return re.match(r'^noidle$', request)
 
 
     ### Filter: add OK
 
     def _add_ok_filter(self, request, response, filter_chain):
         response = self._call_next_filter(request, response, filter_chain)
-        if not self._has_error(response) and not self._is_idle(request):
+        if not self._has_error(response):
             response.append(u'OK')
         return response
 
     def _has_error(self, response):
         return response and response[-1].startswith(u'ACK')
-
-    def _is_idle(self, request):
-        return request.startswith('idle')
-
 
     ### Filter: call handler
 

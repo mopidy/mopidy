@@ -1,6 +1,6 @@
 from mock import patch
 
-from mopidy.frontends.mpd.dispatcher import SUBSYSTEMS
+from mopidy.frontends.mpd.protocol.status import SUBSYSTEMS
 from mopidy.models import Track
 
 from tests.frontends.mpd import protocol
