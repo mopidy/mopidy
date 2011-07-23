@@ -34,9 +34,10 @@ class BaseTestCase(unittest.TestCase):
         self.mixer.stop().get()
         settings.runtime.clear()
 
-    def sendRequest(self, request, clear=False):
+    def sendRequest(self, request):
         self.connection.response = []
-        self.session.on_line_received(request)
+        request = '%s\n' % request.encode('utf-8')
+        self.session.on_receive({'received': request})
         return self.connection.response
 
     def assertNoResponse(self):
