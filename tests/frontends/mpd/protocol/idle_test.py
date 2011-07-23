@@ -10,10 +10,10 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.session.on_idle(subsystem)
 
     def assertEqualEvents(self, events):
-        self.assertEqual(set(events), self.dispatcher.events)
+        self.assertEqual(set(events), self.context.events)
 
     def assertEqualSubscriptions(self, events):
-        self.assertEqual(set(events), self.dispatcher.subscriptions)
+        self.assertEqual(set(events), self.context.subscriptions)
 
     def assertNoEvents(self):
         self.assertEqualEvents([])

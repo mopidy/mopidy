@@ -36,8 +36,6 @@ class MpdDispatcher(object):
         self.command_list = False
         self.command_list_ok = False
         self.command_list_index = None
-        self.subscriptions = set()
-        self.events = set()
         self.context = MpdContext(self, session=session)
 
     def handle_request(self, request, current_command_list_index=None):
@@ -55,9 +53,10 @@ class MpdDispatcher(object):
         return self._call_next_filter(request, response, filter_chain)
 
     def handle_idle(self, subsystem):
-        self.events.add(subsystem)
+        self.context.events.add(subsystem)
 
-        subsystems = self.subscriptions.intersection(self.events)
+        subsystems = self.context.subscriptions.intersection(
+            self.context.events)
         if not subsystems:
             return
 
@@ -65,8 +64,8 @@ class MpdDispatcher(object):
         for subsystem in subsystems:
             response.append(u'changed: %s' % subsystem)
         response.append(u'OK')
-        self.subscriptions = set()
-        self.events = set()
+        self.context.subscriptions = set()
+        self.context.events = set()
         self.context.session.send_lines(response)
 
     def _call_next_filter(self, request, response, filter_chain):
@@ -134,27 +133,28 @@ class MpdDispatcher(object):
 
     def _idle_filter(self, request, response, filter_chain):
         if re.match(r'^noidle$', request):
-            if not self.subscriptions:
+            if not self.context.subscriptions:
                 return []
-            self.subscriptions = set()
-            self.events = set()
+            self.context.subscriptions = set()
+            self.context.events = set()
             self.context.session.connection.enable_timeout()
             return [u'OK']
 
-        if self.subscriptions:
+        if self.context.subscriptions:
             self.context.session.close()
             return []
 
         if re.match(r'^idle( .+)?$', request):
             for subsystem in self._extract_subsystems(request):
-                self.subscriptions.add(subsystem)
+                self.context.subscriptions.add(subsystem)
 
-            subsystems = self.subscriptions.intersection(self.events)
+            subsystems = self.context.subscriptions.intersection(
+                self.context.events)
             if subsystems:
                 for subsystem in subsystems:
                     response.append(u'changed: %s' % subsystem)
-                self.events = set()
-                self.subscriptions = set()
+                self.context.events = set()
+                self.context.subscriptions = set()
                 response.append(u'OK')
                 return response
             else:
@@ -246,9 +246,17 @@ class MpdContext(object):
     #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
+    #: The active subsystems that have pending events.
+    events = None
+
+    #: The subsytems that we want to be notified about in idle mode.
+    subscriptions = None
+
     def __init__(self, dispatcher, session=None):
         self.dispatcher = dispatcher
         self.session = session
+        self.events = set()
+        self.subscriptions = set()
         self._backend = None
         self._mixer = None
 
