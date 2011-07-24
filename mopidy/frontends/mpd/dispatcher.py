@@ -27,6 +27,8 @@ class MpdDispatcher(object):
     back to the MPD session.
     """
 
+    _noidle = re.compile(r'^noidle$')
+
     def __init__(self, session=None):
         self.authenticated = False
         self.command_list = False
@@ -128,13 +130,13 @@ class MpdDispatcher(object):
     ### Filter: idle
 
     def _idle_filter(self, request, response, filter_chain):
-        if self._is_currently_idle() and not self._is_noidle(request):
+        if self._is_currently_idle() and not self._noidle.match(request):
             logger.debug(u'Client sent us %s, only %s is allowed while in '
                 'the idle state', repr(request), repr(u'noidle'))
             self.context.session.close()
             return []
 
-        if not self._is_currently_idle() and self._is_noidle(request):
+        if not self._is_currently_idle() and self._noidle.match(request):
             return [] # noidle was called before idle
 
         response = self._call_next_filter(request, response, filter_chain)
@@ -146,9 +148,6 @@ class MpdDispatcher(object):
 
     def _is_currently_idle(self):
         return bool(self.context.subscriptions)
-
-    def _is_noidle(self, request):
-        return re.match(r'^noidle$', request)
 
 
     ### Filter: add OK
