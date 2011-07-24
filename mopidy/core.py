@@ -71,7 +71,7 @@ def parse_options():
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
     parser.add_option('-v', '--verbose',
-        action='store_const', const=2, dest='verbosity_level',
+        action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
     parser.add_option('--save-debug-log',
         action='store_true', dest='save_debug_log',
