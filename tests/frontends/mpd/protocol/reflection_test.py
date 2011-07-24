@@ -9,14 +9,14 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'command: commands')
         self.assertInResponse(u'command: play')
         self.assertInResponse(u'command: status')
-        self.assertInResponse(u'command: idle')
-        self.assertInResponse(u'command: noidle')
         # Check if commands you do not have access to are not present
         self.assertNotInResponse(u'command: kill')
         # Check if the blacklisted commands are not present
         self.assertNotInResponse(u'command: command_list_begin')
         self.assertNotInResponse(u'command: command_list_ok_begin')
         self.assertNotInResponse(u'command: command_list_end')
+        self.assertNotInResponse(u'command: idle')
+        self.assertNotInResponse(u'command: noidle')
         self.assertNotInResponse(u'command: sticker')
         self.assertInResponse(u'OK')
 

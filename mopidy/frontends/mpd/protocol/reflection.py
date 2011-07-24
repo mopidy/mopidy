@@ -27,6 +27,10 @@ def commands(context):
         command_names.remove('command_list_ok_begin')
     if 'command_list_end' in command_names:
         command_names.remove('command_list_end')
+    if 'idle' in command_names:
+        command_names.remove('idle')
+    if 'noidle' in command_names:
+        command_names.remove('noidle')
     if 'sticker' in command_names:
         command_names.remove('sticker')
 
