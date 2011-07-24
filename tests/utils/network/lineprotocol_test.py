@@ -74,6 +74,15 @@ class LineProtocolTest(unittest.TestCase):
         network.LineProtocol.on_receive(self.mock, {'received': 'data\n'})
         self.mock.on_line_received.assert_called_once_with(sentinel.decoded)
 
+    def test_on_receive_with_new_line_with_failed_decode(self):
+        self.mock.connection = Mock(spec=network.Connection)
+        self.mock.recv_buffer = ''
+        self.mock.parse_lines.return_value = [sentinel.line]
+        self.mock.decode.return_value = None
+
+        network.LineProtocol.on_receive(self.mock, {'received': 'data\n'})
+        self.assertEqual(0, self.mock.on_line_received.call_count)
+
     def test_on_receive_with_new_lines_calls_on_recieve(self):
         self.mock.connection = Mock(spec=network.Connection)
         self.mock.recv_buffer = ''

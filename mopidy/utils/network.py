@@ -323,7 +323,8 @@ class LineProtocol(ThreadingActor):
 
         for line in self.parse_lines():
             line = self.decode(line)
-            self.on_line_received(line)
+            if line is not None:
+                self.on_line_received(line)
 
         self.connection.enable_timeout()
 
