@@ -129,8 +129,8 @@ class MpdDispatcher(object):
 
     def _idle_filter(self, request, response, filter_chain):
         if self._is_currently_idle() and not self._is_noidle(request):
-            logger.debug(u'Client send us %s, only %s is allowed while in '
-                'the idle state', repr(request), repr('noidle'))
+            logger.debug(u'Client sent us %s, only %s is allowed while in '
+                'the idle state', repr(request), repr(u'noidle'))
             self.context.session.close()
             return []
 
