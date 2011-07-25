@@ -278,11 +278,11 @@ class LineProtocol(ThreadingActor):
     then splitting data along line boundaries.
     """
 
-    #: Line terinator to use for outputed lines.
+    #: Line terminator to use for outputed lines.
     terminator = '\n'
 
-    #: Regex to use for splitings lines, will be set compiled version of its
-    #: own value, or to `terminator`s value if it is not set itself.
+    #: Regex to use for spliting lines, will be set compiled version of its
+    #: own value, or to ``terminator``s value if it is not set itself.
     delimeter = None
 
     #: What encoding to expect incomming data to be in, can be :class:`None`.
