@@ -70,6 +70,7 @@ class MpdSession(network.LineProtocol):
 
     terminator = protocol.LINE_TERMINATOR
     encoding = protocol.ENCODING
+    delimeter = r'\r?\n'
 
     def __init__(self, connection):
         super(MpdSession, self).__init__(connection)
