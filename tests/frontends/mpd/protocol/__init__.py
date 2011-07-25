@@ -27,20 +27,30 @@ class BaseTestCase(unittest.TestCase):
         self.connection = MockConnetion()
         self.session = mpd.MpdSession(self.connection)
         self.dispatcher = self.session.dispatcher
+        self.context = self.dispatcher.context
 
     def tearDown(self):
         self.backend.stop().get()
         self.mixer.stop().get()
         settings.runtime.clear()
 
-    def sendRequest(self, request, clear=False):
+    def sendRequest(self, request):
         self.connection.response = []
-        self.session.on_line_received(request)
+        request = '%s\n' % request.encode('utf-8')
+        self.session.on_receive({'received': request})
         return self.connection.response
+
+    def assertNoResponse(self):
+        self.assertEqual([], self.connection.response)
 
     def assertInResponse(self, value):
         self.assert_(value in self.connection.response, u'Did not find %s '
             'in %s' % (repr(value), repr(self.connection.response)))
+
+    def assertOnceInResponse(self, value):
+        matched = len([r for r in self.connection.response if r == value])
+        self.assertEqual(1, matched, 'Expected to find %s once in %s' %
+            (repr(value), repr(self.connection.response)))
 
     def assertNotInResponse(self, value):
         self.assert_(value not in self.connection.response, u'Found %s in %s' %
