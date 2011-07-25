@@ -286,6 +286,7 @@ class LineProtocol(ThreadingActor):
 
     def __init__(self, connection):
         self.connection = connection
+        self.prevent_timeout = False
         self.recv_buffer = ''
 
     @property
@@ -316,7 +317,8 @@ class LineProtocol(ThreadingActor):
             line = self.decode(line)
             self.on_line_received(line)
 
-        self.connection.enable_timeout()
+        if not self.prevent_timeout:
+            self.connection.enable_timeout()
 
     def on_stop(self):
         """Ensure that cleanup when actor stops."""

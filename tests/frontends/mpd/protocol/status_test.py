@@ -27,21 +27,6 @@ class StatusHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'currentsong')
         self.assertInResponse(u'OK')
 
-    def test_idle_without_subsystems(self):
-        # FIXME this is not the correct behaviour for idle...
-        self.sendRequest(u'idle')
-        self.assertInResponse(u'OK')
-
-    def test_idle_with_subsystems(self):
-        # FIXME this is not the correct behaviour for idle...
-        self.sendRequest(u'idle database playlist')
-        self.assertInResponse(u'OK')
-
-    def test_noidle(self):
-        # FIXME this is not the correct behaviour for idle...
-        self.sendRequest(u'noidle')
-        self.assertInResponse(u'OK')
-
     def test_stats_command(self):
         self.sendRequest(u'stats')
         self.assertInResponse(u'OK')

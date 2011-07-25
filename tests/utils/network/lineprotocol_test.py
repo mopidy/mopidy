@@ -11,11 +11,13 @@ class LineProtocolTest(unittest.TestCase):
         self.mock = Mock(spec=network.LineProtocol)
         self.mock.terminator = network.LineProtocol.terminator
         self.mock.encoding = network.LineProtocol.encoding
+        self.mock.prevent_timeout = False
 
     def test_init_stores_values_in_attributes(self):
         network.LineProtocol.__init__(self.mock, sentinel.connection)
         self.assertEqual(sentinel.connection, self.mock.connection)
         self.assertEqual('', self.mock.recv_buffer)
+        self.assertFalse(self.mock.prevent_timeout)
 
     def test_on_receive_no_new_lines_adds_to_recv_buffer(self):
         self.mock.connection = Mock(spec=network.Connection)
@@ -35,6 +37,16 @@ class LineProtocolTest(unittest.TestCase):
         network.LineProtocol.on_receive(self.mock, {'received': 'data'})
         self.mock.connection.disable_timeout.assert_called_once_with()
         self.mock.connection.enable_timeout.assert_called_once_with()
+
+    def test_on_receive_toggles_unless_prevent_timeout_is_set(self):
+        self.mock.connection = Mock(spec=network.Connection)
+        self.mock.recv_buffer = ''
+        self.mock.parse_lines.return_value = []
+        self.mock.prevent_timeout = True
+
+        network.LineProtocol.on_receive(self.mock, {'received': 'data'})
+        self.mock.connection.disable_timeout.assert_called_once_with()
+        self.assertEqual(0, self.mock.connection.enable_timeout.call_count)
 
     def test_on_receive_no_new_lines_calls_parse_lines(self):
         self.mock.connection = Mock(spec=network.Connection)

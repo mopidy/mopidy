@@ -27,6 +27,8 @@ class MpdDispatcher(object):
     back to the MPD session.
     """
 
+    _noidle = re.compile(r'^noidle$')
+
     def __init__(self, session=None):
         self.authenticated = False
         self.command_list = False
@@ -42,10 +44,27 @@ class MpdDispatcher(object):
             self._catch_mpd_ack_errors_filter,
             self._authenticate_filter,
             self._command_list_filter,
+            self._idle_filter,
             self._add_ok_filter,
             self._call_handler_filter,
         ]
         return self._call_next_filter(request, response, filter_chain)
+
+    def handle_idle(self, subsystem):
+        self.context.events.add(subsystem)
+
+        subsystems = self.context.subscriptions.intersection(
+            self.context.events)
+        if not subsystems:
+            return
+
+        response = []
+        for subsystem in subsystems:
+            response.append(u'changed: %s' % subsystem)
+        response.append(u'OK')
+        self.context.subscriptions = set()
+        self.context.events = set()
+        self.context.session.send_lines(response)
 
     def _call_next_filter(self, request, response, filter_chain):
         if filter_chain:
@@ -108,6 +127,29 @@ class MpdDispatcher(object):
             and request != u'command_list_end')
 
 
+    ### Filter: idle
+
+    def _idle_filter(self, request, response, filter_chain):
+        if self._is_currently_idle() and not self._noidle.match(request):
+            logger.debug(u'Client sent us %s, only %s is allowed while in '
+                'the idle state', repr(request), repr(u'noidle'))
+            self.context.session.close()
+            return []
+
+        if not self._is_currently_idle() and self._noidle.match(request):
+            return [] # noidle was called before idle
+
+        response = self._call_next_filter(request, response, filter_chain)
+
+        if self._is_currently_idle():
+            return []
+        else:
+            return response
+
+    def _is_currently_idle(self):
+        return bool(self.context.subscriptions)
+
+
     ### Filter: add OK
 
     def _add_ok_filter(self, request, response, filter_chain):
@@ -118,7 +160,6 @@ class MpdDispatcher(object):
 
     def _has_error(self, response):
         return response and response[-1].startswith(u'ACK')
-
 
     ### Filter: call handler
 
@@ -181,9 +222,17 @@ class MpdContext(object):
     #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
+    #: The active subsystems that have pending events.
+    events = None
+
+    #: The subsytems that we want to be notified about in idle mode.
+    subscriptions = None
+
     def __init__(self, dispatcher, session=None):
         self.dispatcher = dispatcher
         self.session = session
+        self.events = set()
+        self.subscriptions = set()
         self._backend = None
         self._mixer = None
 

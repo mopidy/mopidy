@@ -57,7 +57,7 @@ class LastfmFrontend(ThreadingActor, BackendListener):
             logger.error(u'Error during Last.fm setup: %s', e)
             self.stop()
 
-    def started_playing(self, track):
+    def track_playback_started(self, track):
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
         self.last_start_time = int(time.time())
@@ -74,7 +74,7 @@ class LastfmFrontend(ThreadingActor, BackendListener):
                 pylast.MalformedResponseError, pylast.WSError) as e:
             logger.warning(u'Error submitting playing track to Last.fm: %s', e)
 
-    def stopped_playing(self, track, time_position):
+    def track_playback_ended(self, track, time_position):
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
         time_position = time_position // 1000
