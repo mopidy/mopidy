@@ -25,6 +25,9 @@ v0.6.0 (in development)
   - The local client now tries to lookup where your music is via XDG, it will
     fall-back to ``~/music`` or use whatever setting you set manually.
 
+- The idle command is now supported by mopidy for the following subsystems:
+  player, playlist, options and mixer (Fixes: :issue:`32`).
+
 **Changes**
 
 - Replace :attr:`mopidy.backends.base.Backend.uri_handlers` with

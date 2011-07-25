@@ -1,15 +1,15 @@
 import logging
 import sys
 
-from pykka.actor import ThreadingActor
+from pykka import registry, actor
 
-from mopidy import settings
+from mopidy import listeners, settings
 from mopidy.frontends.mpd import dispatcher, protocol
 from mopidy.utils import network, process, log
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
-class MpdFrontend(ThreadingActor):
+class MpdFrontend(actor.ThreadingActor, listeners.BackendListener):
     """
     The MPD frontend.
 
@@ -38,6 +38,28 @@ class MpdFrontend(ThreadingActor):
 
     def on_stop(self):
         process.stop_actors_by_class(MpdSession)
+
+    def send_idle(self, subsystem):
+        # FIXME this should be updated once pykka supports non-blocking calls
+        # on proxies or some similar solution
+        registry.ActorRegistry.broadcast({
+            'command': 'pykka_call',
+            'attr_path': ('on_idle',),
+            'args': [subsystem],
+            'kwargs': {},
+        }, target_class=MpdSession)
+
+    def playback_state_changed(self):
+        self.send_idle('player')
+
+    def playlist_changed(self):
+        self.send_idle('playlist')
+
+    def options_changed(self):
+        self.send_idle('options')
+
+    def volume_changed(self):
+        self.send_idle('mixer')
 
 
 class MpdSession(network.LineProtocol):
@@ -70,6 +92,9 @@ class MpdSession(network.LineProtocol):
             self.actor_urn, log.indent(self.terminator.join(response)))
 
         self.send_lines(response)
+
+    def on_idle(self, subsystem):
+        self.dispatcher.handle_idle(subsystem)
 
     def close(self):
         self.stop()

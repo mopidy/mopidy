@@ -1,4 +1,8 @@
-from mopidy import settings
+import logging
+
+from mopidy import listeners, settings
+
+logger = logging.getLogger('mopdy.mixers')
 
 class BaseMixer(object):
     """
@@ -30,6 +34,7 @@ class BaseMixer(object):
         elif volume > 100:
             volume = 100
         self.set_volume(volume)
+        self._trigger_volume_changed()
 
     def get_volume(self):
         """
@@ -46,3 +51,7 @@ class BaseMixer(object):
         *MUST be implemented by subclass.*
         """
         raise NotImplementedError
+
+    def _trigger_volume_changed(self):
+        logger.debug(u'Triggering volume changed event')
+        listeners.BackendListener.send('volume_changed')
