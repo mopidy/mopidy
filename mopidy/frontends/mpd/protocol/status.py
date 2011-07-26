@@ -137,7 +137,7 @@ def status(context):
 
         Reports the current status of the player and the volume level.
 
-        - ``volume``: 0-100
+        - ``volume``: 0-100 (or -1 if no output is set).
         - ``repeat``: 0 or 1
         - ``single``: 0 or 1
         - ``consume``: 0 or 1
@@ -153,7 +153,8 @@ def status(context):
         - ``nextsongid``: playlist songid of the next song to be played
         - ``time``: total time elapsed (of current playing/paused song)
         - ``elapsed``: Total time elapsed within the current song, but with
-          higher resolution.
+          higher resolution (i.e. time in seconds with milliseconds in decimal
+          places). 
         - ``bitrate``: instantaneous bitrate in kbps
         - ``xfade``: crossfade in seconds
         - ``audio``: sampleRate``:bits``:channels
@@ -242,17 +243,11 @@ def _status_state(futures):
         return u'pause'
 
 def _status_time(futures):
-    return u'%s:%s' % (_status_time_elapsed(futures) // 1000,
+    return u'%d:%d' % (futures['playback.time_position'].get() // 1000,
         _status_time_total(futures) // 1000)
 
 def _status_time_elapsed(futures):
-    time_position = futures['playback.time_position'].get()
-    if time_position < 1000:
-        # XXX ncmpcpp and mpc interpretes the elapsed time as seconds instead
-        # of milliseconds if the elapsed time is less than approx. 1000.
-        return 0
-    else:
-        return time_position
+    return u'%.3f' % (futures['playback.time_position'].get() / 1000.0)
 
 def _status_time_total(futures):
     current_cp_track = futures['playback.current_cp_track'].get()
