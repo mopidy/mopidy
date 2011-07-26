@@ -153,6 +153,12 @@ class MprisFrontend(ThreadingActor, BackendListener):
             'Volume': self.mpris_object.Get(PLAYER_IFACE, 'Volume'),
         }, [])
 
+    def seeked(self):
+        logger.debug(u'Received seeked event')
+        if self.mpris_object is None:
+            return
+        self.mpris_object.Seeked(PLAYER_IFACE, self.mpris_object.Get(PLAYER_IFACE, 'Position'))
+
 
 class MprisObject(dbus.service.Object):
     """Implements http://www.mpris.org/2.1/spec/"""
