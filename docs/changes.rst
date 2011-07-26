@@ -25,21 +25,24 @@ v0.6.0 (in development)
   - The local client now tries to lookup where your music is via XDG, it will
     fall-back to ``~/music`` or use whatever setting you set manually.
 
-- The idle command is now supported by mopidy for the following subsystems:
-  player, playlist, options and mixer (Fixes: :issue:`32`).
+- The MPD command ``idle`` is now supported by Mopidy for the following
+  subsystems: player, playlist, options, and mixer. (Fixes: :issue:`32`)
 
 **Changes**
 
 - Replace :attr:`mopidy.backends.base.Backend.uri_handlers` with
   :attr:`mopidy.backends.base.Backend.uri_schemes`, which just takes the part
   up to the colon of an URI, and not any prefix.
+
 - Add Listener API, :mod:`mopidy.listeners`, to be implemented by actors
   wanting to receive events from the backend. This is a formalization of the
   ad hoc events the Last.fm scrobbler has already been using for some time.
+
 - Replaced all of the MPD network code that was provided by asyncore with
-  custom stack. This change was made to facilitate the future support of the
-  ``idle`` command, and to reduce the number of event loops being used.
-- Fix metadata update in Shoutcast streaming (Fixes: :issue:`122`)
+  custom stack. This change was made to facilitate support for the ``idle``
+  command, and to reduce the number of event loops being used.
+
+- Fix metadata update in Shoutcast streaming. (Fixes: :issue:`122`)
 
 
 v0.5.0 (2011-06-15)
