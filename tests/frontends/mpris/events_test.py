@@ -47,3 +47,13 @@ class BackendEventsTest(unittest.TestCase):
         ])
         self.mpris_object.PropertiesChanged.assert_called_with(
             PLAYER_IFACE, {'Metadata': '...', 'PlaybackStatus': '...'}, [])
+
+    def test_volume_changed_event_changes_volume(self):
+        self.mpris_object.Get.return_value = 1.0
+        self.mpris_frontend.volume_changed()
+        self.assertListEqual(self.mpris_object.Get.call_args_list, [
+            ((PLAYER_IFACE, 'Volume'), {}),
+        ])
+        self.mpris_object.PropertiesChanged.assert_called_with(
+            PLAYER_IFACE, {'Volume': 1.0}, [])
+

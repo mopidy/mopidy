@@ -145,6 +145,14 @@ class MprisFrontend(ThreadingActor, BackendListener):
                 self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
         }, [])
 
+    def volume_changed(self):
+        logger.debug(u'Received volume changed event')
+        if self.mpris_object is None:
+            return
+        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
+            'Volume': self.mpris_object.Get(PLAYER_IFACE, 'Volume'),
+        }, [])
+
 
 class MprisObject(dbus.service.Object):
     """Implements http://www.mpris.org/2.1/spec/"""
