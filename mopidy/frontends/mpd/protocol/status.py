@@ -137,7 +137,7 @@ def status(context):
 
         Reports the current status of the player and the volume level.
 
-        - ``volume``: 0-100 (or -1 if no output is set).
+        - ``volume``: 0-100
         - ``repeat``: 0 or 1
         - ``single``: 0 or 1
         - ``consume``: 0 or 1
@@ -153,13 +153,17 @@ def status(context):
         - ``nextsongid``: playlist songid of the next song to be played
         - ``time``: total time elapsed (of current playing/paused song)
         - ``elapsed``: Total time elapsed within the current song, but with
-          higher resolution (i.e. time in seconds with milliseconds in decimal
-          places). 
+          higher resolution. 
         - ``bitrate``: instantaneous bitrate in kbps
         - ``xfade``: crossfade in seconds
         - ``audio``: sampleRate``:bits``:channels
         - ``updatings_db``: job id
         - ``error``: if there is an error, returns message here
+
+    *Clarifications based on experience implementing*
+        - ``volume``: can also be -1 if no output is set.
+        - ``elapsed``: Higher resolution means time in seconds with three
+          decimal places for millisecond precision.
     """
     futures = {
         'current_playlist.tracks': context.backend.current_playlist.tracks,
