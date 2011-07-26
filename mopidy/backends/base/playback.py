@@ -8,6 +8,17 @@ from mopidy.listeners import BackendListener
 
 logger = logging.getLogger('mopidy.backends.base')
 
+
+def option_wrapper(name, default):
+    def get_option(self):
+        return getattr(self, name, default)
+    def set_option(self, value):
+        if getattr(self, name, default) != value:
+            self._trigger_options_changed()
+        return setattr(self, name, value)
+    return property(get_option, set_option)
+
+
 class PlaybackController(object):
     """
     :param backend: the backend
@@ -34,7 +45,7 @@ class PlaybackController(object):
     #:     Tracks are removed from the playlist when they have been played.
     #: :class:`False`
     #:     Tracks are not removed from the playlist.
-    consume = False
+    consume = option_wrapper('_consume', False)
 
     #: The currently playing or selected track.
     #:
@@ -46,21 +57,21 @@ class PlaybackController(object):
     #:     Tracks are selected at random from the playlist.
     #: :class:`False`
     #:     Tracks are played in the order of the playlist.
-    random = False
+    random = option_wrapper('_random', False)
 
     #: :class:`True`
     #:     The current playlist is played repeatedly. To repeat a single track,
     #:     select both :attr:`repeat` and :attr:`single`.
     #: :class:`False`
     #:     The current playlist is played once.
-    repeat = False
+    repeat = option_wrapper('_repeat', False)
 
     #: :class:`True`
     #:     Playback is stopped after current song, unless in :attr:`repeat`
     #:     mode.
     #: :class:`False`
     #:     Playback continues after current song.
-    single = False
+    single = option_wrapper('_single', False)
 
     def __init__(self, backend, provider):
         self.backend = backend
@@ -276,6 +287,9 @@ class PlaybackController(object):
     def state(self, new_state):
         (old_state, self._state) = (self.state, new_state)
         logger.debug(u'Changing state: %s -> %s', old_state, new_state)
+
+        self._trigger_playback_state_changed()
+
         # FIXME play_time stuff assumes backend does not have a better way of
         # handeling this stuff :/
         if (old_state in (self.PLAYING, self.STOPPED)
@@ -346,6 +360,7 @@ class PlaybackController(object):
         original_cp_track = self.current_cp_track
 
         if self.cp_track_at_eot:
+            self._trigger_track_playback_ended()
             self.play(self.cp_track_at_eot)
         else:
             self.stop(clear_current_track=True)
@@ -375,6 +390,7 @@ class PlaybackController(object):
         will continue. If it was paused, it will still be paused, etc.
         """
         if self.cp_track_at_next:
+            self._trigger_track_playback_ended()
             self.change_track(self.cp_track_at_next)
         else:
             self.stop(clear_current_track=True)
@@ -383,7 +399,7 @@ class PlaybackController(object):
         """Pause playback."""
         if self.provider.pause():
             self.state = self.PAUSED
-            self._trigger_paused_playing_event()
+            self._trigger_track_playback_paused()
 
     def play(self, cp_track=None, on_error_step=1):
         """
@@ -405,11 +421,12 @@ class PlaybackController(object):
                 return self.resume()
             elif self.current_cp_track is not None:
                 cp_track = self.current_cp_track
-            elif self.current_cp_track is None:
+            elif self.current_cp_track is None and on_error_step == 1:
                 cp_track = self.cp_track_at_next
+            elif self.current_cp_track is None and on_error_step == -1:
+                cp_track = self.cp_track_at_previous
 
         if cp_track is not None:
-            self.stop()
             self.current_cp_track = cp_track
             self.state = self.PLAYING
             if not self.provider.play(cp_track.track):
@@ -424,7 +441,7 @@ class PlaybackController(object):
         if self.random and self.current_cp_track in self._shuffled:
             self._shuffled.remove(self.current_cp_track)
 
-        self._trigger_started_playing_event()
+        self._trigger_track_playback_started()
 
     def previous(self):
         """
@@ -433,16 +450,14 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        if self.cp_track_at_previous is None:
-            self.stop()
-        else:
-            self.change_track(self.cp_track_at_previous, on_error_step=-1)
+        self._trigger_track_playback_ended()
+        self.change_track(self.cp_track_at_previous, on_error_step=-1)
 
     def resume(self):
         """If paused, resume playing the current track."""
         if self.state == self.PAUSED and self.provider.resume():
             self.state = self.PLAYING
-            self._trigger_resumed_playing_event()
+            self._trigger_track_playback_resumed()
 
     def seek(self, time_position):
         """
@@ -480,65 +495,50 @@ class PlaybackController(object):
         :type clear_current_track: boolean
         """
         if self.state != self.STOPPED:
-            self._trigger_stopped_playing_event()
             if self.provider.stop():
+                self._trigger_track_playback_ended()
                 self.state = self.STOPPED
         if clear_current_track:
             self.current_cp_track = None
 
-    def _trigger_paused_playing_event(self):
-        logger.debug(u'Triggering paused playing event')
+    def _trigger_track_playback_paused(self):
+        logger.debug(u'Triggering track playback paused event')
         if self.current_track is None:
             return
-        ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': ('paused_playing',),
-            'args': [],
-            'kwargs': {
-                'track': self.current_track,
-                'time_position': self.time_position,
-            },
-        }, target_class=BackendListener)
+        BackendListener.send('track_playback_paused',
+            track=self.current_track,
+            time_position=self.time_position)
 
-    def _trigger_resumed_playing_event(self):
-        logger.debug(u'Triggering resumed playing event')
+    def _trigger_track_playback_resumed(self):
+        logger.debug(u'Triggering track playback resumed event')
         if self.current_track is None:
             return
-        ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': ('resumed_playing',),
-            'args': [],
-            'kwargs': {
-                'track': self.current_track,
-                'time_position': self.time_position,
-            },
-        }, target_class=BackendListener)
+        BackendListener.send('track_playback_resumed',
+            track=self.current_track,
+            time_position=self.time_position)
 
-    def _trigger_started_playing_event(self):
-        logger.debug(u'Triggering started playing event')
+    def _trigger_track_playback_started(self):
+        logger.debug(u'Triggering track playback started event')
         if self.current_track is None:
             return
-        ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': ('started_playing',),
-            'args': [],
-            'kwargs': {'track': self.current_track},
-        }, target_class=BackendListener)
+        BackendListener.send('track_playback_started',
+            track=self.current_track)
 
-    def _trigger_stopped_playing_event(self):
-        # TODO Test that this is called on next/prev/end-of-track
-        logger.debug(u'Triggering stopped playing event')
+    def _trigger_track_playback_ended(self):
+        logger.debug(u'Triggering track playback ended event')
         if self.current_track is None:
             return
-        ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': ('stopped_playing',),
-            'args': [],
-            'kwargs': {
-                'track': self.current_track,
-                'time_position': self.time_position,
-            },
-        }, target_class=BackendListener)
+        BackendListener.send('track_playback_ended',
+            track=self.current_track,
+            time_position=self.time_position)
+
+    def _trigger_playback_state_changed(self):
+        logger.debug(u'Triggering playback state change event')
+        BackendListener.send('playback_state_changed')
+
+    def _trigger_options_changed(self):
+        logger.debug(u'Triggering options changed event')
+        BackendListener.send('options_changed')
 
 
 class BasePlaybackProvider(object):

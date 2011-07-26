@@ -7,14 +7,14 @@ class BackendListenerTest(unittest.TestCase):
     def setUp(self):
         self.listener = BackendListener()
 
-    def test_listener_has_default_impl_for_the_paused_playing_event(self):
-        self.listener.paused_playing(Track(), 0)
+    def test_listener_has_default_impl_for_the_track_playback_paused_event(self):
+        self.listener.track_playback_paused(Track(), 0)
 
-    def test_listener_has_default_impl_for_the_resumed_playing_event(self):
-        self.listener.resumed_playing(Track(), 0)
+    def test_listener_has_default_impl_for_the_track_playback_resumed_event(self):
+        self.listener.track_playback_resumed(Track(), 0)
 
-    def test_listener_has_default_impl_for_the_started_playing_event(self):
-        self.listener.started_playing(Track())
+    def test_listener_has_default_impl_for_the_track_playback_started(self):
+        self.listener.track_playback_started(Track())
 
-    def test_listener_has_default_impl_for_the_stopped_playing_event(self):
-        self.listener.stopped_playing(Track(), 0)
+    def test_listener_has_default_impl_for_the_track_playback_ended(self):
+        self.listener.track_playback_ended(Track(), 0)

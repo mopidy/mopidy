@@ -278,15 +278,25 @@ class LineProtocol(ThreadingActor):
     then splitting data along line boundaries.
     """
 
-    #: What terminator to use to split lines.
+    #: Line terminator to use for outputed lines.
     terminator = '\n'
+
+    #: Regex to use for spliting lines, will be set compiled version of its
+    #: own value, or to ``terminator``s value if it is not set itself.
+    delimeter = None
 
     #: What encoding to expect incomming data to be in, can be :class:`None`.
     encoding = 'utf-8'
 
     def __init__(self, connection):
         self.connection = connection
+        self.prevent_timeout = False
         self.recv_buffer = ''
+
+        if self.delimeter:
+            self.delimeter = re.compile(self.delimeter)
+        else:
+            self.delimeter = re.compile(self.terminator)
 
     @property
     def host(self):
@@ -314,9 +324,11 @@ class LineProtocol(ThreadingActor):
 
         for line in self.parse_lines():
             line = self.decode(line)
-            self.on_line_received(line)
+            if line is not None:
+                self.on_line_received(line)
 
-        self.connection.enable_timeout()
+        if not self.prevent_timeout:
+            self.connection.enable_timeout()
 
     def on_stop(self):
         """Ensure that cleanup when actor stops."""
@@ -325,7 +337,7 @@ class LineProtocol(ThreadingActor):
     def parse_lines(self):
         """Consume new data and yield any lines found."""
         while re.search(self.terminator, self.recv_buffer):
-            line, self.recv_buffer = re.split(self.terminator,
+            line, self.recv_buffer = self.delimeter.split(
                 self.recv_buffer, 1)
             yield line
 

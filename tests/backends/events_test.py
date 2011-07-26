@@ -11,10 +11,10 @@ from mopidy.models import Track
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
         self.events = {
-            'paused_playing': threading.Event(),
-            'resumed_playing': threading.Event(),
-            'started_playing': threading.Event(),
-            'stopped_playing': threading.Event(),
+            'track_playback_paused': threading.Event(),
+            'track_playback_resumed': threading.Event(),
+            'track_playback_started': threading.Event(),
+            'track_playback_ended': threading.Event(),
         }
         self.backend = DummyBackend.start().proxy()
         self.listener = DummyBackendListener.start(self.events).proxy()
@@ -22,47 +22,47 @@ class BackendEventsTest(unittest.TestCase):
     def tearDown(self):
         ActorRegistry.stop_all()
 
-    def test_pause_sends_paused_playing_event(self):
+    def test_pause_sends_track_playback_paused_event(self):
         self.backend.current_playlist.add([Track(uri='a')])
         self.backend.playback.play()
         self.backend.playback.pause()
-        self.events['paused_playing'].wait(timeout=1)
-        self.assertTrue(self.events['paused_playing'].is_set())
+        self.events['track_playback_paused'].wait(timeout=1)
+        self.assertTrue(self.events['track_playback_paused'].is_set())
 
-    def test_resume_sends_resumed_playing_event(self):
+    def test_resume_sends_track_playback_resumed(self):
         self.backend.current_playlist.add([Track(uri='a')])
         self.backend.playback.play()
         self.backend.playback.pause()
         self.backend.playback.resume()
-        self.events['resumed_playing'].wait(timeout=1)
-        self.assertTrue(self.events['resumed_playing'].is_set())
+        self.events['track_playback_resumed'].wait(timeout=1)
+        self.assertTrue(self.events['track_playback_resumed'].is_set())
 
-    def test_play_sends_started_playing_event(self):
+    def test_play_sends_track_playback_started_event(self):
         self.backend.current_playlist.add([Track(uri='a')])
         self.backend.playback.play()
-        self.events['started_playing'].wait(timeout=1)
-        self.assertTrue(self.events['started_playing'].is_set())
+        self.events['track_playback_started'].wait(timeout=1)
+        self.assertTrue(self.events['track_playback_started'].is_set())
 
-    def test_stop_sends_stopped_playing_event(self):
+    def test_stop_sends_track_playback_ended_event(self):
         self.backend.current_playlist.add([Track(uri='a')])
         self.backend.playback.play()
         self.backend.playback.stop()
-        self.events['stopped_playing'].wait(timeout=1)
-        self.assertTrue(self.events['stopped_playing'].is_set())
+        self.events['track_playback_ended'].wait(timeout=1)
+        self.assertTrue(self.events['track_playback_ended'].is_set())
 
 
 class DummyBackendListener(ThreadingActor, BackendListener):
     def __init__(self, events):
         self.events = events
 
-    def paused_playing(self, track, time_position):
-        self.events['paused_playing'].set()
+    def track_playback_paused(self, track, time_position):
+        self.events['track_playback_paused'].set()
 
-    def resumed_playing(self, track, time_position):
-        self.events['resumed_playing'].set()
+    def track_playback_resumed(self, track, time_position):
+        self.events['track_playback_resumed'].set()
 
-    def started_playing(self, track):
-        self.events['started_playing'].set()
+    def track_playback_started(self, track):
+        self.events['track_playback_started'].set()
 
-    def stopped_playing(self, track, time_position):
-        self.events['stopped_playing'].set()
+    def track_playback_ended(self, track, time_position):
+        self.events['track_playback_ended'].set()

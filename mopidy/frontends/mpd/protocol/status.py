@@ -4,6 +4,10 @@ from mopidy.backends.base import PlaybackController
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
+#: Subsystems that can be registered with idle command.
+SUBSYSTEMS = ['database', 'mixer', 'options', 'output',
+    'player', 'playlist', 'stored_playlist', 'update', ]
+
 @handle_request(r'^clearerror$')
 def clearerror(context):
     """
@@ -67,12 +71,36 @@ def idle(context, subsystems=None):
         notifications when something changed in one of the specified
         subsystems.
     """
-    pass # TODO
+
+    if subsystems:
+        subsystems = subsystems.split()
+    else:
+        subsystems = SUBSYSTEMS
+
+    for subsystem in subsystems:
+        context.subscriptions.add(subsystem)
+
+    active = context.subscriptions.intersection(context.events)
+    if not active:
+        context.session.prevent_timeout = True
+        return
+
+    response = []
+    context.events = set()
+    context.subscriptions = set()
+
+    for subsystem in active:
+        response.append(u'changed: %s' % subsystem)
+    return response
 
 @handle_request(r'^noidle$')
 def noidle(context):
     """See :meth:`_status_idle`."""
-    pass # TODO
+    if not context.subscriptions:
+        return
+    context.subscriptions = set()
+    context.events = set()
+    context.session.prevent_timeout = False
 
 @handle_request(r'^stats$')
 def stats(context):
@@ -218,7 +246,13 @@ def _status_time(futures):
         _status_time_total(futures) // 1000)
 
 def _status_time_elapsed(futures):
-    return futures['playback.time_position'].get()
+    time_position = futures['playback.time_position'].get()
+    if time_position < 1000:
+        # XXX ncmpcpp and mpc interpretes the elapsed time as seconds instead
+        # of milliseconds if the elapsed time is less than approx. 1000.
+        return 0
+    else:
+        return time_position
 
 def _status_time_total(futures):
     current_cp_track = futures['playback.current_cp_track'].get()
