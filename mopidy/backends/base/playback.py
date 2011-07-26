@@ -484,7 +484,10 @@ class PlaybackController(object):
         self.play_time_started = self._current_wall_time
         self.play_time_accumulated = time_position
 
-        return self.provider.seek(time_position)
+        success = self.provider.seek(time_position)
+        if success:
+            self._trigger_seeked()
+        return success
 
     def stop(self, clear_current_track=False):
         """
@@ -539,6 +542,10 @@ class PlaybackController(object):
     def _trigger_options_changed(self):
         logger.debug(u'Triggering options changed event')
         BackendListener.send('options_changed')
+
+    def _trigger_seeked(self):
+        logger.debug(u'Triggering seeked event')
+        BackendListener.send('seeked')
 
 
 class BasePlaybackProvider(object):

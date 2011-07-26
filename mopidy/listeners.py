@@ -105,3 +105,12 @@ class BackendListener(object):
         *MAY* be implemented by actor.
         """
         pass
+
+    def seeked(self):
+        """
+        Called whenever the time position changes by an unexpected amount, e.g.
+        at seek to a new time position.
+
+        *MAY* be implemented by actor.
+        """
+        pass
