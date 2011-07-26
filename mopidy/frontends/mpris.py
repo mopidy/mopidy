@@ -107,8 +107,8 @@ class MprisFrontend(ThreadingActor, BackendListener):
         except ImportError as e:
             logger.debug(u'Startup notification was not sent (%s)', e)
 
-    def paused_playing(self, track, time_position):
-        logger.debug(u'Received paused playing event')
+    def track_playback_paused(self, track, time_position):
+        logger.debug(u'Received track playback paused event')
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
@@ -116,8 +116,8 @@ class MprisFrontend(ThreadingActor, BackendListener):
                 self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
         }, [])
 
-    def resumed_playing(self, track, time_position):
-        logger.debug(u'Received resumed playing event')
+    def track_playback_resumed(self, track, time_position):
+        logger.debug(u'Received track playback resumed event')
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
@@ -125,8 +125,8 @@ class MprisFrontend(ThreadingActor, BackendListener):
                 self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
         }, [])
 
-    def started_playing(self, track):
-        logger.debug(u'Received started playing event')
+    def track_playback_started(self, track):
+        logger.debug(u'Received track playback started event')
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
@@ -135,8 +135,8 @@ class MprisFrontend(ThreadingActor, BackendListener):
                 self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
         }, [])
 
-    def stopped_playing(self, track, time_position):
-        logger.debug(u'Received stopped playing event')
+    def track_playback_ended(self, track, time_position):
+        logger.debug(u'Received track playback ended event')
         if self.mpris_object is None:
             return
         self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
