@@ -246,7 +246,13 @@ def _status_time(futures):
         _status_time_total(futures) // 1000)
 
 def _status_time_elapsed(futures):
-    return futures['playback.time_position'].get()
+    time_position = futures['playback.time_position'].get()
+    if time_position < 1000:
+        # XXX ncmpcpp and mpc interpretes the elapsed time as seconds instead
+        # of milliseconds if the elapsed time is less than approx. 1000.
+        return 0
+    else:
+        return time_position
 
 def _status_time_total(futures):
     current_cp_track = futures['playback.current_cp_track'].get()
