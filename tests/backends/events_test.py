@@ -1,79 +1,56 @@
-import threading
+import mock
 import unittest
 
-from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
+from mopidy import listeners
 from mopidy.backends.dummy import DummyBackend
-from mopidy.listeners import BackendListener
 from mopidy.models import Track
 
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
-        self.events = {
-            'track_playback_paused': threading.Event(),
-            'track_playback_resumed': threading.Event(),
-            'track_playback_started': threading.Event(),
-            'track_playback_ended': threading.Event(),
-            'seeked': threading.Event(),
-        }
+        self.listener_send = mock.Mock()
+        listeners.BackendListener.send = self.listener_send
         self.backend = DummyBackend.start().proxy()
-        self.listener = DummyBackendListener.start(self.events).proxy()
 
     def tearDown(self):
         ActorRegistry.stop_all()
 
     def test_pause_sends_track_playback_paused_event(self):
         self.backend.current_playlist.add(Track(uri='a'))
-        self.backend.playback.play()
-        self.backend.playback.pause()
-        self.events['track_playback_paused'].wait(timeout=1)
-        self.assertTrue(self.events['track_playback_paused'].is_set())
+        self.backend.playback.play().get()
+        self.listener_send.reset_mock()
+        self.backend.playback.pause().get()
+        self.assertEqual(self.listener_send.call_args[0][0],
+            'track_playback_paused')
 
     def test_resume_sends_track_playback_resumed(self):
         self.backend.current_playlist.add(Track(uri='a'))
         self.backend.playback.play()
-        self.backend.playback.pause()
-        self.backend.playback.resume()
-        self.events['track_playback_resumed'].wait(timeout=1)
-        self.assertTrue(self.events['track_playback_resumed'].is_set())
+        self.backend.playback.pause().get()
+        self.listener_send.reset_mock()
+        self.backend.playback.resume().get()
+        self.assertEqual(self.listener_send.call_args[0][0],
+            'track_playback_resumed')
 
     def test_play_sends_track_playback_started_event(self):
         self.backend.current_playlist.add(Track(uri='a'))
-        self.backend.playback.play()
-        self.events['track_playback_started'].wait(timeout=1)
-        self.assertTrue(self.events['track_playback_started'].is_set())
+        self.listener_send.reset_mock()
+        self.backend.playback.play().get()
+        self.assertEqual(self.listener_send.call_args[0][0],
+            'track_playback_started')
 
     def test_stop_sends_track_playback_ended_event(self):
         self.backend.current_playlist.add(Track(uri='a'))
-        self.backend.playback.play()
-        self.backend.playback.stop()
-        self.events['track_playback_ended'].wait(timeout=1)
-        self.assertTrue(self.events['track_playback_ended'].is_set())
+        self.backend.playback.play().get()
+        self.listener_send.reset_mock()
+        self.backend.playback.stop().get()
+        self.assertEqual(self.listener_send.call_args_list[0][0][0],
+            'track_playback_ended')
 
     def test_seek_sends_seeked_event(self):
         self.backend.current_playlist.add(Track(uri='a', length=40000))
-        self.backend.playback.play()
-        self.backend.playback.seek(1000)
-        self.events['seeked'].wait(timeout=1)
-        self.assertTrue(self.events['seeked'].is_set())
-
-
-class DummyBackendListener(ThreadingActor, BackendListener):
-    def __init__(self, events):
-        self.events = events
-
-    def track_playback_paused(self, track, time_position):
-        self.events['track_playback_paused'].set()
-
-    def track_playback_resumed(self, track, time_position):
-        self.events['track_playback_resumed'].set()
-
-    def track_playback_started(self, track):
-        self.events['track_playback_started'].set()
-
-    def track_playback_ended(self, track, time_position):
-        self.events['track_playback_ended'].set()
-
-    def seeked(self):
-        self.events['seeked'].set()
+        self.backend.playback.play().get()
+        self.listener_send.reset_mock()
+        self.backend.playback.seek(1000).get()
+        self.assertEqual(self.listener_send.call_args[0][0], 'seeked')
