@@ -4,7 +4,6 @@ try:
     import dbus
     import dbus.mainloop.glib
     import dbus.service
-    import gobject
 except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
@@ -21,7 +20,6 @@ from mopidy.utils.process import exit_process
 logger = logging.getLogger('mopidy.frontends.mpris')
 
 # Must be done before dbus.SessionBus() is called
-gobject.threads_init()
 dbus.mainloop.glib.threads_init()
 dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
