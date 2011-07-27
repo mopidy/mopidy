@@ -1,5 +1,7 @@
 import logging
 
+logger = logging.getLogger('mopidy.frontends.mpris')
+
 try:
     import dbus
     import dbus.mainloop.glib
@@ -7,6 +9,12 @@ try:
 except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
+
+try:
+    import indicate
+except ImportError as import_error:
+    indicate = None
+    logger.debug(u'Startup notification will not be sent (%s)', import_error)
 
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
@@ -16,8 +24,6 @@ from mopidy.backends.base.playback import PlaybackController
 from mopidy.listeners import BackendListener
 from mopidy.mixers.base import BaseMixer
 from mopidy.utils.process import exit_process
-
-logger = logging.getLogger('mopidy.frontends.mpris')
 
 # Must be done before dbus.SessionBus() is called
 dbus.mainloop.glib.threads_init()
@@ -89,18 +95,16 @@ class MprisFrontend(ThreadingActor, BackendListener):
         running. When Mopidy exits, the server will be unreferenced and Mopidy
         will automatically be unregistered from e.g. the sound menu.
         """
-        try:
-            import indicate
-            logger.debug(u'Sending startup notification...')
-            self.indicate_server = indicate.Server()
-            self.indicate_server.set_type('music.mopidy')
-            # FIXME Location of .desktop file shouldn't be hardcoded
-            self.indicate_server.set_desktop_file(
-                '/usr/share/applications/mopidy.desktop')
-            self.indicate_server.show()
-            logger.debug(u'Startup notification sent')
-        except ImportError as e:
-            logger.debug(u'Startup notification was not sent (%s)', e)
+        if not indicate:
+            return
+        logger.debug(u'Sending startup notification...')
+        self.indicate_server = indicate.Server()
+        self.indicate_server.set_type('music.mopidy')
+        # FIXME Location of .desktop file shouldn't be hardcoded
+        self.indicate_server.set_desktop_file(
+            '/usr/share/applications/mopidy.desktop')
+        self.indicate_server.show()
+        logger.debug(u'Startup notification sent')
 
     def track_playback_paused(self, track, time_position):
         logger.debug(u'Received track playback paused event')
