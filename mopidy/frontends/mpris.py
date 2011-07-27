@@ -106,51 +106,33 @@ class MprisFrontend(ThreadingActor, BackendListener):
         self.indicate_server.show()
         logger.debug(u'Startup notification sent')
 
-    def track_playback_paused(self, track, time_position):
-        logger.debug(u'Received track playback paused event')
+    def _emit_properties_changed(self, *changed_properties):
         if self.mpris_object is None:
             return
-        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
-            'PlaybackStatus':
-                self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
-        }, [])
+        props_with_new_values = [(p, self.mpris_object.Get(PLAYER_IFACE, p))
+                for p in changed_properties]
+        self.mpris_object.PropertiesChanged(PLAYER_IFACE,
+            dict(props_with_new_values), [])
+
+    def track_playback_paused(self, track, time_position):
+        logger.debug(u'Received track playback paused event')
+        self._emit_properties_changed('PlaybackStatus')
 
     def track_playback_resumed(self, track, time_position):
         logger.debug(u'Received track playback resumed event')
-        if self.mpris_object is None:
-            return
-        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
-            'PlaybackStatus':
-                self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
-        }, [])
+        self._emit_properties_changed('PlaybackStatus')
 
     def track_playback_started(self, track):
         logger.debug(u'Received track playback started event')
-        if self.mpris_object is None:
-            return
-        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
-            'Metadata': self.mpris_object.Get(PLAYER_IFACE, 'Metadata'),
-            'PlaybackStatus':
-                self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
-        }, [])
+        self._emit_properties_changed('PlaybackStatus', 'Metadata')
 
     def track_playback_ended(self, track, time_position):
         logger.debug(u'Received track playback ended event')
-        if self.mpris_object is None:
-            return
-        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
-            'Metadata': self.mpris_object.Get(PLAYER_IFACE, 'Metadata'),
-            'PlaybackStatus':
-                self.mpris_object.Get(PLAYER_IFACE, 'PlaybackStatus'),
-        }, [])
+        self._emit_properties_changed('PlaybackStatus', 'Metadata')
 
     def volume_changed(self):
         logger.debug(u'Received volume changed event')
-        if self.mpris_object is None:
-            return
-        self.mpris_object.PropertiesChanged(PLAYER_IFACE, {
-            'Volume': self.mpris_object.Get(PLAYER_IFACE, 'Volume'),
-        }, [])
+        self._emit_properties_changed('Volume')
 
     def seeked(self):
         logger.debug(u'Received seeked event')

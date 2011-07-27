@@ -32,8 +32,8 @@ class BackendEventsTest(unittest.TestCase):
         self.mpris_object.Get.return_value = '...'
         self.mpris_frontend.track_playback_started(Track())
         self.assertListEqual(self.mpris_object.Get.call_args_list, [
-            ((PLAYER_IFACE, 'Metadata'), {}),
             ((PLAYER_IFACE, 'PlaybackStatus'), {}),
+            ((PLAYER_IFACE, 'Metadata'), {}),
         ])
         self.mpris_object.PropertiesChanged.assert_called_with(
             PLAYER_IFACE, {'Metadata': '...', 'PlaybackStatus': '...'}, [])
@@ -42,8 +42,8 @@ class BackendEventsTest(unittest.TestCase):
         self.mpris_object.Get.return_value = '...'
         self.mpris_frontend.track_playback_ended(Track(), 0)
         self.assertListEqual(self.mpris_object.Get.call_args_list, [
-            ((PLAYER_IFACE, 'Metadata'), {}),
             ((PLAYER_IFACE, 'PlaybackStatus'), {}),
+            ((PLAYER_IFACE, 'Metadata'), {}),
         ])
         self.mpris_object.PropertiesChanged.assert_called_with(
             PLAYER_IFACE, {'Metadata': '...', 'PlaybackStatus': '...'}, [])
