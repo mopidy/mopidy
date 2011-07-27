@@ -56,6 +56,7 @@ DEBUG_LOG_FILENAME = u'mopidy.log'
 #:     FRONTENDS = (
 #:         u'mopidy.frontends.mpd.MpdFrontend',
 #:         u'mopidy.frontends.lastfm.LastfmFrontend',
+#:         u'mopidy.frontends.mpris.MprisFrontend',
 #:     )
 FRONTENDS = (
     u'mopidy.frontends.mpd.MpdFrontend',
