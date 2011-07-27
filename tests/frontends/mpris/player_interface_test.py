@@ -3,7 +3,7 @@ import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.backends.base.playback import PlaybackController
-from mopidy.frontends import mpris
+from mopidy.frontends.mpris import objects
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Album, Artist, Track
 
@@ -13,10 +13,10 @@ STOPPED = PlaybackController.STOPPED
 
 class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):
-        mpris.MprisObject._connect_to_dbus = mock.Mock()
+        objects.MprisObject._connect_to_dbus = mock.Mock()
         self.mixer = DummyMixer.start().proxy()
         self.backend = DummyBackend.start().proxy()
-        self.mpris = mpris.MprisObject()
+        self.mpris = objects.MprisObject()
         self.mpris._backend = self.backend
 
     def tearDown(self):
@@ -25,68 +25,68 @@ class PlayerInterfaceTest(unittest.TestCase):
 
     def test_get_playback_status_is_playing_when_playing(self):
         self.backend.playback.state = PLAYING
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'PlaybackStatus')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'PlaybackStatus')
         self.assertEqual('Playing', result)
 
     def test_get_playback_status_is_paused_when_paused(self):
         self.backend.playback.state = PAUSED
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'PlaybackStatus')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'PlaybackStatus')
         self.assertEqual('Paused', result)
 
     def test_get_playback_status_is_stopped_when_stopped(self):
         self.backend.playback.state = STOPPED
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'PlaybackStatus')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'PlaybackStatus')
         self.assertEqual('Stopped', result)
 
     def test_get_loop_status_is_none_when_not_looping(self):
         self.backend.playback.repeat = False
         self.backend.playback.single = False
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'LoopStatus')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('None', result)
 
     def test_get_loop_status_is_track_when_looping_a_single_track(self):
         self.backend.playback.repeat = True
         self.backend.playback.single = True
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'LoopStatus')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('Track', result)
 
     def test_get_loop_status_is_playlist_when_looping_the_current_playlist(self):
         self.backend.playback.repeat = True
         self.backend.playback.single = False
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'LoopStatus')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('Playlist', result)
 
     def test_set_loop_status_is_ignored_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
         self.backend.playback.repeat = True
         self.backend.playback.single = True
-        self.mpris.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'None')
+        self.mpris.Set(objects.PLAYER_IFACE, 'LoopStatus', 'None')
         self.assertEquals(self.backend.playback.repeat.get(), True)
         self.assertEquals(self.backend.playback.single.get(), True)
 
     def test_set_loop_status_to_none_unsets_repeat_and_single(self):
-        self.mpris.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'None')
+        self.mpris.Set(objects.PLAYER_IFACE, 'LoopStatus', 'None')
         self.assertEquals(self.backend.playback.repeat.get(), False)
         self.assertEquals(self.backend.playback.single.get(), False)
 
     def test_set_loop_status_to_track_sets_repeat_and_single(self):
-        self.mpris.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'Track')
+        self.mpris.Set(objects.PLAYER_IFACE, 'LoopStatus', 'Track')
         self.assertEquals(self.backend.playback.repeat.get(), True)
         self.assertEquals(self.backend.playback.single.get(), True)
 
     def test_set_loop_status_to_playlists_sets_repeat_and_not_single(self):
-        self.mpris.Set(mpris.PLAYER_IFACE, 'LoopStatus', 'Playlist')
+        self.mpris.Set(objects.PLAYER_IFACE, 'LoopStatus', 'Playlist')
         self.assertEquals(self.backend.playback.repeat.get(), True)
         self.assertEquals(self.backend.playback.single.get(), False)
 
     def test_get_rate_is_greater_or_equal_than_minimum_rate(self):
-        rate = self.mpris.Get(mpris.PLAYER_IFACE, 'Rate')
-        minimum_rate = self.mpris.Get(mpris.PLAYER_IFACE, 'MinimumRate')
+        rate = self.mpris.Get(objects.PLAYER_IFACE, 'Rate')
+        minimum_rate = self.mpris.Get(objects.PLAYER_IFACE, 'MinimumRate')
         self.assert_(rate >= minimum_rate)
 
     def test_get_rate_is_less_or_equal_than_maximum_rate(self):
-        rate = self.mpris.Get(mpris.PLAYER_IFACE, 'Rate')
-        maximum_rate = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
+        rate = self.mpris.Get(objects.PLAYER_IFACE, 'Rate')
+        maximum_rate = self.mpris.Get(objects.PLAYER_IFACE, 'MaximumRate')
         self.assert_(rate >= maximum_rate)
 
     def test_set_rate_is_ignored_if_can_control_is_false(self):
@@ -94,46 +94,46 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
-        self.mpris.Set(mpris.PLAYER_IFACE, 'Rate', 0)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Rate', 0)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
     def test_set_rate_to_zero_pauses_playback(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
-        self.mpris.Set(mpris.PLAYER_IFACE, 'Rate', 0)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Rate', 0)
         self.assertEquals(self.backend.playback.state.get(), PAUSED)
 
     def test_get_shuffle_returns_true_if_random_is_active(self):
         self.backend.playback.random = True
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Shuffle')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Shuffle')
         self.assertTrue(result)
 
     def test_get_shuffle_returns_false_if_random_is_inactive(self):
         self.backend.playback.random = False
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Shuffle')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Shuffle')
         self.assertFalse(result)
 
     def test_set_shuffle_is_ignored_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
         self.backend.playback.random = False
-        result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', True)
+        result = self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', True)
         self.assertFalse(self.backend.playback.random.get())
 
     def test_set_shuffle_to_true_activates_random_mode(self):
         self.backend.playback.random = False
         self.assertFalse(self.backend.playback.random.get())
-        result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', True)
+        result = self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', True)
         self.assertTrue(self.backend.playback.random.get())
 
     def test_set_shuffle_to_false_deactivates_random_mode(self):
         self.backend.playback.random = True
         self.assertTrue(self.backend.playback.random.get())
-        result = self.mpris.Set(mpris.PLAYER_IFACE, 'Shuffle', False)
+        result = self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', False)
         self.assertFalse(self.backend.playback.random.get())
 
     def test_get_metadata_has_trackid_even_when_no_current_track(self):
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assert_('mpris:trackid' in result.keys())
         self.assertEquals(result['mpris:trackid'], '')
 
@@ -141,7 +141,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(uri='a')])
         self.backend.playback.play()
         (cpid, track) = self.backend.playback.current_cp_track.get()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('mpris:trackid', result.keys())
         self.assertEquals(result['mpris:trackid'],
             '/com/mopidy/track/%d' % cpid)
@@ -149,21 +149,21 @@ class PlayerInterfaceTest(unittest.TestCase):
     def test_get_metadata_has_track_length(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('mpris:length', result.keys())
         self.assertEquals(result['mpris:length'], 40000000)
 
     def test_get_metadata_has_track_uri(self):
         self.backend.current_playlist.append([Track(uri='a')])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('xesam:url', result.keys())
         self.assertEquals(result['xesam:url'], 'a')
 
     def test_get_metadata_has_track_title(self):
         self.backend.current_playlist.append([Track(name='a')])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('xesam:title', result.keys())
         self.assertEquals(result['xesam:title'], 'a')
 
@@ -171,14 +171,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(artists=[
             Artist(name='a'), Artist(name='b'), Artist(name=None)])])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('xesam:artist', result.keys())
         self.assertEquals(result['xesam:artist'], ['a', 'b'])
 
     def test_get_metadata_has_track_album(self):
         self.backend.current_playlist.append([Track(album=Album(name='a'))])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('xesam:album', result.keys())
         self.assertEquals(result['xesam:album'], 'a')
 
@@ -186,75 +186,75 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(album=Album(artists=[
             Artist(name='a'), Artist(name='b'), Artist(name=None)]))])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('xesam:albumArtist', result.keys())
         self.assertEquals(result['xesam:albumArtist'], ['a', 'b'])
 
     def test_get_metadata_has_track_number_in_album(self):
         self.backend.current_playlist.append([Track(track_no=7)])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Metadata')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('xesam:trackNumber', result.keys())
         self.assertEquals(result['xesam:trackNumber'], 7)
 
     def test_get_volume_should_return_volume_between_zero_and_one(self):
         self.mixer.volume = 0
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Volume')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Volume')
         self.assertEquals(result, 0)
 
         self.mixer.volume = 50
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Volume')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Volume')
         self.assertEquals(result, 0.5)
 
         self.mixer.volume = 100
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'Volume')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Volume')
         self.assertEquals(result, 1)
 
     def test_set_volume_is_ignored_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
         self.mixer.volume = 0
-        self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', 1.0)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Volume', 1.0)
         self.assertEquals(self.mixer.volume.get(), 0)
 
     def test_set_volume_to_one_should_set_mixer_volume_to_100(self):
-        self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', 1.0)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Volume', 1.0)
         self.assertEquals(self.mixer.volume.get(), 100)
 
     def test_set_volume_to_anything_above_one_should_set_mixer_volume_to_100(self):
-        self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', 2.0)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Volume', 2.0)
         self.assertEquals(self.mixer.volume.get(), 100)
 
     def test_set_volume_to_anything_not_a_number_does_not_change_volume(self):
         self.mixer.volume = 10
-        self.mpris.Set(mpris.PLAYER_IFACE, 'Volume', None)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Volume', None)
         self.assertEquals(self.mixer.volume.get(), 10)
 
     def test_get_position_returns_time_position_in_microseconds(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
         self.backend.playback.play()
         self.backend.playback.seek(10000)
-        result_in_microseconds = self.mpris.Get(mpris.PLAYER_IFACE, 'Position')
+        result_in_microseconds = self.mpris.Get(objects.PLAYER_IFACE, 'Position')
         result_in_milliseconds = result_in_microseconds // 1000
         self.assert_(result_in_milliseconds >= 10000)
 
     def test_get_position_when_no_current_track_should_be_zero(self):
-        result_in_microseconds = self.mpris.Get(mpris.PLAYER_IFACE, 'Position')
+        result_in_microseconds = self.mpris.Get(objects.PLAYER_IFACE, 'Position')
         result_in_milliseconds = result_in_microseconds // 1000
         self.assertEquals(result_in_milliseconds, 0)
 
     def test_get_minimum_rate_is_one_or_less(self):
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'MinimumRate')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'MinimumRate')
         self.assert_(result <= 1.0)
 
     def test_get_maximum_rate_is_one_or_more(self):
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'MaximumRate')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'MaximumRate')
         self.assert_(result >= 1.0)
 
     def test_can_go_next_is_true_if_can_control_and_other_next_track(self):
         self.mpris.get_CanControl = lambda *_: True
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoNext')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoNext')
         self.assertTrue(result)
 
     def test_can_go_next_is_false_if_next_track_is_the_same(self):
@@ -262,14 +262,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(uri='a')])
         self.backend.playback.repeat = True
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoNext')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoNext')
         self.assertFalse(result)
 
     def test_can_go_next_is_false_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoNext')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoNext')
         self.assertFalse(result)
 
     def test_can_go_previous_is_true_if_can_control_and_other_previous_track(self):
@@ -277,7 +277,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
         self.backend.playback.next()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoPrevious')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoPrevious')
         self.assertTrue(result)
 
     def test_can_go_previous_is_false_if_previous_track_is_the_same(self):
@@ -285,7 +285,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(uri='a')])
         self.backend.playback.repeat = True
         self.backend.playback.play()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoPrevious')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoPrevious')
         self.assertFalse(result)
 
     def test_can_go_previous_is_false_if_can_control_is_false(self):
@@ -293,7 +293,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.backend.playback.play()
         self.backend.playback.next()
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanGoPrevious')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoPrevious')
         self.assertFalse(result)
 
     def test_can_play_is_true_if_can_control_and_current_track(self):
@@ -301,42 +301,42 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.current_playlist.append([Track(uri='a')])
         self.backend.playback.play()
         self.assertTrue(self.backend.playback.current_track.get())
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPlay')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanPlay')
         self.assertTrue(result)
 
     def test_can_play_is_false_if_no_current_track(self):
         self.mpris.get_CanControl = lambda *_: True
         self.assertFalse(self.backend.playback.current_track.get())
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPlay')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanPlay')
         self.assertFalse(result)
 
     def test_can_play_if_false_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPlay')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanPlay')
         self.assertFalse(result)
 
     def test_can_pause_is_true_if_can_control_and_track_can_be_paused(self):
         self.mpris.get_CanControl = lambda *_: True
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPause')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanPause')
         self.assertTrue(result)
 
     def test_can_pause_if_false_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanPause')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanPause')
         self.assertFalse(result)
 
     def test_can_seek_is_true_if_can_control_is_true(self):
         self.mpris.get_CanControl = lambda *_: True
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanSeek')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanSeek')
         self.assertTrue(result)
 
     def test_can_seek_is_false_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanSeek')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanSeek')
         self.assertFalse(result)
 
     def test_can_control_is_true(self):
-        result = self.mpris.Get(mpris.PLAYER_IFACE, 'CanControl')
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'CanControl')
         self.assertTrue(result)
 
     def test_next_is_ignored_if_can_go_next_is_false(self):

@@ -10,18 +10,10 @@ except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
-try:
-    import indicate
-except ImportError as import_error:
-    indicate = None
-    logger.debug(u'Startup notification will not be sent (%s)', import_error)
-
-from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
 from mopidy.backends.base import Backend
 from mopidy.backends.base.playback import PlaybackController
-from mopidy.listeners import BackendListener
 from mopidy.mixers.base import BaseMixer
 from mopidy.utils.process import exit_process
 
@@ -33,112 +25,6 @@ BUS_NAME = 'org.mpris.MediaPlayer2.mopidy'
 OBJECT_PATH = '/org/mpris/MediaPlayer2'
 ROOT_IFACE = 'org.mpris.MediaPlayer2'
 PLAYER_IFACE = 'org.mpris.MediaPlayer2.Player'
-
-
-class MprisFrontend(ThreadingActor, BackendListener):
-    """
-    Frontend which lets you control Mopidy through the Media Player Remote
-    Interfacing Specification (MPRIS) D-Bus interface.
-
-    An example of an MPRIS client is `Ubuntu's sound menu
-    <https://wiki.ubuntu.com/SoundMenu>`_.
-
-    **Dependencies:**
-
-    - ``dbus`` Python bindings. The package is named ``python-dbus`` in
-      Ubuntu/Debian.
-    - ``libindicate`` Python bindings is needed to expose Mopidy in e.g. the
-      Ubuntu Sound Menu. The package is named ``python-indicate`` in
-      Ubuntu/Debian.
-
-    **Testing the frontend**
-
-    To test, start Mopidy, and then run the following in a Python shell::
-
-        import dbus
-        bus = dbus.SessionBus()
-        player = bus.get_object('org.mpris.MediaPlayer2.mopidy',
-            '/org/mpris/MediaPlayer2')
-
-    Now you can control Mopidy through the player object. Examples:
-
-    - To get some properties from Mopidy, run::
-
-        props = player.GetAll('org.mpris.MediaPlayer2',
-            dbus_interface='org.freedesktop.DBus.Properties')
-
-    - To quit Mopidy through D-Bus, run::
-
-        player.Quit(dbus_interface='org.mpris.MediaPlayer2')
-    """
-
-    def __init__(self):
-        self.indicate_server = None
-        self.mpris_object = None
-
-    def on_start(self):
-        self.mpris_object = MprisObject()
-        self.send_startup_notification()
-
-    def on_stop(self):
-        logger.debug(u'Removing MPRIS object from D-Bus connection...')
-        self.mpris_object.remove_from_connection()
-        self.mpris_object = None
-        logger.debug(u'Removed MPRIS object from D-Bus connection')
-
-    def send_startup_notification(self):
-        """
-        Send startup notification using libindicate to make Mopidy appear in
-        e.g. `Ubuntu's sound menu <https://wiki.ubuntu.com/SoundMenu>`_.
-
-        A reference to the libindicate server is kept for as long as Mopidy is
-        running. When Mopidy exits, the server will be unreferenced and Mopidy
-        will automatically be unregistered from e.g. the sound menu.
-        """
-        if not indicate:
-            return
-        logger.debug(u'Sending startup notification...')
-        self.indicate_server = indicate.Server()
-        self.indicate_server.set_type('music.mopidy')
-        # FIXME Location of .desktop file shouldn't be hardcoded
-        self.indicate_server.set_desktop_file(
-            '/usr/share/applications/mopidy.desktop')
-        self.indicate_server.show()
-        logger.debug(u'Startup notification sent')
-
-    def _emit_properties_changed(self, *changed_properties):
-        if self.mpris_object is None:
-            return
-        props_with_new_values = [(p, self.mpris_object.Get(PLAYER_IFACE, p))
-                for p in changed_properties]
-        self.mpris_object.PropertiesChanged(PLAYER_IFACE,
-            dict(props_with_new_values), [])
-
-    def track_playback_paused(self, track, time_position):
-        logger.debug(u'Received track playback paused event')
-        self._emit_properties_changed('PlaybackStatus')
-
-    def track_playback_resumed(self, track, time_position):
-        logger.debug(u'Received track playback resumed event')
-        self._emit_properties_changed('PlaybackStatus')
-
-    def track_playback_started(self, track):
-        logger.debug(u'Received track playback started event')
-        self._emit_properties_changed('PlaybackStatus', 'Metadata')
-
-    def track_playback_ended(self, track, time_position):
-        logger.debug(u'Received track playback ended event')
-        self._emit_properties_changed('PlaybackStatus', 'Metadata')
-
-    def volume_changed(self):
-        logger.debug(u'Received volume changed event')
-        self._emit_properties_changed('Volume')
-
-    def seeked(self):
-        logger.debug(u'Received seeked event')
-        if self.mpris_object is None:
-            return
-        self.mpris_object.Seeked(PLAYER_IFACE, self.mpris_object.Get(PLAYER_IFACE, 'Position'))
 
 
 class MprisObject(dbus.service.Object):
@@ -198,7 +84,8 @@ class MprisObject(dbus.service.Object):
     def backend(self):
         if self._backend is None:
             backend_refs = ActorRegistry.get_by_class(Backend)
-            assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+            assert len(backend_refs) == 1, \
+                'Expected exactly one running backend.'
             self._backend = backend_refs[0].proxy()
         return self._backend
 
@@ -262,7 +149,7 @@ class MprisObject(dbus.service.Object):
     @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Raise(self):
         logger.debug(u'%s.Raise called', ROOT_IFACE)
-        pass # We do not have a GUI
+        # Do nothing, as we do not have a GUI
 
     @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Quit(self):
@@ -390,7 +277,7 @@ class MprisObject(dbus.service.Object):
     @dbus.service.signal(dbus_interface=PLAYER_IFACE, signature='x')
     def Seeked(self, position):
         logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
-        pass
+        # Do nothing, as just calling the method is enough to emit the signal.
 
 
     ### Player interface properties
