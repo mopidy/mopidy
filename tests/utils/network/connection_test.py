@@ -322,25 +322,35 @@ class ConnectionTest(unittest.TestCase):
         self.mock.send_lock.acquire.assert_called_once_with(True)
         self.mock.send_lock.release.assert_called_once_with()
 
-    def test_queue_send_appends_to_send_buffer(self):
-        self.mock.send_lock = Mock()
+    def test_queue_send_calls_send(self):
         self.mock.send_buffer = ''
-
-        network.Connection.queue_send(self.mock, 'abc')
-        self.assertEqual('abc', self.mock.send_buffer)
-
-        network.Connection.queue_send(self.mock, 'def')
-        self.assertEqual('abcdef', self.mock.send_buffer)
-
-        network.Connection.queue_send(self.mock, '')
-        self.assertEqual('abcdef', self.mock.send_buffer)
-
-    def test_queue_send_calls_enable_send(self):
         self.mock.send_lock = Mock()
-        self.mock.send_buffer = ''
+        self.mock.send.return_value = ''
 
         network.Connection.queue_send(self.mock, 'data')
+        self.mock.send.assert_called_once_with('data')
+        self.assertEqual(0, self.mock.enable_send.call_count)
+        self.assertEqual('', self.mock.send_buffer)
+
+    def test_queue_send_calls_enable_send_for_partial_send(self):
+        self.mock.send_buffer = ''
+        self.mock.send_lock = Mock()
+        self.mock.send.return_value = 'ta'
+
+        network.Connection.queue_send(self.mock, 'data')
+        self.mock.send.assert_called_once_with('data')
         self.mock.enable_send.assert_called_once_with()
+        self.assertEqual('ta', self.mock.send_buffer)
+
+    def test_queue_send_calls_send_with_existing_buffer(self):
+        self.mock.send_buffer = 'foo'
+        self.mock.send_lock = Mock()
+        self.mock.send.return_value = ''
+
+        network.Connection.queue_send(self.mock, 'bar')
+        self.mock.send.assert_called_once_with('foobar')
+        self.assertEqual(0, self.mock.enable_send.call_count)
+        self.assertEqual('', self.mock.send_buffer)
 
     def test_recv_callback_respects_io_err(self):
         self.mock.sock = Mock(spec=socket.SocketType)

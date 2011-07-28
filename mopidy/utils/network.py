@@ -164,9 +164,10 @@ class Connection(object):
     def queue_send(self, data):
         """Send data to client exactly as is."""
         self.send_lock.acquire(True)
-        self.send_buffer += data
+        self.send_buffer = self.send(self.send_buffer + data)
         self.send_lock.release()
-        self.enable_send()
+        if self.send_buffer:
+            self.enable_send()
 
     def enable_timeout(self):
         """Reactivate timeout mechanism."""
