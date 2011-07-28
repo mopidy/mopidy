@@ -162,12 +162,23 @@ class Connection(object):
             pass
 
     def queue_send(self, data):
-        """Send data to client exactly as is."""
+        """Try to send data to client exactly as is and queue rest."""
         self.send_lock.acquire(True)
         self.send_buffer = self.send(self.send_buffer + data)
         self.send_lock.release()
         if self.send_buffer:
             self.enable_send()
+
+    def send(self, data):
+        """Send data to client, return any unsent data."""
+        try:
+            sent = self.sock.send(data)
+            return data[sent:]
+        except socket.error as e:
+            if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
+                return data
+            self.stop(u'Unexpected client error: %s' % e)
+            return ''
 
     def enable_timeout(self):
         """Reactivate timeout mechanism."""
@@ -261,16 +272,6 @@ class Connection(object):
             self.send_lock.release()
 
         return True
-
-    def send(self, data):
-        try:
-            sent = self.sock.send(data)
-            return data[sent:]
-        except socket.error as e:
-            if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
-                return data
-            self.stop(u'Unexpected client error: %s' % e)
-            return ''
 
     def timeout_callback(self):
         self.stop(u'Client timeout out after %s seconds' % self.timeout)
