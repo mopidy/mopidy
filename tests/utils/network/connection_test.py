@@ -492,27 +492,20 @@ class ConnectionTest(unittest.TestCase):
         self.mock.send.assert_called_once_with('data')
         self.assertEqual('ta', self.mock.send_buffer)
 
-    @SkipTest
-    def test_send_callback_recoverable_error(self):
-        self.mock.send_lock = Mock()
-        self.mock.send_lock.acquire.return_value = True
-        self.mock.send_buffer = 'data'
+    def test_send_recoverable_error(self):
+        self.mock.sock = Mock(spec=socket.SocketType)
 
         for error in (errno.EWOULDBLOCK, errno.EINTR):
             self.mock.sock.send.side_effect = socket.error(error, '')
-            self.assertTrue(network.Connection.send_callback(
-                self.mock, sentinel.fd, gobject.IO_IN))
+
+            network.Connection.send(self.mock, 'data')
             self.assertEqual(0, self.mock.stop.call_count)
 
-    @SkipTest
-    def test_send_callback_unrecoverable_error(self):
-        self.mock.send_lock = Mock()
-        self.mock.send_lock.acquire.return_value = True
-        self.mock.send_buffer = 'data'
-
+    def test_send_unrecoverable_error(self):
+        self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.send.side_effect = socket.error
-        self.assertTrue(network.Connection.send_callback(
-            self.mock, sentinel.fd, gobject.IO_IN))
+
+        self.assertEqual('', network.Connection.send(self.mock, 'data'))
         self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_timeout_callback(self):

@@ -269,6 +269,7 @@ class Connection(object):
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return data
             self.stop(u'Unexpected client error: %s' % e)
+            return ''
 
     def timeout_callback(self):
         self.stop(u'Client timeout out after %s seconds' % self.timeout)
