@@ -161,7 +161,7 @@ class Connection(object):
         except socket.error:
             pass
 
-    def send(self, data):
+    def queue_send(self, data):
         """Send data to client exactly as is."""
         self.send_lock.acquire(True)
         self.send_buffer += data
@@ -383,4 +383,4 @@ class LineProtocol(ThreadingActor):
             return
 
         data = self.join_lines(lines)
-        self.connection.send(self.encode(data))
+        self.connection.queue_send(self.encode(data))

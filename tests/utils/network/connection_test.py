@@ -318,7 +318,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.send_lock = Mock()
         self.mock.send_buffer = ''
 
-        network.Connection.send(self.mock, 'data')
+        network.Connection.queue_send(self.mock, 'data')
         self.mock.send_lock.acquire.assert_called_once_with(True)
         self.mock.send_lock.release.assert_called_once_with()
 
@@ -326,20 +326,20 @@ class ConnectionTest(unittest.TestCase):
         self.mock.send_lock = Mock()
         self.mock.send_buffer = ''
 
-        network.Connection.send(self.mock, 'abc')
+        network.Connection.queue_send(self.mock, 'abc')
         self.assertEqual('abc', self.mock.send_buffer)
 
-        network.Connection.send(self.mock, 'def')
+        network.Connection.queue_send(self.mock, 'def')
         self.assertEqual('abcdef', self.mock.send_buffer)
 
-        network.Connection.send(self.mock, '')
+        network.Connection.queue_send(self.mock, '')
         self.assertEqual('abcdef', self.mock.send_buffer)
 
     def test_send_calls_enable_send(self):
         self.mock.send_lock = Mock()
         self.mock.send_buffer = ''
 
-        network.Connection.send(self.mock, 'data')
+        network.Connection.queue_send(self.mock, 'data')
         self.mock.enable_send.assert_called_once_with()
 
     def test_recv_callback_respects_io_err(self):

@@ -14,7 +14,7 @@ class MockConnetion(mock.Mock):
         self.port = mock.sentinel.port
         self.response = []
 
-    def send(self, data):
+    def queue_send(self, data):
         lines = (line for line in data.split('\n') if line)
         self.response.extend(lines)
 
