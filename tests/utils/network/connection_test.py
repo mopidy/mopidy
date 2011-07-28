@@ -501,6 +501,20 @@ class ConnectionTest(unittest.TestCase):
             network.Connection.send(self.mock, 'data')
             self.assertEqual(0, self.mock.stop.call_count)
 
+    def test_send_calls_socket_send(self):
+        self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.send.return_value = 4
+
+        self.assertEqual('', network.Connection.send(self.mock, 'data'))
+        self.mock.sock.send.assert_called_once_with('data')
+
+    def test_send_calls_socket_send_partial_send(self):
+        self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.send.return_value = 2
+
+        self.assertEqual('ta', network.Connection.send(self.mock, 'data'))
+        self.mock.sock.send.assert_called_once_with('data')
+
     def test_send_unrecoverable_error(self):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.send.side_effect = socket.error
