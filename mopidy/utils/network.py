@@ -253,17 +253,22 @@ class Connection(object):
             return True
 
         try:
-            sent = self.sock.send(self.send_buffer)
-            self.send_buffer = self.send_buffer[sent:]
+            self.send_buffer = self.send(self.send_buffer)
             if not self.send_buffer:
                 self.disable_send()
-        except socket.error as e:
-            if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
-                self.stop(u'Unexpected client error: %s' % e)
         finally:
             self.send_lock.release()
 
         return True
+
+    def send(self, data):
+        try:
+            sent = self.sock.send(data)
+            return data[sent:]
+        except socket.error as e:
+            if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
+                return data
+            self.stop(u'Unexpected client error: %s' % e)
 
     def timeout_callback(self):
         self.stop(u'Client timeout out after %s seconds' % self.timeout)
