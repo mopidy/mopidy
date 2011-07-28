@@ -314,7 +314,7 @@ class ConnectionTest(unittest.TestCase):
         self.assertEqual(0, gobject.source_remove.call_count)
         self.assertEqual(None, self.mock.timeout_id)
 
-    def test_send_acquires_and_releases_lock(self):
+    def test_queue_send_acquires_and_releases_lock(self):
         self.mock.send_lock = Mock()
         self.mock.send_buffer = ''
 
@@ -322,7 +322,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.send_lock.acquire.assert_called_once_with(True)
         self.mock.send_lock.release.assert_called_once_with()
 
-    def test_send_appends_to_send_buffer(self):
+    def test_queue_send_appends_to_send_buffer(self):
         self.mock.send_lock = Mock()
         self.mock.send_buffer = ''
 
@@ -335,7 +335,7 @@ class ConnectionTest(unittest.TestCase):
         network.Connection.queue_send(self.mock, '')
         self.assertEqual('abcdef', self.mock.send_buffer)
 
-    def test_send_calls_enable_send(self):
+    def test_queue_send_calls_enable_send(self):
         self.mock.send_lock = Mock()
         self.mock.send_buffer = ''
 
