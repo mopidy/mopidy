@@ -92,7 +92,6 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 
 .. _use_mpd_on_a_network:
 
-
 Connecting from other machines on the network
 =============================================
 
@@ -120,6 +119,8 @@ file::
     LASTFM_PASSWORD = u'mysecret'
 
 
+.. _install_desktop_file:
+
 Controlling Mopidy through the Ubuntu Sound Menu
 ================================================
 
@@ -139,10 +140,10 @@ After you have installed the file, start Mopidy in any way, and Mopidy should
 appear in the Ubuntu Sound Menu. When you quit Mopidy, it will still be listed
 in the Ubuntu Sound Menu, and may be restarted by selecting it there.
 
-The Ubuntu Sound Menu interacts with Mopidy's MPRIS frontend.
-The MPRIS frontend supports the minimum requirements of the `MPRIS
-specification <http://www.mpris.org/>`_. The ``TrackList`` and the
-``Playlists`` interfaces of the spec are not supported.
+The Ubuntu Sound Menu interacts with Mopidy's MPRIS frontend,
+:mod:`mopidy.frontends.mpris`. The MPRIS frontend supports the minimum
+requirements of the `MPRIS specification <http://www.mpris.org/>`_. The
+``TrackList`` and the ``Playlists`` interfaces of the spec are not supported.
 
 
 Streaming audio through a SHOUTcast/Icecast server

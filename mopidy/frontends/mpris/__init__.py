@@ -18,18 +18,22 @@ from mopidy.listeners import BackendListener
 class MprisFrontend(ThreadingActor, BackendListener):
     """
     Frontend which lets you control Mopidy through the Media Player Remote
-    Interfacing Specification (MPRIS) D-Bus interface.
+    Interfacing Specification (`MPRIS <http://www.mpris.org/>`_) D-Bus
+    interface.
 
-    An example of an MPRIS client is `Ubuntu's sound menu
+    An example of an MPRIS client is the `Ubuntu Sound Menu
     <https://wiki.ubuntu.com/SoundMenu>`_.
 
     **Dependencies:**
 
-    - ``dbus`` Python bindings. The package is named ``python-dbus`` in
+    - D-Bus Python bindings. The package is named ``python-dbus`` in
       Ubuntu/Debian.
     - ``libindicate`` Python bindings is needed to expose Mopidy in e.g. the
       Ubuntu Sound Menu. The package is named ``python-indicate`` in
       Ubuntu/Debian.
+    - An ``.desktop`` file for Mopidy installed at the path set in
+      :attr:`mopidy.settings.DESKTOP_FILE`. See :ref:`install_desktop_file` for
+      details.
 
     **Testing the frontend**
 
