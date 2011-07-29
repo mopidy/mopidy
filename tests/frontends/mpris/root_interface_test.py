@@ -1,6 +1,7 @@
 import mock
 import unittest
 
+from mopidy import settings
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpris import objects
 
@@ -43,6 +44,12 @@ class RootInterfaceTest(unittest.TestCase):
     def test_desktop_entry_is_mopidy(self):
         result = self.mpris.Get(objects.ROOT_IFACE, 'DesktopEntry')
         self.assertEquals(result, 'mopidy')
+
+    def test_desktop_entry_is_based_on_DESKTOP_FILE_setting(self):
+        settings.runtime['DESKTOP_FILE'] = '/tmp/foo.desktop'
+        result = self.mpris.Get(objects.ROOT_IFACE, 'DesktopEntry')
+        self.assertEquals(result, 'foo')
+        settings.runtime.clear()
 
     def test_supported_uri_schemes_is_empty(self):
         result = self.mpris.Get(objects.ROOT_IFACE, 'SupportedUriSchemes')

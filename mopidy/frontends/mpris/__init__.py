@@ -10,6 +10,7 @@ except ImportError as import_error:
 
 from pykka.actor import ThreadingActor
 
+from mopidy import settings
 from mopidy.frontends.mpris import objects
 from mopidy.listeners import BackendListener
 
@@ -79,9 +80,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
         logger.debug(u'Sending startup notification...')
         self.indicate_server = indicate.Server()
         self.indicate_server.set_type('music.mopidy')
-        # FIXME Location of .desktop file shouldn't be hardcoded
-        self.indicate_server.set_desktop_file(
-            '/usr/share/applications/mopidy.desktop')
+        self.indicate_server.set_desktop_file(settings.DESKTOP_FILE)
         self.indicate_server.show()
         logger.debug(u'Startup notification sent')
 

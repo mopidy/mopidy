@@ -1,4 +1,5 @@
 import logging
+import os
 
 logger = logging.getLogger('mopidy.frontends.mpris')
 
@@ -12,6 +13,7 @@ except ImportError as import_error:
 
 from pykka.registry import ActorRegistry
 
+from mopidy import settings
 from mopidy.backends.base import Backend
 from mopidy.backends.base.playback import PlaybackController
 from mopidy.mixers.base import BaseMixer
@@ -49,7 +51,7 @@ class MprisObject(dbus.service.Object):
             # NOTE Change if adding optional track list support
             'HasTrackList': (False, None),
             'Identity': ('Mopidy', None),
-            'DesktopEntry': ('mopidy', None),
+            'DesktopEntry': (self.get_DesktopEntry, None),
             'SupportedUriSchemes': (self.get_SupportedUriSchemes, None),
             # TODO Return MIME types supported by local backend if active
             'SupportedMimeTypes': (dbus.Array([], signature='s'), None),
@@ -158,6 +160,9 @@ class MprisObject(dbus.service.Object):
 
 
     ### Root interface properties
+
+    def get_DesktopEntry(self):
+        return os.path.splitext(os.path.basename(settings.DESKTOP_FILE))[0]
 
     def get_SupportedUriSchemes(self):
         return dbus.Array(self.backend.uri_schemes.get(), signature='s')
