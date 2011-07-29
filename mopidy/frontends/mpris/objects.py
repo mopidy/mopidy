@@ -200,7 +200,7 @@ class MprisObject(dbus.service.Object):
         logger.debug(u'%s.PlayPause called', PLAYER_IFACE)
         if not self.get_CanPause():
             logger.debug(u'%s.PlayPause not allowed', PLAYER_IFACE)
-            return # TODO Raise error
+            return
         state = self.backend.playback.state.get()
         if state == PlaybackController.PLAYING:
             self.backend.playback.pause().get()
@@ -214,7 +214,7 @@ class MprisObject(dbus.service.Object):
         logger.debug(u'%s.Stop called', PLAYER_IFACE)
         if not self.get_CanControl():
             logger.debug(u'%s.Stop not allowed', PLAYER_IFACE)
-            return # TODO Raise error
+            return
         self.backend.playback.stop().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
@@ -312,7 +312,7 @@ class MprisObject(dbus.service.Object):
     def set_LoopStatus(self, value):
         if not self.get_CanControl():
             logger.debug(u'Setting %s.LoopStatus not allowed', PLAYER_IFACE)
-            return # TODO Raise error
+            return
         if value == 'None':
             self.backend.playback.repeat = False
             self.backend.playback.single = False
@@ -328,7 +328,7 @@ class MprisObject(dbus.service.Object):
             # NOTE The spec does not explictly require this check, but it was
             # added to be consistent with all the other property setters.
             logger.debug(u'Setting %s.Rate not allowed', PLAYER_IFACE)
-            return # TODO Raise error
+            return
         if value == 0:
             self.Pause()
 
@@ -338,7 +338,7 @@ class MprisObject(dbus.service.Object):
     def set_Shuffle(self, value):
         if not self.get_CanControl():
             logger.debug(u'Setting %s.Shuffle not allowed', PLAYER_IFACE)
-            return # TODO Raise error
+            return
         if value:
             self.backend.playback.random = True
         else:
@@ -381,7 +381,7 @@ class MprisObject(dbus.service.Object):
     def set_Volume(self, value):
         if not self.get_CanControl():
             logger.debug(u'Setting %s.Volume not allowed', PLAYER_IFACE)
-            return # TODO Raise error
+            return
         if value is None:
             return
         elif value < 0:
