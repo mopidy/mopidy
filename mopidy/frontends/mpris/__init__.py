@@ -63,7 +63,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
     def on_start(self):
         try:
             self.mpris_object = objects.MprisObject()
-            self.send_startup_notification()
+            self._send_startup_notification()
         except Exception as e:
             logger.error(u'MPRIS frontend setup failed (%s)', e)
             self.stop()
@@ -75,7 +75,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
             self.mpris_object = None
         logger.debug(u'Removed MPRIS object from D-Bus connection')
 
-    def send_startup_notification(self):
+    def _send_startup_notification(self):
         """
         Send startup notification using libindicate to make Mopidy appear in
         e.g. `Ubuntu's sound menu <https://wiki.ubuntu.com/SoundMenu>`_.
