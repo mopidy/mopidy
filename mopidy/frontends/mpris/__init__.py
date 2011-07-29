@@ -57,13 +57,18 @@ class MprisFrontend(ThreadingActor, BackendListener):
         self.mpris_object = None
 
     def on_start(self):
-        self.mpris_object = objects.MprisObject()
-        self.send_startup_notification()
+        try:
+            self.mpris_object = objects.MprisObject()
+            self.send_startup_notification()
+        except Exception as e:
+            logger.error(u'MPRIS frontend setup failed (%s)', e)
+            self.stop()
 
     def on_stop(self):
         logger.debug(u'Removing MPRIS object from D-Bus connection...')
-        self.mpris_object.remove_from_connection()
-        self.mpris_object = None
+        if self.mpris_object:
+            self.mpris_object.remove_from_connection()
+            self.mpris_object = None
         logger.debug(u'Removed MPRIS object from D-Bus connection')
 
     def send_startup_notification(self):
