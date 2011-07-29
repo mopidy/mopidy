@@ -8,7 +8,7 @@ import unittest
 from mopidy.utils import network
 
 from mock import patch, sentinel, Mock
-from tests import any_int, any_unicode
+from tests import any_int, any_unicode, SkipTest
 
 class ConnectionTest(unittest.TestCase):
     def setUp(self):
@@ -314,33 +314,43 @@ class ConnectionTest(unittest.TestCase):
         self.assertEqual(0, gobject.source_remove.call_count)
         self.assertEqual(None, self.mock.timeout_id)
 
-    def test_send_acquires_and_releases_lock(self):
+    def test_queue_send_acquires_and_releases_lock(self):
         self.mock.send_lock = Mock()
         self.mock.send_buffer = ''
 
-        network.Connection.send(self.mock, 'data')
+        network.Connection.queue_send(self.mock, 'data')
         self.mock.send_lock.acquire.assert_called_once_with(True)
         self.mock.send_lock.release.assert_called_once_with()
 
-    def test_send_appends_to_send_buffer(self):
-        self.mock.send_lock = Mock()
+    def test_queue_send_calls_send(self):
         self.mock.send_buffer = ''
-
-        network.Connection.send(self.mock, 'abc')
-        self.assertEqual('abc', self.mock.send_buffer)
-
-        network.Connection.send(self.mock, 'def')
-        self.assertEqual('abcdef', self.mock.send_buffer)
-
-        network.Connection.send(self.mock, '')
-        self.assertEqual('abcdef', self.mock.send_buffer)
-
-    def test_send_calls_enable_send(self):
         self.mock.send_lock = Mock()
-        self.mock.send_buffer = ''
+        self.mock.send.return_value = ''
 
-        network.Connection.send(self.mock, 'data')
+        network.Connection.queue_send(self.mock, 'data')
+        self.mock.send.assert_called_once_with('data')
+        self.assertEqual(0, self.mock.enable_send.call_count)
+        self.assertEqual('', self.mock.send_buffer)
+
+    def test_queue_send_calls_enable_send_for_partial_send(self):
+        self.mock.send_buffer = ''
+        self.mock.send_lock = Mock()
+        self.mock.send.return_value = 'ta'
+
+        network.Connection.queue_send(self.mock, 'data')
+        self.mock.send.assert_called_once_with('data')
         self.mock.enable_send.assert_called_once_with()
+        self.assertEqual('ta', self.mock.send_buffer)
+
+    def test_queue_send_calls_send_with_existing_buffer(self):
+        self.mock.send_buffer = 'foo'
+        self.mock.send_lock = Mock()
+        self.mock.send.return_value = ''
+
+        network.Connection.queue_send(self.mock, 'bar')
+        self.mock.send.assert_called_once_with('foobar')
+        self.assertEqual(0, self.mock.enable_send.call_count)
+        self.assertEqual('', self.mock.send_buffer)
 
     def test_recv_callback_respects_io_err(self):
         self.mock.sock = Mock(spec=socket.SocketType)
@@ -473,48 +483,53 @@ class ConnectionTest(unittest.TestCase):
         self.mock.send_lock = Mock()
         self.mock.send_lock.acquire.return_value = True
         self.mock.send_buffer = 'data'
-        self.mock.sock = Mock(spec=socket.SocketType)
-        self.mock.sock.send.return_value = 4
+        self.mock.send.return_value = ''
 
         self.assertTrue(network.Connection.send_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
         self.mock.disable_send.assert_called_once_with()
-        self.mock.sock.send.assert_called_once_with('data')
+        self.mock.send.assert_called_once_with('data')
         self.assertEqual('', self.mock.send_buffer)
 
     def test_send_callback_sends_partial_data(self):
         self.mock.send_lock = Mock()
         self.mock.send_lock.acquire.return_value = True
         self.mock.send_buffer = 'data'
-        self.mock.sock = Mock(spec=socket.SocketType)
-        self.mock.sock.send.return_value = 2
+        self.mock.send.return_value = 'ta'
 
         self.assertTrue(network.Connection.send_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
-        self.mock.sock.send.assert_called_once_with('data')
+        self.mock.send.assert_called_once_with('data')
         self.assertEqual('ta', self.mock.send_buffer)
 
-    def test_send_callback_recoverable_error(self):
-        self.mock.send_lock = Mock()
-        self.mock.send_lock.acquire.return_value = True
-        self.mock.send_buffer = 'data'
+    def test_send_recoverable_error(self):
         self.mock.sock = Mock(spec=socket.SocketType)
 
         for error in (errno.EWOULDBLOCK, errno.EINTR):
             self.mock.sock.send.side_effect = socket.error(error, '')
-            self.assertTrue(network.Connection.send_callback(
-                self.mock, sentinel.fd, gobject.IO_IN))
+
+            network.Connection.send(self.mock, 'data')
             self.assertEqual(0, self.mock.stop.call_count)
 
-    def test_send_callback_unrecoverable_error(self):
-        self.mock.send_lock = Mock()
-        self.mock.send_lock.acquire.return_value = True
-        self.mock.send_buffer = 'data'
+    def test_send_calls_socket_send(self):
         self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.send.return_value = 4
 
+        self.assertEqual('', network.Connection.send(self.mock, 'data'))
+        self.mock.sock.send.assert_called_once_with('data')
+
+    def test_send_calls_socket_send_partial_send(self):
+        self.mock.sock = Mock(spec=socket.SocketType)
+        self.mock.sock.send.return_value = 2
+
+        self.assertEqual('ta', network.Connection.send(self.mock, 'data'))
+        self.mock.sock.send.assert_called_once_with('data')
+
+    def test_send_unrecoverable_error(self):
+        self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.send.side_effect = socket.error
-        self.assertTrue(network.Connection.send_callback(
-            self.mock, sentinel.fd, gobject.IO_IN))
+
+        self.assertEqual('', network.Connection.send(self.mock, 'data'))
         self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_timeout_callback(self):

@@ -196,7 +196,7 @@ class LineProtocolTest(unittest.TestCase):
 
         network.LineProtocol.send_lines(self.mock, [])
         self.assertEqual(0, self.mock.encode.call_count)
-        self.assertEqual(0, self.mock.connection.send.call_count)
+        self.assertEqual(0, self.mock.connection.queue_send.call_count)
 
     def test_send_lines_calls_join_lines(self):
         self.mock.connection = Mock(spec=network.Connection)
@@ -218,7 +218,7 @@ class LineProtocolTest(unittest.TestCase):
         self.mock.encode.return_value = sentinel.data
 
         network.LineProtocol.send_lines(self.mock, sentinel.lines)
-        self.mock.connection.send.assert_called_once_with(sentinel.data)
+        self.mock.connection.queue_send.assert_called_once_with(sentinel.data)
 
     def test_join_lines_returns_empty_string_for_no_lines(self):
         self.assertEqual(u'', network.LineProtocol.join_lines(self.mock, []))
