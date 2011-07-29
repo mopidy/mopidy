@@ -53,7 +53,8 @@ class MprisObject(dbus.service.Object):
             'Identity': ('Mopidy', None),
             'DesktopEntry': (self.get_DesktopEntry, None),
             'SupportedUriSchemes': (self.get_SupportedUriSchemes, None),
-            # TODO Return MIME types supported by local backend if active
+            # NOTE Return MIME types supported by local backend if support for
+            # reporting supported MIME types is added
             'SupportedMimeTypes': (dbus.Array([], signature='s'), None),
         }
 
@@ -265,7 +266,8 @@ class MprisObject(dbus.service.Object):
             # the other methods doesn't help much if OpenUri is open for use.
             logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
             return
-        # TODO Check if URI has known MIME type.
+        # NOTE Check if URI has MIME type known to the backend, if MIME support
+        # is added to the backend.
         uri_schemes = self.backend.uri_schemes.get()
         if not any([uri.startswith(uri_scheme) for uri_scheme in uri_schemes]):
             return
