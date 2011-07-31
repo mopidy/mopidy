@@ -3,7 +3,6 @@ import sys
 
 from mopidy import settings
 from mopidy.backends.local import LocalBackend
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 from mopidy.utils.path import path_to_uri
 

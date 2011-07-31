@@ -1,7 +1,7 @@
 from distutils.version import StrictVersion as SV
 import platform
 
-from mopidy import get_version, get_plain_version, get_platform, get_python
+from mopidy import get_plain_version, get_platform, get_python
 
 from tests import unittest
 
