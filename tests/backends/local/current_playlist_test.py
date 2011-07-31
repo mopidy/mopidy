@@ -1,18 +1,16 @@
-import unittest
-
-# FIXME Our Windows build server does not support GStreamer yet
 import sys
-if sys.platform == 'win32':
-    from tests import SkipTest
-    raise SkipTest
 
 from mopidy import settings
 from mopidy.backends.local import LocalBackend
 from mopidy.models import Track
 
+from tests import unittest
 from tests.backends.base.current_playlist import CurrentPlaylistControllerTest
 from tests.backends.local import generate_song
 
+
+@unittest.skipIf(sys.platform == 'win32',
+    'Our Windows build server does not support GStreamer yet')
 class LocalCurrentPlaylistControllerTest(CurrentPlaylistControllerTest,
         unittest.TestCase):
 

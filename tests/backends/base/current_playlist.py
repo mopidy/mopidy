@@ -1,11 +1,11 @@
 import mock
-import multiprocessing
 import random
 
 from mopidy.models import Playlist, Track
 from mopidy.gstreamer import GStreamer
 
 from tests.backends.base import populate_playlist
+
 
 class CurrentPlaylistControllerTest(object):
     tracks = []

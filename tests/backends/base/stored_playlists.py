@@ -5,7 +5,8 @@ import tempfile
 from mopidy import settings
 from mopidy.models import Playlist
 
-from tests import SkipTest, path_to_data_dir
+from tests import unittest, path_to_data_dir
+
 
 class StoredPlaylistsControllerTest(object):
     def setUp(self):
@@ -78,11 +79,13 @@ class StoredPlaylistsControllerTest(object):
         except LookupError as e:
             self.assertEqual(u'"name=c" match no playlists', e[0])
 
+    @unittest.SkipTest
     def test_lookup(self):
-        raise SkipTest
+        pass
 
+    @unittest.SkipTest
     def test_refresh(self):
-        raise SkipTest
+        pass
 
     def test_rename(self):
         playlist = self.stored.create('test')
@@ -100,5 +103,6 @@ class StoredPlaylistsControllerTest(object):
         self.stored.save(playlist)
         self.assert_(playlist in self.stored.playlists)
 
+    @unittest.SkipTest
     def test_playlist_with_unknown_track(self):
-        raise SkipTest
+        pass

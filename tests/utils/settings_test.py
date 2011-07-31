@@ -1,9 +1,11 @@
 import os
-import unittest
 
 from mopidy import settings as default_settings_module, SettingsError
 from mopidy.utils.settings import (format_settings_list, mask_value_if_secret,
     SettingsProxy, validate_settings)
+
+from tests import unittest
+
 
 class ValidateSettingsTest(unittest.TestCase):
     def setUp(self):

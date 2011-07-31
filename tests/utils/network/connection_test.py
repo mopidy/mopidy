@@ -3,12 +3,12 @@ import gobject
 import logging
 import pykka
 import socket
-import unittest
+from mock import patch, sentinel, Mock
 
 from mopidy.utils import network
 
-from mock import patch, sentinel, Mock
-from tests import any_int, any_unicode, SkipTest
+from tests import unittest, any_int, any_unicode
+
 
 class ConnectionTest(unittest.TestCase):
     def setUp(self):

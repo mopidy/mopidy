@@ -1,5 +1,6 @@
 from tests.frontends.mpd import protocol
 
+
 class AudioOutputHandlerTest(protocol.BaseTestCase):
     def test_enableoutput(self):
         self.sendRequest(u'enableoutput "0"')

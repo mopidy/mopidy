@@ -1,7 +1,8 @@
-import unittest
-
 from mopidy.mixers.denon import DenonMixer
 from tests.mixers.base_test import BaseMixerTest
+
+from tests import unittest
+
 
 class DenonMixerDeviceMock(object):
     def __init__(self):
@@ -23,6 +24,7 @@ class DenonMixerDeviceMock(object):
 
     def open(self):
         self._open = True
+
 
 class DenonMixerTest(BaseMixerTest, unittest.TestCase):
     ACTUAL_MAX = 99

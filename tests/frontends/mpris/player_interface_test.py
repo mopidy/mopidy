@@ -1,5 +1,4 @@
 import mock
-import unittest
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.backends.base.playback import PlaybackController
@@ -7,9 +6,12 @@ from mopidy.frontends.mpris import objects
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Album, Artist, Track
 
+from tests import unittest
+
 PLAYING = PlaybackController.PLAYING
 PAUSED = PlaybackController.PAUSED
 STOPPED = PlaybackController.STOPPED
+
 
 class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):

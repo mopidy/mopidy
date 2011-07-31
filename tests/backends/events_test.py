@@ -1,11 +1,13 @@
 import mock
-import unittest
 
 from pykka.registry import ActorRegistry
 
 from mopidy.backends.dummy import DummyBackend
 from mopidy.listeners import BackendListener
 from mopidy.models import Track
+
+from tests import unittest
+
 
 @mock.patch.object(BackendListener, 'send')
 class BackendEventsTest(unittest.TestCase):

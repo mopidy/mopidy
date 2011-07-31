@@ -1,9 +1,9 @@
 from mock import patch
 
 from mopidy.frontends.mpd.protocol.status import SUBSYSTEMS
-from mopidy.models import Track
 
 from tests.frontends.mpd import protocol
+
 
 class IdleHandlerTest(protocol.BaseTestCase):
     def idleEvent(self, subsystem):

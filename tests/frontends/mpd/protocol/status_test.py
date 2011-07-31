@@ -2,6 +2,7 @@ from mopidy.models import Track
 
 from tests.frontends.mpd import protocol
 
+
 class StatusHandlerTest(protocol.BaseTestCase):
     def test_clearerror(self):
         self.sendRequest(u'clearerror')
