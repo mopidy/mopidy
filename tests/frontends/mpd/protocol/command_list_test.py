@@ -1,5 +1,6 @@
 from tests.frontends.mpd import protocol
 
+
 class CommandListsTest(protocol.BaseTestCase):
     def test_command_list_begin(self):
         response = self.sendRequest(u'command_list_begin')

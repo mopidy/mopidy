@@ -1,5 +1,6 @@
 from tests.frontends.mpd import protocol
 
+
 class StickersHandlerTest(protocol.BaseTestCase):
     def test_sticker_get(self):
         self.sendRequest(

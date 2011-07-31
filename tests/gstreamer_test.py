@@ -1,21 +1,16 @@
-import multiprocessing
-import unittest
-
-from tests import SkipTest
-
-# FIXME Our Windows build server does not support GStreamer yet
 import sys
-if sys.platform == 'win32':
-    raise SkipTest
 
 from mopidy import settings
 from mopidy.gstreamer import GStreamer
 from mopidy.utils.path import path_to_uri
 
-from tests import path_to_data_dir
+from tests import unittest, path_to_data_dir
 
 # TODO BaseOutputTest?
 
+
+@unittest.skipIf(sys.platform == 'win32',
+    'Our Windows build server does not support GStreamer yet')
 class GStreamerTest(unittest.TestCase):
     def setUp(self):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
@@ -48,11 +43,11 @@ class GStreamerTest(unittest.TestCase):
         self.gstreamer.start_playback()
         self.assertTrue(self.gstreamer.stop_playback())
 
-    @SkipTest
+    @unittest.SkipTest
     def test_deliver_data(self):
         pass # TODO
 
-    @SkipTest
+    @unittest.SkipTest
     def test_end_of_data_stream(self):
         pass # TODO
 
@@ -71,10 +66,10 @@ class GStreamerTest(unittest.TestCase):
         self.assertTrue(self.gstreamer.set_volume(100))
         self.assertEqual(100, self.gstreamer.get_volume())
 
-    @SkipTest
+    @unittest.SkipTest
     def test_set_state_encapsulation(self):
         pass # TODO
 
-    @SkipTest
+    @unittest.SkipTest
     def test_set_position(self):
         pass # TODO

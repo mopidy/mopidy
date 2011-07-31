@@ -2,6 +2,7 @@ from mopidy.models import Track
 
 from tests.frontends.mpd import protocol
 
+
 class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
     def test_add(self):
         needle = Track(uri='dummy://foo')

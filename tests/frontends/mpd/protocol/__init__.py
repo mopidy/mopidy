@@ -1,10 +1,11 @@
-import unittest
 import mock
 
 from mopidy import settings
 from mopidy.backends import dummy as backend
 from mopidy.frontends import mpd
 from mopidy.mixers import dummy as mixer
+
+from tests import unittest
 
 
 class MockConnetion(mock.Mock):

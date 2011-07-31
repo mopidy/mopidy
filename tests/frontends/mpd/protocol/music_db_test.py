@@ -1,5 +1,6 @@
 from tests.frontends.mpd import protocol
 
+
 class MusicDatabaseHandlerTest(protocol.BaseTestCase):
     def test_count(self):
         self.sendRequest(u'count "tag" "needle"')

@@ -1,6 +1,7 @@
-import unittest
-
 from mopidy.utils import get_class
+
+from tests import unittest
+
 
 class GetClassTest(unittest.TestCase):
     def test_loading_module_that_does_not_exist(self):

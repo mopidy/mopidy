@@ -1,7 +1,7 @@
 from mopidy.backends import base as backend
 from mopidy.models import Track
 
-from tests import SkipTest
+from tests import unittest
 from tests.frontends.mpd import protocol
 
 PAUSED = backend.PlaybackController.PAUSED
@@ -146,14 +146,17 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
         self.assertInResponse(u'off')
 
+    @unittest.SkipTest
     def test_replay_gain_status_off(self):
-        raise SkipTest # TODO
+        pass
 
+    @unittest.SkipTest
     def test_replay_gain_status_track(self):
-        raise SkipTest # TODO
+        pass
 
+    @unittest.SkipTest
     def test_replay_gain_status_album(self):
-        raise SkipTest # TODO
+        pass
 
 
 class PlaybackControlHandlerTest(protocol.BaseTestCase):

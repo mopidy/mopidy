@@ -1,11 +1,12 @@
 #encoding: utf-8
 
 import re
-import unittest
+from mock import sentinel, Mock
 
 from mopidy.utils import network
 
-from mock import sentinel, Mock
+from tests import unittest
+
 
 class LineProtocolTest(unittest.TestCase):
     def setUp(self):

@@ -1,8 +1,10 @@
 import mock
-import unittest
 
 from mopidy.frontends.mpris import MprisFrontend, objects
 from mopidy.models import Track
+
+from tests import unittest
+
 
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):

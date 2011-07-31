@@ -1,15 +1,15 @@
 import mock
-import multiprocessing
 import random
 import time
 
 from mopidy.models import Track
 from mopidy.gstreamer import GStreamer
 
-from tests import SkipTest
+from tests import unittest
 from tests.backends.base import populate_playlist
 
 # TODO Test 'playlist repeat', e.g. repeat=1,single=0
+
 
 class PlaybackControllerTest(object):
     tracks = []
@@ -520,7 +520,7 @@ class PlaybackControllerTest(object):
 
         self.assert_(wrapper.called)
 
-    @SkipTest # Blocks for 10ms
+    @unittest.SkipTest # Blocks for 10ms
     @populate_playlist
     def test_end_of_track_callback_gets_called(self):
         self.playback.play()
@@ -599,7 +599,7 @@ class PlaybackControllerTest(object):
         self.playback.pause()
         self.assertEqual(self.playback.resume(), None)
 
-    @SkipTest # Uses sleep and might not work with LocalBackend
+    @unittest.SkipTest # Uses sleep and might not work with LocalBackend
     @populate_playlist
     def test_resume_continues_from_right_position(self):
         self.playback.play()
@@ -668,7 +668,7 @@ class PlaybackControllerTest(object):
         self.playback.seek(0)
         self.assertEqual(self.playback.state, self.playback.PLAYING)
 
-    @SkipTest
+    @unittest.SkipTest
     @populate_playlist
     def test_seek_beyond_end_of_song(self):
         # FIXME need to decide return value
@@ -688,7 +688,7 @@ class PlaybackControllerTest(object):
         self.playback.seek(self.current_playlist.tracks[-1].length * 100)
         self.assertEqual(self.playback.state, self.playback.STOPPED)
 
-    @SkipTest
+    @unittest.SkipTest
     @populate_playlist
     def test_seek_beyond_start_of_song(self):
         # FIXME need to decide return value
@@ -741,7 +741,7 @@ class PlaybackControllerTest(object):
 
         self.assertEqual(self.playback.time_position, 0)
 
-    @SkipTest # Uses sleep and does might not work with LocalBackend
+    @unittest.SkipTest # Uses sleep and does might not work with LocalBackend
     @populate_playlist
     def test_time_position_when_playing(self):
         self.playback.play()
@@ -750,7 +750,7 @@ class PlaybackControllerTest(object):
         second = self.playback.time_position
         self.assert_(second > first, '%s - %s' % (first, second))
 
-    @SkipTest # Uses sleep
+    @unittest.SkipTest # Uses sleep
     @populate_playlist
     def test_time_position_when_paused(self):
         self.playback.play()

@@ -60,6 +60,7 @@ def find_files(path):
                 yield filename
 # pylint: enable = W0612
 
+# FIXME replace with mock usage in tests.
 class Mtime(object):
     def __init__(self):
         self.fake = None

@@ -1,9 +1,11 @@
 import os
 import subprocess
 import sys
-import unittest
 
 import mopidy
+
+from tests import unittest
+
 
 class HelpTest(unittest.TestCase):
     def test_help_has_mopidy_options(self):

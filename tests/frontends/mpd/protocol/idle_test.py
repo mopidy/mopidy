@@ -5,6 +5,7 @@ from mopidy.models import Track
 
 from tests.frontends.mpd import protocol
 
+
 class IdleHandlerTest(protocol.BaseTestCase):
     def idleEvent(self, subsystem):
         self.session.on_idle(subsystem)

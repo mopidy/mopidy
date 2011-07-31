@@ -1,12 +1,12 @@
 import errno
 import gobject
 import socket
-import unittest
+from mock import patch, sentinel, Mock
 
 from mopidy.utils import network
 
-from mock import patch, sentinel, Mock
-from tests import any_int
+from tests import unittest, any_int
+
 
 class ServerTest(unittest.TestCase):
     def setUp(self):

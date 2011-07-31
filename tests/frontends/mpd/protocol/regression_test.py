@@ -4,6 +4,7 @@ from mopidy.models import Track
 
 from tests.frontends.mpd import protocol
 
+
 class IssueGH17RegressionTest(protocol.BaseTestCase):
     """
     The issue: http://github.com/mopidy/mopidy/issues#issue/17

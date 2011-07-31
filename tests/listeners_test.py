@@ -1,7 +1,8 @@
-import unittest
-
 from mopidy.listeners import BackendListener
 from mopidy.models import Track
+
+from tests import unittest
+
 
 class BackendListenerTest(unittest.TestCase):
     def setUp(self):

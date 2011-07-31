@@ -1,10 +1,10 @@
 import socket
-import unittest
+from mock import patch, Mock
 
 from mopidy.utils import network
 
-from mock import patch, Mock
-from tests import SkipTest
+from tests import unittest
+
 
 class FormatHostnameTest(unittest.TestCase):
     @patch('mopidy.utils.network.has_ipv6', True)
@@ -52,6 +52,6 @@ class CreateSocketTest(unittest.TestCase):
         self.assertEqual(socket_mock.call_args[0],
             (socket.AF_INET6, socket.SOCK_STREAM))
 
-    @SkipTest
+    @unittest.SkipTest
     def test_ipv6_only_is_set(self):
         pass
