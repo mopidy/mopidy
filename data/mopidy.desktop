@@ -8,3 +8,4 @@ TryExec=mopidy
 Exec=mopidy
 Terminal=true
 Categories=AudioVideo;Audio;Player;ConsoleOnly;
+StartupNotify=true

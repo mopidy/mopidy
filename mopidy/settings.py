@@ -49,6 +49,15 @@ DEBUG_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
 #:     DEBUG_LOG_FILENAME = u'mopidy.log'
 DEBUG_LOG_FILENAME = u'mopidy.log'
 
+#: Location of the Mopidy .desktop file.
+#:
+#: Used by :mod:`mopidy.frontends.mpris`.
+#:
+#: Default::
+#:
+#:     DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
+DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
+
 #: List of server frontends to use.
 #:
 #: Default::
@@ -56,10 +65,12 @@ DEBUG_LOG_FILENAME = u'mopidy.log'
 #:     FRONTENDS = (
 #:         u'mopidy.frontends.mpd.MpdFrontend',
 #:         u'mopidy.frontends.lastfm.LastfmFrontend',
+#:         u'mopidy.frontends.mpris.MprisFrontend',
 #:     )
 FRONTENDS = (
     u'mopidy.frontends.mpd.MpdFrontend',
     u'mopidy.frontends.lastfm.LastfmFrontend',
+    u'mopidy.frontends.mpris.MprisFrontend',
 )
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
