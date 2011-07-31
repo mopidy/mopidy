@@ -555,7 +555,7 @@ class PlaybackControllerTest(object):
     @populate_playlist
     def test_pause_when_stopped(self):
         self.playback.pause()
-        self.assertEqual(self.playback.state, self.playback.STOPPED)
+        self.assertEqual(self.playback.state, self.playback.PAUSED)
 
     @populate_playlist
     def test_pause_when_playing(self):

@@ -28,6 +28,11 @@ v0.6.0 (in development)
 - The MPD command ``idle`` is now supported by Mopidy for the following
   subsystems: player, playlist, options, and mixer. (Fixes: :issue:`32`)
 
+- A new frontend :mod:`mopidy.frontends.mpris` have been added. It exposes
+  Mopidy through the `MPRIS interface <http://www.mpris.org/>`_ over D-Bus. In
+  practice, this makes it possible to control Mopidy thorugh the `Ubuntu Sound
+  Menu <https://wiki.ubuntu.com/SoundMenu>`_.
+
 **Changes**
 
 - Replace :attr:`mopidy.backends.base.Backend.uri_handlers` with
@@ -126,6 +131,18 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
   - Use :mod:`logging` instead of ``print`` statements.
 
   - Found and worked around strange WMA metadata behaviour.
+
+- Backend API:
+
+  - Calling on :meth:`mopidy.backends.base.playback.PlaybackController.next`
+    and :meth:`mopidy.backends.base.playback.PlaybackController.previous` no
+    longer implies that playback should be started. The playback state--whether
+    playing, paused or stopped--will now be kept.
+
+  - The method
+    :meth:`mopidy.backends.base.playback.PlaybackController.change_track`
+    has been added. Like ``next()``, and ``prev()``, it changes the current
+    track without changing the playback state.
 
 
 v0.4.1 (2011-05-06)

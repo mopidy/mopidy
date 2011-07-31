@@ -14,14 +14,41 @@ class BackendListener(object):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of backend listener events"""
-        # FIXME this should be updated once pykka supports non-blocking calls
-        # on proxies or some similar solution
+        # FIXME this should be updated once Pykka supports non-blocking calls
+        # on proxies or some similar solution.
         registry.ActorRegistry.broadcast({
             'command': 'pykka_call',
             'attr_path': (event,),
             'args': [],
             'kwargs': kwargs,
         }, target_class=BackendListener)
+
+    def track_playback_paused(self, track, time_position):
+        """
+        Called whenever track playback is paused.
+
+        *MAY* be implemented by actor.
+
+        :param track: the track that was playing when playback paused
+        :type track: :class:`mopidy.models.Track`
+        :param time_position: the time position in milliseconds
+        :type time_position: int
+        """
+        pass
+
+    def track_playback_resumed(self, track, time_position):
+        """
+        Called whenever track playback is resumed.
+
+        *MAY* be implemented by actor.
+
+        :param track: the track that was playing when playback resumed
+        :type track: :class:`mopidy.models.Track`
+        :param time_position: the time position in milliseconds
+        :type time_position: int
+        """
+        pass
+
 
     def track_playback_started(self, track):
         """
@@ -74,6 +101,15 @@ class BackendListener(object):
     def volume_changed(self):
         """
         Called whenever the volume is changed.
+
+        *MAY* be implemented by actor.
+        """
+        pass
+
+    def seeked(self):
+        """
+        Called whenever the time position changes by an unexpected amount, e.g.
+        at seek to a new time position.
 
         *MAY* be implemented by actor.
         """

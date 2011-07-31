@@ -9,26 +9,6 @@
     :members:
 
 
-MPD server
-==========
-
-.. inheritance-diagram:: mopidy.frontends.mpd.server
-
-.. automodule:: mopidy.frontends.mpd.server
-    :synopsis: MPD server
-    :members:
-
-
-MPD session
-===========
-
-.. inheritance-diagram:: mopidy.frontends.mpd.session
-
-.. automodule:: mopidy.frontends.mpd.session
-    :synopsis: MPD client session
-    :members:
-
-
 MPD dispatcher
 ==============
 
