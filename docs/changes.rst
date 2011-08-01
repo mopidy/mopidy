@@ -17,8 +17,7 @@ v0.6.0 (in development)
   - This means that your settings file will need to be moved from
     ``~/.mopidy/settings.py`` to ``~/.config/mopidy/settings.py``.
   - Your Spotify cache will now be stored in ``~/.cache/mopidy`` instead of
-    ``~/.mopidy/spotify_cache``, this matches Spotify's own behaviour for their
-    Linux client.
+    ``~/.mopidy/spotify_cache``.
   - The local backend's ``tag_cache`` should now be in
     ``~/.local/share/mopidy/tag_cache``, likewise your playlists will be in
     ``~/.local/share/mopidy/playlists``.
