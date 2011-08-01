@@ -273,7 +273,7 @@ loading from Mopidy 0.3.0 is still present.
     the debug log, to ease debugging of issues with attached debug logs.
 
 
-v0.3.1 (2010-01-22)
+v0.3.1 (2011-01-22)
 ===================
 
 A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
@@ -287,7 +287,7 @@ A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
   installed if the installation is executed as the root user.
 
 
-v0.3.0 (2010-01-22)
+v0.3.0 (2011-01-22)
 ===================
 
 Mopidy 0.3.0 brings a bunch of small changes all over the place, but no large
