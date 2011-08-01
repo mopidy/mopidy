@@ -7,7 +7,7 @@ from tests.frontends.mpd import protocol
 
 class IssueGH17RegressionTest(protocol.BaseTestCase):
     """
-    The issue: http://github.com/mopidy/mopidy/issues#issue/17
+    The issue: http://github.com/mopidy/mopidy/issues/17
 
     How to reproduce:
 
@@ -37,7 +37,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
 
 class IssueGH18RegressionTest(protocol.BaseTestCase):
     """
-    The issue: http://github.com/mopidy/mopidy/issues#issue/18
+    The issue: http://github.com/mopidy/mopidy/issues/18
 
     How to reproduce:
 
@@ -71,7 +71,7 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
 
 class IssueGH22RegressionTest(protocol.BaseTestCase):
     """
-    The issue: http://github.com/mopidy/mopidy/issues/#issue/22
+    The issue: http://github.com/mopidy/mopidy/issues/22
 
     How to reproduce:
 
@@ -101,7 +101,7 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
 
 class IssueGH69RegressionTest(protocol.BaseTestCase):
     """
-    The issue: https://github.com/mopidy/mopidy/issues#issue/69
+    The issue: https://github.com/mopidy/mopidy/issues/69
 
     How to reproduce:
 
