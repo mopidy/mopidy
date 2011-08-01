@@ -1,9 +1,11 @@
 import mock
-import unittest
 
 from mopidy import settings
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpris import objects
+
+from tests import unittest
+
 
 class RootInterfaceTest(unittest.TestCase):
     def setUp(self):

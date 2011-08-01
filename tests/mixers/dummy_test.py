@@ -1,7 +1,8 @@
-import unittest
-
 from mopidy.mixers.dummy import DummyMixer
+
+from tests import unittest
 from tests.mixers.base_test import BaseMixerTest
+
 
 class DenonMixerTest(BaseMixerTest, unittest.TestCase):
     mixer_class = DummyMixer

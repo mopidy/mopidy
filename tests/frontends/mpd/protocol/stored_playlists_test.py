@@ -1,8 +1,9 @@
-import datetime as dt
+import datetime
 
 from mopidy.models import Track, Playlist
 
 from tests.frontends.mpd import protocol
+
 
 class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylist(self):
@@ -33,7 +34,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
             u'ACK [50@0] {listplaylistinfo} No such playlist')
 
     def test_listplaylists(self):
-        last_modified = dt.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
         self.backend.stored_playlists.playlists = [Playlist(name='a',
             last_modified=last_modified)]
 

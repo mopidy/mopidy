@@ -1,24 +1,19 @@
-import unittest
 import os
-
-from tests import SkipTest
-
-# FIXME Our Windows build server does not support GStreamer yet
 import sys
-if sys.platform == 'win32':
-    raise SkipTest
 
 from mopidy import settings
 from mopidy.backends.local import LocalBackend
-from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Playlist, Track
 from mopidy.utils.path import path_to_uri
 
-from tests import path_to_data_dir
-from tests.backends.base.stored_playlists import \
-    StoredPlaylistsControllerTest
+from tests import unittest, path_to_data_dir
+from tests.backends.base.stored_playlists import (
+    StoredPlaylistsControllerTest)
 from tests.backends.local import generate_song
 
+
+@unittest.skipIf(sys.platform == 'win32',
+    'Our Windows build server does not support GStreamer yet')
 class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
         unittest.TestCase):
 
@@ -77,14 +72,18 @@ class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
         self.assertEqual('test', self.stored.playlists[0].name)
         self.assertEqual(track.uri, self.stored.playlists[0].tracks[0].uri)
 
+    @unittest.SkipTest
     def test_santitising_of_playlist_filenames(self):
-        raise SkipTest
+        pass
 
+    @unittest.SkipTest
     def test_playlist_folder_is_createad(self):
-        raise SkipTest
+        pass
 
+    @unittest.SkipTest
     def test_create_sets_playlist_uri(self):
-        raise SkipTest
+        pass
 
+    @unittest.SkipTest
     def test_save_sets_playlist_uri(self):
-        raise SkipTest
+        pass

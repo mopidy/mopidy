@@ -1,11 +1,13 @@
-import datetime as dt
+import datetime
 import os
-import unittest
 
 from mopidy import settings
 from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, Playlist, Track
+
+from tests import unittest
+
 
 class TrackMpdFormatTest(unittest.TestCase):
     track = Track(
@@ -15,7 +17,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         album=Album(name=u'an album', num_tracks=13,
             artists=[Artist(name=u'an other artist')]),
         track_no=7,
-        date=dt.date(1977, 1, 1),
+        date=datetime.date(1977, 1, 1),
         length=137000,
     )
 
@@ -61,7 +63,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Album', 'an album') in result)
         self.assert_(('AlbumArtist', 'an other artist') in result)
         self.assert_(('Track', '7/13') in result)
-        self.assert_(('Date', dt.date(1977, 1, 1)) in result)
+        self.assert_(('Date', datetime.date(1977, 1, 1)) in result)
         self.assert_(('Pos', 9) in result)
         self.assert_(('Id', 122) in result)
         self.assertEqual(len(result), 10)

@@ -1,9 +1,9 @@
-import datetime as dt
-import unittest
+import datetime
 
 from mopidy.models import Artist, Album, CpTrack, Track, Playlist
 
-from tests import SkipTest
+from tests import unittest
+
 
 class GenericCopyTets(unittest.TestCase):
     def compare(self, orig, other):
@@ -48,6 +48,7 @@ class GenericCopyTets(unittest.TestCase):
     def test_copying_track_with_invalid_key(self):
         test = lambda: Track().copy(invalid_key=True)
         self.assertRaises(TypeError, test)
+
 
 class ArtistTest(unittest.TestCase):
     def test_uri(self):
@@ -321,7 +322,7 @@ class TrackTest(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, track, 'track_no', None)
 
     def test_date(self):
-        date = dt.date(1977, 1, 1)
+        date = datetime.date(1977, 1, 1)
         track = Track(date=date)
         self.assertEqual(track.date, date)
         self.assertRaises(AttributeError, setattr, track, 'date', None)
@@ -400,7 +401,7 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_date(self):
-        date = dt.date.today()
+        date = datetime.date.today()
         track1 = Track(date=date)
         track2 = Track(date=date)
         self.assertEqual(track1, track2)
@@ -425,7 +426,7 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(hash(track1), hash(track2))
 
     def test_eq(self):
-        date = dt.date.today()
+        date = datetime.date.today()
         artists = [Artist()]
         album = Album()
         track1 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
@@ -474,8 +475,8 @@ class TrackTest(unittest.TestCase):
         self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_date(self):
-        track1 = Track(date=dt.date.today())
-        track2 = Track(date=dt.date.today()-dt.timedelta(days=1))
+        track1 = Track(date=datetime.date.today())
+        track2 = Track(date=datetime.date.today()-datetime.timedelta(days=1))
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 
@@ -500,11 +501,11 @@ class TrackTest(unittest.TestCase):
     def test_ne(self):
         track1 = Track(uri=u'uri1', name=u'name1',
             artists=[Artist(name=u'name1')], album=Album(name=u'name1'),
-            track_no=1, date=dt.date.today(), length=100, bitrate=100,
+            track_no=1, date=datetime.date.today(), length=100, bitrate=100,
             musicbrainz_id='id1')
         track2 = Track(uri=u'uri2', name=u'name2',
             artists=[Artist(name=u'name2')], album=Album(name=u'name2'),
-            track_no=2, date=dt.date.today()-dt.timedelta(days=1),
+            track_no=2, date=datetime.date.today()-datetime.timedelta(days=1),
             length=200, bitrate=200, musicbrainz_id='id2')
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
@@ -535,7 +536,7 @@ class PlaylistTest(unittest.TestCase):
         self.assertEqual(playlist.length, 3)
 
     def test_last_modified(self):
-        last_modified = dt.datetime.now()
+        last_modified = datetime.datetime.now()
         playlist = Playlist(last_modified=last_modified)
         self.assertEqual(playlist.last_modified, last_modified)
         self.assertRaises(AttributeError, setattr, playlist, 'last_modified',
@@ -543,7 +544,7 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_uri(self):
         tracks = [Track()]
-        last_modified = dt.datetime.now()
+        last_modified = datetime.datetime.now()
         playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_playlist = playlist.copy(uri=u'another uri')
@@ -554,7 +555,7 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_name(self):
         tracks = [Track()]
-        last_modified = dt.datetime.now()
+        last_modified = datetime.datetime.now()
         playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_playlist = playlist.copy(name=u'another name')
@@ -565,7 +566,7 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_tracks(self):
         tracks = [Track()]
-        last_modified = dt.datetime.now()
+        last_modified = datetime.datetime.now()
         playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_tracks = [Track(), Track()]
@@ -577,8 +578,8 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_last_modified(self):
         tracks = [Track()]
-        last_modified = dt.datetime.now()
-        new_last_modified = last_modified + dt.timedelta(1)
+        last_modified = datetime.datetime.now()
+        new_last_modified = last_modified + datetime.timedelta(1)
         playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_playlist = playlist.copy(last_modified=new_last_modified)

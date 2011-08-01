@@ -2,6 +2,7 @@ from mopidy import settings
 
 from tests.frontends.mpd import protocol
 
+
 class ReflectionHandlerTest(protocol.BaseTestCase):
     def test_commands_returns_list_of_all_commands(self):
         self.sendRequest(u'commands')

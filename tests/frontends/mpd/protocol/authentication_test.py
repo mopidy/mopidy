@@ -2,6 +2,7 @@ from mopidy import settings
 
 from tests.frontends.mpd import protocol
 
+
 class AuthenticationTest(protocol.BaseTestCase):
     def test_authentication_with_valid_password_is_accepted(self):
         settings.MPD_SERVER_PASSWORD = u'topsecret'

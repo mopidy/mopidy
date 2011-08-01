@@ -1,10 +1,10 @@
-import unittest
-
 from mopidy.backends import dummy as backend
 from mopidy.frontends.mpd import dispatcher
 from mopidy.frontends.mpd.protocol import status
 from mopidy.mixers import dummy as mixer
 from mopidy.models import Track
+
+from tests import unittest
 
 PAUSED = backend.PlaybackController.PAUSED
 PLAYING = backend.PlaybackController.PLAYING
@@ -12,6 +12,7 @@ STOPPED = backend.PlaybackController.STOPPED
 
 # FIXME migrate to using protocol.BaseTestCase instead of status.stats
 # directly?
+
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
