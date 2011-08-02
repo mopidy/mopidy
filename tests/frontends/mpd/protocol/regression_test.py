@@ -121,3 +121,28 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
         self.sendRequest(u'clear')
         self.sendRequest(u'load "foo"')
         self.assertNotInResponse('song: None')
+
+
+class IssueGH113RegressionTest(protocol.BaseTestCase):
+    """
+    The issue: https://github.com/mopidy/mopidy/issues/113
+
+    How to reproduce:
+
+    - Have a playlist with a name contining backslashes, like
+      "all lart spotify:track:\w\{22\} pastes".
+    - Try to load the playlist with the backslashes in the playlist name
+      escaped.
+    """
+
+    def test(self):
+        self.backend.stored_playlists.create(
+            u'all lart spotify:track:\w\{22\} pastes')
+
+        self.sendRequest(u'lsinfo "/"')
+        self.assertInResponse(
+            u'playlist: all lart spotify:track:\w\{22\} pastes')
+
+        self.sendRequest(
+            r'listplaylistinfo "all lart spotify:track:\\w\\{22\\} pastes"')
+        self.assertInResponse('OK')
