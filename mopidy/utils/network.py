@@ -369,7 +369,7 @@ class LineProtocol(ThreadingActor):
         Can be overridden by subclasses to change decoding behaviour.
         """
         try:
-            return line.decode('string_escape').decode(self.encoding)
+            return line.decode(self.encoding)
         except UnicodeError:
             logger.warning(u'Stopping actor due to decode problem, data '
                 'supplied by client was not valid %s', self.encoding)

@@ -230,12 +230,9 @@ class LineProtocolTest(unittest.TestCase):
 
     def test_decode_calls_decode_on_string(self):
         string = Mock()
-        unescaped_string = Mock()
-        string.decode.return_value = unescaped_string
 
         network.LineProtocol.decode(self.mock, string)
-        string.decode.assert_called_once_with('string_escape')
-        unescaped_string.decode.assert_called_once_with(self.mock.encoding)
+        string.decode.assert_called_once_with(self.mock.encoding)
 
     def test_decode_plain_ascii(self):
         result = network.LineProtocol.decode(self.mock, 'abc')

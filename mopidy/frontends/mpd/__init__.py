@@ -96,5 +96,13 @@ class MpdSession(network.LineProtocol):
     def on_idle(self, subsystem):
         self.dispatcher.handle_idle(subsystem)
 
+    def decode(self, line):
+        try:
+            return super(MpdSession, self).decode(line.decode('string_escape'))
+        except ValueError:
+            logger.warning(u'Stopping actor due to unescaping error, data '
+                'supplied by client was not valid.')
+            self.stop()
+
     def close(self):
         self.stop()
