@@ -48,6 +48,8 @@ v0.6.0 (in development)
 
 - Fix metadata update in Shoutcast streaming. (Fixes: :issue:`122`)
 
+- Unescape all incoming MPD requests. (Fixes: :issue:`113`)
+
 
 v0.5.0 (2011-06-15)
 ===================
