@@ -20,9 +20,8 @@ A command line client. Version 0.14 had some issues with Mopidy (see
 ncmpc
 -----
 
-A console client. Uses the ``idle`` command heavily, which Mopidy doesn't
-support yet (see :issue:`32`). If you want a console client, use ncmpcpp
-instead.
+A console client. Works with Mopidy 0.6 and upwards. Uses the ``idle`` MPD
+command, but in resource inefficient way.
 
 
 ncmpcpp
@@ -48,15 +47,15 @@ from `Launchpad <https://launchpad.net/ubuntu/+source/ncmpcpp>`_.
 Communication mode
 ^^^^^^^^^^^^^^^^^^
 
-In newer versions of ncmpcpp, like 0.5.5 shipped with Ubuntu 11.04, ncmcpp
-defaults to "notifications" mode for MPD communications, which Mopidy currently
-does not support. To workaround this limitation in Mopidy, edit the ncmpcpp
-configuration file at ``~/.ncmpcpp/config`` and add the following setting::
+In newer versions of ncmpcpp, like ncmpcpp 0.5.5 shipped with Ubuntu 11.04,
+ncmcpp defaults to "notifications" mode for MPD communications, which Mopidy
+did not support before Mopidy 0.6. To workaround this limitation in earlier
+versions of Mopidy, edit the ncmpcpp configuration file at
+``~/.ncmpcpp/config`` and add the following setting::
 
     mpd_communication_mode = "polling"
 
-You can track the development of "notifications" mode support in Mopidy in
-:issue:`32`.
+If you use Mopidy 0.6 or newer, you don't need to change anything.
 
 
 Graphical clients
