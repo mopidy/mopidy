@@ -21,7 +21,7 @@ ncmpc
 -----
 
 A console client. Works with Mopidy 0.6 and upwards. Uses the ``idle`` MPD
-command, but in resource inefficient way.
+command, but in a resource inefficient way.
 
 
 ncmpcpp
