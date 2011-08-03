@@ -17,4 +17,4 @@ class LocalOutput(BaseOutput):
     """
 
     def describe_bin(self):
-        return 'autoaudiosink'
+        return 'volume ! autoaudiosink'

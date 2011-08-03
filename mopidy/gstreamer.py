@@ -38,7 +38,6 @@ class GStreamer(ThreadingActor):
         self._source = None
         self._tee = None
         self._uridecodebin = None
-        self._volume = None
         self._outputs = []
         self._handlers = {}
 
@@ -51,14 +50,12 @@ class GStreamer(ThreadingActor):
         description = ' ! '.join([
             'uridecodebin name=uri',
             'audioconvert name=convert',
-            'volume name=volume',
             'tee name=tee'])
 
         logger.debug(u'Setting up base GStreamer pipeline: %s', description)
 
         self._pipeline = gst.parse_launch(description)
         self._tee = self._pipeline.get_by_name('tee')
-        self._volume = self._pipeline.get_by_name('volume')
         self._uridecodebin = self._pipeline.get_by_name('uri')
 
         self._uridecodebin.connect('notify::source', self._on_new_source)
@@ -247,7 +244,14 @@ class GStreamer(ThreadingActor):
 
         :rtype: int in range [0..100]
         """
-        return int(self._volume.get_property('volume') * 100)
+        mixers = self._pipeline.iterate_all_by_interface(gst.interfaces.Mixer)
+        try:
+            mixer = mixers.next()
+        except StopIteration:
+            return 0
+        # FIXME this _will_ break for mixers that don't implement
+        # GstStreamVolume
+        return int(mixer.get_property('volume') * 100)
 
     def set_volume(self, volume):
         """
@@ -257,7 +261,11 @@ class GStreamer(ThreadingActor):
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self._volume.set_property('volume', volume / 100.0)
+        mixers = self._pipeline.iterate_all_by_interface(gst.interfaces.Mixer)
+        for mixer in mixers:
+            # FIXME this _will_ break for mixers that don't implement
+            # GstStreamVolume
+            mixer.set_property('volume', volume / 100.0)
         return True
 
     def set_metadata(self, track):
