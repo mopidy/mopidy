@@ -17,10 +17,6 @@ class StoredPlaylistsController(object):
         self.backend = backend
         self.provider = provider
 
-    def destroy(self):
-        """Cleanup after component."""
-        self.provider.destroy()
-
     @property
     def playlists(self):
         """
@@ -132,14 +128,6 @@ class BaseStoredPlaylistsProvider(object):
     def __init__(self, backend):
         self.backend = backend
         self._playlists = []
-
-    def destroy(self):
-        """
-        Cleanup after component.
-
-        *MAY be implemented by subclass.*
-        """
-        pass
 
     @property
     def playlists(self):

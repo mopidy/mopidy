@@ -16,10 +16,6 @@ class LibraryController(object):
         self.backend = backend
         self.provider = provider
 
-    def destroy(self):
-        """Cleanup after component."""
-        self.provider.destroy()
-
     def find_exact(self, **query):
         """
         Search the library for tracks where ``field`` is ``values``.
@@ -88,14 +84,6 @@ class BaseLibraryProvider(object):
 
     def __init__(self, backend):
         self.backend = backend
-
-    def destroy(self):
-        """
-        Cleanup after component.
-
-        *MAY be implemented by subclasses.*
-        """
-        pass
 
     def find_exact(self, **query):
         """

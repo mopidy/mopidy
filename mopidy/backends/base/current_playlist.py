@@ -21,10 +21,6 @@ class CurrentPlaylistController(object):
         self._cp_tracks = []
         self._version = 0
 
-    def destroy(self):
-        """Cleanup after component."""
-        pass
-
     @property
     def cp_tracks(self):
         """

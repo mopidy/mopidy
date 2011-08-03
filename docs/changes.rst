@@ -50,6 +50,12 @@ v0.6.0 (in development)
 
 - Unescape all incoming MPD requests. (Fixes: :issue:`113`)
 
+**multi-backend changes**
+
+- Remove `destroy()` methods from backend controller and provider APIs, as it
+  was not in use and actually not called by any code. Will reintroduce when
+  needed.
+
 
 v0.5.0 (2011-06-15)
 ===================
