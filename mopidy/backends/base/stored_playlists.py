@@ -189,4 +189,3 @@ class BaseStoredPlaylistsProvider(object):
         *MUST be implemented by subclass.*
         """
         raise NotImplementedError
-

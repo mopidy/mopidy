@@ -78,7 +78,8 @@ class SpotifyBackend(ThreadingActor, Backend):
 
     def on_start(self):
         gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        assert len(gstreamer_refs) == 1, \
+            'Expected exactly one running GStreamer.'
         self.gstreamer = gstreamer_refs[0].proxy()
 
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
