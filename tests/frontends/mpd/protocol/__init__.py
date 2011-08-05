@@ -8,9 +8,9 @@ from mopidy.mixers import dummy as mixer
 from tests import unittest
 
 
-class MockConnetion(mock.Mock):
+class MockConnection(mock.Mock):
     def __init__(self, *args, **kwargs):
-        super(MockConnetion, self).__init__(*args, **kwargs)
+        super(MockConnection, self).__init__(*args, **kwargs)
         self.host = mock.sentinel.host
         self.port = mock.sentinel.port
         self.response = []
@@ -25,7 +25,7 @@ class BaseTestCase(unittest.TestCase):
         self.backend = backend.DummyBackend.start().proxy()
         self.mixer = mixer.DummyMixer.start().proxy()
 
-        self.connection = MockConnetion()
+        self.connection = MockConnection()
         self.session = mpd.MpdSession(self.connection)
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
