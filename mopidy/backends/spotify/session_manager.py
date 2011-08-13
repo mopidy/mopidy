@@ -151,9 +151,12 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         """Search method used by Mopidy backend"""
         def callback(results, userdata=None):
             # TODO Include results from results.albums(), etc. too
+            # TODO Consider launching a second search if results.total_tracks()
+            # is larger than len(results.tracks())
             playlist = Playlist(tracks=[
                 SpotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
             queue.put(playlist)
         self.connected.wait()
-        self.session.search(query, callback)
+        self.session.search(query, callback, track_count=100,
+            album_count=0, artist_count=0)

@@ -50,6 +50,9 @@ v0.6.0 (in development)
 
 - Unescape all incoming MPD requests. (Fixes: :issue:`113`)
 
+- Increase the maximum number of results returned by Spotify searches from 32
+  to 100.
+
 **multi-backend changes**
 
 - Remove `destroy()` methods from backend controller and provider APIs, as it
