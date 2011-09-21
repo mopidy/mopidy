@@ -85,6 +85,9 @@ class SpotifyBackend(ThreadingActor, Backend):
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         self.spotify = self._connect()
 
+    def on_stop(self):
+        self.spotify.logout()
+
     def _connect(self):
         from .session_manager import SpotifySessionManager
 

@@ -160,3 +160,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self.connected.wait()
         self.session.search(query, callback, track_count=100,
             album_count=0, artist_count=0)
+
+    def logout(self):
+        """Log out from spotify"""
+        logger.debug(u'Logging out from spotify')
+        self.session.logout()
