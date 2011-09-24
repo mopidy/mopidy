@@ -12,6 +12,8 @@ v0.6.0 (in development)
 
 - Pykka 0.12.3 or greater is required.
 
+- pyspotify 1.4 or greater is required.
+
 - All config, data, and cache locations are now based on the XDG spec.
 
   - This means that your settings file will need to be moved from
@@ -52,6 +54,9 @@ v0.6.0 (in development)
 
 - Increase the maximum number of results returned by Spotify searches from 32
   to 100.
+
+- Send Spotify search queries to pyspotify as unicode objects, as required by
+  pyspotify 1.4. (Fixes: :issue:`129`)
 
 **multi-backend changes**
 

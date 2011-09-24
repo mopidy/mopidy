@@ -55,7 +55,7 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
         spotify_query = u' '.join(spotify_query)
         logger.debug(u'Spotify search query: %s' % spotify_query)
         queue = Queue.Queue()
-        self.backend.spotify.search(spotify_query.encode(ENCODING), queue)
+        self.backend.spotify.search(spotify_query, queue)
         try:
             return queue.get(timeout=3) # XXX What is an reasonable timeout?
         except Queue.Empty:
