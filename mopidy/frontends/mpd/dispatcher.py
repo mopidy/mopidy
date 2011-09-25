@@ -90,7 +90,7 @@ class MpdDispatcher(object):
     def _authenticate_filter(self, request, response, filter_chain):
         if self.authenticated:
             return self._call_next_filter(request, response, filter_chain)
-        elif  settings.MPD_SERVER_PASSWORD is None:
+        elif settings.MPD_SERVER_PASSWORD is None:
             self.authenticated = True
             return self._call_next_filter(request, response, filter_chain)
         else:
@@ -160,6 +160,7 @@ class MpdDispatcher(object):
 
     def _has_error(self, response):
         return response and response[-1].startswith(u'ACK')
+
 
     ### Filter: call handler
 
@@ -241,11 +242,10 @@ class MpdContext(object):
         """
         The backend. An instance of :class:`mopidy.backends.base.Backend`.
         """
-        if self._backend is not None:
-            return self._backend
-        backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        self._backend = backend_refs[0].proxy()
+        if self._backend is None:
+            backend_refs = ActorRegistry.get_by_class(Backend)
+            assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+            self._backend = backend_refs[0].proxy()
         return self._backend
 
     @property
@@ -253,9 +253,8 @@ class MpdContext(object):
         """
         The mixer. An instance of :class:`mopidy.mixers.base.BaseMixer`.
         """
-        if self._mixer is not None:
-            return self._mixer
-        mixer_refs = ActorRegistry.get_by_class(BaseMixer)
-        assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
-        self._mixer = mixer_refs[0].proxy()
+        if self._mixer is None:
+            mixer_refs = ActorRegistry.get_by_class(BaseMixer)
+            assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
+            self._mixer = mixer_refs[0].proxy()
         return self._mixer
