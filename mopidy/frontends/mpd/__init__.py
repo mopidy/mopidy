@@ -29,7 +29,8 @@ class MpdFrontend(actor.ThreadingActor, listeners.BackendListener):
         port = settings.MPD_SERVER_PORT
 
         try:
-            network.Server(hostname, port, protocol=MpdSession)
+            network.Server(hostname, port, protocol=MpdSession,
+                max_connections=settings.MPD_SERVER_MAX_CONNECTIONS)
         except IOError, e:
             logger.error(u'MPD server startup failed: %s', e)
             sys.exit(1)

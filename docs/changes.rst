@@ -58,6 +58,9 @@ v0.6.0 (in development)
 - Send Spotify search queries to pyspotify as unicode objects, as required by
   pyspotify 1.4. (Fixes: :issue:`129`)
 
+- Add setting :attr:`mopidy.settings.MPD_SERVER_MAX_CONNECTIONS`. (Fixes:
+  :issue:`134`)
+
 **multi-backend changes**
 
 - Remove `destroy()` methods from backend controller and provider APIs, as it

@@ -180,6 +180,11 @@ MPD_SERVER_PORT = 6600
 #: Default: :class:`None`, which means no password required.
 MPD_SERVER_PASSWORD = None
 
+#: The maximum number of concurrent connections the MPD server will accept.
+#:
+#: Default: 20
+MPD_SERVER_MAX_CONNECTIONS = 20
+
 #: List of outputs to use. See :mod:`mopidy.outputs` for all available
 #: backends
 #:
