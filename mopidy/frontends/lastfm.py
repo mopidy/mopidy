@@ -10,14 +10,14 @@ except ImportError as import_error:
 from pykka.actor import ThreadingActor
 
 from mopidy import settings, SettingsError
-from mopidy.frontends.base import BaseFrontend
+from mopidy.listeners import BackendListener
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
 API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
-class LastfmFrontend(ThreadingActor, BaseFrontend):
+class LastfmFrontend(ThreadingActor, BackendListener):
     """
     Frontend which scrobbles the music you play to your `Last.fm
     <http://www.last.fm>`_ profile.
@@ -57,15 +57,7 @@ class LastfmFrontend(ThreadingActor, BaseFrontend):
             logger.error(u'Error during Last.fm setup: %s', e)
             self.stop()
 
-    def on_receive(self, message):
-        if message.get('command') == 'started_playing':
-            self.started_playing(message['track'])
-        elif message.get('command') == 'stopped_playing':
-            self.stopped_playing(message['track'], message['stop_position'])
-        else:
-            pass # Ignore any other messages
-
-    def started_playing(self, track):
+    def track_playback_started(self, track):
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
         self.last_start_time = int(time.time())
@@ -82,14 +74,14 @@ class LastfmFrontend(ThreadingActor, BaseFrontend):
                 pylast.MalformedResponseError, pylast.WSError) as e:
             logger.warning(u'Error submitting playing track to Last.fm: %s', e)
 
-    def stopped_playing(self, track, stop_position):
+    def track_playback_ended(self, track, time_position):
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
-        stop_position = stop_position // 1000
+        time_position = time_position // 1000
         if duration < 30:
             logger.debug(u'Track too short to scrobble. (30s)')
             return
-        if stop_position < duration // 2 and stop_position < 240:
+        if time_position < duration // 2 and time_position < 240:
             logger.debug(
                 u'Track not played long enough to scrobble. (50% or 240s)')
             return

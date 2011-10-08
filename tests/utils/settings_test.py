@@ -1,9 +1,11 @@
 import os
-import unittest
 
 from mopidy import settings as default_settings_module, SettingsError
 from mopidy.utils.settings import (format_settings_list, mask_value_if_secret,
     SettingsProxy, validate_settings)
+
+from tests import unittest
+
 
 class ValidateSettingsTest(unittest.TestCase):
     def setUp(self):
@@ -149,6 +151,14 @@ class SettingsProxyTest(unittest.TestCase):
         self.settings.TEST = './test'
         actual = self.settings.TEST
         self.assertEqual(actual, './test')
+
+    def test_value_ending_in_file_can_be_none(self):
+        self.settings.TEST_FILE = None
+        self.assertEqual(self.settings.TEST_FILE, None)
+
+    def test_value_ending_in_path_can_be_none(self):
+        self.settings.TEST_PATH = None
+        self.assertEqual(self.settings.TEST_PATH, None)
 
     def test_interactive_input_of_missing_defaults(self):
         self.settings.default['TEST'] = ''

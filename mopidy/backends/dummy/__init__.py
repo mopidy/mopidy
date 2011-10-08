@@ -32,7 +32,7 @@ class DummyBackend(ThreadingActor, Backend):
         self.stored_playlists = StoredPlaylistsController(backend=self,
             provider=stored_playlists_provider)
 
-        self.uri_handlers = [u'dummy:']
+        self.uri_schemes = [u'dummy']
 
 
 class DummyLibraryProvider(BaseLibraryProvider):

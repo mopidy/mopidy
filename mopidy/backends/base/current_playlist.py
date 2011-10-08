@@ -2,6 +2,7 @@ from copy import copy
 import logging
 import random
 
+from mopidy.listeners import BackendListener
 from mopidy.models import CpTrack
 
 logger = logging.getLogger('mopidy.backends.base')
@@ -16,12 +17,9 @@ class CurrentPlaylistController(object):
 
     def __init__(self, backend):
         self.backend = backend
+        self.cp_id = 0
         self._cp_tracks = []
         self._version = 0
-
-    def destroy(self):
-        """Cleanup after component."""
-        pass
 
     @property
     def cp_tracks(self):
@@ -53,8 +51,9 @@ class CurrentPlaylistController(object):
     def version(self, version):
         self._version = version
         self.backend.playback.on_current_playlist_change()
+        self._trigger_playlist_changed()
 
-    def add(self, track, at_position=None):
+    def add(self, track, at_position=None, increase_version=True):
         """
         Add the track to the end of, or at the given position in the current
         playlist.
@@ -68,12 +67,14 @@ class CurrentPlaylistController(object):
         """
         assert at_position <= len(self._cp_tracks), \
             u'at_position can not be greater than playlist length'
-        cp_track = CpTrack(self.version, track)
+        cp_track = CpTrack(self.cp_id, track)
         if at_position is not None:
             self._cp_tracks.insert(at_position, cp_track)
         else:
             self._cp_tracks.append(cp_track)
-        self.version += 1
+        if increase_version:
+            self.version += 1
+        self.cp_id += 1
         return cp_track
 
     def append(self, tracks):
@@ -84,7 +85,10 @@ class CurrentPlaylistController(object):
         :type tracks: list of :class:`mopidy.models.Track`
         """
         for track in tracks:
-            self.add(track)
+            self.add(track, increase_version=False)
+
+        if tracks:
+            self.version += 1
 
     def clear(self):
         """Clear the current playlist."""
@@ -199,3 +203,7 @@ class CurrentPlaylistController(object):
         random.shuffle(shuffled)
         self._cp_tracks = before + shuffled + after
         self.version += 1
+
+    def _trigger_playlist_changed(self):
+        logger.debug(u'Triggering playlist changed event')
+        BackendListener.send('playlist_changed')

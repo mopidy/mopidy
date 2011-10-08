@@ -67,7 +67,7 @@ class SpotifyBackend(ThreadingActor, Backend):
         self.stored_playlists = StoredPlaylistsController(backend=self,
             provider=stored_playlists_provider)
 
-        self.uri_handlers = [u'spotify:', u'http://open.spotify.com/']
+        self.uri_schemes = [u'spotify']
 
         self.gstreamer = None
         self.spotify = None
@@ -78,11 +78,15 @@ class SpotifyBackend(ThreadingActor, Backend):
 
     def on_start(self):
         gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        assert len(gstreamer_refs) == 1, \
+            'Expected exactly one running GStreamer.'
         self.gstreamer = gstreamer_refs[0].proxy()
 
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         self.spotify = self._connect()
+
+    def on_stop(self):
+        self.spotify.logout()
 
     def _connect(self):
         from .session_manager import SpotifySessionManager

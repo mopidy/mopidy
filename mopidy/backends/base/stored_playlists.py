@@ -17,10 +17,6 @@ class StoredPlaylistsController(object):
         self.backend = backend
         self.provider = provider
 
-    def destroy(self):
-        """Cleanup after component."""
-        self.provider.destroy()
-
     @property
     def playlists(self):
         """
@@ -133,14 +129,6 @@ class BaseStoredPlaylistsProvider(object):
         self.backend = backend
         self._playlists = []
 
-    def destroy(self):
-        """
-        Cleanup after component.
-
-        *MAY be implemented by subclass.*
-        """
-        pass
-
     @property
     def playlists(self):
         """
@@ -201,4 +189,3 @@ class BaseStoredPlaylistsProvider(object):
         *MUST be implemented by subclass.*
         """
         raise NotImplementedError
-

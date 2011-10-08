@@ -1,16 +1,17 @@
-import unittest
 from datetime import date
 
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
 
-from tests import path_to_data_dir, SkipTest
+from tests import unittest, path_to_data_dir
+
 
 class FakeGstDate(object):
     def __init__(self, year, month, day):
         self.year = year
         self.month = month
         self.day = day
+
 
 class TranslatorTest(unittest.TestCase):
     def setUp(self):
@@ -126,6 +127,7 @@ class TranslatorTest(unittest.TestCase):
         del self.track['date']
         self.check()
 
+
 class ScannerTest(unittest.TestCase):
     def setUp(self):
         self.errors = {}
@@ -185,6 +187,6 @@ class ScannerTest(unittest.TestCase):
         self.scan('scanner/image')
         self.assert_(self.errors)
 
-    @SkipTest
+    @unittest.SkipTest
     def test_song_without_time_is_handeled(self):
         pass

@@ -1,15 +1,17 @@
-import unittest
-
 from mopidy.utils import get_class
+
+from tests import unittest
+
 
 class GetClassTest(unittest.TestCase):
     def test_loading_module_that_does_not_exist(self):
-        test = lambda: get_class('foo.bar.Baz')
-        self.assertRaises(ImportError, test)
+        self.assertRaises(ImportError, get_class, 'foo.bar.Baz')
 
     def test_loading_class_that_does_not_exist(self):
-        test = lambda: get_class('unittest.FooBarBaz')
-        self.assertRaises(ImportError, test)
+        self.assertRaises(ImportError, get_class, 'unittest.FooBarBaz')
+
+    def test_loading_incorrect_class_path(self):
+        self.assertRaises(ImportError, get_class, 'foobarbaz')
 
     def test_import_error_message_contains_complete_class_path(self):
         try:

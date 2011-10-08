@@ -1,4 +1,8 @@
 import nose
+import yappi
 
-if __name__ == '__main__':
+try:
+    yappi.start()
     nose.main()
+finally:
+    yappi.print_stats()

@@ -4,12 +4,12 @@ import os
 import shutil
 import sys
 import tempfile
-import unittest
 
 from mopidy.utils.path import (get_or_create_folder, mtime,
     path_to_uri, uri_to_path, split_path, find_files)
 
-from tests import path_to_data_dir
+from tests import unittest, path_to_data_dir
+
 
 class GetOrCreateFolderTest(unittest.TestCase):
     def setUp(self):

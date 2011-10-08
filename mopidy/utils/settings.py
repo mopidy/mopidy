@@ -2,12 +2,13 @@
 from __future__ import absolute_import
 from copy import copy
 import getpass
+import glib
 import logging
 import os
 from pprint import pformat
 import sys
 
-from mopidy import SettingsError
+from mopidy import SettingsError, SETTINGS_PATH, SETTINGS_FILE
 from mopidy.utils.log import indent
 
 logger = logging.getLogger('mopidy.utils.settings')
@@ -20,11 +21,9 @@ class SettingsProxy(object):
         self.runtime = {}
 
     def _get_local_settings(self):
-        dotdir = os.path.expanduser(u'~/.mopidy/')
-        settings_file = os.path.join(dotdir, u'settings.py')
-        if not os.path.isfile(settings_file):
+        if not os.path.isfile(SETTINGS_FILE):
             return {}
-        sys.path.insert(0, dotdir)
+        sys.path.insert(0, SETTINGS_PATH)
         # pylint: disable = F0401
         import settings as local_settings_module
         # pylint: enable = F0401
@@ -53,6 +52,8 @@ class SettingsProxy(object):
         value = self.current[attr]
         if isinstance(value, basestring) and len(value) == 0:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
+        if not value:
+            return value
         if attr.endswith('_PATH') or attr.endswith('_FILE'):
             value = os.path.expanduser(value)
             value = os.path.abspath(value)

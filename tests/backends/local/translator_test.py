@@ -2,13 +2,12 @@
 
 import os
 import tempfile
-import unittest
 
 from mopidy.utils.path import path_to_uri
 from mopidy.backends.local.translator import parse_m3u, parse_mpd_tag_cache
 from mopidy.models import Track, Artist, Album
 
-from tests import SkipTest, path_to_data_dir
+from tests import unittest, path_to_data_dir
 
 song1_path = path_to_data_dir('song1.mp3')
 song2_path = path_to_data_dir('song2.mp3')
@@ -16,6 +15,9 @@ encoded_path = path_to_data_dir(u'æøå.mp3')
 song1_uri = path_to_uri(song1_path)
 song2_uri = path_to_uri(song2_path)
 encoded_uri = path_to_uri(encoded_path)
+
+# FIXME use mock instead of tempfile.NamedTemporaryFile
+
 
 class M3UToUriTest(unittest.TestCase):
     def test_empty_file(self):
@@ -127,9 +129,10 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
 
         self.assertEqual(track, list(tracks)[0])
 
+    @unittest.SkipTest
     def test_misencoded_cache(self):
         # FIXME not sure if this can happen
-        raise SkipTest
+        pass
 
     def test_cache_with_blank_track_info(self):
         tracks = parse_mpd_tag_cache(path_to_data_dir('blank_tag_cache'),

@@ -11,28 +11,16 @@ def commands(context):
         Shows which commands the current user has access to.
     """
     if context.dispatcher.authenticated:
-        command_names = [command.name for command in mpd_commands]
+        command_names = set([command.name for command in mpd_commands])
     else:
-        command_names = [command.name for command in mpd_commands
-            if not command.auth_required]
+        command_names = set([command.name for command in mpd_commands
+            if not command.auth_required])
 
-    # No permission to use
-    if 'kill' in command_names:
-        command_names.remove('kill')
-
-    # Not shown by MPD in its command list
-    if 'command_list_begin' in command_names:
-        command_names.remove('command_list_begin')
-    if 'command_list_ok_begin' in command_names:
-        command_names.remove('command_list_ok_begin')
-    if 'command_list_end' in command_names:
-        command_names.remove('command_list_end')
-    if 'idle' in command_names:
-        command_names.remove('idle')
-    if 'noidle' in command_names:
-        command_names.remove('noidle')
-    if 'sticker' in command_names:
-        command_names.remove('sticker')
+    # No one is permited to use kill, rest of commands are not listed by MPD,
+    # so we shouldn't either.
+    command_names = command_names - set(['kill', 'command_list_begin',
+        'command_list_ok_begin', 'command_list_ok_begin', 'command_list_end',
+        'idle', 'noidle', 'sticker'])
 
     return [('command', command_name) for command_name in sorted(command_names)]
 
@@ -95,4 +83,5 @@ def urlhandlers(context):
 
         Gets a list of available URL handlers.
     """
-    return [(u'handler', uri) for uri in context.backend.uri_handlers.get()]
+    return [(u'handler', uri_scheme)
+        for uri_scheme in context.backend.uri_schemes.get()]

@@ -1,6 +1,7 @@
 from mopidy.models import Playlist, Track, Album, Artist
 
-from tests import SkipTest, path_to_data_dir
+from tests import unittest, path_to_data_dir
+
 
 class LibraryControllerTest(object):
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
@@ -20,11 +21,13 @@ class LibraryControllerTest(object):
     def test_refresh(self):
         self.library.refresh()
 
+    @unittest.SkipTest
     def test_refresh_uri(self):
-        raise SkipTest
+        pass
 
+    @unittest.SkipTest
     def test_refresh_missing_uri(self):
-        raise SkipTest
+        pass
 
     def test_lookup(self):
         track = self.library.lookup(self.tracks[0].uri)

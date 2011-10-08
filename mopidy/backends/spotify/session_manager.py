@@ -1,3 +1,4 @@
+import glib
 import logging
 import os
 import threading
@@ -6,7 +7,7 @@ from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from pykka.registry import ActorRegistry
 
-from mopidy import get_version, settings
+from mopidy import get_version, settings, CACHE_PATH
 from mopidy.backends.base import Backend
 from mopidy.backends.spotify import BITRATES
 from mopidy.backends.spotify.container_manager import SpotifyContainerManager
@@ -21,9 +22,10 @@ logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 # pylint: disable = R0901
 # SpotifySessionManager: Too many ancestors (9/7)
 
+
 class SpotifySessionManager(BaseThread, PyspotifySessionManager):
-    cache_location = settings.SPOTIFY_CACHE_PATH
-    settings_location = settings.SPOTIFY_CACHE_PATH
+    cache_location = settings.SPOTIFY_CACHE_PATH or CACHE_PATH
+    settings_location = settings.SPOTIFY_CACHE_PATH or CACHE_PATH
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
@@ -118,6 +120,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             'channels': channels,
         }
         self.gstreamer.emit_data(capabilites, bytes(frames))
+        return num_frames
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
@@ -148,9 +151,17 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         """Search method used by Mopidy backend"""
         def callback(results, userdata=None):
             # TODO Include results from results.albums(), etc. too
+            # TODO Consider launching a second search if results.total_tracks()
+            # is larger than len(results.tracks())
             playlist = Playlist(tracks=[
                 SpotifyTranslator.to_mopidy_track(t)
                 for t in results.tracks()])
             queue.put(playlist)
         self.connected.wait()
-        self.session.search(query, callback)
+        self.session.search(query, callback, track_count=100,
+            album_count=0, artist_count=0)
+
+    def logout(self):
+        """Log out from spotify"""
+        logger.debug(u'Logging out from spotify')
+        self.session.logout()

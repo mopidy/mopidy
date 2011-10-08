@@ -4,7 +4,7 @@ Available settings and their default values.
 .. warning::
 
     Do *not* change settings directly in :mod:`mopidy.settings`. Instead, add a
-    file called ``~/.mopidy/settings.py`` and redefine settings there.
+    file called ``~/.config/mopidy/settings.py`` and redefine settings there.
 """
 
 #: List of playback backends to use. See :mod:`mopidy.backends` for all
@@ -26,7 +26,8 @@ BACKENDS = (
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
-#: Which GStreamer bin description to use in :class:`mopidy.outputs.CustomOutput`.
+#: Which GStreamer bin description to use in
+#: :class:`mopidy.outputs.custom.CustomOutput`.
 #:
 #: Default::
 #:
@@ -48,6 +49,15 @@ DEBUG_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
 #:     DEBUG_LOG_FILENAME = u'mopidy.log'
 DEBUG_LOG_FILENAME = u'mopidy.log'
 
+#: Location of the Mopidy .desktop file.
+#:
+#: Used by :mod:`mopidy.frontends.mpris`.
+#:
+#: Default::
+#:
+#:     DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
+DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
+
 #: List of server frontends to use.
 #:
 #: Default::
@@ -55,10 +65,12 @@ DEBUG_LOG_FILENAME = u'mopidy.log'
 #:     FRONTENDS = (
 #:         u'mopidy.frontends.mpd.MpdFrontend',
 #:         u'mopidy.frontends.lastfm.LastfmFrontend',
+#:         u'mopidy.frontends.mpris.MprisFrontend',
 #:     )
 FRONTENDS = (
     u'mopidy.frontends.mpd.MpdFrontend',
     u'mopidy.frontends.lastfm.LastfmFrontend',
+    u'mopidy.frontends.mpris.MprisFrontend',
 )
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
@@ -77,8 +89,9 @@ LASTFM_PASSWORD = u''
 #:
 #: Default::
 #:
-#:    LOCAL_MUSIC_PATH = u'~/music'
-LOCAL_MUSIC_PATH = u'~/music'
+#:    # Defaults to asking glib where music is stored, fallback is ~/music
+#:    LOCAL_MUSIC_PATH = None
+LOCAL_MUSIC_PATH = None
 
 #: Path to playlist folder with m3u files for local music.
 #:
@@ -86,8 +99,8 @@ LOCAL_MUSIC_PATH = u'~/music'
 #:
 #: Default::
 #:
-#:    LOCAL_PLAYLIST_PATH = u'~/.mopidy/playlists'
-LOCAL_PLAYLIST_PATH = u'~/.mopidy/playlists'
+#:    LOCAL_PLAYLIST_PATH = None # Implies $XDG_DATA_DIR/mopidy/playlists
+LOCAL_PLAYLIST_PATH = None
 
 #: Path to tag cache for local music.
 #:
@@ -95,8 +108,8 @@ LOCAL_PLAYLIST_PATH = u'~/.mopidy/playlists'
 #:
 #: Default::
 #:
-#:    LOCAL_TAG_CACHE_FILE = u'~/.mopidy/tag_cache'
-LOCAL_TAG_CACHE_FILE = u'~/.mopidy/tag_cache'
+#:    LOCAL_TAG_CACHE_FILE = None # Implies $XDG_DATA_DIR/mopidy/tag_cache
+LOCAL_TAG_CACHE_FILE = None
 
 #: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
 #:
@@ -167,6 +180,11 @@ MPD_SERVER_PORT = 6600
 #: Default: :class:`None`, which means no password required.
 MPD_SERVER_PASSWORD = None
 
+#: The maximum number of concurrent connections the MPD server will accept.
+#:
+#: Default: 20
+MPD_SERVER_MAX_CONNECTIONS = 20
+
 #: List of outputs to use. See :mod:`mopidy.outputs` for all available
 #: backends
 #:
@@ -236,7 +254,7 @@ SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
 #: Path to the Spotify cache.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-SPOTIFY_CACHE_PATH = u'~/.mopidy/spotify_cache'
+SPOTIFY_CACHE_PATH = None
 
 #: Your Spotify Premium username.
 #:
