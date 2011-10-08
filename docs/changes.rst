@@ -5,8 +5,19 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.6.0 (in development)
-=======================
+v0.6.0 (2011-10-09)
+===================
+
+The development of Mopidy have been quite slow for the last couple of months,
+but we do have some goodies to release which have been idling in the
+develop branch since the warmer days of the summer. This release brings support
+for the MPD ``idle`` command, which makes it possible for a client wait for
+updates from the server instead of polling every second. Also, we've added
+support for the MPRIS standard, so that Mopidy can be controlled over D-Bus
+from e.g. the Ubuntu Sound Menu.
+
+Please note that 0.6.0 requires some updated dependencies, as listed under
+*Important changes* below.
 
 **Important changes**
 
@@ -31,7 +42,7 @@ v0.6.0 (in development)
 
 - A new frontend :mod:`mopidy.frontends.mpris` have been added. It exposes
   Mopidy through the `MPRIS interface <http://www.mpris.org/>`_ over D-Bus. In
-  practice, this makes it possible to control Mopidy thorugh the `Ubuntu Sound
+  practice, this makes it possible to control Mopidy through the `Ubuntu Sound
   Menu <https://wiki.ubuntu.com/SoundMenu>`_.
 
 **Changes**
@@ -60,8 +71,6 @@ v0.6.0 (in development)
 
 - Add setting :attr:`mopidy.settings.MPD_SERVER_MAX_CONNECTIONS`. (Fixes:
   :issue:`134`)
-
-**multi-backend changes**
 
 - Remove `destroy()` methods from backend controller and provider APIs, as it
   was not in use and actually not called by any code. Will reintroduce when
