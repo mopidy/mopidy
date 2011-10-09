@@ -10,10 +10,10 @@ changes you may want to do, and a complete listing of available settings.
 Changing settings
 =================
 
-Mopidy reads settings from the file ``~/.mopidy/settings.py``, where ``~``
-means your *home directory*. If your username is ``alice`` and you are running
-Linux, the settings file should probably be at
-``/home/alice/.mopidy/settings.py``.
+Mopidy reads settings from the file ``~/.config/mopidy/settings.py``, where
+``~`` means your *home directory*. If your username is ``alice`` and you are
+running Linux, the settings file should probably be at
+``/home/alice/.config/mopidy/settings.py``.
 
 You can either create the settings file yourself, or run the ``mopidy``
 command, and it will create an empty settings file for you.
@@ -22,7 +22,7 @@ When you have created the settings file, open it in a text editor, and add
 settings you want to change. If you want to keep the default value for setting,
 you should *not* redefine it in your own settings file.
 
-A complete ``~/.mopidy/settings.py`` may look as simple as this::
+A complete ``~/.config/mopidy/settings.py`` may look as simple as this::
 
     MPD_SERVER_HOSTNAME = u'::'
     SPOTIFY_USERNAME = u'alice'
@@ -77,7 +77,7 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 
     mopidy --list-settings
 
-#. Scan your music library. Currently the command outputs the ``tag_cache`` to
+#. Scan your music library. The command outputs the ``tag_cache`` to
    ``stdout``, which means that you will need to redirect the output to a file
    yourself::
 

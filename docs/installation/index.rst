@@ -46,6 +46,9 @@ Otherwise, make sure you got the required dependencies installed.
   - To use the Last.FM scrobbler, see :mod:`mopidy.frontends.lastfm` for
     additional requirements.
 
+  - To use the MPRIS frontend, e.g. using the Ubuntu Sound Menu, see
+    :mod:`mopidy.frontends.mpris` for additional requirements.
+
 
 Install latest stable release
 =============================
