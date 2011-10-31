@@ -163,5 +163,5 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
 
     def logout(self):
         """Log out from spotify"""
-        logger.debug(u'Logging out from spotify')
+        logger.debug(u'Logging out from Spotify')
         self.session.logout()
