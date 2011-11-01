@@ -16,11 +16,9 @@ class SpotifyContainerManager(PyspotifyContainerManager):
 
         self.session_manager.refresh_stored_playlists()
 
-        playlists = [playlist
-            for playlist in self.session_manager.session.playlist_container()
-            if playlist.type() == 'playlist']
-        for playlist in playlists:
-            self.session_manager.playlist_manager.watch(playlist)
+        for playlist in self.session_manager.session.playlist_container():
+            if playlist.type() == 'playlist':
+                self.session_manager.playlist_manager.watch(playlist)
         logger.debug(u'Watching %d playlist(s) for changes', len(playlists))
 
     def playlist_added(self, container, playlist, position, userdata):
