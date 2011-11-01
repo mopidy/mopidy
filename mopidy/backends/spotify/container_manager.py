@@ -16,10 +16,12 @@ class SpotifyContainerManager(PyspotifyContainerManager):
 
         self.session_manager.refresh_stored_playlists()
 
+        count = 0
         for playlist in self.session_manager.session.playlist_container():
             if playlist.type() == 'playlist':
                 self.session_manager.playlist_manager.watch(playlist)
-        logger.debug(u'Watching %d playlist(s) for changes', len(playlists))
+                count += 1
+        logger.debug(u'Watching %d playlist(s) for changes', count)
 
     def playlist_added(self, container, playlist, position, userdata):
         """Callback used by pyspotify"""
