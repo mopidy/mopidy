@@ -139,11 +139,11 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def refresh_stored_playlists(self):
         """Refresh the stored playlists in the backend with fresh meta data
         from Spotify"""
-        playlists = []
-        for spotify_playlist in self.session.playlist_container():
-            playlists.append(
-                SpotifyTranslator.to_mopidy_playlist(spotify_playlist))
-        playlists = filter(None, playlists)
+        playlists = [playlist
+            for playlist in
+                [SpotifyTranslator.to_mopidy_playlist(spotify_playlist)
+                    for spotify_playlist in self.session.playlist_container()]
+            if playlist is not None]
         self.backend.stored_playlists.playlists = playlists
         logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
 
