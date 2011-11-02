@@ -10,11 +10,13 @@ v0.7.0 (in development)
 
 **Important changes**
 
-- Nothing so far
+- pyspotify 1.5 or greater is required.
 
 **Changes**
 
-- Nothing so far
+- Spotify playlist folder boundaries are now properly detected. In other words,
+  if you use playlist folders, you will no longer get lots of log messages
+  about bad playlists.
 
 
 v0.6.0 (2011-10-09)
