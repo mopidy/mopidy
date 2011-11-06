@@ -2,4 +2,5 @@ coverage
 mock >= 0.7
 nose
 tox
+unittest2
 yappi
