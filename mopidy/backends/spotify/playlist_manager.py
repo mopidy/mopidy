@@ -27,7 +27,8 @@ class SpotifyPlaylistManager(PyspotifyPlaylistManager):
     def tracks_removed(self, playlist, tracks, userdata):
         """Callback used by pyspotify"""
         logger.debug(u'Callback called: '
-            u'%d track(s) removed from playlist "%s"', len(tracks), playlist.name())
+            u'%d track(s) removed from playlist "%s"',
+            len(tracks), playlist.name())
         self.session_manager.refresh_stored_playlists()
 
     def playlist_renamed(self, playlist, userdata):
