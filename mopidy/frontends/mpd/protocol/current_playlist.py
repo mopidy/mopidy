@@ -254,6 +254,12 @@ def playlistinfo(context, songpos=None,
         end = songpos + 1
         if start == -1:
             end = None
+        else:
+            #Fetch one single track, hot code path (avoid deep-copying the entire playlist)
+            res = context.backend.current_playlist.get(cpid=songpos).get()
+            cpids = [res.cpid]
+            l = [res.track]
+            return tracks_to_mpd_format(l, 0, 1, cpids=cpids)
         cpids = [ct[0] for ct in
             context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(

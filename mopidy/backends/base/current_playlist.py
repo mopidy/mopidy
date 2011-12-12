@@ -40,6 +40,13 @@ class CurrentPlaylistController(object):
         return [ct[1] for ct in self._cp_tracks]
 
     @property
+    def tracks_len(self):
+        """
+        Length of current playlist
+        """
+        return len(self._cp_tracks)
+
+    @property
     def version(self):
         """
         The current playlist version. Integer which is increased every time the
