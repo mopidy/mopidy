@@ -1,7 +1,6 @@
 from copy import copy
 import logging
 import random
-import pprint
 
 from mopidy.listeners import BackendListener
 from mopidy.models import CpTrack
