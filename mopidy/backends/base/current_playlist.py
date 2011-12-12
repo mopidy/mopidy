@@ -28,7 +28,6 @@ class CurrentPlaylistController(object):
 
         Read-only.
         """
-        logger.debug(u'current_playlist.cp_tracks')
         return [copy(ct) for ct in self._cp_tracks]
 
     @property
@@ -38,7 +37,6 @@ class CurrentPlaylistController(object):
 
         Read-only.
         """
-        logger.debug(u'current_playlist.tracks()')
         return [ct[1] for ct in self._cp_tracks]
 
     @property
