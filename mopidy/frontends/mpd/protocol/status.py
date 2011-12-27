@@ -166,7 +166,7 @@ def status(context):
           decimal places for millisecond precision.
     """
     futures = {
-        'current_playlist.tracks_len': context.backend.current_playlist.tracks_len,
+        'current_playlist.length': context.backend.current_playlist.length,
         'current_playlist.version': context.backend.current_playlist.version,
         'mixer.volume': context.mixer.volume,
         'playback.consume': context.backend.playback.consume,
@@ -213,7 +213,7 @@ def _status_consume(futures):
         return 0
 
 def _status_playlist_length(futures):
-    return futures['current_playlist.tracks_len'].get()
+    return futures['current_playlist.length'].get()
 
 def _status_playlist_version(futures):
     return futures['current_playlist.version'].get()

@@ -18,6 +18,13 @@ class CurrentPlaylistControllerTest(object):
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
 
+    def test_length(self):
+        self.assertEqual(0, len(self.controller.cp_tracks))
+        self.assertEqual(0, self.controller.length)
+        self.controller.append(self.tracks)
+        self.assertEqual(3, len(self.controller.cp_tracks))
+        self.assertEqual(3, self.controller.length)
+
     def test_add(self):
         for track in self.tracks:
             cp_track = self.controller.add(track)

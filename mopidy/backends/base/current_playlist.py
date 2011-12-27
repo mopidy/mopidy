@@ -40,9 +40,9 @@ class CurrentPlaylistController(object):
         return [ct[1] for ct in self._cp_tracks]
 
     @property
-    def tracks_len(self):
+    def length(self):
         """
-        Length of current playlist
+        Length of the current playlist.
         """
         return len(self._cp_tracks)
 
