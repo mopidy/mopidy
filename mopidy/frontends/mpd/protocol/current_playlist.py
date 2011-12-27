@@ -255,32 +255,26 @@ def playlistinfo(context, songpos=None,
         if start == -1:
             end = None
         else:
-            #Fetch one single track, hot code path (avoid deep-copying the entire playlist)
-            res = context.backend.current_playlist.get(cpid=songpos).get()
-            cpids = [res.cpid]
-            l = [res.track]
-            return tracks_to_mpd_format(l, 0, 1, cpids=cpids)
-        cpids = [ct[0] for ct in
-            context.backend.current_playlist.cp_tracks.get()]
-        return tracks_to_mpd_format(
-            context.backend.current_playlist.tracks.get(),
-            start, end, cpids=cpids)
+            # Hot code path: Fetch a single track, while avoiding deep-copying
+            # the entire playlist
+            cp_track = context.backend.current_playlist.get(cpid=songpos).get()
+            cpids = [cp_track.cpid]
+            tracks = [cp_track.track]
+            return tracks_to_mpd_format(tracks, 0, 1, cpids=cpids)
     else:
         if start is None:
             start = 0
         start = int(start)
-        if not (0 <= start <= len(
-                context.backend.current_playlist.tracks.get())):
+        if not (0 <= start <= context.backend.current_playlist.length.get()):
             raise MpdArgError(u'Bad song index', command=u'playlistinfo')
         if end is not None:
             end = int(end)
-            if end > len(context.backend.current_playlist.tracks.get()):
+            if end > context.backend.current_playlist.length.get():
                 end = None
-        cpids = [ct[0] for ct in
-            context.backend.current_playlist.cp_tracks.get()]
-        return tracks_to_mpd_format(
-            context.backend.current_playlist.tracks.get(),
-            start, end, cpids=cpids)
+    cp_tracks = context.backend.current_playlist.cp_tracks.get()
+    cpids = [cp_track.cpid for cp_track in cp_tracks]
+    tracks = [cp_track.track for cp_track in cp_tracks]
+    return tracks_to_mpd_format(tracks, start, end, cpids=cpids)
 
 @handle_request(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
 @handle_request(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
