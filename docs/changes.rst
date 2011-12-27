@@ -18,6 +18,13 @@ v0.7.0 (in development)
   if you use playlist folders, you will no longer get lots of log messages
   about bad playlists.
 
+- Added the method
+  :meth:`mopidy.backends.base.CurrentPlaylistController.length()` to reduce the
+  need for copying the entire current playlist from one thread to another.
+  Thanks to John Bäckstrand.
+
+- The MPD command ``playlistinfo`` is now faster, thanks to John Bäckstrand.
+
 
 v0.6.0 (2011-10-09)
 ===================
