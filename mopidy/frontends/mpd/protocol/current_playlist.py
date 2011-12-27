@@ -225,6 +225,7 @@ def playlistid(context, cpid=None):
             context.backend.current_playlist.cp_tracks.get())
 
 @handle_request(r'^playlistinfo$')
+@handle_request(r'^playlistinfo "-1"$')
 @handle_request(r'^playlistinfo "(?P<songpos>-?\d+)"$')
 @handle_request(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
 def playlistinfo(context, songpos=None,
@@ -243,20 +244,10 @@ def playlistinfo(context, songpos=None,
     - uses negative indexes, like ``playlistinfo "-1"``, to request
       the entire playlist
     """
-    if songpos == "-1":
-        songpos = None
-
     if songpos is not None:
         songpos = int(songpos)
-        start = songpos
-        end = songpos + 1
-        if start == -1:
-            end = None
-        else:
-            # Hot code path: Fetch a single track, while avoiding deep-copying
-            # the entire playlist
-            cp_track = context.backend.current_playlist.get(cpid=songpos).get()
-            return tracks_to_mpd_format([cp_track], 0, 1)
+        cp_track = context.backend.current_playlist.get(cpid=songpos).get()
+        return track_to_mpd_format(cp_track, position=songpos)
     else:
         if start is None:
             start = 0
@@ -267,8 +258,8 @@ def playlistinfo(context, songpos=None,
             end = int(end)
             if end > context.backend.current_playlist.length.get():
                 end = None
-    cp_tracks = context.backend.current_playlist.cp_tracks.get()
-    return tracks_to_mpd_format(cp_tracks, start, end)
+        cp_tracks = context.backend.current_playlist.cp_tracks.get()
+        return tracks_to_mpd_format(cp_tracks, start, end)
 
 @handle_request(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
 @handle_request(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
