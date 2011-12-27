@@ -1,7 +1,8 @@
 from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
 from mopidy.frontends.mpd.protocol import handle_request
-from mopidy.frontends.mpd.translator import tracks_to_mpd_format
+from mopidy.frontends.mpd.translator import (track_to_mpd_format,
+    tracks_to_mpd_format)
 
 @handle_request(r'^add "(?P<uri>[^"]*)"$')
 def add(context, uri):
@@ -193,10 +194,9 @@ def playlistfind(context, tag, needle):
     if tag == 'filename':
         try:
             cp_track = context.backend.current_playlist.get(uri=needle).get()
-            (cpid, track) = cp_track
             position = context.backend.current_playlist.cp_tracks.get().index(
                 cp_track)
-            return track.mpd_format(cpid=cpid, position=position)
+            return track_to_mpd_format(cp_track, position=position)
         except LookupError:
             return None
     raise MpdNotImplemented # TODO
@@ -217,14 +217,12 @@ def playlistid(context, cpid=None):
             cp_track = context.backend.current_playlist.get(cpid=cpid).get()
             position = context.backend.current_playlist.cp_tracks.get().index(
                 cp_track)
-            return cp_track.track.mpd_format(position=position, cpid=cpid)
+            return track_to_mpd_format(cp_track, position=position)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playlistid')
     else:
-        cpids = [ct[0] for ct in
-            context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(
-            context.backend.current_playlist.tracks.get(), cpids=cpids)
+            context.backend.current_playlist.cp_tracks.get())
 
 @handle_request(r'^playlistinfo$')
 @handle_request(r'^playlistinfo "(?P<songpos>-?\d+)"$')
@@ -258,9 +256,7 @@ def playlistinfo(context, songpos=None,
             # Hot code path: Fetch a single track, while avoiding deep-copying
             # the entire playlist
             cp_track = context.backend.current_playlist.get(cpid=songpos).get()
-            cpids = [cp_track.cpid]
-            tracks = [cp_track.track]
-            return tracks_to_mpd_format(tracks, 0, 1, cpids=cpids)
+            return tracks_to_mpd_format([cp_track], 0, 1)
     else:
         if start is None:
             start = 0
@@ -272,9 +268,7 @@ def playlistinfo(context, songpos=None,
             if end > context.backend.current_playlist.length.get():
                 end = None
     cp_tracks = context.backend.current_playlist.cp_tracks.get()
-    cpids = [cp_track.cpid for cp_track in cp_tracks]
-    tracks = [cp_track.track for cp_track in cp_tracks]
-    return tracks_to_mpd_format(tracks, start, end, cpids=cpids)
+    return tracks_to_mpd_format(cp_tracks, start, end)
 
 @handle_request(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
 @handle_request(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
@@ -313,10 +307,8 @@ def plchanges(context, version):
     """
     # XXX Naive implementation that returns all tracks as changed
     if int(version) < context.backend.current_playlist.version:
-        cpids = [ct[0] for ct in
-            context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(
-            context.backend.current_playlist.tracks.get(), cpids=cpids)
+            context.backend.current_playlist.cp_tracks.get())
 
 @handle_request(r'^plchangesposid "(?P<version>\d+)"$')
 def plchangesposid(context, version):

@@ -1,8 +1,9 @@
 import pykka.future
 
 from mopidy.backends.base import PlaybackController
-from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.protocol import handle_request
+from mopidy.frontends.mpd.translator import track_to_mpd_format
 
 #: Subsystems that can be registered with idle command.
 SUBSYSTEMS = ['database', 'mixer', 'options', 'output',
@@ -32,9 +33,8 @@ def currentsong(context):
     """
     current_cp_track = context.backend.playback.current_cp_track.get()
     if current_cp_track is not None:
-        return current_cp_track.track.mpd_format(
-            position=context.backend.playback.current_playlist_position.get(),
-            cpid=current_cp_track.cpid)
+        position = context.backend.playback.current_playlist_position.get()
+        return track_to_mpd_format(current_cp_track, position=position)
 
 @handle_request(r'^idle$')
 @handle_request(r'^idle (?P<subsystems>.+)$')
