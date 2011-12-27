@@ -220,7 +220,3 @@ class Playlist(ImmutableObject):
     def length(self):
         """The number of tracks in the playlist. Read-only."""
         return len(self.tracks)
-
-    def mpd_format(self, *args, **kwargs):
-        from mopidy.frontends.mpd import translator
-        return translator.playlist_to_mpd_format(self, *args, **kwargs)

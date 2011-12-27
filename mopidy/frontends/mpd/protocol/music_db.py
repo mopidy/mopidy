@@ -1,8 +1,9 @@
 import re
 import shlex
 
-from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
+from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
+from mopidy.frontends.mpd.translator import playlist_to_mpd_format
 
 def _build_query(mpd_query):
     """
@@ -68,7 +69,8 @@ def find(context, mpd_query):
     - also uses the search type "date".
     """
     query = _build_query(mpd_query)
-    return context.backend.library.find_exact(**query).get().mpd_format()
+    return playlist_to_mpd_format(
+        context.backend.library.find_exact(**query).get())
 
 @handle_request(r'^findadd '
      r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? '
@@ -324,7 +326,8 @@ def search(context, mpd_query):
     - also uses the search type "date".
     """
     query = _build_query(mpd_query)
-    return context.backend.library.search(**query).get().mpd_format()
+    return playlist_to_mpd_format(
+        context.backend.library.search(**query).get())
 
 @handle_request(r'^update( "(?P<uri>[^"]+)")*$')
 def update(context, uri=None, rescan_unmodified_files=False):
