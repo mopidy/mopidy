@@ -260,6 +260,18 @@ class CurrentPlaylistControllerTest(object):
         self.assertEqual(self.tracks[0], shuffled_tracks[0])
         self.assertEqual(set(self.tracks), set(shuffled_tracks))
 
+    @populate_playlist
+    def test_slice_returns_a_subset_of_tracks(self):
+        track_slice = self.controller.slice(1, 3)
+        self.assertEqual(2, len(track_slice))
+        self.assertEqual(self.tracks[1], track_slice[0].track)
+        self.assertEqual(self.tracks[2], track_slice[1].track)
+
+    @populate_playlist
+    def test_slice_returns_empty_list_if_indexes_outside_tracks_list(self):
+        self.assertEqual(0, len(self.controller.slice(7, 8)))
+        self.assertEqual(0, len(self.controller.slice(-1, 1)))
+
     def test_version_does_not_change_when_appending_nothing(self):
         version = self.controller.version
         self.controller.append([])

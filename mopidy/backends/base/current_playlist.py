@@ -223,6 +223,19 @@ class CurrentPlaylistController(object):
         self._cp_tracks = before + shuffled + after
         self.version += 1
 
+    def slice(self, start, end):
+        """
+        Returns a slice of the current playlist, limited by the given
+        start and end positions.
+
+        :param start: position of first track to include in slice
+        :type start: int
+        :param end: position after last track to include in slice
+        :type end: int
+        :rtype: two-tuple of (CPID integer, :class:`mopidy.models.Track`)
+        """
+        return [copy(cp_track) for cp_track in self._cp_tracks[start:end]]
+
     def _trigger_playlist_changed(self):
         logger.debug(u'Triggering playlist changed event')
         BackendListener.send('playlist_changed')

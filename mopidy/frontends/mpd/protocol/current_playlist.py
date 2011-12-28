@@ -76,7 +76,7 @@ def delete_range(context, start, end=None):
         end = int(end)
     else:
         end = context.backend.current_playlist.length.get()
-    cp_tracks = context.backend.current_playlist.cp_tracks.get()[start:end]
+    cp_tracks = context.backend.current_playlist.slice(start, end).get()
     if not cp_tracks:
         raise MpdArgError(u'Bad song index', command=u'delete')
     for (cpid, _) in cp_tracks:
@@ -87,7 +87,8 @@ def delete_songpos(context, songpos):
     """See :meth:`delete_range`"""
     try:
         songpos = int(songpos)
-        (cpid, _) = context.backend.current_playlist.cp_tracks.get()[songpos]
+        (cpid, _) = context.backend.current_playlist.slice(
+            songpos, songpos + 1).get()[0]
         context.backend.current_playlist.remove(cpid=cpid)
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'delete')

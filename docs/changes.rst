@@ -21,10 +21,11 @@ v0.7.0 (in development)
 - The MPD command ``playlistinfo`` is now faster, thanks to John Bäckstrand.
 
 - Added the method
-  :meth:`mopidy.backends.base.CurrentPlaylistController.length()` and
-  :meth:`mopidy.backends.base.CurrentPlaylistController.index()` to reduce the
+  :meth:`mopidy.backends.base.CurrentPlaylistController.length()`,
+  :meth:`mopidy.backends.base.CurrentPlaylistController.index()`, and
+  :meth:`mopidy.backends.base.CurrentPlaylistController.slice()` to reduce the
   need for copying the entire current playlist from one thread to another.
-  Thanks to John Bäckstrand.
+  Thanks to John Bäckstrand for pinpointing the issue.
 
 
 v0.6.0 (2011-10-09)
