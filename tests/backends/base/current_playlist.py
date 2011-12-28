@@ -1,7 +1,7 @@
 import mock
 import random
 
-from mopidy.models import Playlist, Track
+from mopidy.models import CpTrack, Playlist, Track
 from mopidy.gstreamer import GStreamer
 
 from tests.backends.base import populate_playlist
@@ -17,6 +17,13 @@ class CurrentPlaylistControllerTest(object):
         self.playback = self.backend.playback
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
+
+    def test_length(self):
+        self.assertEqual(0, len(self.controller.cp_tracks))
+        self.assertEqual(0, self.controller.length)
+        self.controller.append(self.tracks)
+        self.assertEqual(3, len(self.controller.cp_tracks))
+        self.assertEqual(3, self.controller.length)
 
     def test_add(self):
         for track in self.tracks:
@@ -136,6 +143,18 @@ class CurrentPlaylistControllerTest(object):
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
+    def test_index_returns_index_of_track(self):
+        cp_tracks = []
+        for track in self.tracks:
+            cp_tracks.append(self.controller.add(track))
+        self.assertEquals(0, self.controller.index(cp_tracks[0]))
+        self.assertEquals(1, self.controller.index(cp_tracks[1]))
+        self.assertEquals(2, self.controller.index(cp_tracks[2]))
+
+    def test_index_raises_value_error_if_item_not_found(self):
+        test = lambda: self.controller.index(CpTrack(0, Track()))
+        self.assertRaises(ValueError, test)
+
     @populate_playlist
     def test_move_single(self):
         self.controller.move(0, 0, 2)
@@ -240,6 +259,18 @@ class CurrentPlaylistControllerTest(object):
         self.assertNotEqual(self.tracks, shuffled_tracks)
         self.assertEqual(self.tracks[0], shuffled_tracks[0])
         self.assertEqual(set(self.tracks), set(shuffled_tracks))
+
+    @populate_playlist
+    def test_slice_returns_a_subset_of_tracks(self):
+        track_slice = self.controller.slice(1, 3)
+        self.assertEqual(2, len(track_slice))
+        self.assertEqual(self.tracks[1], track_slice[0].track)
+        self.assertEqual(self.tracks[2], track_slice[1].track)
+
+    @populate_playlist
+    def test_slice_returns_empty_list_if_indexes_outside_tracks_list(self):
+        self.assertEqual(0, len(self.controller.slice(7, 8)))
+        self.assertEqual(0, len(self.controller.slice(-1, 1)))
 
     def test_version_does_not_change_when_appending_nothing(self):
         version = self.controller.version

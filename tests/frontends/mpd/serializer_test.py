@@ -4,7 +4,7 @@ import os
 from mopidy import settings
 from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
-from mopidy.models import Album, Artist, Playlist, Track
+from mopidy.models import Album, Artist, CpTrack, Playlist, Track
 
 from tests import unittest
 
@@ -45,17 +45,17 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assert_(('Pos', 1) not in result)
 
     def test_track_to_mpd_format_with_cpid(self):
-        result = translator.track_to_mpd_format(Track(), cpid=1)
+        result = translator.track_to_mpd_format(CpTrack(1, Track()))
         self.assert_(('Id', 1) not in result)
 
     def test_track_to_mpd_format_with_position_and_cpid(self):
-        result = translator.track_to_mpd_format(Track(), position=1, cpid=2)
+        result = translator.track_to_mpd_format(CpTrack(2, Track()), position=1)
         self.assert_(('Pos', 1) in result)
         self.assert_(('Id', 2) in result)
 
     def test_track_to_mpd_format_for_nonempty_track(self):
         result = translator.track_to_mpd_format(
-            self.track, position=9, cpid=122)
+            CpTrack(122, self.track), position=9)
         self.assert_(('file', 'a uri') in result)
         self.assert_(('Time', 137) in result)
         self.assert_(('Artist', 'an artist') in result)
