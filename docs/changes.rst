@@ -4,9 +4,31 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-
 v0.7.0 (in development)
 =======================
+
+**Important changes**
+
+- Nothing yet.
+
+**Changes**
+
+- The MPD command ``playlistinfo`` is now faster, thanks to John Bäckstrand.
+
+- Added the method
+  :meth:`mopidy.backends.base.CurrentPlaylistController.length()`,
+  :meth:`mopidy.backends.base.CurrentPlaylistController.index()`, and
+  :meth:`mopidy.backends.base.CurrentPlaylistController.slice()` to reduce the
+  need for copying the entire current playlist from one thread to another.
+  Thanks to John Bäckstrand for pinpointing the issue.
+
+
+v0.6.1 (2011-12-28)
+===================
+
+This is a maintenance release to make Mopidy 0.6 work with pyspotify >= 1.5,
+which Mopidy's develop branch have supported for a long time. This should also
+make the Debian packages work out of the box again.
 
 **Important changes**
 
@@ -18,14 +40,6 @@ v0.7.0 (in development)
   if you use playlist folders, you will no longer get lots of log messages
   about bad playlists.
 
-- The MPD command ``playlistinfo`` is now faster, thanks to John Bäckstrand.
-
-- Added the method
-  :meth:`mopidy.backends.base.CurrentPlaylistController.length()`,
-  :meth:`mopidy.backends.base.CurrentPlaylistController.index()`, and
-  :meth:`mopidy.backends.base.CurrentPlaylistController.slice()` to reduce the
-  need for copying the entire current playlist from one thread to another.
-  Thanks to John Bäckstrand for pinpointing the issue.
 
 
 v0.6.0 (2011-10-09)
