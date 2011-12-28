@@ -5,6 +5,24 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+v0.6.1 (2011-12-28)
+===================
+
+This is a maintenance release to make Mopidy 0.6 work with pyspotify >= 1.5,
+which Mopidy's develop branch have supported for a long time. This should also
+make the Debian packages work out of the box again.
+
+**Important changes**
+
+- pyspotify 1.5 or greater is required.
+
+**Changes**
+
+- Spotify playlist folder boundaries are now properly detected. In other words,
+  if you use playlist folders, you will no longer get lots of log messages
+  about bad playlists.
+
+
 v0.6.0 (2011-10-09)
 ===================
 

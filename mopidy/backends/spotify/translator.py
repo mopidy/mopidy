@@ -51,9 +51,8 @@ class SpotifyTranslator(object):
     def to_mopidy_playlist(cls, spotify_playlist):
         if not spotify_playlist.is_loaded():
             return Playlist(name=u'[loading...]')
-        # FIXME Replace this try-except with a check on the playlist type,
-        # which is currently not supported by pyspotify, to avoid handling
-        # playlist folder boundaries like normal playlists.
+        if spotify_playlist.type() != 'playlist':
+            return
         try:
             return Playlist(
                 uri=str(Link.from_playlist(spotify_playlist)),
@@ -63,5 +62,4 @@ class SpotifyTranslator(object):
                     if str(Link.from_track(t, 0))],
             )
         except SpotifyError, e:
-            logger.info(u'Failed translating Spotify playlist '
-                '(probably a playlist folder boundary): %s', e)
+            logger.warning(u'Failed translating Spotify playlist: %s', e)
