@@ -75,7 +75,7 @@ def delete_range(context, start, end=None):
     if end is not None:
         end = int(end)
     else:
-        end = len(context.backend.current_playlist.tracks.get())
+        end = context.backend.current_playlist.length.get()
     cp_tracks = context.backend.current_playlist.cp_tracks.get()[start:end]
     if not cp_tracks:
         raise MpdArgError(u'Bad song index', command=u'delete')
