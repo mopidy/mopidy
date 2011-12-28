@@ -1,7 +1,7 @@
 import mock
 import random
 
-from mopidy.models import Playlist, Track
+from mopidy.models import CpTrack, Playlist, Track
 from mopidy.gstreamer import GStreamer
 
 from tests.backends.base import populate_playlist
@@ -142,6 +142,18 @@ class CurrentPlaylistControllerTest(object):
         self.controller.append(self.controller.tracks[1:2])
         self.assertEqual(self.playback.state, self.playback.STOPPED)
         self.assertEqual(self.playback.current_track, None)
+
+    def test_index_returns_index_of_track(self):
+        cp_tracks = []
+        for track in self.tracks:
+            cp_tracks.append(self.controller.add(track))
+        self.assertEquals(0, self.controller.index(cp_tracks[0]))
+        self.assertEquals(1, self.controller.index(cp_tracks[1]))
+        self.assertEquals(2, self.controller.index(cp_tracks[2]))
+
+    def test_index_raises_value_error_if_item_not_found(self):
+        test = lambda: self.controller.index(CpTrack(0, Track()))
+        self.assertRaises(ValueError, test)
 
     @populate_playlist
     def test_move_single(self):

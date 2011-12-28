@@ -136,6 +136,19 @@ class CurrentPlaylistController(object):
         else:
             raise LookupError(u'"%s" match multiple tracks' % criteria_string)
 
+    def index(self, cp_track):
+        """
+        Get index of the given (CPID integer, :class:`mopidy.models.Track`)
+        two-tuple in the current playlist.
+
+        Raises :exc:`ValueError` if not found.
+
+        :param cp_track: track to find the index of
+        :type cp_track: two-tuple (CPID integer, :class:`mopidy.models.Track`)
+        :rtype: int
+        """
+        return self._cp_tracks.index(cp_track)
+
     def move(self, start, end, to_position):
         """
         Move the tracks in the slice ``[start:end]`` to ``to_position``.
@@ -175,7 +188,6 @@ class CurrentPlaylistController(object):
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
-        :type track: :class:`mopidy.models.Track`
         """
         cp_track = self.get(**criteria)
         position = self._cp_tracks.index(cp_track)

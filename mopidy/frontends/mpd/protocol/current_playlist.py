@@ -158,8 +158,7 @@ def moveid(context, cpid, to):
     cpid = int(cpid)
     to = int(to)
     cp_track = context.backend.current_playlist.get(cpid=cpid).get()
-    position = context.backend.current_playlist.cp_tracks.get().index(
-        cp_track)
+    position = context.backend.current_playlist.index(cp_track).get()
     context.backend.current_playlist.move(position, position + 1, to)
 
 @handle_request(r'^playlist$')
@@ -194,8 +193,7 @@ def playlistfind(context, tag, needle):
     if tag == 'filename':
         try:
             cp_track = context.backend.current_playlist.get(uri=needle).get()
-            position = context.backend.current_playlist.cp_tracks.get().index(
-                cp_track)
+            position = context.backend.current_playlist.index(cp_track).get()
             return track_to_mpd_format(cp_track, position=position)
         except LookupError:
             return None
@@ -215,8 +213,7 @@ def playlistid(context, cpid=None):
         try:
             cpid = int(cpid)
             cp_track = context.backend.current_playlist.get(cpid=cpid).get()
-            position = context.backend.current_playlist.cp_tracks.get().index(
-                cp_track)
+            position = context.backend.current_playlist.index(cp_track).get()
             return track_to_mpd_format(cp_track, position=position)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playlistid')
@@ -375,7 +372,6 @@ def swapid(context, cpid1, cpid2):
     cpid2 = int(cpid2)
     cp_track1 = context.backend.current_playlist.get(cpid=cpid1).get()
     cp_track2 = context.backend.current_playlist.get(cpid=cpid2).get()
-    cp_tracks = context.backend.current_playlist.cp_tracks.get()
-    position1 = cp_tracks.index(cp_track1)
-    position2 = cp_tracks.index(cp_track2)
+    position1 = context.backend.current_playlist.index(cp_track1).get()
+    position2 = context.backend.current_playlist.index(cp_track2).get()
     swap(context, position1, position2)
