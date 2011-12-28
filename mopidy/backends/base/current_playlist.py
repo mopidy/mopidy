@@ -28,7 +28,7 @@ class CurrentPlaylistController(object):
 
         Read-only.
         """
-        return [copy(ct) for ct in self._cp_tracks]
+        return [copy(cp_track) for cp_track in self._cp_tracks]
 
     @property
     def tracks(self):
@@ -37,7 +37,7 @@ class CurrentPlaylistController(object):
 
         Read-only.
         """
-        return [ct[1] for ct in self._cp_tracks]
+        return [cp_track.track for cp_track in self._cp_tracks]
 
     @property
     def length(self):
@@ -123,9 +123,9 @@ class CurrentPlaylistController(object):
         matches = self._cp_tracks
         for (key, value) in criteria.iteritems():
             if key == 'cpid':
-                matches = filter(lambda ct: ct[0] == value, matches)
+                matches = filter(lambda ct: ct.cpid == value, matches)
             else:
-                matches = filter(lambda ct: getattr(ct[1], key) == value,
+                matches = filter(lambda ct: getattr(ct.track, key) == value,
                     matches)
         if len(matches) == 1:
             return matches[0]
