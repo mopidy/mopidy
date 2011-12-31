@@ -32,8 +32,8 @@ class SpotifyBackend(ThreadingActor, Backend):
 
     **Dependencies:**
 
-    - libspotify == 0.0.8 (libspotify8 package from apt.mopidy.com)
-    - pyspotify == 1.3 (python-spotify package from apt.mopidy.com)
+    - libspotify >= 10, < 11 (libspotify10 package from apt.mopidy.com)
+    - pyspotify >= 1.5 (python-spotify package from apt.mopidy.com)
 
     **Settings:**
 
