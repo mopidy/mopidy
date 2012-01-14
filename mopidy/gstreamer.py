@@ -13,15 +13,6 @@ from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
 
-default_caps = gst.Caps("""
-    audio/x-raw-int,
-    endianness=(int)1234,
-    channels=(int)2,
-    width=(int)16,
-    depth=(int)16,
-    signed=(boolean)true,
-    rate=(int)44100""")
-
 
 class GStreamer(ThreadingActor):
     """
@@ -34,6 +25,14 @@ class GStreamer(ThreadingActor):
     """
 
     def __init__(self):
+        self._default_caps = gst.Caps("""
+            audio/x-raw-int,
+            endianness=(int)1234,
+            channels=(int)2,
+            width=(int)16,
+            depth=(int)16,
+            signed=(boolean)true,
+            rate=(int)44100""")
         self._pipeline = None
         self._source = None
         self._tee = None
@@ -77,7 +76,7 @@ class GStreamer(ThreadingActor):
     def _on_new_source(self, element, pad):
         self._source = element.get_property('source')
         try:
-            self._source.set_property('caps', default_caps)
+            self._source.set_property('caps', self._default_caps)
         except TypeError:
             pass
 
