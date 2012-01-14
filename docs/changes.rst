@@ -261,7 +261,7 @@ loading from Mopidy 0.3.0 is still present.
 
 **Important changes**
 
-- Mopidy now depends on `Pykka <http://jodal.github.com/pykka>`_ >=0.12. If you
+- Mopidy now depends on `Pykka <http://pykka.readthedocs.org/>`_ >=0.12. If you
   install from APT, Pykka will automatically be installed. If you are not
   installing from APT, you may install Pykka from PyPI::
 
