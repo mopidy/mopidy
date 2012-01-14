@@ -2,8 +2,6 @@
 :mod:`mopidy.frontends.mpd` -- MPD server
 *****************************************
 
-.. inheritance-diagram:: mopidy.frontends.mpd
-
 .. automodule:: mopidy.frontends.mpd
     :synopsis: MPD server frontend
     :members:
@@ -11,8 +9,6 @@
 
 MPD dispatcher
 ==============
-
-.. inheritance-diagram:: mopidy.frontends.mpd.dispatcher
 
 .. automodule:: mopidy.frontends.mpd.dispatcher
     :synopsis: MPD request dispatcher
