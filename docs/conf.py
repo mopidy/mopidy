@@ -55,7 +55,9 @@ for mod_name in MOCK_MODULES:
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../'))
 
-import mopidy
+# When RTD builds the project, it sets the READTHEDOCS environment variable to
+# the string True.
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # -- General configuration -----------------------------------------------------
 
@@ -85,6 +87,7 @@ copyright = u'2010-2012, Stein Magnus Jodal and contributors'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
+import mopidy
 release = mopidy.get_version()
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])
@@ -132,7 +135,10 @@ modindex_common_prefix = ['mopidy.']
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'nature'
+if on_rtd:
+    html_theme = 'default'
+else:
+    html_theme = 'nature'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
