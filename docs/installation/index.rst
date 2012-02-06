@@ -18,36 +18,36 @@ Requirements
     gstreamer
     libspotify
 
-If you install Mopidy from the APT archive, as described below, you can skip
-the dependency installation part.
+If you install Mopidy from the APT archive, as described below, APT will take
+care of all the dependencies for you. Otherwise, make sure you got the required
+dependencies installed.
 
-Otherwise, make sure you got the required dependencies installed.
+- Hard dependencies:
 
-- Python >= 2.6, < 3
+  - Python >= 2.6, < 3
 
-- `Pykka <http://pykka.readthedocs.org/>`_ >= 0.12.3
+  - Pykka >= 0.12.3::
 
-- GStreamer >= 0.10, with Python bindings. See :doc:`gstreamer`.
+        sudo pip install -U pykka
 
-- Mixer dependencies: The default mixer does not require any additional
-  dependencies. If you use another mixer, see the mixer's docs for any
-  additional requirements.
-
-- Dependencies for at least one Mopidy backend:
-
-  - The default backend, :mod:`mopidy.backends.spotify`, requires libspotify
-    and pyspotify. See :doc:`libspotify`.
-
-  - The local backend, :mod:`mopidy.backends.local`, requires no additional
-    dependencies.
+  - GStreamer 0.10.x, with Python bindings. See :doc:`gstreamer`.
 
 - Optional dependencies:
 
-  - To use the Last.FM scrobbler, see :mod:`mopidy.frontends.lastfm` for
-    additional requirements.
+  - For Spotify support, you need libspotify and pyspotify. See
+    :doc:`libspotify`.
 
-  - To use the MPRIS frontend, e.g. using the Ubuntu Sound Menu, see
-    :mod:`mopidy.frontends.mpris` for additional requirements.
+  - To scrobble your played tracks to Last.FM, you need pylast::
+
+        sudo pip install -U pylast
+
+  - To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound Menu, you
+    need some additional requirements::
+
+        sudo apt-get install python-dbus python-indicate
+
+  - Some custom mixers (but not the default one) require additional
+    dependencies. See the docs for each mixer.
 
 
 Install latest stable release
