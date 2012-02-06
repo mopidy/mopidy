@@ -79,8 +79,8 @@ On Linux from APT archive
 -------------------------
 
 If you run a Debian based Linux distribution, like Ubuntu, see
-http://apt.mopidy.com/ for how to the Mopidy APT archive as a software source
-on your installation. Then, simply run::
+http://apt.mopidy.com/ for how to use the Mopidy APT archive as a software
+source on your system. Then, simply run::
 
     sudo apt-get install python-spotify
 
