@@ -101,7 +101,7 @@ install Mopidy from PyPI using Pip.
 #. Then, you need to install Pip::
 
        sudo apt-get install python-setuptools python-pip   # On Ubuntu/Debian
-       sudo easy_install pip                                # On OS X
+       sudo easy_install pip                               # On OS X
 
 #. To install the currently latest stable release of Mopidy::
 
@@ -111,8 +111,6 @@ install Mopidy from PyPI using Pip.
 
 #. Next, you need to set a couple of :doc:`settings </settings>`, and then
    you're ready to :doc:`run Mopidy </running>`.
-
-If you for some reason can't use Pip, try ``easy_install`` instead.
 
 
 Install development version
@@ -135,7 +133,7 @@ Mopidy's ``develop`` branch.
 #. Then, you need to install Pip::
 
        sudo apt-get install python-setuptools python-pip   # On Ubuntu/Debian
-       sudo easy_install pip                                # On OS X
+       sudo easy_install pip                               # On OS X
 
 #. To install the latest snapshot of Mopidy, run::
 
