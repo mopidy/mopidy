@@ -100,7 +100,7 @@ install Mopidy from PyPI using Pip.
 
 #. Then, you need to install Pip::
 
-       sudo aptitude install python-setuptools python-pip   # On Ubuntu/Debian
+       sudo apt-get install python-setuptools python-pip   # On Ubuntu/Debian
        sudo easy_install pip                                # On OS X
 
 #. To install the currently latest stable release of Mopidy::
@@ -134,7 +134,7 @@ Mopidy's ``develop`` branch.
 
 #. Then, you need to install Pip::
 
-       sudo aptitude install python-setuptools python-pip   # On Ubuntu/Debian
+       sudo apt-get install python-setuptools python-pip   # On Ubuntu/Debian
        sudo easy_install pip                                # On OS X
 
 #. To install the latest snapshot of Mopidy, run::
@@ -157,7 +157,7 @@ If you want to contribute to Mopidy, you should install Mopidy using Git.
 
 #. Then install Git, if haven't already::
 
-      sudo aptitude install git-core      # On Ubuntu/Debian
+      sudo apt-get install git-core      # On Ubuntu/Debian
       sudo brew install git               # On OS X using Homebrew
 
 #. Clone the official Mopidy repository, or your own fork of it::
