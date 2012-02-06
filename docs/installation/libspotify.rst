@@ -12,12 +12,6 @@ install libspotify and `pyspotify <http://pyspotify.mopidy.com/>`_.
     This backend requires a paid `Spotify premium account
     <http://www.spotify.com/no/get-spotify/premium/>`_.
 
-.. note::
-
-    This product uses SPOTIFY CORE but is not endorsed, certified or otherwise
-    approved in any way by Spotify. Spotify is the registered trade mark of the
-    Spotify Group.
-
 
 Installing libspotify
 =====================
@@ -26,29 +20,29 @@ Installing libspotify
 On Linux from APT archive
 -------------------------
 
-If you run a Debian based Linux distribution, like Ubuntu, see
-http://apt.mopidy.com/ for how to the Mopidy APT archive as a software source
-on your installation. Then, simply run::
-
-    sudo apt-get install libspotify8
-
-When libspotify has been installed, continue with
-:ref:`pyspotify_installation`.
+If you install from APT, jump directly to :ref:`pyspotify_installation` below.
 
 
 On Linux from source
 --------------------
 
-Download and install libspotify 0.0.8 for your OS and CPU architecture from
-https://developer.spotify.com/en/libspotify/.
+First, check pyspotify's changelog to see what's the latest version of
+libspotify which is supported. The versions of libspotify and pyspotify are
+tightly coupled.
 
-For 64-bit Linux the process is as follows::
+Download and install the appropriate version of libspotify for your OS and CPU
+architecture from https://developer.spotify.com/en/libspotify/.
+
+For libspotify 0.0.8 for 64-bit Linux the process is as follows::
 
     wget http://developer.spotify.com/download/libspotify/libspotify-0.0.8-linux6-x86_64.tar.gz
     tar zxfv libspotify-0.0.8-linux6-x86_64.tar.gz
     cd libspotify-0.0.8-linux6-x86_64/
     sudo make install prefix=/usr/local
     sudo ldconfig
+
+Remember to adjust for the latest libspotify version supported by pyspotify,
+your OS and your CPU architecture.
 
 When libspotify has been installed, continue with
 :ref:`pyspotify_installation`.
@@ -84,29 +78,35 @@ by installing pyspotify.
 On Linux from APT archive
 -------------------------
 
-Assuming that you've already set up http://apt.mopidy.com/ as a software
-source, run::
+If you run a Debian based Linux distribution, like Ubuntu, see
+http://apt.mopidy.com/ for how to the Mopidy APT archive as a software source
+on your installation. Then, simply run::
 
     sudo apt-get install python-spotify
 
-If you haven't already installed libspotify, this command will install both
-libspotify and pyspotify for you.
+This command will install both libspotify and pyspotify for you.
 
 
-On Linux/OS X from source
+On Linux from source
 -------------------------
+
+If you have have already installed libspotify, you can continue with installing
+the libspotify Python bindings, called pyspotify.
 
 On Linux, you need to get the Python development files installed. On
 Debian/Ubuntu systems run::
 
     sudo apt-get install python-dev
 
-On OS X no additional dependencies are needed.
-
 Then get, build, and install the latest releast of pyspotify using ``pip``::
 
     sudo pip install -U pyspotify
 
-Or using the older ``easy_install``::
 
-    sudo easy_install pyspotify
+On OS X from source
+-------------------
+
+If you have already installed libspotify, you can get, build, and install the
+latest releast of pyspotify using ``pip``::
+
+    sudo pip install -U pyspotify
