@@ -60,7 +60,7 @@ libspotify::
 To update your existing libspotify installation using Homebrew::
 
     brew update
-    brew install `brew outdated`
+    brew upgrade
 
 When libspotify has been installed, continue with
 :ref:`pyspotify_installation`.
