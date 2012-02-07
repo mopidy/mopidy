@@ -50,7 +50,7 @@ On OS X from Homebrew
     very happy to include Python specific packages into Homebrew, even though
     they are not installable by pip. If you're interested, see the discussion
     in `Homebrew's issue #1612
-    <http://github.com/mxcl/homebrew/issues/issue/1612>`_ for details.
+    <https://github.com/mxcl/homebrew/issues/issue/1612>`_ for details.
 
 The following is currently the shortest path to installing GStreamer with
 Python bindings on OS X using Homebrew.
