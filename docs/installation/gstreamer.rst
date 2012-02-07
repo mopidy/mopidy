@@ -57,14 +57,14 @@ Python bindings on OS X using Homebrew.
 #. Download our Homebrew formulas for ``pycairo``, ``pygobject``, ``pygtk``,
    and ``gst-python``::
 
-      wget -O $(brew --prefix)/Library/Formula/pycairo.rb \
-          https://github.com/jodal/homebrew/raw/gst-python/Library/Formula/pycairo.rb
-      wget -O $(brew --prefix)/Library/Formula/pygobject.rb \
-          https://github.com/jodal/homebrew/raw/gst-python/Library/Formula/pygobject.rb
-      wget -O $(brew --prefix)/Library/Formula/pygtk.rb \
-          https://github.com/jodal/homebrew/raw/gst-python/Library/Formula/pygtk.rb
-      wget -O $(brew --prefix)/Library/Formula/gst-python.rb \
-          https://github.com/jodal/homebrew/raw/gst-python/Library/Formula/gst-python.rb
+      curl -o $(brew --prefix)/Library/Formula/pycairo.rb \
+          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pycairo.rb
+      curl -o $(brew --prefix)/Library/Formula/pygobject.rb \
+          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pygobject.rb
+      curl -o $(brew --prefix)/Library/Formula/pygtk.rb \
+          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pygtk.rb
+      curl -o $(brew --prefix)/Library/Formula/gst-python.rb \
+          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/gst-python.rb
 
 #. Install the required packages::
 
