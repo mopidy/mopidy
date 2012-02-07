@@ -36,8 +36,8 @@ repository::
         gstreamer0.10-ugly-plugins
 
 
-Installing GStreamer on OS X from Homebrew
-------------------------------------------
+Installing GStreamer on OS X
+============================
 
 .. note::
 
