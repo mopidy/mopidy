@@ -57,8 +57,8 @@ Python bindings on OS X using Homebrew.
 
 #. Install `Homebrew <https://github.com/mxcl/homebrew>`_.
 
-#. Download our Homebrew formulas for `pycairo`, `pygobject`, `pygtk`, and
-   `gst-python`::
+#. Download our Homebrew formulas for ``pycairo``, ``pygobject``, ``pygtk``,
+   and ``gst-python``::
 
       wget -O $(brew --prefix)/Library/Formula/pycairo.rb \
           https://github.com/jodal/homebrew/raw/gst-python/Library/Formula/pycairo.rb
