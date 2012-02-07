@@ -6,19 +6,16 @@ To use the Mopidy, you first need to install GStreamer and the GStreamer Python
 bindings.
 
 
-Installing GStreamer
-====================
-
-On Linux
---------
+Installing GStreamer on Linux
+=============================
 
 GStreamer is packaged for most popular Linux distributions. Search for
 GStreamer in your package manager, and make sure to install the Python
 bindings, and the "good" and "ugly" plugin sets.
 
 
-On Debian/Ubuntu
-^^^^^^^^^^^^^^^^
+Debian/Ubuntu
+-------------
 
 If you use Debian/Ubuntu you can install GStreamer like this::
 
@@ -29,8 +26,8 @@ If you install Mopidy from our APT archive, you don't need to install GStreamer
 yourself. The Mopidy Debian package will handle it for you.
 
 
-On Arch Linux
-^^^^^^^^^^^^^
+Arch Linux
+----------
 
 If you use Arch Linux, install the following packages from the official
 repository::
@@ -39,8 +36,8 @@ repository::
         gstreamer0.10-ugly-plugins
 
 
-On OS X from Homebrew
----------------------
+Installing GStreamer on OS X from Homebrew
+------------------------------------------
 
 .. note::
 
