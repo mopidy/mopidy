@@ -1,10 +1,17 @@
+import sys
+
 import mock
 
+from mopidy import OptionalDependencyError
 from mopidy.backends.dummy import DummyBackend
 from mopidy.backends.base.playback import PlaybackController
-from mopidy.frontends.mpris import objects
 from mopidy.mixers.dummy import DummyMixer
 from mopidy.models import Album, Artist, Track
+
+try:
+    from mopidy.frontends.mpris import objects
+except OptionalDependencyError:
+    pass
 
 from tests import unittest
 
@@ -13,6 +20,7 @@ PAUSED = PlaybackController.PAUSED
 STOPPED = PlaybackController.STOPPED
 
 
+@unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
 class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):
         objects.MprisObject._connect_to_dbus = mock.Mock()

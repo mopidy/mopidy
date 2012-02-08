@@ -1,11 +1,19 @@
+import sys
+
 import mock
 
-from mopidy.frontends.mpris import MprisFrontend, objects
+from mopidy import OptionalDependencyError
 from mopidy.models import Track
+
+try:
+    from mopidy.frontends.mpris import MprisFrontend, objects
+except OptionalDependencyError:
+    pass
 
 from tests import unittest
 
 
+@unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
         self.mpris_frontend = MprisFrontend() # As a plain class, not an actor
