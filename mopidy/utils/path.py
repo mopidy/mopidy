@@ -8,9 +8,12 @@ logger = logging.getLogger('mopidy.utils.path')
 
 def get_or_create_folder(folder):
     folder = os.path.expanduser(folder)
-    if not os.path.isdir(folder):
+    if os.path.isfile(folder):
+        raise OSError('A file with the same name as the desired ' \
+            'dir, "%s", already exists.' % folder)
+    elif not os.path.isdir(folder):
         logger.info(u'Creating dir %s', folder)
-        os.mkdir(folder, 0755)
+        os.makedirs(folder, 0755)
     return folder
 
 def get_or_create_file(filename):

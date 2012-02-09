@@ -22,6 +22,10 @@ v0.7.0 (in development)
   need for copying the entire current playlist from one thread to another.
   Thanks to John Bäckstrand for pinpointing the issue.
 
+- Fix crash on creation of config and cache directories if intermediate
+  directories does not exist. This was especially the case on OS X, where
+  ``~/.config`` doesn't exist for most users.
+
 
 v0.6.1 (2011-12-28)
 ===================
