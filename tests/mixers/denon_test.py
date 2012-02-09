@@ -34,7 +34,7 @@ class DenonMixerTest(BaseMixerTest, unittest.TestCase):
 
     def setUp(self):
         self.device = DenonMixerDeviceMock()
-        self.mixer = DenonMixer(None, device=self.device)
+        self.mixer = DenonMixer(device=self.device)
 
     def test_reopen_device(self):
         self.device._open = False
