@@ -26,6 +26,7 @@ class DenonMixer(ThreadingActor, BaseMixer):
     """
 
     def __init__(self, *args, **kwargs):
+        super(DenonMixer, self).__init__(*arg, **kwargs)
         self._device = kwargs.get('device', None)
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0

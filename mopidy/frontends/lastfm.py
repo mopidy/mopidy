@@ -37,6 +37,7 @@ class LastfmFrontend(ThreadingActor, BackendListener):
     """
 
     def __init__(self):
+        super(LastfmFrontend, self).__init__()
         self.lastfm = None
         self.last_start_time = None
 

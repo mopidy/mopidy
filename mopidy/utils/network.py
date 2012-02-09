@@ -297,6 +297,7 @@ class LineProtocol(ThreadingActor):
     encoding = 'utf-8'
 
     def __init__(self, connection):
+        super(LineProtocol, self).__init__()
         self.connection = connection
         self.prevent_timeout = False
         self.recv_buffer = ''

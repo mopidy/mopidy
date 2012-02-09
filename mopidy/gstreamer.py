@@ -25,6 +25,7 @@ class GStreamer(ThreadingActor):
     """
 
     def __init__(self):
+        super(GStreamer, self).__init__()
         self._default_caps = gst.Caps("""
             audio/x-raw-int,
             endianness=(int)1234,

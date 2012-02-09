@@ -25,6 +25,7 @@ class MpdFrontend(actor.ThreadingActor, listeners.BackendListener):
     """
 
     def __init__(self):
+        super(MpdFrontend, self).__init__()
         hostname = network.format_hostname(settings.MPD_SERVER_HOSTNAME)
         port = settings.MPD_SERVER_PORT
 

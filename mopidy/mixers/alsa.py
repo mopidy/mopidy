@@ -23,6 +23,7 @@ class AlsaMixer(ThreadingActor, BaseMixer):
     """
 
     def __init__(self):
+        super(AlsaMixer, self).__init__()
         self._mixer = None
 
     def on_start(self):
