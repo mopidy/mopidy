@@ -2,7 +2,6 @@
 from __future__ import absolute_import
 from copy import copy
 import getpass
-import glib
 import logging
 import os
 from pprint import pformat

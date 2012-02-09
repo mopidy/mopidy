@@ -81,7 +81,8 @@ class MprisObject(dbus.service.Object):
     def _connect_to_dbus(self):
         logger.debug(u'Connecting to D-Bus...')
         mainloop = dbus.mainloop.glib.DBusGMainLoop()
-        bus_name = dbus.service.BusName(BUS_NAME, dbus.SessionBus(mainloop=mainloop))
+        bus_name = dbus.service.BusName(BUS_NAME,
+            dbus.SessionBus(mainloop=mainloop))
         logger.info(u'Connected to D-Bus')
         return bus_name
 

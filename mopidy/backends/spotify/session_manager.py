@@ -1,4 +1,3 @@
-import glib
 import logging
 import os
 import threading

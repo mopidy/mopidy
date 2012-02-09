@@ -332,7 +332,8 @@ class GStreamer(ThreadingActor):
         self._tee.send_event(event)
 
     def _handle_event_probe(self, teesrc, event):
-        if event.type == gst.EVENT_CUSTOM_DOWNSTREAM and event.has_name('mopidy-unlink-tee'):
+        if (event.type == gst.EVENT_CUSTOM_DOWNSTREAM
+                and event.has_name('mopidy-unlink-tee')):
             data = self._get_structure_data(event.get_structure())
 
             output = teesrc.get_peer().get_parent()

@@ -4,7 +4,6 @@ import logging
 from spotify import Link, SpotifyError
 
 from mopidy import settings
-from mopidy.backends.spotify import ENCODING
 from mopidy.models import Artist, Album, Track, Playlist
 
 logger = logging.getLogger('mopidy.backends.spotify.translator')

@@ -2,8 +2,6 @@ import logging
 import random
 import time
 
-from pykka.registry import ActorRegistry
-
 from mopidy.listeners import BackendListener
 
 logger = logging.getLogger('mopidy.backends.base')
