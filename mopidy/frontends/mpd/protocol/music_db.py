@@ -189,8 +189,14 @@ def _list_build_query(field, mpd_query):
     """Converts a ``list`` query to a Mopidy query."""
     if mpd_query is None:
         return {}
-    # shlex does not seem to be friends with unicode objects
-    tokens = shlex.split(mpd_query.encode('utf-8'))
+    try:
+        # shlex does not seem to be friends with unicode objects
+        tokens = shlex.split(mpd_query.encode('utf-8'))
+    except ValueError as error:
+        if error.message == 'No closing quotation':
+            raise MpdArgError(u'Invalid unquoted character', command=u'list')
+        else:
+            raise error
     tokens = [t.decode('utf-8') for t in tokens]
     if len(tokens) == 1:
         if field == u'album':

@@ -146,3 +146,19 @@ class IssueGH113RegressionTest(protocol.BaseTestCase):
         self.sendRequest(
             r'listplaylistinfo "all lart spotify:track:\\w\\{22\\} pastes"')
         self.assertInResponse('OK')
+
+
+class IssueGH137RegressionTest(protocol.BaseTestCase):
+    """
+    The issue: https://github.com/mopidy/mopidy/issues/137
+
+    How to reproduce:
+
+    - Send "list" query with mismatching quotes
+    """
+
+    def test(self):
+        self.sendRequest(u'list Date Artist "Anita Ward" '
+            u'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
+
+        self.assertInResponse('ACK [2@0] {list} Invalid unquoted character')

@@ -31,6 +31,9 @@ v0.7.0 (in development)
 - Fix ``gst.LinkError`` which appeared when using newer versions of GStreamer,
   e.g. on Ubuntu 12.04 Alpha. (Fixes: :issue:`144`)
 
+- Fix crash on mismatching quotation in ``list`` MPD queries. (Fixes:
+  :issue:`137`)
+
 
 v0.6.1 (2011-12-28)
 ===================
