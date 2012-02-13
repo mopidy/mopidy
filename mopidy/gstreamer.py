@@ -84,7 +84,7 @@ class GStreamer(ThreadingActor):
     def _on_new_pad(self, source, pad, target_pad):
         if not pad.is_linked():
             if target_pad.is_linked():
-                target_pad.unlink(target_pad.get_peer())
+                target_pad.get_peer().unlink(target_pad)
             pad.link(target_pad)
 
     def _on_message(self, bus, message):
