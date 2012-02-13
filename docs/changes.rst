@@ -26,6 +26,11 @@ v0.7.0 (in development)
   directories does not exist. This was especially the case on OS X, where
   ``~/.config`` doesn't exist for most users.
 
+**Bug fixes**
+
+- Fix ``gst.LinkError`` which appeared when using newer versions of GStreamer,
+  e.g. on Ubuntu 12.04 Alpha. (Fixes: :issue:`144`)
+
 
 v0.6.1 (2011-12-28)
 ===================
@@ -220,7 +225,7 @@ This is a bug fix release fixing audio problems on older GStreamer and some
 minor bugs.
 
 
-**Bugfixes**
+**Bug fixes**
 
 - Fix broken audio on at least GStreamer 0.10.30, which affects Ubuntu 10.10.
   The GStreamer `appsrc` bin wasn't being linked due to lack of default caps.
@@ -347,7 +352,7 @@ v0.3.1 (2011-01-22)
 
 A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
 
-**Bugfixes**
+**Bug fixes**
 
 - The Spotify application key was missing from the Python package.
 
@@ -516,7 +521,7 @@ v0.2.1 (2011-01-07)
 
 This is a maintenance release without any new features.
 
-**Bugfixes**
+**Bug fixes**
 
 - Fix crash in :mod:`mopidy.frontends.lastfm` which occurred at playback if
   either :mod:`pylast` was not installed or the Last.fm scrobbling was not
@@ -846,7 +851,7 @@ As always, report problems at our IRC channel or our issue tracker. Thanks!
 
 - Merged the ``gstreamer`` branch from Thomas Adamcik:
 
-  - More than 200 new tests, and thus several bugfixes to existing code.
+  - More than 200 new tests, and thus several bug fixes to existing code.
   - Several new generic features, like shuffle, consume, and playlist repeat.
     (Fixes: :issue:`3`)
   - **[Work in Progress]** A new backend for playing music from a local music
