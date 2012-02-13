@@ -26,8 +26,6 @@ v0.7.0 (in development)
   directories does not exist. This was especially the case on OS X, where
   ``~/.config`` doesn't exist for most users.
 
-**Bug fixes**
-
 - Fix ``gst.LinkError`` which appeared when using newer versions of GStreamer,
   e.g. on Ubuntu 12.04 Alpha. (Fixes: :issue:`144`)
 
