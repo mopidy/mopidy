@@ -16,6 +16,10 @@ v0.7.3 (in development)
   `~/.cache/mopidy/spotify`. You can change this by setting
   :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`.
 
+- Reduce time required to update the Spotify cache on startup. One one
+  system/Spotify account, the time from clean cache to ready for use was
+  reduced from 35s to 12s.
+
 
 v0.7.2 (2012-05-07)
 ===================
