@@ -24,9 +24,7 @@ class BaseMixer(object):
         if not hasattr(self, '_user_volume'):
             self._user_volume = 0
         volume = self.get_volume()
-        if volume is None:
-            return None
-        elif not self.amplification_factor < 1:
+        if volume is None or not self.amplification_factor < 1:
             return volume
         else:
             user_volume = int(volume / self.amplification_factor)
