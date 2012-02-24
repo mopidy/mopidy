@@ -2,7 +2,7 @@ import logging
 
 from mopidy import listeners, settings
 
-logger = logging.getLogger('mopdy.mixers')
+logger = logging.getLogger('mopidy.mixers')
 
 class BaseMixer(object):
     """
