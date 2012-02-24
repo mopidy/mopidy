@@ -21,19 +21,32 @@ class BaseMixer(object):
         Integer in range [0, 100]. :class:`None` if unknown. Values below 0 is
         equal to 0. Values above 100 is equal to 100.
         """
+        if not hasattr(self, '_user_volume'):
+            self._user_volume = 0
         volume = self.get_volume()
         if volume is None:
             return None
-        return int(volume / self.amplification_factor)
+        elif not self.amplification_factor < 1:
+            return volume
+        else:
+            user_volume = int(volume / self.amplification_factor)
+            if (user_volume - 1) <= self._user_volume <= (user_volume + 1):
+                return self._user_volume
+            else:
+                return user_volume
 
     @volume.setter
     def volume(self, volume):
-        volume = int(int(volume) * self.amplification_factor)
+        if not hasattr(self, '_user_volume'):
+            self._user_volume = 0
+        volume = int(volume)
         if volume < 0:
             volume = 0
         elif volume > 100:
             volume = 100
-        self.set_volume(volume)
+        self._user_volume = volume
+        real_volume = int(volume * self.amplification_factor)
+        self.set_volume(real_volume)
         self._trigger_volume_changed()
 
     def get_volume(self):

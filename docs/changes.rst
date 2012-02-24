@@ -32,6 +32,12 @@ v0.7.0 (in development)
 - Fix crash on mismatching quotation in ``list`` MPD queries. (Fixes:
   :issue:`137`)
 
+- Volume is now reported to be the same as the volume was set to, also when
+  internal rounding have been done due to
+  :attr:`mopidy.settings.MIXER_MAX_VOLUME` has been set to cap the volume. This
+  should make it possible to manage capped volume from clients that only
+  increase volume with one step at a time, like ncmpcpp does.
+
 
 v0.6.1 (2011-12-28)
 ===================
