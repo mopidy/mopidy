@@ -152,7 +152,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         """Refresh the stored playlists in the backend with fresh meta data
         from Spotify"""
         if not self._initial_data_receive_completed:
-            self.debug(u'Still getting data; skipped refresh of playlists')
+            logger.debug(u'Still getting data; skipped refresh of playlists')
             return
         playlists = map(SpotifyTranslator.to_mopidy_playlist,
             self.session.playlist_container())
