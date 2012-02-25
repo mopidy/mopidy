@@ -8,7 +8,7 @@ import os
 
 from subprocess import PIPE, Popen
 
-VERSION = (0, 7, 0)
+VERSION = (0, 8, 0)
 
 DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
 CACHE_PATH = os.path.join(str(glib.get_user_cache_dir()), 'mopidy')
