@@ -8,6 +8,7 @@ class GStreamerSoftwareMixer(ThreadingActor, BaseMixer):
     """Mixer which uses GStreamer to control volume in software."""
 
     def __init__(self):
+        super(GStreamerSoftwareMixer, self).__init__()
         self.output = None
 
     def on_start(self):

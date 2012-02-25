@@ -8,11 +8,11 @@ import os
 
 from subprocess import PIPE, Popen
 
-VERSION = (0, 6, 1)
+VERSION = (0, 7, 0)
 
-DATA_PATH = os.path.join(glib.get_user_data_dir(), 'mopidy')
-CACHE_PATH = os.path.join(glib.get_user_cache_dir(), 'mopidy')
-SETTINGS_PATH = os.path.join(glib.get_user_config_dir(), 'mopidy')
+DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
+CACHE_PATH = os.path.join(str(glib.get_user_cache_dir()), 'mopidy')
+SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
 SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
 
 def get_version():

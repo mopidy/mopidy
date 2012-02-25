@@ -4,7 +4,6 @@ import logging
 from spotify import Link, SpotifyError
 
 from mopidy import settings
-from mopidy.backends.spotify import ENCODING
 from mopidy.models import Artist, Album, Track, Playlist
 
 logger = logging.getLogger('mopidy.backends.spotify.translator')
@@ -31,9 +30,10 @@ class SpotifyTranslator(object):
         uri = str(Link.from_track(spotify_track, 0))
         if not spotify_track.is_loaded():
             return Track(uri=uri, name=u'[loading...]')
-        if (spotify_track.album() is not None and
-                dt.MINYEAR <= int(spotify_track.album().year()) <= dt.MAXYEAR):
-            date = dt.date(spotify_track.album().year(), 1, 1)
+        spotify_album = spotify_track.album()
+        if (spotify_album is not None and spotify_album.is_loaded()
+                and dt.MINYEAR <= int(spotify_album.year()) <= dt.MAXYEAR):
+            date = dt.date(spotify_album.year(), 1, 1)
         else:
             date = None
         return Track(

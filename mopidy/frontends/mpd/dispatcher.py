@@ -244,7 +244,8 @@ class MpdContext(object):
         """
         if self._backend is None:
             backend_refs = ActorRegistry.get_by_class(Backend)
-            assert len(backend_refs) == 1, 'Expected exactly one running backend.'
+            assert len(backend_refs) == 1, \
+                'Expected exactly one running backend.'
             self._backend = backend_refs[0].proxy()
         return self._backend
 

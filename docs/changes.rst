@@ -4,6 +4,41 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.7.0 (2012-02-25)
+===================
+
+Not a big release with regard to features, but this release got some
+performance improvements over v0.6, especially for slower Atom systems. It also
+fixes a couple of other bugs, including one which made Mopidy crash when using
+GStreamer from the prereleases of Ubuntu 12.04.
+
+**Changes**
+
+- The MPD command ``playlistinfo`` is now faster, thanks to John Bäckstrand.
+
+- Added the method
+  :meth:`mopidy.backends.base.CurrentPlaylistController.length()`,
+  :meth:`mopidy.backends.base.CurrentPlaylistController.index()`, and
+  :meth:`mopidy.backends.base.CurrentPlaylistController.slice()` to reduce the
+  need for copying the entire current playlist from one thread to another.
+  Thanks to John Bäckstrand for pinpointing the issue.
+
+- Fix crash on creation of config and cache directories if intermediate
+  directories does not exist. This was especially the case on OS X, where
+  ``~/.config`` doesn't exist for most users.
+
+- Fix ``gst.LinkError`` which appeared when using newer versions of GStreamer,
+  e.g. on Ubuntu 12.04 Alpha. (Fixes: :issue:`144`)
+
+- Fix crash on mismatching quotation in ``list`` MPD queries. (Fixes:
+  :issue:`137`)
+
+- Volume is now reported to be the same as the volume was set to, also when
+  internal rounding have been done due to
+  :attr:`mopidy.settings.MIXER_MAX_VOLUME` has been set to cap the volume. This
+  should make it possible to manage capped volume from clients that only
+  increase volume with one step at a time, like ncmpcpp does.
+
 
 v0.6.1 (2011-12-28)
 ===================
@@ -21,6 +56,7 @@ make the Debian packages work out of the box again.
 - Spotify playlist folder boundaries are now properly detected. In other words,
   if you use playlist folders, you will no longer get lots of log messages
   about bad playlists.
+
 
 
 v0.6.0 (2011-10-09)
@@ -197,7 +233,7 @@ This is a bug fix release fixing audio problems on older GStreamer and some
 minor bugs.
 
 
-**Bugfixes**
+**Bug fixes**
 
 - Fix broken audio on at least GStreamer 0.10.30, which affects Ubuntu 10.10.
   The GStreamer `appsrc` bin wasn't being linked due to lack of default caps.
@@ -242,7 +278,7 @@ loading from Mopidy 0.3.0 is still present.
 
 **Important changes**
 
-- Mopidy now depends on `Pykka <http://jodal.github.com/pykka>`_ >=0.12. If you
+- Mopidy now depends on `Pykka <http://pykka.readthedocs.org/>`_ >=0.12. If you
   install from APT, Pykka will automatically be installed. If you are not
   installing from APT, you may install Pykka from PyPI::
 
@@ -324,7 +360,7 @@ v0.3.1 (2011-01-22)
 
 A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
 
-**Bugfixes**
+**Bug fixes**
 
 - The Spotify application key was missing from the Python package.
 
@@ -493,7 +529,7 @@ v0.2.1 (2011-01-07)
 
 This is a maintenance release without any new features.
 
-**Bugfixes**
+**Bug fixes**
 
 - Fix crash in :mod:`mopidy.frontends.lastfm` which occurred at playback if
   either :mod:`pylast` was not installed or the Last.fm scrobbling was not
@@ -823,7 +859,7 @@ As always, report problems at our IRC channel or our issue tracker. Thanks!
 
 - Merged the ``gstreamer`` branch from Thomas Adamcik:
 
-  - More than 200 new tests, and thus several bugfixes to existing code.
+  - More than 200 new tests, and thus several bug fixes to existing code.
   - Several new generic features, like shuffle, consume, and playlist repeat.
     (Fixes: :issue:`3`)
   - **[Work in Progress]** A new backend for playing music from a local music

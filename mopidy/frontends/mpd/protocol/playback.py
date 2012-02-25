@@ -178,7 +178,8 @@ def playpos(context, songpos):
     if songpos == -1:
         return _play_minus_one(context)
     try:
-        cp_track = context.backend.current_playlist.cp_tracks.get()[songpos]
+        cp_track = context.backend.current_playlist.slice(
+            songpos, songpos + 1).get()[0]
         return context.backend.playback.play(cp_track).get()
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'play')
@@ -191,8 +192,8 @@ def _play_minus_one(context):
     elif context.backend.playback.current_cp_track.get() is not None:
         cp_track = context.backend.playback.current_cp_track.get()
         return context.backend.playback.play(cp_track).get()
-    elif context.backend.current_playlist.cp_tracks.get():
-        cp_track = context.backend.current_playlist.cp_tracks.get()[0]
+    elif context.backend.current_playlist.slice(0, 1).get():
+        cp_track = context.backend.current_playlist.slice(0, 1).get()[0]
         return context.backend.playback.play(cp_track).get()
     else:
         return # Fail silently

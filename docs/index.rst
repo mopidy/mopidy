@@ -19,9 +19,7 @@ please create an issue in the `issue tracker
 Project resources
 =================
 
-- `Documentation for the latest release <http://www.mopidy.com/docs/master/>`_
-- `Documentation for the development version
-  <http://www.mopidy.com/docs/develop/>`_
+- `Documentation <http://docs.mopidy.com/>`_
 - `Source code <http://github.com/mopidy/mopidy>`_
 - `Issue tracker <http://github.com/mopidy/mopidy/issues>`_
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_

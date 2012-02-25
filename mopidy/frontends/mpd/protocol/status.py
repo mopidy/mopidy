@@ -1,8 +1,9 @@
 import pykka.future
 
 from mopidy.backends.base import PlaybackController
-from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.protocol import handle_request
+from mopidy.frontends.mpd.translator import track_to_mpd_format
 
 #: Subsystems that can be registered with idle command.
 SUBSYSTEMS = ['database', 'mixer', 'options', 'output',
@@ -32,9 +33,8 @@ def currentsong(context):
     """
     current_cp_track = context.backend.playback.current_cp_track.get()
     if current_cp_track is not None:
-        return current_cp_track.track.mpd_format(
-            position=context.backend.playback.current_playlist_position.get(),
-            cpid=current_cp_track.cpid)
+        position = context.backend.playback.current_playlist_position.get()
+        return track_to_mpd_format(current_cp_track, position=position)
 
 @handle_request(r'^idle$')
 @handle_request(r'^idle (?P<subsystems>.+)$')
@@ -166,7 +166,7 @@ def status(context):
           decimal places for millisecond precision.
     """
     futures = {
-        'current_playlist.tracks': context.backend.current_playlist.tracks,
+        'current_playlist.length': context.backend.current_playlist.length,
         'current_playlist.version': context.backend.current_playlist.version,
         'mixer.volume': context.mixer.volume,
         'playback.consume': context.backend.playback.consume,
@@ -213,7 +213,7 @@ def _status_consume(futures):
         return 0
 
 def _status_playlist_length(futures):
-    return len(futures['current_playlist.tracks'].get())
+    return futures['current_playlist.length'].get()
 
 def _status_playlist_version(futures):
     return futures['current_playlist.version'].get()

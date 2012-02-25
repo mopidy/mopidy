@@ -8,7 +8,7 @@ contributed what, please refer to our git repository.
 Source code license
 ===================
 
-Copyright 2009-2011 Stein Magnus Jodal and contributors
+Copyright 2009-2012 Stein Magnus Jodal and contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ limitations under the License.
 Documentation license
 =====================
 
-Copyright 2010-2011 Stein Magnus Jodal and contributors
+Copyright 2010-2012 Stein Magnus Jodal and contributors
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 3.0
 Unported License. To view a copy of this license, visit

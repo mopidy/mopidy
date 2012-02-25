@@ -4,7 +4,6 @@ import Queue
 from spotify import Link, SpotifyError
 
 from mopidy.backends.base import BaseLibraryProvider
-from mopidy.backends.spotify import ENCODING
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 

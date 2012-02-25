@@ -25,8 +25,9 @@ class DenonMixer(ThreadingActor, BaseMixer):
     - :attr:`mopidy.settings.MIXER_EXT_PORT` -- Example: ``/dev/ttyUSB0``
     """
 
-    def __init__(self, *args, **kwargs):
-        self._device = kwargs.get('device', None)
+    def __init__(self, device=None):
+        super(DenonMixer, self).__init__()
+        self._device = device
         self._levels = ['99'] + ["%(#)02d" % {'#': v} for v in range(0, 99)]
         self._volume = 0
 

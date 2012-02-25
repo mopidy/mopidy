@@ -1,12 +1,19 @@
+import sys
+
 import mock
 
-from mopidy import settings
+from mopidy import OptionalDependencyError, settings
 from mopidy.backends.dummy import DummyBackend
-from mopidy.frontends.mpris import objects
+
+try:
+    from mopidy.frontends.mpris import objects
+except OptionalDependencyError:
+    pass
 
 from tests import unittest
 
 
+@unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
 class RootInterfaceTest(unittest.TestCase):
     def setUp(self):
         objects.exit_process = mock.Mock()

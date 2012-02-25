@@ -23,7 +23,6 @@ from mopidy.utils.process import exit_process
 # Must be done before dbus.SessionBus() is called
 gobject.threads_init()
 dbus.mainloop.glib.threads_init()
-dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 BUS_NAME = 'org.mpris.MediaPlayer2.mopidy'
 OBJECT_PATH = '/org/mpris/MediaPlayer2'
@@ -81,7 +80,9 @@ class MprisObject(dbus.service.Object):
 
     def _connect_to_dbus(self):
         logger.debug(u'Connecting to D-Bus...')
-        bus_name = dbus.service.BusName(BUS_NAME, dbus.SessionBus())
+        mainloop = dbus.mainloop.glib.DBusGMainLoop()
+        bus_name = dbus.service.BusName(BUS_NAME,
+            dbus.SessionBus(mainloop=mainloop))
         logger.info(u'Connected to D-Bus')
         return bus_name
 

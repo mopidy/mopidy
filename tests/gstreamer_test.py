@@ -6,8 +6,6 @@ from mopidy.utils.path import path_to_uri
 
 from tests import unittest, path_to_data_dir
 
-# TODO BaseOutputTest?
-
 
 @unittest.skipIf(sys.platform == 'win32',
     'Our Windows build server does not support GStreamer yet')

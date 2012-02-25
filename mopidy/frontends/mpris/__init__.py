@@ -57,6 +57,7 @@ class MprisFrontend(ThreadingActor, BackendListener):
     """
 
     def __init__(self):
+        super(MprisFrontend, self).__init__()
         self.indicate_server = None
         self.mpris_object = None
 

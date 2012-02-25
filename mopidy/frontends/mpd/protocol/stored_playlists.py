@@ -1,7 +1,8 @@
 import datetime as dt
 
-from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNoExistError, MpdNotImplemented
+from mopidy.frontends.mpd.protocol import handle_request
+from mopidy.frontends.mpd.translator import playlist_to_mpd_format
 
 @handle_request(r'^listplaylist "(?P<name>[^"]+)"$')
 def listplaylist(context, name):
@@ -40,7 +41,7 @@ def listplaylistinfo(context, name):
     """
     try:
         playlist = context.backend.stored_playlists.get(name=name).get()
-        return playlist.mpd_format()
+        return playlist_to_mpd_format(playlist)
     except LookupError:
         raise MpdNoExistError(
             u'No such playlist', command=u'listplaylistinfo')

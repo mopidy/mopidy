@@ -37,6 +37,7 @@ class NadMixer(ThreadingActor, BaseMixer):
     """
 
     def __init__(self):
+        super(NadMixer, self).__init__()
         self._volume_cache = None
         self._nad_talker = NadTalker.start().proxy()
 
@@ -71,6 +72,7 @@ class NadTalker(ThreadingActor):
     _nad_volume = None
 
     def __init__(self):
+        super(NadTalker, self).__init__()
         self._device = None
 
     def on_start(self):
