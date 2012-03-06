@@ -4,12 +4,26 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-v0.7.0 (in development)
-=======================
+v0.8 (in development)
+=====================
 
 **Important changes**
 
-- Nothing yet.
+- Nothing so far
+
+**Changes**
+
+- Change from version tuple at :attr:`mopidy.VERSION` to :pep:`386` compliant
+  version string at :attr:`mopidy.__version__` to conform to :pep:`396`.
+
+
+v0.7.0 (2012-02-25)
+===================
+
+Not a big release with regard to features, but this release got some
+performance improvements over v0.6, especially for slower Atom systems. It also
+fixes a couple of other bugs, including one which made Mopidy crash when using
+GStreamer from the prereleases of Ubuntu 12.04.
 
 **Changes**
 

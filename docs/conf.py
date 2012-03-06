@@ -11,7 +11,9 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import os
+import re
+import sys
 
 class Mock(object):
     def __init__(self, *args, **kwargs):
@@ -48,6 +50,11 @@ MOCK_MODULES = [
 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
+
+def get_version():
+    init_py = open('../mopidy/__init__.py').read()
+    metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", init_py))
+    return metadata['version']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -87,8 +94,7 @@ copyright = u'2010-2012, Stein Magnus Jodal and contributors'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-import mopidy
-release = mopidy.get_version()
+release = get_version()
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])
 
