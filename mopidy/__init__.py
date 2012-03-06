@@ -19,7 +19,7 @@ def get_version():
     try:
         return get_git_version()
     except EnvironmentError:
-        return get_plain_version()
+        return __version__
 
 def get_git_version():
     process = Popen(['git', 'describe'], stdout=PIPE, stderr=PIPE)
