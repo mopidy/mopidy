@@ -1,14 +1,13 @@
-import gobject
-gobject.threads_init()
-
-import pygst
-pygst.require('0.10')
-import gst
-
 import datetime
+import sys
+
+from gi.repository import GLib, GObject, Gst
 
 from mopidy.utils.path import path_to_uri, find_files
 from mopidy.models import Track, Artist, Album
+
+GObject.threads_init()
+Gst.init(sys.argv)
 
 def translator(data):
     albumartist_kwargs = {}
@@ -20,17 +19,17 @@ def translator(data):
         if source_key in data:
             target[target_key] = data[source_key]
 
-    _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
-    _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
-    _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
+    _retrieve(Gst.TAG_ALBUM, 'name', album_kwargs)
+    _retrieve(Gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
+    _retrieve(Gst.TAG_ARTIST, 'name', artist_kwargs)
 
-    if gst.TAG_DATE in data and data[gst.TAG_DATE]:
-        date = data[gst.TAG_DATE]
+    if Gst.TAG_DATE in data and data[Gst.TAG_DATE]:
+        date = data[Gst.TAG_DATE]
         date = datetime.date(date.year, date.month, date.day)
         track_kwargs['date'] = date
 
-    _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
-    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
+    _retrieve(Gst.TAG_TITLE, 'name', track_kwargs)
+    _retrieve(Gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
 
     # Following keys don't seem to have TAG_* constant.
     _retrieve('album-artist', 'name', albumartist_kwargs)
@@ -43,7 +42,7 @@ def translator(data):
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
     track_kwargs['uri'] = data['uri']
-    track_kwargs['length'] = data[gst.TAG_DURATION]
+    track_kwargs['length'] = data[Gst.TAG_DURATION]
     track_kwargs['album'] = Album(**album_kwargs)
     track_kwargs['artists'] = [Artist(**artist_kwargs)]
 
@@ -55,16 +54,17 @@ class Scanner(object):
         self.uris = [path_to_uri(f) for f in find_files(folder)]
         self.data_callback = data_callback
         self.error_callback = error_callback
-        self.loop = gobject.MainLoop()
+        self.loop = GObject.MainLoop()
 
-        fakesink = gst.element_factory_make('fakesink')
+        fakesink = Gst.ElementFactory.make('fakesink', 'fakesink')
 
-        self.uribin = gst.element_factory_make('uridecodebin')
-        self.uribin.set_property('caps', gst.Caps('audio/x-raw-int'))
+        self.uribin = Gst.ElementFactory.make('uridecodebin', 'uribin')
+        self.uribin.set_property('caps',
+            Gst.caps_from_string('audio/x-raw-int'))
         self.uribin.connect('pad-added', self.process_new_pad,
             fakesink.get_pad('sink'))
 
-        self.pipe = gst.element_factory_make('pipeline')
+        self.pipe = Gst.ElementFactory.make('pipeline', 'pipe')
         self.pipe.add(self.uribin)
         self.pipe.add(fakesink)
 
@@ -80,7 +80,7 @@ class Scanner(object):
         taglist = message.parse_tag()
         data = {
             'uri': unicode(self.uribin.get_property('uri')),
-            gst.TAG_DURATION: self.get_duration(),
+            Gst.TAG_DURATION: self.get_duration(),
         }
 
         for key in taglist.keys():
@@ -109,17 +109,17 @@ class Scanner(object):
         self.pipe.get_state() # Block until state change is done.
         try:
             return self.pipe.query_duration(
-                gst.FORMAT_TIME, None)[0] // gst.MSECOND
-        except gst.QueryError:
+                Gst.Format.TIME, None)[0] // Gst.MSECOND
+        except Gst.QueryError:
             return None
 
     def next_uri(self):
         if not self.uris:
             return self.stop()
 
-        self.pipe.set_state(gst.STATE_NULL)
+        self.pipe.set_state(Gst.State.NULL)
         self.uribin.set_property('uri', self.uris.pop())
-        self.pipe.set_state(gst.STATE_PAUSED)
+        self.pipe.set_state(Gst.State.PAUSED)
 
     def start(self):
         if not self.uris:
@@ -128,5 +128,5 @@ class Scanner(object):
         self.loop.run()
 
     def stop(self):
-        self.pipe.set_state(gst.STATE_NULL)
+        self.pipe.set_state(Gst.State.NULL)
         self.loop.quit()

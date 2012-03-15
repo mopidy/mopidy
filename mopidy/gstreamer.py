@@ -1,8 +1,7 @@
-import pygst
-pygst.require('0.10')
-import gst
-
 import logging
+import sys
+
+from gi.repository import GLib, Gst
 
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
@@ -13,6 +12,7 @@ from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
 
+Gst.init(sys.argv)
 
 class GStreamer(ThreadingActor):
     """
@@ -26,7 +26,7 @@ class GStreamer(ThreadingActor):
 
     def __init__(self):
         super(GStreamer, self).__init__()
-        self._default_caps = gst.Caps("""
+        self._default_caps = Gst.caps_from_string("""
             audio/x-raw-int,
             endianness=(int)1234,
             channels=(int)2,
@@ -56,7 +56,7 @@ class GStreamer(ThreadingActor):
 
         logger.debug(u'Setting up base GStreamer pipeline: %s', description)
 
-        self._pipeline = gst.parse_launch(description)
+        self._pipeline = Gst.parse_launch(description)
         self._tee = self._pipeline.get_by_name('tee')
         self._volume = self._pipeline.get_by_name('volume')
         self._uridecodebin = self._pipeline.get_by_name('uri')
@@ -92,15 +92,15 @@ class GStreamer(ThreadingActor):
             if self._handlers[message.src](message):
                 return # Message was handeled by output
 
-        if message.type == gst.MESSAGE_EOS:
+        if message.type == Gst.MessageType.EOS:
             logger.debug(u'GStreamer signalled end-of-stream. '
                 'Telling backend ...')
             self._get_backend().playback.on_end_of_track()
-        elif message.type == gst.MESSAGE_ERROR:
+        elif message.type == Gst.MessageType.ERROR:
             error, debug = message.parse_error()
             logger.error(u'%s %s', error, debug)
             self.stop_playback()
-        elif message.type == gst.MESSAGE_WARNING:
+        elif message.type == Gst.MessageType.WARNING:
             error, debug = message.parse_warning()
             logger.warning(u'%s %s', error, debug)
 
@@ -128,8 +128,8 @@ class GStreamer(ThreadingActor):
         :type capabilities: string
         :param data: raw audio data to be played
         """
-        caps = gst.caps_from_string(capabilities)
-        buffer_ = gst.Buffer(buffer(data))
+        caps = Gst.caps_from_string(capabilities)
+        buffer_ = Gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
         self._source.set_property('caps', caps)
         self._source.emit('push-buffer', buffer_)
@@ -150,12 +150,12 @@ class GStreamer(ThreadingActor):
 
         :rtype: int
         """
-        if self._pipeline.get_state()[1] == gst.STATE_NULL:
+        if self._pipeline.get_state()[1] == Gst.State.NULL:
             return 0
         try:
-            position = self._pipeline.query_position(gst.FORMAT_TIME)[0]
-            return position // gst.MSECOND
-        except gst.QueryError, e:
+            position = self._pipeline.query_position(Gst.Format.TIME)[0]
+            return position // Gst.MSECOND
+        except Gst.QueryError, e:
             logger.error('time_position failed: %s', e)
             return 0
 
@@ -168,8 +168,8 @@ class GStreamer(ThreadingActor):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         self._pipeline.get_state() # block until state changes are done
-        handeled = self._pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
-            gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
+        handeled = self._pipeline.seek_simple(Gst.Format(Gst.Format.TIME),
+            Gst.SeekFlags.FLUSH, position * Gst.MSECOND)
         self._pipeline.get_state() # block until seek is done
         return handeled
 
@@ -179,7 +179,7 @@ class GStreamer(ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        return self._set_state(gst.STATE_PLAYING)
+        return self._set_state(Gst.State.PLAYING)
 
     def pause_playback(self):
         """
@@ -187,7 +187,7 @@ class GStreamer(ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        return self._set_state(gst.STATE_PAUSED)
+        return self._set_state(Gst.State.PAUSED)
 
     def prepare_change(self):
         """
@@ -196,9 +196,9 @@ class GStreamer(ThreadingActor):
         This function *MUST* be called before changing URIs or doing
         changes like updating data that is being pushed. The reason for this
         is that GStreamer will reset all its state when it changes to
-        :attr:`gst.STATE_READY`.
+        :attr:`Gst.State.READY`.
         """
-        return self._set_state(gst.STATE_READY)
+        return self._set_state(Gst.State.READY)
 
     def stop_playback(self):
         """
@@ -206,7 +206,7 @@ class GStreamer(ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        return self._set_state(gst.STATE_NULL)
+        return self._set_state(Gst.State.NULL)
 
     def _set_state(self, state):
         """
@@ -224,17 +224,17 @@ class GStreamer(ThreadingActor):
             "READY" -> "NULL"
             "READY" -> "PAUSED"
 
-        :param state: State to set pipeline to. One of: `gst.STATE_NULL`,
-            `gst.STATE_READY`, `gst.STATE_PAUSED` and `gst.STATE_PLAYING`.
-        :type state: :class:`gst.State`
+        :param state: State to set pipeline to. One of: `Gst.State.NULL`,
+            `Gst.State.READY`, `Gst.State.PAUSED` and `Gst.State.PLAYING`.
+        :type state: :class:`Gst.State`
         :rtype: :class:`True` if successfull, else :class:`False`
         """
         result = self._pipeline.set_state(state)
-        if result == gst.STATE_CHANGE_FAILURE:
+        if result == Gst.StateChangeReturn.FAILURE:
             logger.warning('Setting GStreamer state to %s: failed',
                 state.value_name)
             return False
-        elif result == gst.STATE_CHANGE_ASYNC:
+        elif result == Gst.StateChangeReturn.ASYNC:
             logger.debug('Setting GStreamer state to %s: async',
                 state.value_name)
             return True
@@ -273,25 +273,25 @@ class GStreamer(ThreadingActor):
         :param track: the current track
         :type track: :class:`mopidy.modes.Track`
         """
-        taglist = gst.TagList()
+        taglist = Gst.TagList()
         artists = [a for a in (track.artists or []) if a.name]
 
         # Default to blank data to trick shoutcast into clearing any previous
         # values it might have.
-        taglist[gst.TAG_ARTIST] = u' '
-        taglist[gst.TAG_TITLE] = u' '
-        taglist[gst.TAG_ALBUM] = u' '
+        taglist[Gst.TAG_ARTIST] = u' '
+        taglist[Gst.TAG_TITLE] = u' '
+        taglist[Gst.TAG_ALBUM] = u' '
 
         if artists:
-            taglist[gst.TAG_ARTIST] = u', '.join([a.name for a in artists])
+            taglist[Gst.TAG_ARTIST] = u', '.join([a.name for a in artists])
 
         if track.name:
-            taglist[gst.TAG_TITLE] = track.name
+            taglist[Gst.TAG_TITLE] = track.name
 
         if track.album and track.album.name:
-            taglist[gst.TAG_ALBUM] = track.album.name
+            taglist[Gst.TAG_ALBUM] = track.album.name
 
-        event = gst.event_new_tag(taglist)
+        event = Gst.event_new_tag(taglist)
         self._pipeline.send_event(event)
 
     def connect_output(self, output):
@@ -299,11 +299,11 @@ class GStreamer(ThreadingActor):
         Connect output to pipeline.
 
         :param output: output to connect to the pipeline
-        :type output: :class:`gst.Bin`
+        :type output: :class:`Gst.Bin`
         """
         self._pipeline.add(output)
         output.sync_state_with_parent() # Required to add to running pipe
-        gst.element_link_many(self._tee, output)
+        self._tee.link(output)
         self._outputs.append(output)
         logger.debug('GStreamer added %s', output.get_name())
 
@@ -320,7 +320,7 @@ class GStreamer(ThreadingActor):
         Remove output from our pipeline.
 
         :param output: output to remove from the pipeline
-        :type output: :class:`gst.Bin`
+        :type output: :class:`Gst.Bin`
         """
         if output not in self._outputs:
             raise LookupError('Ouput %s not present in pipeline'
@@ -328,14 +328,14 @@ class GStreamer(ThreadingActor):
         teesrc = output.get_pad('sink').get_peer()
         handler = teesrc.add_event_probe(self._handle_event_probe)
 
-        struct = gst.Structure('mopidy-unlink-tee')
+        struct = Gst.Structure('mopidy-unlink-tee')
         struct.set_value('handler', handler)
 
-        event = gst.event_new_custom(gst.EVENT_CUSTOM_DOWNSTREAM, struct)
+        event = Gst.event_new_custom(Gst.EVENT_CUSTOM_DOWNSTREAM, struct)
         self._tee.send_event(event)
 
     def _handle_event_probe(self, teesrc, event):
-        if (event.type == gst.EVENT_CUSTOM_DOWNSTREAM
+        if (event.type == Gst.EVENT_CUSTOM_DOWNSTREAM
                 and event.has_name('mopidy-unlink-tee')):
             data = self._get_structure_data(event.get_structure())
 
@@ -344,7 +344,7 @@ class GStreamer(ThreadingActor):
             teesrc.unlink(teesrc.get_peer())
             teesrc.remove_event_probe(data['handler'])
 
-            output.set_state(gst.STATE_NULL)
+            output.set_state(Gst.STATE_NULL)
             self._pipeline.remove(output)
 
             logger.warning('Removed %s', output.get_name())
@@ -379,8 +379,8 @@ class GStreamer(ThreadingActor):
         Note that there can only be one handler per element.
 
         :param element: element to watch messages from
-        :type element: :class:`gst.Element`
-        :param handler: callable that takes :class:`gst.Message` and returns
+        :type element: :class:`Gst.Element`
+        :param handler: callable that takes :class:`Gst.Message` and returns
             :class:`True` if the message has been handeled
         :type handler: callable
         """
@@ -391,6 +391,6 @@ class GStreamer(ThreadingActor):
         Remove custom message handler.
 
         :param element: element to remove message handling from.
-        :type element: :class:`gst.Element`
+        :type element: :class:`Gst.Element`
         """
         self._handlers.pop(element, None)
