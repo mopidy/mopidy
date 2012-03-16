@@ -291,7 +291,7 @@ class GStreamer(ThreadingActor):
         if track.album and track.album.name:
             taglist[Gst.TAG_ALBUM] = track.album.name
 
-        event = Gst.event_new_tag(taglist)
+        event = Gst.Event.tag(taglist)
         self._pipeline.send_event(event)
 
     def connect_output(self, output):
@@ -331,7 +331,7 @@ class GStreamer(ThreadingActor):
         struct = Gst.Structure('mopidy-unlink-tee')
         struct.set_value('handler', handler)
 
-        event = Gst.event_new_custom(Gst.EVENT_CUSTOM_DOWNSTREAM, struct)
+        event = Gst.Event.custom(Gst.EVENT_CUSTOM_DOWNSTREAM, struct)
         self._tee.send_event(event)
 
     def _handle_event_probe(self, teesrc, event):
