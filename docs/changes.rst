@@ -4,6 +4,7 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+
 v0.8 (in development)
 =====================
 
@@ -15,6 +16,17 @@ v0.8 (in development)
 
 - Change from version tuple at :attr:`mopidy.VERSION` to :pep:`386` compliant
   version string at :attr:`mopidy.__version__` to conform to :pep:`396`.
+
+
+v0.7.1 (2012-04-22)
+===================
+
+This is a maintenance release to make Mopidy 0.6 work with pyspotify >= 1.7.
+
+**Changes**
+
+- Don't override pyspotify's ``notify_main_thread`` callback. The default
+  implementation is sensible, while our override did nothing.
 
 
 v0.7.0 (2012-02-25)
