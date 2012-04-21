@@ -21,7 +21,7 @@ v0.8 (in development)
 v0.7.1 (2012-04-22)
 ===================
 
-This is a maintenance release to make Mopidy 0.6 work with pyspotify >= 1.7.
+This is a maintenance release to make Mopidy 0.7 work with pyspotify >= 1.7.
 
 **Changes**
 
