@@ -96,10 +96,6 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         """Callback used by pyspotify"""
         logger.debug(u'User message: %s', message.strip())
 
-    def notify_main_thread(self, session):
-        """Callback used by pyspotify"""
-        logger.debug(u'notify_main_thread() called')
-
     def music_delivery(self, session, frames, frame_size, num_frames,
             sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
