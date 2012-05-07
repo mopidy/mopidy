@@ -5,10 +5,22 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+v0.7.2 (2012-05-07)
+===================
+
+This is a maintenance release to make Mopidy 0.7 build on systems without all
+of Mopidy's runtime dependencies, like Launchpad PPAs.
+
+**Changes**
+
+- Change from version tuple at :attr:`mopidy.VERSION` to :pep:`386` compliant
+  version string at :attr:`mopidy.__version__` to conform to :pep:`396`.
+
+
 v0.7.1 (2012-04-22)
 ===================
 
-This is a maintenance release to make Mopidy 0.6 work with pyspotify >= 1.7.
+This is a maintenance release to make Mopidy 0.7 work with pyspotify >= 1.7.
 
 **Changes**
 

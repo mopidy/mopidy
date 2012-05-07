@@ -37,7 +37,7 @@ dependencies installed.
   - For Spotify support, you need libspotify and pyspotify. See
     :doc:`libspotify`.
 
-  - To scrobble your played tracks to Last.FM, you need pylast::
+  - To scrobble your played tracks to Last.fm, you need pylast::
 
         sudo pip install -U pylast
 
