@@ -5,12 +5,11 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.8 (in development)
-=====================
+v0.7.2 (2012-05-07)
+===================
 
-**Important changes**
-
-- Nothing so far
+This is a maintenance release to make Mopidy 0.7 build on systems without all
+of Mopidy's runtime dependencies, like Launchpad PPAs.
 
 **Changes**
 
