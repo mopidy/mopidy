@@ -4,6 +4,14 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.7.3 (in development)
+=======================
+
+**Changes**
+
+- Fixed crash when logging :exc:`IOError` exceptions on systems using languages
+  with non-ASCII characters, like French.
+
 
 v0.7.2 (2012-05-07)
 ===================
