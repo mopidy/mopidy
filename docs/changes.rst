@@ -12,6 +12,10 @@ v0.7.3 (in development)
 - Fixed crash when logging :exc:`IOError` exceptions on systems using languages
   with non-ASCII characters, like French.
 
+- Move the default location of the Spotify cache from `~/.cache/mopidy` to
+  `~/.cache/mopidy/spotify`. You can change this by setting
+  :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`.
+
 
 v0.7.2 (2012-05-07)
 ===================

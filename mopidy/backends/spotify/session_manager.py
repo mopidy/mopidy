@@ -23,8 +23,9 @@ logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
 
 class SpotifySessionManager(BaseThread, PyspotifySessionManager):
-    cache_location = settings.SPOTIFY_CACHE_PATH or CACHE_PATH
-    settings_location = settings.SPOTIFY_CACHE_PATH or CACHE_PATH
+    cache_location = (settings.SPOTIFY_CACHE_PATH
+        or os.path.join(CACHE_PATH, 'spotify'))
+    settings_location = cache_location
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
