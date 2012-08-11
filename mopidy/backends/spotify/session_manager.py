@@ -23,8 +23,9 @@ logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
 
 class SpotifySessionManager(BaseThread, PyspotifySessionManager):
-    cache_location = settings.SPOTIFY_CACHE_PATH or CACHE_PATH
-    settings_location = settings.SPOTIFY_CACHE_PATH or CACHE_PATH
+    cache_location = (settings.SPOTIFY_CACHE_PATH
+        or os.path.join(CACHE_PATH, 'spotify'))
+    settings_location = cache_location
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
@@ -41,6 +42,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
 
         self.container_manager = None
         self.playlist_manager = None
+
+        self._initial_data_receive_completed = False
 
     def run_inside_try(self):
         self.setup()
@@ -125,6 +128,17 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def log_message(self, session, data):
         """Callback used by pyspotify"""
         logger.debug(u'System message: %s' % data.strip())
+        if 'offline-mgr' in data and 'files unlocked' in data:
+            # XXX This is a very very fragile and ugly hack, but we get no
+            # proper event when libspotify is done with initial data loading.
+            # We delay the expensive refresh of Mopidy's stored playlists until
+            # this message arrives. This way, we avoid doing the refresh once
+            # for every playlist or other change. This reduces the time from
+            # startup until the Spotify backend is ready from 35s to 12s in one
+            # test with clean Spotify cache. In cases with an outdated cache
+            # the time improvements should be a lot better.
+            self._initial_data_receive_completed = True
+            self.refresh_stored_playlists()
 
     def end_of_track(self, session):
         """Callback used by pyspotify"""
@@ -134,6 +148,9 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def refresh_stored_playlists(self):
         """Refresh the stored playlists in the backend with fresh meta data
         from Spotify"""
+        if not self._initial_data_receive_completed:
+            logger.debug(u'Still getting data; skipped refresh of playlists')
+            return
         playlists = map(SpotifyTranslator.to_mopidy_playlist,
             self.session.playlist_container())
         playlists = filter(None, playlists)

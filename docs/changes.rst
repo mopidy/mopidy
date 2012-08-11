@@ -4,6 +4,25 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.7.3 (2012-08-11)
+===================
+
+A small maintenance release to fix a crash affecting a few users, and a couple
+of small adjustments to the Spotify backend.
+
+**Changes**
+
+- Fixed crash when logging :exc:`IOError` exceptions on systems using languages
+  with non-ASCII characters, like French.
+
+- Move the default location of the Spotify cache from `~/.cache/mopidy` to
+  `~/.cache/mopidy/spotify`. You can change this by setting
+  :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`.
+
+- Reduce time required to update the Spotify cache on startup. One one
+  system/Spotify account, the time from clean cache to ready for use was
+  reduced from 35s to 12s.
+
 
 v0.7.2 (2012-05-07)
 ===================
