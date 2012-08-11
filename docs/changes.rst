@@ -4,8 +4,11 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-v0.7.3 (in development)
-=======================
+v0.7.3 (2012-08-11)
+===================
+
+A small maintenance release to fix a crash affecting a few users, and a couple
+of small adjustments to the Spotify backend.
 
 **Changes**
 
