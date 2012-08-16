@@ -1,6 +1,8 @@
 import logging
 import Queue
 
+from time import sleep
+
 from spotify import Link, SpotifyError
 
 from mopidy.backends.base import BaseLibraryProvider
@@ -16,9 +18,10 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
     def lookup(self, uri):
         try:
             spotify_track = Link.from_string(uri).as_track()
-            # TODO Block until metadata_updated callback is called. Before that
-            # the track will be unloaded, unless it's already in the stored
-            # playlists.
+            # Block until metadata_update callback has been called.
+            while (not spotify_track.is_loaded()):
+                logger.debug(u'Waiting for metadata to load')
+                sleep(0.05)
             return SpotifyTranslator.to_mopidy_track(spotify_track)
         except SpotifyError as e:
             logger.debug(u'Failed to lookup "%s": %s', uri, e)
