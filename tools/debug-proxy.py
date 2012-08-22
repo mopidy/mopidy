@@ -4,9 +4,12 @@ import argparse
 import difflib
 import sys
 
-from gevent import select
-from gevent import server
-from gevent import socket
+from gevent import select, server, socket
+
+COLORS = ['\033[1;%dm' % (30+i) for i in range(8)]
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = COLORS
+RESET = "\033[0m"
+BOLD = "\033[1m"
 
 
 def proxy(client, address, reference_address, actual_address):
@@ -53,7 +56,7 @@ def loop(client, address, reference, actual):
     disconnected = read([reference, actual], responses, find_response_end_token)
     diff(address, '', responses[reference], responses[actual])
 
-    # We lost the a backend, might as well give up.
+    # We lost a backend, might as well give up.
     if disconnected:
         return
 
@@ -138,7 +141,17 @@ def diff(address, command, reference_response, actual_response):
                                      actual_response.splitlines(True),
                                      fromfile='Reference response',
                                      tofile='Actual response'):
+
+        if line.startswith('+') and not line.startswith('+++'):
+            sys.stdout.write(GREEN)
+        elif line.startswith('-') and not line.startswith('---'):
+            sys.stdout.write(RED)
+        elif line.startswith('@@'):
+            sys.stdout.write(CYAN)
+
         sys.stdout.write(line)
+        sys.stdout.write(RESET)
+
     sys.stdout.flush()
 
 
