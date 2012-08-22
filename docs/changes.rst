@@ -4,6 +4,17 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.8 (in development)
+=====================
+
+**Changes**
+
+- Added tools/debug-proxy.py to tee client requests to two backends and diff
+  responses. Intended as a developer tool for checking for MPD protocol changes
+  and various client support. Requires gevent, which currently is not a
+  dependency of Mopidy.
+
+
 v0.7.3 (2012-08-11)
 ===================
 
