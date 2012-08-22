@@ -1,9 +1,10 @@
-import unittest
-
 from mopidy.mixers.dummy import DummyMixer
+
+from tests import unittest
 from tests.mixers.base_test import BaseMixerTest
 
-class DenonMixerTest(BaseMixerTest, unittest.TestCase):
+
+class DummyMixerTest(BaseMixerTest, unittest.TestCase):
     mixer_class = DummyMixer
 
     def test_set_volume_is_capped(self):
@@ -15,3 +16,8 @@ class DenonMixerTest(BaseMixerTest, unittest.TestCase):
         self.mixer.amplification_factor = 0.5
         self.mixer._volume = 50
         self.assertEquals(self.mixer.volume, 100)
+
+    def test_get_volume_get_the_same_number_as_was_set(self):
+        self.mixer.amplification_factor = 0.5
+        self.mixer.volume = 13
+        self.assertEquals(self.mixer.volume, 13)

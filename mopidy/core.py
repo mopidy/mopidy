@@ -1,47 +1,48 @@
 import logging
 import optparse
+import os
 import signal
 import sys
-import time
+
+import gobject
+gobject.threads_init()
 
 # Extract any non-GStreamer arguments, and leave the GStreamer arguments for
 # processing by GStreamer. This needs to be done before GStreamer is imported,
 # so that GStreamer doesn't hijack e.g. ``--help``.
 # NOTE This naive fix does not support values like ``bar`` in
 # ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
-def is_gst_arg(arg):
-    return arg.startswith('--gst') or arg == '--help-gst'
+def is_gst_arg(argument):
+    return argument.startswith('--gst') or argument == '--help-gst'
 gstreamer_args = [arg for arg in sys.argv[1:] if is_gst_arg(arg)]
 mopidy_args = [arg for arg in sys.argv[1:] if not is_gst_arg(arg)]
 sys.argv[1:] = gstreamer_args
 
-from pykka.registry import ActorRegistry
-
 from mopidy import (get_version, settings, OptionalDependencyError,
-    SettingsError)
+    SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
 from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import (GObjectEventThread, exit_handler,
-    stop_remaining_actors, stop_actors_by_class)
+from mopidy.utils.process import (exit_handler, stop_remaining_actors,
+    stop_actors_by_class)
 from mopidy.utils.settings import list_settings_optparse_callback
 
 logger = logging.getLogger('mopidy.core')
 
 def main():
     signal.signal(signal.SIGTERM, exit_handler)
+    loop = gobject.MainLoop()
     try:
         options = parse_options()
         setup_logging(options.verbosity_level, options.save_debug_log)
+        check_old_folders()
         setup_settings(options.interactive)
-        setup_gobject_loop()
         setup_gstreamer()
         setup_mixer()
         setup_backend()
         setup_frontends()
-        while True:
-            time.sleep(1)
+        loop.run()
     except SettingsError as e:
         logger.error(e.message)
     except KeyboardInterrupt:
@@ -49,6 +50,7 @@ def main():
     except Exception as e:
         logger.exception(e)
     finally:
+        loop.quit()
         stop_frontends()
         stop_backend()
         stop_mixer()
@@ -67,7 +69,7 @@ def parse_options():
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
     parser.add_option('-v', '--verbose',
-        action='store_const', const=2, dest='verbosity_level',
+        action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
     parser.add_option('--save-debug-log',
         action='store_true', dest='save_debug_log',
@@ -77,17 +79,25 @@ def parse_options():
         help='list current settings')
     return parser.parse_args(args=mopidy_args)[0]
 
+def check_old_folders():
+    old_settings_folder = os.path.expanduser(u'~/.mopidy')
+
+    if not os.path.isdir(old_settings_folder):
+        return
+
+    logger.warning(u'Old settings folder found at %s, settings.py should be '
+        'moved to %s, any cache data should be deleted. See release notes '
+        'for further instructions.', old_settings_folder, SETTINGS_PATH)
+
 def setup_settings(interactive):
-    get_or_create_folder('~/.mopidy/')
-    get_or_create_file('~/.mopidy/settings.py')
+    get_or_create_folder(SETTINGS_PATH)
+    get_or_create_folder(DATA_PATH)
+    get_or_create_file(SETTINGS_FILE)
     try:
         settings.validate(interactive)
     except SettingsError, e:
         logger.error(e.message)
         sys.exit(1)
-
-def setup_gobject_loop():
-    GObjectEventThread().start()
 
 def setup_gstreamer():
     GStreamer.start()

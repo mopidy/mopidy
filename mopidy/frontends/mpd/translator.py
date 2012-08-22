@@ -2,26 +2,28 @@ import os
 import re
 
 from mopidy import settings
-from mopidy.utils.path import mtime as get_mtime
 from mopidy.frontends.mpd import protocol
-from mopidy.utils.path import uri_to_path, split_path
+from mopidy.models import CpTrack
+from mopidy.utils.path import mtime as get_mtime, uri_to_path, split_path
 
-def track_to_mpd_format(track, position=None, cpid=None):
+def track_to_mpd_format(track, position=None):
     """
     Format track for output to MPD client.
 
     :param track: the track
-    :type track: :class:`mopidy.models.Track`
+    :type track: :class:`mopidy.models.Track` or :class:`mopidy.models.CpTrack`
     :param position: track's position in playlist
     :type position: integer
-    :param cpid: track's CPID (current playlist ID)
-    :type cpid: integer
     :param key: if we should set key
     :type key: boolean
     :param mtime: if we should set mtime
     :type mtime: boolean
     :rtype: list of two-tuples
     """
+    if isinstance(track, CpTrack):
+        (cpid, track) = track
+    else:
+        (cpid, track) = (None, track)
     result = [
         ('file', track.uri or ''),
         ('Time', track.length and (track.length // 1000) or 0),
@@ -88,14 +90,15 @@ def artists_to_mpd_format(artists):
     artists.sort(key=lambda a: a.name)
     return u', '.join([a.name for a in artists if a.name])
 
-def tracks_to_mpd_format(tracks, start=0, end=None, cpids=None):
+def tracks_to_mpd_format(tracks, start=0, end=None):
     """
     Format list of tracks for output to MPD client.
 
     Optionally limit output to the slice ``[start:end]`` of the list.
 
     :param tracks: the tracks
-    :type tracks: list of :class:`mopidy.models.Track`
+    :type tracks: list of :class:`mopidy.models.Track` or
+        :class:`mopidy.models.CpTrack`
     :param start: position of first track to include in output
     :type start: int (positive or negative)
     :param end: position after last track to include in output
@@ -106,11 +109,10 @@ def tracks_to_mpd_format(tracks, start=0, end=None, cpids=None):
         end = len(tracks)
     tracks = tracks[start:end]
     positions = range(start, end)
-    cpids = cpids and cpids[start:end] or [None for _ in tracks]
-    assert len(tracks) == len(positions) == len(cpids)
+    assert len(tracks) == len(positions)
     result = []
-    for track, position, cpid in zip(tracks, positions, cpids):
-        result.append(track_to_mpd_format(track, position, cpid))
+    for track, position in zip(tracks, positions):
+        result.append(track_to_mpd_format(track, position))
     return result
 
 def playlist_to_mpd_format(playlist, *args, **kwargs):

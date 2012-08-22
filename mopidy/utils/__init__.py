@@ -1,3 +1,4 @@
+import locale
 import logging
 import os
 import sys
@@ -29,3 +30,9 @@ def get_class(name):
     except (ImportError, AttributeError):
         raise ImportError("Couldn't load: %s" % name)
     return class_object
+
+def locale_decode(bytestr):
+    try:
+        return unicode(bytestr)
+    except UnicodeError:
+        return str(bytestr).decode(locale.getpreferredencoding())

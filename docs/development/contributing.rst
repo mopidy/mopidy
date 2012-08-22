@@ -74,7 +74,7 @@ Running tests
 To run tests, you need a couple of dependencies. They can be installed through
 Debian/Ubuntu package management::
 
-    sudo aptitude install python-coverage python-mock python-nose
+    sudo apt-get install python-coverage python-mock python-nose
 
 Or, they can be installed using ``pip``::
 
@@ -126,7 +126,7 @@ from the documentation files, you need some additional dependencies.
 
 You can install them through Debian/Ubuntu package management::
 
-    sudo aptitude install python-sphinx python-pygraphviz graphviz
+    sudo apt-get install python-sphinx python-pygraphviz graphviz
 
 Then, to generate docs::
 
@@ -134,18 +134,8 @@ Then, to generate docs::
     make        # For help on available targets
     make html   # To generate HTML docs
 
-.. note::
-
-    The documentation at http://www.mopidy.com/ is automatically updated when a
-    documentation update is pushed to ``mopidy/mopidy`` at GitHub.
-
-    Documentation generated from the ``master`` branch is published at
-    http://www.mopidy.com/docs/master/, and will always be valid for the latest
-    release.
-
-    Documentation generated from the ``develop`` branch is published at
-    http://www.mopidy.com/docs/develop/, and will always be valid for the
-    latest development snapshot.
+The documentation at http://docs.mopidy.com/ is automatically updated when a
+documentation update is pushed to ``mopidy/mopidy`` at GitHub.
 
 
 Creating releases

@@ -1,4 +1,5 @@
 import glob
+import glib
 import logging
 import os
 import shutil
@@ -6,7 +7,7 @@ import shutil
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
+from mopidy import settings, DATA_PATH
 from mopidy.backends.base import (Backend, CurrentPlaylistController,
     LibraryController, BaseLibraryProvider, PlaybackController,
     BasePlaybackProvider, StoredPlaylistsController,
@@ -17,6 +18,14 @@ from mopidy.gstreamer import GStreamer
 from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
+
+DEFAULT_PLAYLIST_PATH = os.path.join(DATA_PATH, 'playlists')
+DEFAULT_TAG_CACHE_FILE = os.path.join(DATA_PATH, 'tag_cache')
+DEFAULT_MUSIC_PATH = str(glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC))
+
+if not DEFAULT_MUSIC_PATH or DEFAULT_MUSIC_PATH == os.path.expanduser(u'~'):
+    DEFAULT_MUSIC_PATH = os.path.expanduser(u'~/music')
+
 
 class LocalBackend(ThreadingActor, Backend):
     """
@@ -58,7 +67,8 @@ class LocalBackend(ThreadingActor, Backend):
 
     def on_start(self):
         gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        assert len(gstreamer_refs) == 1, \
+            'Expected exactly one running GStreamer.'
         self.gstreamer = gstreamer_refs[0].proxy()
 
 
@@ -96,7 +106,7 @@ class LocalPlaybackProvider(BasePlaybackProvider):
 class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
     def __init__(self, *args, **kwargs):
         super(LocalStoredPlaylistsProvider, self).__init__(*args, **kwargs)
-        self._folder = settings.LOCAL_PLAYLIST_PATH
+        self._folder = settings.LOCAL_PLAYLIST_PATH or DEFAULT_PLAYLIST_PATH
         self.refresh()
 
     def lookup(self, uri):
@@ -173,8 +183,8 @@ class LocalLibraryProvider(BaseLibraryProvider):
         self.refresh()
 
     def refresh(self, uri=None):
-        tag_cache = settings.LOCAL_TAG_CACHE_FILE
-        music_folder = settings.LOCAL_MUSIC_PATH
+        tag_cache = settings.LOCAL_TAG_CACHE_FILE or DEFAULT_TAG_CACHE_FILE
+        music_folder = settings.LOCAL_MUSIC_PATH or DEFAULT_MUSIC_PATH
 
         tracks = parse_mpd_tag_cache(tag_cache, music_folder)
 

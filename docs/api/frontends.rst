@@ -7,7 +7,7 @@ The following requirements applies to any frontend implementation:
 - A frontend MAY do mostly whatever it wants to, including creating threads,
   opening TCP ports and exposing Mopidy for a group of clients.
 - A frontend MUST implement at least one `Pykka
-  <http://jodal.github.com/pykka/>`_ actor, called the "main actor" from here
+  <http://pykka.readthedocs.org/>`_ actor, called the "main actor" from here
   on.
 - It MAY use additional actors to implement whatever it does, and using actors
   in frontend implementations is encouraged.
@@ -28,3 +28,4 @@ Frontend implementations
 
 * :mod:`mopidy.frontends.lastfm`
 * :mod:`mopidy.frontends.mpd`
+* :mod:`mopidy.frontends.mpris`

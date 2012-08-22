@@ -1,8 +1,13 @@
 import pykka.future
 
 from mopidy.backends.base import PlaybackController
-from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.protocol import handle_request
+from mopidy.frontends.mpd.translator import track_to_mpd_format
+
+#: Subsystems that can be registered with idle command.
+SUBSYSTEMS = ['database', 'mixer', 'options', 'output',
+    'player', 'playlist', 'stored_playlist', 'update', ]
 
 @handle_request(r'^clearerror$')
 def clearerror(context):
@@ -28,9 +33,8 @@ def currentsong(context):
     """
     current_cp_track = context.backend.playback.current_cp_track.get()
     if current_cp_track is not None:
-        return current_cp_track.track.mpd_format(
-            position=context.backend.playback.current_playlist_position.get(),
-            cpid=current_cp_track.cpid)
+        position = context.backend.playback.current_playlist_position.get()
+        return track_to_mpd_format(current_cp_track, position=position)
 
 @handle_request(r'^idle$')
 @handle_request(r'^idle (?P<subsystems>.+)$')
@@ -67,12 +71,36 @@ def idle(context, subsystems=None):
         notifications when something changed in one of the specified
         subsystems.
     """
-    pass # TODO
+
+    if subsystems:
+        subsystems = subsystems.split()
+    else:
+        subsystems = SUBSYSTEMS
+
+    for subsystem in subsystems:
+        context.subscriptions.add(subsystem)
+
+    active = context.subscriptions.intersection(context.events)
+    if not active:
+        context.session.prevent_timeout = True
+        return
+
+    response = []
+    context.events = set()
+    context.subscriptions = set()
+
+    for subsystem in active:
+        response.append(u'changed: %s' % subsystem)
+    return response
 
 @handle_request(r'^noidle$')
 def noidle(context):
     """See :meth:`_status_idle`."""
-    pass # TODO
+    if not context.subscriptions:
+        return
+    context.subscriptions = set()
+    context.events = set()
+    context.session.prevent_timeout = False
 
 @handle_request(r'^stats$')
 def stats(context):
@@ -125,15 +153,20 @@ def status(context):
         - ``nextsongid``: playlist songid of the next song to be played
         - ``time``: total time elapsed (of current playing/paused song)
         - ``elapsed``: Total time elapsed within the current song, but with
-          higher resolution.
+          higher resolution. 
         - ``bitrate``: instantaneous bitrate in kbps
         - ``xfade``: crossfade in seconds
         - ``audio``: sampleRate``:bits``:channels
         - ``updatings_db``: job id
         - ``error``: if there is an error, returns message here
+
+    *Clarifications based on experience implementing*
+        - ``volume``: can also be -1 if no output is set.
+        - ``elapsed``: Higher resolution means time in seconds with three
+          decimal places for millisecond precision.
     """
     futures = {
-        'current_playlist.tracks': context.backend.current_playlist.tracks,
+        'current_playlist.length': context.backend.current_playlist.length,
         'current_playlist.version': context.backend.current_playlist.version,
         'mixer.volume': context.mixer.volume,
         'playback.consume': context.backend.playback.consume,
@@ -180,7 +213,7 @@ def _status_consume(futures):
         return 0
 
 def _status_playlist_length(futures):
-    return len(futures['current_playlist.tracks'].get())
+    return futures['current_playlist.length'].get()
 
 def _status_playlist_version(futures):
     return futures['current_playlist.version'].get()
@@ -214,11 +247,11 @@ def _status_state(futures):
         return u'pause'
 
 def _status_time(futures):
-    return u'%s:%s' % (_status_time_elapsed(futures) // 1000,
+    return u'%d:%d' % (futures['playback.time_position'].get() // 1000,
         _status_time_total(futures) // 1000)
 
 def _status_time_elapsed(futures):
-    return futures['playback.time_position'].get()
+    return u'%.3f' % (futures['playback.time_position'].get() / 1000.0)
 
 def _status_time_total(futures):
     current_cp_track = futures['playback.current_cp_track'].get()

@@ -27,6 +27,8 @@ class MpdDispatcher(object):
     back to the MPD session.
     """
 
+    _noidle = re.compile(r'^noidle$')
+
     def __init__(self, session=None):
         self.authenticated = False
         self.command_list = False
@@ -42,10 +44,27 @@ class MpdDispatcher(object):
             self._catch_mpd_ack_errors_filter,
             self._authenticate_filter,
             self._command_list_filter,
+            self._idle_filter,
             self._add_ok_filter,
             self._call_handler_filter,
         ]
         return self._call_next_filter(request, response, filter_chain)
+
+    def handle_idle(self, subsystem):
+        self.context.events.add(subsystem)
+
+        subsystems = self.context.subscriptions.intersection(
+            self.context.events)
+        if not subsystems:
+            return
+
+        response = []
+        for subsystem in subsystems:
+            response.append(u'changed: %s' % subsystem)
+        response.append(u'OK')
+        self.context.subscriptions = set()
+        self.context.events = set()
+        self.context.session.send_lines(response)
 
     def _call_next_filter(self, request, response, filter_chain):
         if filter_chain:
@@ -71,7 +90,7 @@ class MpdDispatcher(object):
     def _authenticate_filter(self, request, response, filter_chain):
         if self.authenticated:
             return self._call_next_filter(request, response, filter_chain)
-        elif  settings.MPD_SERVER_PASSWORD is None:
+        elif settings.MPD_SERVER_PASSWORD is None:
             self.authenticated = True
             return self._call_next_filter(request, response, filter_chain)
         else:
@@ -106,6 +125,29 @@ class MpdDispatcher(object):
     def _is_processing_command_list(self, request):
         return (self.command_list_index is not None
             and request != u'command_list_end')
+
+
+    ### Filter: idle
+
+    def _idle_filter(self, request, response, filter_chain):
+        if self._is_currently_idle() and not self._noidle.match(request):
+            logger.debug(u'Client sent us %s, only %s is allowed while in '
+                'the idle state', repr(request), repr(u'noidle'))
+            self.context.session.close()
+            return []
+
+        if not self._is_currently_idle() and self._noidle.match(request):
+            return [] # noidle was called before idle
+
+        response = self._call_next_filter(request, response, filter_chain)
+
+        if self._is_currently_idle():
+            return []
+        else:
+            return response
+
+    def _is_currently_idle(self):
+        return bool(self.context.subscriptions)
 
 
     ### Filter: add OK
@@ -178,12 +220,20 @@ class MpdContext(object):
     #: The current :class:`MpdDispatcher`.
     dispatcher = None
 
-    #: The current :class:`mopidy.frontends.mpd.session.MpdSession`.
+    #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
+
+    #: The active subsystems that have pending events.
+    events = None
+
+    #: The subsytems that we want to be notified about in idle mode.
+    subscriptions = None
 
     def __init__(self, dispatcher, session=None):
         self.dispatcher = dispatcher
         self.session = session
+        self.events = set()
+        self.subscriptions = set()
         self._backend = None
         self._mixer = None
 
@@ -192,11 +242,11 @@ class MpdContext(object):
         """
         The backend. An instance of :class:`mopidy.backends.base.Backend`.
         """
-        if self._backend is not None:
-            return self._backend
-        backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        self._backend = backend_refs[0].proxy()
+        if self._backend is None:
+            backend_refs = ActorRegistry.get_by_class(Backend)
+            assert len(backend_refs) == 1, \
+                'Expected exactly one running backend.'
+            self._backend = backend_refs[0].proxy()
         return self._backend
 
     @property
@@ -204,9 +254,8 @@ class MpdContext(object):
         """
         The mixer. An instance of :class:`mopidy.mixers.base.BaseMixer`.
         """
-        if self._mixer is not None:
-            return self._mixer
-        mixer_refs = ActorRegistry.get_by_class(BaseMixer)
-        assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
-        self._mixer = mixer_refs[0].proxy()
+        if self._mixer is None:
+            mixer_refs = ActorRegistry.get_by_class(BaseMixer)
+            assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
+            self._mixer = mixer_refs[0].proxy()
         return self._mixer

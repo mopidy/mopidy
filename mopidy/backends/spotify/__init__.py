@@ -10,7 +10,6 @@ from mopidy.gstreamer import GStreamer
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
-ENCODING = 'utf-8'
 BITRATES = {96: 2, 160: 0, 320: 1}
 
 class SpotifyBackend(ThreadingActor, Backend):
@@ -32,8 +31,8 @@ class SpotifyBackend(ThreadingActor, Backend):
 
     **Dependencies:**
 
-    - libspotify == 0.0.8 (libspotify8 package from apt.mopidy.com)
-    - pyspotify == 1.3 (python-spotify package from apt.mopidy.com)
+    - libspotify >= 10, < 11 (libspotify10 package from apt.mopidy.com)
+    - pyspotify >= 1.5 (python-spotify package from apt.mopidy.com)
 
     **Settings:**
 
@@ -78,11 +77,15 @@ class SpotifyBackend(ThreadingActor, Backend):
 
     def on_start(self):
         gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        assert len(gstreamer_refs) == 1, \
+            'Expected exactly one running GStreamer.'
         self.gstreamer = gstreamer_refs[0].proxy()
 
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         self.spotify = self._connect()
+
+    def on_stop(self):
+        self.spotify.logout()
 
     def _connect(self):
         from .session_manager import SpotifySessionManager

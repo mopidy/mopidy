@@ -18,33 +18,36 @@ Requirements
     gstreamer
     libspotify
 
-If you install Mopidy from the APT archive, as described below, you can skip
-the dependency installation part.
+If you install Mopidy from the APT archive, as described below, APT will take
+care of all the dependencies for you. Otherwise, make sure you got the required
+dependencies installed.
 
-Otherwise, make sure you got the required dependencies installed.
+- Hard dependencies:
 
-- Python >= 2.6, < 3
+  - Python >= 2.6, < 3
 
-- `Pykka <http://jodal.github.com/pykka/>`_ >= 0.12.3
+  - Pykka >= 0.12.3::
 
-- GStreamer >= 0.10, with Python bindings. See :doc:`gstreamer`.
+        sudo pip install -U pykka
 
-- Mixer dependencies: The default mixer does not require any additional
-  dependencies. If you use another mixer, see the mixer's docs for any
-  additional requirements.
-
-- Dependencies for at least one Mopidy backend:
-
-  - The default backend, :mod:`mopidy.backends.spotify`, requires libspotify
-    and pyspotify. See :doc:`libspotify`.
-
-  - The local backend, :mod:`mopidy.backends.local`, requires no additional
-    dependencies.
+  - GStreamer 0.10.x, with Python bindings. See :doc:`gstreamer`.
 
 - Optional dependencies:
 
-  - To use the Last.FM scrobbler, see :mod:`mopidy.frontends.lastfm` for
-    additional requirements.
+  - For Spotify support, you need libspotify and pyspotify. See
+    :doc:`libspotify`.
+
+  - To scrobble your played tracks to Last.fm, you need pylast::
+
+        sudo pip install -U pylast
+
+  - To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound Menu, you
+    need some additional requirements::
+
+        sudo apt-get install python-dbus python-indicate
+
+  - Some custom mixers (but not the default one) require additional
+    dependencies. See the docs for each mixer.
 
 
 Install latest stable release
@@ -97,8 +100,8 @@ install Mopidy from PyPI using Pip.
 
 #. Then, you need to install Pip::
 
-       sudo aptitude install python-setuptools python-pip   # On Ubuntu/Debian
-       sudo easy_install pip                                # On OS X
+       sudo apt-get install python-setuptools python-pip   # On Ubuntu/Debian
+       sudo easy_install pip                               # On OS X
 
 #. To install the currently latest stable release of Mopidy::
 
@@ -108,8 +111,6 @@ install Mopidy from PyPI using Pip.
 
 #. Next, you need to set a couple of :doc:`settings </settings>`, and then
    you're ready to :doc:`run Mopidy </running>`.
-
-If you for some reason can't use Pip, try ``easy_install`` instead.
 
 
 Install development version
@@ -131,8 +132,8 @@ Mopidy's ``develop`` branch.
 
 #. Then, you need to install Pip::
 
-       sudo aptitude install python-setuptools python-pip   # On Ubuntu/Debian
-       sudo easy_install pip                                # On OS X
+       sudo apt-get install python-setuptools python-pip   # On Ubuntu/Debian
+       sudo easy_install pip                               # On OS X
 
 #. To install the latest snapshot of Mopidy, run::
 
@@ -154,7 +155,7 @@ If you want to contribute to Mopidy, you should install Mopidy using Git.
 
 #. Then install Git, if haven't already::
 
-      sudo aptitude install git-core      # On Ubuntu/Debian
+      sudo apt-get install git-core      # On Ubuntu/Debian
       sudo brew install git               # On OS X using Homebrew
 
 #. Clone the official Mopidy repository, or your own fork of it::

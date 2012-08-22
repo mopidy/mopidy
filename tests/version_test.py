@@ -1,12 +1,14 @@
 from distutils.version import StrictVersion as SV
-import unittest
 import platform
 
-from mopidy import get_version, get_plain_version, get_platform, get_python
+from mopidy import __version__, get_platform, get_python
+
+from tests import unittest
+
 
 class VersionTest(unittest.TestCase):
     def test_current_version_is_parsable_as_a_strict_version_number(self):
-        SV(get_plain_version())
+        SV(__version__)
 
     def test_versions_can_be_strictly_ordered(self):
         self.assert_(SV('0.1.0a0') < SV('0.1.0a1'))
@@ -20,8 +22,13 @@ class VersionTest(unittest.TestCase):
         self.assert_(SV('0.3.1') < SV('0.4.0'))
         self.assert_(SV('0.4.0') < SV('0.4.1'))
         self.assert_(SV('0.4.1') < SV('0.5.0'))
-        self.assert_(SV('0.5.0') < SV(get_plain_version()))
-        self.assert_(SV(get_plain_version()) < SV('0.6.1'))
+        self.assert_(SV('0.5.0') < SV('0.6.0'))
+        self.assert_(SV('0.6.0') < SV('0.6.1'))
+        self.assert_(SV('0.6.1') < SV('0.7.0'))
+        self.assert_(SV('0.7.0') < SV('0.7.1'))
+        self.assert_(SV('0.7.1') < SV('0.7.2'))
+        self.assert_(SV('0.7.2') < SV(__version__))
+        self.assert_(SV(__version__) < SV('0.8.0'))
 
     def test_get_platform_contains_platform(self):
         self.assert_(platform.platform() in get_platform())

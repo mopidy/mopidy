@@ -1,7 +1,8 @@
 from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
 from mopidy.frontends.mpd.protocol import handle_request
-from mopidy.frontends.mpd.translator import tracks_to_mpd_format
+from mopidy.frontends.mpd.translator import (track_to_mpd_format,
+    tracks_to_mpd_format)
 
 @handle_request(r'^add "(?P<uri>[^"]*)"$')
 def add(context, uri):
@@ -74,8 +75,8 @@ def delete_range(context, start, end=None):
     if end is not None:
         end = int(end)
     else:
-        end = len(context.backend.current_playlist.tracks.get())
-    cp_tracks = context.backend.current_playlist.cp_tracks.get()[start:end]
+        end = context.backend.current_playlist.length.get()
+    cp_tracks = context.backend.current_playlist.slice(start, end).get()
     if not cp_tracks:
         raise MpdArgError(u'Bad song index', command=u'delete')
     for (cpid, _) in cp_tracks:
@@ -86,7 +87,8 @@ def delete_songpos(context, songpos):
     """See :meth:`delete_range`"""
     try:
         songpos = int(songpos)
-        (cpid, _) = context.backend.current_playlist.cp_tracks.get()[songpos]
+        (cpid, _) = context.backend.current_playlist.slice(
+            songpos, songpos + 1).get()[0]
         context.backend.current_playlist.remove(cpid=cpid)
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'delete')
@@ -157,8 +159,7 @@ def moveid(context, cpid, to):
     cpid = int(cpid)
     to = int(to)
     cp_track = context.backend.current_playlist.get(cpid=cpid).get()
-    position = context.backend.current_playlist.cp_tracks.get().index(
-        cp_track)
+    position = context.backend.current_playlist.index(cp_track).get()
     context.backend.current_playlist.move(position, position + 1, to)
 
 @handle_request(r'^playlist$')
@@ -193,10 +194,8 @@ def playlistfind(context, tag, needle):
     if tag == 'filename':
         try:
             cp_track = context.backend.current_playlist.get(uri=needle).get()
-            (cpid, track) = cp_track
-            position = context.backend.current_playlist.cp_tracks.get().index(
-                cp_track)
-            return track.mpd_format(cpid=cpid, position=position)
+            position = context.backend.current_playlist.index(cp_track).get()
+            return track_to_mpd_format(cp_track, position=position)
         except LookupError:
             return None
     raise MpdNotImplemented # TODO
@@ -215,18 +214,16 @@ def playlistid(context, cpid=None):
         try:
             cpid = int(cpid)
             cp_track = context.backend.current_playlist.get(cpid=cpid).get()
-            position = context.backend.current_playlist.cp_tracks.get().index(
-                cp_track)
-            return cp_track.track.mpd_format(position=position, cpid=cpid)
+            position = context.backend.current_playlist.index(cp_track).get()
+            return track_to_mpd_format(cp_track, position=position)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playlistid')
     else:
-        cpids = [ct[0] for ct in
-            context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(
-            context.backend.current_playlist.tracks.get(), cpids=cpids)
+            context.backend.current_playlist.cp_tracks.get())
 
 @handle_request(r'^playlistinfo$')
+@handle_request(r'^playlistinfo "-1"$')
 @handle_request(r'^playlistinfo "(?P<songpos>-?\d+)"$')
 @handle_request(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
 def playlistinfo(context, songpos=None,
@@ -245,36 +242,22 @@ def playlistinfo(context, songpos=None,
     - uses negative indexes, like ``playlistinfo "-1"``, to request
       the entire playlist
     """
-    if songpos == "-1":
-        songpos = None
-
     if songpos is not None:
         songpos = int(songpos)
-        start = songpos
-        end = songpos + 1
-        if start == -1:
-            end = None
-        cpids = [ct[0] for ct in
-            context.backend.current_playlist.cp_tracks.get()]
-        return tracks_to_mpd_format(
-            context.backend.current_playlist.tracks.get(),
-            start, end, cpids=cpids)
+        cp_track = context.backend.current_playlist.get(cpid=songpos).get()
+        return track_to_mpd_format(cp_track, position=songpos)
     else:
         if start is None:
             start = 0
         start = int(start)
-        if not (0 <= start <= len(
-                context.backend.current_playlist.tracks.get())):
+        if not (0 <= start <= context.backend.current_playlist.length.get()):
             raise MpdArgError(u'Bad song index', command=u'playlistinfo')
         if end is not None:
             end = int(end)
-            if end > len(context.backend.current_playlist.tracks.get()):
+            if end > context.backend.current_playlist.length.get():
                 end = None
-        cpids = [ct[0] for ct in
-            context.backend.current_playlist.cp_tracks.get()]
-        return tracks_to_mpd_format(
-            context.backend.current_playlist.tracks.get(),
-            start, end, cpids=cpids)
+        cp_tracks = context.backend.current_playlist.cp_tracks.get()
+        return tracks_to_mpd_format(cp_tracks, start, end)
 
 @handle_request(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
 @handle_request(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
@@ -313,10 +296,8 @@ def plchanges(context, version):
     """
     # XXX Naive implementation that returns all tracks as changed
     if int(version) < context.backend.current_playlist.version:
-        cpids = [ct[0] for ct in
-            context.backend.current_playlist.cp_tracks.get()]
         return tracks_to_mpd_format(
-            context.backend.current_playlist.tracks.get(), cpids=cpids)
+            context.backend.current_playlist.cp_tracks.get())
 
 @handle_request(r'^plchangesposid "(?P<version>\d+)"$')
 def plchangesposid(context, version):
@@ -392,7 +373,6 @@ def swapid(context, cpid1, cpid2):
     cpid2 = int(cpid2)
     cp_track1 = context.backend.current_playlist.get(cpid=cpid1).get()
     cp_track2 = context.backend.current_playlist.get(cpid=cpid2).get()
-    cp_tracks = context.backend.current_playlist.cp_tracks.get()
-    position1 = cp_tracks.index(cp_track1)
-    position2 = cp_tracks.index(cp_track2)
+    position1 = context.backend.current_playlist.index(cp_track1).get()
+    position2 = context.backend.current_playlist.index(cp_track2).get()
     swap(context, position1, position2)

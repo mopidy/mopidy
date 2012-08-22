@@ -10,10 +10,10 @@ changes you may want to do, and a complete listing of available settings.
 Changing settings
 =================
 
-Mopidy reads settings from the file ``~/.mopidy/settings.py``, where ``~``
-means your *home directory*. If your username is ``alice`` and you are running
-Linux, the settings file should probably be at
-``/home/alice/.mopidy/settings.py``.
+Mopidy reads settings from the file ``~/.config/mopidy/settings.py``, where
+``~`` means your *home directory*. If your username is ``alice`` and you are
+running Linux, the settings file should probably be at
+``/home/alice/.config/mopidy/settings.py``.
 
 You can either create the settings file yourself, or run the ``mopidy``
 command, and it will create an empty settings file for you.
@@ -22,7 +22,7 @@ When you have created the settings file, open it in a text editor, and add
 settings you want to change. If you want to keep the default value for setting,
 you should *not* redefine it in your own settings file.
 
-A complete ``~/.mopidy/settings.py`` may look as simple as this::
+A complete ``~/.config/mopidy/settings.py`` may look as simple as this::
 
     MPD_SERVER_HOSTNAME = u'::'
     SPOTIFY_USERNAME = u'alice'
@@ -77,7 +77,7 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 
     mopidy --list-settings
 
-#. Scan your music library. Currently the command outputs the ``tag_cache`` to
+#. Scan your music library. The command outputs the ``tag_cache`` to
    ``stdout``, which means that you will need to redirect the output to a file
    yourself::
 
@@ -91,7 +91,6 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 
 
 .. _use_mpd_on_a_network:
-
 
 Connecting from other machines on the network
 =============================================
@@ -118,6 +117,33 @@ file::
 
     LASTFM_USERNAME = u'myusername'
     LASTFM_PASSWORD = u'mysecret'
+
+
+.. _install_desktop_file:
+
+Controlling Mopidy through the Ubuntu Sound Menu
+================================================
+
+If you are running Ubuntu and installed Mopidy using the Debian package from
+APT you should be able to control Mopidy through the `Ubuntu Sound Menu
+<https://wiki.ubuntu.com/SoundMenu>`_ without any changes.
+
+If you installed Mopidy in any other way and want to control Mopidy through the
+Ubuntu Sound Menu, you must install the ``mopidy.desktop`` file which can be
+found in the ``data/`` dir of the Mopidy source into the
+``/usr/share/applications`` dir by hand::
+
+    cd /path/to/mopidy/source
+    sudo cp data/mopidy.desktop /usr/share/applications/
+
+After you have installed the file, start Mopidy in any way, and Mopidy should
+appear in the Ubuntu Sound Menu. When you quit Mopidy, it will still be listed
+in the Ubuntu Sound Menu, and may be restarted by selecting it there.
+
+The Ubuntu Sound Menu interacts with Mopidy's MPRIS frontend,
+:mod:`mopidy.frontends.mpris`. The MPRIS frontend supports the minimum
+requirements of the `MPRIS specification <http://www.mpris.org/>`_. The
+``TrackList`` and the ``Playlists`` interfaces of the spec are not supported.
 
 
 Streaming audio through a SHOUTcast/Icecast server

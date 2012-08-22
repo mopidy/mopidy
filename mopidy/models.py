@@ -185,10 +185,6 @@ class Track(ImmutableObject):
         self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
 
-    def mpd_format(self, *args, **kwargs):
-        from mopidy.frontends.mpd import translator
-        return translator.track_to_mpd_format(self, *args, **kwargs)
-
 
 class Playlist(ImmutableObject):
     """
@@ -224,7 +220,3 @@ class Playlist(ImmutableObject):
     def length(self):
         """The number of tracks in the playlist. Read-only."""
         return len(self.tracks)
-
-    def mpd_format(self, *args, **kwargs):
-        from mopidy.frontends.mpd import translator
-        return translator.playlist_to_mpd_format(self, *args, **kwargs)

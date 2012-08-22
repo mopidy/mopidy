@@ -13,15 +13,6 @@ from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
 
-default_caps = gst.Caps("""
-    audio/x-raw-int,
-    endianness=(int)1234,
-    channels=(int)2,
-    width=(int)16,
-    depth=(int)16,
-    signed=(boolean)true,
-    rate=(int)44100""")
-
 
 class GStreamer(ThreadingActor):
     """
@@ -34,6 +25,15 @@ class GStreamer(ThreadingActor):
     """
 
     def __init__(self):
+        super(GStreamer, self).__init__()
+        self._default_caps = gst.Caps("""
+            audio/x-raw-int,
+            endianness=(int)1234,
+            channels=(int)2,
+            width=(int)16,
+            depth=(int)16,
+            signed=(boolean)true,
+            rate=(int)44100""")
         self._pipeline = None
         self._source = None
         self._uridecodebin = None
@@ -42,9 +42,6 @@ class GStreamer(ThreadingActor):
         self._handlers = {}
 
     def on_start(self):
-        # **Warning:** :class:`GStreamer` requires
-        # :class:`mopidy.utils.process.GObjectEventThread` to be running. This
-        # is not enforced by :class:`GStreamer` itself.
         self._setup_pipeline()
         self._setup_outputs()
         self._setup_message_processor()
@@ -78,12 +75,14 @@ class GStreamer(ThreadingActor):
     def _on_new_source(self, element, pad):
         self._source = element.get_property('source')
         try:
-            self._source.set_property('caps', default_caps)
+            self._source.set_property('caps', self._default_caps)
         except TypeError:
             pass
 
     def _on_new_pad(self, source, pad, target_pad):
         if not pad.is_linked():
+            if target_pad.is_linked():
+                target_pad.get_peer().unlink(target_pad)
             pad.link(target_pad)
 
     def _on_message(self, bus, message):
@@ -300,5 +299,3 @@ class GStreamer(ThreadingActor):
         output.sync_state_with_parent() # Required to add to running pipe
         gst.element_link_many(self._volume, output)
         logger.debug('Output set to %s', output.get_name())
-
-    # FIXME re-add disconnect / swap output code?

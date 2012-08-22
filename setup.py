@@ -6,9 +6,13 @@ from distutils.core import setup
 from distutils.command.install_data import install_data
 from distutils.command.install import INSTALL_SCHEMES
 import os
+import re
 import sys
 
-from mopidy import get_version
+def get_version():
+    init_py = open('mopidy/__init__.py').read()
+    metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", init_py))
+    return metadata['version']
 
 class osx_install_data(install_data):
     # On MacOS, the platform-specific lib dir is

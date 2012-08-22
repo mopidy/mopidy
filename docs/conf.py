@@ -11,7 +11,50 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import os
+import re
+import sys
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(self, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            return type(name, (), {})
+        else:
+            return Mock()
+
+MOCK_MODULES = [
+    'alsaaudio',
+    'dbus',
+    'dbus.mainloop',
+    'dbus.mainloop.glib',
+    'dbus.service',
+    'glib',
+    'gobject',
+    'gst',
+    'pygst',
+    'pykka',
+    'pykka.actor',
+    'pykka.future',
+    'pykka.registry',
+    'pylast',
+    'serial',
+]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
+
+def get_version():
+    init_py = open('../mopidy/__init__.py').read()
+    metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", init_py))
+    return metadata['version']
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -19,14 +62,15 @@ import sys, os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../'))
 
-import mopidy
+# When RTD builds the project, it sets the READTHEDOCS environment variable to
+# the string True.
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.graphviz', 'sphinx.ext.inheritance_diagram',
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.graphviz',
     'sphinx.ext.extlinks', 'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -43,14 +87,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Mopidy'
-copyright = u'2010-2011, Stein Magnus Jodal and contributors'
+copyright = u'2010-2012, Stein Magnus Jodal and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = mopidy.get_version()
+release = get_version()
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])
 
@@ -97,7 +141,7 @@ modindex_common_prefix = ['mopidy.']
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'nature'
+html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -116,7 +160,8 @@ html_theme_path = ['_themes']
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '_static/mopidy.png'
+if on_rtd:
+    html_logo = '_static/mopidy.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -130,7 +175,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-html_last_updated_fmt = '%b %d, %Y'
+#html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -202,4 +247,4 @@ latex_documents = [
 
 needs_sphinx = '1.0'
 
-extlinks = {'issue': ('http://github.com/mopidy/mopidy/issues/%s', 'GH-')}
+extlinks = {'issue': ('https://github.com/mopidy/mopidy/issues/%s', 'GH-')}

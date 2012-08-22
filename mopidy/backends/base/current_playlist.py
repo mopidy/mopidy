@@ -2,6 +2,7 @@ from copy import copy
 import logging
 import random
 
+from mopidy.listeners import BackendListener
 from mopidy.models import CpTrack
 
 logger = logging.getLogger('mopidy.backends.base')
@@ -16,12 +17,9 @@ class CurrentPlaylistController(object):
 
     def __init__(self, backend):
         self.backend = backend
+        self.cp_id = 0
         self._cp_tracks = []
         self._version = 0
-
-    def destroy(self):
-        """Cleanup after component."""
-        pass
 
     @property
     def cp_tracks(self):
@@ -30,7 +28,7 @@ class CurrentPlaylistController(object):
 
         Read-only.
         """
-        return [copy(ct) for ct in self._cp_tracks]
+        return [copy(cp_track) for cp_track in self._cp_tracks]
 
     @property
     def tracks(self):
@@ -39,7 +37,14 @@ class CurrentPlaylistController(object):
 
         Read-only.
         """
-        return [ct[1] for ct in self._cp_tracks]
+        return [cp_track.track for cp_track in self._cp_tracks]
+
+    @property
+    def length(self):
+        """
+        Length of the current playlist.
+        """
+        return len(self._cp_tracks)
 
     @property
     def version(self):
@@ -53,8 +58,9 @@ class CurrentPlaylistController(object):
     def version(self, version):
         self._version = version
         self.backend.playback.on_current_playlist_change()
+        self._trigger_playlist_changed()
 
-    def add(self, track, at_position=None):
+    def add(self, track, at_position=None, increase_version=True):
         """
         Add the track to the end of, or at the given position in the current
         playlist.
@@ -68,12 +74,14 @@ class CurrentPlaylistController(object):
         """
         assert at_position <= len(self._cp_tracks), \
             u'at_position can not be greater than playlist length'
-        cp_track = CpTrack(self.version, track)
+        cp_track = CpTrack(self.cp_id, track)
         if at_position is not None:
             self._cp_tracks.insert(at_position, cp_track)
         else:
             self._cp_tracks.append(cp_track)
-        self.version += 1
+        if increase_version:
+            self.version += 1
+        self.cp_id += 1
         return cp_track
 
     def append(self, tracks):
@@ -84,7 +92,10 @@ class CurrentPlaylistController(object):
         :type tracks: list of :class:`mopidy.models.Track`
         """
         for track in tracks:
-            self.add(track)
+            self.add(track, increase_version=False)
+
+        if tracks:
+            self.version += 1
 
     def clear(self):
         """Clear the current playlist."""
@@ -112,9 +123,9 @@ class CurrentPlaylistController(object):
         matches = self._cp_tracks
         for (key, value) in criteria.iteritems():
             if key == 'cpid':
-                matches = filter(lambda ct: ct[0] == value, matches)
+                matches = filter(lambda ct: ct.cpid == value, matches)
             else:
-                matches = filter(lambda ct: getattr(ct[1], key) == value,
+                matches = filter(lambda ct: getattr(ct.track, key) == value,
                     matches)
         if len(matches) == 1:
             return matches[0]
@@ -124,6 +135,19 @@ class CurrentPlaylistController(object):
             raise LookupError(u'"%s" match no tracks' % criteria_string)
         else:
             raise LookupError(u'"%s" match multiple tracks' % criteria_string)
+
+    def index(self, cp_track):
+        """
+        Get index of the given (CPID integer, :class:`mopidy.models.Track`)
+        two-tuple in the current playlist.
+
+        Raises :exc:`ValueError` if not found.
+
+        :param cp_track: track to find the index of
+        :type cp_track: two-tuple (CPID integer, :class:`mopidy.models.Track`)
+        :rtype: int
+        """
+        return self._cp_tracks.index(cp_track)
 
     def move(self, start, end, to_position):
         """
@@ -164,7 +188,6 @@ class CurrentPlaylistController(object):
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
-        :type track: :class:`mopidy.models.Track`
         """
         cp_track = self.get(**criteria)
         position = self._cp_tracks.index(cp_track)
@@ -199,3 +222,20 @@ class CurrentPlaylistController(object):
         random.shuffle(shuffled)
         self._cp_tracks = before + shuffled + after
         self.version += 1
+
+    def slice(self, start, end):
+        """
+        Returns a slice of the current playlist, limited by the given
+        start and end positions.
+
+        :param start: position of first track to include in slice
+        :type start: int
+        :param end: position after last track to include in slice
+        :type end: int
+        :rtype: two-tuple of (CPID integer, :class:`mopidy.models.Track`)
+        """
+        return [copy(cp_track) for cp_track in self._cp_tracks[start:end]]
+
+    def _trigger_playlist_changed(self):
+        logger.debug(u'Triggering playlist changed event')
+        BackendListener.send('playlist_changed')

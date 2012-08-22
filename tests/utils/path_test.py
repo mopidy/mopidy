@@ -4,12 +4,12 @@ import os
 import shutil
 import sys
 import tempfile
-import unittest
 
 from mopidy.utils.path import (get_or_create_folder, mtime,
     path_to_uri, uri_to_path, split_path, find_files)
 
-from tests import path_to_data_dir
+from tests import unittest, path_to_data_dir
+
 
 class GetOrCreateFolderTest(unittest.TestCase):
     def setUp(self):
@@ -28,11 +28,31 @@ class GetOrCreateFolderTest(unittest.TestCase):
         self.assert_(os.path.isdir(folder))
         self.assertEqual(created, folder)
 
+    def test_creating_nested_folders(self):
+        level2_folder = os.path.join(self.parent, 'test')
+        level3_folder = os.path.join(self.parent, 'test', 'test')
+        self.assert_(not os.path.exists(level2_folder))
+        self.assert_(not os.path.isdir(level2_folder))
+        self.assert_(not os.path.exists(level3_folder))
+        self.assert_(not os.path.isdir(level3_folder))
+        created = get_or_create_folder(level3_folder)
+        self.assert_(os.path.exists(level2_folder))
+        self.assert_(os.path.isdir(level2_folder))
+        self.assert_(os.path.exists(level3_folder))
+        self.assert_(os.path.isdir(level3_folder))
+        self.assertEqual(created, level3_folder)
+
     def test_creating_existing_folder(self):
         created = get_or_create_folder(self.parent)
         self.assert_(os.path.exists(self.parent))
         self.assert_(os.path.isdir(self.parent))
         self.assertEqual(created, self.parent)
+
+    def test_create_folder_with_name_of_existing_file_throws_oserror(self):
+        conflicting_file = os.path.join(self.parent, 'test')
+        open(conflicting_file, 'w').close()
+        folder = os.path.join(self.parent, 'test')
+        self.assertRaises(OSError, get_or_create_folder, folder)
 
 
 class PathToFileURITest(unittest.TestCase):

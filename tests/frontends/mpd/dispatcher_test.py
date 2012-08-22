@@ -1,10 +1,11 @@
-import unittest
-
 from mopidy.backends.dummy import DummyBackend
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.exceptions import MpdAckError
 from mopidy.frontends.mpd.protocol import request_handlers, handle_request
 from mopidy.mixers.dummy import DummyMixer
+
+from tests import unittest
+
 
 class MpdDispatcherTest(unittest.TestCase):
     def setUp(self):
