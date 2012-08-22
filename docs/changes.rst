@@ -14,6 +14,9 @@ v0.8 (in development)
   and various client support. Requires gevent, which currently is not a
   dependency of Mopidy.
 
+- Removed most traces of multiple outputs support. Having this feature
+  currently seems to be more trouble than what it is worth.
+
 
 v0.7.3 (2012-08-11)
 ===================
