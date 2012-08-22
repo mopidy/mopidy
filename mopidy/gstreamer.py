@@ -38,12 +38,11 @@ class GStreamer(ThreadingActor):
         self._source = None
         self._uridecodebin = None
         self._volume = None
-        self._outputs = []
-        self._handlers = {}
+        self._output = None
 
     def on_start(self):
         self._setup_pipeline()
-        self._setup_outputs()
+        self._setup_output()
         self._setup_message_processor()
 
     def _setup_pipeline(self):
@@ -62,10 +61,16 @@ class GStreamer(ThreadingActor):
         self._uridecodebin.connect('pad-added', self._on_new_pad,
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
-    def _setup_outputs(self):
-        for klass in settings.OUTPUTS:
-            self._outputs.append(get_class(klass)())
-        self.connect_output(self._outputs[0].bin)
+    def _setup_output(self):
+        self._output = get_class(settings.OUTPUTS[0])()
+
+        if len(settings.OUTPUTS) > 1:
+            logger.warning('Only first output will be used.')
+
+        self._pipeline.add(self._output.bin)
+        gst.element_link_many(self._volume, self._output.bin)
+
+        logger.debug('Output set to %s', self._output.get_name())
 
     def _setup_message_processor(self):
         bus = self._pipeline.get_bus()
@@ -287,15 +292,3 @@ class GStreamer(ThreadingActor):
 
         event = gst.event_new_tag(taglist)
         self._pipeline.send_event(event)
-
-    def connect_output(self, output):
-        """
-        Connect output to pipeline.
-
-        :param output: output to connect to the pipeline
-        :type output: :class:`gst.Bin`
-        """
-        self._pipeline.add(output)
-        output.sync_state_with_parent() # Required to add to running pipe
-        gst.element_link_many(self._volume, output)
-        logger.debug('Output set to %s', output.get_name())
