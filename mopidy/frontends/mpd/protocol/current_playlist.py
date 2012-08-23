@@ -243,7 +243,7 @@ def playlistinfo(context, songpos=None,
     """
     if songpos is not None:
         songpos = int(songpos)
-        cp_track = context.backend.current_playlist.get(cpid=songpos).get()
+        cp_track = context.backend.current_playlist.cp_tracks.get()[songpos]
         return track_to_mpd_format(cp_track, position=songpos)
     else:
         if start is None:

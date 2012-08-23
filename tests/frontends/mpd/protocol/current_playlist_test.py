@@ -285,6 +285,8 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_playlistinfo_with_songpos(self):
+        # Make the track's CPID not match the playlist position
+        self.backend.current_playlist.cp_id = 17
         self.backend.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
