@@ -7,8 +7,7 @@ import logging
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
-from mopidy.utils import get_class
+from mopidy import settings, utils
 from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
@@ -62,15 +61,10 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
     def _setup_output(self):
-        self._output = get_class(settings.OUTPUTS[0])()
-
-        if len(settings.OUTPUTS) > 1:
-            logger.warning('Only first output will be used.')
-
-        self._pipeline.add(self._output.bin)
-        gst.element_link_many(self._volume, self._output.bin)
-
-        logger.debug('Output set to %s', self._output.get_name())
+        self._output = utils.get_function(settings.OUTPUT)()
+        self._pipeline.add(self._output)
+        gst.element_link_many(self._volume, self._output)
+        logger.debug('Output set to %s', settings.OUTPUT)
 
     def _setup_message_processor(self):
         bus = self._pipeline.get_bus()

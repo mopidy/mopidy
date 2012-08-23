@@ -185,13 +185,12 @@ MPD_SERVER_PASSWORD = None
 #: Default: 20
 MPD_SERVER_MAX_CONNECTIONS = 20
 
-#: List of outputs to use. See :mod:`mopidy.outputs` for all available
-#: backends
+#: Output to use. See :mod:`mopidy.outputs` for all available backends
 #:
 #: Default::
 #:
-#:     OUTPUTS = (u'mopidy.outputs.local.LocalOutput',)
-OUTPUTS = (u'mopidy.outputs.local.LocalOutput',)
+#:     OUTPUT = u'mopidy.outputs.local'
+OUTPUT = u'mopidy.outputs.local'
 
 #: Hostname of the SHOUTcast server which Mopidy should stream audio to.
 #:
