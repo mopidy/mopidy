@@ -1,0 +1,37 @@
+.navbar .nav { height: @navbarHeight; }
+.navbar .nav > li > a { padding: (@navbarHeight - 20)/2 10px ((@navbarHeight - 20)/2 + 1); }
+.navbar .brand { padding: (((@navbarHeight - 20) / 2) * 0.8) 20px (((@navbarHeight - 20) / 2) * 1.2); }
+
+@navbarHeight: 60px;
+@navbarBackground: green;
+@navbarBackgroundHighlight: green;
+@navbarLinkColor: white;
+@navbarLinkColorHover: white;
+
+#plslist a, #pltable a, .navlist a {
+	display: block;
+}
+      body {
+        padding-top: 80px;
+        padding-bottom: 10px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+      .sidebar-nav li {
+        margin-top: 20px;
+      }
+      .brand {
+	margin-right: 20px;
+      }
+      .nav img {
+	margin-top: 16px;
+      }
+      .breakafter {
+	margin-right: 15px;
+      }
+
+     .content {
+     	/*visibility:hidden; 
+     	/*display:none;*/
+     }

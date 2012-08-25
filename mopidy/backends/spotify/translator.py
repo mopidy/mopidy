@@ -23,7 +23,10 @@ class SpotifyTranslator(object):
         if spotify_album is None or not spotify_album.is_loaded():
             return Album(name=u'[loading...]')
         # TODO pyspotify got much more data on albums than this
-        return Album(name=spotify_album.name())
+        return Album(
+            uri=str(Link.from_album(spotify_album)),
+            name=spotify_album.name()
+        )
 
     @classmethod
     def to_mopidy_track(cls, spotify_track):

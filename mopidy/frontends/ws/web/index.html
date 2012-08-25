@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<meta http-equiv="imagetoolbar" content="no" />
+	<meta content="true" name="MSSmartTagsPreventParsing" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9" /> 
+
+<!-- proble <meta name = "viewport" content = "width=device-width, initial-scale = 1.0, user-scalable = no"> -->
+	<!-- <meta name="viewport" content="width=device-width, user-scalable=no"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <meta charset="utf-8">
+    <title>Mopidy</title>
+    <meta name="description" content="">
+    <meta name="author" content="Wouter van Wijk">
+    <meta name="copyright" content="(c) 2012 Wouter van Wijk" />
+    <!-- Le styles -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/ws.css" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    
+  </head>
+
+  <body>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid" >
+	          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+	            <span class="icon-bar">aaa </span>
+	            <span class="icon-bar"> </span>
+	            <span class="icon-bar"> </span>
+	          </a>
+		  
+	          <a class="brand" href="#">Mopidy
+	                                </a>
+	          <div class="nav-collapse">
+	          	<div>
+	            <ul class="nav">
+<!--	            	socket.emit('getplaylisttracks', uri);
+	              <li><a href="#" onclick="getPlaylists(); return false;"><img src="img/icons/arrow_left_alt1_32x32.png" alt="Back" style="margin-top: 8px;" class="breakafter" /></a></li>
+-->
+	              <li><a href="#" onclick="socket.emit('getcurrentplaylist'); return false;"><img src="img/icons/arrow_left_alt1_32x32.png" alt="Back" style="margin-top: 8px;" class="breakafter" /></a></li>
+	             <li><a href="#" onclick="doprevious(); return false"><img src="img/icons/first_16x16.png" alt="Previous Track" /></a></li>
+	              <li><a href="#" onclick="playpause(); return false"><img src="img/icons/play_alt_32x32.png" style="margin-top: 8px;" alt="Play" id="playbt" /></a></li>
+	              <li><a href="#" onclick="donext(); return false"><img src="img/icons/last_16x16.png" alt="Next Track" class="breakafter" /></a></li>
+
+	              <li><a href="#mute" onclick="volumeMute(); return false;"><img src="img/icons/volume_mute_24x18.png" alt="" /></a></li>
+	              <li><a href="#" onclick="volumeDown(); return false;"><img src="img/icons/volume_12x9.png" alt="" /></a></li>
+	              <li><a href="#" onclick="volumeUp(); return false;"><img src="img/icons/volume_24x18.png"  class="breakafter" alt="" /></a></li>
+	              <li><a href="#" onclick="doshuffle(); return false"><img src="img/icons/loop_alt2_24x21.png" alt="" id="shufflebt" /></a></li>
+	              <li><a href="#" onclick="dorepeat(); return false"><img src="img/icons/reload_18x21.png" class="breakafter" id="repeatbt" alt="" /></a></li>
+	              <!-- <li><a href="#"><img src="img/icons/heart_fill_24x21.png" alt="" /></a></li> -->
+	              <li class="dropdown"><a href="#plus" class="dropdown-toggle" data-toggle="dropdown"><img src="img/icons/plus_16x16.png" alt="" /><b class="caret"></b></a>
+			<ul class="dropdown-menu">
+			  <li><a href="#buttonGroups">Add to playlist</a></li>
+			  <li><a href="#buttonDropdowns">Favorite Song</a></li>
+			  <li><a href="#buttonDropdowns">Favorite Album</a></li>
+			  <li><a href="#buttonDropdowns">Favorite Artist</a></li>
+			</ul>
+		      </li>
+	            </ul> <!-- nav -->
+			
+		    <form class="navbar-search pull-right">
+				<input id="searchinput" onkeypress="return searchPressed(event.keyCode);" type="text" class="search-query" placeholder="Search...">
+		    </form>
+		    </div>
+		    <div>
+		    	<span id="songname"> </span> &nbsp; - &nbsp;<span id="artist"> </span> 
+		    	<br/>
+		    	<span id="songelapsed"> </span> - 
+		    	<span id="songlength"> </span>&nbsp;<br/>
+		    	Volume: <span id="volume"> </span>&nbsp;
+		    	
+		    </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header">Menu</li>
+	      	  <li id="lihome"><a href="#home">Home</a></li>
+              <li id="licurrent"><a href="#current" >Current</a></li>
+              <li class="active" id="limymusic"><a href="#mymusic" >My Music</a></li>
+              <li id="lisearch"><a href="#search">Search</a></li>
+            </ul>
+          </div><!--/.well -->
+          
+		 
+	 <div class="well sidebar-nav" id="result">
+	  </div>
+		 
+
+        </div><!--/span3-->
+        
+<!--        <div class="span9 content" id="content"> </div> -->
+        <div class="span9 content" id="home"> 
+        	
+          <div class="hero-unit">
+            <img src="img/logo-hifi.png" align="right" class="visible-tablet visible-desktop" />
+            <img src="img/logo-hifi.png" align="right" width=75%" height="75%"  class="visible-phone" />
+            <h2>Home</h2>
+	    <img src="img/recalbums.png" class="visible-tablet visible-desktop" />
+	    <img src="img/recalbums.png" width=75%" height="75%" class="visible-phone" />
+            <p>Welcome back!</p>
+          </div>
+          
+        </div>
+        <div class="span9 content" id="mymusic">  	
+          <div class="row-fluid">
+            <div class="span4">
+              <h2>Playlists</h2>
+              <p><ul id="plslist"> 
+              </ul></p>
+            </div>
+          </div><!--/row-->
+        </div>
+        <div class="span9 content" id="current"> 
+	        <table>
+				<thead>
+					<tr>
+					<!--	<th>#</th> -->
+						<th>Title</th>
+						<th>Artist</th>
+						<th>Album</th>
+						<th>Length</th>
+					</tr>
+				</thead>
+				<tbody id="pltable">
+					
+				</tbody>
+			</table>
+        </div>
+        <div class="span9 content" id="search"> 
+        	<ul class="nav nav-tabs" id="srchtabs">
+				<li class="active"><a href="#srchsongs" data-toggle="tab">Songs</a></li>
+				<li><a href="#srchartists" data-toggle="tab">Artists</a></li>
+				<li><a href="#srchalbums" data-toggle="tab">Albums</a></li>
+			</ul>
+			<div class="tab-content">
+        		<div class="tab-pane active fade in" id="srchsongs">	
+					<h2>Songs</h2>
+			        <table>
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Artist</th>
+								<th>Album</th>
+								<th>Length</th>
+							</tr>
+						</thead>
+						<tbody id="trackresulttable">
+							
+						</tbody>
+					</table>
+				</div>
+				<div class="tab-pane fade" id="srchartists">	
+					<h2>Artists</h2>
+			        <table>
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Artist</th>
+								<th>Album</th>
+								<th>Length</th>
+							</tr>
+						</thead>
+						<tbody id="artistresulttable">
+							
+						</tbody>
+					</table>
+				</div>
+				<div class="tab-pane fade" id="srchalbums">
+					<h2>Albums</h2>
+			        <table>
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Artist</th>
+								<th>Album</th>
+								<th>Length</th>
+							</tr>
+						</thead>
+						<tbody id="albumresulttable">
+							
+						</tbody>
+					</table>
+				</div>
+			</div>			
+        </div> <!-- search div -->
+	
+      </div><!--/row fluid-->
+
+      <hr>
+
+    </div><!--/.fluid-container-->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+ <!--   <script src="js/jquery.js"></script> -->
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap-transition.js"></script>
+    <script src="js/bootstrap-alert.js"></script>
+    <script src="js/bootstrap-modal.js"></script>
+    <script src="js/bootstrap-dropdown.js"></script>
+    <script src="js/bootstrap-scrollspy.js"></script>
+    <script src="js/bootstrap-tab.js"></script>
+    <script src="js/bootstrap-tooltip.js"></script>
+    <script src="js/bootstrap-popover.js"></script>
+    <script src="js/bootstrap-button.js"></script>
+    <script src="js/bootstrap-collapse.js"></script>
+    <script src="js/bootstrap-carousel.js"></script>
+    <script src="js/bootstrap-typeahead.js"></script>
+
+    <script src="js/socket.io.js"></script>
+    <script src="js/functionsvars.js"></script>
+    <script src="js/ws.js"></script>
+    <script src="js/gui.js"></script>
+    
+  </body>
+</html>

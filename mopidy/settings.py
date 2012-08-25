@@ -68,9 +68,10 @@ DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
 #:         u'mopidy.frontends.mpris.MprisFrontend',
 #:     )
 FRONTENDS = (
-    u'mopidy.frontends.mpd.MpdFrontend',
-    u'mopidy.frontends.lastfm.LastfmFrontend',
-    u'mopidy.frontends.mpris.MprisFrontend',
+#    u'mopidy.frontends.mpd.MpdFrontend',
+#    u'mopidy.frontends.lastfm.LastfmFrontend',
+# u'mopidy.frontends.mpris.MprisFrontend',
+    u'mopidy.frontends.ws.WsFrontend',
 )
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
@@ -116,7 +117,10 @@ LOCAL_TAG_CACHE_FILE = None
 #: Default::
 #:
 #:     MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
-MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
+
+#wvw
+#MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
+MIXER = u'mopidy.mixers.alsa.AlsaMixer'
 
 #: ALSA mixer only. What mixer control to use. If set to :class:`False`, first
 #: ``Master`` and then ``PCM`` will be tried.
@@ -276,3 +280,8 @@ SPOTIFY_PASSWORD = u''
 #:
 #:     SPOTIFY_BITRATE = 160
 SPOTIFY_BITRATE = 160
+
+#websockets frontend settings
+WS_SERVER_PORT = 8080
+WS_SERVER_HOSTNAME = u'0.0.0.0'
+WS_SERVER_MAX_REQUESTS = 500
