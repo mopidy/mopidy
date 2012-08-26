@@ -18,6 +18,13 @@ v0.8 (in development)
   Track position and CPID was intermixed, so it would cause a crash if a CPID
   matching the track position didn't exist. (Fixes: :issue:`162`)
 
+- Removed most traces of multiple outputs support. Having this feature
+  currently seems to be more trouble than what it is worth.
+  :attr:`mopidy.settings.OUTPUTS` setting is no longer supported, and has been
+  replaced with :attr:`mopidy.settings.OUTPUT` which is a GStreamer
+  bin described in the same format as ``gst-launch`` expects. Default value is
+  ``autoaudiosink``.
+
 
 v0.7.3 (2012-08-11)
 ===================
