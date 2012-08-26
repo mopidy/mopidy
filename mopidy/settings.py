@@ -26,14 +26,6 @@ BACKENDS = (
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
-#: Which GStreamer bin description to use in
-#: :class:`mopidy.outputs.custom.CustomOutput`.
-#:
-#: Default::
-#:
-#:     CUSTOM_OUTPUT = u'fakesink'
-CUSTOM_OUTPUT = u'fakesink'
-
 #: The log format used for debug logging.
 #:
 #: See http://docs.python.org/library/logging.html#formatter-objects for

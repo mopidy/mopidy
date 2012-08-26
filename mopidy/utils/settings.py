@@ -112,6 +112,7 @@ def validate_settings(defaults, settings):
     errors = {}
 
     changed = {
+        'CUSTOM_OUTPUT': 'OUTPUT',
         'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
         'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
         'FRONTEND': 'FRONTENDS',
@@ -139,20 +140,23 @@ def validate_settings(defaults, settings):
 
         if setting == 'BACKENDS':
             if 'mopidy.backends.despotify.DespotifyBackend' in value:
-                errors[setting] = (u'Deprecated setting value. '
+                errors[setting] = (
+                    u'Deprecated setting value. '
                     u'"mopidy.backends.despotify.DespotifyBackend" is no '
                     u'longer available.')
                 continue
 
         if setting == 'OUTPUTS':
-            errors[setting] = (u'Deprecated setting, please change to OUTPUT. '
-                u'Please note that output values have also changed.')
+            errors[setting] = (
+                u'Deprecated setting, please change to OUTPUT. OUTPUT expectes '
+                u'a GStreamer bin describing your desired output.')
             continue
 
         if setting == 'SPOTIFY_BITRATE':
             if value not in (96, 160, 320):
-                errors[setting] = (u'Unavailable Spotify bitrate. ' +
-                    u'Available bitrates are 96, 160, and 320.')
+                errors[setting] = (
+                    u'Unavailable Spotify bitrate. Available bitrates are 96, '
+                    u'160, and 320.')
 
         if setting not in defaults:
             errors[setting] = u'Unknown setting. Is it misspelled?'

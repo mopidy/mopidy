@@ -22,24 +22,18 @@ def import_module(name):
     return sys.modules[name]
 
 
-def _get_obj(name):
+def get_class(name):
     logger.debug('Loading: %s', name)
     if '.' not in name:
         raise ImportError("Couldn't load: %s" % name)
     module_name = name[:name.rindex('.')]
-    obj_name = name[name.rindex('.') + 1:]
+    cls_name = name[name.rindex('.') + 1:]
     try:
         module = import_module(module_name)
-        obj = getattr(module, obj_name)
+        cls = getattr(module, cls_name)
     except (ImportError, AttributeError):
         raise ImportError("Couldn't load: %s" % name)
-    return obj
-
-
-# We provide both get_class and get_function to make it more obvious what the
-# intent of our code really is.
-get_class = _get_obj
-get_function = _get_obj
+    return cls
 
 
 def locale_decode(bytestr):
