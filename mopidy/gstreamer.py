@@ -37,13 +37,17 @@ class GStreamer(ThreadingActor):
         self._source = None
         self._uridecodebin = None
         self._output = None
+        self._mixer = None
 
     def on_start(self):
         self._setup_pipeline()
         self._setup_output()
+        self._setup_mixer()
         self._setup_message_processor()
 
     def _setup_pipeline(self):
+        # TODO: replace with and input bin so we simply have an input bin we
+        # connect to an output bin with a mixer on the side. set_uri on bin?
         description = ' ! '.join([
             'uridecodebin name=uri',
             'audioconvert name=convert'])
@@ -63,6 +67,36 @@ class GStreamer(ThreadingActor):
         gst.element_link_many(self._pipeline.get_by_name('convert'),
                               self._output)
         logger.debug('Output set to %s', settings.OUTPUT)
+
+    def _setup_mixer(self):
+        if not settings.MIXER:
+            logger.debug('Not adding mixer.')
+            return
+
+        mixer = gst.element_factory_make(settings.MIXER)
+        if mixer.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
+            logger.warning('Adding mixer %r failed.', settings.MIXER)
+            return
+
+        track = self._select_mixer_track(mixer)
+        if not track:
+            logger.warning('Could not find usable mixer track.')
+            return
+
+        self._mixer = (mixer, track)
+        logger.info('Mixer set to %s using %s',
+                    mixer.get_factory().get_name(), track.label)
+
+    def _select_mixer_track(self, mixer):
+        # Look for track with label == MIXER_TRACK, otherwise fallback to
+        # master track which is also an output.
+        for track in mixer.list_tracks():
+            if settings.MIXER_TRACK:
+                if track.label == settings.MIXER_TRACK:
+                    return track
+            elif track.flags & (gst.interfaces.MIXER_TRACK_MASTER |
+                                gst.interfaces.MIXER_TRACK_OUTPUT):
+                return track
 
     def _setup_message_processor(self):
         bus = self._pipeline.get_bus()
@@ -236,33 +270,41 @@ class GStreamer(ThreadingActor):
 
     def get_volume(self):
         """
-        Get volume level of the GStreamer software mixer.
+        Get volume level of the installed mixer.
 
-        :rtype: int in range [0..100]
+        :rtype: int in range [-1..100]
         """
-        mixers = self._pipeline.iterate_all_by_interface(gst.interfaces.Mixer)
-        try:
-            mixer = mixers.next()
-        except StopIteration:
-            return 0
-        # FIXME this _will_ break for mixers that don't implement
-        # GstStreamVolume
-        return int(mixer.get_property('volume') * 100)
+        if self._mixer is None:
+            # TODO: add tests for this case and check we propagate change
+            return -1
+
+        mixer, track = self._mixer
+
+        volumes = mixer.get_volume(track)
+        avg_volume = sum(volumes) / len(volumes)
+        return utils.rescale(avg_volume,
+                             old=(track.min_volume, track.max_volume),
+                             new=(0, 100))
 
     def set_volume(self, volume):
         """
-        Set volume level of the GStreamer software mixer.
+        Set volume level of the installed mixer.
 
         :param volume: the volume in the range [0..100]
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        mixers = self._pipeline.iterate_all_by_interface(gst.interfaces.Mixer)
-        for mixer in mixers:
-            # FIXME this _will_ break for mixers that don't implement
-            # GstStreamVolume
-            mixer.set_property('volume', volume / 100.0)
-        return True
+        if self._mixer is None:
+            return False
+
+        mixer, track = self._mixer
+
+        volume = utils.rescale(volume, old=(0, 100),
+                               new=(track.min_volume, track.max_volume))
+        volumes = (volume,) * track.num_channels
+
+        mixer.set_volume(track, volumes)
+        return mixer.get_volume(track) == volumes
 
     def set_metadata(self, track):
         """

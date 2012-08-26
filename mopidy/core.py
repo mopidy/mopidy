@@ -106,10 +106,12 @@ def stop_gstreamer():
     stop_actors_by_class(GStreamer)
 
 def setup_mixer():
-    get_class(settings.MIXER).start()
+    # TODO: remove this hack which is just a stepping stone for our
+    # refactoring.
+    get_class('mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer').start()
 
 def stop_mixer():
-    stop_actors_by_class(get_class(settings.MIXER))
+    stop_actors_by_class(get_class('mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'))
 
 def setup_backend():
     get_class(settings.BACKENDS[0]).start()

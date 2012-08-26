@@ -1,3 +1,5 @@
+from __future__ import division
+
 import locale
 import logging
 import os
@@ -15,6 +17,14 @@ def flatten(the_list):
         else:
             result.append(element)
     return result
+
+
+def rescale(v, old=None, new=None):
+    """Convert value between scales."""
+    new_min, new_max = new
+    old_min, old_max = old
+    scaled = (new_max - new_min) / (old_max - old_min) * (v - old_min) + new_min
+    return int(scaled)
 
 
 def import_module(name):
