@@ -356,15 +356,14 @@ class GStreamer(ThreadingActor):
         """
         Get volume level of the installed mixer.
 
-          0 == muted.
-        100 == max volume for given system.
-         -1 == no mixer present, i.e. volume unknown.
+           0 == muted.
+         100 == max volume for given system.
+        None == no mixer present, i.e. volume unknown.
 
-        :rtype: int in range [-1..100]
+        :rtype: int in range [0..100]
         """
         if self._mixer is None:
-            # TODO: add tests for this case and check we propagate change
-            return -1
+            return None
 
         mixer, track = self._mixer
 
