@@ -61,7 +61,7 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
     def _setup_output(self):
-        self._output = utils.get_function(settings.OUTPUT)()
+        self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
         self._pipeline.add(self._output)
         gst.element_link_many(self._volume, self._output)
         logger.debug('Output set to %s', settings.OUTPUT)

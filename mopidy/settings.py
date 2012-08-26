@@ -189,8 +189,8 @@ MPD_SERVER_MAX_CONNECTIONS = 20
 #:
 #: Default::
 #:
-#:     OUTPUT = u'mopidy.outputs.local'
-OUTPUT = u'mopidy.outputs.local'
+#:     OUTPUT = u'autoaudiosink'
+OUTPUT = u'autoaudiosink'
 
 #: Hostname of the SHOUTcast server which Mopidy should stream audio to.
 #:
