@@ -17,7 +17,7 @@ logger = logging.getLogger('mopidy.gstreamer')
 # TODO: we might want to add some ranking to the mixers we know about?
 # TODO: move to mixers module and do from mopidy.mixers import * to install
 # elements.
-class AutoAudioMixer(gst.Element):
+class AutoAudioMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
     __gstdetails__ = ('AutoAudioMixer',
                       'Mixer',
                       'Element automatically selects a mixer.',
@@ -88,6 +88,9 @@ class AutoAudioMixer(gst.Element):
 
     def set_volume(self, track, volumes):
         return self._mixer.set_volume(track, volumes)
+
+    def set_record(self, track, record):
+        pass
 
 
 gobject.type_register(AutoAudioMixer)
