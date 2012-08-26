@@ -36,7 +36,7 @@ class AutoAudioMixer(gst.Element):
         factories.sort(key: lambda f: (-f.get_rank(), f.get_name())
 
         for factory in factories:
-           # Avoid sink/srcs that implment mixing.
+            # Avoid sink/srcs that implment mixing.
             if factory.get_klass() != 'Generic/Audio':
                 continue
             # Avoid anything that doesn't implment mixing.
@@ -353,6 +353,10 @@ class GStreamer(ThreadingActor):
         """
         Get volume level of the installed mixer.
 
+          0 == muted.
+        100 == max volume for given system.
+         -1 == no mixer present, i.e. volume unknown.
+
         :rtype: int in range [-1..100]
         """
         if self._mixer is None:
@@ -364,8 +368,7 @@ class GStreamer(ThreadingActor):
         volumes = mixer.get_volume(track)
         avg_volume = sum(volumes) / len(volumes)
         return utils.rescale(avg_volume,
-                             old=(track.min_volume, track.max_volume),
-                             new=(0, 100))
+            old=(track.min_volume, track.max_volume), new=(0, 100))
 
     def set_volume(self, volume):
         """
@@ -380,11 +383,12 @@ class GStreamer(ThreadingActor):
 
         mixer, track = self._mixer
 
-        volume = utils.rescale(volume, old=(0, 100),
-                               new=(track.min_volume, track.max_volume))
-        volumes = (volume,) * track.num_channels
+        volume = utils.rescale(volume,
+            old=(0, 100), new=(track.min_volume, track.max_volume))
 
+        volumes = (volume,) * track.num_channels
         mixer.set_volume(track, volumes)
+
         return mixer.get_volume(track) == volumes
 
     def set_metadata(self, track):

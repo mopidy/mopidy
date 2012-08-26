@@ -108,7 +108,7 @@ LOCAL_TAG_CACHE_FILE = None
 #: Expects a GStreamer mixer to use, typical values are:
 #: alsamixer, pulsemixer, oss4mixer, ossmixer.
 #:
-#: Setting this to ``None`` means no volume controll.
+#: Setting this to ``None`` means no volume control.
 #:
 #: Default::
 #:
@@ -118,7 +118,8 @@ MIXER = u'autoaudiomixer'
 #: Sound mixer track to use.
 #:
 #: Name of the mixer track to use. If this is not set we will try to find the
-#: output track with master set.
+#: output track with master set. As an example, using ``alsamixer`` you would
+#: typically set this to ``Master`` or ``PCM``.
 #:
 #: Default::
 #:
