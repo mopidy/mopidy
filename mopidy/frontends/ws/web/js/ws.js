@@ -28,7 +28,8 @@ function handleGetplaylists (resultArr) {
 function handlePlaylist (resultArr) {
 	newplaylisturi = resultArr["uri"];
 	playlists[ newplaylisturi ] = resultArr;
-	updatePlaylist(newplaylisturi);
+	playlisttotable(playlists[newplaylisturi], '#pltable');
+	currentviewuri = newplaylisturi;
 }
 
 //process results of a returned playlist
@@ -37,50 +38,11 @@ function handleCurrentPlaylist (resultArr) {
 	//$("#result").html(resultArr);
 }
 
-function handleSearchAlbum (resultArr) {
+function handleSearchResults (searchtype, resultArr) {
 	//div id is albumresulttable
-	$('#albumresulttable').empty();
-	resultToSonglist(resultArr, searchalbums);
-	tmp = '';
-	for(var i=0; i < searchalbums.length; i++) {
-		var child = '<tr><td><a href="#" id="' + i + '">' + searchalbums[i].title +
-			 '</a></td><td><a href="#" id="' + i + '">' + searchalbums[i].artist + 
-			 '</a></td><td><a href="#" id="' + i + '">' + searchalbums[i].album + 
-			 '</a></td><td><a href="# id="' + i + '">' + searchalbums[i].getTime + '</a></td></tr>';
-		tmp += child;
-	};
-	$('#albumresulttable').html(tmp);
-	$('#albumresulttable a').click( function() { return newPlaylist(searchalbums, 'Search Albums Results', this.id) } );	
+	console.log(searchtype);
+	console.log(resultArr);
+	tableid = '#' + searchtype + 'resulttable'
+	playlisttotable(resultArr, tableid);
 }
 
-function handleSearchTitle (resultArr) {
-	//div id is trackresulttable
-	$('#trackresulttable').empty();
-	resultToSonglist(resultArr, searchtracks);
-	tmp = '';
-	for(var i=0; i < searchtracks.length; i++) {
-		var child = '<tr><td><a href="#" id="' + i + '">' + searchtracks[i].title +
-			 '</a></td><td><a href="#" id="' + i + '">' + searchtracks[i].artist + 
-			 '</a></td><td><a href="#" id="' + i + '">' + searchtracks[i].album + 
-			 '</a></td><td><a href="# id="' + i + '">' + searchtracks[i].getTime + '</a></td></tr>';
-		tmp += child;
-	};
-	$('#trackresulttable').html(tmp);
-	$('#trackresulttable a').click( function() { newPlaylist(searchtracks, 'Search Track Results', this.id) } );
-}
-
-function handleSearchArtist (resultArr) {
-	//div id is artistresulttable
-	$('#artistresulttable').empty();
-	resultToPlaylist(resultArr, searchartists);
-	tmp = '';
-	for(var i=0; i < searchartists.length; i++) {
-		var child = '<tr><td><a href="#" id="' + i + '">' + searchartists[i].title +
-			 '</a></td><td><a href="#" id="' + i + '">' + searchartists[i].artist + 
-			 '</a></td><td><a href="#" id="' + i + '">' + searchartists[i].album + 
-			 '</a></td><td><a href="# id="' + i + '">' + searchartists[i].getTime + '</a></td></tr>';
-		tmp += child;
-	};
-	$('#artistresulttable').html(tmp);
-	$('#artistresulttable a').click( function() { newPlaylist(searchartists, 'Search Artist Results', this.id) } );
-}

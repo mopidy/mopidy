@@ -2,8 +2,8 @@
  * 
  */
 	
-//process results of a returned playlist
-function updatePlaylist (pluri) {
+//process updated playlist to gui
+function playlisttotable(playlist, table) {
 	/*  <tr>
 			<td>Title</td>
 			<td>Artist</td>
@@ -11,15 +11,9 @@ function updatePlaylist (pluri) {
 			<td>Length</td>
 		</tr>
 	*/
-	//if (currentviewuri != pluri) {return}
-	
-	$('#pltable').empty();
-	
 	tmp = '';
-	//console.log(playlists[pluri]);
-	with(playlists[pluri]) {
+	with(playlist) {
 		for(var i=0; i < tracks.length; i++) {
-			//console.log(i);
 			var child = '<tr><td><a href="#" class="play" id="' + tracks[i].uri + '">' + tracks[i].name + "</a></td><td>";
 				for(var j=0; j < tracks[i].artists.length; j++) {
 					//console.log(j);
@@ -30,10 +24,16 @@ function updatePlaylist (pluri) {
 			tmp += child;
 		};
 	}
-	$('#pltable').html(tmp);
-	$('#pltable .play').click( function() { return playtrack(this.id) } );
-	$('#pltable .show').click( function() { return showview(this.id) } );
-	currentviewuri = pluri;
+	//if (currentviewuri != pluri) {return}
+	
+	$(table).empty();
+	
+	//console.log(playlists[pluri]);
+	
+	$(table).html( tmp );
+	
+	$(table + ' .play').click( function() { return playtrack(this.id) } );
+	$(table + ' .show').click( function() { return showview(this.id) } );
 }
 
 //play uri, update playlist to player if needed
@@ -87,7 +87,8 @@ function setPlaylist (uri) {
 	$('#pltable').empty();
 	//get if pl not in cache	
 	if(playlists[ uri ]) {
-		updatePlaylist(uri);
+		playlisttotable(playlists[uri], '#pltable');
+		currentviewuri = uri;
 	} else {
 		socket.emit('getplaylisttracks', uri);
 	}
@@ -147,12 +148,9 @@ function searchPressed(key) {
 function initSearch(value) {
 	if ((value.length < 100) && (value.length > 0)) {
 		//seperate requests for now
-		//socket.emit('list', 'artist ' + value);
-
-		//socket.emit('search', value, 'album');
-		socket.emit('search', value, 'title');
-		socket.emit('search', value, 'artist');
-		socket.emit('search', value, 'album');
+		socket.emit('search', 'track', value);
+		socket.emit('search', 'artist', value);
+		socket.emit('search', 'album', value);
 	}
 }
 
@@ -246,7 +244,8 @@ function getPlaylists() {
 }
 
 //timer function to update interface
-function updateStatus() {
+function updateTime() {
+	
 }
 
 function switchContent (divid) {
@@ -272,23 +271,19 @@ function initSocketEvents() {
 	socket.on('status_change', function(data) {
 		$("#result").html(data);
 	});
+	
 	// List of Playlists arrived
-	socket.on('playlists', function(data) {
-		//console.log(data);
-    	handleGetplaylists(data);
-	});
+	socket.on('playlists', handleGetplaylists );
 
 	// Tracks of Playlist arrived
-	socket.on('playlist', function(data) {
-		//console.log(data);
-    	handlePlaylist(data);
-	});
+	socket.on('playlist', handlePlaylist );
 
 	// Tracks of CurrentPlaylist arrived
-	socket.on('currentplaylist', function(data) {
-		//console.log(data);
-    	handleCurrentPlaylist(data);
-	});
+	socket.on('currentplaylist', handleCurrentPlaylist );
+
+	// Results of search for tracks arrived
+	socket.on('results', handleSearchResults );
+
 }
 
 $(document).ready(function(){

@@ -43,7 +43,7 @@ def flattentracks(tracks):
             flatartists.append(flatartist)
             #flatartist.clear() 
 
-        flattrack["bitrate"] = track.bitrate
+        #flattrack["bitrate"] = track.bitrate
         flattrack["uri"] = track.uri
         flattrack["name"] = track.name
         flattrack["track_no"] = track.track_no
@@ -88,6 +88,8 @@ class WsNamespace(BaseNamespace):
     Namespace for Gevent webserver 
 
     """
+    
+    
     
     #events from the client(s)
     def on_play(self, message=None):
@@ -203,10 +205,12 @@ class WsNamespace(BaseNamespace):
         self.emit('playlist', playlist)
     
     def on_search(self, searchtype, keywords):
-        
-        
-        playlist = flattenplaylist(self.request.backend.stored_playlists.get(uri=pluri).get())
-        self.emit('playlist', playlist)
+        logger.info(searchtype + ':' + keywords)
+        query = {searchtype: keywords}
+        playlist = flattenplaylist(self.request.backend.library.search(**query).get())
+        logger.info(playlist)
+         #context.backend.library.find_exact(**query).get())
+        self.emit('results', searchtype, playlist)
 
     def on_getcurrentplaylist(self):
         #playlist = flattenplaylist(self.request.backend.current_playlist.get().get())
