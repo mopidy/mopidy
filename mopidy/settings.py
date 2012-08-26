@@ -26,14 +26,6 @@ BACKENDS = (
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
-#: Which GStreamer bin description to use in
-#: :class:`mopidy.outputs.custom.CustomOutput`.
-#:
-#: Default::
-#:
-#:     CUSTOM_OUTPUT = u'fakesink'
-CUSTOM_OUTPUT = u'fakesink'
-
 #: The log format used for debug logging.
 #:
 #: See http://docs.python.org/library/logging.html#formatter-objects for
@@ -180,17 +172,17 @@ MPD_SERVER_PORT = 6600
 #: Default: :class:`None`, which means no password required.
 MPD_SERVER_PASSWORD = None
 
-#: List of outputs to use. See :mod:`mopidy.outputs` for all available
-#: backends
+#: The maximum number of concurrent connections the MPD server will accept.
+#:
+#: Default: 20
+MPD_SERVER_MAX_CONNECTIONS = 20
+
+#: Output to use. See :mod:`mopidy.outputs` for all available backends
 #:
 #: Default::
 #:
-#:     OUTPUTS = (
-#:         u'mopidy.outputs.local.LocalOutput',
-#:     )
-OUTPUTS = (
-    u'mopidy.outputs.local.LocalOutput',
-)
+#:     OUTPUT = u'autoaudiosink'
+OUTPUT = u'autoaudiosink'
 
 #: Hostname of the SHOUTcast server which Mopidy should stream audio to.
 #:

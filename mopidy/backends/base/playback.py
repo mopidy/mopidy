@@ -2,8 +2,6 @@ import logging
 import random
 import time
 
-from pykka.registry import ActorRegistry
-
 from mopidy.listeners import BackendListener
 
 logger = logging.getLogger('mopidy.backends.base')
@@ -81,12 +79,6 @@ class PlaybackController(object):
         self._first_shuffle = True
         self.play_time_accumulated = 0
         self.play_time_started = None
-
-    def destroy(self):
-        """
-        Cleanup after component.
-        """
-        self.provider.destroy()
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
@@ -558,14 +550,6 @@ class BasePlaybackProvider(object):
 
     def __init__(self, backend):
         self.backend = backend
-
-    def destroy(self):
-        """
-        Cleanup after component.
-
-        *MAY be implemented by subclasses.*
-        """
-        pass
 
     def pause(self):
         """

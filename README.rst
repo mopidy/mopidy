@@ -9,11 +9,9 @@ in Spotify's vast archive, manage playlists, and play music, you can use most
 platforms, including Windows, Mac OS X, Linux, Android and iOS.
 
 To install Mopidy, check out
-`the installation docs <http://www.mopidy.com/docs/master/installation/>`_.
+`the installation docs <http://docs.mopidy.com/en/latest/installation/>`_.
 
-- `Documentation for the latest release <http://www.mopidy.com/docs/master/>`_
-- `Documentation for the development version
-  <http://www.mopidy.com/docs/develop/>`_
+- `Documentation <http://docs.mopidy.com/>`_
 - `Source code <http://github.com/mopidy/mopidy>`_
 - `Issue tracker <http://github.com/mopidy/mopidy/issues>`_
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_

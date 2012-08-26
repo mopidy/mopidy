@@ -4,7 +4,6 @@ import logging
 from spotify import Link, SpotifyError
 
 from mopidy import settings
-from mopidy.backends.spotify import ENCODING
 from mopidy.models import Artist, Album, Track, Playlist
 
 logger = logging.getLogger('mopidy.backends.spotify.translator')
@@ -31,9 +30,10 @@ class SpotifyTranslator(object):
         uri = str(Link.from_track(spotify_track, 0))
         if not spotify_track.is_loaded():
             return Track(uri=uri, name=u'[loading...]')
-        if (spotify_track.album() is not None and
-                dt.MINYEAR <= int(spotify_track.album().year()) <= dt.MAXYEAR):
-            date = dt.date(spotify_track.album().year(), 1, 1)
+        spotify_album = spotify_track.album()
+        if (spotify_album is not None and spotify_album.is_loaded()
+                and dt.MINYEAR <= int(spotify_album.year()) <= dt.MAXYEAR):
+            date = dt.date(spotify_album.year(), 1, 1)
         else:
             date = None
         return Track(
@@ -51,9 +51,8 @@ class SpotifyTranslator(object):
     def to_mopidy_playlist(cls, spotify_playlist):
         if not spotify_playlist.is_loaded():
             return Playlist(name=u'[loading...]')
-        # FIXME Replace this try-except with a check on the playlist type,
-        # which is currently not supported by pyspotify, to avoid handling
-        # playlist folder boundaries like normal playlists.
+        if spotify_playlist.type() != 'playlist':
+            return
         try:
             return Playlist(
                 uri=str(Link.from_playlist(spotify_playlist)),
@@ -63,5 +62,4 @@ class SpotifyTranslator(object):
                     if str(Link.from_track(t, 0))],
             )
         except SpotifyError, e:
-            logger.info(u'Failed translating Spotify playlist '
-                '(probably a playlist folder boundary): %s', e)
+            logger.warning(u'Failed translating Spotify playlist: %s', e)

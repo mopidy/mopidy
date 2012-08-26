@@ -10,10 +10,10 @@ changes you may want to do, and a complete listing of available settings.
 Changing settings
 =================
 
-Mopidy reads settings from the file ``~/.mopidy/settings.py``, where ``~``
-means your *home directory*. If your username is ``alice`` and you are running
-Linux, the settings file should probably be at
-``/home/alice/.mopidy/settings.py``.
+Mopidy reads settings from the file ``~/.config/mopidy/settings.py``, where
+``~`` means your *home directory*. If your username is ``alice`` and you are
+running Linux, the settings file should probably be at
+``/home/alice/.config/mopidy/settings.py``.
 
 You can either create the settings file yourself, or run the ``mopidy``
 command, and it will create an empty settings file for you.
@@ -22,7 +22,7 @@ When you have created the settings file, open it in a text editor, and add
 settings you want to change. If you want to keep the default value for setting,
 you should *not* redefine it in your own settings file.
 
-A complete ``~/.mopidy/settings.py`` may look as simple as this::
+A complete ``~/.config/mopidy/settings.py`` may look as simple as this::
 
     MPD_SERVER_HOSTNAME = u'::'
     SPOTIFY_USERNAME = u'alice'
@@ -77,7 +77,7 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 
     mopidy --list-settings
 
-#. Scan your music library. Currently the command outputs the ``tag_cache`` to
+#. Scan your music library. The command outputs the ``tag_cache`` to
    ``stdout``, which means that you will need to redirect the output to a file
    yourself::
 
@@ -157,18 +157,17 @@ server simultaneously. To use the SHOUTcast output, do the following:
 #. Install, configure and start the Icecast server. It can be found in the
    ``icecast2`` package in Debian/Ubuntu.
 
-#. Add ``mopidy.outputs.shoutcast.ShoutcastOutput`` output to the
-   :attr:`mopidy.settings.OUTPUTS` setting.
+#. Set :attr:`mopidy.settings.OUTPUT` to ``lame ! shout2send`` (an ogg-vorbis
+   encoder could be used instead of lame).
 
-#. Check the default values for the following settings, and alter them to match
-   your Icecast setup if needed:
+#. You might also need to change the shout2send default settings, run
+   ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
+   you want to change ``ip``, ``username``, ``password`` and ``mount``. For
+   example, to set the password use: ``lame ! shout2send password="s3cret"``.
 
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_HOSTNAME`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PORT`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_USERNAME`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PASSWORD`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_MOUNT`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_ENCODER`
+Other advanced setups are also possible for outputs. Basically anything you can
+get a gst-lauch command to output to can be plugged into
+:attr:`mopidy.settings.OUTPUT``.
 
 
 Available settings

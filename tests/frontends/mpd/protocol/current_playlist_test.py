@@ -271,14 +271,22 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest(u'playlistinfo')
         self.assertInResponse(u'Title: a')
+        self.assertInResponse(u'Pos: 0')
         self.assertInResponse(u'Title: b')
+        self.assertInResponse(u'Pos: 1')
         self.assertInResponse(u'Title: c')
+        self.assertInResponse(u'Pos: 2')
         self.assertInResponse(u'Title: d')
+        self.assertInResponse(u'Pos: 3')
         self.assertInResponse(u'Title: e')
+        self.assertInResponse(u'Pos: 4')
         self.assertInResponse(u'Title: f')
+        self.assertInResponse(u'Pos: 5')
         self.assertInResponse(u'OK')
 
     def test_playlistinfo_with_songpos(self):
+        # Make the track's CPID not match the playlist position
+        self.backend.current_playlist.cp_id = 17
         self.backend.current_playlist.append([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
@@ -286,11 +294,17 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest(u'playlistinfo "4"')
         self.assertNotInResponse(u'Title: a')
+        self.assertNotInResponse(u'Pos: 0')
         self.assertNotInResponse(u'Title: b')
+        self.assertNotInResponse(u'Pos: 1')
         self.assertNotInResponse(u'Title: c')
+        self.assertNotInResponse(u'Pos: 2')
         self.assertNotInResponse(u'Title: d')
+        self.assertNotInResponse(u'Pos: 3')
         self.assertInResponse(u'Title: e')
+        self.assertInResponse(u'Pos: 4')
         self.assertNotInResponse(u'Title: f')
+        self.assertNotInResponse(u'Pos: 5')
         self.assertInResponse(u'OK')
 
     def test_playlistinfo_with_negative_songpos_same_as_playlistinfo(self):
@@ -306,11 +320,17 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest(u'playlistinfo "2:"')
         self.assertNotInResponse(u'Title: a')
+        self.assertNotInResponse(u'Pos: 0')
         self.assertNotInResponse(u'Title: b')
+        self.assertNotInResponse(u'Pos: 1')
         self.assertInResponse(u'Title: c')
+        self.assertInResponse(u'Pos: 2')
         self.assertInResponse(u'Title: d')
+        self.assertInResponse(u'Pos: 3')
         self.assertInResponse(u'Title: e')
+        self.assertInResponse(u'Pos: 4')
         self.assertInResponse(u'Title: f')
+        self.assertInResponse(u'Pos: 5')
         self.assertInResponse(u'OK')
 
     def test_playlistinfo_with_closed_range(self):

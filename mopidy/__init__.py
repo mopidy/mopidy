@@ -1,25 +1,25 @@
-import platform
 import sys
 if not (2, 6) <= sys.version_info < (3,):
     sys.exit(u'Mopidy requires Python >= 2.6, < 3')
 
-import glib
 import os
-
+import platform
 from subprocess import PIPE, Popen
 
-VERSION = (0, 6, 0)
+import glib
 
-DATA_PATH = os.path.join(glib.get_user_data_dir(), 'mopidy')
-CACHE_PATH = os.path.join(glib.get_user_cache_dir(), 'mopidy')
-SETTINGS_PATH = os.path.join(glib.get_user_config_dir(), 'mopidy')
+__version__ = '0.7.3'
+
+DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
+CACHE_PATH = os.path.join(str(glib.get_user_cache_dir()), 'mopidy')
+SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
 SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
 
 def get_version():
     try:
         return get_git_version()
     except EnvironmentError:
-        return get_plain_version()
+        return __version__
 
 def get_git_version():
     process = Popen(['git', 'describe'], stdout=PIPE, stderr=PIPE)
@@ -29,9 +29,6 @@ def get_git_version():
     if version.startswith('v'):
         version = version[1:]
     return version
-
-def get_plain_version():
-    return '.'.join(map(str, VERSION))
 
 def get_platform():
     return platform.platform()

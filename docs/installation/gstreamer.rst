@@ -2,18 +2,20 @@
 GStreamer installation
 **********************
 
-To use the Mopidy, you first need to install GStreamer and its Python bindings.
+To use the Mopidy, you first need to install GStreamer and the GStreamer Python
+bindings.
 
 
-Installing GStreamer
-====================
-
-On Linux
---------
+Installing GStreamer on Linux
+=============================
 
 GStreamer is packaged for most popular Linux distributions. Search for
 GStreamer in your package manager, and make sure to install the Python
 bindings, and the "good" and "ugly" plugin sets.
+
+
+Debian/Ubuntu
+-------------
 
 If you use Debian/Ubuntu you can install GStreamer like this::
 
@@ -24,30 +26,67 @@ If you install Mopidy from our APT archive, you don't need to install GStreamer
 yourself. The Mopidy Debian package will handle it for you.
 
 
-On OS X from Homebrew
----------------------
+Arch Linux
+----------
+
+If you use Arch Linux, install the following packages from the official
+repository::
+
+    sudo pacman -S gstreamer0.10-python gstreamer0.10-good-plugins \
+        gstreamer0.10-ugly-plugins
+
+
+Installing GStreamer on OS X
+============================
 
 .. note::
 
-    We have created GStreamer formulas for Homebrew to make the GStreamer
-    installation easy for you, but not all our formulas have been merged into
-    Homebrew's master branch yet. You should either fetch the formula files
-    from `Homebrew's issue #1612
-    <http://github.com/mxcl/homebrew/issues/issue/1612>`_ yourself, or fall
-    back to using MacPorts.
+    We have been working with `Homebrew <https://github.com/mxcl/homebrew>`_ to
+    make all the GStreamer packages easily installable on OS X using Homebrew.
+    We've gotten most of our packages included, but the Homebrew guys aren't
+    very happy to include Python specific packages into Homebrew, even though
+    they are not installable by pip. If you're interested, see the discussion
+    in `Homebrew's issue #1612
+    <https://github.com/mxcl/homebrew/issues/issue/1612>`_ for details.
 
-To install GStreamer on OS X using Homebrew::
+The following is currently the shortest path to installing GStreamer with
+Python bindings on OS X using Homebrew.
 
-    brew install gst-python gst-plugins-good gst-plugins-ugly
+#. Install `Homebrew <https://github.com/mxcl/homebrew>`_.
 
+#. Download our Homebrew formulas for ``pycairo``, ``pygobject``, ``pygtk``,
+   and ``gst-python``::
 
-On OS X from MacPorts
----------------------
+      curl -o $(brew --prefix)/Library/Formula/pycairo.rb \
+          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pycairo.rb
+      curl -o $(brew --prefix)/Library/Formula/pygobject.rb \
+          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pygobject.rb
+      curl -o $(brew --prefix)/Library/Formula/pygtk.rb \
+          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pygtk.rb
+      curl -o $(brew --prefix)/Library/Formula/gst-python.rb \
+          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/gst-python.rb
 
-To install GStreamer on OS X using MacPorts::
+#. Install the required packages::
 
-    sudo port install py26-gst-python gstreamer-plugins-good \
-        gstreamer-plugins-ugly
+      brew install gst-python gst-plugins-good gst-plugins-ugly
+
+#. Make sure to include Homebrew's Python ``site-packages`` directory in your
+   ``PYTHONPATH``. If you don't include this, Mopidy will not find GStreamer
+   and crash.
+
+   You can either amend your ``PYTHONPATH`` permanently, by adding the
+   following statement to your shell's init file, e.g. ``~/.bashrc``::
+
+       export PYTHONPATH=$(brew --prefix)/lib/python2.6/site-packages:$PYTHONPATH
+
+   Or, you can prefix the Mopidy command every time you run it::
+
+       PYTHONPATH=$(brew --prefix)/lib/python2.6/site-packages mopidy
+
+   Note that you need to replace ``python2.6`` with ``python2.7`` if that's
+   the Python version you are using. To find your Python version, run::
+
+       python --version
 
 
 Testing the installation
@@ -73,12 +112,9 @@ Using a custom audio sink
 =========================
 
 If you for some reason want to use some other GStreamer audio sink than
-``autoaudiosink``, you can add ``mopidy.outputs.custom.CustomOutput`` to the
-:attr:`mopidy.settings.OUTPUTS` setting, and set the
-:attr:`mopidy.settings.CUSTOM_OUTPUT` setting to a partial GStreamer pipeline
-description describing the GStreamer sink you want to use.
+``autoaudiosink``, you can set :attr:`mopidy.settings.OUTPUT` to a partial
+GStreamer pipeline description describing the GStreamer sink you want to use.
 
 Example of ``settings.py`` for OSS4::
 
-    OUTPUTS = (u'mopidy.outputs.custom.CustomOutput',)
-    CUSTOM_OUTPUT = u'oss4sink'
+    OUTPUT = u'oss4sink'

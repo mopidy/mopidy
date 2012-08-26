@@ -21,7 +21,7 @@ logger = logging.getLogger(u'mopidy.backends.local')
 
 DEFAULT_PLAYLIST_PATH = os.path.join(DATA_PATH, 'playlists')
 DEFAULT_TAG_CACHE_FILE = os.path.join(DATA_PATH, 'tag_cache')
-DEFAULT_MUSIC_PATH = glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC)
+DEFAULT_MUSIC_PATH = str(glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC))
 
 if not DEFAULT_MUSIC_PATH or DEFAULT_MUSIC_PATH == os.path.expanduser(u'~'):
     DEFAULT_MUSIC_PATH = os.path.expanduser(u'~/music')
@@ -67,7 +67,8 @@ class LocalBackend(ThreadingActor, Backend):
 
     def on_start(self):
         gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, 'Expected exactly one running gstreamer.'
+        assert len(gstreamer_refs) == 1, \
+            'Expected exactly one running GStreamer.'
         self.gstreamer = gstreamer_refs[0].proxy()
 
 

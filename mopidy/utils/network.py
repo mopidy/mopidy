@@ -9,6 +9,8 @@ from pykka import ActorDeadError
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
+from mopidy.utils import locale_decode
+
 logger = logging.getLogger('mopidy.utils.server')
 
 class ShouldRetrySocketCall(Exception):
@@ -21,9 +23,9 @@ def try_ipv6_socket():
     try:
         socket.socket(socket.AF_INET6).close()
         return True
-    except IOError, e:
+    except IOError as error:
         logger.debug(u'Platform supports IPv6, but socket '
-            'creation failed, disabling: %s', e)
+            'creation failed, disabling: %s', locale_decode(error))
     return False
 
 #: Boolean value that indicates if creating an IPv6 socket will succeed.
@@ -297,6 +299,7 @@ class LineProtocol(ThreadingActor):
     encoding = 'utf-8'
 
     def __init__(self, connection):
+        super(LineProtocol, self).__init__()
         self.connection = connection
         self.prevent_timeout = False
         self.recv_buffer = ''

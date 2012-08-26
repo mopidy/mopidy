@@ -4,7 +4,6 @@ import Queue
 from spotify import Link, SpotifyError
 
 from mopidy.backends.base import BaseLibraryProvider
-from mopidy.backends.spotify import ENCODING
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 
@@ -55,7 +54,7 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
         spotify_query = u' '.join(spotify_query)
         logger.debug(u'Spotify search query: %s' % spotify_query)
         queue = Queue.Queue()
-        self.backend.spotify.search(spotify_query.encode(ENCODING), queue)
+        self.backend.spotify.search(spotify_query, queue)
         try:
             return queue.get(timeout=3) # XXX What is an reasonable timeout?
         except Queue.Empty:

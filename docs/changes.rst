@@ -4,13 +4,145 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.8 (in development)
+=====================
 
-v0.6.0 (in development)
-=======================
+**Changes**
+
+- Added tools/debug-proxy.py to tee client requests to two backends and diff
+  responses. Intended as a developer tool for checking for MPD protocol changes
+  and various client support. Requires gevent, which currently is not a
+  dependency of Mopidy.
+
+- Fixed bug when the MPD command `playlistinfo` is used with a track position.
+  Track position and CPID was intermixed, so it would cause a crash if a CPID
+  matching the track position didn't exist. (Fixes: :issue:`162`)
+
+- Removed most traces of multiple outputs support. Having this feature
+  currently seems to be more trouble than what it is worth.
+  :attr:`mopidy.settings.OUTPUTS` setting is no longer supported, and has been
+  replaced with :attr:`mopidy.settings.OUTPUT` which is a GStreamer
+  bin descriped in the same format as gst-launch expects. Default value is
+  ``autoaudiosink``.
+
+
+v0.7.3 (2012-08-11)
+===================
+
+A small maintenance release to fix a crash affecting a few users, and a couple
+of small adjustments to the Spotify backend.
+
+**Changes**
+
+- Fixed crash when logging :exc:`IOError` exceptions on systems using languages
+  with non-ASCII characters, like French.
+
+- Move the default location of the Spotify cache from `~/.cache/mopidy` to
+  `~/.cache/mopidy/spotify`. You can change this by setting
+  :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`.
+
+- Reduce time required to update the Spotify cache on startup. One one
+  system/Spotify account, the time from clean cache to ready for use was
+  reduced from 35s to 12s.
+
+
+v0.7.2 (2012-05-07)
+===================
+
+This is a maintenance release to make Mopidy 0.7 build on systems without all
+of Mopidy's runtime dependencies, like Launchpad PPAs.
+
+**Changes**
+
+- Change from version tuple at :attr:`mopidy.VERSION` to :pep:`386` compliant
+  version string at :attr:`mopidy.__version__` to conform to :pep:`396`.
+
+
+v0.7.1 (2012-04-22)
+===================
+
+This is a maintenance release to make Mopidy 0.7 work with pyspotify >= 1.7.
+
+**Changes**
+
+- Don't override pyspotify's ``notify_main_thread`` callback. The default
+  implementation is sensible, while our override did nothing.
+
+
+v0.7.0 (2012-02-25)
+===================
+
+Not a big release with regard to features, but this release got some
+performance improvements over v0.6, especially for slower Atom systems. It also
+fixes a couple of other bugs, including one which made Mopidy crash when using
+GStreamer from the prereleases of Ubuntu 12.04.
+
+**Changes**
+
+- The MPD command ``playlistinfo`` is now faster, thanks to John Bäckstrand.
+
+- Added the method
+  :meth:`mopidy.backends.base.CurrentPlaylistController.length()`,
+  :meth:`mopidy.backends.base.CurrentPlaylistController.index()`, and
+  :meth:`mopidy.backends.base.CurrentPlaylistController.slice()` to reduce the
+  need for copying the entire current playlist from one thread to another.
+  Thanks to John Bäckstrand for pinpointing the issue.
+
+- Fix crash on creation of config and cache directories if intermediate
+  directories does not exist. This was especially the case on OS X, where
+  ``~/.config`` doesn't exist for most users.
+
+- Fix ``gst.LinkError`` which appeared when using newer versions of GStreamer,
+  e.g. on Ubuntu 12.04 Alpha. (Fixes: :issue:`144`)
+
+- Fix crash on mismatching quotation in ``list`` MPD queries. (Fixes:
+  :issue:`137`)
+
+- Volume is now reported to be the same as the volume was set to, also when
+  internal rounding have been done due to
+  :attr:`mopidy.settings.MIXER_MAX_VOLUME` has been set to cap the volume. This
+  should make it possible to manage capped volume from clients that only
+  increase volume with one step at a time, like ncmpcpp does.
+
+
+v0.6.1 (2011-12-28)
+===================
+
+This is a maintenance release to make Mopidy 0.6 work with pyspotify >= 1.5,
+which Mopidy's develop branch have supported for a long time. This should also
+make the Debian packages work out of the box again.
+
+**Important changes**
+
+- pyspotify 1.5 or greater is required.
+
+**Changes**
+
+- Spotify playlist folder boundaries are now properly detected. In other words,
+  if you use playlist folders, you will no longer get lots of log messages
+  about bad playlists.
+
+
+
+v0.6.0 (2011-10-09)
+===================
+
+The development of Mopidy have been quite slow for the last couple of months,
+but we do have some goodies to release which have been idling in the
+develop branch since the warmer days of the summer. This release brings support
+for the MPD ``idle`` command, which makes it possible for a client wait for
+updates from the server instead of polling every second. Also, we've added
+support for the MPRIS standard, so that Mopidy can be controlled over D-Bus
+from e.g. the Ubuntu Sound Menu.
+
+Please note that 0.6.0 requires some updated dependencies, as listed under
+*Important changes* below.
 
 **Important changes**
 
 - Pykka 0.12.3 or greater is required.
+
+- pyspotify 1.4 or greater is required.
 
 - All config, data, and cache locations are now based on the XDG spec.
 
@@ -29,7 +161,7 @@ v0.6.0 (in development)
 
 - A new frontend :mod:`mopidy.frontends.mpris` have been added. It exposes
   Mopidy through the `MPRIS interface <http://www.mpris.org/>`_ over D-Bus. In
-  practice, this makes it possible to control Mopidy thorugh the `Ubuntu Sound
+  practice, this makes it possible to control Mopidy through the `Ubuntu Sound
   Menu <https://wiki.ubuntu.com/SoundMenu>`_.
 
 **Changes**
@@ -49,6 +181,19 @@ v0.6.0 (in development)
 - Fix metadata update in Shoutcast streaming. (Fixes: :issue:`122`)
 
 - Unescape all incoming MPD requests. (Fixes: :issue:`113`)
+
+- Increase the maximum number of results returned by Spotify searches from 32
+  to 100.
+
+- Send Spotify search queries to pyspotify as unicode objects, as required by
+  pyspotify 1.4. (Fixes: :issue:`129`)
+
+- Add setting :attr:`mopidy.settings.MPD_SERVER_MAX_CONNECTIONS`. (Fixes:
+  :issue:`134`)
+
+- Remove `destroy()` methods from backend controller and provider APIs, as it
+  was not in use and actually not called by any code. Will reintroduce when
+  needed.
 
 
 v0.5.0 (2011-06-15)
@@ -153,7 +298,7 @@ This is a bug fix release fixing audio problems on older GStreamer and some
 minor bugs.
 
 
-**Bugfixes**
+**Bug fixes**
 
 - Fix broken audio on at least GStreamer 0.10.30, which affects Ubuntu 10.10.
   The GStreamer `appsrc` bin wasn't being linked due to lack of default caps.
@@ -198,7 +343,7 @@ loading from Mopidy 0.3.0 is still present.
 
 **Important changes**
 
-- Mopidy now depends on `Pykka <http://jodal.github.com/pykka>`_ >=0.12. If you
+- Mopidy now depends on `Pykka <http://pykka.readthedocs.org/>`_ >=0.12. If you
   install from APT, Pykka will automatically be installed. If you are not
   installing from APT, you may install Pykka from PyPI::
 
@@ -280,7 +425,7 @@ v0.3.1 (2011-01-22)
 
 A couple of fixes to the 0.3.0 release is needed to get a smooth installation.
 
-**Bugfixes**
+**Bug fixes**
 
 - The Spotify application key was missing from the Python package.
 
@@ -449,7 +594,7 @@ v0.2.1 (2011-01-07)
 
 This is a maintenance release without any new features.
 
-**Bugfixes**
+**Bug fixes**
 
 - Fix crash in :mod:`mopidy.frontends.lastfm` which occurred at playback if
   either :mod:`pylast` was not installed or the Last.fm scrobbling was not
@@ -779,7 +924,7 @@ As always, report problems at our IRC channel or our issue tracker. Thanks!
 
 - Merged the ``gstreamer`` branch from Thomas Adamcik:
 
-  - More than 200 new tests, and thus several bugfixes to existing code.
+  - More than 200 new tests, and thus several bug fixes to existing code.
   - Several new generic features, like shuffle, consume, and playlist repeat.
     (Fixes: :issue:`3`)
   - **[Work in Progress]** A new backend for playing music from a local music

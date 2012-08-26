@@ -12,13 +12,11 @@ gobject.threads_init()
 # so that GStreamer doesn't hijack e.g. ``--help``.
 # NOTE This naive fix does not support values like ``bar`` in
 # ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
-def is_gst_arg(arg):
-    return arg.startswith('--gst') or arg == '--help-gst'
+def is_gst_arg(argument):
+    return argument.startswith('--gst') or argument == '--help-gst'
 gstreamer_args = [arg for arg in sys.argv[1:] if is_gst_arg(arg)]
 mopidy_args = [arg for arg in sys.argv[1:] if not is_gst_arg(arg)]
 sys.argv[1:] = gstreamer_args
-
-from pykka.registry import ActorRegistry
 
 from mopidy import (get_version, settings, OptionalDependencyError,
     SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
