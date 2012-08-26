@@ -55,8 +55,7 @@ def addid(context, uri, songpos=None):
     track = context.backend.library.lookup(uri).get()
     if track is None:
         raise MpdNoExistError(u'No such song', command=u'addid')
-    if songpos and songpos > len(
-            context.backend.current_playlist.tracks.get()):
+    if songpos and songpos > context.backend.current_playlist.length.get():
         raise MpdArgError(u'Bad song index', command=u'addid')
     cp_track = context.backend.current_playlist.add(track,
         at_position=songpos).get()
@@ -132,7 +131,7 @@ def move_range(context, start, to, end=None):
         ``TO`` in the playlist.
     """
     if end is None:
-        end = len(context.backend.current_playlist.tracks.get())
+        end = context.backend.current_playlist.length.get()
     start = int(start)
     end = int(end)
     to = int(to)
@@ -244,7 +243,7 @@ def playlistinfo(context, songpos=None,
     """
     if songpos is not None:
         songpos = int(songpos)
-        cp_track = context.backend.current_playlist.get(cpid=songpos).get()
+        cp_track = context.backend.current_playlist.cp_tracks.get()[songpos]
         return track_to_mpd_format(cp_track, position=songpos)
     else:
         if start is None:

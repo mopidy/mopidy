@@ -14,6 +14,10 @@ v0.8 (in development)
   and various client support. Requires gevent, which currently is not a
   dependency of Mopidy.
 
+- Fixed bug when the MPD command `playlistinfo` is used with a track position.
+  Track position and CPID was intermixed, so it would cause a crash if a CPID
+  matching the track position didn't exist. (Fixes: :issue:`162`)
+
 - Removed most traces of multiple outputs support. Having this feature
   currently seems to be more trouble than what it is worth.
   :attr:`mopidy.settings.OUTPUTS` setting is no longer supported, and has been
