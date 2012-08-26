@@ -157,16 +157,17 @@ server simultaneously. To use the SHOUTcast output, do the following:
 #. Install, configure and start the Icecast server. It can be found in the
    ``icecast2`` package in Debian/Ubuntu.
 
-#. Set :attr:`mopidy.settings.OUTPUT` to ``lame ! shout2send`` (an ogg-vorbis
+#. Set :attr:`mopidy.settings.OUTPUT` to ``lame ! shout2send`` (an Ogg Vorbis
    encoder could be used instead of lame).
 
-#. You might also need to change the shout2send default settings, run
+#. You might also need to change the ``shout2send`` default settings, run
    ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
    you want to change ``ip``, ``username``, ``password`` and ``mount``. For
-   example, to set the password use: ``lame ! shout2send password="s3cret"``.
+   example, to set the password use:
+   ``lame ! shout2send username="foobar" password="s3cret"``.
 
 Other advanced setups are also possible for outputs. Basically anything you can
-get a gst-lauch command to output to can be plugged into
+get a ``gst-lauch`` command to output to can be plugged into
 :attr:`mopidy.settings.OUTPUT``.
 
 

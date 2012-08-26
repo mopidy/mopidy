@@ -7,7 +7,7 @@ import logging
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings, utils
+from mopidy import settings
 from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
