@@ -206,7 +206,10 @@ class WsNamespace(BaseNamespace):
     
     def on_search(self, searchtype, keywords):
         logger.info(searchtype + ':' + keywords)
-        query = {searchtype: keywords}
+        if searchtype == 'all':
+            query = {'': keywords}
+        else:
+            query = {searchtype: keywords}
         playlist = flattenplaylist(self.request.backend.library.search(**query).get())
         logger.info(playlist)
          #context.backend.library.find_exact(**query).get())

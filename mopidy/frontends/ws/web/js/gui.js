@@ -148,6 +148,7 @@ function searchPressed(key) {
 function initSearch(value) {
 	if ((value.length < 100) && (value.length > 0)) {
 		//seperate requests for now
+		socket.emit('search', 'all', value);
 		socket.emit('search', 'track', value);
 		socket.emit('search', 'artist', value);
 		socket.emit('search', 'album', value);

@@ -112,11 +112,11 @@
         <div class="span9 content" id="home"> 
         	
           <div class="hero-unit">
-            <img src="img/logo-hifi.png" align="right" class="visible-tablet visible-desktop" />
-            <img src="img/logo-hifi.png" align="right" width=75%" height="75%"  class="visible-phone" />
+            <img src="img/logo.png" align="right" class="visible-tablet visible-desktop" />
+            <img src="img/logo.png" align="right" width=75%" height="75%"  class="visible-phone" />
             <h2>Home</h2>
-	    <img src="img/recalbums.png" class="visible-tablet visible-desktop" />
-	    <img src="img/recalbums.png" width=75%" height="75%" class="visible-phone" />
+	    <img src="img/albums.png" class="visible-tablet visible-desktop" />
+	    <img src="img/albums.png" width=75%" height="75%" class="visible-phone" />
             <p>Welcome back!</p>
           </div>
           
@@ -148,13 +148,13 @@
         </div>
         <div class="span9 content" id="search"> 
         	<ul class="nav nav-tabs" id="srchtabs">
-				<li class="active"><a href="#srchsongs" data-toggle="tab">Songs</a></li>
-				<li><a href="#srchartists" data-toggle="tab">Artists</a></li>
-				<li><a href="#srchalbums" data-toggle="tab">Albums</a></li>
+				<li class="active"><a href="#searchall" data-toggle="tab">All</a></li>
+				<li><a href="#searchartists" data-toggle="tab">Artists</a></li>
+				<li><a href="#searchtracks" data-toggle="tab">Songs</a></li>
+				<li><a href="#searchalbums" data-toggle="tab">Albums</a></li>
 			</ul>
 			<div class="tab-content">
-        		<div class="tab-pane active fade in" id="srchsongs">	
-					<h2>Songs</h2>
+        		<div class="tab-pane active fade in" id="searchall">	
 			        <table>
 						<thead>
 							<tr>
@@ -164,13 +164,12 @@
 								<th>Length</th>
 							</tr>
 						</thead>
-						<tbody id="trackresulttable">
+						<tbody id="allresulttable">
 							
 						</tbody>
 					</table>
 				</div>
-				<div class="tab-pane fade" id="srchartists">	
-					<h2>Artists</h2>
+				<div class="tab-pane fade in" id="searchartists">	
 			        <table>
 						<thead>
 							<tr>
@@ -185,8 +184,22 @@
 						</tbody>
 					</table>
 				</div>
-				<div class="tab-pane fade" id="srchalbums">
-					<h2>Albums</h2>
+				<div class="tab-pane fade" id="searchtracks">	
+			        <table>
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Artist</th>
+								<th>Album</th>
+								<th>Length</th>
+							</tr>
+						</thead>
+						<tbody id="trackresulttable">
+							
+						</tbody>
+					</table>
+				</div>
+				<div class="tab-pane fade" id="searchalbums">
 			        <table>
 						<thead>
 							<tr>
