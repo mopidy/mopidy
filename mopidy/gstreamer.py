@@ -1,5 +1,6 @@
 import pygst
 pygst.require('0.10')
+import gobject
 import gst
 
 import logging
@@ -11,6 +12,86 @@ from mopidy import settings, utils
 from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
+
+
+# TODO: we might want to add some ranking to the mixers we know about?
+# TODO: move to mixers module and do from mopidy.mixers import * to install
+# elements.
+class AutoAudioMixer(gst.Element):
+    __gstdetails__ = ('AutoAudioMixer',
+                      'Mixer',
+                      'Element automatically selects a mixer.',
+                      'Thomas Adamcik')
+
+    def __init__(self):
+        gst.Element.__init__(self)
+        self._mixer = self._find_mixer()
+        self._mixer.set_state(gst.STATE_READY)
+        logger.debug('AutoAudioMixer choose: %s', self._mixer.get_name())
+
+    def _find_mixer(self):
+        registry = gst.registry_get_default()
+
+        factories = registry.get_feature_list(gst.TYPE_ELEMENT_FACTORY)
+        factories.sort(key: lambda f: (-f.get_rank(), f.get_name())
+
+        for factory in factories:
+           # Avoid sink/srcs that implment mixing.
+            if factory.get_klass() != 'Generic/Audio':
+                continue
+            # Avoid anything that doesn't implment mixing.
+            elif not factory.has_interface('GstMixer'):
+                continue
+
+            element = factory.create()
+            if not element:
+                continue
+
+            # Element has devices, try each one.
+            if hasattr(element, 'probe_get_values_name'):
+                devices = element.probe_get_values_name('device')
+
+                for device in devices:
+                    element.set_property('device', device)
+                    if self._check_mixer(element):
+                        return element
+
+            # Otherwise just test it as is.
+            elif self._check_mixer(element):
+                return element
+
+    def _check_mixer(self, element):
+        try:
+            # Only allow elements that succesfully become ready.
+            result = element.set_state(gst.STATE_READY)
+            if result != gst.STATE_CHANGE_SUCCESS:
+                return False
+
+            # Only allow elements that have a least one output track.
+            output_flag = gst.interfaces.MIXER_TRACK_OUTPUT
+            return bool(self._find_track(element, output_flag))
+        finally:
+            element.set_state(gst.STATE_NULL)
+
+    def _find_track(self, element, flags):
+        # Return first track that matches flags. 
+        for track in element.list_tracks():
+            if track.flags & flags:
+                return track
+        return None
+
+    def list_tracks(self):
+        return self._mixer.list_tracks()
+
+    def get_volume(self, track):
+        return self._mixer.get_volume(track)
+
+    def set_volume(self, track, volumes):
+        return self._mixer.set_volume(track, volumes)
+
+
+gobject.type_register(AutoAudioMixer)
+gst.element_register (AutoAudioMixer, 'autoaudiomixer', gst.RANK_MARGINAL)
 
 
 class GStreamer(ThreadingActor):

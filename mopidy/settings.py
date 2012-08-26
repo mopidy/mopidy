@@ -112,9 +112,8 @@ LOCAL_TAG_CACHE_FILE = None
 #:
 #: Default::
 #:
-#:     MIXER = u'alsamixer'
-# TODO: update to an automixer that tries to select correct mixer.
-MIXER = u'alsamixer'
+#:     MIXER = u'autoaudiomixer'
+MIXER = u'autoaudiomixer'
 
 #: Sound mixer track to use.
 #:
