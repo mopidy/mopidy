@@ -7,7 +7,7 @@ try:
     import dbus
     import dbus.mainloop.glib
     import dbus.service
-    import gobject
+    from gi.repository import GObject
 except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
@@ -21,7 +21,7 @@ from mopidy.mixers.base import BaseMixer
 from mopidy.utils.process import exit_process
 
 # Must be done before dbus.SessionBus() is called
-gobject.threads_init()
+GObject.threads_init()
 dbus.mainloop.glib.threads_init()
 
 BUS_NAME = 'org.mpris.MediaPlayer2.mopidy'

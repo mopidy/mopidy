@@ -1,6 +1,4 @@
-import pygst
-pygst.require('0.10')
-import gst
+from gi.repository import Gst
 
 import logging
 
@@ -9,9 +7,9 @@ logger = logging.getLogger('mopidy.outputs')
 class BaseOutput(object):
     """Base class for pluggable audio outputs."""
 
-    MESSAGE_EOS = gst.MESSAGE_EOS
-    MESSAGE_ERROR = gst.MESSAGE_ERROR
-    MESSAGE_WARNING = gst.MESSAGE_WARNING
+    MESSAGE_EOS = Gst.MessageType.EOS
+    MESSAGE_ERROR = Gst.MessageType.ERROR
+    MESSAGE_WARNING = Gst.MessageType.WARNING
 
     def __init__(self, gstreamer):
         self.gstreamer = gstreamer
@@ -23,7 +21,7 @@ class BaseOutput(object):
     def _build_bin(self):
         description = 'queue ! %s' % self.describe_bin()
         logger.debug('Creating new output: %s', description)
-        return gst.parse_bin_from_description(description, True)
+        return Gst.parse_bin_from_description(description, True)
 
     def connect(self):
         """Attach output to GStreamer pipeline."""
@@ -92,11 +90,11 @@ class BaseOutput(object):
         """
         Helper method for setting of properties on elements.
 
-        Will call :meth:`gst.Element.set_property` on ``element`` for each key
+        Will call :meth:`Gst.Element.set_property` on ``element`` for each key
         in ``properties`` that has a value that is not :class:`None`.
 
         :param element: element to set properties on
-        :type element: :class:`gst.Element`
+        :type element: :class:`Gst.Element`
         :param properties: properties to set on element
         :type properties: dict
         """

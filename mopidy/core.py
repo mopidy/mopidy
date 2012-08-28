@@ -4,8 +4,8 @@ import os
 import signal
 import sys
 
-import gobject
-gobject.threads_init()
+from gi.repository import GObject
+GObject.threads_init()
 
 # Extract any non-GStreamer arguments, and leave the GStreamer arguments for
 # processing by GStreamer. This needs to be done before GStreamer is imported,
@@ -32,7 +32,7 @@ logger = logging.getLogger('mopidy.core')
 
 def main():
     signal.signal(signal.SIGTERM, exit_handler)
-    loop = gobject.MainLoop()
+    loop = GObject.MainLoop()
     try:
         options = parse_options()
         setup_logging(options.verbosity_level, options.save_debug_log)

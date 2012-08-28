@@ -3,9 +3,9 @@ import logging
 logger = logging.getLogger('mopidy.frontends.mpris')
 
 try:
-    import indicate
+    from gi.repository import Indicate
 except ImportError as import_error:
-    indicate = None
+    Indicate = None
     logger.debug(u'Startup notification will not be sent (%s)', import_error)
 
 from pykka.actor import ThreadingActor
@@ -85,10 +85,10 @@ class MprisFrontend(ThreadingActor, BackendListener):
         running. When Mopidy exits, the server will be unreferenced and Mopidy
         will automatically be unregistered from e.g. the sound menu.
         """
-        if not indicate:
+        if not Indicate:
             return
         logger.debug(u'Sending startup notification...')
-        self.indicate_server = indicate.Server()
+        self.indicate_server = Indicate.Server()
         self.indicate_server.set_type('music.mopidy')
         self.indicate_server.set_desktop_file(settings.DESKTOP_FILE)
         self.indicate_server.show()
