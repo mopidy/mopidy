@@ -103,7 +103,6 @@ class WsNamespace(BaseNamespace):
     def on_playtrack(self, trackuri):
         logger.info('play ' + trackuri)
         
-        
         #try:
         logger.info(self.request.backend.playback.current_playlist_position.get())
         #cp_track = context.backend.current_playlist.get(cpid=cpid).get()
@@ -200,8 +199,8 @@ class WsNamespace(BaseNamespace):
             result.append((playlist.name, playlist.uri, last_modified))
         self.emit('playlists', result)
 
-    def on_getplaylisttracks(self, pluri):
-        playlist = flattenplaylist(self.request.backend.stored_playlists.get(uri=pluri).get())
+    def on_getplaylisttracks(self, playlisturi):
+        playlist = flattenplaylist(self.request.backend.stored_playlists.get(uri=playlisturi).get())
         self.emit('playlist', playlist)
     
     def on_search(self, searchtype, keywords):
@@ -213,7 +212,19 @@ class WsNamespace(BaseNamespace):
         playlist = flattenplaylist(self.request.backend.library.search(**query).get())
         logger.info(playlist)
          #context.backend.library.find_exact(**query).get())
-        self.emit('results', searchtype, playlist)
+        self.emit('searchresults', searchtype, playlist)
+
+    def on_getalbum(self, albumuri):
+        playlist = self.request.backend.library.lookup(uri=albumuri).get()
+        logger.info(playlist)
+        playlist = flattenplaylist(playlist)
+        self.emit('albumresults', playlist)
+
+    def on_getartist(self, artisturi):
+        playlist = self.request.backend.library.lookup(uri=artisturi).get()
+        logger.info(playlist)
+        playlist = flattenplaylist(playlist)
+        self.emit('artistresults', playlist)
 
     def on_getcurrentplaylist(self):
         #playlist = flattenplaylist(self.request.backend.current_playlist.get().get())
