@@ -8,7 +8,7 @@ import logging
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
+from mopidy import settings, utils
 from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
@@ -33,7 +33,7 @@ class AutoAudioMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer)
         registry = gst.registry_get_default()
 
         factories = registry.get_feature_list(gst.TYPE_ELEMENT_FACTORY)
-        factories.sort(key: lambda f: (-f.get_rank(), f.get_name())
+        factories.sort(key=lambda f: (-f.get_rank(), f.get_name()))
 
         for factory in factories:
             # Avoid sink/srcs that implment mixing.
