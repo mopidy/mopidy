@@ -1,10 +1,17 @@
 import pygst
 pygst.require('0.10')
 import gst
-
 import pykka
-import pylast
-import spotify
+
+try:
+    import pylast
+except ImportError:
+    pylast = False
+
+try:
+    import spotify
+except ImportError:
+    spotify = False
 
 from mopidy.utils import deps
 
@@ -44,6 +51,7 @@ class DepsTest(unittest.TestCase):
         self.assertEquals(pykka.__version__, result['version'])
         self.assertIn('pykka', result['path'])
 
+    @unittest.skipUnless(spotify, 'pyspotify not found')
     def test_pyspotify_info(self):
         result = deps.pyspotify_info()
 
@@ -53,6 +61,7 @@ class DepsTest(unittest.TestCase):
         self.assertIn('Built for libspotify API version', result['other'])
         self.assertIn(str(spotify.api_version), result['other'])
 
+    @unittest.skipUnless(pylast, 'pylast not found')
     def test_pylast_info(self):
         result = deps.pylast_info()
 
