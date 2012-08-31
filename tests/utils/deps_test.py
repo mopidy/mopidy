@@ -1,3 +1,5 @@
+import platform
+
 import pygst
 pygst.require('0.10')
 import gst
@@ -44,6 +46,14 @@ class DepsTest(unittest.TestCase):
         self.assertIn('Imported from: /foo/bar', result)
         self.assertNotIn('/baz.py', result)
         self.assertIn('Quux', result)
+
+    def test_python_info(self):
+        result = deps.python_info()
+
+        self.assertEquals('Python', result['name'])
+        self.assertIn(platform.python_implementation(), result['version'])
+        self.assertIn(platform.python_version(), result['version'])
+        self.assertIn('python', result['path'])
 
     def test_gstreamer_info(self):
         result = deps.gstreamer_info()

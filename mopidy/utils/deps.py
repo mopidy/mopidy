@@ -1,4 +1,5 @@
 import os
+import platform
 import sys
 
 import pygst
@@ -24,6 +25,7 @@ def list_deps_optparse_callback(*args):
 def format_dependency_list(adapters=None):
     if adapters is None:
         adapters = [
+            python_info,
             gstreamer_info,
             pykka_info,
             pyspotify_info,
@@ -46,6 +48,15 @@ def format_dependency_list(adapters=None):
             lines.append('  Other: %s' % (
                 indent(dep_info['other'])),)
     return '\n'.join(lines)
+
+
+def python_info():
+    return {
+        'name': 'Python',
+        'version': '%s %s' % (platform.python_implementation(),
+            platform.python_version()),
+        'path': platform.__file__,
+    }
 
 
 def gstreamer_info():
