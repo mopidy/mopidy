@@ -29,6 +29,7 @@ def format_dependency_list(adapters=None):
             pyspotify_info,
             pylast_info,
             dbus_info,
+            serial_info,
         ]
 
     lines = []
@@ -104,6 +105,17 @@ def dbus_info():
         import dbus
         dep_info['version'] = dbus.__version__
         dep_info['path'] = dbus.__file__
+    except ImportError:
+        pass
+    return dep_info
+
+
+def serial_info():
+    dep_info = {'name': 'pyserial'}
+    try:
+        import serial
+        dep_info['version'] = serial.VERSION
+        dep_info['path'] = serial.__file__
     except ImportError:
         pass
     return dep_info

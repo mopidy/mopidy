@@ -14,6 +14,11 @@ except ImportError:
     pylast = False
 
 try:
+    import serial
+except ImportError:
+    serial = False
+
+try:
     import spotify
 except ImportError:
     spotify = False
@@ -81,3 +86,11 @@ class DepsTest(unittest.TestCase):
         self.assertEquals('dbus-python', result['name'])
         self.assertEquals(dbus.__version__, result['version'])
         self.assertIn('dbus', result['path'])
+
+    @unittest.skipUnless(serial, 'serial not found')
+    def test_serial_info(self):
+        result = deps.serial_info()
+
+        self.assertEquals('pyserial', result['name'])
+        self.assertEquals(serial.VERSION, result['version'])
+        self.assertIn('serial', result['path'])
