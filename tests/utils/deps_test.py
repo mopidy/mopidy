@@ -47,6 +47,12 @@ class DepsTest(unittest.TestCase):
         self.assertNotIn('/baz.py', result)
         self.assertIn('Quux', result)
 
+    def test_platform_info(self):
+        result = deps.platform_info()
+
+        self.assertEquals('Platform', result['name'])
+        self.assertIn(platform.platform(), result['version'])
+
     def test_python_info(self):
         result = deps.python_info()
 

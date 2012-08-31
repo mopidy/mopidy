@@ -25,6 +25,7 @@ def list_deps_optparse_callback(*args):
 def format_dependency_list(adapters=None):
     if adapters is None:
         adapters = [
+            platform_info,
             python_info,
             gstreamer_info,
             pykka_info,
@@ -48,6 +49,13 @@ def format_dependency_list(adapters=None):
             lines.append('  Other: %s' % (
                 indent(dep_info['other'])),)
     return '\n'.join(lines)
+
+
+def platform_info():
+    return {
+        'name': 'Platform',
+        'version': platform.platform(),
+    }
 
 
 def python_info():
