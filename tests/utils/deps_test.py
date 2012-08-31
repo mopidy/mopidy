@@ -1,3 +1,7 @@
+import pygst
+pygst.require('0.10')
+import gst
+
 import pykka
 import spotify
 
@@ -21,6 +25,15 @@ class DepsTest(unittest.TestCase):
         self.assertIn('Pykka: not found', result)
         self.assertIn('Imported from: /foo/bar/baz', result)
         self.assertIn('Quux', result)
+
+    def test_gstreamer_info(self):
+        result = deps.gstreamer_info()
+
+        self.assertEquals('Gstreamer', result['name'])
+        self.assertEquals('.'.join(map(str, gst.get_gst_version())), result['version'])
+        self.assertIn('gst', result['path'])
+        self.assertIn('Python wrapper: gst-python', result['other'])
+        self.assertIn('.'.join(map(str, gst.get_pygst_version())), result['other'])
 
     def test_pykka_info(self):
         result = deps.pykka_info()

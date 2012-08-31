@@ -1,5 +1,9 @@
 import sys
 
+import pygst
+pygst.require('0.10')
+import gst
+
 import pykka
 
 from mopidy.utils.log import indent
@@ -19,6 +23,7 @@ def list_deps_optparse_callback(*args):
 def format_dependency_list(adapters=None):
     if adapters is None:
         adapters = [
+            gstreamer_info,
             pykka_info,
             pyspotify_info,
         ]
@@ -36,6 +41,16 @@ def format_dependency_list(adapters=None):
             lines.append('  Other: %s' % (
                 indent(dep_info['other'])),)
     return '\n'.join(lines)
+
+
+def gstreamer_info():
+    return {
+        'name': 'Gstreamer',
+        'version': '.'.join(map(str, gst.get_gst_version())),
+        'path': gst.__file__,
+        'other': 'Python wrapper: gst-python %s' % (
+            '.'.join(map(str, gst.get_pygst_version()))),
+    }
 
 
 def pykka_info():
