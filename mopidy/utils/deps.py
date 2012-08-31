@@ -71,7 +71,7 @@ def gstreamer_info():
     other = []
     other.append('Python wrapper: gst-python %s' % (
         '.'.join(map(str, gst.get_pygst_version()))))
-    other.append('Elements:')
+    other.append('Relevant elements:')
     for name, status in _gstreamer_check_elements():
         other.append('  %s: %s' % (name, status))
     return {
