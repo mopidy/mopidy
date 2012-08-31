@@ -68,13 +68,66 @@ def python_info():
 
 
 def gstreamer_info():
+    other = []
+    other.append('Python wrapper: gst-python %s' % (
+        '.'.join(map(str, gst.get_pygst_version()))))
+    other.append('Elements:')
+    for name, status in _gstreamer_check_elements():
+        other.append('  %s: %s' % (name, status))
     return {
         'name': 'Gstreamer',
         'version': '.'.join(map(str, gst.get_gst_version())),
         'path': gst.__file__,
-        'other': 'Python wrapper: gst-python %s' % (
-            '.'.join(map(str, gst.get_pygst_version()))),
+        'other': '\n'.join(other),
     }
+
+
+def _gstreamer_check_elements():
+    elements_to_check = [
+        # Core playback
+        'uridecodebin',
+
+        # External HTTP streams
+        'souphttpsrc',
+
+        # Spotify
+        'appsrc',
+
+        # Mixers and sinks
+        'alsamixer',
+        'alsasink',
+        'ossmixer',
+        'osssink',
+        'oss4mixer',
+        'oss4sink',
+        'pulsemixer',
+        'pulsesink',
+
+        # MP3 encoding and decoding
+        'mp3parse',
+        'mad',
+        'id3demux',
+        'id3v2mux',
+        'lame',
+
+        # Ogg Vorbis encoding and decoding
+        'vorbisdec',
+        'vorbisenc',
+        'vorbisparse',
+        'oggdemux',
+        'oggmux',
+        'oggparse',
+
+        # Flac decoding
+        'flacdec',
+        'flacparse',
+
+        # Shoutcast output
+        'shout2send',
+    ]
+    known_elements = [factory.get_name() for factory in
+        gst.registry_get_default().get_feature_list(gst.TYPE_ELEMENT_FACTORY)]
+    return [(element, element in known_elements) for element in elements_to_check]
 
 
 def pykka_info():

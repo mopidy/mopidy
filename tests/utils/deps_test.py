@@ -69,6 +69,7 @@ class DepsTest(unittest.TestCase):
         self.assertIn('gst', result['path'])
         self.assertIn('Python wrapper: gst-python', result['other'])
         self.assertIn('.'.join(map(str, gst.get_pygst_version())), result['other'])
+        self.assertIn('Elements:', result['other'])
 
     def test_pykka_info(self):
         result = deps.pykka_info()
