@@ -22,6 +22,7 @@ from mopidy import (get_version, settings, OptionalDependencyError,
     SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
 from mopidy.gstreamer import GStreamer
 from mopidy.utils import get_class
+from mopidy.utils.deps import list_deps_optparse_callback
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
 from mopidy.utils.process import (exit_handler, stop_remaining_actors,
@@ -77,6 +78,9 @@ def parse_options():
     parser.add_option('--list-settings',
         action='callback', callback=list_settings_optparse_callback,
         help='list current settings')
+    parser.add_option('--list-deps',
+        action='callback', callback=list_deps_optparse_callback,
+        help='list dependencies and their versions')
     return parser.parse_args(args=mopidy_args)[0]
 
 def check_old_folders():
