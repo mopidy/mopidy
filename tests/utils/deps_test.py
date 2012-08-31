@@ -4,6 +4,11 @@ import gst
 import pykka
 
 try:
+    import dbus
+except ImportError:
+    dbus = False
+
+try:
     import pylast
 except ImportError:
     pylast = False
@@ -68,3 +73,11 @@ class DepsTest(unittest.TestCase):
         self.assertEquals('pylast', result['name'])
         self.assertEquals(pylast.__version__, result['version'])
         self.assertIn('pylast', result['path'])
+
+    @unittest.skipUnless(dbus, 'dbus not found')
+    def test_dbus_info(self):
+        result = deps.dbus_info()
+
+        self.assertEquals('dbus-python', result['name'])
+        self.assertEquals(dbus.__version__, result['version'])
+        self.assertIn('dbus', result['path'])

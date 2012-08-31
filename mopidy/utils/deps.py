@@ -28,6 +28,7 @@ def format_dependency_list(adapters=None):
             pykka_info,
             pyspotify_info,
             pylast_info,
+            dbus_info,
         ]
 
     lines = []
@@ -92,6 +93,17 @@ def pylast_info():
         import pylast
         dep_info['version'] = pylast.__version__
         dep_info['path'] = pylast.__file__
+    except ImportError:
+        pass
+    return dep_info
+
+
+def dbus_info():
+    dep_info = {'name': 'dbus-python'}
+    try:
+        import dbus
+        dep_info['version'] = dbus.__version__
+        dep_info['path'] = dbus.__file__
     except ImportError:
         pass
     return dep_info
