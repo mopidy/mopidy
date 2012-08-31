@@ -15,7 +15,7 @@ class DepsTest(unittest.TestCase):
         adapters = [
             lambda: dict(name='Python', version='FooPython 2.7.3'),
             lambda: dict(name='Platform', version='Loonix 4.0.1'),
-            lambda: dict(name='Pykka', path='/foo/bar/baz', other='Quux')
+            lambda: dict(name='Pykka', path='/foo/bar/baz.py', other='Quux')
         ]
 
         result = deps.format_dependency_list(adapters)
@@ -23,7 +23,8 @@ class DepsTest(unittest.TestCase):
         self.assertIn('Python: FooPython 2.7.3', result)
         self.assertIn('Platform: Loonix 4.0.1', result)
         self.assertIn('Pykka: not found', result)
-        self.assertIn('Imported from: /foo/bar/baz', result)
+        self.assertIn('Imported from: /foo/bar', result)
+        self.assertNotIn('/baz.py', result)
         self.assertIn('Quux', result)
 
     def test_gstreamer_info(self):

@@ -1,3 +1,4 @@
+import os
 import sys
 
 import pygst
@@ -36,7 +37,8 @@ def format_dependency_list(adapters=None):
             'version': dep_info.get('version', 'not found'),
         })
         if 'path' in dep_info:
-            lines.append('  Imported from: %(path)s' % dep_info)
+            lines.append('  Imported from: %s' % (
+                os.path.dirname(dep_info['path'])))
         if 'other' in dep_info:
             lines.append('  Other: %s' % (
                 indent(dep_info['other'])),)
