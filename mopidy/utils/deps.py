@@ -27,6 +27,7 @@ def format_dependency_list(adapters=None):
             gstreamer_info,
             pykka_info,
             pyspotify_info,
+            pylast_info,
         ]
 
     lines = []
@@ -80,6 +81,17 @@ def pyspotify_info():
         dep_info['path'] = spotify.__file__
         dep_info['other'] = 'Built for libspotify API version %d' % (
             spotify.api_version,)
+    except ImportError:
+        pass
+    return dep_info
+
+
+def pylast_info():
+    dep_info = {'name': 'pylast'}
+    try:
+        import pylast
+        dep_info['version'] = pylast.__version__
+        dep_info['path'] = pylast.__file__
     except ImportError:
         pass
     return dep_info
