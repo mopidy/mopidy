@@ -1,5 +1,6 @@
 import pygst
 pygst.require('0.10')
+import gobject
 import gst
 
 import logging
@@ -11,6 +12,10 @@ from mopidy import settings
 from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
+
+
+class GStreamerError(Exception):
+    pass
 
 
 class GStreamer(ThreadingActor):
@@ -39,7 +44,6 @@ class GStreamer(ThreadingActor):
         self._volume = None
         self._output = None
 
-    def on_start(self):
         self._setup_pipeline()
         self._setup_output()
         self._setup_message_processor()
@@ -61,7 +65,12 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
     def _setup_output(self):
-        self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
+        try:
+            self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
+        except gobject.GError as e:
+            raise GStreamerError('%r while creating %r' % (e.message,
+                                                           settings.OUTPUT))
+
         self._pipeline.add(self._output)
         gst.element_link_many(self._volume, self._output)
         logger.debug('Output set to %s', settings.OUTPUT)
