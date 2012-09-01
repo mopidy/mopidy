@@ -12,6 +12,7 @@ from mopidy.utils.log import indent
 
 logger = logging.getLogger('mopidy.utils.settings')
 
+
 class SettingsProxy(object):
     def __init__(self, default_settings_module):
         self.default = self._get_settings_dict_from_module(
@@ -151,10 +152,16 @@ def validate_settings(defaults, settings):
                     u'Available bitrates are 96, 160, and 320.')
 
         if setting not in defaults:
-            errors[setting] = u'Unknown setting. Is it misspelled?'
+            errors[setting] = u'Unknown setting.'
+            suggestion = did_you_mean(setting, defaults)
+
+            if suggestion:
+                errors[setting] += u' Did you mean %s?' % suggestion
+
             continue
 
     return errors
+
 
 def list_settings_optparse_callback(*args):
     """
@@ -166,6 +173,7 @@ def list_settings_optparse_callback(*args):
     from mopidy import settings
     print format_settings_list(settings)
     sys.exit(0)
+
 
 def format_settings_list(settings):
     errors = settings.get_errors()
@@ -181,8 +189,41 @@ def format_settings_list(settings):
             lines.append(u'  Error: %s' % errors[key])
     return '\n'.join(lines)
 
+
 def mask_value_if_secret(key, value):
     if key.endswith('PASSWORD') and value:
         return u'********'
     else:
         return value
+
+
+def did_you_mean(setting, defaults):
+    """Suggest most likely setting based on levenshtein."""
+    if not defaults:
+        return None
+
+    setting = setting.upper()
+    candidates = [(levenshtein(setting, d), d) for d in defaults]
+    candidates.sort()
+
+    if candidates[0][0] <= 3:
+        return candidates[0][1]
+    return None
+
+
+def levenshtein(a, b, max=3):
+    """Calculates the Levenshtein distance between a and b."""
+    n, m = len(a), len(b)
+    if n > m:
+        return levenshtein(b, a)
+
+    current = xrange(n+1)
+    for i in xrange(1, m+1):
+        previous, current = current, [i] + [0] * n
+        for j in xrange(1, n+1):
+            add, delete = previous[j] + 1, current[j-1] + 1
+            change = previous[j-1]
+            if a[j-1] != b[i-1]:
+                change += 1
+            current[j] = min(add, delete, change)
+    return current[n]
