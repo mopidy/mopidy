@@ -21,9 +21,7 @@ class GStreamerError(Exception):
 # TODO: we might want to add some ranking to the mixers we know about?
 # TODO: move to mixers module and do from mopidy.mixers import * to install
 # elements.
-# TODO: use gst.Bin so we can add the real mixer and have state sync
-# automatically.
-class AutoAudioMixer(gst.Bin, gst.ImplementsInterface, gst.interfaces.Mixer):
+class AutoAudioMixer(gst.Bin):
     __gstdetails__ = ('AutoAudioMixer',
                       'Mixer',
                       'Element automatically selects a mixer.',
@@ -31,9 +29,12 @@ class AutoAudioMixer(gst.Bin, gst.ImplementsInterface, gst.interfaces.Mixer):
 
     def __init__(self):
         gst.Bin.__init__(self)
-        self._mixer = self._find_mixer()
-        self.add(self._mixer)
-        logger.debug('AutoAudioMixer chose: %s', self._mixer.get_name())
+        mixer = self._find_mixer()
+        if mixer:
+            self.add(mixer)
+            logger.debug('AutoAudioMixer chose: %s', mixer.get_name())
+        else:
+            logger.debug('AutoAudioMixer did not find any usable mixers')
 
     def _find_mixer(self):
         registry = gst.registry_get_default()
@@ -77,18 +78,6 @@ class AutoAudioMixer(gst.Bin, gst.ImplementsInterface, gst.interfaces.Mixer):
             if track.flags & flags:
                 return True
         return False
-
-    def list_tracks(self):
-        return self._mixer.list_tracks()
-
-    def get_volume(self, track):
-        return self._mixer.get_volume(track)
-
-    def set_volume(self, track, volumes):
-        return self._mixer.set_volume(track, volumes)
-
-    def set_record(self, track, record):
-        pass
 
 
 gobject.type_register(AutoAudioMixer)
@@ -233,26 +222,34 @@ class GStreamer(ThreadingActor):
         self._pipeline.add(self._output)
         gst.element_link_many(self._pipeline.get_by_name('queue'),
                               self._output)
-        logger.debug('Output set to %s', output_description)
+        logger.info('Output set to %s', output_description)
 
-    def _setup_mixer(self, mixer_element, track_label):
-        if not mixer_element:
+    def _setup_mixer(self, mixer_bin_description, track_label):
+        if not mixer_bin_description:
             logger.debug('Not adding mixer.')
             return
 
-        mixerbin = gst.parse_bin_from_description(mixer_element, False)
-        if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
-            logger.warning('Adding mixer %r failed.', mixer_element)
+        mixerbin = gst.parse_bin_from_description(mixer_bin_description, False)
+
+        # We assume that the bin will contain a single mixer.
+        mixer = mixerbin.get_by_interface('GstMixer')
+        if not mixer:
+            logger.warning('Did not find any mixers in %r',
+                           mixer_bin_description)
             return
 
-        mixer = mixerbin.get_by_interface('GstMixer')
+        if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
+            logger.warning('Setting mixer %r to READY failed.',
+                           mixer_bin_description)
+            return
+
         track = self._select_mixer_track(mixer, track_label)
         if not track:
             logger.warning('Could not find usable mixer track.')
             return
 
         self._mixer = (mixer, track)
-        logger.info('Mixer set to %s using %s',
+        logger.info('Mixer set to %s using track called %s',
                     mixer.get_factory().get_name(), track.label)
 
     def _select_mixer_track(self, mixer, track_label):
@@ -450,7 +447,6 @@ class GStreamer(ThreadingActor):
             return None
 
         mixer, track = self._mixer
-
 
         volumes = mixer.get_volume(track)
         avg_volume = float(sum(volumes)) / len(volumes)
