@@ -14,10 +14,6 @@ from mopidy.backends.base import Backend
 logger = logging.getLogger('mopidy.gstreamer')
 
 
-class GStreamerError(Exception):
-    pass
-
-
 # TODO: we might want to add some ranking to the mixers we know about?
 # TODO: move to mixers module and do from mopidy.mixers import * to install
 # elements.
@@ -213,34 +209,32 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('queue').get_pad('sink'))
 
     def _setup_output(self, output_description):
-        try:
-            self._output = gst.parse_bin_from_description(output_description, True)
-        except gobject.GError as e:
-            raise GStreamerError('%r while creating %r' % (e.message,
-                                                           output_description))
+        # This will raise a gobject.GError if the description is bad.
+        self._output = gst.parse_bin_from_description(output_description, True)
 
         self._pipeline.add(self._output)
         gst.element_link_many(self._pipeline.get_by_name('queue'),
                               self._output)
         logger.info('Output set to %s', output_description)
 
-    def _setup_mixer(self, mixer_bin_description, track_label):
-        if not mixer_bin_description:
-            logger.debug('Not adding mixer.')
+    def _setup_mixer(self, mixer_description, track_label):
+        if not mixer_description:
+            logger.info('Not setting up mixer.')
             return
 
-        mixerbin = gst.parse_bin_from_description(mixer_bin_description, False)
+        # This will raise a gobject.GError if the description is bad.
+        mixerbin = gst.parse_bin_from_description(mixer_description, False)
 
         # We assume that the bin will contain a single mixer.
         mixer = mixerbin.get_by_interface('GstMixer')
         if not mixer:
             logger.warning('Did not find any mixers in %r',
-                           mixer_bin_description)
+                           mixer_description)
             return
 
         if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
             logger.warning('Setting mixer %r to READY failed.',
-                           mixer_bin_description)
+                           mixer_description)
             return
 
         track = self._select_mixer_track(mixer, track_label)
