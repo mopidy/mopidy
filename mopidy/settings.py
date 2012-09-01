@@ -126,17 +126,6 @@ MIXER = u'autoaudiomixer'
 #:     MIXER_TRACK = None
 MIXER_TRACK = None
 
-#: The maximum volume. Integer in the range 0 to 100.
-#:
-#: If this settings is set to 80, the mixer will set the actual volume to 80
-#: when asked to set it to 100.
-#:
-#: Default::
-#:
-#:     MIXER_MAX_VOLUME = 100
-# TODO: re-add support for this.
-MIXER_MAX_VOLUME = 100
-
 #: Which address Mopidy's MPD server should bind to.
 #:
 #:Examples:

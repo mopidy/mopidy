@@ -125,6 +125,7 @@ def validate_settings(defaults, settings):
         'MIXER_EXT_PORT': None,
         'MIXER_EXT_SPEAKERS_A': None,
         'MIXER_EXT_SPEAKERS_B': None,
+        'MIXER_MAX_VOLUME': None,
         'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
         'SERVER_PORT': 'MPD_SERVER_PORT',

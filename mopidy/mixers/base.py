@@ -5,13 +5,8 @@ from mopidy import listeners, settings
 logger = logging.getLogger('mopidy.mixers')
 
 class BaseMixer(object):
-    """
-    **Settings:**
-
-    - :attr:`mopidy.settings.MIXER_MAX_VOLUME`
-    """
-
-    amplification_factor = settings.MIXER_MAX_VOLUME / 100.0
+    # TODO: remove completly
+    amplification_factor = 1.0
 
     @property
     def volume(self):
