@@ -131,6 +131,7 @@ def create_fake_track(label, min_volume, max_volume, num_channels, flags):
 
     return Track()
 
+
 class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
     __gstdetails__ = ('FakeMixer',
                       'Mixer',
@@ -181,10 +182,12 @@ class GStreamer(ThreadingActor):
     **Settings:**
 
     - :attr:`mopidy.settings.OUTPUT`
+    - :attr:`mopidy.settings.MIXER`
+    - :attr:`mopidy.settings.MIXER_TRACK`
 
     """
 
-    def __init__(self):
+    def __init__(self, output=None, mixer=None, mixer_track=None):
         super(GStreamer, self).__init__()
         self._default_caps = gst.Caps("""
             audio/x-raw-int,
@@ -201,8 +204,9 @@ class GStreamer(ThreadingActor):
         self._mixer = None
 
         self._setup_pipeline()
-        self._setup_output()
-        self._setup_mixer()
+        self._setup_output(output or settings.OUTPUT)
+        self._setup_mixer(mixer or settings.MIXER,
+                          mixer_track or settings.MIXER_TRACK)
         self._setup_message_processor()
 
     def _setup_pipeline(self):
@@ -223,29 +227,29 @@ class GStreamer(ThreadingActor):
         self._uridecodebin.connect('pad-added', self._on_new_pad,
             self._pipeline.get_by_name('queue').get_pad('sink'))
 
-    def _setup_output(self):
+    def _setup_output(self, output_description):
         try:
-            self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
+            self._output = gst.parse_bin_from_description(output_description, True)
         except gobject.GError as e:
             raise GStreamerError('%r while creating %r' % (e.message,
-                                                           settings.OUTPUT))
+                                                           output_description))
 
         self._pipeline.add(self._output)
         gst.element_link_many(self._pipeline.get_by_name('queue'),
                               self._output)
-        logger.debug('Output set to %s', settings.OUTPUT)
+        logger.debug('Output set to %s', output_description)
 
-    def _setup_mixer(self):
-        if not settings.MIXER:
+    def _setup_mixer(self, mixer_element, track_label):
+        if not mixer_element:
             logger.debug('Not adding mixer.')
             return
 
-        mixer = gst.element_factory_make(settings.MIXER)
+        mixer = gst.element_factory_make(mixer_element)
         if mixer.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
-            logger.warning('Adding mixer %r failed.', settings.MIXER)
+            logger.warning('Adding mixer %r failed.', mixer_element)
             return
 
-        track = self._select_mixer_track(mixer)
+        track = self._select_mixer_track(mixer, track_label)
         if not track:
             logger.warning('Could not find usable mixer track.')
             return
@@ -254,12 +258,12 @@ class GStreamer(ThreadingActor):
         logger.info('Mixer set to %s using %s',
                     mixer.get_factory().get_name(), track.label)
 
-    def _select_mixer_track(self, mixer):
+    def _select_mixer_track(self, mixer, track_label):
         # Look for track with label == MIXER_TRACK, otherwise fallback to
         # master track which is also an output.
         for track in mixer.list_tracks():
-            if settings.MIXER_TRACK:
-                if track.label == settings.MIXER_TRACK:
+            if track_label:
+                if track.label == track_label:
                     return track
             elif track.flags & (gst.interfaces.MIXER_TRACK_MASTER |
                                 gst.interfaces.MIXER_TRACK_OUTPUT):

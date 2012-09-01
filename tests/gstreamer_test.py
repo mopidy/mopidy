@@ -11,10 +11,11 @@ from tests import unittest, path_to_data_dir
     'Our Windows build server does not support GStreamer yet')
 class GStreamerTest(unittest.TestCase):
     def setUp(self):
+        # TODO: does this modify global settings without reseting it?
+        # TODO: should use a fake backend stub for this test?
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
-        settings.MIXER = 'fakemixer'
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.gstreamer = GStreamer()
+        self.gstreamer = GStreamer(mixer='fakemixer')
 
     def prepare_uri(self, uri):
         self.gstreamer.prepare_change()
