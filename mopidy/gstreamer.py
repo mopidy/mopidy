@@ -23,16 +23,16 @@ class GStreamerError(Exception):
 # elements.
 # TODO: use gst.Bin so we can add the real mixer and have state sync
 # automatically.
-class AutoAudioMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
+class AutoAudioMixer(gst.Bin, gst.ImplementsInterface, gst.interfaces.Mixer):
     __gstdetails__ = ('AutoAudioMixer',
                       'Mixer',
                       'Element automatically selects a mixer.',
                       'Thomas Adamcik')
 
     def __init__(self):
-        gst.Element.__init__(self)
+        gst.Bin.__init__(self)
         self._mixer = self._find_mixer()
-        self._mixer.set_state(gst.STATE_READY)
+        self.add(self._mixer)
         logger.debug('AutoAudioMixer chose: %s', self._mixer.get_name())
 
     def _find_mixer(self):
