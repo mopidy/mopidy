@@ -11,11 +11,8 @@ from pykka.registry import ActorRegistry
 from mopidy import settings
 from mopidy.backends.base import Backend
 
+
 logger = logging.getLogger('mopidy.gstreamer')
-
-
-class GStreamerError(Exception):
-    pass
 
 
 class GStreamer(ThreadingActor):
