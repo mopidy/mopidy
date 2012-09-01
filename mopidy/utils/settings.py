@@ -202,6 +202,7 @@ def did_you_mean(setting, defaults):
     if not defaults:
         return None
 
+    setting = setting.upper()
     candidates = [(levenshtein(setting, d), d) for d in defaults]
     candidates.sort()
 
