@@ -173,60 +173,6 @@ MPD_SERVER_MAX_CONNECTIONS = 20
 #:     OUTPUT = u'autoaudiosink'
 OUTPUT = u'autoaudiosink'
 
-#: Hostname of the SHOUTcast server which Mopidy should stream audio to.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
-SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
-
-#: Port of the SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_PORT = 8000
-SHOUTCAST_OUTPUT_PORT = 8000
-
-#: User to authenticate as against SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_USERNAME = u'source'
-SHOUTCAST_OUTPUT_USERNAME = u'source'
-
-#: Password to authenticate with against SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
-SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
-
-#: Mountpoint to use for the stream on the SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_MOUNT = u'/stream'
-SHOUTCAST_OUTPUT_MOUNT = u'/stream'
-
-#: Encoder to use to process audio data before streaming to SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:     SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
-SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
-
 #: Path to the Spotify cache.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.

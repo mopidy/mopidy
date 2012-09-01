@@ -14,6 +14,10 @@ from mopidy.backends.base import Backend
 logger = logging.getLogger('mopidy.gstreamer')
 
 
+class GStreamerError(Exception):
+    pass
+
+
 # TODO: we might want to add some ranking to the mixers we know about?
 # TODO: move to mixers module and do from mopidy.mixers import * to install
 # elements.
@@ -123,7 +127,6 @@ class GStreamer(ThreadingActor):
         self._output = None
         self._mixer = None
 
-    def on_start(self):
         self._setup_pipeline()
         self._setup_output()
         self._setup_mixer()
@@ -134,7 +137,9 @@ class GStreamer(ThreadingActor):
         # connect to an output bin with a mixer on the side. set_uri on bin?
         description = ' ! '.join([
             'uridecodebin name=uri',
-            'audioconvert name=convert'])
+            'audioconvert name=convert',
+            'audioresample name=resample',
+            'queue name=queue'])
 
         logger.debug(u'Setting up base GStreamer pipeline: %s', description)
 
@@ -143,12 +148,17 @@ class GStreamer(ThreadingActor):
 
         self._uridecodebin.connect('notify::source', self._on_new_source)
         self._uridecodebin.connect('pad-added', self._on_new_pad,
-            self._pipeline.get_by_name('convert').get_pad('sink'))
+            self._pipeline.get_by_name('queue').get_pad('sink'))
 
     def _setup_output(self):
-        self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
+        try:
+            self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
+        except gobject.GError as e:
+            raise GStreamerError('%r while creating %r' % (e.message,
+                                                           settings.OUTPUT))
+
         self._pipeline.add(self._output)
-        gst.element_link_many(self._pipeline.get_by_name('convert'),
+        gst.element_link_many(self._pipeline.get_by_name('queue'),
                               self._output)
         logger.debug('Output set to %s', settings.OUTPUT)
 
