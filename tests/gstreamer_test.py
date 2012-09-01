@@ -15,7 +15,7 @@ class GStreamerTest(unittest.TestCase):
         # TODO: should use a fake backend stub for this test?
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.gstreamer = GStreamer(mixer='fakemixer')
+        self.gstreamer = GStreamer(mixer='fakemixer track_max_volume=65536')
 
     def prepare_uri(self, uri):
         self.gstreamer.prepare_change()
@@ -50,20 +50,10 @@ class GStreamerTest(unittest.TestCase):
     def test_end_of_data_stream(self):
         pass # TODO
 
-    def test_default_get_volume_result(self):
-        self.assertEqual(100, self.gstreamer.get_volume())
-
     def test_set_volume(self):
-        self.assertTrue(self.gstreamer.set_volume(50))
-        self.assertEqual(50, self.gstreamer.get_volume())
-
-    def test_set_volume_to_zero(self):
-        self.assertTrue(self.gstreamer.set_volume(0))
-        self.assertEqual(0, self.gstreamer.get_volume())
-
-    def test_set_volume_to_one_hundred(self):
-        self.assertTrue(self.gstreamer.set_volume(100))
-        self.assertEqual(100, self.gstreamer.get_volume())
+        for value in range(0, 101):
+            self.assertTrue(self.gstreamer.set_volume(value))
+            self.assertEqual(value, self.gstreamer.get_volume())
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):

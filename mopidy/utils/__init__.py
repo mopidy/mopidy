@@ -23,8 +23,8 @@ def rescale(v, old=None, new=None):
     """Convert value between scales."""
     new_min, new_max = new
     old_min, old_max = old
-    scaled = (new_max - new_min) / (old_max - old_min) * (v - old_min) + new_min
-    return int(scaled)
+    scaling = float(new_max - new_min) / (old_max - old_min)
+    return round(scaling * (v - old_min) + new_min)
 
 
 def import_module(name):
