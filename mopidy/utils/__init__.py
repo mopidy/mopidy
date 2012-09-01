@@ -8,7 +8,7 @@ import sys
 logger = logging.getLogger('mopidy.utils')
 
 
-# TODO: user itertools.chain.from_iterable(the_list)?
+# TODO: use itertools.chain.from_iterable(the_list)?
 def flatten(the_list):
     result = []
     for element in the_list:
