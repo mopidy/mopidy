@@ -64,7 +64,7 @@ class DepsTest(unittest.TestCase):
     def test_gstreamer_info(self):
         result = deps.gstreamer_info()
 
-        self.assertEquals('Gstreamer', result['name'])
+        self.assertEquals('GStreamer', result['name'])
         self.assertEquals('.'.join(map(str, gst.get_gst_version())), result['version'])
         self.assertIn('gst', result['path'])
         self.assertIn('Python wrapper: gst-python', result['other'])

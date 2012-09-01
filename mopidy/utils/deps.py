@@ -75,7 +75,7 @@ def gstreamer_info():
     for name, status in _gstreamer_check_elements():
         other.append('  %s: %s' % (name, 'OK' if status else 'not found'))
     return {
-        'name': 'Gstreamer',
+        'name': 'GStreamer',
         'version': '.'.join(map(str, gst.get_gst_version())),
         'path': gst.__file__,
         'other': '\n'.join(other),
