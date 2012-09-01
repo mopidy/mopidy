@@ -103,11 +103,12 @@ gobject.type_register(AutoAudioMixer)
 gst.element_register (AutoAudioMixer, 'autoaudiomixer', gst.RANK_MARGINAL)
 
 
-def create_fake_track(label, min_volume, max_volume, num_channels, flags):
+def create_fake_track(label, intial_volume, min_volume, max_volume,
+                      num_channels, flags):
     class Track(gst.interfaces.MixerTrack):
         def __init__(self):
             super(Track, self).__init__()
-            self.volumes = (100,) * self.num_channels
+            self.volumes = (intial_volume,) * self.num_channels
 
         @gobject.property
         def label(self):
@@ -140,6 +141,8 @@ class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
 
     track_label = gobject.property(type=str, default='Master')
 
+    track_initial_volume = gobject.property(type=int, default=0)
+
     track_min_volume = gobject.property(type=int, default=0)
 
     track_max_volume = gobject.property(type=int, default=100)
@@ -155,6 +158,7 @@ class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
 
     def list_tracks(self):
         track = create_fake_track(self.track_label,
+                                  self.track_initial_volume,
                                   self.track_min_volume,
                                   self.track_max_volume,
                                   self.track_num_channels,
@@ -244,11 +248,12 @@ class GStreamer(ThreadingActor):
             logger.debug('Not adding mixer.')
             return
 
-        mixer = gst.element_factory_make(mixer_element)
-        if mixer.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
+        mixerbin = gst.parse_bin_from_description(mixer_element, False)
+        if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
             logger.warning('Adding mixer %r failed.', mixer_element)
             return
 
+        mixer = mixerbin.get_by_interface('GstMixer')
         track = self._select_mixer_track(mixer, track_label)
         if not track:
             logger.warning('Could not find usable mixer track.')
@@ -454,10 +459,13 @@ class GStreamer(ThreadingActor):
 
         mixer, track = self._mixer
 
+
         volumes = mixer.get_volume(track)
-        avg_volume = sum(volumes) / len(volumes)
-        return utils.rescale(avg_volume,
-            old=(track.min_volume, track.max_volume), new=(0, 100))
+        avg_volume = float(sum(volumes)) / len(volumes)
+
+        new_scale = (0, 100)
+        old_scale = (track.min_volume, track.max_volume)
+        return utils.rescale(avg_volume, old=old_scale, new=new_scale)
 
     def set_volume(self, volume):
         """
@@ -472,8 +480,10 @@ class GStreamer(ThreadingActor):
 
         mixer, track = self._mixer
 
-        volume = utils.rescale(volume,
-            old=(0, 100), new=(track.min_volume, track.max_volume))
+        old_scale = (0, 100)
+        new_scale = (track.min_volume, track.max_volume)
+
+        volume = utils.rescale(volume, old=old_scale, new=new_scale)
 
         volumes = (volume,) * track.num_channels
         mixer.set_volume(track, volumes)
