@@ -49,42 +49,34 @@ class AutoAudioMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer)
             elif not factory.has_interface('GstMixer'):
                 continue
 
-            element = factory.create()
-            if not element:
-                continue
+            if self._test_mixer(factory):
+                return factory.create()
 
-            # Element has devices, try each one.
-            if hasattr(element, 'probe_get_values_name'):
-                devices = element.probe_get_values_name('device')
+        return None
 
-                for device in devices:
-                    element.set_property('device', device)
-                    if self._check_mixer(element):
-                        return element
+    def _test_mixer(self, factory):
+        element = factory.create()
+        if not element:
+            return False
 
-            # Otherwise just test it as is.
-            elif self._check_mixer(element):
-                return element
-
-    def _check_mixer(self, element):
         try:
-            # Only allow elements that succesfully become ready.
             result = element.set_state(gst.STATE_READY)
             if result != gst.STATE_CHANGE_SUCCESS:
                 return False
 
-            # Only allow elements that have a least one output track.
-            output_flag = gst.interfaces.MIXER_TRACK_OUTPUT
-            return bool(self._find_track(element, output_flag))
+            # Trust that the default device is sane and just check tracks.
+            return self._test_tracks(element)
         finally:
             element.set_state(gst.STATE_NULL)
 
-    def _find_track(self, element, flags):
-        # Return first track that matches flags. 
+    def _test_tracks(self, element):
+        # Only allow elements that have a least one output track.
+        flags = gst.interfaces.MIXER_TRACK_OUTPUT
+
         for track in element.list_tracks():
             if track.flags & flags:
-                return track
-        return None
+                return True
+        return False
 
     def list_tracks(self):
         return self._mixer.list_tracks()
@@ -452,7 +444,7 @@ class GStreamer(ThreadingActor):
          100 == max volume for given system.
         None == no mixer present, i.e. volume unknown.
 
-        :rtype: int in range [0..100]
+        :rtype: int in range [0..100] or :class:`None`
         """
         if self._mixer is None:
             return None
