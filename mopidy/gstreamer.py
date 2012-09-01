@@ -52,6 +52,8 @@ class GStreamer(ThreadingActor):
         description = ' ! '.join([
             'uridecodebin name=uri',
             'audioconvert name=convert',
+            'audioresample name=resample',
+            'queue name=queue',
             'volume name=volume'])
 
         logger.debug(u'Setting up base GStreamer pipeline: %s', description)
