@@ -22,6 +22,10 @@ v0.8 (in development)
   required and optional dependencies, their current versions, and some other
   information useful for debugging. (Fixes: :issue:`74`)
 
+- When unknown settings are encountered, we now check if it's similar to a
+  known setting, and suggests to the user what we think the setting should have
+  been.
+
 
 v0.7.3 (2012-08-11)
 ===================
