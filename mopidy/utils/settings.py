@@ -136,29 +136,31 @@ def validate_settings(defaults, settings):
             else:
                 errors[setting] = u'Deprecated setting. Use %s.' % (
                     changed[setting],)
-            continue
 
-        if setting == 'BACKENDS':
+        elif setting == 'BACKENDS':
             if 'mopidy.backends.despotify.DespotifyBackend' in value:
                 errors[setting] = (
                     u'Deprecated setting value. '
                     u'"mopidy.backends.despotify.DespotifyBackend" is no '
                     u'longer available.')
-                continue
 
-        if setting == 'OUTPUTS':
+        elif setting == 'OUTPUTS':
             errors[setting] = (
                 u'Deprecated setting, please change to OUTPUT. OUTPUT expectes '
                 u'a GStreamer bin describing your desired output.')
-            continue
 
-        if setting == 'SPOTIFY_BITRATE':
+        elif setting == 'SPOTIFY_BITRATE':
             if value not in (96, 160, 320):
                 errors[setting] = (
                     u'Unavailable Spotify bitrate. Available bitrates are 96, '
                     u'160, and 320.')
 
-        if setting not in defaults:
+        elif setting.startswith('SHOUTCAST_OUTPUT_'):
+            errors[setting] = (
+                u'Deprecated setting, please set the value via the GStreamer '
+                u'bin in OUTPUT.')
+
+        elif setting not in defaults:
             errors[setting] = u'Unknown setting. Is it misspelled?'
             continue
 
