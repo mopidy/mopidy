@@ -42,10 +42,10 @@ class StatusHandlerTest(unittest.TestCase):
         self.assert_('playtime' in result)
         self.assert_(int(result['playtime']) >= 0)
 
-    def test_status_method_contains_volume_which_defaults_to_0(self):
+    def test_status_method_contains_volume_with_na_value(self):
         result = dict(status.status(self.context))
         self.assert_('volume' in result)
-        self.assertEqual(int(result['volume']), 0)
+        self.assertEqual(int(result['volume']), -1)
 
     def test_status_method_contains_volume(self):
         self.mixer.volume = 17

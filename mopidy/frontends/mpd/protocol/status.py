@@ -137,7 +137,7 @@ def status(context):
 
         Reports the current status of the player and the volume level.
 
-        - ``volume``: 0-100
+        - ``volume``: 0-100 or -1
         - ``repeat``: 0 or 1
         - ``single``: 0 or 1
         - ``consume``: 0 or 1
@@ -267,7 +267,7 @@ def _status_volume(futures):
     if volume is not None:
         return volume
     else:
-        return 0
+        return -1
 
 def _status_xfade(futures):
     return 0 # Not supported
