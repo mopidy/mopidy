@@ -23,7 +23,7 @@ class ValidateSettingsTest(unittest.TestCase):
         result = validate_settings(self.defaults,
             {'MPD_SERVER_HOSTNMAE': '127.0.0.1'})
         self.assertEqual(result['MPD_SERVER_HOSTNMAE'],
-            u'Unknown setting. Is it misspelled?')
+            u'Unknown setting. Did you mean MPD_SERVER_HOSTNAME?')
 
     def test_not_renamed_setting_returns_error(self):
         result = validate_settings(self.defaults,

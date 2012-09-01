@@ -199,6 +199,9 @@ def mask_value_if_secret(key, value):
 
 def did_you_mean(setting, defaults):
     """Suggest most likely setting based on levenshtein."""
+    if not defaults:
+        return None
+
     candidates = [(levenshtein(setting, d), d) for d in defaults]
     candidates.sort()
 
