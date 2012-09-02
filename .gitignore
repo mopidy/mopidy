@@ -4,6 +4,7 @@
 .idea
 .noseids
 .tox
+.*
 MANIFEST
 build/
 cover/
