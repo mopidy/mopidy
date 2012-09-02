@@ -7,6 +7,8 @@ from mopidy.backends.base import BaseLibraryProvider
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 
+TIME_OUT = 10
+
 logger = logging.getLogger('mopidy.backends.spotify.library')
 
 class SpotifyLibraryProvider(BaseLibraryProvider):
@@ -24,8 +26,12 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
                 # the track will be unloaded, unless it's already in the stored
                 # playlists.
                 browser = self.backend.spotify.session.browse_album(spotify_album)
+                #wait 5 seconds
+                start = time.time()
                 while not browser.is_loaded():
                     time.sleep(0.1)
+                    if time.time() > (start + TIME_OUT):
+                        break
                 album = SpotifyTranslator.to_mopidy_album(spotify_album)
                 logger.info(browser)
                 #for track in browser:
@@ -51,8 +57,12 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
                 # the track will be unloaded, unless it's already in the stored
                 # playlists.
                 browser = self.backend.spotify.session.browse_artist(spotify_artist)
+                #wait 5 seconds
+                start = time.time()
                 while not browser.is_loaded():
                     time.sleep(0.1)
+                    if time.time() > (start + TIME_OUT):
+                        break
                 artist = SpotifyTranslator.to_mopidy_artist(spotify_artist)
                 logger.info(browser)
                 #for track in browser:
@@ -117,6 +127,6 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
         queue = Queue.Queue()
         self.backend.spotify.search(spotify_query, queue)
         try:
-            return queue.get(timeout=3) # XXX What is an reasonable timeout?
+            return queue.get(timeout=TIME_OUT) # XXX What is an reasonable timeout?
         except Queue.Empty:
-            return Playlist(tracks=[])
+            return Playlist(tracks=[], uri="spotify:search:" + spotify_query)

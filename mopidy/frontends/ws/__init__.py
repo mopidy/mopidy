@@ -21,6 +21,7 @@ from mopidy.backends.base import Backend
 from mopidy.mixers.base import BaseMixer
 from mopidy.listeners import BackendListener
 from mopidy.backends.base import PlaybackController
+from mopidy.models import Playlist
 
 #get directory with static web content
 webdir = os.path.join(os.path.dirname(__file__), 'web')
@@ -29,7 +30,7 @@ logger = logging.getLogger('mopidy.frontends.ws')
 #server object
 srv = None
 
-mutevolume = 0 
+mutevolume = -1
 
 def flattentracks(tracks):
     flattracks = []
@@ -88,9 +89,7 @@ class WsNamespace(BaseNamespace):
     Namespace for Gevent webserver 
 
     """
-    
-    
-    
+
     #events from the client(s)
     def on_play(self, message=None):
         logger.info(' play')
@@ -99,7 +98,7 @@ class WsNamespace(BaseNamespace):
             return self.request.backend.playback.play().get()
         else:
             return self.request.backend.playback.pause().get()
-    
+            
     def on_playtrack(self, trackuri):
         logger.info('play ' + trackuri)
         
@@ -121,7 +120,26 @@ class WsNamespace(BaseNamespace):
         #except LookupError:
         #    pass
         #raise WsNoExistError(u'No such song', command=u'playid')
-            
+           
+    def on_loadtracklist(self, trackuris):
+        trackslist = []
+        for uri in trackuris:
+            track = self.request.backend.library.lookup(uri=uri).get()
+            trackslist.append(track)
+        
+        playlist = Playlist(tracks=trackslist)
+        self.request.backend.current_playlist.clear()
+        res = self.request.backend.current_playlist.append(playlist.tracks).get()
+        logger.info(res)
+        
+    def on_playplaylist(self, playuri):
+        #TODO 
+        logger.info(playuri)
+        playlist = self.request.backend.stored_playlists.get(uri=playuri).get()
+        self.request.backend.current_playlist.clear()
+        res = self.request.backend.current_playlist.append(playlist.tracks).get()
+        logger.info(res)
+         
     def on_next(self, message=None):
         logger.info(' next')
         self.emit('status_change', 'next')
@@ -155,18 +173,17 @@ class WsNamespace(BaseNamespace):
             volume = 100
         self.request.mixer.volume = volume
     
-    def on_muteunmute(self):
+    def on_mute(self, state):
         #TODO Broadcast
         global mutevolume
-        if mutevolume > 0:
+        if state:
+            logger.info('mute')
+            mutevolume = int(self.request.mixer.volume.get())
+            self.request.mixer.volume = 0
+        elif mutevolume > 0:
             logger.info('unmute')
             self.request.mixer.volume = mutevolume
-            mutevolume = 0
-        else:
-            logger.info('mute')
-            mutevolume = self.request.mixer.volume.get()
-            mutevolume = int(mutevolume)
-            self.request.mixer.volume = 0
+            mutevolume = -1
             
     def on_seek(self, message=None):
         pos = int(message)
@@ -231,14 +248,7 @@ class WsNamespace(BaseNamespace):
         playlist = flattentracks(self.request.backend.current_playlist.tracks.get())
         
         self.emit('currentplaylist', playlist)
-   
-    def on_playplaylist(self, playuri):
-#TODO 
-        logger.info(playuri)
-        playlist = self.request.backend.stored_playlists.get(uri=playuri).get()
-        self.request.backend.current_playlist.clear()
-        res = self.request.backend.current_playlist.append(playlist.tracks).get()
-        logger.info(res)
+
    
 class WsSession(object):
     """
