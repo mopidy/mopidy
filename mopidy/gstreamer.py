@@ -1,6 +1,5 @@
 import pygst
 pygst.require('0.10')
-import gobject
 import gst
 
 import logging
@@ -10,149 +9,9 @@ from pykka.registry import ActorRegistry
 
 from mopidy import settings, utils
 from mopidy.backends.base import Backend
+from mopidy import mixers # Trigger install of gst mixer plugins.
 
 logger = logging.getLogger('mopidy.gstreamer')
-
-
-# TODO: we might want to add some ranking to the mixers we know about?
-# TODO: move to mixers module and do from mopidy.mixers import * to install
-# elements.
-class AutoAudioMixer(gst.Bin):
-    __gstdetails__ = ('AutoAudioMixer',
-                      'Mixer',
-                      'Element automatically selects a mixer.',
-                      'Thomas Adamcik')
-
-    def __init__(self):
-        gst.Bin.__init__(self)
-        mixer = self._find_mixer()
-        if mixer:
-            self.add(mixer)
-            logger.debug('AutoAudioMixer chose: %s', mixer.get_name())
-        else:
-            logger.debug('AutoAudioMixer did not find any usable mixers')
-
-    def _find_mixer(self):
-        registry = gst.registry_get_default()
-
-        factories = registry.get_feature_list(gst.TYPE_ELEMENT_FACTORY)
-        factories.sort(key=lambda f: (-f.get_rank(), f.get_name()))
-
-        for factory in factories:
-            # Avoid sink/srcs that implment mixing.
-            if factory.get_klass() != 'Generic/Audio':
-                continue
-            # Avoid anything that doesn't implment mixing.
-            elif not factory.has_interface('GstMixer'):
-                continue
-
-            if self._test_mixer(factory):
-                return factory.create()
-
-        return None
-
-    def _test_mixer(self, factory):
-        element = factory.create()
-        if not element:
-            return False
-
-        try:
-            result = element.set_state(gst.STATE_READY)
-            if result != gst.STATE_CHANGE_SUCCESS:
-                return False
-
-            # Trust that the default device is sane and just check tracks.
-            return self._test_tracks(element)
-        finally:
-            element.set_state(gst.STATE_NULL)
-
-    def _test_tracks(self, element):
-        # Only allow elements that have a least one output track.
-        flags = gst.interfaces.MIXER_TRACK_OUTPUT
-
-        for track in element.list_tracks():
-            if track.flags & flags:
-                return True
-        return False
-
-
-gobject.type_register(AutoAudioMixer)
-gst.element_register (AutoAudioMixer, 'autoaudiomixer', gst.RANK_MARGINAL)
-
-
-def create_fake_track(label, intial_volume, min_volume, max_volume,
-                      num_channels, flags):
-    class Track(gst.interfaces.MixerTrack):
-        def __init__(self):
-            super(Track, self).__init__()
-            self.volumes = (intial_volume,) * self.num_channels
-
-        @gobject.property
-        def label(self):
-            return label
-
-        @gobject.property
-        def min_volume(self):
-            return min_volume
-
-        @gobject.property
-        def max_volume(self):
-            return max_volume
-
-        @gobject.property
-        def num_channels(self):
-            return num_channels
-
-        @gobject.property
-        def flags(self):
-            return flags
-
-    return Track()
-
-
-class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
-    __gstdetails__ = ('FakeMixer',
-                      'Mixer',
-                      'Fake mixer for use in tests.',
-                      'Thomas Adamcik')
-
-    track_label = gobject.property(type=str, default='Master')
-
-    track_initial_volume = gobject.property(type=int, default=0)
-
-    track_min_volume = gobject.property(type=int, default=0)
-
-    track_max_volume = gobject.property(type=int, default=100)
-
-    track_num_channels = gobject.property(type=int, default=2)
-
-    track_flags = gobject.property(type=int,
-        default=(gst.interfaces.MIXER_TRACK_MASTER |
-                 gst.interfaces.MIXER_TRACK_OUTPUT))
-
-    def __init__(self):
-        gst.Element.__init__(self)
-
-    def list_tracks(self):
-        track = create_fake_track(self.track_label,
-                                  self.track_initial_volume,
-                                  self.track_min_volume,
-                                  self.track_max_volume,
-                                  self.track_num_channels,
-                                  self.track_flags)
-        return [track]
-
-    def get_volume(self, track):
-        return track.volumes
-
-    def set_volume(self, track, volumes):
-        track.volumes = volumes
-
-    def set_record(self, track, record):
-        pass
-
-gobject.type_register(FakeMixer)
-gst.element_register (FakeMixer, 'fakemixer', gst.RANK_MARGINAL)
 
 
 class GStreamer(ThreadingActor):
