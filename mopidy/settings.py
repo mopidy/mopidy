@@ -26,14 +26,6 @@ BACKENDS = (
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
-#: Which GStreamer bin description to use in
-#: :class:`mopidy.outputs.custom.CustomOutput`.
-#:
-#: Default::
-#:
-#:     CUSTOM_OUTPUT = u'fakesink'
-CUSTOM_OUTPUT = u'fakesink'
-
 #: The log format used for debug logging.
 #:
 #: See http://docs.python.org/library/logging.html#formatter-objects for
@@ -185,71 +177,12 @@ MPD_SERVER_PASSWORD = None
 #: Default: 20
 MPD_SERVER_MAX_CONNECTIONS = 20
 
-#: List of outputs to use. See :mod:`mopidy.outputs` for all available
-#: backends
+#: Output to use. See :mod:`mopidy.outputs` for all available backends
 #:
 #: Default::
 #:
-#:     OUTPUTS = (
-#:         u'mopidy.outputs.local.LocalOutput',
-#:     )
-OUTPUTS = (
-    u'mopidy.outputs.local.LocalOutput',
-)
-
-#: Hostname of the SHOUTcast server which Mopidy should stream audio to.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
-SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
-
-#: Port of the SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_PORT = 8000
-SHOUTCAST_OUTPUT_PORT = 8000
-
-#: User to authenticate as against SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_USERNAME = u'source'
-SHOUTCAST_OUTPUT_USERNAME = u'source'
-
-#: Password to authenticate with against SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
-SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
-
-#: Mountpoint to use for the stream on the SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_MOUNT = u'/stream'
-SHOUTCAST_OUTPUT_MOUNT = u'/stream'
-
-#: Encoder to use to process audio data before streaming to SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:     SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
-SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
+#:     OUTPUT = u'autoaudiosink'
+OUTPUT = u'autoaudiosink'
 
 #: Path to the Spotify cache.
 #:

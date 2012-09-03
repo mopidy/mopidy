@@ -1,5 +1,6 @@
 import pygst
 pygst.require('0.10')
+import gobject
 import gst
 
 import logging
@@ -8,10 +9,13 @@ from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
 from mopidy import settings
-from mopidy.utils import get_class
 from mopidy.backends.base import Backend
 
 logger = logging.getLogger('mopidy.gstreamer')
+
+
+class GStreamerError(Exception):
+    pass
 
 
 class GStreamer(ThreadingActor):
@@ -20,7 +24,7 @@ class GStreamer(ThreadingActor):
 
     **Settings:**
 
-    - :attr:`mopidy.settings.OUTPUTS`
+    - :attr:`mopidy.settings.OUTPUT`
 
     """
 
@@ -36,28 +40,25 @@ class GStreamer(ThreadingActor):
             rate=(int)44100""")
         self._pipeline = None
         self._source = None
-        self._tee = None
         self._uridecodebin = None
         self._volume = None
-        self._outputs = []
-        self._handlers = {}
+        self._output = None
 
-    def on_start(self):
         self._setup_pipeline()
-        self._setup_outputs()
+        self._setup_output()
         self._setup_message_processor()
 
     def _setup_pipeline(self):
         description = ' ! '.join([
             'uridecodebin name=uri',
             'audioconvert name=convert',
-            'volume name=volume',
-            'tee name=tee'])
+            'audioresample name=resample',
+            'queue name=queue',
+            'volume name=volume'])
 
         logger.debug(u'Setting up base GStreamer pipeline: %s', description)
 
         self._pipeline = gst.parse_launch(description)
-        self._tee = self._pipeline.get_by_name('tee')
         self._volume = self._pipeline.get_by_name('volume')
         self._uridecodebin = self._pipeline.get_by_name('uri')
 
@@ -65,9 +66,16 @@ class GStreamer(ThreadingActor):
         self._uridecodebin.connect('pad-added', self._on_new_pad,
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
-    def _setup_outputs(self):
-        for output in settings.OUTPUTS:
-            get_class(output)(self).connect()
+    def _setup_output(self):
+        try:
+            self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
+        except gobject.GError as e:
+            raise GStreamerError('%r while creating %r' % (e.message,
+                                                           settings.OUTPUT))
+
+        self._pipeline.add(self._output)
+        gst.element_link_many(self._volume, self._output)
+        logger.debug('Output set to %s', settings.OUTPUT)
 
     def _setup_message_processor(self):
         bus = self._pipeline.get_bus()
@@ -88,10 +96,6 @@ class GStreamer(ThreadingActor):
             pad.link(target_pad)
 
     def _on_message(self, bus, message):
-        if message.src in self._handlers:
-            if self._handlers[message.src](message):
-                return # Message was handeled by output
-
         if message.type == gst.MESSAGE_EOS:
             logger.debug(u'GStreamer signalled end-of-stream. '
                 'Telling backend ...')
@@ -293,104 +297,3 @@ class GStreamer(ThreadingActor):
 
         event = gst.event_new_tag(taglist)
         self._pipeline.send_event(event)
-
-    def connect_output(self, output):
-        """
-        Connect output to pipeline.
-
-        :param output: output to connect to the pipeline
-        :type output: :class:`gst.Bin`
-        """
-        self._pipeline.add(output)
-        output.sync_state_with_parent() # Required to add to running pipe
-        gst.element_link_many(self._tee, output)
-        self._outputs.append(output)
-        logger.debug('GStreamer added %s', output.get_name())
-
-    def list_outputs(self):
-        """
-        Get list with the name of all active outputs.
-
-        :rtype: list of strings
-        """
-        return [output.get_name() for output in self._outputs]
-
-    def remove_output(self, output):
-        """
-        Remove output from our pipeline.
-
-        :param output: output to remove from the pipeline
-        :type output: :class:`gst.Bin`
-        """
-        if output not in self._outputs:
-            raise LookupError('Ouput %s not present in pipeline'
-                % output.get_name)
-        teesrc = output.get_pad('sink').get_peer()
-        handler = teesrc.add_event_probe(self._handle_event_probe)
-
-        struct = gst.Structure('mopidy-unlink-tee')
-        struct.set_value('handler', handler)
-
-        event = gst.event_new_custom(gst.EVENT_CUSTOM_DOWNSTREAM, struct)
-        self._tee.send_event(event)
-
-    def _handle_event_probe(self, teesrc, event):
-        if (event.type == gst.EVENT_CUSTOM_DOWNSTREAM
-                and event.has_name('mopidy-unlink-tee')):
-            data = self._get_structure_data(event.get_structure())
-
-            output = teesrc.get_peer().get_parent()
-
-            teesrc.unlink(teesrc.get_peer())
-            teesrc.remove_event_probe(data['handler'])
-
-            output.set_state(gst.STATE_NULL)
-            self._pipeline.remove(output)
-
-            logger.warning('Removed %s', output.get_name())
-            return False
-        return True
-
-    def _get_structure_data(self, struct):
-        # Ugly hack to get around missing get_value in pygst bindings :/
-        data = {}
-        def get_data(key, value):
-            data[key] = value
-        struct.foreach(get_data)
-        return data
-
-    def connect_message_handler(self, element, handler):
-        """
-        Attach custom message handler for given element.
-
-        Hook to allow outputs (or other code) to register custom message
-        handlers for all messages coming from the element in question.
-
-        In the case of outputs, :meth:`mopidy.outputs.BaseOutput.on_connect`
-        should be used to attach such handlers and care should be taken to
-        remove them in :meth:`mopidy.outputs.BaseOutput.on_remove` using
-        :meth:`remove_message_handler`.
-
-        The handler callback will only be given the message in question, and
-        is free to ignore the message. However, if the handler wants to prevent
-        the default handling of the message it should return :class:`True`
-        indicating that the message has been handled.
-
-        Note that there can only be one handler per element.
-
-        :param element: element to watch messages from
-        :type element: :class:`gst.Element`
-        :param handler: callable that takes :class:`gst.Message` and returns
-            :class:`True` if the message has been handeled
-        :type handler: callable
-        """
-        self._handlers[element] = handler
-
-    def remove_message_handler(self, element):
-        """
-        Remove custom message handler.
-
-        :param element: element to remove message handling from.
-        :type element: :class:`gst.Element`
-        """
-        self._handlers.pop(element, None)

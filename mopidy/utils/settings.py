@@ -113,6 +113,7 @@ def validate_settings(defaults, settings):
     errors = {}
 
     changed = {
+        'CUSTOM_OUTPUT': 'OUTPUT',
         'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
         'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
         'FRONTEND': 'FRONTENDS',
@@ -121,7 +122,6 @@ def validate_settings(defaults, settings):
         'LOCAL_OUTPUT_OVERRIDE': 'CUSTOM_OUTPUT',
         'LOCAL_PLAYLIST_FOLDER': 'LOCAL_PLAYLIST_PATH',
         'LOCAL_TAG_CACHE': 'LOCAL_TAG_CACHE_FILE',
-        'OUTPUT': None,
         'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
         'SERVER_PORT': 'MPD_SERVER_PORT',
@@ -137,28 +137,36 @@ def validate_settings(defaults, settings):
             else:
                 errors[setting] = u'Deprecated setting. Use %s.' % (
                     changed[setting],)
-            continue
 
-        if setting == 'BACKENDS':
+        elif setting == 'BACKENDS':
             if 'mopidy.backends.despotify.DespotifyBackend' in value:
-                errors[setting] = (u'Deprecated setting value. ' +
-                    '"mopidy.backends.despotify.DespotifyBackend" is no ' +
-                    'longer available.')
-                continue
+                errors[setting] = (
+                    u'Deprecated setting value. '
+                    u'"mopidy.backends.despotify.DespotifyBackend" is no '
+                    u'longer available.')
 
-        if setting == 'SPOTIFY_BITRATE':
+        elif setting == 'OUTPUTS':
+            errors[setting] = (
+                u'Deprecated setting, please change to OUTPUT. OUTPUT expectes '
+                u'a GStreamer bin describing your desired output.')
+
+        elif setting == 'SPOTIFY_BITRATE':
             if value not in (96, 160, 320):
-                errors[setting] = (u'Unavailable Spotify bitrate. ' +
-                    u'Available bitrates are 96, 160, and 320.')
+                errors[setting] = (
+                    u'Unavailable Spotify bitrate. Available bitrates are 96, '
+                    u'160, and 320.')
 
-        if setting not in defaults:
+        elif setting.startswith('SHOUTCAST_OUTPUT_'):
+            errors[setting] = (
+                u'Deprecated setting, please set the value via the GStreamer '
+                u'bin in OUTPUT.')
+
+        elif setting not in defaults:
             errors[setting] = u'Unknown setting.'
             suggestion = did_you_mean(setting, defaults)
 
             if suggestion:
                 errors[setting] += u' Did you mean %s?' % suggestion
-
-            continue
 
     return errors
 

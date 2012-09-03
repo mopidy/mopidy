@@ -14,7 +14,6 @@ class GStreamerTest(unittest.TestCase):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
         self.gstreamer = GStreamer()
-        self.gstreamer.on_start()
 
     def prepare_uri(self, uri):
         self.gstreamer.prepare_change()
@@ -71,3 +70,8 @@ class GStreamerTest(unittest.TestCase):
     @unittest.SkipTest
     def test_set_position(self):
         pass # TODO
+
+    @unittest.SkipTest
+    def test_invalid_output_raises_error(self):
+        pass # TODO
+

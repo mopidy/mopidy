@@ -20,7 +20,7 @@ sys.argv[1:] = gstreamer_args
 
 from mopidy import (get_version, settings, OptionalDependencyError,
     SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
-from mopidy.gstreamer import GStreamer
+from mopidy.gstreamer import GStreamer, GStreamerError
 from mopidy.utils import get_class
 from mopidy.utils.deps import list_deps_optparse_callback
 from mopidy.utils.log import setup_logging
@@ -46,6 +46,8 @@ def main():
         loop.run()
     except SettingsError as e:
         logger.error(e.message)
+    except GStreamerError as e:
+        logger.error(e)
     except KeyboardInterrupt:
         logger.info(u'Interrupted. Exiting...')
     except Exception as e:
