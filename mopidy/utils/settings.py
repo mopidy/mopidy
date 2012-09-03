@@ -102,7 +102,7 @@ def validate_settings(defaults, settings):
     Checks the settings for both errors like misspellings and against a set of
     rules for renamed settings, etc.
 
-    Returns of setting names with associated errors.
+    Returns mapping from setting names to associated errors.
 
     :param defaults: Mopidy's default settings
     :type defaults: dict
