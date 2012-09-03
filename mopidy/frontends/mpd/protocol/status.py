@@ -168,7 +168,7 @@ def status(context):
     futures = {
         'current_playlist.length': context.backend.current_playlist.length,
         'current_playlist.version': context.backend.current_playlist.version,
-        'mixer.volume': context.mixer.volume,
+        'playback.volume': context.backend.playback.volume,
         'playback.consume': context.backend.playback.consume,
         'playback.random': context.backend.playback.random,
         'playback.repeat': context.backend.playback.repeat,
@@ -263,7 +263,7 @@ def _status_time_total(futures):
         return current_cp_track.track.length
 
 def _status_volume(futures):
-    volume = futures['mixer.volume'].get()
+    volume = futures['playback.volume'].get()
     if volume is not None:
         return volume
     else:

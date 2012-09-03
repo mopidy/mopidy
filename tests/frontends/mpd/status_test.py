@@ -1,7 +1,6 @@
 from mopidy.backends import dummy as backend
 from mopidy.frontends.mpd import dispatcher
 from mopidy.frontends.mpd.protocol import status
-from mopidy.mixers import dummy as mixer
 from mopidy.models import Track
 
 from tests import unittest
@@ -17,13 +16,11 @@ STOPPED = backend.PlaybackController.STOPPED
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
         self.backend = backend.DummyBackend.start().proxy()
-        self.mixer = mixer.DummyMixer.start().proxy()
         self.dispatcher = dispatcher.MpdDispatcher()
         self.context = self.dispatcher.context
 
     def tearDown(self):
         self.backend.stop().get()
-        self.mixer.stop().get()
 
     def test_stats_method(self):
         result = status.stats(self.context)
@@ -48,7 +45,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['volume']), -1)
 
     def test_status_method_contains_volume(self):
-        self.mixer.volume = 17
+        self.backend.playback.volume = 17
         result = dict(status.status(self.context))
         self.assert_('volume' in result)
         self.assertEqual(int(result['volume']), 17)

@@ -3,7 +3,6 @@ import mock
 from mopidy import settings
 from mopidy.backends import dummy as backend
 from mopidy.frontends import mpd
-from mopidy.mixers import dummy as mixer
 
 from tests import unittest
 
@@ -23,7 +22,6 @@ class MockConnection(mock.Mock):
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         self.backend = backend.DummyBackend.start().proxy()
-        self.mixer = mixer.DummyMixer.start().proxy()
 
         self.connection = MockConnection()
         self.session = mpd.MpdSession(self.connection)
@@ -32,7 +30,6 @@ class BaseTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.backend.stop().get()
-        self.mixer.stop().get()
         settings.runtime.clear()
 
     def sendRequest(self, request):
