@@ -196,7 +196,7 @@ def _list_build_query(field, mpd_query):
         if error.message == 'No closing quotation':
             raise MpdArgError(u'Invalid unquoted character', command=u'list')
         else:
-            raise error
+            raise
     tokens = [t.decode('utf-8') for t in tokens]
     if len(tokens) == 1:
         if field == u'album':
