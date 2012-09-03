@@ -40,7 +40,6 @@ def main():
         check_old_folders()
         setup_settings(options.interactive)
         setup_gstreamer()
-        setup_mixer()
         setup_backend()
         setup_frontends()
         loop.run()
@@ -54,7 +53,6 @@ def main():
         loop.quit()
         stop_frontends()
         stop_backend()
-        stop_mixer()
         stop_gstreamer()
         stop_remaining_actors()
 
@@ -108,14 +106,6 @@ def setup_gstreamer():
 
 def stop_gstreamer():
     stop_actors_by_class(GStreamer)
-
-def setup_mixer():
-    # TODO: remove this hack which is just a stepping stone for our
-    # refactoring.
-    get_class('mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer').start()
-
-def stop_mixer():
-    stop_actors_by_class(get_class('mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'))
 
 def setup_backend():
     get_class(settings.BACKENDS[0]).start()
