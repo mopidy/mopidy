@@ -64,11 +64,8 @@ class GStreamer(ThreadingActor):
             self._pipeline.get_by_name('convert').get_pad('sink'))
 
     def _setup_output(self):
-        try:
-            self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
-        except gobject.GError as e:
-            raise GStreamerError('%r while creating %r' % (e.message,
-                                                           settings.OUTPUT))
+        # This will raise a gobject.GError if the description is bad.
+        self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
 
         self._pipeline.add(self._output)
         gst.element_link_many(self._volume, self._output)
