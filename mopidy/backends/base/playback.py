@@ -319,6 +319,14 @@ class PlaybackController(object):
     def _current_wall_time(self):
         return int(time.time() * 1000)
 
+    @property
+    def volume(self):
+        return self.provider.get_volume()
+
+    @volume.setter
+    def volume(self, volume):
+        self.provider.set_volume(volume)
+
     def change_track(self, cp_track, on_error_step=1):
         """
         Change to the given track, keeping the current playback state.
@@ -602,5 +610,29 @@ class BasePlaybackProvider(object):
         *MUST be implemented by subclass.*
 
         :rtype: :class:`True` if successful, else :class:`False`
+        """
+        raise NotImplementedError
+
+    # TODO: having these in the provider is stupid, but since we currently
+    # don't have gstreamer exposed in a sensible way for this...
+    # On the bright side it makes testing volume stuff less painful.
+    def get_volume(self):
+        """
+        Get current volume
+
+        *MUST be implemented by subclass.*
+
+        :rtype: int [0..100] or :class:`None`
+        """
+        raise NotImplementedError
+
+    def set_volume(self, volume):
+        """
+        Get current volume
+
+        *MUST be implemented by subclass.*
+
+        :param: volume
+        :type volume: int [0..100]
         """
         raise NotImplementedError

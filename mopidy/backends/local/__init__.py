@@ -102,6 +102,12 @@ class LocalPlaybackProvider(BasePlaybackProvider):
     def stop(self):
         return self.backend.gstreamer.stop_playback().get()
 
+    def get_volume(self):
+        return self.backend.gstreamer.get_volume().get()
+
+    def set_volume(self, volume):
+        self.backend.gstreamer.set_volume(volume).get()
+
 
 class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
     def __init__(self, *args, **kwargs):

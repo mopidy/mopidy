@@ -41,3 +41,9 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
         result = self.backend.gstreamer.stop_playback()
         self.backend.spotify.session.play(0)
         return result
+
+    def get_volume(self):
+        return self.backend.gstreamer.get_volume()
+
+    def set_volume(self, volume):
+        self.backend.gstreamer.set_volume(volume)
