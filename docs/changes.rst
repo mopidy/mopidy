@@ -26,11 +26,11 @@ v0.8 (in development)
   known setting, and suggests to the user what we think the setting should have
   been.
 
-- Removed most traces of multiple outputs support. Having this feature
-  currently seems to be more trouble than what it is worth.
-  :attr:`mopidy.settings.OUTPUTS` setting is no longer supported, and has been
-  replaced with :attr:`mopidy.settings.OUTPUT` which is a GStreamer
-  bin described in the same format as ``gst-launch`` expects. Default value is
+- Removed multiple outputs support. Having this feature currently seems to be
+  more trouble than what it is worth. The :attr:`mopidy.settings.OUTPUTS`
+  setting is no longer supported, and has been replaced with
+  :attr:`mopidy.settings.OUTPUT` which is a GStreamer bin description string in
+  the same format as ``gst-launch`` expects. Default value is
   ``autoaudiosink``.
 
 
