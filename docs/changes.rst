@@ -31,7 +31,8 @@ v0.8 (in development)
   setting is no longer supported, and has been replaced with
   :attr:`mopidy.settings.OUTPUT` which is a GStreamer bin description string in
   the same format as ``gst-launch`` expects. Default value is
-  ``autoaudiosink``. (Fixes: :issue:`81`, :issue:`115`, :issue:`159`)
+  ``autoaudiosink``. (Fixes: :issue:`81`, :issue:`115`, :issue:`121`,
+  :issue:`159`)
 
 
 v0.7.3 (2012-08-11)
