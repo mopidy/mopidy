@@ -142,6 +142,7 @@ class GStreamer(ThreadingActor):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
+        logger.info('end of str gstreamer')
         self._source.emit('end-of-stream')
 
     def get_position(self):

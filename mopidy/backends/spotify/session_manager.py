@@ -30,7 +30,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     user_agent = 'Mopidy %s' % get_version()
 
     def __init__(self, username, password):
-        PyspotifySessionManager.__init__(self, username, password)
+        PyspotifySessionManager.__init__(self, username=username, password=password)
         BaseThread.__init__(self)
         self.name = 'SpotifyThread'
 
@@ -48,7 +48,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def run_inside_try(self):
         self.setup()
         self.connect()
-
+        
     def setup(self):
         gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
         assert len(gstreamer_refs) == 1, \
