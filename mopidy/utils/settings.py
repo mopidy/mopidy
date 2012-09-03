@@ -148,7 +148,7 @@ def validate_settings(defaults, settings):
         elif setting == 'OUTPUTS':
             errors[setting] = (
                 u'Deprecated setting, please change to OUTPUT. OUTPUT expectes '
-                u'a GStreamer bin describing your desired output.')
+                u'a GStreamer bin description string for your desired output.')
 
         elif setting == 'SPOTIFY_BITRATE':
             if value not in (96, 160, 320):
