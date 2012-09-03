@@ -151,7 +151,6 @@ class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
     def set_record(self, track, record):
         pass
 
-
 gobject.type_register(FakeMixer)
 gst.element_register (FakeMixer, 'fakemixer', gst.RANK_MARGINAL)
 

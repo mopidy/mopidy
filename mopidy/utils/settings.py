@@ -12,6 +12,7 @@ from mopidy.utils.log import indent
 
 logger = logging.getLogger('mopidy.utils.settings')
 
+
 class SettingsProxy(object):
     def __init__(self, default_settings_module):
         self.default = self._get_settings_dict_from_module(
@@ -101,7 +102,7 @@ def validate_settings(defaults, settings):
     Checks the settings for both errors like misspellings and against a set of
     rules for renamed settings, etc.
 
-    Returns of setting names with associated errors.
+    Returns mapping from setting names to associated errors.
 
     :param defaults: Mopidy's default settings
     :type defaults: dict
@@ -116,9 +117,9 @@ def validate_settings(defaults, settings):
         'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
         'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
         'FRONTEND': 'FRONTENDS',
-        'GSTREAMER_AUDIO_SINK': 'CUSTOM_OUTPUT',
+        'GSTREAMER_AUDIO_SINK': 'OUTPUT',
         'LOCAL_MUSIC_FOLDER': 'LOCAL_MUSIC_PATH',
-        'LOCAL_OUTPUT_OVERRIDE': 'CUSTOM_OUTPUT',
+        'LOCAL_OUTPUT_OVERRIDE': 'OUTPUT',
         'LOCAL_PLAYLIST_FOLDER': 'LOCAL_PLAYLIST_PATH',
         'LOCAL_TAG_CACHE': 'LOCAL_TAG_CACHE_FILE',
         'MIXER_ALSA_CONTROL': None,
@@ -152,7 +153,7 @@ def validate_settings(defaults, settings):
         elif setting == 'OUTPUTS':
             errors[setting] = (
                 u'Deprecated setting, please change to OUTPUT. OUTPUT expectes '
-                u'a GStreamer bin describing your desired output.')
+                u'a GStreamer bin description string for your desired output.')
 
         elif setting == 'SPOTIFY_BITRATE':
             if value not in (96, 160, 320):
@@ -166,10 +167,14 @@ def validate_settings(defaults, settings):
                 u'bin in OUTPUT.')
 
         elif setting not in defaults:
-            errors[setting] = u'Unknown setting. Is it misspelled?'
-            continue
+            errors[setting] = u'Unknown setting.'
+            suggestion = did_you_mean(setting, defaults)
+
+            if suggestion:
+                errors[setting] += u' Did you mean %s?' % suggestion
 
     return errors
+
 
 def list_settings_optparse_callback(*args):
     """
@@ -181,6 +186,7 @@ def list_settings_optparse_callback(*args):
     from mopidy import settings
     print format_settings_list(settings)
     sys.exit(0)
+
 
 def format_settings_list(settings):
     errors = settings.get_errors()
@@ -196,8 +202,41 @@ def format_settings_list(settings):
             lines.append(u'  Error: %s' % errors[key])
     return '\n'.join(lines)
 
+
 def mask_value_if_secret(key, value):
     if key.endswith('PASSWORD') and value:
         return u'********'
     else:
         return value
+
+
+def did_you_mean(setting, defaults):
+    """Suggest most likely setting based on levenshtein."""
+    if not defaults:
+        return None
+
+    setting = setting.upper()
+    candidates = [(levenshtein(setting, d), d) for d in defaults]
+    candidates.sort()
+
+    if candidates[0][0] <= 3:
+        return candidates[0][1]
+    return None
+
+
+def levenshtein(a, b, max=3):
+    """Calculates the Levenshtein distance between a and b."""
+    n, m = len(a), len(b)
+    if n > m:
+        return levenshtein(b, a)
+
+    current = xrange(n+1)
+    for i in xrange(1, m+1):
+        previous, current = current, [i] + [0] * n
+        for j in xrange(1, n+1):
+            add, delete = previous[j] + 1, current[j-1] + 1
+            change = previous[j-1]
+            if a[j-1] != b[i-1]:
+                change += 1
+            current[j] = min(add, delete, change)
+    return current[n]
