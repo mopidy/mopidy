@@ -209,7 +209,8 @@ class GStreamer(ThreadingActor):
 
     def _setup_output(self, output_description):
         # This will raise a gobject.GError if the description is bad.
-        self._output = gst.parse_bin_from_description(output_description, True)
+        self._output = gst.parse_bin_from_description(
+            output_description, ghost_unconnected_pads=True)
 
         self._pipeline.add(self._output)
         gst.element_link_many(self._pipeline.get_by_name('queue'),
