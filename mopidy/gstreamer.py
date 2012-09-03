@@ -65,7 +65,8 @@ class GStreamer(ThreadingActor):
 
     def _setup_output(self):
         # This will raise a gobject.GError if the description is bad.
-        self._output = gst.parse_bin_from_description(settings.OUTPUT, True)
+        self._output = gst.parse_bin_from_description(settings.OUTPUT,
+            ghost_unconnected_pads=True)
 
         self._pipeline.add(self._output)
         gst.element_link_many(self._volume, self._output)
