@@ -44,8 +44,8 @@ class GStreamer(ThreadingActor):
 
         self._setup_pipeline()
         self._setup_output(output or settings.OUTPUT)
-        self._setup_mixer(mixer or settings.MIXER,
-                          mixer_track or settings.MIXER_TRACK)
+        self._setup_mixer(
+            mixer or settings.MIXER, mixer_track or settings.MIXER_TRACK)
         self._setup_message_processor()
 
     def _setup_pipeline(self):

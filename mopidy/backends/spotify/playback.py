@@ -43,7 +43,7 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
         return result
 
     def get_volume(self):
-        return self.backend.gstreamer.get_volume()
+        return self.backend.gstreamer.get_volume().get()
 
     def set_volume(self, volume):
         self.backend.gstreamer.set_volume(volume)

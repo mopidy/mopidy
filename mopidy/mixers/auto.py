@@ -31,10 +31,10 @@ class AutoAudioMixer(gst.Bin):
         factories.sort(key=lambda f: (-f.get_rank(), f.get_name()))
 
         for factory in factories:
-            # Avoid sink/srcs that implment mixing.
+            # Avoid sink/srcs that implement mixing.
             if factory.get_klass() != 'Generic/Audio':
                 continue
-            # Avoid anything that doesn't implment mixing.
+            # Avoid anything that doesn't implement mixing.
             elif not factory.has_interface('GstMixer'):
                 continue
 
@@ -69,4 +69,4 @@ class AutoAudioMixer(gst.Bin):
 
 
 gobject.type_register(AutoAudioMixer)
-gst.element_register (AutoAudioMixer, 'autoaudiomixer', gst.RANK_MARGINAL)
+gst.element_register(AutoAudioMixer, 'autoaudiomixer', gst.RANK_MARGINAL)
