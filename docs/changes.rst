@@ -34,6 +34,14 @@ v0.8 (in development)
   ``autoaudiosink``. (Fixes: :issue:`81`, :issue:`115`, :issue:`121`,
   :issue:`159`)
 
+- Switch to pure GStreamer based mixing. This implies that users setup a
+  GStreamer bin with a mixer in it in :attr:`mopidy.setting.MIXER`. The default
+  value is ``autoaudiomixer``, a custom mixer that attempts to find a mixer that
+  will work on your system. If this picks the wrong mixer you can of course
+  override it. Setting the mixer to :class:`None` is also support. MPD protocol
+  support for volume has also been updated to return -1 when we have no mixer
+  set.
+
 
 v0.7.3 (2012-08-11)
 ===================

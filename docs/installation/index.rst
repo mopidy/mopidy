@@ -46,9 +46,6 @@ dependencies installed.
 
         sudo apt-get install python-dbus python-indicate
 
-  - Some custom mixers (but not the default one) require additional
-    dependencies. See the docs for each mixer.
-
 
 Install latest stable release
 =============================
