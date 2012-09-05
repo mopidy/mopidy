@@ -613,9 +613,6 @@ class BasePlaybackProvider(object):
         """
         raise NotImplementedError
 
-    # TODO: having these in the provider is stupid, but since we currently
-    # don't have gstreamer exposed in a sensible way for this...
-    # On the bright side it makes testing volume stuff less painful.
     def get_volume(self):
         """
         Get current volume
