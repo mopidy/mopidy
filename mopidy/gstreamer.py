@@ -26,7 +26,7 @@ class GStreamer(ThreadingActor):
 
     """
 
-    def __init__(self, output=None, mixer=None, mixer_track=None):
+    def __init__(self):
         super(GStreamer, self).__init__()
         self._default_caps = gst.Caps("""
             audio/x-raw-int,
@@ -43,9 +43,8 @@ class GStreamer(ThreadingActor):
         self._mixer = None
 
         self._setup_pipeline()
-        self._setup_output(output or settings.OUTPUT)
-        self._setup_mixer(
-            mixer or settings.MIXER, mixer_track or settings.MIXER_TRACK)
+        self._setup_output()
+        self._setup_mixer()
         self._setup_message_processor()
 
     def _setup_pipeline(self):
@@ -66,37 +65,35 @@ class GStreamer(ThreadingActor):
         self._uridecodebin.connect('pad-added', self._on_new_pad,
             self._pipeline.get_by_name('queue').get_pad('sink'))
 
-    def _setup_output(self, output_description):
+    def _setup_output(self):
         # This will raise a gobject.GError if the description is bad.
         self._output = gst.parse_bin_from_description(
-            output_description, ghost_unconnected_pads=True)
+            settings.OUTPUT, ghost_unconnected_pads=True)
 
         self._pipeline.add(self._output)
         gst.element_link_many(self._pipeline.get_by_name('queue'),
                               self._output)
-        logger.info('Output set to %s', output_description)
+        logger.info('Output set to %s', settings.OUTPUT)
 
-    def _setup_mixer(self, mixer_description, track_label):
-        if not mixer_description:
+    def _setup_mixer(self):
+        if not settings.MIXER:
             logger.info('Not setting up mixer.')
             return
 
         # This will raise a gobject.GError if the description is bad.
-        mixerbin = gst.parse_bin_from_description(mixer_description, False)
+        mixerbin = gst.parse_bin_from_description(settings.MIXER, False)
 
         # We assume that the bin will contain a single mixer.
         mixer = mixerbin.get_by_interface('GstMixer')
         if not mixer:
-            logger.warning('Did not find any mixers in %r',
-                           mixer_description)
+            logger.warning('Did not find any mixers in %r', settings.MIXER)
             return
 
         if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
-            logger.warning('Setting mixer %r to READY failed.',
-                           mixer_description)
+            logger.warning('Setting mixer %r to READY failed.', settings.MIXER)
             return
 
-        track = self._select_mixer_track(mixer, track_label)
+        track = self._select_mixer_track(mixer, settings.MIXER_TRACK)
         if not track:
             logger.warning('Could not find usable mixer track.')
             return
