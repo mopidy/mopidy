@@ -12,8 +12,12 @@ from tests import unittest, path_to_data_dir
 class GStreamerTest(unittest.TestCase):
     def setUp(self):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
+        settings.OUTPUT = 'fakesink'
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
         self.gstreamer = GStreamer()
+
+    def tearDown(self):
+        settings.runtime.clear()
 
     def prepare_uri(self, uri):
         self.gstreamer.prepare_change()
