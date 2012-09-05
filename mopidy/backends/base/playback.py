@@ -350,9 +350,6 @@ class PlaybackController(object):
     def on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
-
-        Typically called by :class:`mopidy.process.CoreProcess` after a message
-        from a library thread is received.
         """
         if self.state == self.STOPPED:
             return

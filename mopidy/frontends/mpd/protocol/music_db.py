@@ -193,7 +193,7 @@ def _list_build_query(field, mpd_query):
         # shlex does not seem to be friends with unicode objects
         tokens = shlex.split(mpd_query.encode('utf-8'))
     except ValueError as error:
-        if error.message == 'No closing quotation':
+        if str(error) == 'No closing quotation':
             raise MpdArgError(u'Invalid unquoted character', command=u'list')
         else:
             raise
