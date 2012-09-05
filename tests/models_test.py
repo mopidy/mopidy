@@ -79,6 +79,11 @@ class ArtistTest(unittest.TestCase):
             "Artist(name='name', uri='uri')",
             repr(Artist(uri='uri', name='name')))
 
+    def test_serialize(self):
+        self.assertDictEqual(
+            {'uri': 'uri', 'name': 'name'},
+            Artist(uri='uri', name='name').serialize())
+
     def test_eq_name(self):
         artist1 = Artist(name=u'name')
         artist2 = Artist(name=u'name')
@@ -179,6 +184,17 @@ class AlbumTest(unittest.TestCase):
         self.assertEquals(
             "Album(artists=[Artist(name='foo')], name='name', uri='uri')",
             repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
+
+    def test_serialize_without_artists(self):
+        self.assertDictEqual(
+            {'uri': 'uri', 'name': 'name'},
+            Album(uri='uri', name='name').serialize())
+
+    def test_serialize_with_artists(self):
+        artist = Artist(name='foo')
+        self.assertDictEqual(
+            {'uri': 'uri', 'name': 'name', 'artists': [artist.serialize()]},
+            Album(uri='uri', name='name', artists=[artist]).serialize())
 
     def test_eq_name(self):
         album1 = Album(name=u'name')
@@ -359,6 +375,23 @@ class TrackTest(unittest.TestCase):
         self.assertEquals(
             "Track(artists=[Artist(name='foo')], name='name', uri='uri')",
             repr(Track(uri='uri', name='name', artists=[Artist(name='foo')])))
+
+    def test_serialize_without_artists(self):
+        self.assertDictEqual(
+            {'uri': 'uri', 'name': 'name'},
+            Track(uri='uri', name='name').serialize())
+
+    def test_serialize_with_artists(self):
+        artist = Artist(name='foo')
+        self.assertDictEqual(
+            {'uri': 'uri', 'name': 'name', 'artists': [artist.serialize()]},
+            Track(uri='uri', name='name', artists=[artist]).serialize())
+
+    def test_serialize_with_album(self):
+        album = Album(name='foo')
+        self.assertDictEqual(
+            {'uri': 'uri', 'name': 'name', 'album': album.serialize()},
+            Track(uri='uri', name='name', album=album).serialize())
 
     def test_eq_uri(self):
         track1 = Track(uri=u'uri1')
@@ -602,6 +635,17 @@ class PlaylistTest(unittest.TestCase):
             "Playlist(name='name', tracks=[Track(artists=[], name='foo')], "
             "uri='uri')",
             repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
+
+    def test_serialize_without_tracks(self):
+        self.assertDictEqual(
+            {'uri': 'uri', 'name': 'name'},
+            Playlist(uri='uri', name='name').serialize())
+
+    def test_serialize_with_tracks(self):
+        track = Track(name='foo')
+        self.assertDictEqual(
+            {'uri': 'uri', 'name': 'name', 'tracks': [track.serialize()]},
+            Playlist(uri='uri', name='name', tracks=[track]).serialize())
 
     def test_eq_name(self):
         playlist1 = Playlist(name=u'name')

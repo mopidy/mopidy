@@ -74,6 +74,19 @@ class ImmutableObject(object):
                 % key)
         return self.__class__(**data)
 
+    def serialize(self):
+        data = {}
+        for key in self.__dict__.keys():
+            public_key = key.lstrip('_')
+            value = self.__dict__[key]
+            if isinstance(value, (set, frozenset, list, tuple)):
+                value = [o.serialize() for o in value]
+            elif isinstance(value, ImmutableObject):
+                value = value.serialize()
+            if value:
+                data[public_key] = value
+        return data
+
 
 class Artist(ImmutableObject):
     """
@@ -215,6 +228,8 @@ class Playlist(ImmutableObject):
     def __init__(self, *args, **kwargs):
         self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
         super(Playlist, self).__init__(*args, **kwargs)
+
+    # TODO: def insert(self, pos, track): ... ?
 
     @property
     def length(self):
