@@ -2,6 +2,8 @@
 Mopidy
 ******
 
+.. image:: https://secure.travis-ci.org/mopidy/mopidy.png?branch=develop
+
 Mopidy is a music server which can play music from `Spotify
 <http://www.spotify.com/>`_ or from your local hard drive. To search for music
 in Spotify's vast archive, manage playlists, and play music, you can use most
