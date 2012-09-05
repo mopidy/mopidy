@@ -1,6 +1,5 @@
 import pygst
 pygst.require('0.10')
-import gobject
 import gst
 
 import logging
@@ -8,9 +7,9 @@ import logging
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
+from mopidy import settings, utils
 from mopidy.backends.base import Backend
-
+from mopidy import mixers # Trigger install of gst mixer plugins.
 
 logger = logging.getLogger('mopidy.gstreamer')
 
@@ -22,6 +21,8 @@ class GStreamer(ThreadingActor):
     **Settings:**
 
     - :attr:`mopidy.settings.OUTPUT`
+    - :attr:`mopidy.settings.MIXER`
+    - :attr:`mopidy.settings.MIXER_TRACK`
 
     """
 
@@ -38,39 +39,79 @@ class GStreamer(ThreadingActor):
         self._pipeline = None
         self._source = None
         self._uridecodebin = None
-        self._volume = None
         self._output = None
+        self._mixer = None
 
         self._setup_pipeline()
         self._setup_output()
+        self._setup_mixer()
         self._setup_message_processor()
 
     def _setup_pipeline(self):
+        # TODO: replace with and input bin so we simply have an input bin we
+        # connect to an output bin with a mixer on the side. set_uri on bin?
         description = ' ! '.join([
             'uridecodebin name=uri',
             'audioconvert name=convert',
             'audioresample name=resample',
-            'queue name=queue',
-            'volume name=volume'])
+            'queue name=queue'])
 
         logger.debug(u'Setting up base GStreamer pipeline: %s', description)
 
         self._pipeline = gst.parse_launch(description)
-        self._volume = self._pipeline.get_by_name('volume')
         self._uridecodebin = self._pipeline.get_by_name('uri')
 
         self._uridecodebin.connect('notify::source', self._on_new_source)
         self._uridecodebin.connect('pad-added', self._on_new_pad,
-            self._pipeline.get_by_name('convert').get_pad('sink'))
+            self._pipeline.get_by_name('queue').get_pad('sink'))
 
     def _setup_output(self):
         # This will raise a gobject.GError if the description is bad.
-        self._output = gst.parse_bin_from_description(settings.OUTPUT,
-            ghost_unconnected_pads=True)
+        self._output = gst.parse_bin_from_description(
+            settings.OUTPUT, ghost_unconnected_pads=True)
 
         self._pipeline.add(self._output)
-        gst.element_link_many(self._volume, self._output)
-        logger.debug('Output set to %s', settings.OUTPUT)
+        gst.element_link_many(self._pipeline.get_by_name('queue'),
+                              self._output)
+        logger.info('Output set to %s', settings.OUTPUT)
+
+    def _setup_mixer(self):
+        if not settings.MIXER:
+            logger.info('Not setting up mixer.')
+            return
+
+        # This will raise a gobject.GError if the description is bad.
+        mixerbin = gst.parse_bin_from_description(settings.MIXER, False)
+
+        # We assume that the bin will contain a single mixer.
+        mixer = mixerbin.get_by_interface('GstMixer')
+        if not mixer:
+            logger.warning('Did not find any mixers in %r', settings.MIXER)
+            return
+
+        if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
+            logger.warning('Setting mixer %r to READY failed.', settings.MIXER)
+            return
+
+        track = self._select_mixer_track(mixer, settings.MIXER_TRACK)
+        if not track:
+            logger.warning('Could not find usable mixer track.')
+            return
+
+        self._mixer = (mixer, track)
+        logger.info('Mixer set to %s using track called %s',
+                    mixer.get_factory().get_name(), track.label)
+
+    def _select_mixer_track(self, mixer, track_label):
+        # Look for track with label == MIXER_TRACK, otherwise fallback to
+        # master track which is also an output.
+        for track in mixer.list_tracks():
+            if track_label:
+                if track.label == track_label:
+                    return track
+            elif track.flags & (gst.interfaces.MIXER_TRACK_MASTER |
+                                gst.interfaces.MIXER_TRACK_OUTPUT):
+                return track
 
     def _setup_message_processor(self):
         bus = self._pipeline.get_bus()
@@ -244,22 +285,48 @@ class GStreamer(ThreadingActor):
 
     def get_volume(self):
         """
-        Get volume level of the GStreamer software mixer.
+        Get volume level of the installed mixer.
 
-        :rtype: int in range [0..100]
+           0 == muted.
+         100 == max volume for given system.
+        None == no mixer present, i.e. volume unknown.
+
+        :rtype: int in range [0..100] or :class:`None`
         """
-        return int(self._volume.get_property('volume') * 100)
+        if self._mixer is None:
+            return None
+
+        mixer, track = self._mixer
+
+        volumes = mixer.get_volume(track)
+        avg_volume = float(sum(volumes)) / len(volumes)
+
+        new_scale = (0, 100)
+        old_scale = (track.min_volume, track.max_volume)
+        return utils.rescale(avg_volume, old=old_scale, new=new_scale)
 
     def set_volume(self, volume):
         """
-        Set volume level of the GStreamer software mixer.
+        Set volume level of the installed mixer.
 
         :param volume: the volume in the range [0..100]
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self._volume.set_property('volume', volume / 100.0)
-        return True
+        if self._mixer is None:
+            return False
+
+        mixer, track = self._mixer
+
+        old_scale = (0, 100)
+        new_scale = (track.min_volume, track.max_volume)
+
+        volume = utils.rescale(volume, old=old_scale, new=new_scale)
+
+        volumes = (volume,) * track.num_channels
+        mixer.set_volume(track, volumes)
+
+        return mixer.get_volume(track) == volumes
 
     def set_metadata(self, track):
         """

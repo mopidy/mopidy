@@ -11,7 +11,7 @@ from tests import unittest, path_to_data_dir
     'Our Windows build server does not support GStreamer yet')
 class GStreamerTest(unittest.TestCase):
     def setUp(self):
-        settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
+        settings.MIXER = 'fakemixer track_max_volume=65536'
         settings.OUTPUT = 'fakesink'
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
         self.gstreamer = GStreamer()
@@ -52,20 +52,10 @@ class GStreamerTest(unittest.TestCase):
     def test_end_of_data_stream(self):
         pass # TODO
 
-    def test_default_get_volume_result(self):
-        self.assertEqual(100, self.gstreamer.get_volume())
-
     def test_set_volume(self):
-        self.assertTrue(self.gstreamer.set_volume(50))
-        self.assertEqual(50, self.gstreamer.get_volume())
-
-    def test_set_volume_to_zero(self):
-        self.assertTrue(self.gstreamer.set_volume(0))
-        self.assertEqual(0, self.gstreamer.get_volume())
-
-    def test_set_volume_to_one_hundred(self):
-        self.assertTrue(self.gstreamer.set_volume(100))
-        self.assertEqual(100, self.gstreamer.get_volume())
+        for value in range(0, 101):
+            self.assertTrue(self.gstreamer.set_volume(value))
+            self.assertEqual(value, self.gstreamer.get_volume())
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):

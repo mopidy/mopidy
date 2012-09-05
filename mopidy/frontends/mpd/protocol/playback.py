@@ -353,7 +353,7 @@ def setvol(context, volume):
         volume = 0
     if volume > 100:
         volume = 100
-    context.mixer.volume = volume
+    context.backend.playback.volume = volume
 
 @handle_request(r'^single (?P<state>[01])$')
 @handle_request(r'^single "(?P<state>[01])"$')

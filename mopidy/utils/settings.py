@@ -122,6 +122,11 @@ def validate_settings(defaults, settings):
         'LOCAL_OUTPUT_OVERRIDE': 'OUTPUT',
         'LOCAL_PLAYLIST_FOLDER': 'LOCAL_PLAYLIST_PATH',
         'LOCAL_TAG_CACHE': 'LOCAL_TAG_CACHE_FILE',
+        'MIXER_ALSA_CONTROL': None,
+        'MIXER_EXT_PORT': None,
+        'MIXER_EXT_SPEAKERS_A': None,
+        'MIXER_EXT_SPEAKERS_B': None,
+        'MIXER_MAX_VOLUME': None,
         'SERVER': None,
         'SERVER_HOSTNAME': 'MPD_SERVER_HOSTNAME',
         'SERVER_PORT': 'MPD_SERVER_PORT',
@@ -147,7 +152,7 @@ def validate_settings(defaults, settings):
 
         elif setting == 'OUTPUTS':
             errors[setting] = (
-                u'Deprecated setting, please change to OUTPUT. OUTPUT expectes '
+                u'Deprecated setting, please change to OUTPUT. OUTPUT expects '
                 u'a GStreamer bin description string for your desired output.')
 
         elif setting == 'SPOTIFY_BITRATE':

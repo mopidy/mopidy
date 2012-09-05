@@ -17,7 +17,6 @@ from pykka.registry import ActorRegistry
 from mopidy import settings
 from mopidy.backends.base import Backend
 from mopidy.backends.base.playback import PlaybackController
-from mopidy.mixers.base import BaseMixer
 from mopidy.utils.process import exit_process
 
 # Must be done before dbus.SessionBus() is called
@@ -37,7 +36,6 @@ class MprisObject(dbus.service.Object):
 
     def __init__(self):
         self._backend = None
-        self._mixer = None
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
             PLAYER_IFACE: self._get_player_iface_properties(),
@@ -94,14 +92,6 @@ class MprisObject(dbus.service.Object):
                 'Expected exactly one running backend.'
             self._backend = backend_refs[0].proxy()
         return self._backend
-
-    @property
-    def mixer(self):
-        if self._mixer is None:
-            mixer_refs = ActorRegistry.get_by_class(BaseMixer)
-            assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
-            self._mixer = mixer_refs[0].proxy()
-        return self._mixer
 
     def _get_track_id(self, cp_track):
         return '/com/mopidy/track/%d' % cp_track.cpid
@@ -380,7 +370,7 @@ class MprisObject(dbus.service.Object):
             return dbus.Dictionary(metadata, signature='sv')
 
     def get_Volume(self):
-        volume = self.mixer.volume.get()
+        volume = self.backend.playback.volume.get()
         if volume is not None:
             return volume / 100.0
 
@@ -391,11 +381,11 @@ class MprisObject(dbus.service.Object):
         if value is None:
             return
         elif value < 0:
-            self.mixer.volume = 0
+            self.backend.playback.volume = 0
         elif value > 1:
-            self.mixer.volume = 100
+            self.backend.playback.volume = 100
         elif 0 <= value <= 1:
-            self.mixer.volume = int(value * 100)
+            self.backend.playback.volume = int(value * 100)
 
     def get_Position(self):
         return self.backend.playback.time_position.get() * 1000
