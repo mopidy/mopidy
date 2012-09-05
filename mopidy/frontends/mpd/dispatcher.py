@@ -15,7 +15,6 @@ from mopidy.frontends.mpd.protocol import (audio_output, command_list,
     connection, current_playlist, empty, music_db, playback, reflection,
     status, stickers, stored_playlists)
 # pylint: enable = W0611
-from mopidy.mixers.base import BaseMixer
 from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
@@ -235,7 +234,6 @@ class MpdContext(object):
         self.events = set()
         self.subscriptions = set()
         self._backend = None
-        self._mixer = None
 
     @property
     def backend(self):
@@ -248,14 +246,3 @@ class MpdContext(object):
                 'Expected exactly one running backend.'
             self._backend = backend_refs[0].proxy()
         return self._backend
-
-    @property
-    def mixer(self):
-        """
-        The mixer. An instance of :class:`mopidy.mixers.base.BaseMixer`.
-        """
-        if self._mixer is None:
-            mixer_refs = ActorRegistry.get_by_class(BaseMixer)
-            assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
-            self._mixer = mixer_refs[0].proxy()
-        return self._mixer

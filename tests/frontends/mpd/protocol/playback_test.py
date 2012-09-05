@@ -76,37 +76,37 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
     def test_setvol_below_min(self):
         self.sendRequest(u'setvol "-10"')
-        self.assertEqual(0, self.mixer.volume.get())
+        self.assertEqual(0, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_min(self):
         self.sendRequest(u'setvol "0"')
-        self.assertEqual(0, self.mixer.volume.get())
+        self.assertEqual(0, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_middle(self):
         self.sendRequest(u'setvol "50"')
-        self.assertEqual(50, self.mixer.volume.get())
+        self.assertEqual(50, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_max(self):
         self.sendRequest(u'setvol "100"')
-        self.assertEqual(100, self.mixer.volume.get())
+        self.assertEqual(100, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_above_max(self):
         self.sendRequest(u'setvol "110"')
-        self.assertEqual(100, self.mixer.volume.get())
+        self.assertEqual(100, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_plus_is_ignored(self):
         self.sendRequest(u'setvol "+10"')
-        self.assertEqual(10, self.mixer.volume.get())
+        self.assertEqual(10, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_without_quotes(self):
         self.sendRequest(u'setvol 50')
-        self.assertEqual(50, self.mixer.volume.get())
+        self.assertEqual(50, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_single_off(self):

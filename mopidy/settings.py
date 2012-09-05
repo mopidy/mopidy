@@ -103,50 +103,28 @@ LOCAL_PLAYLIST_PATH = None
 #:    LOCAL_TAG_CACHE_FILE = None # Implies $XDG_DATA_DIR/mopidy/tag_cache
 LOCAL_TAG_CACHE_FILE = None
 
-#: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
+#: Sound mixer to use.
+#:
+#: Expects a GStreamer mixer to use, typical values are:
+#: alsamixer, pulsemixer, oss4mixer, ossmixer.
+#:
+#: Setting this to ``None`` means no volume control.
 #:
 #: Default::
 #:
-#:     MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
-MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
+#:     MIXER = u'autoaudiomixer'
+MIXER = u'autoaudiomixer'
 
-#: ALSA mixer only. What mixer control to use. If set to :class:`False`, first
-#: ``Master`` and then ``PCM`` will be tried.
+#: Sound mixer track to use.
 #:
-#: Example: ``Master Front``. Default: :class:`False`
-MIXER_ALSA_CONTROL = False
-
-#: External mixers only. Which port the mixer is connected to.
-#:
-#: This must point to the device port like ``/dev/ttyUSB0``.
-#:
-#: Default: :class:`None`
-MIXER_EXT_PORT = None
-
-#: External mixers only. What input source the external mixer should use.
-#:
-#: Example: ``Aux``. Default: :class:`None`
-MIXER_EXT_SOURCE = None
-
-#: External mixers only. What state Speakers A should be in.
-#:
-#: Default: :class:`None`.
-MIXER_EXT_SPEAKERS_A = None
-
-#: External mixers only. What state Speakers B should be in.
-#:
-#: Default: :class:`None`.
-MIXER_EXT_SPEAKERS_B = None
-
-#: The maximum volume. Integer in the range 0 to 100.
-#:
-#: If this settings is set to 80, the mixer will set the actual volume to 80
-#: when asked to set it to 100.
+#: Name of the mixer track to use. If this is not set we will try to find the
+#: output track with master set. As an example, using ``alsamixer`` you would
+#: typically set this to ``Master`` or ``PCM``.
 #:
 #: Default::
 #:
-#:     MIXER_MAX_VOLUME = 100
-MIXER_MAX_VOLUME = 100
+#:     MIXER_TRACK = None
+MIXER_TRACK = None
 
 #: Which address Mopidy's MPD server should bind to.
 #:

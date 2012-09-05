@@ -20,17 +20,11 @@ The backend
 Playback controller
 ===================
 
-Manages playback, with actions like play, pause, stop, next, previous, and
-seek.
+Manages playback, with actions like play, pause, stop, next, previous,
+seek, and volume control.
 
 .. autoclass:: mopidy.backends.base.PlaybackController
     :members:
-
-
-Mixer controller
-================
-
-Manages volume. See :class:`mopidy.mixers.base.BaseMixer`.
 
 
 Current playlist controller

@@ -181,11 +181,6 @@ they artist and album tabs do not hang. The folder tab still freezes when
 ``lsinfo`` returns a list of stored playlists, though zero files. Thus, we've
 discovered a couple of bugs in Droid MPD Client.
 
-The volume control is very slick, with a turn knob, just like on an amplifier.
-It lends itself to showing off to friends when combined with Mopidy's external
-amplifier mixers. Everybody loves turning a knob on a touch screen and see the
-physical knob on the amplifier turn as well ;-)
-
 Even though ``lsinfo`` returns the stored playlists for the folder tab, they
 are not displayed anywhere. Thus, we had to select an album in the album tab to
 complete the test procedure.

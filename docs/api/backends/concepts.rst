@@ -27,4 +27,3 @@ Providers:
     "Playback\ncontroller" -> "Playback\nproviders"
     Backend -> "Stored\nplaylists\ncontroller"
     "Stored\nplaylists\ncontroller" -> "Stored\nplaylist\nproviders"
-    Backend -> Mixer

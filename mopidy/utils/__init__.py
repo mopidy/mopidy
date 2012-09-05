@@ -1,3 +1,5 @@
+from __future__ import division
+
 import locale
 import logging
 import os
@@ -6,7 +8,7 @@ import sys
 logger = logging.getLogger('mopidy.utils')
 
 
-# TODO: user itertools.chain.from_iterable(the_list)?
+# TODO: use itertools.chain.from_iterable(the_list)?
 def flatten(the_list):
     result = []
     for element in the_list:
@@ -15,6 +17,14 @@ def flatten(the_list):
         else:
             result.append(element)
     return result
+
+
+def rescale(v, old=None, new=None):
+    """Convert value between scales."""
+    new_min, new_max = new
+    old_min, old_max = old
+    scaling = float(new_max - new_min) / (old_max - old_min)
+    return round(scaling * (v - old_min) + new_min)
 
 
 def import_module(name):
