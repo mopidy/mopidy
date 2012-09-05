@@ -21,7 +21,7 @@ Playback controller
 ===================
 
 Manages playback, with actions like play, pause, stop, next, previous,
-seek and volume control.
+seek, and volume control.
 
 .. autoclass:: mopidy.backends.base.PlaybackController
     :members:
