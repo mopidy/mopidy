@@ -187,3 +187,9 @@ SPOTIFY_PASSWORD = u''
 #:
 #:     SPOTIFY_BITRATE = 160
 SPOTIFY_BITRATE = 160
+
+#: Playlist to load on startup
+#:
+#: Used by :mod:'mopidy.backends.spotify'.
+SPOTIFY_AUTOLOAD_PLAYLIST = u''
+

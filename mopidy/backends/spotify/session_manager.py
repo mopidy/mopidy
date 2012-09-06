@@ -156,6 +156,15 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         playlists = filter(None, playlists)
         self.backend.stored_playlists.playlists = playlists
         logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
+        try:
+            playlist = self.backend.stored_playlists.\
+                    get(name=settings.SPOTIFY_AUTOLOAD_PLAYLIST).get()
+            self.backend.current_playlist.append(playlist.tracks)
+            logger.info(u'Loaded {0}'.\
+                    format(settings.SPOTIFY_AUTOLOAD_PLAYLIST))
+        except LookupError:
+            logger.info(u"No such playlist {0}".\
+                    format(settings.SPOTIFY_AUTOLOAD_PLAYLIST))
 
     def search(self, query, queue):
         """Search method used by Mopidy backend"""
