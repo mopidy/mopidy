@@ -4,12 +4,12 @@ import gobject
 import gst
 
 
-def create_fake_track(label, intial_volume, min_volume, max_volume,
+def create_fake_track(label, initial_volume, min_volume, max_volume,
                       num_channels, flags):
     class Track(gst.interfaces.MixerTrack):
         def __init__(self):
             super(Track, self).__init__()
-            self.volumes = (intial_volume,) * self.num_channels
+            self.volumes = (initial_volume,) * self.num_channels
 
         @gobject.property
         def label(self):
