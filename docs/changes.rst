@@ -42,6 +42,26 @@ v0.8 (in development)
   protocol support for volume has also been updated to return -1 when we have
   no mixer set.
 
+- Removed the Denon hardware mixer, as it is not maintained.
+
+- Updated the NAD hardware mixer to work in the new GStreamer based mixing
+  regime. Settings are now passed as GStreamer element properties. In practice
+  that means that the following old-style config:
+
+      MIXER = u'mopidy.mixers.nad.NadMixer'
+      MIXER_EXT_PORT = u'/dev/ttyUSB0'
+      MIXER_EXT_SOURCE = u'Aux'
+      MIXER_EXT_SPEAKERS_A = u'On'
+      MIXER_EXT_SPEAKERS_B = u'Off'
+
+  Now is reduced to simply:
+
+      MIXER = u'nadmixer port=/dev/ttyUSB0 source=Aux speakers-a=On speakers-b=Off'
+
+  The ``port`` property defaults to ``/dev/ttyUSB0``, and the rest of the
+  properties may be left out if you don't want the mixer to adjust the settings
+  on your NAD amplifier when Mopidy is started.
+
 
 v0.7.3 (2012-08-11)
 ===================
