@@ -18,7 +18,7 @@ v0.8 (in development)
   Track position and CPID was intermixed, so it would cause a crash if a CPID
   matching the track position didn't exist. (Fixes: :issue:`162`)
 
-- Added :option:`--list-deps` option to :cmd:`mopidy` command that lists
+- Added :option:`--list-deps` option to the `mopidy` command that lists
   required and optional dependencies, their current versions, and some other
   information useful for debugging. (Fixes: :issue:`74`)
 
