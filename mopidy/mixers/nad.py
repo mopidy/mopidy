@@ -80,11 +80,11 @@ gst.element_register(NadMixer, 'nadmixer', gst.RANK_MARGINAL)
 
 class NadTalker(ThreadingActor):
     """
-    Independent thread which does the communication with the NAD device.
+    Independent thread which does the communication with the NAD amplifier
 
     Since the communication is done in an independent thread, Mopidy won't
     block other requests while doing rather time consuming work like
-    calibrating the NAD device's volume.
+    calibrating the NAD amplifier's volume.
     """
 
     # Serial link settings
@@ -100,7 +100,7 @@ class NadTalker(ThreadingActor):
     # for NAD C 355BEE.
     TIMEOUT = 0.2
 
-    # Number of volume levels the device supports. 40 for NAD C 355BEE.
+    # Number of volume levels the amplifier supports. 40 for NAD C 355BEE.
     VOLUME_LEVELS = 40
 
     def __init__(self, port, source, speakers_a, speakers_b):
@@ -129,7 +129,7 @@ class NadTalker(ThreadingActor):
         self._set_device_to_known_state()
 
     def _open_connection(self):
-        logger.info(u'Connecting to NAD amplifier using serial device "%s"',
+        logger.info(u'Connecting to NAD amplifier using "%s"',
             self.port)
         self._device = serial.Serial(
             port=self.port,
@@ -154,7 +154,7 @@ class NadTalker(ThreadingActor):
 
     def _power_device_on(self):
         while self._ask_device('Main.Power') != 'On':
-            logger.info(u'Powering device on')
+            logger.info(u'Powering NAD amplifier on')
             self._command_device('Main.Power', 'On')
 
     def _select_speakers(self):
