@@ -55,10 +55,7 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
             self._nad_talker.set_volume(volume)
 
     def set_mute(self, track, mute):
-        if mute:
-            self._nad_talker.mute()
-        else:
-            self._nad_talker.unmute()
+        self._nad_talker.mute(mute)
 
     def do_change_state(self, transition):
         if transition == gst.STATE_CHANGE_NULL_TO_READY:
@@ -147,7 +144,7 @@ class NadTalker(ThreadingActor):
         self._power_device_on()
         self._select_speakers()
         self._select_input_source()
-        self._unmute()
+        self.mute(False)
         self._calibrate_volume()
 
     def _get_device_model(self):
@@ -176,10 +173,15 @@ class NadTalker(ThreadingActor):
                 logger.info(u'Selecting input source "%s"', self.source)
                 self._command_device('Main.Source', self.source)
 
-    def _unmute(self):
-        while self._ask_device('Main.Mute') != 'Off':
-            logger.info(u'Unmuting device')
-            self._command_device('Main.Mute', 'Off')
+    def mute(self, mute):
+        if mute:
+            while self._ask_device('Main.Mute') != 'On':
+                logger.info(u'Muting NAD amplifier')
+                self._command_device('Main.Mute', 'On')
+        else:
+            while self._ask_device('Main.Mute') != 'Off':
+                logger.info(u'Unmuting NAD amplifier')
+                self._command_device('Main.Mute', 'Off')
 
     def _ask_device(self, key):
         self._write('%s?' % key)
