@@ -8,6 +8,9 @@ from socketio import socketio_manage
 from socketio.server import SocketIOServer
 import socketio
 
+from mopidy import listeners
+from pykka import registry, actor
+
 import datetime as dt
 import logging
 import os
@@ -86,8 +89,7 @@ def not_found(start_response):
     start_response('404 Not Found', [])
     return ['<h1>Not Found</h1>']
 
-class WsNamespace(BaseNamespace):
-#class WsNamespace(object):
+class WsNamespace(BaseNamespace, listeners.BackendListener):
     """
     
      #   Namespace for Gevent webserver 
@@ -215,8 +217,8 @@ class WsNamespace(BaseNamespace):
             query = {searchtype: keywords}
         logger.info(searchtype + ':' + keywords)
         playlist = flattenplaylist(self.request.backend.library.search(**query).get())
-        logger.info(playlist)
-         #context.backend.library.find_exact(**query).get())
+        #logger.info(playlist)
+        #context.backend.library.find_exact(**query).get())
         self.emit('searchresults', searchtype, playlist)
 
     def on_getalbum(self, albumuri):
@@ -234,7 +236,7 @@ class WsNamespace(BaseNamespace):
     def on_getcurrentplaylist(self):
         #playlist = flattenplaylist(self.request.backend.current_playlist.get().get())
         playlist = flattentracks(self.request.backend.current_playlist.tracks.get())  
-        self.emit('currentplaylist', playlist)
+        self.emit('currentplaylist', playlist)        
 
    
 class WsSession(object):
@@ -286,7 +288,7 @@ class WsSession(object):
             socketio_manage(environ, {'/mopidy': WsNamespace}, self.context)
             pass
         else:
-            return not_found(start_response)
+            return not_found(start_response)    
 
 class IOServer(object):
     """
@@ -299,28 +301,19 @@ class IOServer(object):
     """
 
     def start(self, hostname, port):
+        global srv
         try:
-            SocketIOServer((hostname, port), WsSession(), resource="socket.io", policy_server=True, policy_listener=(hostname, 10843)).serve_forever()
+            srv = SocketIOServer((hostname, port), WsSession(), resource="socket.io", policy_server=True, policy_listener=(hostname, 10843)).serve_forever()
         except IOError, e:
             logger.error(u'Websockets server startup failed: %s', e)
             sys.exit(1)
 
-    #mopidy events
-    def playback_state_changed(self):
-        logger.info('playback state changed')
-        self.emit('status_change', 'event play changed')
+    def stop(self):
+        global srv
+        srv.socket.close()
+        #srv.shutdown()
+        process.stop_actors_by_class(WsSession)
 
-    def playlist_changed(self):
-        logger.info('pl state changed')
-        self.emit('status_change', 'event playlist changed')
-
-    def options_changed(self):
-        logger.info('op state changed')
-        self.emit('status_change', 'event options changed')
-
-    def volume_changed(self):
-        logger.info('vol state changed')
-        self.emit('status_change', 'event volume changed')
         
 class WsContext(object):
     """

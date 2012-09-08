@@ -8,18 +8,17 @@ import logging
 import os
 import sys
 
-from mopidy.frontends.ws import exceptions
-
 from pykka import registry, actor
 
 from mopidy import listeners, settings
-from mopidy.utils import network, process, log
+from mopidy.utils import locale_decode, log, network, process
 
-from mopidy.backends.base import Backend
-from mopidy.mixers.base import BaseMixer
-from mopidy.listeners import BackendListener
-from mopidy.backends.base import PlaybackController
-from mopidy.models import Playlist
+from mopidy.frontends.ws import exceptions
+
+#from mopidy.backends.base import Backend
+#from mopidy.mixers.base import BaseMixer
+#from mopidy.backends.base import PlaybackController
+#from mopidy.models import Playlist
 
 #get directory with static web content
 webdir = os.path.join(os.path.dirname(__file__), 'web')
@@ -40,7 +39,11 @@ class WsFrontend(actor.ThreadingActor, listeners.BackendListener):
     - :attr:`mopidy.settings.WS_SERVER_PORT`
     """
  
+    def __init__(self):
+        super(WsFrontend, self).__init__()
+        
     def on_start(self):
+        #import here because of threading gevent and pykka
         from mopidy.frontends.ws import wsserver
 
         global srv
@@ -57,6 +60,25 @@ class WsFrontend(actor.ThreadingActor, listeners.BackendListener):
             sys.exit(1)
 
     def on_stop(self):
+        global srv
         from mopidy.frontends.ws import wsserver
+        srv.stop()
         logger.info('stop ws')
         process.stop_actors_by_class(IOServer)
+
+    #mopidy events
+    def playback_state_changed(self):
+        logger.info('playback state changed')
+        self.emit('status_change', 'event play changed')
+
+    def playlist_changed(self):
+        logger.info('pl state changed')
+        self.emit('status_change', 'event playlist changed')
+
+    def options_changed(self):
+        logger.info('op state changed')
+        self.emit('status_change', 'event options changed')
+
+    def volume_changed(self):
+        logger.info('vol state changed')
+        self.emit('status_change', 'event volume changed')
