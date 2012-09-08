@@ -12,7 +12,7 @@ except ImportError:
 
 from pykka.actor import ThreadingActor
 
-from mopidy.mixers.fake import create_fake_track
+from mopidy.mixers import create_track
 
 
 logger = logging.getLogger('mopidy.mixers.nad')
@@ -35,7 +35,7 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
         self._nad_talker = None
 
     def list_tracks(self):
-        track = create_fake_track(
+        track = create_track(
             label='Master',
             initial_volume=0,
             min_volume=0,
