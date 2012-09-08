@@ -23,9 +23,6 @@ class GStreamerTest(unittest.TestCase):
         self.gstreamer.prepare_change()
         self.gstreamer.set_uri(uri)
 
-    def tearDown(self):
-        settings.runtime.clear()
-
     def test_start_playback_existing_file(self):
         self.prepare_uri(self.song_uri)
         self.assertTrue(self.gstreamer.start_playback())
