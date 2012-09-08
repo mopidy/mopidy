@@ -133,9 +133,7 @@ class GStreamer(ThreadingActor):
 
     def _on_message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
-            logger.debug(u'GStreamer signalled end-of-stream. '
-                'Telling backend ...')
-            self._get_backend().playback.on_end_of_track()
+            self._notify_backend_of_eos()
         elif message.type == gst.MESSAGE_ERROR:
             error, debug = message.parse_error()
             logger.error(u'%s %s', error, debug)
@@ -144,10 +142,14 @@ class GStreamer(ThreadingActor):
             error, debug = message.parse_warning()
             logger.warning(u'%s %s', error, debug)
 
-    def _get_backend(self):
+    def _notify_backend_of_eos(self):
         backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        return backend_refs[0].proxy()
+        assert len(backend_refs) <= 1, 'Expected at most one running backend.'
+        if backend_refs:
+            logger.debug(u'Notifying backend of end-of-stream.')
+            backend_refs[0].proxy().playback.on_end_of_track()
+        else:
+            logger.debug(u'No backend to notify of end-of-stream found.')
 
     def set_uri(self, uri):
         """
