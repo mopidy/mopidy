@@ -34,6 +34,9 @@ def create_track(label, initial_volume, min_volume, max_volume,
     return Track()
 
 
-# Import all mixers so that they are registered with GStreamer
+# Import all mixers so that they are registered with GStreamer.
+#
+# Keep these imports at the bottom of the file to avoid cyclic import problems
+# when mixers use the above code.
 from mopidy.mixers.auto import AutoAudioMixer
 from mopidy.mixers.fake import FakeMixer
