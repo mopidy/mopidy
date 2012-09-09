@@ -1,6 +1,7 @@
 import pygst
 pygst.require('0.10')
 import gst
+import gobject
 
 import logging
 
@@ -9,7 +10,10 @@ from pykka.registry import ActorRegistry
 
 from mopidy import settings, utils
 from mopidy.backends.base import Backend
-from mopidy import mixers # Trigger install of gst mixer plugins.
+from mopidy.utils import process
+
+# Trigger install of gst mixer plugins
+from mopidy import mixers
 
 logger = logging.getLogger('mopidy.gstreamer')
 
@@ -42,10 +46,15 @@ class GStreamer(ThreadingActor):
         self._output = None
         self._mixer = None
 
-        self._setup_pipeline()
-        self._setup_output()
-        self._setup_mixer()
-        self._setup_message_processor()
+    def on_start(self):
+        try:
+            self._setup_pipeline()
+            self._setup_output()
+            self._setup_mixer()
+            self._setup_message_processor()
+        except gobject.GError as ex:
+            logger.exception(ex)
+            process.exit_process()
 
     def on_stop(self):
         self._teardown_message_processor()
