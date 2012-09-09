@@ -36,7 +36,7 @@ from mopidy.utils.deps import list_deps_optparse_callback
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
 from mopidy.utils.process import (exit_handler, stop_remaining_actors,
-    stop_actors_by_class)
+    stop_actors_by_class, DebugThread)
 from mopidy.utils.settings import list_settings_optparse_callback
 
 
@@ -44,7 +44,12 @@ logger = logging.getLogger('mopidy.main')
 
 
 def main():
+    debug_thread = DebugThread()
+    debug_thread.start()
+
+    signal.signal(signal.SIGUSR1, debug_thread.handler)
     signal.signal(signal.SIGTERM, exit_handler)
+
     loop = gobject.MainLoop()
     try:
         options = parse_options()
