@@ -47,6 +47,10 @@ class GStreamer(ThreadingActor):
         self._setup_mixer()
         self._setup_message_processor()
 
+    def on_stop(self):
+        self._teardown_message_processor()
+        self._teardown_pipeline()
+
     def _setup_pipeline(self):
         # TODO: replace with and input bin so we simply have an input bin we
         # connect to an output bin with a mixer on the side. set_uri on bin?
@@ -64,6 +68,9 @@ class GStreamer(ThreadingActor):
         self._uridecodebin.connect('notify::source', self._on_new_source)
         self._uridecodebin.connect('pad-added', self._on_new_pad,
             self._pipeline.get_by_name('queue').get_pad('sink'))
+
+    def _teardown_pipeline(self):
+        self._pipeline.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
         # This will raise a gobject.GError if the description is bad.
@@ -117,6 +124,10 @@ class GStreamer(ThreadingActor):
         bus = self._pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message', self._on_message)
+
+    def _teardown_message_processor(self):
+        bus = self._pipeline.get_bus()
+        bus.remove_signal_watch()
 
     def _on_new_source(self, element, pad):
         self._source = element.get_property('source')
