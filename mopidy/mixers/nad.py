@@ -129,7 +129,7 @@ class NadTalker(ThreadingActor):
         self._set_device_to_known_state()
 
     def _open_connection(self):
-        logger.info(u'Connecting to NAD amplifier using "%s"',
+        logger.info(u'NAD amplifier: Connecting through "%s"',
             self.port)
         self._device = serial.Serial(
             port=self.port,
@@ -149,7 +149,7 @@ class NadTalker(ThreadingActor):
 
     def _get_device_model(self):
         model = self._ask_device('Main.Model')
-        logger.info(u'Connected to NAD amplifier model "%s"', model)
+        logger.info(u'NAD amplifier: Connected to model "%s"', model)
         return model
 
     def _power_device_on(self):
@@ -175,10 +175,10 @@ class NadTalker(ThreadingActor):
         # The NAD C 355BEE amplifier has 40 different volume levels. We have no
         # way of asking on which level we are. Thus, we must calibrate the
         # mixer by decreasing the volume 39 times.
-        logger.info(u'Calibrating NAD amplifier by setting volume to 0')
+        logger.info(u'NAD amplifier: Calibrating by setting volume to 0')
         self._nad_volume = self.VOLUME_LEVELS
         self.set_volume(0)
-        logger.info(u'Done calibrating NAD amplifier')
+        logger.info(u'NAD amplifier: Done calibrating')
 
     def set_volume(self, volume):
         # Increase or decrease the amplifier volume until it matches the given
