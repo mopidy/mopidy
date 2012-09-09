@@ -11,6 +11,7 @@ logger = logging.getLogger('mopidy.backends.spotify.library')
 
 
 class SpotifyTrack(Track):
+    """Proxy object for unloaded Spotify tracks."""
     def __init__(self, uri):
         self._spotify_track = Link.from_string(uri).as_track()
         self._unloaded_track = Track(uri=uri, name=u'[loading...]')
@@ -34,15 +35,15 @@ class SpotifyTrack(Track):
     def __repr__(self):
         return self._proxy.__repr__()
 
-    def __hash__(self):  # hash on just uri for consistency?
+    def __hash__(self):
         return hash(self._proxy.uri)
 
-    def __eq__(self, other): # compare on just uri for consistency?
+    def __eq__(self, other):
         if not isinstance(other, Track):
             return False
         return self._proxy.uri == other.uri
 
-    def copy(self, **values): # is it okay to return a plain track?
+    def copy(self, **values):
         return self._proxy.copy(**values)
 
 
