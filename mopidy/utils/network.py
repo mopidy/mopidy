@@ -150,7 +150,7 @@ class Connection(object):
         logger.log(level, reason)
 
         try:
-            self.actor_ref.stop()
+            self.actor_ref.stop(block=False)
         except ActorDeadError:
             pass
 
