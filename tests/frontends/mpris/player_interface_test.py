@@ -205,6 +205,10 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(result['xesam:trackNumber'], 7)
 
     def test_get_volume_should_return_volume_between_zero_and_one(self):
+        self.backend.playback.volume = None
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Volume')
+        self.assertEquals(result, 0)
+
         self.backend.playback.volume = 0
         result = self.mpris.Get(objects.PLAYER_IFACE, 'Volume')
         self.assertEquals(result, 0)

@@ -371,8 +371,9 @@ class MprisObject(dbus.service.Object):
 
     def get_Volume(self):
         volume = self.backend.playback.volume.get()
-        if volume is not None:
-            return volume / 100.0
+        if volume is None:
+            return 0
+        return volume / 100.0
 
     def set_Volume(self, value):
         if not self.get_CanControl():

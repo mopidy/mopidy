@@ -125,6 +125,47 @@ statistics and uses pylint to check for errors and possible improvements in our
 code. So, if you're out of work, the code coverage and pylint data at the CI
 server should give you a place to start.
 
+Protocol debugging
+==================
+
+Since the main interface provided to Mopidy is through the MPD protocol, it is
+crucial that we try and stay in sync with protocol developments. In an attempt
+to make it easier to debug differences Mopidy and MPD protocol handling we have
+created ``tools/debug-proxy.py``.
+
+This tool is proxy that sits in front of two MPD protocol aware servers and
+sends all requests to both, returning the primary response to the client and
+then printing any diff in the two responses.
+
+Note that this tool depends on ``gevent`` unlike the rest of Mopidy at the time
+of writing. See ``--help`` for available options. Sample session::
+
+    [127.0.0.1]:59714
+    listallinfo
+    --- Reference response
+    +++ Actual response
+    @@ -1,16 +1,1 @@
+    -file: uri1
+    -Time: 4
+    -Artist: artist1
+    -Title: track1
+    -Album: album1
+    -file: uri2
+    -Time: 4
+    -Artist: artist2
+    -Title: track2
+    -Album: album2
+    -file: uri3
+    -Time: 4
+    -Artist: artist3
+    -Title: track3
+    -Album: album3
+    -OK
+    +ACK [2@0] {listallinfo} incorrect arguments
+
+To ensure that Mopidy and MPD have comparable state it is suggested you setup
+both to use ``tests/data/library_tag_cache`` for their tag cache and
+``tests/data`` for music/playlist folders.
 
 Writing documentation
 =====================

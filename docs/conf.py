@@ -22,17 +22,17 @@ class Mock(object):
     def __call__(self, *args, **kwargs):
         return Mock()
 
+    def __or__(self, other):
+        return Mock()
+
     @classmethod
     def __getattr__(self, name):
         if name in ('__file__', '__path__'):
             return '/dev/null'
-        elif name[0] == name[0].upper():
-            return type(name, (), {})
         else:
             return Mock()
 
 MOCK_MODULES = [
-    'alsaaudio',
     'dbus',
     'dbus.mainloop',
     'dbus.mainloop.glib',

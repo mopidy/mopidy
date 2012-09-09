@@ -18,7 +18,7 @@ v0.8 (in development)
   Track position and CPID was intermixed, so it would cause a crash if a CPID
   matching the track position didn't exist. (Fixes: :issue:`162`)
 
-- Added :option:`--list-deps` option to :cmd:`mopidy` command that lists
+- Added :option:`--list-deps` option to the `mopidy` command that lists
   required and optional dependencies, their current versions, and some other
   information useful for debugging. (Fixes: :issue:`74`)
 
@@ -41,6 +41,32 @@ v0.8 (in development)
   override it. Setting the mixer to :class:`None` is also supported. MPD
   protocol support for volume has also been updated to return -1 when we have
   no mixer set.
+
+- Removed the Denon hardware mixer, as it is not maintained.
+
+- Updated the NAD hardware mixer to work in the new GStreamer based mixing
+  regime. Settings are now passed as GStreamer element properties. In practice
+  that means that the following old-style config:
+
+      MIXER = u'mopidy.mixers.nad.NadMixer'
+      MIXER_EXT_PORT = u'/dev/ttyUSB0'
+      MIXER_EXT_SOURCE = u'Aux'
+      MIXER_EXT_SPEAKERS_A = u'On'
+      MIXER_EXT_SPEAKERS_B = u'Off'
+
+  Now is reduced to simply:
+
+      MIXER = u'nadmixer port=/dev/ttyUSB0 source=aux speakers-a=on speakers-b=off'
+
+  The ``port`` property defaults to ``/dev/ttyUSB0``, and the rest of the
+  properties may be left out if you don't want the mixer to adjust the settings
+  on your NAD amplifier when Mopidy is started.
+
+- Fixed :issue:`150` which caused some clients to block Mopidy completely. Bug
+  was caused by some clients sending ``close`` and then shutting down the
+  connection right away. This trigged a situation in which the connection
+  cleanup code would wait for an response that would never come inside the
+  event loop, blocking everything else.
 
 
 v0.7.3 (2012-08-11)
