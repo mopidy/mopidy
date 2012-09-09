@@ -153,45 +153,23 @@ class NadTalker(ThreadingActor):
         return model
 
     def _power_device_on(self):
-        while self._ask_device('Main.Power') != 'On':
-            logger.info(u'Powering NAD amplifier on')
-            self._command_device('Main.Power', 'On')
+        self._check_and_set('Main.Power', 'On')
 
     def _select_speakers(self):
         if self.speakers_a is not None:
-            while (self._ask_device('Main.SpeakerA') != self.speakers_a):
-                logger.info(u'Setting speakers A to "%s"', self.speakers_a)
-                self._command_device('Main.SpeakerA', self.speakers_a)
+            self._check_and_set('Main.SpeakerA', self.speakers_a)
         if self.speakers_b is not None:
-            while (self._ask_device('Main.SpeakerB') != self.speakers_b):
-                logger.info(u'Setting speakers B to "%s"', self.speakers_b)
-                self._command_device('Main.SpeakerB', self.speakers_b)
+            self._check_and_set('Main.SpeakerB', self.speakers_b)
 
     def _select_input_source(self):
         if self.source is not None:
-            while self._ask_device('Main.Source') != self.source:
-                logger.info(u'Selecting input source "%s"', self.source)
-                self._command_device('Main.Source', self.source)
+            self._check_and_set('Main.Source', self.source)
 
     def mute(self, mute):
         if mute:
-            while self._ask_device('Main.Mute') != 'On':
-                logger.info(u'Muting NAD amplifier')
-                self._command_device('Main.Mute', 'On')
+            self._check_and_set('Main.Mute', 'On')
         else:
-            while self._ask_device('Main.Mute') != 'Off':
-                logger.info(u'Unmuting NAD amplifier')
-                self._command_device('Main.Mute', 'Off')
-
-    def _ask_device(self, key):
-        self._write('%s?' % key)
-        return self._readline().replace('%s=' % key, '')
-
-    def _command_device(self, key, value):
-        if type(value) == unicode:
-            value = value.encode('utf-8')
-        self._write('%s=%s' % (key, value))
-        self._readline()
+            self._check_and_set('Main.Mute', 'Off')
 
     def _calibrate_volume(self):
         # The NAD C 355BEE amplifier has 40 different volume levels. We have no
@@ -225,6 +203,27 @@ class NadTalker(ThreadingActor):
         # Decrease volume. Returns :class:`True` if confirmed by device.
         self._write('Main.Volume-')
         return self._readline() == 'Main.Volume-'
+
+    def _check_and_set(self, key, value):
+        for attempt in range(1, 4):
+            if self._ask_device(key) == value:
+                return
+            logger.info(u'NAD amplifier: Setting "%s" to "%s" (attempt %d/3)',
+                key, value, attempt)
+            self._command_device(key, value)
+        if self._ask_device(key) != value:
+            logger.info(u'NAD amplifier: Gave up on setting "%s" to "%s"',
+                key, value)
+
+    def _ask_device(self, key):
+        self._write('%s?' % key)
+        return self._readline().replace('%s=' % key, '')
+
+    def _command_device(self, key, value):
+        if type(value) == unicode:
+            value = value.encode('utf-8')
+        self._write('%s=%s' % (key, value))
+        self._readline()
 
     def _write(self, data):
         # Write data to device. Prepends and appends a newline to the data, as
