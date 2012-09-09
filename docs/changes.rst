@@ -62,6 +62,12 @@ v0.8 (in development)
   properties may be left out if you don't want the mixer to adjust the settings
   on your NAD amplifier when Mopidy is started.
 
+- Fixed :issue:`150` which caused some clients to block Mopidy completely. Bug
+  was caused by some clients sending ``close`` and then shutting down the
+  connection right away. This trigged a situation in which the connection
+  cleanup code would wait for an response that would never come inside the
+  event loop, blocking everything else.
+
 
 v0.7.3 (2012-08-11)
 ===================
