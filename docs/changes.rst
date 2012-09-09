@@ -68,6 +68,9 @@ v0.8 (in development)
   cleanup code would wait for an response that would never come inside the
   event loop, blocking everything else.
 
+- Created a Spotify track proxy that will switch to using loaded data as soon
+  as it becomes available. Fixes :issue:`72`.
+
 
 v0.7.3 (2012-08-11)
 ===================
