@@ -108,16 +108,8 @@ class NadTalker(ThreadingActor):
 
         self.port = port
         self.source = source
-        if speakers_a in ('On', 'Off'):
-            self.speakers_a = speakers_a
-        else:
-            logger.warning('speakers-a must be "On" or "Off", or unset')
-            self.speakers_a = None
-        if speakers_b in ('On', 'Off'):
-            self.speakers_b = speakers_b
-        else:
-            logger.warning('speakers-b must be "On" or "Off", or unset')
-            self.speakers_b = None
+        self.speakers_a = speakers_a
+        self.speakers_b = speakers_b
 
         # Volume in range 0..VOLUME_LEVELS. :class:`None` before calibration.
         self._nad_volume = None
@@ -157,13 +149,13 @@ class NadTalker(ThreadingActor):
 
     def _select_speakers(self):
         if self.speakers_a is not None:
-            self._check_and_set('Main.SpeakerA', self.speakers_a)
+            self._check_and_set('Main.SpeakerA', self.speakers_a.title())
         if self.speakers_b is not None:
-            self._check_and_set('Main.SpeakerB', self.speakers_b)
+            self._check_and_set('Main.SpeakerB', self.speakers_b.title())
 
     def _select_input_source(self):
         if self.source is not None:
-            self._check_and_set('Main.Source', self.source)
+            self._check_and_set('Main.Source', self.source.title())
 
     def mute(self, mute):
         if mute:

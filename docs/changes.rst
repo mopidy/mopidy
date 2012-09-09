@@ -56,7 +56,7 @@ v0.8 (in development)
 
   Now is reduced to simply:
 
-      MIXER = u'nadmixer port=/dev/ttyUSB0 source=Aux speakers-a=On speakers-b=Off'
+      MIXER = u'nadmixer port=/dev/ttyUSB0 source=aux speakers-a=on speakers-b=off'
 
   The ``port`` property defaults to ``/dev/ttyUSB0``, and the rest of the
   properties may be left out if you don't want the mixer to adjust the settings
