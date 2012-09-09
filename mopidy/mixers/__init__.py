@@ -40,3 +40,4 @@ def create_track(label, initial_volume, min_volume, max_volume,
 # when mixers use the above code.
 from mopidy.mixers.auto import AutoAudioMixer
 from mopidy.mixers.fake import FakeMixer
+from mopidy.mixers.nad import NadMixer
