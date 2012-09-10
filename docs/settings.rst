@@ -166,9 +166,9 @@ server simultaneously. To use the SHOUTcast output, do the following:
    example, to set the username and password, use:
    ``lame ! shout2send username="foobar" password="s3cret"``.
 
-Other advanced setups are also possible for outputs. Basically anything you can
-get a ``gst-lauch`` command to output to can be plugged into
-:attr:`mopidy.settings.OUTPUT``.
+Other advanced setups are also possible for outputs. Basically, anything you
+can use with the ``gst-launch-0.10`` command can be plugged into
+:attr:`mopidy.settings.OUTPUT`.
 
 
 Available settings
