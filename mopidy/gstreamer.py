@@ -32,6 +32,7 @@ class GStreamer(ThreadingActor):
 
     def __init__(self):
         super(GStreamer, self).__init__()
+
         self._default_caps = gst.Caps("""
             audio/x-raw-int,
             endianness=(int)1234,
@@ -40,11 +41,14 @@ class GStreamer(ThreadingActor):
             depth=(int)16,
             signed=(boolean)true,
             rate=(int)44100""")
+
         self._pipeline = None
         self._source = None
         self._uridecodebin = None
         self._output = None
         self._mixer = None
+
+        self._message_processor_set_up = False
 
     def on_start(self):
         try:
@@ -133,10 +137,12 @@ class GStreamer(ThreadingActor):
         bus = self._pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message', self._on_message)
+        self._message_processor_set_up = True
 
     def _teardown_message_processor(self):
-        bus = self._pipeline.get_bus()
-        bus.remove_signal_watch()
+        if self._message_processor_set_up:
+            bus = self._pipeline.get_bus()
+            bus.remove_signal_watch()
 
     def _on_new_source(self, element, pad):
         self._source = element.get_property('source')
