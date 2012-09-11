@@ -107,7 +107,8 @@ class GStreamer(ThreadingActor):
             return
 
         try:
-            mixerbin = gst.parse_bin_from_description(settings.MIXER, False)
+            mixerbin = gst.parse_bin_from_description(settings.MIXER,
+                ghost_unconnected_pads=False)
         except gobject.GError as ex:
             logger.warning('Failed to create mixer "%s": %s',
                 settings.MIXER, ex)
