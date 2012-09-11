@@ -14,9 +14,10 @@ class GStreamerTest(unittest.TestCase):
         settings.MIXER = 'fakemixer track_max_volume=65536'
         settings.OUTPUT = 'fakesink'
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.gstreamer = GStreamer()
+        self.gstreamer = GStreamer.start().proxy()
 
     def tearDown(self):
+        self.gstreamer.stop()
         settings.runtime.clear()
 
     def prepare_uri(self, uri):
@@ -25,21 +26,21 @@ class GStreamerTest(unittest.TestCase):
 
     def test_start_playback_existing_file(self):
         self.prepare_uri(self.song_uri)
-        self.assertTrue(self.gstreamer.start_playback())
+        self.assertTrue(self.gstreamer.start_playback().get())
 
     def test_start_playback_non_existing_file(self):
         self.prepare_uri(self.song_uri + 'bogus')
-        self.assertFalse(self.gstreamer.start_playback())
+        self.assertFalse(self.gstreamer.start_playback().get())
 
     def test_pause_playback_while_playing(self):
         self.prepare_uri(self.song_uri)
         self.gstreamer.start_playback()
-        self.assertTrue(self.gstreamer.pause_playback())
+        self.assertTrue(self.gstreamer.pause_playback().get())
 
     def test_stop_playback_while_playing(self):
         self.prepare_uri(self.song_uri)
         self.gstreamer.start_playback()
-        self.assertTrue(self.gstreamer.stop_playback())
+        self.assertTrue(self.gstreamer.stop_playback().get())
 
     @unittest.SkipTest
     def test_deliver_data(self):
@@ -51,8 +52,8 @@ class GStreamerTest(unittest.TestCase):
 
     def test_set_volume(self):
         for value in range(0, 101):
-            self.assertTrue(self.gstreamer.set_volume(value))
-            self.assertEqual(value, self.gstreamer.get_volume())
+            self.assertTrue(self.gstreamer.set_volume(value).get())
+            self.assertEqual(value, self.gstreamer.get_volume().get())
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
