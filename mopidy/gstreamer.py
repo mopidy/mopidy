@@ -62,6 +62,7 @@ class GStreamer(ThreadingActor):
 
     def on_stop(self):
         self._teardown_message_processor()
+        self._teardown_mixer()
         self._teardown_pipeline()
 
     def _setup_pipeline(self):
@@ -132,6 +133,11 @@ class GStreamer(ThreadingActor):
             elif track.flags & (gst.interfaces.MIXER_TRACK_MASTER |
                                 gst.interfaces.MIXER_TRACK_OUTPUT):
                 return track
+
+    def _teardown_mixer(self):
+        if self._mixer is not None:
+            (mixer, track) = self._mixer
+            mixer.set_state(gst.STATE_NULL)
 
     def _setup_message_processor(self):
         bus = self._pipeline.get_bus()
