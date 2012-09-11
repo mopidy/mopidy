@@ -87,9 +87,14 @@ class GStreamer(ThreadingActor):
         self._pipeline.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
-        # This will raise a gobject.GError if the description is bad.
-        self._output = gst.parse_bin_from_description(
-            settings.OUTPUT, ghost_unconnected_pads=True)
+        try:
+            self._output = gst.parse_bin_from_description(
+                settings.OUTPUT, ghost_unconnected_pads=True)
+        except gobject.GError as ex:
+            logger.error('Failed to create output "%s": %s',
+                settings.OUTPUT, ex)
+            process.exit_process()
+            return
 
         self._pipeline.add(self._output)
         gst.element_link_many(self._pipeline.get_by_name('queue'),
