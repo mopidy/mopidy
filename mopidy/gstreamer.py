@@ -101,8 +101,12 @@ class GStreamer(ThreadingActor):
             logger.info('Not setting up mixer.')
             return
 
-        # This will raise a gobject.GError if the description is bad.
-        mixerbin = gst.parse_bin_from_description(settings.MIXER, False)
+        try:
+            mixerbin = gst.parse_bin_from_description(settings.MIXER, False)
+        except gobject.GError as ex:
+            logger.warning('Failed to create mixer "%s": %s',
+                settings.MIXER, ex)
+            return
 
         # We assume that the bin will contain a single mixer.
         mixer = mixerbin.get_by_interface('GstMixer')
