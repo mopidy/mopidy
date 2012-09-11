@@ -71,6 +71,8 @@ v0.8 (in development)
 - Created a Spotify track proxy that will switch to using loaded data as soon
   as it becomes available. Fixes :issue:`72`.
 
+- Fixed crash on lookup of unknown path when using local backend.
+
 
 v0.7.3 (2012-08-11)
 ===================

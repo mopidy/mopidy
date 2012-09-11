@@ -203,7 +203,8 @@ class LocalLibraryProvider(BaseLibraryProvider):
         try:
             return self._uri_mapping[uri]
         except KeyError:
-            raise LookupError('%s not found.' % uri)
+            logger.debug(u'Failed to lookup "%s"', uri)
+            return None
 
     def find_exact(self, **query):
         self._validate_query(query)
