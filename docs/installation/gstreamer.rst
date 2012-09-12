@@ -2,7 +2,7 @@
 GStreamer installation
 **********************
 
-To use the Mopidy, you first need to install GStreamer and the GStreamer Python
+To use Mopidy, you first need to install GStreamer and the GStreamer Python
 bindings.
 
 
