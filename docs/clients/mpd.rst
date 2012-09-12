@@ -268,23 +268,19 @@ All in all, PMix works but can do less than MPDroid. Use MPDroid instead.
 
 .. _ios_mpd_clients:
 
-iPhone/iPod Touch clients
-=========================
-
-impdclient
-----------
-
-There's an open source MPD client for iOS called `impdclient
-<http://code.google.com/p/impdclient/>`_ which has not seen any updates since
-August 2008. So far, we've not heard of users trying it with Mopidy. Please
-notify us of your successes and/or problems if you do try it out.
-
+iOS clients
+===========
 
 MPod
 ----
 
-The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ client can be
-installed from the `iTunes Store
+Test date:
+    2011-01-19
+Tested version:
+    1.5.1
+
+The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ iPhone/iPod Touch
+app can be installed from the `iTunes Store
 <http://itunes.apple.com/us/app/mpod/id285063020>`_.
 
 Users have reported varying success in using MPoD together with Mopidy. Thus,
@@ -328,3 +324,10 @@ we've tested a fresh install of MPoD 1.5.1 with Mopidy as of revision e7ed28d
 - **Wishlist:** MPoD supports autodetection/-configuration of MPD servers
   through the use of Bonjour. Mopidy does not currently support this, but there
   is a wishlist bug at :issue:`39`.
+
+
+MPaD
+----
+
+The `MPaD <http://www.katoemba.net/makesnosenseatall/mpad/>`_ iPad app works
+with Mopidy. A complete review may appear here in the future.
