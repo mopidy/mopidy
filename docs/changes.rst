@@ -951,7 +951,7 @@ Since the previous release Mopidy has seen about 300 commits, more than 200 new
 tests, a libspotify release, and major feature additions to Spotify. The new
 releases from Spotify have lead to updates to our dependencies, and also to new
 bugs in Mopidy. Thus, this is primarily a bugfix release, even though the not
-yet finished work on a Gstreamer backend have been merged.
+yet finished work on a GStreamer backend have been merged.
 
 All users are recommended to upgrade to 0.1.0a1, and should at the same time
 ensure that they have the latest versions of our dependencies: Despotify r508
@@ -976,7 +976,7 @@ As always, report problems at our IRC channel or our issue tracker. Thanks!
   - Several new generic features, like shuffle, consume, and playlist repeat.
     (Fixes: :issue:`3`)
   - **[Work in Progress]** A new backend for playing music from a local music
-    archive using the Gstreamer library.
+    archive using the GStreamer library.
 
 - Made :class:`mopidy.mixers.alsa.AlsaMixer` work on machines without a mixer
   named "Master".
