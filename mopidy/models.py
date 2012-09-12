@@ -157,8 +157,8 @@ class Track(ImmutableObject):
     :type album: :class:`Album`
     :param track_no: track number in album
     :type track_no: integer
-    :param date: track release date
-    :type date: :class:`datetime.date`
+    :param date: track release date (YYYY or YYYY-MM-DD)
+    :type date: string
     :param length: track length in milliseconds
     :type length: integer
     :param bitrate: bitrate in kbit/s

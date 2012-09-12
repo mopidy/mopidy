@@ -338,7 +338,7 @@ class TrackTest(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, track, 'track_no', None)
 
     def test_date(self):
-        date = datetime.date(1977, 1, 1)
+        date = '1977-01-01'
         track = Track(date=date)
         self.assertEqual(track.date, date)
         self.assertRaises(AttributeError, setattr, track, 'date', None)
@@ -434,7 +434,7 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(hash(track1), hash(track2))
 
     def test_eq_date(self):
-        date = datetime.date.today()
+        date = '1977-01-01'
         track1 = Track(date=date)
         track2 = Track(date=date)
         self.assertEqual(track1, track2)
@@ -459,7 +459,7 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(hash(track1), hash(track2))
 
     def test_eq(self):
-        date = datetime.date.today()
+        date = '1977-01-01'
         artists = [Artist()]
         album = Album()
         track1 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
@@ -508,8 +508,8 @@ class TrackTest(unittest.TestCase):
         self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne_date(self):
-        track1 = Track(date=datetime.date.today())
-        track2 = Track(date=datetime.date.today()-datetime.timedelta(days=1))
+        track1 = Track(date='1977-01-01')
+        track2 = Track(date='1977-01-02')
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 
@@ -534,12 +534,12 @@ class TrackTest(unittest.TestCase):
     def test_ne(self):
         track1 = Track(uri=u'uri1', name=u'name1',
             artists=[Artist(name=u'name1')], album=Album(name=u'name1'),
-            track_no=1, date=datetime.date.today(), length=100, bitrate=100,
+            track_no=1, date='1977-01-01', length=100, bitrate=100,
             musicbrainz_id='id1')
         track2 = Track(uri=u'uri2', name=u'name2',
             artists=[Artist(name=u'name2')], album=Album(name=u'name2'),
-            track_no=2, date=datetime.date.today()-datetime.timedelta(days=1),
-            length=200, bitrate=200, musicbrainz_id='id2')
+            track_no=2, date='1977-01-02', length=200, bitrate=200,
+            musicbrainz_id='id2')
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 

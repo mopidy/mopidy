@@ -242,7 +242,7 @@ def _list_date(context, query):
     playlist = context.backend.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.date is not None:
-            dates.add((u'Date', track.date.strftime('%Y-%m-%d')))
+            dates.add((u'Date', track.date))
     return dates
 
 @handle_request(r'^listall "(?P<uri>[^"]+)"')

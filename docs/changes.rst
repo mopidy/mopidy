@@ -73,6 +73,9 @@ v0.8 (in development)
 
 - Fixed crash on lookup of unknown path when using local backend.
 
+- Support tracks with only release year, and not a full release date, like e.g.
+  Spotify tracks.
+
 
 v0.7.3 (2012-08-11)
 ===================
