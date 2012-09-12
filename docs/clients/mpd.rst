@@ -30,19 +30,12 @@ ncmpcpp
 A console client that generally works well with Mopidy, and is regularly used
 by Mopidy developers.
 
-Search
-^^^^^^
-
-Search only works for ncmpcpp versions 0.5.1 and higher, and in two of the
-three search modes:
+Search only works in two of the three search modes:
 
 - "Match if tag contains search phrase (regexes supported)" -- Does not work.
   The client tries to fetch all known metadata and do the search client side.
 - "Match if tag contains searched phrase (no regexes)" -- Works.
 - "Match only if both values are the same" -- Works.
-
-If you run Ubuntu 10.04 or older, you can fetch an updated version of ncmpcpp
-from `Launchpad <https://launchpad.net/ubuntu/+source/ncmpcpp>`_.
 
 Communication mode
 ^^^^^^^^^^^^^^^^^^
