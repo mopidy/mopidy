@@ -37,19 +37,6 @@ Search only works in two of the three search modes:
 - "Match if tag contains searched phrase (no regexes)" -- Works.
 - "Match only if both values are the same" -- Works.
 
-Communication mode
-^^^^^^^^^^^^^^^^^^
-
-In newer versions of ncmpcpp, like ncmpcpp 0.5.5 shipped with Ubuntu 11.04,
-ncmcpp defaults to "notifications" mode for MPD communications, which Mopidy
-did not support before Mopidy 0.6. To workaround this limitation in earlier
-versions of Mopidy, edit the ncmpcpp configuration file at
-``~/.ncmpcpp/config`` and add the following setting::
-
-    mpd_communication_mode = "polling"
-
-If you use Mopidy 0.6 or newer, you don't need to change anything.
-
 
 Graphical clients
 =================
