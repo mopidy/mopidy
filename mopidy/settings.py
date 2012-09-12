@@ -1,5 +1,5 @@
 """
-Available settings and their default values.
+All available settings and their default values.
 
 .. warning::
 
@@ -13,6 +13,10 @@ Available settings and their default values.
 #: Default::
 #:
 #:     BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
+#:
+#: Other typical values::
+#:
+#:     BACKENDS = (u'mopidy.backends.local.LocalBackend',)
 #:
 #: .. note::
 #:     Currently only the first backend in the list is used.
@@ -106,9 +110,9 @@ LOCAL_TAG_CACHE_FILE = None
 #: Sound mixer to use.
 #:
 #: Expects a GStreamer mixer to use, typical values are:
-#: alsamixer, pulsemixer, oss4mixer, ossmixer.
+#: ``alsamixer``, ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
 #:
-#: Setting this to ``None`` means no volume control.
+#: Setting this to :class:`None` turns off volume control.
 #:
 #: Default::
 #:
@@ -118,7 +122,7 @@ MIXER = u'autoaudiomixer'
 #: Sound mixer track to use.
 #:
 #: Name of the mixer track to use. If this is not set we will try to find the
-#: output track with master set. As an example, using ``alsamixer`` you would
+#: master output track. As an example, using ``alsamixer`` you would
 #: typically set this to ``Master`` or ``PCM``.
 #:
 #: Default::
@@ -128,7 +132,9 @@ MIXER_TRACK = None
 
 #: Which address Mopidy's MPD server should bind to.
 #:
-#:Examples:
+#: Used by :mod:`mopidy.frontends.mpd`.
+#:
+#: Examples:
 #:
 #: ``127.0.0.1``
 #:     Listens only on the IPv4 loopback interface. Default.
@@ -142,15 +148,21 @@ MPD_SERVER_HOSTNAME = u'127.0.0.1'
 
 #: Which TCP port Mopidy's MPD server should listen to.
 #:
+#: Used by :mod:`mopidy.frontends.mpd`.
+#:
 #: Default: 6600
 MPD_SERVER_PORT = 6600
 
 #: The password required for connecting to the MPD server.
 #:
+#: Used by :mod:`mopidy.frontends.mpd`.
+#:
 #: Default: :class:`None`, which means no password required.
 MPD_SERVER_PASSWORD = None
 
 #: The maximum number of concurrent connections the MPD server will accept.
+#:
+#: Used by :mod:`mopidy.frontends.mpd`.
 #:
 #: Default: 20
 MPD_SERVER_MAX_CONNECTIONS = 20
