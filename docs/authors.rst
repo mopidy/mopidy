@@ -9,6 +9,9 @@ Contributors to Mopidy in the order of appearance:
 - Thomas Adamcik <adamcik@samfundet.no>
 - Kristian Klette <klette@klette.us>
 
+A complete list of persons with commits accepted into the Mopidy repo can be
+found at `GitHub <https://github.com/mopidy/mopidy/graphs/contributors>`_.
+
 
 Showing your appreciation
 =========================
