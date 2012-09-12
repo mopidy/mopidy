@@ -381,7 +381,7 @@ class GStreamer(ThreadingActor):
         deliver raw audio data to GStreamer.
 
         :param track: the current track
-        :type track: :class:`mopidy.modes.Track`
+        :type track: :class:`mopidy.models.Track`
         """
         taglist = gst.TagList()
         artists = [a for a in (track.artists or []) if a.name]
