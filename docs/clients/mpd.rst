@@ -230,7 +230,7 @@ Rating:
 - When using Android 4.1.1, MPDroid crashes here and there, e.g. when having an
   empty current playlist and pressing play.
 
-Disregarding Adnroid 4.x problems, MPDroid is a good MPD client.
+Disregarding Android 4.x problems, MPDroid is a good MPD client.
 
 
 PMix
