@@ -1,12 +1,13 @@
-from mopidy import core
+from mopidy.core import PlaybackState
 from mopidy.models import Track
 
 from tests import unittest
 from tests.frontends.mpd import protocol
 
-PAUSED = core.PlaybackController.PAUSED
-PLAYING = core.PlaybackController.PLAYING
-STOPPED = core.PlaybackController.STOPPED
+
+PAUSED = PlaybackState.PAUSED
+PLAYING = PlaybackState.PLAYING
+STOPPED = PlaybackState.STOPPED
 
 
 class PlaybackOptionsHandlerTest(protocol.BaseTestCase):

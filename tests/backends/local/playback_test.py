@@ -2,6 +2,7 @@ import sys
 
 from mopidy import settings
 from mopidy.backends.local import LocalBackend
+from mopidy.core import PlaybackState
 from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
@@ -39,14 +40,14 @@ class LocalPlaybackControllerTest(PlaybackControllerTest, unittest.TestCase):
     def test_play_mp3(self):
         self.add_track('blank.mp3')
         self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
 
     def test_play_ogg(self):
         self.add_track('blank.ogg')
         self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
 
     def test_play_flac(self):
         self.add_track('blank.flac')
         self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)

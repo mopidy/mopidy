@@ -14,8 +14,9 @@ except ImportError as import_error:
 
 from pykka.registry import ActorRegistry
 
-from mopidy import core, settings
+from mopidy import settings
 from mopidy.backends.base import Backend
+from mopidy.core import PlaybackState
 from mopidy.utils.process import exit_process
 
 # Must be done before dbus.SessionBus() is called
@@ -197,11 +198,11 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.PlayPause not allowed', PLAYER_IFACE)
             return
         state = self.backend.playback.state.get()
-        if state == core.PlaybackController.PLAYING:
+        if state == PlaybackState.PLAYING:
             self.backend.playback.pause().get()
-        elif state == core.PlaybackController.PAUSED:
+        elif state == PlaybackState.PAUSED:
             self.backend.playback.resume().get()
-        elif state == core.PlaybackController.STOPPED:
+        elif state == PlaybackState.STOPPED:
             self.backend.playback.play().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
@@ -219,7 +220,7 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
             return
         state = self.backend.playback.state.get()
-        if state == core.PlaybackController.PAUSED:
+        if state == PlaybackState.PAUSED:
             self.backend.playback.resume().get()
         else:
             self.backend.playback.play().get()
@@ -286,11 +287,11 @@ class MprisObject(dbus.service.Object):
 
     def get_PlaybackStatus(self):
         state = self.backend.playback.state.get()
-        if state == core.PlaybackController.PLAYING:
+        if state == PlaybackState.PLAYING:
             return 'Playing'
-        elif state == core.PlaybackController.PAUSED:
+        elif state == PlaybackState.PAUSED:
             return 'Paused'
-        elif state == core.PlaybackController.STOPPED:
+        elif state == PlaybackState.STOPPED:
             return 'Stopped'
 
     def get_LoopStatus(self):
