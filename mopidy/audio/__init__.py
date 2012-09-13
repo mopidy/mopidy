@@ -13,12 +13,12 @@ from mopidy.backends.base import Backend
 from mopidy.utils import process
 
 # Trigger install of gst mixer plugins
-from mopidy import mixers
+from mopidy.audio import mixers
 
-logger = logging.getLogger('mopidy.gstreamer')
+logger = logging.getLogger('mopidy.audio')
 
 
-class GStreamer(ThreadingActor):
+class Audio(ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
 
@@ -31,7 +31,7 @@ class GStreamer(ThreadingActor):
     """
 
     def __init__(self):
-        super(GStreamer, self).__init__()
+        super(Audio, self).__init__()
 
         self._default_caps = gst.Caps("""
             audio/x-raw-int,

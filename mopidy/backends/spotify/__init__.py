@@ -3,9 +3,8 @@ import logging
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import core, settings
+from mopidy import audio, core, settings
 from mopidy.backends import base
-from mopidy.gstreamer import GStreamer
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
@@ -67,7 +66,7 @@ class SpotifyBackend(ThreadingActor, base.Backend):
 
         self.uri_schemes = [u'spotify']
 
-        self.gstreamer = None
+        self.audio = None
         self.spotify = None
 
         # Fail early if settings are not present
@@ -75,10 +74,10 @@ class SpotifyBackend(ThreadingActor, base.Backend):
         self.password = settings.SPOTIFY_PASSWORD
 
     def on_start(self):
-        gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, \
-            'Expected exactly one running GStreamer.'
-        self.gstreamer = gstreamer_refs[0].proxy()
+        audio_refs = ActorRegistry.get_by_class(audio.Audio)
+        assert len(audio_refs) == 1, \
+            'Expected exactly one running Audio instance.'
+        self.audio = audio_refs[0].proxy()
 
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         self.spotify = self._connect()

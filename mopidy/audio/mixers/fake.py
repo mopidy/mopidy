@@ -3,7 +3,7 @@ pygst.require('0.10')
 import gobject
 import gst
 
-from mopidy.mixers import create_track
+from mopidy.audio.mixers import create_track
 
 
 class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
