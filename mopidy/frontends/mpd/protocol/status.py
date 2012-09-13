@@ -1,6 +1,6 @@
 import pykka.future
 
-from mopidy.backends.base import PlaybackController
+from mopidy import core
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.translator import track_to_mpd_format
@@ -194,8 +194,8 @@ def status(context):
     if futures['playback.current_cp_track'].get() is not None:
         result.append(('song', _status_songpos(futures)))
         result.append(('songid', _status_songid(futures)))
-    if futures['playback.state'].get() in (PlaybackController.PLAYING,
-            PlaybackController.PAUSED):
+    if futures['playback.state'].get() in (core.PlaybackController.PLAYING,
+            core.PlaybackController.PAUSED):
         result.append(('time', _status_time(futures)))
         result.append(('elapsed', _status_time_elapsed(futures)))
         result.append(('bitrate', _status_bitrate(futures)))
@@ -239,11 +239,11 @@ def _status_songpos(futures):
 
 def _status_state(futures):
     state = futures['playback.state'].get()
-    if state == PlaybackController.PLAYING:
+    if state == core.PlaybackController.PLAYING:
         return u'play'
-    elif state == PlaybackController.STOPPED:
+    elif state == core.PlaybackController.STOPPED:
         return u'stop'
-    elif state == PlaybackController.PAUSED:
+    elif state == core.PlaybackController.PAUSED:
         return u'pause'
 
 def _status_time(futures):

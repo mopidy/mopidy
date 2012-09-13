@@ -1,12 +1,12 @@
-.. _backend-provider-api:
+.. _backend-api:
 
-********************
-Backend provider API
-********************
+***********
+Backend API
+***********
 
-The backend provider API is the interface that must be implemented when you
-create a backend. If you are working on a frontend and need to access the
-backend, see the :ref:`backend-controller-api`.
+The backend API is the interface that must be implemented when you create a
+backend. If you are working on a frontend and need to access the backend, see
+the :ref:`core-api`.
 
 
 Playback provider
@@ -30,8 +30,8 @@ Library provider
     :members:
 
 
-Backend provider implementations
-================================
+Backend implementations
+=======================
 
 * :mod:`mopidy.backends.dummy`
 * :mod:`mopidy.backends.spotify`
