@@ -2,8 +2,8 @@ import mock
 import random
 import time
 
+from mopidy import audio
 from mopidy.models import Track
-from mopidy.gstreamer import GStreamer
 
 from tests import unittest
 from tests.backends.base import populate_playlist
@@ -16,7 +16,7 @@ class PlaybackControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
-        self.backend.gstreamer = mock.Mock(spec=GStreamer)
+        self.backend.audio = mock.Mock(spec=audio.Audio)
         self.playback = self.backend.playback
         self.current_playlist = self.backend.current_playlist
 
@@ -729,7 +729,7 @@ class PlaybackControllerTest(object):
     def test_time_position_when_stopped(self):
         future = mock.Mock()
         future.get = mock.Mock(return_value=0)
-        self.backend.gstreamer.get_position = mock.Mock(return_value=future)
+        self.backend.audio.get_position = mock.Mock(return_value=future)
 
         self.assertEqual(self.playback.time_position, 0)
 
@@ -737,7 +737,7 @@ class PlaybackControllerTest(object):
     def test_time_position_when_stopped_with_playlist(self):
         future = mock.Mock()
         future.get = mock.Mock(return_value=0)
-        self.backend.gstreamer.get_position = mock.Mock(return_value=future)
+        self.backend.audio.get_position = mock.Mock(return_value=future)
 
         self.assertEqual(self.playback.time_position, 0)
 

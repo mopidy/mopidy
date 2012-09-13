@@ -7,10 +7,9 @@ import shutil
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import core, settings, DATA_PATH
+from mopidy import audio, core, settings, DATA_PATH
 from mopidy.backends import base
 from mopidy.models import Playlist, Track, Album
-from mopidy.gstreamer import GStreamer
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
@@ -58,13 +57,13 @@ class LocalBackend(ThreadingActor, base.Backend):
 
         self.uri_schemes = [u'file']
 
-        self.gstreamer = None
+        self.audio = None
 
     def on_start(self):
-        gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, \
-            'Expected exactly one running GStreamer.'
-        self.gstreamer = gstreamer_refs[0].proxy()
+        audio_refs = ActorRegistry.get_by_class(audio.Audio)
+        assert len(audio_refs) == 1, \
+            'Expected exactly one running Audio instance.'
+        self.audio = audio_refs[0].proxy()
 
 
 class LocalPlaybackController(core.PlaybackController):
@@ -76,32 +75,32 @@ class LocalPlaybackController(core.PlaybackController):
 
     @property
     def time_position(self):
-        return self.backend.gstreamer.get_position().get()
+        return self.backend.audio.get_position().get()
 
 
 class LocalPlaybackProvider(base.BasePlaybackProvider):
     def pause(self):
-        return self.backend.gstreamer.pause_playback().get()
+        return self.backend.audio.pause_playback().get()
 
     def play(self, track):
-        self.backend.gstreamer.prepare_change()
-        self.backend.gstreamer.set_uri(track.uri).get()
-        return self.backend.gstreamer.start_playback().get()
+        self.backend.audio.prepare_change()
+        self.backend.audio.set_uri(track.uri).get()
+        return self.backend.audio.start_playback().get()
 
     def resume(self):
-        return self.backend.gstreamer.start_playback().get()
+        return self.backend.audio.start_playback().get()
 
     def seek(self, time_position):
-        return self.backend.gstreamer.set_position(time_position).get()
+        return self.backend.audio.set_position(time_position).get()
 
     def stop(self):
-        return self.backend.gstreamer.stop_playback().get()
+        return self.backend.audio.stop_playback().get()
 
     def get_volume(self):
-        return self.backend.gstreamer.get_volume().get()
+        return self.backend.audio.get_volume().get()
 
     def set_volume(self, volume):
-        self.backend.gstreamer.set_volume(volume).get()
+        self.backend.audio.set_volume(volume).get()
 
 
 class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
