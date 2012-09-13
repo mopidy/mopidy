@@ -3,6 +3,7 @@ import logging
 from spotify import Link, SpotifyError
 
 from mopidy.backends.base import BasePlaybackProvider
+from mopidy.core import PlaybackState
 
 logger = logging.getLogger('mopidy.backends.spotify.playback')
 
@@ -11,7 +12,7 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
         return self.backend.audio.pause_playback()
 
     def play(self, track):
-        if self.backend.playback.state == self.backend.playback.PLAYING:
+        if self.backend.playback.state == PlaybackState.PLAYING:
             self.backend.spotify.session.play(0)
         if track.uri is None:
             return False

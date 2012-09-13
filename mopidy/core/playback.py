@@ -20,6 +20,22 @@ def option_wrapper(name, default):
     return property(get_option, set_option)
 
 
+
+class PlaybackState(object):
+    """
+    Enum of playback states.
+    """
+
+    #: Constant representing the paused state.
+    PAUSED = u'paused'
+
+    #: Constant representing the playing state.
+    PLAYING = u'playing'
+
+    #: Constant representing the stopped state.
+    STOPPED = u'stopped'
+
+
 class PlaybackController(object):
     """
     :param backend: the backend
@@ -32,15 +48,6 @@ class PlaybackController(object):
     # Too many instance attributes
 
     pykka_traversable = True
-
-    #: Constant representing the paused state.
-    PAUSED = u'paused'
-
-    #: Constant representing the playing state.
-    PLAYING = u'playing'
-
-    #: Constant representing the stopped state.
-    STOPPED = u'stopped'
 
     #: :class:`True`
     #:     Tracks are removed from the playlist when they have been played.
@@ -77,7 +84,7 @@ class PlaybackController(object):
     def __init__(self, backend, provider):
         self.backend = backend
         self.provider = provider
-        self._state = self.STOPPED
+        self._state = PlaybackState.STOPPED
         self._shuffled = []
         self._first_shuffle = True
         self.play_time_accumulated = 0
@@ -287,24 +294,26 @@ class PlaybackController(object):
 
         # FIXME play_time stuff assumes backend does not have a better way of
         # handeling this stuff :/
-        if (old_state in (self.PLAYING, self.STOPPED)
-                and new_state == self.PLAYING):
+        if (old_state in (PlaybackState.PLAYING, PlaybackState.STOPPED)
+                and new_state == PlaybackState.PLAYING):
             self._play_time_start()
-        elif old_state == self.PLAYING and new_state == self.PAUSED:
+        elif (old_state == PlaybackState.PLAYING
+                and new_state == PlaybackState.PAUSED):
             self._play_time_pause()
-        elif old_state == self.PAUSED and new_state == self.PLAYING:
+        elif (old_state == PlaybackState.PAUSED
+                and new_state == PlaybackState.PLAYING):
             self._play_time_resume()
 
     @property
     def time_position(self):
         """Time position in milliseconds."""
-        if self.state == self.PLAYING:
+        if self.state == PlaybackState.PLAYING:
             time_since_started = (self._current_wall_time -
                 self.play_time_started)
             return self.play_time_accumulated + time_since_started
-        elif self.state == self.PAUSED:
+        elif self.state == PlaybackState.PAUSED:
             return self.play_time_accumulated
-        elif self.state == self.STOPPED:
+        elif self.state == PlaybackState.STOPPED:
             return 0
 
     def _play_time_start(self):
@@ -345,16 +354,16 @@ class PlaybackController(object):
         old_state = self.state
         self.stop()
         self.current_cp_track = cp_track
-        if old_state == self.PLAYING:
+        if old_state == PlaybackState.PLAYING:
             self.play(on_error_step=on_error_step)
-        elif old_state == self.PAUSED:
+        elif old_state == PlaybackState.PAUSED:
             self.pause()
 
     def on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
         """
-        if self.state == self.STOPPED:
+        if self.state == PlaybackState.STOPPED:
             return
 
         original_cp_track = self.current_cp_track
@@ -398,7 +407,7 @@ class PlaybackController(object):
     def pause(self):
         """Pause playback."""
         if self.provider.pause():
-            self.state = self.PAUSED
+            self.state = PlaybackState.PAUSED
             self._trigger_track_playback_paused()
 
     def play(self, cp_track=None, on_error_step=1):
@@ -417,7 +426,7 @@ class PlaybackController(object):
         if cp_track is not None:
             assert cp_track in self.backend.current_playlist.cp_tracks
         elif cp_track is None:
-            if self.state == self.PAUSED:
+            if self.state == PlaybackState.PAUSED:
                 return self.resume()
             elif self.current_cp_track is not None:
                 cp_track = self.current_cp_track
@@ -428,7 +437,7 @@ class PlaybackController(object):
 
         if cp_track is not None:
             self.current_cp_track = cp_track
-            self.state = self.PLAYING
+            self.state = PlaybackState.PLAYING
             if not self.provider.play(cp_track.track):
                 # Track is not playable
                 if self.random and self._shuffled:
@@ -455,8 +464,8 @@ class PlaybackController(object):
 
     def resume(self):
         """If paused, resume playing the current track."""
-        if self.state == self.PAUSED and self.provider.resume():
-            self.state = self.PLAYING
+        if self.state == PlaybackState.PAUSED and self.provider.resume():
+            self.state = PlaybackState.PLAYING
             self._trigger_track_playback_resumed()
 
     def seek(self, time_position):
@@ -470,9 +479,9 @@ class PlaybackController(object):
         if not self.backend.current_playlist.tracks:
             return False
 
-        if self.state == self.STOPPED:
+        if self.state == PlaybackState.STOPPED:
             self.play()
-        elif self.state == self.PAUSED:
+        elif self.state == PlaybackState.PAUSED:
             self.resume()
 
         if time_position < 0:
@@ -497,10 +506,10 @@ class PlaybackController(object):
             stopping
         :type clear_current_track: boolean
         """
-        if self.state != self.STOPPED:
+        if self.state != PlaybackState.STOPPED:
             if self.provider.stop():
                 self._trigger_track_playback_ended()
-                self.state = self.STOPPED
+                self.state = PlaybackState.STOPPED
         if clear_current_track:
             self.current_cp_track = None
 
