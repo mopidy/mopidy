@@ -14,9 +14,8 @@ except ImportError as import_error:
 
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
+from mopidy import core, settings
 from mopidy.backends.base import Backend
-from mopidy.backends.base.playback import PlaybackController
 from mopidy.utils.process import exit_process
 
 # Must be done before dbus.SessionBus() is called
@@ -198,11 +197,11 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.PlayPause not allowed', PLAYER_IFACE)
             return
         state = self.backend.playback.state.get()
-        if state == PlaybackController.PLAYING:
+        if state == core.PlaybackController.PLAYING:
             self.backend.playback.pause().get()
-        elif state == PlaybackController.PAUSED:
+        elif state == core.PlaybackController.PAUSED:
             self.backend.playback.resume().get()
-        elif state == PlaybackController.STOPPED:
+        elif state == core.PlaybackController.STOPPED:
             self.backend.playback.play().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
@@ -220,7 +219,7 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
             return
         state = self.backend.playback.state.get()
-        if state == PlaybackController.PAUSED:
+        if state == core.PlaybackController.PAUSED:
             self.backend.playback.resume().get()
         else:
             self.backend.playback.play().get()
@@ -287,11 +286,11 @@ class MprisObject(dbus.service.Object):
 
     def get_PlaybackStatus(self):
         state = self.backend.playback.state.get()
-        if state == PlaybackController.PLAYING:
+        if state == core.PlaybackController.PLAYING:
             return 'Playing'
-        elif state == PlaybackController.PAUSED:
+        elif state == core.PlaybackController.PAUSED:
             return 'Paused'
-        elif state == PlaybackController.STOPPED:
+        elif state == core.PlaybackController.STOPPED:
             return 'Stopped'
 
     def get_LoopStatus(self):

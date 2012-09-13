@@ -1,4 +1,4 @@
-from mopidy.backends.base import PlaybackController
+from mopidy import core
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
@@ -105,10 +105,10 @@ def pause(context, state=None):
     """
     if state is None:
         if (context.backend.playback.state.get() ==
-                PlaybackController.PLAYING):
+                core.PlaybackController.PLAYING):
             context.backend.playback.pause()
         elif (context.backend.playback.state.get() ==
-                PlaybackController.PAUSED):
+                core.PlaybackController.PAUSED):
             context.backend.playback.resume()
     elif int(state):
         context.backend.playback.pause()
@@ -185,9 +185,11 @@ def playpos(context, songpos):
         raise MpdArgError(u'Bad song index', command=u'play')
 
 def _play_minus_one(context):
-    if (context.backend.playback.state.get() == PlaybackController.PLAYING):
+    if (context.backend.playback.state.get() ==
+            core.PlaybackController.PLAYING):
         return # Nothing to do
-    elif (context.backend.playback.state.get() == PlaybackController.PAUSED):
+    elif (context.backend.playback.state.get() ==
+            core.PlaybackController.PAUSED):
         return context.backend.playback.resume().get()
     elif context.backend.playback.current_cp_track.get() is not None:
         cp_track = context.backend.playback.current_cp_track.get()

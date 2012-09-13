@@ -2,9 +2,8 @@ import sys
 
 import mock
 
-from mopidy import OptionalDependencyError
+from mopidy import core, OptionalDependencyError
 from mopidy.backends.dummy import DummyBackend
-from mopidy.backends.base.playback import PlaybackController
 from mopidy.models import Album, Artist, Track
 
 try:
@@ -14,9 +13,9 @@ except OptionalDependencyError:
 
 from tests import unittest
 
-PLAYING = PlaybackController.PLAYING
-PAUSED = PlaybackController.PAUSED
-STOPPED = PlaybackController.STOPPED
+PLAYING = core.PlaybackController.PLAYING
+PAUSED = core.PlaybackController.PAUSED
+STOPPED = core.PlaybackController.STOPPED
 
 
 @unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
