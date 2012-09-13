@@ -331,9 +331,14 @@ class Audio(ThreadingActor):
         """
         Get volume level of the installed mixer.
 
-           0 == muted.
-         100 == max volume for given system.
-        None == no mixer present, i.e. volume unknown.
+        Example values:
+
+        0:
+            Muted.
+        100:
+            Max volume for given system.
+        :class:`None`:
+            No mixer present, so the volume is unknown.
 
         :rtype: int in range [0..100] or :class:`None`
         """
