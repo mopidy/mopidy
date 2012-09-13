@@ -30,7 +30,7 @@ sys.path.insert(0,
 
 from mopidy import (get_version, settings, OptionalDependencyError,
     SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
-from mopidy.gstreamer import GStreamer
+from mopidy.audio import Audio
 from mopidy.utils import get_class
 from mopidy.utils.deps import list_deps_optparse_callback
 from mopidy.utils.log import setup_logging
@@ -51,7 +51,7 @@ def main():
         setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
-        setup_gstreamer()
+        setup_audio()
         setup_backend()
         setup_frontends()
         loop.run()
@@ -65,7 +65,7 @@ def main():
         loop.quit()
         stop_frontends()
         stop_backend()
-        stop_gstreamer()
+        stop_audio()
         stop_remaining_actors()
 
 
@@ -117,12 +117,12 @@ def setup_settings(interactive):
         sys.exit(1)
 
 
-def setup_gstreamer():
-    GStreamer.start()
+def setup_audio():
+    Audio.start()
 
 
-def stop_gstreamer():
-    stop_actors_by_class(GStreamer)
+def stop_audio():
+    stop_actors_by_class(Audio)
 
 def setup_backend():
     get_class(settings.BACKENDS[0]).start()
