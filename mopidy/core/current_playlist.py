@@ -5,7 +5,9 @@ import random
 from mopidy.listeners import BackendListener
 from mopidy.models import CpTrack
 
-logger = logging.getLogger('mopidy.backends.base')
+
+logger = logging.getLogger('mopidy.core')
+
 
 class CurrentPlaylistController(object):
     """

@@ -7,11 +7,8 @@ import shutil
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings, DATA_PATH
-from mopidy.backends.base import (Backend, CurrentPlaylistController,
-    LibraryController, BaseLibraryProvider, PlaybackController,
-    BasePlaybackProvider, StoredPlaylistsController,
-    BaseStoredPlaylistsProvider)
+from mopidy import core, settings, DATA_PATH
+from mopidy.backends import base
 from mopidy.models import Playlist, Track, Album
 from mopidy.gstreamer import GStreamer
 
@@ -27,11 +24,9 @@ if not DEFAULT_MUSIC_PATH or DEFAULT_MUSIC_PATH == os.path.expanduser(u'~'):
     DEFAULT_MUSIC_PATH = os.path.expanduser(u'~/music')
 
 
-class LocalBackend(ThreadingActor, Backend):
+class LocalBackend(ThreadingActor, base.Backend):
     """
     A backend for playing music from a local music archive.
-
-    **Issues:** https://github.com/mopidy/mopidy/issues?labels=backend-local
 
     **Dependencies:**
 
@@ -47,10 +42,10 @@ class LocalBackend(ThreadingActor, Backend):
     def __init__(self, *args, **kwargs):
         super(LocalBackend, self).__init__(*args, **kwargs)
 
-        self.current_playlist = CurrentPlaylistController(backend=self)
+        self.current_playlist = core.CurrentPlaylistController(backend=self)
 
         library_provider = LocalLibraryProvider(backend=self)
-        self.library = LibraryController(backend=self,
+        self.library = core.LibraryController(backend=self,
             provider=library_provider)
 
         playback_provider = LocalPlaybackProvider(backend=self)
@@ -58,7 +53,7 @@ class LocalBackend(ThreadingActor, Backend):
             provider=playback_provider)
 
         stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
-        self.stored_playlists = StoredPlaylistsController(backend=self,
+        self.stored_playlists = core.StoredPlaylistsController(backend=self,
             provider=stored_playlists_provider)
 
         self.uri_schemes = [u'file']
@@ -72,7 +67,7 @@ class LocalBackend(ThreadingActor, Backend):
         self.gstreamer = gstreamer_refs[0].proxy()
 
 
-class LocalPlaybackController(PlaybackController):
+class LocalPlaybackController(core.PlaybackController):
     def __init__(self, *args, **kwargs):
         super(LocalPlaybackController, self).__init__(*args, **kwargs)
 
@@ -84,7 +79,7 @@ class LocalPlaybackController(PlaybackController):
         return self.backend.gstreamer.get_position().get()
 
 
-class LocalPlaybackProvider(BasePlaybackProvider):
+class LocalPlaybackProvider(base.BasePlaybackProvider):
     def pause(self):
         return self.backend.gstreamer.pause_playback().get()
 
@@ -109,7 +104,7 @@ class LocalPlaybackProvider(BasePlaybackProvider):
         self.backend.gstreamer.set_volume(volume).get()
 
 
-class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
+class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
     def __init__(self, *args, **kwargs):
         super(LocalStoredPlaylistsProvider, self).__init__(*args, **kwargs)
         self._folder = settings.LOCAL_PLAYLIST_PATH or DEFAULT_PLAYLIST_PATH
@@ -182,7 +177,7 @@ class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
         self._playlists.append(playlist)
 
 
-class LocalLibraryProvider(BaseLibraryProvider):
+class LocalLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(LocalLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}

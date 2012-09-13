@@ -3,16 +3,15 @@ import logging
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
-from mopidy.backends.base import (Backend, CurrentPlaylistController,
-    LibraryController, PlaybackController, StoredPlaylistsController)
+from mopidy import core, settings
+from mopidy.backends import base
 from mopidy.gstreamer import GStreamer
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
 BITRATES = {96: 2, 160: 0, 320: 1}
 
-class SpotifyBackend(ThreadingActor, Backend):
+class SpotifyBackend(ThreadingActor, base.Backend):
     """
     A backend for playing music from the `Spotify <http://www.spotify.com/>`_
     music streaming service. The backend uses the official `libspotify
@@ -51,19 +50,19 @@ class SpotifyBackend(ThreadingActor, Backend):
 
         super(SpotifyBackend, self).__init__(*args, **kwargs)
 
-        self.current_playlist = CurrentPlaylistController(backend=self)
+        self.current_playlist = core.CurrentPlaylistController(backend=self)
 
         library_provider = SpotifyLibraryProvider(backend=self)
-        self.library = LibraryController(backend=self,
+        self.library = core.LibraryController(backend=self,
             provider=library_provider)
 
         playback_provider = SpotifyPlaybackProvider(backend=self)
-        self.playback = PlaybackController(backend=self,
+        self.playback = core.PlaybackController(backend=self,
             provider=playback_provider)
 
         stored_playlists_provider = SpotifyStoredPlaylistsProvider(
             backend=self)
-        self.stored_playlists = StoredPlaylistsController(backend=self,
+        self.stored_playlists = core.StoredPlaylistsController(backend=self,
             provider=stored_playlists_provider)
 
         self.uri_schemes = [u'spotify']

@@ -616,9 +616,9 @@ to this problem.
     :class:`mopidy.models.Album`, and :class:`mopidy.models.Track`.
 
   - Prepare for multi-backend support (see :issue:`40`) by introducing the
-    :ref:`provider concept <backend-concepts>`. Split the backend API into a
-    :ref:`backend controller API <backend-controller-api>` (for frontend use)
-    and a :ref:`backend provider API <backend-provider-api>` (for backend
+    :ref:`provider concept <concepts>`. Split the backend API into a
+    :ref:`backend controller API <core-api>` (for frontend use)
+    and a :ref:`backend provider API <backend-api>` (for backend
     implementation use), which includes the following changes:
 
     - Rename ``BaseBackend`` to :class:`mopidy.backends.base.Backend`.
