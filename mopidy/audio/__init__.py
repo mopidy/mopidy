@@ -13,7 +13,7 @@ from mopidy.backends.base import Backend
 from mopidy.utils import process
 
 # Trigger install of gst mixer plugins
-from mopidy import mixers
+from mopidy.audio import mixers
 
 logger = logging.getLogger('mopidy.audio')
 
