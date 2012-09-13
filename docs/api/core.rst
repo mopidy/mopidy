@@ -1,4 +1,4 @@
-.. _backend-controller-api:
+.. _core-api:
 
 ********
 Core API
@@ -8,8 +8,6 @@ Core API
 The core API is the interface that is used by frontends like
 :mod:`mopidy.frontends.mpd`. The core layer is inbetween the frontends and the
 backends.
-
-If you want to implement your own backend, see the :ref:`backend-provider-api`.
 
 
 Playback controller
