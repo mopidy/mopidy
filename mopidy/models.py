@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+
 class ImmutableObject(object):
     """
     Superclass for immutable objects whose fields can only be modified via the

@@ -2,6 +2,7 @@ import mock
 import random
 
 from mopidy import audio
+from mopidy.core import PlaybackState
 from mopidy.models import CpTrack, Playlist, Track
 
 from tests.backends.base import populate_playlist
@@ -71,9 +72,9 @@ class CurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_clear_when_playing(self):
         self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.controller.clear()
-        self.assertEqual(self.playback.state, self.playback.STOPPED)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     def test_get_by_uri_returns_unique_match(self):
         track = Track(uri='a')
@@ -134,13 +135,13 @@ class CurrentPlaylistControllerTest(object):
         self.playback.play()
         track = self.playback.current_track
         self.controller.append(self.controller.tracks[1:2])
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.assertEqual(self.playback.current_track, track)
 
     @populate_playlist
     def test_append_preserves_stopped_state(self):
         self.controller.append(self.controller.tracks[1:2])
-        self.assertEqual(self.playback.state, self.playback.STOPPED)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
     def test_index_returns_index_of_track(self):

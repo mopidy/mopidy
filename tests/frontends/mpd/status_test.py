@@ -1,14 +1,15 @@
-from mopidy import core
 from mopidy.backends import dummy
+from mopidy.core import PlaybackState
 from mopidy.frontends.mpd import dispatcher
 from mopidy.frontends.mpd.protocol import status
 from mopidy.models import Track
 
 from tests import unittest
 
-PAUSED = core.PlaybackController.PAUSED
-PLAYING = core.PlaybackController.PLAYING
-STOPPED = core.PlaybackController.STOPPED
+
+PAUSED = PlaybackState.PAUSED
+PLAYING = PlaybackState.PLAYING
+STOPPED = PlaybackState.STOPPED
 
 # FIXME migrate to using protocol.BaseTestCase instead of status.stats
 # directly?
