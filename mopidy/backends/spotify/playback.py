@@ -8,9 +8,6 @@ from mopidy.core import PlaybackState
 logger = logging.getLogger('mopidy.backends.spotify.playback')
 
 class SpotifyPlaybackProvider(BasePlaybackProvider):
-    def pause(self):
-        return self.backend.audio.pause_playback()
-
     def play(self, track):
         if self.backend.playback.state == PlaybackState.PLAYING:
             self.backend.spotify.session.play(0)
@@ -39,12 +36,5 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
         return True
 
     def stop(self):
-        result = self.backend.audio.stop_playback()
         self.backend.spotify.session.play(0)
-        return result
-
-    def get_volume(self):
-        return self.backend.audio.get_volume().get()
-
-    def set_volume(self, volume):
-        self.backend.audio.set_volume(volume)
+        return super(SpotifyPlaybackProvider, self).stop()
