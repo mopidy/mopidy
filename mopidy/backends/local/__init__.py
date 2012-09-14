@@ -47,7 +47,7 @@ class LocalBackend(ThreadingActor, base.Backend):
         self.library = core.LibraryController(backend=self,
             provider=library_provider)
 
-        playback_provider = LocalPlaybackProvider(backend=self)
+        playback_provider = base.BasePlaybackProvider(backend=self)
         self.playback = LocalPlaybackController(backend=self,
             provider=playback_provider)
 
@@ -76,31 +76,6 @@ class LocalPlaybackController(core.PlaybackController):
     @property
     def time_position(self):
         return self.backend.audio.get_position().get()
-
-
-class LocalPlaybackProvider(base.BasePlaybackProvider):
-    def pause(self):
-        return self.backend.audio.pause_playback().get()
-
-    def play(self, track):
-        self.backend.audio.prepare_change()
-        self.backend.audio.set_uri(track.uri).get()
-        return self.backend.audio.start_playback().get()
-
-    def resume(self):
-        return self.backend.audio.start_playback().get()
-
-    def seek(self, time_position):
-        return self.backend.audio.set_position(time_position).get()
-
-    def stop(self):
-        return self.backend.audio.stop_playback().get()
-
-    def get_volume(self):
-        return self.backend.audio.get_volume().get()
-
-    def set_volume(self, volume):
-        self.backend.audio.set_volume(volume).get()
 
 
 class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
