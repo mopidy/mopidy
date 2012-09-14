@@ -206,7 +206,7 @@ class CurrentPlaylistControllerTest(object):
         version = self.controller.version
         self.controller.remove(uri=track1.uri)
         self.assert_(version < self.controller.version)
-        self.assert_(track1 not in self.controller.tracks)
+        self.assertNotIn(track1, self.controller.tracks)
         self.assertEqual(track2, self.controller.tracks[1])
 
     @populate_playlist

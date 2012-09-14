@@ -42,7 +42,7 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual([], self.connection.response)
 
     def assertInResponse(self, value):
-        self.assert_(value in self.connection.response, u'Did not find %s '
+        self.assertIn(value, self.connection.response, u'Did not find %s '
             'in %s' % (repr(value), repr(self.connection.response)))
 
     def assertOnceInResponse(self, value):
@@ -51,7 +51,7 @@ class BaseTestCase(unittest.TestCase):
             (repr(value), repr(self.connection.response)))
 
     def assertNotInResponse(self, value):
-        self.assert_(value not in self.connection.response, u'Found %s in %s' %
+        self.assertNotIn(value, self.connection.response, u'Found %s in %s' %
             (repr(value), repr(self.connection.response)))
 
     def assertEqualResponse(self, value):

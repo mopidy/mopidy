@@ -37,7 +37,7 @@ class MpdDispatcherTest(unittest.TestCase):
             expected_handler
         (handler, kwargs) = self.dispatcher._find_handler('known_command an_arg')
         self.assertEqual(handler, expected_handler)
-        self.assert_('arg1' in kwargs)
+        self.assertIn('arg1', kwargs)
         self.assertEqual(kwargs['arg1'], 'an_arg')
 
     def test_handling_unknown_request_yields_error(self):
@@ -48,5 +48,5 @@ class MpdDispatcherTest(unittest.TestCase):
         expected = 'magic'
         request_handlers['known request'] = lambda x: expected
         result = self.dispatcher.handle_request('known request')
-        self.assert_(u'OK' in result)
-        self.assert_(expected in result)
+        self.assertIn(u'OK', result)
+        self.assertIn(expected, result)

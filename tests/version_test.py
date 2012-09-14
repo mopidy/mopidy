@@ -31,10 +31,10 @@ class VersionTest(unittest.TestCase):
         self.assert_(SV(__version__) < SV('0.8.0'))
 
     def test_get_platform_contains_platform(self):
-        self.assert_(platform.platform() in get_platform())
+        self.assertIn(platform.platform(), get_platform())
 
     def test_get_python_contains_python_implementation(self):
-        self.assert_(platform.python_implementation() in get_python())
+        self.assertIn(platform.python_implementation(), get_python())
 
     def test_get_python_contains_python_version(self):
-        self.assert_(platform.python_version() in get_python())
+        self.assertIn(platform.python_version(), get_python())

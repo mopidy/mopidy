@@ -141,7 +141,7 @@ class PlayerInterfaceTest(unittest.TestCase):
 
     def test_get_metadata_has_trackid_even_when_no_current_track(self):
         result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
-        self.assert_('mpris:trackid' in result.keys())
+        self.assertIn('mpris:trackid', result.keys())
         self.assertEquals(result['mpris:trackid'], '')
 
     def test_get_metadata_has_trackid_based_on_cpid(self):

@@ -107,7 +107,7 @@ class SettingsProxyTest(unittest.TestCase):
 
     def test_setattr_updates_runtime_settings(self):
         self.settings.TEST = 'test'
-        self.assert_('TEST' in self.settings.runtime)
+        self.assertIn('TEST', self.settings.runtime)
 
     def test_setattr_updates_runtime_with_value(self):
         self.settings.TEST = 'test'
@@ -181,34 +181,33 @@ class FormatSettingListTest(unittest.TestCase):
     def test_contains_the_setting_name(self):
         self.settings.TEST = u'test'
         result = setting_utils.format_settings_list(self.settings)
-        self.assert_('TEST:' in result, result)
+        self.assertIn('TEST:', result, result)
 
     def test_repr_of_a_string_value(self):
         self.settings.TEST = u'test'
         result = setting_utils.format_settings_list(self.settings)
-        self.assert_("TEST: u'test'" in result, result)
+        self.assertIn("TEST: u'test'", result, result)
 
     def test_repr_of_an_int_value(self):
         self.settings.TEST = 123
         result = setting_utils.format_settings_list(self.settings)
-        self.assert_("TEST: 123" in result, result)
+        self.assertIn("TEST: 123", result, result)
 
     def test_repr_of_a_tuple_value(self):
         self.settings.TEST = (123, u'abc')
         result = setting_utils.format_settings_list(self.settings)
-        self.assert_("TEST: (123, u'abc')" in result, result)
+        self.assertIn("TEST: (123, u'abc')", result, result)
 
     def test_passwords_are_masked(self):
         self.settings.TEST_PASSWORD = u'secret'
         result = setting_utils.format_settings_list(self.settings)
-        self.assert_("TEST_PASSWORD: u'secret'" not in result, result)
-        self.assert_("TEST_PASSWORD: u'********'" in result, result)
+        self.assertNotIn("TEST_PASSWORD: u'secret'", result, result)
+        self.assertIn("TEST_PASSWORD: u'********'", result, result)
 
     def test_short_values_are_not_pretty_printed(self):
         self.settings.FRONTEND = (u'mopidy.frontends.mpd.MpdFrontend',)
         result = setting_utils.format_settings_list(self.settings)
-        self.assert_("FRONTEND: (u'mopidy.frontends.mpd.MpdFrontend',)" in result,
-            result)
+        self.assertIn("FRONTEND: (u'mopidy.frontends.mpd.MpdFrontend',)", result)
 
     def test_long_values_are_pretty_printed(self):
         self.settings.FRONTEND = (u'mopidy.frontends.mpd.MpdFrontend',

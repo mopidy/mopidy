@@ -43,7 +43,7 @@ class GenericCopyTets(unittest.TestCase):
         artist2 = Artist(name='bar')
         track = Track(artists=[artist1])
         copy = track.copy(artists=[artist2])
-        self.assert_(artist2 in copy.artists)
+        self.assertIn(artist2, copy.artists)
 
     def test_copying_track_with_invalid_key(self):
         test = lambda: Track().copy(invalid_key=True)
@@ -155,7 +155,7 @@ class AlbumTest(unittest.TestCase):
     def test_artists(self):
         artist = Artist()
         album = Album(artists=[artist])
-        self.assert_(artist in album.artists)
+        self.assertIn(artist, album.artists)
         self.assertRaises(AttributeError, setattr, album, 'artists', None)
 
     def test_num_tracks(self):

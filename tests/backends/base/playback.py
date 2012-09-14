@@ -274,7 +274,7 @@ class PlaybackControllerTest(object):
         self.playback.consume = True
         self.playback.play()
         self.playback.next()
-        self.assert_(self.tracks[0] in self.backend.current_playlist.tracks)
+        self.assertIn(self.tracks[0], self.backend.current_playlist.tracks)
 
     @populate_playlist
     def test_next_with_single_and_repeat(self):
@@ -411,7 +411,7 @@ class PlaybackControllerTest(object):
         self.playback.consume = True
         self.playback.play()
         self.playback.on_end_of_track()
-        self.assert_(self.tracks[0] not in self.backend.current_playlist.tracks)
+        self.assertNotIn(self.tracks[0], self.backend.current_playlist.tracks)
 
     @populate_playlist
     def test_end_of_track_with_random(self):
@@ -855,7 +855,7 @@ class PlaybackControllerTest(object):
         self.playback.play()
         played = []
         for _ in self.tracks:
-            self.assert_(self.playback.current_track not in played)
+            self.assertNotIn(self.playback.current_track, played)
             played.append(self.playback.current_track)
             self.playback.next()
 
