@@ -74,11 +74,16 @@ class BackendListener(object):
         """
         pass
 
-    def playback_state_changed(self):
+    def playback_state_changed(self, old_state, new_state):
         """
         Called whenever playback state is changed.
 
         *MAY* be implemented by actor.
+
+        :param old_state: the state before the change
+        :type old_state: string from :class:`mopidy.core.PlaybackState` field
+        :param new_state: the state after the change
+        :type new_state: string from :class:`mopidy.core.PlaybackState` field
         """
         pass
 

@@ -51,7 +51,7 @@ class MpdFrontend(actor.ThreadingActor, listeners.BackendListener):
             'kwargs': {},
         }, target_class=MpdSession)
 
-    def playback_state_changed(self):
+    def playback_state_changed(self, old_state, new_state):
         self.send_idle('player')
 
     def playlist_changed(self):

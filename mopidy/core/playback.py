@@ -290,7 +290,7 @@ class PlaybackController(object):
         (old_state, self._state) = (self.state, new_state)
         logger.debug(u'Changing state: %s -> %s', old_state, new_state)
 
-        self._trigger_playback_state_changed()
+        self._trigger_playback_state_changed(old_state, new_state)
 
         # FIXME play_time stuff assumes backend does not have a better way of
         # handeling this stuff :/
@@ -544,9 +544,10 @@ class PlaybackController(object):
             track=self.current_track,
             time_position=self.time_position)
 
-    def _trigger_playback_state_changed(self):
+    def _trigger_playback_state_changed(self, old_state, new_state):
         logger.debug(u'Triggering playback state change event')
-        BackendListener.send('playback_state_changed')
+        BackendListener.send('playback_state_changed',
+            old_state=old_state, new_state=new_state)
 
     def _trigger_options_changed(self):
         logger.debug(u'Triggering options changed event')

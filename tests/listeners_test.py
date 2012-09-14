@@ -1,3 +1,4 @@
+from mopidy.core import PlaybackState
 from mopidy.listeners import BackendListener
 from mopidy.models import Track
 
@@ -21,7 +22,8 @@ class BackendListenerTest(unittest.TestCase):
         self.listener.track_playback_ended(Track(), 0)
 
     def test_listener_has_default_impl_for_playback_state_changed(self):
-        self.listener.playback_state_changed()
+        self.listener.playback_state_changed(
+            PlaybackState.STOPPED, PlaybackState.PLAYING)
 
     def test_listener_has_default_impl_for_playlist_changed(self):
         self.listener.playlist_changed()
