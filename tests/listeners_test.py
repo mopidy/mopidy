@@ -35,4 +35,4 @@ class BackendListenerTest(unittest.TestCase):
         self.listener.volume_changed()
 
     def test_listener_has_default_impl_for_seeked(self):
-        self.listener.seeked()
+        self.listener.seeked(0)

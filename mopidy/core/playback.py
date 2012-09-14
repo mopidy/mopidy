@@ -495,7 +495,7 @@ class PlaybackController(object):
 
         success = self.provider.seek(time_position)
         if success:
-            self._trigger_seeked()
+            self._trigger_seeked(time_position)
         return success
 
     def stop(self, clear_current_track=False):
@@ -553,6 +553,6 @@ class PlaybackController(object):
         logger.debug(u'Triggering options changed event')
         BackendListener.send('options_changed')
 
-    def _trigger_seeked(self):
+    def _trigger_seeked(self, time_position):
         logger.debug(u'Triggering seeked event')
-        BackendListener.send('seeked')
+        BackendListener.send('seeked', time_position=time_position)

@@ -111,11 +111,14 @@ class BackendListener(object):
         """
         pass
 
-    def seeked(self):
+    def seeked(self, time_position):
         """
         Called whenever the time position changes by an unexpected amount, e.g.
         at seek to a new time position.
 
         *MAY* be implemented by actor.
+
+        :param time_position: the position that was seeked to in milliseconds
+        :type time_position: int
         """
         pass
