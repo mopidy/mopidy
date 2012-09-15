@@ -93,7 +93,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         logger.info('Loading playlists from %s', self._folder)
 
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
-            name = os.path.basename(m3u)[:len('.m3u')]
+            name = os.path.basename(m3u)[:-len('.m3u')]
             tracks = []
             for uri in parse_m3u(m3u):
                 try:
