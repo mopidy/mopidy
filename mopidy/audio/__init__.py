@@ -208,6 +208,8 @@ class Audio(ThreadingActor):
         """
         Call this to deliver raw audio data to be played.
 
+        Note that the uri must be set to ``appsrc://`` for this to work.
+
         :param capabilities: a GStreamer capabilities string
         :type capabilities: string
         :param data: raw audio data to be played

@@ -9,5 +9,6 @@ API reference
     models
     backends
     core
+    audio
     frontends
     listeners
