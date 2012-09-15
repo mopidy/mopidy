@@ -53,11 +53,6 @@ MOCK_MODULES = [
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
-def get_version():
-    init_py = open('../mopidy/__init__.py').read()
-    metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", init_py))
-    return metadata['version']
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -96,6 +91,7 @@ copyright = u'2010-2012, Stein Magnus Jodal and contributors'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
+from mopidy import get_version
 release = get_version()
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])
