@@ -156,6 +156,12 @@ class FindFilesTest(unittest.TestCase):
             self.assert_(is_unicode(name),
                 '%s is not unicode object' % repr(name))
 
+    def test_ignores_hidden_folders(self):
+        self.assertEqual(self.find('.hidden'), [])
+
+    def test_ignores_hidden_files(self):
+        self.assertEqual(self.find('.blank.mp3'), [])
+
 
 class MtimeTest(unittest.TestCase):
     def tearDown(self):

@@ -47,21 +47,31 @@ def split_path(path):
             break
     return parts
 
-# pylint: disable = W0612
-# Unused variable 'dirnames'
 def find_files(path):
     if os.path.isfile(path):
         if not isinstance(path, unicode):
             path = path.decode('utf-8')
-        yield path
+        if not os.path.basename(path).startswith('.'):
+            yield path
     else:
         for dirpath, dirnames, filenames in os.walk(path):
+            # Filter out hidden folders by modifying dirnames in place.
+            for dirname in dirnames:
+                if dirname.startswith('.'):
+                    dirnames.remove(dirname)
+
             for filename in filenames:
+                # Skip hidden files.
+                if filename.startswith('.'):
+                    continue
+
                 filename = os.path.join(dirpath, filename)
                 if not isinstance(filename, unicode):
-                    filename = filename.decode('utf-8')
+                    try:
+                        filename = filename.decode('utf-8')
+                    except UnicodeDecodeError:
+                        filename = filename.decode('latin1')
                 yield filename
-# pylint: enable = W0612
 
 # FIXME replace with mock usage in tests.
 class Mtime(object):
