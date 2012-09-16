@@ -1,12 +1,13 @@
 # encoding: utf-8
 
+import glib
 import os
 import shutil
 import sys
 import tempfile
 
 from mopidy.utils.path import (get_or_create_folder, mtime,
-    path_to_uri, uri_to_path, split_path, find_files)
+    path_to_uri, uri_to_path, expand_path, split_path, find_files)
 
 from tests import unittest, path_to_data_dir
 
@@ -133,6 +134,30 @@ class SplitPathTest(unittest.TestCase):
 
     def test_only_slash(self):
         self.assertEqual([], split_path('/'))
+
+
+class ExpandPathTest(unittest.TestCase):
+    # TODO: test via mocks?
+
+    def test_empty_path(self):
+        self.assertEqual(os.path.abspath('.'), expand_path(''))
+
+    def test_absolute_path(self):
+        self.assertEqual('/tmp/foo', expand_path('/tmp/foo'))
+
+    def test_home_dir_expansion(self):
+        self.assertEqual(os.path.expanduser('~/foo'), expand_path('~/foo'))
+
+    def test_abspath(self):
+        self.assertEqual(os.path.abspath('./foo'), expand_path('./foo'))
+
+    def test_xdg_subsititution(self):
+        self.assertEqual(glib.get_user_data_dir() + '/foo',
+            expand_path('$XDG_DATA_DIR/foo'))
+
+    def test_xdg_subsititution_unknown(self):
+        self.assertEqual('/tmp/$XDG_INVALID_DIR/foo',
+            expand_path('/tmp/$XDG_INVALID_DIR/foo'))
 
 
 class FindFilesTest(unittest.TestCase):

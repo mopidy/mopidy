@@ -62,9 +62,10 @@ def split_path(path):
 
 
 def expand_path(path):
+    path = string.Template(path).safe_substitute(XDG_DIRS)
     path = os.path.expanduser(path)
     path = os.path.abspath(path)
-    return string.Template(path).safe_substitute(XDG_DIRS)
+    return path
 
 
 def find_files(path):
