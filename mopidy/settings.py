@@ -85,9 +85,8 @@ LASTFM_PASSWORD = u''
 #:
 #: Default::
 #:
-#:    # Defaults to asking glib where music is stored, fallback is ~/music
-#:    LOCAL_MUSIC_PATH = None
-LOCAL_MUSIC_PATH = None
+#:    LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
+LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
 
 #: Path to playlist folder with m3u files for local music.
 #:
@@ -95,8 +94,8 @@ LOCAL_MUSIC_PATH = None
 #:
 #: Default::
 #:
-#:    LOCAL_PLAYLIST_PATH = None # Implies $XDG_DATA_DIR/mopidy/playlists
-LOCAL_PLAYLIST_PATH = None
+#:    LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
+LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
 
 #: Path to tag cache for local music.
 #:
@@ -104,8 +103,8 @@ LOCAL_PLAYLIST_PATH = None
 #:
 #: Default::
 #:
-#:    LOCAL_TAG_CACHE_FILE = None # Implies $XDG_DATA_DIR/mopidy/tag_cache
-LOCAL_TAG_CACHE_FILE = None
+#:    LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
+LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
 
 #: Sound mixer to use.
 #:
@@ -177,7 +176,11 @@ OUTPUT = u'autoaudiosink'
 #: Path to the Spotify cache.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-SPOTIFY_CACHE_PATH = None
+#:
+#: Default::
+#:
+#:     SPOTIFY_CACHE_PATH = u'$XDG_CACHE_DIR/mopidy/spotify'
+SPOTIFY_CACHE_PATH = u'$XDG_CACHE_DIR/mopidy/spotify'
 
 #: Your Spotify Premium username.
 #:
@@ -194,7 +197,7 @@ SPOTIFY_PASSWORD = u''
 #: Available values are 96, 160, and 320.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-#
+#:
 #: Default::
 #:
 #:     SPOTIFY_BITRATE = 160
