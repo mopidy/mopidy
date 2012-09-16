@@ -85,10 +85,10 @@ class DebugThread(threading.Thread):
             threads = dict((t.ident, t.name) for t in threading.enumerate())
 
             for ident, frame in sys._current_frames().items():
-                if self.ident == ident:
-                    continue
-
-                print "## Thread: %s (%s) ##" % (threads[ident], ident)
-                print ''.join(traceback.format_stack(frame))
+                if self.ident != ident:
+                    stack = ''.join(traceback.format_stack(frame))
+                    logger.debug('Current state of %s (%s):\n%s',
+                        threads[ident], ident, stack)
+                del frame
 
             self.event.clear()
