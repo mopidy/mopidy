@@ -98,10 +98,6 @@ class Audio(ThreadingActor):
             logger.error('Failed to create output "%s": %s',
                 settings.OUTPUT, ex)
             process.exit_process()
-        except gst.LinkError as ex:
-            logger.error('Failed to link output "%s": %s',
-                settings.OUTPUT, ex)
-            process.exit_process()
 
     def _setup_mixer(self):
         if not settings.MIXER:
