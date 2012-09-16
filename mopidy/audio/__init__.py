@@ -90,16 +90,18 @@ class Audio(ThreadingActor):
         try:
             self._output = gst.parse_bin_from_description(
                 settings.OUTPUT, ghost_unconnected_pads=True)
+            self._pipeline.add(self._output)
+            gst.element_link_many(self._pipeline.get_by_name('queue'),
+                                  self._output)
+            logger.info('Output set to %s', settings.OUTPUT)
         except gobject.GError as ex:
             logger.error('Failed to create output "%s": %s',
                 settings.OUTPUT, ex)
             process.exit_process()
-            return
-
-        self._pipeline.add(self._output)
-        gst.element_link_many(self._pipeline.get_by_name('queue'),
-                              self._output)
-        logger.info('Output set to %s', settings.OUTPUT)
+        except gst.LinkError as ex:
+            logger.error('Failed to link output "%s": %s',
+                settings.OUTPUT, ex)
+            process.exit_process()
 
     def _setup_mixer(self):
         if not settings.MIXER:
