@@ -52,7 +52,7 @@ def translator(data):
 
 class Scanner(object):
     def __init__(self, folder, data_callback, error_callback=None):
-        self.uris = [path_to_uri(f) for f in find_files(folder)]
+        self.files = find_files(folder)
         self.data_callback = data_callback
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
@@ -114,18 +114,19 @@ class Scanner(object):
             return None
 
     def next_uri(self):
-        if not self.uris:
-            return self.stop()
-
+        try:
+            uri = path_to_uri(self.files.next())
+        except StopIteration:
+            self.stop()
+            return False
         self.pipe.set_state(gst.STATE_NULL)
-        self.uribin.set_property('uri', self.uris.pop())
+        self.uribin.set_property('uri', uri)
         self.pipe.set_state(gst.STATE_PAUSED)
+        return True
 
     def start(self):
-        if not self.uris:
-            return
-        self.next_uri()
-        self.loop.run()
+        if self.next_uri():
+            self.loop.run()
 
     def stop(self):
         self.pipe.set_state(gst.STATE_NULL)

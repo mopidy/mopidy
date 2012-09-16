@@ -6,7 +6,7 @@ from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from pykka.registry import ActorRegistry
 
-from mopidy import audio, get_version, settings, CACHE_PATH
+from mopidy import audio, get_version, settings
 from mopidy.backends.base import Backend
 from mopidy.backends.spotify import BITRATES
 from mopidy.backends.spotify.container_manager import SpotifyContainerManager
@@ -22,8 +22,7 @@ logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
 
 class SpotifySessionManager(BaseThread, PyspotifySessionManager):
-    cache_location = (settings.SPOTIFY_CACHE_PATH
-        or os.path.join(CACHE_PATH, 'spotify'))
+    cache_location = settings.SPOTIFY_CACHE_PATH
     settings_location = cache_location
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
