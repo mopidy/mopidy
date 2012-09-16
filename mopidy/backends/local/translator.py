@@ -7,7 +7,7 @@ from mopidy.models import Track, Artist, Album
 from mopidy.utils import locale_decode
 from mopidy.utils.path import path_to_uri
 
-def parse_m3u(file_path):
+def parse_m3u(file_path, music_folder):
     """
     Convert M3U file list of uris
 
@@ -29,8 +29,6 @@ def parse_m3u(file_path):
     """
 
     uris = []
-    folder = os.path.dirname(file_path)
-
     try:
         with open(file_path) as m3u:
             contents = m3u.readlines()
@@ -48,7 +46,7 @@ def parse_m3u(file_path):
         if line.startswith('file://'):
             uris.append(line)
         else:
-            path = path_to_uri(folder, line)
+            path = path_to_uri(music_folder, line)
             uris.append(path)
 
     return uris

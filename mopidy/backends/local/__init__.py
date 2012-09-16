@@ -7,7 +7,7 @@ import shutil
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import audio, core, settings, DATA_PATH
+from mopidy import audio, core, settings
 from mopidy.backends import base
 from mopidy.models import Playlist, Track, Album
 
@@ -88,7 +88,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
             name = os.path.basename(m3u)[:-len('.m3u')]
             tracks = []
-            for uri in parse_m3u(m3u):
+            for uri in parse_m3u(m3u, settings.LOCAL_MUSIC_PATH):
                 try:
                     tracks.append(self.backend.library.lookup(uri))
                 except LookupError, e:
