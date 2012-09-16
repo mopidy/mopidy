@@ -3,23 +3,16 @@ from __future__ import absolute_import
 
 import copy
 import getpass
-import glib
 import logging
 import os
 import pprint
-import string
 import sys
 
 from mopidy import SettingsError, SETTINGS_PATH, SETTINGS_FILE
-from mopidy.utils.log import indent
+from mopidy.utils import log
+from mopidy.utils import path
 
 logger = logging.getLogger('mopidy.utils.settings')
-
-XDG_DIRS = {
-    'XDG_CACHE_DIR': glib.get_user_cache_dir(),
-    'XDG_DATA_DIR': glib.get_user_data_dir(),
-    'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
-}
 
 
 class SettingsProxy(object):
@@ -67,7 +60,7 @@ class SettingsProxy(object):
         if not value:
             return value
         if attr.endswith('_PATH') or attr.endswith('_FILE'):
-            value = self.expandpath(value)
+            value = path.expand_path(value)
         return value
 
     def __setattr__(self, attr, value):
@@ -76,17 +69,12 @@ class SettingsProxy(object):
         else:
             super(SettingsProxy, self).__setattr__(attr, value)
 
-    def expandpath(self, value):
-        value = os.path.expanduser(value)
-        value = os.path.abspath(value)
-        return string.Template(value).safe_substitute(XDG_DIRS)
-
     def validate(self, interactive):
         if interactive:
             self._read_missing_settings_from_stdin(self.current, self.runtime)
         if self.get_errors():
             logger.error(u'Settings validation errors: %s',
-                indent(self.get_errors_as_string()))
+                log.indent(self.get_errors_as_string()))
             raise SettingsError(u'Settings validation failed.')
 
     def _read_missing_settings_from_stdin(self, current, runtime):
@@ -210,11 +198,11 @@ def format_settings_list(settings):
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
         masked_value = mask_value_if_secret(key, value)
-        lines.append(u'%s: %s' % (key, indent(
+        lines.append(u'%s: %s' % (key, log.indent(
             pprint.pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
             lines.append(u'  Default: %s' %
-                indent(pformat(default_value), places=4))
+                log.indent(pformat(default_value), places=4))
         if errors.get(key) is not None:
             lines.append(u'  Error: %s' % errors[key])
     return '\n'.join(lines)
