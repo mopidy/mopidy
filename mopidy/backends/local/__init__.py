@@ -15,13 +15,6 @@ from .translator import parse_m3u, parse_mpd_tag_cache
 
 logger = logging.getLogger(u'mopidy.backends.local')
 
-DEFAULT_PLAYLIST_PATH = os.path.join(DATA_PATH, 'playlists')
-DEFAULT_TAG_CACHE_FILE = os.path.join(DATA_PATH, 'tag_cache')
-DEFAULT_MUSIC_PATH = str(glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC))
-
-if not DEFAULT_MUSIC_PATH or DEFAULT_MUSIC_PATH == os.path.expanduser(u'~'):
-    DEFAULT_MUSIC_PATH = os.path.expanduser(u'~/music')
-
 
 class LocalBackend(ThreadingActor, base.Backend):
     """
@@ -81,7 +74,7 @@ class LocalPlaybackController(core.PlaybackController):
 class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
     def __init__(self, *args, **kwargs):
         super(LocalStoredPlaylistsProvider, self).__init__(*args, **kwargs)
-        self._folder = settings.LOCAL_PLAYLIST_PATH or DEFAULT_PLAYLIST_PATH
+        self._folder = settings.LOCAL_PLAYLIST_PATH
         self.refresh()
 
     def lookup(self, uri):
@@ -158,12 +151,11 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
         self.refresh()
 
     def refresh(self, uri=None):
-        tag_cache = settings.LOCAL_TAG_CACHE_FILE or DEFAULT_TAG_CACHE_FILE
-        music_folder = settings.LOCAL_MUSIC_PATH or DEFAULT_MUSIC_PATH
+        tracks = parse_mpd_tag_cache(settings.LOCAL_TAG_CACHE_FILE,
+            settings.LOCAL_MUSIC_PATH)
 
-        tracks = parse_mpd_tag_cache(tag_cache, music_folder)
-
-        logger.info('Loading tracks in %s from %s', music_folder, tag_cache)
+        logger.info('Loading tracks in %s from %s', settings.LOCAL_MUSIC_PATH,
+            settings.LOCAL_TAG_CACHE_FILE)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track

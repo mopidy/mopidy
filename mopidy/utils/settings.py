@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 import copy
 import getpass
+import glib
 import logging
 import os
 import pprint
@@ -13,6 +14,12 @@ from mopidy import SettingsError, SETTINGS_PATH, SETTINGS_FILE
 from mopidy.utils.log import indent
 
 logger = logging.getLogger('mopidy.utils.settings')
+
+XDG_DIRS = {
+    'XDG_CACHE_DIR': glib.get_user_cache_dir(),
+    'XDG_DATA_DIR': glib.get_user_data_dir(),
+    'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
+}
 
 
 class SettingsProxy(object):
@@ -72,7 +79,7 @@ class SettingsProxy(object):
     def expandpath(self, value):
         value = os.path.expanduser(value)
         value = os.path.abspath(value)
-        return value
+        return string.Template(value).safe_substitute(XDG_DIRS)
 
     def validate(self, interactive):
         if interactive:
