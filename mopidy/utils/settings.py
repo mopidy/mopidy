@@ -1,10 +1,12 @@
 # Absolute import needed to import ~/.mopidy/settings.py and not ourselves
 from __future__ import absolute_import
-from copy import copy
+
+import copy
 import getpass
 import logging
 import os
-from pprint import pformat
+import pprint
+import string
 import sys
 
 from mopidy import SettingsError, SETTINGS_PATH, SETTINGS_FILE
@@ -39,7 +41,7 @@ class SettingsProxy(object):
 
     @property
     def current(self):
-        current = copy(self.default)
+        current = copy.copy(self.default)
         current.update(self.local)
         current.update(self.runtime)
         return current
@@ -47,16 +49,18 @@ class SettingsProxy(object):
     def __getattr__(self, attr):
         if not self._is_setting(attr):
             return
-        if attr not in self.current:
+
+        current = self.current # bind locally to avoid copying+updates
+        if attr not in current:
             raise SettingsError(u'Setting "%s" is not set.' % attr)
-        value = self.current[attr]
+
+        value = current[attr]
         if isinstance(value, basestring) and len(value) == 0:
             raise SettingsError(u'Setting "%s" is empty.' % attr)
         if not value:
             return value
         if attr.endswith('_PATH') or attr.endswith('_FILE'):
-            value = os.path.expanduser(value)
-            value = os.path.abspath(value)
+            value = self.expandpath(value)
         return value
 
     def __setattr__(self, attr, value):
@@ -64,6 +68,11 @@ class SettingsProxy(object):
             self.runtime[attr] = value
         else:
             super(SettingsProxy, self).__setattr__(attr, value)
+
+    def expandpath(self, value):
+        value = os.path.expanduser(value)
+        value = os.path.abspath(value)
+        return value
 
     def validate(self, interactive):
         if interactive:
@@ -194,7 +203,8 @@ def format_settings_list(settings):
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
         masked_value = mask_value_if_secret(key, value)
-        lines.append(u'%s: %s' % (key, indent(pformat(masked_value), places=2)))
+        lines.append(u'%s: %s' % (key, indent(
+            pprint.pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
             lines.append(u'  Default: %s' %
                 indent(pformat(default_value), places=4))
