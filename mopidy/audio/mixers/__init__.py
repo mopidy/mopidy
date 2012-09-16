@@ -38,6 +38,6 @@ def create_track(label, initial_volume, min_volume, max_volume,
 #
 # Keep these imports at the bottom of the file to avoid cyclic import problems
 # when mixers use the above code.
-from mopidy.mixers.auto import AutoAudioMixer
-from mopidy.mixers.fake import FakeMixer
-from mopidy.mixers.nad import NadMixer
+from .auto import AutoAudioMixer
+from .fake import FakeMixer
+from .nad import NadMixer

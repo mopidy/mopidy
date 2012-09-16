@@ -2,7 +2,7 @@
 GStreamer installation
 **********************
 
-To use the Mopidy, you first need to install GStreamer and the GStreamer Python
+To use Mopidy, you first need to install GStreamer and the GStreamer Python
 bindings.
 
 
@@ -54,15 +54,8 @@ Python bindings on OS X using Homebrew.
 
 #. Install `Homebrew <https://github.com/mxcl/homebrew>`_.
 
-#. Download our Homebrew formulas for ``pycairo``, ``pygobject``, ``pygtk``,
-   and ``gst-python``::
+#. Download our Homebrew formula for ``gst-python``::
 
-      curl -o $(brew --prefix)/Library/Formula/pycairo.rb \
-          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pycairo.rb
-      curl -o $(brew --prefix)/Library/Formula/pygobject.rb \
-          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pygobject.rb
-      curl -o $(brew --prefix)/Library/Formula/pygtk.rb \
-          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/pygtk.rb
       curl -o $(brew --prefix)/Library/Formula/gst-python.rb \
           https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/gst-python.rb
 
@@ -77,13 +70,13 @@ Python bindings on OS X using Homebrew.
    You can either amend your ``PYTHONPATH`` permanently, by adding the
    following statement to your shell's init file, e.g. ``~/.bashrc``::
 
-       export PYTHONPATH=$(brew --prefix)/lib/python2.6/site-packages:$PYTHONPATH
+       export PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages:$PYTHONPATH
 
    Or, you can prefix the Mopidy command every time you run it::
 
-       PYTHONPATH=$(brew --prefix)/lib/python2.6/site-packages mopidy
+       PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages mopidy
 
-   Note that you need to replace ``python2.6`` with ``python2.7`` if that's
+   Note that you need to replace ``python2.7`` with ``python2.6`` if that's
    the Python version you are using. To find your Python version, run::
 
        python --version

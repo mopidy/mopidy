@@ -1,12 +1,7 @@
-import logging
+from .library import BaseLibraryProvider
+from .playback import BasePlaybackProvider
+from .stored_playlists import BaseStoredPlaylistsProvider
 
-from .current_playlist import CurrentPlaylistController
-from .library import LibraryController, BaseLibraryProvider
-from .playback import PlaybackController, BasePlaybackProvider
-from .stored_playlists import (StoredPlaylistsController,
-    BaseStoredPlaylistsProvider)
-
-logger = logging.getLogger('mopidy.backends.base')
 
 class Backend(object):
     #: The current playlist controller. An instance of

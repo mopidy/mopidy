@@ -1,4 +1,3 @@
-import datetime as dt
 import logging
 
 from spotify import Link, SpotifyError
@@ -31,9 +30,8 @@ class SpotifyTranslator(object):
         if not spotify_track.is_loaded():
             return Track(uri=uri, name=u'[loading...]')
         spotify_album = spotify_track.album()
-        if (spotify_album is not None and spotify_album.is_loaded()
-                and dt.MINYEAR <= int(spotify_album.year()) <= dt.MAXYEAR):
-            date = dt.date(spotify_album.year(), 1, 1)
+        if spotify_album is not None and spotify_album.is_loaded():
+            date = spotify_album.year()
         else:
             date = None
         return Track(

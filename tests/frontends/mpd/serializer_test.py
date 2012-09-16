@@ -31,66 +31,66 @@ class TrackMpdFormatTest(unittest.TestCase):
 
     def test_track_to_mpd_format_for_empty_track(self):
         result = translator.track_to_mpd_format(Track())
-        self.assert_(('file', '') in result)
-        self.assert_(('Time', 0) in result)
-        self.assert_(('Artist', '') in result)
-        self.assert_(('Title', '') in result)
-        self.assert_(('Album', '') in result)
-        self.assert_(('Track', 0) in result)
-        self.assert_(('Date', '') in result)
+        self.assertIn(('file', ''), result)
+        self.assertIn(('Time', 0), result)
+        self.assertIn(('Artist', ''), result)
+        self.assertIn(('Title', ''), result)
+        self.assertIn(('Album', ''), result)
+        self.assertIn(('Track', 0), result)
+        self.assertIn(('Date', ''), result)
         self.assertEqual(len(result), 7)
 
     def test_track_to_mpd_format_with_position(self):
         result = translator.track_to_mpd_format(Track(), position=1)
-        self.assert_(('Pos', 1) not in result)
+        self.assertNotIn(('Pos', 1), result)
 
     def test_track_to_mpd_format_with_cpid(self):
         result = translator.track_to_mpd_format(CpTrack(1, Track()))
-        self.assert_(('Id', 1) not in result)
+        self.assertNotIn(('Id', 1), result)
 
     def test_track_to_mpd_format_with_position_and_cpid(self):
         result = translator.track_to_mpd_format(CpTrack(2, Track()), position=1)
-        self.assert_(('Pos', 1) in result)
-        self.assert_(('Id', 2) in result)
+        self.assertIn(('Pos', 1), result)
+        self.assertIn(('Id', 2), result)
 
     def test_track_to_mpd_format_for_nonempty_track(self):
         result = translator.track_to_mpd_format(
             CpTrack(122, self.track), position=9)
-        self.assert_(('file', 'a uri') in result)
-        self.assert_(('Time', 137) in result)
-        self.assert_(('Artist', 'an artist') in result)
-        self.assert_(('Title', 'a name') in result)
-        self.assert_(('Album', 'an album') in result)
-        self.assert_(('AlbumArtist', 'an other artist') in result)
-        self.assert_(('Track', '7/13') in result)
-        self.assert_(('Date', datetime.date(1977, 1, 1)) in result)
-        self.assert_(('Pos', 9) in result)
-        self.assert_(('Id', 122) in result)
+        self.assertIn(('file', 'a uri'), result)
+        self.assertIn(('Time', 137), result)
+        self.assertIn(('Artist', 'an artist'), result)
+        self.assertIn(('Title', 'a name'), result)
+        self.assertIn(('Album', 'an album'), result)
+        self.assertIn(('AlbumArtist', 'an other artist'), result)
+        self.assertIn(('Track', '7/13'), result)
+        self.assertIn(('Date', datetime.date(1977, 1, 1)), result)
+        self.assertIn(('Pos', 9), result)
+        self.assertIn(('Id', 122), result)
         self.assertEqual(len(result), 10)
 
     def test_track_to_mpd_format_musicbrainz_trackid(self):
         track = self.track.copy(musicbrainz_id='foo')
         result = translator.track_to_mpd_format(track)
-        self.assert_(('MUSICBRAINZ_TRACKID', 'foo') in result)
+        self.assertIn(('MUSICBRAINZ_TRACKID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_albumid(self):
         album = self.track.album.copy(musicbrainz_id='foo')
         track = self.track.copy(album=album)
         result = translator.track_to_mpd_format(track)
-        self.assert_(('MUSICBRAINZ_ALBUMID', 'foo') in result)
+        self.assertIn(('MUSICBRAINZ_ALBUMID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_albumid(self):
         artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
         album = self.track.album.copy(artists=[artist])
         track = self.track.copy(album=album)
         result = translator.track_to_mpd_format(track)
-        self.assert_(('MUSICBRAINZ_ALBUMARTISTID', 'foo') in result)
+        self.assertIn(('MUSICBRAINZ_ALBUMARTISTID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_artistid(self):
         artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
         track = self.track.copy(artists=[artist])
         result = translator.track_to_mpd_format(track)
-        self.assert_(('MUSICBRAINZ_ARTISTID', 'foo') in result)
+        self.assertIn(('MUSICBRAINZ_ARTISTID', 'foo'), result)
 
     def test_artists_to_mpd_format(self):
         artists = [Artist(name=u'ABBA'), Artist(name=u'Beatles')]

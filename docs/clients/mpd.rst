@@ -30,32 +30,12 @@ ncmpcpp
 A console client that generally works well with Mopidy, and is regularly used
 by Mopidy developers.
 
-Search
-^^^^^^
-
-Search only works for ncmpcpp versions 0.5.1 and higher, and in two of the
-three search modes:
+Search only works in two of the three search modes:
 
 - "Match if tag contains search phrase (regexes supported)" -- Does not work.
   The client tries to fetch all known metadata and do the search client side.
 - "Match if tag contains searched phrase (no regexes)" -- Works.
 - "Match only if both values are the same" -- Works.
-
-If you run Ubuntu 10.04 or older, you can fetch an updated version of ncmpcpp
-from `Launchpad <https://launchpad.net/ubuntu/+source/ncmpcpp>`_.
-
-Communication mode
-^^^^^^^^^^^^^^^^^^
-
-In newer versions of ncmpcpp, like ncmpcpp 0.5.5 shipped with Ubuntu 11.04,
-ncmcpp defaults to "notifications" mode for MPD communications, which Mopidy
-did not support before Mopidy 0.6. To workaround this limitation in earlier
-versions of Mopidy, edit the ncmpcpp configuration file at
-``~/.ncmpcpp/config`` and add the following setting::
-
-    mpd_communication_mode = "polling"
-
-If you use Mopidy 0.6 or newer, you don't need to change anything.
 
 
 Graphical clients
@@ -102,8 +82,8 @@ It generally works well with Mopidy.
 Android clients
 ===============
 
-We've tested all six MPD clients we could find for Android with Mopidy 0.3 on a
-HTC Hero with Android 2.1, using the following test procedure:
+We've tested all four MPD clients we could find for Android with Mopidy 0.7.3 on
+a Samsung Galaxy Nexus with Android 4.1.1, using the following test procedure:
 
 #. Connect to Mopidy
 #. Search for ``foo``, with search type "any" if it can be selected
@@ -127,152 +107,180 @@ HTC Hero with Android 2.1, using the following test procedure:
 #. Check if the app got support for single mode and consume mode
 #. Kill Mopidy and confirm that the app handles it without crashing
 
-In summary:
+We found that all four apps crashed on Android 4.1.1.
 
-- BitMPC lacks finishing touches on its user interface but supports all
-  features tested.
-- Droid MPD Client works well, but got a couple of bugs one can live with and
-  does not expose stored playlist anywhere.
-- IcyBeats is not usable yet.
-- MPDroid is working well and looking good, but does not have search
-  functionality.
-- PMix is just a lesser MPDroid, so use MPDroid instead.
-- ThreeMPD is too buggy to even get connected to Mopidy.
+Combining what we managed to find before the apps crashed with our experience
+from an older version of this review, using Android 2.1, we can say that:
 
-Our recommendation:
+- PMix can be ignored, because it is unmaintained and its fork MPDroid is
+  better on all fronts.
 
-- If you do not care about looks, use BitMPC.
-- If you do not care about stored playlists, use Droid MPD Client.
-- If you do not care about searching, use MPDroid.
+- Droid MPD Client was to buggy to get an impression from. Unclear if the bugs
+  are due to the app or that it hasn't been updated for Android 4.x.
+
+- BitMPC is in our experience feature complete, but ugly.
+
+- MPDroid, now that search is in place, is probably feature complete as well,
+  and looks nicer than BitMPC.
+
+In conclusion: MPD clients on Android 4.x is a sad affair. If you want to try
+anyway, try BitMPC and MPDroid.
 
 
 BitMPC
 ------
 
-We tested version 1.0.0, which at the time had 1k-5k downloads, <100 ratings,
-3.5 stars.
+Test date:
+    2012-09-12
+Tested version:
+    1.0.0 (released 2010-04-12)
+Downloads:
+    5,000+
+Rating:
+    3.7 stars from about 100 ratings
 
-The user interface lacks some finishing touches. E.g. you can't enter a
-hostname for the server. Only IPv4 addresses are allowed.
 
-All features exercised in the test procedure works. BitMPC lacks support for
-single mode and consume mode. BitMPC crashes if Mopidy is killed or crash.
+- The user interface lacks some finishing touches. E.g. you can't enter a
+  hostname for the server. Only IPv4 addresses are allowed.
+
+- When we last tested the same version of BitMPC using Android 2.1:
+
+  - All features exercised in the test procedure worked.
+
+  - BitMPC lacked support for single mode and consume mode.
+
+  - BitMPC crashed if Mopidy was killed or crashed.
+
+- When we tried to test using Android 4.1.1, BitMPC started and connected to
+  Mopidy without problems, but the app crashed as soon as fire off our search,
+  and continued to crash on startup after that.
+
+In conclusion, BitMPC is usable if you got an older Android phone and don't
+care about looks. For newer Android versions, BitMPC will probably not work as
+it hasn't been maintained for 2.5 years.
 
 
 Droid MPD Client
 ----------------
 
-We tested version 0.4.0, which at the time had 5k-10k downloads, >200 ratings,
-4 stars.
+Test date:
+    2012-09-12
+Tested version:
+    1.4.0 (released 2011-12-20)
+Downloads:
+    10,000+
+Rating:
+    4.2 stars from 400+ ratings
 
-To find the search functionality, you have to select the menu, then "Playlist
-manager", then the search tab. I do not understand why search is hidden inside
-"Playlist manager".
+- No intutive way to ask the app to connect to the server after adding the
+  server hostname to the settings.
 
-The user interface have some French remnants, like "Rechercher" in the search
-field.
+- To find the search functionality, you have to select the menu,
+  then "Playlist manager", then the search tab. I do not understand why search
+  is hidden inside "Playlist manager".
 
-When selecting the artist tab, it issues the ``list Artist`` command and
-becomes stuck waiting for the results. Same thing happens for the album tab,
-which issues ``list Album``, and the folder tab, which issues ``lsinfo``.
-Mopidy returned zero hits immediately on all three commands. If Mopidy has
-loaded your stored playlists and returns more than zero hits on these commands,
-they artist and album tabs do not hang. The folder tab still freezes when
-``lsinfo`` returns a list of stored playlists, though zero files. Thus, we've
-discovered a couple of bugs in Droid MPD Client.
+- The tabs "Artists" and "Albums" did not contain anything, and did not cause
+  any requests.
 
-Even though ``lsinfo`` returns the stored playlists for the folder tab, they
-are not displayed anywhere. Thus, we had to select an album in the album tab to
-complete the test procedure.
+- The tab "Folders" showed a spinner and said "Updating data..." but did not
+  send any requests.
 
-At one point, I had problems turning off repeat mode. After I adjusted the
-volume and tried again, it worked.
+- Searching for "foo" did nothing. No request was sent to the server.
 
-Droid MPD client does not support single mode or consume mode. It does not
-detect that the server is killed/crashed. You'll only notice it by no actions
-having any effect, e.g. you can't turn the volume knob any more.
+- Once, I managed to get a list of stored playlists in the "Search" tab, but I
+  never managed to reproduce this. Opening the stored playlists doesn't work,
+  because Mopidy haven't implemented ``lsinfo "Playlist name"`` (see
+  :issue:`193`).
 
-In conclusion, some bugs and caveats, but most of the test procedure was
-possible to perform.
+- Droid MPD client does not support single mode or consume mode.
 
+- Not able to complete the test procedure, due to the above problems.
 
-IcyBeats
---------
-
-We tested version 0.2, which at the time had 50-100 downloads, no ratings.
-The app was still in beta when we tried it.
-
-IcyBeats successfully connected to Mopidy and I was able to adjust volume. When
-I was searching for some tracks, I could not figure out how to actually start
-the search, as there was no search button and pressing enter in the input field
-just added a new line. I was stuck. In other words, IcyBeats 0.2 is not usable
-with Mopidy.
-
-IcyBeats does have something going for it: IcyBeats uses IPv6 to connect to
-Mopidy. The future is just around the corner!
+In conclusion, not a client we can recommend.
 
 
 MPDroid
 -------
 
-We tested version 0.6.9, which at the time had 5k-10k downloads, <200 ratings,
-4.5 stars. MPDroid started out as a fork of PMix.
+Test date:
+    2012-09-12
+Tested version:
+    0.7 (released 2011-06-19)
+Downloads:
+    10,000+
+Rating:
+    4.5 stars from ~500 ratings
 
-First of all, MPDroid's user interface looks nice.
+- MPDroid started out as a fork of PMix.
 
-I couldn't find any search functionality, so I added the initial track using
-another client. Other than the missing search functionality, everything in the
-test procedure worked out flawlessly. Like all other Android clients, MPDroid
-does not support single mode or consume mode. When Mopidy is killed, MPDroid
-handles it gracefully and asks if you want to try to reconnect.
+- First of all, MPDroid's user interface looks nice.
 
-All in all, MPDroid is a good MPD client without search support.
+- Last time we tested MPDroid (v0.6.9), we couldn't find any search
+  functionality. Now we found it, and it worked.
+
+- Last time we tested MPDroid (v0.6.9) everything in the test procedure worked
+  out flawlessly.
+
+- Like all other Android clients, MPDroid does not support single mode or
+  consume mode.
+
+- When Mopidy is killed, MPDroid handles it gracefully and asks if you want to
+  try to reconnect.
+
+- When using Android 4.1.1, MPDroid crashes here and there, e.g. when having an
+  empty current playlist and pressing play.
+
+Disregarding Android 4.x problems, MPDroid is a good MPD client.
 
 
 PMix
 ----
 
-We tested version 0.4.0, which at the time had 10k-50k downloads, >200 ratings,
-4 stars.
+Test date:
+    2012-09-12
+Tested version:
+    0.4.0 (released 2010-03-06)
+Downloads:
+    10,000+
+Rating:
+    3.8 stars from >200 ratings
 
-Add MPDroid is a fork from PMix, it is no surprise that PMix does not support
-search either. In addition, I could not find stored playlists. Other than that,
-I was able to complete the test procedure. PMix crashed once during testing,
-but handled the killing of Mopidy just as nicely as MPDroid. It does not
-support single mode or consume mode.
+- Using Android 4.1.1, PMix, which haven't been updated for 2.5 years, crashes
+  as soon as it connects to Mopidy.
+
+- Last time we tested the same version of PMix using Android 2.1, we found
+  that:
+
+  - PMix does not support search.
+
+  - I could not find stored playlists.
+
+  - Other than that, I was able to complete the test procedure.
+
+  - PMix crashed once during testing.
+
+  - PMix handled the killing of Mopidy just as nicely as MPDroid.
+
+  - It does not support single mode or consume mode.
 
 All in all, PMix works but can do less than MPDroid. Use MPDroid instead.
 
 
-ThreeMPD
---------
-
-We tested version 0.3.0, which at the time had 1k-5k downloads, <25 ratings,
-2.5 average. The developer request users to use MPDroid instead, due to limited
-time for maintenance. Does not support password authentication.
-
-ThreeMPD froze during startup, so we were not able to test it.
-
-
 .. _ios_mpd_clients:
 
-iPhone/iPod Touch clients
-=========================
-
-impdclient
-----------
-
-There's an open source MPD client for iOS called `impdclient
-<http://code.google.com/p/impdclient/>`_ which has not seen any updates since
-August 2008. So far, we've not heard of users trying it with Mopidy. Please
-notify us of your successes and/or problems if you do try it out.
-
+iOS clients
+===========
 
 MPod
 ----
 
-The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ client can be
-installed from the `iTunes Store
+Test date:
+    2011-01-19
+Tested version:
+    1.5.1
+
+The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ iPhone/iPod Touch
+app can be installed from the `iTunes Store
 <http://itunes.apple.com/us/app/mpod/id285063020>`_.
 
 Users have reported varying success in using MPoD together with Mopidy. Thus,
@@ -316,3 +324,10 @@ we've tested a fresh install of MPoD 1.5.1 with Mopidy as of revision e7ed28d
 - **Wishlist:** MPoD supports autodetection/-configuration of MPD servers
   through the use of Bonjour. Mopidy does not currently support this, but there
   is a wishlist bug at :issue:`39`.
+
+
+MPaD
+----
+
+The `MPaD <http://www.katoemba.net/makesnosenseatall/mpad/>`_ iPad app works
+with Mopidy. A complete review may appear here in the future.

@@ -7,13 +7,9 @@ import shutil
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings, DATA_PATH
-from mopidy.backends.base import (Backend, CurrentPlaylistController,
-    LibraryController, BaseLibraryProvider, PlaybackController,
-    BasePlaybackProvider, StoredPlaylistsController,
-    BaseStoredPlaylistsProvider)
+from mopidy import audio, core, settings, DATA_PATH
+from mopidy.backends import base
 from mopidy.models import Playlist, Track, Album
-from mopidy.gstreamer import GStreamer
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
@@ -27,11 +23,9 @@ if not DEFAULT_MUSIC_PATH or DEFAULT_MUSIC_PATH == os.path.expanduser(u'~'):
     DEFAULT_MUSIC_PATH = os.path.expanduser(u'~/music')
 
 
-class LocalBackend(ThreadingActor, Backend):
+class LocalBackend(ThreadingActor, base.Backend):
     """
     A backend for playing music from a local music archive.
-
-    **Issues:** https://github.com/mopidy/mopidy/issues?labels=backend-local
 
     **Dependencies:**
 
@@ -47,32 +41,32 @@ class LocalBackend(ThreadingActor, Backend):
     def __init__(self, *args, **kwargs):
         super(LocalBackend, self).__init__(*args, **kwargs)
 
-        self.current_playlist = CurrentPlaylistController(backend=self)
+        self.current_playlist = core.CurrentPlaylistController(backend=self)
 
         library_provider = LocalLibraryProvider(backend=self)
-        self.library = LibraryController(backend=self,
+        self.library = core.LibraryController(backend=self,
             provider=library_provider)
 
-        playback_provider = LocalPlaybackProvider(backend=self)
+        playback_provider = base.BasePlaybackProvider(backend=self)
         self.playback = LocalPlaybackController(backend=self,
             provider=playback_provider)
 
         stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
-        self.stored_playlists = StoredPlaylistsController(backend=self,
+        self.stored_playlists = core.StoredPlaylistsController(backend=self,
             provider=stored_playlists_provider)
 
         self.uri_schemes = [u'file']
 
-        self.gstreamer = None
+        self.audio = None
 
     def on_start(self):
-        gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, \
-            'Expected exactly one running GStreamer.'
-        self.gstreamer = gstreamer_refs[0].proxy()
+        audio_refs = ActorRegistry.get_by_class(audio.Audio)
+        assert len(audio_refs) == 1, \
+            'Expected exactly one running Audio instance.'
+        self.audio = audio_refs[0].proxy()
 
 
-class LocalPlaybackController(PlaybackController):
+class LocalPlaybackController(core.PlaybackController):
     def __init__(self, *args, **kwargs):
         super(LocalPlaybackController, self).__init__(*args, **kwargs)
 
@@ -81,35 +75,10 @@ class LocalPlaybackController(PlaybackController):
 
     @property
     def time_position(self):
-        return self.backend.gstreamer.get_position().get()
+        return self.backend.audio.get_position().get()
 
 
-class LocalPlaybackProvider(BasePlaybackProvider):
-    def pause(self):
-        return self.backend.gstreamer.pause_playback().get()
-
-    def play(self, track):
-        self.backend.gstreamer.prepare_change()
-        self.backend.gstreamer.set_uri(track.uri).get()
-        return self.backend.gstreamer.start_playback().get()
-
-    def resume(self):
-        return self.backend.gstreamer.start_playback().get()
-
-    def seek(self, time_position):
-        return self.backend.gstreamer.set_position(time_position).get()
-
-    def stop(self):
-        return self.backend.gstreamer.stop_playback().get()
-
-    def get_volume(self):
-        return self.backend.gstreamer.get_volume().get()
-
-    def set_volume(self, volume):
-        self.backend.gstreamer.set_volume(volume).get()
-
-
-class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
+class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
     def __init__(self, *args, **kwargs):
         super(LocalStoredPlaylistsProvider, self).__init__(*args, **kwargs)
         self._folder = settings.LOCAL_PLAYLIST_PATH or DEFAULT_PLAYLIST_PATH
@@ -124,7 +93,7 @@ class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
         logger.info('Loading playlists from %s', self._folder)
 
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
-            name = os.path.basename(m3u)[:len('.m3u')]
+            name = os.path.basename(m3u)[:-len('.m3u')]
             tracks = []
             for uri in parse_m3u(m3u):
                 try:
@@ -182,7 +151,7 @@ class LocalStoredPlaylistsProvider(BaseStoredPlaylistsProvider):
         self._playlists.append(playlist)
 
 
-class LocalLibraryProvider(BaseLibraryProvider):
+class LocalLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(LocalLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
@@ -203,7 +172,8 @@ class LocalLibraryProvider(BaseLibraryProvider):
         try:
             return self._uri_mapping[uri]
         except KeyError:
-            raise LookupError('%s not found.' % uri)
+            logger.debug(u'Failed to lookup "%s"', uri)
+            return None
 
     def find_exact(self, **query):
         self._validate_query(query)

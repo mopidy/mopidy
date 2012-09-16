@@ -7,24 +7,7 @@ This change log is used to track all major changes to Mopidy.
 v0.8 (in development)
 =====================
 
-**Changes**
-
-- Added tools/debug-proxy.py to tee client requests to two backends and diff
-  responses. Intended as a developer tool for checking for MPD protocol changes
-  and various client support. Requires gevent, which currently is not a
-  dependency of Mopidy.
-
-- Fixed bug when the MPD command `playlistinfo` is used with a track position.
-  Track position and CPID was intermixed, so it would cause a crash if a CPID
-  matching the track position didn't exist. (Fixes: :issue:`162`)
-
-- Added :option:`--list-deps` option to the `mopidy` command that lists
-  required and optional dependencies, their current versions, and some other
-  information useful for debugging. (Fixes: :issue:`74`)
-
-- When unknown settings are encountered, we now check if it's similar to a
-  known setting, and suggests to the user what we think the setting should have
-  been.
+**Audio output and mixer changes**
 
 - Removed multiple outputs support. Having this feature currently seems to be
   more trouble than what it is worth. The :attr:`mopidy.settings.OUTPUTS`
@@ -35,10 +18,10 @@ v0.8 (in development)
   :issue:`159`)
 
 - Switch to pure GStreamer based mixing. This implies that users setup a
-  GStreamer bin with a mixer in it in :attr:`mopidy.setting.MIXER`. The default
-  value is ``autoaudiomixer``, a custom mixer that attempts to find a mixer that
-  will work on your system. If this picks the wrong mixer you can of course
-  override it. Setting the mixer to :class:`None` is also supported. MPD
+  GStreamer bin with a mixer in it in :attr:`mopidy.settings.MIXER`. The
+  default value is ``autoaudiomixer``, a custom mixer that attempts to find a
+  mixer that will work on your system. If this picks the wrong mixer you can of
+  course override it. Setting the mixer to :class:`None` is also supported. MPD
   protocol support for volume has also been updated to return -1 when we have
   no mixer set.
 
@@ -46,7 +29,7 @@ v0.8 (in development)
 
 - Updated the NAD hardware mixer to work in the new GStreamer based mixing
   regime. Settings are now passed as GStreamer element properties. In practice
-  that means that the following old-style config:
+  that means that the following old-style config::
 
       MIXER = u'mopidy.mixers.nad.NadMixer'
       MIXER_EXT_PORT = u'/dev/ttyUSB0'
@@ -54,7 +37,7 @@ v0.8 (in development)
       MIXER_EXT_SPEAKERS_A = u'On'
       MIXER_EXT_SPEAKERS_B = u'Off'
 
-  Now is reduced to simply:
+  Now is reduced to simply::
 
       MIXER = u'nadmixer port=/dev/ttyUSB0 source=aux speakers-a=on speakers-b=off'
 
@@ -62,11 +45,40 @@ v0.8 (in development)
   properties may be left out if you don't want the mixer to adjust the settings
   on your NAD amplifier when Mopidy is started.
 
-- Fixed :issue:`150` which caused some clients to block Mopidy completely. Bug
-  was caused by some clients sending ``close`` and then shutting down the
-  connection right away. This trigged a situation in which the connection
+**Changes**
+
+- When unknown settings are encountered, we now check if it's similar to a
+  known setting, and suggests to the user what we think the setting should have
+  been.
+
+- Added :option:`--list-deps` option to the ``mopidy`` command that lists
+  required and optional dependencies, their current versions, and some other
+  information useful for debugging. (Fixes: :issue:`74`)
+
+- Added ``tools/debug-proxy.py`` to tee client requests to two backends and
+  diff responses. Intended as a developer tool for checking for MPD protocol
+  changes and various client support. Requires gevent, which currently is not a
+  dependency of Mopidy.
+
+- Support tracks with only release year, and not a full release date, like e.g.
+  Spotify tracks.
+
+**Bug fixes**
+
+- :issue:`72`: Created a Spotify track proxy that will switch to using loaded
+  data as soon as it becomes available.
+
+- :issue:`162`: Fixed bug when the MPD command ``playlistinfo`` is used with a
+  track position. Track position and CPID was intermixed, so it would cause a
+  crash if a CPID matching the track position didn't exist.
+
+- :issue:`150`: Fix bug which caused some clients to block Mopidy completely.
+  The bug was caused by some clients sending ``close`` and then shutting down
+  the connection right away. This trigged a situation in which the connection
   cleanup code would wait for an response that would never come inside the
   event loop, blocking everything else.
+
+- Fixed crash on lookup of unknown path when using local backend.
 
 
 v0.7.3 (2012-08-11)
@@ -608,9 +620,9 @@ to this problem.
     :class:`mopidy.models.Album`, and :class:`mopidy.models.Track`.
 
   - Prepare for multi-backend support (see :issue:`40`) by introducing the
-    :ref:`provider concept <backend-concepts>`. Split the backend API into a
-    :ref:`backend controller API <backend-controller-api>` (for frontend use)
-    and a :ref:`backend provider API <backend-provider-api>` (for backend
+    :ref:`provider concept <concepts>`. Split the backend API into a
+    :ref:`backend controller API <core-api>` (for frontend use)
+    and a :ref:`backend provider API <backend-api>` (for backend
     implementation use), which includes the following changes:
 
     - Rename ``BaseBackend`` to :class:`mopidy.backends.base.Backend`.
@@ -852,8 +864,8 @@ In the last two months, Mopidy's MPD frontend has gotten lots of stability
 fixes and error handling improvements, proper support for having the same track
 multiple times in a playlist, and support for IPv6. We have also fixed the
 choppy playback on the libspotify backend. For the road ahead of us, we got an
-updated :doc:`release roadmap <development/roadmap>` with our goals for the 0.1
-to 0.3 releases.
+updated :doc:`release roadmap <development>` with our goals for the 0.1 to 0.3
+releases.
 
 Enjoy the best alpha relase of Mopidy ever :-)
 
@@ -946,7 +958,7 @@ Since the previous release Mopidy has seen about 300 commits, more than 200 new
 tests, a libspotify release, and major feature additions to Spotify. The new
 releases from Spotify have lead to updates to our dependencies, and also to new
 bugs in Mopidy. Thus, this is primarily a bugfix release, even though the not
-yet finished work on a Gstreamer backend have been merged.
+yet finished work on a GStreamer backend have been merged.
 
 All users are recommended to upgrade to 0.1.0a1, and should at the same time
 ensure that they have the latest versions of our dependencies: Despotify r508
@@ -971,7 +983,7 @@ As always, report problems at our IRC channel or our issue tracker. Thanks!
   - Several new generic features, like shuffle, consume, and playlist repeat.
     (Fixes: :issue:`3`)
   - **[Work in Progress]** A new backend for playing music from a local music
-    archive using the Gstreamer library.
+    archive using the GStreamer library.
 
 - Made :class:`mopidy.mixers.alsa.AlsaMixer` work on machines without a mixer
   named "Master".

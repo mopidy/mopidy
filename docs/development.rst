@@ -1,9 +1,40 @@
-*****************
-How to contribute
-*****************
+***********
+Development
+***********
 
 Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
 ``irc.freenode.net`` and through `GitHub <http://github.com/>`_.
+
+
+Release schedule
+================
+
+We intend to have about one timeboxed feature release every month
+in periods of active development. The feature releases are numbered 0.x.0. The
+features added is a mix of what we feel is most important/requested of the
+missing features, and features we develop just because we find them fun to
+make, even though they may be useful for very few users or for a limited use
+case.
+
+Bugfix releases, numbered 0.x.y, will be released whenever we discover bugs
+that are too serious to wait for the next feature release. We will only release
+bugfix releases for the last feature release. E.g. when 0.3.0 is released, we
+will no longer provide bugfix releases for the 0.2 series. In other words,
+there will be just a single supported release at any point in time.
+
+
+Feature wishlist
+================
+
+We maintain our collection of sane or less sane ideas for future Mopidy
+features as `issues <https://github.com/mopidy/mopidy/issues>`_ at GitHub
+labeled with `the "wishlist" label
+<https://github.com/mopidy/mopidy/issues?labels=wishlist>`_. Feel free to vote
+up any feature you would love to see in Mopidy, but please refrain from adding
+a comment just to say "I want this too!". You are of course free to add
+comments if you have suggestions for how the feature should work or be
+implemented, and you may add new wishlist issues if your ideas are not already
+represented.
 
 
 Code style
@@ -124,6 +155,49 @@ In addition to running tests, the Jenkins CI server also gathers coverage
 statistics and uses pylint to check for errors and possible improvements in our
 code. So, if you're out of work, the code coverage and pylint data at the CI
 server should give you a place to start.
+
+
+Protocol debugging
+==================
+
+Since the main interface provided to Mopidy is through the MPD protocol, it is
+crucial that we try and stay in sync with protocol developments. In an attempt
+to make it easier to debug differences Mopidy and MPD protocol handling we have
+created ``tools/debug-proxy.py``.
+
+This tool is proxy that sits in front of two MPD protocol aware servers and
+sends all requests to both, returning the primary response to the client and
+then printing any diff in the two responses.
+
+Note that this tool depends on ``gevent`` unlike the rest of Mopidy at the time
+of writing. See ``--help`` for available options. Sample session::
+
+    [127.0.0.1]:59714
+    listallinfo
+    --- Reference response
+    +++ Actual response
+    @@ -1,16 +1,1 @@
+    -file: uri1
+    -Time: 4
+    -Artist: artist1
+    -Title: track1
+    -Album: album1
+    -file: uri2
+    -Time: 4
+    -Artist: artist2
+    -Title: track2
+    -Album: album2
+    -file: uri3
+    -Time: 4
+    -Artist: artist3
+    -Title: track3
+    -Album: album3
+    -OK
+    +ACK [2@0] {listallinfo} incorrect arguments
+
+To ensure that Mopidy and MPD have comparable state it is suggested you setup
+both to use ``tests/data/library_tag_cache`` for their tag cache and
+``tests/data`` for music/playlist folders.
 
 
 Writing documentation

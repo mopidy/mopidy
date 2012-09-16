@@ -1,4 +1,4 @@
-.. _backend-concepts:
+.. _concepts:
 
 **********************************************
 The backend, controller, and provider concepts
@@ -12,11 +12,11 @@ Controllers:
     functionality. Most, but not all, controllers delegates some work to one or
     more providers. The controllers are responsible for choosing the right
     provider for any given task based upon i.e. the track's URI. See
-    :ref:`backend-controller-api` for more details.
+    :ref:`core-api` for more details.
 Providers:
     Anything specific to i.e. Spotify integration or local storage is contained
     in the providers. To integrate with new music sources, you just add new
-    providers. See :ref:`backend-provider-api` for more details.
+    providers. See :ref:`backend-api` for more details.
 
 .. digraph:: backend_relations
 

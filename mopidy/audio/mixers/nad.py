@@ -12,10 +12,10 @@ except ImportError:
 
 from pykka.actor import ThreadingActor
 
-from mopidy.mixers import create_track
+from mopidy.audio.mixers import create_track
 
 
-logger = logging.getLogger('mopidy.mixers.nad')
+logger = logging.getLogger('mopidy.audio.mixers.nad')
 
 
 class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):

@@ -1,7 +1,6 @@
 import sys
 
-from mopidy import settings
-from mopidy.gstreamer import GStreamer
+from mopidy import audio, settings
 from mopidy.utils.path import path_to_uri
 
 from tests import unittest, path_to_data_dir
@@ -9,37 +8,38 @@ from tests import unittest, path_to_data_dir
 
 @unittest.skipIf(sys.platform == 'win32',
     'Our Windows build server does not support GStreamer yet')
-class GStreamerTest(unittest.TestCase):
+class AudioTest(unittest.TestCase):
     def setUp(self):
         settings.MIXER = 'fakemixer track_max_volume=65536'
         settings.OUTPUT = 'fakesink'
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.gstreamer = GStreamer()
+        self.audio = audio.Audio.start().proxy()
 
     def tearDown(self):
+        self.audio.stop()
         settings.runtime.clear()
 
     def prepare_uri(self, uri):
-        self.gstreamer.prepare_change()
-        self.gstreamer.set_uri(uri)
+        self.audio.prepare_change()
+        self.audio.set_uri(uri)
 
     def test_start_playback_existing_file(self):
         self.prepare_uri(self.song_uri)
-        self.assertTrue(self.gstreamer.start_playback())
+        self.assertTrue(self.audio.start_playback().get())
 
     def test_start_playback_non_existing_file(self):
         self.prepare_uri(self.song_uri + 'bogus')
-        self.assertFalse(self.gstreamer.start_playback())
+        self.assertFalse(self.audio.start_playback().get())
 
     def test_pause_playback_while_playing(self):
         self.prepare_uri(self.song_uri)
-        self.gstreamer.start_playback()
-        self.assertTrue(self.gstreamer.pause_playback())
+        self.audio.start_playback()
+        self.assertTrue(self.audio.pause_playback().get())
 
     def test_stop_playback_while_playing(self):
         self.prepare_uri(self.song_uri)
-        self.gstreamer.start_playback()
-        self.assertTrue(self.gstreamer.stop_playback())
+        self.audio.start_playback()
+        self.assertTrue(self.audio.stop_playback().get())
 
     @unittest.SkipTest
     def test_deliver_data(self):
@@ -51,8 +51,8 @@ class GStreamerTest(unittest.TestCase):
 
     def test_set_volume(self):
         for value in range(0, 101):
-            self.assertTrue(self.gstreamer.set_volume(value))
-            self.assertEqual(value, self.gstreamer.get_volume())
+            self.assertTrue(self.audio.set_volume(value).get())
+            self.assertEqual(value, self.audio.get_volume().get())
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
@@ -65,4 +65,3 @@ class GStreamerTest(unittest.TestCase):
     @unittest.SkipTest
     def test_invalid_output_raises_error(self):
         pass # TODO
-

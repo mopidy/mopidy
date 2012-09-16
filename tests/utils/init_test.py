@@ -20,7 +20,7 @@ class GetClassTest(unittest.TestCase):
         try:
             utils.get_class('foo.bar.Baz')
         except ImportError as e:
-            self.assert_('foo.bar.Baz' in str(e))
+            self.assertIn('foo.bar.Baz', str(e))
 
     def test_loading_existing_class(self):
         cls = utils.get_class('unittest.TestCase')

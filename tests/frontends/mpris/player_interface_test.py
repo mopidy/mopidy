@@ -4,7 +4,7 @@ import mock
 
 from mopidy import OptionalDependencyError
 from mopidy.backends.dummy import DummyBackend
-from mopidy.backends.base.playback import PlaybackController
+from mopidy.core import PlaybackState
 from mopidy.models import Album, Artist, Track
 
 try:
@@ -14,9 +14,9 @@ except OptionalDependencyError:
 
 from tests import unittest
 
-PLAYING = PlaybackController.PLAYING
-PAUSED = PlaybackController.PAUSED
-STOPPED = PlaybackController.STOPPED
+PLAYING = PlaybackState.PLAYING
+PAUSED = PlaybackState.PAUSED
+STOPPED = PlaybackState.STOPPED
 
 
 @unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
@@ -141,7 +141,7 @@ class PlayerInterfaceTest(unittest.TestCase):
 
     def test_get_metadata_has_trackid_even_when_no_current_track(self):
         result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
-        self.assert_('mpris:trackid' in result.keys())
+        self.assertIn('mpris:trackid', result.keys())
         self.assertEquals(result['mpris:trackid'], '')
 
     def test_get_metadata_has_trackid_based_on_cpid(self):

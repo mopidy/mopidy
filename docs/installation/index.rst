@@ -173,7 +173,7 @@ If you want to contribute to Mopidy, you should install Mopidy using Git.
 
 For an introduction to ``git``, please visit `git-scm.com
 <http://git-scm.com/>`_. Also, please read our :doc:`developer documentation
-</development/index>`.
+</development>`.
 
 
 From AUR on ArchLinux

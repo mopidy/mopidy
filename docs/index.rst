@@ -54,7 +54,7 @@ Development documentation
 .. toctree::
     :maxdepth: 3
 
-    development/index
+    development
 
 Indices and tables
 ==================
