@@ -132,6 +132,7 @@ class PlaybackController(object):
         Read-only. A :class:`mopidy.models.Track` extracted from
         :attr:`cp_track_at_eot` for convenience.
         """
+        logger.debug('get_track at eot')
         return self._get_track(self.cp_track_at_eot)
 
     @property
@@ -345,16 +346,21 @@ class PlaybackController(object):
 
         Typically called by :class:`mopidy.process.CoreProcess` after a message
         from a library thread is received.
-        """
+        """ 
+        logger.info(self.state)
         if self.state == self.STOPPED:
             return
 
         original_cp_track = self.current_cp_track
-
+        
+        logger.info('endo f track')
+        
+        
         if self.cp_track_at_eot:
             self._trigger_track_playback_ended()
             self.play(self.cp_track_at_eot)
         else:
+            logger.info('stop')
             self.stop(clear_current_track=True)
 
         if self.consume:

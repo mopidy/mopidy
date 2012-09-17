@@ -29,6 +29,7 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
             return False
 
     def resume(self):
+        #logger.info('resume spot')
         return self.seek(self.backend.playback.time_position)
 
     def seek(self, time_position):

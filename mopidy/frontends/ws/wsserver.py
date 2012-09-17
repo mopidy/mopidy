@@ -116,13 +116,11 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
             self.request.backend.playback.change_track(cp_track)
         
             logger.info(self.request.backend.playback.current_playlist_position.get())
-            
+            logger.info(self.request.backend.playback.play().get())
+        
         except LookupError:
-            #pass
-            raise exceptions.WsNoExistError(u'No such song', command=u'playtrack')
-        
-        logger.info(self.request.backend.playback.play().get())
-        
+            pass
+            #raise exceptions.WsNoExistError(u'No such song', command=u'playtrack')
    
     def on_loadtracklist(self, trackuris):
         trackslist = []
@@ -190,7 +188,7 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
             
     def on_seek(self, message=None):
         pos = int(message)
-        if (pos >= 0) and (pos <= 100000000): #100 mln sec should be enough 
+        if (pos >= 0) and (pos <= 100000000): #100 mln sec should be enough ....
             self.request.backend.playback.seek(int(seconds) * 1000)  
     
     #playlist handlers
