@@ -170,7 +170,7 @@ def validate_settings(defaults, settings):
                 u'Deprecated setting, please set the value via the GStreamer '
                 u'bin in OUTPUT.')
 
-        elif setting not in defaults:
+        elif setting not in defaults and not setting.startswith('CUSTOM_'):
             errors[setting] = u'Unknown setting.'
             suggestion = did_you_mean(setting, defaults)
 
