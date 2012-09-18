@@ -73,7 +73,7 @@ v0.8 (in development)
   ``$XDG_MUSIC_DIR`` substitution. Defaults for such settings have been updated
   to use this instead of hidden away defaults.
 
-- Playback is no done using ``playbin2`` from GStreamer instead of rolling our
+- Playback is now done using ``playbin2`` from GStreamer instead of rolling our
   own. This is the first step towards resolving :issue:`171`.
 
 **Bug fixes**
