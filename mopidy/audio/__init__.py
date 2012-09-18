@@ -45,6 +45,7 @@ class Audio(ThreadingActor):
         self._playbin = None
         self._mixer = None
         self._mixer_track = None
+        self._software_mixing = False
 
         self._message_processor_set_up = False
 
@@ -86,6 +87,11 @@ class Audio(ThreadingActor):
     def _setup_mixer(self):
         if not settings.MIXER:
             logger.info('Not setting up mixer.')
+            return
+
+        if settings.MIXER == 'software':
+            self._software_mixing = True
+            logger.info('Mixer set to software mixing.')
             return
 
         try:
@@ -315,6 +321,9 @@ class Audio(ThreadingActor):
 
         :rtype: int in range [0..100] or :class:`None`
         """
+        if self._software_mixing:
+            return round(self._playbin.get_property('volume') * 100)
+
         if self._mixer is None:
             return None
 
@@ -333,6 +342,10 @@ class Audio(ThreadingActor):
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        if self._software_mixing:
+            self._playbin.set_property('volume', volume / 100.0)
+            return True
+
         if self._mixer is None:
             return False
 
