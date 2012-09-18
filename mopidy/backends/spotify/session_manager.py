@@ -153,7 +153,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             self.session.playlist_container())
         playlists = filter(None, playlists)
         self.backend.stored_playlists.playlists = playlists
-        logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
+        logger.info(u'Loaded %d Spotify playlist(s)', len(playlists))
 
     def search(self, query, queue):
         """Search method used by Mopidy backend"""
