@@ -42,17 +42,14 @@ class Audio(ThreadingActor):
             signed=(boolean)true,
             rate=(int)44100""")
 
-        self._pipeline = None
-        self._source = None
-        self._uridecodebin = None
-        self._output = None
+        self._playbin = None
         self._mixer = None
 
         self._message_processor_set_up = False
 
     def on_start(self):
         try:
-            self._setup_pipeline()
+            self._setup_playbin()
             self._setup_output()
             self._setup_mixer()
             self._setup_message_processor()
@@ -63,36 +60,22 @@ class Audio(ThreadingActor):
     def on_stop(self):
         self._teardown_message_processor()
         self._teardown_mixer()
-        self._teardown_pipeline()
+        self._teardown_playbin()
 
-    def _setup_pipeline(self):
-        # TODO: replace with and input bin so we simply have an input bin we
-        # connect to an output bin with a mixer on the side. set_uri on bin?
-        description = ' ! '.join([
-            'uridecodebin name=uri',
-            'audioconvert name=convert',
-            'audioresample name=resample',
-            'queue name=queue'])
+    def _setup_playbin(self):
+        self._playbin = gst.element_factory_make('playbin2')
 
-        logger.debug(u'Setting up base GStreamer pipeline: %s', description)
+        fakesink = gst.element_factory_make('fakesink')
+        self._playbin.set_property('video-sink', fakesink)
 
-        self._pipeline = gst.parse_launch(description)
-        self._uridecodebin = self._pipeline.get_by_name('uri')
-
-        self._uridecodebin.connect('notify::source', self._on_new_source)
-        self._uridecodebin.connect('pad-added', self._on_new_pad,
-            self._pipeline.get_by_name('queue').get_pad('sink'))
-
-    def _teardown_pipeline(self):
-        self._pipeline.set_state(gst.STATE_NULL)
+    def _teardown_playbin(self):
+        self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
         try:
-            self._output = gst.parse_bin_from_description(
+            output = gst.parse_bin_from_description(
                 settings.OUTPUT, ghost_unconnected_pads=True)
-            self._pipeline.add(self._output)
-            gst.element_link_many(self._pipeline.get_by_name('queue'),
-                                  self._output)
+            self._playbin.set_property('audio-sink', output)
             logger.info('Output set to %s', settings.OUTPUT)
         except gobject.GError as ex:
             logger.error('Failed to create output "%s": %s',
@@ -148,28 +131,15 @@ class Audio(ThreadingActor):
             mixer.set_state(gst.STATE_NULL)
 
     def _setup_message_processor(self):
-        bus = self._pipeline.get_bus()
+        bus = self._playbin.get_bus()
         bus.add_signal_watch()
         bus.connect('message', self._on_message)
         self._message_processor_set_up = True
 
     def _teardown_message_processor(self):
         if self._message_processor_set_up:
-            bus = self._pipeline.get_bus()
+            bus = self._playbin.get_bus()
             bus.remove_signal_watch()
-
-    def _on_new_source(self, element, pad):
-        self._source = element.get_property('source')
-        try:
-            self._source.set_property('caps', self._default_caps)
-        except TypeError:
-            pass
-
-    def _on_new_pad(self, source, pad, target_pad):
-        if not pad.is_linked():
-            if target_pad.is_linked():
-                target_pad.get_peer().unlink(target_pad)
-            pad.link(target_pad)
 
     def _on_message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
@@ -200,7 +170,7 @@ class Audio(ThreadingActor):
         :param uri: the URI to play
         :type uri: string
         """
-        self._uridecodebin.set_property('uri', uri)
+        self._playbin.set_property('uri', uri)
 
     def emit_data(self, capabilities, data):
         """
@@ -215,18 +185,20 @@ class Audio(ThreadingActor):
         caps = gst.caps_from_string(capabilities)
         buffer_ = gst.Buffer(buffer(data))
         buffer_.set_caps(caps)
-        self._source.set_property('caps', caps)
-        self._source.emit('push-buffer', buffer_)
+
+        source = self._playbin.get_property('source')
+        source.set_property('caps', caps)
+        source.emit('push-buffer', buffer_)
 
     def emit_end_of_stream(self):
         """
-        Put an end-of-stream token on the pipeline. This is typically used in
+        Put an end-of-stream token on the playbin. This is typically used in
         combination with :meth:`emit_data`.
 
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        self._source.emit('end-of-stream')
+        self._playbin.get_property('source').emit('end-of-stream')
 
     def get_position(self):
         """
@@ -234,10 +206,10 @@ class Audio(ThreadingActor):
 
         :rtype: int
         """
-        if self._pipeline.get_state()[1] == gst.STATE_NULL:
+        if self._playbin.get_state()[1] == gst.STATE_NULL:
             return 0
         try:
-            position = self._pipeline.query_position(gst.FORMAT_TIME)[0]
+            position = self._playbin.query_position(gst.FORMAT_TIME)[0]
             return position // gst.MSECOND
         except gst.QueryError, e:
             logger.error('time_position failed: %s', e)
@@ -251,10 +223,10 @@ class Audio(ThreadingActor):
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self._pipeline.get_state() # block until state changes are done
-        handeled = self._pipeline.seek_simple(gst.Format(gst.FORMAT_TIME),
+        self._playbin.get_state() # block until state changes are done
+        handeled = self._playbin.seek_simple(gst.Format(gst.FORMAT_TIME),
             gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
-        self._pipeline.get_state() # block until seek is done
+        self._playbin.get_state() # block until seek is done
         return handeled
 
     def start_playback(self):
@@ -308,12 +280,12 @@ class Audio(ThreadingActor):
             "READY" -> "NULL"
             "READY" -> "PAUSED"
 
-        :param state: State to set pipeline to. One of: `gst.STATE_NULL`,
+        :param state: State to set playbin to. One of: `gst.STATE_NULL`,
             `gst.STATE_READY`, `gst.STATE_PAUSED` and `gst.STATE_PLAYING`.
         :type state: :class:`gst.State`
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        result = self._pipeline.set_state(state)
+        result = self._playbin.set_state(state)
         if result == gst.STATE_CHANGE_FAILURE:
             logger.warning('Setting GStreamer state to %s: failed',
                 state.value_name)
@@ -382,7 +354,7 @@ class Audio(ThreadingActor):
         Set track metadata for currently playing song.
 
         Only needs to be called by sources such as `appsrc` which do not
-        already inject tags in pipeline, e.g. when using :meth:`emit_data` to
+        already inject tags in playbin, e.g. when using :meth:`emit_data` to
         deliver raw audio data to GStreamer.
 
         :param track: the current track
@@ -407,4 +379,4 @@ class Audio(ThreadingActor):
             taglist[gst.TAG_ALBUM] = track.album.name
 
         event = gst.event_new_tag(taglist)
-        self._pipeline.send_event(event)
+        self._playbin.send_event(event)
