@@ -44,6 +44,7 @@ class Audio(ThreadingActor):
 
         self._playbin = None
         self._mixer = None
+        self._mixer_track = None
 
         self._message_processor_set_up = False
 
@@ -110,7 +111,8 @@ class Audio(ThreadingActor):
             logger.warning('Could not find usable mixer track.')
             return
 
-        self._mixer = (mixer, track)
+        self._mixer = mixer
+        self._mixer_track = track
         logger.info('Mixer set to %s using track called %s',
                     mixer.get_factory().get_name(), track.label)
 
@@ -127,8 +129,7 @@ class Audio(ThreadingActor):
 
     def _teardown_mixer(self):
         if self._mixer is not None:
-            (mixer, track) = self._mixer
-            mixer.set_state(gst.STATE_NULL)
+            self._mixer.set_state(gst.STATE_NULL)
 
     def _setup_message_processor(self):
         bus = self._playbin.get_bus()
@@ -317,13 +318,11 @@ class Audio(ThreadingActor):
         if self._mixer is None:
             return None
 
-        mixer, track = self._mixer
-
-        volumes = mixer.get_volume(track)
+        volumes = self._mixer.get_volume(self._mixer_track)
         avg_volume = float(sum(volumes)) / len(volumes)
 
         new_scale = (0, 100)
-        old_scale = (track.min_volume, track.max_volume)
+        old_scale = (self._mixer_track.min_volume, self._mixer_track.max_volume)
         return utils.rescale(avg_volume, old=old_scale, new=new_scale)
 
     def set_volume(self, volume):
@@ -337,17 +336,15 @@ class Audio(ThreadingActor):
         if self._mixer is None:
             return False
 
-        mixer, track = self._mixer
-
         old_scale = (0, 100)
-        new_scale = (track.min_volume, track.max_volume)
+        new_scale = (self._mixer_track.min_volume, self._mixer_track.max_volume)
 
         volume = utils.rescale(volume, old=old_scale, new=new_scale)
 
-        volumes = (volume,) * track.num_channels
-        mixer.set_volume(track, volumes)
+        volumes = (volume,) * self._mixer_track.num_channels
+        self._mixer.set_volume(self._mixer_track, volumes)
 
-        return mixer.get_volume(track) == volumes
+        return self._mixer.get_volume(self._mixer_track) == volumes
 
     def set_metadata(self, track):
         """
