@@ -111,7 +111,8 @@ LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
 #: Expects a GStreamer mixer to use, typical values are:
 #: ``alsamixer``, ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
 #:
-#: Setting this to :class:`None` turns off volume control.
+#: Setting this to :class:`None` turns off volume control. ``software``
+#: can be used to force software mixing in the application.
 #:
 #: Default::
 #:
