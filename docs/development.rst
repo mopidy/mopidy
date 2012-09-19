@@ -264,15 +264,15 @@ settings file in the following way::
     elif 'local' in profile:
         BACKENDS = (u'mopidy.backends.local.LocalBackend',)
         LOCAL_MUSIC_PATH = u'~/music'
-    
+
     if 'shoutcast' in profile:
         OUTPUT = u'lame ! shout2send mount="/stream"'
     elif 'silent' in profile:
-        OUTPUT = 'fakesink'
+        OUTPUT = u'fakesink'
         MIXER = None
 
-    SPOTIFY_USERNAME = 'xxxxx'
-    SPOTIFY_PASSWORD = 'xxxxx'
+    SPOTIFY_USERNAME = u'xxxxx'
+    SPOTIFY_PASSWORD = u'xxxxx'
 
 Using this setup you can now run Mopidy with ``PROFILE=silent,spotify mopidy``
 if you for instance want to test Spotify without any actual audio output.
