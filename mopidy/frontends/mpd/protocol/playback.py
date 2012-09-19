@@ -161,11 +161,11 @@ def playpos(context, songpos):
 
     *Clarifications:*
 
-    - ``playid "-1"`` when playing is ignored.
-    - ``playid "-1"`` when paused resumes playback.
-    - ``playid "-1"`` when stopped with a current track starts playback at the
+    - ``play "-1"`` when playing is ignored.
+    - ``play "-1"`` when paused resumes playback.
+    - ``play "-1"`` when stopped with a current track starts playback at the
       current track.
-    - ``playid "-1"`` when stopped without a current track, e.g. after playlist
+    - ``play "-1"`` when stopped without a current track, e.g. after playlist
       replacement, starts playback at the first track.
 
     *BitMPC:*
