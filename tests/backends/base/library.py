@@ -34,8 +34,8 @@ class LibraryControllerTest(object):
         self.assertEqual(track, self.tracks[0])
 
     def test_lookup_unknown_track(self):
-        test = lambda: self.library.lookup('fake uri')
-        self.assertRaises(LookupError, test)
+        track = self.library.lookup('fake uri')
+        self.assertEquals(track, None)
 
     def test_find_exact_no_hits(self):
         result = self.library.find_exact(track=['unknown track'])

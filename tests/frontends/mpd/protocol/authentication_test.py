@@ -38,7 +38,6 @@ class AuthenticationTest(protocol.BaseTestCase):
 
         self.sendRequest(u'close')
         self.assertFalse(self.dispatcher.authenticated)
-        self.assertInResponse(u'OK')
 
     def test_commands_is_allowed_without_authentication(self):
         settings.MPD_SERVER_PASSWORD = u'topsecret'

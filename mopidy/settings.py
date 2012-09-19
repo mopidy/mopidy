@@ -1,5 +1,5 @@
 """
-Available settings and their default values.
+All available settings and their default values.
 
 .. warning::
 
@@ -14,6 +14,10 @@ Available settings and their default values.
 #:
 #:     BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
 #:
+#: Other typical values::
+#:
+#:     BACKENDS = (u'mopidy.backends.local.LocalBackend',)
+#:
 #: .. note::
 #:     Currently only the first backend in the list is used.
 BACKENDS = (
@@ -25,14 +29,6 @@ BACKENDS = (
 #: See http://docs.python.org/library/logging.html#formatter-objects for
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
-
-#: Which GStreamer bin description to use in
-#: :class:`mopidy.outputs.custom.CustomOutput`.
-#:
-#: Default::
-#:
-#:     CUSTOM_OUTPUT = u'fakesink'
-CUSTOM_OUTPUT = u'fakesink'
 
 #: The log format used for debug logging.
 #:
@@ -89,9 +85,8 @@ LASTFM_PASSWORD = u''
 #:
 #: Default::
 #:
-#:    # Defaults to asking glib where music is stored, fallback is ~/music
-#:    LOCAL_MUSIC_PATH = None
-LOCAL_MUSIC_PATH = None
+#:    LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
+LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
 
 #: Path to playlist folder with m3u files for local music.
 #:
@@ -99,8 +94,8 @@ LOCAL_MUSIC_PATH = None
 #:
 #: Default::
 #:
-#:    LOCAL_PLAYLIST_PATH = None # Implies $XDG_DATA_DIR/mopidy/playlists
-LOCAL_PLAYLIST_PATH = None
+#:    LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
+LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
 
 #: Path to tag cache for local music.
 #:
@@ -108,57 +103,38 @@ LOCAL_PLAYLIST_PATH = None
 #:
 #: Default::
 #:
-#:    LOCAL_TAG_CACHE_FILE = None # Implies $XDG_DATA_DIR/mopidy/tag_cache
-LOCAL_TAG_CACHE_FILE = None
+#:    LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
+LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
 
-#: Sound mixer to use. See :mod:`mopidy.mixers` for all available mixers.
+#: Sound mixer to use.
+#:
+#: Expects a GStreamer mixer to use, typical values are:
+#: ``alsamixer``, ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
+#:
+#: Setting this to :class:`None` turns off volume control. ``software``
+#: can be used to force software mixing in the application.
 #:
 #: Default::
 #:
-#:     MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
-MIXER = u'mopidy.mixers.gstreamer_software.GStreamerSoftwareMixer'
+#:     MIXER = u'autoaudiomixer'
+MIXER = u'autoaudiomixer'
 
-#: ALSA mixer only. What mixer control to use. If set to :class:`False`, first
-#: ``Master`` and then ``PCM`` will be tried.
+#: Sound mixer track to use.
 #:
-#: Example: ``Master Front``. Default: :class:`False`
-MIXER_ALSA_CONTROL = False
-
-#: External mixers only. Which port the mixer is connected to.
-#:
-#: This must point to the device port like ``/dev/ttyUSB0``.
-#:
-#: Default: :class:`None`
-MIXER_EXT_PORT = None
-
-#: External mixers only. What input source the external mixer should use.
-#:
-#: Example: ``Aux``. Default: :class:`None`
-MIXER_EXT_SOURCE = None
-
-#: External mixers only. What state Speakers A should be in.
-#:
-#: Default: :class:`None`.
-MIXER_EXT_SPEAKERS_A = None
-
-#: External mixers only. What state Speakers B should be in.
-#:
-#: Default: :class:`None`.
-MIXER_EXT_SPEAKERS_B = None
-
-#: The maximum volume. Integer in the range 0 to 100.
-#:
-#: If this settings is set to 80, the mixer will set the actual volume to 80
-#: when asked to set it to 100.
+#: Name of the mixer track to use. If this is not set we will try to find the
+#: master output track. As an example, using ``alsamixer`` you would
+#: typically set this to ``Master`` or ``PCM``.
 #:
 #: Default::
 #:
-#:     MIXER_MAX_VOLUME = 100
-MIXER_MAX_VOLUME = 100
+#:     MIXER_TRACK = None
+MIXER_TRACK = None
 
 #: Which address Mopidy's MPD server should bind to.
 #:
-#:Examples:
+#: Used by :mod:`mopidy.frontends.mpd`.
+#:
+#: Examples:
 #:
 #: ``127.0.0.1``
 #:     Listens only on the IPv4 loopback interface. Default.
@@ -172,89 +148,40 @@ MPD_SERVER_HOSTNAME = u'127.0.0.1'
 
 #: Which TCP port Mopidy's MPD server should listen to.
 #:
+#: Used by :mod:`mopidy.frontends.mpd`.
+#:
 #: Default: 6600
 MPD_SERVER_PORT = 6600
 
 #: The password required for connecting to the MPD server.
+#:
+#: Used by :mod:`mopidy.frontends.mpd`.
 #:
 #: Default: :class:`None`, which means no password required.
 MPD_SERVER_PASSWORD = None
 
 #: The maximum number of concurrent connections the MPD server will accept.
 #:
+#: Used by :mod:`mopidy.frontends.mpd`.
+#:
 #: Default: 20
 MPD_SERVER_MAX_CONNECTIONS = 20
 
-#: List of outputs to use. See :mod:`mopidy.outputs` for all available
-#: backends
+#: Output to use. See :mod:`mopidy.outputs` for all available backends
 #:
 #: Default::
 #:
-#:     OUTPUTS = (
-#:         u'mopidy.outputs.local.LocalOutput',
-#:     )
-OUTPUTS = (
-    u'mopidy.outputs.local.LocalOutput',
-)
-
-#: Hostname of the SHOUTcast server which Mopidy should stream audio to.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
-SHOUTCAST_OUTPUT_HOSTNAME = u'127.0.0.1'
-
-#: Port of the SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_PORT = 8000
-SHOUTCAST_OUTPUT_PORT = 8000
-
-#: User to authenticate as against SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_USERNAME = u'source'
-SHOUTCAST_OUTPUT_USERNAME = u'source'
-
-#: Password to authenticate with against SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
-SHOUTCAST_OUTPUT_PASSWORD = u'hackme'
-
-#: Mountpoint to use for the stream on the SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:    SHOUTCAST_OUTPUT_MOUNT = u'/stream'
-SHOUTCAST_OUTPUT_MOUNT = u'/stream'
-
-#: Encoder to use to process audio data before streaming to SHOUTcast server.
-#:
-#: Used by :mod:`mopidy.outputs.shoutcast`.
-#:
-#: Default::
-#:
-#:     SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
-SHOUTCAST_OUTPUT_ENCODER = u'lame mode=stereo bitrate=320'
+#:     OUTPUT = u'autoaudiosink'
+OUTPUT = u'autoaudiosink'
 
 #: Path to the Spotify cache.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-SPOTIFY_CACHE_PATH = None
+#:
+#: Default::
+#:
+#:     SPOTIFY_CACHE_PATH = u'$XDG_CACHE_DIR/mopidy/spotify'
+SPOTIFY_CACHE_PATH = u'$XDG_CACHE_DIR/mopidy/spotify'
 
 #: Your Spotify Premium username.
 #:
@@ -271,7 +198,7 @@ SPOTIFY_PASSWORD = u''
 #: Available values are 96, 160, and 320.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-#
+#:
 #: Default::
 #:
 #:     SPOTIFY_BITRATE = 160

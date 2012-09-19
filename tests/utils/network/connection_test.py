@@ -91,7 +91,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock = Mock(spec=socket.SocketType)
 
         network.Connection.stop(self.mock, sentinel.reason)
-        self.mock.actor_ref.stop.assert_called_once_with()
+        self.mock.actor_ref.stop.assert_called_once_with(block=False)
 
     def test_stop_handles_actor_already_being_stopped(self):
         self.mock.stopping = False
@@ -100,7 +100,7 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock = Mock(spec=socket.SocketType)
 
         network.Connection.stop(self.mock, sentinel.reason)
-        self.mock.actor_ref.stop.assert_called_once_with()
+        self.mock.actor_ref.stop.assert_called_once_with(block=False)
 
     def test_stop_sets_stopping_to_true(self):
         self.mock.stopping = False

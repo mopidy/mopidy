@@ -1,10 +1,19 @@
+import glib
 import logging
 import os
-import sys
 import re
+import string
+import sys
 import urllib
 
 logger = logging.getLogger('mopidy.utils.path')
+
+XDG_DIRS = {
+    'XDG_CACHE_DIR': glib.get_user_cache_dir(),
+    'XDG_DATA_DIR': glib.get_user_data_dir(),
+    'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
+}
+
 
 def get_or_create_folder(folder):
     folder = os.path.expanduser(folder)
@@ -16,12 +25,14 @@ def get_or_create_folder(folder):
         os.makedirs(folder, 0755)
     return folder
 
+
 def get_or_create_file(filename):
     filename = os.path.expanduser(filename)
     if not os.path.isfile(filename):
         logger.info(u'Creating file %s', filename)
         open(filename, 'w')
     return filename
+
 
 def path_to_uri(*paths):
     path = os.path.join(*paths)
@@ -30,12 +41,14 @@ def path_to_uri(*paths):
         return 'file:' + urllib.pathname2url(path)
     return 'file://' + urllib.pathname2url(path)
 
+
 def uri_to_path(uri):
     if sys.platform == 'win32':
         path = urllib.url2pathname(re.sub('^file:', '', uri))
     else:
         path = urllib.url2pathname(re.sub('^file://', '', uri))
     return path.encode('latin1').decode('utf-8') # Undo double encoding
+
 
 def split_path(path):
     parts = []
@@ -47,21 +60,40 @@ def split_path(path):
             break
     return parts
 
-# pylint: disable = W0612
-# Unused variable 'dirnames'
+
+def expand_path(path):
+    path = string.Template(path).safe_substitute(XDG_DIRS)
+    path = os.path.expanduser(path)
+    path = os.path.abspath(path)
+    return path
+
+
 def find_files(path):
     if os.path.isfile(path):
         if not isinstance(path, unicode):
             path = path.decode('utf-8')
-        yield path
+        if not os.path.basename(path).startswith('.'):
+            yield path
     else:
         for dirpath, dirnames, filenames in os.walk(path):
+            # Filter out hidden folders by modifying dirnames in place.
+            for dirname in dirnames:
+                if dirname.startswith('.'):
+                    dirnames.remove(dirname)
+
             for filename in filenames:
+                # Skip hidden files.
+                if filename.startswith('.'):
+                    continue
+
                 filename = os.path.join(dirpath, filename)
                 if not isinstance(filename, unicode):
-                    filename = filename.decode('utf-8')
+                    try:
+                        filename = filename.decode('utf-8')
+                    except UnicodeDecodeError:
+                        filename = filename.decode('latin1')
                 yield filename
-# pylint: enable = W0612
+
 
 # FIXME replace with mock usage in tests.
 class Mtime(object):

@@ -16,8 +16,7 @@ from pykka.registry import ActorRegistry
 
 from mopidy import settings
 from mopidy.backends.base import Backend
-from mopidy.backends.base.playback import PlaybackController
-from mopidy.mixers.base import BaseMixer
+from mopidy.core import PlaybackState
 from mopidy.utils.process import exit_process
 
 # Must be done before dbus.SessionBus() is called
@@ -37,7 +36,6 @@ class MprisObject(dbus.service.Object):
 
     def __init__(self):
         self._backend = None
-        self._mixer = None
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
             PLAYER_IFACE: self._get_player_iface_properties(),
@@ -94,14 +92,6 @@ class MprisObject(dbus.service.Object):
                 'Expected exactly one running backend.'
             self._backend = backend_refs[0].proxy()
         return self._backend
-
-    @property
-    def mixer(self):
-        if self._mixer is None:
-            mixer_refs = ActorRegistry.get_by_class(BaseMixer)
-            assert len(mixer_refs) == 1, 'Expected exactly one running mixer.'
-            self._mixer = mixer_refs[0].proxy()
-        return self._mixer
 
     def _get_track_id(self, cp_track):
         return '/com/mopidy/track/%d' % cp_track.cpid
@@ -208,11 +198,11 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.PlayPause not allowed', PLAYER_IFACE)
             return
         state = self.backend.playback.state.get()
-        if state == PlaybackController.PLAYING:
+        if state == PlaybackState.PLAYING:
             self.backend.playback.pause().get()
-        elif state == PlaybackController.PAUSED:
+        elif state == PlaybackState.PAUSED:
             self.backend.playback.resume().get()
-        elif state == PlaybackController.STOPPED:
+        elif state == PlaybackState.STOPPED:
             self.backend.playback.play().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
@@ -230,7 +220,7 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
             return
         state = self.backend.playback.state.get()
-        if state == PlaybackController.PAUSED:
+        if state == PlaybackState.PAUSED:
             self.backend.playback.resume().get()
         else:
             self.backend.playback.play().get()
@@ -297,11 +287,11 @@ class MprisObject(dbus.service.Object):
 
     def get_PlaybackStatus(self):
         state = self.backend.playback.state.get()
-        if state == PlaybackController.PLAYING:
+        if state == PlaybackState.PLAYING:
             return 'Playing'
-        elif state == PlaybackController.PAUSED:
+        elif state == PlaybackState.PAUSED:
             return 'Paused'
-        elif state == PlaybackController.STOPPED:
+        elif state == PlaybackState.STOPPED:
             return 'Stopped'
 
     def get_LoopStatus(self):
@@ -380,9 +370,10 @@ class MprisObject(dbus.service.Object):
             return dbus.Dictionary(metadata, signature='sv')
 
     def get_Volume(self):
-        volume = self.mixer.volume.get()
-        if volume is not None:
-            return volume / 100.0
+        volume = self.backend.playback.volume.get()
+        if volume is None:
+            return 0
+        return volume / 100.0
 
     def set_Volume(self, value):
         if not self.get_CanControl():
@@ -391,11 +382,11 @@ class MprisObject(dbus.service.Object):
         if value is None:
             return
         elif value < 0:
-            self.mixer.volume = 0
+            self.backend.playback.volume = 0
         elif value > 1:
-            self.mixer.volume = 100
+            self.backend.playback.volume = 100
         elif 0 <= value <= 1:
-            self.mixer.volume = int(value * 100)
+            self.backend.playback.volume = int(value * 100)
 
     def get_Position(self):
         return self.backend.playback.time_position.get() * 1000

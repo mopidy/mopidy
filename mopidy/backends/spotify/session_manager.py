@@ -6,14 +6,13 @@ from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from pykka.registry import ActorRegistry
 
-from mopidy import get_version, settings, CACHE_PATH
+from mopidy import audio, get_version, settings
 from mopidy.backends.base import Backend
 from mopidy.backends.spotify import BITRATES
 from mopidy.backends.spotify.container_manager import SpotifyContainerManager
 from mopidy.backends.spotify.playlist_manager import SpotifyPlaylistManager
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
-from mopidy.gstreamer import GStreamer
 from mopidy.utils.process import BaseThread
 
 logger = logging.getLogger('mopidy.backends.spotify.session_manager')
@@ -23,8 +22,7 @@ logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
 
 class SpotifySessionManager(BaseThread, PyspotifySessionManager):
-    cache_location = (settings.SPOTIFY_CACHE_PATH
-        or os.path.join(CACHE_PATH, 'spotify'))
+    cache_location = settings.SPOTIFY_CACHE_PATH
     settings_location = cache_location
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
@@ -34,7 +32,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         BaseThread.__init__(self)
         self.name = 'SpotifyThread'
 
-        self.gstreamer = None
+        self.audio = None
         self.backend = None
 
         self.connected = threading.Event()
@@ -50,10 +48,10 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self.connect()
 
     def setup(self):
-        gstreamer_refs = ActorRegistry.get_by_class(GStreamer)
-        assert len(gstreamer_refs) == 1, \
-            'Expected exactly one running gstreamer.'
-        self.gstreamer = gstreamer_refs[0].proxy()
+        audio_refs = ActorRegistry.get_by_class(audio.Audio)
+        assert len(audio_refs) == 1, \
+            'Expected exactly one running Audio instance.'
+        self.audio = audio_refs[0].proxy()
 
         backend_refs = ActorRegistry.get_by_class(Backend)
         assert len(backend_refs) == 1, 'Expected exactly one running backend.'
@@ -117,7 +115,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             'sample_rate': sample_rate,
             'channels': channels,
         }
-        self.gstreamer.emit_data(capabilites, bytes(frames))
+        self.audio.emit_data(capabilites, bytes(frames))
         return num_frames
 
     def play_token_lost(self, session):
@@ -143,7 +141,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     def end_of_track(self, session):
         """Callback used by pyspotify"""
         logger.debug(u'End of data stream reached')
-        self.gstreamer.emit_end_of_stream()
+        self.audio.emit_end_of_stream()
 
     def refresh_stored_playlists(self):
         """Refresh the stored playlists in the backend with fresh meta data
@@ -155,7 +153,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             self.session.playlist_container())
         playlists = filter(None, playlists)
         self.backend.stored_playlists.playlists = playlists
-        logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
+        logger.info(u'Loaded %d Spotify playlist(s)', len(playlists))
 
     def search(self, query, queue):
         """Search method used by Mopidy backend"""

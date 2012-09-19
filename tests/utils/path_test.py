@@ -1,12 +1,12 @@
 # encoding: utf-8
 
+import glib
 import os
 import shutil
 import sys
 import tempfile
 
-from mopidy.utils.path import (get_or_create_folder, mtime,
-    path_to_uri, uri_to_path, split_path, find_files)
+from mopidy.utils import path
 
 from tests import unittest, path_to_data_dir
 
@@ -23,7 +23,7 @@ class GetOrCreateFolderTest(unittest.TestCase):
         folder = os.path.join(self.parent, 'test')
         self.assert_(not os.path.exists(folder))
         self.assert_(not os.path.isdir(folder))
-        created = get_or_create_folder(folder)
+        created = path.get_or_create_folder(folder)
         self.assert_(os.path.exists(folder))
         self.assert_(os.path.isdir(folder))
         self.assertEqual(created, folder)
@@ -35,7 +35,7 @@ class GetOrCreateFolderTest(unittest.TestCase):
         self.assert_(not os.path.isdir(level2_folder))
         self.assert_(not os.path.exists(level3_folder))
         self.assert_(not os.path.isdir(level3_folder))
-        created = get_or_create_folder(level3_folder)
+        created = path.get_or_create_folder(level3_folder)
         self.assert_(os.path.exists(level2_folder))
         self.assert_(os.path.isdir(level2_folder))
         self.assert_(os.path.exists(level3_folder))
@@ -43,7 +43,7 @@ class GetOrCreateFolderTest(unittest.TestCase):
         self.assertEqual(created, level3_folder)
 
     def test_creating_existing_folder(self):
-        created = get_or_create_folder(self.parent)
+        created = path.get_or_create_folder(self.parent)
         self.assert_(os.path.exists(self.parent))
         self.assert_(os.path.isdir(self.parent))
         self.assertEqual(created, self.parent)
@@ -52,92 +52,116 @@ class GetOrCreateFolderTest(unittest.TestCase):
         conflicting_file = os.path.join(self.parent, 'test')
         open(conflicting_file, 'w').close()
         folder = os.path.join(self.parent, 'test')
-        self.assertRaises(OSError, get_or_create_folder, folder)
+        self.assertRaises(OSError, path.get_or_create_folder, folder)
 
 
 class PathToFileURITest(unittest.TestCase):
     def test_simple_path(self):
         if sys.platform == 'win32':
-            result = path_to_uri(u'C:/WINDOWS/clock.avi')
+            result = path.path_to_uri(u'C:/WINDOWS/clock.avi')
             self.assertEqual(result, 'file:///C://WINDOWS/clock.avi')
         else:
-            result = path_to_uri(u'/etc/fstab')
+            result = path.path_to_uri(u'/etc/fstab')
             self.assertEqual(result, 'file:///etc/fstab')
 
     def test_folder_and_path(self):
         if sys.platform == 'win32':
-            result = path_to_uri(u'C:/WINDOWS/', u'clock.avi')
+            result = path.path_to_uri(u'C:/WINDOWS/', u'clock.avi')
             self.assertEqual(result, 'file:///C://WINDOWS/clock.avi')
         else:
-            result = path_to_uri(u'/etc', u'fstab')
+            result = path.path_to_uri(u'/etc', u'fstab')
             self.assertEqual(result, u'file:///etc/fstab')
 
     def test_space_in_path(self):
         if sys.platform == 'win32':
-            result = path_to_uri(u'C:/test this')
+            result = path.path_to_uri(u'C:/test this')
             self.assertEqual(result, 'file:///C://test%20this')
         else:
-            result = path_to_uri(u'/tmp/test this')
+            result = path.path_to_uri(u'/tmp/test this')
             self.assertEqual(result, u'file:///tmp/test%20this')
 
     def test_unicode_in_path(self):
         if sys.platform == 'win32':
-            result = path_to_uri(u'C:/æøå')
+            result = path.path_to_uri(u'C:/æøå')
             self.assertEqual(result, 'file:///C://%C3%A6%C3%B8%C3%A5')
         else:
-            result = path_to_uri(u'/tmp/æøå')
+            result = path.path_to_uri(u'/tmp/æøå')
             self.assertEqual(result, u'file:///tmp/%C3%A6%C3%B8%C3%A5')
 
 
 class UriToPathTest(unittest.TestCase):
     def test_simple_uri(self):
         if sys.platform == 'win32':
-            result = uri_to_path('file:///C://WINDOWS/clock.avi')
+            result = path.uri_to_path('file:///C://WINDOWS/clock.avi')
             self.assertEqual(result, u'C:/WINDOWS/clock.avi')
         else:
-            result = uri_to_path('file:///etc/fstab')
+            result = path.uri_to_path('file:///etc/fstab')
             self.assertEqual(result, u'/etc/fstab')
 
     def test_space_in_uri(self):
         if sys.platform == 'win32':
-            result = uri_to_path('file:///C://test%20this')
+            result = path.uri_to_path('file:///C://test%20this')
             self.assertEqual(result, u'C:/test this')
         else:
-            result = uri_to_path(u'file:///tmp/test%20this')
+            result = path.uri_to_path(u'file:///tmp/test%20this')
             self.assertEqual(result, u'/tmp/test this')
 
     def test_unicode_in_uri(self):
         if sys.platform == 'win32':
-            result = uri_to_path( 'file:///C://%C3%A6%C3%B8%C3%A5')
+            result = path.uri_to_path( 'file:///C://%C3%A6%C3%B8%C3%A5')
             self.assertEqual(result, u'C:/æøå')
         else:
-            result = uri_to_path(u'file:///tmp/%C3%A6%C3%B8%C3%A5')
+            result = path.uri_to_path(u'file:///tmp/%C3%A6%C3%B8%C3%A5')
             self.assertEqual(result, u'/tmp/æøå')
 
 
 class SplitPathTest(unittest.TestCase):
     def test_empty_path(self):
-        self.assertEqual([], split_path(''))
+        self.assertEqual([], path.split_path(''))
 
     def test_single_folder(self):
-        self.assertEqual(['foo'], split_path('foo'))
+        self.assertEqual(['foo'], path.split_path('foo'))
 
     def test_folders(self):
-        self.assertEqual(['foo', 'bar', 'baz'], split_path('foo/bar/baz'))
+        self.assertEqual(['foo', 'bar', 'baz'], path.split_path('foo/bar/baz'))
 
     def test_folders(self):
-        self.assertEqual(['foo', 'bar', 'baz'], split_path('foo/bar/baz'))
+        self.assertEqual(['foo', 'bar', 'baz'], path.split_path('foo/bar/baz'))
 
     def test_initial_slash_is_ignored(self):
-        self.assertEqual(['foo', 'bar', 'baz'], split_path('/foo/bar/baz'))
+        self.assertEqual(['foo', 'bar', 'baz'], path.split_path('/foo/bar/baz'))
 
     def test_only_slash(self):
-        self.assertEqual([], split_path('/'))
+        self.assertEqual([], path.split_path('/'))
+
+
+class ExpandPathTest(unittest.TestCase):
+    # TODO: test via mocks?
+
+    def test_empty_path(self):
+        self.assertEqual(os.path.abspath('.'), path.expand_path(''))
+
+    def test_absolute_path(self):
+        self.assertEqual('/tmp/foo', path.expand_path('/tmp/foo'))
+
+    def test_home_dir_expansion(self):
+        self.assertEqual(os.path.expanduser('~/foo'), path.expand_path('~/foo'))
+
+    def test_abspath(self):
+        self.assertEqual(os.path.abspath('./foo'), path.expand_path('./foo'))
+
+    def test_xdg_subsititution(self):
+        self.assertEqual(glib.get_user_data_dir() + '/foo',
+            path.expand_path('$XDG_DATA_DIR/foo'))
+
+    def test_xdg_subsititution_unknown(self):
+        self.assertEqual('/tmp/$XDG_INVALID_DIR/foo',
+            path.expand_path('/tmp/$XDG_INVALID_DIR/foo'))
 
 
 class FindFilesTest(unittest.TestCase):
-    def find(self, path):
-        return list(find_files(path_to_data_dir(path)))
+    def find(self, value):
+        return list(path.find_files(path_to_data_dir(value)))
 
     def test_basic_folder(self):
         self.assert_(self.find(''))
@@ -156,15 +180,21 @@ class FindFilesTest(unittest.TestCase):
             self.assert_(is_unicode(name),
                 '%s is not unicode object' % repr(name))
 
+    def test_ignores_hidden_folders(self):
+        self.assertEqual(self.find('.hidden'), [])
+
+    def test_ignores_hidden_files(self):
+        self.assertEqual(self.find('.blank.mp3'), [])
+
 
 class MtimeTest(unittest.TestCase):
     def tearDown(self):
-        mtime.undo_fake()
+        path.mtime.undo_fake()
 
     def test_mtime_of_current_dir(self):
         mtime_dir = int(os.stat('.').st_mtime)
-        self.assertEqual(mtime_dir, mtime('.'))
+        self.assertEqual(mtime_dir, path.mtime('.'))
 
     def test_fake_time_is_returned(self):
-        mtime.set_fake_time(123456)
-        self.assertEqual(mtime('.'), 123456)
+        path.mtime.set_fake_time(123456)
+        self.assertEqual(path.mtime('.'), 123456)

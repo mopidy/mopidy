@@ -193,10 +193,10 @@ def _list_build_query(field, mpd_query):
         # shlex does not seem to be friends with unicode objects
         tokens = shlex.split(mpd_query.encode('utf-8'))
     except ValueError as error:
-        if error.message == 'No closing quotation':
+        if str(error) == 'No closing quotation':
             raise MpdArgError(u'Invalid unquoted character', command=u'list')
         else:
-            raise error
+            raise
     tokens = [t.decode('utf-8') for t in tokens]
     if len(tokens) == 1:
         if field == u'album':
@@ -242,7 +242,7 @@ def _list_date(context, query):
     playlist = context.backend.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.date is not None:
-            dates.add((u'Date', track.date.strftime('%Y-%m-%d')))
+            dates.add((u'Date', track.date))
     return dates
 
 @handle_request(r'^listall "(?P<uri>[^"]+)"')

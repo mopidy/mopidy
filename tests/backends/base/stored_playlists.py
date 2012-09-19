@@ -30,7 +30,7 @@ class StoredPlaylistsControllerTest(object):
     def test_create_in_playlists(self):
         playlist = self.stored.create('test')
         self.assert_(self.stored.playlists)
-        self.assert_(playlist in self.stored.playlists)
+        self.assertIn(playlist, self.stored.playlists)
 
     def test_playlists_empty_to_start_with(self):
         self.assert_(not self.stored.playlists)
@@ -101,7 +101,7 @@ class StoredPlaylistsControllerTest(object):
         # FIXME should we handle playlists without names?
         playlist = Playlist(name='test')
         self.stored.save(playlist)
-        self.assert_(playlist in self.stored.playlists)
+        self.assertIn(playlist, self.stored.playlists)
 
     @unittest.SkipTest
     def test_playlist_with_unknown_track(self):

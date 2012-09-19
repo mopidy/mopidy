@@ -56,7 +56,7 @@ You may also want to change some of the ``LOCAL_*`` settings. See
 
     Currently, Mopidy supports using Spotify *or* local storage as a music
     source. We're working on using both sources simultaneously, and will
-    hopefully have support for this in the 0.6 release.
+    have support for this in a future release.
 
 
 .. _generating_a_tag_cache:
@@ -157,18 +157,18 @@ server simultaneously. To use the SHOUTcast output, do the following:
 #. Install, configure and start the Icecast server. It can be found in the
    ``icecast2`` package in Debian/Ubuntu.
 
-#. Add ``mopidy.outputs.shoutcast.ShoutcastOutput`` output to the
-   :attr:`mopidy.settings.OUTPUTS` setting.
+#. Set :attr:`mopidy.settings.OUTPUT` to ``lame ! shout2send``. An Ogg Vorbis
+   encoder could be used instead of the lame MP3 encoder.
 
-#. Check the default values for the following settings, and alter them to match
-   your Icecast setup if needed:
+#. You might also need to change the ``shout2send`` default settings, run
+   ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
+   you want to change ``ip``, ``username``, ``password``, and ``mount``. For
+   example, to set the username and password, use:
+   ``lame ! shout2send username="foobar" password="s3cret"``.
 
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_HOSTNAME`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PORT`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_USERNAME`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_PASSWORD`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_MOUNT`
-   - :attr:`mopidy.settings.SHOUTCAST_OUTPUT_ENCODER`
+Other advanced setups are also possible for outputs. Basically, anything you
+can use with the ``gst-launch-0.10`` command can be plugged into
+:attr:`mopidy.settings.OUTPUT`.
 
 
 Available settings

@@ -1,8 +1,9 @@
 import mock
 import random
 
+from mopidy import audio
+from mopidy.core import PlaybackState
 from mopidy.models import CpTrack, Playlist, Track
-from mopidy.gstreamer import GStreamer
 
 from tests.backends.base import populate_playlist
 
@@ -12,7 +13,7 @@ class CurrentPlaylistControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class()
-        self.backend.gstreamer = mock.Mock(spec=GStreamer)
+        self.backend.audio = mock.Mock(spec=audio.Audio)
         self.controller = self.backend.current_playlist
         self.playback = self.backend.playback
 
@@ -71,9 +72,9 @@ class CurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_clear_when_playing(self):
         self.playback.play()
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.controller.clear()
-        self.assertEqual(self.playback.state, self.playback.STOPPED)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     def test_get_by_uri_returns_unique_match(self):
         track = Track(uri='a')
@@ -134,13 +135,13 @@ class CurrentPlaylistControllerTest(object):
         self.playback.play()
         track = self.playback.current_track
         self.controller.append(self.controller.tracks[1:2])
-        self.assertEqual(self.playback.state, self.playback.PLAYING)
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.assertEqual(self.playback.current_track, track)
 
     @populate_playlist
     def test_append_preserves_stopped_state(self):
         self.controller.append(self.controller.tracks[1:2])
-        self.assertEqual(self.playback.state, self.playback.STOPPED)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
     def test_index_returns_index_of_track(self):
@@ -205,7 +206,7 @@ class CurrentPlaylistControllerTest(object):
         version = self.controller.version
         self.controller.remove(uri=track1.uri)
         self.assert_(version < self.controller.version)
-        self.assert_(track1 not in self.controller.tracks)
+        self.assertNotIn(track1, self.controller.tracks)
         self.assertEqual(track2, self.controller.tracks[1])
 
     @populate_playlist

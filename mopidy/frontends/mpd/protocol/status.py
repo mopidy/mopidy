@@ -1,6 +1,6 @@
 import pykka.future
 
-from mopidy.backends.base import PlaybackController
+from mopidy.core import PlaybackState
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.translator import track_to_mpd_format
@@ -137,7 +137,7 @@ def status(context):
 
         Reports the current status of the player and the volume level.
 
-        - ``volume``: 0-100
+        - ``volume``: 0-100 or -1
         - ``repeat``: 0 or 1
         - ``single``: 0 or 1
         - ``consume``: 0 or 1
@@ -168,7 +168,7 @@ def status(context):
     futures = {
         'current_playlist.length': context.backend.current_playlist.length,
         'current_playlist.version': context.backend.current_playlist.version,
-        'mixer.volume': context.mixer.volume,
+        'playback.volume': context.backend.playback.volume,
         'playback.consume': context.backend.playback.consume,
         'playback.random': context.backend.playback.random,
         'playback.repeat': context.backend.playback.repeat,
@@ -194,8 +194,8 @@ def status(context):
     if futures['playback.current_cp_track'].get() is not None:
         result.append(('song', _status_songpos(futures)))
         result.append(('songid', _status_songid(futures)))
-    if futures['playback.state'].get() in (PlaybackController.PLAYING,
-            PlaybackController.PAUSED):
+    if futures['playback.state'].get() in (PlaybackState.PLAYING,
+            PlaybackState.PAUSED):
         result.append(('time', _status_time(futures)))
         result.append(('elapsed', _status_time_elapsed(futures)))
         result.append(('bitrate', _status_bitrate(futures)))
@@ -239,11 +239,11 @@ def _status_songpos(futures):
 
 def _status_state(futures):
     state = futures['playback.state'].get()
-    if state == PlaybackController.PLAYING:
+    if state == PlaybackState.PLAYING:
         return u'play'
-    elif state == PlaybackController.STOPPED:
+    elif state == PlaybackState.STOPPED:
         return u'stop'
-    elif state == PlaybackController.PAUSED:
+    elif state == PlaybackState.PAUSED:
         return u'pause'
 
 def _status_time(futures):
@@ -263,11 +263,11 @@ def _status_time_total(futures):
         return current_cp_track.track.length
 
 def _status_volume(futures):
-    volume = futures['mixer.volume'].get()
+    volume = futures['playback.volume'].get()
     if volume is not None:
         return volume
     else:
-        return 0
+        return -1
 
 def _status_xfade(futures):
     return 0 # Not supported

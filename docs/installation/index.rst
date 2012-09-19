@@ -46,9 +46,6 @@ dependencies installed.
 
         sudo apt-get install python-dbus python-indicate
 
-  - Some custom mixers (but not the default one) require additional
-    dependencies. See the docs for each mixer.
-
 
 Install latest stable release
 =============================
@@ -176,7 +173,7 @@ If you want to contribute to Mopidy, you should install Mopidy using Git.
 
 For an introduction to ``git``, please visit `git-scm.com
 <http://git-scm.com/>`_. Also, please read our :doc:`developer documentation
-</development/index>`.
+</development>`.
 
 
 From AUR on ArchLinux

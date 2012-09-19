@@ -1,4 +1,4 @@
-from mopidy.backends.base import PlaybackController
+from mopidy.core import PlaybackState
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
     MpdNotImplemented)
@@ -104,11 +104,9 @@ def pause(context, state=None):
     - Calls ``pause`` without any arguments to toogle pause.
     """
     if state is None:
-        if (context.backend.playback.state.get() ==
-                PlaybackController.PLAYING):
+        if (context.backend.playback.state.get() == PlaybackState.PLAYING):
             context.backend.playback.pause()
-        elif (context.backend.playback.state.get() ==
-                PlaybackController.PAUSED):
+        elif (context.backend.playback.state.get() == PlaybackState.PAUSED):
             context.backend.playback.resume()
     elif int(state):
         context.backend.playback.pause()
@@ -123,8 +121,8 @@ def play(context):
     """
     return context.backend.playback.play().get()
 
-@handle_request(r'^playid "(?P<cpid>\d+)"$')
-@handle_request(r'^playid "(?P<cpid>-1)"$')
+@handle_request(r'^playid (?P<cpid>-?\d+)$')
+@handle_request(r'^playid "(?P<cpid>-?\d+)"$')
 def playid(context, cpid):
     """
     *musicpd.org, playback section:*
@@ -163,11 +161,11 @@ def playpos(context, songpos):
 
     *Clarifications:*
 
-    - ``playid "-1"`` when playing is ignored.
-    - ``playid "-1"`` when paused resumes playback.
-    - ``playid "-1"`` when stopped with a current track starts playback at the
+    - ``play "-1"`` when playing is ignored.
+    - ``play "-1"`` when paused resumes playback.
+    - ``play "-1"`` when stopped with a current track starts playback at the
       current track.
-    - ``playid "-1"`` when stopped without a current track, e.g. after playlist
+    - ``play "-1"`` when stopped without a current track, e.g. after playlist
       replacement, starts playback at the first track.
 
     *BitMPC:*
@@ -185,9 +183,9 @@ def playpos(context, songpos):
         raise MpdArgError(u'Bad song index', command=u'play')
 
 def _play_minus_one(context):
-    if (context.backend.playback.state.get() == PlaybackController.PLAYING):
+    if (context.backend.playback.state.get() == PlaybackState.PLAYING):
         return # Nothing to do
-    elif (context.backend.playback.state.get() == PlaybackController.PAUSED):
+    elif (context.backend.playback.state.get() == PlaybackState.PAUSED):
         return context.backend.playback.resume().get()
     elif context.backend.playback.current_cp_track.get() is not None:
         cp_track = context.backend.playback.current_cp_track.get()
@@ -353,7 +351,7 @@ def setvol(context, volume):
         volume = 0
     if volume > 100:
         volume = 100
-    context.mixer.volume = volume
+    context.backend.playback.volume = volume
 
 @handle_request(r'^single (?P<state>[01])$')
 @handle_request(r'^single "(?P<state>[01])"$')

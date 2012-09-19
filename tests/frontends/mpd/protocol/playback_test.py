@@ -1,12 +1,13 @@
-from mopidy.backends import base as backend
+from mopidy.core import PlaybackState
 from mopidy.models import Track
 
 from tests import unittest
 from tests.frontends.mpd import protocol
 
-PAUSED = backend.PlaybackController.PAUSED
-PLAYING = backend.PlaybackController.PLAYING
-STOPPED = backend.PlaybackController.STOPPED
+
+PAUSED = PlaybackState.PAUSED
+PLAYING = PlaybackState.PLAYING
+STOPPED = PlaybackState.STOPPED
 
 
 class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
@@ -76,37 +77,37 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
     def test_setvol_below_min(self):
         self.sendRequest(u'setvol "-10"')
-        self.assertEqual(0, self.mixer.volume.get())
+        self.assertEqual(0, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_min(self):
         self.sendRequest(u'setvol "0"')
-        self.assertEqual(0, self.mixer.volume.get())
+        self.assertEqual(0, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_middle(self):
         self.sendRequest(u'setvol "50"')
-        self.assertEqual(50, self.mixer.volume.get())
+        self.assertEqual(50, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_max(self):
         self.sendRequest(u'setvol "100"')
-        self.assertEqual(100, self.mixer.volume.get())
+        self.assertEqual(100, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_above_max(self):
         self.sendRequest(u'setvol "110"')
-        self.assertEqual(100, self.mixer.volume.get())
+        self.assertEqual(100, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_plus_is_ignored(self):
         self.sendRequest(u'setvol "+10"')
-        self.assertEqual(10, self.mixer.volume.get())
+        self.assertEqual(10, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_setvol_without_quotes(self):
         self.sendRequest(u'setvol 50')
-        self.assertEqual(50, self.mixer.volume.get())
+        self.assertEqual(50, self.backend.playback.volume.get())
         self.assertInResponse(u'OK')
 
     def test_single_off(self):
@@ -283,6 +284,13 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.backend.current_playlist.append([Track()])
 
         self.sendRequest(u'playid "0"')
+        self.assertEqual(PLAYING, self.backend.playback.state.get())
+        self.assertInResponse(u'OK')
+
+    def test_playid_without_quotes(self):
+        self.backend.current_playlist.append([Track()])
+
+        self.sendRequest(u'playid 0')
         self.assertEqual(PLAYING, self.backend.playback.state.get())
         self.assertInResponse(u'OK')
 

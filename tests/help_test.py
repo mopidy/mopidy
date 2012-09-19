@@ -13,18 +13,18 @@ class HelpTest(unittest.TestCase):
         args = [sys.executable, mopidy_dir, '--help']
         process = subprocess.Popen(args, stdout=subprocess.PIPE)
         output = process.communicate()[0]
-        self.assert_('--version' in output)
-        self.assert_('--help' in output)
-        self.assert_('--help-gst' in output)
-        self.assert_('--interactive' in output)
-        self.assert_('--quiet' in output)
-        self.assert_('--verbose' in output)
-        self.assert_('--save-debug-log' in output)
-        self.assert_('--list-settings' in output)
+        self.assertIn('--version', output)
+        self.assertIn('--help', output)
+        self.assertIn('--help-gst', output)
+        self.assertIn('--interactive', output)
+        self.assertIn('--quiet', output)
+        self.assertIn('--verbose', output)
+        self.assertIn('--save-debug-log', output)
+        self.assertIn('--list-settings', output)
 
     def test_help_gst_has_gstreamer_options(self):
         mopidy_dir = os.path.dirname(mopidy.__file__)
         args = [sys.executable, mopidy_dir, '--help-gst']
         process = subprocess.Popen(args, stdout=subprocess.PIPE)
         output = process.communicate()[0]
-        self.assert_('--gst-version' in output)
+        self.assertIn('--gst-version', output)
