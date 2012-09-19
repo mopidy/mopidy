@@ -4,8 +4,13 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-v0.8 (in development)
-=====================
+
+v0.8.0 (2012-09-20)
+===================
+
+This release does not include any major new features. We've done a major
+cleanup of how audio outputs and audio mixers work, and on the way we've
+resolved a bunch of related issues.
 
 **Audio output and mixer changes**
 
