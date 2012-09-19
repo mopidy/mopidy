@@ -88,7 +88,7 @@ class PlaybackController(object):
         self._shuffled = []
         self._first_shuffle = True
         self.play_time_accumulated = 0
-        self.play_time_started = None
+        self.play_time_started = 0
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
