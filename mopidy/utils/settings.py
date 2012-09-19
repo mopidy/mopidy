@@ -198,11 +198,11 @@ def format_settings_list(settings):
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
         masked_value = mask_value_if_secret(key, value)
-        lines.append(u'%s: %s' % (key, log.indent(
-            pprint.pformat(masked_value), places=2)))
+        lines.append(u'%s: %s' % (
+            key, log.indent(pprint.pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
             lines.append(u'  Default: %s' %
-                log.indent(pformat(default_value), places=4))
+                log.indent(pprint.pformat(default_value), places=4))
         if errors.get(key) is not None:
             lines.append(u'  Error: %s' % errors[key])
     return '\n'.join(lines)
