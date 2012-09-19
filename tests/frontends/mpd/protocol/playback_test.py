@@ -287,6 +287,13 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertEqual(PLAYING, self.backend.playback.state.get())
         self.assertInResponse(u'OK')
 
+    def test_playid_without_quotes(self):
+        self.backend.current_playlist.append([Track()])
+
+        self.sendRequest(u'playid 0')
+        self.assertEqual(PLAYING, self.backend.playback.state.get())
+        self.assertInResponse(u'OK')
+
     def test_playid_minus_one_plays_first_in_playlist_if_no_current_track(self):
         self.assertEqual(self.backend.playback.current_track.get(), None)
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])

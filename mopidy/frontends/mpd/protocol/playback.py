@@ -121,8 +121,8 @@ def play(context):
     """
     return context.backend.playback.play().get()
 
-@handle_request(r'^playid "(?P<cpid>\d+)"$')
-@handle_request(r'^playid "(?P<cpid>-1)"$')
+@handle_request(r'^playid (?P<cpid>-?\d+)$')
+@handle_request(r'^playid "(?P<cpid>-?\d+)"$')
 def playid(context, cpid):
     """
     *musicpd.org, playback section:*
