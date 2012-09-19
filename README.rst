@@ -16,5 +16,6 @@ To install Mopidy, check out
 - `Documentation <http://docs.mopidy.com/>`_
 - `Source code <http://github.com/mopidy/mopidy>`_
 - `Issue tracker <http://github.com/mopidy/mopidy/issues>`_
+- `CI server <http://travis-ci.org/mopidy/mopidy>`_
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
 - `Download development snapshot <http://github.com/mopidy/mopidy/tarball/develop#egg=mopidy-dev>`_
