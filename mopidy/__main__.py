@@ -46,8 +46,8 @@ logger = logging.getLogger('mopidy.main')
 def main():
     signal.signal(signal.SIGTERM, exit_handler)
     loop = gobject.MainLoop()
+    options = parse_options()
     try:
-        options = parse_options()
         setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
