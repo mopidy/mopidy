@@ -56,6 +56,7 @@ class DummyLibraryProvider(base.BaseLibraryProvider):
 class DummyPlaybackProvider(base.BasePlaybackProvider):
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)
+        self._time_position = 0
         self._volume = None
 
     def pause(self):
@@ -63,16 +64,21 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
 
     def play(self, track):
         """Pass None as track to force failure"""
+        self._time_position = 0
         return track is not None
 
     def resume(self):
         return True
 
     def seek(self, time_position):
+        self._time_position = time_position
         return True
 
     def stop(self):
         return True
+
+    def get_time_position(self):
+        return self._time_position
 
     def get_volume(self):
         return self._volume
