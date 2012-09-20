@@ -307,6 +307,9 @@ class PlaybackController(object):
     @property
     def time_position(self):
         """Time position in milliseconds."""
+        return self.provider.get_time_position()
+
+    def _wall_clock_based_time_position():
         if self.state == PlaybackState.PLAYING:
             time_since_started = (self._current_wall_time -
                 self.play_time_started)
