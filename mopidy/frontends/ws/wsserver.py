@@ -1,12 +1,15 @@
 """
 The WebSockets frontend.
 based on mpd-frontend and examples from gevent-socketio
+
+#TODO QUEUE intensive tasks: loadtrackslist, getplaylists, search, getalbum/artist
 """
 
 from socketio.namespace import BaseNamespace
 from socketio import socketio_manage
 from socketio.server import SocketIOServer
 import socketio
+from threading import Timer
 
 from mopidy import listeners
 from pykka import registry, actor
@@ -32,6 +35,10 @@ from mopidy.models import Playlist
 #get directory with static web content
 webdir = os.path.join(os.path.dirname(__file__), 'web')
 logger = logging.getLogger('mopidy.frontends.ws')
+
+voltmr = None
+postmr = None
+pos = 0
 
 #server object
 srv = None
@@ -98,7 +105,7 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
 
     #events from the client(s)
     def on_play(self, message=None):
-        logger.info(' play')
+        logger.info(' play event')
         self.emit('status_change', message)
         if message:
             return self.request.backend.playback.play().get()
@@ -115,8 +122,8 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
             cp_track = self.request.backend.current_playlist.get(uri=trackuri).get()
             self.request.backend.playback.change_track(cp_track)
         
-            logger.info(self.request.backend.playback.current_playlist_position.get())
-            logger.info(self.request.backend.playback.play().get())
+#            logger.info(self.request.backend.playback.current_playlist_position.get())
+            self.request.backend.playback.play().get()
         
         except LookupError:
             pass
@@ -131,15 +138,14 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
         playlist = Playlist(tracks=trackslist)
         self.request.backend.current_playlist.clear()
         res = self.request.backend.current_playlist.append(playlist.tracks).get()
-        logger.info(res)
         
     def on_playplaylist(self, playuri):
         #TODO 
-        logger.info(playuri)
+        #logger.info(playuri)
         playlist = self.request.backend.stored_playlists.get(uri=playuri).get()
         self.request.backend.current_playlist.clear()
         res = self.request.backend.current_playlist.append(playlist.tracks).get()
-        logger.info(res)
+        #logger.info(res)
          
     def on_next(self, message=None):
         logger.info(' next')
@@ -154,18 +160,22 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
         self.request.backend.playback.stop()
         
     def on_random(self, message=None):
+        self.emit('status_change', 'random ' + message)
         if message == 'true':
             self.request.backend.playback.random = True
         else:
             self.request.backend.playback.random = False
             
     def on_repeat(self, message=None):
+        self.emit('status_change', 'repeat ' + message)
         if message == 'true':
             self.request.backend.playback.repeat = True
         else:
             self.request.backend.playback.repeat = False
             
     def on_setvolume(self, volume):
+        logger.info(volume)
+        self.emit('status_change', 'vol ' + volume)
         mutevolume = 0
         volume = int(volume)
         if volume < 0:
@@ -175,6 +185,7 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
         self.request.mixer.volume = volume
     
     def on_mute(self, state):
+        self.emit('status_change', 'mute ' + state)
         #TODO Broadcast
         global mutevolume
         if state:
@@ -186,10 +197,12 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
             self.request.mixer.volume = mutevolume
             mutevolume = -1
             
-    def on_seek(self, message=None):
+    def on_seekpos(self, message=None):
+        logger.info(message)
         pos = int(message)
+        # set timer to prevent too much speed...
         if (pos >= 0) and (pos <= 100000000): #100 mln sec should be enough ....
-            self.request.backend.playback.seek(int(seconds) * 1000)  
+            self.request.backend.playback.seek(int(pos) * 1000)          
     
     #playlist handlers
     def on_getplaylists(self):
@@ -206,7 +219,15 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
     def on_getplaylisttracks(self, playlisturi):
         playlist = flattenplaylist(self.request.backend.stored_playlists.get(uri=playlisturi).get())
         self.emit('playlist', playlist)
-    
+        
+    def on_getvolume(self):
+        self.emit('getvolume', self.request.mixer.volume.get());
+        
+    def on_getpos(self):
+        #TODO
+        pass
+        #self.emit('getpos', int(self.request.backend.playback.seek.get()) / 1000);
+        
     def on_search(self, searchtype, keywords):
 
         if searchtype == 'all':
@@ -221,18 +242,19 @@ class WsNamespace(BaseNamespace, listeners.BackendListener):
 
     def on_getalbum(self, albumuri):
         playlist = self.request.backend.library.lookup(uri=albumuri).get()
-        logger.info(playlist)
+#        logger.info(playlist)
         playlist = flattenplaylist(playlist)
         self.emit('albumresults', playlist)
 
     def on_getartist(self, artisturi):
         playlist = self.request.backend.library.lookup(uri=artisturi).get()
-        logger.info(playlist)
+#        logger.info(playlist)
         playlist = flattenplaylist(playlist)
         self.emit('artistresults', playlist)
 
     def on_getcurrentplaylist(self):
         #playlist = flattenplaylist(self.request.backend.current_playlist.get().get())
+        logger.info('current playlist')
         playlist = flattentracks(self.request.backend.current_playlist.tracks.get())  
         self.emit('currentplaylist', playlist)        
 
