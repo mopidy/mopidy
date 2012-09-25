@@ -65,6 +65,16 @@ class BasePlaybackProvider(object):
         """
         return self.backend.audio.stop_playback().get()
 
+    def get_time_position(self):
+        """
+        Get the current time position in milliseconds.
+
+        *MAY be reimplemented by subclass.*
+
+        :rtype: int
+        """
+        return self.backend.audio.get_position().get()
+
     def get_volume(self):
         """
         Get current volume

@@ -1,6 +1,5 @@
 import logging
 import random
-import time
 
 from mopidy.listeners import BackendListener
 
@@ -18,7 +17,6 @@ def option_wrapper(name, default):
         return setattr(self, name, value)
 
     return property(get_option, set_option)
-
 
 
 class PlaybackState(object):
@@ -87,8 +85,6 @@ class PlaybackController(object):
         self._state = PlaybackState.STOPPED
         self._shuffled = []
         self._first_shuffle = True
-        self.play_time_accumulated = 0
-        self.play_time_started = 0
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
@@ -292,44 +288,10 @@ class PlaybackController(object):
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-        # FIXME play_time stuff assumes backend does not have a better way of
-        # handeling this stuff :/
-        if (old_state in (PlaybackState.PLAYING, PlaybackState.STOPPED)
-                and new_state == PlaybackState.PLAYING):
-            self._play_time_start()
-        elif (old_state == PlaybackState.PLAYING
-                and new_state == PlaybackState.PAUSED):
-            self._play_time_pause()
-        elif (old_state == PlaybackState.PAUSED
-                and new_state == PlaybackState.PLAYING):
-            self._play_time_resume()
-
     @property
     def time_position(self):
         """Time position in milliseconds."""
-        if self.state == PlaybackState.PLAYING:
-            time_since_started = (self._current_wall_time -
-                self.play_time_started)
-            return self.play_time_accumulated + time_since_started
-        elif self.state == PlaybackState.PAUSED:
-            return self.play_time_accumulated
-        elif self.state == PlaybackState.STOPPED:
-            return 0
-
-    def _play_time_start(self):
-        self.play_time_accumulated = 0
-        self.play_time_started = self._current_wall_time
-
-    def _play_time_pause(self):
-        time_since_started = self._current_wall_time - self.play_time_started
-        self.play_time_accumulated += time_since_started
-
-    def _play_time_resume(self):
-        self.play_time_started = self._current_wall_time
-
-    @property
-    def _current_wall_time(self):
-        return int(time.time() * 1000)
+        return self.provider.get_time_position()
 
     @property
     def volume(self):
@@ -489,9 +451,6 @@ class PlaybackController(object):
         elif time_position > self.current_track.length:
             self.next()
             return True
-
-        self.play_time_started = self._current_wall_time
-        self.play_time_accumulated = time_position
 
         success = self.provider.seek(time_position)
         if success:
