@@ -5,7 +5,9 @@ from spotify import Link, SpotifyError
 from mopidy.backends.base import BasePlaybackProvider
 from mopidy.core import PlaybackState
 
+
 logger = logging.getLogger('mopidy.backends.spotify.playback')
+
 
 class SpotifyPlaybackProvider(BasePlaybackProvider):
     def play(self, track):
@@ -38,3 +40,10 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
     def stop(self):
         self.backend.spotify.session.play(0)
         return super(SpotifyPlaybackProvider, self).stop()
+
+    def get_time_position(self):
+        # XXX: The default implementation of get_time_position hangs/times out
+        # when used with the Spotify backend and GStreamer appsrc. If this can
+        # be resolved, we no longer need to use a wall clock based time
+        # position for Spotify playback.
+        return self.wall_clock_based_time_position()

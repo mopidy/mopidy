@@ -1,6 +1,5 @@
 import logging
 import random
-import time
 
 from mopidy.listeners import BackendListener
 
@@ -18,7 +17,6 @@ def option_wrapper(name, default):
         return setattr(self, name, value)
 
     return property(get_option, set_option)
-
 
 
 class PlaybackState(object):
@@ -87,8 +85,6 @@ class PlaybackController(object):
         self._state = PlaybackState.STOPPED
         self._shuffled = []
         self._first_shuffle = True
-        self.play_time_accumulated = 0
-        self.play_time_started = 0
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
@@ -292,47 +288,10 @@ class PlaybackController(object):
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-        # FIXME play_time stuff assumes backend does not have a better way of
-        # handeling this stuff :/
-        if (old_state in (PlaybackState.PLAYING, PlaybackState.STOPPED)
-                and new_state == PlaybackState.PLAYING):
-            self._play_time_start()
-        elif (old_state == PlaybackState.PLAYING
-                and new_state == PlaybackState.PAUSED):
-            self._play_time_pause()
-        elif (old_state == PlaybackState.PAUSED
-                and new_state == PlaybackState.PLAYING):
-            self._play_time_resume()
-
     @property
     def time_position(self):
         """Time position in milliseconds."""
         return self.provider.get_time_position()
-
-    def _wall_clock_based_time_position():
-        if self.state == PlaybackState.PLAYING:
-            time_since_started = (self._current_wall_time -
-                self.play_time_started)
-            return self.play_time_accumulated + time_since_started
-        elif self.state == PlaybackState.PAUSED:
-            return self.play_time_accumulated
-        elif self.state == PlaybackState.STOPPED:
-            return 0
-
-    def _play_time_start(self):
-        self.play_time_accumulated = 0
-        self.play_time_started = self._current_wall_time
-
-    def _play_time_pause(self):
-        time_since_started = self._current_wall_time - self.play_time_started
-        self.play_time_accumulated += time_since_started
-
-    def _play_time_resume(self):
-        self.play_time_started = self._current_wall_time
-
-    @property
-    def _current_wall_time(self):
-        return int(time.time() * 1000)
 
     @property
     def volume(self):
@@ -411,6 +370,7 @@ class PlaybackController(object):
         """Pause playback."""
         if self.provider.pause():
             self.state = PlaybackState.PAUSED
+            self.provider.update_play_time_on_pause()
             self._trigger_track_playback_paused()
 
     def play(self, cp_track=None, on_error_step=1):
@@ -453,6 +413,7 @@ class PlaybackController(object):
         if self.random and self.current_cp_track in self._shuffled:
             self._shuffled.remove(self.current_cp_track)
 
+        self.provider.update_play_time_on_play()
         self._trigger_track_playback_started()
 
     def previous(self):
@@ -469,6 +430,7 @@ class PlaybackController(object):
         """If paused, resume playing the current track."""
         if self.state == PlaybackState.PAUSED and self.provider.resume():
             self.state = PlaybackState.PLAYING
+            self.provider.update_play_time_on_resume()
             self._trigger_track_playback_resumed()
 
     def seek(self, time_position):
@@ -493,11 +455,9 @@ class PlaybackController(object):
             self.next()
             return True
 
-        self.play_time_started = self._current_wall_time
-        self.play_time_accumulated = time_position
-
         success = self.provider.seek(time_position)
         if success:
+            self.provider.update_play_time_on_seek(time_position)
             self._trigger_seeked(time_position)
         return success
 
