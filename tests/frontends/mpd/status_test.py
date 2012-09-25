@@ -159,18 +159,21 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_elapsed(self):
-        self.backend.playback.state = PAUSED
-        self.backend.playback.play_time_accumulated = 59123
+        self.backend.current_playlist.append([Track(length=60000)])
+        self.backend.playback.play()
+        self.backend.playback.pause()
+        self.backend.playback.seek(59123)
         result = dict(status.status(self.context))
         self.assertIn('elapsed', result)
         self.assertEqual(result['elapsed'], '59.123')
 
     def test_status_method_when_starting_playing_contains_elapsed_zero(self):
-        self.backend.playback.state = PAUSED
-        self.backend.playback.play_time_accumulated = 123 # Less than 1000ms
+        self.backend.current_playlist.append([Track(length=10000)])
+        self.backend.playback.play()
+        self.backend.playback.pause()
         result = dict(status.status(self.context))
         self.assertIn('elapsed', result)
-        self.assertEqual(result['elapsed'], '0.123')
+        self.assertEqual(result['elapsed'], '0.000')
 
     def test_status_method_when_playing_contains_bitrate(self):
         self.backend.current_playlist.append([Track(bitrate=320)])
