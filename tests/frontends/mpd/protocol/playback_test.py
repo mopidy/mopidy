@@ -259,25 +259,29 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
     def test_play_minus_is_ignored_if_playing(self):
         self.backend.current_playlist.append([Track(length=40000)])
         self.backend.playback.seek(30000)
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertEquals(PLAYING, self.backend.playback.state.get())
 
         self.sendRequest(u'play "-1"')
         self.assertEqual(PLAYING, self.backend.playback.state.get())
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertInResponse(u'OK')
 
     def test_play_minus_one_resumes_if_paused(self):
         self.backend.current_playlist.append([Track(length=40000)])
         self.backend.playback.seek(30000)
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertEquals(PLAYING, self.backend.playback.state.get())
         self.backend.playback.pause()
         self.assertEquals(PAUSED, self.backend.playback.state.get())
 
         self.sendRequest(u'play "-1"')
         self.assertEqual(PLAYING, self.backend.playback.state.get())
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertInResponse(u'OK')
 
     def test_playid(self):
@@ -327,25 +331,29 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
     def test_playid_minus_is_ignored_if_playing(self):
         self.backend.current_playlist.append([Track(length=40000)])
         self.backend.playback.seek(30000)
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertEquals(PLAYING, self.backend.playback.state.get())
 
         self.sendRequest(u'playid "-1"')
         self.assertEqual(PLAYING, self.backend.playback.state.get())
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertInResponse(u'OK')
 
     def test_playid_minus_one_resumes_if_paused(self):
         self.backend.current_playlist.append([Track(length=40000)])
         self.backend.playback.seek(30000)
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertEquals(PLAYING, self.backend.playback.state.get())
         self.backend.playback.pause()
         self.assertEquals(PAUSED, self.backend.playback.state.get())
 
         self.sendRequest(u'playid "-1"')
         self.assertEqual(PLAYING, self.backend.playback.state.get())
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertInResponse(u'OK')
 
     def test_playid_which_does_not_exist(self):
@@ -363,7 +371,7 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest(u'seek "0"')
         self.sendRequest(u'seek "0" "30"')
-        self.assert_(self.backend.playback.time_position >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position, 30000)
         self.assertInResponse(u'OK')
 
     def test_seek_with_songpos(self):
@@ -380,13 +388,15 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest(u'seek 0')
         self.sendRequest(u'seek 0 30')
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertInResponse(u'OK')
 
     def test_seekid(self):
         self.backend.current_playlist.append([Track(length=40000)])
         self.sendRequest(u'seekid "0" "30"')
-        self.assert_(self.backend.playback.time_position.get() >= 30000)
+        self.assertGreaterEqual(self.backend.playback.time_position.get(),
+            30000)
         self.assertInResponse(u'OK')
 
     def test_seekid_with_cpid(self):

@@ -618,7 +618,7 @@ class PlaybackControllerTest(object):
     def test_seek_when_stopped_updates_position(self):
         self.playback.seek(1000)
         position = self.playback.time_position
-        self.assert_(position >= 990, position)
+        self.assertGreaterEqual(position, 990)
 
     def test_seek_on_empty_playlist(self):
         self.assertFalse(self.playback.seek(0))
@@ -644,7 +644,7 @@ class PlaybackControllerTest(object):
         self.playback.play()
         self.playback.seek(length - 1000)
         position = self.playback.time_position
-        self.assert_(position >= length - 1010, position)
+        self.assertGreaterEqual(position, length - 1010)
 
     @populate_playlist
     def test_seek_when_paused(self):
@@ -660,7 +660,7 @@ class PlaybackControllerTest(object):
         self.playback.pause()
         self.playback.seek(length - 1000)
         position = self.playback.time_position
-        self.assert_(position >= length - 1010, position)
+        self.assertGreaterEqual(position, length - 1010)
 
     @populate_playlist
     def test_seek_when_paused_triggers_play(self):
@@ -702,7 +702,7 @@ class PlaybackControllerTest(object):
         self.playback.play()
         self.playback.seek(-1000)
         position = self.playback.time_position
-        self.assert_(position >= 0, position)
+        self.assertGreaterEqual(position, 0)
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
 
     @populate_playlist
@@ -749,7 +749,7 @@ class PlaybackControllerTest(object):
         first = self.playback.time_position
         time.sleep(1)
         second = self.playback.time_position
-        self.assert_(second > first, '%s - %s' % (first, second))
+        self.assertGreater(second, first)
 
     @unittest.SkipTest # Uses sleep
     @populate_playlist

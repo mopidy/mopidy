@@ -89,12 +89,12 @@ class PlayerInterfaceTest(unittest.TestCase):
     def test_get_rate_is_greater_or_equal_than_minimum_rate(self):
         rate = self.mpris.Get(objects.PLAYER_IFACE, 'Rate')
         minimum_rate = self.mpris.Get(objects.PLAYER_IFACE, 'MinimumRate')
-        self.assert_(rate >= minimum_rate)
+        self.assertGreaterEqual(rate, minimum_rate)
 
     def test_get_rate_is_less_or_equal_than_maximum_rate(self):
         rate = self.mpris.Get(objects.PLAYER_IFACE, 'Rate')
         maximum_rate = self.mpris.Get(objects.PLAYER_IFACE, 'MaximumRate')
-        self.assert_(rate >= maximum_rate)
+        self.assertGreaterEqual(rate, maximum_rate)
 
     def test_set_rate_is_ignored_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
@@ -246,7 +246,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.seek(10000)
         result_in_microseconds = self.mpris.Get(objects.PLAYER_IFACE, 'Position')
         result_in_milliseconds = result_in_microseconds // 1000
-        self.assert_(result_in_milliseconds >= 10000)
+        self.assertGreaterEqual(result_in_milliseconds, 10000)
 
     def test_get_position_when_no_current_track_should_be_zero(self):
         result_in_microseconds = self.mpris.Get(objects.PLAYER_IFACE, 'Position')
@@ -255,11 +255,11 @@ class PlayerInterfaceTest(unittest.TestCase):
 
     def test_get_minimum_rate_is_one_or_less(self):
         result = self.mpris.Get(objects.PLAYER_IFACE, 'MinimumRate')
-        self.assert_(result <= 1.0)
+        self.assertLessEqual(result, 1.0)
 
     def test_get_maximum_rate_is_one_or_more(self):
         result = self.mpris.Get(objects.PLAYER_IFACE, 'MaximumRate')
-        self.assert_(result >= 1.0)
+        self.assertGreaterEqual(result, 1.0)
 
     def test_can_go_next_is_true_if_can_control_and_other_next_track(self):
         self.mpris.get_CanControl = lambda *_: True
@@ -490,13 +490,13 @@ class PlayerInterfaceTest(unittest.TestCase):
 
         self.assertEquals(self.backend.playback.state.get(), PAUSED)
         at_pause = self.backend.playback.time_position.get()
-        self.assert_(at_pause >= 0)
+        self.assertGreaterEqual(at_pause, 0)
 
         self.mpris.PlayPause()
 
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         after_pause = self.backend.playback.time_position.get()
-        self.assert_(after_pause >= at_pause)
+        self.assertGreaterEqual(after_pause, at_pause)
 
     def test_playpause_when_stopped_should_start_playback(self):
         self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
@@ -545,17 +545,17 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.play()
 
         before_pause = self.backend.playback.time_position.get()
-        self.assert_(before_pause >= 0)
+        self.assertGreaterEqual(before_pause, 0)
 
         self.mpris.Pause()
         self.assertEquals(self.backend.playback.state.get(), PAUSED)
         at_pause = self.backend.playback.time_position.get()
-        self.assert_(at_pause >= before_pause)
+        self.assertGreaterEqual(at_pause, before_pause)
 
         self.mpris.Play()
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         after_pause = self.backend.playback.time_position.get()
-        self.assert_(after_pause >= at_pause)
+        self.assertGreaterEqual(after_pause, at_pause)
 
     def test_play_when_there_is_no_track_has_no_effect(self):
         self.backend.current_playlist.clear()
@@ -569,7 +569,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.play()
 
         before_seek = self.backend.playback.time_position.get()
-        self.assert_(before_seek >= 0)
+        self.assertGreaterEqual(before_seek, 0)
 
         milliseconds_to_seek = 10000
         microseconds_to_seek = milliseconds_to_seek * 1000
@@ -577,15 +577,15 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Seek(microseconds_to_seek)
 
         after_seek = self.backend.playback.time_position.get()
-        self.assert_(before_seek <= after_seek < (
-            before_seek + milliseconds_to_seek))
+        self.assertLessEqual(before_seek, after_seek)
+        self.assertLess(after_seek, before_seek + milliseconds_to_seek)
 
     def test_seek_seeks_given_microseconds_forward_in_the_current_track(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
         self.backend.playback.play()
 
         before_seek = self.backend.playback.time_position.get()
-        self.assert_(before_seek >= 0)
+        self.assertGreaterEqual(before_seek, 0)
 
         milliseconds_to_seek = 10000
         microseconds_to_seek = milliseconds_to_seek * 1000
@@ -595,7 +595,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
         after_seek = self.backend.playback.time_position.get()
-        self.assert_(after_seek >= (before_seek + milliseconds_to_seek))
+        self.assertGreaterEqual(after_seek, before_seek + milliseconds_to_seek)
 
     def test_seek_seeks_given_microseconds_backward_if_negative(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
@@ -603,7 +603,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.seek(20000)
 
         before_seek = self.backend.playback.time_position.get()
-        self.assert_(before_seek >= 20000)
+        self.assertGreaterEqual(before_seek, 20000)
 
         milliseconds_to_seek = -10000
         microseconds_to_seek = milliseconds_to_seek * 1000
@@ -613,8 +613,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
         after_seek = self.backend.playback.time_position.get()
-        self.assert_(after_seek >= (before_seek + milliseconds_to_seek))
-        self.assert_(after_seek < before_seek)
+        self.assertGreaterEqual(after_seek, before_seek + milliseconds_to_seek)
+        self.assertLess(after_seek, before_seek)
 
     def test_seek_seeks_to_start_of_track_if_new_position_is_negative(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
@@ -622,7 +622,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.seek(20000)
 
         before_seek = self.backend.playback.time_position.get()
-        self.assert_(before_seek >= 20000)
+        self.assertGreaterEqual(before_seek, 20000)
 
         milliseconds_to_seek = -30000
         microseconds_to_seek = milliseconds_to_seek * 1000
@@ -632,9 +632,9 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
         after_seek = self.backend.playback.time_position.get()
-        self.assert_(after_seek >= (before_seek + milliseconds_to_seek))
-        self.assert_(after_seek < before_seek)
-        self.assert_(after_seek >= 0)
+        self.assertGreaterEqual(after_seek, before_seek + milliseconds_to_seek)
+        self.assertLess(after_seek, before_seek)
+        self.assertGreaterEqual(after_seek, 0)
 
     def test_seek_skips_to_next_track_if_new_position_larger_than_track_length(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000),
@@ -643,7 +643,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.seek(20000)
 
         before_seek = self.backend.playback.time_position.get()
-        self.assert_(before_seek >= 20000)
+        self.assertGreaterEqual(before_seek, 20000)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
 
@@ -656,8 +656,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.current_track.get().uri, 'b')
 
         after_seek = self.backend.playback.time_position.get()
-        self.assert_(after_seek >= 0)
-        self.assert_(after_seek < before_seek)
+        self.assertGreaterEqual(after_seek, 0)
+        self.assertLess(after_seek, before_seek)
 
     def test_set_position_is_ignored_if_can_seek_is_false(self):
         self.mpris.get_CanSeek = lambda *_: False
@@ -665,7 +665,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.play()
 
         before_set_position = self.backend.playback.time_position.get()
-        self.assert_(before_set_position <= 5000)
+        self.assertLessEqual(before_set_position, 5000)
 
         track_id = 'a'
 
@@ -675,15 +675,15 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
 
         after_set_position = self.backend.playback.time_position.get()
-        self.assert_(before_set_position <= after_set_position <
-            position_to_set_in_milliseconds)
+        self.assertLessEqual(before_set_position, after_set_position)
+        self.assertLess(after_set_position, position_to_set_in_milliseconds)
 
     def test_set_position_sets_the_current_track_position_in_microsecs(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
         self.backend.playback.play()
 
         before_set_position = self.backend.playback.time_position.get()
-        self.assert_(before_set_position <= 5000)
+        self.assertLessEqual(before_set_position, 5000)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
         track_id = '/com/mopidy/track/0'
@@ -696,7 +696,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
 
         after_set_position = self.backend.playback.time_position.get()
-        self.assert_(after_set_position >= position_to_set_in_milliseconds)
+        self.assertGreaterEqual(after_set_position, position_to_set_in_milliseconds)
 
     def test_set_position_does_nothing_if_the_position_is_negative(self):
         self.backend.current_playlist.append([Track(uri='a', length=40000)])
@@ -704,8 +704,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.seek(20000)
 
         before_set_position = self.backend.playback.time_position.get()
-        self.assert_(before_set_position >= 20000)
-        self.assert_(before_set_position <= 25000)
+        self.assertGreaterEqual(before_set_position, 20000)
+        self.assertLessEqual(before_set_position, 25000)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
 
@@ -717,7 +717,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
 
         after_set_position = self.backend.playback.time_position.get()
-        self.assert_(after_set_position >= before_set_position)
+        self.assertGreaterEqual(after_set_position, before_set_position)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
 
@@ -727,8 +727,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.seek(20000)
 
         before_set_position = self.backend.playback.time_position.get()
-        self.assert_(before_set_position >= 20000)
-        self.assert_(before_set_position <= 25000)
+        self.assertGreaterEqual(before_set_position, 20000)
+        self.assertLessEqual(before_set_position, 25000)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
 
@@ -740,7 +740,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
 
         after_set_position = self.backend.playback.time_position.get()
-        self.assert_(after_set_position >= before_set_position)
+        self.assertGreaterEqual(after_set_position, before_set_position)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
 
@@ -750,8 +750,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.playback.seek(20000)
 
         before_set_position = self.backend.playback.time_position.get()
-        self.assert_(before_set_position >= 20000)
-        self.assert_(before_set_position <= 25000)
+        self.assertGreaterEqual(before_set_position, 20000)
+        self.assertLessEqual(before_set_position, 25000)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
 
@@ -763,7 +763,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
 
         after_set_position = self.backend.playback.time_position.get()
-        self.assert_(after_set_position >= before_set_position)
+        self.assertGreaterEqual(after_set_position, before_set_position)
         self.assertEquals(self.backend.playback.state.get(), PLAYING)
         self.assertEquals(self.backend.playback.current_track.get().uri, 'a')
 

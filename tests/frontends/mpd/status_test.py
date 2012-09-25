@@ -27,19 +27,19 @@ class StatusHandlerTest(unittest.TestCase):
     def test_stats_method(self):
         result = status.stats(self.context)
         self.assertIn('artists', result)
-        self.assert_(int(result['artists']) >= 0)
+        self.assertGreaterEqual(int(result['artists']), 0)
         self.assertIn('albums', result)
-        self.assert_(int(result['albums']) >= 0)
+        self.assertGreaterEqual(int(result['albums']), 0)
         self.assertIn('songs', result)
-        self.assert_(int(result['songs']) >= 0)
+        self.assertGreaterEqual(int(result['songs']), 0)
         self.assertIn('uptime', result)
-        self.assert_(int(result['uptime']) >= 0)
+        self.assertGreaterEqual(int(result['uptime']), 0)
         self.assertIn('db_playtime', result)
-        self.assert_(int(result['db_playtime']) >= 0)
+        self.assertGreaterEqual(int(result['db_playtime']), 0)
         self.assertIn('db_update', result)
-        self.assert_(int(result['db_update']) >= 0)
+        self.assertGreaterEqual(int(result['db_update']), 0)
         self.assertIn('playtime', result)
-        self.assert_(int(result['playtime']) >= 0)
+        self.assertGreaterEqual(int(result['playtime']), 0)
 
     def test_status_method_contains_volume_with_na_value(self):
         result = dict(status.status(self.context))
@@ -98,12 +98,12 @@ class StatusHandlerTest(unittest.TestCase):
     def test_status_method_contains_playlistlength(self):
         result = dict(status.status(self.context))
         self.assertIn('playlistlength', result)
-        self.assert_(int(result['playlistlength']) >= 0)
+        self.assertGreaterEqual(int(result['playlistlength']), 0)
 
     def test_status_method_contains_xfade(self):
         result = dict(status.status(self.context))
         self.assertIn('xfade', result)
-        self.assert_(int(result['xfade']) >= 0)
+        self.assertGreaterEqual(int(result['xfade']), 0)
 
     def test_status_method_contains_state_is_play(self):
         self.backend.playback.state = PLAYING
@@ -129,7 +129,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.backend.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('song', result)
-        self.assert_(int(result['song']) >= 0)
+        self.assertGreaterEqual(int(result['song']), 0)
 
     def test_status_method_when_playlist_loaded_contains_cpid_as_songid(self):
         self.backend.current_playlist.append([Track()])
@@ -146,7 +146,7 @@ class StatusHandlerTest(unittest.TestCase):
         (position, total) = result['time'].split(':')
         position = int(position)
         total = int(total)
-        self.assert_(position <= total)
+        self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_time_with_length(self):
         self.backend.current_playlist.append([Track(length=10000)])
@@ -156,7 +156,7 @@ class StatusHandlerTest(unittest.TestCase):
         (position, total) = result['time'].split(':')
         position = int(position)
         total = int(total)
-        self.assert_(position <= total)
+        self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_elapsed(self):
         self.backend.playback.state = PAUSED

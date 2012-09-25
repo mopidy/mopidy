@@ -205,7 +205,7 @@ class CurrentPlaylistControllerTest(object):
         track2 = self.controller.tracks[2]
         version = self.controller.version
         self.controller.remove(uri=track1.uri)
-        self.assert_(version < self.controller.version)
+        self.assertLess(version, self.controller.version)
         self.assertNotIn(track1, self.controller.tracks)
         self.assertEqual(track2, self.controller.tracks[1])
 
@@ -281,4 +281,4 @@ class CurrentPlaylistControllerTest(object):
     def test_version_increases_when_appending_something(self):
         version = self.controller.version
         self.controller.append([Track()])
-        self.assert_(version < self.controller.version)
+        self.assertLess(version, self.controller.version)

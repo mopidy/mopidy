@@ -415,7 +415,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         version = self.backend.current_playlist.version.get()
 
         self.sendRequest(u'shuffle')
-        self.assert_(version < self.backend.current_playlist.version.get())
+        self.assertLess(version, self.backend.current_playlist.version.get())
         self.assertInResponse(u'OK')
 
     def test_shuffle_with_open_range(self):
@@ -426,7 +426,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         version = self.backend.current_playlist.version.get()
 
         self.sendRequest(u'shuffle "4:"')
-        self.assert_(version < self.backend.current_playlist.version.get())
+        self.assertLess(version, self.backend.current_playlist.version.get())
         tracks = self.backend.current_playlist.tracks.get()
         self.assertEqual(tracks[0].name, 'a')
         self.assertEqual(tracks[1].name, 'b')
@@ -442,7 +442,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         version = self.backend.current_playlist.version.get()
 
         self.sendRequest(u'shuffle "1:3"')
-        self.assert_(version < self.backend.current_playlist.version.get())
+        self.assertLess(version, self.backend.current_playlist.version.get())
         tracks = self.backend.current_playlist.tracks.get()
         self.assertEqual(tracks[0].name, 'a')
         self.assertEqual(tracks[3].name, 'd')
