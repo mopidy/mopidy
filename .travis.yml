@@ -10,3 +10,10 @@ before_script:
   - "rm $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt"
 
 script: nosetests
+
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#mopidy"
+    on_success: change
+    on_failure: change
