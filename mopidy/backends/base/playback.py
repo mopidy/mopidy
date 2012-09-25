@@ -1,8 +1,3 @@
-import time
-
-from mopidy.core.playback import PlaybackState
-
-
 class BasePlaybackProvider(object):
     """
     :param backend: the backend
@@ -13,9 +8,6 @@ class BasePlaybackProvider(object):
 
     def __init__(self, backend):
         self.backend = backend
-
-        self._play_time_accumulated = 0
-        self._play_time_started = 0
 
     def pause(self):
         """
@@ -103,40 +95,3 @@ class BasePlaybackProvider(object):
         :type volume: int [0..100]
         """
         self.backend.audio.set_volume(volume)
-
-    def wall_clock_based_time_position(self):
-        """
-        Helper method that tracks track time position using the wall clock.
-
-        To use this helper you must call the helper from your implementation of
-        :meth:`get_time_position` and return its return value.
-
-        :rtype: int
-        """
-        state = self.backend.playback.state
-        if state == PlaybackState.PLAYING:
-            time_since_started = (self._wall_time() -
-                self._play_time_started)
-            return self._play_time_accumulated + time_since_started
-        elif state == PlaybackState.PAUSED:
-            return self._play_time_accumulated
-        elif state == PlaybackState.STOPPED:
-            return 0
-
-    def update_play_time_on_play(self):
-        self._play_time_accumulated = 0
-        self._play_time_started = self._wall_time()
-
-    def update_play_time_on_pause(self):
-        time_since_started = self._wall_time() - self._play_time_started
-        self._play_time_accumulated += time_since_started
-
-    def update_play_time_on_resume(self):
-        self._play_time_started = self._wall_time()
-
-    def update_play_time_on_seek(self, time_position):
-        self._play_time_started = self._wall_time()
-        self._play_time_accumulated = time_position
-
-    def _wall_time(self):
-        return int(time.time() * 1000)

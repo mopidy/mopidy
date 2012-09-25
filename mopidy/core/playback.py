@@ -370,7 +370,6 @@ class PlaybackController(object):
         """Pause playback."""
         if self.provider.pause():
             self.state = PlaybackState.PAUSED
-            self.provider.update_play_time_on_pause()
             self._trigger_track_playback_paused()
 
     def play(self, cp_track=None, on_error_step=1):
@@ -413,7 +412,6 @@ class PlaybackController(object):
         if self.random and self.current_cp_track in self._shuffled:
             self._shuffled.remove(self.current_cp_track)
 
-        self.provider.update_play_time_on_play()
         self._trigger_track_playback_started()
 
     def previous(self):
@@ -430,7 +428,6 @@ class PlaybackController(object):
         """If paused, resume playing the current track."""
         if self.state == PlaybackState.PAUSED and self.provider.resume():
             self.state = PlaybackState.PLAYING
-            self.provider.update_play_time_on_resume()
             self._trigger_track_playback_resumed()
 
     def seek(self, time_position):
@@ -457,7 +454,6 @@ class PlaybackController(object):
 
         success = self.provider.seek(time_position)
         if success:
-            self.provider.update_play_time_on_seek(time_position)
             self._trigger_seeked(time_position)
         return success
 
