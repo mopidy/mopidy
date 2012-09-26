@@ -123,9 +123,6 @@ class MprisFrontend(ThreadingActor, BackendListener):
         logger.debug(u'Received volume changed event')
         self._emit_properties_changed('Volume')
 
-    def seeked(self):
+    def seeked(self, time_position_in_ms):
         logger.debug(u'Received seeked event')
-        if self.mpris_object is None:
-            return
-        self.mpris_object.Seeked(
-            self.mpris_object.Get(objects.PLAYER_IFACE, 'Position'))
+        self.mpris_object.Seeked(time_position_in_ms * 1000)

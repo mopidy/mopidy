@@ -70,9 +70,5 @@ class BackendEventsTest(unittest.TestCase):
             objects.PLAYER_IFACE, {'Volume': 1.0}, [])
 
     def test_seeked_event_causes_mpris_seeked_event(self):
-        self.mpris_object.Get.return_value = 31000000
-        self.mpris_frontend.seeked()
-        self.assertListEqual(self.mpris_object.Get.call_args_list, [
-            ((objects.PLAYER_IFACE, 'Position'), {}),
-        ])
+        self.mpris_frontend.seeked(31000)
         self.mpris_object.Seeked.assert_called_with(31000000)
