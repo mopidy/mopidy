@@ -4,8 +4,6 @@ import threading
 
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
-from pykka.registry import ActorRegistry
-
 from mopidy import audio, get_version, settings
 from mopidy.backends.base import Backend
 from mopidy.backends.spotify import BITRATES

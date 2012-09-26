@@ -5,7 +5,6 @@ import os
 import shutil
 
 from pykka.actor import ThreadingActor
-from pykka.registry import ActorRegistry
 
 from mopidy import audio, core, settings
 from mopidy.backends import base
