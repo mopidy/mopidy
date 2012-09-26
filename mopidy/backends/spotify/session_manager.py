@@ -27,13 +27,13 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, audio, backend):
         PyspotifySessionManager.__init__(self, username, password)
         BaseThread.__init__(self)
         self.name = 'SpotifyThread'
 
-        self.audio = None
-        self.backend = None
+        self.audio = audio
+        self.backend = backend
 
         self.connected = threading.Event()
         self.session = None
@@ -44,18 +44,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self._initial_data_receive_completed = False
 
     def run_inside_try(self):
-        self.setup()
         self.connect()
-
-    def setup(self):
-        audio_refs = ActorRegistry.get_by_class(audio.Audio)
-        assert len(audio_refs) == 1, \
-            'Expected exactly one running Audio instance.'
-        self.audio = audio_refs[0].proxy()
-
-        backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        self.backend = backend_refs[0].proxy()
 
     def logged_in(self, session, error):
         """Callback used by pyspotify"""

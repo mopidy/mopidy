@@ -47,7 +47,7 @@ class SpotifyBackend(ThreadingActor, base.Backend):
         from .playback import SpotifyPlaybackProvider
         from .stored_playlists import SpotifyStoredPlaylistsProvider
 
-        super(SpotifyBackend, self).__init__(*args, **kwargs)
+        base.Backend.__init__(self, *args, **kwargs)
 
         self.current_playlist = core.CurrentPlaylistController(backend=self)
 
@@ -66,7 +66,6 @@ class SpotifyBackend(ThreadingActor, base.Backend):
 
         self.uri_schemes = [u'spotify']
 
-        self.audio = None
         self.spotify = None
 
         # Fail early if settings are not present
@@ -74,11 +73,6 @@ class SpotifyBackend(ThreadingActor, base.Backend):
         self.password = settings.SPOTIFY_PASSWORD
 
     def on_start(self):
-        audio_refs = ActorRegistry.get_by_class(audio.Audio)
-        assert len(audio_refs) == 1, \
-            'Expected exactly one running Audio instance.'
-        self.audio = audio_refs[0].proxy()
-
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
         self.spotify = self._connect()
 
@@ -89,6 +83,7 @@ class SpotifyBackend(ThreadingActor, base.Backend):
         from .session_manager import SpotifySessionManager
 
         logger.debug(u'Connecting to Spotify')
-        spotify = SpotifySessionManager(self.username, self.password)
+        spotify = SpotifySessionManager(self.username, self.password,
+            audio=self.audio, backend=self.actor_ref.proxy())
         spotify.start()
         return spotify

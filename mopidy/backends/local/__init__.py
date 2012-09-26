@@ -32,7 +32,7 @@ class LocalBackend(ThreadingActor, base.Backend):
     """
 
     def __init__(self, *args, **kwargs):
-        super(LocalBackend, self).__init__(*args, **kwargs)
+        base.Backend.__init__(self, *args, **kwargs)
 
         self.current_playlist = core.CurrentPlaylistController(backend=self)
 
@@ -49,14 +49,6 @@ class LocalBackend(ThreadingActor, base.Backend):
             provider=stored_playlists_provider)
 
         self.uri_schemes = [u'file']
-
-        self.audio = None
-
-    def on_start(self):
-        audio_refs = ActorRegistry.get_by_class(audio.Audio)
-        assert len(audio_refs) == 1, \
-            'Expected exactly one running Audio instance.'
-        self.audio = audio_refs[0].proxy()
 
 
 class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
