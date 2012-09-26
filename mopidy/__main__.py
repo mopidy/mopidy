@@ -51,8 +51,8 @@ def main():
         setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
-        setup_audio()
-        setup_backend()
+        audio = setup_audio()
+        setup_backend(audio)
         setup_frontends()
         loop.run()
     except SettingsError as e:
@@ -118,14 +118,15 @@ def setup_settings(interactive):
 
 
 def setup_audio():
-    Audio.start()
+    return Audio.start().proxy()
 
 
 def stop_audio():
     stop_actors_by_class(Audio)
 
-def setup_backend():
-    get_class(settings.BACKENDS[0]).start()
+
+def setup_backend(audio):
+    get_class(settings.BACKENDS[0]).start(audio=audio)
 
 
 def stop_backend():
