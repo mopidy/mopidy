@@ -4,6 +4,12 @@ from .stored_playlists import BaseStoredPlaylistsProvider
 
 
 class Backend(object):
+    #: Actor proxy to an instance of :class:`mopidy.audio.Audio`.
+    #:
+    #: Should be passed to the backend constructor as the kwarg ``audio``,
+    #: which will then set this field.
+    audio = None
+
     #: The current playlist controller. An instance of
     #: :class:`mopidy.backends.base.CurrentPlaylistController`.
     current_playlist = None
@@ -22,3 +28,6 @@ class Backend(object):
 
     #: List of URI schemes this backend can handle.
     uri_schemes = []
+
+    def __init__(self, audio=None):
+        self.audio = audio
