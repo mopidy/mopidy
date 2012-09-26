@@ -83,6 +83,7 @@ class SpotifyBackend(ThreadingActor, base.Backend):
         from .session_manager import SpotifySessionManager
 
         logger.debug(u'Connecting to Spotify')
-        spotify = SpotifySessionManager(self.username, self.password)
+        spotify = SpotifySessionManager(self.username, self.password,
+            audio=self.audio, backend=self.actor_ref.proxy())
         spotify.start()
         return spotify
