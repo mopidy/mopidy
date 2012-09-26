@@ -293,7 +293,7 @@ class LineProtocol(ThreadingActor):
 
     #: Regex to use for spliting lines, will be set compiled version of its
     #: own value, or to ``terminator``s value if it is not set itself.
-    delimeter = None
+    delimiter = None
 
     #: What encoding to expect incomming data to be in, can be :class:`None`.
     encoding = 'utf-8'
@@ -304,10 +304,10 @@ class LineProtocol(ThreadingActor):
         self.prevent_timeout = False
         self.recv_buffer = ''
 
-        if self.delimeter:
-            self.delimeter = re.compile(self.delimeter)
+        if self.delimiter:
+            self.delimiter = re.compile(self.delimiter)
         else:
-            self.delimeter = re.compile(self.terminator)
+            self.delimiter = re.compile(self.terminator)
 
     @property
     def host(self):
@@ -348,7 +348,7 @@ class LineProtocol(ThreadingActor):
     def parse_lines(self):
         """Consume new data and yield any lines found."""
         while re.search(self.terminator, self.recv_buffer):
-            line, self.recv_buffer = self.delimeter.split(
+            line, self.recv_buffer = self.delimiter.split(
                 self.recv_buffer, 1)
             yield line
 
