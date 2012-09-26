@@ -10,24 +10,20 @@ class Backend(object):
     #: which will then set this field.
     audio = None
 
-    #: The current playlist controller. An instance of
-    #: :class:`mopidy.backends.base.CurrentPlaylistController`.
-    current_playlist = None
-
-    #: The library controller. An instance of
-    # :class:`mopidy.backends.base.LibraryController`.
+    #: The library provider. An instance of
+    # :class:`mopidy.backends.base.BaseLibraryProvider`.
     library = None
 
-    #: The playback controller. An instance of
-    #: :class:`mopidy.backends.base.PlaybackController`.
+    #: The playback provider. An instance of
+    #: :class:`mopidy.backends.base.BasePlaybackProvider`.
     playback = None
 
-    #: The stored playlists controller. An instance of
-    #: :class:`mopidy.backends.base.StoredPlaylistsController`.
+    #: The stored playlists provider. An instance of
+    #: :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`.
     stored_playlists = None
 
     #: List of URI schemes this backend can handle.
     uri_schemes = []
 
-    def __init__(self, audio=None):
+    def __init__(self, audio):
         self.audio = audio

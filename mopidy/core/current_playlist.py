@@ -17,8 +17,8 @@ class CurrentPlaylistController(object):
 
     pykka_traversable = True
 
-    def __init__(self, backend):
-        self.backend = backend
+    def __init__(self, core):
+        self.core = core
         self.cp_id = 0
         self._cp_tracks = []
         self._version = 0
@@ -59,7 +59,7 @@ class CurrentPlaylistController(object):
     @version.setter
     def version(self, version):
         self._version = version
-        self.backend.playback.on_current_playlist_change()
+        self.core.playback.on_current_playlist_change()
         self._trigger_playlist_changed()
 
     def add(self, track, at_position=None, increase_version=True):

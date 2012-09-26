@@ -1,6 +1,5 @@
 from pykka.actor import ThreadingActor
 
-from mopidy import core
 from mopidy.backends import base
 from mopidy.models import Playlist
 
@@ -14,21 +13,11 @@ class DummyBackend(ThreadingActor, base.Backend):
     """
 
     def __init__(self, *args, **kwargs):
-        super(DummyBackend, self).__init__(*args, **kwargs)
+        base.Backend.__init__(self, *args, **kwargs)
 
-        self.current_playlist = core.CurrentPlaylistController(backend=self)
-
-        library_provider = DummyLibraryProvider(backend=self)
-        self.library = core.LibraryController(backend=self,
-            provider=library_provider)
-
-        playback_provider = DummyPlaybackProvider(backend=self)
-        self.playback = core.PlaybackController(backend=self,
-            provider=playback_provider)
-
-        stored_playlists_provider = DummyStoredPlaylistsProvider(backend=self)
-        self.stored_playlists = core.StoredPlaylistsController(backend=self,
-            provider=stored_playlists_provider)
+        self.library = DummyLibraryProvider(backend=self)
+        self.playback = DummyPlaybackProvider(backend=self)
+        self.stored_playlists = DummyStoredPlaylistsProvider(backend=self)
 
         self.uri_schemes = [u'dummy']
 

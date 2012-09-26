@@ -14,8 +14,7 @@ except ImportError as import_error:
 
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
-from mopidy.backends.base import Backend
+from mopidy import core, settings
 from mopidy.core import PlaybackState
 from mopidy.utils.process import exit_process
 
@@ -35,7 +34,7 @@ class MprisObject(dbus.service.Object):
     properties = None
 
     def __init__(self):
-        self._backend = None
+        self._core = None
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
             PLAYER_IFACE: self._get_player_iface_properties(),
@@ -86,12 +85,13 @@ class MprisObject(dbus.service.Object):
 
     @property
     def backend(self):
-        if self._backend is None:
-            backend_refs = ActorRegistry.get_by_class(Backend)
-            assert len(backend_refs) == 1, \
-                'Expected exactly one running backend.'
-            self._backend = backend_refs[0].proxy()
-        return self._backend
+        # TODO: Rename property to 'core'
+        if self._core is None:
+            core_refs = ActorRegistry.get_by_class(core.Core)
+            assert len(core_refs) == 1, \
+                'Expected exactly one running core instance.'
+            self._core = core_refs[0].proxy()
+        return self._core
 
     def _get_track_id(self, cp_track):
         return '/com/mopidy/track/%d' % cp_track.cpid

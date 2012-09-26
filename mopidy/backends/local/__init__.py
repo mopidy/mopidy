@@ -6,7 +6,7 @@ import shutil
 
 from pykka.actor import ThreadingActor
 
-from mopidy import audio, core, settings
+from mopidy import settings
 from mopidy.backends import base
 from mopidy.models import Playlist, Track, Album
 
@@ -33,19 +33,9 @@ class LocalBackend(ThreadingActor, base.Backend):
     def __init__(self, *args, **kwargs):
         base.Backend.__init__(self, *args, **kwargs)
 
-        self.current_playlist = core.CurrentPlaylistController(backend=self)
-
-        self.library_provider = LocalLibraryProvider(backend=self)
-        self.library = core.LibraryController(backend=self,
-            provider=self.library_provider)
-
-        playback_provider = base.BasePlaybackProvider(backend=self)
-        self.playback = core.PlaybackController(backend=self,
-            provider=playback_provider)
-
-        stored_playlists_provider = LocalStoredPlaylistsProvider(backend=self)
-        self.stored_playlists = core.StoredPlaylistsController(backend=self,
-            provider=stored_playlists_provider)
+        self.library = LocalLibraryProvider(backend=self)
+        self.playback = base.BasePlaybackProvider(backend=self)
+        self.stored_playlists = LocalStoredPlaylistsProvider(backend=self)
 
         self.uri_schemes = [u'file']
 
@@ -69,7 +59,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
             tracks = []
             for uri in parse_m3u(m3u, settings.LOCAL_MUSIC_PATH):
                 try:
-                    tracks.append(self.backend.library_provider.lookup(uri))
+                    tracks.append(self.backend.library.lookup(uri))
                 except LookupError, e:
                     logger.error('Playlist item could not be added: %s', e)
             playlist = Playlist(tracks=tracks, name=name)

@@ -2,7 +2,7 @@ import logging
 
 from pykka.actor import ThreadingActor
 
-from mopidy import audio, core, settings
+from mopidy import settings
 from mopidy.backends import base
 
 logger = logging.getLogger('mopidy.backends.spotify')
@@ -48,20 +48,9 @@ class SpotifyBackend(ThreadingActor, base.Backend):
 
         base.Backend.__init__(self, *args, **kwargs)
 
-        self.current_playlist = core.CurrentPlaylistController(backend=self)
-
-        library_provider = SpotifyLibraryProvider(backend=self)
-        self.library = core.LibraryController(backend=self,
-            provider=library_provider)
-
-        playback_provider = SpotifyPlaybackProvider(backend=self)
-        self.playback = core.PlaybackController(backend=self,
-            provider=playback_provider)
-
-        self.stored_playlists_provider = SpotifyStoredPlaylistsProvider(
-            backend=self)
-        self.stored_playlists = core.StoredPlaylistsController(backend=self,
-            provider=self.stored_playlists_provider)
+        self.library = SpotifyLibraryProvider(backend=self)
+        self.playback = SpotifyPlaybackProvider(backend=self)
+        self.stored_playlists = SpotifyStoredPlaylistsProvider(backend=self)
 
         self.uri_schemes = [u'spotify']
 

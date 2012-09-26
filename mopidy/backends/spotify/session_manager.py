@@ -138,7 +138,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         playlists = map(SpotifyTranslator.to_mopidy_playlist,
             self.session.playlist_container())
         playlists = filter(None, playlists)
-        self.backend.stored_playlists_provider.playlists = playlists
+        self.backend.stored_playlists.playlists = playlists
         logger.info(u'Loaded %d Spotify playlist(s)', len(playlists))
 
     def search(self, query, queue):

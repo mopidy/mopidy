@@ -4,8 +4,7 @@ import re
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
-from mopidy.backends.base import Backend
+from mopidy import core, settings
 from mopidy.frontends.mpd import exceptions
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
@@ -233,16 +232,17 @@ class MpdContext(object):
         self.session = session
         self.events = set()
         self.subscriptions = set()
-        self._backend = None
+        self._core = None
 
     @property
     def backend(self):
         """
-        The backend. An instance of :class:`mopidy.backends.base.Backend`.
+        The Mopidy core. An instance of :class:`mopidy.core.Core`.
         """
-        if self._backend is None:
-            backend_refs = ActorRegistry.get_by_class(Backend)
-            assert len(backend_refs) == 1, \
-                'Expected exactly one running backend.'
-            self._backend = backend_refs[0].proxy()
-        return self._backend
+        # TODO: Rename property to 'core'
+        if self._core is None:
+            core_refs = ActorRegistry.get_by_class(core.Core)
+            assert len(core_refs) == 1, \
+                'Expected exactly one running core instance.'
+            self._core = core_refs[0].proxy()
+        return self._core

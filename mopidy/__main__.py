@@ -31,6 +31,7 @@ sys.path.insert(0,
 from mopidy import (get_version, settings, OptionalDependencyError,
     SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
 from mopidy.audio import Audio
+from mopidy.core import Core
 from mopidy.utils import get_class
 from mopidy.utils.deps import list_deps_optparse_callback
 from mopidy.utils.log import setup_logging
@@ -52,7 +53,8 @@ def main():
         check_old_folders()
         setup_settings(options.interactive)
         audio = setup_audio()
-        setup_backend(audio)
+        backend = setup_backend(audio)
+        setup_core(audio, backend)
         setup_frontends()
         loop.run()
     except SettingsError as e:
@@ -64,6 +66,7 @@ def main():
     finally:
         loop.quit()
         stop_frontends()
+        stop_core()
         stop_backend()
         stop_audio()
         stop_remaining_actors()
@@ -126,11 +129,19 @@ def stop_audio():
 
 
 def setup_backend(audio):
-    get_class(settings.BACKENDS[0]).start(audio=audio)
+    return get_class(settings.BACKENDS[0]).start(audio=audio).proxy()
 
 
 def stop_backend():
     stop_actors_by_class(get_class(settings.BACKENDS[0]))
+
+
+def setup_core(audio, backend):
+    return Core.start(audio, backend).proxy()
+
+
+def stop_core():
+    stop_actors_by_class(Core)
 
 
 def setup_frontends():

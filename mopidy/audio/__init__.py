@@ -8,8 +8,7 @@ import logging
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy import settings, utils
-from mopidy.backends.base import Backend
+from mopidy import core, settings, utils
 from mopidy.utils import process
 
 # Trigger install of gst mixer plugins
@@ -150,7 +149,7 @@ class Audio(ThreadingActor):
 
     def _on_message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
-            self._notify_backend_of_eos()
+            self._notify_core_of_eos()
         elif message.type == gst.MESSAGE_ERROR:
             error, debug = message.parse_error()
             logger.error(u'%s %s', error, debug)
@@ -159,14 +158,14 @@ class Audio(ThreadingActor):
             error, debug = message.parse_warning()
             logger.warning(u'%s %s', error, debug)
 
-    def _notify_backend_of_eos(self):
-        backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) <= 1, 'Expected at most one running backend.'
-        if backend_refs:
-            logger.debug(u'Notifying backend of end-of-stream.')
-            backend_refs[0].proxy().playback.on_end_of_track()
+    def _notify_core_of_eos(self):
+        core_refs = ActorRegistry.get_by_class(core.Core)
+        assert len(core_refs) <= 1, 'Expected at most one running core instance'
+        if core_refs:
+            logger.debug(u'Notifying core of end-of-stream')
+            core_refs[0].proxy().playback.on_end_of_track()
         else:
-            logger.debug(u'No backend to notify of end-of-stream found.')
+            logger.debug(u'No core instance to notify of end-of-stream found')
 
     def set_uri(self, uri):
         """
