@@ -1,4 +1,4 @@
-from pykka import registry
+from pykka.registry import ActorRegistry
 
 
 class CoreListener(object):
@@ -15,14 +15,9 @@ class CoreListener(object):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of core listener events"""
-        # FIXME this should be updated once Pykka supports non-blocking calls
-        # on proxies or some similar solution.
-        registry.ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': (event,),
-            'args': [],
-            'kwargs': kwargs,
-        }, target_class=CoreListener)
+        listeners = ActorRegistry.get_by_class(CoreListener)
+        for listener in listeners:
+            getattr(listener.proxy(), event)(**kwargs)
 
     def track_playback_paused(self, track, time_position):
         """
@@ -49,7 +44,6 @@ class CoreListener(object):
         :type time_position: int
         """
         pass
-
 
     def track_playback_started(self, track):
         """
