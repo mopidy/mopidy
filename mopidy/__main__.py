@@ -54,8 +54,8 @@ def main():
         setup_settings(options.interactive)
         audio = setup_audio()
         backend = setup_backend(audio)
-        setup_core(audio, backend)
-        setup_frontends()
+        core = setup_core(audio, backend)
+        setup_frontends(core)
         loop.run()
     except SettingsError as e:
         logger.error(e.message)
@@ -137,17 +137,17 @@ def stop_backend():
 
 
 def setup_core(audio, backend):
-    return Core.start(audio, backend).proxy()
+    return Core.start(audio=audio, backend=backend).proxy()
 
 
 def stop_core():
     stop_actors_by_class(Core)
 
 
-def setup_frontends():
+def setup_frontends(core):
     for frontend_class_name in settings.FRONTENDS:
         try:
-            get_class(frontend_class_name).start()
+            get_class(frontend_class_name).start(core=core)
         except OptionalDependencyError as e:
             logger.info(u'Disabled: %s (%s)', frontend_class_name, e)
 

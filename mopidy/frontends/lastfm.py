@@ -37,7 +37,7 @@ class LastfmFrontend(ThreadingActor, core.CoreListener):
     - :attr:`mopidy.settings.LASTFM_PASSWORD`
     """
 
-    def __init__(self):
+    def __init__(self, core):
         super(LastfmFrontend, self).__init__()
         self.lastfm = None
         self.last_start_time = None

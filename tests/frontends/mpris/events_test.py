@@ -16,7 +16,7 @@ from tests import unittest
 @unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
-        self.mpris_frontend = MprisFrontend() # As a plain class, not an actor
+        self.mpris_frontend = MprisFrontend(core=None)  # As a plain class, not an actor
         self.mpris_object = mock.Mock(spec=objects.MprisObject)
         self.mpris_frontend.mpris_object = self.mpris_object
 

@@ -55,7 +55,7 @@ class MprisFrontend(ThreadingActor, core.CoreListener):
         player.Quit(dbus_interface='org.mpris.MediaPlayer2')
     """
 
-    def __init__(self):
+    def __init__(self, core):
         super(MprisFrontend, self).__init__()
         self.indicate_server = None
         self.mpris_object = None

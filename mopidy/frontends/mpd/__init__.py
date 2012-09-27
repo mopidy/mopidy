@@ -26,7 +26,7 @@ class MpdFrontend(actor.ThreadingActor, core.CoreListener):
     - :attr:`mopidy.settings.MPD_SERVER_PASSWORD`
     """
 
-    def __init__(self):
+    def __init__(self, core):
         super(MpdFrontend, self).__init__()
         hostname = network.format_hostname(settings.MPD_SERVER_HOSTNAME)
         port = settings.MPD_SERVER_PORT
