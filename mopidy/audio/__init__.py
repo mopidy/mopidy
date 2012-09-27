@@ -6,13 +6,13 @@ import gobject
 import logging
 
 from pykka.actor import ThreadingActor
-from pykka.registry import ActorRegistry
 
-from mopidy import core, settings, utils
+from mopidy import settings, utils
 from mopidy.utils import process
 
 # Trigger install of gst mixer plugins
-from mopidy.audio import mixers
+from . import mixers
+from .listener import AudioListener
 
 logger = logging.getLogger('mopidy.audio')
 
@@ -149,7 +149,7 @@ class Audio(ThreadingActor):
 
     def _on_message(self, bus, message):
         if message.type == gst.MESSAGE_EOS:
-            self._notify_core_of_eos()
+            self._trigger_reached_end_of_stream_event()
         elif message.type == gst.MESSAGE_ERROR:
             error, debug = message.parse_error()
             logger.error(u'%s %s', error, debug)
@@ -158,14 +158,9 @@ class Audio(ThreadingActor):
             error, debug = message.parse_warning()
             logger.warning(u'%s %s', error, debug)
 
-    def _notify_core_of_eos(self):
-        core_refs = ActorRegistry.get_by_class(core.Core)
-        assert len(core_refs) <= 1, 'Expected at most one running core instance'
-        if core_refs:
-            logger.debug(u'Notifying core of end-of-stream')
-            core_refs[0].proxy().playback.on_end_of_track()
-        else:
-            logger.debug(u'No core instance to notify of end-of-stream found')
+    def _trigger_reached_end_of_stream_event(self):
+        logger.debug(u'Triggering reached end of stream event')
+        AudioListener.send('reached_end_of_stream')
 
     def set_uri(self, uri):
         """
