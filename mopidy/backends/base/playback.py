@@ -75,24 +75,3 @@ class BasePlaybackProvider(object):
         :rtype: int
         """
         return self.audio.get_position().get()
-
-    def get_volume(self):
-        """
-        Get current volume
-
-        *MAY be reimplemented by subclass.*
-
-        :rtype: int [0..100] or :class:`None`
-        """
-        return self.audio.get_volume().get()
-
-    def set_volume(self, volume):
-        """
-        Get current volume
-
-        *MAY be reimplemented by subclass.*
-
-        :param: volume
-        :type volume: int [0..100]
-        """
-        self.audio.set_volume(volume)

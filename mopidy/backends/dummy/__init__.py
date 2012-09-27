@@ -44,7 +44,6 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)
         self._time_position = 0
-        self._volume = None
 
     def pause(self):
         return True
@@ -66,12 +65,6 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
 
     def get_time_position(self):
         return self._time_position
-
-    def get_volume(self):
-        return self._volume
-
-    def set_volume(self, volume):
-        self._volume = volume
 
 
 class DummyStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):

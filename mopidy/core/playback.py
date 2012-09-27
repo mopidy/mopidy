@@ -86,6 +86,7 @@ class PlaybackController(object):
         self._state = PlaybackState.STOPPED
         self._shuffled = []
         self._first_shuffle = True
+        self._volume = None
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
@@ -296,12 +297,20 @@ class PlaybackController(object):
 
     @property
     def volume(self):
-        """Volume as int in range [0..100]."""
-        return self.backend.playback.get_volume().get()
+        """Volume as int in range [0..100] or :class:`None`"""
+        if self.audio:
+            return self.audio.get_volume().get()
+        else:
+            # For testing
+            return self._volume
 
     @volume.setter
     def volume(self, volume):
-        self.backend.playback.set_volume(volume).get()
+        if self.audio:
+            self.audio.set_volume(volume)
+        else:
+            # For testing
+            self._volume = volume
 
     def change_track(self, cp_track, on_error_step=1):
         """
