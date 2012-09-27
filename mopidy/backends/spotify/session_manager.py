@@ -4,8 +4,7 @@ import threading
 
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
-from mopidy import audio, get_version, settings
-from mopidy.backends.base import Backend
+from mopidy import get_version, settings
 from mopidy.backends.spotify import BITRATES
 from mopidy.backends.spotify.container_manager import SpotifyContainerManager
 from mopidy.backends.spotify.playlist_manager import SpotifyPlaylistManager
