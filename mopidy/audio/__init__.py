@@ -32,15 +32,6 @@ class Audio(ThreadingActor):
     def __init__(self):
         super(Audio, self).__init__()
 
-        self._default_caps = gst.Caps("""
-            audio/x-raw-int,
-            endianness=(int)1234,
-            channels=(int)2,
-            width=(int)16,
-            depth=(int)16,
-            signed=(boolean)true,
-            rate=(int)44100""")
-
         self._playbin = None
         self._mixer = None
         self._mixer_track = None
