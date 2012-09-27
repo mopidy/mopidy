@@ -27,12 +27,12 @@ class MpdDispatcher(object):
 
     _noidle = re.compile(r'^noidle$')
 
-    def __init__(self, session=None):
+    def __init__(self, session=None, core=None):
         self.authenticated = False
         self.command_list = False
         self.command_list_ok = False
         self.command_list_index = None
-        self.context = MpdContext(self, session=session)
+        self.context = MpdContext(self, session=session, core=core)
 
     def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -221,27 +221,18 @@ class MpdContext(object):
     #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
+    #: The Mopidy core API. An instance of :class:`mopidy.core.Core`.
+    core = None
+
     #: The active subsystems that have pending events.
     events = None
 
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    def __init__(self, dispatcher, session=None):
+    def __init__(self, dispatcher, session=None, core=None):
         self.dispatcher = dispatcher
         self.session = session
+        self.core = core
         self.events = set()
         self.subscriptions = set()
-        self._core = None
-
-    @property
-    def core(self):
-        """
-        The Mopidy core. An instance of :class:`mopidy.core.Core`.
-        """
-        if self._core is None:
-            core_refs = ActorRegistry.get_by_class(core.Core)
-            assert len(core_refs) == 1, \
-                'Expected exactly one running core instance.'
-            self._core = core_refs[0].proxy()
-        return self._core

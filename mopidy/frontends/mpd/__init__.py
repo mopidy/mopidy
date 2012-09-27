@@ -32,7 +32,8 @@ class MpdFrontend(actor.ThreadingActor, core.CoreListener):
         port = settings.MPD_SERVER_PORT
 
         try:
-            network.Server(hostname, port, protocol=MpdSession,
+            network.Server(hostname, port,
+                protocol=MpdSession, protocol_kwargs={'core': core},
                 max_connections=settings.MPD_SERVER_MAX_CONNECTIONS)
         except IOError as error:
             logger.error(u'MPD server startup failed: %s', locale_decode(error))
@@ -76,9 +77,9 @@ class MpdSession(network.LineProtocol):
     encoding = protocol.ENCODING
     delimiter = r'\r?\n'
 
-    def __init__(self, connection):
+    def __init__(self, connection, core=None):
         super(MpdSession, self).__init__(connection)
-        self.dispatcher = dispatcher.MpdDispatcher(self)
+        self.dispatcher = dispatcher.MpdDispatcher(session=self, core=core)
 
     def on_start(self):
         logger.info(u'New MPD connection from [%s]:%s', self.host, self.port)

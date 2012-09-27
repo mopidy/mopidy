@@ -27,7 +27,7 @@ class BaseTestCase(unittest.TestCase):
         self.core = core.Core.start(backend=self.backend).proxy()
 
         self.connection = MockConnection()
-        self.session = mpd.MpdSession(self.connection)
+        self.session = mpd.MpdSession(self.connection, core=self.core)
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
