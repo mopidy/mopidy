@@ -164,10 +164,11 @@ class ServerTest(unittest.TestCase):
     @patch.object(network, 'Connection', new=Mock())
     def test_init_connection(self):
         self.mock.protocol = sentinel.protocol
+        self.mock.protocol_kwargs = {}
         self.mock.timeout = sentinel.timeout
 
         network.Server.init_connection(self.mock, sentinel.sock, sentinel.addr)
-        network.Connection.assert_called_once_with(sentinel.protocol,
+        network.Connection.assert_called_once_with(sentinel.protocol, {},
             sentinel.sock, sentinel.addr, sentinel.timeout)
 
     def test_reject_connection(self):

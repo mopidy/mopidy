@@ -11,10 +11,13 @@ from pykka.registry import ActorRegistry
 
 from mopidy.utils import locale_decode
 
+
 logger = logging.getLogger('mopidy.utils.server')
+
 
 class ShouldRetrySocketCall(Exception):
     """Indicate that attempted socket call should be retried"""
+
 
 def try_ipv6_socket():
     """Determine if system really supports IPv6"""
@@ -28,8 +31,10 @@ def try_ipv6_socket():
             'creation failed, disabling: %s', locale_decode(error))
     return False
 
+
 #: Boolean value that indicates if creating an IPv6 socket will succeed.
 has_ipv6 = try_ipv6_socket()
+
 
 def create_socket():
     """Create a TCP socket with or without IPv6 depending on system support"""
@@ -42,17 +47,21 @@ def create_socket():
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return sock
 
+
 def format_hostname(hostname):
     """Format hostname for display."""
     if (has_ipv6 and re.match('\d+.\d+.\d+.\d+', hostname) is not None):
         hostname = '::ffff:%s' % hostname
     return hostname
 
+
 class Server(object):
     """Setup listener and register it with gobject's event loop."""
 
-    def __init__(self, host, port, protocol, max_connections=5, timeout=30):
+    def __init__(self, host, port, protocol, protocol_kwargs=None,
+            max_connections=5, timeout=30):
         self.protocol = protocol
+        self.protocol_kwargs = protocol_kwargs or {}
         self.max_connections = max_connections
         self.timeout = timeout
         self.server_socket = self.create_server_socket(host, port)
@@ -105,7 +114,8 @@ class Server(object):
             pass
 
     def init_connection(self, sock, addr):
-        Connection(self.protocol, sock, addr, self.timeout)
+        Connection(self.protocol, self.protocol_kwargs,
+            sock, addr, self.timeout)
 
 
 class Connection(object):
@@ -117,13 +127,14 @@ class Connection(object):
     # false return value would only tell us that what we thought was registered
     # is already gone, there is really nothing more we can do.
 
-    def __init__(self, protocol, sock, addr, timeout):
+    def __init__(self, protocol, protocol_kwargs, sock, addr, timeout):
         sock.setblocking(False)
 
         self.host, self.port = addr[:2] # IPv6 has larger addr
 
         self.sock = sock
         self.protocol = protocol
+        self.protocol_kwargs = protocol_kwargs
         self.timeout = timeout
 
         self.send_lock = threading.Lock()
@@ -135,7 +146,7 @@ class Connection(object):
         self.send_id = None
         self.timeout_id = None
 
-        self.actor_ref = self.protocol.start(self)
+        self.actor_ref = self.protocol.start(self, **self.protocol_kwargs)
 
         self.enable_recv()
         self.enable_timeout()
