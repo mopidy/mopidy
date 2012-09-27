@@ -58,10 +58,10 @@ class SpotifyBackend(ThreadingActor, base.Backend):
         self.playback = core.PlaybackController(backend=self,
             provider=playback_provider)
 
-        stored_playlists_provider = SpotifyStoredPlaylistsProvider(
+        self.stored_playlists_provider = SpotifyStoredPlaylistsProvider(
             backend=self)
         self.stored_playlists = core.StoredPlaylistsController(backend=self,
-            provider=stored_playlists_provider)
+            provider=self.stored_playlists_provider)
 
         self.uri_schemes = [u'spotify']
 
