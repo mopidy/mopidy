@@ -235,11 +235,10 @@ class MpdContext(object):
         self._core = None
 
     @property
-    def backend(self):
+    def core(self):
         """
         The Mopidy core. An instance of :class:`mopidy.core.Core`.
         """
-        # TODO: Rename property to 'core'
         if self._core is None:
             core_refs = ActorRegistry.get_by_class(core.Core)
             assert len(core_refs) == 1, \
