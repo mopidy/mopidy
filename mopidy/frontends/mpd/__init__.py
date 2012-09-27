@@ -3,13 +3,15 @@ import sys
 
 from pykka import registry, actor
 
-from mopidy import listeners, settings
+from mopidy import core, settings
 from mopidy.frontends.mpd import dispatcher, protocol
 from mopidy.utils import locale_decode, log, network, process
 
+
 logger = logging.getLogger('mopidy.frontends.mpd')
 
-class MpdFrontend(actor.ThreadingActor, listeners.BackendListener):
+
+class MpdFrontend(actor.ThreadingActor, core.CoreListener):
     """
     The MPD frontend.
 

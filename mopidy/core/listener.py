@@ -1,11 +1,12 @@
 from pykka import registry
 
-class BackendListener(object):
+
+class CoreListener(object):
     """
-    Marker interface for recipients of events sent by the backend.
+    Marker interface for recipients of events sent by the core actor.
 
     Any Pykka actor that mixes in this class will receive calls to the methods
-    defined here when the corresponding events happen in the backend. This
+    defined here when the corresponding events happen in the core actor. This
     interface is used both for looking up what actors to notify of the events,
     and for providing default implementations for those listeners that are not
     interested in all events.
@@ -13,7 +14,7 @@ class BackendListener(object):
 
     @staticmethod
     def send(event, **kwargs):
-        """Helper to allow calling of backend listener events"""
+        """Helper to allow calling of core listener events"""
         # FIXME this should be updated once Pykka supports non-blocking calls
         # on proxies or some similar solution.
         registry.ActorRegistry.broadcast({
@@ -21,7 +22,7 @@ class BackendListener(object):
             'attr_path': (event,),
             'args': [],
             'kwargs': kwargs,
-        }, target_class=BackendListener)
+        }, target_class=CoreListener)
 
     def track_playback_paused(self, track, time_position):
         """

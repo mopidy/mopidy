@@ -9,15 +9,16 @@ except ImportError as import_error:
 
 from pykka.actor import ThreadingActor
 
-from mopidy import settings, SettingsError
-from mopidy.listeners import BackendListener
+from mopidy import core, settings, SettingsError
+
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
 API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
-class LastfmFrontend(ThreadingActor, BackendListener):
+
+class LastfmFrontend(ThreadingActor, core.CoreListener):
     """
     Frontend which scrobbles the music you play to your `Last.fm
     <http://www.last.fm>`_ profile.

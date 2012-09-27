@@ -2,8 +2,9 @@ from copy import copy
 import logging
 import random
 
-from mopidy.listeners import BackendListener
 from mopidy.models import CpTrack
+
+from .listener import CoreListener
 
 
 logger = logging.getLogger('mopidy.core')
@@ -240,4 +241,4 @@ class CurrentPlaylistController(object):
 
     def _trigger_playlist_changed(self):
         logger.debug(u'Triggering playlist changed event')
-        BackendListener.send('playlist_changed')
+        CoreListener.send('playlist_changed')
