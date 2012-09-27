@@ -35,9 +35,9 @@ class LocalBackend(ThreadingActor, base.Backend):
 
         self.current_playlist = core.CurrentPlaylistController(backend=self)
 
-        library_provider = LocalLibraryProvider(backend=self)
+        self.library_provider = LocalLibraryProvider(backend=self)
         self.library = core.LibraryController(backend=self,
-            provider=library_provider)
+            provider=self.library_provider)
 
         playback_provider = base.BasePlaybackProvider(backend=self)
         self.playback = core.PlaybackController(backend=self,
@@ -69,7 +69,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
             tracks = []
             for uri in parse_m3u(m3u, settings.LOCAL_MUSIC_PATH):
                 try:
-                    tracks.append(self.backend.library.lookup(uri))
+                    tracks.append(self.backend.library_provider.lookup(uri))
                 except LookupError, e:
                     logger.error('Playlist item could not be added: %s', e)
             playlist = Playlist(tracks=tracks, name=name)
