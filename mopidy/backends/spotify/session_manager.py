@@ -24,13 +24,13 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % get_version()
 
-    def __init__(self, username, password, audio, backend):
+    def __init__(self, username, password, audio, backend_ref):
         PyspotifySessionManager.__init__(self, username, password)
         BaseThread.__init__(self)
         self.name = 'SpotifyThread'
 
         self.audio = audio
-        self.backend = backend
+        self.backend_ref = backend_ref
 
         self.connected = threading.Event()
         self.session = None
@@ -41,6 +41,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self._initial_data_receive_completed = False
 
     def run_inside_try(self):
+        self.backend = self.backend_ref.proxy()
         self.connect()
 
     def logged_in(self, session, error):

@@ -30,11 +30,9 @@ class LocalBackend(ThreadingActor, base.Backend):
     - :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
     """
 
-    def __init__(self, *args, **kwargs):
-        base.Backend.__init__(self, *args, **kwargs)
-
+    def __init__(self, audio):
         self.library = LocalLibraryProvider(backend=self)
-        self.playback = base.BasePlaybackProvider(backend=self)
+        self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
         self.stored_playlists = LocalStoredPlaylistsProvider(backend=self)
 
         self.uri_schemes = [u'file']

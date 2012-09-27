@@ -24,6 +24,3 @@ class Backend(object):
 
     #: List of URI schemes this backend can handle.
     uri_schemes = []
-
-    def __init__(self, audio):
-        self.audio = audio

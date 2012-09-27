@@ -12,11 +12,9 @@ class DummyBackend(ThreadingActor, base.Backend):
     Handles URIs starting with ``dummy:``.
     """
 
-    def __init__(self, *args, **kwargs):
-        base.Backend.__init__(self, *args, **kwargs)
-
+    def __init__(self, audio):
         self.library = DummyLibraryProvider(backend=self)
-        self.playback = DummyPlaybackProvider(backend=self)
+        self.playback = DummyPlaybackProvider(audio=audio, backend=self)
         self.stored_playlists = DummyStoredPlaylistsProvider(backend=self)
 
         self.uri_schemes = [u'dummy']
