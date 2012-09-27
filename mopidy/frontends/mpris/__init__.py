@@ -57,12 +57,13 @@ class MprisFrontend(ThreadingActor, core.CoreListener):
 
     def __init__(self, core):
         super(MprisFrontend, self).__init__()
+        self.core = core
         self.indicate_server = None
         self.mpris_object = None
 
     def on_start(self):
         try:
-            self.mpris_object = objects.MprisObject()
+            self.mpris_object = objects.MprisObject(self.core)
             self._send_startup_notification()
         except Exception as e:
             logger.error(u'MPRIS frontend setup failed (%s)', e)

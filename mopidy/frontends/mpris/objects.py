@@ -1,8 +1,6 @@
 import logging
 import os
 
-logger = logging.getLogger('mopidy.frontends.mpris')
-
 try:
     import dbus
     import dbus.mainloop.glib
@@ -12,11 +10,12 @@ except ImportError as import_error:
     from mopidy import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
-from pykka.registry import ActorRegistry
-
-from mopidy import core, settings
+from mopidy import settings
 from mopidy.core import PlaybackState
 from mopidy.utils.process import exit_process
+
+
+logger = logging.getLogger('mopidy.frontends.mpris')
 
 # Must be done before dbus.SessionBus() is called
 gobject.threads_init()
@@ -33,8 +32,8 @@ class MprisObject(dbus.service.Object):
 
     properties = None
 
-    def __init__(self):
-        self._core = None
+    def __init__(self, core):
+        self.core = core
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
             PLAYER_IFACE: self._get_player_iface_properties(),
@@ -82,15 +81,6 @@ class MprisObject(dbus.service.Object):
             dbus.SessionBus(mainloop=mainloop))
         logger.info(u'Connected to D-Bus')
         return bus_name
-
-    @property
-    def core(self):
-        if self._core is None:
-            core_refs = ActorRegistry.get_by_class(core.Core)
-            assert len(core_refs) == 1, \
-                'Expected exactly one running core instance.'
-            self._core = core_refs[0].proxy()
-        return self._core
 
     def _get_track_id(self, cp_track):
         return '/com/mopidy/track/%d' % cp_track.cpid
