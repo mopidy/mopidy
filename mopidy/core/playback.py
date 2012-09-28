@@ -1,7 +1,7 @@
 import logging
 import random
 
-from .listener import CoreListener
+from . import listener
 
 
 logger = logging.getLogger('mopidy.backends.base')
@@ -488,7 +488,7 @@ class PlaybackController(object):
         logger.debug(u'Triggering track playback paused event')
         if self.current_track is None:
             return
-        CoreListener.send('track_playback_paused',
+        listener.CoreListener.send('track_playback_paused',
             track=self.current_track,
             time_position=self.time_position)
 
@@ -496,7 +496,7 @@ class PlaybackController(object):
         logger.debug(u'Triggering track playback resumed event')
         if self.current_track is None:
             return
-        CoreListener.send('track_playback_resumed',
+        listener.CoreListener.send('track_playback_resumed',
             track=self.current_track,
             time_position=self.time_position)
 
@@ -504,26 +504,26 @@ class PlaybackController(object):
         logger.debug(u'Triggering track playback started event')
         if self.current_track is None:
             return
-        CoreListener.send('track_playback_started',
+        listener.CoreListener.send('track_playback_started',
             track=self.current_track)
 
     def _trigger_track_playback_ended(self):
         logger.debug(u'Triggering track playback ended event')
         if self.current_track is None:
             return
-        CoreListener.send('track_playback_ended',
+        listener.CoreListener.send('track_playback_ended',
             track=self.current_track,
             time_position=self.time_position)
 
     def _trigger_playback_state_changed(self, old_state, new_state):
         logger.debug(u'Triggering playback state change event')
-        CoreListener.send('playback_state_changed',
+        listener.CoreListener.send('playback_state_changed',
             old_state=old_state, new_state=new_state)
 
     def _trigger_options_changed(self):
         logger.debug(u'Triggering options changed event')
-        CoreListener.send('options_changed')
+        listener.CoreListener.send('options_changed')
 
     def _trigger_seeked(self, time_position):
         logger.debug(u'Triggering seeked event')
-        CoreListener.send('seeked', time_position=time_position)
+        listener.CoreListener.send('seeked', time_position=time_position)
