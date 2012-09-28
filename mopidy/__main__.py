@@ -32,12 +32,10 @@ from mopidy import (get_version, settings, OptionalDependencyError,
     SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
 from mopidy.audio import Audio
 from mopidy.core import Core
-from mopidy.utils import get_class
+from mopidy.utils import get_class, process
 from mopidy.utils.deps import list_deps_optparse_callback
 from mopidy.utils.log import setup_logging
 from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import (exit_handler, stop_remaining_actors,
-    stop_actors_by_class)
 from mopidy.utils.settings import list_settings_optparse_callback
 
 
@@ -45,7 +43,7 @@ logger = logging.getLogger('mopidy.main')
 
 
 def main():
-    signal.signal(signal.SIGTERM, exit_handler)
+    signal.signal(signal.SIGTERM, process.exit_handler)
     loop = gobject.MainLoop()
     options = parse_options()
     try:
@@ -69,7 +67,7 @@ def main():
         stop_core()
         stop_backend()
         stop_audio()
-        stop_remaining_actors()
+        process.stop_remaining_actors()
 
 
 def parse_options():
@@ -125,7 +123,7 @@ def setup_audio():
 
 
 def stop_audio():
-    stop_actors_by_class(Audio)
+    process.stop_actors_by_class(Audio)
 
 
 def setup_backend(audio):
@@ -133,7 +131,7 @@ def setup_backend(audio):
 
 
 def stop_backend():
-    stop_actors_by_class(get_class(settings.BACKENDS[0]))
+    process.stop_actors_by_class(get_class(settings.BACKENDS[0]))
 
 
 def setup_core(audio, backend):
@@ -141,7 +139,7 @@ def setup_core(audio, backend):
 
 
 def stop_core():
-    stop_actors_by_class(Core)
+    process.stop_actors_by_class(Core)
 
 
 def setup_frontends(core):
@@ -155,7 +153,7 @@ def setup_frontends(core):
 def stop_frontends():
     for frontend_class_name in settings.FRONTENDS:
         try:
-            stop_actors_by_class(get_class(frontend_class_name))
+            process.stop_actors_by_class(get_class(frontend_class_name))
         except OptionalDependencyError:
             pass
 
