@@ -17,19 +17,19 @@ class ConnectionTest(unittest.TestCase):
     def test_init_ensure_nonblocking_io(self):
         sock = Mock(spec=socket.SocketType)
 
-        network.Connection.__init__(self.mock, Mock(), sock,
+        network.Connection.__init__(self.mock, Mock(), {}, sock,
             (sentinel.host, sentinel.port), sentinel.timeout)
         sock.setblocking.assert_called_once_with(False)
 
     def test_init_starts_actor(self):
         protocol = Mock(spec=network.LineProtocol)
 
-        network.Connection.__init__(self.mock, protocol, Mock(),
+        network.Connection.__init__(self.mock, protocol, {}, Mock(),
             (sentinel.host, sentinel.port), sentinel.timeout)
         protocol.start.assert_called_once_with(self.mock)
 
     def test_init_enables_recv_and_timeout(self):
-        network.Connection.__init__(self.mock, Mock(), Mock(),
+        network.Connection.__init__(self.mock, Mock(), {}, Mock(),
             (sentinel.host, sentinel.port), sentinel.timeout)
         self.mock.enable_recv.assert_called_once_with()
         self.mock.enable_timeout.assert_called_once_with()
@@ -37,12 +37,14 @@ class ConnectionTest(unittest.TestCase):
     def test_init_stores_values_in_attributes(self):
         addr = (sentinel.host, sentinel.port)
         protocol = Mock(spec=network.LineProtocol)
+        protocol_kwargs = {}
         sock = Mock(spec=socket.SocketType)
 
         network.Connection.__init__(
-            self.mock, protocol, sock, addr, sentinel.timeout)
+            self.mock, protocol, protocol_kwargs, sock, addr, sentinel.timeout)
         self.assertEqual(sock, self.mock.sock)
         self.assertEqual(protocol, self.mock.protocol)
+        self.assertEqual(protocol_kwargs, self.mock.protocol_kwargs)
         self.assertEqual(sentinel.timeout, self.mock.timeout)
         self.assertEqual(sentinel.host, self.mock.host)
         self.assertEqual(sentinel.port, self.mock.port)
@@ -51,10 +53,11 @@ class ConnectionTest(unittest.TestCase):
         addr = (sentinel.host, sentinel.port,
             sentinel.flowinfo, sentinel.scopeid)
         protocol = Mock(spec=network.LineProtocol)
+        protocol_kwargs = {}
         sock = Mock(spec=socket.SocketType)
 
         network.Connection.__init__(
-            self.mock, protocol, sock, addr, sentinel.timeout)
+            self.mock, protocol, protocol_kwargs, sock, addr, sentinel.timeout)
         self.assertEqual(sentinel.host, self.mock.host)
         self.assertEqual(sentinel.port, self.mock.port)
 

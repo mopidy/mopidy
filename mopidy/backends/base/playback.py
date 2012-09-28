@@ -6,7 +6,8 @@ class BasePlaybackProvider(object):
 
     pykka_traversable = True
 
-    def __init__(self, backend):
+    def __init__(self, audio, backend):
+        self.audio = audio
         self.backend = backend
 
     def pause(self):
@@ -17,7 +18,7 @@ class BasePlaybackProvider(object):
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        return self.backend.audio.pause_playback().get()
+        return self.audio.pause_playback().get()
 
     def play(self, track):
         """
@@ -29,9 +30,9 @@ class BasePlaybackProvider(object):
         :type track: :class:`mopidy.models.Track`
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self.backend.audio.prepare_change()
-        self.backend.audio.set_uri(track.uri).get()
-        return self.backend.audio.start_playback().get()
+        self.audio.prepare_change()
+        self.audio.set_uri(track.uri).get()
+        return self.audio.start_playback().get()
 
     def resume(self):
         """
@@ -41,7 +42,7 @@ class BasePlaybackProvider(object):
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        return self.backend.audio.start_playback().get()
+        return self.audio.start_playback().get()
 
     def seek(self, time_position):
         """
@@ -53,7 +54,7 @@ class BasePlaybackProvider(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        return self.backend.audio.set_position(time_position).get()
+        return self.audio.set_position(time_position).get()
 
     def stop(self):
         """
@@ -63,7 +64,7 @@ class BasePlaybackProvider(object):
 
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        return self.backend.audio.stop_playback().get()
+        return self.audio.stop_playback().get()
 
     def get_time_position(self):
         """
@@ -73,25 +74,4 @@ class BasePlaybackProvider(object):
 
         :rtype: int
         """
-        return self.backend.audio.get_position().get()
-
-    def get_volume(self):
-        """
-        Get current volume
-
-        *MAY be reimplemented by subclass.*
-
-        :rtype: int [0..100] or :class:`None`
-        """
-        return self.backend.audio.get_volume().get()
-
-    def set_volume(self, volume):
-        """
-        Get current volume
-
-        *MAY be reimplemented by subclass.*
-
-        :param: volume
-        :type volume: int [0..100]
-        """
-        self.backend.audio.set_volume(volume)
+        return self.audio.get_position().get()

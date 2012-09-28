@@ -8,9 +8,9 @@ class LibraryController(object):
 
     pykka_traversable = True
 
-    def __init__(self, backend, provider):
+    def __init__(self, backend, core):
         self.backend = backend
-        self.provider = provider
+        self.core = core
 
     def find_exact(self, **query):
         """
@@ -29,7 +29,7 @@ class LibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        return self.provider.find_exact(**query)
+        return self.backend.library.find_exact(**query).get()
 
     def lookup(self, uri):
         """
@@ -39,7 +39,7 @@ class LibraryController(object):
         :type uri: string
         :rtype: :class:`mopidy.models.Track` or :class:`None`
         """
-        return self.provider.lookup(uri)
+        return self.backend.library.lookup(uri).get()
 
     def refresh(self, uri=None):
         """
@@ -48,7 +48,7 @@ class LibraryController(object):
         :param uri: directory or track URI
         :type uri: string
         """
-        return self.provider.refresh(uri)
+        return self.backend.library.refresh(uri).get()
 
     def search(self, **query):
         """
@@ -67,4 +67,4 @@ class LibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        return self.provider.search(**query)
+        return self.backend.library.search(**query).get()

@@ -48,3 +48,10 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
 
 .. autoclass:: mopidy.core.LibraryController
     :members:
+
+
+Core listener
+=============
+
+.. autoclass:: mopidy.core.CoreListener
+    :members:

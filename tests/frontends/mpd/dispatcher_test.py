@@ -1,4 +1,7 @@
-from mopidy.backends.dummy import DummyBackend
+from pykka.registry import ActorRegistry
+
+from mopidy import core
+from mopidy.backends import dummy
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.exceptions import MpdAckError
 from mopidy.frontends.mpd.protocol import request_handlers, handle_request
@@ -8,11 +11,12 @@ from tests import unittest
 
 class MpdDispatcherTest(unittest.TestCase):
     def setUp(self):
-        self.backend = DummyBackend.start().proxy()
+        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.core = core.Core.start(backend=self.backend).proxy()
         self.dispatcher = MpdDispatcher()
 
     def tearDown(self):
-        self.backend.stop().get()
+        ActorRegistry.stop_all()
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None

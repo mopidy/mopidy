@@ -1,6 +1,5 @@
 from pykka.actor import ThreadingActor
 
-from mopidy import core
 from mopidy.backends import base
 from mopidy.models import Playlist
 
@@ -13,22 +12,10 @@ class DummyBackend(ThreadingActor, base.Backend):
     Handles URIs starting with ``dummy:``.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(DummyBackend, self).__init__(*args, **kwargs)
-
-        self.current_playlist = core.CurrentPlaylistController(backend=self)
-
-        library_provider = DummyLibraryProvider(backend=self)
-        self.library = core.LibraryController(backend=self,
-            provider=library_provider)
-
-        playback_provider = DummyPlaybackProvider(backend=self)
-        self.playback = core.PlaybackController(backend=self,
-            provider=playback_provider)
-
-        stored_playlists_provider = DummyStoredPlaylistsProvider(backend=self)
-        self.stored_playlists = core.StoredPlaylistsController(backend=self,
-            provider=stored_playlists_provider)
+    def __init__(self, audio):
+        self.library = DummyLibraryProvider(backend=self)
+        self.playback = DummyPlaybackProvider(audio=audio, backend=self)
+        self.stored_playlists = DummyStoredPlaylistsProvider(backend=self)
 
         self.uri_schemes = [u'dummy']
 
@@ -57,7 +44,6 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)
         self._time_position = 0
-        self._volume = None
 
     def pause(self):
         return True
@@ -79,12 +65,6 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
 
     def get_time_position(self):
         return self._time_position
-
-    def get_volume(self):
-        return self._volume
-
-    def set_volume(self, volume):
-        self._volume = volume
 
 
 class DummyStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):

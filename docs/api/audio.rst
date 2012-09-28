@@ -10,10 +10,17 @@ the URI of the resource they want to play, for these cases the default playback
 provider should be used.
 
 For more advanced cases such as when the raw audio data is delivered outside of
-GStreamer or the backend needs to add metadata to the currently playing resource,
-developers should sub-class the base playback provider and implement the extra
-behaviour that is needed through the following API:
+GStreamer or the backend needs to add metadata to the currently playing
+resource, developers should sub-class the base playback provider and implement
+the extra behaviour that is needed through the following API:
 
 
 .. autoclass:: mopidy.audio.Audio
+    :members:
+
+
+Audio listener
+==============
+
+.. autoclass:: mopidy.audio.AudioListener
     :members:

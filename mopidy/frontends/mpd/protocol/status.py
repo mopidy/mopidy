@@ -31,9 +31,9 @@ def currentsong(context):
         Displays the song info of the current song (same song that is
         identified in status).
     """
-    current_cp_track = context.backend.playback.current_cp_track.get()
+    current_cp_track = context.core.playback.current_cp_track.get()
     if current_cp_track is not None:
-        position = context.backend.playback.current_playlist_position.get()
+        position = context.core.playback.current_playlist_position.get()
         return track_to_mpd_format(current_cp_track, position=position)
 
 @handle_request(r'^idle$')
@@ -166,18 +166,18 @@ def status(context):
           decimal places for millisecond precision.
     """
     futures = {
-        'current_playlist.length': context.backend.current_playlist.length,
-        'current_playlist.version': context.backend.current_playlist.version,
-        'playback.volume': context.backend.playback.volume,
-        'playback.consume': context.backend.playback.consume,
-        'playback.random': context.backend.playback.random,
-        'playback.repeat': context.backend.playback.repeat,
-        'playback.single': context.backend.playback.single,
-        'playback.state': context.backend.playback.state,
-        'playback.current_cp_track': context.backend.playback.current_cp_track,
+        'current_playlist.length': context.core.current_playlist.length,
+        'current_playlist.version': context.core.current_playlist.version,
+        'playback.volume': context.core.playback.volume,
+        'playback.consume': context.core.playback.consume,
+        'playback.random': context.core.playback.random,
+        'playback.repeat': context.core.playback.repeat,
+        'playback.single': context.core.playback.single,
+        'playback.state': context.core.playback.state,
+        'playback.current_cp_track': context.core.playback.current_cp_track,
         'playback.current_playlist_position':
-            context.backend.playback.current_playlist_position,
-        'playback.time_position': context.backend.playback.time_position,
+            context.core.playback.current_playlist_position,
+        'playback.time_position': context.core.playback.time_position,
     }
     pykka.future.get_all(futures.values())
     result = [

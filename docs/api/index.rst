@@ -11,4 +11,3 @@ API reference
     core
     audio
     frontends
-    listeners

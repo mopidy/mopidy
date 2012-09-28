@@ -1,7 +1,9 @@
 import mock
 
-from mopidy import settings
-from mopidy.backends import dummy as backend
+from pykka.registry import ActorRegistry
+
+from mopidy import core, settings
+from mopidy.backends import dummy
 from mopidy.frontends import mpd
 
 from tests import unittest
@@ -21,15 +23,16 @@ class MockConnection(mock.Mock):
 
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
-        self.backend = backend.DummyBackend.start().proxy()
+        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.core = core.Core.start(backend=self.backend).proxy()
 
         self.connection = MockConnection()
-        self.session = mpd.MpdSession(self.connection)
+        self.session = mpd.MpdSession(self.connection, core=self.core)
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
     def tearDown(self):
-        self.backend.stop().get()
+        ActorRegistry.stop_all()
         settings.runtime.clear()
 
     def sendRequest(self, request):

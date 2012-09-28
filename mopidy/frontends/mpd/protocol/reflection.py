@@ -84,4 +84,4 @@ def urlhandlers(context):
         Gets a list of available URL handlers.
     """
     return [(u'handler', uri_scheme)
-        for uri_scheme in context.backend.uri_schemes.get()]
+        for uri_scheme in context.core.uri_schemes.get()]

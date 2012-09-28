@@ -2,7 +2,9 @@ import os
 import shutil
 import tempfile
 
-from mopidy import settings
+import mock
+
+from mopidy import audio, core, settings
 from mopidy.models import Playlist
 
 from tests import unittest, path_to_data_dir
@@ -14,8 +16,10 @@ class StoredPlaylistsControllerTest(object):
         settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('library_tag_cache')
         settings.LOCAL_MUSIC_PATH = path_to_data_dir('')
 
-        self.backend = self.backend_class()
-        self.stored  = self.backend.stored_playlists
+        self.audio = mock.Mock(spec=audio.Audio)
+        self.backend = self.backend_class.start(audio=self.audio).proxy()
+        self.core = core.Core(backend=self.backend)
+        self.stored  = self.core.stored_playlists
 
     def tearDown(self):
         if os.path.exists(settings.LOCAL_PLAYLIST_PATH):

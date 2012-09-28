@@ -3,13 +3,15 @@ import sys
 
 from pykka import registry, actor
 
-from mopidy import listeners, settings
+from mopidy import core, settings
 from mopidy.frontends.mpd import dispatcher, protocol
 from mopidy.utils import locale_decode, log, network, process
 
+
 logger = logging.getLogger('mopidy.frontends.mpd')
 
-class MpdFrontend(actor.ThreadingActor, listeners.BackendListener):
+
+class MpdFrontend(actor.ThreadingActor, core.CoreListener):
     """
     The MPD frontend.
 
@@ -24,13 +26,14 @@ class MpdFrontend(actor.ThreadingActor, listeners.BackendListener):
     - :attr:`mopidy.settings.MPD_SERVER_PASSWORD`
     """
 
-    def __init__(self):
+    def __init__(self, core):
         super(MpdFrontend, self).__init__()
         hostname = network.format_hostname(settings.MPD_SERVER_HOSTNAME)
         port = settings.MPD_SERVER_PORT
 
         try:
-            network.Server(hostname, port, protocol=MpdSession,
+            network.Server(hostname, port,
+                protocol=MpdSession, protocol_kwargs={'core': core},
                 max_connections=settings.MPD_SERVER_MAX_CONNECTIONS)
         except IOError as error:
             logger.error(u'MPD server startup failed: %s', locale_decode(error))
@@ -74,9 +77,9 @@ class MpdSession(network.LineProtocol):
     encoding = protocol.ENCODING
     delimiter = r'\r?\n'
 
-    def __init__(self, connection):
+    def __init__(self, connection, core=None):
         super(MpdSession, self).__init__(connection)
-        self.dispatcher = dispatcher.MpdDispatcher(self)
+        self.dispatcher = dispatcher.MpdDispatcher(session=self, core=core)
 
     def on_start(self):
         logger.info(u'New MPD connection from [%s]:%s', self.host, self.port)

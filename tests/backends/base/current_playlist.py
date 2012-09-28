@@ -1,7 +1,9 @@
 import mock
 import random
 
-from mopidy import audio
+from pykka.registry import ActorRegistry
+
+from mopidy import audio, core
 from mopidy.core import PlaybackState
 from mopidy.models import CpTrack, Playlist, Track
 
@@ -12,12 +14,16 @@ class CurrentPlaylistControllerTest(object):
     tracks = []
 
     def setUp(self):
-        self.backend = self.backend_class()
-        self.backend.audio = mock.Mock(spec=audio.Audio)
-        self.controller = self.backend.current_playlist
-        self.playback = self.backend.playback
+        self.audio = mock.Mock(spec=audio.Audio)
+        self.backend = self.backend_class.start(audio=self.audio).proxy()
+        self.core = core.Core(audio=audio, backend=self.backend)
+        self.controller = self.core.current_playlist
+        self.playback = self.core.playback
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
+
+    def tearDown(self):
+        ActorRegistry.stop_all()
 
     def test_length(self):
         self.assertEqual(0, len(self.controller.cp_tracks))
