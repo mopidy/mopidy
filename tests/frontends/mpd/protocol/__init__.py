@@ -23,7 +23,7 @@ class MockConnection(mock.Mock):
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         self.backend = dummy.DummyBackend.start(audio=None).proxy()
-        self.core = core.Core.start(backend=self.backend).proxy()
+        self.core = core.Core.start(backends=[self.backend]).proxy()
 
         self.connection = MockConnection()
         self.session = session.MpdSession(self.connection, core=self.core)

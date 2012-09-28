@@ -54,8 +54,8 @@ def main():
         check_old_folders()
         setup_settings(options.interactive)
         audio = setup_audio()
-        backend = setup_backend(audio)
-        core = setup_core(audio, backend)
+        backends = setup_backends(audio)
+        core = setup_core(audio, backends)
         setup_frontends(core)
         loop.run()
     except exceptions.SettingsError as ex:
@@ -68,7 +68,7 @@ def main():
         loop.quit()
         stop_frontends()
         stop_core()
-        stop_backend()
+        stop_backends()
         stop_audio()
         process.stop_remaining_actors()
 
@@ -147,16 +147,22 @@ def stop_audio():
     process.stop_actors_by_class(Audio)
 
 
-def setup_backend(audio):
-    return importing.get_class(settings.BACKENDS[0]).start(audio=audio).proxy()
+def setup_backends(audio):
+    backends = []
+    for backend_class_name in settings.BACKENDS:
+        backend_class = importing.get_class(backend_class_name)
+        backend = backend_class.start(audio=audio).proxy()
+        backends.append(backend)
+    return backends
 
 
-def stop_backend():
-    process.stop_actors_by_class(importing.get_class(settings.BACKENDS[0]))
+def stop_backends():
+    for backend_class_name in settings.BACKENDS:
+        process.stop_actors_by_class(importing.get_class(backend_class_name))
 
 
-def setup_core(audio, backend):
-    return Core.start(audio=audio, backend=backend).proxy()
+def setup_core(audio, backends):
+    return Core.start(audio=audio, backends=backends).proxy()
 
 
 def stop_core():

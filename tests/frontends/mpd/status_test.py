@@ -21,7 +21,7 @@ STOPPED = PlaybackState.STOPPED
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
         self.backend = dummy.DummyBackend.start(audio=None).proxy()
-        self.core = core.Core.start(backend=self.backend).proxy()
+        self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = dispatcher.MpdDispatcher(core=self.core)
         self.context = self.dispatcher.context
 

@@ -25,25 +25,25 @@ class Core(pykka.ThreadingActor, AudioListener):
     #: :class:`mopidy.core.StoredPlaylistsController`.
     stored_playlists = None
 
-    def __init__(self, audio=None, backend=None):
+    def __init__(self, audio=None, backends=None):
         super(Core, self).__init__()
 
-        self._backend = backend
+        self._backends = backends
 
         self.current_playlist = CurrentPlaylistController(core=self)
 
-        self.library = LibraryController(backend=backend, core=self)
+        self.library = LibraryController(backend=backends[0], core=self)
 
         self.playback = PlaybackController(
-            audio=audio, backend=backend, core=self)
+            audio=audio, backend=backends[0], core=self)
 
         self.stored_playlists = StoredPlaylistsController(
-            backend=backend, core=self)
+            backend=backends[0], core=self)
 
     @property
     def uri_schemes(self):
         """List of URI schemes we can handle"""
-        return self._backend.uri_schemes.get()
+        return self._backends[0].uri_schemes.get()
 
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()

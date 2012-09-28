@@ -23,7 +23,7 @@ class LibraryControllerTest(object):
 
     def setUp(self):
         self.backend = self.backend_class.start(audio=None).proxy()
-        self.core = core.Core(backend=self.backend)
+        self.core = core.Core(backends=[self.backend])
         self.library = self.core.library
 
     def tearDown(self):

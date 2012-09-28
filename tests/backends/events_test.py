@@ -13,7 +13,7 @@ class BackendEventsTest(unittest.TestCase):
     def setUp(self):
         self.audio = mock.Mock(spec=audio.Audio)
         self.backend = dummy.DummyBackend.start(audio=audio).proxy()
-        self.core = core.Core.start(backend=self.backend).proxy()
+        self.core = core.Core.start(backends=[self.backend]).proxy()
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()

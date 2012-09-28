@@ -25,7 +25,7 @@ class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):
         objects.MprisObject._connect_to_dbus = mock.Mock()
         self.backend = dummy.DummyBackend.start(audio=None).proxy()
-        self.core = core.Core.start(backend=self.backend).proxy()
+        self.core = core.Core.start(backends=[self.backend]).proxy()
         self.mpris = objects.MprisObject(core=self.core)
 
     def tearDown(self):
