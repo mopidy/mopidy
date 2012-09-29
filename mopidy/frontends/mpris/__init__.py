@@ -10,12 +10,11 @@ except ImportError as import_error:
 
 from pykka.actor import ThreadingActor
 
-from mopidy import settings
+from mopidy import core, settings
 from mopidy.frontends.mpris import objects
-from mopidy.listeners import BackendListener
 
 
-class MprisFrontend(ThreadingActor, BackendListener):
+class MprisFrontend(ThreadingActor, core.CoreListener):
     """
     Frontend which lets you control Mopidy through the Media Player Remote
     Interfacing Specification (`MPRIS <http://www.mpris.org/>`_) D-Bus
@@ -56,14 +55,15 @@ class MprisFrontend(ThreadingActor, BackendListener):
         player.Quit(dbus_interface='org.mpris.MediaPlayer2')
     """
 
-    def __init__(self):
+    def __init__(self, core):
         super(MprisFrontend, self).__init__()
+        self.core = core
         self.indicate_server = None
         self.mpris_object = None
 
     def on_start(self):
         try:
-            self.mpris_object = objects.MprisObject()
+            self.mpris_object = objects.MprisObject(self.core)
             self._send_startup_notification()
         except Exception as e:
             logger.error(u'MPRIS frontend setup failed (%s)', e)

@@ -2,7 +2,7 @@ import logging
 
 from pykka.actor import ThreadingActor
 
-from mopidy import audio, core, settings
+from mopidy import settings
 from mopidy.backends import base
 
 logger = logging.getLogger('mopidy.backends.spotify')
@@ -41,48 +41,29 @@ class SpotifyBackend(ThreadingActor, base.Backend):
     # Imports inside methods are to prevent loading of __init__.py to fail on
     # missing spotify dependencies.
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, audio):
         from .library import SpotifyLibraryProvider
         from .playback import SpotifyPlaybackProvider
+        from .session_manager import SpotifySessionManager
         from .stored_playlists import SpotifyStoredPlaylistsProvider
 
-        base.Backend.__init__(self, *args, **kwargs)
-
-        self.current_playlist = core.CurrentPlaylistController(backend=self)
-
-        library_provider = SpotifyLibraryProvider(backend=self)
-        self.library = core.LibraryController(backend=self,
-            provider=library_provider)
-
-        playback_provider = SpotifyPlaybackProvider(backend=self)
-        self.playback = core.PlaybackController(backend=self,
-            provider=playback_provider)
-
-        self.stored_playlists_provider = SpotifyStoredPlaylistsProvider(
-            backend=self)
-        self.stored_playlists = core.StoredPlaylistsController(backend=self,
-            provider=self.stored_playlists_provider)
+        self.library = SpotifyLibraryProvider(backend=self)
+        self.playback = SpotifyPlaybackProvider(audio=audio, backend=self)
+        self.stored_playlists = SpotifyStoredPlaylistsProvider(backend=self)
 
         self.uri_schemes = [u'spotify']
 
-        self.spotify = None
-
         # Fail early if settings are not present
-        self.username = settings.SPOTIFY_USERNAME
-        self.password = settings.SPOTIFY_PASSWORD
+        username = settings.SPOTIFY_USERNAME
+        password = settings.SPOTIFY_PASSWORD
+
+        self.spotify = SpotifySessionManager(username, password,
+            audio=audio, backend_ref=self.actor_ref)
 
     def on_start(self):
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')
-        self.spotify = self._connect()
+        logger.debug(u'Connecting to Spotify')
+        self.spotify.start()
 
     def on_stop(self):
         self.spotify.logout()
-
-    def _connect(self):
-        from .session_manager import SpotifySessionManager
-
-        logger.debug(u'Connecting to Spotify')
-        spotify = SpotifySessionManager(self.username, self.password,
-            audio=self.audio, backend=self.actor_ref.proxy())
-        spotify.start()
-        return spotify

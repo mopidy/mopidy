@@ -65,8 +65,7 @@ class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
 
         self.stored.save(playlist)
 
-        self.backend = self.backend_class()
-        self.stored = self.backend.stored_playlists
+        self.backend = self.backend_class.start(audio=self.audio).proxy()
 
         self.assert_(self.stored.playlists)
         self.assertEqual('test', self.stored.playlists[0].name)

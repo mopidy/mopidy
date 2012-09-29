@@ -30,10 +30,10 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
                 Link.from_string(track.uri).as_track())
             self.backend.spotify.session.play(1)
 
-            self.backend.audio.prepare_change()
-            self.backend.audio.set_uri('appsrc://')
-            self.backend.audio.start_playback()
-            self.backend.audio.set_metadata(track)
+            self.audio.prepare_change()
+            self.audio.set_uri('appsrc://')
+            self.audio.start_playback()
+            self.audio.set_metadata(track)
 
             self._timer.play()
 
@@ -50,9 +50,9 @@ class SpotifyPlaybackProvider(BasePlaybackProvider):
         return self.seek(time_position)
 
     def seek(self, time_position):
-        self.backend.audio.prepare_change()
+        self.audio.prepare_change()
         self.backend.spotify.session.seek(time_position)
-        self.backend.audio.start_playback()
+        self.audio.start_playback()
 
         self._timer.seek(time_position)
 

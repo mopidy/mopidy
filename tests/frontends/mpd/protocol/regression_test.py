@@ -16,23 +16,23 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
     - Press next until you get to the unplayable track
     """
     def test(self):
-        self.backend.current_playlist.append([
+        self.core.current_playlist.append([
             Track(uri='a'), Track(uri='b'), None,
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
         random.seed(1) # Playlist order: abcfde
 
         self.sendRequest(u'play')
-        self.assertEquals('a', self.backend.playback.current_track.get().uri)
+        self.assertEquals('a', self.core.playback.current_track.get().uri)
         self.sendRequest(u'random "1"')
         self.sendRequest(u'next')
-        self.assertEquals('b', self.backend.playback.current_track.get().uri)
+        self.assertEquals('b', self.core.playback.current_track.get().uri)
         self.sendRequest(u'next')
         # Should now be at track 'c', but playback fails and it skips ahead
-        self.assertEquals('f', self.backend.playback.current_track.get().uri)
+        self.assertEquals('f', self.core.playback.current_track.get().uri)
         self.sendRequest(u'next')
-        self.assertEquals('d', self.backend.playback.current_track.get().uri)
+        self.assertEquals('d', self.core.playback.current_track.get().uri)
         self.sendRequest(u'next')
-        self.assertEquals('e', self.backend.playback.current_track.get().uri)
+        self.assertEquals('e', self.core.playback.current_track.get().uri)
 
 
 class IssueGH18RegressionTest(protocol.BaseTestCase):
@@ -47,7 +47,7 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.backend.current_playlist.append([
+        self.core.current_playlist.append([
             Track(uri='a'), Track(uri='b'), Track(uri='c'),
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
         random.seed(1)
@@ -59,11 +59,11 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
         self.sendRequest(u'next')
 
         self.sendRequest(u'next')
-        cp_track_1 = self.backend.playback.current_cp_track.get()
+        cp_track_1 = self.core.playback.current_cp_track.get()
         self.sendRequest(u'next')
-        cp_track_2 = self.backend.playback.current_cp_track.get()
+        cp_track_2 = self.core.playback.current_cp_track.get()
         self.sendRequest(u'next')
-        cp_track_3 = self.backend.playback.current_cp_track.get()
+        cp_track_3 = self.core.playback.current_cp_track.get()
 
         self.assertNotEqual(cp_track_1, cp_track_2)
         self.assertNotEqual(cp_track_2, cp_track_3)
@@ -83,7 +83,7 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.backend.current_playlist.append([
+        self.core.current_playlist.append([
             Track(uri='a'), Track(uri='b'), Track(uri='c'),
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
         random.seed(1)
@@ -111,8 +111,8 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.backend.stored_playlists.create('foo')
-        self.backend.current_playlist.append([
+        self.core.stored_playlists.create('foo')
+        self.core.current_playlist.append([
             Track(uri='a'), Track(uri='b'), Track(uri='c'),
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
 
@@ -136,7 +136,7 @@ class IssueGH113RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.backend.stored_playlists.create(
+        self.core.stored_playlists.create(
             u'all lart spotify:track:\w\{22\} pastes')
 
         self.sendRequest(u'lsinfo "/"')

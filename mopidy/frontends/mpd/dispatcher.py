@@ -4,8 +4,7 @@ import re
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
-from mopidy import settings
-from mopidy.backends.base import Backend
+from mopidy import core, settings
 from mopidy.frontends.mpd import exceptions
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
@@ -28,12 +27,12 @@ class MpdDispatcher(object):
 
     _noidle = re.compile(r'^noidle$')
 
-    def __init__(self, session=None):
+    def __init__(self, session=None, core=None):
         self.authenticated = False
         self.command_list = False
         self.command_list_ok = False
         self.command_list_index = None
-        self.context = MpdContext(self, session=session)
+        self.context = MpdContext(self, session=session, core=core)
 
     def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -222,27 +221,18 @@ class MpdContext(object):
     #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
+    #: The Mopidy core API. An instance of :class:`mopidy.core.Core`.
+    core = None
+
     #: The active subsystems that have pending events.
     events = None
 
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    def __init__(self, dispatcher, session=None):
+    def __init__(self, dispatcher, session=None, core=None):
         self.dispatcher = dispatcher
         self.session = session
+        self.core = core
         self.events = set()
         self.subscriptions = set()
-        self._backend = None
-
-    @property
-    def backend(self):
-        """
-        The backend. An instance of :class:`mopidy.backends.base.Backend`.
-        """
-        if self._backend is None:
-            backend_refs = ActorRegistry.get_by_class(Backend)
-            assert len(backend_refs) == 1, \
-                'Expected exactly one running backend.'
-            self._backend = backend_refs[0].proxy()
-        return self._backend

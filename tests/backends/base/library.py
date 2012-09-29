@@ -1,3 +1,8 @@
+import mock
+
+from pykka.registry import ActorRegistry
+
+from mopidy import core
 from mopidy.models import Playlist, Track, Album, Artist
 
 from tests import unittest, path_to_data_dir
@@ -15,8 +20,12 @@ class LibraryControllerTest(object):
         Track()]
 
     def setUp(self):
-        self.backend = self.backend_class()
-        self.library = self.backend.library
+        self.backend = self.backend_class.start(audio=None).proxy()
+        self.core = core.Core(backend=self.backend)
+        self.library = self.core.library
+
+    def tearDown(self):
+        ActorRegistry.stop_all()
 
     def test_refresh(self):
         self.library.refresh()

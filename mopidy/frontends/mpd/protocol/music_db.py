@@ -70,7 +70,7 @@ def find(context, mpd_query):
     """
     query = _build_query(mpd_query)
     return playlist_to_mpd_format(
-        context.backend.library.find_exact(**query).get())
+        context.core.library.find_exact(**query).get())
 
 @handle_request(r'^findadd '
      r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? '
@@ -223,7 +223,7 @@ def _list_build_query(field, mpd_query):
 
 def _list_artist(context, query):
     artists = set()
-    playlist = context.backend.library.find_exact(**query).get()
+    playlist = context.core.library.find_exact(**query).get()
     for track in playlist.tracks:
         for artist in track.artists:
             artists.add((u'Artist', artist.name))
@@ -231,7 +231,7 @@ def _list_artist(context, query):
 
 def _list_album(context, query):
     albums = set()
-    playlist = context.backend.library.find_exact(**query).get()
+    playlist = context.core.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.album is not None:
             albums.add((u'Album', track.album.name))
@@ -239,7 +239,7 @@ def _list_album(context, query):
 
 def _list_date(context, query):
     dates = set()
-    playlist = context.backend.library.find_exact(**query).get()
+    playlist = context.core.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.date is not None:
             dates.add((u'Date', track.date))
@@ -333,7 +333,7 @@ def search(context, mpd_query):
     """
     query = _build_query(mpd_query)
     return playlist_to_mpd_format(
-        context.backend.library.search(**query).get())
+        context.core.library.search(**query).get())
 
 @handle_request(r'^update( "(?P<uri>[^"]+)")*$')
 def update(context, uri=None, rescan_unmodified_files=False):

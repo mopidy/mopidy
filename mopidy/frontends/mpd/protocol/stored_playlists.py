@@ -20,7 +20,7 @@ def listplaylist(context, name):
         file: relative/path/to/file3.mp3
     """
     try:
-        playlist = context.backend.stored_playlists.get(name=name).get()
+        playlist = context.core.stored_playlists.get(name=name).get()
         return ['file: %s' % t.uri for t in playlist.tracks]
     except LookupError:
         raise MpdNoExistError(u'No such playlist', command=u'listplaylist')
@@ -40,7 +40,7 @@ def listplaylistinfo(context, name):
         Album, Artist, Track
     """
     try:
-        playlist = context.backend.stored_playlists.get(name=name).get()
+        playlist = context.core.stored_playlists.get(name=name).get()
         return playlist_to_mpd_format(playlist)
     except LookupError:
         raise MpdNoExistError(
@@ -68,7 +68,7 @@ def listplaylists(context):
         Last-Modified: 2010-02-06T02:11:08Z
     """
     result = []
-    for playlist in context.backend.stored_playlists.playlists.get():
+    for playlist in context.core.stored_playlists.playlists.get():
         result.append((u'playlist', playlist.name))
         last_modified = (playlist.last_modified or
             dt.datetime.now()).isoformat()
@@ -94,8 +94,8 @@ def load(context, name):
     - ``load`` appends the given playlist to the current playlist.
     """
     try:
-        playlist = context.backend.stored_playlists.get(name=name).get()
-        context.backend.current_playlist.append(playlist.tracks)
+        playlist = context.core.stored_playlists.get(name=name).get()
+        context.core.current_playlist.append(playlist.tracks)
     except LookupError:
         raise MpdNoExistError(u'No such playlist', command=u'load')
 

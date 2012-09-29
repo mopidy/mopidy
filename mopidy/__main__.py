@@ -28,15 +28,10 @@ sys.path.insert(0,
     os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from mopidy import (get_version, settings, OptionalDependencyError,
-    SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
-from mopidy.audio import Audio
-from mopidy.utils import get_class
+import mopidy
+from mopidy import audio, core, settings, utils
+from mopidy.utils import log, path, process
 from mopidy.utils.deps import list_deps_optparse_callback
-from mopidy.utils.log import setup_logging
-from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import (exit_handler, stop_remaining_actors,
-    stop_actors_by_class)
 from mopidy.utils.settings import list_settings_optparse_callback
 
 
@@ -44,33 +39,35 @@ logger = logging.getLogger('mopidy.main')
 
 
 def main():
-    signal.signal(signal.SIGTERM, exit_handler)
+    signal.signal(signal.SIGTERM, process.exit_handler)
     loop = gobject.MainLoop()
     options = parse_options()
     try:
-        setup_logging(options.verbosity_level, options.save_debug_log)
+        log.setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
         audio = setup_audio()
-        setup_backend(audio)
-        setup_frontends()
+        backend = setup_backend(audio)
+        core = setup_core(audio, backend)
+        setup_frontends(core)
         loop.run()
-    except SettingsError as e:
-        logger.error(e.message)
+    except mopidy.SettingsError as ex:
+        logger.error(ex.message)
     except KeyboardInterrupt:
         logger.info(u'Interrupted. Exiting...')
-    except Exception as e:
-        logger.exception(e)
+    except Exception as ex:
+        logger.exception(ex)
     finally:
         loop.quit()
         stop_frontends()
+        stop_core()
         stop_backend()
         stop_audio()
-        stop_remaining_actors()
+        process.stop_remaining_actors()
 
 
 def parse_options():
-    parser = optparse.OptionParser(version=u'Mopidy %s' % get_version())
+    parser = optparse.OptionParser(version=u'Mopidy %s' % mopidy.get_version())
     parser.add_option('--help-gst',
         action='store_true', dest='help_gst',
         help='show GStreamer help options')
@@ -103,49 +100,57 @@ def check_old_folders():
 
     logger.warning(u'Old settings folder found at %s, settings.py should be '
         'moved to %s, any cache data should be deleted. See release notes '
-        'for further instructions.', old_settings_folder, SETTINGS_PATH)
+        'for further instructions.', old_settings_folder, mopidy.SETTINGS_PATH)
 
 
 def setup_settings(interactive):
-    get_or_create_folder(SETTINGS_PATH)
-    get_or_create_folder(DATA_PATH)
-    get_or_create_file(SETTINGS_FILE)
+    path.get_or_create_folder(mopidy.SETTINGS_PATH)
+    path.get_or_create_folder(mopidy.DATA_PATH)
+    path.get_or_create_file(mopidy.SETTINGS_FILE)
     try:
         settings.validate(interactive)
-    except SettingsError, e:
-        logger.error(e.message)
+    except mopidy.SettingsError as ex:
+        logger.error(ex.message)
         sys.exit(1)
 
 
 def setup_audio():
-    return Audio.start().proxy()
+    return audio.Audio.start().proxy()
 
 
 def stop_audio():
-    stop_actors_by_class(Audio)
+    process.stop_actors_by_class(audio.Audio)
 
 
 def setup_backend(audio):
-    get_class(settings.BACKENDS[0]).start(audio=audio)
+    return utils.get_class(settings.BACKENDS[0]).start(audio=audio).proxy()
 
 
 def stop_backend():
-    stop_actors_by_class(get_class(settings.BACKENDS[0]))
+    process.stop_actors_by_class(utils.get_class(settings.BACKENDS[0]))
 
 
-def setup_frontends():
+def setup_core(audio, backend):
+    return core.Core.start(audio=audio, backend=backend).proxy()
+
+
+def stop_core():
+    process.stop_actors_by_class(core.Core)
+
+
+def setup_frontends(core):
     for frontend_class_name in settings.FRONTENDS:
         try:
-            get_class(frontend_class_name).start()
-        except OptionalDependencyError as e:
-            logger.info(u'Disabled: %s (%s)', frontend_class_name, e)
+            utils.get_class(frontend_class_name).start(core=core)
+        except mopidy.OptionalDependencyError as ex:
+            logger.info(u'Disabled: %s (%s)', frontend_class_name, ex)
 
 
 def stop_frontends():
     for frontend_class_name in settings.FRONTENDS:
         try:
-            stop_actors_by_class(get_class(frontend_class_name))
-        except OptionalDependencyError:
+            process.stop_actors_by_class(utils.get_class(frontend_class_name))
+        except mopidy.OptionalDependencyError:
             pass
 
 
