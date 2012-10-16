@@ -8,7 +8,7 @@ import gst
 
 import pykka
 
-from mopidy.utils.log import indent
+from . import formatting
 
 
 def list_deps_optparse_callback(*args):
@@ -47,7 +47,7 @@ def format_dependency_list(adapters=None):
                 os.path.dirname(dep_info['path'])))
         if 'other' in dep_info:
             lines.append('  Other: %s' % (
-                indent(dep_info['other'])),)
+                formatting.indent(dep_info['other'])),)
     return '\n'.join(lines)
 
 

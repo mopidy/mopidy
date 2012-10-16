@@ -9,8 +9,7 @@ import pprint
 import sys
 
 from mopidy import exceptions, SETTINGS_PATH, SETTINGS_FILE
-from mopidy.utils import log
-from mopidy.utils import path
+from mopidy.utils import formatting, path
 
 logger = logging.getLogger('mopidy.utils.settings')
 
@@ -76,7 +75,7 @@ class SettingsProxy(object):
         if self.get_errors():
             logger.error(
                 u'Settings validation errors: %s',
-                log.indent(self.get_errors_as_string()))
+                formatting.indent(self.get_errors_as_string()))
             raise exceptions.SettingsError(u'Settings validation failed.')
 
     def _read_missing_settings_from_stdin(self, current, runtime):
@@ -203,11 +202,11 @@ def format_settings_list(settings):
         default_value = settings.default.get(key)
         masked_value = mask_value_if_secret(key, value)
         lines.append(u'%s: %s' % (
-            key, log.indent(pprint.pformat(masked_value), places=2)))
+            key, formatting.indent(pprint.pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
             lines.append(
                 u'  Default: %s' %
-                log.indent(pprint.pformat(default_value), places=4))
+                formatting.indent(pprint.pformat(default_value), places=4))
         if errors.get(key) is not None:
             lines.append(u'  Error: %s' % errors[key])
     return '\n'.join(lines)
