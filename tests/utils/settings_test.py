@@ -1,6 +1,6 @@
 import os
 
-import mopidy
+from mopidy import exceptions, settings
 from mopidy.utils import settings as setting_utils
 
 from tests import unittest
@@ -79,7 +79,7 @@ class ValidateSettingsTest(unittest.TestCase):
 
 class SettingsProxyTest(unittest.TestCase):
     def setUp(self):
-        self.settings = setting_utils.SettingsProxy(mopidy.settings)
+        self.settings = setting_utils.SettingsProxy(settings)
         self.settings.local.clear()
 
     def test_set_and_get_attr(self):
@@ -90,7 +90,7 @@ class SettingsProxyTest(unittest.TestCase):
         try:
             self.settings.TEST
             self.fail(u'Should raise exception')
-        except mopidy.SettingsError as e:
+        except exceptions.SettingsError as e:
             self.assertEqual(u'Setting "TEST" is not set.', e.message)
 
     def test_getattr_raises_error_on_empty_setting(self):
@@ -98,7 +98,7 @@ class SettingsProxyTest(unittest.TestCase):
         try:
             self.settings.TEST
             self.fail(u'Should raise exception')
-        except mopidy.SettingsError as e:
+        except exceptions.SettingsError as e:
             self.assertEqual(u'Setting "TEST" is empty.', e.message)
 
     def test_getattr_does_not_raise_error_if_setting_is_false(self):
@@ -184,7 +184,7 @@ class SettingsProxyTest(unittest.TestCase):
 
 class FormatSettingListTest(unittest.TestCase):
     def setUp(self):
-        self.settings = setting_utils.SettingsProxy(mopidy.settings)
+        self.settings = setting_utils.SettingsProxy(settings)
 
     def test_contains_the_setting_name(self):
         self.settings.TEST = u'test'

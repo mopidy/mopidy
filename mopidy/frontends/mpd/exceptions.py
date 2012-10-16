@@ -1,4 +1,4 @@
-from mopidy import MopidyException
+from mopidy.exceptions import MopidyException
 
 
 class MpdAckError(MopidyException):

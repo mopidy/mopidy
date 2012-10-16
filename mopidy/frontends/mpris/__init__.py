@@ -1,5 +1,10 @@
 import logging
 
+from pykka.actor import ThreadingActor
+
+from mopidy import core, settings
+from mopidy.frontends.mpris import objects
+
 logger = logging.getLogger('mopidy.frontends.mpris')
 
 try:
@@ -7,11 +12,6 @@ try:
 except ImportError as import_error:
     indicate = None  # noqa
     logger.debug(u'Startup notification will not be sent (%s)', import_error)
-
-from pykka.actor import ThreadingActor
-
-from mopidy import core, settings
-from mopidy.frontends.mpris import objects
 
 
 class MprisFrontend(ThreadingActor, core.CoreListener):

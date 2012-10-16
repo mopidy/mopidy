@@ -29,7 +29,7 @@ sys.path.insert(
 
 
 import mopidy
-from mopidy import audio, core, settings, utils
+from mopidy import audio, core, exceptions, settings, utils
 from mopidy.utils import log, path, process
 from mopidy.utils.deps import list_deps_optparse_callback
 from mopidy.utils.settings import list_settings_optparse_callback
@@ -51,7 +51,7 @@ def main():
         core_ref = setup_core(audio_ref, backend_ref)
         setup_frontends(core_ref)
         loop.run()
-    except mopidy.SettingsError as ex:
+    except exceptions.SettingsError as ex:
         logger.error(ex.message)
     except KeyboardInterrupt:
         logger.info(u'Interrupted. Exiting...')
@@ -117,7 +117,7 @@ def setup_settings(interactive):
     path.get_or_create_file(mopidy.SETTINGS_FILE)
     try:
         settings.validate(interactive)
-    except mopidy.SettingsError as ex:
+    except exceptions.SettingsError as ex:
         logger.error(ex.message)
         sys.exit(1)
 
@@ -150,7 +150,7 @@ def setup_frontends(core):
     for frontend_class_name in settings.FRONTENDS:
         try:
             utils.get_class(frontend_class_name).start(core=core)
-        except mopidy.OptionalDependencyError as ex:
+        except exceptions.OptionalDependencyError as ex:
             logger.info(u'Disabled: %s (%s)', frontend_class_name, ex)
 
 
@@ -158,7 +158,7 @@ def stop_frontends():
     for frontend_class_name in settings.FRONTENDS:
         try:
             process.stop_actors_by_class(utils.get_class(frontend_class_name))
-        except mopidy.OptionalDependencyError:
+        except exceptions.OptionalDependencyError:
             pass
 
 

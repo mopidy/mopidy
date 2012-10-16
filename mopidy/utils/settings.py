@@ -8,7 +8,7 @@ import os
 import pprint
 import sys
 
-from mopidy import SettingsError, SETTINGS_PATH, SETTINGS_FILE
+from mopidy import exceptions, SETTINGS_PATH, SETTINGS_FILE
 from mopidy.utils import log
 from mopidy.utils import path
 
@@ -53,11 +53,11 @@ class SettingsProxy(object):
 
         current = self.current  # bind locally to avoid copying+updates
         if attr not in current:
-            raise SettingsError(u'Setting "%s" is not set.' % attr)
+            raise exceptions.SettingsError(u'Setting "%s" is not set.' % attr)
 
         value = current[attr]
         if isinstance(value, basestring) and len(value) == 0:
-            raise SettingsError(u'Setting "%s" is empty.' % attr)
+            raise exceptions.SettingsError(u'Setting "%s" is empty.' % attr)
         if not value:
             return value
         if attr.endswith('_PATH') or attr.endswith('_FILE'):
@@ -77,7 +77,7 @@ class SettingsProxy(object):
             logger.error(
                 u'Settings validation errors: %s',
                 log.indent(self.get_errors_as_string()))
-            raise SettingsError(u'Settings validation failed.')
+            raise exceptions.SettingsError(u'Settings validation failed.')
 
     def _read_missing_settings_from_stdin(self, current, runtime):
         for setting, value in sorted(current.iteritems()):

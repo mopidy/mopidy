@@ -48,28 +48,6 @@ def get_python():
     return u' '.join([implementation, version])
 
 
-class MopidyException(Exception):
-    def __init__(self, message, *args, **kwargs):
-        super(MopidyException, self).__init__(message, *args, **kwargs)
-        self._message = message
-
-    @property
-    def message(self):
-        """Reimplement message field that was deprecated in Python 2.6"""
-        return self._message
-
-    @message.setter  # noqa
-    def message(self, message):
-        self._message = message
-
-
-class SettingsError(MopidyException):
-    pass
-
-
-class OptionalDependencyError(MopidyException):
-    pass
-
 from mopidy import settings as default_settings_module
 from mopidy.utils.settings import SettingsProxy
 settings = SettingsProxy(default_settings_module)

@@ -4,12 +4,12 @@ import mock
 
 from pykka.registry import ActorRegistry
 
-from mopidy import core, settings, OptionalDependencyError
+from mopidy import core, exceptions, settings
 from mopidy.backends import dummy
 
 try:
     from mopidy.frontends.mpris import objects
-except OptionalDependencyError:
+except exceptions.OptionalDependencyError:
     pass
 
 from tests import unittest

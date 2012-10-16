@@ -6,7 +6,7 @@ import threading
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
-from mopidy import SettingsError
+from mopidy import exceptions
 
 logger = logging.getLogger('mopidy.utils.process')
 
@@ -59,7 +59,7 @@ class BaseThread(threading.Thread):
             self.run_inside_try()
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
-        except SettingsError as e:
+        except exceptions.SettingsError as e:
             logger.error(e.message)
         except ImportError as e:
             logger.error(e)

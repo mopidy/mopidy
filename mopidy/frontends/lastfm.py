@@ -1,16 +1,14 @@
 import logging
 import time
 
+from pykka.actor import ThreadingActor
+
+from mopidy import core, exceptions, settings
+
 try:
     import pylast
 except ImportError as import_error:
-    from mopidy import OptionalDependencyError
-    raise OptionalDependencyError(import_error)
-
-from pykka.actor import ThreadingActor
-
-from mopidy import core, settings, SettingsError
-
+    raise exceptions.OptionalDependencyError(import_error)
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
@@ -50,7 +48,7 @@ class LastfmFrontend(ThreadingActor, core.CoreListener):
                 api_key=API_KEY, api_secret=API_SECRET,
                 username=username, password_hash=password_hash)
             logger.info(u'Connected to Last.fm')
-        except SettingsError as e:
+        except exceptions.SettingsError as e:
             logger.info(u'Last.fm scrobbler not started')
             logger.debug(u'Last.fm settings error: %s', e)
             self.stop()

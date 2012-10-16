@@ -7,7 +7,7 @@ try:
     import dbus.service
     import gobject
 except ImportError as import_error:
-    from mopidy import OptionalDependencyError
+    from mopidy.exceptions import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
 from mopidy import settings

@@ -4,14 +4,14 @@ import mock
 
 from pykka.registry import ActorRegistry
 
-from mopidy import core, OptionalDependencyError
+from mopidy import core, exceptions
 from mopidy.backends import dummy
 from mopidy.core import PlaybackState
 from mopidy.models import Album, Artist, Track
 
 try:
     from mopidy.frontends.mpris import objects
-except OptionalDependencyError:
+except exceptions.OptionalDependencyError:
     pass
 
 from tests import unittest

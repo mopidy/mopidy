@@ -2,7 +2,7 @@ import sys
 
 import mock
 
-from mopidy import OptionalDependencyError
+from mopidy.exceptions import OptionalDependencyError
 from mopidy.models import Track
 
 try:
