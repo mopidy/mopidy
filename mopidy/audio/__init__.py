@@ -10,11 +10,12 @@ from pykka.actor import ThreadingActor
 from mopidy import settings, utils
 from mopidy.utils import process
 
-# Trigger install of gst mixer plugins
 from . import mixers
 from .listener import AudioListener
 
 logger = logging.getLogger('mopidy.audio')
+
+mixers.register_mixers()
 
 
 class Audio(ThreadingActor):

@@ -1,6 +1,5 @@
 import pygst
 pygst.require('0.10')
-import gobject
 import gst
 
 import logging
@@ -67,7 +66,3 @@ class AutoAudioMixer(gst.Bin):
             if track.flags & flags:
                 return True
         return False
-
-
-gobject.type_register(AutoAudioMixer)
-gst.element_register(AutoAudioMixer, 'autoaudiomixer', gst.RANK_MARGINAL)

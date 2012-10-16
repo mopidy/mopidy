@@ -76,10 +76,6 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
         ).proxy()
 
 
-gobject.type_register(NadMixer)
-gst.element_register(NadMixer, 'nadmixer', gst.RANK_MARGINAL)
-
-
 class NadTalker(ThreadingActor):
     """
     Independent thread which does the communication with the NAD amplifier
