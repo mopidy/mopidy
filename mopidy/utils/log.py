@@ -1,8 +1,8 @@
 import logging
 import logging.handlers
 
-from mopidy import get_platform, get_python, settings
-from . import versioning
+from mopidy import settings
+from . import deps, versioning
 
 
 def setup_logging(verbosity_level, save_debug_log):
@@ -12,8 +12,8 @@ def setup_logging(verbosity_level, save_debug_log):
         setup_debug_logging_to_file()
     logger = logging.getLogger('mopidy.utils.log')
     logger.info(u'Starting Mopidy %s', versioning.get_version())
-    logger.info(u'Platform: %s', get_platform())
-    logger.info(u'Python: %s', get_python())
+    logger.info(u'%(name)s: %(version)s', deps.platform_info())
+    logger.info(u'%(name)s: %(version)s', deps.python_info())
 
 
 def setup_root_logger():

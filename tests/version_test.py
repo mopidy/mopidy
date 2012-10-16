@@ -1,7 +1,6 @@
 from distutils.version import StrictVersion as SV
-import platform
 
-from mopidy import __version__, get_platform, get_python
+from mopidy import __version__
 
 from tests import unittest
 
@@ -30,12 +29,3 @@ class VersionTest(unittest.TestCase):
         self.assertLess(SV('0.7.2'), SV('0.7.3'))
         self.assertLess(SV('0.7.3'), SV(__version__))
         self.assertLess(SV(__version__), SV('0.8.1'))
-
-    def test_get_platform_contains_platform(self):
-        self.assertIn(platform.platform(), get_platform())
-
-    def test_get_python_contains_python_implementation(self):
-        self.assertIn(platform.python_implementation(), get_python())
-
-    def test_get_python_contains_python_version(self):
-        self.assertIn(platform.python_version(), get_python())
