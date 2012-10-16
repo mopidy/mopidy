@@ -30,6 +30,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.name = 'SpotifyThread'
 
         self.audio = audio
+        self.backend = None
         self.backend_ref = backend_ref
 
         self.connected = threading.Event()
