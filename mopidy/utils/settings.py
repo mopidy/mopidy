@@ -1,4 +1,5 @@
-# Absolute import needed to import ~/.mopidy/settings.py and not ourselves
+# Absolute import needed to import ~/.config/mopidy/settings.py and not
+# ourselves
 from __future__ import absolute_import
 
 import copy
