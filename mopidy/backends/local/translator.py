@@ -8,7 +8,7 @@ from mopidy.utils.path import path_to_uri
 
 
 def parse_m3u(file_path, music_folder):
-    """
+    r"""
     Convert M3U file list of uris
 
     Example M3U data::

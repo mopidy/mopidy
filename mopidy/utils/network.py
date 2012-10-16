@@ -52,7 +52,7 @@ def create_socket():
 
 def format_hostname(hostname):
     """Format hostname for display."""
-    if (has_ipv6 and re.match('\d+.\d+.\d+.\d+', hostname) is not None):
+    if (has_ipv6 and re.match(r'\d+.\d+.\d+.\d+', hostname) is not None):
         hostname = '::ffff:%s' % hostname
     return hostname
 
