@@ -39,7 +39,7 @@ class MprisObject(dbus.service.Object):
             PLAYER_IFACE: self._get_player_iface_properties(),
         }
         bus_name = self._connect_to_dbus()
-        super(MprisObject, self).__init__(bus_name, OBJECT_PATH)
+        dbus.service.Object.__init__(self, bus_name, OBJECT_PATH)
 
     def _get_root_iface_properties(self):
         return {
@@ -97,7 +97,7 @@ class MprisObject(dbus.service.Object):
         logger.debug(
             u'%s.Get(%s, %s) called',
             dbus.PROPERTIES_IFACE, repr(interface), repr(prop))
-        (getter, setter) = self.properties[interface][prop]
+        (getter, _) = self.properties[interface][prop]
         if callable(getter):
             return getter()
         else:
@@ -109,7 +109,7 @@ class MprisObject(dbus.service.Object):
         logger.debug(
             u'%s.GetAll(%s) called', dbus.PROPERTIES_IFACE, repr(interface))
         getters = {}
-        for key, (getter, setter) in self.properties[interface].iteritems():
+        for key, (getter, _) in self.properties[interface].iteritems():
             getters[key] = getter() if callable(getter) else getter
         return getters
 
@@ -119,7 +119,7 @@ class MprisObject(dbus.service.Object):
         logger.debug(
             u'%s.Set(%s, %s, %s) called',
             dbus.PROPERTIES_IFACE, repr(interface), repr(prop), repr(value))
-        getter, setter = self.properties[interface][prop]
+        _, setter = self.properties[interface][prop]
         if setter is not None:
             setter(value)
             self.PropertiesChanged(
@@ -332,7 +332,7 @@ class MprisObject(dbus.service.Object):
         if current_cp_track is None:
             return {'mpris:trackid': ''}
         else:
-            (cpid, track) = current_cp_track
+            (_, track) = current_cp_track
             metadata = {'mpris:trackid': self._get_track_id(current_cp_track)}
             if track.length:
                 metadata['mpris:length'] = track.length * 1000
