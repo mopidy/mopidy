@@ -19,18 +19,19 @@ def command_list_begin(context):
         returned. If ``command_list_ok_begin`` is used, ``list_OK`` is
         returned for each successful command executed in the command list.
     """
-    context.dispatcher.command_list = []
+    context.dispatcher.command_list_receiving = True
     context.dispatcher.command_list_ok = False
+    context.dispatcher.command_list = []
 
 
 @handle_request(r'^command_list_end$')
 def command_list_end(context):
     """See :meth:`command_list_begin()`."""
-    if context.dispatcher.command_list is False:
-        # Test for False exactly, and not e.g. empty list
+    if not context.dispatcher.command_list_receiving:
         raise MpdUnknownCommand(command='command_list_end')
+    context.dispatcher.command_list_receiving = False
     (command_list, context.dispatcher.command_list) = (
-        context.dispatcher.command_list, False)
+        context.dispatcher.command_list, [])
     (command_list_ok, context.dispatcher.command_list_ok) = (
         context.dispatcher.command_list_ok, False)
     command_list_response = []
@@ -49,5 +50,6 @@ def command_list_end(context):
 @handle_request(r'^command_list_ok_begin$')
 def command_list_ok_begin(context):
     """See :meth:`command_list_begin()`."""
-    context.dispatcher.command_list = []
+    context.dispatcher.command_list_receiving = True
     context.dispatcher.command_list_ok = True
+    context.dispatcher.command_list = []

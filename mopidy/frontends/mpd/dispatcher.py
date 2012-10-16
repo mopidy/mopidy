@@ -22,8 +22,9 @@ class MpdDispatcher(object):
 
     def __init__(self, session=None, core=None):
         self.authenticated = False
-        self.command_list = False
+        self.command_list_receiving = False
         self.command_list_ok = False
+        self.command_list = []
         self.command_list_index = None
         self.context = MpdContext(self, session=session, core=core)
 
@@ -108,8 +109,7 @@ class MpdDispatcher(object):
 
     def _is_receiving_command_list(self, request):
         return (
-            self.command_list is not False and
-            request != u'command_list_end')
+            self.command_list_receiving and request != u'command_list_end')
 
     def _is_processing_command_list(self, request):
         return (
