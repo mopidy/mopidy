@@ -21,9 +21,6 @@ class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
     track_flags = gobject.property(type=int, default=(
         gst.interfaces.MIXER_TRACK_MASTER | gst.interfaces.MIXER_TRACK_OUTPUT))
 
-    def __init__(self):
-        gst.Element.__init__(self)
-
     def list_tracks(self):
         track = utils.create_track(
             self.track_label,

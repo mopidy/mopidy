@@ -13,6 +13,7 @@ logger = logging.getLogger('mopidy.backends.spotify.library')
 class SpotifyTrack(Track):
     """Proxy object for unloaded Spotify tracks."""
     def __init__(self, uri):
+        super(SpotifyTrack, self).__init__()
         self._spotify_track = Link.from_string(uri).as_track()
         self._unloaded_track = Track(uri=uri, name=u'[loading...]')
         self._track = None

@@ -30,10 +30,8 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
     speakers_a = gobject.property(type=str)
     speakers_b = gobject.property(type=str)
 
-    def __init__(self):
-        gst.Element.__init__(self)
-        self._volume_cache = 0
-        self._nad_talker = None
+    _volume_cache = 0
+    _nad_talker = None
 
     def list_tracks(self):
         track = utils.create_track(
