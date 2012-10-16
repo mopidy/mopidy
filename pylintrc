@@ -7,12 +7,15 @@
 # C0111 - Missing docstring
 # R0201 - Method could be a function
 # R0801 - Similar lines in %s files
+# R0902 - Too many instance attributes (%s/%s)
 # R0903 - Too few public methods (%s/%s)
 # R0904 - Too many public methods (%s/%s)
+# R0912 - Too many branches (%s/%s)
+# R0913 - Too many arguments (%s/%s)
 # R0921 - Abstract class not referenced
 # W0141 - Used builtin function '%s'
 # W0142 - Used * or ** magic
 # W0511 - TODO, FIXME and XXX in the code
 # W0613 - Unused argument %r
 #
-disable = C0103,C0111,R0201,R0801,R0903,R0904,R0921,W0141,W0142,W0511,W0613
+disable = C0103,C0111,R0201,R0801,R0902,R0903,R0904,R0912,R0913,R0921,W0141,W0142,W0511,W0613
