@@ -31,7 +31,9 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from mopidy import audio, core, exceptions, settings
+from mopidy import exceptions, settings
+from mopidy.audio import Audio
+from mopidy.core import Core
 from mopidy.utils import (
     deps, importing, log, path, process, settings as settings_utils,
     versioning)
@@ -49,10 +51,10 @@ def main():
         log.setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
-        audio_ref = setup_audio()
-        backend_ref = setup_backend(audio_ref)
-        core_ref = setup_core(audio_ref, backend_ref)
-        setup_frontends(core_ref)
+        audio = setup_audio()
+        backend = setup_backend(audio)
+        core = setup_core(audio, backend)
+        setup_frontends(core)
         loop.run()
     except exceptions.SettingsError as ex:
         logger.error(ex.message)
@@ -136,11 +138,11 @@ def setup_settings(interactive):
 
 
 def setup_audio():
-    return audio.Audio.start().proxy()
+    return Audio.start().proxy()
 
 
 def stop_audio():
-    process.stop_actors_by_class(audio.Audio)
+    process.stop_actors_by_class(Audio)
 
 
 def setup_backend(audio):
@@ -152,11 +154,11 @@ def stop_backend():
 
 
 def setup_core(audio, backend):
-    return core.Core.start(audio=audio, backend=backend).proxy()
+    return Core.start(audio=audio, backend=backend).proxy()
 
 
 def stop_core():
-    process.stop_actors_by_class(core.Core)
+    process.stop_actors_by_class(Core)
 
 
 def setup_frontends(core):
