@@ -9,7 +9,7 @@ import os
 import pprint
 import sys
 
-from mopidy import exceptions, SETTINGS_PATH, SETTINGS_FILE
+from mopidy import exceptions
 from mopidy.utils import formatting, path
 
 logger = logging.getLogger('mopidy.utils.settings')
@@ -23,9 +23,9 @@ class SettingsProxy(object):
         self.runtime = {}
 
     def _get_local_settings(self):
-        if not os.path.isfile(SETTINGS_FILE):
+        if not os.path.isfile(path.SETTINGS_FILE):
             return {}
-        sys.path.insert(0, SETTINGS_PATH)
+        sys.path.insert(0, path.SETTINGS_PATH)
         # pylint: disable = F0401
         import settings as local_settings_module
         # pylint: enable = F0401

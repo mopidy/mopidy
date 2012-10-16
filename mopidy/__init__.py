@@ -1,17 +1,8 @@
-import os
 import sys
-
 if not (2, 6) <= sys.version_info < (3,):
     sys.exit(u'Mopidy requires Python >= 2.6, < 3')
 
-import glib
-
 __version__ = '0.8.0'
-
-DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
-CACHE_PATH = os.path.join(str(glib.get_user_cache_dir()), 'mopidy')
-SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
-SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
 
 from mopidy import settings as default_settings_module
 from mopidy.utils.settings import SettingsProxy

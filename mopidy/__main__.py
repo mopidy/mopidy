@@ -31,7 +31,6 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-import mopidy
 from mopidy import audio, core, exceptions, settings
 from mopidy.utils import (
     deps, importing, log, path, process, settings as settings_utils,
@@ -122,13 +121,13 @@ def check_old_folders():
     logger.warning(
         u'Old settings folder found at %s, settings.py should be moved '
         u'to %s, any cache data should be deleted. See release notes for '
-        u'further instructions.', old_settings_folder, mopidy.SETTINGS_PATH)
+        u'further instructions.', old_settings_folder, path.SETTINGS_PATH)
 
 
 def setup_settings(interactive):
-    path.get_or_create_folder(mopidy.SETTINGS_PATH)
-    path.get_or_create_folder(mopidy.DATA_PATH)
-    path.get_or_create_file(mopidy.SETTINGS_FILE)
+    path.get_or_create_folder(path.SETTINGS_PATH)
+    path.get_or_create_folder(path.DATA_PATH)
+    path.get_or_create_file(path.SETTINGS_FILE)
     try:
         settings.validate(interactive)
     except exceptions.SettingsError as ex:

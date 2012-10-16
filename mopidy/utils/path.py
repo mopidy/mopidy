@@ -1,4 +1,3 @@
-import glib
 import logging
 import os
 import re
@@ -6,8 +5,13 @@ import string
 import sys
 import urllib
 
+import glib
+
 logger = logging.getLogger('mopidy.utils.path')
 
+DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
+SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
+SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
 XDG_DIRS = {
     'XDG_CACHE_DIR': glib.get_user_cache_dir(),
     'XDG_DATA_DIR': glib.get_user_data_dir(),
