@@ -234,7 +234,7 @@ def did_you_mean(setting, defaults):
     return None
 
 
-def levenshtein(a, b, max=3):
+def levenshtein(a, b):
     """Calculates the Levenshtein distance between a and b."""
     n, m = len(a), len(b)
     if n > m:
