@@ -4,18 +4,12 @@ import re
 from pykka import ActorDeadError
 
 from mopidy import settings
-from mopidy.frontends.mpd import exceptions
-from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
-# Do not remove the following import. The protocol modules must be imported to
-# get them registered as request handlers.
-# pylint: disable = W0611
-from mopidy.frontends.mpd.protocol import (
-    audio_output, command_list, connection, current_playlist, empty, music_db,
-    playback, reflection, status, stickers, stored_playlists)
-# pylint: enable = W0611
+from mopidy.frontends.mpd import exceptions, protocol
 from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
+
+protocol.load_protocol_modules()
 
 
 class MpdDispatcher(object):
@@ -92,7 +86,7 @@ class MpdDispatcher(object):
         else:
             command_name = request.split(' ')[0]
             command_names_not_requiring_auth = [
-                command.name for command in mpd_commands
+                command.name for command in protocol.mpd_commands
                 if not command.auth_required]
             if command_name in command_names_not_requiring_auth:
                 return self._call_next_filter(request, response, filter_chain)
@@ -172,12 +166,13 @@ class MpdDispatcher(object):
         return handler(self.context, **kwargs)
 
     def _find_handler(self, request):
-        for pattern in request_handlers:
+        for pattern in protocol.request_handlers:
             matches = re.match(pattern, request)
             if matches is not None:
-                return (request_handlers[pattern], matches.groupdict())
+                return (
+                    protocol.request_handlers[pattern], matches.groupdict())
         command_name = request.split(' ')[0]
-        if command_name in [command.name for command in mpd_commands]:
+        if command_name in [command.name for command in protocol.mpd_commands]:
             raise exceptions.MpdArgError(
                 u'incorrect arguments', command=command_name)
         raise exceptions.MpdUnknownCommand(command=command_name)
