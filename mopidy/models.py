@@ -13,8 +13,9 @@ class ImmutableObject(object):
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
             if not hasattr(self, key):
-                raise TypeError('__init__() got an unexpected keyword ' + \
-                    'argument \'%s\'' % key)
+                raise TypeError(
+                    u"__init__() got an unexpected keyword argument '%s'" %
+                    key)
             self.__dict__[key] = value
 
     def __setattr__(self, name, value):
@@ -71,8 +72,8 @@ class ImmutableObject(object):
             if hasattr(self, key):
                 data[key] = values.pop(key)
         if values:
-            raise TypeError("copy() got an unexpected keyword argument '%s'"
-                % key)
+            raise TypeError(
+                u"copy() got an unexpected keyword argument '%s'" % key)
         return self.__class__(**data)
 
     def serialize(self):

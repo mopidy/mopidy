@@ -1,7 +1,8 @@
 from mopidy.core import PlaybackState
 from mopidy.frontends.mpd.protocol import handle_request
-from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
-    MpdNotImplemented)
+from mopidy.frontends.mpd.exceptions import (
+    MpdArgError, MpdNoExistError, MpdNotImplemented)
+
 
 @handle_request(r'^consume (?P<state>[01])$')
 @handle_request(r'^consume "(?P<state>[01])"$')
@@ -20,6 +21,7 @@ def consume(context, state):
     else:
         context.core.playback.consume = False
 
+
 @handle_request(r'^crossfade "(?P<seconds>\d+)"$')
 def crossfade(context, seconds):
     """
@@ -30,7 +32,8 @@ def crossfade(context, seconds):
         Sets crossfading between songs.
     """
     seconds = int(seconds)
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
+
 
 @handle_request(r'^next$')
 def next_(context):
@@ -89,6 +92,7 @@ def next_(context):
     """
     return context.core.playback.next().get()
 
+
 @handle_request(r'^pause$')
 @handle_request(r'^pause "(?P<state>[01])"$')
 def pause(context, state=None):
@@ -113,6 +117,7 @@ def pause(context, state=None):
     else:
         context.core.playback.resume()
 
+
 @handle_request(r'^play$')
 def play(context):
     """
@@ -120,6 +125,7 @@ def play(context):
     without arguments.
     """
     return context.core.playback.play().get()
+
 
 @handle_request(r'^playid (?P<cpid>-?\d+)$')
 @handle_request(r'^playid "(?P<cpid>-?\d+)"$')
@@ -148,6 +154,7 @@ def playid(context, cpid):
         return context.core.playback.play(cp_track).get()
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'playid')
+
 
 @handle_request(r'^play (?P<songpos>-?\d+)$')
 @handle_request(r'^play "(?P<songpos>-?\d+)"$')
@@ -182,9 +189,10 @@ def playpos(context, songpos):
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'play')
 
+
 def _play_minus_one(context):
     if (context.core.playback.state.get() == PlaybackState.PLAYING):
-        return # Nothing to do
+        return  # Nothing to do
     elif (context.core.playback.state.get() == PlaybackState.PAUSED):
         return context.core.playback.resume().get()
     elif context.core.playback.current_cp_track.get() is not None:
@@ -194,7 +202,8 @@ def _play_minus_one(context):
         cp_track = context.core.current_playlist.slice(0, 1).get()[0]
         return context.core.playback.play(cp_track).get()
     else:
-        return # Fail silently
+        return  # Fail silently
+
 
 @handle_request(r'^previous$')
 def previous(context):
@@ -242,6 +251,7 @@ def previous(context):
     """
     return context.core.playback.previous().get()
 
+
 @handle_request(r'^random (?P<state>[01])$')
 @handle_request(r'^random "(?P<state>[01])"$')
 def random(context, state):
@@ -256,6 +266,7 @@ def random(context, state):
         context.core.playback.random = True
     else:
         context.core.playback.random = False
+
 
 @handle_request(r'^repeat (?P<state>[01])$')
 @handle_request(r'^repeat "(?P<state>[01])"$')
@@ -272,6 +283,7 @@ def repeat(context, state):
     else:
         context.core.playback.repeat = False
 
+
 @handle_request(r'^replay_gain_mode "(?P<mode>(off|track|album))"$')
 def replay_gain_mode(context, mode):
     """
@@ -286,7 +298,8 @@ def replay_gain_mode(context, mode):
 
         This command triggers the options idle event.
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
+
 
 @handle_request(r'^replay_gain_status$')
 def replay_gain_status(context):
@@ -298,7 +311,8 @@ def replay_gain_status(context):
         Prints replay gain options. Currently, only the variable
         ``replay_gain_mode`` is returned.
     """
-    return u'off' # TODO
+    return u'off'  # TODO
+
 
 @handle_request(r'^seek (?P<songpos>\d+) (?P<seconds>\d+)$')
 @handle_request(r'^seek "(?P<songpos>\d+)" "(?P<seconds>\d+)"$')
@@ -319,6 +333,7 @@ def seek(context, songpos, seconds):
         playpos(context, songpos)
     context.core.playback.seek(int(seconds) * 1000)
 
+
 @handle_request(r'^seekid "(?P<cpid>\d+)" "(?P<seconds>\d+)"$')
 def seekid(context, cpid, seconds):
     """
@@ -331,6 +346,7 @@ def seekid(context, cpid, seconds):
     if context.core.playback.current_cpid != cpid:
         playid(context, cpid)
     context.core.playback.seek(int(seconds) * 1000)
+
 
 @handle_request(r'^setvol (?P<volume>[-+]*\d+)$')
 @handle_request(r'^setvol "(?P<volume>[-+]*\d+)"$')
@@ -353,6 +369,7 @@ def setvol(context, volume):
         volume = 100
     context.core.playback.volume = volume
 
+
 @handle_request(r'^single (?P<state>[01])$')
 @handle_request(r'^single "(?P<state>[01])"$')
 def single(context, state):
@@ -369,6 +386,7 @@ def single(context, state):
         context.core.playback.single = True
     else:
         context.core.playback.single = False
+
 
 @handle_request(r'^stop$')
 def stop(context):

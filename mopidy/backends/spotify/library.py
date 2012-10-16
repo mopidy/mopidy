@@ -22,7 +22,8 @@ class SpotifyTrack(Track):
         if self._track:
             return self._track
         elif self._spotify_track.is_loaded():
-            self._track = SpotifyTranslator.to_mopidy_track(self._spotify_track)
+            self._track = SpotifyTranslator.to_mopidy_track(
+                self._spotify_track)
             return self._track
         else:
             return self._unloaded_track
@@ -59,7 +60,7 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
             return None
 
     def refresh(self, uri=None):
-        pass # TODO
+        pass  # TODO
 
     def search(self, **query):
         if not query:
@@ -81,7 +82,7 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
                 if field == u'any':
                     spotify_query.append(value)
                 elif field == u'year':
-                    value = int(value.split('-')[0]) # Extract year
+                    value = int(value.split('-')[0])  # Extract year
                     spotify_query.append(u'%s:%d' % (field, value))
                 else:
                     spotify_query.append(u'%s:"%s"' % (field, value))
@@ -90,6 +91,6 @@ class SpotifyLibraryProvider(BaseLibraryProvider):
         queue = Queue.Queue()
         self.backend.spotify.search(spotify_query, queue)
         try:
-            return queue.get(timeout=3) # XXX What is an reasonable timeout?
+            return queue.get(timeout=3)  # XXX What is an reasonable timeout?
         except Queue.Empty:
             return Playlist(tracks=[])

@@ -10,6 +10,7 @@ import datetime
 from mopidy.utils.path import path_to_uri, find_files
 from mopidy.models import Track, Artist, Album
 
+
 def translator(data):
     albumartist_kwargs = {}
     album_kwargs = {}
@@ -37,7 +38,8 @@ def translator(data):
     _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
     _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
     _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
-    _retrieve('musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
+    _retrieve(
+        'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
@@ -61,8 +63,8 @@ class Scanner(object):
 
         self.uribin = gst.element_factory_make('uridecodebin')
         self.uribin.set_property('caps', gst.Caps('audio/x-raw-int'))
-        self.uribin.connect('pad-added', self.process_new_pad,
-            fakesink.get_pad('sink'))
+        self.uribin.connect(
+            'pad-added', self.process_new_pad, fakesink.get_pad('sink'))
 
         self.pipe = gst.element_factory_make('pipeline')
         self.pipe.add(self.uribin)
@@ -106,7 +108,7 @@ class Scanner(object):
         self.next_uri()
 
     def get_duration(self):
-        self.pipe.get_state() # Block until state change is done.
+        self.pipe.get_state()  # Block until state change is done.
         try:
             return self.pipe.query_duration(
                 gst.FORMAT_TIME, None)[0] // gst.MSECOND

@@ -7,6 +7,7 @@ from mopidy.models import Artist, Album, Track, Playlist
 
 logger = logging.getLogger('mopidy.backends.spotify.translator')
 
+
 class SpotifyTranslator(object):
     @classmethod
     def to_mopidy_artist(cls, spotify_artist):
@@ -57,7 +58,7 @@ class SpotifyTranslator(object):
                 name=spotify_playlist.name(),
                 # FIXME if check on link is a hackish workaround for is_local
                 tracks=[cls.to_mopidy_track(t) for t in spotify_playlist
-                    if str(Link.from_track(t, 0))],
+                        if str(Link.from_track(t, 0))],
             )
         except SpotifyError, e:
             logger.warning(u'Failed translating Spotify playlist: %s', e)

@@ -53,7 +53,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         logger.info(u'Connected to Spotify')
         self.session = session
 
-        logger.debug(u'Preferred Spotify bitrate is %s kbps',
+        logger.debug(
+            u'Preferred Spotify bitrate is %s kbps',
             settings.SPOTIFY_BITRATE)
         self.session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
 
@@ -85,7 +86,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         logger.debug(u'User message: %s', message.strip())
 
     def music_delivery(self, session, frames, frame_size, num_frames,
-            sample_type, sample_rate, channels):
+                       sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
         # pylint: disable = R0913
         # Too many arguments (8/5)
@@ -136,7 +137,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         if not self._initial_data_receive_completed:
             logger.debug(u'Still getting data; skipped refresh of playlists')
             return
-        playlists = map(SpotifyTranslator.to_mopidy_playlist,
+        playlists = map(
+            SpotifyTranslator.to_mopidy_playlist,
             self.session.playlist_container())
         playlists = filter(None, playlists)
         self.backend.stored_playlists.playlists = playlists
@@ -153,8 +155,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
                 for t in results.tracks()])
             queue.put(playlist)
         self.connected.wait()
-        self.session.search(query, callback, track_count=100,
-            album_count=0, artist_count=0)
+        self.session.search(
+            query, callback, track_count=100, album_count=0, artist_count=0)
 
     def logout(self):
         """Log out from spotify"""

@@ -8,7 +8,7 @@ import gst
 try:
     import serial
 except ImportError:
-    serial = None
+    serial = None  # noqa
 
 from pykka.actor import ThreadingActor
 
@@ -19,10 +19,11 @@ logger = logging.getLogger('mopidy.audio.mixers.nad')
 
 
 class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
-    __gstdetails__ = ('NadMixer',
-                      'Mixer',
-                      'Mixer to control NAD amplifiers using a serial link',
-                      'Stein Magnus Jodal')
+    __gstdetails__ = (
+        'NadMixer',
+        'Mixer',
+        'Mixer to control NAD amplifiers using a serial link',
+        'Stein Magnus Jodal')
 
     port = gobject.property(type=str, default='/dev/ttyUSB0')
     source = gobject.property(type=str)
@@ -41,8 +42,9 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
             min_volume=0,
             max_volume=100,
             num_channels=1,
-            flags=(gst.interfaces.MIXER_TRACK_MASTER |
-                 gst.interfaces.MIXER_TRACK_OUTPUT))
+            flags=(
+                gst.interfaces.MIXER_TRACK_MASTER |
+                gst.interfaces.MIXER_TRACK_OUTPUT))
         return [track]
 
     def get_volume(self, track):
@@ -121,8 +123,7 @@ class NadTalker(ThreadingActor):
         self._set_device_to_known_state()
 
     def _open_connection(self):
-        logger.info(u'NAD amplifier: Connecting through "%s"',
-            self.port)
+        logger.info(u'NAD amplifier: Connecting through "%s"', self.port)
         self._device = serial.Serial(
             port=self.port,
             baudrate=self.BAUDRATE,
@@ -200,11 +201,13 @@ class NadTalker(ThreadingActor):
         for attempt in range(1, 4):
             if self._ask_device(key) == value:
                 return
-            logger.info(u'NAD amplifier: Setting "%s" to "%s" (attempt %d/3)',
+            logger.info(
+                u'NAD amplifier: Setting "%s" to "%s" (attempt %d/3)',
                 key, value, attempt)
             self._command_device(key, value)
         if self._ask_device(key) != value:
-            logger.info(u'NAD amplifier: Gave up on setting "%s" to "%s"',
+            logger.info(
+                u'NAD amplifier: Gave up on setting "%s" to "%s"',
                 key, value)
 
     def _ask_device(self, key):

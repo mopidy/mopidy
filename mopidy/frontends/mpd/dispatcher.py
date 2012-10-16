@@ -2,21 +2,21 @@ import logging
 import re
 
 from pykka import ActorDeadError
-from pykka.registry import ActorRegistry
 
-from mopidy import core, settings
+from mopidy import settings
 from mopidy.frontends.mpd import exceptions
 from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
 # Do not remove the following import. The protocol modules must be imported to
 # get them registered as request handlers.
 # pylint: disable = W0611
-from mopidy.frontends.mpd.protocol import (audio_output, command_list,
-    connection, current_playlist, empty, music_db, playback, reflection,
-    status, stickers, stored_playlists)
+from mopidy.frontends.mpd.protocol import (
+    audio_output, command_list, connection, current_playlist, empty, music_db,
+    playback, reflection, status, stickers, stored_playlists)
 # pylint: enable = W0611
 from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
+
 
 class MpdDispatcher(object):
     """
@@ -71,7 +71,6 @@ class MpdDispatcher(object):
         else:
             return response
 
-
     ### Filter: catch MPD ACK errors
 
     def _catch_mpd_ack_errors_filter(self, request, response, filter_chain):
@@ -81,7 +80,6 @@ class MpdDispatcher(object):
             if self.command_list_index is not None:
                 mpd_ack_error.index = self.command_list_index
             return [mpd_ack_error.get_mpd_ack()]
-
 
     ### Filter: authenticate
 
@@ -101,7 +99,6 @@ class MpdDispatcher(object):
             else:
                 raise exceptions.MpdPermissionError(command=command_name)
 
-
     ### Filter: command list
 
     def _command_list_filter(self, request, response, filter_chain):
@@ -117,25 +114,27 @@ class MpdDispatcher(object):
             return response
 
     def _is_receiving_command_list(self, request):
-        return (self.command_list is not False
-            and request != u'command_list_end')
+        return (
+            self.command_list is not False and
+            request != u'command_list_end')
 
     def _is_processing_command_list(self, request):
-        return (self.command_list_index is not None
-            and request != u'command_list_end')
-
+        return (
+            self.command_list_index is not None and
+            request != u'command_list_end')
 
     ### Filter: idle
 
     def _idle_filter(self, request, response, filter_chain):
         if self._is_currently_idle() and not self._noidle.match(request):
-            logger.debug(u'Client sent us %s, only %s is allowed while in '
-                'the idle state', repr(request), repr(u'noidle'))
+            logger.debug(
+                u'Client sent us %s, only %s is allowed while in '
+                u'the idle state', repr(request), repr(u'noidle'))
             self.context.session.close()
             return []
 
         if not self._is_currently_idle() and self._noidle.match(request):
-            return [] # noidle was called before idle
+            return []  # noidle was called before idle
 
         response = self._call_next_filter(request, response, filter_chain)
 
@@ -147,7 +146,6 @@ class MpdDispatcher(object):
     def _is_currently_idle(self):
         return bool(self.context.subscriptions)
 
-
     ### Filter: add OK
 
     def _add_ok_filter(self, request, response, filter_chain):
@@ -158,7 +156,6 @@ class MpdDispatcher(object):
 
     def _has_error(self, response):
         return response and response[-1].startswith(u'ACK')
-
 
     ### Filter: call handler
 
@@ -181,8 +178,8 @@ class MpdDispatcher(object):
                 return (request_handlers[pattern], matches.groupdict())
         command_name = request.split(' ')[0]
         if command_name in [command.name for command in mpd_commands]:
-            raise exceptions.MpdArgError(u'incorrect arguments',
-                command=command_name)
+            raise exceptions.MpdArgError(
+                u'incorrect arguments', command=command_name)
         raise exceptions.MpdUnknownCommand(command=command_name)
 
     def _format_response(self, response):

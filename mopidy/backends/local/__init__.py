@@ -1,5 +1,4 @@
 import glob
-import glib
 import logging
 import os
 import shutil
@@ -8,7 +7,7 @@ from pykka.actor import ThreadingActor
 
 from mopidy import settings
 from mopidy.backends import base
-from mopidy.models import Playlist, Track, Album
+from mopidy.models import Playlist, Album
 
 from .translator import parse_m3u, parse_mpd_tag_cache
 
@@ -45,7 +44,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         self.refresh()
 
     def lookup(self, uri):
-        pass # TODO
+        pass  # TODO
 
     def refresh(self):
         playlists = []
@@ -118,11 +117,12 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(settings.LOCAL_TAG_CACHE_FILE,
-            settings.LOCAL_MUSIC_PATH)
+        tracks = parse_mpd_tag_cache(
+            settings.LOCAL_TAG_CACHE_FILE, settings.LOCAL_MUSIC_PATH)
 
-        logger.info('Loading tracks in %s from %s', settings.LOCAL_MUSIC_PATH,
-            settings.LOCAL_TAG_CACHE_FILE)
+        logger.info(
+            'Loading tracks in %s from %s',
+            settings.LOCAL_MUSIC_PATH, settings.LOCAL_TAG_CACHE_FILE)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
@@ -150,7 +150,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 artist_filter = lambda t: filter(
                     lambda a: q == a.name, t.artists)
                 uri_filter = lambda t: q == t.uri
-                any_filter = lambda t: (track_filter(t) or album_filter(t) or
+                any_filter = lambda t: (
+                    track_filter(t) or album_filter(t) or
                     artist_filter(t) or uri_filter(t))
 
                 if field == 'track':
@@ -178,7 +179,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             for value in values:
                 q = value.strip().lower()
 
-                track_filter  = lambda t: q in t.name.lower()
+                track_filter = lambda t: q in t.name.lower()
                 album_filter = lambda t: q in getattr(
                     t, 'album', Album()).name.lower()
                 artist_filter = lambda t: filter(

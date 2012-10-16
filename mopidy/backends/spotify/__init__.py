@@ -9,6 +9,7 @@ logger = logging.getLogger('mopidy.backends.spotify')
 
 BITRATES = {96: 2, 160: 0, 320: 1}
 
+
 class SpotifyBackend(ThreadingActor, base.Backend):
     """
     A backend for playing music from the `Spotify <http://www.spotify.com/>`_
@@ -57,8 +58,8 @@ class SpotifyBackend(ThreadingActor, base.Backend):
         username = settings.SPOTIFY_USERNAME
         password = settings.SPOTIFY_PASSWORD
 
-        self.spotify = SpotifySessionManager(username, password,
-            audio=audio, backend_ref=self.actor_ref)
+        self.spotify = SpotifySessionManager(
+            username, password, audio=audio, backend_ref=self.actor_ref)
 
     def on_start(self):
         logger.info(u'Mopidy uses SPOTIFY(R) CORE')

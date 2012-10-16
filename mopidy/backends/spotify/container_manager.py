@@ -5,6 +5,7 @@ from spotify.manager import SpotifyContainerManager as \
 
 logger = logging.getLogger('mopidy.backends.spotify.container_manager')
 
+
 class SpotifyContainerManager(PyspotifyContainerManager):
     def __init__(self, session_manager):
         PyspotifyContainerManager.__init__(self)
@@ -25,13 +26,13 @@ class SpotifyContainerManager(PyspotifyContainerManager):
 
     def playlist_added(self, container, playlist, position, userdata):
         """Callback used by pyspotify"""
-        logger.debug(u'Callback called: playlist added at position %d',
-            position)
+        logger.debug(
+            u'Callback called: playlist added at position %d', position)
         # container_loaded() is called after this callback, so we do not need
         # to handle this callback.
 
     def playlist_moved(self, container, playlist, old_position, new_position,
-            userdata):
+                       userdata):
         """Callback used by pyspotify"""
         logger.debug(
             u'Callback called: playlist "%s" moved from position %d to %d',

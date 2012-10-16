@@ -18,8 +18,9 @@ XDG_DIRS = {
 def get_or_create_folder(folder):
     folder = os.path.expanduser(folder)
     if os.path.isfile(folder):
-        raise OSError('A file with the same name as the desired ' \
-            'dir, "%s", already exists.' % folder)
+        raise OSError(
+            u'A file with the same name as the desired dir, '
+            u'"%s", already exists.' % folder)
     elif not os.path.isdir(folder):
         logger.info(u'Creating dir %s', folder)
         os.makedirs(folder, 0755)
@@ -47,7 +48,7 @@ def uri_to_path(uri):
         path = urllib.url2pathname(re.sub('^file:', '', uri))
     else:
         path = urllib.url2pathname(re.sub('^file://', '', uri))
-    return path.encode('latin1').decode('utf-8') # Undo double encoding
+    return path.encode('latin1').decode('utf-8')  # Undo double encoding
 
 
 def split_path(path):

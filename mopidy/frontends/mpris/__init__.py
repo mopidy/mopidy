@@ -5,7 +5,7 @@ logger = logging.getLogger('mopidy.frontends.mpris')
 try:
     import indicate
 except ImportError as import_error:
-    indicate = None
+    indicate = None  # noqa
     logger.debug(u'Startup notification will not be sent (%s)', import_error)
 
 from pykka.actor import ThreadingActor
@@ -100,8 +100,8 @@ class MprisFrontend(ThreadingActor, core.CoreListener):
         props_with_new_values = [
             (p, self.mpris_object.Get(objects.PLAYER_IFACE, p))
             for p in changed_properties]
-        self.mpris_object.PropertiesChanged(objects.PLAYER_IFACE,
-            dict(props_with_new_values), [])
+        self.mpris_object.PropertiesChanged(
+            objects.PLAYER_IFACE, dict(props_with_new_values), [])
 
     def track_playback_paused(self, track, time_position):
         logger.debug(u'Received track playback paused event')

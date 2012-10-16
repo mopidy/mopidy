@@ -5,7 +5,8 @@ import gobject
 
 
 def create_track(label, initial_volume, min_volume, max_volume,
-                      num_channels, flags):
+                 num_channels, flags):
+
     class Track(gst.interfaces.MixerTrack):
         def __init__(self):
             super(Track, self).__init__()

@@ -29,6 +29,7 @@ mpd_commands = set()
 
 request_handlers = {}
 
+
 def handle_request(pattern, auth_required=True):
     """
     Decorator for connecting command handlers to command requests.

@@ -1,8 +1,8 @@
-from mopidy.frontends.mpd.exceptions import (MpdArgError, MpdNoExistError,
-    MpdNotImplemented)
+from mopidy.frontends.mpd import translator
+from mopidy.frontends.mpd.exceptions import (
+    MpdArgError, MpdNoExistError, MpdNotImplemented)
 from mopidy.frontends.mpd.protocol import handle_request
-from mopidy.frontends.mpd.translator import (track_to_mpd_format,
-    tracks_to_mpd_format)
+
 
 @handle_request(r'^add "(?P<uri>[^"]*)"$')
 def add(context, uri):
@@ -28,6 +28,7 @@ def add(context, uri):
                 return
     raise MpdNoExistError(
         u'directory or file not found', command=u'add')
+
 
 @handle_request(r'^addid "(?P<uri>[^"]*)"( "(?P<songpos>\d+)")*$')
 def addid(context, uri, songpos=None):
@@ -57,9 +58,10 @@ def addid(context, uri, songpos=None):
         raise MpdNoExistError(u'No such song', command=u'addid')
     if songpos and songpos > context.core.current_playlist.length.get():
         raise MpdArgError(u'Bad song index', command=u'addid')
-    cp_track = context.core.current_playlist.add(track,
-        at_position=songpos).get()
+    cp_track = context.core.current_playlist.add(
+        track, at_position=songpos).get()
     return ('Id', cp_track.cpid)
+
 
 @handle_request(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
 def delete_range(context, start, end=None):
@@ -81,6 +83,7 @@ def delete_range(context, start, end=None):
     for (cpid, _) in cp_tracks:
         context.core.current_playlist.remove(cpid=cpid)
 
+
 @handle_request(r'^delete "(?P<songpos>\d+)"$')
 def delete_songpos(context, songpos):
     """See :meth:`delete_range`"""
@@ -91,6 +94,7 @@ def delete_songpos(context, songpos):
         context.core.current_playlist.remove(cpid=cpid)
     except IndexError:
         raise MpdArgError(u'Bad song index', command=u'delete')
+
 
 @handle_request(r'^deleteid "(?P<cpid>\d+)"$')
 def deleteid(context, cpid):
@@ -109,6 +113,7 @@ def deleteid(context, cpid):
     except LookupError:
         raise MpdNoExistError(u'No such song', command=u'deleteid')
 
+
 @handle_request(r'^clear$')
 def clear(context):
     """
@@ -119,6 +124,7 @@ def clear(context):
         Clears the current playlist.
     """
     context.core.current_playlist.clear()
+
 
 @handle_request(r'^move "(?P<start>\d+):(?P<end>\d+)*" "(?P<to>\d+)"$')
 def move_range(context, start, to, end=None):
@@ -137,12 +143,14 @@ def move_range(context, start, to, end=None):
     to = int(to)
     context.core.current_playlist.move(start, end, to)
 
+
 @handle_request(r'^move "(?P<songpos>\d+)" "(?P<to>\d+)"$')
 def move_songpos(context, songpos, to):
     """See :meth:`move_range`."""
     songpos = int(songpos)
     to = int(to)
     context.core.current_playlist.move(songpos, songpos + 1, to)
+
 
 @handle_request(r'^moveid "(?P<cpid>\d+)" "(?P<to>\d+)"$')
 def moveid(context, cpid, to):
@@ -161,6 +169,7 @@ def moveid(context, cpid, to):
     position = context.core.current_playlist.index(cp_track).get()
     context.core.current_playlist.move(position, position + 1, to)
 
+
 @handle_request(r'^playlist$')
 def playlist(context):
     """
@@ -175,6 +184,7 @@ def playlist(context):
             Do not use this, instead use ``playlistinfo``.
     """
     return playlistinfo(context)
+
 
 @handle_request(r'^playlistfind (?P<tag>[^"]+) "(?P<needle>[^"]+)"$')
 @handle_request(r'^playlistfind "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
@@ -194,10 +204,11 @@ def playlistfind(context, tag, needle):
         try:
             cp_track = context.core.current_playlist.get(uri=needle).get()
             position = context.core.current_playlist.index(cp_track).get()
-            return track_to_mpd_format(cp_track, position=position)
+            return translator.track_to_mpd_format(cp_track, position=position)
         except LookupError:
             return None
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
+
 
 @handle_request(r'^playlistid( "(?P<cpid>\d+)")*$')
 def playlistid(context, cpid=None):
@@ -214,19 +225,19 @@ def playlistid(context, cpid=None):
             cpid = int(cpid)
             cp_track = context.core.current_playlist.get(cpid=cpid).get()
             position = context.core.current_playlist.index(cp_track).get()
-            return track_to_mpd_format(cp_track, position=position)
+            return translator.track_to_mpd_format(cp_track, position=position)
         except LookupError:
             raise MpdNoExistError(u'No such song', command=u'playlistid')
     else:
-        return tracks_to_mpd_format(
+        return translator.tracks_to_mpd_format(
             context.core.current_playlist.cp_tracks.get())
+
 
 @handle_request(r'^playlistinfo$')
 @handle_request(r'^playlistinfo "-1"$')
 @handle_request(r'^playlistinfo "(?P<songpos>-?\d+)"$')
 @handle_request(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
-def playlistinfo(context, songpos=None,
-        start=None, end=None):
+def playlistinfo(context, songpos=None, start=None, end=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -244,7 +255,7 @@ def playlistinfo(context, songpos=None,
     if songpos is not None:
         songpos = int(songpos)
         cp_track = context.core.current_playlist.cp_tracks.get()[songpos]
-        return track_to_mpd_format(cp_track, position=songpos)
+        return translator.track_to_mpd_format(cp_track, position=songpos)
     else:
         if start is None:
             start = 0
@@ -256,7 +267,8 @@ def playlistinfo(context, songpos=None,
             if end > context.core.current_playlist.length.get():
                 end = None
         cp_tracks = context.core.current_playlist.cp_tracks.get()
-        return tracks_to_mpd_format(cp_tracks, start, end)
+        return translator.tracks_to_mpd_format(cp_tracks, start, end)
+
 
 @handle_request(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
 @handle_request(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
@@ -274,7 +286,8 @@ def playlistsearch(context, tag, needle):
     - does not add quotes around the tag
     - uses ``filename`` and ``any`` as tags
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
+
 
 @handle_request(r'^plchanges (?P<version>-?\d+)$')
 @handle_request(r'^plchanges "(?P<version>-?\d+)"$')
@@ -295,8 +308,9 @@ def plchanges(context, version):
     """
     # XXX Naive implementation that returns all tracks as changed
     if int(version) < context.core.current_playlist.version:
-        return tracks_to_mpd_format(
+        return translator.tracks_to_mpd_format(
             context.core.current_playlist.cp_tracks.get())
+
 
 @handle_request(r'^plchangesposid "(?P<version>\d+)"$')
 def plchangesposid(context, version):
@@ -321,6 +335,7 @@ def plchangesposid(context, version):
             result.append((u'Id', cpid))
         return result
 
+
 @handle_request(r'^shuffle$')
 @handle_request(r'^shuffle "(?P<start>\d+):(?P<end>\d+)*"$')
 def shuffle(context, start=None, end=None):
@@ -337,6 +352,7 @@ def shuffle(context, start=None, end=None):
     if end is not None:
         end = int(end)
     context.core.current_playlist.shuffle(start, end)
+
 
 @handle_request(r'^swap "(?P<songpos1>\d+)" "(?P<songpos2>\d+)"$')
 def swap(context, songpos1, songpos2):
@@ -358,6 +374,7 @@ def swap(context, songpos1, songpos2):
     tracks.insert(songpos2, song1)
     context.core.current_playlist.clear()
     context.core.current_playlist.append(tracks)
+
 
 @handle_request(r'^swapid "(?P<cpid1>\d+)" "(?P<cpid2>\d+)"$')
 def swapid(context, cpid1, cpid2):

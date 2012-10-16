@@ -77,8 +77,8 @@ class MprisObject(dbus.service.Object):
     def _connect_to_dbus(self):
         logger.debug(u'Connecting to D-Bus...')
         mainloop = dbus.mainloop.glib.DBusGMainLoop()
-        bus_name = dbus.service.BusName(BUS_NAME,
-            dbus.SessionBus(mainloop=mainloop))
+        bus_name = dbus.service.BusName(
+            BUS_NAME, dbus.SessionBus(mainloop=mainloop))
         logger.info(u'Connected to D-Bus')
         return bus_name
 
@@ -92,9 +92,10 @@ class MprisObject(dbus.service.Object):
     ### Properties interface
 
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
-        in_signature='ss', out_signature='v')
+                         in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
-        logger.debug(u'%s.Get(%s, %s) called',
+        logger.debug(
+            u'%s.Get(%s, %s) called',
             dbus.PROPERTIES_IFACE, repr(interface), repr(prop))
         (getter, setter) = self.properties[interface][prop]
         if callable(getter):
@@ -103,34 +104,35 @@ class MprisObject(dbus.service.Object):
             return getter
 
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
-        in_signature='s', out_signature='a{sv}')
+                         in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
-        logger.debug(u'%s.GetAll(%s) called',
-            dbus.PROPERTIES_IFACE, repr(interface))
+        logger.debug(
+            u'%s.GetAll(%s) called', dbus.PROPERTIES_IFACE, repr(interface))
         getters = {}
         for key, (getter, setter) in self.properties[interface].iteritems():
             getters[key] = getter() if callable(getter) else getter
         return getters
 
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
-        in_signature='ssv', out_signature='')
+                         in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
-        logger.debug(u'%s.Set(%s, %s, %s) called',
+        logger.debug(
+            u'%s.Set(%s, %s, %s) called',
             dbus.PROPERTIES_IFACE, repr(interface), repr(prop), repr(value))
         getter, setter = self.properties[interface][prop]
         if setter is not None:
             setter(value)
-            self.PropertiesChanged(interface,
-                {prop: self.Get(interface, prop)}, [])
+            self.PropertiesChanged(
+                interface, {prop: self.Get(interface, prop)}, [])
 
     @dbus.service.signal(dbus_interface=dbus.PROPERTIES_IFACE,
-            signature='sa{sv}as')
+                         signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed_properties,
-            invalidated_properties):
-        logger.debug(u'%s.PropertiesChanged(%s, %s, %s) signaled',
+                          invalidated_properties):
+        logger.debug(
+            u'%s.PropertiesChanged(%s, %s, %s) signaled',
             dbus.PROPERTIES_IFACE, interface, changed_properties,
             invalidated_properties)
-
 
     ### Root interface methods
 
@@ -144,7 +146,6 @@ class MprisObject(dbus.service.Object):
         logger.debug(u'%s.Quit called', ROOT_IFACE)
         exit_process()
 
-
     ### Root interface properties
 
     def get_DesktopEntry(self):
@@ -152,7 +153,6 @@ class MprisObject(dbus.service.Object):
 
     def get_SupportedUriSchemes(self):
         return dbus.Array(self.core.uri_schemes.get(), signature='s')
-
 
     ### Player interface methods
 
@@ -263,14 +263,12 @@ class MprisObject(dbus.service.Object):
         else:
             logger.debug(u'Track with URI "%s" not found in library.', uri)
 
-
     ### Player interface signals
 
     @dbus.service.signal(dbus_interface=PLAYER_IFACE, signature='x')
     def Seeked(self, position):
         logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
         # Do nothing, as just calling the method is enough to emit the signal.
-
 
     ### Player interface properties
 
@@ -383,20 +381,23 @@ class MprisObject(dbus.service.Object):
     def get_CanGoNext(self):
         if not self.get_CanControl():
             return False
-        return (self.core.playback.cp_track_at_next.get() !=
+        return (
+            self.core.playback.cp_track_at_next.get() !=
             self.core.playback.current_cp_track.get())
 
     def get_CanGoPrevious(self):
         if not self.get_CanControl():
             return False
-        return (self.core.playback.cp_track_at_previous.get() !=
+        return (
+            self.core.playback.cp_track_at_previous.get() !=
             self.core.playback.current_cp_track.get())
 
     def get_CanPlay(self):
         if not self.get_CanControl():
             return False
-        return (self.core.playback.current_track.get() is not None
-            or self.core.playback.track_at_next.get() is not None)
+        return (
+            self.core.playback.current_track.get() is not None or
+            self.core.playback.track_at_next.get() is not None)
 
     def get_CanPause(self):
         if not self.get_CanControl():

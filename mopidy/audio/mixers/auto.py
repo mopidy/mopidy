@@ -10,10 +10,11 @@ logger = logging.getLogger('mopidy.audio.mixers.auto')
 
 # TODO: we might want to add some ranking to the mixers we know about?
 class AutoAudioMixer(gst.Bin):
-    __gstdetails__ = ('AutoAudioMixer',
-                      'Mixer',
-                      'Element automatically selects a mixer.',
-                      'Thomas Adamcik')
+    __gstdetails__ = (
+        'AutoAudioMixer',
+        'Mixer',
+        'Element automatically selects a mixer.',
+        'Thomas Adamcik')
 
     def __init__(self):
         gst.Bin.__init__(self)

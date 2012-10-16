@@ -3,6 +3,7 @@ import logging.handlers
 
 from mopidy import get_version, get_platform, get_python, settings
 
+
 def setup_logging(verbosity_level, save_debug_log):
     setup_root_logger()
     setup_console_logging(verbosity_level)
@@ -13,9 +14,11 @@ def setup_logging(verbosity_level, save_debug_log):
     logger.info(u'Platform: %s', get_platform())
     logger.info(u'Python: %s', get_python())
 
+
 def setup_root_logger():
     root = logging.getLogger('')
     root.setLevel(logging.DEBUG)
+
 
 def setup_console_logging(verbosity_level):
     if verbosity_level == 0:
@@ -37,6 +40,7 @@ def setup_console_logging(verbosity_level):
     if verbosity_level < 3:
         logging.getLogger('pykka').setLevel(logging.INFO)
 
+
 def setup_debug_logging_to_file():
     formatter = logging.Formatter(settings.DEBUG_LOG_FORMAT)
     handler = logging.handlers.RotatingFileHandler(
@@ -45,6 +49,7 @@ def setup_debug_logging_to_file():
     handler.setLevel(logging.DEBUG)
     root = logging.getLogger('')
     root.addHandler(handler)
+
 
 def indent(string, places=4, linebreak='\n'):
     lines = string.split(linebreak)

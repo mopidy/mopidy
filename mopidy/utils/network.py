@@ -27,8 +27,10 @@ def try_ipv6_socket():
         socket.socket(socket.AF_INET6).close()
         return True
     except IOError as error:
-        logger.debug(u'Platform supports IPv6, but socket '
-            'creation failed, disabling: %s', locale_decode(error))
+        logger.debug(
+            u'Platform supports IPv6, but socket creation failed, '
+            u'disabling: %s',
+            locale_decode(error))
     return False
 
 
@@ -59,7 +61,7 @@ class Server(object):
     """Setup listener and register it with gobject's event loop."""
 
     def __init__(self, host, port, protocol, protocol_kwargs=None,
-            max_connections=5, timeout=30):
+                 max_connections=5, timeout=30):
         self.protocol = protocol
         self.protocol_kwargs = protocol_kwargs or {}
         self.max_connections = max_connections
@@ -114,8 +116,8 @@ class Server(object):
             pass
 
     def init_connection(self, sock, addr):
-        Connection(self.protocol, self.protocol_kwargs,
-            sock, addr, self.timeout)
+        Connection(
+            self.protocol, self.protocol_kwargs, sock, addr, self.timeout)
 
 
 class Connection(object):
@@ -130,7 +132,7 @@ class Connection(object):
     def __init__(self, protocol, protocol_kwargs, sock, addr, timeout):
         sock.setblocking(False)
 
-        self.host, self.port = addr[:2] # IPv6 has larger addr
+        self.host, self.port = addr[:2]  # IPv6 has larger addr
 
         self.sock = sock
         self.protocol = protocol
@@ -214,7 +216,8 @@ class Connection(object):
             return
 
         try:
-            self.recv_id = gobject.io_add_watch(self.sock.fileno(),
+            self.recv_id = gobject.io_add_watch(
+                self.sock.fileno(),
                 gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
@@ -231,7 +234,8 @@ class Connection(object):
             return
 
         try:
-            self.send_id = gobject.io_add_watch(self.sock.fileno(),
+            self.send_id = gobject.io_add_watch(
+                self.sock.fileno(),
                 gobject.IO_OUT | gobject.IO_ERR | gobject.IO_HUP,
                 self.send_callback)
         except socket.error as e:
@@ -372,8 +376,10 @@ class LineProtocol(ThreadingActor):
         try:
             return line.encode(self.encoding)
         except UnicodeError:
-            logger.warning(u'Stopping actor due to encode problem, data '
-                'supplied by client was not valid %s', self.encoding)
+            logger.warning(
+                u'Stopping actor due to encode problem, data '
+                u'supplied by client was not valid %s',
+                self.encoding)
             self.stop()
 
     def decode(self, line):
@@ -385,8 +391,10 @@ class LineProtocol(ThreadingActor):
         try:
             return line.decode(self.encoding)
         except UnicodeError:
-            logger.warning(u'Stopping actor due to decode problem, data '
-                'supplied by client was not valid %s', self.encoding)
+            logger.warning(
+                u'Stopping actor due to decode problem, data '
+                u'supplied by client was not valid %s',
+                self.encoding)
             self.stop()
 
     def join_lines(self, lines):

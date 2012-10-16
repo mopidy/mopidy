@@ -7,19 +7,19 @@ from mopidy.audio.mixers import create_track
 
 
 class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
-    __gstdetails__ = ('FakeMixer',
-                      'Mixer',
-                      'Fake mixer for use in tests.',
-                      'Thomas Adamcik')
+    __gstdetails__ = (
+        'FakeMixer',
+        'Mixer',
+        'Fake mixer for use in tests.',
+        'Thomas Adamcik')
 
     track_label = gobject.property(type=str, default='Master')
     track_initial_volume = gobject.property(type=int, default=0)
     track_min_volume = gobject.property(type=int, default=0)
     track_max_volume = gobject.property(type=int, default=100)
     track_num_channels = gobject.property(type=int, default=2)
-    track_flags = gobject.property(type=int,
-        default=(gst.interfaces.MIXER_TRACK_MASTER |
-                 gst.interfaces.MIXER_TRACK_OUTPUT))
+    track_flags = gobject.property(type=int, default=(
+        gst.interfaces.MIXER_TRACK_MASTER | gst.interfaces.MIXER_TRACK_OUTPUT))
 
     def __init__(self):
         gst.Element.__init__(self)

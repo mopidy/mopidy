@@ -2,7 +2,6 @@ from __future__ import division
 
 import locale
 import logging
-import os
 import sys
 
 logger = logging.getLogger('mopidy.utils')

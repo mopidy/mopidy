@@ -20,11 +20,13 @@ CACHE_PATH = os.path.join(str(glib.get_user_cache_dir()), 'mopidy')
 SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
 SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
 
+
 def get_version():
     try:
         return get_git_version()
     except EnvironmentError:
         return __version__
+
 
 def get_git_version():
     process = Popen(['git', 'describe'], stdout=PIPE, stderr=PIPE)
@@ -35,13 +37,16 @@ def get_git_version():
         version = version[1:]
     return version
 
+
 def get_platform():
     return platform.platform()
+
 
 def get_python():
     implementation = platform.python_implementation()
     version = platform.python_version()
     return u' '.join([implementation, version])
+
 
 class MopidyException(Exception):
     def __init__(self, message, *args, **kwargs):
@@ -53,12 +58,14 @@ class MopidyException(Exception):
         """Reimplement message field that was deprecated in Python 2.6"""
         return self._message
 
-    @message.setter
+    @message.setter  # noqa
     def message(self, message):
         self._message = message
 
+
 class SettingsError(MopidyException):
     pass
+
 
 class OptionalDependencyError(MopidyException):
     pass

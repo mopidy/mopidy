@@ -1,6 +1,7 @@
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdUnknownCommand
 
+
 @handle_request(r'^command_list_begin$')
 def command_list_begin(context):
     """
@@ -20,6 +21,7 @@ def command_list_begin(context):
     """
     context.dispatcher.command_list = []
     context.dispatcher.command_list_ok = False
+
 
 @handle_request(r'^command_list_end$')
 def command_list_end(context):
@@ -42,6 +44,7 @@ def command_list_end(context):
         if command_list_ok:
             command_list_response.append(u'list_OK')
     return command_list_response
+
 
 @handle_request(r'^command_list_ok_begin$')
 def command_list_ok_begin(context):

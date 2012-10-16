@@ -21,7 +21,7 @@ class StoredPlaylistsController(object):
         """
         return self.backend.stored_playlists.playlists.get()
 
-    @playlists.setter
+    @playlists.setter  # noqa
     def playlists(self, playlists):
         self.backend.stored_playlists.playlists = playlists
 
@@ -71,8 +71,8 @@ class StoredPlaylistsController(object):
         if len(matches) == 0:
             raise LookupError('"%s" match no playlists' % criteria_string)
         else:
-            raise LookupError('"%s" match multiple playlists'
-                % criteria_string)
+            raise LookupError(
+                '"%s" match multiple playlists' % criteria_string)
 
     def lookup(self, uri):
         """

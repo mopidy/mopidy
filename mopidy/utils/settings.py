@@ -32,7 +32,8 @@ class SettingsProxy(object):
         return self._get_settings_dict_from_module(local_settings_module)
 
     def _get_settings_dict_from_module(self, module):
-        settings = filter(lambda (key, value): self._is_setting(key),
+        settings = filter(
+            lambda (key, value): self._is_setting(key),
             module.__dict__.iteritems())
         return dict(settings)
 
@@ -50,7 +51,7 @@ class SettingsProxy(object):
         if not self._is_setting(attr):
             return
 
-        current = self.current # bind locally to avoid copying+updates
+        current = self.current  # bind locally to avoid copying+updates
         if attr not in current:
             raise SettingsError(u'Setting "%s" is not set.' % attr)
 
@@ -73,7 +74,8 @@ class SettingsProxy(object):
         if interactive:
             self._read_missing_settings_from_stdin(self.current, self.runtime)
         if self.get_errors():
-            logger.error(u'Settings validation errors: %s',
+            logger.error(
+                u'Settings validation errors: %s',
                 log.indent(self.get_errors_as_string()))
             raise SettingsError(u'Settings validation failed.')
 
@@ -84,11 +86,13 @@ class SettingsProxy(object):
 
     def _read_from_stdin(self, prompt):
         if u'_PASSWORD' in prompt:
-            return (getpass.getpass(prompt)
+            return (
+                getpass.getpass(prompt)
                 .decode(sys.stdin.encoding, 'ignore'))
         else:
             sys.stdout.write(prompt)
-            return (sys.stdin.readline().strip()
+            return (
+                sys.stdin.readline().strip()
                 .decode(sys.stdin.encoding, 'ignore'))
 
     def get_errors(self):
@@ -201,7 +205,8 @@ def format_settings_list(settings):
         lines.append(u'%s: %s' % (
             key, log.indent(pprint.pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
-            lines.append(u'  Default: %s' %
+            lines.append(
+                u'  Default: %s' %
                 log.indent(pprint.pformat(default_value), places=4))
         if errors.get(key) is not None:
             lines.append(u'  Error: %s' % errors[key])
@@ -235,13 +240,13 @@ def levenshtein(a, b, max=3):
     if n > m:
         return levenshtein(b, a)
 
-    current = xrange(n+1)
-    for i in xrange(1, m+1):
+    current = xrange(n + 1)
+    for i in xrange(1, m + 1):
         previous, current = current, [i] + [0] * n
-        for j in xrange(1, n+1):
-            add, delete = previous[j] + 1, current[j-1] + 1
-            change = previous[j-1]
-            if a[j-1] != b[i-1]:
+        for j in xrange(1, n + 1):
+            add, delete = previous[j] + 1, current[j - 1] + 1
+            change = previous[j - 1]
+            if a[j - 1] != b[i - 1]:
                 change += 1
             current[j] = min(add, delete, change)
     return current[n]

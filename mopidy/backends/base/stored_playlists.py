@@ -22,7 +22,7 @@ class BaseStoredPlaylistsProvider(object):
         """
         return copy(self._playlists)
 
-    @playlists.setter
+    @playlists.setter  # noqa
     def playlists(self, playlists):
         self._playlists = playlists
 

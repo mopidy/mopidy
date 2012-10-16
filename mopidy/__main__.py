@@ -24,8 +24,8 @@ sys.argv[1:] = gstreamer_args
 
 # Add ../ to the path so we can run Mopidy from a Git checkout without
 # installing it on the system.
-sys.path.insert(0,
-    os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
 import mopidy
@@ -46,10 +46,10 @@ def main():
         log.setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
-        audio = setup_audio()
-        backend = setup_backend(audio)
-        core = setup_core(audio, backend)
-        setup_frontends(core)
+        audio_ref = setup_audio()
+        backend_ref = setup_backend(audio_ref)
+        core_ref = setup_core(audio_ref, backend_ref)
+        setup_frontends(core_ref)
         loop.run()
     except mopidy.SettingsError as ex:
         logger.error(ex.message)
@@ -68,25 +68,32 @@ def main():
 
 def parse_options():
     parser = optparse.OptionParser(version=u'Mopidy %s' % mopidy.get_version())
-    parser.add_option('--help-gst',
+    parser.add_option(
+        '--help-gst',
         action='store_true', dest='help_gst',
         help='show GStreamer help options')
-    parser.add_option('-i', '--interactive',
+    parser.add_option(
+        '-i', '--interactive',
         action='store_true', dest='interactive',
         help='ask interactively for required settings which are missing')
-    parser.add_option('-q', '--quiet',
+    parser.add_option(
+        '-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
-    parser.add_option('-v', '--verbose',
+    parser.add_option(
+        '-v', '--verbose',
         action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
-    parser.add_option('--save-debug-log',
+    parser.add_option(
+        '--save-debug-log',
         action='store_true', dest='save_debug_log',
         help='save debug log to "./mopidy.log"')
-    parser.add_option('--list-settings',
+    parser.add_option(
+        '--list-settings',
         action='callback', callback=list_settings_optparse_callback,
         help='list current settings')
-    parser.add_option('--list-deps',
+    parser.add_option(
+        '--list-deps',
         action='callback', callback=list_deps_optparse_callback,
         help='list dependencies and their versions')
     return parser.parse_args(args=mopidy_args)[0]
@@ -98,9 +105,10 @@ def check_old_folders():
     if not os.path.isdir(old_settings_folder):
         return
 
-    logger.warning(u'Old settings folder found at %s, settings.py should be '
-        'moved to %s, any cache data should be deleted. See release notes '
-        'for further instructions.', old_settings_folder, mopidy.SETTINGS_PATH)
+    logger.warning(
+        u'Old settings folder found at %s, settings.py should be moved '
+        u'to %s, any cache data should be deleted. See release notes for '
+        u'further instructions.', old_settings_folder, mopidy.SETTINGS_PATH)
 
 
 def setup_settings(interactive):

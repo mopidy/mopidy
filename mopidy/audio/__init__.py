@@ -70,8 +70,8 @@ class Audio(ThreadingActor):
             self._playbin.set_property('audio-sink', output)
             logger.info('Output set to %s', settings.OUTPUT)
         except gobject.GError as ex:
-            logger.error('Failed to create output "%s": %s',
-                settings.OUTPUT, ex)
+            logger.error(
+                'Failed to create output "%s": %s', settings.OUTPUT, ex)
             process.exit_process()
 
     def _setup_mixer(self):
@@ -85,11 +85,11 @@ class Audio(ThreadingActor):
             return
 
         try:
-            mixerbin = gst.parse_bin_from_description(settings.MIXER,
-                ghost_unconnected_pads=False)
+            mixerbin = gst.parse_bin_from_description(
+                settings.MIXER, ghost_unconnected_pads=False)
         except gobject.GError as ex:
-            logger.warning('Failed to create mixer "%s": %s',
-                settings.MIXER, ex)
+            logger.warning(
+                'Failed to create mixer "%s": %s', settings.MIXER, ex)
             return
 
         # We assume that the bin will contain a single mixer.
@@ -215,10 +215,11 @@ class Audio(ThreadingActor):
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self._playbin.get_state() # block until state changes are done
-        handeled = self._playbin.seek_simple(gst.Format(gst.FORMAT_TIME),
-            gst.SEEK_FLAG_FLUSH, position * gst.MSECOND)
-        self._playbin.get_state() # block until seek is done
+        self._playbin.get_state()  # block until state changes are done
+        handeled = self._playbin.seek_simple(
+            gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH,
+            position * gst.MSECOND)
+        self._playbin.get_state()  # block until seek is done
         return handeled
 
     def start_playback(self):
@@ -279,16 +280,16 @@ class Audio(ThreadingActor):
         """
         result = self._playbin.set_state(state)
         if result == gst.STATE_CHANGE_FAILURE:
-            logger.warning('Setting GStreamer state to %s: failed',
-                state.value_name)
+            logger.warning(
+                'Setting GStreamer state to %s: failed', state.value_name)
             return False
         elif result == gst.STATE_CHANGE_ASYNC:
-            logger.debug('Setting GStreamer state to %s: async',
-                state.value_name)
+            logger.debug(
+                'Setting GStreamer state to %s: async', state.value_name)
             return True
         else:
-            logger.debug('Setting GStreamer state to %s: OK',
-                state.value_name)
+            logger.debug(
+                'Setting GStreamer state to %s: OK', state.value_name)
             return True
 
     def get_volume(self):
@@ -316,7 +317,8 @@ class Audio(ThreadingActor):
         avg_volume = float(sum(volumes)) / len(volumes)
 
         new_scale = (0, 100)
-        old_scale = (self._mixer_track.min_volume, self._mixer_track.max_volume)
+        old_scale = (
+            self._mixer_track.min_volume, self._mixer_track.max_volume)
         return utils.rescale(avg_volume, old=old_scale, new=new_scale)
 
     def set_volume(self, volume):
@@ -335,7 +337,8 @@ class Audio(ThreadingActor):
             return False
 
         old_scale = (0, 100)
-        new_scale = (self._mixer_track.min_volume, self._mixer_track.max_volume)
+        new_scale = (
+            self._mixer_track.min_volume, self._mixer_track.max_volume)
 
         volume = utils.rescale(volume, old=old_scale, new=new_scale)
 

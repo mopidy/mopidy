@@ -7,7 +7,6 @@ from mopidy import core, settings
 from mopidy.frontends.mpd import dispatcher, protocol
 from mopidy.utils import locale_decode, log, network, process
 
-
 logger = logging.getLogger('mopidy.frontends.mpd')
 
 
@@ -32,11 +31,13 @@ class MpdFrontend(actor.ThreadingActor, core.CoreListener):
         port = settings.MPD_SERVER_PORT
 
         try:
-            network.Server(hostname, port,
+            network.Server(
+                hostname, port,
                 protocol=MpdSession, protocol_kwargs={'core': core},
                 max_connections=settings.MPD_SERVER_MAX_CONNECTIONS)
         except IOError as error:
-            logger.error(u'MPD server startup failed: %s', locale_decode(error))
+            logger.error(
+                u'MPD server startup failed: %s', locale_decode(error))
             sys.exit(1)
 
         logger.info(u'MPD server running at [%s]:%s', hostname, port)
@@ -86,15 +87,18 @@ class MpdSession(network.LineProtocol):
         self.send_lines([u'OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):
-        logger.debug(u'Request from [%s]:%s to %s: %s', self.host, self.port,
-            self.actor_urn, line)
+        logger.debug(
+            u'Request from [%s]:%s to %s: %s',
+            self.host, self.port, self.actor_urn, line)
 
         response = self.dispatcher.handle_request(line)
         if not response:
             return
 
-        logger.debug(u'Response to [%s]:%s from %s: %s', self.host, self.port,
-            self.actor_urn, log.indent(self.terminator.join(response)))
+        logger.debug(
+            u'Response to [%s]:%s from %s: %s',
+            self.host, self.port, self.actor_urn,
+            log.indent(self.terminator.join(response)))
 
         self.send_lines(response)
 
@@ -105,8 +109,9 @@ class MpdSession(network.LineProtocol):
         try:
             return super(MpdSession, self).decode(line.decode('string_escape'))
         except ValueError:
-            logger.warning(u'Stopping actor due to unescaping error, data '
-                'supplied by client was not valid.')
+            logger.warning(
+                u'Stopping actor due to unescaping error, data '
+                u'supplied by client was not valid.')
             self.stop()
 
     def close(self):

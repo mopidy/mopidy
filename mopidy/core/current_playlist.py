@@ -6,7 +6,6 @@ from mopidy.models import CpTrack
 
 from . import listener
 
-
 logger = logging.getLogger('mopidy.core')
 
 
@@ -57,7 +56,7 @@ class CurrentPlaylistController(object):
         """
         return self._version
 
-    @version.setter
+    @version.setter  # noqa
     def version(self, version):
         self._version = version
         self.core.playback.on_current_playlist_change()
@@ -128,8 +127,8 @@ class CurrentPlaylistController(object):
             if key == 'cpid':
                 matches = filter(lambda ct: ct.cpid == value, matches)
             else:
-                matches = filter(lambda ct: getattr(ct.track, key) == value,
-                    matches)
+                matches = filter(
+                    lambda ct: getattr(ct.track, key) == value, matches)
         if len(matches) == 1:
             return matches[0]
         criteria_string = ', '.join(
