@@ -1,7 +1,9 @@
 import logging
 import os
 import re
+# pylint: disable = W0402
 import string
+# pylint: enable = W0402
 import sys
 import urllib
 

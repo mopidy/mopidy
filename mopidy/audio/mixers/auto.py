@@ -19,7 +19,9 @@ class AutoAudioMixer(gst.Bin):
         gst.Bin.__init__(self)
         mixer = self._find_mixer()
         if mixer:
+            # pylint: disable=E1101
             self.add(mixer)
+            # pylint: enable=E1101
             logger.debug('AutoAudioMixer chose: %s', mixer.get_name())
         else:
             logger.debug('AutoAudioMixer did not find any usable mixers')

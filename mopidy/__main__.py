@@ -1,4 +1,6 @@
+# pylint: disable = E0611,F0401
 from distutils.version import StrictVersion
+# pylint: enable = E0611,F0401
 import logging
 import optparse
 import os
