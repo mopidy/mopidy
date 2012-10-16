@@ -31,7 +31,8 @@ sys.path.insert(
 import mopidy
 from mopidy import audio, core, exceptions, settings
 from mopidy.utils import (
-    deps, importing, log, path, process, settings as settings_utils)
+    deps, importing, log, path, process, settings as settings_utils,
+    versioning)
 
 
 logger = logging.getLogger('mopidy.main')
@@ -66,7 +67,8 @@ def main():
 
 
 def parse_options():
-    parser = optparse.OptionParser(version=u'Mopidy %s' % mopidy.get_version())
+    parser = optparse.OptionParser(
+        version=u'Mopidy %s' % versioning.get_version())
     parser.add_option(
         '--help-gst',
         action='store_true', dest='help_gst',

@@ -97,7 +97,7 @@ copyright = u'2010-2012, Stein Magnus Jodal and contributors'
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-from mopidy import get_version
+from mopidy.utils.versioning import get_version
 release = get_version()
 # The short X.Y version.
 version = '.'.join(release.split('.')[:2])

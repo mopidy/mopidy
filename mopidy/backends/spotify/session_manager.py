@@ -4,13 +4,13 @@ import threading
 
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
-from mopidy import get_version, settings
+from mopidy import settings
 from mopidy.backends.spotify import BITRATES
 from mopidy.backends.spotify.container_manager import SpotifyContainerManager
 from mopidy.backends.spotify.playlist_manager import SpotifyPlaylistManager
 from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
-from mopidy.utils.process import BaseThread
+from mopidy.utils import process, versioning
 
 logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 
@@ -18,15 +18,15 @@ logger = logging.getLogger('mopidy.backends.spotify.session_manager')
 # SpotifySessionManager: Too many ancestors (9/7)
 
 
-class SpotifySessionManager(BaseThread, PyspotifySessionManager):
+class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     cache_location = settings.SPOTIFY_CACHE_PATH
     settings_location = cache_location
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
-    user_agent = 'Mopidy %s' % get_version()
+    user_agent = 'Mopidy %s' % versioning.get_version()
 
     def __init__(self, username, password, audio, backend_ref):
         PyspotifySessionManager.__init__(self, username, password)
-        BaseThread.__init__(self)
+        process.BaseThread.__init__(self)
         self.name = 'SpotifyThread'
 
         self.audio = audio
