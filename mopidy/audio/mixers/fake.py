@@ -11,7 +11,7 @@ class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
         'FakeMixer',
         'Mixer',
         'Fake mixer for use in tests.',
-        'Thomas Adamcik')
+        'Mopidy')
 
     track_label = gobject.property(type=str, default='Master')
     track_initial_volume = gobject.property(type=int, default=0)

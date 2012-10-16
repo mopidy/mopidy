@@ -23,7 +23,7 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
         'NadMixer',
         'Mixer',
         'Mixer to control NAD amplifiers using a serial link',
-        'Stein Magnus Jodal')
+        'Mopidy')
 
     port = gobject.property(type=str, default='/dev/ttyUSB0')
     source = gobject.property(type=str)

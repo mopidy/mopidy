@@ -14,7 +14,7 @@ class AutoAudioMixer(gst.Bin):
         'AutoAudioMixer',
         'Mixer',
         'Element automatically selects a mixer.',
-        'Thomas Adamcik')
+        'Mopidy')
 
     def __init__(self):
         gst.Bin.__init__(self)
