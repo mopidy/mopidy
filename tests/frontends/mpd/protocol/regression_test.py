@@ -19,7 +19,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
         self.core.current_playlist.append([
             Track(uri='a'), Track(uri='b'), None,
             Track(uri='d'), Track(uri='e'), Track(uri='f')])
-        random.seed(1) # Playlist order: abcfde
+        random.seed(1)  # Playlist order: abcfde
 
         self.sendRequest(u'play')
         self.assertEquals('a', self.core.playback.current_track.get().uri)
@@ -158,7 +158,8 @@ class IssueGH137RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.sendRequest(u'list Date Artist "Anita Ward" '
+        self.sendRequest(
+            u'list Date Artist "Anita Ward" '
             u'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
 
         self.assertInResponse('ACK [2@0] {list} Invalid unquoted character')

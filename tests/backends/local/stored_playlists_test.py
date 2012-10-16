@@ -1,6 +1,4 @@
 import os
-import sys
-
 from mopidy import settings
 from mopidy.backends.local import LocalBackend
 from mopidy.models import Playlist, Track
@@ -12,10 +10,8 @@ from tests.backends.base.stored_playlists import (
 from tests.backends.local import generate_song
 
 
-@unittest.skipIf(sys.platform == 'win32',
-    'Our Windows build server does not support GStreamer yet')
 class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
-        unittest.TestCase):
+                                         unittest.TestCase):
 
     backend_class = LocalBackend
 

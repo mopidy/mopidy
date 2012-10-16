@@ -38,8 +38,8 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'addid "dummy://foo"')
         self.assertEqual(len(self.core.current_playlist.tracks.get()), 6)
         self.assertEqual(self.core.current_playlist.tracks.get()[5], needle)
-        self.assertInResponse(u'Id: %d' %
-            self.core.current_playlist.cp_tracks.get()[5][0])
+        self.assertInResponse(
+            u'Id: %d' % self.core.current_playlist.cp_tracks.get()[5][0])
         self.assertInResponse(u'OK')
 
     def test_addid_with_empty_uri_acks(self):
@@ -57,8 +57,8 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'addid "dummy://foo" "3"')
         self.assertEqual(len(self.core.current_playlist.tracks.get()), 6)
         self.assertEqual(self.core.current_playlist.tracks.get()[3], needle)
-        self.assertInResponse(u'Id: %d' %
-            self.core.current_playlist.cp_tracks.get()[3][0])
+        self.assertInResponse(
+            u'Id: %d' % self.core.current_playlist.cp_tracks.get()[3][0])
         self.assertInResponse(u'OK')
 
     def test_addid_with_songpos_out_of_bounds_should_ack(self):
@@ -91,8 +91,8 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.current_playlist.tracks.get()), 5)
 
-        self.sendRequest(u'delete "%d"' %
-            self.core.current_playlist.cp_tracks.get()[2][0])
+        self.sendRequest(
+            u'delete "%d"' % self.core.current_playlist.cp_tracks.get()[2][0])
         self.assertEqual(len(self.core.current_playlist.tracks.get()), 4)
         self.assertInResponse(u'OK')
 
@@ -233,7 +233,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.core.current_playlist.append([
             Track(uri='file:///exists')])
 
-        self.sendRequest( u'playlistfind filename "file:///exists"')
+        self.sendRequest(u'playlistfind filename "file:///exists"')
         self.assertInResponse(u'file: file:///exists')
         self.assertInResponse(u'Id: 0')
         self.assertInResponse(u'Pos: 0')
@@ -357,7 +357,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_playlistsearch(self):
-        self.sendRequest( u'playlistsearch "any" "needle"')
+        self.sendRequest(u'playlistsearch "any" "needle"')
         self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
 
     def test_playlistsearch_without_quotes(self):

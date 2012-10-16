@@ -35,8 +35,8 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylists(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
-        self.core.stored_playlists.playlists = [Playlist(name='a',
-            last_modified=last_modified)]
+        self.core.stored_playlists.playlists = [
+            Playlist(name='a', last_modified=last_modified)]
 
         self.sendRequest(u'listplaylists')
         self.assertInResponse(u'playlist: a')
@@ -47,8 +47,9 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
     def test_load_known_playlist_appends_to_current_playlist(self):
         self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.current_playlist.tracks.get()), 2)
-        self.core.stored_playlists.playlists = [Playlist(name='A-list',
-            tracks=[Track(uri='c'), Track(uri='d'), Track(uri='e')])]
+        self.core.stored_playlists.playlists = [
+            Playlist(name='A-list', tracks=[
+                Track(uri='c'), Track(uri='d'), Track(uri='e')])]
 
         self.sendRequest(u'load "A-list"')
         tracks = self.core.current_playlist.tracks.get()

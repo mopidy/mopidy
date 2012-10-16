@@ -1,5 +1,3 @@
-import mock
-
 from pykka.registry import ActorRegistry
 
 from mopidy import core
@@ -10,12 +8,16 @@ from tests import unittest, path_to_data_dir
 
 class LibraryControllerTest(object):
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
-    albums = [Album(name='album1', artists=artists[:1]),
+    albums = [
+        Album(name='album1', artists=artists[:1]),
         Album(name='album2', artists=artists[1:2]),
         Album()]
-    tracks = [Track(name='track1', length=4000, artists=artists[:1],
+    tracks = [
+        Track(
+            name='track1', length=4000, artists=artists[:1],
             album=albums[0], uri='file://' + path_to_data_dir('uri1')),
-        Track(name='track2', length=4000, artists=artists[1:2],
+        Track(
+            name='track2', length=4000, artists=artists[1:2],
             album=albums[1], uri='file://' + path_to_data_dir('uri2')),
         Track()]
 

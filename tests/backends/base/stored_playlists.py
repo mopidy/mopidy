@@ -19,7 +19,7 @@ class StoredPlaylistsControllerTest(object):
         self.audio = mock.Mock(spec=audio.Audio)
         self.backend = self.backend_class.start(audio=self.audio).proxy()
         self.core = core.Core(backend=self.backend)
-        self.stored  = self.core.stored_playlists
+        self.stored = self.core.stored_playlists
 
     def tearDown(self):
         if os.path.exists(settings.LOCAL_PLAYLIST_PATH):

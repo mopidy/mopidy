@@ -16,7 +16,8 @@ from tests import unittest
 @unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
-        self.mpris_frontend = MprisFrontend(core=None)  # As a plain class, not an actor
+        # As a plain class, not an actor:
+        self.mpris_frontend = MprisFrontend(core=None)
         self.mpris_object = mock.Mock(spec=objects.MprisObject)
         self.mpris_frontend.mpris_object = self.mpris_object
 
@@ -38,7 +39,7 @@ class BackendEventsTest(unittest.TestCase):
         self.mpris_object.PropertiesChanged.assert_called_with(
             objects.PLAYER_IFACE, {'PlaybackStatus': 'Playing'}, [])
 
-    def test_track_playback_started_event_changes_playback_status_and_metadata(self):
+    def test_track_playback_started_changes_playback_status_and_metadata(self):
         self.mpris_object.Get.return_value = '...'
         self.mpris_frontend.track_playback_started(Track())
         self.assertListEqual(self.mpris_object.Get.call_args_list, [
@@ -49,7 +50,7 @@ class BackendEventsTest(unittest.TestCase):
             objects.PLAYER_IFACE,
             {'Metadata': '...', 'PlaybackStatus': '...'}, [])
 
-    def test_track_playback_ended_event_changes_playback_status_and_metadata(self):
+    def test_track_playback_ended_changes_playback_status_and_metadata(self):
         self.mpris_object.Get.return_value = '...'
         self.mpris_frontend.track_playback_ended(Track(), 0)
         self.assertListEqual(self.mpris_object.Get.call_args_list, [

@@ -59,7 +59,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(objects.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('Track', result)
 
-    def test_get_loop_status_is_playlist_when_looping_the_current_playlist(self):
+    def test_get_loop_status_is_playlist_when_looping_current_playlist(self):
         self.core.playback.repeat = True
         self.core.playback.single = False
         result = self.mpris.Get(objects.PLAYER_IFACE, 'LoopStatus')
@@ -126,19 +126,19 @@ class PlayerInterfaceTest(unittest.TestCase):
     def test_set_shuffle_is_ignored_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
         self.core.playback.random = False
-        result = self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', True)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', True)
         self.assertFalse(self.core.playback.random.get())
 
     def test_set_shuffle_to_true_activates_random_mode(self):
         self.core.playback.random = False
         self.assertFalse(self.core.playback.random.get())
-        result = self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', True)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', True)
         self.assertTrue(self.core.playback.random.get())
 
     def test_set_shuffle_to_false_deactivates_random_mode(self):
         self.core.playback.random = True
         self.assertTrue(self.core.playback.random.get())
-        result = self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', False)
+        self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', False)
         self.assertFalse(self.core.playback.random.get())
 
     def test_get_metadata_has_trackid_even_when_no_current_track(self):
@@ -152,8 +152,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         (cpid, track) = self.core.playback.current_cp_track.get()
         result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertIn('mpris:trackid', result.keys())
-        self.assertEquals(result['mpris:trackid'],
-            '/com/mopidy/track/%d' % cpid)
+        self.assertEquals(
+            result['mpris:trackid'], '/com/mopidy/track/%d' % cpid)
 
     def test_get_metadata_has_track_length(self):
         self.core.current_playlist.append([Track(uri='a', length=40000)])
@@ -233,7 +233,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Set(objects.PLAYER_IFACE, 'Volume', 1.0)
         self.assertEquals(self.core.playback.volume.get(), 100)
 
-    def test_set_volume_to_anything_above_one_should_set_mixer_volume_to_100(self):
+    def test_set_volume_to_anything_above_one_sets_mixer_volume_to_100(self):
         self.mpris.Set(objects.PLAYER_IFACE, 'Volume', 2.0)
         self.assertEquals(self.core.playback.volume.get(), 100)
 
@@ -246,12 +246,14 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.core.current_playlist.append([Track(uri='a', length=40000)])
         self.core.playback.play()
         self.core.playback.seek(10000)
-        result_in_microseconds = self.mpris.Get(objects.PLAYER_IFACE, 'Position')
+        result_in_microseconds = self.mpris.Get(
+            objects.PLAYER_IFACE, 'Position')
         result_in_milliseconds = result_in_microseconds // 1000
         self.assertGreaterEqual(result_in_milliseconds, 10000)
 
     def test_get_position_when_no_current_track_should_be_zero(self):
-        result_in_microseconds = self.mpris.Get(objects.PLAYER_IFACE, 'Position')
+        result_in_microseconds = self.mpris.Get(
+            objects.PLAYER_IFACE, 'Position')
         result_in_milliseconds = result_in_microseconds // 1000
         self.assertEquals(result_in_milliseconds, 0)
 
@@ -285,7 +287,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoNext')
         self.assertFalse(result)
 
-    def test_can_go_previous_is_true_if_can_control_and_other_previous_track(self):
+    def test_can_go_previous_is_true_if_can_control_and_previous_track(self):
         self.mpris.get_CanControl = lambda *_: True
         self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.core.playback.play()
@@ -360,7 +362,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Next()
         self.assertEquals(self.core.playback.current_track.get().uri, 'a')
 
-    def test_next_when_playing_should_skip_to_next_track_and_keep_playing(self):
+    def test_next_when_playing_skips_to_next_track_and_keep_playing(self):
         self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.core.playback.play()
         self.assertEquals(self.core.playback.current_track.get().uri, 'a')
@@ -388,7 +390,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.core.playback.current_track.get().uri, 'b')
         self.assertEquals(self.core.playback.state.get(), PAUSED)
 
-    def test_next_when_stopped_should_skip_to_next_track_and_stay_stopped(self):
+    def test_next_when_stopped_skips_to_next_track_and_stay_stopped(self):
         self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.core.playback.play()
         self.core.playback.stop()
@@ -407,7 +409,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Previous()
         self.assertEquals(self.core.playback.current_track.get().uri, 'b')
 
-    def test_previous_when_playing_should_skip_to_prev_track_and_keep_playing(self):
+    def test_previous_when_playing_skips_to_prev_track_and_keep_playing(self):
         self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.core.playback.play()
         self.core.playback.next()
@@ -425,7 +427,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.Previous()
         self.assertEquals(self.core.playback.state.get(), STOPPED)
 
-    def test_previous_when_paused_should_skip_to_previous_track_and_stay_paused(self):
+    def test_previous_when_paused_skips_to_previous_track_and_pause(self):
         self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.core.playback.play()
         self.core.playback.next()
@@ -436,7 +438,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEquals(self.core.playback.current_track.get().uri, 'a')
         self.assertEquals(self.core.playback.state.get(), PAUSED)
 
-    def test_previous_when_stopped_should_skip_to_previous_track_and_stay_stopped(self):
+    def test_previous_when_stopped_skips_to_previous_track_and_stops(self):
         self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.core.playback.play()
         self.core.playback.next()
@@ -638,8 +640,9 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertLess(after_seek, before_seek)
         self.assertGreaterEqual(after_seek, 0)
 
-    def test_seek_skips_to_next_track_if_new_position_larger_than_track_length(self):
-        self.core.current_playlist.append([Track(uri='a', length=40000),
+    def test_seek_skips_to_next_track_if_new_position_gt_track_length(self):
+        self.core.current_playlist.append([
+            Track(uri='a', length=40000),
             Track(uri='b')])
         self.core.playback.play()
         self.core.playback.seek(20000)
@@ -671,14 +674,14 @@ class PlayerInterfaceTest(unittest.TestCase):
 
         track_id = 'a'
 
-        position_to_set_in_milliseconds = 20000
-        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+        position_to_set_in_millisec = 20000
+        position_to_set_in_microsec = position_to_set_in_millisec * 1000
 
-        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+        self.mpris.SetPosition(track_id, position_to_set_in_microsec)
 
         after_set_position = self.core.playback.time_position.get()
         self.assertLessEqual(before_set_position, after_set_position)
-        self.assertLess(after_set_position, position_to_set_in_milliseconds)
+        self.assertLess(after_set_position, position_to_set_in_millisec)
 
     def test_set_position_sets_the_current_track_position_in_microsecs(self):
         self.core.current_playlist.append([Track(uri='a', length=40000)])
@@ -690,15 +693,16 @@ class PlayerInterfaceTest(unittest.TestCase):
 
         track_id = '/com/mopidy/track/0'
 
-        position_to_set_in_milliseconds = 20000
-        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+        position_to_set_in_millisec = 20000
+        position_to_set_in_microsec = position_to_set_in_millisec * 1000
 
-        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+        self.mpris.SetPosition(track_id, position_to_set_in_microsec)
 
         self.assertEquals(self.core.playback.state.get(), PLAYING)
 
         after_set_position = self.core.playback.time_position.get()
-        self.assertGreaterEqual(after_set_position, position_to_set_in_milliseconds)
+        self.assertGreaterEqual(
+            after_set_position, position_to_set_in_millisec)
 
     def test_set_position_does_nothing_if_the_position_is_negative(self):
         self.core.current_playlist.append([Track(uri='a', length=40000)])
@@ -713,17 +717,17 @@ class PlayerInterfaceTest(unittest.TestCase):
 
         track_id = '/com/mopidy/track/0'
 
-        position_to_set_in_milliseconds = -1000
-        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+        position_to_set_in_millisec = -1000
+        position_to_set_in_microsec = position_to_set_in_millisec * 1000
 
-        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+        self.mpris.SetPosition(track_id, position_to_set_in_microsec)
 
         after_set_position = self.core.playback.time_position.get()
         self.assertGreaterEqual(after_set_position, before_set_position)
         self.assertEquals(self.core.playback.state.get(), PLAYING)
         self.assertEquals(self.core.playback.current_track.get().uri, 'a')
 
-    def test_set_position_does_nothing_if_position_is_larger_than_track_length(self):
+    def test_set_position_does_nothing_if_position_is_gt_track_length(self):
         self.core.current_playlist.append([Track(uri='a', length=40000)])
         self.core.playback.play()
         self.core.playback.seek(20000)
@@ -736,17 +740,17 @@ class PlayerInterfaceTest(unittest.TestCase):
 
         track_id = 'a'
 
-        position_to_set_in_milliseconds = 50000
-        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+        position_to_set_in_millisec = 50000
+        position_to_set_in_microsec = position_to_set_in_millisec * 1000
 
-        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+        self.mpris.SetPosition(track_id, position_to_set_in_microsec)
 
         after_set_position = self.core.playback.time_position.get()
         self.assertGreaterEqual(after_set_position, before_set_position)
         self.assertEquals(self.core.playback.state.get(), PLAYING)
         self.assertEquals(self.core.playback.current_track.get().uri, 'a')
 
-    def test_set_position_does_nothing_if_track_id_does_not_match_current_track(self):
+    def test_set_position_is_noop_if_track_id_isnt_current_track(self):
         self.core.current_playlist.append([Track(uri='a', length=40000)])
         self.core.playback.play()
         self.core.playback.seek(20000)
@@ -759,10 +763,10 @@ class PlayerInterfaceTest(unittest.TestCase):
 
         track_id = 'b'
 
-        position_to_set_in_milliseconds = 0
-        position_to_set_in_microseconds = position_to_set_in_milliseconds * 1000
+        position_to_set_in_millisec = 0
+        position_to_set_in_microsec = position_to_set_in_millisec * 1000
 
-        self.mpris.SetPosition(track_id, position_to_set_in_microseconds)
+        self.mpris.SetPosition(track_id, position_to_set_in_microsec)
 
         after_set_position = self.core.playback.time_position.get()
         self.assertGreaterEqual(after_set_position, before_set_position)
@@ -789,8 +793,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.backend.library.dummy_library = [
             Track(uri='dummy:/test/uri')]
         self.mpris.OpenUri('dummy:/test/uri')
-        self.assertEquals(self.core.current_playlist.tracks.get()[0].uri,
-            'dummy:/test/uri')
+        self.assertEquals(
+            self.core.current_playlist.tracks.get()[0].uri, 'dummy:/test/uri')
 
     def test_open_uri_starts_playback_of_new_track_if_stopped(self):
         self.mpris.get_CanPlay = lambda *_: True
@@ -802,8 +806,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.OpenUri('dummy:/test/uri')
 
         self.assertEquals(self.core.playback.state.get(), PLAYING)
-        self.assertEquals(self.core.playback.current_track.get().uri,
-            'dummy:/test/uri')
+        self.assertEquals(
+            self.core.playback.current_track.get().uri, 'dummy:/test/uri')
 
     def test_open_uri_starts_playback_of_new_track_if_paused(self):
         self.mpris.get_CanPlay = lambda *_: True
@@ -818,8 +822,8 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.OpenUri('dummy:/test/uri')
 
         self.assertEquals(self.core.playback.state.get(), PLAYING)
-        self.assertEquals(self.core.playback.current_track.get().uri,
-            'dummy:/test/uri')
+        self.assertEquals(
+            self.core.playback.current_track.get().uri, 'dummy:/test/uri')
 
     def test_open_uri_starts_playback_of_new_track_if_playing(self):
         self.mpris.get_CanPlay = lambda *_: True
@@ -833,5 +837,5 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris.OpenUri('dummy:/test/uri')
 
         self.assertEquals(self.core.playback.state.get(), PLAYING)
-        self.assertEquals(self.core.playback.current_track.get().uri,
-            'dummy:/test/uri')
+        self.assertEquals(
+            self.core.playback.current_track.get().uri, 'dummy:/test/uri')

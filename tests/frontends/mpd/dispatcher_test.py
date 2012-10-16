@@ -32,14 +32,16 @@ class MpdDispatcherTest(unittest.TestCase):
             self.dispatcher._find_handler('an_unknown_command with args')
             self.fail('Should raise exception')
         except MpdAckError as e:
-            self.assertEqual(e.get_mpd_ack(),
+            self.assertEqual(
+                e.get_mpd_ack(),
                 u'ACK [5@0] {} unknown command "an_unknown_command"')
 
-    def test_finding_handler_for_known_command_returns_handler_and_kwargs(self):
+    def test_find_handler_for_known_command_returns_handler_and_kwargs(self):
         expected_handler = lambda x: None
         request_handlers['known_command (?P<arg1>.+)'] = \
             expected_handler
-        (handler, kwargs) = self.dispatcher._find_handler('known_command an_arg')
+        (handler, kwargs) = self.dispatcher._find_handler(
+            'known_command an_arg')
         self.assertEqual(handler, expected_handler)
         self.assertIn('arg1', kwargs)
         self.assertEqual(kwargs['arg1'], 'an_arg')

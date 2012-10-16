@@ -1,5 +1,6 @@
-from mopidy.frontends.mpd.exceptions import (MpdAckError, MpdPermissionError,
-    MpdUnknownCommand, MpdSystemError, MpdNotImplemented)
+from mopidy.frontends.mpd.exceptions import (
+    MpdAckError, MpdPermissionError, MpdUnknownCommand, MpdSystemError,
+    MpdNotImplemented)
 
 from tests import unittest
 
@@ -34,19 +35,22 @@ class MpdExceptionsTest(unittest.TestCase):
         try:
             raise MpdUnknownCommand(command=u'play')
         except MpdAckError as e:
-            self.assertEqual(e.get_mpd_ack(),
+            self.assertEqual(
+                e.get_mpd_ack(),
                 u'ACK [5@0] {} unknown command "play"')
 
     def test_mpd_system_error(self):
         try:
             raise MpdSystemError('foo')
         except MpdSystemError as e:
-            self.assertEqual(e.get_mpd_ack(),
+            self.assertEqual(
+                e.get_mpd_ack(),
                 u'ACK [52@0] {} foo')
 
     def test_mpd_permission_error(self):
         try:
             raise MpdPermissionError(command='foo')
         except MpdPermissionError as e:
-            self.assertEqual(e.get_mpd_ack(),
+            self.assertEqual(
+                e.get_mpd_ack(),
                 u'ACK [4@0] {foo} you don\'t have permission for "foo"')

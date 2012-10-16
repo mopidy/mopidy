@@ -67,8 +67,8 @@ class ArtistTest(unittest.TestCase):
         mb_id = u'mb-id'
         artist = Artist(musicbrainz_id=mb_id)
         self.assertEqual(artist.musicbrainz_id, mb_id)
-        self.assertRaises(AttributeError, setattr, artist,
-            'musicbrainz_id', None)
+        self.assertRaises(
+            AttributeError, setattr, artist, 'musicbrainz_id', None)
 
     def test_invalid_kwarg(self):
         test = lambda: Artist(foo='baz')
@@ -168,8 +168,8 @@ class AlbumTest(unittest.TestCase):
         mb_id = u'mb-id'
         album = Album(musicbrainz_id=mb_id)
         self.assertEqual(album.musicbrainz_id, mb_id)
-        self.assertRaises(AttributeError, setattr, album,
-            'musicbrainz_id', None)
+        self.assertRaises(
+            AttributeError, setattr, album, 'musicbrainz_id', None)
 
     def test_invalid_kwarg(self):
         test = lambda: Album(foo='baz')
@@ -237,9 +237,11 @@ class AlbumTest(unittest.TestCase):
 
     def test_eq(self):
         artists = [Artist()]
-        album1 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2,
+        album1 = Album(
+            name=u'name', uri=u'uri', artists=artists, num_tracks=2,
             musicbrainz_id='id')
-        album2 = Album(name=u'name', uri=u'uri', artists=artists, num_tracks=2,
+        album2 = Album(
+            name=u'name', uri=u'uri', artists=artists, num_tracks=2,
             musicbrainz_id='id')
         self.assertEqual(album1, album2)
         self.assertEqual(hash(album1), hash(album2))
@@ -281,12 +283,12 @@ class AlbumTest(unittest.TestCase):
         self.assertNotEqual(hash(album1), hash(album2))
 
     def test_ne(self):
-        album1 = Album(name=u'name1', uri=u'uri1',
-            artists=[Artist(name=u'name1')], num_tracks=1,
-            musicbrainz_id='id1')
-        album2 = Album(name=u'name2', uri=u'uri2',
-            artists=[Artist(name=u'name2')], num_tracks=2,
-            musicbrainz_id='id2')
+        album1 = Album(
+            name=u'name1', uri=u'uri1', artists=[Artist(name=u'name1')],
+            num_tracks=1, musicbrainz_id='id1')
+        album2 = Album(
+            name=u'name2', uri=u'uri2', artists=[Artist(name=u'name2')],
+            num_tracks=2, musicbrainz_id='id2')
         self.assertNotEqual(album1, album2)
         self.assertNotEqual(hash(album1), hash(album2))
 
@@ -359,8 +361,8 @@ class TrackTest(unittest.TestCase):
         mb_id = u'mb-id'
         track = Track(musicbrainz_id=mb_id)
         self.assertEqual(track.musicbrainz_id, mb_id)
-        self.assertRaises(AttributeError, setattr, track,
-            'musicbrainz_id', None)
+        self.assertRaises(
+            AttributeError, setattr, track, 'musicbrainz_id', None)
 
     def test_invalid_kwarg(self):
         test = lambda: Track(foo='baz')
@@ -462,12 +464,12 @@ class TrackTest(unittest.TestCase):
         date = '1977-01-01'
         artists = [Artist()]
         album = Album()
-        track1 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
-            track_no=1, date=date, length=100, bitrate=100,
-            musicbrainz_id='id')
-        track2 = Track(uri=u'uri', name=u'name', artists=artists, album=album,
-            track_no=1, date=date, length=100, bitrate=100,
-            musicbrainz_id='id')
+        track1 = Track(
+            uri=u'uri', name=u'name', artists=artists, album=album, track_no=1,
+            date=date, length=100, bitrate=100, musicbrainz_id='id')
+        track2 = Track(
+            uri=u'uri', name=u'name', artists=artists, album=album, track_no=1,
+            date=date, length=100, bitrate=100, musicbrainz_id='id')
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
@@ -532,14 +534,14 @@ class TrackTest(unittest.TestCase):
         self.assertNotEqual(hash(track1), hash(track2))
 
     def test_ne(self):
-        track1 = Track(uri=u'uri1', name=u'name1',
-            artists=[Artist(name=u'name1')], album=Album(name=u'name1'),
-            track_no=1, date='1977-01-01', length=100, bitrate=100,
-            musicbrainz_id='id1')
-        track2 = Track(uri=u'uri2', name=u'name2',
-            artists=[Artist(name=u'name2')], album=Album(name=u'name2'),
-            track_no=2, date='1977-01-02', length=200, bitrate=200,
-            musicbrainz_id='id2')
+        track1 = Track(
+            uri=u'uri1', name=u'name1', artists=[Artist(name=u'name1')],
+            album=Album(name=u'name1'), track_no=1, date='1977-01-01',
+            length=100, bitrate=100, musicbrainz_id='id1')
+        track2 = Track(
+            uri=u'uri2', name=u'name2', artists=[Artist(name=u'name2')],
+            album=Album(name=u'name2'), track_no=2, date='1977-01-02',
+            length=200, bitrate=200, musicbrainz_id='id2')
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 
@@ -572,13 +574,14 @@ class PlaylistTest(unittest.TestCase):
         last_modified = datetime.datetime.now()
         playlist = Playlist(last_modified=last_modified)
         self.assertEqual(playlist.last_modified, last_modified)
-        self.assertRaises(AttributeError, setattr, playlist, 'last_modified',
-            None)
+        self.assertRaises(
+            AttributeError, setattr, playlist, 'last_modified', None)
 
     def test_with_new_uri(self):
         tracks = [Track()]
         last_modified = datetime.datetime.now()
-        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
+        playlist = Playlist(
+            uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_playlist = playlist.copy(uri=u'another uri')
         self.assertEqual(new_playlist.uri, u'another uri')
@@ -589,7 +592,8 @@ class PlaylistTest(unittest.TestCase):
     def test_with_new_name(self):
         tracks = [Track()]
         last_modified = datetime.datetime.now()
-        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
+        playlist = Playlist(
+            uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_playlist = playlist.copy(name=u'another name')
         self.assertEqual(new_playlist.uri, u'an uri')
@@ -600,7 +604,8 @@ class PlaylistTest(unittest.TestCase):
     def test_with_new_tracks(self):
         tracks = [Track()]
         last_modified = datetime.datetime.now()
-        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
+        playlist = Playlist(
+            uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_tracks = [Track(), Track()]
         new_playlist = playlist.copy(tracks=new_tracks)
@@ -613,7 +618,8 @@ class PlaylistTest(unittest.TestCase):
         tracks = [Track()]
         last_modified = datetime.datetime.now()
         new_last_modified = last_modified + datetime.timedelta(1)
-        playlist = Playlist(uri=u'an uri', name=u'a name', tracks=tracks,
+        playlist = Playlist(
+            uri=u'an uri', name=u'a name', tracks=tracks,
             last_modified=last_modified)
         new_playlist = playlist.copy(last_modified=new_last_modified)
         self.assertEqual(new_playlist.uri, u'an uri')
@@ -666,7 +672,7 @@ class PlaylistTest(unittest.TestCase):
         self.assertEqual(playlist1, playlist2)
         self.assertEqual(hash(playlist1), hash(playlist2))
 
-    def test_eq_uri(self):
+    def test_eq_last_modified(self):
         playlist1 = Playlist(last_modified=1)
         playlist2 = Playlist(last_modified=1)
         self.assertEqual(playlist1, playlist2)
@@ -674,10 +680,10 @@ class PlaylistTest(unittest.TestCase):
 
     def test_eq(self):
         tracks = [Track()]
-        playlist1 = Playlist(uri=u'uri', name=u'name', tracks=tracks,
-            last_modified=1)
-        playlist2 = Playlist(uri=u'uri', name=u'name', tracks=tracks,
-            last_modified=1)
+        playlist1 = Playlist(
+            uri=u'uri', name=u'name', tracks=tracks, last_modified=1)
+        playlist2 = Playlist(
+            uri=u'uri', name=u'name', tracks=tracks, last_modified=1)
         self.assertEqual(playlist1, playlist2)
         self.assertEqual(hash(playlist1), hash(playlist2))
 
@@ -705,17 +711,18 @@ class PlaylistTest(unittest.TestCase):
         self.assertNotEqual(playlist1, playlist2)
         self.assertNotEqual(hash(playlist1), hash(playlist2))
 
-    def test_ne_uri(self):
+    def test_ne_last_modified(self):
         playlist1 = Playlist(last_modified=1)
         playlist2 = Playlist(last_modified=2)
         self.assertNotEqual(playlist1, playlist2)
         self.assertNotEqual(hash(playlist1), hash(playlist2))
 
     def test_ne(self):
-        playlist1 = Playlist(uri=u'uri1', name=u'name2',
-            tracks=[Track(uri=u'uri1')], last_modified=1)
-        playlist2 = Playlist(uri=u'uri2', name=u'name2',
-            tracks=[Track(uri=u'uri2')], last_modified=2)
+        playlist1 = Playlist(
+            uri=u'uri1', name=u'name2', tracks=[Track(uri=u'uri1')],
+            last_modified=1)
+        playlist2 = Playlist(
+            uri=u'uri2', name=u'name2', tracks=[Track(uri=u'uri2')],
+            last_modified=2)
         self.assertNotEqual(playlist1, playlist2)
         self.assertNotEqual(hash(playlist1), hash(playlist2))
-

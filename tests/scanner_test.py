@@ -134,8 +134,8 @@ class ScannerTest(unittest.TestCase):
         self.data = {}
 
     def scan(self, path):
-        scanner = Scanner(path_to_data_dir(path),
-            self.data_callback, self.error_callback)
+        scanner = Scanner(
+            path_to_data_dir(path), self.data_callback, self.error_callback)
         scanner.start()
 
     def check(self, name, key, value):
@@ -160,8 +160,9 @@ class ScannerTest(unittest.TestCase):
 
     def test_uri_is_set(self):
         self.scan('scanner/simple')
-        self.check('scanner/simple/song1.mp3', 'uri', 'file://'
-            + path_to_data_dir('scanner/simple/song1.mp3'))
+        self.check(
+            'scanner/simple/song1.mp3', 'uri',
+            'file://%s' % path_to_data_dir('scanner/simple/song1.mp3'))
 
     def test_duration_is_set(self):
         self.scan('scanner/simple')

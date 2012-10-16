@@ -28,8 +28,8 @@ class CommandListsTest(protocol.BaseTestCase):
 
     def test_command_list_with_error_returns_ack_with_correct_index(self):
         self.sendRequest(u'command_list_begin')
-        self.sendRequest(u'play') # Known command
-        self.sendRequest(u'paly') # Unknown command
+        self.sendRequest(u'play')  # Known command
+        self.sendRequest(u'paly')  # Unknown command
         self.sendRequest(u'command_list_end')
         self.assertEqualResponse(u'ACK [5@1] {} unknown command "paly"')
 

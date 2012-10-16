@@ -48,7 +48,8 @@ class CurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_add_at_position_outside_of_playlist(self):
-        test = lambda: self.controller.add(self.tracks[0], len(self.tracks)+2)
+        test = lambda: self.controller.add(
+            self.tracks[0], len(self.tracks) + 2)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
@@ -180,19 +181,19 @@ class CurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_moving_track_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(0, 0, tracks+5)
+        test = lambda: self.controller.move(0, 0, tracks + 5)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_move_group_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(0, 2, tracks+5)
+        test = lambda: self.controller.move(0, 2, tracks + 5)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_move_group_out_of_range(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(tracks+2, tracks+3, 0)
+        test = lambda: self.controller.move(tracks + 2, tracks + 3, 0)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
@@ -253,7 +254,7 @@ class CurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_shuffle_superset(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.shuffle(1, tracks+5)
+        test = lambda: self.controller.shuffle(1, tracks + 5)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist

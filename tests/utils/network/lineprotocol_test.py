@@ -103,8 +103,8 @@ class LineProtocolTest(unittest.TestCase):
         self.mock.parse_lines.return_value = ['line1', 'line2']
         self.mock.decode.return_value = sentinel.decoded
 
-        network.LineProtocol.on_receive(self.mock,
-            {'received': 'line1\nline2\n'})
+        network.LineProtocol.on_receive(
+            self.mock, {'received': 'line1\nline2\n'})
         self.assertEqual(2, self.mock.on_line_received.call_count)
 
     def test_parse_lines_emtpy_buffer(self):

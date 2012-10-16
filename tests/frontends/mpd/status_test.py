@@ -1,6 +1,6 @@
 from pykka.registry import ActorRegistry
 
-from mopidy import audio, core
+from mopidy import core
 from mopidy.backends import dummy
 from mopidy.core import PlaybackState
 from mopidy.frontends.mpd import dispatcher
@@ -97,7 +97,7 @@ class StatusHandlerTest(unittest.TestCase):
     def test_status_method_contains_playlist(self):
         result = dict(status.status(self.context))
         self.assertIn('playlist', result)
-        self.assertIn(int(result['playlist']), xrange(0, 2**31 - 1))
+        self.assertIn(int(result['playlist']), xrange(0, 2 ** 31 - 1))
 
     def test_status_method_contains_playlistlength(self):
         result = dict(status.status(self.context))

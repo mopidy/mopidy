@@ -49,7 +49,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertNotIn(('Id', 1), result)
 
     def test_track_to_mpd_format_with_position_and_cpid(self):
-        result = translator.track_to_mpd_format(CpTrack(2, Track()), position=1)
+        result = translator.track_to_mpd_format(
+            CpTrack(2, Track()), position=1)
         self.assertIn(('Pos', 1), result)
         self.assertIn(('Id', 2), result)
 
@@ -79,7 +80,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_ALBUMID', 'foo'), result)
 
-    def test_track_to_mpd_format_musicbrainz_albumid(self):
+    def test_track_to_mpd_format_musicbrainz_albumartistid(self):
         artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
         album = self.track.album.copy(artists=[artist])
         track = self.track.copy(album=album)
@@ -131,7 +132,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         folder = settings.LOCAL_MUSIC_PATH
         result = dict(translator.track_to_mpd_format(track))
         result['file'] = uri_to_path(result['file'])
-        result['file'] = result['file'][len(folder)+1:]
+        result['file'] = result['file'][len(folder) + 1:]
         result['key'] = os.path.basename(result['file'])
         result['mtime'] = mtime('')
         return translator.order_mpd_track_info(result.items())
@@ -147,7 +148,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         self.assertEqual(('songList begin',), result[0])
         for i, row in enumerate(result):
             if row == ('songList end',):
-                return result[1:i], result[i+1:]
+                return result[1:i], result[i + 1:]
         self.fail("Couldn't find songList end in result")
 
     def consume_directory(self, result):
@@ -157,7 +158,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         directory = result[2][1]
         for i, row in enumerate(result):
             if row == ('end', directory):
-                return result[3:i], result[i+1:]
+                return result[3:i], result[i + 1:]
         self.fail("Couldn't find end %s in result" % directory)
 
     def test_empty_tag_cache_has_header(self):
