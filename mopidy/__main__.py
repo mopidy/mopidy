@@ -1,3 +1,4 @@
+from distutils.version import StrictVersion
 import logging
 import optparse
 import os
@@ -6,6 +7,8 @@ import sys
 
 import gobject
 gobject.threads_init()
+
+import pykka
 
 
 # Extract any non-GStreamer arguments, and leave the GStreamer arguments for
@@ -39,6 +42,7 @@ logger = logging.getLogger('mopidy.main')
 
 
 def main():
+    check_dependencies()
     signal.signal(signal.SIGTERM, process.exit_handler)
     loop = gobject.MainLoop()
     options = parse_options()
@@ -64,6 +68,14 @@ def main():
         stop_backend()
         stop_audio()
         process.stop_remaining_actors()
+
+
+def check_dependencies():
+    pykka_required = '0.16'
+    if StrictVersion(pykka.__version__) < StrictVersion(pykka_required):
+        sys.exit(
+            u'Mopidy requires Pykka >= %s, but found %s' %
+            (pykka_required, pykka.__version__))
 
 
 def parse_options():

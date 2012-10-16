@@ -1,16 +1,11 @@
+import os
+import platform
 import sys
+
 if not (2, 6) <= sys.version_info < (3,):
     sys.exit(u'Mopidy requires Python >= 2.6, < 3')
 
-from distutils.version import StrictVersion
-import os
-import platform
-
 import glib
-
-import pykka
-if StrictVersion(pykka.__version__) < StrictVersion('0.16'):
-    sys.exit(u'Mopidy requires Pykka >= 0.16')
 
 __version__ = '0.8.0'
 
