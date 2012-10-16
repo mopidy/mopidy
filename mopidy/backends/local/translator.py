@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger('mopidy.backends.local.translator')
 
 from mopidy.models import Track, Artist, Album
-from mopidy.utils import locale_decode
+from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri
 
 

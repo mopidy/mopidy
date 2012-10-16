@@ -9,7 +9,7 @@ from pykka import ActorDeadError
 from pykka.actor import ThreadingActor
 from pykka.registry import ActorRegistry
 
-from mopidy.utils import locale_decode
+from mopidy.utils import encoding
 
 
 logger = logging.getLogger('mopidy.utils.server')
@@ -30,7 +30,7 @@ def try_ipv6_socket():
         logger.debug(
             u'Platform supports IPv6, but socket creation failed, '
             u'disabling: %s',
-            locale_decode(error))
+            encoding.locale_decode(error))
     return False
 
 

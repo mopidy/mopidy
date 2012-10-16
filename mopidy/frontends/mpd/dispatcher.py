@@ -5,7 +5,6 @@ from pykka import ActorDeadError
 
 from mopidy import settings
 from mopidy.frontends.mpd import exceptions, protocol
-from mopidy.utils import flatten
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
 
@@ -187,10 +186,19 @@ class MpdDispatcher(object):
         if result is None:
             return []
         if isinstance(result, set):
-            return flatten(list(result))
+            return self._flatten(list(result))
         if not isinstance(result, list):
             return [result]
-        return flatten(result)
+        return self._flatten(result)
+
+    def _flatten(self, the_list):
+        result = []
+        for element in the_list:
+            if isinstance(element, list):
+                result.extend(self._flatten(element))
+            else:
+                result.append(element)
+        return result
 
     def _format_lines(self, line):
         if isinstance(line, dict):

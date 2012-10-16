@@ -7,7 +7,7 @@ import logging
 
 from pykka.actor import ThreadingActor
 
-from mopidy import settings, utils
+from mopidy import settings
 from mopidy.utils import process
 
 from . import mixers
@@ -320,7 +320,7 @@ class Audio(ThreadingActor):
         new_scale = (0, 100)
         old_scale = (
             self._mixer_track.min_volume, self._mixer_track.max_volume)
-        return utils.rescale(avg_volume, old=old_scale, new=new_scale)
+        return self._rescale(avg_volume, old=old_scale, new=new_scale)
 
     def set_volume(self, volume):
         """
@@ -341,12 +341,19 @@ class Audio(ThreadingActor):
         new_scale = (
             self._mixer_track.min_volume, self._mixer_track.max_volume)
 
-        volume = utils.rescale(volume, old=old_scale, new=new_scale)
+        volume = self._rescale(volume, old=old_scale, new=new_scale)
 
         volumes = (volume,) * self._mixer_track.num_channels
         self._mixer.set_volume(self._mixer_track, volumes)
 
         return self._mixer.get_volume(self._mixer_track) == volumes
+
+    def _rescale(self, value, old=None, new=None):
+        """Convert value between scales."""
+        new_min, new_max = new
+        old_min, old_max = old
+        scaling = float(new_max - new_min) / (old_max - old_min)
+        return round(scaling * (value - old_min) + new_min)
 
     def set_metadata(self, track):
         """

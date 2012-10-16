@@ -5,7 +5,7 @@ from pykka import registry, actor
 
 from mopidy import core, settings
 from mopidy.frontends.mpd import session
-from mopidy.utils import locale_decode, network, process
+from mopidy.utils import encoding, network, process
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
@@ -37,7 +37,8 @@ class MpdFrontend(actor.ThreadingActor, core.CoreListener):
                 max_connections=settings.MPD_SERVER_MAX_CONNECTIONS)
         except IOError as error:
             logger.error(
-                u'MPD server startup failed: %s', locale_decode(error))
+                u'MPD server startup failed: %s',
+                encoding.locale_decode(error))
             sys.exit(1)
 
         logger.info(u'MPD server running at [%s]:%s', hostname, port)

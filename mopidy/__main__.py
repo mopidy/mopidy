@@ -29,10 +29,9 @@ sys.path.insert(
 
 
 import mopidy
-from mopidy import audio, core, exceptions, settings, utils
-from mopidy.utils import log, path, process
-from mopidy.utils.deps import list_deps_optparse_callback
-from mopidy.utils.settings import list_settings_optparse_callback
+from mopidy import audio, core, exceptions, settings
+from mopidy.utils import (
+    deps, importing, log, path, process, settings as settings_utils)
 
 
 logger = logging.getLogger('mopidy.main')
@@ -90,11 +89,12 @@ def parse_options():
         help='save debug log to "./mopidy.log"')
     parser.add_option(
         '--list-settings',
-        action='callback', callback=list_settings_optparse_callback,
+        action='callback',
+        callback=settings_utils.list_settings_optparse_callback,
         help='list current settings')
     parser.add_option(
         '--list-deps',
-        action='callback', callback=list_deps_optparse_callback,
+        action='callback', callback=deps.list_deps_optparse_callback,
         help='list dependencies and their versions')
     return parser.parse_args(args=mopidy_args)[0]
 
@@ -131,11 +131,11 @@ def stop_audio():
 
 
 def setup_backend(audio):
-    return utils.get_class(settings.BACKENDS[0]).start(audio=audio).proxy()
+    return importing.get_class(settings.BACKENDS[0]).start(audio=audio).proxy()
 
 
 def stop_backend():
-    process.stop_actors_by_class(utils.get_class(settings.BACKENDS[0]))
+    process.stop_actors_by_class(importing.get_class(settings.BACKENDS[0]))
 
 
 def setup_core(audio, backend):
@@ -149,7 +149,7 @@ def stop_core():
 def setup_frontends(core):
     for frontend_class_name in settings.FRONTENDS:
         try:
-            utils.get_class(frontend_class_name).start(core=core)
+            importing.get_class(frontend_class_name).start(core=core)
         except exceptions.OptionalDependencyError as ex:
             logger.info(u'Disabled: %s (%s)', frontend_class_name, ex)
 
@@ -157,7 +157,8 @@ def setup_frontends(core):
 def stop_frontends():
     for frontend_class_name in settings.FRONTENDS:
         try:
-            process.stop_actors_by_class(utils.get_class(frontend_class_name))
+            frontend_class = importing.get_class(frontend_class_name)
+            process.stop_actors_by_class(frontend_class)
         except exceptions.OptionalDependencyError:
             pass
 
