@@ -4,7 +4,7 @@ from pykka.registry import ActorRegistry
 
 from mopidy import core, settings
 from mopidy.backends import dummy
-from mopidy.frontends import mpd
+from mopidy.frontends.mpd import session
 
 from tests import unittest
 
@@ -27,7 +27,7 @@ class BaseTestCase(unittest.TestCase):
         self.core = core.Core.start(backend=self.backend).proxy()
 
         self.connection = MockConnection()
-        self.session = mpd.MpdSession(self.connection, core=self.core)
+        self.session = session.MpdSession(self.connection, core=self.core)
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
