@@ -15,4 +15,6 @@ def register_mixer(mixer_class):
 
 
 def register_mixers():
-    map(register_mixer, [AutoAudioMixer, FakeMixer, NadMixer])
+    register_mixer(AutoAudioMixer)
+    register_mixer(FakeMixer)
+    register_mixer(NadMixer)
