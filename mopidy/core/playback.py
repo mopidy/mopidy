@@ -13,7 +13,9 @@ def option_wrapper(name, default):
 
     def set_option(self, value):
         if getattr(self, name, default) != value:
+            # pylint: disable = W0212
             self._trigger_options_changed()
+            # pylint: enable = W0212
         return setattr(self, name, value)
 
     return property(get_option, set_option)
