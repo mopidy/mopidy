@@ -5,6 +5,16 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+v0.8.1 (in development)
+=======================
+
+**Bug fixes**
+
+- :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors
+  observed by some users on some Spotify tracks due to a change introduced in
+  0.8.0. See the issue for a patch that applies to 0.8.0.
+
+
 v0.8.0 (2012-09-20)
 ===================
 
