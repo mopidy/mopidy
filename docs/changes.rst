@@ -12,6 +12,12 @@ v0.9.0 (in development)
 
 - Pykka >= 0.16 is now required.
 
+**Bug fixes**
+
+- :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors
+  observed by some users on some Spotify tracks due to a change introduced in
+  0.8.0. See the issue for a patch that applies to 0.8.0.
+
 
 v0.8.0 (2012-09-20)
 ===================

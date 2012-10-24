@@ -61,6 +61,21 @@ class Audio(ThreadingActor):
         fakesink = gst.element_factory_make('fakesink')
         self._playbin.set_property('video-sink', fakesink)
 
+        self._playbin.connect('notify::source', self._on_new_source)
+
+    def _on_new_source(self, element, pad):
+        uri = element.get_property('uri')
+        if not uri or not uri.startswith('appsrc://'):
+            return
+
+        # These caps matches the audio data provided by libspotify
+        default_caps = gst.Caps(
+            'audio/x-raw-int, endianness=(int)1234, channels=(int)2, '
+            'width=(int)16, depth=(int)16, signed=(boolean)true, '
+            'rate=(int)44100')
+        source = element.get_property('source')
+        source.set_property('caps', default_caps)
+
     def _teardown_playbin(self):
         self._playbin.set_state(gst.STATE_NULL)
 
