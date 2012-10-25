@@ -41,9 +41,10 @@ Code style
 ==========
 
 - Follow :pep:`8` unless otherwise noted. `pep8.py
-  <http://pypi.python.org/pypi/pep8/>`_ can be used to check your code against
-  the guidelines, however remember that matching the style of the surrounding
-  code is also important.
+  <http://pypi.python.org/pypi/pep8/>`_ or `flake8
+  <http://pypi.python.org/pypi/flake8>`_  can be used to check your code
+  against the guidelines, however remember that matching the style of the
+  surrounding code is also important.
 
 - Use four spaces for indentation, *never* tabs.
 
