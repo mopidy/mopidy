@@ -1,10 +1,10 @@
 import logging
 
-logger = logging.getLogger('mopidy.backends.local.translator')
-
 from mopidy.models import Track, Artist, Album
 from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri
+
+logger = logging.getLogger('mopidy.backends.local')
 
 
 def parse_m3u(file_path, music_folder):
