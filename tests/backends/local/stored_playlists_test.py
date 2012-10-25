@@ -1,4 +1,5 @@
 import os
+
 from mopidy import settings
 from mopidy.backends.local import LocalBackend
 from mopidy.models import Playlist, Track
