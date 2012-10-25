@@ -3,11 +3,12 @@ import Queue
 
 from spotify import Link, SpotifyError
 
-from mopidy.backends.base import BaseLibraryProvider
-from mopidy.backends.spotify.translator import SpotifyTranslator
+from mopidy.backends import base
 from mopidy.models import Track, Playlist
 
-logger = logging.getLogger('mopidy.backends.spotify.library')
+from .translator import SpotifyTranslator
+
+logger = logging.getLogger('mopidy.backends.spotify')
 
 
 class SpotifyTrack(Track):
@@ -49,7 +50,7 @@ class SpotifyTrack(Track):
         return self._proxy.copy(**values)
 
 
-class SpotifyLibraryProvider(BaseLibraryProvider):
+class SpotifyLibraryProvider(base.BaseLibraryProvider):
     def find_exact(self, **query):
         return self.search(**query)
 

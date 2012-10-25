@@ -3,7 +3,7 @@ import logging
 
 from spotify.manager import SpotifyPlaylistManager as PyspotifyPlaylistManager
 
-logger = logging.getLogger('mopidy.backends.spotify.playlist_manager')
+logger = logging.getLogger('mopidy.backends.spotify')
 
 
 class SpotifyPlaylistManager(PyspotifyPlaylistManager):

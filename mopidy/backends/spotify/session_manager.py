@@ -5,14 +5,16 @@ import threading
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from mopidy import settings
-from mopidy.backends.spotify import BITRATES
-from mopidy.backends.spotify.container_manager import SpotifyContainerManager
-from mopidy.backends.spotify.playlist_manager import SpotifyPlaylistManager
-from mopidy.backends.spotify.translator import SpotifyTranslator
 from mopidy.models import Playlist
 from mopidy.utils import process, versioning
 
-logger = logging.getLogger('mopidy.backends.spotify.session_manager')
+from .container_manager import SpotifyContainerManager
+from .playlist_manager import SpotifyPlaylistManager
+from .translator import SpotifyTranslator
+
+logger = logging.getLogger('mopidy.backends.spotify')
+
+BITRATES = {96: 2, 160: 0, 320: 1}
 
 # pylint: disable = R0901
 # SpotifySessionManager: Too many ancestors (9/7)

@@ -3,7 +3,7 @@ import logging
 from spotify.manager import SpotifyContainerManager as \
     PyspotifyContainerManager
 
-logger = logging.getLogger('mopidy.backends.spotify.container_manager')
+logger = logging.getLogger('mopidy.backends.spotify')
 
 
 class SpotifyContainerManager(PyspotifyContainerManager):

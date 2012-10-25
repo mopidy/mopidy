@@ -3,14 +3,14 @@ import time
 
 from spotify import Link, SpotifyError
 
-from mopidy.backends.base import BasePlaybackProvider
+from mopidy.backends import base
 from mopidy.core import PlaybackState
 
 
-logger = logging.getLogger('mopidy.backends.spotify.playback')
+logger = logging.getLogger('mopidy.backends.spotify')
 
 
-class SpotifyPlaybackProvider(BasePlaybackProvider):
+class SpotifyPlaybackProvider(base.BasePlaybackProvider):
     def __init__(self, *args, **kwargs):
         super(SpotifyPlaybackProvider, self).__init__(*args, **kwargs)
 
