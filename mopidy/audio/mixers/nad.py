@@ -10,7 +10,7 @@ try:
 except ImportError:
     serial = None  # noqa
 
-from pykka.actor import ThreadingActor
+import pykka
 
 from . import utils
 
@@ -74,7 +74,7 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
         ).proxy()
 
 
-class NadTalker(ThreadingActor):
+class NadTalker(pykka.ThreadingActor):
     """
     Independent thread which does the communication with the NAD amplifier
 

@@ -1,7 +1,7 @@
 import logging
 import re
 
-from pykka import ActorDeadError
+import pykka
 
 from mopidy import settings
 from mopidy.frontends.mpd import exceptions, protocol
@@ -156,7 +156,7 @@ class MpdDispatcher(object):
         try:
             response = self._format_response(self._call_handler(request))
             return self._call_next_filter(request, response, filter_chain)
-        except ActorDeadError as e:
+        except pykka.ActorDeadError as e:
             logger.warning(u'Tried to communicate with dead actor.')
             raise exceptions.MpdSystemError(e)
 

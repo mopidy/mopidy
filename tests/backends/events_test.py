@@ -1,6 +1,5 @@
 import mock
-
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import audio, core
 from mopidy.backends import dummy
@@ -17,7 +16,7 @@ class BackendEventsTest(unittest.TestCase):
         self.core = core.Core.start(backend=self.backend).proxy()
 
     def tearDown(self):
-        ActorRegistry.stop_all()
+        pykka.ActorRegistry.stop_all()
 
     def test_pause_sends_track_playback_paused_event(self, send):
         self.core.current_playlist.add(Track(uri='a'))

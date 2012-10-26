@@ -1,4 +1,4 @@
-from pykka.registry import ActorRegistry
+import pykka
 
 
 class AudioListener(object):
@@ -15,7 +15,7 @@ class AudioListener(object):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of audio listener events"""
-        listeners = ActorRegistry.get_by_class(AudioListener)
+        listeners = pykka.ActorRegistry.get_by_class(AudioListener)
         for listener in listeners:
             getattr(listener.proxy(), event)(**kwargs)
 

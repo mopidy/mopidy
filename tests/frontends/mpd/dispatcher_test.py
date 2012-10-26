@@ -1,4 +1,4 @@
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import core
 from mopidy.backends import dummy
@@ -16,7 +16,7 @@ class MpdDispatcherTest(unittest.TestCase):
         self.dispatcher = MpdDispatcher()
 
     def tearDown(self):
-        ActorRegistry.stop_all()
+        pykka.ActorRegistry.stop_all()
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None

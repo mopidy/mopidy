@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from pykka import registry, actor
+import pykka
 
 from mopidy import settings
 from mopidy.core import CoreListener
@@ -11,7 +11,7 @@ from mopidy.utils import encoding, network, process
 logger = logging.getLogger('mopidy.frontends.mpd')
 
 
-class MpdFrontend(actor.ThreadingActor, CoreListener):
+class MpdFrontend(pykka.ThreadingActor, CoreListener):
     """
     The MPD frontend.
 
@@ -50,7 +50,7 @@ class MpdFrontend(actor.ThreadingActor, CoreListener):
     def send_idle(self, subsystem):
         # FIXME this should be updated once pykka supports non-blocking calls
         # on proxies or some similar solution
-        registry.ActorRegistry.broadcast({
+        pykka.ActorRegistry.broadcast({
             'command': 'pykka_call',
             'attr_path': ('on_idle',),
             'args': [subsystem],

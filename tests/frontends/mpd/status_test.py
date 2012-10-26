@@ -1,4 +1,4 @@
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import core
 from mopidy.backends import dummy
@@ -26,7 +26,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.context = self.dispatcher.context
 
     def tearDown(self):
-        ActorRegistry.stop_all()
+        pykka.ActorRegistry.stop_all()
 
     def test_stats_method(self):
         result = status.stats(self.context)

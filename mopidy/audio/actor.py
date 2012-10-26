@@ -5,7 +5,7 @@ import gobject
 
 import logging
 
-from pykka.actor import ThreadingActor
+import pykka
 
 from mopidy import settings
 from mopidy.utils import process
@@ -18,7 +18,7 @@ logger = logging.getLogger('mopidy.audio')
 mixers.register_mixers()
 
 
-class Audio(ThreadingActor):
+class Audio(pykka.ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
 

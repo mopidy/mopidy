@@ -1,7 +1,7 @@
 import mock
 import random
 
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import audio, core
 from mopidy.core import PlaybackState
@@ -23,7 +23,7 @@ class CurrentPlaylistControllerTest(object):
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
 
     def tearDown(self):
-        ActorRegistry.stop_all()
+        pykka.ActorRegistry.stop_all()
 
     def test_length(self):
         self.assertEqual(0, len(self.controller.cp_tracks))

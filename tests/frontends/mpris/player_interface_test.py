@@ -1,8 +1,7 @@
 import sys
 
 import mock
-
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import core, exceptions
 from mopidy.backends import dummy
@@ -30,7 +29,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.mpris = objects.MprisObject(core=self.core)
 
     def tearDown(self):
-        ActorRegistry.stop_all()
+        pykka.ActorRegistry.stop_all()
 
     def test_get_playback_status_is_playing_when_playing(self):
         self.core.playback.state = PLAYING

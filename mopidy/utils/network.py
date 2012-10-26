@@ -5,9 +5,7 @@ import re
 import socket
 import threading
 
-from pykka import ActorDeadError
-from pykka.actor import ThreadingActor
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy.utils import encoding
 
@@ -105,7 +103,7 @@ class Server(object):
                 self.number_of_connections() >= self.max_connections)
 
     def number_of_connections(self):
-        return len(ActorRegistry.get_by_class(self.protocol))
+        return len(pykka.ActorRegistry.get_by_class(self.protocol))
 
     def reject_connection(self, sock, addr):
         # FIXME provide more context in logging?
@@ -164,7 +162,7 @@ class Connection(object):
 
         try:
             self.actor_ref.stop(block=False)
-        except ActorDeadError:
+        except pykka.ActorDeadError:
             pass
 
         self.disable_timeout()
@@ -266,7 +264,7 @@ class Connection(object):
 
         try:
             self.actor_ref.tell({'received': data})
-        except ActorDeadError:
+        except pykka.ActorDeadError:
             self.stop(u'Actor is dead.')
 
         return True
@@ -295,7 +293,7 @@ class Connection(object):
         return False
 
 
-class LineProtocol(ThreadingActor):
+class LineProtocol(pykka.ThreadingActor):
     """
     Base class for handling line based protocols.
 

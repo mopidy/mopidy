@@ -1,6 +1,6 @@
 import logging
 
-from pykka.actor import ThreadingActor
+import pykka
 
 from mopidy import settings
 from mopidy.backends import base
@@ -8,7 +8,7 @@ from mopidy.backends import base
 logger = logging.getLogger('mopidy.backends.spotify')
 
 
-class SpotifyBackend(ThreadingActor, base.Backend):
+class SpotifyBackend(pykka.ThreadingActor, base.Backend):
     """
     A backend for playing music from the `Spotify <http://www.spotify.com/>`_
     music streaming service. The backend uses the official `libspotify

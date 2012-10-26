@@ -1,4 +1,4 @@
-import pykka.future
+import pykka
 
 from mopidy.core import PlaybackState
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
@@ -186,7 +186,7 @@ def status(context):
             context.core.playback.current_playlist_position),
         'playback.time_position': context.core.playback.time_position,
     }
-    pykka.future.get_all(futures.values())
+    pykka.get_all(futures.values())
     result = [
         ('volume', _status_volume(futures)),
         ('repeat', _status_repeat(futures)),

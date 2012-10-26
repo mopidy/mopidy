@@ -1,10 +1,10 @@
-from pykka.actor import ThreadingActor
+import pykka
 
 from mopidy.backends import base
 from mopidy.models import Playlist
 
 
-class DummyBackend(ThreadingActor, base.Backend):
+class DummyBackend(pykka.ThreadingActor, base.Backend):
     """
     A backend which implements the backend API in the simplest way possible.
     Used in tests of the frontends.

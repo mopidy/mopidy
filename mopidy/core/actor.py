@@ -1,4 +1,4 @@
-from pykka.actor import ThreadingActor
+import pykka
 
 from mopidy.audio import AudioListener
 
@@ -8,7 +8,7 @@ from .playback import PlaybackController
 from .stored_playlists import StoredPlaylistsController
 
 
-class Core(ThreadingActor, AudioListener):
+class Core(pykka.ThreadingActor, AudioListener):
     #: The current playlist controller. An instance of
     #: :class:`mopidy.core.CurrentPlaylistController`.
     current_playlist = None

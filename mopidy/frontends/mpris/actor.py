@@ -1,6 +1,6 @@
 import logging
 
-from pykka.actor import ThreadingActor
+import pykka
 
 from mopidy import settings
 from mopidy.core import CoreListener
@@ -15,7 +15,7 @@ except ImportError as import_error:
     logger.debug(u'Startup notification will not be sent (%s)', import_error)
 
 
-class MprisFrontend(ThreadingActor, CoreListener):
+class MprisFrontend(pykka.ThreadingActor, CoreListener):
     """
     Frontend which lets you control Mopidy through the Media Player Remote
     Interfacing Specification (`MPRIS <http://www.mpris.org/>`_) D-Bus

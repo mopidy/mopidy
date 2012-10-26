@@ -1,4 +1,4 @@
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import core
 from mopidy.models import Playlist, Track, Album, Artist
@@ -27,7 +27,7 @@ class LibraryControllerTest(object):
         self.library = self.core.library
 
     def tearDown(self):
-        ActorRegistry.stop_all()
+        pykka.ActorRegistry.stop_all()
 
     def test_refresh(self):
         self.library.refresh()

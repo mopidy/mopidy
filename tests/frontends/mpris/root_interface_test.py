@@ -1,8 +1,7 @@
 import sys
 
 import mock
-
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import core, exceptions, settings
 from mopidy.backends import dummy
@@ -25,7 +24,7 @@ class RootInterfaceTest(unittest.TestCase):
         self.mpris = objects.MprisObject(core=self.core)
 
     def tearDown(self):
-        ActorRegistry.stop_all()
+        pykka.ActorRegistry.stop_all()
 
     def test_constructor_connects_to_dbus(self):
         self.assert_(self.mpris._connect_to_dbus.called)

@@ -1,4 +1,4 @@
-from pykka.registry import ActorRegistry
+import pykka
 
 
 class CoreListener(object):
@@ -15,7 +15,7 @@ class CoreListener(object):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of core listener events"""
-        listeners = ActorRegistry.get_by_class(CoreListener)
+        listeners = pykka.ActorRegistry.get_by_class(CoreListener)
         for listener in listeners:
             getattr(listener.proxy(), event)(**kwargs)
 

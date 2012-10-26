@@ -1,7 +1,7 @@
 import logging
 import time
 
-from pykka.actor import ThreadingActor
+import pykka
 
 from mopidy import exceptions, settings
 from mopidy.core import CoreListener
@@ -17,7 +17,7 @@ API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
 
-class LastfmFrontend(ThreadingActor, CoreListener):
+class LastfmFrontend(pykka.ThreadingActor, CoreListener):
     """
     Frontend which scrobbles the music you play to your `Last.fm
     <http://www.last.fm>`_ profile.

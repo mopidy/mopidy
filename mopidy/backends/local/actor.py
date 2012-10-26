@@ -1,6 +1,6 @@
 import logging
 
-from pykka.actor import ThreadingActor
+import pykka
 
 from mopidy.backends import base
 
@@ -10,7 +10,7 @@ from .stored_playlists import LocalStoredPlaylistsProvider
 logger = logging.getLogger(u'mopidy.backends.local')
 
 
-class LocalBackend(ThreadingActor, base.Backend):
+class LocalBackend(pykka.ThreadingActor, base.Backend):
     """
     A backend for playing music from a local music archive.
 

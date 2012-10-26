@@ -1,6 +1,5 @@
 import mock
-
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import core, settings
 from mopidy.backends import dummy
@@ -32,7 +31,7 @@ class BaseTestCase(unittest.TestCase):
         self.context = self.dispatcher.context
 
     def tearDown(self):
-        ActorRegistry.stop_all()
+        pykka.ActorRegistry.stop_all()
         settings.runtime.clear()
 
     def sendRequest(self, request):
