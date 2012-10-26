@@ -26,7 +26,7 @@ dependencies installed.
 
   - Python >= 2.6, < 3
 
-  - Pykka >= 0.16::
+  - Pykka >= 1.0::
 
         sudo pip install -U pykka
 
