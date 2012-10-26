@@ -84,20 +84,20 @@ class Audio(ThreadingActor):
             output = gst.parse_bin_from_description(
                 settings.OUTPUT, ghost_unconnected_pads=True)
             self._playbin.set_property('audio-sink', output)
-            logger.info('Output set to %s', settings.OUTPUT)
+            logger.info('Audio output set to "%s"', settings.OUTPUT)
         except gobject.GError as ex:
             logger.error(
-                'Failed to create output "%s": %s', settings.OUTPUT, ex)
+                'Failed to create audio output "%s": %s', settings.OUTPUT, ex)
             process.exit_process()
 
     def _setup_mixer(self):
         if not settings.MIXER:
-            logger.info('Not setting up mixer.')
+            logger.info('Not setting up audio mixer')
             return
 
         if settings.MIXER == 'software':
             self._software_mixing = True
-            logger.info('Mixer set to software mixing.')
+            logger.info('Audio mixer is using software mixing')
             return
 
         try:
@@ -105,28 +105,31 @@ class Audio(ThreadingActor):
                 settings.MIXER, ghost_unconnected_pads=False)
         except gobject.GError as ex:
             logger.warning(
-                'Failed to create mixer "%s": %s', settings.MIXER, ex)
+                'Failed to create audio mixer "%s": %s', settings.MIXER, ex)
             return
 
         # We assume that the bin will contain a single mixer.
         mixer = mixerbin.get_by_interface('GstMixer')
         if not mixer:
-            logger.warning('Did not find any mixers in %r', settings.MIXER)
+            logger.warning(
+                'Did not find any audio mixers in "%s"', settings.MIXER)
             return
 
         if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
-            logger.warning('Setting mixer %r to READY failed.', settings.MIXER)
+            logger.warning(
+                'Setting audio mixer "%s" to READY failed', settings.MIXER)
             return
 
         track = self._select_mixer_track(mixer, settings.MIXER_TRACK)
         if not track:
-            logger.warning('Could not find usable mixer track.')
+            logger.warning('Could not find usable audio mixer track')
             return
 
         self._mixer = mixer
         self._mixer_track = track
-        logger.info('Mixer set to %s using track called %s',
-                    mixer.get_factory().get_name(), track.label)
+        logger.info(
+            'Audio mixer set to "%s" using track "%s"',
+            mixer.get_factory().get_name(), track.label)
 
     def _select_mixer_track(self, mixer, track_label):
         # Look for track with label == MIXER_TRACK, otherwise fallback to
@@ -297,15 +300,15 @@ class Audio(ThreadingActor):
         result = self._playbin.set_state(state)
         if result == gst.STATE_CHANGE_FAILURE:
             logger.warning(
-                'Setting GStreamer state to %s: failed', state.value_name)
+                'Setting GStreamer state to %s failed', state.value_name)
             return False
         elif result == gst.STATE_CHANGE_ASYNC:
             logger.debug(
-                'Setting GStreamer state to %s: async', state.value_name)
+                'Setting GStreamer state to %s is async', state.value_name)
             return True
         else:
             logger.debug(
-                'Setting GStreamer state to %s: OK', state.value_name)
+                'Setting GStreamer state to %s is OK', state.value_name)
             return True
 
     def get_volume(self):
