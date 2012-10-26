@@ -8,6 +8,10 @@ This change log is used to track all major changes to Mopidy.
 v0.8.1 (in development)
 =======================
 
+**Dependencies**
+
+- Pykka >= 1.0 is now required.
+
 **Bug fixes**
 
 - :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors

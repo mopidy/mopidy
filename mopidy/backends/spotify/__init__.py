@@ -47,7 +47,7 @@ class SpotifyBackend(ThreadingActor, base.Backend):
         from .playback import SpotifyPlaybackProvider
         from .stored_playlists import SpotifyStoredPlaylistsProvider
 
-        super(SpotifyBackend, self).__init__(*args, **kwargs)
+        super(SpotifyBackend, self).__init__()
 
         self.current_playlist = core.CurrentPlaylistController(backend=self)
 

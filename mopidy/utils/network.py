@@ -250,7 +250,7 @@ class Connection(object):
             return True
 
         try:
-            self.actor_ref.send_one_way({'received': data})
+            self.actor_ref.tell({'received': data})
         except ActorDeadError:
             self.stop(u'Actor is dead.')
 
