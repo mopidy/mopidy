@@ -13,6 +13,8 @@ class DummyBackend(ThreadingActor, base.Backend):
     """
 
     def __init__(self, audio):
+        super(DummyBackend, self).__init__()
+
         self.library = DummyLibraryProvider(backend=self)
         self.playback = DummyPlaybackProvider(audio=audio, backend=self)
         self.stored_playlists = DummyStoredPlaylistsProvider(backend=self)

@@ -41,6 +41,8 @@ class SpotifyBackend(ThreadingActor, base.Backend):
     # missing spotify dependencies.
 
     def __init__(self, audio):
+        super(SpotifyBackend, self).__init__()
+
         from .library import SpotifyLibraryProvider
         from .playback import SpotifyPlaybackProvider
         from .session_manager import SpotifySessionManager

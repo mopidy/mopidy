@@ -74,7 +74,7 @@ def main():
 
 
 def check_dependencies():
-    pykka_required = '0.16'
+    pykka_required = '1.0'
     if StrictVersion(pykka.__version__) < StrictVersion(pykka_required):
         sys.exit(
             u'Mopidy requires Pykka >= %s, but found %s' %

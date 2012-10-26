@@ -26,6 +26,8 @@ class Core(ThreadingActor, AudioListener):
     stored_playlists = None
 
     def __init__(self, audio=None, backend=None):
+        super(Core, self).__init__()
+
         self._backend = backend
 
         self.current_playlist = CurrentPlaylistController(core=self)

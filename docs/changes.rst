@@ -10,7 +10,7 @@ v0.9.0 (in development)
 
 **Dependencies**
 
-- Pykka >= 0.16 is now required.
+- Pykka >= 1.0 is now required.
 
 **Bug fixes**
 

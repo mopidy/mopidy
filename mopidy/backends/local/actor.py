@@ -26,6 +26,8 @@ class LocalBackend(ThreadingActor, base.Backend):
     """
 
     def __init__(self, audio):
+        super(LocalBackend, self).__init__()
+
         self.library = LocalLibraryProvider(backend=self)
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
         self.stored_playlists = LocalStoredPlaylistsProvider(backend=self)
