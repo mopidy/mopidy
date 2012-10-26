@@ -48,14 +48,9 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         process.stop_actors_by_class(session.MpdSession)
 
     def send_idle(self, subsystem):
-        # FIXME this should be updated once pykka supports non-blocking calls
-        # on proxies or some similar solution
-        pykka.ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': ('on_idle',),
-            'args': [subsystem],
-            'kwargs': {},
-        }, target_class=session.MpdSession)
+        listeners = pykka.ActorRegistry.get_by_class(session.MpdSession)
+        for listener in listeners:
+            getattr(listener.proxy(), 'on_idle')(subsystem)
 
     def playback_state_changed(self, old_state, new_state):
         self.send_idle('player')
