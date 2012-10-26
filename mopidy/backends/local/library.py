@@ -20,7 +20,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             settings.LOCAL_TAG_CACHE_FILE, settings.LOCAL_MUSIC_PATH)
 
         logger.info(
-            'Loading tracks in %s from %s',
+            'Loading tracks from %s using %s',
             settings.LOCAL_MUSIC_PATH, settings.LOCAL_TAG_CACHE_FILE)
 
         for track in tracks:
@@ -30,7 +30,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
         try:
             return self._uri_mapping[uri]
         except KeyError:
-            logger.debug(u'Failed to lookup "%s"', uri)
+            logger.debug(u'Failed to lookup %r', uri)
             return None
 
     def find_exact(self, **query):
