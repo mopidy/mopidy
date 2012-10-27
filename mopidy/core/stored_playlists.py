@@ -1,15 +1,8 @@
 class StoredPlaylistsController(object):
-    """
-    :param backend: backend the controller is a part of
-    :type backend: :class:`mopidy.backends.base.Backend`
-    :param provider: provider the controller should use
-    :type provider: instance of :class:`BaseStoredPlaylistsProvider`
-    """
-
     pykka_traversable = True
 
-    def __init__(self, backend, core):
-        self.backend = backend
+    def __init__(self, backends, core):
+        self.backends = backends
         self.core = core
 
     @property
@@ -19,11 +12,11 @@ class StoredPlaylistsController(object):
 
         Read/write. List of :class:`mopidy.models.Playlist`.
         """
-        return self.backend.stored_playlists.playlists.get()
+        return self.backends[0].stored_playlists.playlists.get()
 
     @playlists.setter  # noqa
     def playlists(self, playlists):
-        self.backend.stored_playlists.playlists = playlists
+        self.backends[0].stored_playlists.playlists = playlists
 
     def create(self, name):
         """
@@ -33,7 +26,7 @@ class StoredPlaylistsController(object):
         :type name: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        return self.backend.stored_playlists.create(name).get()
+        return self.backends[0].stored_playlists.create(name).get()
 
     def delete(self, playlist):
         """
@@ -42,7 +35,7 @@ class StoredPlaylistsController(object):
         :param playlist: the playlist to delete
         :type playlist: :class:`mopidy.models.Playlist`
         """
-        return self.backend.stored_playlists.delete(playlist).get()
+        return self.backends[0].stored_playlists.delete(playlist).get()
 
     def get(self, **criteria):
         """
@@ -83,14 +76,13 @@ class StoredPlaylistsController(object):
         :type uri: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        return self.backend.stored_playlists.lookup(uri).get()
+        return self.backends[0].stored_playlists.lookup(uri).get()
 
     def refresh(self):
         """
-        Refresh the stored playlists in
-        :attr:`mopidy.backends.base.StoredPlaylistsController.playlists`.
+        Refresh the stored playlists in :attr:`playlists`.
         """
-        return self.backend.stored_playlists.refresh().get()
+        return self.backends[0].stored_playlists.refresh().get()
 
     def rename(self, playlist, new_name):
         """
@@ -101,7 +93,8 @@ class StoredPlaylistsController(object):
         :param new_name: the new name
         :type new_name: string
         """
-        return self.backend.stored_playlists.rename(playlist, new_name).get()
+        return self.backends[0].stored_playlists.rename(
+            playlist, new_name).get()
 
     def save(self, playlist):
         """
@@ -110,4 +103,4 @@ class StoredPlaylistsController(object):
         :param playlist: the playlist
         :type playlist: :class:`mopidy.models.Playlist`
         """
-        return self.backend.stored_playlists.save(playlist).get()
+        return self.backends[0].stored_playlists.save(playlist).get()

@@ -4,7 +4,7 @@ import random
 from . import listener
 
 
-logger = logging.getLogger('mopidy.backends.base')
+logger = logging.getLogger('mopidy.core')
 
 
 def option_wrapper(name, default):
@@ -37,13 +37,6 @@ class PlaybackState(object):
 
 
 class PlaybackController(object):
-    """
-    :param backend: the backend
-    :type backend: :class:`mopidy.backends.base.Backend`
-    :param provider: provider the controller should use
-    :type provider: instance of :class:`BasePlaybackProvider`
-    """
-
     # pylint: disable = R0902
     # Too many instance attributes
 
@@ -81,10 +74,13 @@ class PlaybackController(object):
     #:     Playback continues after current song.
     single = option_wrapper('_single', False)
 
-    def __init__(self, audio, backend, core):
+    def __init__(self, audio, backends, core):
         self.audio = audio
-        self.backend = backend
+
+        self.backends = backends
+
         self.core = core
+
         self._state = PlaybackState.STOPPED
         self._shuffled = []
         self._first_shuffle = True
@@ -295,7 +291,7 @@ class PlaybackController(object):
     @property
     def time_position(self):
         """Time position in milliseconds."""
-        return self.backend.playback.get_time_position().get()
+        return self.backends[0].playback.get_time_position().get()
 
     @property
     def volume(self):
@@ -381,7 +377,7 @@ class PlaybackController(object):
 
     def pause(self):
         """Pause playback."""
-        if self.backend.playback.pause().get():
+        if self.backends[0].playback.pause().get():
             self.state = PlaybackState.PAUSED
             self._trigger_track_playback_paused()
 
@@ -413,7 +409,7 @@ class PlaybackController(object):
         if cp_track is not None:
             self.current_cp_track = cp_track
             self.state = PlaybackState.PLAYING
-            if not self.backend.playback.play(cp_track.track).get():
+            if not self.backends[0].playback.play(cp_track.track).get():
                 # Track is not playable
                 if self.random and self._shuffled:
                     self._shuffled.remove(cp_track)
@@ -440,7 +436,7 @@ class PlaybackController(object):
     def resume(self):
         """If paused, resume playing the current track."""
         if (self.state == PlaybackState.PAUSED and
-                self.backend.playback.resume().get()):
+                self.backends[0].playback.resume().get()):
             self.state = PlaybackState.PLAYING
             self._trigger_track_playback_resumed()
 
@@ -466,7 +462,7 @@ class PlaybackController(object):
             self.next()
             return True
 
-        success = self.backend.playback.seek(time_position).get()
+        success = self.backends[0].playback.seek(time_position).get()
         if success:
             self._trigger_seeked(time_position)
         return success
@@ -480,7 +476,7 @@ class PlaybackController(object):
         :type clear_current_track: boolean
         """
         if self.state != PlaybackState.STOPPED:
-            if self.backend.playback.stop().get():
+            if self.backends[0].playback.stop().get():
                 self._trigger_track_playback_ended()
                 self.state = PlaybackState.STOPPED
         if clear_current_track:

@@ -32,13 +32,13 @@ class Core(pykka.ThreadingActor, AudioListener):
 
         self.current_playlist = CurrentPlaylistController(core=self)
 
-        self.library = LibraryController(backend=backends[0], core=self)
+        self.library = LibraryController(backends=backends, core=self)
 
         self.playback = PlaybackController(
-            audio=audio, backend=backends[0], core=self)
+            audio=audio, backends=backends, core=self)
 
         self.stored_playlists = StoredPlaylistsController(
-            backend=backends[0], core=self)
+            backends=backends, core=self)
 
     @property
     def uri_schemes(self):

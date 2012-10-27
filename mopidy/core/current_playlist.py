@@ -6,15 +6,11 @@ from mopidy.models import CpTrack
 
 from . import listener
 
+
 logger = logging.getLogger('mopidy.core')
 
 
 class CurrentPlaylistController(object):
-    """
-    :param backend: backend the controller is a part of
-    :type backend: :class:`mopidy.backends.base.Backend`
-    """
-
     pykka_traversable = True
 
     def __init__(self, core):
