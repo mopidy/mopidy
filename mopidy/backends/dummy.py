@@ -51,9 +51,9 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
         return True
 
     def play(self, track):
-        """Pass None as track to force failure"""
+        """Pass a track with URI 'dummy:error' to force failure"""
         self._time_position = 0
-        return track is not None
+        return track.uri != 'dummy:error'
 
     def resume(self):
         return True
