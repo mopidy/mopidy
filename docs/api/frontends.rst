@@ -37,6 +37,8 @@ The following requirements applies to any frontend implementation:
   specified events.
 
 
+.. _frontend-implementations:
+
 Frontend implementations
 ========================
 

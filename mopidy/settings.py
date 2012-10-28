@@ -7,7 +7,7 @@ All available settings and their default values.
     file called ``~/.config/mopidy/settings.py`` and redefine settings there.
 """
 
-#: List of playback backends to use. See :mod:`mopidy.backends` for all
+#: List of playback backends to use. See :ref:`backend-implementations` for all
 #: available backends.
 #:
 #: Default::
@@ -54,7 +54,8 @@ DEBUG_LOG_FILENAME = u'mopidy.log'
 #:     DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
 DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
 
-#: List of server frontends to use.
+#: List of server frontends to use. See :ref:`frontend-implementations` for
+#: available frontends.
 #:
 #: Default::
 #:
@@ -106,7 +107,7 @@ LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
 #:    LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
 LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
 
-#: Sound mixer to use.
+#: Audio mixer to use.
 #:
 #: Expects a GStreamer mixer to use, typical values are:
 #: ``alsamixer``, ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
@@ -119,7 +120,7 @@ LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
 #:     MIXER = u'autoaudiomixer'
 MIXER = u'autoaudiomixer'
 
-#: Sound mixer track to use.
+#: Audio mixer track to use.
 #:
 #: Name of the mixer track to use. If this is not set we will try to find the
 #: master output track. As an example, using ``alsamixer`` you would
@@ -167,7 +168,11 @@ MPD_SERVER_PASSWORD = None
 #: Default: 20
 MPD_SERVER_MAX_CONNECTIONS = 20
 
-#: Output to use. See :mod:`mopidy.outputs` for all available backends
+#: Audio output to use.
+#:
+#: Expects a GStreamer sink. Typical values are ``autoaudiosink``,
+#: ``alsasink``, ``osssink``, ``oss4sink``, ``pulsesink``, and ``shout2send``,
+#: and additional arguments specific to each sink.
 #:
 #: Default::
 #:
