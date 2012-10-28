@@ -12,6 +12,54 @@ v0.9.0 (in development)
 
 - Pykka >= 1.0 is now required.
 
+**Multiple backends support**
+
+Support for using the local and Spotify backends simultaneously have for a very
+long time been our most requested feature. Finally, it's here!
+
+- Both the local backend and the Spotify backend are now turned on by default.
+  The local backend is listed first in the :attr:`mopidy.settings.BACKENDS`
+  setting, and are thus given the highest priority in e.g. search results,
+  meaning that we're listing search hits from the local backend first. If you
+  want to prioritize the backends in another way, simply set ``BACKENDS`` in
+  your own settings file and reorder the backends.
+
+  There are no other setting changes related to the local and Spotify backends.
+  As always, see :mod:`mopidy.settings` for the full list of available
+  settings.
+
+Internally, Mopidy have seen a lot of changes to pave the way for multiple
+backends:
+
+- A new layer and actor, "core", have been added to our stack, inbetween the
+  frontends and the backends. The responsibility of this layer and actor is to
+  take requests from the frontends, pass them on to one or more backends, and
+  combining the response from the backends into a single response to the
+  requesting frontend.
+
+  The frontends no longer know anything about the backends. They just use the
+  :ref:`core-api`.
+
+- The base playback provider have gotten sane default behavior instead of the
+  old empty functions. By default, the playback provider now lets GStreamer
+  keep track of the current track's time position. The local backend simply
+  uses the base playback provider without any changes. The same applies to any
+  future backend that just needs GStreamer to play an URI for it.
+
+- The dependency graph between the core controllers and the backend providers
+  have been straightened out, so that we don't have any circular dependencies
+  or similar. The frontend, core, backend, and audio layers are now strictly
+  separate.  The frontend layer calls on the core layer, and the core layer
+  calls on the backend layer. Both the core layer and the backends are allowed
+  to call on the audio layer. Any data flow in the opposite direction is done
+  by broadcasting of events to listeners, through e.g.
+  :class:`mopidy.core.CoreListener` and :class:`mopidy.audio.AudioListener`.
+
+- All dependencies are now explicitly passed to the constructors of the
+  frontends, core, and the backends. This makes testing each layer with
+  dummy/mocked lower layers easier than with the old variant, where
+  dependencies where looked up in Pykka's actor registry.
+
 **Bug fixes**
 
 - :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors
