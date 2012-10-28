@@ -18,6 +18,10 @@ v0.9.0 (in development)
   observed by some users on some Spotify tracks due to a change introduced in
   0.8.0. See the issue for a patch that applies to 0.8.0.
 
+- Volume returned by the MPD command `status` contained a floating point ``.0``
+  suffix. This bug was introduced with the large audio outout and mixer changes
+  in v0.8.0. It now returns an integer again.
+
 
 v0.8.0 (2012-09-20)
 ===================

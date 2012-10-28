@@ -371,7 +371,7 @@ class Audio(pykka.ThreadingActor):
         new_min, new_max = new
         old_min, old_max = old
         scaling = float(new_max - new_min) / (old_max - old_min)
-        return round(scaling * (value - old_min) + new_min)
+        return int(round(scaling * (value - old_min) + new_min))
 
     def set_metadata(self, track):
         """
