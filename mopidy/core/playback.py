@@ -1,5 +1,6 @@
 import logging
 import random
+import urlparse
 
 from . import listener
 
@@ -78,9 +79,11 @@ class PlaybackController(object):
         self.audio = audio
 
         self.backends = backends
-        uri_schemes_by_backend = {backend: backend.uri_schemes.get()
+        uri_schemes_by_backend = {
+            backend: backend.uri_schemes.get()
             for backend in backends}
-        self.backends_by_uri_scheme = {uri_scheme: backend
+        self.backends_by_uri_scheme = {
+            uri_scheme: backend
             for backend, uri_schemes in uri_schemes_by_backend.items()
             for uri_scheme in uri_schemes}
 
@@ -94,8 +97,8 @@ class PlaybackController(object):
     def _get_backend(self):
         if self.current_cp_track is None:
             return None
-        track = self.current_cp_track.track
-        uri_scheme = track.uri.split(':', 1)[0]
+        uri = self.current_cp_track.track.uri
+        uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends_by_uri_scheme[uri_scheme]
 
     def _get_cpid(self, cp_track):

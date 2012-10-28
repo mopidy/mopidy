@@ -1,3 +1,5 @@
+import urlparse
+
 import pykka
 
 from mopidy.models import Playlist
@@ -8,16 +10,18 @@ class LibraryController(object):
 
     def __init__(self, backends, core):
         self.backends = backends
-        uri_schemes_by_backend = {backend: backend.uri_schemes.get()
+        uri_schemes_by_backend = {
+            backend: backend.uri_schemes.get()
             for backend in backends}
-        self.backends_by_uri_scheme = {uri_scheme: backend
+        self.backends_by_uri_scheme = {
+            uri_scheme: backend
             for backend, uri_schemes in uri_schemes_by_backend.items()
             for uri_scheme in uri_schemes}
 
         self.core = core
 
     def _get_backend(self, uri):
-        uri_scheme = uri.split(':', 1)[0]
+        uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends_by_uri_scheme.get(uri_scheme)
 
     def find_exact(self, **query):
@@ -37,9 +41,7 @@ class LibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        futures = []
-        for backend in self.backends:
-            futures.append(backend.library.find_exact(**query))
+        futures = [b.library.find_exact(**query) for b in self.backends]
         results = pykka.get_all(futures)
         return Playlist(tracks=[
             track for playlist in results for track in playlist.tracks])
@@ -55,6 +57,8 @@ class LibraryController(object):
         backend = self._get_backend(uri)
         if backend:
             return backend.library.lookup(uri).get()
+        else:
+            return None
 
     def refresh(self, uri=None):
         """
@@ -66,12 +70,10 @@ class LibraryController(object):
         if uri is not None:
             backend = self._get_backend(uri)
             if backend:
-                return backend.library.refresh(uri).get()
+                backend.library.refresh(uri).get()
         else:
-            futures = []
-            for backend in self.backends:
-                futures.append(backend.library.refresh(uri))
-            return pykka.get_all(futures)
+            futures = [b.library.refresh(uri) for b in self.backends]
+            pykka.get_all(futures)
 
     def search(self, **query):
         """
@@ -90,9 +92,7 @@ class LibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        futures = []
-        for backend in self.backends:
-            futures.append(backend.library.search(**query))
+        futures = [b.library.search(**query) for b in self.backends]
         results = pykka.get_all(futures)
         return Playlist(tracks=[
             track for playlist in results for track in playlist.tracks])
