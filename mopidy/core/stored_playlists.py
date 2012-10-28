@@ -1,3 +1,5 @@
+import itertools
+
 import pykka
 
 
@@ -15,10 +17,9 @@ class StoredPlaylistsController(object):
 
         Read/write. List of :class:`mopidy.models.Playlist`.
         """
-        futures = [backend.stored_playlists.playlists
-            for backend in self.backends]
+        futures = [b.stored_playlists.playlists for b in self.backends]
         results = pykka.get_all(futures)
-        return [playlist for result in results for playlist in result]
+        return list(itertools.chain(*results))
 
     @playlists.setter  # noqa
     def playlists(self, playlists):
