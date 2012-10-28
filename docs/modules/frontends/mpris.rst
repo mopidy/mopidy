@@ -4,4 +4,3 @@
 
 .. automodule:: mopidy.frontends.mpris
     :synopsis: MPRIS frontend
-    :members:

@@ -4,6 +4,10 @@
 Audio API
 *********
 
+.. module:: mopidy.audio
+    :synopsis: Thin wrapper around the parts of GStreamer we use
+
+
 The audio API is the interface we have built around GStreamer to support our
 specific use cases. Most backends should be able to get by with simply setting
 the URI of the resource they want to play, for these cases the default playback

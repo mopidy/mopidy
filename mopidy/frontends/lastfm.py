@@ -1,3 +1,27 @@
+"""
+Frontend which scrobbles the music you play to your `Last.fm
+<http://www.last.fm>`_ profile.
+
+.. note::
+
+    This frontend requires a free user account at Last.fm.
+
+**Dependencies:**
+
+- `pylast <http://code.google.com/p/pylast/>`_ >= 0.5.7
+
+**Settings:**
+
+- :attr:`mopidy.settings.LASTFM_USERNAME`
+- :attr:`mopidy.settings.LASTFM_PASSWORD`
+
+**Usage:**
+
+Make sure :attr:`mopidy.settings.FRONTENDS` includes
+``mopidy.frontends.lastfm.LastfmFrontend``. By default, the setting includes
+the Last.fm frontend.
+"""
+
 import logging
 import time
 
@@ -18,24 +42,6 @@ API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
 
 class LastfmFrontend(pykka.ThreadingActor, CoreListener):
-    """
-    Frontend which scrobbles the music you play to your `Last.fm
-    <http://www.last.fm>`_ profile.
-
-    .. note::
-
-        This frontend requires a free user account at Last.fm.
-
-    **Dependencies:**
-
-    - `pylast <http://code.google.com/p/pylast/>`_ >= 0.5.7
-
-    **Settings:**
-
-    - :attr:`mopidy.settings.LASTFM_USERNAME`
-    - :attr:`mopidy.settings.LASTFM_PASSWORD`
-    """
-
     def __init__(self, core):
         super(LastfmFrontend, self).__init__()
         self.lastfm = None

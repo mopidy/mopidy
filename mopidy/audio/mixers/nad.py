@@ -1,3 +1,50 @@
+"""Mixer that controls volume using a NAD amplifier.
+
+**Dependencies:**
+
+- pyserial (python-serial in Debian/Ubuntu)
+
+- The NAD amplifier must be connected to the machine running Mopidy using a
+  serial cable.
+
+**Settings:**
+
+- Set :attr:`mopidy.settings.MIXER` to ``nadmixer`` to use it. You probably
+  also needs to add some properties to the ``MIXER`` setting.
+
+Supported properties includes:
+
+``port``:
+    The serial device to use, defaults to ``/dev/ttyUSB0``. This must be
+    set correctly for the mixer to work.
+
+``source``:
+    The source that should be selected on the amplifier, like ``aux``,
+    ``disc``, ``tape``, ``tuner``, etc. Leave unset if you don't want the
+    mixer to change it for you.
+
+``speakers-a``:
+    Set to ``on`` or ``off`` if you want the mixer to make sure that
+    speaker set A is turned on or off. Leave unset if you don't want the
+    mixer to change it for you.
+
+``speakers-b``:
+    See ``speakers-a``.
+
+Configuration examples::
+
+    # Minimum configuration, if the amplifier is available at /dev/ttyUSB0
+    MIXER = u'nadmixer'
+
+    # Minimum configuration, if the amplifier is available elsewhere
+    MIXER = u'nadmixer port=/dev/ttyUSB3'
+
+    # Full configuration
+    MIXER = (
+        u'nadmixer port=/dev/ttyUSB0 '
+        u'source=aux speakers-a=on speakers-b=off')
+"""
+
 import logging
 
 import pygst
@@ -76,7 +123,7 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
 
 class NadTalker(pykka.ThreadingActor):
     """
-    Independent thread which does the communication with the NAD amplifier
+    Independent thread which does the communication with the NAD amplifier.
 
     Since the communication is done in an independent thread, Mopidy won't
     block other requests while doing rather time consuming work like

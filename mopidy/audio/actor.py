@@ -231,7 +231,7 @@ class Audio(pykka.ThreadingActor):
         Set position in milliseconds.
 
         :param position: the position in milliseconds
-        :type volume: int
+        :type position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
         self._playbin.get_state()  # block until state changes are done

@@ -1,3 +1,14 @@
+"""Fake mixer for use in tests.
+
+**Dependencies:**
+
+- None
+
+**Settings:**
+
+- Set :attr:`mopidy.settings.MIXER` to ``fakemixer`` to use this mixer.
+"""
+
 import pygst
 pygst.require('0.10')
 import gobject

@@ -1,3 +1,17 @@
+"""Mixer element that automatically selects the real mixer to use.
+
+This is Mopidy's default mixer.
+
+**Dependencies:**
+
+- None
+
+**Settings:**
+
+- If this wasn't the default, you would set :attr:`mopidy.settings.MIXER`
+  to ``autoaudiomixer`` to use this mixer.
+"""
+
 import pygst
 pygst.require('0.10')
 import gst

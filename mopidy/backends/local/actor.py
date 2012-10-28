@@ -11,20 +11,6 @@ logger = logging.getLogger(u'mopidy.backends.local')
 
 
 class LocalBackend(pykka.ThreadingActor, base.Backend):
-    """
-    A backend for playing music from a local music archive.
-
-    **Dependencies:**
-
-    - None
-
-    **Settings:**
-
-    - :attr:`mopidy.settings.LOCAL_MUSIC_PATH`
-    - :attr:`mopidy.settings.LOCAL_PLAYLIST_PATH`
-    - :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
-    """
-
     def __init__(self, audio):
         super(LocalBackend, self).__init__()
 

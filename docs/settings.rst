@@ -29,6 +29,8 @@ A complete ``~/.config/mopidy/settings.py`` may look as simple as this::
     SPOTIFY_PASSWORD = u'mysecret'
 
 
+.. _music-from-spotify:
+
 Music from Spotify
 ==================
 
@@ -38,6 +40,8 @@ Premium account's username and password into the file, like this::
     SPOTIFY_USERNAME = u'myusername'
     SPOTIFY_PASSWORD = u'mysecret'
 
+
+.. _music-from-local-storage:
 
 Music from local storage
 ========================

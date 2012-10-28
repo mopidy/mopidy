@@ -1,3 +1,19 @@
+"""A dummy backend for use in tests.
+
+This backend implements the backend API in the simplest way possible.  It is
+used in tests of the frontends.
+
+The backend handles URIs starting with ``dummy:``.
+
+**Dependencies:**
+
+- None
+
+**Settings:**
+
+- None
+"""
+
 import pykka
 
 from mopidy.backends import base
@@ -5,13 +21,6 @@ from mopidy.models import Playlist
 
 
 class DummyBackend(pykka.ThreadingActor, base.Backend):
-    """
-    A backend which implements the backend API in the simplest way possible.
-    Used in tests of the frontends.
-
-    Handles URIs starting with ``dummy:``.
-    """
-
     def __init__(self, audio):
         super(DummyBackend, self).__init__()
 
