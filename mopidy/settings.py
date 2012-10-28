@@ -10,17 +10,17 @@ All available settings and their default values.
 #: List of playback backends to use. See :ref:`backend-implementations` for all
 #: available backends.
 #:
+#: When results from multiple backends are combined, they are combined in the
+#: order the backends are listed here.
+#:
 #: Default::
 #:
-#:     BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
-#:
-#: Other typical values::
-#:
-#:     BACKENDS = (u'mopidy.backends.local.LocalBackend',)
-#:
-#: .. note::
-#:     Currently only the first backend in the list is used.
+#:     BACKENDS = (
+#:         u'mopidy.backends.local.LocalBackend',
+#:         u'mopidy.backends.spotify.SpotifyBackend',
+#:     )
 BACKENDS = (
+    u'mopidy.backends.local.LocalBackend',
     u'mopidy.backends.spotify.SpotifyBackend',
 )
 
