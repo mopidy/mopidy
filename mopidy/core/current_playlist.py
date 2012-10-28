@@ -67,6 +67,8 @@ class CurrentPlaylistController(object):
         :type track: :class:`mopidy.models.Track`
         :param at_position: position in current playlist to add track
         :type at_position: int or :class:`None`
+        :param increase_version: if the playlist version should be increased
+        :type increase_version: :class:`True` or :class:`False`
         :rtype: two-tuple of (CPID integer, :class:`mopidy.models.Track`) that
             was added to the current playlist playlist
         """
