@@ -69,8 +69,8 @@ See :ref:`core-api` for more details.
 Backends
 ========
 
-The backends are organized as a set of providers with responsiblity forseparate
-sets of functionality, similar to the core actor.
+The backends are organized as a set of providers with responsiblity for
+separate sets of functionality, similar to the core actor.
 
 Anything specific to i.e. Spotify integration or local storage is contained in
 the backends. To integrate with new music sources, you just add a new backend.
