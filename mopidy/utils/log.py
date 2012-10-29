@@ -6,6 +6,7 @@ from . import deps, versioning
 
 
 def setup_logging(verbosity_level, save_debug_log):
+    logging.captureWarnings(True)
     setup_root_logger()
     setup_console_logging(verbosity_level)
     if save_debug_log:
