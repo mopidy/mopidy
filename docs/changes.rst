@@ -56,6 +56,13 @@ backends:
   dummy/mocked lower layers easier than with the old variant, where
   dependencies where looked up in Pykka's actor registry.
 
+- The stored playlists part of the core API have been revised a bit:
+
+  - :attr:`mopidy.core.StoredPlaylistsController.playlists` no longer supports
+    assignment to it. The `playlists` property on the backend layer still does,
+    and all functionality is maintained by assigning to the playlists
+    collections at the backend level.
+
 **Changes**
 
 - Made the :mod:`NAD mixer <mopidy.audio.mixers.nad>` responsive to interrupts

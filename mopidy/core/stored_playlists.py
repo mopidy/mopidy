@@ -15,16 +15,11 @@ class StoredPlaylistsController(object):
         """
         Currently stored playlists.
 
-        Read/write. List of :class:`mopidy.models.Playlist`.
+        Read-only. List of :class:`mopidy.models.Playlist`.
         """
         futures = [b.stored_playlists.playlists for b in self.backends]
         results = pykka.get_all(futures)
         return list(itertools.chain(*results))
-
-    @playlists.setter  # noqa
-    def playlists(self, playlists):
-        # TODO Support multiple backends
-        self.backends[0].stored_playlists.playlists = playlists
 
     def create(self, name):
         """

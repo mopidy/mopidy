@@ -65,12 +65,13 @@ class StoredPlaylistsControllerTest(object):
 
     def test_get_by_name_returns_unique_match(self):
         playlist = Playlist(name='b')
-        self.stored.playlists = [Playlist(name='a'), playlist]
+        self.backend.stored_playlists.playlists = [
+            Playlist(name='a'), playlist]
         self.assertEqual(playlist, self.stored.get(name='b'))
 
     def test_get_by_name_returns_first_of_multiple_matches(self):
         playlist = Playlist(name='b')
-        self.stored.playlists = [
+        self.backend.stored_playlists.playlists = [
             playlist, Playlist(name='a'), Playlist(name='b')]
         try:
             self.stored.get(name='b')
@@ -79,7 +80,8 @@ class StoredPlaylistsControllerTest(object):
             self.assertEqual(u'"name=b" match multiple playlists', e[0])
 
     def test_get_by_name_raises_keyerror_if_no_match(self):
-        self.stored.playlists = [Playlist(name='a'), Playlist(name='b')]
+        self.backend.stored_playlists.playlists = [
+            Playlist(name='a'), Playlist(name='b')]
         try:
             self.stored.get(name='c')
             self.fail(u'Should raise LookupError if no match')
