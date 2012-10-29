@@ -54,20 +54,12 @@ class Core(pykka.ThreadingActor, AudioListener):
         self.playback.on_end_of_track()
 
 
-class Backends(object):
+class Backends(list):
     def __init__(self, backends):
-        self._backends = backends
+        super(Backends, self).__init__(backends)
 
-        uri_schemes_by_backend = {
-            backend: backend.uri_schemes.get()
-            for backend in backends}
-        self.by_uri_scheme = {
-            uri_scheme: backend
-            for backend, uri_schemes in uri_schemes_by_backend.items()
-            for uri_scheme in uri_schemes}
-
-    def __len__(self):
-        return len(self._backends)
-
-    def __getitem__(self, key):
-        return self._backends[key]
+        self.by_uri_scheme = {}
+        for backend in backends:
+            uri_schemes = backend.uri_schemes.get()
+            for uri_scheme in uri_schemes:
+                self.by_uri_scheme[uri_scheme] = backend
