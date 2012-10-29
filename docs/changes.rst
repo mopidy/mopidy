@@ -20,7 +20,8 @@ v0.9.0 (in development)
 
 - :issue:`216`: Volume returned by the MPD command `status` contained a
   floating point ``.0`` suffix. This bug was introduced with the large audio
-  outout and mixer changes in v0.8.0. It now returns an integer again.
+  output and mixer changes in v0.8.0 and broke the MPDroid Android client. It
+  now returns an integer again.
 
 
 v0.8.0 (2012-09-20)
