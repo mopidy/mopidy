@@ -1,9 +1,21 @@
+import itertools
+import urlparse
+
+import pykka
+
+from mopidy.models import Playlist
+
+
 class LibraryController(object):
     pykka_traversable = True
 
     def __init__(self, backends, core):
         self.backends = backends
         self.core = core
+
+    def _get_backend(self, uri):
+        uri_scheme = urlparse.urlparse(uri).scheme
+        return self.backends.by_uri_scheme.get(uri_scheme, None)
 
     def find_exact(self, **query):
         """
@@ -22,7 +34,10 @@ class LibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        return self.backends[0].library.find_exact(**query).get()
+        futures = [b.library.find_exact(**query) for b in self.backends]
+        results = pykka.get_all(futures)
+        return Playlist(tracks=[
+            track for playlist in results for track in playlist.tracks])
 
     def lookup(self, uri):
         """
@@ -32,7 +47,11 @@ class LibraryController(object):
         :type uri: string
         :rtype: :class:`mopidy.models.Track` or :class:`None`
         """
-        return self.backends[0].library.lookup(uri).get()
+        backend = self._get_backend(uri)
+        if backend:
+            return backend.library.lookup(uri).get()
+        else:
+            return None
 
     def refresh(self, uri=None):
         """
@@ -41,7 +60,13 @@ class LibraryController(object):
         :param uri: directory or track URI
         :type uri: string
         """
-        return self.backends[0].library.refresh(uri).get()
+        if uri is not None:
+            backend = self._get_backend(uri)
+            if backend:
+                backend.library.refresh(uri).get()
+        else:
+            futures = [b.library.refresh(uri) for b in self.backends]
+            pykka.get_all(futures)
 
     def search(self, **query):
         """
@@ -60,4 +85,8 @@ class LibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        return self.backends[0].library.search(**query).get()
+        futures = [b.library.search(**query) for b in self.backends]
+        results = pykka.get_all(futures)
+        track_lists = [playlist.tracks for playlist in results]
+        tracks = list(itertools.chain(*track_lists))
+        return Playlist(tracks=tracks)
