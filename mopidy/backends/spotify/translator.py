@@ -1,6 +1,6 @@
 import logging
 
-from spotify import Link, SpotifyError
+from spotify import Link
 
 from mopidy import settings
 from mopidy.models import Artist, Album, Track, Playlist
@@ -11,22 +11,27 @@ logger = logging.getLogger('mopidy.backends.spotify')
 class SpotifyTranslator(object):
     @classmethod
     def to_mopidy_artist(cls, spotify_artist):
+        if spotify_artist is None:
+            return
+        uri = str(Link.from_artist(spotify_artist))
         if not spotify_artist.is_loaded():
-            return Artist(name=u'[loading...]')
-        return Artist(
-            uri=str(Link.from_artist(spotify_artist)),
-            name=spotify_artist.name()
-        )
+            return Artist(uri=uri, name=u'[loading...]')
+        return Artist(uri=uri, name=spotify_artist.name())
 
     @classmethod
     def to_mopidy_album(cls, spotify_album):
-        if spotify_album is None or not spotify_album.is_loaded():
-            return Album(name=u'[loading...]')
+        if spotify_album is None:
+            return
+        uri = str(Link.from_album(spotify_album))
+        if not spotify_album.is_loaded():
+            return Album(uri=uri, name=u'[loading...]')
         # TODO pyspotify got much more data on albums than this
-        return Album(name=spotify_album.name())
+        return Album(uri=uri, name=spotify_album.name())
 
     @classmethod
     def to_mopidy_track(cls, spotify_track):
+        if spotify_track is None:
+            return
         uri = str(Link.from_track(spotify_track, 0))
         if not spotify_track.is_loaded():
             return Track(uri=uri, name=u'[loading...]')
@@ -48,17 +53,16 @@ class SpotifyTranslator(object):
 
     @classmethod
     def to_mopidy_playlist(cls, spotify_playlist):
-        if not spotify_playlist.is_loaded():
-            return Playlist(name=u'[loading...]')
-        if spotify_playlist.type() != 'playlist':
+        if spotify_playlist is None or spotify_playlist.type() != 'playlist':
             return
-        try:
-            return Playlist(
-                uri=str(Link.from_playlist(spotify_playlist)),
-                name=spotify_playlist.name(),
-                # FIXME if check on link is a hackish workaround for is_local
-                tracks=[cls.to_mopidy_track(t) for t in spotify_playlist
-                        if str(Link.from_track(t, 0))],
-            )
-        except SpotifyError, e:
-            logger.warning(u'Failed translating Spotify playlist: %s', e)
+        uri = str(Link.from_playlist(spotify_playlist))
+        if not spotify_playlist.is_loaded():
+            return Playlist(uri=uri, name=u'[loading...]')
+        return Playlist(
+            uri=uri,
+            name=spotify_playlist.name(),
+            tracks=[
+                cls.to_mopidy_track(spotify_track)
+                for spotify_track in spotify_playlist
+                if not spotify_track.is_local()],
+        )
