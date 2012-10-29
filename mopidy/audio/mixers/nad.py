@@ -179,7 +179,7 @@ class NadTalker(pykka.ThreadingActor):
         self._select_speakers()
         self._select_input_source()
         self.mute(False)
-        self._calibrate_volume()
+        self.calibrate_volume()
 
     def _get_device_model(self):
         model = self._ask_device('Main.Model')
@@ -205,14 +205,21 @@ class NadTalker(pykka.ThreadingActor):
         else:
             self._check_and_set('Main.Mute', 'Off')
 
-    def _calibrate_volume(self):
+    def calibrate_volume(self, current_nad_volume=None):
         # The NAD C 355BEE amplifier has 40 different volume levels. We have no
         # way of asking on which level we are. Thus, we must calibrate the
         # mixer by decreasing the volume 39 times.
-        logger.info(u'NAD amplifier: Calibrating by setting volume to 0')
-        self._nad_volume = self.VOLUME_LEVELS
-        self.set_volume(0)
-        logger.info(u'NAD amplifier: Done calibrating')
+        if current_nad_volume is None:
+            current_nad_volume = self.VOLUME_LEVELS
+        if current_nad_volume == self.VOLUME_LEVELS:
+            logger.info(u'NAD amplifier: Calibrating by setting volume to 0')
+        self._nad_volume = current_nad_volume
+        if self._decrease_volume():
+            current_nad_volume -= 1
+        if current_nad_volume == 0:
+            logger.info(u'NAD amplifier: Done calibrating')
+        else:
+            self.actor_ref.proxy().calibrate_volume(current_nad_volume)
 
     def set_volume(self, volume):
         # Increase or decrease the amplifier volume until it matches the given

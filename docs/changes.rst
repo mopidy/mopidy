@@ -60,6 +60,13 @@ backends:
   dummy/mocked lower layers easier than with the old variant, where
   dependencies where looked up in Pykka's actor registry.
 
+**Changes**
+
+- Made the :mod:`NAD mixer <mopidy.audio.mixers.nad>` responsive to interrupts
+  during amplifier calibration. It will now quit immediately, while previously
+  it completed the calibration first, and then quit, which could take more than
+  15 seconds.
+
 **Bug fixes**
 
 - :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors
