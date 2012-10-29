@@ -392,9 +392,9 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_seek_with_songpos(self):
-        seek_track = Track(uri='dummy:2', length=40000)
+        seek_track = Track(uri='dummy:b', length=40000)
         self.core.current_playlist.append(
-            [Track(uri='dummy:1', length=40000), seek_track])
+            [Track(uri='dummy:a', length=40000), seek_track])
 
         self.sendRequest(u'seek "1" "30"')
         self.assertEqual(self.core.playback.current_track.get(), seek_track)
@@ -417,9 +417,9 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_seekid_with_cpid(self):
-        seek_track = Track(uri='dummy:2', length=40000)
+        seek_track = Track(uri='dummy:b', length=40000)
         self.core.current_playlist.append(
-            [Track(uri='dummy:1', length=40000), seek_track])
+            [Track(uri='dummy:a', length=40000), seek_track])
 
         self.sendRequest(u'seekid "1" "30"')
         self.assertEqual(1, self.core.playback.current_cpid.get())
