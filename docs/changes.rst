@@ -592,7 +592,7 @@ to this problem.
 - Local backend:
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
-    any help from the original MPD server. See :ref:`generating_a_tag_cache`
+    any help from the original MPD server. See :ref:`generating-a-tag-cache`
     for instructions on how to use it.
 
   - Fix support for UTF-8 encoding in tag caches.
@@ -601,7 +601,7 @@ to this problem.
 
   - Add support for password authentication. See
     :attr:`mopidy.settings.MPD_SERVER_PASSWORD` and
-    :ref:`use_mpd_on_a_network` for details on how to use it. (Fixes:
+    :ref:`use-mpd-on-a-network` for details on how to use it. (Fixes:
     :issue:`41`)
 
   - Support ``setvol 50`` without quotes around the argument. Fixes volume

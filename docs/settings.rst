@@ -63,7 +63,7 @@ You may also want to change some of the ``LOCAL_*`` settings. See
     have support for this in a future release.
 
 
-.. _generating_a_tag_cache:
+.. _generating-a-tag-cache:
 
 Generating a tag cache
 ----------------------
@@ -94,7 +94,7 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 #. Start Mopidy, find the music library in a client, and play some local music!
 
 
-.. _use_mpd_on_a_network:
+.. _use-mpd-on-a-network:
 
 Connecting from other machines on the network
 =============================================
@@ -123,7 +123,7 @@ file::
     LASTFM_PASSWORD = u'mysecret'
 
 
-.. _install_desktop_file:
+.. _install-desktop-file:
 
 Controlling Mopidy through the Ubuntu Sound Menu
 ================================================

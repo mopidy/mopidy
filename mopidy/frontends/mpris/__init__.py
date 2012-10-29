@@ -16,7 +16,7 @@ An example of an MPRIS client is the `Ubuntu Sound Menu
   Ubuntu/Debian.
 
 - An ``.desktop`` file for Mopidy installed at the path set in
-  :attr:`mopidy.settings.DESKTOP_FILE`. See :ref:`install_desktop_file` for
+  :attr:`mopidy.settings.DESKTOP_FILE`. See :ref:`install-desktop-file` for
   details.
 
 **Settings:**
