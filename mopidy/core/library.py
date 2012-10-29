@@ -15,7 +15,7 @@ class LibraryController(object):
 
     def _get_backend(self, uri):
         uri_scheme = urlparse.urlparse(uri).scheme
-        return self.backends.by_uri_scheme.get(uri_scheme)
+        return self.backends.by_uri_scheme.get(uri_scheme, None)
 
     def find_exact(self, **query):
         """
