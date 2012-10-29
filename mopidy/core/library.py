@@ -1,3 +1,4 @@
+import itertools
 import urlparse
 
 import pykka
@@ -94,5 +95,6 @@ class LibraryController(object):
         """
         futures = [b.library.search(**query) for b in self.backends]
         results = pykka.get_all(futures)
-        return Playlist(tracks=[
-            track for playlist in results for track in playlist.tracks])
+        track_lists = [playlist.tracks for playlist in results]
+        tracks = list(itertools.chain(*track_lists))
+        return Playlist(tracks=tracks)
