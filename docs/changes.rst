@@ -31,13 +31,13 @@ long time been our most requested feature. Finally, it's here!
 Internally, Mopidy have seen a lot of changes to pave the way for multiple
 backends:
 
-- A new layer and actor, "core", have been added to our stack, inbetween the
-  frontends and the backends. The responsibility of this layer and actor is to
-  take requests from the frontends, pass them on to one or more backends, and
-  combining the response from the backends into a single response to the
+- A new layer and actor, "core", has been added to our stack, inbetween the
+  frontends and the backends. The responsibility of the core layer and actor is
+  to take requests from the frontends, pass them on to one or more backends,
+  and combining the response from the backends into a single response to the
   requesting frontend.
 
-  The frontends no longer know anything about the backends. They just use the
+  Frontends no longer know anything about the backends. They just use the
   :ref:`core-api`.
 
 - The base playback provider have gotten sane default behavior instead of the
