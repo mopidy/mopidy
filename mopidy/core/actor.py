@@ -62,4 +62,7 @@ class Backends(list):
         for backend in backends:
             uri_schemes = backend.uri_schemes.get()
             for uri_scheme in uri_schemes:
+                assert uri_scheme not in self.by_uri_scheme, (
+                    'URI scheme %s is already handled by %s'
+                    % (uri_scheme, backend.__class__.__name__))
                 self.by_uri_scheme[uri_scheme] = backend
