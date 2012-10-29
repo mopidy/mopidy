@@ -26,7 +26,10 @@ class CoreActorTest(unittest.TestCase):
         self.assertIn('dummy2', result)
 
     def test_backends_with_colliding_uri_schemes_fails(self):
+        self.backend1.__class__.__name__ = 'B1'
+        self.backend2.__class__.__name__ = 'B2'
         self.backend2.uri_schemes.get.return_value = ['dummy1', 'dummy2']
         self.assertRaisesRegexp(
-            AssertionError, 'URI scheme dummy1 is already handled by Mock',
+            AssertionError,
+            'Cannot add URI scheme dummy1 for B2, it is already handled by B1',
             Core, audio=None, backends=[self.backend1, self.backend2])
