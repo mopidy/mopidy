@@ -40,19 +40,19 @@ backends:
   Frontends no longer know anything about the backends. They just use the
   :ref:`core-api`.
 
-- The base playback provider have gotten sane default behavior instead of the
-  old empty functions. By default, the playback provider now lets GStreamer
-  keep track of the current track's time position. The local backend simply
-  uses the base playback provider without any changes. The same applies to any
-  future backend that just needs GStreamer to play an URI for it.
+- The base playback provider has been updated with sane default behavior
+  instead of empty functions. By default, the playback provider now lets
+  GStreamer keep track of the current track's time position. The local backend
+  simply uses the base playback provider without any changes. The same applies
+  to any future backend that just needs GStreamer to play an URI for it.
 
 - The dependency graph between the core controllers and the backend providers
-  have been straightened out, so that we don't have any circular dependencies
-  or similar. The frontend, core, backend, and audio layers are now strictly
-  separate.  The frontend layer calls on the core layer, and the core layer
-  calls on the backend layer. Both the core layer and the backends are allowed
-  to call on the audio layer. Any data flow in the opposite direction is done
-  by broadcasting of events to listeners, through e.g.
+  have been straightened out, so that we don't have any circular dependencies.
+  The frontend, core, backend, and audio layers are now strictly separate. The
+  frontend layer calls on the core layer, and the core layer calls on the
+  backend layer. Both the core layer and the backends are allowed to call on
+  the audio layer. Any data flow in the opposite direction is done by
+  broadcasting of events to listeners, through e.g.
   :class:`mopidy.core.CoreListener` and :class:`mopidy.audio.AudioListener`.
 
 - All dependencies are now explicitly passed to the constructors of the
