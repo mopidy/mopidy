@@ -65,6 +65,7 @@ See :ref:`core-api` for more details.
     "Stored\nplaylists\ncontroller" -> "Local backend"
     "Stored\nplaylists\ncontroller" -> "Spotify backend"
 
+
 Backends
 ========
 
