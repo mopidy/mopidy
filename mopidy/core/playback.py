@@ -77,16 +77,7 @@ class PlaybackController(object):
 
     def __init__(self, audio, backends, core):
         self.audio = audio
-
         self.backends = backends
-        uri_schemes_by_backend = {
-            backend: backend.uri_schemes.get()
-            for backend in backends}
-        self.backends_by_uri_scheme = {
-            uri_scheme: backend
-            for backend, uri_schemes in uri_schemes_by_backend.items()
-            for uri_scheme in uri_schemes}
-
         self.core = core
 
         self._state = PlaybackState.STOPPED
@@ -99,7 +90,7 @@ class PlaybackController(object):
             return None
         uri = self.current_cp_track.track.uri
         uri_scheme = urlparse.urlparse(uri).scheme
-        return self.backends_by_uri_scheme[uri_scheme]
+        return self.backends.by_uri_scheme[uri_scheme]
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
