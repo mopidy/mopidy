@@ -6,11 +6,13 @@ from . import deps, versioning
 
 
 def setup_logging(verbosity_level, save_debug_log):
-    logging.captureWarnings(True)
     setup_root_logger()
     setup_console_logging(verbosity_level)
     if save_debug_log:
         setup_debug_logging_to_file()
+    if hasattr(logging, 'captureWarnings'):
+        # New in Python 2.7
+        logging.captureWarnings(True)
     logger = logging.getLogger('mopidy.utils.log')
     logger.info(u'Starting Mopidy %s', versioning.get_version())
     logger.info(u'%(name)s: %(version)s', deps.platform_info())
