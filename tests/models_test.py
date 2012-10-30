@@ -164,6 +164,12 @@ class AlbumTest(unittest.TestCase):
         self.assertEqual(album.num_tracks, num_tracks)
         self.assertRaises(AttributeError, setattr, album, 'num_tracks', None)
 
+    def test_date(self):
+        date = '1977-01-01'
+        album = Album(date=date)
+        self.assertEqual(album.date, date)
+        self.assertRaises(AttributeError, setattr, album, 'date', None)
+
     def test_musicbrainz_id(self):
         mb_id = u'mb-id'
         album = Album(musicbrainz_id=mb_id)
@@ -229,6 +235,13 @@ class AlbumTest(unittest.TestCase):
         self.assertEqual(album1, album2)
         self.assertEqual(hash(album1), hash(album2))
 
+    def test_eq_date(self):
+        date = '1977-01-01'
+        album1 = Album(date=date)
+        album2 = Album(date=date)
+        self.assertEqual(album1, album2)
+        self.assertEqual(hash(album1), hash(album2))
+
     def test_eq_musibrainz_id(self):
         album1 = Album(musicbrainz_id=u'id')
         album2 = Album(musicbrainz_id=u'id')
@@ -273,6 +286,12 @@ class AlbumTest(unittest.TestCase):
     def test_ne_num_tracks(self):
         album1 = Album(num_tracks=1)
         album2 = Album(num_tracks=2)
+        self.assertNotEqual(album1, album2)
+        self.assertNotEqual(hash(album1), hash(album2))
+
+    def test_ne_date(self):
+        album1 = Album(date='1977-01-01')
+        album2 = Album(date='1977-01-02')
         self.assertNotEqual(album1, album2)
         self.assertNotEqual(hash(album1), hash(album2))
 
