@@ -6,7 +6,7 @@ from spotify import Link, SpotifyError
 from mopidy.backends import base
 from mopidy.models import Track, Playlist
 
-from .translator import SpotifyTranslator
+from . import translator
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
@@ -24,8 +24,7 @@ class SpotifyTrack(Track):
         if self._track:
             return self._track
         elif self._spotify_track.is_loaded():
-            self._track = SpotifyTranslator.to_mopidy_track(
-                self._spotify_track)
+            self._track = translator.to_mopidy_track(self._spotify_track)
             return self._track
         else:
             return self._unloaded_track

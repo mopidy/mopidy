@@ -8,9 +8,9 @@ from mopidy import settings
 from mopidy.models import Playlist
 from mopidy.utils import process, versioning
 
+from . import translator
 from .container_manager import SpotifyContainerManager
 from .playlist_manager import SpotifyPlaylistManager
-from .translator import SpotifyTranslator
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
@@ -141,8 +141,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             logger.debug(u'Still getting data; skipped refresh of playlists')
             return
         playlists = map(
-            SpotifyTranslator.to_mopidy_playlist,
-            self.session.playlist_container())
+            translator.to_mopidy_playlist, self.session.playlist_container())
         playlists = filter(None, playlists)
         self.backend.stored_playlists.playlists = playlists
         logger.info(u'Loaded %d Spotify playlist(s)', len(playlists))
@@ -154,8 +153,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             # TODO Consider launching a second search if results.total_tracks()
             # is larger than len(results.tracks())
             playlist = Playlist(tracks=[
-                SpotifyTranslator.to_mopidy_track(t)
-                for t in results.tracks()])
+                translator.to_mopidy_track(t) for t in results.tracks()])
             queue.put(playlist)
         self.connected.wait()
         self.session.search(
