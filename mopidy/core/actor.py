@@ -56,7 +56,7 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     """List of URI schemes we can handle"""
 
     def reached_end_of_stream(self):
-        self.playback.on_end_of_track()
+        self.playback.on_end_of_stream()
 
     def state_changed(self, old_state, new_state):
         # XXX: This is a temporary fix for issue #232 while we wait for a more

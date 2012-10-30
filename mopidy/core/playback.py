@@ -312,6 +312,11 @@ class PlaybackController(object):
         elif old_state == PlaybackState.PAUSED:
             self.pause()
 
+    def on_end_of_stream(self):
+        self._trigger_track_playback_ended()
+        self.state = PlaybackState.STOPPED
+        self.current_cp_track = None
+
     def on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
@@ -326,8 +331,6 @@ class PlaybackController(object):
         if self.tl_track_at_eot:
             self._trigger_track_playback_ended()
             self.play(self.tl_track_at_eot)
-        else:
-            self.stop(clear_current_track=True)
 
         if self.consume:
             self.core.tracklist.remove(tlid=original_tl_track.tlid)
