@@ -5,8 +5,11 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.8.1 (in development)
-=======================
+v0.8.1 (2012-10-30)
+===================
+
+A small maintenance release to fix a bug introduced in 0.8.0 and update Mopidy
+to work with Pykka 1.0.
 
 **Dependencies**
 
