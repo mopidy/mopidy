@@ -39,25 +39,10 @@ repository::
 Installing GStreamer on OS X
 ============================
 
-.. note::
-
-    We have been working with `Homebrew <https://github.com/mxcl/homebrew>`_ to
-    make all the GStreamer packages easily installable on OS X using Homebrew.
-    We've gotten most of our packages included, but the Homebrew guys aren't
-    very happy to include Python specific packages into Homebrew, even though
-    they are not installable by pip. If you're interested, see the discussion
-    in `Homebrew's issue #1612
-    <https://github.com/mxcl/homebrew/issues/issue/1612>`_ for details.
-
-The following is currently the shortest path to installing GStreamer with
-Python bindings on OS X using Homebrew.
+We have been working with `Homebrew <https://github.com/mxcl/homebrew>`_ for a
+to make all the GStreamer packages easily installable on OS X.
 
 #. Install `Homebrew <https://github.com/mxcl/homebrew>`_.
-
-#. Download our Homebrew formula for ``gst-python``::
-
-      curl -o $(brew --prefix)/Library/Formula/gst-python.rb \
-          https://raw.github.com/jodal/homebrew/gst-python/Library/Formula/gst-python.rb
 
 #. Install the required packages::
 

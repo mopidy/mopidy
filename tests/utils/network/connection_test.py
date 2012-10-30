@@ -383,14 +383,14 @@ class ConnectionTest(unittest.TestCase):
 
         self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
-        self.mock.actor_ref.send_one_way.assert_called_once_with(
+        self.mock.actor_ref.tell.assert_called_once_with(
             {'received': 'data'})
 
     def test_recv_callback_handles_dead_actors(self):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.recv.return_value = 'data'
         self.mock.actor_ref = Mock()
-        self.mock.actor_ref.send_one_way.side_effect = pykka.ActorDeadError()
+        self.mock.actor_ref.tell.side_effect = pykka.ActorDeadError()
 
         self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))

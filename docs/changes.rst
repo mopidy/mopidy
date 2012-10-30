@@ -5,6 +5,27 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+v0.8.1 (2012-10-30)
+===================
+
+A small maintenance release to fix a bug introduced in 0.8.0 and update Mopidy
+to work with Pykka 1.0.
+
+**Dependencies**
+
+- Pykka >= 1.0 is now required.
+
+**Bug fixes**
+
+- :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors
+  observed by some users on some Spotify tracks due to a change introduced in
+  0.8.0. See the issue for a patch that applies to 0.8.0.
+
+- :issue:`216`: Volume returned by the MPD command `status` contained a
+  floating point ``.0`` suffix. This bug was introduced with the large audio
+  outout and mixer changes in v0.8.0. It now returns an integer again.
+
+
 v0.8.0 (2012-09-20)
 ===================
 

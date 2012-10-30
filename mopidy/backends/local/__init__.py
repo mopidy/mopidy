@@ -32,7 +32,7 @@ class LocalBackend(ThreadingActor, base.Backend):
     """
 
     def __init__(self, *args, **kwargs):
-        super(LocalBackend, self).__init__(*args, **kwargs)
+        super(LocalBackend, self).__init__()
 
         self.current_playlist = core.CurrentPlaylistController(backend=self)
 
