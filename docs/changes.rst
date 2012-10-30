@@ -67,6 +67,9 @@ backends:
   it completed the calibration first, and then quit, which could take more than
   15 seconds.
 
+- Added :attr:`mopidy.models.Album.date` attribute. It has the same format as
+  the existing :attr:`mopidy.models.Track.date`.
+
 **Bug fixes**
 
 - :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors
