@@ -70,6 +70,8 @@ backends:
 - Added :attr:`mopidy.models.Album.date` attribute. It has the same format as
   the existing :attr:`mopidy.models.Track.date`.
 
+- The Spotify backend now includes release year and artist on albums.
+
 **Bug fixes**
 
 - :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors

@@ -25,8 +25,11 @@ class SpotifyTranslator(object):
         uri = str(Link.from_album(spotify_album))
         if not spotify_album.is_loaded():
             return Album(uri=uri, name=u'[loading...]')
-        # TODO pyspotify got much more data on albums than this
-        return Album(uri=uri, name=spotify_album.name())
+        return Album(
+            uri=uri,
+            name=spotify_album.name(),
+            artists=[cls.to_mopidy_artist(spotify_album.artist())],
+            date=spotify_album.year())
 
     @classmethod
     def to_mopidy_track(cls, spotify_track):
@@ -48,8 +51,7 @@ class SpotifyTranslator(object):
             track_no=spotify_track.index(),
             date=date,
             length=spotify_track.duration(),
-            bitrate=settings.SPOTIFY_BITRATE,
-        )
+            bitrate=settings.SPOTIFY_BITRATE)
 
     @classmethod
     def to_mopidy_playlist(cls, spotify_playlist):
@@ -64,5 +66,4 @@ class SpotifyTranslator(object):
             tracks=[
                 cls.to_mopidy_track(spotify_track)
                 for spotify_track in spotify_playlist
-                if not spotify_track.is_local()],
-        )
+                if not spotify_track.is_local()])
