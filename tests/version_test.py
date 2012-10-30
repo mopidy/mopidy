@@ -27,5 +27,6 @@ class VersionTest(unittest.TestCase):
         self.assertLess(SV('0.7.0'), SV('0.7.1'))
         self.assertLess(SV('0.7.1'), SV('0.7.2'))
         self.assertLess(SV('0.7.2'), SV('0.7.3'))
-        self.assertLess(SV('0.7.3'), SV(__version__))
-        self.assertLess(SV(__version__), SV('0.8.1'))
+        self.assertLess(SV('0.7.3'), SV('0.8.0'))
+        self.assertLess(SV('0.8.0'), SV(__version__))
+        self.assertLess(SV(__version__), SV('0.8.2'))

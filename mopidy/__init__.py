@@ -21,7 +21,7 @@ if (isinstance(pykka.__version__, basestring)
 warnings.filterwarnings('ignore', 'could not open display')
 
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 
 from mopidy import settings as default_settings_module

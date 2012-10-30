@@ -8,10 +8,6 @@ This change log is used to track all major changes to Mopidy.
 v0.9.0 (in development)
 =======================
 
-**Dependencies**
-
-- Pykka >= 1.0 is now required.
-
 **Multiple backends support**
 
 Support for using the local and Spotify backends simultaneously have for a very
@@ -71,6 +67,17 @@ backends:
   the existing :attr:`mopidy.models.Track.date`.
 
 - The Spotify backend now includes release year and artist on albums.
+
+
+v0.8.1 (2012-10-30)
+===================
+
+A small maintenance release to fix a bug introduced in 0.8.0 and update Mopidy
+to work with Pykka 1.0.
+
+**Dependencies**
+
+- Pykka >= 1.0 is now required.
 
 **Bug fixes**
 
