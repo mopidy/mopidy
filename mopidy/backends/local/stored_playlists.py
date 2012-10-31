@@ -6,6 +6,7 @@ import shutil
 from mopidy import settings
 from mopidy.backends import base
 from mopidy.models import Playlist
+from mopidy.utils import path
 
 from .translator import parse_m3u
 
@@ -27,14 +28,15 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         logger.info('Loading playlists from %s', self._folder)
 
         for m3u in glob.glob(os.path.join(self._folder, '*.m3u')):
+            uri = path.path_to_uri(m3u)
             name = os.path.splitext(os.path.basename(m3u))[0]
             tracks = []
-            for uri in parse_m3u(m3u, settings.LOCAL_MUSIC_PATH):
+            for track_uri in parse_m3u(m3u, settings.LOCAL_MUSIC_PATH):
                 try:
-                    tracks.append(self.backend.library.lookup(uri))
+                    tracks.append(self.backend.library.lookup(track_uri))
                 except LookupError as ex:
                     logger.error('Playlist item could not be added: %s', ex)
-            playlist = Playlist(tracks=tracks, name=name)
+            playlist = Playlist(uri=uri, name=name, tracks=tracks)
 
             # FIXME playlist name needs better handling
             # FIXME tracks should come from lib. lookup

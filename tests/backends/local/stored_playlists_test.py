@@ -57,6 +57,8 @@ class LocalStoredPlaylistsControllerTest(
         self.assertEqual(uri, contents.strip())
 
     def test_playlists_are_loaded_at_startup(self):
+        playlist_path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
+
         track = Track(uri=path_to_uri(path_to_data_dir('uri2')))
         playlist = self.stored.create('test')
         playlist = playlist.copy(tracks=[track])
@@ -65,6 +67,9 @@ class LocalStoredPlaylistsControllerTest(
         backend = self.backend_class(audio=self.audio)
 
         self.assert_(backend.stored_playlists.playlists)
+        self.assertEqual(
+            path_to_uri(playlist_path),
+            backend.stored_playlists.playlists[0].uri)
         self.assertEqual(
             playlist.name, backend.stored_playlists.playlists[0].name)
         self.assertEqual(
