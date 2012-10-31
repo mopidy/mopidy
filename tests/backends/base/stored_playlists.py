@@ -30,11 +30,15 @@ class StoredPlaylistsControllerTest(object):
 
         settings.runtime.clear()
 
-    def test_create(self):
+    def test_create_returns_playlist_with_name_set(self):
         playlist = self.stored.create('test')
         self.assertEqual(playlist.name, 'test')
 
-    def test_create_in_playlists(self):
+    def test_create_returns_playlist_with_uri_set(self):
+        playlist = self.stored.create('test')
+        self.assert_(playlist.uri)
+
+    def test_create_adds_playlist_to_playlists_collection(self):
         playlist = self.stored.create('test')
         self.assert_(self.stored.playlists)
         self.assertIn(playlist, self.stored.playlists)
@@ -88,9 +92,12 @@ class StoredPlaylistsControllerTest(object):
         except LookupError as e:
             self.assertEqual(u'"name=c" match no playlists', e[0])
 
-    @unittest.SkipTest
-    def test_lookup(self):
-        pass
+    def test_lookup_finds_playlist_by_uri(self):
+        original_playlist = self.stored.create('test')
+
+        looked_up_playlist = self.stored.lookup(original_playlist.uri)
+
+        self.assertEqual(original_playlist, looked_up_playlist)
 
     @unittest.SkipTest
     def test_refresh(self):
@@ -106,11 +113,14 @@ class StoredPlaylistsControllerTest(object):
         test = lambda: self.stored.get(name='test2')
         self.assertRaises(LookupError, test)
 
-    def test_save(self):
-        # FIXME should we handle playlists without names?
-        playlist = Playlist(name='test')
-        self.stored.save(playlist)
-        self.assertIn(playlist, self.stored.playlists)
+    def test_save_replaces_playlist_with_updated_playlist(self):
+        playlist1 = self.stored.create('test1')
+        self.assertIn(playlist1, self.stored.playlists)
+
+        playlist2 = playlist1.copy(name='test2')
+        self.stored.save(playlist2)
+        self.assertNotIn(playlist1, self.stored.playlists)
+        self.assertIn(playlist2, self.stored.playlists)
 
     @unittest.SkipTest
     def test_playlist_with_unknown_track(self):

@@ -20,7 +20,9 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         self.refresh()
 
     def lookup(self, uri):
-        pass  # TODO
+        for playlist in self._playlists:
+            if playlist.uri == uri:
+                return playlist
 
     def refresh(self):
         playlists = []
@@ -46,7 +48,9 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         self.playlists = playlists
 
     def create(self, name):
-        playlist = Playlist(name=name)
+        file_path = os.path.join(self._folder, name + '.m3u')
+        uri = path.path_to_uri(file_path)
+        playlist = Playlist(uri=uri, name=name)
         self.save(playlist)
         return playlist
 
@@ -74,9 +78,10 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         shutil.move(src, dst)
 
     def save(self, playlist):
-        file_path = os.path.join(self._folder, playlist.name + '.m3u')
+        assert playlist.uri, 'Cannot save playlist without URI'
 
         # FIXME this should be a save_m3u function, not inside save
+        file_path = playlist.uri[len('file://'):]
         with open(file_path, 'w') as file_handle:
             for track in playlist.tracks:
                 if track.uri.startswith('file://'):
@@ -84,4 +89,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
                 else:
                     file_handle.write(track.uri + '\n')
 
+        original_playlist = self.lookup(playlist.uri)
+        if original_playlist is not None:
+            self._playlists.remove(original_playlist)
         self._playlists.append(playlist)
