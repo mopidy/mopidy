@@ -113,12 +113,12 @@ class StoredPlaylistsControllerTest(object):
         test = lambda: self.stored.get(name='test2')
         self.assertRaises(LookupError, test)
 
-    def test_save_replaces_playlist_with_updated_playlist(self):
+    def test_save_replaces_stored_playlist_with_updated_playlist(self):
         playlist1 = self.stored.create('test1')
         self.assertIn(playlist1, self.stored.playlists)
 
         playlist2 = playlist1.copy(name='test2')
-        self.stored.save(playlist2)
+        playlist2 = self.stored.save(playlist2)
         self.assertNotIn(playlist1, self.stored.playlists)
         self.assertIn(playlist2, self.stored.playlists)
 

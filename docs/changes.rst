@@ -65,7 +65,7 @@ backends:
 
   - :meth:`mopidy.core.StoredPlaylistsController.save` now returns the saved
     playlist. The returned playlist may differ from the saved playlist, and
-    should thus be used instead of the saved playlist.
+    should thus be used instead of the playlist passed to ``save()``.
 
 **Changes**
 

@@ -23,14 +23,16 @@ class LocalStoredPlaylistsControllerTest(
         self.assert_(os.path.exists(path))
 
     def test_saved_playlist_is_persisted(self):
-        path1 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
+        path1 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test1.m3u')
         path2 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test2.m3u')
 
-        playlist = self.stored.create('test')
+        playlist = self.stored.create('test1')
 
+        self.assertTrue(os.path.exists(path1))
         self.assertFalse(os.path.exists(path2))
 
-        self.stored.rename(playlist, 'test2')
+        playlist = playlist.copy(name='test2')
+        playlist = self.stored.save(playlist)
 
         self.assertFalse(os.path.exists(path1))
         self.assertTrue(os.path.exists(path2))
@@ -54,7 +56,7 @@ class LocalStoredPlaylistsControllerTest(
         playlist = self.stored.create('test')
         playlist_path = playlist.uri[len('file://'):]
         playlist = playlist.copy(tracks=[track])
-        self.stored.save(playlist)
+        playlist = self.stored.save(playlist)
 
         with open(playlist_path) as playlist_file:
             contents = playlist_file.read()
@@ -67,7 +69,7 @@ class LocalStoredPlaylistsControllerTest(
         track = Track(uri=path_to_uri(path_to_data_dir('uri2')))
         playlist = self.stored.create('test')
         playlist = playlist.copy(tracks=[track])
-        self.stored.save(playlist)
+        playlist = self.stored.save(playlist)
 
         backend = self.backend_class(audio=self.audio)
 
