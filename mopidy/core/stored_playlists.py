@@ -21,16 +21,26 @@ class StoredPlaylistsController(object):
         results = pykka.get_all(futures)
         return list(itertools.chain(*results))
 
-    def create(self, name):
+    def create(self, name, uri_scheme=None):
         """
         Create a new playlist.
 
+        If ``uri_scheme`` matches an URI scheme handled by a current backend,
+        that backend is asked to create the playlist. If ``uri_scheme`` is
+        :class:`None` or doesn't match a current backend, the first backend is
+        asked to create the playlist.
+
         :param name: name of the new playlist
         :type name: string
+        :param uri_scheme: use the backend matching the URI scheme
+        :type uri_scheme: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.create(name).get()
+        if uri_scheme in self.backends.by_uri_scheme:
+            backend = self.backends.by_uri_scheme[uri_scheme]
+        else:
+            backend = self.backends[0]
+        return backend.stored_playlists.create(name).get()
 
     def delete(self, playlist):
         """

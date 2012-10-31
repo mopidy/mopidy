@@ -37,5 +37,27 @@ class StoredPlaylistsTest(unittest.TestCase):
         self.assertIn(self.pl2a, result)
         self.assertIn(self.pl2b, result)
 
+    def test_create_without_uri_scheme_uses_first_backend(self):
+        playlist = Playlist()
+        self.sp1.create().get.return_value = playlist
+        self.sp1.reset_mock()
+
+        result = self.core.stored_playlists.create('foo')
+
+        self.assertEqual(playlist, result)
+        self.sp1.create.assert_called_once_with('foo')
+        self.assertFalse(self.sp2.create.called)
+
+    def test_create_with_uri_scheme_selects_the_matching_backend(self):
+        playlist = Playlist()
+        self.sp2.create().get.return_value = playlist
+        self.sp2.reset_mock()
+
+        result = self.core.stored_playlists.create('foo', uri_scheme='dummy2')
+
+        self.assertEqual(playlist, result)
+        self.assertFalse(self.sp1.create.called)
+        self.sp2.create.assert_called_once_with('foo')
+
     # TODO The rest of the stored playlists API is pending redesign before
     # we'll update it to support multiple backends.
