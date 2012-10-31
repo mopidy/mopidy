@@ -67,6 +67,9 @@ backends:
     playlist. The returned playlist may differ from the saved playlist, and
     should thus be used instead of the playlist passed to ``save()``.
 
+  - :meth:`mopidy.core.StoredPlaylistsController.rename` has been removed,
+    since renaming can be done with ``save()``.
+
 **Changes**
 
 - Made the :mod:`NAD mixer <mopidy.audio.mixers.nad>` responsive to interrupts

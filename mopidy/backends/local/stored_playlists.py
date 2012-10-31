@@ -64,19 +64,6 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
 
         self.playlists = playlists
 
-    def rename(self, playlist, name):
-        if playlist not in self._playlists:
-            return
-
-        src = os.path.join(self._folder, playlist.name + '.m3u')
-        dst = os.path.join(self._folder, name + '.m3u')
-
-        renamed = playlist.copy(name=name)
-        index = self._playlists.index(playlist)
-        self._playlists[index] = renamed
-
-        shutil.move(src, dst)
-
     def save(self, playlist):
         assert playlist.uri, 'Cannot save playlist without URI'
 

@@ -119,19 +119,6 @@ class StoredPlaylistsController(object):
                 backend = self.backends.by_uri_scheme[uri_scheme]
                 backend.stored_playlists.refresh().get()
 
-    def rename(self, playlist, new_name):
-        """
-        Rename playlist.
-
-        :param playlist: the playlist
-        :type playlist: :class:`mopidy.models.Playlist`
-        :param new_name: the new name
-        :type new_name: string
-        """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.rename(
-            playlist, new_name).get()
-
     def save(self, playlist):
         """
         Save the playlist to the set of stored playlists.

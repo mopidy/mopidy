@@ -103,16 +103,6 @@ class StoredPlaylistsControllerTest(object):
     def test_refresh(self):
         pass
 
-    def test_rename(self):
-        playlist = self.stored.create('test')
-        self.stored.rename(playlist, 'test2')
-        self.stored.get(name='test2')
-
-    def test_rename_unknown_playlist(self):
-        self.stored.rename(Playlist(), 'test2')
-        test = lambda: self.stored.get(name='test2')
-        self.assertRaises(LookupError, test)
-
     def test_save_replaces_stored_playlist_with_updated_playlist(self):
         playlist1 = self.stored.create('test1')
         self.assertIn(playlist1, self.stored.playlists)

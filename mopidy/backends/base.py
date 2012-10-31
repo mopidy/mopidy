@@ -204,14 +204,6 @@ class BaseStoredPlaylistsProvider(object):
         """
         raise NotImplementedError
 
-    def rename(self, playlist, new_name):
-        """
-        See :meth:`mopidy.core.StoredPlaylistsController.rename`.
-
-        *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
     def save(self, playlist):
         """
         See :meth:`mopidy.core.StoredPlaylistsController.save`.
