@@ -32,8 +32,8 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
             for uri in parse_m3u(m3u, settings.LOCAL_MUSIC_PATH):
                 try:
                     tracks.append(self.backend.library.lookup(uri))
-                except LookupError, e:
-                    logger.error('Playlist item could not be added: %s', e)
+                except LookupError as ex:
+                    logger.error('Playlist item could not be added: %s', ex)
             playlist = Playlist(tracks=tracks, name=name)
 
             # FIXME playlist name needs better handling
