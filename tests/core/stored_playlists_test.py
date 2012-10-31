@@ -107,5 +107,38 @@ class StoredPlaylistsTest(unittest.TestCase):
         self.assertFalse(self.sp1.refresh.called)
         self.assertFalse(self.sp2.refresh.called)
 
-    # TODO The rest of the stored playlists API is pending redesign before
-    # we'll update it to support multiple backends.
+    def test_save_selects_the_dummy1_backend(self):
+        playlist = Playlist(uri='dummy1:a')
+        self.sp1.save().get.return_value = playlist
+        self.sp1.reset_mock()
+
+        result = self.core.stored_playlists.save(playlist)
+
+        self.assertEqual(playlist, result)
+        self.sp1.save.assert_called_once_with(playlist)
+        self.assertFalse(self.sp2.save.called)
+
+    def test_save_selects_the_dummy2_backend(self):
+        playlist = Playlist(uri='dummy2:a')
+        self.sp2.save().get.return_value = playlist
+        self.sp2.reset_mock()
+
+        result = self.core.stored_playlists.save(playlist)
+
+        self.assertEqual(playlist, result)
+        self.assertFalse(self.sp1.save.called)
+        self.sp2.save.assert_called_once_with(playlist)
+
+    def test_save_does_nothing_if_playlist_uri_is_unset(self):
+        result = self.core.stored_playlists.save(Playlist())
+
+        self.assertIsNone(result)
+        self.assertFalse(self.sp1.save.called)
+        self.assertFalse(self.sp2.save.called)
+
+    def test_save_does_nothing_if_playlist_uri_has_unknown_scheme(self):
+        result = self.core.stored_playlists.save(Playlist(uri='foobar:a'))
+
+        self.assertIsNone(result)
+        self.assertFalse(self.sp1.save.called)
+        self.assertFalse(self.sp2.save.called)

@@ -31,6 +31,9 @@ class StoredPlaylistsController(object):
         :class:`None` or doesn't match a current backend, the first backend is
         asked to create the playlist.
 
+        All new playlists should be created by calling this method, and **not**
+        by creating new instances of :class:`mopidy.models.Playlist`.
+
         :param name: name of the new playlist
         :type name: string
         :param uri_scheme: use the backend matching the URI scheme
@@ -128,15 +131,28 @@ class StoredPlaylistsController(object):
         """
         Save the playlist to the set of stored playlists.
 
-        Returns the saved playlist. The return playlist may differ from the
-        saved playlist. E.g. if the playlist name was changed, the returned
-        playlist may have a different URI. The caller of this method should
-        throw away the playlist sent to this method, and use the returned
-        playlist instead.
+        For a playlist to be saveable, it must have the ``uri`` attribute set.
+        You should not set the ``uri`` atribute yourself, but use playlist
+        objects returned by :meth:`create` or retrieved from :attr:`playlists`,
+        which will always give you saveable playlists.
+
+        The method returns the saved playlist. The return playlist may differ
+        from the saved playlist. E.g. if the playlist name was changed, the
+        returned playlist may have a different URI. The caller of this method
+        should throw away the playlist sent to this method, and use the
+        returned playlist instead.
+
+        If the playlist's URI isn't set or doesn't match the URI scheme of a
+        current backend, nothing is done and :class:`None` is returned.
 
         :param playlist: the playlist
         :type playlist: :class:`mopidy.models.Playlist`
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.save(playlist).get()
+        if playlist.uri is None:
+            return
+        uri_scheme = urlparse.urlparse(playlist.uri).scheme
+        if uri_scheme not in self.backends.by_uri_scheme:
+            return
+        backend = self.backends.by_uri_scheme[uri_scheme]
+        return backend.stored_playlists.save(playlist).get()
