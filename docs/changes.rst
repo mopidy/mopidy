@@ -63,6 +63,10 @@ backends:
     and all functionality is maintained by assigning to the playlists
     collections at the backend level.
 
+  - :meth:`mopidy.core.StoredPlaylistsController.save` now returns the saved
+    playlist. The returned playlist may differ from the saved playlist, and
+    should thus be used instead of the saved playlist.
+
 **Changes**
 
 - Made the :mod:`NAD mixer <mopidy.audio.mixers.nad>` responsive to interrupts

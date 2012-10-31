@@ -136,8 +136,15 @@ class StoredPlaylistsController(object):
         """
         Save the playlist to the set of stored playlists.
 
+        Returns the saved playlist. The return playlist may differ from the
+        saved playlist. E.g. if the playlist name was changed, the returned
+        playlist may have a different URI. The caller of this method should
+        throw away the playlist sent to this method, and use the returned
+        playlist instead.
+
         :param playlist: the playlist
         :type playlist: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist`
         """
         # TODO Support multiple backends
         return self.backends[0].stored_playlists.save(playlist).get()
