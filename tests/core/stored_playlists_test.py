@@ -71,5 +71,23 @@ class StoredPlaylistsTest(unittest.TestCase):
         self.assertFalse(self.sp1.lookup.called)
         self.sp2.lookup.assert_called_once_with('dummy2:a')
 
+    def test_refresh_without_uri_scheme_refreshes_all_backends(self):
+        self.core.stored_playlists.refresh()
+
+        self.sp1.refresh.assert_called_once_with()
+        self.sp2.refresh.assert_called_once_with()
+
+    def test_refresh_with_uri_scheme_refreshes_matching_backend(self):
+        self.core.stored_playlists.refresh(uri_scheme='dummy2')
+
+        self.assertFalse(self.sp1.refresh.called)
+        self.sp2.refresh.assert_called_once_with()
+
+    def test_refresh_with_unknown_uri_scheme_refreshes_nothing(self):
+        self.core.stored_playlists.refresh(uri_scheme='foobar')
+
+        self.assertFalse(self.sp1.refresh.called)
+        self.assertFalse(self.sp2.refresh.called)
+
     # TODO The rest of the stored playlists API is pending redesign before
     # we'll update it to support multiple backends.

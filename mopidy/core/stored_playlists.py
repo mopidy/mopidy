@@ -99,12 +99,25 @@ class StoredPlaylistsController(object):
         else:
             return None
 
-    def refresh(self):
+    def refresh(self, uri_scheme=None):
         """
         Refresh the stored playlists in :attr:`playlists`.
+
+        If ``uri_scheme`` is :class:`None`, all backends are asked to refresh.
+        If ``uri_scheme`` is an URI scheme handled by a backend, only that
+        backend is asked to refresh. If ``uri_scheme`` doesn't match any
+        current backend, nothing happens.
+
+        :param uri_scheme: limit to the backend matching the URI scheme
+        :type uri_scheme: string
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.refresh().get()
+        if uri_scheme is None:
+            futures = [b.stored_playlists.refresh() for b in self.backends]
+            pykka.get_all(futures)
+        else:
+            if uri_scheme in self.backends.by_uri_scheme:
+                backend = self.backends.by_uri_scheme[uri_scheme]
+                backend.stored_playlists.refresh().get()
 
     def rename(self, playlist, new_name):
         """
