@@ -3,6 +3,7 @@ import shutil
 import tempfile
 
 import mock
+import pykka
 
 from mopidy import audio, core, settings
 from mopidy.models import Playlist
@@ -22,6 +23,8 @@ class StoredPlaylistsControllerTest(object):
         self.stored = self.core.stored_playlists
 
     def tearDown(self):
+        pykka.ActorRegistry.stop_all()
+
         if os.path.exists(settings.LOCAL_PLAYLIST_PATH):
             shutil.rmtree(settings.LOCAL_PLAYLIST_PATH)
 

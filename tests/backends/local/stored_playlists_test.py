@@ -11,8 +11,8 @@ from tests.backends.base.stored_playlists import (
 from tests.backends.local import generate_song
 
 
-class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
-                                         unittest.TestCase):
+class LocalStoredPlaylistsControllerTest(
+        StoredPlaylistsControllerTest, unittest.TestCase):
 
     backend_class = LocalBackend
 
@@ -28,13 +28,13 @@ class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
         self.stored.save(Playlist(name='test2'))
         self.assert_(os.path.exists(path))
 
-    def test_deleted_playlist_get_removed(self):
+    def test_deleted_playlist_is_removed(self):
         playlist = self.stored.create('test')
         self.stored.delete(playlist)
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
         self.assert_(not os.path.exists(path))
 
-    def test_renamed_playlist_gets_moved(self):
+    def test_renamed_playlist_is_moved(self):
         playlist = self.stored.create('test')
         file1 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
         file2 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test2.m3u')
@@ -43,7 +43,7 @@ class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
         self.assert_(not os.path.exists(file1))
         self.assert_(os.path.exists(file2))
 
-    def test_playlist_contents_get_written_to_disk(self):
+    def test_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1))
         uri = track.uri[len('file://'):]
         playlist = Playlist(tracks=[track], name='test')
@@ -58,15 +58,17 @@ class LocalStoredPlaylistsControllerTest(StoredPlaylistsControllerTest,
 
     def test_playlists_are_loaded_at_startup(self):
         track = Track(uri=path_to_uri(path_to_data_dir('uri2')))
-        playlist = Playlist(tracks=[track], name='test')
-
+        playlist = self.stored.create('test')
+        playlist = playlist.copy(tracks=[track])
         self.stored.save(playlist)
 
-        self.backend = self.backend_class.start(audio=self.audio).proxy()
+        backend = self.backend_class(audio=self.audio)
 
-        self.assert_(self.stored.playlists)
-        self.assertEqual('test', self.stored.playlists[0].name)
-        self.assertEqual(track.uri, self.stored.playlists[0].tracks[0].uri)
+        self.assert_(backend.stored_playlists.playlists)
+        self.assertEqual(
+            playlist.name, backend.stored_playlists.playlists[0].name)
+        self.assertEqual(
+            track.uri, backend.stored_playlists.playlists[0].tracks[0].uri)
 
     @unittest.SkipTest
     def test_santitising_of_playlist_filenames(self):
