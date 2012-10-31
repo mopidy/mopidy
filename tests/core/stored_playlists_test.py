@@ -59,6 +59,24 @@ class StoredPlaylistsTest(unittest.TestCase):
         self.assertFalse(self.sp1.create.called)
         self.sp2.create.assert_called_once_with('foo')
 
+    def test_delete_selects_the_dummy1_backend(self):
+        self.core.stored_playlists.delete('dummy1:a')
+
+        self.sp1.delete.assert_called_once_with('dummy1:a')
+        self.assertFalse(self.sp2.delete.called)
+
+    def test_delete_selects_the_dummy2_backend(self):
+        self.core.stored_playlists.delete('dummy2:a')
+
+        self.assertFalse(self.sp1.delete.called)
+        self.sp2.delete.assert_called_once_with('dummy2:a')
+
+    def test_delete_with_unknown_uri_scheme_does_nothing(self):
+        self.core.stored_playlists.delete('unknown:a')
+
+        self.assertFalse(self.sp1.delete.called)
+        self.assertFalse(self.sp2.delete.called)
+
     def test_lookup_selects_the_dummy1_backend(self):
         self.core.stored_playlists.lookup('dummy1:a')
 

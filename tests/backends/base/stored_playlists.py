@@ -47,12 +47,15 @@ class StoredPlaylistsControllerTest(object):
         self.assert_(not self.stored.playlists)
 
     def test_delete_non_existant_playlist(self):
-        self.stored.delete(Playlist())
+        self.stored.delete('file:///unknown/playlist')
 
-    def test_delete_playlist(self):
+    def test_delete_playlist_removes_it_from_the_collection(self):
         playlist = self.stored.create('test')
-        self.stored.delete(playlist)
-        self.assert_(not self.stored.playlists)
+        self.assertIn(playlist, self.stored.playlists)
+
+        self.stored.delete(playlist.uri)
+
+        self.assertNotIn(playlist, self.stored.playlists)
 
     def test_get_without_criteria(self):
         test = self.stored.get

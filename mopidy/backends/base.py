@@ -180,7 +180,7 @@ class BaseStoredPlaylistsProvider(object):
         """
         raise NotImplementedError
 
-    def delete(self, playlist):
+    def delete(self, uri):
         """
         See :meth:`mopidy.core.StoredPlaylistsController.delete`.
 

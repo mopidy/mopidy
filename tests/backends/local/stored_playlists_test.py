@@ -39,15 +39,12 @@ class LocalStoredPlaylistsControllerTest(
 
     def test_deleted_playlist_is_removed(self):
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
-
         self.assertFalse(os.path.exists(path))
 
         playlist = self.stored.create('test')
-
         self.assertTrue(os.path.exists(path))
 
-        self.stored.delete(playlist)
-
+        self.stored.delete(playlist.uri)
         self.assertFalse(os.path.exists(path))
 
     def test_playlist_contents_is_written_to_disk(self):

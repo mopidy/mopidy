@@ -56,12 +56,17 @@ backends:
   dummy/mocked lower layers easier than with the old variant, where
   dependencies where looked up in Pykka's actor registry.
 
-- The stored playlists part of the core API have been revised a bit:
+- The stored playlists part of the core API have been revised to be more
+  focused around the playlist URI, and some redundant functionality have been
+  removed:
 
   - :attr:`mopidy.core.StoredPlaylistsController.playlists` no longer supports
     assignment to it. The `playlists` property on the backend layer still does,
     and all functionality is maintained by assigning to the playlists
     collections at the backend level.
+
+  - :meth:`mopidy.core.StoredPlaylistsController.delete` now accepts an URI,
+    and not a playlist object.
 
   - :meth:`mopidy.core.StoredPlaylistsController.save` now returns the saved
     playlist. The returned playlist may differ from the saved playlist, and

@@ -43,15 +43,20 @@ class StoredPlaylistsController(object):
             backend = self.backends[0]
         return backend.stored_playlists.create(name).get()
 
-    def delete(self, playlist):
+    def delete(self, uri):
         """
-        Delete playlist.
+        Delete playlist identified by the URI.
 
-        :param playlist: the playlist to delete
-        :type playlist: :class:`mopidy.models.Playlist`
+        If the URI doesn't match the URI schemes handled by the current
+        backends, nothing happens.
+
+        :param uri: URI of the playlist to delete
+        :type uri: string
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.delete(playlist).get()
+        uri_scheme = urlparse.urlparse(uri).scheme
+        backend = self.backends.by_uri_scheme.get(uri_scheme, None)
+        if backend:
+            return backend.stored_playlists.delete(uri).get()
 
     def get(self, **criteria):
         """

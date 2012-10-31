@@ -29,15 +29,13 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         self.save(playlist)
         return playlist
 
-    def delete(self, playlist):
-        if playlist not in self._playlists:
+    def delete(self, uri):
+        playlist = self.lookup(uri)
+        if not playlist:
             return
 
         self._playlists.remove(playlist)
-        filename = os.path.join(self._folder, playlist.name + '.m3u')
-
-        if os.path.exists(filename):
-            os.remove(filename)
+        self._delete_m3u(playlist)
 
     def lookup(self, uri):
         for playlist in self._playlists:
@@ -94,3 +92,8 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
                 else:
                     uri = track.uri
                 file_handle.write(uri + '\n')
+
+    def _delete_m3u(self, playlist):
+        file_path = playlist.uri[len('file://'):]
+        if os.path.exists(file_path):
+            os.remove(file_path)
