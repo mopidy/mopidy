@@ -1,4 +1,5 @@
 import itertools
+import urlparse
 
 import pykka
 
@@ -85,14 +86,18 @@ class StoredPlaylistsController(object):
     def lookup(self, uri):
         """
         Lookup playlist with given URI in both the set of stored playlists and
-        in any other playlist sources.
+        in any other playlist sources. Returns :class:`None` if not found.
 
         :param uri: playlist URI
         :type uri: string
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.lookup(uri).get()
+        uri_scheme = urlparse.urlparse(uri).scheme
+        backend = self.backends.by_uri_scheme.get(uri_scheme, None)
+        if backend:
+            return backend.stored_playlists.lookup(uri).get()
+        else:
+            return None
 
     def refresh(self):
         """

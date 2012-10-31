@@ -59,5 +59,17 @@ class StoredPlaylistsTest(unittest.TestCase):
         self.assertFalse(self.sp1.create.called)
         self.sp2.create.assert_called_once_with('foo')
 
+    def test_lookup_selects_the_dummy1_backend(self):
+        self.core.stored_playlists.lookup('dummy1:a')
+
+        self.sp1.lookup.assert_called_once_with('dummy1:a')
+        self.assertFalse(self.sp2.lookup.called)
+
+    def test_lookup_selects_the_dummy2_backend(self):
+        self.core.stored_playlists.lookup('dummy2:a')
+
+        self.assertFalse(self.sp1.lookup.called)
+        self.sp2.lookup.assert_called_once_with('dummy2:a')
+
     # TODO The rest of the stored playlists API is pending redesign before
     # we'll update it to support multiple backends.
