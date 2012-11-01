@@ -23,26 +23,18 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
 
         return super(SpotifyPlaybackProvider, self).pause()
 
-    def play(self, track):
-        if track.uri is None:
-            return False
-
+    def change_track(self, track):
+        self.audio.set_uri('appsrc://').get()
+        self.audio.set_metadata(track).get()
         try:
             self.backend.spotify.session.load(
                 Link.from_string(track.uri).as_track())
             self.backend.spotify.session.play(1)
-
-            self.audio.prepare_change()
-            self.audio.set_uri('appsrc://')
-            self.audio.start_playback()
-            self.audio.set_metadata(track)
-
-            self._timer.play()
-
-            return True
         except SpotifyError as e:
             logger.info('Playback of %s failed: %s', track.uri, e)
             return False
+        self._timer.play()
+        return True
 
     def resume(self):
         time_position = self.get_time_position()

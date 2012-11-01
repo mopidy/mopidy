@@ -88,8 +88,8 @@ class BaseLibraryProvider(object):
 
 class BasePlaybackProvider(object):
     """
-    :param audio: the audio actor
-    :type audio: actor proxy to an instance of :class:`mopidy.audio.Audio`
+    :param audio: audio sub-system
+    :type audio: actor proxy to a :class:`mopidy.audio.Audio` actor.
     :param backend: the backend
     :type backend: :class:`mopidy.backends.base.Backend`
     """
@@ -121,8 +121,23 @@ class BasePlaybackProvider(object):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         self.audio.prepare_change()
-        self.audio.set_uri(track.uri).get()
+        self.change_track(track)
         return self.audio.start_playback().get()
+
+    def change_track(self, track):
+        """
+        Swith to provided track.
+
+        Used for handling of EOT and and in :meth:`play`.
+
+        *MAY be reimplemented by subclass.*
+
+        :param track: the track to play
+        :type track: :class:`mopidy.models.Track`
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        self.audio.set_uri(track.uri).get()
+        return True
 
     def resume(self):
         """
