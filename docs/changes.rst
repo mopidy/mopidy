@@ -70,6 +70,11 @@ backends:
 
 - Added support for search by filename to local backend.
 
+**Bug fixes**
+
+- :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
+  accepts unquotes playlist names if they don't contain spaces.
+
 
 v0.8.1 (2012-10-30)
 ===================

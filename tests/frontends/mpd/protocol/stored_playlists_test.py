@@ -14,6 +14,14 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'file: file:///dev/urandom')
         self.assertInResponse(u'OK')
 
+    def test_listplaylist_without_quotes(self):
+        self.core.stored_playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+
+        self.sendRequest(u'listplaylist name')
+        self.assertInResponse(u'file: file:///dev/urandom')
+        self.assertInResponse(u'OK')
+
     def test_listplaylist_fails_if_no_playlist_is_found(self):
         self.sendRequest(u'listplaylist "name"')
         self.assertEqualResponse(u'ACK [50@0] {listplaylist} No such playlist')
@@ -23,6 +31,16 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
             Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
 
         self.sendRequest(u'listplaylistinfo "name"')
+        self.assertInResponse(u'file: file:///dev/urandom')
+        self.assertInResponse(u'Track: 0')
+        self.assertNotInResponse(u'Pos: 0')
+        self.assertInResponse(u'OK')
+
+    def test_listplaylistinfo_without_quotes(self):
+        self.core.stored_playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+
+        self.sendRequest(u'listplaylistinfo name')
         self.assertInResponse(u'file: file:///dev/urandom')
         self.assertInResponse(u'Track: 0')
         self.assertNotInResponse(u'Pos: 0')
