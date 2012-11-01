@@ -1,14 +1,12 @@
 import glob
 import logging
 import os
-import re
 import shutil
-import unicodedata
 
 from mopidy import settings
 from mopidy.backends import base
 from mopidy.models import Playlist
-from mopidy.utils import path
+from mopidy.utils import formatting, path
 
 from .translator import parse_m3u
 
@@ -23,7 +21,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         self.refresh()
 
     def create(self, name):
-        name = self._slugify(name)
+        name = formatting.slugify(name)
         uri = path.path_to_uri(self._get_m3u_path(name))
         playlist = Playlist(uri=uri, name=name)
         return self.save(playlist)
@@ -70,7 +68,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         old_playlist = self.lookup(playlist.uri)
 
         if old_playlist and playlist.name != old_playlist.name:
-            playlist = playlist.copy(name=self._slugify(playlist.name))
+            playlist = playlist.copy(name=formatting.slugify(playlist.name))
             playlist = self._rename_m3u(playlist)
 
         self._save_m3u(playlist)
@@ -84,7 +82,7 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         return playlist
 
     def _get_m3u_path(self, name):
-        name = self._slugify(name)
+        name = formatting.slugify(name)
         file_path = os.path.join(self._path, name + '.m3u')
         self._validate_file_path(file_path)
         return file_path
@@ -134,16 +132,3 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         common_prefix = os.path.commonprefix([real_base_path, real_dir_path])
         assert common_prefix == real_base_path, (
             'File path %s must be in %s' % (real_file_path, real_base_path))
-
-    def _slugify(self, value):
-        """
-        Converts to lowercase, removes non-word characters (alphanumerics and
-        underscores) and converts spaces to hyphens. Also strips leading and
-        trailing whitespace.
-
-        This function is based on Django's slugify implementation.
-        """
-        value = unicodedata.normalize('NFKD', value)
-        value = value.encode('ascii', 'ignore').decode('ascii')
-        value = re.sub(r'[^\w\s-]', '', value).strip().lower()
-        return re.sub(r'[-\s]+', '-', value)
