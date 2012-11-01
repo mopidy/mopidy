@@ -57,9 +57,9 @@ class StoredPlaylistsController(object):
         :type uri: string
         """
         uri_scheme = urlparse.urlparse(uri).scheme
-        backend = self.backends.by_uri_scheme.get(uri_scheme, None)
-        if backend:
-            return backend.stored_playlists.delete(uri).get()
+        if uri_scheme in self.backends.by_uri_scheme:
+            backend = self.backends.by_uri_scheme[uri_scheme]
+            backend.stored_playlists.delete(uri).get()
 
     def get(self, **criteria):
         """
