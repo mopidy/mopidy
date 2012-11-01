@@ -70,6 +70,8 @@ class BaseLibraryProvider(object):
 
 class BasePlaybackProvider(object):
     """
+    :param audio: the audio actor
+    :type audio: actor proxy to an instance of :class:`mopidy.audio.Audio`
     :param backend: the backend
     :type backend: :class:`mopidy.backends.base.Backend`
     """
