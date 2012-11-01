@@ -307,7 +307,7 @@ def plchanges(context, version):
     - Calls ``plchanges "-1"`` two times per second to get the entire playlist.
     """
     # XXX Naive implementation that returns all tracks as changed
-    if int(version) < context.core.current_playlist.version:
+    if int(version) < context.core.current_playlist.version.get():
         return translator.tracks_to_mpd_format(
             context.core.current_playlist.cp_tracks.get())
 
