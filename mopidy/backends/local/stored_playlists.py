@@ -84,12 +84,12 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
     def _get_m3u_path(self, name):
         name = formatting.slugify(name)
         file_path = os.path.join(self._path, name + '.m3u')
-        self._validate_file_path(file_path)
+        path.check_file_path_is_inside_base_dir(file_path, self._path)
         return file_path
 
     def _save_m3u(self, playlist):
         file_path = path.uri_to_path(playlist.uri)
-        self._validate_file_path(file_path)
+        path.check_file_path_is_inside_base_dir(file_path, self._path)
         with open(file_path, 'w') as file_handle:
             for track in playlist.tracks:
                 if track.uri.startswith('file://'):
@@ -100,35 +100,17 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
 
     def _delete_m3u(self, uri):
         file_path = path.uri_to_path(uri)
-        self._validate_file_path(file_path)
+        path.check_file_path_is_inside_base_dir(file_path, self._path)
         if os.path.exists(file_path):
             os.remove(file_path)
 
     def _rename_m3u(self, playlist):
         src_file_path = path.uri_to_path(playlist.uri)
-        self._validate_file_path(src_file_path)
+        path.check_file_path_is_inside_base_dir(src_file_path, self._path)
 
         dst_file_path = self._get_m3u_path(playlist.name)
-        self._validate_file_path(dst_file_path)
+        path.check_file_path_is_inside_base_dir(dst_file_path, self._path)
 
         shutil.move(src_file_path, dst_file_path)
 
         return playlist.copy(uri=path.path_to_uri(dst_file_path))
-
-    def _validate_file_path(self, file_path):
-        assert not file_path.endswith(os.sep), (
-            'File path %s cannot end with a path separator' % file_path)
-
-        # Expand symlinks
-        real_base_path = os.path.realpath(self._path)
-        real_file_path = os.path.realpath(file_path)
-
-        # Use dir of file for prefix comparision, so we don't accept
-        # /tmp/foo.m3u as being inside /tmp/foo, simply because they have a
-        # common prefix, /tmp/foo, which matches the base path, /tmp/foo.
-        real_dir_path = os.path.dirname(real_file_path)
-
-        # Check if dir of file is the base path or a subdir
-        common_prefix = os.path.commonprefix([real_base_path, real_dir_path])
-        assert common_prefix == real_base_path, (
-            'File path %s must be in %s' % (real_file_path, real_base_path))
