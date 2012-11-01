@@ -68,6 +68,8 @@ backends:
 
 - The Spotify backend now includes release year and artist on albums.
 
+- Added support for search by filename to local backend.
+
 
 v0.8.1 (2012-10-30)
 ===================

@@ -59,7 +59,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(album_filter, result_tracks)
                 elif field == 'artist':
                     result_tracks = filter(artist_filter, result_tracks)
-                elif field == 'uri':
+                elif field in ('uri', 'filename'):
                     result_tracks = filter(uri_filter, result_tracks)
                 elif field == 'any':
                     result_tracks = filter(any_filter, result_tracks)
@@ -93,7 +93,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(album_filter, result_tracks)
                 elif field == 'artist':
                     result_tracks = filter(artist_filter, result_tracks)
-                elif field == 'uri':
+                elif field == 'uri' or field == 'filename':
                     result_tracks = filter(uri_filter, result_tracks)
                 elif field == 'any':
                     result_tracks = filter(any_filter, result_tracks)
