@@ -1,7 +1,9 @@
 import glob
 import logging
 import os
+import re
 import shutil
+import unicodedata
 
 from mopidy import settings
 from mopidy.backends import base
@@ -20,9 +22,8 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         self._folder = settings.LOCAL_PLAYLIST_PATH
         self.refresh()
 
-    # TODO playlist names needs safer handling using a slug function
-
     def create(self, name):
+        name = self._slugify(name)
         file_path = os.path.join(self._folder, name + '.m3u')
         uri = path.path_to_uri(file_path)
         playlist = Playlist(uri=uri, name=name)
@@ -68,10 +69,11 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         old_playlist = self.lookup(playlist.uri)
 
         if old_playlist and playlist.name != old_playlist.name:
+            new_name = self._slugify(playlist.name)
             src = os.path.join(self._folder, old_playlist.name + '.m3u')
-            dst = os.path.join(self._folder, playlist.name + '.m3u')
+            dst = os.path.join(self._folder, new_name + '.m3u')
             shutil.move(src, dst)
-            playlist = playlist.copy(uri=path.path_to_uri(dst))
+            playlist = playlist.copy(uri=path.path_to_uri(dst), name=new_name)
 
         self._save_m3u(playlist)
 
@@ -97,3 +99,16 @@ class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
         file_path = playlist.uri[len('file://'):]
         if os.path.exists(file_path):
             os.remove(file_path)
+
+    def _slugify(self, value):
+        """
+        Converts to lowercase, removes non-word characters (alphanumerics and
+        underscores) and converts spaces to hyphens. Also strips leading and
+        trailing whitespace.
+
+        This function is based on Django's slugify implementation.
+        """
+        value = unicodedata.normalize('NFKD', value)
+        value = value.encode('ascii', 'ignore').decode('ascii')
+        value = re.sub('[^\w\s-]', '', value).strip().lower()
+        return re.sub('[-\s]+', '-', value)

@@ -31,15 +31,15 @@ class StoredPlaylistsControllerTest(object):
         settings.runtime.clear()
 
     def test_create_returns_playlist_with_name_set(self):
-        playlist = self.stored.create('test')
+        playlist = self.stored.create(u'test')
         self.assertEqual(playlist.name, 'test')
 
     def test_create_returns_playlist_with_uri_set(self):
-        playlist = self.stored.create('test')
+        playlist = self.stored.create(u'test')
         self.assert_(playlist.uri)
 
     def test_create_adds_playlist_to_playlists_collection(self):
-        playlist = self.stored.create('test')
+        playlist = self.stored.create(u'test')
         self.assert_(self.stored.playlists)
         self.assertIn(playlist, self.stored.playlists)
 
@@ -50,7 +50,7 @@ class StoredPlaylistsControllerTest(object):
         self.stored.delete('file:///unknown/playlist')
 
     def test_delete_playlist_removes_it_from_the_collection(self):
-        playlist = self.stored.create('test')
+        playlist = self.stored.create(u'test')
         self.assertIn(playlist, self.stored.playlists)
 
         self.stored.delete(playlist.uri)
@@ -66,7 +66,7 @@ class StoredPlaylistsControllerTest(object):
         self.assertRaises(LookupError, test)
 
     def test_get_with_right_criteria(self):
-        playlist1 = self.stored.create('test')
+        playlist1 = self.stored.create(u'test')
         playlist2 = self.stored.get(name='test')
         self.assertEqual(playlist1, playlist2)
 
@@ -96,7 +96,7 @@ class StoredPlaylistsControllerTest(object):
             self.assertEqual(u'"name=c" match no playlists', e[0])
 
     def test_lookup_finds_playlist_by_uri(self):
-        original_playlist = self.stored.create('test')
+        original_playlist = self.stored.create(u'test')
 
         looked_up_playlist = self.stored.lookup(original_playlist.uri)
 
@@ -107,10 +107,10 @@ class StoredPlaylistsControllerTest(object):
         pass
 
     def test_save_replaces_stored_playlist_with_updated_playlist(self):
-        playlist1 = self.stored.create('test1')
+        playlist1 = self.stored.create(u'test1')
         self.assertIn(playlist1, self.stored.playlists)
 
-        playlist2 = playlist1.copy(name='test2')
+        playlist2 = playlist1.copy(name=u'test2')
         playlist2 = self.stored.save(playlist2)
         self.assertNotIn(playlist1, self.stored.playlists)
         self.assertIn(playlist2, self.stored.playlists)

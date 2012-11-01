@@ -18,22 +18,40 @@ class LocalStoredPlaylistsControllerTest(
 
     def test_created_playlist_is_persisted(self):
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
-        self.assert_(not os.path.exists(path))
-        self.stored.create('test')
-        self.assert_(os.path.exists(path))
+        self.assertFalse(os.path.exists(path))
+
+        self.stored.create(u'test')
+        self.assertTrue(os.path.exists(path))
+
+    def test_create_slugifies_playlist_name(self):
+        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test-foo-bar.m3u')
+        self.assertFalse(os.path.exists(path))
+
+        playlist = self.stored.create(u'test FOO baR')
+        self.assertEqual(u'test-foo-bar', playlist.name)
+        self.assertTrue(os.path.exists(path))
+
+    def test_create_slugifies_names_which_tries_to_change_directory(self):
+        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test-foo-bar.m3u')
+        self.assertFalse(os.path.exists(path))
+
+        playlist = self.stored.create(u'../../test FOO baR')
+        self.assertEqual(u'test-foo-bar', playlist.name)
+        self.assertTrue(os.path.exists(path))
 
     def test_saved_playlist_is_persisted(self):
         path1 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test1.m3u')
-        path2 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test2.m3u')
+        path2 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test2-foo-bar.m3u')
 
-        playlist = self.stored.create('test1')
+        playlist = self.stored.create(u'test1')
 
         self.assertTrue(os.path.exists(path1))
         self.assertFalse(os.path.exists(path2))
 
-        playlist = playlist.copy(name='test2')
+        playlist = playlist.copy(name=u'test2 FOO baR')
         playlist = self.stored.save(playlist)
 
+        self.assertEqual(u'test2-foo-bar', playlist.name)
         self.assertFalse(os.path.exists(path1))
         self.assertTrue(os.path.exists(path2))
 
@@ -41,7 +59,7 @@ class LocalStoredPlaylistsControllerTest(
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
         self.assertFalse(os.path.exists(path))
 
-        playlist = self.stored.create('test')
+        playlist = self.stored.create(u'test')
         self.assertTrue(os.path.exists(path))
 
         self.stored.delete(playlist.uri)
@@ -50,7 +68,7 @@ class LocalStoredPlaylistsControllerTest(
     def test_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1))
         track_path = track.uri[len('file://'):]
-        playlist = self.stored.create('test')
+        playlist = self.stored.create(u'test')
         playlist_path = playlist.uri[len('file://'):]
         playlist = playlist.copy(tracks=[track])
         playlist = self.stored.save(playlist)
@@ -64,7 +82,7 @@ class LocalStoredPlaylistsControllerTest(
         playlist_path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
 
         track = Track(uri=path_to_uri(path_to_data_dir('uri2')))
-        playlist = self.stored.create('test')
+        playlist = self.stored.create(u'test')
         playlist = playlist.copy(tracks=[track])
         playlist = self.stored.save(playlist)
 
