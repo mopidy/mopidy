@@ -5,6 +5,7 @@ from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.translator import playlist_to_mpd_format
 
 
+@handle_request(r'^listplaylist (?P<name>\S+)$')
 @handle_request(r'^listplaylist "(?P<name>[^"]+)"$')
 def listplaylist(context, name):
     """
@@ -27,6 +28,7 @@ def listplaylist(context, name):
         raise MpdNoExistError(u'No such playlist', command=u'listplaylist')
 
 
+@handle_request(r'^listplaylistinfo (?P<name>\S+)$')
 @handle_request(r'^listplaylistinfo "(?P<name>[^"]+)"$')
 def listplaylistinfo(context, name):
     """

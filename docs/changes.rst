@@ -86,6 +86,16 @@ backends:
 
 - The Spotify backend now includes release year and artist on albums.
 
+- Added support for search by filename to local backend.
+
+**Bug fixes**
+
+- :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
+  accepts unquotes playlist names if they don't contain spaces.
+
+- The MPD command ``plchanges`` always returned the entire playlist. It now
+  returns an empty response when the client has seen the latest version.
+
 
 v0.8.1 (2012-10-30)
 ===================

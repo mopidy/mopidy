@@ -364,7 +364,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.sendRequest(u'playlistsearch any "needle"')
         self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
 
-    def test_plchanges(self):
+    def test_plchanges_with_lower_version_returns_changes(self):
         self.core.current_playlist.append(
             [Track(name='a'), Track(name='b'), Track(name='c')])
 
@@ -372,6 +372,28 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'Title: a')
         self.assertInResponse(u'Title: b')
         self.assertInResponse(u'Title: c')
+        self.assertInResponse(u'OK')
+
+    def test_plchanges_with_equal_version_returns_nothing(self):
+        self.core.current_playlist.append(
+            [Track(name='a'), Track(name='b'), Track(name='c')])
+
+        self.assertEqual(self.core.current_playlist.version.get(), 1)
+        self.sendRequest(u'plchanges "1"')
+        self.assertNotInResponse(u'Title: a')
+        self.assertNotInResponse(u'Title: b')
+        self.assertNotInResponse(u'Title: c')
+        self.assertInResponse(u'OK')
+
+    def test_plchanges_with_greater_version_returns_nothing(self):
+        self.core.current_playlist.append(
+            [Track(name='a'), Track(name='b'), Track(name='c')])
+
+        self.assertEqual(self.core.current_playlist.version.get(), 1)
+        self.sendRequest(u'plchanges "2"')
+        self.assertNotInResponse(u'Title: a')
+        self.assertNotInResponse(u'Title: b')
+        self.assertNotInResponse(u'Title: c')
         self.assertInResponse(u'OK')
 
     def test_plchanges_with_minus_one_returns_entire_playlist(self):
