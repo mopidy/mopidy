@@ -15,7 +15,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_listplaylist_without_quotes(self):
-        self.core.stored_playlists.playlists = [
+        self.backend.stored_playlists.playlists = [
             Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
 
         self.sendRequest(u'listplaylist name')
@@ -37,7 +37,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_listplaylistinfo_without_quotes(self):
-        self.core.stored_playlists.playlists = [
+        self.backend.stored_playlists.playlists = [
             Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
 
         self.sendRequest(u'listplaylistinfo name')
