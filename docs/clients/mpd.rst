@@ -1,6 +1,8 @@
-************************
-MPD client compatability
-************************
+.. _mpd-clients:
+
+***********
+MPD clients
+***********
 
 This is a list of MPD clients we either know works well with Mopidy, or that we
 know won't work well. For a more exhaustive list of MPD clients, see
