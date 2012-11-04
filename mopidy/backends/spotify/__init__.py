@@ -20,8 +20,8 @@ https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 
 **Dependencies:**
 
-- libspotify >= 11, < 12 (libspotify11 package from apt.mopidy.com)
-- pyspotify >= 1.7, < 1.8 (python-spotify package from apt.mopidy.com)
+- libspotify >= 12, < 13 (libspotify12 package from apt.mopidy.com)
+- pyspotify >= 1.8, < 1.9 (python-spotify package from apt.mopidy.com)
 
 **Settings:**
 
