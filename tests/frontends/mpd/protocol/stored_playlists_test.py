@@ -7,7 +7,7 @@ from tests.frontends.mpd import protocol
 
 class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylist(self):
-        self.core.stored_playlists.playlists = [
+        self.backend.stored_playlists.playlists = [
             Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
 
         self.sendRequest(u'listplaylist "name"')
@@ -15,7 +15,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_listplaylist_without_quotes(self):
-        self.core.stored_playlists.playlists = [
+        self.backend.stored_playlists.playlists = [
             Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
 
         self.sendRequest(u'listplaylist name')
@@ -27,7 +27,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse(u'ACK [50@0] {listplaylist} No such playlist')
 
     def test_listplaylistinfo(self):
-        self.core.stored_playlists.playlists = [
+        self.backend.stored_playlists.playlists = [
             Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
 
         self.sendRequest(u'listplaylistinfo "name"')
@@ -37,7 +37,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_listplaylistinfo_without_quotes(self):
-        self.core.stored_playlists.playlists = [
+        self.backend.stored_playlists.playlists = [
             Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
 
         self.sendRequest(u'listplaylistinfo name')
@@ -53,7 +53,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylists(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
-        self.core.stored_playlists.playlists = [
+        self.backend.stored_playlists.playlists = [
             Playlist(name='a', last_modified=last_modified)]
 
         self.sendRequest(u'listplaylists')
@@ -65,7 +65,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
     def test_load_known_playlist_appends_to_current_playlist(self):
         self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.current_playlist.tracks.get()), 2)
-        self.core.stored_playlists.playlists = [
+        self.backend.stored_playlists.playlists = [
             Playlist(name='A-list', tracks=[
                 Track(uri='c'), Track(uri='d'), Track(uri='e')])]
 
