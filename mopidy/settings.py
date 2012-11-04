@@ -26,7 +26,7 @@ BACKENDS = (
 
 #: The log format used for informational logging.
 #:
-#: See http://docs.python.org/library/logging.html#formatter-objects for
+#: See http://docs.python.org/2/library/logging.html#formatter-objects for
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 

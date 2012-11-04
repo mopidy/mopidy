@@ -281,7 +281,7 @@ Tested version:
 
 The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ iPhone/iPod Touch
 app can be installed from the `iTunes Store
-<http://itunes.apple.com/us/app/mpod/id285063020>`_.
+<https://itunes.apple.com/us/app/mpod/id285063020>`_.
 
 Users have reported varying success in using MPoD together with Mopidy. Thus,
 we've tested a fresh install of MPoD 1.5.1 with Mopidy as of revision e7ed28d

@@ -19,16 +19,16 @@ To install Mopidy, start by reading :ref:`installation`.
 If you get stuck, we usually hang around at ``#mopidy`` at `irc.freenode.net
 <http://freenode.net/>`_. If you stumble into a bug or got a feature request,
 please create an issue in the `issue tracker
-<http://github.com/mopidy/mopidy/issues>`_.
+<https://github.com/mopidy/mopidy/issues>`_.
 
 
 Project resources
 =================
 
 - `Documentation <http://docs.mopidy.com/>`_
-- `Source code <http://github.com/mopidy/mopidy>`_
-- `Issue tracker <http://github.com/mopidy/mopidy/issues>`_
-- `CI server <http://travis-ci.org/mopidy/mopidy>`_
+- `Source code <https://github.com/mopidy/mopidy>`_
+- `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
+- `CI server <https://travis-ci.org/mopidy/mopidy>`_
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
 
 

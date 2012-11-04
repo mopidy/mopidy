@@ -3,7 +3,7 @@ Development
 ***********
 
 Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
-``irc.freenode.net`` and through `GitHub <http://github.com/>`_.
+``irc.freenode.net`` and through `GitHub <https://github.com/>`_.
 
 
 Release schedule
@@ -90,7 +90,8 @@ Code style
 Commit guidelines
 =================
 
-- We follow the development process described at http://nvie.com/git-model.
+- We follow the development process described at
+  `nvie.com <http://nvie.com/posts/a-successful-git-branching-model/>`_.
 
 - Keep commits small and on topic.
 
@@ -133,13 +134,13 @@ To run tests with test coverage statistics::
     nosetests --with-coverage
 
 For more documentation on testing, check out the `nose documentation
-<http://somethingaboutorange.com/mrl/projects/nose/>`_.
+<http://nose.readthedocs.org/>`_.
 
 
 Continuous integration
 ======================
 
-Mopidy uses the free service `Travis CI <http://travis-ci.org/#mopidy/mopidy>`_
+Mopidy uses the free service `Travis CI <https://travis-ci.org/mopidy/mopidy>`_
 for automatically running the test suite when code is pushed to GitHub. This
 works both for the main Mopidy repo, but also for any forks. This way, any
 contributions to Mopidy through GitHub will automatically be tested by Travis
@@ -205,7 +206,7 @@ playlists.
 Writing documentation
 =====================
 
-To write documentation, we use `Sphinx <http://sphinx.pocoo.org/>`_. See their
+To write documentation, we use `Sphinx <http://sphinx-doc.org/>`_. See their
 site for lots of documentation on how to use Sphinx. To generate HTML or LaTeX
 from the documentation files, you need some additional dependencies.
 

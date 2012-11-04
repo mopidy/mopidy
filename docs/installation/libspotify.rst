@@ -3,8 +3,8 @@ libspotify installation
 ***********************
 
 Mopidy uses `libspotify
-<http://developer.spotify.com/en/libspotify/overview/>`_ for playing music from
-the Spotify music service. To use :mod:`mopidy.backends.spotify` you must
+<https://developer.spotify.com/technologies/libspotify/>`_ for playing music
+from the Spotify music service. To use :mod:`mopidy.backends.spotify` you must
 install libspotify and `pyspotify <http://pyspotify.mopidy.com/>`_.
 
 .. note::

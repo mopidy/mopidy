@@ -1143,7 +1143,7 @@ Mopidy is working and usable. 0.1.0a0 is an alpha release, which basicly means
 we will still change APIs, add features, etc. before the final 0.1.0 release.
 But the software is usable as is, so we release it. Please give it a try and
 give us feedback, either at our IRC channel or through the `issue tracker
-<http://github.com/mopidy/mopidy/issues>`_. Thanks!
+<https://github.com/mopidy/mopidy/issues>`_. Thanks!
 
 **Changes**
 
