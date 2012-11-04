@@ -5,19 +5,18 @@ Mopidy
 .. image:: https://secure.travis-ci.org/mopidy/mopidy.png?branch=develop
 
 Mopidy is a music server which can play music both from your local hard drive
-and from `Spotify <http://www.spotify.com/>`_. Searches returns results from
-both your local hard drive and from Spotify, and you can mix tracks from both
-sources in your play queue. Your Spotify playlists are also available for use,
-though we don't support modifying them yet.
+and from Spotify. Searches returns results from both your local hard drive and
+from Spotify, and you can mix tracks from both sources in your play queue. Your
+Spotify playlists are also available for use, though we don't support modifying
+them yet.
 
 To control your music server, you can use the Ubuntu Sound Menu on the machine
 running Mopidy, any device on the same network which supports the DLNA media
-controller spec (with the help of Rygel in addition to Mopidy), or any `MPD
-client <http://mpd.wikia.com/>`_. MPD clients are available for most platforms,
-including Windows, Mac OS X, Linux, Android and iOS.
+controller spec (with the help of Rygel in addition to Mopidy), or any MPD
+client. MPD clients are available for most platforms, including Windows, Mac OS
+X, Linux, Android and iOS.
 
-To install Mopidy, check out
-`the installation docs <http://docs.mopidy.com/en/latest/installation/>`_.
+To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 
 - `Documentation <http://docs.mopidy.com/>`_
 - `Source code <http://github.com/mopidy/mopidy>`_
