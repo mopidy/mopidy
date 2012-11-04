@@ -1,4 +1,5 @@
 import itertools
+import urlparse
 
 import pykka
 
@@ -15,37 +16,50 @@ class StoredPlaylistsController(object):
         """
         Currently stored playlists.
 
-        Read/write. List of :class:`mopidy.models.Playlist`.
+        Read-only. List of :class:`mopidy.models.Playlist`.
         """
         futures = [b.stored_playlists.playlists for b in self.backends]
         results = pykka.get_all(futures)
         return list(itertools.chain(*results))
 
-    @playlists.setter  # noqa
-    def playlists(self, playlists):
-        # TODO Support multiple backends
-        self.backends[0].stored_playlists.playlists = playlists
-
-    def create(self, name):
+    def create(self, name, uri_scheme=None):
         """
         Create a new playlist.
 
+        If ``uri_scheme`` matches an URI scheme handled by a current backend,
+        that backend is asked to create the playlist. If ``uri_scheme`` is
+        :class:`None` or doesn't match a current backend, the first backend is
+        asked to create the playlist.
+
+        All new playlists should be created by calling this method, and **not**
+        by creating new instances of :class:`mopidy.models.Playlist`.
+
         :param name: name of the new playlist
         :type name: string
+        :param uri_scheme: use the backend matching the URI scheme
+        :type uri_scheme: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.create(name).get()
+        if uri_scheme in self.backends.by_uri_scheme:
+            backend = self.backends.by_uri_scheme[uri_scheme]
+        else:
+            backend = self.backends[0]
+        return backend.stored_playlists.create(name).get()
 
-    def delete(self, playlist):
+    def delete(self, uri):
         """
-        Delete playlist.
+        Delete playlist identified by the URI.
 
-        :param playlist: the playlist to delete
-        :type playlist: :class:`mopidy.models.Playlist`
+        If the URI doesn't match the URI schemes handled by the current
+        backends, nothing happens.
+
+        :param uri: URI of the playlist to delete
+        :type uri: string
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.delete(playlist).get()
+        uri_scheme = urlparse.urlparse(uri).scheme
+        if uri_scheme in self.backends.by_uri_scheme:
+            backend = self.backends.by_uri_scheme[uri_scheme]
+            backend.stored_playlists.delete(uri).get()
 
     def get(self, **criteria):
         """
@@ -80,41 +94,65 @@ class StoredPlaylistsController(object):
     def lookup(self, uri):
         """
         Lookup playlist with given URI in both the set of stored playlists and
-        in any other playlist sources.
+        in any other playlist sources. Returns :class:`None` if not found.
 
         :param uri: playlist URI
         :type uri: string
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.lookup(uri).get()
+        uri_scheme = urlparse.urlparse(uri).scheme
+        backend = self.backends.by_uri_scheme.get(uri_scheme, None)
+        if backend:
+            return backend.stored_playlists.lookup(uri).get()
+        else:
+            return None
 
-    def refresh(self):
+    def refresh(self, uri_scheme=None):
         """
         Refresh the stored playlists in :attr:`playlists`.
-        """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.refresh().get()
 
-    def rename(self, playlist, new_name):
-        """
-        Rename playlist.
+        If ``uri_scheme`` is :class:`None`, all backends are asked to refresh.
+        If ``uri_scheme`` is an URI scheme handled by a backend, only that
+        backend is asked to refresh. If ``uri_scheme`` doesn't match any
+        current backend, nothing happens.
 
-        :param playlist: the playlist
-        :type playlist: :class:`mopidy.models.Playlist`
-        :param new_name: the new name
-        :type new_name: string
+        :param uri_scheme: limit to the backend matching the URI scheme
+        :type uri_scheme: string
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.rename(
-            playlist, new_name).get()
+        if uri_scheme is None:
+            futures = [b.stored_playlists.refresh() for b in self.backends]
+            pykka.get_all(futures)
+        else:
+            if uri_scheme in self.backends.by_uri_scheme:
+                backend = self.backends.by_uri_scheme[uri_scheme]
+                backend.stored_playlists.refresh().get()
 
     def save(self, playlist):
         """
         Save the playlist to the set of stored playlists.
 
+        For a playlist to be saveable, it must have the ``uri`` attribute set.
+        You should not set the ``uri`` atribute yourself, but use playlist
+        objects returned by :meth:`create` or retrieved from :attr:`playlists`,
+        which will always give you saveable playlists.
+
+        The method returns the saved playlist. The return playlist may differ
+        from the saved playlist. E.g. if the playlist name was changed, the
+        returned playlist may have a different URI. The caller of this method
+        should throw away the playlist sent to this method, and use the
+        returned playlist instead.
+
+        If the playlist's URI isn't set or doesn't match the URI scheme of a
+        current backend, nothing is done and :class:`None` is returned.
+
         :param playlist: the playlist
         :type playlist: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
-        # TODO Support multiple backends
-        return self.backends[0].stored_playlists.save(playlist).get()
+        if playlist.uri is None:
+            return
+        uri_scheme = urlparse.urlparse(playlist.uri).scheme
+        if uri_scheme not in self.backends.by_uri_scheme:
+            return
+        backend = self.backends.by_uri_scheme[uri_scheme]
+        return backend.stored_playlists.save(playlist).get()

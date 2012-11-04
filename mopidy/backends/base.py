@@ -182,7 +182,7 @@ class BaseStoredPlaylistsProvider(object):
         """
         raise NotImplementedError
 
-    def delete(self, playlist):
+    def delete(self, uri):
         """
         See :meth:`mopidy.core.StoredPlaylistsController.delete`.
 
@@ -201,14 +201,6 @@ class BaseStoredPlaylistsProvider(object):
     def refresh(self):
         """
         See :meth:`mopidy.core.StoredPlaylistsController.refresh`.
-
-        *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
-    def rename(self, playlist, new_name):
-        """
-        See :meth:`mopidy.core.StoredPlaylistsController.rename`.
 
         *MUST be implemented by subclass.*
         """
