@@ -39,6 +39,8 @@ User documentation
     :maxdepth: 3
 
     installation/index
+    installation/gstreamer
+    installation/libspotify
     settings
     running
     clients/index

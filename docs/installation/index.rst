@@ -12,12 +12,6 @@ versions.
 Requirements
 ============
 
-.. toctree::
-    :hidden:
-
-    gstreamer
-    libspotify
-
 If you install Mopidy from the APT archive, as described below, APT will take
 care of all the dependencies for you. Otherwise, make sure you got the required
 dependencies installed.
