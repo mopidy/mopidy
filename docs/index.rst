@@ -42,6 +42,7 @@ User documentation
     installation/index
     installation/gstreamer
     installation/libspotify
+    installation/raspberrypi
     settings
     running
     clients/index
