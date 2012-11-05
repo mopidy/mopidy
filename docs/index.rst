@@ -10,10 +10,9 @@ also available for use, though we don't support modifying them yet.
 
 To control your music server, you can use the :ref:`Ubuntu Sound Menu
 <ubuntu-sound-menu>` on the machine running Mopidy, any device on the same
-network which supports the :ref:`DLNA <dlna-clients>` media controller spec
-(with the help of :ref:`Rygel <rygel>` in addition to Mopidy), or any :ref:`MPD
-client <mpd-clients>`. MPD clients are available for most platforms, including
-Windows, Mac OS X, Linux, Android and iOS.
+network which can control UPnP MediaRenderers (see :ref:`upnp-clients`), or any
+:ref:`MPD client <mpd-clients>`. MPD clients are available for most platforms,
+including Windows, Mac OS X, Linux, Android, and iOS.
 
 To install Mopidy, start by reading :ref:`installation`.
 

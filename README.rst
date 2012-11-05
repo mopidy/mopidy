@@ -11,10 +11,9 @@ Spotify playlists are also available for use, though we don't support modifying
 them yet.
 
 To control your music server, you can use the Ubuntu Sound Menu on the machine
-running Mopidy, any device on the same network which supports the DLNA media
-controller spec (with the help of Rygel in addition to Mopidy), or any MPD
-client. MPD clients are available for most platforms, including Windows, Mac OS
-X, Linux, Android and iOS.
+running Mopidy, any device on the same network which can control UPnP
+MediaRenderers, or any MPD client. MPD clients are available for most
+platforms, including Windows, Mac OS X, Linux, Android and iOS.
 
 To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 
