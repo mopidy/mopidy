@@ -12,6 +12,36 @@ http://mpd.wikia.com/wiki/Clients.
     :local:
 
 
+Test procedure
+==============
+
+In some cases, we've used the following test procedure to compare the feature
+completeness of clients:
+
+#. Connect to Mopidy
+#. Search for "foo", with search type "any" if it can be selected
+#. Add "The Pretender" from the search results to the current playlist
+#. Start playback
+#. Pause and resume playback
+#. Adjust volume
+#. Find a playlist and append it to the current playlist
+#. Skip to next track
+#. Skip to previous track
+#. Select the last track from the current playlist
+#. Turn on repeat mode
+#. Seek to 10 seconds or so before the end of the track
+#. Wait for the end of the track and confirm that playback continues at the
+   start of the playlist
+#. Turn off repeat mode
+#. Turn on random mode
+#. Skip to next track and confirm that it random mode works
+#. Turn off random mode
+#. Stop playback
+#. Check if the app got support for single mode and consume mode
+#. Kill Mopidy and confirm that the app handles it without crashing
+
+
+
 Console clients
 ===============
 
@@ -85,63 +115,47 @@ It generally works well with Mopidy.
 Android clients
 ===============
 
-We've tested all four MPD clients we could find for Android with Mopidy 0.7.3 on
-a Samsung Galaxy Nexus with Android 4.1.1, using the following test procedure:
+We've tested all five MPD clients we could find for Android with Mopidy 0.8.1
+on a Samsung Galaxy Nexus with Android 4.1.2, using our standard test
+procedure.
 
-#. Connect to Mopidy
-#. Search for ``foo``, with search type "any" if it can be selected
-#. Add "The Pretender" from the search results to the current playlist
-#. Start playback
-#. Pause and resume playback
-#. Adjust volume
-#. Find a playlist and append it to the current playlist
-#. Skip to next track
-#. Skip to previous track
-#. Select the last track from the current playlist
-#. Turn on repeat mode
-#. Seek to 10 seconds or so before the end of the track
-#. Wait for the end of the track and confirm that playback continues at the
-   start of the playlist
-#. Turn off repeat mode
-#. Turn on random mode
-#. Skip to next track and confirm that it random mode works
-#. Turn off random mode
-#. Stop playback
-#. Check if the app got support for single mode and consume mode
-#. Kill Mopidy and confirm that the app handles it without crashing
 
-We found that all four apps crashed on Android 4.1.1.
+MPDroid
+-------
 
-Combining what we managed to find before the apps crashed with our experience
-from an older version of this review, using Android 2.1, we can say that:
+Test date:
+    2012-11-06
+Tested version:
+    1.03.1 (released 2012-10-16)
 
-- PMix can be ignored, because it is unmaintained and its fork MPDroid is
-  better on all fronts.
+You can get `MPDroid from Google Play
+<https://play.google.com/store/apps/details?id=com.namelessdev.mpdroid>`_.
 
-- Droid MPD Client was to buggy to get an impression from. Unclear if the bugs
-  are due to the app or that it hasn't been updated for Android 4.x.
+- MPDroid started out as a fork of PMix, and is now much better.
 
-- BitMPC is in our experience feature complete, but ugly.
+- MPDroid's user interface looks nice.
 
-- MPDroid, now that search is in place, is probably feature complete as well,
-  and looks nicer than BitMPC.
+- Everything in the test procedure works.
 
-In conclusion: MPD clients on Android 4.x is a sad affair. If you want to try
-anyway, try BitMPC and MPDroid.
+- In contrast to all other Android clients, MPDroid does support single mode or
+  consume mode.
+
+- When Mopidy is killed, MPDroid handles it gracefully and asks if you want to
+  try to reconnect.
+
+MPDroid is a good MPD client, and really the only one we can recommend.
 
 
 BitMPC
 ------
 
 Test date:
-    2012-09-12
+    2012-11-06
 Tested version:
     1.0.0 (released 2010-04-12)
-Downloads:
-    5,000+
-Rating:
-    3.7 stars from about 100 ratings
 
+You can get `BitMPC from Google Play
+<https://play.google.com/store/apps/details?id=bitendian.bitmpc>`_.
 
 - The user interface lacks some finishing touches. E.g. you can't enter a
   hostname for the server. Only IPv4 addresses are allowed.
@@ -155,8 +169,8 @@ Rating:
   - BitMPC crashed if Mopidy was killed or crashed.
 
 - When we tried to test using Android 4.1.1, BitMPC started and connected to
-  Mopidy without problems, but the app crashed as soon as fire off our search,
-  and continued to crash on startup after that.
+  Mopidy without problems, but the app crashed as soon as we fired off our
+  search, and continued to crash on startup after that.
 
 In conclusion, BitMPC is usable if you got an older Android phone and don't
 care about looks. For newer Android versions, BitMPC will probably not work as
@@ -167,13 +181,12 @@ Droid MPD Client
 ----------------
 
 Test date:
-    2012-09-12
+    2012-11-06
 Tested version:
     1.4.0 (released 2011-12-20)
-Downloads:
-    10,000+
-Rating:
-    4.2 stars from 400+ ratings
+
+You can get `Droid MPD Client from Google Play
+<https://play.google.com/store/apps/details?id=com.soreha.droidmpdclient>`_.
 
 - No intutive way to ask the app to connect to the server after adding the
   server hostname to the settings.
@@ -190,11 +203,6 @@ Rating:
 
 - Searching for "foo" did nothing. No request was sent to the server.
 
-- Once, I managed to get a list of stored playlists in the "Search" tab, but I
-  never managed to reproduce this. Opening the stored playlists doesn't work,
-  because Mopidy haven't implemented ``lsinfo "Playlist name"`` (see
-  :issue:`193`).
-
 - Droid MPD client does not support single mode or consume mode.
 
 - Not able to complete the test procedure, due to the above problems.
@@ -202,71 +210,34 @@ Rating:
 In conclusion, not a client we can recommend.
 
 
-MPDroid
--------
-
-Test date:
-    2012-09-12
-Tested version:
-    0.7 (released 2011-06-19)
-Downloads:
-    10,000+
-Rating:
-    4.5 stars from ~500 ratings
-
-- MPDroid started out as a fork of PMix.
-
-- First of all, MPDroid's user interface looks nice.
-
-- Last time we tested MPDroid (v0.6.9), we couldn't find any search
-  functionality. Now we found it, and it worked.
-
-- Last time we tested MPDroid (v0.6.9) everything in the test procedure worked
-  out flawlessly.
-
-- Like all other Android clients, MPDroid does not support single mode or
-  consume mode.
-
-- When Mopidy is killed, MPDroid handles it gracefully and asks if you want to
-  try to reconnect.
-
-- When using Android 4.1.1, MPDroid crashes here and there, e.g. when having an
-  empty current playlist and pressing play.
-
-Disregarding Android 4.x problems, MPDroid is a good MPD client.
-
-
 PMix
 ----
 
 Test date:
-    2012-09-12
+    2012-11-06
 Tested version:
     0.4.0 (released 2010-03-06)
-Downloads:
-    10,000+
-Rating:
-    3.8 stars from >200 ratings
 
-- Using Android 4.1.1, PMix, which haven't been updated for 2.5 years, crashes
-  as soon as it connects to Mopidy.
+You can get `PMix from Google Play
+<https://play.google.com/store/apps/details?id=org.pmix.ui>`_.
 
-- Last time we tested the same version of PMix using Android 2.1, we found
-  that:
+PMix haven't been updated for 2.5 years, and has less working features than
+it's fork MPDroid. Ignore PMix and use MPDroid instead.
 
-  - PMix does not support search.
 
-  - I could not find stored playlists.
+MPD Remote
+----------
 
-  - Other than that, I was able to complete the test procedure.
+Test date:
+    2012-11-06
+Tested version:
+    1.0 (released 2012-05-01)
 
-  - PMix crashed once during testing.
+You can get `MPD Remote from Google Play
+<https://play.google.com/store/apps/details?id=fr.mildlyusefulsoftware.mpdremote>`_.
 
-  - PMix handled the killing of Mopidy just as nicely as MPDroid.
-
-  - It does not support single mode or consume mode.
-
-All in all, PMix works but can do less than MPDroid. Use MPDroid instead.
+This app looks terrible in the screen shots, got just 100+ downloads, and got a
+terrible rating. I honestly didn't take the time to test it.
 
 
 .. _ios_mpd_clients:
