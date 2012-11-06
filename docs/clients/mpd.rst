@@ -15,11 +15,16 @@ http://mpd.wikia.com/wiki/Clients.
 Console clients
 ===============
 
-mpc
----
+ncmpcpp
+-------
 
-A command line client. Version 0.14 had some issues with Mopidy (see
-:issue:`5`), but 0.16 seems to work nicely.
+A console client that works well with Mopidy, and is regularly used by Mopidy
+developers.
+
+Search does not work in the "Match if tag contains search phrase (regexes
+supported)" mode because the client tries to fetch all known metadata and do
+the search on the client side. The two other search modes works nicely, so this
+is not a problem.
 
 
 ncmpc
@@ -29,18 +34,11 @@ A console client. Works with Mopidy 0.6 and upwards. Uses the ``idle`` MPD
 command, but in a resource inefficient way.
 
 
-ncmpcpp
--------
+mpc
+---
 
-A console client that generally works well with Mopidy, and is regularly used
-by Mopidy developers.
-
-Search only works in two of the three search modes:
-
-- "Match if tag contains search phrase (regexes supported)" -- Does not work.
-  The client tries to fetch all known metadata and do the search client side.
-- "Match if tag contains searched phrase (no regexes)" -- Works.
-- "Match only if both values are the same" -- Works.
+A command line client. Version 0.16 and upwards seems to work nicely with
+Mopidy.
 
 
 Graphical clients
@@ -50,7 +48,7 @@ GMPC
 ----
 
 `GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
-well with Mopidy, and is regularly used by Mopidy developers.
+well with Mopidy.
 
 GMPC may sometimes requests a lot of meta data of related albums, artists, etc.
 This takes more time with Mopidy, which needs to query Spotify for the data,
@@ -69,8 +67,8 @@ When you search in Sonata, it only sends the first to letters of the search
 query to Mopidy, and then does the rest of the filtering itself on the client
 side. Since Spotify has a collection of millions of tracks and they only return
 the first 100 hits for any search query, searching for two-letter combinations
-seldom returns any useful results. See :issue:`1` and the matching `Sonata
-bug`_ for details.
+seldom returns any useful results. See :issue:`1` and the closed `Sonata bug`_
+for details.
 
 .. _Sonata bug: http://developer.berlios.de/feature/?func=detailfeature&feature_id=5038&group_id=7323
 
