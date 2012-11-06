@@ -257,6 +257,6 @@ Support
 =======
 
 If you had trouble with the above or got Mopidy working a different way on
-RaspberryPi, please send us a pull request to update this page with your new
+Raspberry Pi, please send us a pull request to update this page with your new
 information. As usual, the folks at ``#mopidy`` on ``irc.freenode.net`` may be
 able to help with any problems encountered.
