@@ -1,8 +1,8 @@
 .. _installation:
 
-*******************
-Mopidy installation
-*******************
+************
+Installation
+************
 
 There are several ways to install Mopidy. What way is best depends upon your OS
 and/or distribution. If you want to contribute to the development of Mopidy,
@@ -74,25 +74,79 @@ package found in AUR.
    you're ready to :doc:`run Mopidy </running>`.
 
 
+OS X: Install from Homebrew and Pip
+===================================
+
+If you are running OS X, you can install everything needed with Homebrew and
+Pip.
+
+#. Install `Homebrew <https://github.com/mxcl/homebrew>`_.
+
+   If you are already using Homebrew, make sure your installation is up to
+   date before you continue::
+
+       brew update
+       brew upgrade
+
+#. Install the required packages from Homebrew::
+
+       brew install gst-python gst-plugins-good gst-plugins-ugly libspotify
+
+#. Make sure to include Homebrew's Python ``site-packages`` directory in your
+   ``PYTHONPATH``. If you don't include this, Mopidy will not find GStreamer
+   and crash.
+
+   You can either amend your ``PYTHONPATH`` permanently, by adding the
+   following statement to your shell's init file, e.g. ``~/.bashrc``::
+
+       export PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages:$PYTHONPATH
+
+   Or, you can prefix the Mopidy command every time you run it::
+
+       PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages mopidy
+
+   Note that you need to replace ``python2.7`` with ``python2.6`` in the above
+   ``PYTHONPATH`` examples if you are using Python 2.6. To find your Python
+   version, run::
+
+       python --version
+
+#. Next up, you need to install some Python packages. To do so, we use Pip. If
+   you don't have the ``pip`` command, you can install it now::
+
+       sudo easy_install pip
+
+#. Then get, build, and install the latest releast of pyspotify, pylast, pykka,
+   and Mopidy using Pip::
+
+       sudo pip install -U pyspotify pylast pykka mopidy
+
+#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
+   you're ready to :doc:`run Mopidy </running>`.
+
+
 Otherwise: Install from source using Pip
 ========================================
 
-If you are on OS X or on Linux, but can't install from the APT archive or from
-AUR, you can install Mopidy from PyPI using Pip.
+If you are on on Linux, but can't install from the APT archive or from AUR, you
+can install Mopidy from PyPI using Pip.
 
 #. First of all, you need Python >= 2.6, < 3. Check if you have Python and what
    version by running::
 
        python --version
 
-#. When you install using Pip, you need to make sure you have Pip. If you
-   don't, this is how you install it on Debian/Ubuntu::
+#. When you install using Pip, you need to make sure you have Pip. You'll also
+   need a C compiler and the Python development headers to build pyspotify
+   later.
 
-       sudo apt-get install python-setuptools python-pip
+   This is how you install it on Debian/Ubuntu::
 
-   Or on OS X::
+       sudo apt-get install build-essential python-dev python-pip
 
-       sudo easy_install pip
+   And on Arch Linux from the official repository::
+
+       sudo pacman -S base-devel python2-pip
 
 #. Then you'll need to install all of Mopidy's hard dependencies:
 
@@ -100,12 +154,48 @@ AUR, you can install Mopidy from PyPI using Pip.
 
          sudo pip install -U pykka
 
-   - GStreamer 0.10.x, with Python bindings. See :doc:`gstreamer` for detailed
-     instructions.
+   - GStreamer 0.10.x, with Python bindings. GStreamer is packaged for most
+     popular Linux distributions. Search for GStreamer in your package manager,
+     and make sure to install the Python bindings, and the "good" and "ugly"
+     plugin sets.
+
+     If you use Debian/Ubuntu you can install GStreamer like this::
+
+         sudo apt-get install python-gst0.10 gstreamer0.10-plugins-good \
+             gstreamer0.10-plugins-ugly gstreamer0.10-tools
+
+     If you use Arch Linux, install the following packages from the official
+     repository::
+
+         sudo pacman -S gstreamer0.10-python gstreamer0.10-good-plugins \
+             gstreamer0.10-ugly-plugins
 
 #. Optional: If you want Spotify support in Mopidy, you'll need to install
-   libspotify and the Python bindings, pyspotify. See :doc:`libspotify` for
-   detailed instructions.
+   libspotify and the Python bindings, pyspotify.
+
+   #. First, check `pyspotify's changelog <http://pyspotify.mopidy.com/>`_ to
+      see what's the latest version of libspotify which it supports. The
+      versions of libspotify and pyspotify are tightly coupled, so you'll need
+      to get this right.
+
+   #. Download and install the appropriate version of libspotify for your OS and
+      CPU architecture from `Spotify
+      <https://developer.spotify.com/technologies/libspotify/>`_.
+
+      For libspotify 12.1.51 for 64-bit Linux the process is as follows::
+
+          wget https://developer.spotify.com/download/libspotify/libspotify-12.1.51-Linux-x86_64-release.tar.gz
+          tar zxfv libspotify-12.1.51-Linux-x86_64-release.tar.gz
+          cd libspotify-12.1.51-Linux-x86_64-release/
+          sudo make install prefix=/usr/local
+          sudo ldconfig
+
+      Remember to adjust the above example for the latest libspotify version
+      supported by pyspotify, your OS, and your CPU architecture.
+
+   #. Then get, build, and install the latest release of pyspotify using Pip::
+
+          sudo pip install -U pyspotify
 
 #. Optional: If you want to scrobble your played tracks to Last.fm, you need
    pylast::
@@ -113,9 +203,13 @@ AUR, you can install Mopidy from PyPI using Pip.
       sudo pip install -U pylast
 
 #. Optional: To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound
-   Menu, you need some additional requirements. On Debian/Ubuntu::
+   Menu or from an UPnP client via Rygel, you need some additional
+   dependencies: the Python bindings for libindicate, and the Python bindings
+   for libdbus, the reference D-Bus library.
 
-      sudo apt-get install python-dbus python-indicate
+   On Debian/Ubuntu::
+
+       sudo apt-get install python-dbus python-indicate
 
 #. Then, to install the latest release of Mopidy::
 
@@ -123,7 +217,7 @@ AUR, you can install Mopidy from PyPI using Pip.
 
    To upgrade Mopidy to future releases, just rerun this command.
 
-   Alternatively, if you want to follow Mopidy development closer, you may
+   Alternatively, if you want to track Mopidy development closer, you may
    install a snapshot of Mopidy's ``develop`` Git branch using Pip::
 
         sudo pip install mopidy==dev

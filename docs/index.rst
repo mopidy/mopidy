@@ -39,8 +39,6 @@ User documentation
     :maxdepth: 3
 
     installation/index
-    installation/gstreamer
-    installation/libspotify
     installation/raspberrypi
     settings
     running

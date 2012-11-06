@@ -19,8 +19,8 @@ You can either create the settings file yourself, or run the ``mopidy``
 command, and it will create an empty settings file for you.
 
 When you have created the settings file, open it in a text editor, and add
-settings you want to change. If you want to keep the default value for setting,
-you should *not* redefine it in your own settings file.
+settings you want to change. If you want to keep the default value for a
+setting, you should *not* redefine it in your own settings file.
 
 A complete ``~/.config/mopidy/settings.py`` may look as simple as this::
 
@@ -138,6 +138,41 @@ The Ubuntu Sound Menu interacts with Mopidy's MPRIS frontend,
 :mod:`mopidy.frontends.mpris`. The MPRIS frontend supports the minimum
 requirements of the `MPRIS specification <http://www.mpris.org/>`_. The
 ``TrackList`` and the ``Playlists`` interfaces of the spec are not supported.
+
+
+Using a custom audio sink
+=========================
+
+If you have successfully installed GStreamer, and then run the ``gst-inspect``
+or ``gst-inspect-0.10`` command, you should see a long listing of installed
+plugins, ending in a summary line::
+
+    $ gst-inspect-0.10
+    ... long list of installed plugins ...
+    Total count: 254 plugins (1 blacklist entry not shown), 1156 features
+
+Next, you should be able to produce a audible tone by running::
+
+    gst-launch-0.10 audiotestsrc ! sudioresample ! autoaudiosink
+
+If you cannot hear any sound when running this command, you won't hear any
+sound from Mopidy either, as Mopidy by default uses GStreamer's
+``autoaudiosink`` to play audio. Thus, make this work before you file a bug
+against Mopidy.
+
+If you for some reason want to use some other GStreamer audio sink than
+``autoaudiosink``, you can set the setting :attr:`mopidy.settings.OUTPUT` to a
+partial GStreamer pipeline description describing the GStreamer sink you want
+to use.
+
+Example of ``settings.py`` for using OSS4::
+
+    OUTPUT = u'oss4sink'
+
+Again, this is the equivalent of the following ``gst-inspect`` command, so make
+this work first::
+
+    gst-launch-0.10 audiotestsrc ! audioresample ! oss4sink
 
 
 Streaming audio through a SHOUTcast/Icecast server
