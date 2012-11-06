@@ -102,7 +102,18 @@ squeeze distribution.
 
          sudo reboot
 
-7. Installing Mopidy and its dependencies from `apt.mopidy.com
+7. To avoid a couple of potential problems with Mopidy, turn on IPv6 support:
+
+   - Load the IPv6 kernel module now::
+
+         sudo modprobe ipv6
+
+   - Add ``ipv6`` to ``/etc/modules`` to ensure the IPv6 kernel module is
+     loaded on boot::
+
+         echo ipv6 | sudo tee /etc/modules
+
+8. Installing Mopidy and its dependencies from `apt.mopidy.com
    <http://apt.mopidy.com/>`_, as described in :ref:`installation`. In short::
 
        wget -q -O - http://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
@@ -110,7 +121,7 @@ squeeze distribution.
        sudo apt-get update
        sudo apt-get install mopidy
 
-8. jackd2, which should be installed at this point, seems to cause some
+9. jackd2, which should be installed at this point, seems to cause some
    problems. Let's install jackd1, as it seems to work a little bit better::
 
        sudo apt-get install jackd1
