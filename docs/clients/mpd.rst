@@ -48,12 +48,12 @@ Console clients
 ncmpcpp
 -------
 
+A console client that works well with Mopidy, and is regularly used by Mopidy
+developers.
+
 .. image:: /_static/mpd-client-ncmpcpp.png
     :width: 575
     :height: 426
-
-A console client that works well with Mopidy, and is regularly used by Mopidy
-developers.
 
 Search does not work in the "Match if tag contains search phrase (regexes
 supported)" mode because the client tries to fetch all known metadata and do
@@ -81,12 +81,12 @@ Graphical clients
 GMPC
 ----
 
+`GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
+well with Mopidy.
+
 .. image:: /_static/mpd-client-gmpc.png
     :width: 1000
     :height: 565
-
-`GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
-well with Mopidy.
 
 GMPC may sometimes requests a lot of meta data of related albums, artists, etc.
 This takes more time with Mopidy, which needs to query Spotify for the data,
@@ -98,12 +98,12 @@ before it will catch up.
 Sonata
 ------
 
+`Sonata <http://sonata.berlios.de/>`_ is a graphical MPD client (GTK+).
+It generally works well with Mopidy, except for search.
+
 .. image:: /_static/mpd-client-sonata.png
     :width: 475
     :height: 424
-
-`Sonata <http://sonata.berlios.de/>`_ is a graphical MPD client (GTK+).
-It generally works well with Mopidy, except for search.
 
 When you search in Sonata, it only sends the first to letters of the search
 query to Mopidy, and then does the rest of the filtering itself on the client
@@ -135,14 +135,14 @@ procedure.
 MPDroid
 -------
 
-.. image:: /_static/mpd-client-mpdroid.jpg
-    :width: 288
-    :height: 512
-
 Test date:
     2012-11-06
 Tested version:
     1.03.1 (released 2012-10-16)
+
+.. image:: /_static/mpd-client-mpdroid.jpg
+    :width: 288
+    :height: 512
 
 You can get `MPDroid from Google Play
 <https://play.google.com/store/apps/details?id=com.namelessdev.mpdroid>`_.
@@ -264,14 +264,14 @@ iOS clients
 MPoD
 ----
 
-.. image:: /_static/mpd-client-mpod.jpg
-    :width: 320
-    :height: 480
-
 Test date:
     2012-11-06
 Tested version:
     1.7.1
+
+.. image:: /_static/mpd-client-mpod.jpg
+    :width: 320
+    :height: 480
 
 The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ iPhone/iPod Touch
 app can be installed from `MPoD at iTunes Store
@@ -292,14 +292,14 @@ app can be installed from `MPoD at iTunes Store
 MPaD
 ----
 
-.. image:: /_static/mpd-client-mpad.jpg
-    :width: 480
-    :height: 360
-
 Test date:
     2012-11-06
 Tested version:
     1.7.1
+
+.. image:: /_static/mpd-client-mpad.jpg
+    :width: 480
+    :height: 360
 
 The `MPaD <http://www.katoemba.net/makesnosenseatall/mpad/>`_ iPad app can be
 purchased from `MPaD at iTunes Store
