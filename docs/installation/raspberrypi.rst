@@ -24,33 +24,48 @@ How to for Debian 6 (Squeeze)
 =============================
 
 The following guide illustrates how to get Mopidy running on a minimal Debian
-squeeze distribution. The image used can be downloaded at
-http://www.linuxsystems.it/2012/06/debian-wheezy-raspberry-pi-minimal-image/.
-This image is a very minimal distribution and does not include many common
-packages you might be used to having access to. If you find yourself trying to
-complete instructions here and getting ``command not found``, try using
-``apt-get`` to install the relevant packages!
+squeeze distribution.
 
-1. Flash the OS image to your SD card. See
+1. The image used can be downloaded at
+   http://www.linuxsystems.it/2012/06/debian-wheezy-raspberry-pi-minimal-image/.
+   This image is a very minimal distribution and does not include many common
+   packages you might be used to having access to. If you find yourself trying
+   to complete instructions here and getting ``command not found``, try using
+   ``apt-get`` to install the relevant packages!
+
+2. Flash the OS image to your SD card. See
    http://elinux.org/RPi_Easy_SD_Card_Setup for help.
 
-2. If you have an SD card that's >2 GB, resize the disk image to use some more
+3. If you have an SD card that's >2 GB, resize the disk image to use some more
    space (we'll need a bit more to install some packages and stuff). See
    http://elinux.org/RPi_Resize_Flash_Partitions#Manually_resizing_the_SD_card_on_Raspberry_Pi
    for help.
 
-3. To even get to the point where we can start installing software let's
-   install ``sudo`` and create a user account with ``sudo`` rights so we don't
-   have to do everything on the ``root`` account::
+4. To even get to the point where we can start installing software let's create
+   a new user and give it sudo access.
 
-      apt-get install sudo
-      adduser <username>
-      adduser <username> sudo
+   - Install ``sudo``::
 
-   Log in to your Raspberry Pi again with your new user account instead of the
-   ``root`` account.
+         apt-get install sudo
 
-4. Enable the Raspberry Pi's sound drivers:
+   - Create a user account::
+
+         adduser <username>
+
+   - Give the user sudo access by adding it to the ``sudo`` group so we don't
+     have to do everything on the ``root`` account::
+
+         adduser <username> sudo
+
+   - While we're at it, give your user access to the sound card by adding it to
+     the audio group::
+
+         adduser <username> audio
+
+   - Log in to your Raspberry Pi again with your new user account instead of
+     the ``root`` account.
+
+5. Enable the Raspberry Pi's sound drivers:
 
    - To enable the Raspberry Pi's sound driver::
 
@@ -60,7 +75,7 @@ complete instructions here and getting ``command not found``, try using
 
          echo "snd_bcm2835" | sudo tee /etc/modules
 
-5. Let's get the Raspberry Pi up-to-date:
+6. Let's get the Raspberry Pi up-to-date:
 
    - Get some tools that we need to download and run the ``rpi-update``
      script::
@@ -87,51 +102,22 @@ complete instructions here and getting ``command not found``, try using
 
          sudo reboot
 
-6. Install some software that we'll need to get up and running::
+7. Installing Mopidy and its dependencies from `apt.mopidy.com
+   <http://apt.mopidy.com/>`_, as described in :ref:`installation`. In short::
 
-       sudo apt-get install python2.7 python-dev python-pip
+       wget -q -O - http://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
+       sudo apt-get update
+       sudo apt-get install mopidy
 
-   This will take a little while to download and install.
-
-7. Start installing Mopidy's dependencies (from :ref:`installation`)::
-
-       sudo pip install pykka
-       sudo apt-get install python-gst0.10 gstreamer0.10-plugins-good \
-           gstreamer0.10-plugins-ugly gstreamer-tools
-
-8. Install libspotify and pyspotify. Note that these two pieces of software
-   are rather tightly coupled; thus, it's important to make sure you have two
-   compatible versions installed. At the time of writing, pyspotify 1.8.1 and
-   libspotify 12 are the most recent stable versions of these software
-   components.
-
-   - Download libspotify for ARMv5::
-
-         wget https://developer.spotify.com/download/libspotify/libspotify-12.1.51-Linux-armv5-release.tar.gz
-         tar xvfz libspotify-12.1.51-Linux-armv5-release.tar.gz
-         cd libspotify-12.1.51-Linux-armv5-release
-         sudo make install
-         sudo ldconfig
-
-   - Now install pyspotify::
-
-         sudo pip install pyspotify==1.8.1
-
-9. jackd2, which should be installed at this point, seems to cause some
+8. jackd2, which should be installed at this point, seems to cause some
    problems. Let's install jackd1, as it seems to work a little bit better::
 
        sudo apt-get install jackd1
 
-10. Add your user to the ``audio`` group::
-
-        sudo adduser <username> audio
-
-11. Finally! Install Mopidy::
-
-        sudo pip install mopidy
-
 You may encounter some issues with your audio configuration where sound does
-not play. If that happens, edit your ``/etc/asound.conf`` to read something like::
+not play. If that happens, edit your ``/etc/asound.conf`` to read something
+like::
 
     pcm.mmap0 {
         type mmap_emul;
@@ -173,6 +159,9 @@ software packages, as Wheezy is going to be the next release of Debian.
    default user using username ``pi`` and password ``raspberry``. To become
    root, just enter ``sudo -i``.
 
+   Opposed to on Squeeze, there is no need to add your user to the ``audio``
+   group, as the ``pi`` user already is a member of that group.
+
 5. As opposed to on Squeeze, the correct sound driver comes preinstalled.
 
 6. As opposed  to on Squeeze, your kernel and GPU firmware is rather up to date
@@ -197,23 +186,20 @@ software packages, as Wheezy is going to be the next release of Debian.
        sudo apt-get update
        sudo apt-get install mopidy
 
-9. Opposed to on Squeeze, there is no need to add your user to the ``audio``
-   group, as the ``pi`` user already is a member of that group.
+9. Since I have a HDMI cable connected, but want the sound on the analog sound
+   connector, I have to run::
 
-10. Since I have a HDMI cable connected, but want the sound on the analog sound
-    connector, I have to run::
+       amixer cset numid=3 1
 
-        amixer cset numid=3 1
+   to force it to use analog output. ``1`` means analog, ``0`` means auto, and
+   is the default, while ``2`` means HDMI. You can test sound output
+   independent of Mopidy by running::
 
-    to force it to use analog output. ``1`` means analog, ``0`` means auto, and
-    is the default, while ``2`` means HDMI. You can test sound output
-    independent of Mopidy by running::
+       aplay /usr/share/sounds/alsa/Front_Center.wav
 
-        aplay /usr/share/sounds/alsa/Front_Center.wav
-
-    To make the change to analog output stick, you can add the ``amixer`` command
-    to e.g. ``/etc/rc.local``, which will be executed when the system is
-    booting.
+   To make the change to analog output stick, you can add the ``amixer`` command
+   to e.g. ``/etc/rc.local``, which will be executed when the system is
+   booting.
 
 
 Known Issues
