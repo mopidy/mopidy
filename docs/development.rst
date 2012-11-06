@@ -164,18 +164,26 @@ Then, to run all tests, go to the project directory and run::
 For example::
 
     $ nosetests
-    ......................................................................
-    ......................................................................
-    ......................................................................
-    .......
-    ----------------------------------------------------------------------
-    Ran 217 tests in 0.267s
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................
+    -----------------------------------------------------------------------------
+    1062 tests run in 7.4 seconds (1062 tests passed)
 
-    OK
+To run tests with test coverage statistics, remember to specify the tests dir::
 
-To run tests with test coverage statistics::
-
-    nosetests --with-coverage
+    nosetests --with-coverage tests/
 
 For more documentation on testing, check out the `nose documentation
 <http://nose.readthedocs.org/>`_.
@@ -247,6 +255,35 @@ both to use ``tests/data/advanced_tag_cache`` for their tag cache and
 playlists.
 
 
+Setting profiles during development
+===================================
+
+While developing Mopidy switching settings back and forth can become an all too
+frequent occurrence. As a quick hack to get around this you can structure your
+settings file in the following way::
+
+    import os
+    profile = os.environ.get('PROFILE', '').split(',')
+
+    if 'spotify' in profile:
+        BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
+    elif 'local' in profile:
+        BACKENDS = (u'mopidy.backends.local.LocalBackend',)
+        LOCAL_MUSIC_PATH = u'~/music'
+
+    if 'shoutcast' in profile:
+        OUTPUT = u'lame ! shout2send mount="/stream"'
+    elif 'silent' in profile:
+        OUTPUT = u'fakesink'
+        MIXER = None
+
+    SPOTIFY_USERNAME = u'xxxxx'
+    SPOTIFY_PASSWORD = u'xxxxx'
+
+Using this setup you can now run Mopidy with ``PROFILE=silent,spotify mopidy``
+if you for instance want to test Spotify without any actual audio output.
+
+
 Writing documentation
 =====================
 
@@ -293,32 +330,3 @@ Creating releases
     python setup.py sdist upload
 
 #. Spread the word.
-
-
-Setting profiles during development
-===================================
-
-While developing Mopidy switching settings back and forth can become an all too
-frequent occurrence. As a quick hack to get around this you can structure your
-settings file in the following way::
-
-    import os
-    profile = os.environ.get('PROFILE', '').split(',')
-
-    if 'spotify' in profile:
-        BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
-    elif 'local' in profile:
-        BACKENDS = (u'mopidy.backends.local.LocalBackend',)
-        LOCAL_MUSIC_PATH = u'~/music'
-
-    if 'shoutcast' in profile:
-        OUTPUT = u'lame ! shout2send mount="/stream"'
-    elif 'silent' in profile:
-        OUTPUT = u'fakesink'
-        MIXER = None
-
-    SPOTIFY_USERNAME = u'xxxxx'
-    SPOTIFY_PASSWORD = u'xxxxx'
-
-Using this setup you can now run Mopidy with ``PROFILE=silent,spotify mopidy``
-if you for instance want to test Spotify without any actual audio output.
