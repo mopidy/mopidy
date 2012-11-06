@@ -37,6 +37,50 @@ implemented, and you may add new wishlist issues if your ideas are not already
 represented.
 
 
+.. _run-from-git:
+
+Run Mopidy from Git repo
+========================
+
+If you want to contribute to the development of Mopidy, you should run Mopidy
+directly from the Git repo.
+
+#. First of all, install Mopidy in the recommended way for your OS and/or
+   distribution, like described at :ref:`installation`. You can have a
+   system-wide installation of the last Mopidy release in addition to the Git
+   repo which you run from when you code on Mopidy.
+
+#. Then install Git, if haven't already. For Ubuntu/Debian::
+
+      sudo apt-get install git-core
+
+   On OS X using Homebrew::
+
+      sudo brew install git
+
+#. Clone the official Mopidy repository::
+
+      git clone git://github.com/mopidy/mopidy.git
+
+   or your own fork of it::
+
+      git clone git@github.com:mygithubuser/mopidy.git
+
+#. You can then run Mopidy directly from the Git repository::
+
+      cd mopidy/          # Move into the Git repo dir
+      python mopidy       # Run python on the mopidy source code dir
+
+How you update your clone depends on whether you cloned the official Mopidy
+repository or your own fork, whether you have made any changes to the clone
+or not, and whether you are currently working on a feature branch or not. In
+other words, you'll need to learn Git.
+
+For an introduction to Git, please visit `git-scm.com <http://git-scm.com/>`_.
+Also, please read the rest of our developer documentation before you start
+contributing.
+
+
 Code style
 ==========
 
