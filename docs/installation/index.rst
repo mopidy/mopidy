@@ -8,6 +8,9 @@ There are several ways to install Mopidy. What way is best depends upon your OS
 and/or distribution. If you want to contribute to the development of Mopidy,
 you should first read this page, then have a look at :ref:`run-from-git`.
 
+.. contents:: Installation guides
+    :local:
+
 
 Debian/Ubuntu: Install from apt.mopidy.com
 ==========================================
