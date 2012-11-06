@@ -245,59 +245,28 @@ terrible rating. I honestly didn't take the time to test it.
 iOS clients
 ===========
 
-MPod
+MPoD
 ----
 
 Test date:
-    2011-01-19
+    2012-11-06
 Tested version:
-    1.5.1
+    1.7.1
 
 The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ iPhone/iPod Touch
-app can be installed from the `iTunes Store
+app can be installed from `MPoD at iTunes Store
 <https://itunes.apple.com/us/app/mpod/id285063020>`_.
 
-Users have reported varying success in using MPoD together with Mopidy. Thus,
-we've tested a fresh install of MPoD 1.5.1 with Mopidy as of revision e7ed28d
-(pre-0.3) on an iPod Touch 3rd generation. The following are our findings:
+- The user interface looks nice.
 
-- **Works:** Playback control generally works, including stop, play, pause,
-  previous, next, repeat, random, seek, and volume control.
+- All features exercised in the test procedure worked with MPaD, except seek,
+  which I didn't figure out to do.
 
-- **Bug:** Search does not work, neither in the artist, album, or song
-  tabs. Mopidy gets no requests at all from MPoD when executing searches. Seems
-  like MPoD only searches in local cache, even if "Use local cache" is turned
-  off in MPoD's settings. Until this is fixed by the MPoD developer, MPoD will
-  be much less useful with Mopidy.
+- Search only works in the "Browse" tab, and not under in the "Artist",
+  "Album", or "Song" tabs. For the tabs where search doesn't work, no queries
+  are sent to Mopidy when searching.
 
-- **Bug:** When adding another playlist to the current playlist in MPoD,
-  the currently playing track restarts at the beginning. I do not currently
-  know enough about this bug, because I'm not sure if MPoD was in the "add to
-  active playlist" or "replace active playlist" mode when I tested it. I only
-  later learned what that button was for. Anyway, what I experienced was:
-
-  #. I play a track
-  #. I select a new playlist
-  #. MPoD reconnects to Mopidy for unknown reason
-  #. MPoD issues MPD command ``load "a playlist name"``
-  #. MPoD issues MPD command ``play "-1"``
-  #. MPoD issues MPD command ``playlistinfo "-1"``
-  #. I hear that the currently playing tracks restarts playback
-
-- **Tips:** MPoD seems to cache stored playlists, but they won't work if the
-  server hasn't loaded stored playlists from e.g. Spotify yet. A trick to force
-  refetching of playlists from Mopidy is to add a new empty playlist in MPoD.
-
-- **Wishlist:** Modifying the current playlists is not supported by MPoD it
-  seems.
-
-- **Wishlist:** MPoD supports playback of Last.fm radio streams through the MPD
-  server. Mopidy does not currently support this, but there is a wishlist bug
-  at :issue:`38`.
-
-- **Wishlist:** MPoD supports autodetection/-configuration of MPD servers
-  through the use of Bonjour. Mopidy does not currently support this, but there
-  is a wishlist bug at :issue:`39`.
+- Single mode and consume mode is supported.
 
 
 MPaD
@@ -317,7 +286,11 @@ purchased from `MPaD at iTunes Store
 
 - All features exercised in the test procedure worked with MPaD.
 
-- Single mode and consume mode is support.
+- Search only works in the "Browse" tab, and not under in the "Artist",
+  "Album", or "Song" tabs. For the tabs where search doesn't work, no queries
+  are sent to Mopidy when searching.
+
+- Single mode and consume mode is supported.
 
 - The server menu can be very slow top open, and there is no visible feedback
   when waiting for the connection to a server to succeed.
