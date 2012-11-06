@@ -406,7 +406,7 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
 - If you use the Spotify backend, you *must* upgrade to libspotify 0.0.8 and
   pyspotify 1.3. If you install from APT, libspotify and pyspotify will
   automatically be upgraded. If you are not installing from APT, follow the
-  instructions at :doc:`/installation/libspotify/`.
+  instructions at :ref:`installation`.
 
 - If you have explicitly set the :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE`
   setting, you must update your settings file. The new setting is named
@@ -547,8 +547,7 @@ loading from Mopidy 0.3.0 is still present.
 - If you use the Spotify backend, you *should* upgrade to libspotify 0.0.7 and
   the latest pyspotify from the Mopidy developers. If you install from APT,
   libspotify and pyspotify will automatically be upgraded. If you are not
-  installing from APT, follow the instructions at
-  :doc:`/installation/libspotify/`.
+  installing from APT, follow the instructions at :ref:`installation`.
 
 
 **Changes**
@@ -660,7 +659,7 @@ to this problem.
 
 - If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
   the latest pyspotify from the Mopidy developers. Follow the instructions at
-  :doc:`/installation/libspotify/`.
+  :ref:`installation`.
 
 - If you use the Last.fm frontend, you need to upgrade to pylast 0.5.7. Run
   ``sudo pip install --upgrade pylast`` or install Mopidy from APT.
@@ -815,10 +814,10 @@ We've worked a bit on OS X support, but not all issues are completely solved
 yet. :issue:`25`  is the one that is currently blocking OS X support. Any help
 solving it will be greatly appreciated!
 
-Finally, please :ref:`update your pyspotify installation
-<pyspotify_installation>` when upgrading to Mopidy 0.2.0. The latest pyspotify
-got a fix for the segmentation fault that occurred when playing music and
-searching at the same time, thanks to Valentin David.
+Finally, please :ref:`update your pyspotify installation <installation>` when
+upgrading to Mopidy 0.2.0. The latest pyspotify got a fix for the segmentation
+fault that occurred when playing music and searching at the same time, thanks
+to Valentin David.
 
 **Important changes**
 
@@ -883,12 +882,11 @@ fixing the OS X issues for a future release. You can track the progress at
 **Important changes**
 
 - License changed from GPLv2 to Apache License, version 2.0.
-- GStreamer is now a required dependency. See our :doc:`GStreamer installation
-  docs <installation/gstreamer>`.
+- GStreamer is now a required dependency. See our :ref:`GStreamer installation
+  docs <installation>`.
 - :mod:`mopidy.backends.libspotify` is now the default backend.
   :mod:`mopidy.backends.despotify` is no longer available. This means that you
-  need to install the :doc:`dependencies for libspotify
-  <installation/libspotify>`.
+  need to install the :ref:`dependencies for libspotify <installation>`.
 - If you used :mod:`mopidy.backends.libspotify` previously, pyspotify must be
   updated when updating to this release, to get working seek functionality.
 - :attr:`mopidy.settings.SERVER_HOSTNAME` and
