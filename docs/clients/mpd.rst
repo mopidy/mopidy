@@ -8,6 +8,9 @@ This is a list of MPD clients we either know works well with Mopidy, or that we
 know won't work well. For a more exhaustive list of MPD clients, see
 http://mpd.wikia.com/wiki/Clients.
 
+.. contents:: Contents
+    :local:
+
 
 Console clients
 ===============
