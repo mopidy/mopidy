@@ -303,5 +303,21 @@ we've tested a fresh install of MPoD 1.5.1 with Mopidy as of revision e7ed28d
 MPaD
 ----
 
-The `MPaD <http://www.katoemba.net/makesnosenseatall/mpad/>`_ iPad app works
-with Mopidy. A complete review may appear here in the future.
+Test date:
+    2012-11-06
+Tested version:
+    1.7.1
+
+The `MPaD <http://www.katoemba.net/makesnosenseatall/mpad/>`_ iPad app can be
+purchased from `MPaD at iTunes Store
+<https://itunes.apple.com/us/app/mpad/id423097706>`_
+
+- The user interface looks nice, though I would like to be able to view the
+  current playlist in the large part of the split view.
+
+- All features exercised in the test procedure worked with MPaD.
+
+- Single mode and consume mode is support.
+
+- The server menu can be very slow top open, and there is no visible feedback
+  when waiting for the connection to a server to succeed.
