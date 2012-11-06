@@ -106,8 +106,8 @@ for details.
 Theremin
 --------
 
-`Theremin <http://theremin.sigterm.eu/>`_ is a graphical MPD client for OS X.
-It generally works well with Mopidy.
+`Theremin <https://github.com/pweiskircher/Theremin>`_ is a graphical MPD
+client for OS X. It is unmaintained, but generally works well with Mopidy.
 
 
 .. _android_mpd_clients:
