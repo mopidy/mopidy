@@ -48,6 +48,10 @@ Console clients
 ncmpcpp
 -------
 
+.. image:: /_static/mpd-client-ncmpcpp.png
+    :width: 575
+    :height: 426
+
 A console client that works well with Mopidy, and is regularly used by Mopidy
 developers.
 
@@ -77,6 +81,10 @@ Graphical clients
 GMPC
 ----
 
+.. image:: /_static/mpd-client-gmpc.png
+    :width: 1000
+    :height: 565
+
 `GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
 well with Mopidy.
 
@@ -89,6 +97,10 @@ before it will catch up.
 
 Sonata
 ------
+
+.. image:: /_static/mpd-client-sonata.png
+    :width: 475
+    :height: 424
 
 `Sonata <http://sonata.berlios.de/>`_ is a graphical MPD client (GTK+).
 It generally works well with Mopidy, except for search.
@@ -122,6 +134,10 @@ procedure.
 
 MPDroid
 -------
+
+.. image:: /_static/mpd-client-mpdroid.jpg
+    :width: 288
+    :height: 512
 
 Test date:
     2012-11-06
@@ -248,6 +264,10 @@ iOS clients
 MPoD
 ----
 
+.. image:: /_static/mpd-client-mpod.jpg
+    :width: 320
+    :height: 480
+
 Test date:
     2012-11-06
 Tested version:
@@ -271,6 +291,10 @@ app can be installed from `MPoD at iTunes Store
 
 MPaD
 ----
+
+.. image:: /_static/mpd-client-mpad.jpg
+    :width: 480
+    :height: 360
 
 Test date:
     2012-11-06
