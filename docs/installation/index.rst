@@ -52,6 +52,13 @@ figure it out for itself, run the following to upgrade right away::
     sudo apt-get dist-upgrade
 
 
+Raspberry Pi running Debian
+===========================
+
+We have guides for installing a Raspberry Pi from scratch with either Debian
+6.0 Squeeze or Debian 7.0 Wheezy. See :ref:`raspberrypi-installation`.
+
+
 Arch Linux: Install from AUR
 ============================
 

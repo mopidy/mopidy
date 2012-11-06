@@ -1,3 +1,5 @@
+.. _raspberrypi-installation:
+
 ****************************
 Installation on Raspberry Pi
 ****************************
