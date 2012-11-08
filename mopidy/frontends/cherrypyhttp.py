@@ -2,8 +2,14 @@ from __future__ import absolute_import
 
 import logging
 
-import cherrypy
 import pykka
+
+from mopidy import exceptions
+
+try:
+    import cherrypy
+except ImportError as import_error:
+    raise exceptions.OptionalDependencyError(import_error)
 
 
 logger = logging.getLogger('mopidy.frontends.cherrypyhttp')
