@@ -39,16 +39,6 @@ class ValidateSettingsTest(unittest.TestCase):
             result['SPOTIFY_LIB_APPKEY'],
             u'Deprecated setting. It may be removed.')
 
-    def test_deprecated_setting_value_returns_error(self):
-        result = setting_utils.validate_settings(
-            self.defaults,
-            {'BACKENDS': ('mopidy.backends.despotify.DespotifyBackend',)})
-        self.assertEqual(
-            result['BACKENDS'],
-            u'Deprecated setting value. '
-            u'"mopidy.backends.despotify.DespotifyBackend" is no longer '
-            u'available.')
-
     def test_unavailable_bitrate_setting_returns_error(self):
         result = setting_utils.validate_settings(
             self.defaults, {'SPOTIFY_BITRATE': 50})
