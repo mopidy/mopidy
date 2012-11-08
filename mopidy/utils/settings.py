@@ -143,6 +143,11 @@ def validate_settings(defaults, settings):
         'SPOTIFY_LIB_CACHE': 'SPOTIFY_CACHE_PATH',
     }
 
+    list_of_one_or_more = [
+        'BACKENDS',
+        'FRONTENDS',
+    ]
+
     for setting, value in settings.iteritems():
         if setting in changed:
             if changed[setting] is None:
@@ -166,6 +171,10 @@ def validate_settings(defaults, settings):
             errors[setting] = (
                 u'Deprecated setting, please set the value via the GStreamer '
                 u'bin in OUTPUT.')
+
+        elif setting in list_of_one_or_more:
+            if not value:
+                errors[setting] = u'Must contain at least one value.'
 
         elif setting not in defaults:
             errors[setting] = u'Unknown setting.'
