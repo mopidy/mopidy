@@ -4,7 +4,7 @@ import logging
 
 import pykka
 
-from mopidy import exceptions
+from mopidy import exceptions, settings
 
 try:
     import cherrypy
@@ -19,11 +19,14 @@ class HttpFrontend(pykka.ThreadingActor):
     def __init__(self, core):
         super(HttpFrontend, self).__init__()
         self.core = core
+        cherrypy.config.update({
+            'server.socket_host': settings.HTTP_SERVER_HOSTNAME,
+            'server.socket_port': settings.HTTP_SERVER_PORT,
+        })
+        cherrypy.tree.mount(Root(self.core), '/')
 
     def on_start(self):
         logger.debug(u'Starting HTTP server')
-        cherrypy.tree.mount(Root(self.core), '/', {})
-        cherrypy.server.socket_port = 6680
         cherrypy.server.start()
         logger.info(u'HTTP server running at %s',
             cherrypy.server.base())
