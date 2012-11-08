@@ -1,7 +1,9 @@
 import logging
 import signal
+import sys
 import thread
 import threading
+import traceback
 
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
@@ -10,6 +12,8 @@ from mopidy import exceptions
 
 logger = logging.getLogger('mopidy.utils.process')
 
+SIGNALS = dict((k, v) for v, k in signal.__dict__.iteritems()
+    if v.startswith('SIG') and not v.startswith('SIG_'))
 
 def exit_process():
     logger.debug(u'Interrupting main...')
@@ -19,9 +23,7 @@ def exit_process():
 
 def exit_handler(signum, frame):
     """A :mod:`signal` handler which will exit the program on signal."""
-    signals = dict((k, v) for v, k in signal.__dict__.iteritems()
-                   if v.startswith('SIG') and not v.startswith('SIG_'))
-    logger.info(u'Got %s signal', signals[signum])
+    logger.info(u'Got %s signal', SIGNALS[signum])
     exit_process()
 
 
@@ -71,3 +73,27 @@ class BaseThread(threading.Thread):
 
     def run_inside_try(self):
         raise NotImplementedError
+
+class DebugThread(threading.Thread):
+    daemon = True
+    name = 'DebugThread'
+
+    event = threading.Event()
+
+    def handler(self, signum, frame):
+        logger.info(u'Got %s signal', SIGNALS[signum])
+        self.event.set()
+
+    def run(self):
+        while True:
+            self.event.wait()
+            threads = dict((t.ident, t.name) for t in threading.enumerate())
+
+            for ident, frame in sys._current_frames().items():
+                if self.ident != ident:
+                    stack = ''.join(traceback.format_stack(frame))
+                    logger.debug('Current state of %s (%s):\n%s',
+                        threads[ident], ident, stack)
+                del frame
+
+            self.event.clear()
