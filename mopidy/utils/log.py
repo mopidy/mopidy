@@ -1,20 +1,28 @@
 import logging
 import logging.handlers
 
-from mopidy import get_version, get_platform, get_python, settings
+from mopidy import settings
+from . import deps, versioning
+
 
 def setup_logging(verbosity_level, save_debug_log):
     setup_root_logger()
     setup_console_logging(verbosity_level)
     if save_debug_log:
         setup_debug_logging_to_file()
+    if hasattr(logging, 'captureWarnings'):
+        # New in Python 2.7
+        logging.captureWarnings(True)
     logger = logging.getLogger('mopidy.utils.log')
-    logger.info(u'Starting Mopidy %s on %s %s',
-        get_version(), get_platform(), get_python())
+    logger.info(u'Starting Mopidy %s', versioning.get_version())
+    logger.info(u'%(name)s: %(version)s', deps.platform_info())
+    logger.info(u'%(name)s: %(version)s', deps.python_info())
+
 
 def setup_root_logger():
     root = logging.getLogger('')
     root.setLevel(logging.DEBUG)
+
 
 def setup_console_logging(verbosity_level):
     if verbosity_level == 0:
@@ -36,6 +44,7 @@ def setup_console_logging(verbosity_level):
     if verbosity_level < 3:
         logging.getLogger('pykka').setLevel(logging.INFO)
 
+
 def setup_debug_logging_to_file():
     formatter = logging.Formatter(settings.DEBUG_LOG_FORMAT)
     handler = logging.handlers.RotatingFileHandler(
@@ -44,12 +53,3 @@ def setup_debug_logging_to_file():
     handler.setLevel(logging.DEBUG)
     root = logging.getLogger('')
     root.addHandler(handler)
-
-def indent(string, places=4, linebreak='\n'):
-    lines = string.split(linebreak)
-    if len(lines) == 1:
-        return string
-    result = u''
-    for line in lines:
-        result += linebreak + ' ' * places + line
-    return result

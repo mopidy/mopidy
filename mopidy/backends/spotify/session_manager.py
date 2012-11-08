@@ -4,37 +4,36 @@ import threading
 
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
-from pykka.registry import ActorRegistry
-
-from mopidy import audio, get_version, settings, CACHE_PATH
-from mopidy.backends.base import Backend
-from mopidy.backends.spotify import BITRATES
-from mopidy.backends.spotify.container_manager import SpotifyContainerManager
-from mopidy.backends.spotify.playlist_manager import SpotifyPlaylistManager
-from mopidy.backends.spotify.translator import SpotifyTranslator
+from mopidy import settings
 from mopidy.models import Playlist
-from mopidy.utils.process import BaseThread
+from mopidy.utils import process, versioning
 
-logger = logging.getLogger('mopidy.backends.spotify.session_manager')
+from . import translator
+from .container_manager import SpotifyContainerManager
+from .playlist_manager import SpotifyPlaylistManager
+
+logger = logging.getLogger('mopidy.backends.spotify')
+
+BITRATES = {96: 2, 160: 0, 320: 1}
 
 # pylint: disable = R0901
 # SpotifySessionManager: Too many ancestors (9/7)
 
 
-class SpotifySessionManager(BaseThread, PyspotifySessionManager):
-    cache_location = (settings.SPOTIFY_CACHE_PATH
-        or os.path.join(CACHE_PATH, 'spotify'))
+class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
+    cache_location = settings.SPOTIFY_CACHE_PATH
     settings_location = cache_location
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
-    user_agent = 'Mopidy %s' % get_version()
+    user_agent = 'Mopidy %s' % versioning.get_version()
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, audio, backend_ref):
         PyspotifySessionManager.__init__(self, username, password)
-        BaseThread.__init__(self)
+        process.BaseThread.__init__(self)
         self.name = 'SpotifyThread'
 
-        self.audio = None
+        self.audio = audio
         self.backend = None
+        self.backend_ref = backend_ref
 
         self.connected = threading.Event()
         self.session = None
@@ -45,18 +44,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         self._initial_data_receive_completed = False
 
     def run_inside_try(self):
-        self.setup()
+        self.backend = self.backend_ref.proxy()
         self.connect()
-
-    def setup(self):
-        audio_refs = ActorRegistry.get_by_class(audio.Audio)
-        assert len(audio_refs) == 1, \
-            'Expected exactly one running Audio instance.'
-        self.audio = audio_refs[0].proxy()
-
-        backend_refs = ActorRegistry.get_by_class(Backend)
-        assert len(backend_refs) == 1, 'Expected exactly one running backend.'
-        self.backend = backend_refs[0].proxy()
 
     def logged_in(self, session, error):
         """Callback used by pyspotify"""
@@ -67,7 +56,8 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         logger.info(u'Connected to Spotify')
         self.session = session
 
-        logger.debug(u'Preferred Spotify bitrate is %s kbps',
+        logger.debug(
+            u'Preferred Spotify bitrate is %s kbps',
             settings.SPOTIFY_BITRATE)
         self.session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
 
@@ -99,7 +89,7 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         logger.debug(u'User message: %s', message.strip())
 
     def music_delivery(self, session, frames, frame_size, num_frames,
-            sample_type, sample_rate, channels):
+                       sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
         # pylint: disable = R0913
         # Too many arguments (8/5)
@@ -150,11 +140,11 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
         if not self._initial_data_receive_completed:
             logger.debug(u'Still getting data; skipped refresh of playlists')
             return
-        playlists = map(SpotifyTranslator.to_mopidy_playlist,
-            self.session.playlist_container())
+        playlists = map(
+            translator.to_mopidy_playlist, self.session.playlist_container())
         playlists = filter(None, playlists)
         self.backend.stored_playlists.playlists = playlists
-        logger.debug(u'Refreshed %d stored playlist(s)', len(playlists))
+        logger.info(u'Loaded %d Spotify playlist(s)', len(playlists))
 
     def search(self, query, queue):
         """Search method used by Mopidy backend"""
@@ -163,12 +153,11 @@ class SpotifySessionManager(BaseThread, PyspotifySessionManager):
             # TODO Consider launching a second search if results.total_tracks()
             # is larger than len(results.tracks())
             playlist = Playlist(tracks=[
-                SpotifyTranslator.to_mopidy_track(t)
-                for t in results.tracks()])
+                translator.to_mopidy_track(t) for t in results.tracks()])
             queue.put(playlist)
         self.connected.wait()
-        self.session.search(query, callback, track_count=100,
-            album_count=0, artist_count=0)
+        self.session.search(
+            query, callback, track_count=100, album_count=0, artist_count=0)
 
     def logout(self):
         """Log out from spotify"""

@@ -1,3 +1,6 @@
+import pykka
+
+from mopidy import core
 from mopidy.backends import dummy
 from mopidy.core import PlaybackState
 from mopidy.frontends.mpd import dispatcher
@@ -17,29 +20,30 @@ STOPPED = PlaybackState.STOPPED
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.backend = dummy.DummyBackend.start().proxy()
-        self.dispatcher = dispatcher.MpdDispatcher()
+        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.core = core.Core.start(backends=[self.backend]).proxy()
+        self.dispatcher = dispatcher.MpdDispatcher(core=self.core)
         self.context = self.dispatcher.context
 
     def tearDown(self):
-        self.backend.stop().get()
+        pykka.ActorRegistry.stop_all()
 
     def test_stats_method(self):
         result = status.stats(self.context)
         self.assertIn('artists', result)
-        self.assert_(int(result['artists']) >= 0)
+        self.assertGreaterEqual(int(result['artists']), 0)
         self.assertIn('albums', result)
-        self.assert_(int(result['albums']) >= 0)
+        self.assertGreaterEqual(int(result['albums']), 0)
         self.assertIn('songs', result)
-        self.assert_(int(result['songs']) >= 0)
+        self.assertGreaterEqual(int(result['songs']), 0)
         self.assertIn('uptime', result)
-        self.assert_(int(result['uptime']) >= 0)
+        self.assertGreaterEqual(int(result['uptime']), 0)
         self.assertIn('db_playtime', result)
-        self.assert_(int(result['db_playtime']) >= 0)
+        self.assertGreaterEqual(int(result['db_playtime']), 0)
         self.assertIn('db_update', result)
-        self.assert_(int(result['db_update']) >= 0)
+        self.assertGreaterEqual(int(result['db_update']), 0)
         self.assertIn('playtime', result)
-        self.assert_(int(result['playtime']) >= 0)
+        self.assertGreaterEqual(int(result['playtime']), 0)
 
     def test_status_method_contains_volume_with_na_value(self):
         result = dict(status.status(self.context))
@@ -47,7 +51,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['volume']), -1)
 
     def test_status_method_contains_volume(self):
-        self.backend.playback.volume = 17
+        self.core.playback.volume = 17
         result = dict(status.status(self.context))
         self.assertIn('volume', result)
         self.assertEqual(int(result['volume']), 17)
@@ -58,7 +62,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['repeat']), 0)
 
     def test_status_method_contains_repeat_is_1(self):
-        self.backend.playback.repeat = 1
+        self.core.playback.repeat = 1
         result = dict(status.status(self.context))
         self.assertIn('repeat', result)
         self.assertEqual(int(result['repeat']), 1)
@@ -69,7 +73,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['random']), 0)
 
     def test_status_method_contains_random_is_1(self):
-        self.backend.playback.random = 1
+        self.core.playback.random = 1
         result = dict(status.status(self.context))
         self.assertIn('random', result)
         self.assertEqual(int(result['random']), 1)
@@ -85,7 +89,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['consume']), 0)
 
     def test_status_method_contains_consume_is_1(self):
-        self.backend.playback.consume = 1
+        self.core.playback.consume = 1
         result = dict(status.status(self.context))
         self.assertIn('consume', result)
         self.assertEqual(int(result['consume']), 1)
@@ -93,88 +97,91 @@ class StatusHandlerTest(unittest.TestCase):
     def test_status_method_contains_playlist(self):
         result = dict(status.status(self.context))
         self.assertIn('playlist', result)
-        self.assertIn(int(result['playlist']), xrange(0, 2**31 - 1))
+        self.assertIn(int(result['playlist']), xrange(0, 2 ** 31 - 1))
 
     def test_status_method_contains_playlistlength(self):
         result = dict(status.status(self.context))
         self.assertIn('playlistlength', result)
-        self.assert_(int(result['playlistlength']) >= 0)
+        self.assertGreaterEqual(int(result['playlistlength']), 0)
 
     def test_status_method_contains_xfade(self):
         result = dict(status.status(self.context))
         self.assertIn('xfade', result)
-        self.assert_(int(result['xfade']) >= 0)
+        self.assertGreaterEqual(int(result['xfade']), 0)
 
     def test_status_method_contains_state_is_play(self):
-        self.backend.playback.state = PLAYING
+        self.core.playback.state = PLAYING
         result = dict(status.status(self.context))
         self.assertIn('state', result)
         self.assertEqual(result['state'], 'play')
 
     def test_status_method_contains_state_is_stop(self):
-        self.backend.playback.state = STOPPED
+        self.core.playback.state = STOPPED
         result = dict(status.status(self.context))
         self.assertIn('state', result)
         self.assertEqual(result['state'], 'stop')
 
     def test_status_method_contains_state_is_pause(self):
-        self.backend.playback.state = PLAYING
-        self.backend.playback.state = PAUSED
+        self.core.playback.state = PLAYING
+        self.core.playback.state = PAUSED
         result = dict(status.status(self.context))
         self.assertIn('state', result)
         self.assertEqual(result['state'], 'pause')
 
     def test_status_method_when_playlist_loaded_contains_song(self):
-        self.backend.current_playlist.append([Track()])
-        self.backend.playback.play()
+        self.core.current_playlist.append([Track(uri='dummy:a')])
+        self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('song', result)
-        self.assert_(int(result['song']) >= 0)
+        self.assertGreaterEqual(int(result['song']), 0)
 
     def test_status_method_when_playlist_loaded_contains_cpid_as_songid(self):
-        self.backend.current_playlist.append([Track()])
-        self.backend.playback.play()
+        self.core.current_playlist.append([Track(uri='dummy:a')])
+        self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('songid', result)
         self.assertEqual(int(result['songid']), 0)
 
     def test_status_method_when_playing_contains_time_with_no_length(self):
-        self.backend.current_playlist.append([Track(length=None)])
-        self.backend.playback.play()
+        self.core.current_playlist.append([Track(uri='dummy:a', length=None)])
+        self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('time', result)
         (position, total) = result['time'].split(':')
         position = int(position)
         total = int(total)
-        self.assert_(position <= total)
+        self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_time_with_length(self):
-        self.backend.current_playlist.append([Track(length=10000)])
-        self.backend.playback.play()
+        self.core.current_playlist.append([Track(uri='dummy:a', length=10000)])
+        self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('time', result)
         (position, total) = result['time'].split(':')
         position = int(position)
         total = int(total)
-        self.assert_(position <= total)
+        self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_elapsed(self):
-        self.backend.playback.state = PAUSED
-        self.backend.playback.play_time_accumulated = 59123
+        self.core.current_playlist.append([Track(uri='dummy:a', length=60000)])
+        self.core.playback.play()
+        self.core.playback.pause()
+        self.core.playback.seek(59123)
         result = dict(status.status(self.context))
         self.assertIn('elapsed', result)
         self.assertEqual(result['elapsed'], '59.123')
 
     def test_status_method_when_starting_playing_contains_elapsed_zero(self):
-        self.backend.playback.state = PAUSED
-        self.backend.playback.play_time_accumulated = 123 # Less than 1000ms
+        self.core.current_playlist.append([Track(uri='dummy:a', length=10000)])
+        self.core.playback.play()
+        self.core.playback.pause()
         result = dict(status.status(self.context))
         self.assertIn('elapsed', result)
-        self.assertEqual(result['elapsed'], '0.123')
+        self.assertEqual(result['elapsed'], '0.000')
 
     def test_status_method_when_playing_contains_bitrate(self):
-        self.backend.current_playlist.append([Track(bitrate=320)])
-        self.backend.playback.play()
+        self.core.current_playlist.append([Track(uri='dummy:a', bitrate=320)])
+        self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('bitrate', result)
         self.assertEqual(int(result['bitrate']), 320)

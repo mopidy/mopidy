@@ -14,23 +14,23 @@ class LineProtocolTest(unittest.TestCase):
 
         self.mock.terminator = network.LineProtocol.terminator
         self.mock.encoding = network.LineProtocol.encoding
-        self.mock.delimeter = network.LineProtocol.delimeter
+        self.mock.delimiter = network.LineProtocol.delimiter
         self.mock.prevent_timeout = False
 
     def test_init_stores_values_in_attributes(self):
-        delimeter = re.compile(network.LineProtocol.terminator)
+        delimiter = re.compile(network.LineProtocol.terminator)
         network.LineProtocol.__init__(self.mock, sentinel.connection)
         self.assertEqual(sentinel.connection, self.mock.connection)
         self.assertEqual('', self.mock.recv_buffer)
-        self.assertEqual(delimeter, self.mock.delimeter)
+        self.assertEqual(delimiter, self.mock.delimiter)
         self.assertFalse(self.mock.prevent_timeout)
 
-    def test_init_compiles_delimeter(self):
-        self.mock.delimeter = '\r?\n'
-        delimeter = re.compile('\r?\n')
+    def test_init_compiles_delimiter(self):
+        self.mock.delimiter = '\r?\n'
+        delimiter = re.compile('\r?\n')
 
         network.LineProtocol.__init__(self.mock, sentinel.connection)
-        self.assertEqual(delimeter, self.mock.delimeter)
+        self.assertEqual(delimiter, self.mock.delimiter)
 
     def test_on_receive_no_new_lines_adds_to_recv_buffer(self):
         self.mock.connection = Mock(spec=network.Connection)
@@ -103,26 +103,26 @@ class LineProtocolTest(unittest.TestCase):
         self.mock.parse_lines.return_value = ['line1', 'line2']
         self.mock.decode.return_value = sentinel.decoded
 
-        network.LineProtocol.on_receive(self.mock,
-            {'received': 'line1\nline2\n'})
+        network.LineProtocol.on_receive(
+            self.mock, {'received': 'line1\nline2\n'})
         self.assertEqual(2, self.mock.on_line_received.call_count)
 
     def test_parse_lines_emtpy_buffer(self):
-        self.mock.delimeter = re.compile(r'\n')
+        self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = ''
 
         lines = network.LineProtocol.parse_lines(self.mock)
         self.assertRaises(StopIteration, lines.next)
 
     def test_parse_lines_no_terminator(self):
-        self.mock.delimeter = re.compile(r'\n')
+        self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'data'
 
         lines = network.LineProtocol.parse_lines(self.mock)
         self.assertRaises(StopIteration, lines.next)
 
     def test_parse_lines_termintor(self):
-        self.mock.delimeter = re.compile(r'\n')
+        self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'data\n'
 
         lines = network.LineProtocol.parse_lines(self.mock)
@@ -131,7 +131,7 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual('', self.mock.recv_buffer)
 
     def test_parse_lines_termintor_with_carriage_return(self):
-        self.mock.delimeter = re.compile(r'\r?\n')
+        self.mock.delimiter = re.compile(r'\r?\n')
         self.mock.recv_buffer = 'data\r\n'
 
         lines = network.LineProtocol.parse_lines(self.mock)
@@ -140,7 +140,7 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual('', self.mock.recv_buffer)
 
     def test_parse_lines_no_data_before_terminator(self):
-        self.mock.delimeter = re.compile(r'\n')
+        self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = '\n'
 
         lines = network.LineProtocol.parse_lines(self.mock)
@@ -149,7 +149,7 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual('', self.mock.recv_buffer)
 
     def test_parse_lines_extra_data_after_terminator(self):
-        self.mock.delimeter = re.compile(r'\n')
+        self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'data1\ndata2'
 
         lines = network.LineProtocol.parse_lines(self.mock)
@@ -158,7 +158,7 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual('data2', self.mock.recv_buffer)
 
     def test_parse_lines_unicode(self):
-        self.mock.delimeter = re.compile(r'\n')
+        self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = u'æøå\n'.encode('utf-8')
 
         lines = network.LineProtocol.parse_lines(self.mock)
@@ -167,7 +167,7 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual('', self.mock.recv_buffer)
 
     def test_parse_lines_multiple_lines(self):
-        self.mock.delimeter = re.compile(r'\n')
+        self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'abc\ndef\nghi\njkl'
 
         lines = network.LineProtocol.parse_lines(self.mock)
@@ -178,7 +178,7 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual('jkl', self.mock.recv_buffer)
 
     def test_parse_lines_multiple_calls(self):
-        self.mock.delimeter = re.compile(r'\n')
+        self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'data1'
 
         lines = network.LineProtocol.parse_lines(self.mock)

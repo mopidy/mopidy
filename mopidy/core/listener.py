@@ -1,11 +1,12 @@
-from pykka import registry
+import pykka
 
-class BackendListener(object):
+
+class CoreListener(object):
     """
-    Marker interface for recipients of events sent by the backend.
+    Marker interface for recipients of events sent by the core actor.
 
     Any Pykka actor that mixes in this class will receive calls to the methods
-    defined here when the corresponding events happen in the backend. This
+    defined here when the corresponding events happen in the core actor. This
     interface is used both for looking up what actors to notify of the events,
     and for providing default implementations for those listeners that are not
     interested in all events.
@@ -13,15 +14,10 @@ class BackendListener(object):
 
     @staticmethod
     def send(event, **kwargs):
-        """Helper to allow calling of backend listener events"""
-        # FIXME this should be updated once Pykka supports non-blocking calls
-        # on proxies or some similar solution.
-        registry.ActorRegistry.broadcast({
-            'command': 'pykka_call',
-            'attr_path': (event,),
-            'args': [],
-            'kwargs': kwargs,
-        }, target_class=BackendListener)
+        """Helper to allow calling of core listener events"""
+        listeners = pykka.ActorRegistry.get_by_class(CoreListener)
+        for listener in listeners:
+            getattr(listener.proxy(), event)(**kwargs)
 
     def track_playback_paused(self, track, time_position):
         """
@@ -49,7 +45,6 @@ class BackendListener(object):
         """
         pass
 
-
     def track_playback_started(self, track):
         """
         Called whenever a new track starts playing.
@@ -74,11 +69,16 @@ class BackendListener(object):
         """
         pass
 
-    def playback_state_changed(self):
+    def playback_state_changed(self, old_state, new_state):
         """
         Called whenever playback state is changed.
 
         *MAY* be implemented by actor.
+
+        :param old_state: the state before the change
+        :type old_state: string from :class:`mopidy.core.PlaybackState` field
+        :param new_state: the state after the change
+        :type new_state: string from :class:`mopidy.core.PlaybackState` field
         """
         pass
 
@@ -106,11 +106,14 @@ class BackendListener(object):
         """
         pass
 
-    def seeked(self):
+    def seeked(self, time_position):
         """
         Called whenever the time position changes by an unexpected amount, e.g.
         at seek to a new time position.
 
         *MAY* be implemented by actor.
+
+        :param time_position: the position that was seeked to in milliseconds
+        :type time_position: int
         """
         pass

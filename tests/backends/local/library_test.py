@@ -1,5 +1,3 @@
-import sys
-
 from mopidy import settings
 from mopidy.backends.local import LocalBackend
 
@@ -7,8 +5,6 @@ from tests import unittest, path_to_data_dir
 from tests.backends.base.library import LibraryControllerTest
 
 
-@unittest.skipIf(sys.platform == 'win32',
-    'Our Windows build server does not support GStreamer yet')
 class LocalLibraryControllerTest(LibraryControllerTest, unittest.TestCase):
 
     backend_class = LocalBackend

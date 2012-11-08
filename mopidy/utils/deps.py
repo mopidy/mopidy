@@ -8,7 +8,7 @@ import gst
 
 import pykka
 
-from mopidy.utils.log import indent
+from . import formatting
 
 
 def list_deps_optparse_callback(*args):
@@ -47,7 +47,7 @@ def format_dependency_list(adapters=None):
                 os.path.dirname(dep_info['path'])))
         if 'other' in dep_info:
             lines.append('  Other: %s' % (
-                indent(dep_info['other'])),)
+                formatting.indent(dep_info['other'])),)
     return '\n'.join(lines)
 
 
@@ -61,8 +61,8 @@ def platform_info():
 def python_info():
     return {
         'name': 'Python',
-        'version': '%s %s' % (platform.python_implementation(),
-            platform.python_version()),
+        'version': '%s %s' % (
+            platform.python_implementation(), platform.python_version()),
         'path': platform.__file__,
     }
 
@@ -125,9 +125,11 @@ def _gstreamer_check_elements():
         # Shoutcast output
         'shout2send',
     ]
-    known_elements = [factory.get_name() for factory in
+    known_elements = [
+        factory.get_name() for factory in
         gst.registry_get_default().get_feature_list(gst.TYPE_ELEMENT_FACTORY)]
-    return [(element, element in known_elements) for element in elements_to_check]
+    return [
+        (element, element in known_elements) for element in elements_to_check]
 
 
 def pykka_info():

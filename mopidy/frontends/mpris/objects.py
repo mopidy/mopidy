@@ -1,23 +1,21 @@
 import logging
 import os
 
-logger = logging.getLogger('mopidy.frontends.mpris')
-
 try:
     import dbus
     import dbus.mainloop.glib
     import dbus.service
     import gobject
 except ImportError as import_error:
-    from mopidy import OptionalDependencyError
+    from mopidy.exceptions import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
-from pykka.registry import ActorRegistry
-
 from mopidy import settings
-from mopidy.backends.base import Backend
 from mopidy.core import PlaybackState
 from mopidy.utils.process import exit_process
+
+
+logger = logging.getLogger('mopidy.frontends.mpris')
 
 # Must be done before dbus.SessionBus() is called
 gobject.threads_init()
@@ -34,14 +32,14 @@ class MprisObject(dbus.service.Object):
 
     properties = None
 
-    def __init__(self):
-        self._backend = None
+    def __init__(self, core):
+        self.core = core
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
             PLAYER_IFACE: self._get_player_iface_properties(),
         }
         bus_name = self._connect_to_dbus()
-        super(MprisObject, self).__init__(bus_name, OBJECT_PATH)
+        dbus.service.Object.__init__(self, bus_name, OBJECT_PATH)
 
     def _get_root_iface_properties(self):
         return {
@@ -79,19 +77,10 @@ class MprisObject(dbus.service.Object):
     def _connect_to_dbus(self):
         logger.debug(u'Connecting to D-Bus...')
         mainloop = dbus.mainloop.glib.DBusGMainLoop()
-        bus_name = dbus.service.BusName(BUS_NAME,
-            dbus.SessionBus(mainloop=mainloop))
+        bus_name = dbus.service.BusName(
+            BUS_NAME, dbus.SessionBus(mainloop=mainloop))
         logger.info(u'Connected to D-Bus')
         return bus_name
-
-    @property
-    def backend(self):
-        if self._backend is None:
-            backend_refs = ActorRegistry.get_by_class(Backend)
-            assert len(backend_refs) == 1, \
-                'Expected exactly one running backend.'
-            self._backend = backend_refs[0].proxy()
-        return self._backend
 
     def _get_track_id(self, cp_track):
         return '/com/mopidy/track/%d' % cp_track.cpid
@@ -103,45 +92,47 @@ class MprisObject(dbus.service.Object):
     ### Properties interface
 
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
-        in_signature='ss', out_signature='v')
+                         in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
-        logger.debug(u'%s.Get(%s, %s) called',
+        logger.debug(
+            u'%s.Get(%s, %s) called',
             dbus.PROPERTIES_IFACE, repr(interface), repr(prop))
-        (getter, setter) = self.properties[interface][prop]
+        (getter, _) = self.properties[interface][prop]
         if callable(getter):
             return getter()
         else:
             return getter
 
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
-        in_signature='s', out_signature='a{sv}')
+                         in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
-        logger.debug(u'%s.GetAll(%s) called',
-            dbus.PROPERTIES_IFACE, repr(interface))
+        logger.debug(
+            u'%s.GetAll(%s) called', dbus.PROPERTIES_IFACE, repr(interface))
         getters = {}
-        for key, (getter, setter) in self.properties[interface].iteritems():
+        for key, (getter, _) in self.properties[interface].iteritems():
             getters[key] = getter() if callable(getter) else getter
         return getters
 
     @dbus.service.method(dbus_interface=dbus.PROPERTIES_IFACE,
-        in_signature='ssv', out_signature='')
+                         in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
-        logger.debug(u'%s.Set(%s, %s, %s) called',
+        logger.debug(
+            u'%s.Set(%s, %s, %s) called',
             dbus.PROPERTIES_IFACE, repr(interface), repr(prop), repr(value))
-        getter, setter = self.properties[interface][prop]
+        _, setter = self.properties[interface][prop]
         if setter is not None:
             setter(value)
-            self.PropertiesChanged(interface,
-                {prop: self.Get(interface, prop)}, [])
+            self.PropertiesChanged(
+                interface, {prop: self.Get(interface, prop)}, [])
 
     @dbus.service.signal(dbus_interface=dbus.PROPERTIES_IFACE,
-            signature='sa{sv}as')
+                         signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed_properties,
-            invalidated_properties):
-        logger.debug(u'%s.PropertiesChanged(%s, %s, %s) signaled',
+                          invalidated_properties):
+        logger.debug(
+            u'%s.PropertiesChanged(%s, %s, %s) signaled',
             dbus.PROPERTIES_IFACE, interface, changed_properties,
             invalidated_properties)
-
 
     ### Root interface methods
 
@@ -155,15 +146,13 @@ class MprisObject(dbus.service.Object):
         logger.debug(u'%s.Quit called', ROOT_IFACE)
         exit_process()
 
-
     ### Root interface properties
 
     def get_DesktopEntry(self):
         return os.path.splitext(os.path.basename(settings.DESKTOP_FILE))[0]
 
     def get_SupportedUriSchemes(self):
-        return dbus.Array(self.backend.uri_schemes.get(), signature='s')
-
+        return dbus.Array(self.core.uri_schemes.get(), signature='s')
 
     ### Player interface methods
 
@@ -173,7 +162,7 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanGoNext():
             logger.debug(u'%s.Next not allowed', PLAYER_IFACE)
             return
-        self.backend.playback.next().get()
+        self.core.playback.next().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Previous(self):
@@ -181,7 +170,7 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanGoPrevious():
             logger.debug(u'%s.Previous not allowed', PLAYER_IFACE)
             return
-        self.backend.playback.previous().get()
+        self.core.playback.previous().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Pause(self):
@@ -189,7 +178,7 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanPause():
             logger.debug(u'%s.Pause not allowed', PLAYER_IFACE)
             return
-        self.backend.playback.pause().get()
+        self.core.playback.pause().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def PlayPause(self):
@@ -197,13 +186,13 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanPause():
             logger.debug(u'%s.PlayPause not allowed', PLAYER_IFACE)
             return
-        state = self.backend.playback.state.get()
+        state = self.core.playback.state.get()
         if state == PlaybackState.PLAYING:
-            self.backend.playback.pause().get()
+            self.core.playback.pause().get()
         elif state == PlaybackState.PAUSED:
-            self.backend.playback.resume().get()
+            self.core.playback.resume().get()
         elif state == PlaybackState.STOPPED:
-            self.backend.playback.play().get()
+            self.core.playback.play().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Stop(self):
@@ -211,7 +200,7 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanControl():
             logger.debug(u'%s.Stop not allowed', PLAYER_IFACE)
             return
-        self.backend.playback.stop().get()
+        self.core.playback.stop().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Play(self):
@@ -219,11 +208,11 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanPlay():
             logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
             return
-        state = self.backend.playback.state.get()
+        state = self.core.playback.state.get()
         if state == PlaybackState.PAUSED:
-            self.backend.playback.resume().get()
+            self.core.playback.resume().get()
         else:
-            self.backend.playback.play().get()
+            self.core.playback.play().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Seek(self, offset):
@@ -232,9 +221,9 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.Seek not allowed', PLAYER_IFACE)
             return
         offset_in_milliseconds = offset // 1000
-        current_position = self.backend.playback.time_position.get()
+        current_position = self.core.playback.time_position.get()
         new_position = current_position + offset_in_milliseconds
-        self.backend.playback.seek(new_position)
+        self.core.playback.seek(new_position)
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def SetPosition(self, track_id, position):
@@ -243,7 +232,7 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'%s.SetPosition not allowed', PLAYER_IFACE)
             return
         position = position // 1000
-        current_cp_track = self.backend.playback.current_cp_track.get()
+        current_cp_track = self.core.playback.current_cp_track.get()
         if current_cp_track is None:
             return
         if track_id != self._get_track_id(current_cp_track):
@@ -252,7 +241,7 @@ class MprisObject(dbus.service.Object):
             return
         if current_cp_track.track.length < position:
             return
-        self.backend.playback.seek(position)
+        self.core.playback.seek(position)
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def OpenUri(self, uri):
@@ -264,16 +253,15 @@ class MprisObject(dbus.service.Object):
             return
         # NOTE Check if URI has MIME type known to the backend, if MIME support
         # is added to the backend.
-        uri_schemes = self.backend.uri_schemes.get()
+        uri_schemes = self.core.uri_schemes.get()
         if not any([uri.startswith(uri_scheme) for uri_scheme in uri_schemes]):
             return
-        track = self.backend.library.lookup(uri).get()
+        track = self.core.library.lookup(uri).get()
         if track is not None:
-            cp_track = self.backend.current_playlist.add(track).get()
-            self.backend.playback.play(cp_track)
+            cp_track = self.core.current_playlist.add(track).get()
+            self.core.playback.play(cp_track)
         else:
             logger.debug(u'Track with URI "%s" not found in library.', uri)
-
 
     ### Player interface signals
 
@@ -282,11 +270,10 @@ class MprisObject(dbus.service.Object):
         logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
         # Do nothing, as just calling the method is enough to emit the signal.
 
-
     ### Player interface properties
 
     def get_PlaybackStatus(self):
-        state = self.backend.playback.state.get()
+        state = self.core.playback.state.get()
         if state == PlaybackState.PLAYING:
             return 'Playing'
         elif state == PlaybackState.PAUSED:
@@ -295,8 +282,8 @@ class MprisObject(dbus.service.Object):
             return 'Stopped'
 
     def get_LoopStatus(self):
-        repeat = self.backend.playback.repeat.get()
-        single = self.backend.playback.single.get()
+        repeat = self.core.playback.repeat.get()
+        single = self.core.playback.single.get()
         if not repeat:
             return 'None'
         else:
@@ -310,14 +297,14 @@ class MprisObject(dbus.service.Object):
             logger.debug(u'Setting %s.LoopStatus not allowed', PLAYER_IFACE)
             return
         if value == 'None':
-            self.backend.playback.repeat = False
-            self.backend.playback.single = False
+            self.core.playback.repeat = False
+            self.core.playback.single = False
         elif value == 'Track':
-            self.backend.playback.repeat = True
-            self.backend.playback.single = True
+            self.core.playback.repeat = True
+            self.core.playback.single = True
         elif value == 'Playlist':
-            self.backend.playback.repeat = True
-            self.backend.playback.single = False
+            self.core.playback.repeat = True
+            self.core.playback.single = False
 
     def set_Rate(self, value):
         if not self.get_CanControl():
@@ -329,23 +316,23 @@ class MprisObject(dbus.service.Object):
             self.Pause()
 
     def get_Shuffle(self):
-        return self.backend.playback.random.get()
+        return self.core.playback.random.get()
 
     def set_Shuffle(self, value):
         if not self.get_CanControl():
             logger.debug(u'Setting %s.Shuffle not allowed', PLAYER_IFACE)
             return
         if value:
-            self.backend.playback.random = True
+            self.core.playback.random = True
         else:
-            self.backend.playback.random = False
+            self.core.playback.random = False
 
     def get_Metadata(self):
-        current_cp_track = self.backend.playback.current_cp_track.get()
+        current_cp_track = self.core.playback.current_cp_track.get()
         if current_cp_track is None:
             return {'mpris:trackid': ''}
         else:
-            (cpid, track) = current_cp_track
+            (_, track) = current_cp_track
             metadata = {'mpris:trackid': self._get_track_id(current_cp_track)}
             if track.length:
                 metadata['mpris:length'] = track.length * 1000
@@ -370,7 +357,7 @@ class MprisObject(dbus.service.Object):
             return dbus.Dictionary(metadata, signature='sv')
 
     def get_Volume(self):
-        volume = self.backend.playback.volume.get()
+        volume = self.core.playback.volume.get()
         if volume is None:
             return 0
         return volume / 100.0
@@ -382,32 +369,35 @@ class MprisObject(dbus.service.Object):
         if value is None:
             return
         elif value < 0:
-            self.backend.playback.volume = 0
+            self.core.playback.volume = 0
         elif value > 1:
-            self.backend.playback.volume = 100
+            self.core.playback.volume = 100
         elif 0 <= value <= 1:
-            self.backend.playback.volume = int(value * 100)
+            self.core.playback.volume = int(value * 100)
 
     def get_Position(self):
-        return self.backend.playback.time_position.get() * 1000
+        return self.core.playback.time_position.get() * 1000
 
     def get_CanGoNext(self):
         if not self.get_CanControl():
             return False
-        return (self.backend.playback.cp_track_at_next.get() !=
-            self.backend.playback.current_cp_track.get())
+        return (
+            self.core.playback.cp_track_at_next.get() !=
+            self.core.playback.current_cp_track.get())
 
     def get_CanGoPrevious(self):
         if not self.get_CanControl():
             return False
-        return (self.backend.playback.cp_track_at_previous.get() !=
-            self.backend.playback.current_cp_track.get())
+        return (
+            self.core.playback.cp_track_at_previous.get() !=
+            self.core.playback.current_cp_track.get())
 
     def get_CanPlay(self):
         if not self.get_CanControl():
             return False
-        return (self.backend.playback.current_track.get() is not None
-            or self.backend.playback.track_at_next.get() is not None)
+        return (
+            self.core.playback.current_track.get() is not None or
+            self.core.playback.track_at_next.get() is not None)
 
     def get_CanPause(self):
         if not self.get_CanControl():

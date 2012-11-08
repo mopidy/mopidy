@@ -14,6 +14,14 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'file: file:///dev/urandom')
         self.assertInResponse(u'OK')
 
+    def test_listplaylist_without_quotes(self):
+        self.backend.stored_playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+
+        self.sendRequest(u'listplaylist name')
+        self.assertInResponse(u'file: file:///dev/urandom')
+        self.assertInResponse(u'OK')
+
     def test_listplaylist_fails_if_no_playlist_is_found(self):
         self.sendRequest(u'listplaylist "name"')
         self.assertEqualResponse(u'ACK [50@0] {listplaylist} No such playlist')
@@ -28,6 +36,16 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertNotInResponse(u'Pos: 0')
         self.assertInResponse(u'OK')
 
+    def test_listplaylistinfo_without_quotes(self):
+        self.backend.stored_playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+
+        self.sendRequest(u'listplaylistinfo name')
+        self.assertInResponse(u'file: file:///dev/urandom')
+        self.assertInResponse(u'Track: 0')
+        self.assertNotInResponse(u'Pos: 0')
+        self.assertInResponse(u'OK')
+
     def test_listplaylistinfo_fails_if_no_playlist_is_found(self):
         self.sendRequest(u'listplaylistinfo "name"')
         self.assertEqualResponse(
@@ -35,8 +53,8 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylists(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
-        self.backend.stored_playlists.playlists = [Playlist(name='a',
-            last_modified=last_modified)]
+        self.backend.stored_playlists.playlists = [
+            Playlist(name='a', last_modified=last_modified)]
 
         self.sendRequest(u'listplaylists')
         self.assertInResponse(u'playlist: a')
@@ -45,13 +63,14 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse(u'OK')
 
     def test_load_known_playlist_appends_to_current_playlist(self):
-        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
-        self.assertEqual(len(self.backend.current_playlist.tracks.get()), 2)
-        self.backend.stored_playlists.playlists = [Playlist(name='A-list',
-            tracks=[Track(uri='c'), Track(uri='d'), Track(uri='e')])]
+        self.core.current_playlist.append([Track(uri='a'), Track(uri='b')])
+        self.assertEqual(len(self.core.current_playlist.tracks.get()), 2)
+        self.backend.stored_playlists.playlists = [
+            Playlist(name='A-list', tracks=[
+                Track(uri='c'), Track(uri='d'), Track(uri='e')])]
 
         self.sendRequest(u'load "A-list"')
-        tracks = self.backend.current_playlist.tracks.get()
+        tracks = self.core.current_playlist.tracks.get()
         self.assertEqual(5, len(tracks))
         self.assertEqual('a', tracks[0].uri)
         self.assertEqual('b', tracks[1].uri)
@@ -62,7 +81,7 @@ class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_load_unknown_playlist_acks(self):
         self.sendRequest(u'load "unknown playlist"')
-        self.assertEqual(0, len(self.backend.current_playlist.tracks.get()))
+        self.assertEqual(0, len(self.core.current_playlist.tracks.get()))
         self.assertEqualResponse(u'ACK [50@0] {load} No such playlist')
 
     def test_playlistadd(self):

@@ -1,14 +1,14 @@
 import logging
-import os
-
-logger = logging.getLogger('mopidy.backends.local.translator')
 
 from mopidy.models import Track, Artist, Album
-from mopidy.utils import locale_decode
+from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri
 
-def parse_m3u(file_path):
-    """
+logger = logging.getLogger('mopidy.backends.local')
+
+
+def parse_m3u(file_path, music_folder):
+    r"""
     Convert M3U file list of uris
 
     Example M3U data::
@@ -29,8 +29,6 @@ def parse_m3u(file_path):
     """
 
     uris = []
-    folder = os.path.dirname(file_path)
-
     try:
         with open(file_path) as m3u:
             contents = m3u.readlines()
@@ -48,10 +46,11 @@ def parse_m3u(file_path):
         if line.startswith('file://'):
             uris.append(line)
         else:
-            path = path_to_uri(folder, line)
+            path = path_to_uri(music_folder, line)
             uris.append(path)
 
     return uris
+
 
 def parse_mpd_tag_cache(tag_cache, music_dir=''):
     """
@@ -90,6 +89,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
     _convert_mpd_data(current, tracks, music_dir)
 
     return tracks
+
 
 def _convert_mpd_data(data, tracks, music_dir):
     if not data:
@@ -130,7 +130,8 @@ def _convert_mpd_data(data, tracks, music_dir):
         artist_kwargs['musicbrainz_id'] = data['musicbrainz_artistid']
 
     if 'musicbrainz_albumartistid' in data:
-        albumartist_kwargs['musicbrainz_id'] = data['musicbrainz_albumartistid']
+        albumartist_kwargs['musicbrainz_id'] = (
+            data['musicbrainz_albumartistid'])
 
     if data['file'][0] == '/':
         path = data['file'][1:]
@@ -144,7 +145,7 @@ def _convert_mpd_data(data, tracks, music_dir):
     if albumartist_kwargs:
         albumartist = Artist(**albumartist_kwargs)
         album_kwargs['artists'] = [albumartist]
-    
+
     if album_kwargs:
         album = Album(**album_kwargs)
         track_kwargs['album'] = album

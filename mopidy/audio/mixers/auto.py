@@ -1,6 +1,19 @@
+"""Mixer element that automatically selects the real mixer to use.
+
+This is Mopidy's default mixer.
+
+**Dependencies:**
+
+- None
+
+**Settings:**
+
+- If this wasn't the default, you would set :attr:`mopidy.settings.MIXER`
+  to ``autoaudiomixer`` to use this mixer.
+"""
+
 import pygst
 pygst.require('0.10')
-import gobject
 import gst
 
 import logging
@@ -10,16 +23,19 @@ logger = logging.getLogger('mopidy.audio.mixers.auto')
 
 # TODO: we might want to add some ranking to the mixers we know about?
 class AutoAudioMixer(gst.Bin):
-    __gstdetails__ = ('AutoAudioMixer',
-                      'Mixer',
-                      'Element automatically selects a mixer.',
-                      'Thomas Adamcik')
+    __gstdetails__ = (
+        'AutoAudioMixer',
+        'Mixer',
+        'Element automatically selects a mixer.',
+        'Mopidy')
 
     def __init__(self):
         gst.Bin.__init__(self)
         mixer = self._find_mixer()
         if mixer:
+            # pylint: disable=E1101
             self.add(mixer)
+            # pylint: enable=E1101
             logger.debug('AutoAudioMixer chose: %s', mixer.get_name())
         else:
             logger.debug('AutoAudioMixer did not find any usable mixers')
@@ -66,7 +82,3 @@ class AutoAudioMixer(gst.Bin):
             if track.flags & flags:
                 return True
         return False
-
-
-gobject.type_register(AutoAudioMixer)
-gst.element_register(AutoAudioMixer, 'autoaudiomixer', gst.RANK_MARGINAL)

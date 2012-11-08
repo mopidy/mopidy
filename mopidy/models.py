@@ -13,8 +13,9 @@ class ImmutableObject(object):
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
             if not hasattr(self, key):
-                raise TypeError('__init__() got an unexpected keyword ' + \
-                    'argument \'%s\'' % key)
+                raise TypeError(
+                    u"__init__() got an unexpected keyword argument '%s'" %
+                    key)
             self.__dict__[key] = value
 
     def __setattr__(self, name, value):
@@ -71,8 +72,8 @@ class ImmutableObject(object):
             if hasattr(self, key):
                 data[key] = values.pop(key)
         if values:
-            raise TypeError("copy() got an unexpected keyword argument '%s'"
-                % key)
+            raise TypeError(
+                u"copy() got an unexpected keyword argument '%s'" % key)
         return self.__class__(**data)
 
     def serialize(self):
@@ -119,6 +120,8 @@ class Album(ImmutableObject):
     :type artists: list of :class:`Artist`
     :param num_tracks: number of tracks in album
     :type num_tracks: integer
+    :param date: album release date (YYYY or YYYY-MM-DD)
+    :type date: string
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     """
@@ -134,6 +137,9 @@ class Album(ImmutableObject):
 
     #: The number of tracks in the album. Read-only.
     num_tracks = 0
+
+    #: The album release date. Read-only.
+    date = None
 
     #: The MusicBrainz ID of the album. Read-only.
     musicbrainz_id = None
@@ -202,14 +208,14 @@ class Track(ImmutableObject):
 
 class Playlist(ImmutableObject):
     """
-        :param uri: playlist URI
-        :type uri: string
-        :param name: playlist name
-        :type name: string
-        :param tracks: playlist's tracks
-        :type tracks: list of :class:`Track` elements
-        :param last_modified: playlist's modification time
-        :type last_modified: :class:`datetime.datetime`
+    :param uri: playlist URI
+    :type uri: string
+    :param name: playlist name
+    :type name: string
+    :param tracks: playlist's tracks
+    :type tracks: list of :class:`Track` elements
+    :param last_modified: playlist's modification time
+    :type last_modified: :class:`datetime.datetime`
     """
 
     #: The playlist URI. Read-only.

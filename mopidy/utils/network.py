@@ -5,16 +5,17 @@ import re
 import socket
 import threading
 
-from pykka import ActorDeadError
-from pykka.actor import ThreadingActor
-from pykka.registry import ActorRegistry
+import pykka
 
-from mopidy.utils import locale_decode
+from mopidy.utils import encoding
+
 
 logger = logging.getLogger('mopidy.utils.server')
 
+
 class ShouldRetrySocketCall(Exception):
     """Indicate that attempted socket call should be retried"""
+
 
 def try_ipv6_socket():
     """Determine if system really supports IPv6"""
@@ -24,12 +25,16 @@ def try_ipv6_socket():
         socket.socket(socket.AF_INET6).close()
         return True
     except IOError as error:
-        logger.debug(u'Platform supports IPv6, but socket '
-            'creation failed, disabling: %s', locale_decode(error))
+        logger.debug(
+            u'Platform supports IPv6, but socket creation failed, '
+            u'disabling: %s',
+            encoding.locale_decode(error))
     return False
+
 
 #: Boolean value that indicates if creating an IPv6 socket will succeed.
 has_ipv6 = try_ipv6_socket()
+
 
 def create_socket():
     """Create a TCP socket with or without IPv6 depending on system support"""
@@ -42,17 +47,21 @@ def create_socket():
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return sock
 
+
 def format_hostname(hostname):
     """Format hostname for display."""
-    if (has_ipv6 and re.match('\d+.\d+.\d+.\d+', hostname) is not None):
+    if (has_ipv6 and re.match(r'\d+.\d+.\d+.\d+', hostname) is not None):
         hostname = '::ffff:%s' % hostname
     return hostname
+
 
 class Server(object):
     """Setup listener and register it with gobject's event loop."""
 
-    def __init__(self, host, port, protocol, max_connections=5, timeout=30):
+    def __init__(self, host, port, protocol, protocol_kwargs=None,
+                 max_connections=5, timeout=30):
         self.protocol = protocol
+        self.protocol_kwargs = protocol_kwargs or {}
         self.max_connections = max_connections
         self.timeout = timeout
         self.server_socket = self.create_server_socket(host, port)
@@ -94,7 +103,7 @@ class Server(object):
                 self.number_of_connections() >= self.max_connections)
 
     def number_of_connections(self):
-        return len(ActorRegistry.get_by_class(self.protocol))
+        return len(pykka.ActorRegistry.get_by_class(self.protocol))
 
     def reject_connection(self, sock, addr):
         # FIXME provide more context in logging?
@@ -105,7 +114,8 @@ class Server(object):
             pass
 
     def init_connection(self, sock, addr):
-        Connection(self.protocol, sock, addr, self.timeout)
+        Connection(
+            self.protocol, self.protocol_kwargs, sock, addr, self.timeout)
 
 
 class Connection(object):
@@ -117,13 +127,14 @@ class Connection(object):
     # false return value would only tell us that what we thought was registered
     # is already gone, there is really nothing more we can do.
 
-    def __init__(self, protocol, sock, addr, timeout):
+    def __init__(self, protocol, protocol_kwargs, sock, addr, timeout):
         sock.setblocking(False)
 
-        self.host, self.port = addr[:2] # IPv6 has larger addr
+        self.host, self.port = addr[:2]  # IPv6 has larger addr
 
         self.sock = sock
         self.protocol = protocol
+        self.protocol_kwargs = protocol_kwargs
         self.timeout = timeout
 
         self.send_lock = threading.Lock()
@@ -135,7 +146,7 @@ class Connection(object):
         self.send_id = None
         self.timeout_id = None
 
-        self.actor_ref = self.protocol.start(self)
+        self.actor_ref = self.protocol.start(self, **self.protocol_kwargs)
 
         self.enable_recv()
         self.enable_timeout()
@@ -151,7 +162,7 @@ class Connection(object):
 
         try:
             self.actor_ref.stop(block=False)
-        except ActorDeadError:
+        except pykka.ActorDeadError:
             pass
 
         self.disable_timeout()
@@ -203,7 +214,8 @@ class Connection(object):
             return
 
         try:
-            self.recv_id = gobject.io_add_watch(self.sock.fileno(),
+            self.recv_id = gobject.io_add_watch(
+                self.sock.fileno(),
                 gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
@@ -220,7 +232,8 @@ class Connection(object):
             return
 
         try:
-            self.send_id = gobject.io_add_watch(self.sock.fileno(),
+            self.send_id = gobject.io_add_watch(
+                self.sock.fileno(),
                 gobject.IO_OUT | gobject.IO_ERR | gobject.IO_HUP,
                 self.send_callback)
         except socket.error as e:
@@ -250,8 +263,8 @@ class Connection(object):
             return True
 
         try:
-            self.actor_ref.send_one_way({'received': data})
-        except ActorDeadError:
+            self.actor_ref.tell({'received': data})
+        except pykka.ActorDeadError:
             self.stop(u'Actor is dead.')
 
         return True
@@ -280,7 +293,7 @@ class Connection(object):
         return False
 
 
-class LineProtocol(ThreadingActor):
+class LineProtocol(pykka.ThreadingActor):
     """
     Base class for handling line based protocols.
 
@@ -293,7 +306,7 @@ class LineProtocol(ThreadingActor):
 
     #: Regex to use for spliting lines, will be set compiled version of its
     #: own value, or to ``terminator``s value if it is not set itself.
-    delimeter = None
+    delimiter = None
 
     #: What encoding to expect incomming data to be in, can be :class:`None`.
     encoding = 'utf-8'
@@ -304,10 +317,10 @@ class LineProtocol(ThreadingActor):
         self.prevent_timeout = False
         self.recv_buffer = ''
 
-        if self.delimeter:
-            self.delimeter = re.compile(self.delimeter)
+        if self.delimiter:
+            self.delimiter = re.compile(self.delimiter)
         else:
-            self.delimeter = re.compile(self.terminator)
+            self.delimiter = re.compile(self.terminator)
 
     @property
     def host(self):
@@ -348,7 +361,7 @@ class LineProtocol(ThreadingActor):
     def parse_lines(self):
         """Consume new data and yield any lines found."""
         while re.search(self.terminator, self.recv_buffer):
-            line, self.recv_buffer = self.delimeter.split(
+            line, self.recv_buffer = self.delimiter.split(
                 self.recv_buffer, 1)
             yield line
 
@@ -361,8 +374,10 @@ class LineProtocol(ThreadingActor):
         try:
             return line.encode(self.encoding)
         except UnicodeError:
-            logger.warning(u'Stopping actor due to encode problem, data '
-                'supplied by client was not valid %s', self.encoding)
+            logger.warning(
+                u'Stopping actor due to encode problem, data '
+                u'supplied by client was not valid %s',
+                self.encoding)
             self.stop()
 
     def decode(self, line):
@@ -374,8 +389,10 @@ class LineProtocol(ThreadingActor):
         try:
             return line.decode(self.encoding)
         except UnicodeError:
-            logger.warning(u'Stopping actor due to decode problem, data '
-                'supplied by client was not valid %s', self.encoding)
+            logger.warning(
+                u'Stopping actor due to decode problem, data '
+                u'supplied by client was not valid %s',
+                self.encoding)
             self.stop()
 
     def join_lines(self, lines):

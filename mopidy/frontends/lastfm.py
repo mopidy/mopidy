@@ -1,42 +1,48 @@
+"""
+Frontend which scrobbles the music you play to your `Last.fm
+<http://www.last.fm>`_ profile.
+
+.. note::
+
+    This frontend requires a free user account at Last.fm.
+
+**Dependencies:**
+
+- `pylast <http://code.google.com/p/pylast/>`_ >= 0.5.7
+
+**Settings:**
+
+- :attr:`mopidy.settings.LASTFM_USERNAME`
+- :attr:`mopidy.settings.LASTFM_PASSWORD`
+
+**Usage:**
+
+Make sure :attr:`mopidy.settings.FRONTENDS` includes
+``mopidy.frontends.lastfm.LastfmFrontend``. By default, the setting includes
+the Last.fm frontend.
+"""
+
 import logging
 import time
+
+import pykka
+
+from mopidy import exceptions, settings
+from mopidy.core import CoreListener
 
 try:
     import pylast
 except ImportError as import_error:
-    from mopidy import OptionalDependencyError
-    raise OptionalDependencyError(import_error)
-
-from pykka.actor import ThreadingActor
-
-from mopidy import settings, SettingsError
-from mopidy.listeners import BackendListener
+    raise exceptions.OptionalDependencyError(import_error)
 
 logger = logging.getLogger('mopidy.frontends.lastfm')
 
 API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
-class LastfmFrontend(ThreadingActor, BackendListener):
-    """
-    Frontend which scrobbles the music you play to your `Last.fm
-    <http://www.last.fm>`_ profile.
 
-    .. note::
-
-        This frontend requires a free user account at Last.fm.
-
-    **Dependencies:**
-
-    - `pylast <http://code.google.com/p/pylast/>`_ >= 0.5.7
-
-    **Settings:**
-
-    - :attr:`mopidy.settings.LASTFM_USERNAME`
-    - :attr:`mopidy.settings.LASTFM_PASSWORD`
-    """
-
-    def __init__(self):
+class LastfmFrontend(pykka.ThreadingActor, CoreListener):
+    def __init__(self, core):
         super(LastfmFrontend, self).__init__()
         self.lastfm = None
         self.last_start_time = None
@@ -49,7 +55,7 @@ class LastfmFrontend(ThreadingActor, BackendListener):
                 api_key=API_KEY, api_secret=API_SECRET,
                 username=username, password_hash=password_hash)
             logger.info(u'Connected to Last.fm')
-        except SettingsError as e:
+        except exceptions.SettingsError as e:
             logger.info(u'Last.fm scrobbler not started')
             logger.debug(u'Last.fm settings error: %s', e)
             self.stop()

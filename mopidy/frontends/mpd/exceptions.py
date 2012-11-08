@@ -1,4 +1,5 @@
-from mopidy import MopidyException
+from mopidy.exceptions import MopidyException
+
 
 class MpdAckError(MopidyException):
     """See fields on this class for available MPD error codes"""
@@ -33,11 +34,14 @@ class MpdAckError(MopidyException):
         return u'ACK [%i@%i] {%s} %s' % (
             self.__class__.error_code, self.index, self.command, self.message)
 
+
 class MpdArgError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_ARG
 
+
 class MpdPasswordError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_PASSWORD
+
 
 class MpdPermissionError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_PERMISSION
@@ -45,6 +49,7 @@ class MpdPermissionError(MpdAckError):
     def __init__(self, *args, **kwargs):
         super(MpdPermissionError, self).__init__(*args, **kwargs)
         self.message = u'you don\'t have permission for "%s"' % self.command
+
 
 class MpdUnknownCommand(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_UNKNOWN
@@ -54,11 +59,14 @@ class MpdUnknownCommand(MpdAckError):
         self.message = u'unknown command "%s"' % self.command
         self.command = u''
 
+
 class MpdNoExistError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_NO_EXIST
 
+
 class MpdSystemError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_SYSTEM
+
 
 class MpdNotImplemented(MpdAckError):
     error_code = 0

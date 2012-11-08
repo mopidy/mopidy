@@ -8,11 +8,11 @@ import traceback
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
-from mopidy import SettingsError
+from mopidy import exceptions
 
 logger = logging.getLogger('mopidy.utils.process')
 
-signals = dict((k, v) for v, k in signal.__dict__.iteritems()
+SIGNALS = dict((k, v) for v, k in signal.__dict__.iteritems()
     if v.startswith('SIG') and not v.startswith('SIG_'))
 
 def exit_process():
@@ -20,10 +20,12 @@ def exit_process():
     thread.interrupt_main()
     logger.debug(u'Interrupted main')
 
+
 def exit_handler(signum, frame):
     """A :mod:`signal` handler which will exit the program on signal."""
-    logger.info(u'Got %s signal', signals[signum])
+    logger.info(u'Got %s signal', SIGNALS[signum])
     exit_process()
+
 
 def stop_actors_by_class(klass):
     actors = ActorRegistry.get_by_class(klass)
@@ -31,18 +33,21 @@ def stop_actors_by_class(klass):
     for actor in actors:
         actor.stop()
 
+
 def stop_remaining_actors():
     num_actors = len(ActorRegistry.get_all())
     while num_actors:
         logger.error(
             u'There are actor threads still running, this is probably a bug')
-        logger.debug(u'Seeing %d actor and %d non-actor thread(s): %s',
+        logger.debug(
+            u'Seeing %d actor and %d non-actor thread(s): %s',
             num_actors, threading.active_count() - num_actors,
             ', '.join([t.name for t in threading.enumerate()]))
         logger.debug(u'Stopping %d actor(s)...', num_actors)
         ActorRegistry.stop_all()
         num_actors = len(ActorRegistry.get_all())
     logger.debug(u'All actors stopped.')
+
 
 class BaseThread(threading.Thread):
     def __init__(self):
@@ -56,7 +61,7 @@ class BaseThread(threading.Thread):
             self.run_inside_try()
         except KeyboardInterrupt:
             logger.info(u'Interrupted by user')
-        except SettingsError as e:
+        except exceptions.SettingsError as e:
             logger.error(e.message)
         except ImportError as e:
             logger.error(e)
@@ -76,7 +81,7 @@ class DebugThread(threading.Thread):
     event = threading.Event()
 
     def handler(self, signum, frame):
-        logger.info(u'Got %s signal', signals[signum])
+        logger.info(u'Got %s signal', SIGNALS[signum])
         self.event.set()
 
     def run(self):

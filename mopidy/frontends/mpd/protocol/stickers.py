@@ -1,7 +1,9 @@
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
-@handle_request(r'^sticker delete "(?P<field>[^"]+)" '
+
+@handle_request(
+    r'^sticker delete "(?P<field>[^"]+)" '
     r'"(?P<uri>[^"]+)"( "(?P<name>[^"]+)")*$')
 def sticker_delete(context, field, uri, name=None):
     """
@@ -12,9 +14,11 @@ def sticker_delete(context, field, uri, name=None):
         Deletes a sticker value from the specified object. If you do not
         specify a sticker name, all sticker values are deleted.
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
 
-@handle_request(r'^sticker find "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
+
+@handle_request(
+    r'^sticker find "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
     r'"(?P<name>[^"]+)"$')
 def sticker_find(context, field, uri, name):
     """
@@ -26,9 +30,11 @@ def sticker_find(context, field, uri, name):
         below the specified directory (``URI``). For each matching song, it
         prints the ``URI`` and that one sticker's value.
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
 
-@handle_request(r'^sticker get "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
+
+@handle_request(
+    r'^sticker get "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
     r'"(?P<name>[^"]+)"$')
 def sticker_get(context, field, uri, name):
     """
@@ -38,7 +44,8 @@ def sticker_get(context, field, uri, name):
 
         Reads a sticker value for the specified object.
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
+
 
 @handle_request(r'^sticker list "(?P<field>[^"]+)" "(?P<uri>[^"]+)"$')
 def sticker_list(context, field, uri):
@@ -49,9 +56,11 @@ def sticker_list(context, field, uri):
 
         Lists the stickers for the specified object.
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
 
-@handle_request(r'^sticker set "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
+
+@handle_request(
+    r'^sticker set "(?P<field>[^"]+)" "(?P<uri>[^"]+)" '
     r'"(?P<name>[^"]+)" "(?P<value>[^"]+)"$')
 def sticker_set(context, field, uri, name, value):
     """
@@ -62,4 +71,4 @@ def sticker_set(context, field, uri, name, value):
         Adds a sticker value to the specified object. If a sticker item
         with that name already exists, it is replaced.
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO

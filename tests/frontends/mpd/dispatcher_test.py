@@ -1,4 +1,7 @@
-from mopidy.backends.dummy import DummyBackend
+import pykka
+
+from mopidy import core
+from mopidy.backends import dummy
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.exceptions import MpdAckError
 from mopidy.frontends.mpd.protocol import request_handlers, handle_request
@@ -8,11 +11,12 @@ from tests import unittest
 
 class MpdDispatcherTest(unittest.TestCase):
     def setUp(self):
-        self.backend = DummyBackend.start().proxy()
+        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = MpdDispatcher()
 
     def tearDown(self):
-        self.backend.stop().get()
+        pykka.ActorRegistry.stop_all()
 
     def test_register_same_pattern_twice_fails(self):
         func = lambda: None
@@ -28,14 +32,16 @@ class MpdDispatcherTest(unittest.TestCase):
             self.dispatcher._find_handler('an_unknown_command with args')
             self.fail('Should raise exception')
         except MpdAckError as e:
-            self.assertEqual(e.get_mpd_ack(),
+            self.assertEqual(
+                e.get_mpd_ack(),
                 u'ACK [5@0] {} unknown command "an_unknown_command"')
 
-    def test_finding_handler_for_known_command_returns_handler_and_kwargs(self):
+    def test_find_handler_for_known_command_returns_handler_and_kwargs(self):
         expected_handler = lambda x: None
         request_handlers['known_command (?P<arg1>.+)'] = \
             expected_handler
-        (handler, kwargs) = self.dispatcher._find_handler('known_command an_arg')
+        (handler, kwargs) = self.dispatcher._find_handler(
+            'known_command an_arg')
         self.assertEqual(handler, expected_handler)
         self.assertIn('arg1', kwargs)
         self.assertEqual(kwargs['arg1'], 'an_arg')

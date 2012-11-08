@@ -3,7 +3,7 @@ Development
 ***********
 
 Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
-``irc.freenode.net`` and through `GitHub <http://github.com/>`_.
+``irc.freenode.net`` and through `GitHub <https://github.com/>`_.
 
 
 Release schedule
@@ -37,13 +37,58 @@ implemented, and you may add new wishlist issues if your ideas are not already
 represented.
 
 
+.. _run-from-git:
+
+Run Mopidy from Git repo
+========================
+
+If you want to contribute to the development of Mopidy, you should run Mopidy
+directly from the Git repo.
+
+#. First of all, install Mopidy in the recommended way for your OS and/or
+   distribution, like described at :ref:`installation`. You can have a
+   system-wide installation of the last Mopidy release in addition to the Git
+   repo which you run from when you code on Mopidy.
+
+#. Then install Git, if haven't already. For Ubuntu/Debian::
+
+      sudo apt-get install git-core
+
+   On OS X using Homebrew::
+
+      sudo brew install git
+
+#. Clone the official Mopidy repository::
+
+      git clone git://github.com/mopidy/mopidy.git
+
+   or your own fork of it::
+
+      git clone git@github.com:mygithubuser/mopidy.git
+
+#. You can then run Mopidy directly from the Git repository::
+
+      cd mopidy/          # Move into the Git repo dir
+      python mopidy       # Run python on the mopidy source code dir
+
+How you update your clone depends on whether you cloned the official Mopidy
+repository or your own fork, whether you have made any changes to the clone
+or not, and whether you are currently working on a feature branch or not. In
+other words, you'll need to learn Git.
+
+For an introduction to Git, please visit `git-scm.com <http://git-scm.com/>`_.
+Also, please read the rest of our developer documentation before you start
+contributing.
+
+
 Code style
 ==========
 
 - Follow :pep:`8` unless otherwise noted. `pep8.py
-  <http://pypi.python.org/pypi/pep8/>`_ can be used to check your code against
-  the guidelines, however remember that matching the style of the surrounding
-  code is also important.
+  <http://pypi.python.org/pypi/pep8/>`_ or `flake8
+  <http://pypi.python.org/pypi/flake8>`_  can be used to check your code
+  against the guidelines, however remember that matching the style of the
+  surrounding code is also important.
 
 - Use four spaces for indentation, *never* tabs.
 
@@ -89,7 +134,8 @@ Code style
 Commit guidelines
 =================
 
-- We follow the development process described at http://nvie.com/git-model.
+- We follow the development process described at
+  `nvie.com <http://nvie.com/posts/a-successful-git-branching-model/>`_.
 
 - Keep commits small and on topic.
 
@@ -118,27 +164,35 @@ Then, to run all tests, go to the project directory and run::
 For example::
 
     $ nosetests
-    ......................................................................
-    ......................................................................
-    ......................................................................
-    .......
-    ----------------------------------------------------------------------
-    Ran 217 tests in 0.267s
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................................
+    .............................................................
+    -----------------------------------------------------------------------------
+    1062 tests run in 7.4 seconds (1062 tests passed)
 
-    OK
+To run tests with test coverage statistics, remember to specify the tests dir::
 
-To run tests with test coverage statistics::
-
-    nosetests --with-coverage
+    nosetests --with-coverage tests/
 
 For more documentation on testing, check out the `nose documentation
-<http://somethingaboutorange.com/mrl/projects/nose/>`_.
+<http://nose.readthedocs.org/>`_.
 
 
 Continuous integration
 ======================
 
-Mopidy uses the free service `Travis CI <http://travis-ci.org/#mopidy/mopidy>`_
+Mopidy uses the free service `Travis CI <https://travis-ci.org/mopidy/mopidy>`_
 for automatically running the test suite when code is pushed to GitHub. This
 works both for the main Mopidy repo, but also for any forks. This way, any
 contributions to Mopidy through GitHub will automatically be tested by Travis
@@ -196,14 +250,44 @@ of writing. See ``--help`` for available options. Sample session::
     +ACK [2@0] {listallinfo} incorrect arguments
 
 To ensure that Mopidy and MPD have comparable state it is suggested you setup
-both to use ``tests/data/library_tag_cache`` for their tag cache and
-``tests/data`` for music/playlist folders.
+both to use ``tests/data/advanced_tag_cache`` for their tag cache and
+``tests/data/scanner/advanced/`` for the music folder and ``tests/data`` for
+playlists.
+
+
+Setting profiles during development
+===================================
+
+While developing Mopidy switching settings back and forth can become an all too
+frequent occurrence. As a quick hack to get around this you can structure your
+settings file in the following way::
+
+    import os
+    profile = os.environ.get('PROFILE', '').split(',')
+
+    if 'spotify' in profile:
+        BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
+    elif 'local' in profile:
+        BACKENDS = (u'mopidy.backends.local.LocalBackend',)
+        LOCAL_MUSIC_PATH = u'~/music'
+
+    if 'shoutcast' in profile:
+        OUTPUT = u'lame ! shout2send mount="/stream"'
+    elif 'silent' in profile:
+        OUTPUT = u'fakesink'
+        MIXER = None
+
+    SPOTIFY_USERNAME = u'xxxxx'
+    SPOTIFY_PASSWORD = u'xxxxx'
+
+Using this setup you can now run Mopidy with ``PROFILE=silent,spotify mopidy``
+if you for instance want to test Spotify without any actual audio output.
 
 
 Writing documentation
 =====================
 
-To write documentation, we use `Sphinx <http://sphinx.pocoo.org/>`_. See their
+To write documentation, we use `Sphinx <http://sphinx-doc.org/>`_. See their
 site for lots of documentation on how to use Sphinx. To generate HTML or LaTeX
 from the documentation files, you need some additional dependencies.
 

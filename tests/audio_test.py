@@ -1,13 +1,9 @@
-import sys
-
 from mopidy import audio, settings
 from mopidy.utils.path import path_to_uri
 
 from tests import unittest, path_to_data_dir
 
 
-@unittest.skipIf(sys.platform == 'win32',
-    'Our Windows build server does not support GStreamer yet')
 class AudioTest(unittest.TestCase):
     def setUp(self):
         settings.MIXER = 'fakemixer track_max_volume=65536'
@@ -43,11 +39,11 @@ class AudioTest(unittest.TestCase):
 
     @unittest.SkipTest
     def test_deliver_data(self):
-        pass # TODO
+        pass  # TODO
 
     @unittest.SkipTest
     def test_end_of_data_stream(self):
-        pass # TODO
+        pass  # TODO
 
     def test_set_volume(self):
         for value in range(0, 101):
@@ -56,12 +52,12 @@ class AudioTest(unittest.TestCase):
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
-        pass # TODO
+        pass  # TODO
 
     @unittest.SkipTest
     def test_set_position(self):
-        pass # TODO
+        pass  # TODO
 
     @unittest.SkipTest
     def test_invalid_output_raises_error(self):
-        pass # TODO
+        pass  # TODO

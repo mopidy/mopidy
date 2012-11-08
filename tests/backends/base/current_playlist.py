@@ -1,7 +1,9 @@
 import mock
 import random
 
-from mopidy import audio
+import pykka
+
+from mopidy import audio, core
 from mopidy.core import PlaybackState
 from mopidy.models import CpTrack, Playlist, Track
 
@@ -12,12 +14,16 @@ class CurrentPlaylistControllerTest(object):
     tracks = []
 
     def setUp(self):
-        self.backend = self.backend_class()
-        self.backend.audio = mock.Mock(spec=audio.Audio)
-        self.controller = self.backend.current_playlist
-        self.playback = self.backend.playback
+        self.audio = mock.Mock(spec=audio.Audio)
+        self.backend = self.backend_class.start(audio=self.audio).proxy()
+        self.core = core.Core(audio=audio, backends=[self.backend])
+        self.controller = self.core.current_playlist
+        self.playback = self.core.playback
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
+
+    def tearDown(self):
+        pykka.ActorRegistry.stop_all()
 
     def test_length(self):
         self.assertEqual(0, len(self.controller.cp_tracks))
@@ -42,7 +48,8 @@ class CurrentPlaylistControllerTest(object):
 
     @populate_playlist
     def test_add_at_position_outside_of_playlist(self):
-        test = lambda: self.controller.add(self.tracks[0], len(self.tracks)+2)
+        test = lambda: self.controller.add(
+            self.tracks[0], len(self.tracks) + 2)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
@@ -174,19 +181,19 @@ class CurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_moving_track_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(0, 0, tracks+5)
+        test = lambda: self.controller.move(0, 0, tracks + 5)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_move_group_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(0, 2, tracks+5)
+        test = lambda: self.controller.move(0, 2, tracks + 5)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
     def test_move_group_out_of_range(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(tracks+2, tracks+3, 0)
+        test = lambda: self.controller.move(tracks + 2, tracks + 3, 0)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
@@ -205,7 +212,7 @@ class CurrentPlaylistControllerTest(object):
         track2 = self.controller.tracks[2]
         version = self.controller.version
         self.controller.remove(uri=track1.uri)
-        self.assert_(version < self.controller.version)
+        self.assertLess(version, self.controller.version)
         self.assertNotIn(track1, self.controller.tracks)
         self.assertEqual(track2, self.controller.tracks[1])
 
@@ -247,7 +254,7 @@ class CurrentPlaylistControllerTest(object):
     @populate_playlist
     def test_shuffle_superset(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.shuffle(1, tracks+5)
+        test = lambda: self.controller.shuffle(1, tracks + 5)
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
@@ -281,4 +288,4 @@ class CurrentPlaylistControllerTest(object):
     def test_version_increases_when_appending_something(self):
         version = self.controller.version
         self.controller.append([Track()])
-        self.assert_(version < self.controller.version)
+        self.assertLess(version, self.controller.version)

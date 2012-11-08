@@ -17,44 +17,50 @@ class ConnectionTest(unittest.TestCase):
     def test_init_ensure_nonblocking_io(self):
         sock = Mock(spec=socket.SocketType)
 
-        network.Connection.__init__(self.mock, Mock(), sock,
-            (sentinel.host, sentinel.port), sentinel.timeout)
+        network.Connection.__init__(
+            self.mock, Mock(), {}, sock, (sentinel.host, sentinel.port),
+            sentinel.timeout)
         sock.setblocking.assert_called_once_with(False)
 
     def test_init_starts_actor(self):
         protocol = Mock(spec=network.LineProtocol)
 
-        network.Connection.__init__(self.mock, protocol, Mock(),
-            (sentinel.host, sentinel.port), sentinel.timeout)
+        network.Connection.__init__(
+            self.mock, protocol, {}, Mock(), (sentinel.host, sentinel.port),
+            sentinel.timeout)
         protocol.start.assert_called_once_with(self.mock)
 
     def test_init_enables_recv_and_timeout(self):
-        network.Connection.__init__(self.mock, Mock(), Mock(),
-            (sentinel.host, sentinel.port), sentinel.timeout)
+        network.Connection.__init__(
+            self.mock, Mock(), {}, Mock(), (sentinel.host, sentinel.port),
+            sentinel.timeout)
         self.mock.enable_recv.assert_called_once_with()
         self.mock.enable_timeout.assert_called_once_with()
 
     def test_init_stores_values_in_attributes(self):
         addr = (sentinel.host, sentinel.port)
         protocol = Mock(spec=network.LineProtocol)
+        protocol_kwargs = {}
         sock = Mock(spec=socket.SocketType)
 
         network.Connection.__init__(
-            self.mock, protocol, sock, addr, sentinel.timeout)
+            self.mock, protocol, protocol_kwargs, sock, addr, sentinel.timeout)
         self.assertEqual(sock, self.mock.sock)
         self.assertEqual(protocol, self.mock.protocol)
+        self.assertEqual(protocol_kwargs, self.mock.protocol_kwargs)
         self.assertEqual(sentinel.timeout, self.mock.timeout)
         self.assertEqual(sentinel.host, self.mock.host)
         self.assertEqual(sentinel.port, self.mock.port)
 
     def test_init_handles_ipv6_addr(self):
-        addr = (sentinel.host, sentinel.port,
-            sentinel.flowinfo, sentinel.scopeid)
+        addr = (
+            sentinel.host, sentinel.port, sentinel.flowinfo, sentinel.scopeid)
         protocol = Mock(spec=network.LineProtocol)
+        protocol_kwargs = {}
         sock = Mock(spec=socket.SocketType)
 
         network.Connection.__init__(
-            self.mock, protocol, sock, addr, sentinel.timeout)
+            self.mock, protocol, protocol_kwargs, sock, addr, sentinel.timeout)
         self.assertEqual(sentinel.host, self.mock.host)
         self.assertEqual(sentinel.port, self.mock.port)
 
@@ -135,8 +141,8 @@ class ConnectionTest(unittest.TestCase):
         self.mock.actor_ref = Mock()
         self.mock.sock = Mock(spec=socket.SocketType)
 
-        network.Connection.stop(self.mock, sentinel.reason,
-            level=sentinel.level)
+        network.Connection.stop(
+            self.mock, sentinel.reason, level=sentinel.level)
         network.logger.log.assert_called_once_with(
             sentinel.level, sentinel.reason)
 
@@ -157,7 +163,8 @@ class ConnectionTest(unittest.TestCase):
         gobject.io_add_watch.return_value = sentinel.tag
 
         network.Connection.enable_recv(self.mock)
-        gobject.io_add_watch.assert_called_once_with(sentinel.fileno,
+        gobject.io_add_watch.assert_called_once_with(
+            sentinel.fileno,
             gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
             self.mock.recv_callback)
         self.assertEqual(sentinel.tag, self.mock.recv_id)
@@ -210,7 +217,8 @@ class ConnectionTest(unittest.TestCase):
         gobject.io_add_watch.return_value = sentinel.tag
 
         network.Connection.enable_send(self.mock)
-        gobject.io_add_watch.assert_called_once_with(sentinel.fileno,
+        gobject.io_add_watch.assert_called_once_with(
+            sentinel.fileno,
             gobject.IO_OUT | gobject.IO_ERR | gobject.IO_HUP,
             self.mock.send_callback)
         self.assertEqual(sentinel.tag, self.mock.send_id)
@@ -267,8 +275,8 @@ class ConnectionTest(unittest.TestCase):
         gobject.timeout_add_seconds.return_value = sentinel.tag
 
         network.Connection.enable_timeout(self.mock)
-        gobject.timeout_add_seconds.assert_called_once_with(10,
-            self.mock.timeout_callback)
+        gobject.timeout_add_seconds.assert_called_once_with(
+            10, self.mock.timeout_callback)
         self.assertEqual(sentinel.tag, self.mock.timeout_id)
 
     @patch.object(gobject, 'timeout_add_seconds', new=Mock())
@@ -356,24 +364,25 @@ class ConnectionTest(unittest.TestCase):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.actor_ref = Mock()
 
-        self.assertTrue(network.Connection.recv_callback(self.mock,
-            sentinel.fd, gobject.IO_IN | gobject.IO_ERR))
+        self.assertTrue(network.Connection.recv_callback(
+            self.mock, sentinel.fd, gobject.IO_IN | gobject.IO_ERR))
         self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_recv_callback_respects_io_hup(self):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.actor_ref = Mock()
 
-        self.assertTrue(network.Connection.recv_callback(self.mock,
-            sentinel.fd, gobject.IO_IN | gobject.IO_HUP))
+        self.assertTrue(network.Connection.recv_callback(
+            self.mock, sentinel.fd, gobject.IO_IN | gobject.IO_HUP))
         self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_recv_callback_respects_io_hup_and_io_err(self):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.actor_ref = Mock()
 
-        self.assertTrue(network.Connection.recv_callback(self.mock,
-            sentinel.fd, gobject.IO_IN | gobject.IO_HUP | gobject.IO_ERR))
+        self.assertTrue(network.Connection.recv_callback(
+            self.mock, sentinel.fd,
+            gobject.IO_IN | gobject.IO_HUP | gobject.IO_ERR))
         self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_recv_callback_sends_data_to_actor(self):
@@ -383,14 +392,14 @@ class ConnectionTest(unittest.TestCase):
 
         self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
-        self.mock.actor_ref.send_one_way.assert_called_once_with(
+        self.mock.actor_ref.tell.assert_called_once_with(
             {'received': 'data'})
 
     def test_recv_callback_handles_dead_actors(self):
         self.mock.sock = Mock(spec=socket.SocketType)
         self.mock.sock.recv.return_value = 'data'
         self.mock.actor_ref = Mock()
-        self.mock.actor_ref.send_one_way.side_effect = pykka.ActorDeadError()
+        self.mock.actor_ref.tell.side_effect = pykka.ActorDeadError()
 
         self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
@@ -429,8 +438,8 @@ class ConnectionTest(unittest.TestCase):
         self.mock.actor_ref = Mock()
         self.mock.send_buffer = ''
 
-        self.assertTrue(network.Connection.send_callback(self.mock,
-            sentinel.fd, gobject.IO_IN | gobject.IO_ERR))
+        self.assertTrue(network.Connection.send_callback(
+            self.mock, sentinel.fd, gobject.IO_IN | gobject.IO_ERR))
         self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_send_callback_respects_io_hup(self):
@@ -440,8 +449,8 @@ class ConnectionTest(unittest.TestCase):
         self.mock.actor_ref = Mock()
         self.mock.send_buffer = ''
 
-        self.assertTrue(network.Connection.send_callback(self.mock,
-            sentinel.fd, gobject.IO_IN | gobject.IO_HUP))
+        self.assertTrue(network.Connection.send_callback(
+            self.mock, sentinel.fd, gobject.IO_IN | gobject.IO_HUP))
         self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_send_callback_respects_io_hup_and_io_err(self):
@@ -451,8 +460,9 @@ class ConnectionTest(unittest.TestCase):
         self.mock.actor_ref = Mock()
         self.mock.send_buffer = ''
 
-        self.assertTrue(network.Connection.send_callback(self.mock,
-            sentinel.fd, gobject.IO_IN | gobject.IO_HUP | gobject.IO_ERR))
+        self.assertTrue(network.Connection.send_callback(
+            self.mock, sentinel.fd,
+            gobject.IO_IN | gobject.IO_HUP | gobject.IO_ERR))
         self.mock.stop.assert_called_once_with(any_unicode)
 
     def test_send_callback_acquires_and_releases_lock(self):

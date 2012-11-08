@@ -1,92 +1,25 @@
-************************
-MPD client compatability
-************************
+.. _mpd-clients:
+
+***********
+MPD clients
+***********
 
 This is a list of MPD clients we either know works well with Mopidy, or that we
 know won't work well. For a more exhaustive list of MPD clients, see
 http://mpd.wikia.com/wiki/Clients.
 
-
-Console clients
-===============
-
-mpc
----
-
-A command line client. Version 0.14 had some issues with Mopidy (see
-:issue:`5`), but 0.16 seems to work nicely.
+.. contents:: Contents
+    :local:
 
 
-ncmpc
------
+Test procedure
+==============
 
-A console client. Works with Mopidy 0.6 and upwards. Uses the ``idle`` MPD
-command, but in a resource inefficient way.
-
-
-ncmpcpp
--------
-
-A console client that generally works well with Mopidy, and is regularly used
-by Mopidy developers.
-
-Search only works in two of the three search modes:
-
-- "Match if tag contains search phrase (regexes supported)" -- Does not work.
-  The client tries to fetch all known metadata and do the search client side.
-- "Match if tag contains searched phrase (no regexes)" -- Works.
-- "Match only if both values are the same" -- Works.
-
-
-Graphical clients
-=================
-
-GMPC
-----
-
-`GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
-well with Mopidy, and is regularly used by Mopidy developers.
-
-GMPC may sometimes requests a lot of meta data of related albums, artists, etc.
-This takes more time with Mopidy, which needs to query Spotify for the data,
-than with a normal MPD server, which has a local cache of meta data. Thus, GMPC
-may sometimes feel frozen, but usually you just need to give it a bit of slack
-before it will catch up.
-
-
-Sonata
-------
-
-`Sonata <http://sonata.berlios.de/>`_ is a graphical MPD client (GTK+).
-It generally works well with Mopidy, except for search.
-
-When you search in Sonata, it only sends the first to letters of the search
-query to Mopidy, and then does the rest of the filtering itself on the client
-side. Since Spotify has a collection of millions of tracks and they only return
-the first 100 hits for any search query, searching for two-letter combinations
-seldom returns any useful results. See :issue:`1` and the matching `Sonata
-bug`_ for details.
-
-.. _Sonata bug: http://developer.berlios.de/feature/?func=detailfeature&feature_id=5038&group_id=7323
-
-
-Theremin
---------
-
-`Theremin <http://theremin.sigterm.eu/>`_ is a graphical MPD client for OS X.
-It generally works well with Mopidy.
-
-
-.. _android_mpd_clients:
-
-Android clients
-===============
-
-We've tested all four MPD clients we could find for Android with Mopidy 0.7.3 on
-a Samsung Galaxy Nexus with Android 4.1.1, using the following test procedure:
+In some cases, we've used the following test procedure to compare the feature
+completeness of clients:
 
 #. Connect to Mopidy
-#. Search for ``foo``, with search type "any" if it can be selected
+#. Search for "foo", with search type "any" if it can be selected
 #. Add "The Pretender" from the search results to the current playlist
 #. Start playback
 #. Pause and resume playback
@@ -107,38 +40,138 @@ a Samsung Galaxy Nexus with Android 4.1.1, using the following test procedure:
 #. Check if the app got support for single mode and consume mode
 #. Kill Mopidy and confirm that the app handles it without crashing
 
-We found that all four apps crashed on Android 4.1.1.
 
-Combining what we managed to find before the apps crashed with our experience
-from an older version of this review, using Android 2.1, we can say that:
 
-- PMix can be ignored, because it is unmaintained and its fork MPDroid is
-  better on all fronts.
+Console clients
+===============
 
-- Droid MPD Client was to buggy to get an impression from. Unclear if the bugs
-  are due to the app or that it hasn't been updated for Android 4.x.
+ncmpcpp
+-------
 
-- BitMPC is in our experience feature complete, but ugly.
+A console client that works well with Mopidy, and is regularly used by Mopidy
+developers.
 
-- MPDroid, now that search is in place, is probably feature complete as well,
-  and looks nicer than BitMPC.
+.. image:: /_static/mpd-client-ncmpcpp.png
+    :width: 575
+    :height: 426
 
-In conclusion: MPD clients on Android 4.x is a sad affair. If you want to try
-anyway, try BitMPC and MPDroid.
+Search does not work in the "Match if tag contains search phrase (regexes
+supported)" mode because the client tries to fetch all known metadata and do
+the search on the client side. The two other search modes works nicely, so this
+is not a problem.
+
+
+ncmpc
+-----
+
+A console client. Works with Mopidy 0.6 and upwards. Uses the ``idle`` MPD
+command, but in a resource inefficient way.
+
+
+mpc
+---
+
+A command line client. Version 0.16 and upwards seems to work nicely with
+Mopidy.
+
+
+Graphical clients
+=================
+
+GMPC
+----
+
+`GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
+well with Mopidy.
+
+.. image:: /_static/mpd-client-gmpc.png
+    :width: 1000
+    :height: 565
+
+GMPC may sometimes requests a lot of meta data of related albums, artists, etc.
+This takes more time with Mopidy, which needs to query Spotify for the data,
+than with a normal MPD server, which has a local cache of meta data. Thus, GMPC
+may sometimes feel frozen, but usually you just need to give it a bit of slack
+before it will catch up.
+
+
+Sonata
+------
+
+`Sonata <http://sonata.berlios.de/>`_ is a graphical MPD client (GTK+).
+It generally works well with Mopidy, except for search.
+
+.. image:: /_static/mpd-client-sonata.png
+    :width: 475
+    :height: 424
+
+When you search in Sonata, it only sends the first to letters of the search
+query to Mopidy, and then does the rest of the filtering itself on the client
+side. Since Spotify has a collection of millions of tracks and they only return
+the first 100 hits for any search query, searching for two-letter combinations
+seldom returns any useful results. See :issue:`1` and the closed `Sonata bug`_
+for details.
+
+.. _Sonata bug: http://developer.berlios.de/feature/?func=detailfeature&feature_id=5038&group_id=7323
+
+
+Theremin
+--------
+
+`Theremin <https://github.com/pweiskircher/Theremin>`_ is a graphical MPD
+client for OS X. It is unmaintained, but generally works well with Mopidy.
+
+
+.. _android_mpd_clients:
+
+Android clients
+===============
+
+We've tested all five MPD clients we could find for Android with Mopidy 0.8.1
+on a Samsung Galaxy Nexus with Android 4.1.2, using our standard test
+procedure.
+
+
+MPDroid
+-------
+
+Test date:
+    2012-11-06
+Tested version:
+    1.03.1 (released 2012-10-16)
+
+.. image:: /_static/mpd-client-mpdroid.jpg
+    :width: 288
+    :height: 512
+
+You can get `MPDroid from Google Play
+<https://play.google.com/store/apps/details?id=com.namelessdev.mpdroid>`_.
+
+- MPDroid started out as a fork of PMix, and is now much better.
+
+- MPDroid's user interface looks nice.
+
+- Everything in the test procedure works.
+
+- In contrast to all other Android clients, MPDroid does support single mode or
+  consume mode.
+
+- When Mopidy is killed, MPDroid handles it gracefully and asks if you want to
+  try to reconnect.
+
+MPDroid is a good MPD client, and really the only one we can recommend.
 
 
 BitMPC
 ------
 
 Test date:
-    2012-09-12
+    2012-11-06
 Tested version:
     1.0.0 (released 2010-04-12)
-Downloads:
-    5,000+
-Rating:
-    3.7 stars from about 100 ratings
 
+You can get `BitMPC from Google Play
+<https://play.google.com/store/apps/details?id=bitendian.bitmpc>`_.
 
 - The user interface lacks some finishing touches. E.g. you can't enter a
   hostname for the server. Only IPv4 addresses are allowed.
@@ -152,8 +185,8 @@ Rating:
   - BitMPC crashed if Mopidy was killed or crashed.
 
 - When we tried to test using Android 4.1.1, BitMPC started and connected to
-  Mopidy without problems, but the app crashed as soon as fire off our search,
-  and continued to crash on startup after that.
+  Mopidy without problems, but the app crashed as soon as we fired off our
+  search, and continued to crash on startup after that.
 
 In conclusion, BitMPC is usable if you got an older Android phone and don't
 care about looks. For newer Android versions, BitMPC will probably not work as
@@ -164,13 +197,12 @@ Droid MPD Client
 ----------------
 
 Test date:
-    2012-09-12
+    2012-11-06
 Tested version:
     1.4.0 (released 2011-12-20)
-Downloads:
-    10,000+
-Rating:
-    4.2 stars from 400+ ratings
+
+You can get `Droid MPD Client from Google Play
+<https://play.google.com/store/apps/details?id=com.soreha.droidmpdclient>`_.
 
 - No intutive way to ask the app to connect to the server after adding the
   server hostname to the settings.
@@ -187,11 +219,6 @@ Rating:
 
 - Searching for "foo" did nothing. No request was sent to the server.
 
-- Once, I managed to get a list of stored playlists in the "Search" tab, but I
-  never managed to reproduce this. Opening the stored playlists doesn't work,
-  because Mopidy haven't implemented ``lsinfo "Playlist name"`` (see
-  :issue:`193`).
-
 - Droid MPD client does not support single mode or consume mode.
 
 - Not able to complete the test procedure, due to the above problems.
@@ -199,71 +226,34 @@ Rating:
 In conclusion, not a client we can recommend.
 
 
-MPDroid
--------
-
-Test date:
-    2012-09-12
-Tested version:
-    0.7 (released 2011-06-19)
-Downloads:
-    10,000+
-Rating:
-    4.5 stars from ~500 ratings
-
-- MPDroid started out as a fork of PMix.
-
-- First of all, MPDroid's user interface looks nice.
-
-- Last time we tested MPDroid (v0.6.9), we couldn't find any search
-  functionality. Now we found it, and it worked.
-
-- Last time we tested MPDroid (v0.6.9) everything in the test procedure worked
-  out flawlessly.
-
-- Like all other Android clients, MPDroid does not support single mode or
-  consume mode.
-
-- When Mopidy is killed, MPDroid handles it gracefully and asks if you want to
-  try to reconnect.
-
-- When using Android 4.1.1, MPDroid crashes here and there, e.g. when having an
-  empty current playlist and pressing play.
-
-Disregarding Android 4.x problems, MPDroid is a good MPD client.
-
-
 PMix
 ----
 
 Test date:
-    2012-09-12
+    2012-11-06
 Tested version:
     0.4.0 (released 2010-03-06)
-Downloads:
-    10,000+
-Rating:
-    3.8 stars from >200 ratings
 
-- Using Android 4.1.1, PMix, which haven't been updated for 2.5 years, crashes
-  as soon as it connects to Mopidy.
+You can get `PMix from Google Play
+<https://play.google.com/store/apps/details?id=org.pmix.ui>`_.
 
-- Last time we tested the same version of PMix using Android 2.1, we found
-  that:
+PMix haven't been updated for 2.5 years, and has less working features than
+it's fork MPDroid. Ignore PMix and use MPDroid instead.
 
-  - PMix does not support search.
 
-  - I could not find stored playlists.
+MPD Remote
+----------
 
-  - Other than that, I was able to complete the test procedure.
+Test date:
+    2012-11-06
+Tested version:
+    1.0 (released 2012-05-01)
 
-  - PMix crashed once during testing.
+You can get `MPD Remote from Google Play
+<https://play.google.com/store/apps/details?id=fr.mildlyusefulsoftware.mpdremote>`_.
 
-  - PMix handled the killing of Mopidy just as nicely as MPDroid.
-
-  - It does not support single mode or consume mode.
-
-All in all, PMix works but can do less than MPDroid. Use MPDroid instead.
+This app looks terrible in the screen shots, got just 100+ downloads, and got a
+terrible rating. I honestly didn't take the time to test it.
 
 
 .. _ios_mpd_clients:
@@ -271,63 +261,60 @@ All in all, PMix works but can do less than MPDroid. Use MPDroid instead.
 iOS clients
 ===========
 
-MPod
+MPoD
 ----
 
 Test date:
-    2011-01-19
+    2012-11-06
 Tested version:
-    1.5.1
+    1.7.1
+
+.. image:: /_static/mpd-client-mpod.jpg
+    :width: 320
+    :height: 480
 
 The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ iPhone/iPod Touch
-app can be installed from the `iTunes Store
-<http://itunes.apple.com/us/app/mpod/id285063020>`_.
+app can be installed from `MPoD at iTunes Store
+<https://itunes.apple.com/us/app/mpod/id285063020>`_.
 
-Users have reported varying success in using MPoD together with Mopidy. Thus,
-we've tested a fresh install of MPoD 1.5.1 with Mopidy as of revision e7ed28d
-(pre-0.3) on an iPod Touch 3rd generation. The following are our findings:
+- The user interface looks nice.
 
-- **Works:** Playback control generally works, including stop, play, pause,
-  previous, next, repeat, random, seek, and volume control.
+- All features exercised in the test procedure worked with MPaD, except seek,
+  which I didn't figure out to do.
 
-- **Bug:** Search does not work, neither in the artist, album, or song
-  tabs. Mopidy gets no requests at all from MPoD when executing searches. Seems
-  like MPoD only searches in local cache, even if "Use local cache" is turned
-  off in MPoD's settings. Until this is fixed by the MPoD developer, MPoD will
-  be much less useful with Mopidy.
+- Search only works in the "Browse" tab, and not under in the "Artist",
+  "Album", or "Song" tabs. For the tabs where search doesn't work, no queries
+  are sent to Mopidy when searching.
 
-- **Bug:** When adding another playlist to the current playlist in MPoD,
-  the currently playing track restarts at the beginning. I do not currently
-  know enough about this bug, because I'm not sure if MPoD was in the "add to
-  active playlist" or "replace active playlist" mode when I tested it. I only
-  later learned what that button was for. Anyway, what I experienced was:
-
-  #. I play a track
-  #. I select a new playlist
-  #. MPoD reconnects to Mopidy for unknown reason
-  #. MPoD issues MPD command ``load "a playlist name"``
-  #. MPoD issues MPD command ``play "-1"``
-  #. MPoD issues MPD command ``playlistinfo "-1"``
-  #. I hear that the currently playing tracks restarts playback
-
-- **Tips:** MPoD seems to cache stored playlists, but they won't work if the
-  server hasn't loaded stored playlists from e.g. Spotify yet. A trick to force
-  refetching of playlists from Mopidy is to add a new empty playlist in MPoD.
-
-- **Wishlist:** Modifying the current playlists is not supported by MPoD it
-  seems.
-
-- **Wishlist:** MPoD supports playback of Last.fm radio streams through the MPD
-  server. Mopidy does not currently support this, but there is a wishlist bug
-  at :issue:`38`.
-
-- **Wishlist:** MPoD supports autodetection/-configuration of MPD servers
-  through the use of Bonjour. Mopidy does not currently support this, but there
-  is a wishlist bug at :issue:`39`.
+- Single mode and consume mode is supported.
 
 
 MPaD
 ----
 
-The `MPaD <http://www.katoemba.net/makesnosenseatall/mpad/>`_ iPad app works
-with Mopidy. A complete review may appear here in the future.
+Test date:
+    2012-11-06
+Tested version:
+    1.7.1
+
+.. image:: /_static/mpd-client-mpad.jpg
+    :width: 480
+    :height: 360
+
+The `MPaD <http://www.katoemba.net/makesnosenseatall/mpad/>`_ iPad app can be
+purchased from `MPaD at iTunes Store
+<https://itunes.apple.com/us/app/mpad/id423097706>`_
+
+- The user interface looks nice, though I would like to be able to view the
+  current playlist in the large part of the split view.
+
+- All features exercised in the test procedure worked with MPaD.
+
+- Search only works in the "Browse" tab, and not under in the "Artist",
+  "Album", or "Song" tabs. For the tabs where search doesn't work, no queries
+  are sent to Mopidy when searching.
+
+- Single mode and consume mode is supported.
+
+- The server menu can be very slow top open, and there is no visible feedback
+  when waiting for the connection to a server to succeed.

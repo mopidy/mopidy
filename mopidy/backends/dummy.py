@@ -1,34 +1,32 @@
-from pykka.actor import ThreadingActor
+"""A dummy backend for use in tests.
 
-from mopidy import core
+This backend implements the backend API in the simplest way possible.  It is
+used in tests of the frontends.
+
+The backend handles URIs starting with ``dummy:``.
+
+**Dependencies:**
+
+- None
+
+**Settings:**
+
+- None
+"""
+
+import pykka
+
 from mopidy.backends import base
 from mopidy.models import Playlist
 
 
-class DummyBackend(ThreadingActor, base.Backend):
-    """
-    A backend which implements the backend API in the simplest way possible.
-    Used in tests of the frontends.
+class DummyBackend(pykka.ThreadingActor, base.Backend):
+    def __init__(self, audio):
+        super(DummyBackend, self).__init__()
 
-    Handles URIs starting with ``dummy:``.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(DummyBackend, self).__init__(*args, **kwargs)
-
-        self.current_playlist = core.CurrentPlaylistController(backend=self)
-
-        library_provider = DummyLibraryProvider(backend=self)
-        self.library = core.LibraryController(backend=self,
-            provider=library_provider)
-
-        playback_provider = DummyPlaybackProvider(backend=self)
-        self.playback = core.PlaybackController(backend=self,
-            provider=playback_provider)
-
-        stored_playlists_provider = DummyStoredPlaylistsProvider(backend=self)
-        self.stored_playlists = core.StoredPlaylistsController(backend=self,
-            provider=stored_playlists_provider)
+        self.library = DummyLibraryProvider(backend=self)
+        self.playback = DummyPlaybackProvider(audio=audio, backend=self)
+        self.stored_playlists = DummyStoredPlaylistsProvider(backend=self)
 
         self.uri_schemes = [u'dummy']
 
@@ -56,29 +54,28 @@ class DummyLibraryProvider(base.BaseLibraryProvider):
 class DummyPlaybackProvider(base.BasePlaybackProvider):
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)
-        self._volume = None
+        self._time_position = 0
 
     def pause(self):
         return True
 
     def play(self, track):
-        """Pass None as track to force failure"""
-        return track is not None
+        """Pass a track with URI 'dummy:error' to force failure"""
+        self._time_position = 0
+        return track.uri != 'dummy:error'
 
     def resume(self):
         return True
 
     def seek(self, time_position):
+        self._time_position = time_position
         return True
 
     def stop(self):
         return True
 
-    def get_volume(self):
-        return self._volume
-
-    def set_volume(self, volume):
-        self._volume = volume
+    def get_time_position(self):
+        return self._time_position
 
 
 class DummyStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):

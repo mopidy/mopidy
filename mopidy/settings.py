@@ -7,26 +7,26 @@ All available settings and their default values.
     file called ``~/.config/mopidy/settings.py`` and redefine settings there.
 """
 
-#: List of playback backends to use. See :mod:`mopidy.backends` for all
+#: List of playback backends to use. See :ref:`backend-implementations` for all
 #: available backends.
+#:
+#: When results from multiple backends are combined, they are combined in the
+#: order the backends are listed here.
 #:
 #: Default::
 #:
-#:     BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
-#:
-#: Other typical values::
-#:
-#:     BACKENDS = (u'mopidy.backends.local.LocalBackend',)
-#:
-#: .. note::
-#:     Currently only the first backend in the list is used.
+#:     BACKENDS = (
+#:         u'mopidy.backends.local.LocalBackend',
+#:         u'mopidy.backends.spotify.SpotifyBackend',
+#:     )
 BACKENDS = (
+    u'mopidy.backends.local.LocalBackend',
     u'mopidy.backends.spotify.SpotifyBackend',
 )
 
 #: The log format used for informational logging.
 #:
-#: See http://docs.python.org/library/logging.html#formatter-objects for
+#: See http://docs.python.org/2/library/logging.html#formatter-objects for
 #: details on the format.
 CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
 
@@ -54,7 +54,8 @@ DEBUG_LOG_FILENAME = u'mopidy.log'
 #:     DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
 DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
 
-#: List of server frontends to use.
+#: List of server frontends to use. See :ref:`frontend-implementations` for
+#: available frontends.
 #:
 #: Default::
 #:
@@ -85,9 +86,8 @@ LASTFM_PASSWORD = u''
 #:
 #: Default::
 #:
-#:    # Defaults to asking glib where music is stored, fallback is ~/music
-#:    LOCAL_MUSIC_PATH = None
-LOCAL_MUSIC_PATH = None
+#:    LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
+LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
 
 #: Path to playlist folder with m3u files for local music.
 #:
@@ -95,8 +95,8 @@ LOCAL_MUSIC_PATH = None
 #:
 #: Default::
 #:
-#:    LOCAL_PLAYLIST_PATH = None # Implies $XDG_DATA_DIR/mopidy/playlists
-LOCAL_PLAYLIST_PATH = None
+#:    LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
+LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
 
 #: Path to tag cache for local music.
 #:
@@ -104,22 +104,23 @@ LOCAL_PLAYLIST_PATH = None
 #:
 #: Default::
 #:
-#:    LOCAL_TAG_CACHE_FILE = None # Implies $XDG_DATA_DIR/mopidy/tag_cache
-LOCAL_TAG_CACHE_FILE = None
+#:    LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
+LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
 
-#: Sound mixer to use.
+#: Audio mixer to use.
 #:
 #: Expects a GStreamer mixer to use, typical values are:
 #: ``alsamixer``, ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
 #:
-#: Setting this to :class:`None` turns off volume control.
+#: Setting this to :class:`None` turns off volume control. ``software``
+#: can be used to force software mixing in the application.
 #:
 #: Default::
 #:
 #:     MIXER = u'autoaudiomixer'
 MIXER = u'autoaudiomixer'
 
-#: Sound mixer track to use.
+#: Audio mixer track to use.
 #:
 #: Name of the mixer track to use. If this is not set we will try to find the
 #: master output track. As an example, using ``alsamixer`` you would
@@ -167,7 +168,11 @@ MPD_SERVER_PASSWORD = None
 #: Default: 20
 MPD_SERVER_MAX_CONNECTIONS = 20
 
-#: Output to use. See :mod:`mopidy.outputs` for all available backends
+#: Audio output to use.
+#:
+#: Expects a GStreamer sink. Typical values are ``autoaudiosink``,
+#: ``alsasink``, ``osssink``, ``oss4sink``, ``pulsesink``, and ``shout2send``,
+#: and additional arguments specific to each sink.
 #:
 #: Default::
 #:
@@ -177,7 +182,11 @@ OUTPUT = u'autoaudiosink'
 #: Path to the Spotify cache.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-SPOTIFY_CACHE_PATH = None
+#:
+#: Default::
+#:
+#:     SPOTIFY_CACHE_PATH = u'$XDG_CACHE_DIR/mopidy/spotify'
+SPOTIFY_CACHE_PATH = u'$XDG_CACHE_DIR/mopidy/spotify'
 
 #: Your Spotify Premium username.
 #:
@@ -194,7 +203,7 @@ SPOTIFY_PASSWORD = u''
 #: Available values are 96, 160, and 320.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-#
+#:
 #: Default::
 #:
 #:     SPOTIFY_BITRATE = 160

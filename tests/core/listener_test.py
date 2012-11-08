@@ -1,12 +1,12 @@
-from mopidy.listeners import BackendListener
+from mopidy.core import CoreListener, PlaybackState
 from mopidy.models import Track
 
 from tests import unittest
 
 
-class BackendListenerTest(unittest.TestCase):
+class CoreListenerTest(unittest.TestCase):
     def setUp(self):
-        self.listener = BackendListener()
+        self.listener = CoreListener()
 
     def test_listener_has_default_impl_for_track_playback_paused(self):
         self.listener.track_playback_paused(Track(), 0)
@@ -21,7 +21,8 @@ class BackendListenerTest(unittest.TestCase):
         self.listener.track_playback_ended(Track(), 0)
 
     def test_listener_has_default_impl_for_playback_state_changed(self):
-        self.listener.playback_state_changed()
+        self.listener.playback_state_changed(
+            PlaybackState.STOPPED, PlaybackState.PLAYING)
 
     def test_listener_has_default_impl_for_playlist_changed(self):
         self.listener.playlist_changed()
@@ -33,4 +34,4 @@ class BackendListenerTest(unittest.TestCase):
         self.listener.volume_changed()
 
     def test_listener_has_default_impl_for_seeked(self):
-        self.listener.seeked()
+        self.listener.seeked(0)

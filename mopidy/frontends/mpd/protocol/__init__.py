@@ -24,10 +24,12 @@ VERSION = u'0.16.0'
 
 MpdCommand = namedtuple('MpdCommand', ['name', 'auth_required'])
 
-#: List of all available commands, represented as :class:`MpdCommand` objects.
+#: Set of all available commands, represented as :class:`MpdCommand` objects.
 mpd_commands = set()
 
+#: Map between request matchers and request handler functions.
 request_handlers = {}
+
 
 def handle_request(pattern, auth_required=True):
     """
@@ -60,3 +62,15 @@ def handle_request(pattern, auth_required=True):
             pattern, func.__doc__ or '')
         return func
     return decorator
+
+
+def load_protocol_modules():
+    """
+    The protocol modules must be imported to get them registered in
+    :attr:`request_handlers` and :attr:`mpd_commands`.
+    """
+    # pylint: disable = W0612
+    from . import (  # noqa
+        audio_output, command_list, connection, current_playlist, empty,
+        music_db, playback, reflection, status, stickers, stored_playlists)
+    # pylint: enable = W0612

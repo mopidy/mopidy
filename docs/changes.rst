@@ -4,8 +4,127 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-v0.8 (in development)
-=====================
+
+v0.9.0 (in development)
+=======================
+
+**Multiple backends support**
+
+Support for using the local and Spotify backends simultaneously have for a very
+long time been our most requested feature. Finally, it's here!
+
+- Both the local backend and the Spotify backend are now turned on by default.
+  The local backend is listed first in the :attr:`mopidy.settings.BACKENDS`
+  setting, and are thus given the highest priority in e.g. search results,
+  meaning that we're listing search hits from the local backend first. If you
+  want to prioritize the backends in another way, simply set ``BACKENDS`` in
+  your own settings file and reorder the backends.
+
+  There are no other setting changes related to the local and Spotify backends.
+  As always, see :mod:`mopidy.settings` for the full list of available
+  settings.
+
+Internally, Mopidy have seen a lot of changes to pave the way for multiple
+backends:
+
+- A new layer and actor, "core", has been added to our stack, inbetween the
+  frontends and the backends. The responsibility of the core layer and actor is
+  to take requests from the frontends, pass them on to one or more backends,
+  and combining the response from the backends into a single response to the
+  requesting frontend.
+
+  Frontends no longer know anything about the backends. They just use the
+  :ref:`core-api`.
+
+- The base playback provider has been updated with sane default behavior
+  instead of empty functions. By default, the playback provider now lets
+  GStreamer keep track of the current track's time position. The local backend
+  simply uses the base playback provider without any changes. The same applies
+  to any future backend that just needs GStreamer to play an URI for it.
+
+- The dependency graph between the core controllers and the backend providers
+  have been straightened out, so that we don't have any circular dependencies.
+  The frontend, core, backend, and audio layers are now strictly separate. The
+  frontend layer calls on the core layer, and the core layer calls on the
+  backend layer. Both the core layer and the backends are allowed to call on
+  the audio layer. Any data flow in the opposite direction is done by
+  broadcasting of events to listeners, through e.g.
+  :class:`mopidy.core.CoreListener` and :class:`mopidy.audio.AudioListener`.
+
+- All dependencies are now explicitly passed to the constructors of the
+  frontends, core, and the backends. This makes testing each layer with
+  dummy/mocked lower layers easier than with the old variant, where
+  dependencies where looked up in Pykka's actor registry.
+
+- The stored playlists part of the core API has been revised to be more focused
+  around the playlist URI, and some redundant functionality has been removed:
+
+  - :attr:`mopidy.core.StoredPlaylistsController.playlists` no longer supports
+    assignment to it. The `playlists` property on the backend layer still does,
+    and all functionality is maintained by assigning to the playlists
+    collections at the backend level.
+
+  - :meth:`mopidy.core.StoredPlaylistsController.delete` now accepts an URI,
+    and not a playlist object.
+
+  - :meth:`mopidy.core.StoredPlaylistsController.save` now returns the saved
+    playlist. The returned playlist may differ from the saved playlist, and
+    should thus be used instead of the playlist passed to ``save()``.
+
+  - :meth:`mopidy.core.StoredPlaylistsController.rename` has been removed,
+    since renaming can be done with ``save()``.
+
+**Changes**
+
+- Made the :mod:`NAD mixer <mopidy.audio.mixers.nad>` responsive to interrupts
+  during amplifier calibration. It will now quit immediately, while previously
+  it completed the calibration first, and then quit, which could take more than
+  15 seconds.
+
+- Added :attr:`mopidy.models.Album.date` attribute. It has the same format as
+  the existing :attr:`mopidy.models.Track.date`.
+
+- The Spotify backend now includes release year and artist on albums.
+
+- Added support for search by filename to local backend.
+
+**Bug fixes**
+
+- :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
+  accepts unquotes playlist names if they don't contain spaces.
+
+- The MPD command ``plchanges`` always returned the entire playlist. It now
+  returns an empty response when the client has seen the latest version.
+
+
+v0.8.1 (2012-10-30)
+===================
+
+A small maintenance release to fix a bug introduced in 0.8.0 and update Mopidy
+to work with Pykka 1.0.
+
+**Dependencies**
+
+- Pykka >= 1.0 is now required.
+
+**Bug fixes**
+
+- :issue:`213`: Fix "streaming task paused, reason not-negotiated" errors
+  observed by some users on some Spotify tracks due to a change introduced in
+  0.8.0. See the issue for a patch that applies to 0.8.0.
+
+- :issue:`216`: Volume returned by the MPD command `status` contained a
+  floating point ``.0`` suffix. This bug was introduced with the large audio
+  output and mixer changes in v0.8.0 and broke the MPDroid Android client. It
+  now returns an integer again.
+
+
+v0.8.0 (2012-09-20)
+===================
+
+This release does not include any major new features. We've done a major
+cleanup of how audio outputs and audio mixers work, and on the way we've
+resolved a bunch of related issues.
 
 **Audio output and mixer changes**
 
@@ -23,7 +142,7 @@ v0.8 (in development)
   mixer that will work on your system. If this picks the wrong mixer you can of
   course override it. Setting the mixer to :class:`None` is also supported. MPD
   protocol support for volume has also been updated to return -1 when we have
-  no mixer set.
+  no mixer set. ``software`` can be used to force software mixing.
 
 - Removed the Denon hardware mixer, as it is not maintained.
 
@@ -63,14 +182,23 @@ v0.8 (in development)
 - Support tracks with only release year, and not a full release date, like e.g.
   Spotify tracks.
 
+- Default value of ``LOCAL_MUSIC_PATH`` has been updated to be
+  ``$XDG_MUSIC_DIR``, which on most systems this is set to ``$HOME``. Users of
+  local backend that relied on the old default ``~/music`` need to update their
+  settings. Note that the code responsible for finding this music now also
+  ignores UNIX hidden files and folders.
+
+- File and path settings now support ``$XDG_CACHE_DIR``, ``$XDG_DATA_DIR`` and
+  ``$XDG_MUSIC_DIR`` substitution. Defaults for such settings have been updated
+  to use this instead of hidden away defaults.
+
+- Playback is now done using ``playbin2`` from GStreamer instead of rolling our
+  own. This is the first step towards resolving :issue:`171`.
+
 **Bug fixes**
 
 - :issue:`72`: Created a Spotify track proxy that will switch to using loaded
   data as soon as it becomes available.
-
-- :issue:`162`: Fixed bug when the MPD command ``playlistinfo`` is used with a
-  track position. Track position and CPID was intermixed, so it would cause a
-  crash if a CPID matching the track position didn't exist.
 
 - :issue:`150`: Fix bug which caused some clients to block Mopidy completely.
   The bug was caused by some clients sending ``close`` and then shutting down
@@ -78,7 +206,19 @@ v0.8 (in development)
   cleanup code would wait for an response that would never come inside the
   event loop, blocking everything else.
 
+- :issue:`162`: Fixed bug when the MPD command ``playlistinfo`` is used with a
+  track position. Track position and CPID was intermixed, so it would cause a
+  crash if a CPID matching the track position didn't exist.
+
 - Fixed crash on lookup of unknown path when using local backend.
+
+- :issue:`189`: ``LOCAL_MUSIC_PATH`` and path handling in rest of settings  has
+  been updated so all of the code now uses the correct value.
+
+- Fixed incorrect track URIs generated by M3U playlist parsing code. Generated
+  tracks are now relative to ``LOCAL_MUSIC_PATH``.
+
+- :issue:`203`: Re-add support for software mixing.
 
 
 v0.7.3 (2012-08-11)
@@ -266,7 +406,7 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
 - If you use the Spotify backend, you *must* upgrade to libspotify 0.0.8 and
   pyspotify 1.3. If you install from APT, libspotify and pyspotify will
   automatically be upgraded. If you are not installing from APT, follow the
-  instructions at :doc:`/installation/libspotify/`.
+  instructions at :ref:`installation`.
 
 - If you have explicitly set the :attr:`mopidy.settings.SPOTIFY_HIGH_BITRATE`
   setting, you must update your settings file. The new setting is named
@@ -407,8 +547,7 @@ loading from Mopidy 0.3.0 is still present.
 - If you use the Spotify backend, you *should* upgrade to libspotify 0.0.7 and
   the latest pyspotify from the Mopidy developers. If you install from APT,
   libspotify and pyspotify will automatically be upgraded. If you are not
-  installing from APT, follow the instructions at
-  :doc:`/installation/libspotify/`.
+  installing from APT, follow the instructions at :ref:`installation`.
 
 
 **Changes**
@@ -520,7 +659,7 @@ to this problem.
 
 - If you use the Spotify backend, you need to upgrade to libspotify 0.0.6 and
   the latest pyspotify from the Mopidy developers. Follow the instructions at
-  :doc:`/installation/libspotify/`.
+  :ref:`installation`.
 
 - If you use the Last.fm frontend, you need to upgrade to pylast 0.5.7. Run
   ``sudo pip install --upgrade pylast`` or install Mopidy from APT.
@@ -547,7 +686,7 @@ to this problem.
 - Local backend:
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
-    any help from the original MPD server. See :ref:`generating_a_tag_cache`
+    any help from the original MPD server. See :ref:`generating-a-tag-cache`
     for instructions on how to use it.
 
   - Fix support for UTF-8 encoding in tag caches.
@@ -556,7 +695,7 @@ to this problem.
 
   - Add support for password authentication. See
     :attr:`mopidy.settings.MPD_SERVER_PASSWORD` and
-    :ref:`use_mpd_on_a_network` for details on how to use it. (Fixes:
+    :ref:`use-mpd-on-a-network` for details on how to use it. (Fixes:
     :issue:`41`)
 
   - Support ``setvol 50`` without quotes around the argument. Fixes volume
@@ -675,10 +814,10 @@ We've worked a bit on OS X support, but not all issues are completely solved
 yet. :issue:`25`  is the one that is currently blocking OS X support. Any help
 solving it will be greatly appreciated!
 
-Finally, please :ref:`update your pyspotify installation
-<pyspotify_installation>` when upgrading to Mopidy 0.2.0. The latest pyspotify
-got a fix for the segmentation fault that occurred when playing music and
-searching at the same time, thanks to Valentin David.
+Finally, please :ref:`update your pyspotify installation <installation>` when
+upgrading to Mopidy 0.2.0. The latest pyspotify got a fix for the segmentation
+fault that occurred when playing music and searching at the same time, thanks
+to Valentin David.
 
 **Important changes**
 
@@ -743,12 +882,11 @@ fixing the OS X issues for a future release. You can track the progress at
 **Important changes**
 
 - License changed from GPLv2 to Apache License, version 2.0.
-- GStreamer is now a required dependency. See our :doc:`GStreamer installation
-  docs <installation/gstreamer>`.
+- GStreamer is now a required dependency. See our :ref:`GStreamer installation
+  docs <installation>`.
 - :mod:`mopidy.backends.libspotify` is now the default backend.
   :mod:`mopidy.backends.despotify` is no longer available. This means that you
-  need to install the :doc:`dependencies for libspotify
-  <installation/libspotify>`.
+  need to install the :ref:`dependencies for libspotify <installation>`.
 - If you used :mod:`mopidy.backends.libspotify` previously, pyspotify must be
   updated when updating to this release, to get working seek functionality.
 - :attr:`mopidy.settings.SERVER_HOSTNAME` and
@@ -1003,7 +1141,7 @@ Mopidy is working and usable. 0.1.0a0 is an alpha release, which basicly means
 we will still change APIs, add features, etc. before the final 0.1.0 release.
 But the software is usable as is, so we release it. Please give it a try and
 give us feedback, either at our IRC channel or through the `issue tracker
-<http://github.com/mopidy/mopidy/issues>`_. Thanks!
+<https://github.com/mopidy/mopidy/issues>`_. Thanks!
 
 **Changes**
 

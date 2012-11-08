@@ -1,8 +1,9 @@
 import mock
+import pykka
 
-from mopidy import settings
-from mopidy.backends import dummy as backend
-from mopidy.frontends import mpd
+from mopidy import core, settings
+from mopidy.backends import dummy
+from mopidy.frontends.mpd import session
 
 from tests import unittest
 
@@ -21,15 +22,16 @@ class MockConnection(mock.Mock):
 
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
-        self.backend = backend.DummyBackend.start().proxy()
+        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.core = core.Core.start(backends=[self.backend]).proxy()
 
         self.connection = MockConnection()
-        self.session = mpd.MpdSession(self.connection)
+        self.session = session.MpdSession(self.connection, core=self.core)
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
     def tearDown(self):
-        self.backend.stop().get()
+        pykka.ActorRegistry.stop_all()
         settings.runtime.clear()
 
     def sendRequest(self, request):
@@ -42,17 +44,23 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual([], self.connection.response)
 
     def assertInResponse(self, value):
-        self.assertIn(value, self.connection.response, u'Did not find %s '
-            'in %s' % (repr(value), repr(self.connection.response)))
+        self.assertIn(
+            value, self.connection.response,
+            u'Did not find %s in %s' % (
+                repr(value), repr(self.connection.response)))
 
     def assertOnceInResponse(self, value):
         matched = len([r for r in self.connection.response if r == value])
-        self.assertEqual(1, matched, 'Expected to find %s once in %s' %
-            (repr(value), repr(self.connection.response)))
+        self.assertEqual(
+            1, matched,
+            u'Expected to find %s once in %s' % (
+                repr(value), repr(self.connection.response)))
 
     def assertNotInResponse(self, value):
-        self.assertNotIn(value, self.connection.response, u'Found %s in %s' %
-            (repr(value), repr(self.connection.response)))
+        self.assertNotIn(
+            value, self.connection.response,
+            u'Found %s in %s' % (
+                repr(value), repr(self.connection.response)))
 
     def assertEqualResponse(self, value):
         self.assertEqual(1, len(self.connection.response))

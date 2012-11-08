@@ -1,3 +1,50 @@
+"""Mixer that controls volume using a NAD amplifier.
+
+**Dependencies:**
+
+- pyserial (python-serial in Debian/Ubuntu)
+
+- The NAD amplifier must be connected to the machine running Mopidy using a
+  serial cable.
+
+**Settings:**
+
+- Set :attr:`mopidy.settings.MIXER` to ``nadmixer`` to use it. You probably
+  also needs to add some properties to the ``MIXER`` setting.
+
+Supported properties includes:
+
+``port``:
+    The serial device to use, defaults to ``/dev/ttyUSB0``. This must be
+    set correctly for the mixer to work.
+
+``source``:
+    The source that should be selected on the amplifier, like ``aux``,
+    ``disc``, ``tape``, ``tuner``, etc. Leave unset if you don't want the
+    mixer to change it for you.
+
+``speakers-a``:
+    Set to ``on`` or ``off`` if you want the mixer to make sure that
+    speaker set A is turned on or off. Leave unset if you don't want the
+    mixer to change it for you.
+
+``speakers-b``:
+    See ``speakers-a``.
+
+Configuration examples::
+
+    # Minimum configuration, if the amplifier is available at /dev/ttyUSB0
+    MIXER = u'nadmixer'
+
+    # Minimum configuration, if the amplifier is available elsewhere
+    MIXER = u'nadmixer port=/dev/ttyUSB3'
+
+    # Full configuration
+    MIXER = (
+        u'nadmixer port=/dev/ttyUSB0 '
+        u'source=aux speakers-a=on speakers-b=off')
+"""
+
 import logging
 
 import pygst
@@ -8,41 +55,41 @@ import gst
 try:
     import serial
 except ImportError:
-    serial = None
+    serial = None  # noqa
 
-from pykka.actor import ThreadingActor
+import pykka
 
-from mopidy.audio.mixers import create_track
+from . import utils
 
 
 logger = logging.getLogger('mopidy.audio.mixers.nad')
 
 
 class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
-    __gstdetails__ = ('NadMixer',
-                      'Mixer',
-                      'Mixer to control NAD amplifiers using a serial link',
-                      'Stein Magnus Jodal')
+    __gstdetails__ = (
+        'NadMixer',
+        'Mixer',
+        'Mixer to control NAD amplifiers using a serial link',
+        'Mopidy')
 
     port = gobject.property(type=str, default='/dev/ttyUSB0')
     source = gobject.property(type=str)
     speakers_a = gobject.property(type=str)
     speakers_b = gobject.property(type=str)
 
-    def __init__(self):
-        gst.Element.__init__(self)
-        self._volume_cache = 0
-        self._nad_talker = None
+    _volume_cache = 0
+    _nad_talker = None
 
     def list_tracks(self):
-        track = create_track(
+        track = utils.create_track(
             label='Master',
             initial_volume=0,
             min_volume=0,
             max_volume=100,
             num_channels=1,
-            flags=(gst.interfaces.MIXER_TRACK_MASTER |
-                 gst.interfaces.MIXER_TRACK_OUTPUT))
+            flags=(
+                gst.interfaces.MIXER_TRACK_MASTER |
+                gst.interfaces.MIXER_TRACK_OUTPUT))
         return [track]
 
     def get_volume(self, track):
@@ -74,13 +121,9 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
         ).proxy()
 
 
-gobject.type_register(NadMixer)
-gst.element_register(NadMixer, 'nadmixer', gst.RANK_MARGINAL)
-
-
-class NadTalker(ThreadingActor):
+class NadTalker(pykka.ThreadingActor):
     """
-    Independent thread which does the communication with the NAD amplifier
+    Independent thread which does the communication with the NAD amplifier.
 
     Since the communication is done in an independent thread, Mopidy won't
     block other requests while doing rather time consuming work like
@@ -121,8 +164,7 @@ class NadTalker(ThreadingActor):
         self._set_device_to_known_state()
 
     def _open_connection(self):
-        logger.info(u'NAD amplifier: Connecting through "%s"',
-            self.port)
+        logger.info(u'NAD amplifier: Connecting through "%s"', self.port)
         self._device = serial.Serial(
             port=self.port,
             baudrate=self.BAUDRATE,
@@ -137,7 +179,7 @@ class NadTalker(ThreadingActor):
         self._select_speakers()
         self._select_input_source()
         self.mute(False)
-        self._calibrate_volume()
+        self.calibrate_volume()
 
     def _get_device_model(self):
         model = self._ask_device('Main.Model')
@@ -163,14 +205,21 @@ class NadTalker(ThreadingActor):
         else:
             self._check_and_set('Main.Mute', 'Off')
 
-    def _calibrate_volume(self):
+    def calibrate_volume(self, current_nad_volume=None):
         # The NAD C 355BEE amplifier has 40 different volume levels. We have no
         # way of asking on which level we are. Thus, we must calibrate the
         # mixer by decreasing the volume 39 times.
-        logger.info(u'NAD amplifier: Calibrating by setting volume to 0')
-        self._nad_volume = self.VOLUME_LEVELS
-        self.set_volume(0)
-        logger.info(u'NAD amplifier: Done calibrating')
+        if current_nad_volume is None:
+            current_nad_volume = self.VOLUME_LEVELS
+        if current_nad_volume == self.VOLUME_LEVELS:
+            logger.info(u'NAD amplifier: Calibrating by setting volume to 0')
+        self._nad_volume = current_nad_volume
+        if self._decrease_volume():
+            current_nad_volume -= 1
+        if current_nad_volume == 0:
+            logger.info(u'NAD amplifier: Done calibrating')
+        else:
+            self.actor_ref.proxy().calibrate_volume(current_nad_volume)
 
     def set_volume(self, volume):
         # Increase or decrease the amplifier volume until it matches the given
@@ -200,11 +249,13 @@ class NadTalker(ThreadingActor):
         for attempt in range(1, 4):
             if self._ask_device(key) == value:
                 return
-            logger.info(u'NAD amplifier: Setting "%s" to "%s" (attempt %d/3)',
+            logger.info(
+                u'NAD amplifier: Setting "%s" to "%s" (attempt %d/3)',
                 key, value, attempt)
             self._command_device(key, value)
         if self._ask_device(key) != value:
-            logger.info(u'NAD amplifier: Gave up on setting "%s" to "%s"',
+            logger.info(
+                u'NAD amplifier: Gave up on setting "%s" to "%s"',
                 key, value)
 
     def _ask_device(self, key):

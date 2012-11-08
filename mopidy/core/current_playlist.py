@@ -2,23 +2,19 @@ from copy import copy
 import logging
 import random
 
-from mopidy.listeners import BackendListener
 from mopidy.models import CpTrack
+
+from . import listener
 
 
 logger = logging.getLogger('mopidy.core')
 
 
 class CurrentPlaylistController(object):
-    """
-    :param backend: backend the controller is a part of
-    :type backend: :class:`mopidy.backends.base.Backend`
-    """
-
     pykka_traversable = True
 
-    def __init__(self, backend):
-        self.backend = backend
+    def __init__(self, core):
+        self.core = core
         self.cp_id = 0
         self._cp_tracks = []
         self._version = 0
@@ -56,10 +52,10 @@ class CurrentPlaylistController(object):
         """
         return self._version
 
-    @version.setter
+    @version.setter  # noqa
     def version(self, version):
         self._version = version
-        self.backend.playback.on_current_playlist_change()
+        self.core.playback.on_current_playlist_change()
         self._trigger_playlist_changed()
 
     def add(self, track, at_position=None, increase_version=True):
@@ -71,6 +67,8 @@ class CurrentPlaylistController(object):
         :type track: :class:`mopidy.models.Track`
         :param at_position: position in current playlist to add track
         :type at_position: int or :class:`None`
+        :param increase_version: if the playlist version should be increased
+        :type increase_version: :class:`True` or :class:`False`
         :rtype: two-tuple of (CPID integer, :class:`mopidy.models.Track`) that
             was added to the current playlist playlist
         """
@@ -127,8 +125,8 @@ class CurrentPlaylistController(object):
             if key == 'cpid':
                 matches = filter(lambda ct: ct.cpid == value, matches)
             else:
-                matches = filter(lambda ct: getattr(ct.track, key) == value,
-                    matches)
+                matches = filter(
+                    lambda ct: getattr(ct.track, key) == value, matches)
         if len(matches) == 1:
             return matches[0]
         criteria_string = ', '.join(
@@ -240,4 +238,4 @@ class CurrentPlaylistController(object):
 
     def _trigger_playlist_changed(self):
         logger.debug(u'Triggering playlist changed event')
-        BackendListener.send('playlist_changed')
+        listener.CoreListener.send('playlist_changed')

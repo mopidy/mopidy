@@ -1,13 +1,14 @@
 import sys
 
 import mock
+import pykka
 
-from mopidy import OptionalDependencyError, settings
-from mopidy.backends.dummy import DummyBackend
+from mopidy import core, exceptions, settings
+from mopidy.backends import dummy
 
 try:
     from mopidy.frontends.mpris import objects
-except OptionalDependencyError:
+except exceptions.OptionalDependencyError:
     pass
 
 from tests import unittest
@@ -18,11 +19,12 @@ class RootInterfaceTest(unittest.TestCase):
     def setUp(self):
         objects.exit_process = mock.Mock()
         objects.MprisObject._connect_to_dbus = mock.Mock()
-        self.backend = DummyBackend.start().proxy()
-        self.mpris = objects.MprisObject()
+        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.core = core.Core.start(backends=[self.backend]).proxy()
+        self.mpris = objects.MprisObject(core=self.core)
 
     def tearDown(self):
-        self.backend.stop()
+        pykka.ActorRegistry.stop_all()
 
     def test_constructor_connects_to_dbus(self):
         self.assert_(self.mpris._connect_to_dbus.called)

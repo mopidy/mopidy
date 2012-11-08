@@ -9,10 +9,12 @@ import os
 import re
 import sys
 
+
 def get_version():
     init_py = open('mopidy/__init__.py').read()
     metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", init_py))
     return metadata['version']
+
 
 class osx_install_data(install_data):
     # On MacOS, the platform-specific lib dir is
@@ -28,10 +30,12 @@ class osx_install_data(install_data):
         self.set_undefined_options('install', ('install_lib', 'install_dir'))
         install_data.finalize_options(self)
 
+
 if sys.platform == "darwin":
     cmdclasses = {'install_data': osx_install_data}
 else:
     cmdclasses = {'install_data': install_data}
+
 
 def fullsplit(path, result=None):
     """
@@ -47,12 +51,14 @@ def fullsplit(path, result=None):
         return result
     return fullsplit(head, [tail] + result)
 
+
 # Tell distutils to put the data_files in platform-specific installation
 # locations. See here for an explanation:
 # http://groups.google.com/group/comp.lang.python/browse_thread/
 # thread/35ec7b2fed36eaec/2105ee4d9e8042cb
 for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
+
 
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
@@ -62,6 +68,7 @@ if root_dir != '':
     os.chdir(root_dir)
 project_dir = 'mopidy'
 
+
 for dirpath, dirnames, filenames in os.walk(project_dir):
     # Ignore dirnames that start with '.'
     for i, dirname in enumerate(dirnames):
@@ -70,8 +77,9 @@ for dirpath, dirnames, filenames in os.walk(project_dir):
     if '__init__.py' in filenames:
         packages.append('.'.join(fullsplit(dirpath)))
     elif filenames:
-        data_files.append([dirpath,
-            [os.path.join(dirpath, f) for f in filenames]])
+        data_files.append([
+            dirpath, [os.path.join(dirpath, f) for f in filenames]])
+
 
 setup(
     name='Mopidy',

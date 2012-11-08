@@ -1,23 +1,15 @@
 import logging
 import re
 
-from pykka import ActorDeadError
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy import settings
-from mopidy.backends.base import Backend
-from mopidy.frontends.mpd import exceptions
-from mopidy.frontends.mpd.protocol import mpd_commands, request_handlers
-# Do not remove the following import. The protocol modules must be imported to
-# get them registered as request handlers.
-# pylint: disable = W0611
-from mopidy.frontends.mpd.protocol import (audio_output, command_list,
-    connection, current_playlist, empty, music_db, playback, reflection,
-    status, stickers, stored_playlists)
-# pylint: enable = W0611
-from mopidy.utils import flatten
+from mopidy.frontends.mpd import exceptions, protocol
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
+
+protocol.load_protocol_modules()
+
 
 class MpdDispatcher(object):
     """
@@ -28,12 +20,13 @@ class MpdDispatcher(object):
 
     _noidle = re.compile(r'^noidle$')
 
-    def __init__(self, session=None):
+    def __init__(self, session=None, core=None):
         self.authenticated = False
-        self.command_list = False
+        self.command_list_receiving = False
         self.command_list_ok = False
+        self.command_list = []
         self.command_list_index = None
-        self.context = MpdContext(self, session=session)
+        self.context = MpdContext(self, session=session, core=core)
 
     def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -72,7 +65,6 @@ class MpdDispatcher(object):
         else:
             return response
 
-
     ### Filter: catch MPD ACK errors
 
     def _catch_mpd_ack_errors_filter(self, request, response, filter_chain):
@@ -82,7 +74,6 @@ class MpdDispatcher(object):
             if self.command_list_index is not None:
                 mpd_ack_error.index = self.command_list_index
             return [mpd_ack_error.get_mpd_ack()]
-
 
     ### Filter: authenticate
 
@@ -95,13 +86,12 @@ class MpdDispatcher(object):
         else:
             command_name = request.split(' ')[0]
             command_names_not_requiring_auth = [
-                command.name for command in mpd_commands
+                command.name for command in protocol.mpd_commands
                 if not command.auth_required]
             if command_name in command_names_not_requiring_auth:
                 return self._call_next_filter(request, response, filter_chain)
             else:
                 raise exceptions.MpdPermissionError(command=command_name)
-
 
     ### Filter: command list
 
@@ -118,25 +108,26 @@ class MpdDispatcher(object):
             return response
 
     def _is_receiving_command_list(self, request):
-        return (self.command_list is not False
-            and request != u'command_list_end')
+        return (
+            self.command_list_receiving and request != u'command_list_end')
 
     def _is_processing_command_list(self, request):
-        return (self.command_list_index is not None
-            and request != u'command_list_end')
-
+        return (
+            self.command_list_index is not None and
+            request != u'command_list_end')
 
     ### Filter: idle
 
     def _idle_filter(self, request, response, filter_chain):
         if self._is_currently_idle() and not self._noidle.match(request):
-            logger.debug(u'Client sent us %s, only %s is allowed while in '
-                'the idle state', repr(request), repr(u'noidle'))
+            logger.debug(
+                u'Client sent us %s, only %s is allowed while in '
+                u'the idle state', repr(request), repr(u'noidle'))
             self.context.session.close()
             return []
 
         if not self._is_currently_idle() and self._noidle.match(request):
-            return [] # noidle was called before idle
+            return []  # noidle was called before idle
 
         response = self._call_next_filter(request, response, filter_chain)
 
@@ -147,7 +138,6 @@ class MpdDispatcher(object):
 
     def _is_currently_idle(self):
         return bool(self.context.subscriptions)
-
 
     ### Filter: add OK
 
@@ -160,14 +150,13 @@ class MpdDispatcher(object):
     def _has_error(self, response):
         return response and response[-1].startswith(u'ACK')
 
-
     ### Filter: call handler
 
     def _call_handler_filter(self, request, response, filter_chain):
         try:
             response = self._format_response(self._call_handler(request))
             return self._call_next_filter(request, response, filter_chain)
-        except ActorDeadError as e:
+        except pykka.ActorDeadError as e:
             logger.warning(u'Tried to communicate with dead actor.')
             raise exceptions.MpdSystemError(e)
 
@@ -176,14 +165,15 @@ class MpdDispatcher(object):
         return handler(self.context, **kwargs)
 
     def _find_handler(self, request):
-        for pattern in request_handlers:
+        for pattern in protocol.request_handlers:
             matches = re.match(pattern, request)
             if matches is not None:
-                return (request_handlers[pattern], matches.groupdict())
+                return (
+                    protocol.request_handlers[pattern], matches.groupdict())
         command_name = request.split(' ')[0]
-        if command_name in [command.name for command in mpd_commands]:
-            raise exceptions.MpdArgError(u'incorrect arguments',
-                command=command_name)
+        if command_name in [command.name for command in protocol.mpd_commands]:
+            raise exceptions.MpdArgError(
+                u'incorrect arguments', command=command_name)
         raise exceptions.MpdUnknownCommand(command=command_name)
 
     def _format_response(self, response):
@@ -196,10 +186,19 @@ class MpdDispatcher(object):
         if result is None:
             return []
         if isinstance(result, set):
-            return flatten(list(result))
+            return self._flatten(list(result))
         if not isinstance(result, list):
             return [result]
-        return flatten(result)
+        return self._flatten(result)
+
+    def _flatten(self, the_list):
+        result = []
+        for element in the_list:
+            if isinstance(element, list):
+                result.extend(self._flatten(element))
+            else:
+                result.append(element)
+        return result
 
     def _format_lines(self, line):
         if isinstance(line, dict):
@@ -222,27 +221,18 @@ class MpdContext(object):
     #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
+    #: The Mopidy core API. An instance of :class:`mopidy.core.Core`.
+    core = None
+
     #: The active subsystems that have pending events.
     events = None
 
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    def __init__(self, dispatcher, session=None):
+    def __init__(self, dispatcher, session=None, core=None):
         self.dispatcher = dispatcher
         self.session = session
+        self.core = core
         self.events = set()
         self.subscriptions = set()
-        self._backend = None
-
-    @property
-    def backend(self):
-        """
-        The backend. An instance of :class:`mopidy.backends.base.Backend`.
-        """
-        if self._backend is None:
-            backend_refs = ActorRegistry.get_by_class(Backend)
-            assert len(backend_refs) == 1, \
-                'Expected exactly one running backend.'
-            self._backend = backend_refs[0].proxy()
-        return self._backend
