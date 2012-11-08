@@ -315,7 +315,7 @@ class PlaybackController(object):
     def on_end_of_stream(self):
         self._trigger_track_playback_ended()
         self.state = PlaybackState.STOPPED
-        self.current_cp_track = None
+        self.current_tl_track = None
 
     def on_end_of_track(self):
         """
@@ -329,8 +329,10 @@ class PlaybackController(object):
         original_tl_track = self.current_tl_track
 
         if self.tl_track_at_eot:
+            self.current_tl_track = self.tl_track_at_eot
             self._trigger_track_playback_ended()
-            self.play(self.tl_track_at_eot)
+            self._get_backend().playback.change_track(self.current_track)
+            self._trigger_track_playback_started()
 
         if self.consume:
             self.core.tracklist.remove(tlid=original_tl_track.tlid)

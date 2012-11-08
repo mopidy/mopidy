@@ -77,6 +77,13 @@ class Audio(pykka.ThreadingActor):
     def _on_about_to_finish(self, element):
         self._appsrc = None
 
+        # TODO: this is just a horrible hack to get us started. the
+        # comunication is correct, but this way of hooking it up is not.
+        from mopidy.core import Core
+        logger.debug(u'Triggering reached end of track event')
+        core = pykka.ActorRegistry.get_by_class(Core)[0].proxy()
+        core.playback.on_end_of_track().get()
+
     def _on_new_source(self, element, pad):
         source = element.get_property('source')
 
