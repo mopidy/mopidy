@@ -12,20 +12,20 @@ except ImportError as import_error:
     raise exceptions.OptionalDependencyError(import_error)
 
 
-logger = logging.getLogger('mopidy.frontends.cherrypyhttp')
+logger = logging.getLogger('mopidy.frontends.http')
 
 
-class CherryPyHttpFrontend(pykka.ThreadingActor):
+class HttpFrontend(pykka.ThreadingActor):
     def __init__(self, core):
-        super(CherryPyHttpFrontend, self).__init__()
+        super(HttpFrontend, self).__init__()
         self.core = core
 
     def on_start(self):
-        logger.debug(u'Starting CherryPy HTTP server')
+        logger.debug(u'Starting HTTP server')
         cherrypy.tree.mount(Root(self.core), '/', {})
         cherrypy.server.socket_port = 6680
         cherrypy.server.start()
-        logger.info(u'CherryPy HTTP server running at %s',
+        logger.info(u'HTTP server running at %s',
             cherrypy.server.base())
 
     def on_stop(self):
