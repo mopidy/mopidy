@@ -287,12 +287,12 @@ if you for instance want to test Spotify without any actual audio output.
 Debugging deadlocks
 ===================
 
-Between the numerous pykka threads and gstreamer interactions there can
+Between the numerous Pykka threads and GStreamer interactions there can
 sometimes be a potential for deadlocks. In an effort to make these slightly
-simpler to debug ``settings.DEBUG_THREAD`` or ``--debug-thread``
-can be used to turn on an extra debug thread. This thread is not linked to
-the regular program flow, and it's only task is to dump traceback showing
-the other threads state when we get a ``SIGUSR1``.
+simpler to debug the setting :attr:`mopidy.settings.DEBUG_THREAD` or the option
+``--debug-thread`` can be used to turn on an extra debug thread. This thread is
+not linked to the regular program flow, and it's only task is to dump traceback
+showing the other threads state when we get a ``SIGUSR1``.
 
 
 Writing documentation
