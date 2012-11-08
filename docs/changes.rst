@@ -88,7 +88,7 @@ backends:
 
 - Added support for search by filename to local backend.
 
-- Added optional background thread for debuging deadlocks. When the feature is
+- Added optional background thread for debugging deadlocks. When the feature is
   enabled via the ``--debug-thread`` or ``settings.DEBUG_THREAD`` a ``SIGUSR1``
   signal will dump the traceback for all running threads.
 
