@@ -23,7 +23,16 @@ class HttpFrontend(pykka.ThreadingActor):
             'server.socket_host': settings.HTTP_SERVER_HOSTNAME,
             'server.socket_port': settings.HTTP_SERVER_PORT,
         })
-        cherrypy.tree.mount(Root(self.core), '/')
+        app = cherrypy.tree.mount(Root(self.core), '/')
+        self._setup_logging(app)
+
+    def _setup_logging(self, app):
+        cherrypy.log.access_log.setLevel(logging.NOTSET)
+        cherrypy.log.error_log.setLevel(logging.NOTSET)
+        cherrypy.log.screen = False
+
+        app.log.access_log.setLevel(logging.NOTSET)
+        app.log.error_log.setLevel(logging.NOTSET)
 
     def on_start(self):
         logger.debug(u'Starting HTTP server')
