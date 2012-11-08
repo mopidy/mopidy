@@ -78,8 +78,9 @@ class Audio(pykka.ThreadingActor):
         self._appsrc = None
 
     def _on_new_source(self, element, pad):
-        uri = element.get_property('uri')
-        if not uri or not uri.startswith('appsrc://'):
+        source = element.get_property('source')
+
+        if source.get_factory().get_name() != 'appsrc':
             return
 
         # These caps matches the audio data provided by libspotify
@@ -87,7 +88,6 @@ class Audio(pykka.ThreadingActor):
             b'audio/x-raw-int, endianness=(int)1234, channels=(int)2, '
             b'width=(int)16, depth=(int)16, signed=(boolean)true, '
             b'rate=(int)44100')
-        source = element.get_property('source')
         source.set_property('caps', default_caps)
         # GStreamer does not like unicode
         source.set_property('format', b'time')
