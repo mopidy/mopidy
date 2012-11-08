@@ -45,6 +45,14 @@ DEBUG_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
 #:     DEBUG_LOG_FILENAME = u'mopidy.log'
 DEBUG_LOG_FILENAME = u'mopidy.log'
 
+#: If we should start a background thread that dumps thread's traceback when we
+#: get a SIGUSR1. Mainly a debug tool for figuring out deadlocks.
+#:
+#: Default::
+#: 
+#:     DEBUG_THREAD = False
+DEBUG_THREAD = False
+
 #: Location of the Mopidy .desktop file.
 #:
 #: Used by :mod:`mopidy.frontends.mpris`.

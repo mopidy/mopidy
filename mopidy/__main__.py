@@ -40,14 +40,16 @@ logger = logging.getLogger('mopidy.main')
 
 
 def main():
-    debug_thread = process.DebugThread()
-    debug_thread.start()
-
-    signal.signal(signal.SIGUSR1, debug_thread.handler)
     signal.signal(signal.SIGTERM, process.exit_handler)
 
     loop = gobject.MainLoop()
     options = parse_options()
+
+    if options.debug_thread or settings.DEBUG_THREAD:
+        debug_thread = process.DebugThread()
+        debug_thread.start()
+        signal.signal(signal.SIGUSR1, debug_thread.handler)
+
     try:
         log.setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
@@ -104,6 +106,10 @@ def parse_options():
         '--list-deps',
         action='callback', callback=deps.list_deps_optparse_callback,
         help='list dependencies and their versions')
+    parser.add_option(
+        '--debug-thread',
+        action='store_true', dest='debug_thread',
+        help='run background thread that dumps tracebacks on SIGUSR1')
     return parser.parse_args(args=mopidy_args)[0]
 
 
