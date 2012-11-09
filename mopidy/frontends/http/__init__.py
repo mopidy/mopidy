@@ -37,12 +37,12 @@ class HttpFrontend(pykka.ThreadingActor):
 
     def on_start(self):
         logger.debug(u'Starting HTTP server')
-        cherrypy.server.start()
+        cherrypy.engine.start()
         logger.info(u'HTTP server running at %s',
             cherrypy.server.base())
 
     def on_stop(self):
-        cherrypy.server.stop()
+        cherrypy.engine.stop()
 
 
 class Root(object):
