@@ -14,7 +14,7 @@ try:
 except ImportError as import_error:
     raise exceptions.OptionalDependencyError(import_error)
 
-from . import ws
+from . import api, ws
 
 
 logger = logging.getLogger('mopidy.frontends.http')
@@ -42,14 +42,16 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         cherrypy.tools.websocket = WebSocketTool()
 
     def _create_app(self):
-        root = Root(self.core)
+        root = RootResource()
+        root.api = api.ApiResource(self.core)
         root.ws = ws.WebSocketResource()
-        return cherrypy.tree.mount(root, '/', {
+        config = {
             '/ws': {
                 'tools.websocket.on': True,
                 'tools.websocket.handler_cls': ws.WebSocketHandler,
             },
-        })
+        }
+        return cherrypy.tree.mount(root, '/', config)
 
     def _setup_logging(self, app):
         cherrypy.log.access_log.setLevel(logging.NOTSET)
@@ -75,18 +77,5 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 old_state, new_state)))
 
 
-class Root(object):
-    def __init__(self, core):
-        self.core = core
-
-    @cherrypy.expose
-    @cherrypy.tools.json_out()
-    def index(self):
-        playback_state = self.core.playback.state.get()
-        track = self.core.playback.current_track.get()
-        if track:
-            track = track.serialize()
-        return {
-            'playback_state': playback_state,
-            'current_track': track,
-        }
+class RootResource(object):
+    pass
