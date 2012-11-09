@@ -20,6 +20,7 @@ class HttpFrontend(pykka.ThreadingActor):
         super(HttpFrontend, self).__init__()
         self.core = core
         cherrypy.config.update({
+            'engine.autoreload_on': False,
             'server.socket_host':
                 settings.HTTP_SERVER_HOSTNAME.encode('utf-8'),
             'server.socket_port': settings.HTTP_SERVER_PORT,
