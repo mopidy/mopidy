@@ -13,18 +13,22 @@ Frontend which lets you control Mopidy through HTTP and WebSockets.
 
 - :attr:`mopidy.settings.HTTP_SERVER_PORT`
 
+- :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR`
+
 **Usage**
 
 When this frontend is included in :attr:`mopidy.settings.FRONTENDS`, it starts
 a web server at the port specified by :attr:`mopidy.settings.HTTP_SERVER_PORT`.
+
 This web server exposes both a REST web service at the URL ``/api``, and a
-WebSocket at ``/ws``.
+WebSocket at ``/ws``. The REST API gives you access to most Mopidy
+functionality, while the WebSocket enables Mopidy to instantly push events to
+the client, as they happen.
 
-The REST API gives you access to most Mopidy functionality, while the WebSocket
-enables Mopidy to instantly push events to the client, as they happen.
-
-It is also the intention that the frontend should be able to host static files
-for any external JavaScript client. This has currently not been implemented.
+The web server can also host any static files, for example the HTML, CSS,
+JavaScript and images needed by a web based Mopidy client. To host static
+files, change :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point to the
+directory you want to serve.
 
 **API stability**
 

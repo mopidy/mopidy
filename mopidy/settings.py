@@ -49,7 +49,7 @@ DEBUG_LOG_FILENAME = u'mopidy.log'
 #: get a SIGUSR1. Mainly a debug tool for figuring out deadlocks.
 #:
 #: Default::
-#: 
+#:
 #:     DEBUG_THREAD = False
 DEBUG_THREAD = False
 
@@ -100,6 +100,16 @@ HTTP_SERVER_HOSTNAME = u'127.0.0.1'
 #:
 #: Default: 6680
 HTTP_SERVER_PORT = 6680
+
+#: Which directory Mopidy's HTTP server should serve at /.
+#:
+#: Change this to have Mopidy serve e.g. files for your JavaScript client.
+#: /api and /ws will continue to work as usual even if you change this setting.
+#:
+#: Used by :mod:`mopidy.frontends.http`.
+#:
+#: Default: None
+HTTP_SERVER_STATIC_DIR = None
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
 #:
