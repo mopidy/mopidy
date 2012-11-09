@@ -7,12 +7,13 @@ except ImportError as import_error:
 
 
 class ApiResource(object):
+    exposed = True
+
     def __init__(self, core):
         self.core = core
 
-    @cherrypy.expose
     @cherrypy.tools.json_out()
-    def index(self):
+    def GET(self):
         playback_state = self.core.playback.state.get()
         track = self.core.playback.current_track.get()
         if track:

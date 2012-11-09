@@ -57,6 +57,9 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 'tools.staticdir.index': 'index.html',
                 'tools.staticdir.dir': static_dir,
             },
+            '/api': {
+                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            },
             '/ws': {
                 'tools.websocket.on': True,
                 'tools.websocket.handler_cls': ws.WebSocketHandler,
