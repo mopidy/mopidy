@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Mopidy HTTP frontend</title>
+    <style type="text/css">
+      html {
+        background: #e8ecef;
+        color: #555;
+        font-family: "Droid Serif", Georgia, "Times New Roman", Palatino,
+          "Hoefler Text", Baskerville, serif;;
+        font-size: 150%;
+        line-height: 1.4em;
+      }
+      body {
+        max-width: 20em;
+        margin: 0 auto;
+      }
+      h1, h2, h3 {
+        font-family: Ubuntu, Arial, Helvetica, "Lucida Grande",
+          Verdana, "Gill Sans", sans-serif;
+        line-height: 1.1em;
+      }
+      a {
+        text-decoration: none;
+        border-bottom: 1px dotted;
+      }
+      pre {
+        background: #e8ecef;
+        color: #555;
+        font-size: 10pt;
+        line-height: 1.2em;
+        overflow: auto;
+        padding: 0.5em 1em;
+      }
+      .box {
+        background: white;
+        border-radius: 5px;
+        box-shadow: 5px 5px 5px #d8dcdf;
+        margin: 2em 0;
+        padding: 1em;
+      }
+      .box a {
+        color: #465158;
+      }
+      .box a:hover {
+        opacity: 0.8;
+      }
+      .box.focus {
+        background: #465158;
+        color: #e8ecef;
+      }
+      .box.focus a {
+        color: #e8ecef;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box focus">
+      <h1>Mopidy HTTP&nbsp;frontend</h1>
+
+      <p>This web server is a part of the music server Mopidy. To learn more
+      about Mopidy, please visit <a
+        href="http://www.mopidy.com/">www.mopidy.com</a>.</p>
+    </div>
+
+    <div class="box">
+      <h2>Static content serving</h2>
+
+      <p>To see your own content here, change the setting
+      <tt>HTTP_SERVER_STATIC_DIR</tt> to point to the directory containing your
+      content. This can be used to host a web based Mopidy client here.</p>
+
+      <p>Even if you host your own content on the root of the web server,
+      you'll always have the following services available.</p>
+    </div>
+
+    <div class="box">
+      <h2>Web service</h2>
+
+      <p>Mopidy makes it's API available for use over HTTP at
+      <a href="/api/">/api/</a>. The service tries to be RESTful. It serves and
+      eats JSON data.</p>
+    </div>
+
+    <div class="box">
+      <h2>WebSocket endpoint</h2>
+
+      <p>Mopidy has a WebSocket endpoint at <a href="/ws/">/ws/</a>. You can
+      use WebSockets to get notified about events happening in Mopidy. The
+      alternative would be to regularly poll the conventional web service for
+      updates.</p>
+
+      <p>To connect to the endpoint from a browser with WebSocket support,
+      simply enter the following JavaScript code in the browser's console:</p>
+
+      <pre>var ws = new WebSocket("ws://myhost:myport/ws/');
+ws.onmessage = function (event) {
+  console.log("Incoming message: ", event.data);
+};
+ws.send("Message to the server, ahoy!");</pre>
+    </div>
+
+    <div class="box focus">
+      <h2>Documentation</h2>
+
+      <p>For more information, please refer to the Mopidy documentation at
+      <a href="http://docs.mopidy.com/">docs.mopidy.com</a>.</p>
+    </div>
+  </body>
+</html>

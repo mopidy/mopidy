@@ -1,4 +1,5 @@
 import logging
+import os
 
 import pykka
 
@@ -44,21 +45,23 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         root.api = api.ApiResource(self.core)
         root.ws = ws.WebSocketResource()
 
+        if settings.HTTP_SERVER_STATIC_DIR:
+            static_dir = settings.HTTP_SERVER_STATIC_DIR
+        else:
+            static_dir = os.path.dirname(__file__)
+        logger.debug(u'HTTP server will serve "%s" at /', static_dir)
+
         config = {
+            '/': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.index': 'index.html',
+                'tools.staticdir.dir': static_dir,
+            },
             '/ws': {
                 'tools.websocket.on': True,
                 'tools.websocket.handler_cls': ws.WebSocketHandler,
             },
         }
-
-        if settings.HTTP_SERVER_STATIC_DIR:
-            logger.debug(u'HTTP server will serve "%s" at /',
-                settings.HTTP_SERVER_STATIC_DIR)
-            config['/'] = {
-                'tools.staticdir.on': True,
-                'tools.staticdir.index': 'index.html',
-                'tools.staticdir.dir': settings.HTTP_SERVER_STATIC_DIR,
-            }
 
         return cherrypy.tree.mount(root, '/', config)
 
