@@ -63,7 +63,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
     def on_stop(self):
         logger.debug(u'Stopping HTTP server')
-        cherrypy.engine.stop()
+        cherrypy.engine.exit()
         logger.info(u'Stopped HTTP server')
 
     def playback_state_changed(self, old_state, new_state):
