@@ -7,8 +7,8 @@ from mopidy.core import CoreListener
 
 try:
     import cherrypy
-    from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
     from ws4py.messaging import TextMessage
+    from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 except ImportError as import_error:
     raise exceptions.OptionalDependencyError(import_error)
 

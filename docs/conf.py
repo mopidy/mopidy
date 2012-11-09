@@ -37,6 +37,7 @@ class Mock(object):
 
 
 MOCK_MODULES = [
+    'cherrypy',
     'dbus',
     'dbus.mainloop',
     'dbus.mainloop.glib',
@@ -51,6 +52,11 @@ MOCK_MODULES = [
     'pykka.registry',
     'pylast',
     'serial',
+    'ws4py',
+    'ws4py.messaging',
+    'ws4py.server',
+    'ws4py.server.cherrypyserver',
+    'ws4py.websocket',
 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
