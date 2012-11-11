@@ -153,7 +153,7 @@ plugins, ending in a summary line::
 
 Next, you should be able to produce a audible tone by running::
 
-    gst-launch-0.10 audiotestsrc ! sudioresample ! autoaudiosink
+    gst-launch-0.10 audiotestsrc ! audioresample ! autoaudiosink
 
 If you cannot hear any sound when running this command, you won't hear any
 sound from Mopidy either, as Mopidy by default uses GStreamer's
