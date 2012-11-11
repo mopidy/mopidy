@@ -8,7 +8,7 @@
         background: #e8ecef;
         color: #555;
         font-family: "Droid Serif", Georgia, "Times New Roman", Palatino,
-          "Hoefler Text", Baskerville, serif;;
+          "Hoefler Text", Baskerville, serif;
         font-size: 150%;
         line-height: 1.4em;
       }
@@ -52,6 +52,10 @@
       }
       .box.focus a {
         color: #e8ecef;
+      }
+      #ws-console {
+        height: 200px;
+        overflow: auto;
       }
     </style>
   </head>
@@ -99,6 +103,10 @@ ws.onmessage = function (event) {
   console.log("Incoming message: ", event.data);
 };
 ws.send("Message to the server, ahoy!");</pre>
+
+      <p>Here you can see events arriving from Mopidy in real time:</p>
+
+      <pre id="ws-console"></pre>
     </div>
 
     <div class="box focus">
@@ -107,5 +115,16 @@ ws.send("Message to the server, ahoy!");</pre>
       <p>For more information, please refer to the Mopidy documentation at
       <a href="http://docs.mopidy.com/">docs.mopidy.com</a>.</p>
     </div>
+    <script type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+    </script>
+    <script type="text/javascript">
+      $(function () {
+        var ws = new WebSocket("ws://" + document.location.host + "/ws/");
+        ws.onmessage = function (event) {
+          $("#ws-console").prepend((new Date()).toLocaleTimeString() + ": " + event.data + "\n");
+        };
+      });
+    </script>
   </body>
 </html>
