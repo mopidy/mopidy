@@ -18,7 +18,8 @@ class StoredPlaylistsController(object):
 
         Read-only. List of :class:`mopidy.models.Playlist`.
         """
-        futures = [b.stored_playlists.playlists for b in self.backends]
+        futures = [b.stored_playlists.playlists
+            for b in self.backends.with_stored_playlists]
         results = pykka.get_all(futures)
         return list(itertools.chain(*results))
 
@@ -40,10 +41,10 @@ class StoredPlaylistsController(object):
         :type uri_scheme: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        if uri_scheme in self.backends.by_uri_scheme:
+        if uri_scheme in self.backends.with_stored_playlists_by_uri_scheme:
             backend = self.backends.by_uri_scheme[uri_scheme]
         else:
-            backend = self.backends[0]
+            backend = self.backends.with_stored_playlists[0]
         return backend.stored_playlists.create(name).get()
 
     def delete(self, uri):
@@ -57,8 +58,9 @@ class StoredPlaylistsController(object):
         :type uri: string
         """
         uri_scheme = urlparse.urlparse(uri).scheme
-        if uri_scheme in self.backends.by_uri_scheme:
-            backend = self.backends.by_uri_scheme[uri_scheme]
+        backend = self.backends.with_stored_playlists_by_uri_scheme.get(
+            uri_scheme, None)
+        if backend:
             backend.stored_playlists.delete(uri).get()
 
     def get(self, **criteria):
@@ -101,7 +103,8 @@ class StoredPlaylistsController(object):
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         uri_scheme = urlparse.urlparse(uri).scheme
-        backend = self.backends.by_uri_scheme.get(uri_scheme, None)
+        backend = self.backends.with_stored_playlists_by_uri_scheme.get(
+            uri_scheme, None)
         if backend:
             return backend.stored_playlists.lookup(uri).get()
         else:
@@ -120,11 +123,13 @@ class StoredPlaylistsController(object):
         :type uri_scheme: string
         """
         if uri_scheme is None:
-            futures = [b.stored_playlists.refresh() for b in self.backends]
+            futures = [b.stored_playlists.refresh()
+                for b in self.backends.with_stored_playlists]
             pykka.get_all(futures)
         else:
-            if uri_scheme in self.backends.by_uri_scheme:
-                backend = self.backends.by_uri_scheme[uri_scheme]
+            backend = self.backends.with_stored_playlists_by_uri_scheme.get(
+                uri_scheme, None)
+            if backend:
                 backend.stored_playlists.refresh().get()
 
     def save(self, playlist):
@@ -152,7 +157,7 @@ class StoredPlaylistsController(object):
         if playlist.uri is None:
             return
         uri_scheme = urlparse.urlparse(playlist.uri).scheme
-        if uri_scheme not in self.backends.by_uri_scheme:
-            return
-        backend = self.backends.by_uri_scheme[uri_scheme]
-        return backend.stored_playlists.save(playlist).get()
+        backend = self.backends.with_stored_playlists_by_uri_scheme.get(
+            uri_scheme, None)
+        if backend:
+            return backend.stored_playlists.save(playlist).get()
