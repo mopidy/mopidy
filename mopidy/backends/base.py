@@ -9,19 +9,35 @@ class Backend(object):
     audio = None
 
     #: The library provider. An instance of
-    # :class:`mopidy.backends.base.BaseLibraryProvider`.
+    #: :class:`mopidy.backends.base.BaseLibraryProvider`, or :class:`None` if
+    #: the backend doesn't provide a library.
     library = None
 
     #: The playback provider. An instance of
-    #: :class:`mopidy.backends.base.BasePlaybackProvider`.
+    #: :class:`mopidy.backends.base.BasePlaybackProvider`, or :class:`None` if
+    #: the backend doesn't provide playback.
     playback = None
 
     #: The stored playlists provider. An instance of
-    #: :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`.
+    #: :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`, or
+    #: class:`None` if the backend doesn't provide stored playlists.
     stored_playlists = None
 
     #: List of URI schemes this backend can handle.
     uri_schemes = []
+
+    # Because the providers is marked as pykka_traversible, we can't get() them
+    # from another actor, and need helper methods to check if the providers are
+    # set or None.
+
+    def has_library(self):
+        return self.library is not None
+
+    def has_playback(self):
+        return self.playback is not None
+
+    def has_stored_playlists(self):
+        return self.stored_playlists is not None
 
 
 class BaseLibraryProvider(object):
