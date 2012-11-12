@@ -90,7 +90,7 @@ class PlaybackController(object):
             return None
         uri = self.current_cp_track.track.uri
         uri_scheme = urlparse.urlparse(uri).scheme
-        return self.backends.by_uri_scheme[uri_scheme]
+        return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
 
     def _get_cpid(self, cp_track):
         if cp_track is None:
@@ -298,9 +298,10 @@ class PlaybackController(object):
     def time_position(self):
         """Time position in milliseconds."""
         backend = self._get_backend()
-        if backend is None:
+        if backend:
+            return backend.playback.get_time_position().get()
+        else:
             return 0
-        return backend.playback.get_time_position().get()
 
     @property
     def volume(self):
@@ -387,7 +388,7 @@ class PlaybackController(object):
     def pause(self):
         """Pause playback."""
         backend = self._get_backend()
-        if backend is None or backend.playback.pause().get():
+        if not backend or backend.playback.pause().get():
             self.state = PlaybackState.PAUSED
             self._trigger_track_playback_paused()
 
@@ -419,7 +420,8 @@ class PlaybackController(object):
         if cp_track is not None:
             self.current_cp_track = cp_track
             self.state = PlaybackState.PLAYING
-            if not self._get_backend().playback.play(cp_track.track).get():
+            backend = self._get_backend()
+            if not backend or not backend.playback.play(cp_track.track).get():
                 # Track is not playable
                 if self.random and self._shuffled:
                     self._shuffled.remove(cp_track)
@@ -445,8 +447,10 @@ class PlaybackController(object):
 
     def resume(self):
         """If paused, resume playing the current track."""
-        if (self.state == PlaybackState.PAUSED and
-                self._get_backend().playback.resume().get()):
+        if self.state != PlaybackState.PAUSED:
+            return
+        backend = self._get_backend()
+        if backend and backend.playback.resume().get():
             self.state = PlaybackState.PLAYING
             self._trigger_track_playback_resumed()
 
@@ -472,7 +476,11 @@ class PlaybackController(object):
             self.next()
             return True
 
-        success = self._get_backend().playback.seek(time_position).get()
+        backend = self._get_backend()
+        if not backend:
+            return False
+
+        success = backend.playback.seek(time_position).get()
         if success:
             self._trigger_seeked(time_position)
         return success
@@ -486,7 +494,8 @@ class PlaybackController(object):
         :type clear_current_track: boolean
         """
         if self.state != PlaybackState.STOPPED:
-            if self._get_backend().playback.stop().get():
+            backend = self._get_backend()
+            if not backend or backend.playback.stop().get():
                 self._trigger_track_playback_ended()
                 self.state = PlaybackState.STOPPED
         if clear_current_track:
