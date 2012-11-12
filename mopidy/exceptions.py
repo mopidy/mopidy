@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+
 class MopidyException(Exception):
     def __init__(self, message, *args, **kwargs):
         super(MopidyException, self).__init__(message, *args, **kwargs)

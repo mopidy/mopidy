@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import pygst
 pygst.require('0.10')
 import gst
@@ -70,9 +72,9 @@ class Audio(pykka.ThreadingActor):
 
         # These caps matches the audio data provided by libspotify
         default_caps = gst.Caps(
-            'audio/x-raw-int, endianness=(int)1234, channels=(int)2, '
-            'width=(int)16, depth=(int)16, signed=(boolean)true, '
-            'rate=(int)44100')
+            b'audio/x-raw-int, endianness=(int)1234, channels=(int)2, '
+            b'width=(int)16, depth=(int)16, signed=(boolean)true, '
+            b'rate=(int)44100')
         source = element.get_property('source')
         source.set_property('caps', default_caps)
 
@@ -109,7 +111,7 @@ class Audio(pykka.ThreadingActor):
             return
 
         # We assume that the bin will contain a single mixer.
-        mixer = mixerbin.get_by_interface('GstMixer')
+        mixer = mixerbin.get_by_interface(b'GstMixer')
         if not mixer:
             logger.warning(
                 'Did not find any audio mixers in "%s"', settings.MIXER)
@@ -162,14 +164,14 @@ class Audio(pykka.ThreadingActor):
             self._trigger_reached_end_of_stream_event()
         elif message.type == gst.MESSAGE_ERROR:
             error, debug = message.parse_error()
-            logger.error(u'%s %s', error, debug)
+            logger.error('%s %s', error, debug)
             self.stop_playback()
         elif message.type == gst.MESSAGE_WARNING:
             error, debug = message.parse_warning()
-            logger.warning(u'%s %s', error, debug)
+            logger.warning('%s %s', error, debug)
 
     def _trigger_reached_end_of_stream_event(self):
-        logger.debug(u'Triggering reached end of stream event')
+        logger.debug('Triggering reached end of stream event')
         AudioListener.send('reached_end_of_stream')
 
     def set_uri(self, uri):
@@ -389,12 +391,12 @@ class Audio(pykka.ThreadingActor):
 
         # Default to blank data to trick shoutcast into clearing any previous
         # values it might have.
-        taglist[gst.TAG_ARTIST] = u' '
-        taglist[gst.TAG_TITLE] = u' '
-        taglist[gst.TAG_ALBUM] = u' '
+        taglist[gst.TAG_ARTIST] = ' '
+        taglist[gst.TAG_TITLE] = ' '
+        taglist[gst.TAG_ALBUM] = ' '
 
         if artists:
-            taglist[gst.TAG_ARTIST] = u', '.join([a.name for a in artists])
+            taglist[gst.TAG_ARTIST] = ', '.join([a.name for a in artists])
 
         if track.name:
             taglist[gst.TAG_TITLE] = track.name

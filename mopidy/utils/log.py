@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import logging.handlers
 
@@ -14,9 +16,9 @@ def setup_logging(verbosity_level, save_debug_log):
         # New in Python 2.7
         logging.captureWarnings(True)
     logger = logging.getLogger('mopidy.utils.log')
-    logger.info(u'Starting Mopidy %s', versioning.get_version())
-    logger.info(u'%(name)s: %(version)s', deps.platform_info())
-    logger.info(u'%(name)s: %(version)s', deps.python_info())
+    logger.info('Starting Mopidy %s', versioning.get_version())
+    logger.info('%(name)s: %(version)s', deps.platform_info())
+    logger.info('%(name)s: %(version)s', deps.python_info())
 
 
 def setup_root_logger():

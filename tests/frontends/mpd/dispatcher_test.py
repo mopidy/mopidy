@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import pykka
 
 from mopidy import core
@@ -34,7 +36,7 @@ class MpdDispatcherTest(unittest.TestCase):
         except MpdAckError as e:
             self.assertEqual(
                 e.get_mpd_ack(),
-                u'ACK [5@0] {} unknown command "an_unknown_command"')
+                'ACK [5@0] {} unknown command "an_unknown_command"')
 
     def test_find_handler_for_known_command_returns_handler_and_kwargs(self):
         expected_handler = lambda x: None
@@ -48,11 +50,11 @@ class MpdDispatcherTest(unittest.TestCase):
 
     def test_handling_unknown_request_yields_error(self):
         result = self.dispatcher.handle_request('an unhandled request')
-        self.assertEqual(result[0], u'ACK [5@0] {} unknown command "an"')
+        self.assertEqual(result[0], 'ACK [5@0] {} unknown command "an"')
 
     def test_handling_known_request(self):
         expected = 'magic'
         request_handlers['known request'] = lambda x: expected
         result = self.dispatcher.handle_request('known request')
-        self.assertIn(u'OK', result)
+        self.assertIn('OK', result)
         self.assertIn(expected, result)

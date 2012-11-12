@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import pykka
 
 from mopidy.core import PlaybackState
@@ -94,7 +96,7 @@ def idle(context, subsystems=None):
     context.subscriptions = set()
 
     for subsystem in active:
-        response.append(u'changed: %s' % subsystem)
+        response.append('changed: %s' % subsystem)
     return response
 
 
@@ -257,21 +259,21 @@ def _status_songpos(futures):
 def _status_state(futures):
     state = futures['playback.state'].get()
     if state == PlaybackState.PLAYING:
-        return u'play'
+        return 'play'
     elif state == PlaybackState.STOPPED:
-        return u'stop'
+        return 'stop'
     elif state == PlaybackState.PAUSED:
-        return u'pause'
+        return 'pause'
 
 
 def _status_time(futures):
-    return u'%d:%d' % (
+    return '%d:%d' % (
         futures['playback.time_position'].get() // 1000,
         _status_time_total(futures) // 1000)
 
 
 def _status_time_elapsed(futures):
-    return u'%.3f' % (futures['playback.time_position'].get() / 1000.0)
+    return '%.3f' % (futures['playback.time_position'].get() / 1000.0)
 
 
 def _status_time_total(futures):

@@ -93,6 +93,9 @@ backends:
   :attr:`mopidy.settings.DEBUG_THREAD` setting a ``SIGUSR1`` signal will dump
   the traceback for all running threads.
 
+- Make the entire code base use unicode strings by default, and only fall back
+  to bytestrings where it is required. Another step closer to Python 3.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

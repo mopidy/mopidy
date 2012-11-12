@@ -3,6 +3,8 @@
 # This script is helper to systematicly test the behaviour of MPD's idle
 # command. It is simply provided as a quick hack, expect nothing more.
 
+from __future__ import unicode_literals
+
 import logging
 import pprint
 import socket

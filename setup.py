@@ -2,6 +2,8 @@
 Most of this file is taken from the Django project, which is BSD licensed.
 """
 
+from __future__ import unicode_literals
+
 from distutils.core import setup
 from distutils.command.install_data import install_data
 from distutils.command.install import INSTALL_SCHEMES

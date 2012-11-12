@@ -30,5 +30,7 @@ https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 - :attr:`mopidy.settings.SPOTIFY_PASSWORD`
 """
 
+from __future__ import unicode_literals
+
 # flake8: noqa
 from .actor import SpotifyBackend

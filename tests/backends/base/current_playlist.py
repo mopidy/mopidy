@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import mock
 import random
 
@@ -93,18 +95,18 @@ class CurrentPlaylistControllerTest(object):
         self.controller.append([Track(uri='z'), track, track])
         try:
             self.controller.get(uri='a')
-            self.fail(u'Should raise LookupError if multiple matches')
+            self.fail('Should raise LookupError if multiple matches')
         except LookupError as e:
-            self.assertEqual(u'"uri=a" match multiple tracks', e[0])
+            self.assertEqual('"uri=a" match multiple tracks', e[0])
 
     def test_get_by_uri_raises_error_if_no_match(self):
         self.controller.playlist = Playlist(
             tracks=[Track(uri='z'), Track(uri='y')])
         try:
             self.controller.get(uri='a')
-            self.fail(u'Should raise LookupError if no match')
+            self.fail('Should raise LookupError if no match')
         except LookupError as e:
-            self.assertEqual(u'"uri=a" match no tracks', e[0])
+            self.assertEqual('"uri=a" match no tracks', e[0])
 
     def test_get_by_multiple_criteria_returns_elements_matching_all(self):
         track1 = Track(uri='a', name='x')

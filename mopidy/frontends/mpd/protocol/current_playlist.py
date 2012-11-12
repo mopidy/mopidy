@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy.frontends.mpd import translator
 from mopidy.frontends.mpd.exceptions import (
     MpdArgError, MpdNoExistError, MpdNotImplemented)
@@ -26,8 +28,7 @@ def add(context, uri):
             if track is not None:
                 context.core.current_playlist.add(track)
                 return
-    raise MpdNoExistError(
-        u'directory or file not found', command=u'add')
+    raise MpdNoExistError('directory or file not found', command='add')
 
 
 @handle_request(r'^addid "(?P<uri>[^"]*)"( "(?P<songpos>\d+)")*$')
@@ -50,14 +51,14 @@ def addid(context, uri, songpos=None):
     - ``addid ""`` should return an error.
     """
     if not uri:
-        raise MpdNoExistError(u'No such song', command=u'addid')
+        raise MpdNoExistError('No such song', command='addid')
     if songpos is not None:
         songpos = int(songpos)
     track = context.core.library.lookup(uri).get()
     if track is None:
-        raise MpdNoExistError(u'No such song', command=u'addid')
+        raise MpdNoExistError('No such song', command='addid')
     if songpos and songpos > context.core.current_playlist.length.get():
-        raise MpdArgError(u'Bad song index', command=u'addid')
+        raise MpdArgError('Bad song index', command='addid')
     cp_track = context.core.current_playlist.add(
         track, at_position=songpos).get()
     return ('Id', cp_track.cpid)
@@ -79,7 +80,7 @@ def delete_range(context, start, end=None):
         end = context.core.current_playlist.length.get()
     cp_tracks = context.core.current_playlist.slice(start, end).get()
     if not cp_tracks:
-        raise MpdArgError(u'Bad song index', command=u'delete')
+        raise MpdArgError('Bad song index', command='delete')
     for (cpid, _) in cp_tracks:
         context.core.current_playlist.remove(cpid=cpid)
 
@@ -93,7 +94,7 @@ def delete_songpos(context, songpos):
             songpos, songpos + 1).get()[0]
         context.core.current_playlist.remove(cpid=cpid)
     except IndexError:
-        raise MpdArgError(u'Bad song index', command=u'delete')
+        raise MpdArgError('Bad song index', command='delete')
 
 
 @handle_request(r'^deleteid "(?P<cpid>\d+)"$')
@@ -111,7 +112,7 @@ def deleteid(context, cpid):
             context.core.playback.next()
         return context.core.current_playlist.remove(cpid=cpid).get()
     except LookupError:
-        raise MpdNoExistError(u'No such song', command=u'deleteid')
+        raise MpdNoExistError('No such song', command='deleteid')
 
 
 @handle_request(r'^clear$')
@@ -227,7 +228,7 @@ def playlistid(context, cpid=None):
             position = context.core.current_playlist.index(cp_track).get()
             return translator.track_to_mpd_format(cp_track, position=position)
         except LookupError:
-            raise MpdNoExistError(u'No such song', command=u'playlistid')
+            raise MpdNoExistError('No such song', command='playlistid')
     else:
         return translator.tracks_to_mpd_format(
             context.core.current_playlist.cp_tracks.get())
@@ -261,7 +262,7 @@ def playlistinfo(context, songpos=None, start=None, end=None):
             start = 0
         start = int(start)
         if not (0 <= start <= context.core.current_playlist.length.get()):
-            raise MpdArgError(u'Bad song index', command=u'playlistinfo')
+            raise MpdArgError('Bad song index', command='playlistinfo')
         if end is not None:
             end = int(end)
             if end > context.core.current_playlist.length.get():
@@ -331,8 +332,8 @@ def plchangesposid(context, version):
         result = []
         for (position, (cpid, _)) in enumerate(
                 context.core.current_playlist.cp_tracks.get()):
-            result.append((u'cpos', position))
-            result.append((u'Id', cpid))
+            result.append(('cpos', position))
+            result.append(('Id', cpid))
         return result
 
 

@@ -1,6 +1,6 @@
 # Absolute import needed to import ~/.config/mopidy/settings.py and not
 # ourselves
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import copy
 import getpass
@@ -53,11 +53,11 @@ class SettingsProxy(object):
 
         current = self.current  # bind locally to avoid copying+updates
         if attr not in current:
-            raise exceptions.SettingsError(u'Setting "%s" is not set.' % attr)
+            raise exceptions.SettingsError('Setting "%s" is not set.' % attr)
 
         value = current[attr]
         if isinstance(value, basestring) and len(value) == 0:
-            raise exceptions.SettingsError(u'Setting "%s" is empty.' % attr)
+            raise exceptions.SettingsError('Setting "%s" is empty.' % attr)
         if not value:
             return value
         if attr.endswith('_PATH') or attr.endswith('_FILE'):
@@ -75,17 +75,17 @@ class SettingsProxy(object):
             self._read_missing_settings_from_stdin(self.current, self.runtime)
         if self.get_errors():
             logger.error(
-                u'Settings validation errors: %s',
+                'Settings validation errors: %s',
                 formatting.indent(self.get_errors_as_string()))
-            raise exceptions.SettingsError(u'Settings validation failed.')
+            raise exceptions.SettingsError('Settings validation failed.')
 
     def _read_missing_settings_from_stdin(self, current, runtime):
         for setting, value in sorted(current.iteritems()):
             if isinstance(value, basestring) and len(value) == 0:
-                runtime[setting] = self._read_from_stdin(setting + u': ')
+                runtime[setting] = self._read_from_stdin(setting + ': ')
 
     def _read_from_stdin(self, prompt):
-        if u'_PASSWORD' in prompt:
+        if '_PASSWORD' in prompt:
             return (
                 getpass.getpass(prompt)
                 .decode(sys.stdin.encoding, 'ignore'))
@@ -101,7 +101,7 @@ class SettingsProxy(object):
     def get_errors_as_string(self):
         lines = []
         for (setting, error) in self.get_errors().iteritems():
-            lines.append(u'%s: %s' % (setting, error))
+            lines.append('%s: %s' % (setting, error))
         return '\n'.join(lines)
 
 
@@ -151,37 +151,37 @@ def validate_settings(defaults, settings):
     for setting, value in settings.iteritems():
         if setting in changed:
             if changed[setting] is None:
-                errors[setting] = u'Deprecated setting. It may be removed.'
+                errors[setting] = 'Deprecated setting. It may be removed.'
             else:
-                errors[setting] = u'Deprecated setting. Use %s.' % (
+                errors[setting] = 'Deprecated setting. Use %s.' % (
                     changed[setting],)
 
         elif setting == 'OUTPUTS':
             errors[setting] = (
-                u'Deprecated setting, please change to OUTPUT. OUTPUT expects '
-                u'a GStreamer bin description string for your desired output.')
+                'Deprecated setting, please change to OUTPUT. OUTPUT expects '
+                'a GStreamer bin description string for your desired output.')
 
         elif setting == 'SPOTIFY_BITRATE':
             if value not in (96, 160, 320):
                 errors[setting] = (
-                    u'Unavailable Spotify bitrate. Available bitrates are 96, '
-                    u'160, and 320.')
+                    'Unavailable Spotify bitrate. Available bitrates are 96, '
+                    '160, and 320.')
 
         elif setting.startswith('SHOUTCAST_OUTPUT_'):
             errors[setting] = (
-                u'Deprecated setting, please set the value via the GStreamer '
-                u'bin in OUTPUT.')
+                'Deprecated setting, please set the value via the GStreamer '
+                'bin in OUTPUT.')
 
         elif setting in list_of_one_or_more:
             if not value:
-                errors[setting] = u'Must contain at least one value.'
+                errors[setting] = 'Must contain at least one value.'
 
         elif setting not in defaults:
-            errors[setting] = u'Unknown setting.'
+            errors[setting] = 'Unknown setting.'
             suggestion = did_you_mean(setting, defaults)
 
             if suggestion:
-                errors[setting] += u' Did you mean %s?' % suggestion
+                errors[setting] += ' Did you mean %s?' % suggestion
 
     return errors
 
@@ -204,20 +204,20 @@ def format_settings_list(settings):
     for (key, value) in sorted(settings.current.iteritems()):
         default_value = settings.default.get(key)
         masked_value = mask_value_if_secret(key, value)
-        lines.append(u'%s: %s' % (
+        lines.append('%s: %s' % (
             key, formatting.indent(pprint.pformat(masked_value), places=2)))
         if value != default_value and default_value is not None:
             lines.append(
-                u'  Default: %s' %
+                '  Default: %s' %
                 formatting.indent(pprint.pformat(default_value), places=4))
         if errors.get(key) is not None:
-            lines.append(u'  Error: %s' % errors[key])
+            lines.append('  Error: %s' % errors[key])
     return '\n'.join(lines)
 
 
 def mask_value_if_secret(key, value):
     if key.endswith('PASSWORD') and value:
-        return u'********'
+        return '********'
     else:
         return value
 

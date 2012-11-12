@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import random
 import urlparse
@@ -28,13 +30,13 @@ class PlaybackState(object):
     """
 
     #: Constant representing the paused state.
-    PAUSED = u'paused'
+    PAUSED = 'paused'
 
     #: Constant representing the playing state.
-    PLAYING = u'playing'
+    PLAYING = 'playing'
 
     #: Constant representing the stopped state.
-    STOPPED = u'stopped'
+    STOPPED = 'stopped'
 
 
 class PlaybackController(object):
@@ -290,7 +292,7 @@ class PlaybackController(object):
     @state.setter  # noqa
     def state(self, new_state):
         (old_state, self._state) = (self.state, new_state)
-        logger.debug(u'Changing state: %s -> %s', old_state, new_state)
+        logger.debug('Changing state: %s -> %s', old_state, new_state)
 
         self._trigger_playback_state_changed(old_state, new_state)
 
@@ -493,7 +495,7 @@ class PlaybackController(object):
             self.current_cp_track = None
 
     def _trigger_track_playback_paused(self):
-        logger.debug(u'Triggering track playback paused event')
+        logger.debug('Triggering track playback paused event')
         if self.current_track is None:
             return
         listener.CoreListener.send(
@@ -501,7 +503,7 @@ class PlaybackController(object):
             track=self.current_track, time_position=self.time_position)
 
     def _trigger_track_playback_resumed(self):
-        logger.debug(u'Triggering track playback resumed event')
+        logger.debug('Triggering track playback resumed event')
         if self.current_track is None:
             return
         listener.CoreListener.send(
@@ -509,14 +511,14 @@ class PlaybackController(object):
             track=self.current_track, time_position=self.time_position)
 
     def _trigger_track_playback_started(self):
-        logger.debug(u'Triggering track playback started event')
+        logger.debug('Triggering track playback started event')
         if self.current_track is None:
             return
         listener.CoreListener.send(
             'track_playback_started', track=self.current_track)
 
     def _trigger_track_playback_ended(self):
-        logger.debug(u'Triggering track playback ended event')
+        logger.debug('Triggering track playback ended event')
         if self.current_track is None:
             return
         listener.CoreListener.send(
@@ -524,15 +526,15 @@ class PlaybackController(object):
             track=self.current_track, time_position=self.time_position)
 
     def _trigger_playback_state_changed(self, old_state, new_state):
-        logger.debug(u'Triggering playback state change event')
+        logger.debug('Triggering playback state change event')
         listener.CoreListener.send(
             'playback_state_changed',
             old_state=old_state, new_state=new_state)
 
     def _trigger_options_changed(self):
-        logger.debug(u'Triggering options changed event')
+        logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
 
     def _trigger_seeked(self, time_position):
-        logger.debug(u'Triggering seeked event')
+        logger.debug('Triggering seeked event')
         listener.CoreListener.send('seeked', time_position=time_position)

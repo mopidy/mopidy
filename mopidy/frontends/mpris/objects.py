@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import os
 
@@ -75,11 +77,11 @@ class MprisObject(dbus.service.Object):
         }
 
     def _connect_to_dbus(self):
-        logger.debug(u'Connecting to D-Bus...')
+        logger.debug('Connecting to D-Bus...')
         mainloop = dbus.mainloop.glib.DBusGMainLoop()
         bus_name = dbus.service.BusName(
             BUS_NAME, dbus.SessionBus(mainloop=mainloop))
-        logger.info(u'Connected to D-Bus')
+        logger.info('Connected to D-Bus')
         return bus_name
 
     def _get_track_id(self, cp_track):
@@ -95,7 +97,7 @@ class MprisObject(dbus.service.Object):
                          in_signature='ss', out_signature='v')
     def Get(self, interface, prop):
         logger.debug(
-            u'%s.Get(%s, %s) called',
+            '%s.Get(%s, %s) called',
             dbus.PROPERTIES_IFACE, repr(interface), repr(prop))
         (getter, _) = self.properties[interface][prop]
         if callable(getter):
@@ -107,7 +109,7 @@ class MprisObject(dbus.service.Object):
                          in_signature='s', out_signature='a{sv}')
     def GetAll(self, interface):
         logger.debug(
-            u'%s.GetAll(%s) called', dbus.PROPERTIES_IFACE, repr(interface))
+            '%s.GetAll(%s) called', dbus.PROPERTIES_IFACE, repr(interface))
         getters = {}
         for key, (getter, _) in self.properties[interface].iteritems():
             getters[key] = getter() if callable(getter) else getter
@@ -117,7 +119,7 @@ class MprisObject(dbus.service.Object):
                          in_signature='ssv', out_signature='')
     def Set(self, interface, prop, value):
         logger.debug(
-            u'%s.Set(%s, %s, %s) called',
+            '%s.Set(%s, %s, %s) called',
             dbus.PROPERTIES_IFACE, repr(interface), repr(prop), repr(value))
         _, setter = self.properties[interface][prop]
         if setter is not None:
@@ -130,7 +132,7 @@ class MprisObject(dbus.service.Object):
     def PropertiesChanged(self, interface, changed_properties,
                           invalidated_properties):
         logger.debug(
-            u'%s.PropertiesChanged(%s, %s, %s) signaled',
+            '%s.PropertiesChanged(%s, %s, %s) signaled',
             dbus.PROPERTIES_IFACE, interface, changed_properties,
             invalidated_properties)
 
@@ -138,12 +140,12 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Raise(self):
-        logger.debug(u'%s.Raise called', ROOT_IFACE)
+        logger.debug('%s.Raise called', ROOT_IFACE)
         # Do nothing, as we do not have a GUI
 
     @dbus.service.method(dbus_interface=ROOT_IFACE)
     def Quit(self):
-        logger.debug(u'%s.Quit called', ROOT_IFACE)
+        logger.debug('%s.Quit called', ROOT_IFACE)
         exit_process()
 
     ### Root interface properties
@@ -158,33 +160,33 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Next(self):
-        logger.debug(u'%s.Next called', PLAYER_IFACE)
+        logger.debug('%s.Next called', PLAYER_IFACE)
         if not self.get_CanGoNext():
-            logger.debug(u'%s.Next not allowed', PLAYER_IFACE)
+            logger.debug('%s.Next not allowed', PLAYER_IFACE)
             return
         self.core.playback.next().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Previous(self):
-        logger.debug(u'%s.Previous called', PLAYER_IFACE)
+        logger.debug('%s.Previous called', PLAYER_IFACE)
         if not self.get_CanGoPrevious():
-            logger.debug(u'%s.Previous not allowed', PLAYER_IFACE)
+            logger.debug('%s.Previous not allowed', PLAYER_IFACE)
             return
         self.core.playback.previous().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Pause(self):
-        logger.debug(u'%s.Pause called', PLAYER_IFACE)
+        logger.debug('%s.Pause called', PLAYER_IFACE)
         if not self.get_CanPause():
-            logger.debug(u'%s.Pause not allowed', PLAYER_IFACE)
+            logger.debug('%s.Pause not allowed', PLAYER_IFACE)
             return
         self.core.playback.pause().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def PlayPause(self):
-        logger.debug(u'%s.PlayPause called', PLAYER_IFACE)
+        logger.debug('%s.PlayPause called', PLAYER_IFACE)
         if not self.get_CanPause():
-            logger.debug(u'%s.PlayPause not allowed', PLAYER_IFACE)
+            logger.debug('%s.PlayPause not allowed', PLAYER_IFACE)
             return
         state = self.core.playback.state.get()
         if state == PlaybackState.PLAYING:
@@ -196,17 +198,17 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Stop(self):
-        logger.debug(u'%s.Stop called', PLAYER_IFACE)
+        logger.debug('%s.Stop called', PLAYER_IFACE)
         if not self.get_CanControl():
-            logger.debug(u'%s.Stop not allowed', PLAYER_IFACE)
+            logger.debug('%s.Stop not allowed', PLAYER_IFACE)
             return
         self.core.playback.stop().get()
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Play(self):
-        logger.debug(u'%s.Play called', PLAYER_IFACE)
+        logger.debug('%s.Play called', PLAYER_IFACE)
         if not self.get_CanPlay():
-            logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
+            logger.debug('%s.Play not allowed', PLAYER_IFACE)
             return
         state = self.core.playback.state.get()
         if state == PlaybackState.PAUSED:
@@ -216,9 +218,9 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def Seek(self, offset):
-        logger.debug(u'%s.Seek called', PLAYER_IFACE)
+        logger.debug('%s.Seek called', PLAYER_IFACE)
         if not self.get_CanSeek():
-            logger.debug(u'%s.Seek not allowed', PLAYER_IFACE)
+            logger.debug('%s.Seek not allowed', PLAYER_IFACE)
             return
         offset_in_milliseconds = offset // 1000
         current_position = self.core.playback.time_position.get()
@@ -227,9 +229,9 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def SetPosition(self, track_id, position):
-        logger.debug(u'%s.SetPosition called', PLAYER_IFACE)
+        logger.debug('%s.SetPosition called', PLAYER_IFACE)
         if not self.get_CanSeek():
-            logger.debug(u'%s.SetPosition not allowed', PLAYER_IFACE)
+            logger.debug('%s.SetPosition not allowed', PLAYER_IFACE)
             return
         position = position // 1000
         current_cp_track = self.core.playback.current_cp_track.get()
@@ -245,11 +247,11 @@ class MprisObject(dbus.service.Object):
 
     @dbus.service.method(dbus_interface=PLAYER_IFACE)
     def OpenUri(self, uri):
-        logger.debug(u'%s.OpenUri called', PLAYER_IFACE)
+        logger.debug('%s.OpenUri called', PLAYER_IFACE)
         if not self.get_CanPlay():
             # NOTE The spec does not explictly require this check, but guarding
             # the other methods doesn't help much if OpenUri is open for use.
-            logger.debug(u'%s.Play not allowed', PLAYER_IFACE)
+            logger.debug('%s.Play not allowed', PLAYER_IFACE)
             return
         # NOTE Check if URI has MIME type known to the backend, if MIME support
         # is added to the backend.
@@ -261,13 +263,13 @@ class MprisObject(dbus.service.Object):
             cp_track = self.core.current_playlist.add(track).get()
             self.core.playback.play(cp_track)
         else:
-            logger.debug(u'Track with URI "%s" not found in library.', uri)
+            logger.debug('Track with URI "%s" not found in library.', uri)
 
     ### Player interface signals
 
     @dbus.service.signal(dbus_interface=PLAYER_IFACE, signature='x')
     def Seeked(self, position):
-        logger.debug(u'%s.Seeked signaled', PLAYER_IFACE)
+        logger.debug('%s.Seeked signaled', PLAYER_IFACE)
         # Do nothing, as just calling the method is enough to emit the signal.
 
     ### Player interface properties
@@ -294,7 +296,7 @@ class MprisObject(dbus.service.Object):
 
     def set_LoopStatus(self, value):
         if not self.get_CanControl():
-            logger.debug(u'Setting %s.LoopStatus not allowed', PLAYER_IFACE)
+            logger.debug('Setting %s.LoopStatus not allowed', PLAYER_IFACE)
             return
         if value == 'None':
             self.core.playback.repeat = False
@@ -310,7 +312,7 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanControl():
             # NOTE The spec does not explictly require this check, but it was
             # added to be consistent with all the other property setters.
-            logger.debug(u'Setting %s.Rate not allowed', PLAYER_IFACE)
+            logger.debug('Setting %s.Rate not allowed', PLAYER_IFACE)
             return
         if value == 0:
             self.Pause()
@@ -320,7 +322,7 @@ class MprisObject(dbus.service.Object):
 
     def set_Shuffle(self, value):
         if not self.get_CanControl():
-            logger.debug(u'Setting %s.Shuffle not allowed', PLAYER_IFACE)
+            logger.debug('Setting %s.Shuffle not allowed', PLAYER_IFACE)
             return
         if value:
             self.core.playback.random = True
@@ -364,7 +366,7 @@ class MprisObject(dbus.service.Object):
 
     def set_Volume(self, value):
         if not self.get_CanControl():
-            logger.debug(u'Setting %s.Volume not allowed', PLAYER_IFACE)
+            logger.debug('Setting %s.Volume not allowed', PLAYER_IFACE)
             return
         if value is None:
             return

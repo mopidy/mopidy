@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import mock
 import pykka
 
@@ -46,20 +48,20 @@ class BaseTestCase(unittest.TestCase):
     def assertInResponse(self, value):
         self.assertIn(
             value, self.connection.response,
-            u'Did not find %s in %s' % (
+            'Did not find %s in %s' % (
                 repr(value), repr(self.connection.response)))
 
     def assertOnceInResponse(self, value):
         matched = len([r for r in self.connection.response if r == value])
         self.assertEqual(
             1, matched,
-            u'Expected to find %s once in %s' % (
+            'Expected to find %s once in %s' % (
                 repr(value), repr(self.connection.response)))
 
     def assertNotInResponse(self, value):
         self.assertNotIn(
             value, self.connection.response,
-            u'Found %s in %s' % (
+            'Found %s in %s' % (
                 repr(value), repr(self.connection.response)))
 
     def assertEqualResponse(self, value):

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 import re
 
@@ -93,7 +95,7 @@ def artists_to_mpd_format(artists):
     """
     artists = list(artists)
     artists.sort(key=lambda a: a.name)
-    return u', '.join([a.name for a in artists if a.name])
+    return ', '.join([a.name for a in artists if a.name])
 
 
 def tracks_to_mpd_format(tracks, start=0, end=None):
@@ -178,7 +180,7 @@ def _add_to_tag_cache(result, folders, files):
 def tracks_to_directory_tree(tracks):
     directories = ({}, [])
     for track in tracks:
-        path = u''
+        path = ''
         current = directories
 
         local_folder = settings.LOCAL_MUSIC_PATH

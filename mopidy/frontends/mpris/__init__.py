@@ -50,5 +50,7 @@ Now you can control Mopidy through the player object. Examples:
     player.Quit(dbus_interface='org.mpris.MediaPlayer2')
 """
 
+from __future__ import unicode_literals
+
 # flake8: noqa
 from .actor import MprisFrontend

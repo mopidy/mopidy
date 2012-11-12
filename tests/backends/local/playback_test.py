@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy import settings
 from mopidy.backends.local import LocalBackend
 from mopidy.core import PlaybackState

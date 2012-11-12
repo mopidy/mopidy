@@ -12,6 +12,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from __future__ import unicode_literals
+
 import os
 import sys
 
@@ -89,8 +91,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Mopidy'
-copyright = u'2010-2012, Stein Magnus Jodal and contributors'
+project = 'Mopidy'
+copyright = '2010-2012, Stein Magnus Jodal and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -231,8 +233,8 @@ latex_documents = [
     (
         'index',
         'Mopidy.tex',
-        u'Mopidy Documentation',
-        u'Stein Magnus Jodal',
+        'Mopidy Documentation',
+        'Stein Magnus Jodal',
         'manual'
     ),
 ]

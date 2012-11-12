@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import re
 
@@ -52,8 +54,8 @@ class MpdDispatcher(object):
 
         response = []
         for subsystem in subsystems:
-            response.append(u'changed: %s' % subsystem)
-        response.append(u'OK')
+            response.append('changed: %s' % subsystem)
+        response.append('OK')
         self.context.subscriptions = set()
         self.context.events = set()
         self.context.session.send_lines(response)
@@ -103,26 +105,26 @@ class MpdDispatcher(object):
             response = self._call_next_filter(request, response, filter_chain)
             if (self._is_receiving_command_list(request) or
                     self._is_processing_command_list(request)):
-                if response and response[-1] == u'OK':
+                if response and response[-1] == 'OK':
                     response = response[:-1]
             return response
 
     def _is_receiving_command_list(self, request):
         return (
-            self.command_list_receiving and request != u'command_list_end')
+            self.command_list_receiving and request != 'command_list_end')
 
     def _is_processing_command_list(self, request):
         return (
             self.command_list_index is not None and
-            request != u'command_list_end')
+            request != 'command_list_end')
 
     ### Filter: idle
 
     def _idle_filter(self, request, response, filter_chain):
         if self._is_currently_idle() and not self._noidle.match(request):
             logger.debug(
-                u'Client sent us %s, only %s is allowed while in '
-                u'the idle state', repr(request), repr(u'noidle'))
+                'Client sent us %s, only %s is allowed while in '
+                'the idle state', repr(request), repr('noidle'))
             self.context.session.close()
             return []
 
@@ -144,11 +146,11 @@ class MpdDispatcher(object):
     def _add_ok_filter(self, request, response, filter_chain):
         response = self._call_next_filter(request, response, filter_chain)
         if not self._has_error(response):
-            response.append(u'OK')
+            response.append('OK')
         return response
 
     def _has_error(self, response):
-        return response and response[-1].startswith(u'ACK')
+        return response and response[-1].startswith('ACK')
 
     ### Filter: call handler
 
@@ -157,7 +159,7 @@ class MpdDispatcher(object):
             response = self._format_response(self._call_handler(request))
             return self._call_next_filter(request, response, filter_chain)
         except pykka.ActorDeadError as e:
-            logger.warning(u'Tried to communicate with dead actor.')
+            logger.warning('Tried to communicate with dead actor.')
             raise exceptions.MpdSystemError(e)
 
     def _call_handler(self, request):
@@ -173,7 +175,7 @@ class MpdDispatcher(object):
         command_name = request.split(' ')[0]
         if command_name in [command.name for command in protocol.mpd_commands]:
             raise exceptions.MpdArgError(
-                u'incorrect arguments', command=command_name)
+                'incorrect arguments', command=command_name)
         raise exceptions.MpdUnknownCommand(command=command_name)
 
     def _format_response(self, response):
@@ -202,10 +204,10 @@ class MpdDispatcher(object):
 
     def _format_lines(self, line):
         if isinstance(line, dict):
-            return [u'%s: %s' % (key, value) for (key, value) in line.items()]
+            return ['%s: %s' % (key, value) for (key, value) in line.items()]
         if isinstance(line, tuple):
             (key, value) = line
-            return [u'%s: %s' % (key, value)]
+            return ['%s: %s' % (key, value)]
         return [line]
 
 

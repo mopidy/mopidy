@@ -9,6 +9,8 @@
 - Set :attr:`mopidy.settings.MIXER` to ``fakemixer`` to use this mixer.
 """
 
+from __future__ import unicode_literals
+
 import pygst
 pygst.require('0.10')
 import gobject

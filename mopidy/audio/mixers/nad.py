@@ -45,6 +45,8 @@ Configuration examples::
         u'source=aux speakers-a=on speakers-b=off')
 """
 
+from __future__ import unicode_literals
+
 import logging
 
 import pygst
@@ -107,7 +109,7 @@ class NadMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):
     def do_change_state(self, transition):
         if transition == gst.STATE_CHANGE_NULL_TO_READY:
             if serial is None:
-                logger.warning(u'nadmixer dependency python-serial not found')
+                logger.warning('nadmixer dependency python-serial not found')
                 return gst.STATE_CHANGE_FAILURE
             self._start_nad_talker()
         return gst.STATE_CHANGE_SUCCESS
@@ -164,7 +166,7 @@ class NadTalker(pykka.ThreadingActor):
         self._set_device_to_known_state()
 
     def _open_connection(self):
-        logger.info(u'NAD amplifier: Connecting through "%s"', self.port)
+        logger.info('NAD amplifier: Connecting through "%s"', self.port)
         self._device = serial.Serial(
             port=self.port,
             baudrate=self.BAUDRATE,
@@ -183,7 +185,7 @@ class NadTalker(pykka.ThreadingActor):
 
     def _get_device_model(self):
         model = self._ask_device('Main.Model')
-        logger.info(u'NAD amplifier: Connected to model "%s"', model)
+        logger.info('NAD amplifier: Connected to model "%s"', model)
         return model
 
     def _power_device_on(self):
@@ -212,19 +214,19 @@ class NadTalker(pykka.ThreadingActor):
         if current_nad_volume is None:
             current_nad_volume = self.VOLUME_LEVELS
         if current_nad_volume == self.VOLUME_LEVELS:
-            logger.info(u'NAD amplifier: Calibrating by setting volume to 0')
+            logger.info('NAD amplifier: Calibrating by setting volume to 0')
         self._nad_volume = current_nad_volume
         if self._decrease_volume():
             current_nad_volume -= 1
         if current_nad_volume == 0:
-            logger.info(u'NAD amplifier: Done calibrating')
+            logger.info('NAD amplifier: Done calibrating')
         else:
             self.actor_ref.proxy().calibrate_volume(current_nad_volume)
 
     def set_volume(self, volume):
         # Increase or decrease the amplifier volume until it matches the given
         # target volume.
-        logger.debug(u'Setting volume to %d' % volume)
+        logger.debug('Setting volume to %d' % volume)
         target_nad_volume = int(round(volume * self.VOLUME_LEVELS / 100.0))
         if self._nad_volume is None:
             return  # Calibration needed
@@ -250,12 +252,12 @@ class NadTalker(pykka.ThreadingActor):
             if self._ask_device(key) == value:
                 return
             logger.info(
-                u'NAD amplifier: Setting "%s" to "%s" (attempt %d/3)',
+                'NAD amplifier: Setting "%s" to "%s" (attempt %d/3)',
                 key, value, attempt)
             self._command_device(key, value)
         if self._ask_device(key) != value:
             logger.info(
-                u'NAD amplifier: Gave up on setting "%s" to "%s"',
+                'NAD amplifier: Gave up on setting "%s" to "%s"',
                 key, value)
 
     def _ask_device(self, key):

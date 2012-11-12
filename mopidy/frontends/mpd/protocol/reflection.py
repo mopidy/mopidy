@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy.frontends.mpd.protocol import handle_request, mpd_commands
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
@@ -93,5 +95,5 @@ def urlhandlers(context):
         Gets a list of available URL handlers.
     """
     return [
-        (u'handler', uri_scheme)
+        ('handler', uri_scheme)
         for uri_scheme in context.core.uri_schemes.get()]

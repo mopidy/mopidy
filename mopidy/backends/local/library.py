@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 from mopidy import settings
@@ -6,7 +8,7 @@ from mopidy.models import Playlist, Album
 
 from .translator import parse_mpd_tag_cache
 
-logger = logging.getLogger(u'mopidy.backends.local')
+logger = logging.getLogger('mopidy.backends.local')
 
 
 class LocalLibraryProvider(base.BaseLibraryProvider):
@@ -30,7 +32,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
         try:
             return self._uri_mapping[uri]
         except KeyError:
-            logger.debug(u'Failed to lookup %r', uri)
+            logger.debug('Failed to lookup %r', uri)
             return None
 
     def find_exact(self, **query):

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import gobject
 gobject.threads_init()
 
@@ -62,7 +64,7 @@ class Scanner(object):
         fakesink = gst.element_factory_make('fakesink')
 
         self.uribin = gst.element_factory_make('uridecodebin')
-        self.uribin.set_property('caps', gst.Caps('audio/x-raw-int'))
+        self.uribin.set_property('caps', gst.Caps(b'audio/x-raw-int'))
         self.uribin.connect(
             'pad-added', self.process_new_pad, fakesink.get_pad('sink'))
 

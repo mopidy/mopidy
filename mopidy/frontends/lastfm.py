@@ -22,6 +22,8 @@ Make sure :attr:`mopidy.settings.FRONTENDS` includes
 the Last.fm frontend.
 """
 
+from __future__ import unicode_literals
+
 import logging
 import time
 
@@ -54,21 +56,21 @@ class LastfmFrontend(pykka.ThreadingActor, CoreListener):
             self.lastfm = pylast.LastFMNetwork(
                 api_key=API_KEY, api_secret=API_SECRET,
                 username=username, password_hash=password_hash)
-            logger.info(u'Connected to Last.fm')
+            logger.info('Connected to Last.fm')
         except exceptions.SettingsError as e:
-            logger.info(u'Last.fm scrobbler not started')
-            logger.debug(u'Last.fm settings error: %s', e)
+            logger.info('Last.fm scrobbler not started')
+            logger.debug('Last.fm settings error: %s', e)
             self.stop()
         except (pylast.NetworkError, pylast.MalformedResponseError,
                 pylast.WSError) as e:
-            logger.error(u'Error during Last.fm setup: %s', e)
+            logger.error('Error during Last.fm setup: %s', e)
             self.stop()
 
     def track_playback_started(self, track):
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
         self.last_start_time = int(time.time())
-        logger.debug(u'Now playing track: %s - %s', artists, track.name)
+        logger.debug('Now playing track: %s - %s', artists, track.name)
         try:
             self.lastfm.update_now_playing(
                 artists,
@@ -79,22 +81,22 @@ class LastfmFrontend(pykka.ThreadingActor, CoreListener):
                 mbid=(track.musicbrainz_id or ''))
         except (pylast.ScrobblingError, pylast.NetworkError,
                 pylast.MalformedResponseError, pylast.WSError) as e:
-            logger.warning(u'Error submitting playing track to Last.fm: %s', e)
+            logger.warning('Error submitting playing track to Last.fm: %s', e)
 
     def track_playback_ended(self, track, time_position):
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
         time_position = time_position // 1000
         if duration < 30:
-            logger.debug(u'Track too short to scrobble. (30s)')
+            logger.debug('Track too short to scrobble. (30s)')
             return
         if time_position < duration // 2 and time_position < 240:
             logger.debug(
-                u'Track not played long enough to scrobble. (50% or 240s)')
+                'Track not played long enough to scrobble. (50% or 240s)')
             return
         if self.last_start_time is None:
             self.last_start_time = int(time.time()) - duration
-        logger.debug(u'Scrobbling track: %s - %s', artists, track.name)
+        logger.debug('Scrobbling track: %s - %s', artists, track.name)
         try:
             self.lastfm.scrobble(
                 artists,
@@ -106,4 +108,4 @@ class LastfmFrontend(pykka.ThreadingActor, CoreListener):
                 mbid=(track.musicbrainz_id or ''))
         except (pylast.ScrobblingError, pylast.NetworkError,
                 pylast.MalformedResponseError, pylast.WSError) as e:
-            logger.warning(u'Error submitting played track to Last.fm: %s', e)
+            logger.warning('Error submitting played track to Last.fm: %s', e)

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from copy import copy
 import logging
 import random
@@ -73,7 +75,7 @@ class CurrentPlaylistController(object):
             was added to the current playlist playlist
         """
         assert at_position <= len(self._cp_tracks), \
-            u'at_position can not be greater than playlist length'
+            'at_position can not be greater than playlist length'
         cp_track = CpTrack(self.cp_id, track)
         if at_position is not None:
             self._cp_tracks.insert(at_position, cp_track)
@@ -132,9 +134,9 @@ class CurrentPlaylistController(object):
         criteria_string = ', '.join(
             ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
         if len(matches) == 0:
-            raise LookupError(u'"%s" match no tracks' % criteria_string)
+            raise LookupError('"%s" match no tracks' % criteria_string)
         else:
-            raise LookupError(u'"%s" match multiple tracks' % criteria_string)
+            raise LookupError('"%s" match multiple tracks' % criteria_string)
 
     def index(self, cp_track):
         """
@@ -237,5 +239,5 @@ class CurrentPlaylistController(object):
         return [copy(cp_track) for cp_track in self._cp_tracks[start:end]]
 
     def _trigger_playlist_changed(self):
-        logger.debug(u'Triggering playlist changed event')
+        logger.debug('Triggering playlist changed event')
         listener.CoreListener.send('playlist_changed')

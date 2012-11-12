@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy import settings
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import (
@@ -25,7 +27,7 @@ def kill(context):
 
         Kills MPD.
     """
-    raise MpdPermissionError(command=u'kill')
+    raise MpdPermissionError(command='kill')
 
 
 @handle_request(r'^password "(?P<password>[^"]+)"$', auth_required=False)
@@ -41,7 +43,7 @@ def password_(context, password):
     if password == settings.MPD_SERVER_PASSWORD:
         context.dispatcher.authenticated = True
     else:
-        raise MpdPasswordError(u'incorrect password', command=u'password')
+        raise MpdPasswordError('incorrect password', command='password')
 
 
 @handle_request(r'^ping$', auth_required=False)

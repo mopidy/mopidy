@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 from mopidy.frontends.mpd import dispatcher, protocol
@@ -21,18 +23,18 @@ class MpdSession(network.LineProtocol):
         self.dispatcher = dispatcher.MpdDispatcher(session=self, core=core)
 
     def on_start(self):
-        logger.info(u'New MPD connection from [%s]:%s', self.host, self.port)
-        self.send_lines([u'OK MPD %s' % protocol.VERSION])
+        logger.info('New MPD connection from [%s]:%s', self.host, self.port)
+        self.send_lines(['OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):
-        logger.debug(u'Request from [%s]:%s: %s', self.host, self.port, line)
+        logger.debug('Request from [%s]:%s: %s', self.host, self.port, line)
 
         response = self.dispatcher.handle_request(line)
         if not response:
             return
 
         logger.debug(
-            u'Response to [%s]:%s: %s', self.host, self.port,
+            'Response to [%s]:%s: %s', self.host, self.port,
             formatting.indent(self.terminator.join(response)))
 
         self.send_lines(response)
@@ -45,8 +47,8 @@ class MpdSession(network.LineProtocol):
             return super(MpdSession, self).decode(line.decode('string_escape'))
         except ValueError:
             logger.warning(
-                u'Stopping actor due to unescaping error, data '
-                u'supplied by client was not valid.')
+                'Stopping actor due to unescaping error, data '
+                'supplied by client was not valid.')
             self.stop()
 
     def close(self):

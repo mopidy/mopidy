@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from spotify import Link
 
 from mopidy import settings
@@ -9,7 +11,7 @@ def to_mopidy_artist(spotify_artist):
         return
     uri = str(Link.from_artist(spotify_artist))
     if not spotify_artist.is_loaded():
-        return Artist(uri=uri, name=u'[loading...]')
+        return Artist(uri=uri, name='[loading...]')
     return Artist(uri=uri, name=spotify_artist.name())
 
 
@@ -18,7 +20,7 @@ def to_mopidy_album(spotify_album):
         return
     uri = str(Link.from_album(spotify_album))
     if not spotify_album.is_loaded():
-        return Album(uri=uri, name=u'[loading...]')
+        return Album(uri=uri, name='[loading...]')
     return Album(
         uri=uri,
         name=spotify_album.name(),
@@ -31,7 +33,7 @@ def to_mopidy_track(spotify_track):
         return
     uri = str(Link.from_track(spotify_track, 0))
     if not spotify_track.is_loaded():
-        return Track(uri=uri, name=u'[loading...]')
+        return Track(uri=uri, name='[loading...]')
     spotify_album = spotify_track.album()
     if spotify_album is not None and spotify_album.is_loaded():
         date = spotify_album.year()
@@ -53,7 +55,7 @@ def to_mopidy_playlist(spotify_playlist):
         return
     uri = str(Link.from_playlist(spotify_playlist))
     if not spotify_playlist.is_loaded():
-        return Playlist(uri=uri, name=u'[loading...]')
+        return Playlist(uri=uri, name='[loading...]')
     return Playlist(
         uri=uri,
         name=spotify_playlist.name(),

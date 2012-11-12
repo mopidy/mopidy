@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import Queue
 
@@ -16,7 +18,7 @@ class SpotifyTrack(Track):
     def __init__(self, uri):
         super(SpotifyTrack, self).__init__()
         self._spotify_track = Link.from_string(uri).as_track()
-        self._unloaded_track = Track(uri=uri, name=u'[loading...]')
+        self._unloaded_track = Track(uri=uri, name='[loading...]')
         self._track = None
 
     @property
@@ -57,7 +59,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         try:
             return SpotifyTrack(uri)
         except SpotifyError as e:
-            logger.debug(u'Failed to lookup "%s": %s', uri, e)
+            logger.debug('Failed to lookup "%s": %s', uri, e)
             return None
 
     def refresh(self, uri=None):
@@ -73,22 +75,22 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             return Playlist(tracks=tracks)
         spotify_query = []
         for (field, values) in query.iteritems():
-            if field == u'track':
-                field = u'title'
-            if field == u'date':
-                field = u'year'
+            if field == 'track':
+                field = 'title'
+            if field == 'date':
+                field = 'year'
             if not hasattr(values, '__iter__'):
                 values = [values]
             for value in values:
-                if field == u'any':
+                if field == 'any':
                     spotify_query.append(value)
-                elif field == u'year':
+                elif field == 'year':
                     value = int(value.split('-')[0])  # Extract year
-                    spotify_query.append(u'%s:%d' % (field, value))
+                    spotify_query.append('%s:%d' % (field, value))
                 else:
-                    spotify_query.append(u'%s:"%s"' % (field, value))
-        spotify_query = u' '.join(spotify_query)
-        logger.debug(u'Spotify search query: %s' % spotify_query)
+                    spotify_query.append('%s:"%s"' % (field, value))
+        spotify_query = ' '.join(spotify_query)
+        logger.debug('Spotify search query: %s' % spotify_query)
         queue = Queue.Queue()
         self.backend.spotify.search(spotify_query, queue)
         try:

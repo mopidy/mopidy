@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mock import patch
 
 from mopidy.frontends.mpd.protocol.status import SUBSYSTEMS
@@ -27,180 +29,180 @@ class IdleHandlerTest(protocol.BaseTestCase):
         self.assertNoResponse()
 
     def test_idle(self):
-        self.sendRequest(u'idle')
+        self.sendRequest('idle')
         self.assertEqualSubscriptions(SUBSYSTEMS)
         self.assertNoEvents()
         self.assertNoResponse()
 
     def test_idle_disables_timeout(self):
-        self.sendRequest(u'idle')
+        self.sendRequest('idle')
         self.connection.disable_timeout.assert_called_once_with()
 
     def test_noidle(self):
-        self.sendRequest(u'noidle')
+        self.sendRequest('noidle')
         self.assertNoSubscriptions()
         self.assertNoEvents()
         self.assertNoResponse()
 
     def test_idle_player(self):
-        self.sendRequest(u'idle player')
+        self.sendRequest('idle player')
         self.assertEqualSubscriptions(['player'])
         self.assertNoEvents()
         self.assertNoResponse()
 
     def test_idle_player_playlist(self):
-        self.sendRequest(u'idle player playlist')
+        self.sendRequest('idle player playlist')
         self.assertEqualSubscriptions(['player', 'playlist'])
         self.assertNoEvents()
         self.assertNoResponse()
 
     def test_idle_then_noidle(self):
-        self.sendRequest(u'idle')
-        self.sendRequest(u'noidle')
+        self.sendRequest('idle')
+        self.sendRequest('noidle')
         self.assertNoSubscriptions()
         self.assertNoEvents()
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('OK')
 
     def test_idle_then_noidle_enables_timeout(self):
-        self.sendRequest(u'idle')
-        self.sendRequest(u'noidle')
+        self.sendRequest('idle')
+        self.sendRequest('noidle')
         self.connection.enable_timeout.assert_called_once_with()
 
     def test_idle_then_play(self):
         with patch.object(self.session, 'stop') as stop_mock:
-            self.sendRequest(u'idle')
-            self.sendRequest(u'play')
+            self.sendRequest('idle')
+            self.sendRequest('play')
             stop_mock.assert_called_once_with()
 
     def test_idle_then_idle(self):
         with patch.object(self.session, 'stop') as stop_mock:
-            self.sendRequest(u'idle')
-            self.sendRequest(u'idle')
+            self.sendRequest('idle')
+            self.sendRequest('idle')
             stop_mock.assert_called_once_with()
 
     def test_idle_player_then_play(self):
         with patch.object(self.session, 'stop') as stop_mock:
-            self.sendRequest(u'idle player')
-            self.sendRequest(u'play')
+            self.sendRequest('idle player')
+            self.sendRequest('play')
             stop_mock.assert_called_once_with()
 
     def test_idle_then_player(self):
-        self.sendRequest(u'idle')
-        self.idleEvent(u'player')
+        self.sendRequest('idle')
+        self.idleEvent('player')
         self.assertNoSubscriptions()
         self.assertNoEvents()
-        self.assertOnceInResponse(u'changed: player')
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('changed: player')
+        self.assertOnceInResponse('OK')
 
     def test_idle_player_then_event_player(self):
-        self.sendRequest(u'idle player')
-        self.idleEvent(u'player')
+        self.sendRequest('idle player')
+        self.idleEvent('player')
         self.assertNoSubscriptions()
         self.assertNoEvents()
-        self.assertOnceInResponse(u'changed: player')
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('changed: player')
+        self.assertOnceInResponse('OK')
 
     def test_idle_player_then_noidle(self):
-        self.sendRequest(u'idle player')
-        self.sendRequest(u'noidle')
+        self.sendRequest('idle player')
+        self.sendRequest('noidle')
         self.assertNoSubscriptions()
         self.assertNoEvents()
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('OK')
 
     def test_idle_player_playlist_then_noidle(self):
-        self.sendRequest(u'idle player playlist')
-        self.sendRequest(u'noidle')
+        self.sendRequest('idle player playlist')
+        self.sendRequest('noidle')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('OK')
 
     def test_idle_player_playlist_then_player(self):
-        self.sendRequest(u'idle player playlist')
-        self.idleEvent(u'player')
+        self.sendRequest('idle player playlist')
+        self.idleEvent('player')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertOnceInResponse(u'changed: player')
-        self.assertNotInResponse(u'changed: playlist')
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('changed: player')
+        self.assertNotInResponse('changed: playlist')
+        self.assertOnceInResponse('OK')
 
     def test_idle_playlist_then_player(self):
-        self.sendRequest(u'idle playlist')
-        self.idleEvent(u'player')
+        self.sendRequest('idle playlist')
+        self.idleEvent('player')
         self.assertEqualEvents(['player'])
         self.assertEqualSubscriptions(['playlist'])
         self.assertNoResponse()
 
     def test_idle_playlist_then_player_then_playlist(self):
-        self.sendRequest(u'idle playlist')
-        self.idleEvent(u'player')
-        self.idleEvent(u'playlist')
+        self.sendRequest('idle playlist')
+        self.idleEvent('player')
+        self.idleEvent('playlist')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertNotInResponse(u'changed: player')
-        self.assertOnceInResponse(u'changed: playlist')
-        self.assertOnceInResponse(u'OK')
+        self.assertNotInResponse('changed: player')
+        self.assertOnceInResponse('changed: playlist')
+        self.assertOnceInResponse('OK')
 
     def test_player(self):
-        self.idleEvent(u'player')
+        self.idleEvent('player')
         self.assertEqualEvents(['player'])
         self.assertNoSubscriptions()
         self.assertNoResponse()
 
     def test_player_then_idle_player(self):
-        self.idleEvent(u'player')
-        self.sendRequest(u'idle player')
+        self.idleEvent('player')
+        self.sendRequest('idle player')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertOnceInResponse(u'changed: player')
-        self.assertNotInResponse(u'changed: playlist')
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('changed: player')
+        self.assertNotInResponse('changed: playlist')
+        self.assertOnceInResponse('OK')
 
     def test_player_then_playlist(self):
-        self.idleEvent(u'player')
-        self.idleEvent(u'playlist')
+        self.idleEvent('player')
+        self.idleEvent('playlist')
         self.assertEqualEvents(['player', 'playlist'])
         self.assertNoSubscriptions()
         self.assertNoResponse()
 
     def test_player_then_idle(self):
-        self.idleEvent(u'player')
-        self.sendRequest(u'idle')
+        self.idleEvent('player')
+        self.sendRequest('idle')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertOnceInResponse(u'changed: player')
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('changed: player')
+        self.assertOnceInResponse('OK')
 
     def test_player_then_playlist_then_idle(self):
-        self.idleEvent(u'player')
-        self.idleEvent(u'playlist')
-        self.sendRequest(u'idle')
+        self.idleEvent('player')
+        self.idleEvent('playlist')
+        self.sendRequest('idle')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertOnceInResponse(u'changed: player')
-        self.assertOnceInResponse(u'changed: playlist')
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('changed: player')
+        self.assertOnceInResponse('changed: playlist')
+        self.assertOnceInResponse('OK')
 
     def test_player_then_idle_playlist(self):
-        self.idleEvent(u'player')
-        self.sendRequest(u'idle playlist')
+        self.idleEvent('player')
+        self.sendRequest('idle playlist')
         self.assertEqualEvents(['player'])
         self.assertEqualSubscriptions(['playlist'])
         self.assertNoResponse()
 
     def test_player_then_idle_playlist_then_noidle(self):
-        self.idleEvent(u'player')
-        self.sendRequest(u'idle playlist')
-        self.sendRequest(u'noidle')
+        self.idleEvent('player')
+        self.sendRequest('idle playlist')
+        self.sendRequest('noidle')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertOnceInResponse(u'OK')
+        self.assertOnceInResponse('OK')
 
     def test_player_then_playlist_then_idle_playlist(self):
-        self.idleEvent(u'player')
-        self.idleEvent(u'playlist')
-        self.sendRequest(u'idle playlist')
+        self.idleEvent('player')
+        self.idleEvent('playlist')
+        self.sendRequest('idle playlist')
         self.assertNoEvents()
         self.assertNoSubscriptions()
-        self.assertNotInResponse(u'changed: player')
-        self.assertOnceInResponse(u'changed: playlist')
-        self.assertOnceInResponse(u'OK')
+        self.assertNotInResponse('changed: player')
+        self.assertOnceInResponse('changed: playlist')
+        self.assertOnceInResponse('OK')

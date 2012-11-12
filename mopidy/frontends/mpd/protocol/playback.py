@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy.core import PlaybackState
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import (
@@ -153,7 +155,7 @@ def playid(context, cpid):
         cp_track = context.core.current_playlist.get(cpid=cpid).get()
         return context.core.playback.play(cp_track).get()
     except LookupError:
-        raise MpdNoExistError(u'No such song', command=u'playid')
+        raise MpdNoExistError('No such song', command='playid')
 
 
 @handle_request(r'^play (?P<songpos>-?\d+)$')
@@ -187,7 +189,7 @@ def playpos(context, songpos):
             songpos, songpos + 1).get()[0]
         return context.core.playback.play(cp_track).get()
     except IndexError:
-        raise MpdArgError(u'Bad song index', command=u'play')
+        raise MpdArgError('Bad song index', command='play')
 
 
 def _play_minus_one(context):
@@ -311,7 +313,7 @@ def replay_gain_status(context):
         Prints replay gain options. Currently, only the variable
         ``replay_gain_mode`` is returned.
     """
-    return u'off'  # TODO
+    return 'off'  # TODO
 
 
 @handle_request(r'^seek (?P<songpos>\d+) (?P<seconds>\d+)$')

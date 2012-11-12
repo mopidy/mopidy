@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime as dt
 
 from mopidy.frontends.mpd.exceptions import MpdNoExistError, MpdNotImplemented
@@ -25,7 +27,7 @@ def listplaylist(context, name):
         playlist = context.core.stored_playlists.get(name=name).get()
         return ['file: %s' % t.uri for t in playlist.tracks]
     except LookupError:
-        raise MpdNoExistError(u'No such playlist', command=u'listplaylist')
+        raise MpdNoExistError('No such playlist', command='listplaylist')
 
 
 @handle_request(r'^listplaylistinfo (?P<name>\S+)$')
@@ -47,8 +49,7 @@ def listplaylistinfo(context, name):
         playlist = context.core.stored_playlists.get(name=name).get()
         return playlist_to_mpd_format(playlist)
     except LookupError:
-        raise MpdNoExistError(
-            u'No such playlist', command=u'listplaylistinfo')
+        raise MpdNoExistError('No such playlist', command='listplaylistinfo')
 
 
 @handle_request(r'^listplaylists$')
@@ -74,7 +75,7 @@ def listplaylists(context):
     """
     result = []
     for playlist in context.core.stored_playlists.playlists.get():
-        result.append((u'playlist', playlist.name))
+        result.append(('playlist', playlist.name))
         last_modified = (
             playlist.last_modified or dt.datetime.now()).isoformat()
         # Remove microseconds
@@ -82,7 +83,7 @@ def listplaylists(context):
         # Add time zone information
         # TODO Convert to UTC before adding Z
         last_modified = last_modified + 'Z'
-        result.append((u'Last-Modified', last_modified))
+        result.append(('Last-Modified', last_modified))
     return result
 
 
@@ -103,7 +104,7 @@ def load(context, name):
         playlist = context.core.stored_playlists.get(name=name).get()
         context.core.current_playlist.append(playlist.tracks)
     except LookupError:
-        raise MpdNoExistError(u'No such playlist', command=u'load')
+        raise MpdNoExistError('No such playlist', command='load')
 
 
 @handle_request(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')

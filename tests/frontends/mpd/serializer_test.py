@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 import os
 
@@ -11,11 +13,11 @@ from tests import unittest
 
 class TrackMpdFormatTest(unittest.TestCase):
     track = Track(
-        uri=u'a uri',
-        artists=[Artist(name=u'an artist')],
-        name=u'a name',
-        album=Album(name=u'an album', num_tracks=13,
-            artists=[Artist(name=u'an other artist')]),
+        uri='a uri',
+        artists=[Artist(name='an artist')],
+        name='a name',
+        album=Album(name='an album', num_tracks=13,
+            artists=[Artist(name='an other artist')]),
         track_no=7,
         date=datetime.date(1977, 1, 1),
         length=137000,
@@ -94,14 +96,14 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('MUSICBRAINZ_ARTISTID', 'foo'), result)
 
     def test_artists_to_mpd_format(self):
-        artists = [Artist(name=u'ABBA'), Artist(name=u'Beatles')]
+        artists = [Artist(name='ABBA'), Artist(name='Beatles')]
         translated = translator.artists_to_mpd_format(artists)
-        self.assertEqual(translated, u'ABBA, Beatles')
+        self.assertEqual(translated, 'ABBA, Beatles')
 
     def test_artists_to_mpd_format_artist_with_no_name(self):
         artists = [Artist(name=None)]
         translated = translator.artists_to_mpd_format(artists)
-        self.assertEqual(translated, u'')
+        self.assertEqual(translated, '')
 
 
 class PlaylistMpdFormatTest(unittest.TestCase):
