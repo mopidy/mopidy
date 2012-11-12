@@ -96,6 +96,9 @@ backends:
 - Make the entire code base use unicode strings by default, and only fall back
   to bytestrings where it is required. Another step closer to Python 3.
 
+- The settings validator will now allow any setting prefixed with ``CUSTOM_``
+  to exist in the settings file.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

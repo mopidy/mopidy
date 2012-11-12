@@ -29,6 +29,11 @@ class ValidateSettingsTest(unittest.TestCase):
             result['MPD_SERVER_HOSTNMAE'],
             'Unknown setting. Did you mean MPD_SERVER_HOSTNAME?')
 
+    def test_custom_settings_does_not_return_errors(self):
+        result = setting_utils.validate_settings(
+            self.defaults, {'CUSTOM_MYAPP_SETTING': 'foobar'})
+        self.assertNotIn('CUSTOM_MYAPP_SETTING', result)
+
     def test_not_renamed_setting_returns_error(self):
         result = setting_utils.validate_settings(
             self.defaults, {'SERVER_HOSTNAME': '127.0.0.1'})

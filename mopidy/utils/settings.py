@@ -121,7 +121,6 @@ def validate_settings(defaults, settings):
     errors = {}
 
     changed = {
-        'CUSTOM_OUTPUT': 'OUTPUT',
         'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
         'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
         'FRONTEND': 'FRONTENDS',
@@ -176,7 +175,7 @@ def validate_settings(defaults, settings):
             if not value:
                 errors[setting] = 'Must contain at least one value.'
 
-        elif setting not in defaults:
+        elif setting not in defaults and not setting.startswith('CUSTOM_'):
             errors[setting] = 'Unknown setting.'
             suggestion = did_you_mean(setting, defaults)
 
