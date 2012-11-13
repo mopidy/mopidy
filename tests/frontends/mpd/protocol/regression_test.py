@@ -18,7 +18,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
     - Press next until you get to the unplayable track
     """
     def test(self):
-        self.core.current_playlist.append([
+        self.core.tracklist.append([
             Track(uri='dummy:a'),
             Track(uri='dummy:b'),
             Track(uri='dummy:error'),
@@ -59,7 +59,7 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.current_playlist.append([
+        self.core.tracklist.append([
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
         random.seed(1)
@@ -71,14 +71,14 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
         self.sendRequest('next')
 
         self.sendRequest('next')
-        cp_track_1 = self.core.playback.current_cp_track.get()
+        tl_track_1 = self.core.playback.current_tl_track.get()
         self.sendRequest('next')
-        cp_track_2 = self.core.playback.current_cp_track.get()
+        tl_track_2 = self.core.playback.current_tl_track.get()
         self.sendRequest('next')
-        cp_track_3 = self.core.playback.current_cp_track.get()
+        tl_track_3 = self.core.playback.current_tl_track.get()
 
-        self.assertNotEqual(cp_track_1, cp_track_2)
-        self.assertNotEqual(cp_track_2, cp_track_3)
+        self.assertNotEqual(tl_track_1, tl_track_2)
+        self.assertNotEqual(tl_track_2, tl_track_3)
 
 
 class IssueGH22RegressionTest(protocol.BaseTestCase):
@@ -95,7 +95,7 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.current_playlist.append([
+        self.core.tracklist.append([
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
         random.seed(1)
@@ -124,7 +124,7 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
 
     def test(self):
         self.core.stored_playlists.create('foo')
-        self.core.current_playlist.append([
+        self.core.tracklist.append([
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
 

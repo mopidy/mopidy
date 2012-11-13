@@ -151,7 +151,7 @@ class Album(ImmutableObject):
         super(Album, self).__init__(*args, **kwargs)
 
 
-CpTrack = namedtuple('CpTrack', ['cpid', 'track'])
+TlTrack = namedtuple('TlTrack', ['tlid', 'track'])
 
 
 class Track(ImmutableObject):

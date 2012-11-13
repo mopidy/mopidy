@@ -35,48 +35,48 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.core = Core(audio=None, backends=[
             self.backend1, self.backend2, self.backend3])
-        self.core.current_playlist.append(self.tracks)
+        self.core.tracklist.append(self.tracks)
 
-        self.cp_tracks = self.core.current_playlist.cp_tracks
-        self.unplayable_cp_track = self.cp_tracks[2]
+        self.tl_tracks = self.core.tracklist.tl_tracks
+        self.unplayable_tl_track = self.tl_tracks[2]
 
     def test_play_selects_dummy1_backend(self):
-        self.core.playback.play(self.cp_tracks[0])
+        self.core.playback.play(self.tl_tracks[0])
 
         self.playback1.play.assert_called_once_with(self.tracks[0])
         self.assertFalse(self.playback2.play.called)
 
     def test_play_selects_dummy2_backend(self):
-        self.core.playback.play(self.cp_tracks[1])
+        self.core.playback.play(self.tl_tracks[1])
 
         self.assertFalse(self.playback1.play.called)
         self.playback2.play.assert_called_once_with(self.tracks[1])
 
     def test_play_skips_to_next_on_unplayable_track(self):
-        self.core.playback.play(self.unplayable_cp_track)
+        self.core.playback.play(self.unplayable_tl_track)
 
         self.playback1.play.assert_called_once_with(self.tracks[3])
         self.assertFalse(self.playback2.play.called)
 
-        self.assertEqual(self.core.playback.current_cp_track,
-            self.cp_tracks[3])
+        self.assertEqual(self.core.playback.current_tl_track,
+            self.tl_tracks[3])
 
     def test_pause_selects_dummy1_backend(self):
-        self.core.playback.play(self.cp_tracks[0])
+        self.core.playback.play(self.tl_tracks[0])
         self.core.playback.pause()
 
         self.playback1.pause.assert_called_once_with()
         self.assertFalse(self.playback2.pause.called)
 
     def test_pause_selects_dummy2_backend(self):
-        self.core.playback.play(self.cp_tracks[1])
+        self.core.playback.play(self.tl_tracks[1])
         self.core.playback.pause()
 
         self.assertFalse(self.playback1.pause.called)
         self.playback2.pause.assert_called_once_with()
 
     def test_pause_changes_state_even_if_track_is_unplayable(self):
-        self.core.playback.current_cp_track = self.unplayable_cp_track
+        self.core.playback.current_tl_track = self.unplayable_tl_track
         self.core.playback.pause()
 
         self.assertEqual(self.core.playback.state, PlaybackState.PAUSED)
@@ -84,7 +84,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback2.pause.called)
 
     def test_resume_selects_dummy1_backend(self):
-        self.core.playback.play(self.cp_tracks[0])
+        self.core.playback.play(self.tl_tracks[0])
         self.core.playback.pause()
         self.core.playback.resume()
 
@@ -92,7 +92,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback2.resume.called)
 
     def test_resume_selects_dummy2_backend(self):
-        self.core.playback.play(self.cp_tracks[1])
+        self.core.playback.play(self.tl_tracks[1])
         self.core.playback.pause()
         self.core.playback.resume()
 
@@ -100,7 +100,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.playback2.resume.assert_called_once_with()
 
     def test_resume_does_nothing_if_track_is_unplayable(self):
-        self.core.playback.current_cp_track = self.unplayable_cp_track
+        self.core.playback.current_tl_track = self.unplayable_tl_track
         self.core.playback.state = PlaybackState.PAUSED
         self.core.playback.resume()
 
@@ -109,21 +109,21 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback2.resume.called)
 
     def test_stop_selects_dummy1_backend(self):
-        self.core.playback.play(self.cp_tracks[0])
+        self.core.playback.play(self.tl_tracks[0])
         self.core.playback.stop()
 
         self.playback1.stop.assert_called_once_with()
         self.assertFalse(self.playback2.stop.called)
 
     def test_stop_selects_dummy2_backend(self):
-        self.core.playback.play(self.cp_tracks[1])
+        self.core.playback.play(self.tl_tracks[1])
         self.core.playback.stop()
 
         self.assertFalse(self.playback1.stop.called)
         self.playback2.stop.assert_called_once_with()
 
     def test_stop_changes_state_even_if_track_is_unplayable(self):
-        self.core.playback.current_cp_track = self.unplayable_cp_track
+        self.core.playback.current_tl_track = self.unplayable_tl_track
         self.core.playback.state = PlaybackState.PAUSED
         self.core.playback.stop()
 
@@ -132,21 +132,21 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback2.stop.called)
 
     def test_seek_selects_dummy1_backend(self):
-        self.core.playback.play(self.cp_tracks[0])
+        self.core.playback.play(self.tl_tracks[0])
         self.core.playback.seek(10000)
 
         self.playback1.seek.assert_called_once_with(10000)
         self.assertFalse(self.playback2.seek.called)
 
     def test_seek_selects_dummy2_backend(self):
-        self.core.playback.play(self.cp_tracks[1])
+        self.core.playback.play(self.tl_tracks[1])
         self.core.playback.seek(10000)
 
         self.assertFalse(self.playback1.seek.called)
         self.playback2.seek.assert_called_once_with(10000)
 
     def test_seek_fails_for_unplayable_track(self):
-        self.core.playback.current_cp_track = self.unplayable_cp_track
+        self.core.playback.current_tl_track = self.unplayable_tl_track
         self.core.playback.state = PlaybackState.PLAYING
         success = self.core.playback.seek(1000)
 
@@ -155,7 +155,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback2.seek.called)
 
     def test_time_position_selects_dummy1_backend(self):
-        self.core.playback.play(self.cp_tracks[0])
+        self.core.playback.play(self.tl_tracks[0])
         self.core.playback.seek(10000)
         self.core.playback.time_position
 
@@ -163,7 +163,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback2.get_time_position.called)
 
     def test_time_position_selects_dummy2_backend(self):
-        self.core.playback.play(self.cp_tracks[1])
+        self.core.playback.play(self.tl_tracks[1])
         self.core.playback.seek(10000)
         self.core.playback.time_position
 
@@ -171,7 +171,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.playback2.get_time_position.assert_called_once_with()
 
     def test_time_position_returns_0_if_track_is_unplayable(self):
-        self.core.playback.current_cp_track = self.unplayable_cp_track
+        self.core.playback.current_tl_track = self.unplayable_tl_track
 
         result = self.core.playback.time_position
 

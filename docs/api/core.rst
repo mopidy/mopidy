@@ -26,12 +26,12 @@ seek, and volume control.
     :members:
 
 
-Current playlist controller
-===========================
+Tracklist controller
+====================
 
-Manages everything related to the currently loaded playlist.
+Manages everything related to the tracks we are currently playing.
 
-.. autoclass:: mopidy.core.CurrentPlaylistController
+.. autoclass:: mopidy.core.TracklistController
     :members:
 
 
