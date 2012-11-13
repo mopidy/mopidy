@@ -329,7 +329,7 @@ class Audio(pykka.ThreadingActor):
         :rtype: int in range [0..100] or :class:`None`
         """
         if self._software_mixing:
-            return round(self._playbin.get_property('volume') * 100)
+            return int(round(self._playbin.get_property('volume') * 100))
 
         if self._mixer is None:
             return None
