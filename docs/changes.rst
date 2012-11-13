@@ -105,6 +105,9 @@ backends:
 - The Spotify backend now returns the track if you search for the Spotify track
   URI. (Fixes: :issue:`233`)
 
+- Renamed "current playlist" to "tracklist" everywhere, including the core API
+  used by frontends.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

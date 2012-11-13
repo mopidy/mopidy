@@ -6,17 +6,13 @@ import pykka
 
 from mopidy.audio import AudioListener
 
-from .current_playlist import CurrentPlaylistController
 from .library import LibraryController
 from .playback import PlaybackController
 from .stored_playlists import StoredPlaylistsController
+from .tracklist import TracklistController
 
 
 class Core(pykka.ThreadingActor, AudioListener):
-    #: The current playlist controller. An instance of
-    #: :class:`mopidy.core.CurrentPlaylistController`.
-    current_playlist = None
-
     #: The library controller. An instance of
     # :class:`mopidy.core.LibraryController`.
     library = None
@@ -29,12 +25,14 @@ class Core(pykka.ThreadingActor, AudioListener):
     #: :class:`mopidy.core.StoredPlaylistsController`.
     stored_playlists = None
 
+    #: The tracklist controller. An instance of
+    #: :class:`mopidy.core.TracklistController`.
+    tracklist = None
+
     def __init__(self, audio=None, backends=None):
         super(Core, self).__init__()
 
         self.backends = Backends(backends)
-
-        self.current_playlist = CurrentPlaylistController(core=self)
 
         self.library = LibraryController(backends=self.backends, core=self)
 
@@ -43,6 +41,8 @@ class Core(pykka.ThreadingActor, AudioListener):
 
         self.stored_playlists = StoredPlaylistsController(
             backends=self.backends, core=self)
+
+        self.tracklist = TracklistController(core=self)
 
     @property
     def uri_schemes(self):

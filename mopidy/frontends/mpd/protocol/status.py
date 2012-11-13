@@ -36,10 +36,10 @@ def currentsong(context):
         Displays the song info of the current song (same song that is
         identified in status).
     """
-    current_cp_track = context.core.playback.current_cp_track.get()
-    if current_cp_track is not None:
-        position = context.core.playback.current_playlist_position.get()
-        return track_to_mpd_format(current_cp_track, position=position)
+    current_tl_track = context.core.playback.current_tl_track.get()
+    if current_tl_track is not None:
+        position = context.core.playback.tracklist_position.get()
+        return track_to_mpd_format(current_tl_track, position=position)
 
 
 @handle_request(r'^idle$')
@@ -175,17 +175,17 @@ def status(context):
           decimal places for millisecond precision.
     """
     futures = {
-        'current_playlist.length': context.core.current_playlist.length,
-        'current_playlist.version': context.core.current_playlist.version,
+        'tracklist.length': context.core.tracklist.length,
+        'tracklist.version': context.core.tracklist.version,
         'playback.volume': context.core.playback.volume,
         'playback.consume': context.core.playback.consume,
         'playback.random': context.core.playback.random,
         'playback.repeat': context.core.playback.repeat,
         'playback.single': context.core.playback.single,
         'playback.state': context.core.playback.state,
-        'playback.current_cp_track': context.core.playback.current_cp_track,
-        'playback.current_playlist_position': (
-            context.core.playback.current_playlist_position),
+        'playback.current_tl_track': context.core.playback.current_tl_track,
+        'playback.tracklist_position': (
+            context.core.playback.tracklist_position),
         'playback.time_position': context.core.playback.time_position,
     }
     pykka.get_all(futures.values())
@@ -200,7 +200,7 @@ def status(context):
         ('xfade', _status_xfade(futures)),
         ('state', _status_state(futures)),
     ]
-    if futures['playback.current_cp_track'].get() is not None:
+    if futures['playback.current_tl_track'].get() is not None:
         result.append(('song', _status_songpos(futures)))
         result.append(('songid', _status_songid(futures)))
     if futures['playback.state'].get() in (
@@ -212,9 +212,9 @@ def status(context):
 
 
 def _status_bitrate(futures):
-    current_cp_track = futures['playback.current_cp_track'].get()
-    if current_cp_track is not None:
-        return current_cp_track.track.bitrate
+    current_tl_track = futures['playback.current_tl_track'].get()
+    if current_tl_track is not None:
+        return current_tl_track.track.bitrate
 
 
 def _status_consume(futures):
@@ -225,11 +225,11 @@ def _status_consume(futures):
 
 
 def _status_playlist_length(futures):
-    return futures['current_playlist.length'].get()
+    return futures['tracklist.length'].get()
 
 
 def _status_playlist_version(futures):
-    return futures['current_playlist.version'].get()
+    return futures['tracklist.version'].get()
 
 
 def _status_random(futures):
@@ -245,15 +245,15 @@ def _status_single(futures):
 
 
 def _status_songid(futures):
-    current_cp_track = futures['playback.current_cp_track'].get()
-    if current_cp_track is not None:
-        return current_cp_track.cpid
+    current_tl_track = futures['playback.current_tl_track'].get()
+    if current_tl_track is not None:
+        return current_tl_track.tlid
     else:
         return _status_songpos(futures)
 
 
 def _status_songpos(futures):
-    return futures['playback.current_playlist_position'].get()
+    return futures['playback.tracklist_position'].get()
 
 
 def _status_state(futures):
@@ -277,13 +277,13 @@ def _status_time_elapsed(futures):
 
 
 def _status_time_total(futures):
-    current_cp_track = futures['playback.current_cp_track'].get()
-    if current_cp_track is None:
+    current_tl_track = futures['playback.current_tl_track'].get()
+    if current_tl_track is None:
         return 0
-    elif current_cp_track.track.length is None:
+    elif current_tl_track.track.length is None:
         return 0
     else:
-        return current_cp_track.track.length
+        return current_tl_track.track.length
 
 
 def _status_volume(futures):

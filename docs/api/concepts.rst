@@ -43,14 +43,14 @@ every request from a frontend it calls out to one or more backends which does
 the real work, and when the backends respond, the core actor is responsible for
 combining the responses into a single response to the requesting frontend.
 
-The core actor also keeps track of the current playlist, since it doesn't
-belong to a specific backend.
+The core actor also keeps track of the tracklist, since it doesn't belong to a
+specific backend.
 
 See :ref:`core-api` for more details.
 
 .. digraph:: core_architecture
 
-    Core -> "Current\nplaylist\ncontroller"
+    Core -> "Tracklist\ncontroller"
     Core -> "Library\ncontroller"
     Core -> "Playback\ncontroller"
     Core -> "Stored\nplaylists\ncontroller"

@@ -12,7 +12,7 @@ class StatusHandlerTest(protocol.BaseTestCase):
 
     def test_currentsong(self):
         track = Track()
-        self.core.current_playlist.append([track])
+        self.core.tracklist.append([track])
         self.core.playback.play()
         self.sendRequest('currentsong')
         self.assertInResponse('file: ')

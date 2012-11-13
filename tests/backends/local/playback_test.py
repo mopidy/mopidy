@@ -27,7 +27,7 @@ class LocalPlaybackControllerTest(PlaybackControllerTest, unittest.TestCase):
     def add_track(self, path):
         uri = path_to_uri(path_to_data_dir(path))
         track = Track(uri=uri, length=4464)
-        self.current_playlist.add(track)
+        self.tracklist.add(track)
 
     def test_uri_scheme(self):
         self.assertIn('file', self.core.uri_schemes)

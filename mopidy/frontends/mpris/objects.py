@@ -84,10 +84,10 @@ class MprisObject(dbus.service.Object):
         logger.info('Connected to D-Bus')
         return bus_name
 
-    def _get_track_id(self, cp_track):
-        return '/com/mopidy/track/%d' % cp_track.cpid
+    def _get_track_id(self, tl_track):
+        return '/com/mopidy/track/%d' % tl_track.tlid
 
-    def _get_cpid(self, track_id):
+    def _get_tlid(self, track_id):
         assert track_id.startswith('/com/mopidy/track/')
         return track_id.split('/')[-1]
 
@@ -234,14 +234,14 @@ class MprisObject(dbus.service.Object):
             logger.debug('%s.SetPosition not allowed', PLAYER_IFACE)
             return
         position = position // 1000
-        current_cp_track = self.core.playback.current_cp_track.get()
-        if current_cp_track is None:
+        current_tl_track = self.core.playback.current_tl_track.get()
+        if current_tl_track is None:
             return
-        if track_id != self._get_track_id(current_cp_track):
+        if track_id != self._get_track_id(current_tl_track):
             return
         if position < 0:
             return
-        if current_cp_track.track.length < position:
+        if current_tl_track.track.length < position:
             return
         self.core.playback.seek(position)
 
@@ -260,8 +260,8 @@ class MprisObject(dbus.service.Object):
             return
         track = self.core.library.lookup(uri).get()
         if track is not None:
-            cp_track = self.core.current_playlist.add(track).get()
-            self.core.playback.play(cp_track)
+            tl_track = self.core.tracklist.add(track).get()
+            self.core.playback.play(tl_track)
         else:
             logger.debug('Track with URI "%s" not found in library.', uri)
 
@@ -330,12 +330,12 @@ class MprisObject(dbus.service.Object):
             self.core.playback.random = False
 
     def get_Metadata(self):
-        current_cp_track = self.core.playback.current_cp_track.get()
-        if current_cp_track is None:
+        current_tl_track = self.core.playback.current_tl_track.get()
+        if current_tl_track is None:
             return {'mpris:trackid': ''}
         else:
-            (_, track) = current_cp_track
-            metadata = {'mpris:trackid': self._get_track_id(current_cp_track)}
+            (_, track) = current_tl_track
+            metadata = {'mpris:trackid': self._get_track_id(current_tl_track)}
             if track.length:
                 metadata['mpris:length'] = track.length * 1000
             if track.uri:
@@ -384,15 +384,15 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanControl():
             return False
         return (
-            self.core.playback.cp_track_at_next.get() !=
-            self.core.playback.current_cp_track.get())
+            self.core.playback.tl_track_at_next.get() !=
+            self.core.playback.current_tl_track.get())
 
     def get_CanGoPrevious(self):
         if not self.get_CanControl():
             return False
         return (
-            self.core.playback.cp_track_at_previous.get() !=
-            self.core.playback.current_cp_track.get())
+            self.core.playback.tl_track_at_previous.get() !=
+            self.core.playback.current_tl_track.get())
 
     def get_CanPlay(self):
         if not self.get_CanControl():

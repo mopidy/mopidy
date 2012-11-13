@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import datetime
 
-from mopidy.models import Artist, Album, CpTrack, Track, Playlist
+from mopidy.models import Artist, Album, TlTrack, Track, Playlist
 
 from tests import unittest
 
@@ -314,19 +314,19 @@ class AlbumTest(unittest.TestCase):
         self.assertNotEqual(hash(album1), hash(album2))
 
 
-class CpTrackTest(unittest.TestCase):
+class TlTrackTest(unittest.TestCase):
     def setUp(self):
-        self.cpid = 123
+        self.tlid = 123
         self.track = Track()
-        self.cp_track = CpTrack(self.cpid, self.track)
+        self.tl_track = TlTrack(self.tlid, self.track)
 
-    def test_cp_track_can_be_accessed_as_a_tuple(self):
-        self.assertEqual(self.cpid, self.cp_track[0])
-        self.assertEqual(self.track, self.cp_track[1])
+    def test_tl_track_can_be_accessed_as_a_tuple(self):
+        self.assertEqual(self.tlid, self.tl_track[0])
+        self.assertEqual(self.track, self.tl_track[1])
 
-    def test_cp_track_can_be_accessed_by_attribute_names(self):
-        self.assertEqual(self.cpid, self.cp_track.cpid)
-        self.assertEqual(self.track, self.cp_track.track)
+    def test_tl_track_can_be_accessed_by_attribute_names(self):
+        self.assertEqual(self.tlid, self.tl_track.tlid)
+        self.assertEqual(self.track, self.tl_track.track)
 
 
 class TrackTest(unittest.TestCase):
