@@ -81,13 +81,13 @@ class LibraryControllerTest(object):
         result = self.library.find_exact(album=['album2'])
         self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
 
-    def test_find_exact_filename(self):
-        track_1_filename = 'file://' + path_to_data_dir('uri1')
-        result = self.library.find_exact(filename=track_1_filename)
+    def test_find_exact_uri(self):
+        track_1_uri = 'file://' + path_to_data_dir('uri1')
+        result = self.library.find_exact(uri=track_1_uri)
         self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
 
-        track_2_filename = 'file://' + path_to_data_dir('uri2')
-        result = self.library.find_exact(filename=track_2_filename)
+        track_2_uri = 'file://' + path_to_data_dir('uri2')
+        result = self.library.find_exact(uri=track_2_uri)
         self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
 
     def test_find_exact_wrong_type(self):
@@ -146,13 +146,6 @@ class LibraryControllerTest(object):
         self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
 
         result = self.library.search(uri=['RI2'])
-        self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
-
-    def test_search_filename(self):
-        result = self.library.search(filename=['RI1'])
-        self.assertEqual(result, Playlist(tracks=self.tracks[:1]))
-
-        result = self.library.search(filename=['RI2'])
         self.assertEqual(result, Playlist(tracks=self.tracks[1:2]))
 
     def test_search_any(self):

@@ -24,8 +24,8 @@ def _build_query(mpd_query):
         field = m.groupdict()['field'].lower()
         if field == 'title':
             field = 'track'
-        elif field == 'file':
-            field = 'filename'
+        elif field in ('file', 'filename'):
+            field = 'uri'
         field = str(field)  # Needed for kwargs keys on OS X and Windows
         what = m.groupdict()['what'].lower()
         if field in query:
