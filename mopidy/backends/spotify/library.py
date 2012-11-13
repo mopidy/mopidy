@@ -75,9 +75,16 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             return Playlist(tracks=tracks)
         spotify_query = []
         for (field, values) in query.iteritems():
-            if field == 'track':
+            if field == 'uri':
+                tracks = []
+                for value in values:
+                    track = self.lookup(value)
+                    if track:
+                        tracks.append(track)
+                return Playlist(tracks=tracks)
+            elif field == 'track':
                 field = 'title'
-            if field == 'date':
+            elif field == 'date':
                 field = 'year'
             if not hasattr(values, '__iter__'):
                 values = [values]

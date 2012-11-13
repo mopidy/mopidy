@@ -102,6 +102,9 @@ backends:
 - The MPD commands ``search`` and ``find`` now allows the key ``file``, which
   is used by ncmpcpp instead of ``filename``.
 
+- The Spotify backend now returns the track if you search for the Spotify track
+  URI. (Fixes: :issue:`233`)
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
