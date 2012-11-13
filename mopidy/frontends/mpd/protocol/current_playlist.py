@@ -22,12 +22,10 @@ def add(context, uri):
     """
     if not uri:
         return
-    for uri_scheme in context.core.uri_schemes.get():
-        if uri.startswith(uri_scheme):
-            track = context.core.library.lookup(uri).get()
-            if track is not None:
-                context.core.current_playlist.add(track)
-                return
+    track = context.core.library.lookup(uri).get()
+    if track:
+        context.core.current_playlist.add(track)
+        return
     raise MpdNoExistError('directory or file not found', command='add')
 
 
