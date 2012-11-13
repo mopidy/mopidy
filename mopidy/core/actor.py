@@ -60,10 +60,18 @@ class Backends(list):
     def __init__(self, backends):
         super(Backends, self).__init__(backends)
 
+        # These lists keeps the backends in the original order, but only
+        # includes those which implements the required backend provider. Since
+        # it is important to keep the order, we can't simply use .values() on
+        # the X_by_uri_scheme dicts below.
+        self.with_library = [b for b in backends if b.has_library().get()]
+        self.with_playback = [b for b in backends if b.has_playback().get()]
+        self.with_stored_playlists = [b for b in backends
+            if b.has_stored_playlists().get()]
+
         self.by_uri_scheme = {}
         for backend in backends:
-            uri_schemes = backend.uri_schemes.get()
-            for uri_scheme in uri_schemes:
+            for uri_scheme in backend.uri_schemes.get():
                 assert uri_scheme not in self.by_uri_scheme, (
                     'Cannot add URI scheme %s for %s, '
                     'it is already handled by %s'
@@ -71,3 +79,15 @@ class Backends(list):
                     uri_scheme, backend.__class__.__name__,
                     self.by_uri_scheme[uri_scheme].__class__.__name__)
                 self.by_uri_scheme[uri_scheme] = backend
+
+        self.with_library_by_uri_scheme = {}
+        self.with_playback_by_uri_scheme = {}
+        self.with_stored_playlists_by_uri_scheme = {}
+
+        for uri_scheme, backend in self.by_uri_scheme.items():
+            if backend.has_library().get():
+                self.with_library_by_uri_scheme[uri_scheme] = backend
+            if backend.has_playback().get():
+                self.with_playback_by_uri_scheme[uri_scheme] = backend
+            if backend.has_stored_playlists().get():
+                self.with_stored_playlists_by_uri_scheme[uri_scheme] = backend
