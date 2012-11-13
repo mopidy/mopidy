@@ -129,9 +129,9 @@ def play(context):
     return context.core.playback.play().get()
 
 
-@handle_request(r'^playid (?P<cpid>-?\d+)$')
-@handle_request(r'^playid "(?P<cpid>-?\d+)"$')
-def playid(context, cpid):
+@handle_request(r'^playid (?P<tlid>-?\d+)$')
+@handle_request(r'^playid "(?P<tlid>-?\d+)"$')
+def playid(context, tlid):
     """
     *musicpd.org, playback section:*
 
@@ -148,12 +148,12 @@ def playid(context, cpid):
     - ``playid "-1"`` when stopped without a current track, e.g. after playlist
       replacement, starts playback at the first track.
     """
-    cpid = int(cpid)
-    if cpid == -1:
+    tlid = int(tlid)
+    if tlid == -1:
         return _play_minus_one(context)
     try:
-        cp_track = context.core.current_playlist.get(cpid=cpid).get()
-        return context.core.playback.play(cp_track).get()
+        tl_track = context.core.tracklist.get(tlid=tlid).get()
+        return context.core.playback.play(tl_track).get()
     except LookupError:
         raise MpdNoExistError('No such song', command='playid')
 
@@ -185,9 +185,8 @@ def playpos(context, songpos):
     if songpos == -1:
         return _play_minus_one(context)
     try:
-        cp_track = context.core.current_playlist.slice(
-            songpos, songpos + 1).get()[0]
-        return context.core.playback.play(cp_track).get()
+        tl_track = context.core.tracklist.slice(songpos, songpos + 1).get()[0]
+        return context.core.playback.play(tl_track).get()
     except IndexError:
         raise MpdArgError('Bad song index', command='play')
 
@@ -197,12 +196,12 @@ def _play_minus_one(context):
         return  # Nothing to do
     elif (context.core.playback.state.get() == PlaybackState.PAUSED):
         return context.core.playback.resume().get()
-    elif context.core.playback.current_cp_track.get() is not None:
-        cp_track = context.core.playback.current_cp_track.get()
-        return context.core.playback.play(cp_track).get()
-    elif context.core.current_playlist.slice(0, 1).get():
-        cp_track = context.core.current_playlist.slice(0, 1).get()[0]
-        return context.core.playback.play(cp_track).get()
+    elif context.core.playback.current_tl_track.get() is not None:
+        tl_track = context.core.playback.current_tl_track.get()
+        return context.core.playback.play(tl_track).get()
+    elif context.core.tracklist.slice(0, 1).get():
+        tl_track = context.core.tracklist.slice(0, 1).get()[0]
+        return context.core.playback.play(tl_track).get()
     else:
         return  # Fail silently
 
@@ -331,13 +330,13 @@ def seek(context, songpos, seconds):
 
     - issues ``seek 1 120`` without quotes around the arguments.
     """
-    if context.core.playback.current_playlist_position != songpos:
+    if context.core.playback.tracklist_position != songpos:
         playpos(context, songpos)
     context.core.playback.seek(int(seconds) * 1000)
 
 
-@handle_request(r'^seekid "(?P<cpid>\d+)" "(?P<seconds>\d+)"$')
-def seekid(context, cpid, seconds):
+@handle_request(r'^seekid "(?P<tlid>\d+)" "(?P<seconds>\d+)"$')
+def seekid(context, tlid, seconds):
     """
     *musicpd.org, playback section:*
 
@@ -345,8 +344,8 @@ def seekid(context, cpid, seconds):
 
         Seeks to the position ``TIME`` (in seconds) of song ``SONGID``.
     """
-    if context.core.playback.current_cpid != cpid:
-        playid(context, cpid)
+    if context.core.playback.current_tlid != tlid:
+        playid(context, tlid)
     context.core.playback.seek(int(seconds) * 1000)
 
 

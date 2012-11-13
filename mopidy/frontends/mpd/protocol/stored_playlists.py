@@ -102,7 +102,7 @@ def load(context, name):
     """
     try:
         playlist = context.core.stored_playlists.get(name=name).get()
-        context.core.current_playlist.append(playlist.tracks)
+        context.core.tracklist.append(playlist.tracks)
     except LookupError:
         raise MpdNoExistError('No such playlist', command='load')
 
