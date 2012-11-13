@@ -27,7 +27,7 @@ def _build_query(mpd_query):
         elif field in ('file', 'filename'):
             field = 'uri'
         field = str(field)  # Needed for kwargs keys on OS X and Windows
-        what = m.groupdict()['what'].lower()
+        what = m.groupdict()['what']
         if field in query:
             query[field].append(what)
         else:

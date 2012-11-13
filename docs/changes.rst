@@ -110,6 +110,9 @@ backends:
 - The MPD command ``plchanges`` always returned the entire playlist. It now
   returns an empty response when the client has seen the latest version.
 
+- MPD no longer lowercases search queries. This broke e.g. search by URI, where
+  casing may be essential.
+
 
 v0.8.1 (2012-10-30)
 ===================
