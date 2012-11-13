@@ -75,6 +75,22 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
         self.sendRequest('find artist "what"')
         self.assertInResponse('OK')
 
+    def test_find_filename(self):
+        self.sendRequest('find "filename" "afilename"')
+        self.assertInResponse('OK')
+
+    def test_find_filename_without_quotes(self):
+        self.sendRequest('find filename "afilename"')
+        self.assertInResponse('OK')
+
+    def test_find_file(self):
+        self.sendRequest('find "file" "afilename"')
+        self.assertInResponse('OK')
+
+    def test_find_file_without_quotes(self):
+        self.sendRequest('find file "afilename"')
+        self.assertInResponse('OK')
+
     def test_find_title(self):
         self.sendRequest('find "title" "what"')
         self.assertInResponse('OK')
@@ -311,6 +327,14 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
 
     def test_search_filename_without_quotes(self):
         self.sendRequest('search filename "afilename"')
+        self.assertInResponse('OK')
+
+    def test_search_file(self):
+        self.sendRequest('search "file" "afilename"')
+        self.assertInResponse('OK')
+
+    def test_search_file_without_quotes(self):
+        self.sendRequest('search file "afilename"')
         self.assertInResponse('OK')
 
     def test_search_title(self):

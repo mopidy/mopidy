@@ -99,6 +99,9 @@ backends:
 - The settings validator will now allow any setting prefixed with ``CUSTOM_``
   to exist in the settings file.
 
+- The MPD commands ``search`` and ``find`` now allows the key ``file``, which
+  is used by ncmpcpp instead of ``filename``.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

@@ -13,10 +13,10 @@ def _build_query(mpd_query):
     Parses a MPD query string and converts it to the Mopidy query format.
     """
     query_pattern = (
-        r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"')
+        r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny)"? "[^"]+"')
     query_parts = re.findall(query_pattern, mpd_query)
     query_part_pattern = (
-        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny))"? '
+        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny))"? '
         r'"(?P<what>[^"]+)"')
     query = {}
     for query_part in query_parts:
@@ -24,6 +24,8 @@ def _build_query(mpd_query):
         field = m.groupdict()['field'].lower()
         if field == 'title':
             field = 'track'
+        elif field == 'file':
+            field = 'filename'
         field = str(field)  # Needed for kwargs keys on OS X and Windows
         what = m.groupdict()['what'].lower()
         if field in query:
@@ -47,7 +49,7 @@ def count(context, tag, needle):
 
 
 @handle_request(
-    r'^find (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
+    r'^find (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
     r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def find(context, mpd_query):
     """
@@ -72,6 +74,7 @@ def find(context, mpd_query):
     *ncmpcpp:*
 
     - also uses the search type "date".
+    - uses "file" instead of "filename".
     """
     query = _build_query(mpd_query)
     return playlist_to_mpd_format(
@@ -320,7 +323,7 @@ def rescan(context, uri=None):
 
 
 @handle_request(
-    r'^search (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
+    r'^search (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
     r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def search(context, mpd_query):
     """
@@ -348,6 +351,7 @@ def search(context, mpd_query):
     *ncmpcpp:*
 
     - also uses the search type "date".
+    - uses "file" instead of "filename".
     """
     query = _build_query(mpd_query)
     return playlist_to_mpd_format(
