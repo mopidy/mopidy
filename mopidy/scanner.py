@@ -1,5 +1,8 @@
 from __future__ import unicode_literals
 
+import logging
+import datetime
+
 import gobject
 gobject.threads_init()
 
@@ -7,10 +10,40 @@ import pygst
 pygst.require('0.10')
 import gst
 
-import datetime
-
-from mopidy.utils.path import path_to_uri, find_files
+from mopidy import settings
+from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
+from mopidy.utils import log, path
+
+
+def main():
+    log.setup_root_logger()
+    log.setup_console_logging(2)
+
+    tracks = []
+
+    def store(data):
+        track = translator(data)
+        tracks.append(track)
+        logging.debug('Added %s', track.uri)
+
+    def debug(uri, error, debug):
+        logging.error('Failed %s: %s - %s', uri, error, debug)
+
+    logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+    scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
+    try:
+        scanner.start()
+    except KeyboardInterrupt:
+        scanner.stop()
+
+    logging.info('Done')
+
+    for row in mpd_translator.tracks_to_tag_cache_format(tracks):
+        if len(row) == 1:
+            print ('%s' % row).encode('utf-8')
+        else:
+            print ('%s: %s' % row).encode('utf-8')
 
 
 def translator(data):
@@ -56,7 +89,7 @@ def translator(data):
 
 class Scanner(object):
     def __init__(self, folder, data_callback, error_callback=None):
-        self.files = find_files(folder)
+        self.files = path.find_files(folder)
         self.data_callback = data_callback
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
@@ -119,7 +152,7 @@ class Scanner(object):
 
     def next_uri(self):
         try:
-            uri = path_to_uri(self.files.next())
+            uri = path.path_to_uri(self.files.next())
         except StopIteration:
             self.stop()
             return False
