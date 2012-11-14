@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+import pygst
+pygst.require('0.10')
+import gst
+
 from mopidy import audio, settings
 from mopidy.utils.path import path_to_uri
 
@@ -63,3 +67,48 @@ class AudioTest(unittest.TestCase):
     @unittest.SkipTest
     def test_invalid_output_raises_error(self):
         pass  # TODO
+
+
+class AudioStateTest(unittest.TestCase):
+    def setUp(self):
+        self.audio = audio.Audio()
+
+    def test_state_starts_as_stopped(self):
+        self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
+
+    def test_state_does_not_change_when_in_gst_ready_state(self):
+        self.audio._on_playbin_state_changed(
+            gst.STATE_NULL, gst.STATE_READY, gst.STATE_VOID_PENDING)
+
+        self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
+
+    def test_state_changes_from_stopped_to_playing_on_play(self):
+        self.audio._on_playbin_state_changed(
+            gst.STATE_NULL, gst.STATE_READY, gst.STATE_PLAYING)
+        self.audio._on_playbin_state_changed(
+            gst.STATE_READY, gst.STATE_PAUSED, gst.STATE_PLAYING)
+        self.audio._on_playbin_state_changed(
+            gst.STATE_PAUSED, gst.STATE_PLAYING, gst.STATE_VOID_PENDING)
+
+        self.assertEqual(audio.PlaybackState.PLAYING, self.audio.state)
+
+    def test_state_changes_from_playing_to_paused_on_pause(self):
+        self.audio.state = audio.PlaybackState.PLAYING
+
+        self.audio._on_playbin_state_changed(
+            gst.STATE_PLAYING, gst.STATE_PAUSED, gst.STATE_VOID_PENDING)
+
+        self.assertEqual(audio.PlaybackState.PAUSED, self.audio.state)
+
+    def test_state_changes_from_playing_to_stopped_on_stop(self):
+        self.audio.state = audio.PlaybackState.PLAYING
+
+        self.audio._on_playbin_state_changed(
+            gst.STATE_PLAYING, gst.STATE_PAUSED, gst.STATE_NULL)
+        self.audio._on_playbin_state_changed(
+            gst.STATE_PAUSED, gst.STATE_READY, gst.STATE_NULL)
+        # We never get the following call, so the logic must work without it
+        #self.audio._on_playbin_state_changed(
+        #    gst.STATE_READY, gst.STATE_NULL, gst.STATE_VOID_PENDING)
+
+        self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)

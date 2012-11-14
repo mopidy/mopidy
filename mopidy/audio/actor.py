@@ -13,6 +13,7 @@ from mopidy import settings
 from mopidy.utils import process
 
 from . import mixers
+from .constants import PlaybackState
 from .listener import AudioListener
 
 logger = logging.getLogger('mopidy.audio')
@@ -29,8 +30,10 @@ class Audio(pykka.ThreadingActor):
     - :attr:`mopidy.settings.OUTPUT`
     - :attr:`mopidy.settings.MIXER`
     - :attr:`mopidy.settings.MIXER_TRACK`
-
     """
+
+    #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
+    state = PlaybackState.STOPPED
 
     def __init__(self):
         super(Audio, self).__init__()
@@ -164,8 +167,12 @@ class Audio(pykka.ThreadingActor):
             bus.remove_signal_watch()
 
     def _on_message(self, bus, message):
-        if message.type == gst.MESSAGE_EOS:
-            self._trigger_reached_end_of_stream_event()
+        if (message.type == gst.MESSAGE_STATE_CHANGED
+                and message.src == self._playbin):
+            old_state, new_state, pending_state = message.parse_state_changed()
+            self._on_playbin_state_changed(old_state, new_state, pending_state)
+        elif message.type == gst.MESSAGE_EOS:
+            self._on_end_of_stream()
         elif message.type == gst.MESSAGE_ERROR:
             error, debug = message.parse_error()
             logger.error('%s %s', error, debug)
@@ -174,8 +181,37 @@ class Audio(pykka.ThreadingActor):
             error, debug = message.parse_warning()
             logger.warning('%s %s', error, debug)
 
-    def _trigger_reached_end_of_stream_event(self):
-        logger.debug('Triggering reached end of stream event')
+    def _on_playbin_state_changed(self, old_state, new_state, pending_state):
+        if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
+            # XXX: We're not called on the last state change when going down to
+            # NULL, so we rewrite the second to last call to get the expected
+            # behavior.
+            new_state = gst.STATE_NULL
+            pending_state = gst.STATE_VOID_PENDING
+
+        if pending_state != gst.STATE_VOID_PENDING:
+            return  # Ignore intermediate state changes
+
+        if new_state == gst.STATE_READY:
+            return  # Ignore READY state as it's GStreamer specific
+
+        if new_state == gst.STATE_PLAYING:
+            new_state = PlaybackState.PLAYING
+        elif new_state == gst.STATE_PAUSED:
+            new_state = PlaybackState.PAUSED
+        elif new_state == gst.STATE_NULL:
+            new_state = PlaybackState.STOPPED
+
+        old_state, self.state = self.state, new_state
+
+        logger.debug(
+            'Triggering event: state_changed(old_state=%s, new_state=%s)',
+            old_state, new_state)
+        AudioListener.send('state_changed',
+            old_state=old_state, new_state=new_state)
+
+    def _on_end_of_stream(self):
+        logger.debug('Triggering reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
 
     def set_uri(self, uri):
