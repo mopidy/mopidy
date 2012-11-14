@@ -19,7 +19,7 @@ class SpotifyPlaylistManager(PyspotifyPlaylistManager):
             'Callback called: '
             '%d track(s) added to position %d in playlist "%s"',
             len(tracks), position, playlist.name())
-        self.session_manager.refresh_stored_playlists()
+        self.session_manager.refresh_playlists()
 
     def tracks_moved(self, playlist, tracks, new_position, userdata):
         """Callback used by pyspotify"""
@@ -27,7 +27,7 @@ class SpotifyPlaylistManager(PyspotifyPlaylistManager):
             'Callback called: '
             '%d track(s) moved to position %d in playlist "%s"',
             len(tracks), new_position, playlist.name())
-        self.session_manager.refresh_stored_playlists()
+        self.session_manager.refresh_playlists()
 
     def tracks_removed(self, playlist, tracks, userdata):
         """Callback used by pyspotify"""
@@ -35,13 +35,13 @@ class SpotifyPlaylistManager(PyspotifyPlaylistManager):
             'Callback called: '
             '%d track(s) removed from playlist "%s"',
             len(tracks), playlist.name())
-        self.session_manager.refresh_stored_playlists()
+        self.session_manager.refresh_playlists()
 
     def playlist_renamed(self, playlist, userdata):
         """Callback used by pyspotify"""
         logger.debug(
             'Callback called: Playlist renamed to "%s"', playlist.name())
-        self.session_manager.refresh_stored_playlists()
+        self.session_manager.refresh_playlists()
 
     def playlist_state_changed(self, playlist, userdata):
         """Callback used by pyspotify"""

@@ -35,12 +35,12 @@ Manages everything related to the tracks we are currently playing.
     :members:
 
 
-Stored playlists controller
-===========================
+Playlists controller
+====================
 
-Manages stored playlist.
+Manages persistence of playlists.
 
-.. autoclass:: mopidy.core.StoredPlaylistsController
+.. autoclass:: mopidy.core.PlaylistsController
     :members:
 
 

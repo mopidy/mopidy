@@ -16,9 +16,9 @@ from .translator import parse_m3u
 logger = logging.getLogger('mopidy.backends.local')
 
 
-class LocalStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
+class LocalPlaylistsProvider(base.BasePlaylistsProvider):
     def __init__(self, *args, **kwargs):
-        super(LocalStoredPlaylistsProvider, self).__init__(*args, **kwargs)
+        super(LocalPlaylistsProvider, self).__init__(*args, **kwargs)
         self._path = settings.LOCAL_PLAYLIST_PATH
         self.refresh()
 

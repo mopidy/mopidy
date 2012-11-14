@@ -6,7 +6,7 @@ import urlparse
 import pykka
 
 
-class StoredPlaylistsController(object):
+class PlaylistsController(object):
     pykka_traversable = True
 
     def __init__(self, backends, core):
@@ -16,12 +16,12 @@ class StoredPlaylistsController(object):
     @property
     def playlists(self):
         """
-        Currently stored playlists.
+        The available playlists.
 
         Read-only. List of :class:`mopidy.models.Playlist`.
         """
-        futures = [b.stored_playlists.playlists
-            for b in self.backends.with_stored_playlists]
+        futures = [b.playlists.playlists
+            for b in self.backends.with_playlists]
         results = pykka.get_all(futures)
         return list(itertools.chain(*results))
 
@@ -43,11 +43,11 @@ class StoredPlaylistsController(object):
         :type uri_scheme: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        if uri_scheme in self.backends.with_stored_playlists_by_uri_scheme:
+        if uri_scheme in self.backends.with_playlists_by_uri_scheme:
             backend = self.backends.by_uri_scheme[uri_scheme]
         else:
-            backend = self.backends.with_stored_playlists[0]
-        return backend.stored_playlists.create(name).get()
+            backend = self.backends.with_playlists[0]
+        return backend.playlists.create(name).get()
 
     def delete(self, uri):
         """
@@ -60,14 +60,14 @@ class StoredPlaylistsController(object):
         :type uri: string
         """
         uri_scheme = urlparse.urlparse(uri).scheme
-        backend = self.backends.with_stored_playlists_by_uri_scheme.get(
+        backend = self.backends.with_playlists_by_uri_scheme.get(
             uri_scheme, None)
         if backend:
-            backend.stored_playlists.delete(uri).get()
+            backend.playlists.delete(uri).get()
 
     def get(self, **criteria):
         """
-        Get playlist by given criterias from the set of stored playlists.
+        Get playlist by given criterias from the set of playlists.
 
         Raises :exc:`LookupError` if a unique match is not found.
 
@@ -97,24 +97,24 @@ class StoredPlaylistsController(object):
 
     def lookup(self, uri):
         """
-        Lookup playlist with given URI in both the set of stored playlists and
-        in any other playlist sources. Returns :class:`None` if not found.
+        Lookup playlist with given URI in both the set of playlists and in any
+        other playlist sources. Returns :class:`None` if not found.
 
         :param uri: playlist URI
         :type uri: string
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         uri_scheme = urlparse.urlparse(uri).scheme
-        backend = self.backends.with_stored_playlists_by_uri_scheme.get(
+        backend = self.backends.with_playlists_by_uri_scheme.get(
             uri_scheme, None)
         if backend:
-            return backend.stored_playlists.lookup(uri).get()
+            return backend.playlists.lookup(uri).get()
         else:
             return None
 
     def refresh(self, uri_scheme=None):
         """
-        Refresh the stored playlists in :attr:`playlists`.
+        Refresh the playlists in :attr:`playlists`.
 
         If ``uri_scheme`` is :class:`None`, all backends are asked to refresh.
         If ``uri_scheme`` is an URI scheme handled by a backend, only that
@@ -125,18 +125,18 @@ class StoredPlaylistsController(object):
         :type uri_scheme: string
         """
         if uri_scheme is None:
-            futures = [b.stored_playlists.refresh()
-                for b in self.backends.with_stored_playlists]
+            futures = [b.playlists.refresh()
+                for b in self.backends.with_playlists]
             pykka.get_all(futures)
         else:
-            backend = self.backends.with_stored_playlists_by_uri_scheme.get(
+            backend = self.backends.with_playlists_by_uri_scheme.get(
                 uri_scheme, None)
             if backend:
-                backend.stored_playlists.refresh().get()
+                backend.playlists.refresh().get()
 
     def save(self, playlist):
         """
-        Save the playlist to the set of stored playlists.
+        Save the playlist.
 
         For a playlist to be saveable, it must have the ``uri`` attribute set.
         You should not set the ``uri`` atribute yourself, but use playlist
@@ -159,7 +159,7 @@ class StoredPlaylistsController(object):
         if playlist.uri is None:
             return
         uri_scheme = urlparse.urlparse(playlist.uri).scheme
-        backend = self.backends.with_stored_playlists_by_uri_scheme.get(
+        backend = self.backends.with_playlists_by_uri_scheme.get(
             uri_scheme, None)
         if backend:
-            return backend.stored_playlists.save(playlist).get()
+            return backend.playlists.save(playlist).get()

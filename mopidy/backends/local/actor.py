@@ -7,7 +7,7 @@ import pykka
 from mopidy.backends import base
 
 from .library import LocalLibraryProvider
-from .stored_playlists import LocalStoredPlaylistsProvider
+from .playlists import LocalPlaylistsProvider
 
 logger = logging.getLogger('mopidy.backends.local')
 
@@ -18,6 +18,6 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
 
         self.library = LocalLibraryProvider(backend=self)
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
-        self.stored_playlists = LocalStoredPlaylistsProvider(backend=self)
+        self.playlists = LocalPlaylistsProvider(backend=self)
 
         self.uri_schemes = ['file']

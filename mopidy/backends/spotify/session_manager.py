@@ -122,30 +122,29 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         if 'offline-mgr' in data and 'files unlocked' in data:
             # XXX This is a very very fragile and ugly hack, but we get no
             # proper event when libspotify is done with initial data loading.
-            # We delay the expensive refresh of Mopidy's stored playlists until
-            # this message arrives. This way, we avoid doing the refresh once
-            # for every playlist or other change. This reduces the time from
+            # We delay the expensive refresh of Mopidy's playlists until this
+            # message arrives. This way, we avoid doing the refresh once for
+            # every playlist or other change. This reduces the time from
             # startup until the Spotify backend is ready from 35s to 12s in one
             # test with clean Spotify cache. In cases with an outdated cache
-            # the time improvements should be a lot better.
+            # the time improvements should be a lot greater.
             self._initial_data_receive_completed = True
-            self.refresh_stored_playlists()
+            self.refresh_playlists()
 
     def end_of_track(self, session):
         """Callback used by pyspotify"""
         logger.debug('End of data stream reached')
         self.audio.emit_end_of_stream()
 
-    def refresh_stored_playlists(self):
-        """Refresh the stored playlists in the backend with fresh meta data
-        from Spotify"""
+    def refresh_playlists(self):
+        """Refresh the playlists in the backend with data from Spotify"""
         if not self._initial_data_receive_completed:
             logger.debug('Still getting data; skipped refresh of playlists')
             return
         playlists = map(
             translator.to_mopidy_playlist, self.session.playlist_container())
         playlists = filter(None, playlists)
-        self.backend.stored_playlists.playlists = playlists
+        self.backend.playlists.playlists = playlists
         logger.info('Loaded %d Spotify playlist(s)', len(playlists))
 
     def search(self, query, queue):

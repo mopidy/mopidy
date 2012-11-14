@@ -20,11 +20,11 @@ class SpotifyBackend(pykka.ThreadingActor, base.Backend):
         from .library import SpotifyLibraryProvider
         from .playback import SpotifyPlaybackProvider
         from .session_manager import SpotifySessionManager
-        from .stored_playlists import SpotifyStoredPlaylistsProvider
+        from .playlists import SpotifyPlaylistsProvider
 
         self.library = SpotifyLibraryProvider(backend=self)
         self.playback = SpotifyPlaybackProvider(audio=audio, backend=self)
-        self.stored_playlists = SpotifyStoredPlaylistsProvider(backend=self)
+        self.playlists = SpotifyPlaylistsProvider(backend=self)
 
         self.uri_schemes = ['spotify']
 

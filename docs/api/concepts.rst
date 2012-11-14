@@ -53,7 +53,7 @@ See :ref:`core-api` for more details.
     Core -> "Tracklist\ncontroller"
     Core -> "Library\ncontroller"
     Core -> "Playback\ncontroller"
-    Core -> "Stored\nplaylists\ncontroller"
+    Core -> "Playlists\ncontroller"
 
     "Library\ncontroller" -> "Local backend"
     "Library\ncontroller" -> "Spotify backend"
@@ -62,8 +62,8 @@ See :ref:`core-api` for more details.
     "Playback\ncontroller" -> "Spotify backend"
     "Playback\ncontroller" -> Audio
 
-    "Stored\nplaylists\ncontroller" -> "Local backend"
-    "Stored\nplaylists\ncontroller" -> "Spotify backend"
+    "Playlists\ncontroller" -> "Local backend"
+    "Playlists\ncontroller" -> "Spotify backend"
 
 
 Backends
@@ -80,12 +80,12 @@ See :ref:`backend-api` for more details.
 
     "Local backend" -> "Local\nlibrary\nprovider" -> "Local disk"
     "Local backend" -> "Local\nplayback\nprovider" -> "Local disk"
-    "Local backend" -> "Local\nstored\nplaylists\nprovider" -> "Local disk"
+    "Local backend" -> "Local\nplaylists\nprovider" -> "Local disk"
     "Local\nplayback\nprovider" -> Audio
 
     "Spotify backend" -> "Spotify\nlibrary\nprovider" -> "Spotify service"
     "Spotify backend" -> "Spotify\nplayback\nprovider" -> "Spotify service"
-    "Spotify backend" -> "Spotify\nstored\nplaylists\nprovider" -> "Spotify service"
+    "Spotify backend" -> "Spotify\nplaylists\nprovider" -> "Spotify service"
     "Spotify\nplayback\nprovider" -> Audio
 
 

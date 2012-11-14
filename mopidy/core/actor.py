@@ -8,7 +8,7 @@ from mopidy.audio import AudioListener
 
 from .library import LibraryController
 from .playback import PlaybackController
-from .stored_playlists import StoredPlaylistsController
+from .playlists import PlaylistsController
 from .tracklist import TracklistController
 
 
@@ -21,9 +21,9 @@ class Core(pykka.ThreadingActor, AudioListener):
     #: :class:`mopidy.core.PlaybackController`.
     playback = None
 
-    #: The stored playlists controller. An instance of
-    #: :class:`mopidy.core.StoredPlaylistsController`.
-    stored_playlists = None
+    #: The playlists controller. An instance of
+    #: :class:`mopidy.core.PlaylistsController`.
+    playlists = None
 
     #: The tracklist controller. An instance of
     #: :class:`mopidy.core.TracklistController`.
@@ -39,7 +39,7 @@ class Core(pykka.ThreadingActor, AudioListener):
         self.playback = PlaybackController(
             audio=audio, backends=self.backends, core=self)
 
-        self.stored_playlists = StoredPlaylistsController(
+        self.playlists = PlaylistsController(
             backends=self.backends, core=self)
 
         self.tracklist = TracklistController(core=self)
@@ -66,8 +66,8 @@ class Backends(list):
         # the X_by_uri_scheme dicts below.
         self.with_library = [b for b in backends if b.has_library().get()]
         self.with_playback = [b for b in backends if b.has_playback().get()]
-        self.with_stored_playlists = [b for b in backends
-            if b.has_stored_playlists().get()]
+        self.with_playlists = [b for b in backends
+            if b.has_playlists().get()]
 
         self.by_uri_scheme = {}
         for backend in backends:
@@ -82,12 +82,12 @@ class Backends(list):
 
         self.with_library_by_uri_scheme = {}
         self.with_playback_by_uri_scheme = {}
-        self.with_stored_playlists_by_uri_scheme = {}
+        self.with_playlists_by_uri_scheme = {}
 
         for uri_scheme, backend in self.by_uri_scheme.items():
             if backend.has_library().get():
                 self.with_library_by_uri_scheme[uri_scheme] = backend
             if backend.has_playback().get():
                 self.with_playback_by_uri_scheme[uri_scheme] = backend
-            if backend.has_stored_playlists().get():
-                self.with_stored_playlists_by_uri_scheme[uri_scheme] = backend
+            if backend.has_playlists().get():
+                self.with_playlists_by_uri_scheme[uri_scheme] = backend

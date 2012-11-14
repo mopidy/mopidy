@@ -123,7 +123,7 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.stored_playlists.create('foo')
+        self.core.playlists.create('foo')
         self.core.tracklist.append([
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
@@ -148,7 +148,7 @@ class IssueGH113RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.stored_playlists.create(
+        self.core.playlists.create(
             u'all lart spotify:track:\w\{22\} pastes')
 
         self.sendRequest('lsinfo "/"')

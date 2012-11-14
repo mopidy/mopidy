@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from mopidy.backends import base
 
 
-class SpotifyStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
+class SpotifyPlaylistsProvider(base.BasePlaylistsProvider):
     def create(self, name):
         pass  # TODO
 
