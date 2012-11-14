@@ -4,6 +4,8 @@ import logging
 import random
 import urlparse
 
+from mopidy.audio import PlaybackState
+
 from . import listener
 
 
@@ -22,21 +24,6 @@ def option_wrapper(name, default):
         return setattr(self, name, value)
 
     return property(get_option, set_option)
-
-
-class PlaybackState(object):
-    """
-    Enum of playback states.
-    """
-
-    #: Constant representing the paused state.
-    PAUSED = 'paused'
-
-    #: Constant representing the playing state.
-    PLAYING = 'playing'
-
-    #: Constant representing the stopped state.
-    STOPPED = 'stopped'
 
 
 class PlaybackController(object):
