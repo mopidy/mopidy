@@ -200,7 +200,9 @@ class Audio(pykka.ThreadingActor):
 
         old_state, self.state = self.state, new_state
 
-        logger.debug('Triggering state_changed event')
+        logger.debug(
+            'Triggering event: state_changed(old_state=%s, new_state=%s)',
+            old_state, new_state)
         AudioListener.send('state_changed',
             old_state=old_state, new_state=new_state)
 
