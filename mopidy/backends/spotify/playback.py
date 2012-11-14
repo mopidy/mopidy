@@ -52,12 +52,8 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
         return self.seek(time_position)
 
     def seek(self, time_position):
-        self.audio.prepare_change()
         self.backend.spotify.session.seek(time_position)
-        self.audio.start_playback()
-
         self._timer.seek(time_position)
-
         return True
 
     def stop(self):
