@@ -40,7 +40,8 @@ class Audio(pykka.ThreadingActor):
         self._mixer_track = None
         self._software_mixing = False
 
-        self._message_processor_set_up = False
+        self._notify_source_signal_id = None
+        self._message_signal_id = None
 
     def on_start(self):
         try:
@@ -63,7 +64,8 @@ class Audio(pykka.ThreadingActor):
         fakesink = gst.element_factory_make('fakesink')
         self._playbin.set_property('video-sink', fakesink)
 
-        self._playbin.connect('notify::source', self._on_new_source)
+        self._notify_source_signal_id = self._playbin.connect(
+            'notify::source', self._on_new_source)
 
     def _on_new_source(self, element, pad):
         uri = element.get_property('uri')
@@ -79,6 +81,8 @@ class Audio(pykka.ThreadingActor):
         source.set_property('caps', default_caps)
 
     def _teardown_playbin(self):
+        if self._notify_source_signal_id:
+            self._playbin.disconnect(self._notify_source_signal_id)
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
@@ -151,12 +155,12 @@ class Audio(pykka.ThreadingActor):
     def _setup_message_processor(self):
         bus = self._playbin.get_bus()
         bus.add_signal_watch()
-        bus.connect('message', self._on_message)
-        self._message_processor_set_up = True
+        self._message_signal_id = bus.connect('message', self._on_message)
 
     def _teardown_message_processor(self):
-        if self._message_processor_set_up:
+        if self._message_signal_id:
             bus = self._playbin.get_bus()
+            bus.disconnect(self._message_signal_id)
             bus.remove_signal_watch()
 
     def _on_message(self, bus, message):
