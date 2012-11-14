@@ -179,7 +179,7 @@ class Audio(pykka.ThreadingActor):
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
-            # XXX: We're not called on the last state cheng when going down to
+            # XXX: We're not called on the last state change when going down to
             # NULL, so we rewrite the second to last call to get the expected
             # behavior.
             new_state = gst.STATE_NULL
