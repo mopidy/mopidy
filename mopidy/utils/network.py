@@ -140,7 +140,7 @@ class Connection(object):
         self.timeout = timeout
 
         self.send_lock = threading.Lock()
-        self.send_buffer = ''
+        self.send_buffer = b''
 
         self.stopping = False
 
@@ -193,7 +193,7 @@ class Connection(object):
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return data
             self.stop('Unexpected client error: %s' % e)
-            return ''
+            return b''
 
     def enable_timeout(self):
         """Reactivate timeout mechanism."""
