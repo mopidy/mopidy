@@ -108,6 +108,9 @@ backends:
 - Renamed "current playlist" to "tracklist" everywhere, including the core API
   used by frontends.
 
+- Renamed "stored playlists" to "playlists" everywhere, including the core API
+  used by frontends.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
