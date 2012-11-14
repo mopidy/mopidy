@@ -57,7 +57,11 @@ class Core(pykka.ThreadingActor, AudioListener):
 
     def state_changed(self, old_state, new_state):
         # XXX: This is a temporary fix for issue #232 while we wait for a more
-        # permanent solution with the implementation of issue #234.
+        # permanent solution with the implementation of issue #234. When the
+        # Spotify play token is lost, the Spotify backend pauses audio
+        # playback, but mopidy.core doesn't know this, so we need to update
+        # mopidy.core's state to match the actual state in mopidy.audio. If we
+        # don't do this, clients will think that we're still playing.
         if (new_state == PlaybackState.PAUSED
                 and self.playback.state != PlaybackState.PAUSED):
             self.playback.state = new_state
