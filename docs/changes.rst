@@ -122,6 +122,10 @@ backends:
 - MPD no longer lowercases search queries. This broke e.g. search by URI, where
   casing may be essential.
 
+- :issue:`236`: The ``mopidy-scan`` command failed to include tags from ALAC
+  files (Apple lossless) because it didn't support multiple tag messages from
+  GStreamer per track it scanned.
+
 
 v0.8.1 (2012-10-30)
 ===================
