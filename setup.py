@@ -2,6 +2,8 @@
 Most of this file is taken from the Django project, which is BSD licensed.
 """
 
+from __future__ import unicode_literals
+
 from distutils.core import setup
 from distutils.command.install_data import install_data
 from distutils.command.install import INSTALL_SCHEMES
@@ -64,18 +66,17 @@ for scheme in INSTALL_SCHEMES.values():
 # an easy way to do this.
 packages, data_files = [], []
 root_dir = os.path.dirname(__file__)
-if root_dir != '':
+if root_dir != b'':
     os.chdir(root_dir)
-project_dir = 'mopidy'
-
+project_dir = b'mopidy'
 
 for dirpath, dirnames, filenames in os.walk(project_dir):
     # Ignore dirnames that start with '.'
     for i, dirname in enumerate(dirnames):
-        if dirname.startswith('.'):
+        if dirname.startswith(b'.'):
             del dirnames[i]
-    if '__init__.py' in filenames:
-        packages.append('.'.join(fullsplit(dirpath)))
+    if b'__init__.py' in filenames:
+        packages.append(b'.'.join(fullsplit(dirpath)))
     elif filenames:
         data_files.append([
             dirpath, [os.path.join(dirpath, f) for f in filenames]])
@@ -87,7 +88,7 @@ setup(
     author='Stein Magnus Jodal',
     author_email='stein.magnus@jodal.no',
     packages=packages,
-    package_data={'mopidy': ['backends/spotify/spotify_appkey.key']},
+    package_data={b'mopidy': ['backends/spotify/spotify_appkey.key']},
     cmdclass=cmdclasses,
     data_files=data_files,
     scripts=['bin/mopidy', 'bin/mopidy-scan'],

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy.utils import importing
 
 from tests import unittest

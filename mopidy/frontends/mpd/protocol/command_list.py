@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdUnknownCommand
 
@@ -40,10 +42,10 @@ def command_list_end(context):
             command, current_command_list_index=index)
         command_list_response.extend(response)
         if (command_list_response and
-                command_list_response[-1].startswith(u'ACK')):
+                command_list_response[-1].startswith('ACK')):
             return command_list_response
         if command_list_ok:
-            command_list_response.append(u'list_OK')
+            command_list_response.append('list_OK')
     return command_list_response
 
 

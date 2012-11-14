@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from __future__ import unicode_literals
+
 import os
 import tempfile
 
@@ -12,7 +14,7 @@ from tests import unittest, path_to_data_dir
 data_dir = path_to_data_dir('')
 song1_path = path_to_data_dir('song1.mp3')
 song2_path = path_to_data_dir('song2.mp3')
-encoded_path = path_to_data_dir(u'æøå.mp3')
+encoded_path = path_to_data_dir('æøå.mp3')
 song1_uri = path_to_uri(song1_path)
 song2_uri = path_to_uri(song2_path)
 encoded_uri = path_to_uri(encoded_path)
@@ -138,10 +140,10 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
             path_to_data_dir('utf8_tag_cache'), path_to_data_dir(''))
 
         uri = path_to_uri(path_to_data_dir('song1.mp3'))
-        artists = [Artist(name=u'æøå')]
-        album = Album(name=u'æøå', artists=artists)
+        artists = [Artist(name='æøå')]
+        album = Album(name='æøå', artists=artists)
         track = Track(
-            uri=uri, name=u'æøå', artists=artists, album=album, length=4000)
+            uri=uri, name='æøå', artists=artists, album=album, length=4000)
 
         self.assertEqual(track, list(tracks)[0])
 

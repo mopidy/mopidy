@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import mock
 
 from mopidy.backends import base
@@ -19,7 +21,13 @@ class CoreLibraryTest(unittest.TestCase):
         self.library2 = mock.Mock(spec=base.BaseLibraryProvider)
         self.backend2.library = self.library2
 
-        self.core = Core(audio=None, backends=[self.backend1, self.backend2])
+        # A backend without the optional library provider
+        self.backend3 = mock.Mock()
+        self.backend3.uri_schemes.get.return_value = ['dummy3']
+        self.backend3.has_library().get.return_value = False
+
+        self.core = Core(audio=None, backends=[
+            self.backend1, self.backend2, self.backend3])
 
     def test_lookup_selects_dummy1_backend(self):
         self.core.library.lookup('dummy1:a')
@@ -33,6 +41,13 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertFalse(self.library1.lookup.called)
         self.library2.lookup.assert_called_once_with('dummy2:a')
 
+    def test_lookup_fails_for_dummy3_track(self):
+        result = self.core.library.lookup('dummy3:a')
+
+        self.assertIsNone(result)
+        self.assertFalse(self.library1.lookup.called)
+        self.assertFalse(self.library2.lookup.called)
+
     def test_refresh_with_uri_selects_dummy1_backend(self):
         self.core.library.refresh('dummy1:a')
 
@@ -44,6 +59,12 @@ class CoreLibraryTest(unittest.TestCase):
 
         self.assertFalse(self.library1.refresh.called)
         self.library2.refresh.assert_called_once_with('dummy2:a')
+
+    def test_refresh_with_uri_fails_silently_for_dummy3_uri(self):
+        self.core.library.refresh('dummy3:a')
+
+        self.assertFalse(self.library1.refresh.called)
+        self.assertFalse(self.library2.refresh.called)
 
     def test_refresh_without_uri_calls_all_backends(self):
         self.core.library.refresh()

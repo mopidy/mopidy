@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 from spotify.manager import SpotifyContainerManager as \
@@ -13,21 +15,21 @@ class SpotifyContainerManager(PyspotifyContainerManager):
 
     def container_loaded(self, container, userdata):
         """Callback used by pyspotify"""
-        logger.debug(u'Callback called: playlist container loaded')
+        logger.debug('Callback called: playlist container loaded')
 
-        self.session_manager.refresh_stored_playlists()
+        self.session_manager.refresh_playlists()
 
         count = 0
         for playlist in self.session_manager.session.playlist_container():
             if playlist.type() == 'playlist':
                 self.session_manager.playlist_manager.watch(playlist)
                 count += 1
-        logger.debug(u'Watching %d playlist(s) for changes', count)
+        logger.debug('Watching %d playlist(s) for changes', count)
 
     def playlist_added(self, container, playlist, position, userdata):
         """Callback used by pyspotify"""
         logger.debug(
-            u'Callback called: playlist added at position %d', position)
+            'Callback called: playlist added at position %d', position)
         # container_loaded() is called after this callback, so we do not need
         # to handle this callback.
 
@@ -35,7 +37,7 @@ class SpotifyContainerManager(PyspotifyContainerManager):
                        userdata):
         """Callback used by pyspotify"""
         logger.debug(
-            u'Callback called: playlist "%s" moved from position %d to %d',
+            'Callback called: playlist "%s" moved from position %d to %d',
             playlist.name(), old_position, new_position)
         # container_loaded() is called after this callback, so we do not need
         # to handle this callback.
@@ -43,7 +45,7 @@ class SpotifyContainerManager(PyspotifyContainerManager):
     def playlist_removed(self, container, playlist, position, userdata):
         """Callback used by pyspotify"""
         logger.debug(
-            u'Callback called: playlist "%s" removed from position %d',
+            'Callback called: playlist "%s" removed from position %d',
             playlist.name(), position)
         # container_loaded() is called after this callback, so we do not need
         # to handle this callback.

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from collections import namedtuple
 
 
@@ -14,7 +16,7 @@ class ImmutableObject(object):
         for key, value in kwargs.items():
             if not hasattr(self, key):
                 raise TypeError(
-                    u"__init__() got an unexpected keyword argument '%s'" %
+                    '__init__() got an unexpected keyword argument "%s"' %
                     key)
             self.__dict__[key] = value
 
@@ -73,7 +75,7 @@ class ImmutableObject(object):
                 data[key] = values.pop(key)
         if values:
             raise TypeError(
-                u"copy() got an unexpected keyword argument '%s'" % key)
+                'copy() got an unexpected keyword argument "%s"' % key)
         return self.__class__(**data)
 
     def serialize(self):
@@ -149,7 +151,7 @@ class Album(ImmutableObject):
         super(Album, self).__init__(*args, **kwargs)
 
 
-CpTrack = namedtuple('CpTrack', ['cpid', 'track'])
+TlTrack = namedtuple('TlTrack', ['tlid', 'track'])
 
 
 class Track(ImmutableObject):

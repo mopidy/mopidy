@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 
 from mopidy import settings
@@ -6,13 +8,13 @@ from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
 from tests import unittest, path_to_data_dir
-from tests.backends.base.stored_playlists import (
-    StoredPlaylistsControllerTest)
+from tests.backends.base.playlists import (
+    PlaylistsControllerTest)
 from tests.backends.local import generate_song
 
 
-class LocalStoredPlaylistsControllerTest(
-        StoredPlaylistsControllerTest, unittest.TestCase):
+class LocalPlaylistsControllerTest(
+        PlaylistsControllerTest, unittest.TestCase):
 
     backend_class = LocalBackend
 
@@ -20,38 +22,38 @@ class LocalStoredPlaylistsControllerTest(
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
         self.assertFalse(os.path.exists(path))
 
-        self.stored.create(u'test')
+        self.core.playlists.create('test')
         self.assertTrue(os.path.exists(path))
 
     def test_create_slugifies_playlist_name(self):
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test-foo-bar.m3u')
         self.assertFalse(os.path.exists(path))
 
-        playlist = self.stored.create(u'test FOO baR')
-        self.assertEqual(u'test-foo-bar', playlist.name)
+        playlist = self.core.playlists.create('test FOO baR')
+        self.assertEqual('test-foo-bar', playlist.name)
         self.assertTrue(os.path.exists(path))
 
     def test_create_slugifies_names_which_tries_to_change_directory(self):
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test-foo-bar.m3u')
         self.assertFalse(os.path.exists(path))
 
-        playlist = self.stored.create(u'../../test FOO baR')
-        self.assertEqual(u'test-foo-bar', playlist.name)
+        playlist = self.core.playlists.create('../../test FOO baR')
+        self.assertEqual('test-foo-bar', playlist.name)
         self.assertTrue(os.path.exists(path))
 
     def test_saved_playlist_is_persisted(self):
         path1 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test1.m3u')
         path2 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test2-foo-bar.m3u')
 
-        playlist = self.stored.create(u'test1')
+        playlist = self.core.playlists.create('test1')
 
         self.assertTrue(os.path.exists(path1))
         self.assertFalse(os.path.exists(path2))
 
-        playlist = playlist.copy(name=u'test2 FOO baR')
-        playlist = self.stored.save(playlist)
+        playlist = playlist.copy(name='test2 FOO baR')
+        playlist = self.core.playlists.save(playlist)
 
-        self.assertEqual(u'test2-foo-bar', playlist.name)
+        self.assertEqual('test2-foo-bar', playlist.name)
         self.assertFalse(os.path.exists(path1))
         self.assertTrue(os.path.exists(path2))
 
@@ -59,19 +61,19 @@ class LocalStoredPlaylistsControllerTest(
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
         self.assertFalse(os.path.exists(path))
 
-        playlist = self.stored.create(u'test')
+        playlist = self.core.playlists.create('test')
         self.assertTrue(os.path.exists(path))
 
-        self.stored.delete(playlist.uri)
+        self.core.playlists.delete(playlist.uri)
         self.assertFalse(os.path.exists(path))
 
     def test_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1))
         track_path = track.uri[len('file://'):]
-        playlist = self.stored.create(u'test')
+        playlist = self.core.playlists.create('test')
         playlist_path = playlist.uri[len('file://'):]
         playlist = playlist.copy(tracks=[track])
-        playlist = self.stored.save(playlist)
+        playlist = self.core.playlists.save(playlist)
 
         with open(playlist_path) as playlist_file:
             contents = playlist_file.read()
@@ -82,20 +84,20 @@ class LocalStoredPlaylistsControllerTest(
         playlist_path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
 
         track = Track(uri=path_to_uri(path_to_data_dir('uri2')))
-        playlist = self.stored.create(u'test')
+        playlist = self.core.playlists.create('test')
         playlist = playlist.copy(tracks=[track])
-        playlist = self.stored.save(playlist)
+        playlist = self.core.playlists.save(playlist)
 
         backend = self.backend_class(audio=self.audio)
 
-        self.assert_(backend.stored_playlists.playlists)
+        self.assert_(backend.playlists.playlists)
         self.assertEqual(
             path_to_uri(playlist_path),
-            backend.stored_playlists.playlists[0].uri)
+            backend.playlists.playlists[0].uri)
         self.assertEqual(
-            playlist.name, backend.stored_playlists.playlists[0].name)
+            playlist.name, backend.playlists.playlists[0].name)
         self.assertEqual(
-            track.uri, backend.stored_playlists.playlists[0].tracks[0].uri)
+            track.uri, backend.playlists.playlists[0].tracks[0].uri)
 
     @unittest.SkipTest
     def test_santitising_of_playlist_filenames(self):

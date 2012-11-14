@@ -19,10 +19,10 @@ Playback provider
     :members:
 
 
-Stored playlists provider
-=========================
+Playlists provider
+==================
 
-.. autoclass:: mopidy.backends.base.BaseStoredPlaylistsProvider
+.. autoclass:: mopidy.backends.base.BasePlaylistsProvider
     :members:
 
 

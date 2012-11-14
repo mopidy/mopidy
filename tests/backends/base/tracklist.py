@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import mock
 import random
 
@@ -5,19 +7,19 @@ import pykka
 
 from mopidy import audio, core
 from mopidy.core import PlaybackState
-from mopidy.models import CpTrack, Playlist, Track
+from mopidy.models import TlTrack, Playlist, Track
 
 from tests.backends.base import populate_playlist
 
 
-class CurrentPlaylistControllerTest(object):
+class TracklistControllerTest(object):
     tracks = []
 
     def setUp(self):
         self.audio = mock.Mock(spec=audio.Audio)
         self.backend = self.backend_class.start(audio=self.audio).proxy()
         self.core = core.Core(audio=audio, backends=[self.backend])
-        self.controller = self.core.current_playlist
+        self.controller = self.core.tracklist
         self.playback = self.core.playback
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
@@ -26,25 +28,25 @@ class CurrentPlaylistControllerTest(object):
         pykka.ActorRegistry.stop_all()
 
     def test_length(self):
-        self.assertEqual(0, len(self.controller.cp_tracks))
+        self.assertEqual(0, len(self.controller.tl_tracks))
         self.assertEqual(0, self.controller.length)
         self.controller.append(self.tracks)
-        self.assertEqual(3, len(self.controller.cp_tracks))
+        self.assertEqual(3, len(self.controller.tl_tracks))
         self.assertEqual(3, self.controller.length)
 
     def test_add(self):
         for track in self.tracks:
-            cp_track = self.controller.add(track)
+            tl_track = self.controller.add(track)
             self.assertEqual(track, self.controller.tracks[-1])
-            self.assertEqual(cp_track, self.controller.cp_tracks[-1])
-            self.assertEqual(track, cp_track.track)
+            self.assertEqual(tl_track, self.controller.tl_tracks[-1])
+            self.assertEqual(track, tl_track.track)
 
     def test_add_at_position(self):
         for track in self.tracks[:-1]:
-            cp_track = self.controller.add(track, 0)
+            tl_track = self.controller.add(track, 0)
             self.assertEqual(track, self.controller.tracks[0])
-            self.assertEqual(cp_track, self.controller.cp_tracks[0])
-            self.assertEqual(track, cp_track.track)
+            self.assertEqual(tl_track, self.controller.tl_tracks[0])
+            self.assertEqual(track, tl_track.track)
 
     @populate_playlist
     def test_add_at_position_outside_of_playlist(self):
@@ -53,14 +55,14 @@ class CurrentPlaylistControllerTest(object):
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
-    def test_get_by_cpid(self):
-        cp_track = self.controller.cp_tracks[1]
-        self.assertEqual(cp_track, self.controller.get(cpid=cp_track.cpid))
+    def test_get_by_tlid(self):
+        tl_track = self.controller.tl_tracks[1]
+        self.assertEqual(tl_track, self.controller.get(tlid=tl_track.tlid))
 
     @populate_playlist
     def test_get_by_uri(self):
-        cp_track = self.controller.cp_tracks[1]
-        self.assertEqual(cp_track, self.controller.get(uri=cp_track.track.uri))
+        tl_track = self.controller.tl_tracks[1]
+        self.assertEqual(tl_track, self.controller.get(uri=tl_track.track.uri))
 
     @populate_playlist
     def test_get_by_uri_raises_error_for_invalid_uri(self):
@@ -93,18 +95,18 @@ class CurrentPlaylistControllerTest(object):
         self.controller.append([Track(uri='z'), track, track])
         try:
             self.controller.get(uri='a')
-            self.fail(u'Should raise LookupError if multiple matches')
+            self.fail('Should raise LookupError if multiple matches')
         except LookupError as e:
-            self.assertEqual(u'"uri=a" match multiple tracks', e[0])
+            self.assertEqual('"uri=a" match multiple tracks', e[0])
 
     def test_get_by_uri_raises_error_if_no_match(self):
         self.controller.playlist = Playlist(
             tracks=[Track(uri='z'), Track(uri='y')])
         try:
             self.controller.get(uri='a')
-            self.fail(u'Should raise LookupError if no match')
+            self.fail('Should raise LookupError if no match')
         except LookupError as e:
-            self.assertEqual(u'"uri=a" match no tracks', e[0])
+            self.assertEqual('"uri=a" match no tracks', e[0])
 
     def test_get_by_multiple_criteria_returns_elements_matching_all(self):
         track1 = Track(uri='a', name='x')
@@ -122,7 +124,7 @@ class CurrentPlaylistControllerTest(object):
         self.controller.append([track1, track2, track3])
         self.assertEqual(track2, self.controller.get(uri='b')[1])
 
-    def test_append_appends_to_the_current_playlist(self):
+    def test_append_appends_to_the_tracklist(self):
         self.controller.append([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.controller.tracks), 2)
         self.controller.append([Track(uri='c'), Track(uri='d')])
@@ -152,15 +154,15 @@ class CurrentPlaylistControllerTest(object):
         self.assertEqual(self.playback.current_track, None)
 
     def test_index_returns_index_of_track(self):
-        cp_tracks = []
+        tl_tracks = []
         for track in self.tracks:
-            cp_tracks.append(self.controller.add(track))
-        self.assertEquals(0, self.controller.index(cp_tracks[0]))
-        self.assertEquals(1, self.controller.index(cp_tracks[1]))
-        self.assertEquals(2, self.controller.index(cp_tracks[2]))
+            tl_tracks.append(self.controller.add(track))
+        self.assertEquals(0, self.controller.index(tl_tracks[0]))
+        self.assertEquals(1, self.controller.index(tl_tracks[1]))
+        self.assertEquals(2, self.controller.index(tl_tracks[2]))
 
     def test_index_raises_value_error_if_item_not_found(self):
-        test = lambda: self.controller.index(CpTrack(0, Track()))
+        test = lambda: self.controller.index(TlTrack(0, Track()))
         self.assertRaises(ValueError, test)
 
     @populate_playlist

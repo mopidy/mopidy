@@ -1,9 +1,11 @@
+from __future__ import unicode_literals
+
 import os
 import re
 
 from mopidy import settings
 from mopidy.frontends.mpd import protocol
-from mopidy.models import CpTrack
+from mopidy.models import TlTrack
 from mopidy.utils.path import mtime as get_mtime, uri_to_path, split_path
 
 
@@ -12,7 +14,7 @@ def track_to_mpd_format(track, position=None):
     Format track for output to MPD client.
 
     :param track: the track
-    :type track: :class:`mopidy.models.Track` or :class:`mopidy.models.CpTrack`
+    :type track: :class:`mopidy.models.Track` or :class:`mopidy.models.TlTrack`
     :param position: track's position in playlist
     :type position: integer
     :param key: if we should set key
@@ -21,10 +23,10 @@ def track_to_mpd_format(track, position=None):
     :type mtime: boolean
     :rtype: list of two-tuples
     """
-    if isinstance(track, CpTrack):
-        (cpid, track) = track
+    if isinstance(track, TlTrack):
+        (tlid, track) = track
     else:
-        (cpid, track) = (None, track)
+        (tlid, track) = (None, track)
     result = [
         ('file', track.uri or ''),
         ('Time', track.length and (track.length // 1000) or 0),
@@ -41,9 +43,9 @@ def track_to_mpd_format(track, position=None):
     if track.album is not None and track.album.artists:
         artists = artists_to_mpd_format(track.album.artists)
         result.append(('AlbumArtist', artists))
-    if position is not None and cpid is not None:
+    if position is not None and tlid is not None:
         result.append(('Pos', position))
-        result.append(('Id', cpid))
+        result.append(('Id', tlid))
     if track.album is not None and track.album.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_ALBUMID', track.album.musicbrainz_id))
     # FIXME don't use first and best artist?
@@ -93,7 +95,7 @@ def artists_to_mpd_format(artists):
     """
     artists = list(artists)
     artists.sort(key=lambda a: a.name)
-    return u', '.join([a.name for a in artists if a.name])
+    return ', '.join([a.name for a in artists if a.name])
 
 
 def tracks_to_mpd_format(tracks, start=0, end=None):
@@ -104,7 +106,7 @@ def tracks_to_mpd_format(tracks, start=0, end=None):
 
     :param tracks: the tracks
     :type tracks: list of :class:`mopidy.models.Track` or
-        :class:`mopidy.models.CpTrack`
+        :class:`mopidy.models.TlTrack`
     :param start: position of first track to include in output
     :type start: int (positive or negative)
     :param end: position after last track to include in output
@@ -178,7 +180,7 @@ def _add_to_tag_cache(result, folders, files):
 def tracks_to_directory_tree(tracks):
     directories = ({}, [])
     for track in tracks:
-        path = u''
+        path = ''
         current = directories
 
         local_folder = settings.LOCAL_MUSIC_PATH

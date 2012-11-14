@@ -20,5 +20,7 @@ https://github.com/mopidy/mopidy/issues?labels=Local+backend
 - :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
 """
 
+from __future__ import unicode_literals
+
 # flake8: noqa
 from .actor import LocalBackend

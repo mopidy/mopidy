@@ -14,6 +14,8 @@ The backend handles URIs starting with ``dummy:``.
 - None
 """
 
+from __future__ import unicode_literals
+
 import pykka
 
 from mopidy.backends import base
@@ -26,9 +28,9 @@ class DummyBackend(pykka.ThreadingActor, base.Backend):
 
         self.library = DummyLibraryProvider(backend=self)
         self.playback = DummyPlaybackProvider(audio=audio, backend=self)
-        self.stored_playlists = DummyStoredPlaylistsProvider(backend=self)
+        self.playlists = DummyPlaylistsProvider(backend=self)
 
-        self.uri_schemes = [u'dummy']
+        self.uri_schemes = ['dummy']
 
 
 class DummyLibraryProvider(base.BaseLibraryProvider):
@@ -78,7 +80,7 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
         return self._time_position
 
 
-class DummyStoredPlaylistsProvider(base.BaseStoredPlaylistsProvider):
+class DummyPlaylistsProvider(base.BasePlaylistsProvider):
     def create(self, name):
         playlist = Playlist(name=name)
         self._playlists.append(playlist)

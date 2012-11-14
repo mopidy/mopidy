@@ -65,16 +65,16 @@ class TrackListResource(object):
 
     @cherrypy.tools.json_out()
     def GET(self):
-        cp_tracks_future = self.core.current_playlist.cp_tracks
-        current_cp_track_future = self.core.playback.current_cp_track
+        tl_tracks_future = self.core.tracklist.tl_tracks
+        current_tl_track_future = self.core.playback.current_tl_track
         tracks = []
-        for cp_track in cp_tracks_future.get():
-            track = cp_track.track.serialize()
-            track['cpid'] = cp_track.cpid
+        for tl_track in tl_tracks_future.get():
+            track = tl_track.track.serialize()
+            track['tlid'] = tl_track.tlid
             tracks.append(track)
-        current_cp_track = current_cp_track_future.get()
+        current_tl_track = current_tl_track_future.get()
         return {
-            'currentTrackCpid': current_cp_track and current_cp_track.cpid,
+            'currentTrackTlid': current_tl_track and current_tl_track.tlid,
             'tracks': tracks,
         }
 
@@ -87,7 +87,7 @@ class PlaylistsResource(object):
 
     @cherrypy.tools.json_out()
     def GET(self):
-        playlists = self.core.stored_playlists.playlists.get()
+        playlists = self.core.playlists.playlists.get()
         return {
             'playlists': [p.serialize() for p in playlists],
         }

@@ -84,6 +84,22 @@ contributing.
 Code style
 ==========
 
+- Always import ``unicode_literals`` and use unicode literals for everything
+  except where you're explicitly working with bytes, which are marked with the
+  ``b`` prefix.
+
+  Do this::
+
+    from __future__ import unicode_literals
+
+    foo = 'I am a unicode string, which is a sane default'
+    bar = b'I am a bytestring'
+
+  Not this::
+
+    foo = u'I am a unicode string'
+    bar = 'I am a bytestring, but was it intentional?'
+
 - Follow :pep:`8` unless otherwise noted. `pep8.py
   <http://pypi.python.org/pypi/pep8/>`_ or `flake8
   <http://pypi.python.org/pypi/flake8>`_  can be used to check your code

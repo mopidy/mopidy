@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy.frontends.mpd.protocol import handle_request
 
 

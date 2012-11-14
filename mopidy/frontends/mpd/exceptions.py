@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy.exceptions import MopidyException
 
 
@@ -19,7 +21,7 @@ class MpdAckError(MopidyException):
 
     error_code = 0
 
-    def __init__(self, message=u'', index=0, command=u''):
+    def __init__(self, message='', index=0, command=''):
         super(MpdAckError, self).__init__(message, index, command)
         self.message = message
         self.index = index
@@ -31,7 +33,7 @@ class MpdAckError(MopidyException):
 
             ACK [%(error_code)i@%(index)i] {%(command)s} description
         """
-        return u'ACK [%i@%i] {%s} %s' % (
+        return 'ACK [%i@%i] {%s} %s' % (
             self.__class__.error_code, self.index, self.command, self.message)
 
 
@@ -48,7 +50,7 @@ class MpdPermissionError(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdPermissionError, self).__init__(*args, **kwargs)
-        self.message = u'you don\'t have permission for "%s"' % self.command
+        self.message = 'you don\'t have permission for "%s"' % self.command
 
 
 class MpdUnknownCommand(MpdAckError):
@@ -56,8 +58,8 @@ class MpdUnknownCommand(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
-        self.message = u'unknown command "%s"' % self.command
-        self.command = u''
+        self.message = 'unknown command "%s"' % self.command
+        self.command = ''
 
 
 class MpdNoExistError(MpdAckError):
@@ -73,4 +75,4 @@ class MpdNotImplemented(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdNotImplemented, self).__init__(*args, **kwargs)
-        self.message = u'Not implemented'
+        self.message = 'Not implemented'

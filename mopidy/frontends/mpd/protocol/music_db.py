@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 import shlex
 
@@ -11,19 +13,21 @@ def _build_query(mpd_query):
     Parses a MPD query string and converts it to the Mopidy query format.
     """
     query_pattern = (
-        r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]+"')
+        r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny)"? "[^"]+"')
     query_parts = re.findall(query_pattern, mpd_query)
     query_part_pattern = (
-        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny))"? '
+        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny))"? '
         r'"(?P<what>[^"]+)"')
     query = {}
     for query_part in query_parts:
         m = re.match(query_part_pattern, query_part)
         field = m.groupdict()['field'].lower()
-        if field == u'title':
-            field = u'track'
+        if field == 'title':
+            field = 'track'
+        elif field in ('file', 'filename'):
+            field = 'uri'
         field = str(field)  # Needed for kwargs keys on OS X and Windows
-        what = m.groupdict()['what'].lower()
+        what = m.groupdict()['what']
         if field in query:
             query[field].append(what)
         else:
@@ -45,7 +49,7 @@ def count(context, tag, needle):
 
 
 @handle_request(
-    r'^find (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
+    r'^find (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
     r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def find(context, mpd_query):
     """
@@ -70,6 +74,7 @@ def find(context, mpd_query):
     *ncmpcpp:*
 
     - also uses the search type "date".
+    - uses "file" instead of "filename".
     """
     query = _build_query(mpd_query)
     return playlist_to_mpd_format(
@@ -183,13 +188,13 @@ def list_(context, field, mpd_query=None):
     """
     field = field.lower()
     query = _list_build_query(field, mpd_query)
-    if field == u'artist':
+    if field == 'artist':
         return _list_artist(context, query)
-    elif field == u'album':
+    elif field == 'album':
         return _list_album(context, query)
-    elif field == u'date':
+    elif field == 'date':
         return _list_date(context, query)
-    elif field == u'genre':
+    elif field == 'genre':
         pass  # TODO We don't have genre in our internal data structures yet
 
 
@@ -202,16 +207,16 @@ def _list_build_query(field, mpd_query):
         tokens = shlex.split(mpd_query.encode('utf-8'))
     except ValueError as error:
         if str(error) == 'No closing quotation':
-            raise MpdArgError(u'Invalid unquoted character', command=u'list')
+            raise MpdArgError('Invalid unquoted character', command='list')
         else:
             raise
     tokens = [t.decode('utf-8') for t in tokens]
     if len(tokens) == 1:
-        if field == u'album':
+        if field == 'album':
             return {'artist': [tokens[0]]}
         else:
             raise MpdArgError(
-                u'should be "Album" for 3 arguments', command=u'list')
+                'should be "Album" for 3 arguments', command='list')
     elif len(tokens) % 2 == 0:
         query = {}
         while tokens:
@@ -219,15 +224,15 @@ def _list_build_query(field, mpd_query):
             key = str(key)  # Needed for kwargs keys on OS X and Windows
             value = tokens[1]
             tokens = tokens[2:]
-            if key not in (u'artist', u'album', u'date', u'genre'):
-                raise MpdArgError(u'not able to parse args', command=u'list')
+            if key not in ('artist', 'album', 'date', 'genre'):
+                raise MpdArgError('not able to parse args', command='list')
             if key in query:
                 query[key].append(value)
             else:
                 query[key] = [value]
         return query
     else:
-        raise MpdArgError(u'not able to parse args', command=u'list')
+        raise MpdArgError('not able to parse args', command='list')
 
 
 def _list_artist(context, query):
@@ -235,7 +240,7 @@ def _list_artist(context, query):
     playlist = context.core.library.find_exact(**query).get()
     for track in playlist.tracks:
         for artist in track.artists:
-            artists.add((u'Artist', artist.name))
+            artists.add(('Artist', artist.name))
     return artists
 
 
@@ -244,7 +249,7 @@ def _list_album(context, query):
     playlist = context.core.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.album is not None:
-            albums.add((u'Album', track.album.name))
+            albums.add(('Album', track.album.name))
     return albums
 
 
@@ -253,7 +258,7 @@ def _list_date(context, query):
     playlist = context.core.library.find_exact(**query).get()
     for track in playlist.tracks:
         if track.date is not None:
-            dates.add((u'Date', track.date))
+            dates.add(('Date', track.date))
     return dates
 
 
@@ -300,7 +305,7 @@ def lsinfo(context, uri=None):
     directories located at the root level, for both ``lsinfo``, ``lsinfo
     ""``, and ``lsinfo "/"``.
     """
-    if uri is None or uri == u'/' or uri == u'':
+    if uri is None or uri == '/' or uri == '':
         return stored_playlists.listplaylists(context)
     raise MpdNotImplemented  # TODO
 
@@ -318,7 +323,7 @@ def rescan(context, uri=None):
 
 
 @handle_request(
-    r'^search (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ilename|'
+    r'^search (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
     r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
 def search(context, mpd_query):
     """
@@ -346,6 +351,7 @@ def search(context, mpd_query):
     *ncmpcpp:*
 
     - also uses the search type "date".
+    - uses "file" instead of "filename".
     """
     query = _build_query(mpd_query)
     return playlist_to_mpd_format(

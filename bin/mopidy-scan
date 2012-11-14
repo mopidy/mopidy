@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import unicode_literals
+
 import sys
 import logging
 
@@ -8,20 +10,26 @@ from mopidy.utils.log import setup_console_logging, setup_root_logger
 from mopidy.scanner import Scanner, translator
 from mopidy.frontends.mpd.translator import tracks_to_tag_cache_format
 
+
 setup_root_logger()
 setup_console_logging(2)
 
+
 tracks = []
+
 
 def store(data):
     track = translator(data)
     tracks.append(track)
-    logging.debug(u'Added %s', track.uri)
+    logging.debug('Added %s', track.uri)
+
 
 def debug(uri, error, debug):
-    logging.error(u'Failed %s: %s - %s', uri, error, debug)
+    logging.error('Failed %s: %s - %s', uri, error, debug)
 
-logging.info(u'Scanning %s', settings.LOCAL_MUSIC_PATH)
+
+logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+
 
 scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
 try:
@@ -29,10 +37,12 @@ try:
 except KeyboardInterrupt:
     scanner.stop()
 
-logging.info(u'Done')
+
+logging.info('Done')
+
 
 for a in tracks_to_tag_cache_format(tracks):
     if len(a) == 1:
-        print (u'%s' % a).encode('utf-8')
+        print ('%s' % a).encode('utf-8')
     else:
-        print (u'%s: %s' % a).encode('utf-8')
+        print ('%s: %s' % a).encode('utf-8')

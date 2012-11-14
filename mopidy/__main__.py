@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import optparse
 import os
@@ -62,7 +64,7 @@ def main():
     except exceptions.SettingsError as ex:
         logger.error(ex.message)
     except KeyboardInterrupt:
-        logger.info(u'Interrupted. Exiting...')
+        logger.info('Interrupted. Exiting...')
     except Exception as ex:
         logger.exception(ex)
     finally:
@@ -76,7 +78,7 @@ def main():
 
 def parse_options():
     parser = optparse.OptionParser(
-        version=u'Mopidy %s' % versioning.get_version())
+        version='Mopidy %s' % versioning.get_version())
     parser.add_option(
         '--help-gst',
         action='store_true', dest='help_gst',
@@ -114,15 +116,15 @@ def parse_options():
 
 
 def check_old_folders():
-    old_settings_folder = os.path.expanduser(u'~/.mopidy')
+    old_settings_folder = os.path.expanduser('~/.mopidy')
 
     if not os.path.isdir(old_settings_folder):
         return
 
     logger.warning(
-        u'Old settings folder found at %s, settings.py should be moved '
-        u'to %s, any cache data should be deleted. See release notes for '
-        u'further instructions.', old_settings_folder, path.SETTINGS_PATH)
+        'Old settings folder found at %s, settings.py should be moved '
+        'to %s, any cache data should be deleted. See release notes for '
+        'further instructions.', old_settings_folder, path.SETTINGS_PATH)
 
 
 def setup_settings(interactive):
@@ -171,7 +173,7 @@ def setup_frontends(core):
         try:
             importing.get_class(frontend_class_name).start(core=core)
         except exceptions.OptionalDependencyError as ex:
-            logger.info(u'Disabled: %s (%s)', frontend_class_name, ex)
+            logger.info('Disabled: %s (%s)', frontend_class_name, ex)
 
 
 def stop_frontends():

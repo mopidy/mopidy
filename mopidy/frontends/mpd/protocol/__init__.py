@@ -10,17 +10,19 @@ implement our own MPD server which is compatible with the numerous existing
 `MPD clients <http://mpd.wikia.com/wiki/Clients>`_.
 """
 
+from __future__ import unicode_literals
+
 from collections import namedtuple
 import re
 
 #: The MPD protocol uses UTF-8 for encoding all data.
-ENCODING = u'UTF-8'
+ENCODING = 'UTF-8'
 
 #: The MPD protocol uses ``\n`` as line terminator.
-LINE_TERMINATOR = u'\n'
+LINE_TERMINATOR = '\n'
 
 #: The MPD protocol version is 0.16.0.
-VERSION = u'0.16.0'
+VERSION = '0.16.0'
 
 MpdCommand = namedtuple('MpdCommand', ['name', 'auth_required'])
 
@@ -55,7 +57,7 @@ def handle_request(pattern, auth_required=True):
             mpd_commands.add(
                 MpdCommand(name=match.group(), auth_required=auth_required))
         if pattern in request_handlers:
-            raise ValueError(u'Tried to redefine handler for %s with %s' % (
+            raise ValueError('Tried to redefine handler for %s with %s' % (
                 pattern, func))
         request_handlers[pattern] = func
         func.__doc__ = '    - *Pattern:* ``%s``\n\n%s' % (

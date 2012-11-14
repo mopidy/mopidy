@@ -153,7 +153,7 @@ plugins, ending in a summary line::
 
 Next, you should be able to produce a audible tone by running::
 
-    gst-launch-0.10 audiotestsrc ! sudioresample ! autoaudiosink
+    gst-launch-0.10 audiotestsrc ! audioresample ! autoaudiosink
 
 If you cannot hear any sound when running this command, you won't hear any
 sound from Mopidy either, as Mopidy by default uses GStreamer's
@@ -198,6 +198,21 @@ server simultaneously. To use the SHOUTcast output, do the following:
 Other advanced setups are also possible for outputs. Basically, anything you
 can use with the ``gst-launch-0.10`` command can be plugged into
 :attr:`mopidy.settings.OUTPUT`.
+
+
+Custom settings
+===============
+
+Mopidy's settings validator will stop you from defining any settings in your
+settings file that Mopidy doesn't know about. This may sound obnoxious, but it
+helps you detect typos in your settings, and deprecated settings that should be
+removed or updated.
+
+If you're extending Mopidy in some way, and want to use Mopidy's settings
+system, you can prefix your settings with ``CUSTOM_`` to get around the
+settings validator. We recommend that you choose names like
+``CUSTOM_MYAPP_MYSETTING`` so that multiple custom extensions to Mopidy can be
+used at the same time without any danger of naming collisions.
 
 
 Available settings

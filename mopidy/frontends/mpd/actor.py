@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import sys
 
@@ -24,11 +26,11 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 max_connections=settings.MPD_SERVER_MAX_CONNECTIONS)
         except IOError as error:
             logger.error(
-                u'MPD server startup failed: %s',
+                'MPD server startup failed: %s',
                 encoding.locale_decode(error))
             sys.exit(1)
 
-        logger.info(u'MPD server running at [%s]:%s', hostname, port)
+        logger.info('MPD server running at [%s]:%s', hostname, port)
 
     def on_stop(self):
         process.stop_actors_by_class(session.MpdSession)

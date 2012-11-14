@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import mock
 import pykka
 
@@ -26,8 +28,8 @@ class CoreActorTest(unittest.TestCase):
         self.assertIn('dummy2', result)
 
     def test_backends_with_colliding_uri_schemes_fails(self):
-        self.backend1.__class__.__name__ = 'B1'
-        self.backend2.__class__.__name__ = 'B2'
+        self.backend1.__class__.__name__ = b'B1'
+        self.backend2.__class__.__name__ = b'B2'
         self.backend2.uri_schemes.get.return_value = ['dummy1', 'dummy2']
         self.assertRaisesRegexp(
             AssertionError,

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import os
 import re
@@ -25,10 +27,10 @@ def get_or_create_folder(folder):
     folder = os.path.expanduser(folder)
     if os.path.isfile(folder):
         raise OSError(
-            u'A file with the same name as the desired dir, '
-            u'"%s", already exists.' % folder)
+            'A file with the same name as the desired dir, '
+            '"%s", already exists.' % folder)
     elif not os.path.isdir(folder):
-        logger.info(u'Creating dir %s', folder)
+        logger.info('Creating dir %s', folder)
         os.makedirs(folder, 0755)
     return folder
 
@@ -36,7 +38,7 @@ def get_or_create_folder(folder):
 def get_or_create_file(filename):
     filename = os.path.expanduser(filename)
     if not os.path.isfile(filename):
-        logger.info(u'Creating file %s', filename)
+        logger.info('Creating file %s', filename)
         open(filename, 'w')
     return filename
 

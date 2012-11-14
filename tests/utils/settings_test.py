@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 
 from mopidy import exceptions, settings
@@ -25,29 +27,34 @@ class ValidateSettingsTest(unittest.TestCase):
             self.defaults, {'MPD_SERVER_HOSTNMAE': '127.0.0.1'})
         self.assertEqual(
             result['MPD_SERVER_HOSTNMAE'],
-            u'Unknown setting. Did you mean MPD_SERVER_HOSTNAME?')
+            'Unknown setting. Did you mean MPD_SERVER_HOSTNAME?')
+
+    def test_custom_settings_does_not_return_errors(self):
+        result = setting_utils.validate_settings(
+            self.defaults, {'CUSTOM_MYAPP_SETTING': 'foobar'})
+        self.assertNotIn('CUSTOM_MYAPP_SETTING', result)
 
     def test_not_renamed_setting_returns_error(self):
         result = setting_utils.validate_settings(
             self.defaults, {'SERVER_HOSTNAME': '127.0.0.1'})
         self.assertEqual(
             result['SERVER_HOSTNAME'],
-            u'Deprecated setting. Use MPD_SERVER_HOSTNAME.')
+            'Deprecated setting. Use MPD_SERVER_HOSTNAME.')
 
     def test_unneeded_settings_returns_error(self):
         result = setting_utils.validate_settings(
             self.defaults, {'SPOTIFY_LIB_APPKEY': '/tmp/foo'})
         self.assertEqual(
             result['SPOTIFY_LIB_APPKEY'],
-            u'Deprecated setting. It may be removed.')
+            'Deprecated setting. It may be removed.')
 
     def test_unavailable_bitrate_setting_returns_error(self):
         result = setting_utils.validate_settings(
             self.defaults, {'SPOTIFY_BITRATE': 50})
         self.assertEqual(
             result['SPOTIFY_BITRATE'],
-            u'Unavailable Spotify bitrate. '
-            u'Available bitrates are 96, 160, and 320.')
+            'Unavailable Spotify bitrate. '
+            'Available bitrates are 96, 160, and 320.')
 
     def test_two_errors_are_both_reported(self):
         result = setting_utils.validate_settings(
@@ -56,7 +63,7 @@ class ValidateSettingsTest(unittest.TestCase):
 
     def test_masks_value_if_secret(self):
         secret = setting_utils.mask_value_if_secret('SPOTIFY_PASSWORD', 'bar')
-        self.assertEqual(u'********', secret)
+        self.assertEqual('********', secret)
 
     def test_does_not_mask_value_if_not_secret(self):
         not_secret = setting_utils.mask_value_if_secret(
@@ -72,13 +79,13 @@ class ValidateSettingsTest(unittest.TestCase):
         result = setting_utils.validate_settings(
             self.defaults, {'FRONTENDS': []})
         self.assertEqual(
-            result['FRONTENDS'], u'Must contain at least one value.')
+            result['FRONTENDS'], 'Must contain at least one value.')
 
     def test_empty_backends_list_returns_error(self):
         result = setting_utils.validate_settings(
             self.defaults, {'BACKENDS': []})
         self.assertEqual(
-            result['BACKENDS'], u'Must contain at least one value.')
+            result['BACKENDS'], 'Must contain at least one value.')
 
 
 class SettingsProxyTest(unittest.TestCase):
@@ -93,17 +100,17 @@ class SettingsProxyTest(unittest.TestCase):
     def test_getattr_raises_error_on_missing_setting(self):
         try:
             self.settings.TEST
-            self.fail(u'Should raise exception')
+            self.fail('Should raise exception')
         except exceptions.SettingsError as e:
-            self.assertEqual(u'Setting "TEST" is not set.', e.message)
+            self.assertEqual('Setting "TEST" is not set.', e.message)
 
     def test_getattr_raises_error_on_empty_setting(self):
-        self.settings.TEST = u''
+        self.settings.TEST = ''
         try:
             self.settings.TEST
-            self.fail(u'Should raise exception')
+            self.fail('Should raise exception')
         except exceptions.SettingsError as e:
-            self.assertEqual(u'Setting "TEST" is empty.', e.message)
+            self.assertEqual('Setting "TEST" is empty.', e.message)
 
     def test_getattr_does_not_raise_error_if_setting_is_false(self):
         self.settings.TEST = False
@@ -191,12 +198,12 @@ class FormatSettingListTest(unittest.TestCase):
         self.settings = setting_utils.SettingsProxy(settings)
 
     def test_contains_the_setting_name(self):
-        self.settings.TEST = u'test'
+        self.settings.TEST = 'test'
         result = setting_utils.format_settings_list(self.settings)
         self.assertIn('TEST:', result, result)
 
     def test_repr_of_a_string_value(self):
-        self.settings.TEST = u'test'
+        self.settings.TEST = 'test'
         result = setting_utils.format_settings_list(self.settings)
         self.assertIn("TEST: u'test'", result, result)
 
@@ -206,18 +213,18 @@ class FormatSettingListTest(unittest.TestCase):
         self.assertIn("TEST: 123", result, result)
 
     def test_repr_of_a_tuple_value(self):
-        self.settings.TEST = (123, u'abc')
+        self.settings.TEST = (123, 'abc')
         result = setting_utils.format_settings_list(self.settings)
         self.assertIn("TEST: (123, u'abc')", result, result)
 
     def test_passwords_are_masked(self):
-        self.settings.TEST_PASSWORD = u'secret'
+        self.settings.TEST_PASSWORD = 'secret'
         result = setting_utils.format_settings_list(self.settings)
         self.assertNotIn("TEST_PASSWORD: u'secret'", result, result)
         self.assertIn("TEST_PASSWORD: u'********'", result, result)
 
     def test_short_values_are_not_pretty_printed(self):
-        self.settings.FRONTEND = (u'mopidy.frontends.mpd.MpdFrontend',)
+        self.settings.FRONTEND = ('mopidy.frontends.mpd.MpdFrontend',)
         result = setting_utils.format_settings_list(self.settings)
         self.assertIn(
             "FRONTEND: (u'mopidy.frontends.mpd.MpdFrontend',)", result)

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import Queue
 
@@ -16,7 +18,7 @@ class SpotifyTrack(Track):
     def __init__(self, uri):
         super(SpotifyTrack, self).__init__()
         self._spotify_track = Link.from_string(uri).as_track()
-        self._unloaded_track = Track(uri=uri, name=u'[loading...]')
+        self._unloaded_track = Track(uri=uri, name='[loading...]')
         self._track = None
 
     @property
@@ -57,7 +59,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         try:
             return SpotifyTrack(uri)
         except SpotifyError as e:
-            logger.debug(u'Failed to lookup "%s": %s', uri, e)
+            logger.debug('Failed to lookup "%s": %s', uri, e)
             return None
 
     def refresh(self, uri=None):
@@ -66,29 +68,36 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
     def search(self, **query):
         if not query:
             # Since we can't search for the entire Spotify library, we return
-            # all tracks in the stored playlists when the query is empty.
+            # all tracks in the playlists when the query is empty.
             tracks = []
-            for playlist in self.backend.stored_playlists.playlists:
+            for playlist in self.backend.playlists.playlists:
                 tracks += playlist.tracks
             return Playlist(tracks=tracks)
         spotify_query = []
         for (field, values) in query.iteritems():
-            if field == u'track':
-                field = u'title'
-            if field == u'date':
-                field = u'year'
+            if field == 'uri':
+                tracks = []
+                for value in values:
+                    track = self.lookup(value)
+                    if track:
+                        tracks.append(track)
+                return Playlist(tracks=tracks)
+            elif field == 'track':
+                field = 'title'
+            elif field == 'date':
+                field = 'year'
             if not hasattr(values, '__iter__'):
                 values = [values]
             for value in values:
-                if field == u'any':
+                if field == 'any':
                     spotify_query.append(value)
-                elif field == u'year':
+                elif field == 'year':
                     value = int(value.split('-')[0])  # Extract year
-                    spotify_query.append(u'%s:%d' % (field, value))
+                    spotify_query.append('%s:%d' % (field, value))
                 else:
-                    spotify_query.append(u'%s:"%s"' % (field, value))
-        spotify_query = u' '.join(spotify_query)
-        logger.debug(u'Spotify search query: %s' % spotify_query)
+                    spotify_query.append('%s:"%s"' % (field, value))
+        spotify_query = ' '.join(spotify_query)
+        logger.debug('Spotify search query: %s' % spotify_query)
         queue = Queue.Queue()
         self.backend.spotify.search(spotify_query, queue)
         try:

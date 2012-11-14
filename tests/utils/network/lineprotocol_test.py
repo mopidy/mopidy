@@ -1,4 +1,6 @@
-#encoding: utf-8
+# encoding: utf-8
+
+from __future__ import unicode_literals
 
 import re
 from mock import sentinel, Mock
@@ -159,10 +161,10 @@ class LineProtocolTest(unittest.TestCase):
 
     def test_parse_lines_unicode(self):
         self.mock.delimiter = re.compile(r'\n')
-        self.mock.recv_buffer = u'æøå\n'.encode('utf-8')
+        self.mock.recv_buffer = 'æøå\n'.encode('utf-8')
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual(u'æøå'.encode('utf-8'), lines.next())
+        self.assertEqual('æøå'.encode('utf-8'), lines.next())
         self.assertRaises(StopIteration, lines.next)
         self.assertEqual('', self.mock.recv_buffer)
 
@@ -208,10 +210,10 @@ class LineProtocolTest(unittest.TestCase):
 
     def test_send_line_encodes_joined_lines_with_final_terminator(self):
         self.mock.connection = Mock(spec=network.Connection)
-        self.mock.join_lines.return_value = u'lines\n'
+        self.mock.join_lines.return_value = 'lines\n'
 
         network.LineProtocol.send_lines(self.mock, sentinel.lines)
-        self.mock.encode.assert_called_once_with(u'lines\n')
+        self.mock.encode.assert_called_once_with('lines\n')
 
     def test_send_lines_sends_encoded_string(self):
         self.mock.connection = Mock(spec=network.Connection)
@@ -222,11 +224,11 @@ class LineProtocolTest(unittest.TestCase):
         self.mock.connection.queue_send.assert_called_once_with(sentinel.data)
 
     def test_join_lines_returns_empty_string_for_no_lines(self):
-        self.assertEqual(u'', network.LineProtocol.join_lines(self.mock, []))
+        self.assertEqual('', network.LineProtocol.join_lines(self.mock, []))
 
     def test_join_lines_returns_joined_lines(self):
-        self.assertEqual(u'1\n2\n', network.LineProtocol.join_lines(
-            self.mock, [u'1', u'2']))
+        self.assertEqual('1\n2\n', network.LineProtocol.join_lines(
+            self.mock, ['1', '2']))
 
     def test_decode_calls_decode_on_string(self):
         string = Mock()
@@ -236,13 +238,13 @@ class LineProtocolTest(unittest.TestCase):
 
     def test_decode_plain_ascii(self):
         result = network.LineProtocol.decode(self.mock, 'abc')
-        self.assertEqual(u'abc', result)
+        self.assertEqual('abc', result)
         self.assertEqual(unicode, type(result))
 
     def test_decode_utf8(self):
         result = network.LineProtocol.decode(
-            self.mock, u'æøå'.encode('utf-8'))
-        self.assertEqual(u'æøå', result)
+            self.mock, 'æøå'.encode('utf-8'))
+        self.assertEqual('æøå', result)
         self.assertEqual(unicode, type(result))
 
     def test_decode_invalid_data(self):
@@ -259,13 +261,13 @@ class LineProtocolTest(unittest.TestCase):
         string.encode.assert_called_once_with(self.mock.encoding)
 
     def test_encode_plain_ascii(self):
-        result = network.LineProtocol.encode(self.mock, u'abc')
+        result = network.LineProtocol.encode(self.mock, 'abc')
         self.assertEqual('abc', result)
         self.assertEqual(str, type(result))
 
     def test_encode_utf8(self):
-        result = network.LineProtocol.encode(self.mock, u'æøå')
-        self.assertEqual(u'æøå'.encode('utf-8'), result)
+        result = network.LineProtocol.encode(self.mock, 'æøå')
+        self.assertEqual('æøå'.encode('utf-8'), result)
         self.assertEqual(str, type(result))
 
     def test_encode_invalid_data(self):

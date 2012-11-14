@@ -93,6 +93,24 @@ backends:
   :attr:`mopidy.settings.DEBUG_THREAD` setting a ``SIGUSR1`` signal will dump
   the traceback for all running threads.
 
+- Make the entire code base use unicode strings by default, and only fall back
+  to bytestrings where it is required. Another step closer to Python 3.
+
+- The settings validator will now allow any setting prefixed with ``CUSTOM_``
+  to exist in the settings file.
+
+- The MPD commands ``search`` and ``find`` now allows the key ``file``, which
+  is used by ncmpcpp instead of ``filename``.
+
+- The Spotify backend now returns the track if you search for the Spotify track
+  URI. (Fixes: :issue:`233`)
+
+- Renamed "current playlist" to "tracklist" everywhere, including the core API
+  used by frontends.
+
+- Renamed "stored playlists" to "playlists" everywhere, including the core API
+  used by frontends.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
@@ -100,6 +118,9 @@ backends:
 
 - The MPD command ``plchanges`` always returned the entire playlist. It now
   returns an empty response when the client has seen the latest version.
+
+- MPD no longer lowercases search queries. This broke e.g. search by URI, where
+  casing may be essential.
 
 
 v0.8.1 (2012-10-30)

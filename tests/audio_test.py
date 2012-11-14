@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from mopidy import audio, settings
 from mopidy.utils.path import path_to_uri
 

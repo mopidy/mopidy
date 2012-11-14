@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import errno
 import gobject
 import logging
@@ -26,8 +28,8 @@ def try_ipv6_socket():
         return True
     except IOError as error:
         logger.debug(
-            u'Platform supports IPv6, but socket creation failed, '
-            u'disabling: %s',
+            'Platform supports IPv6, but socket creation failed, '
+            'disabling: %s',
             encoding.locale_decode(error))
     return False
 
@@ -107,7 +109,7 @@ class Server(object):
 
     def reject_connection(self, sock, addr):
         # FIXME provide more context in logging?
-        logger.warning(u'Rejected connection from [%s]:%s', addr[0], addr[1])
+        logger.warning('Rejected connection from [%s]:%s', addr[0], addr[1])
         try:
             sock.close()
         except socket.error:
@@ -190,7 +192,7 @@ class Connection(object):
         except socket.error as e:
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return data
-            self.stop(u'Unexpected client error: %s' % e)
+            self.stop('Unexpected client error: %s' % e)
             return ''
 
     def enable_timeout(self):
@@ -219,7 +221,7 @@ class Connection(object):
                 gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
-            self.stop(u'Problem with connection: %s' % e)
+            self.stop('Problem with connection: %s' % e)
 
     def disable_recv(self):
         if self.recv_id is None:
@@ -237,7 +239,7 @@ class Connection(object):
                 gobject.IO_OUT | gobject.IO_ERR | gobject.IO_HUP,
                 self.send_callback)
         except socket.error as e:
-            self.stop(u'Problem with connection: %s' % e)
+            self.stop('Problem with connection: %s' % e)
 
     def disable_send(self):
         if self.send_id is None:
@@ -248,30 +250,30 @@ class Connection(object):
 
     def recv_callback(self, fd, flags):
         if flags & (gobject.IO_ERR | gobject.IO_HUP):
-            self.stop(u'Bad client flags: %s' % flags)
+            self.stop('Bad client flags: %s' % flags)
             return True
 
         try:
             data = self.sock.recv(4096)
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
-                self.stop(u'Unexpected client error: %s' % e)
+                self.stop('Unexpected client error: %s' % e)
             return True
 
         if not data:
-            self.stop(u'Client most likely disconnected.')
+            self.stop('Client most likely disconnected.')
             return True
 
         try:
             self.actor_ref.tell({'received': data})
         except pykka.ActorDeadError:
-            self.stop(u'Actor is dead.')
+            self.stop('Actor is dead.')
 
         return True
 
     def send_callback(self, fd, flags):
         if flags & (gobject.IO_ERR | gobject.IO_HUP):
-            self.stop(u'Bad client flags: %s' % flags)
+            self.stop('Bad client flags: %s' % flags)
             return True
 
         # If with can't get the lock, simply try again next time socket is
@@ -289,7 +291,7 @@ class Connection(object):
         return True
 
     def timeout_callback(self):
-        self.stop(u'Client timeout out after %s seconds' % self.timeout)
+        self.stop('Client timeout out after %s seconds' % self.timeout)
         return False
 
 
@@ -356,7 +358,7 @@ class LineProtocol(pykka.ThreadingActor):
 
     def on_stop(self):
         """Ensure that cleanup when actor stops."""
-        self.connection.stop(u'Actor is shutting down.')
+        self.connection.stop('Actor is shutting down.')
 
     def parse_lines(self):
         """Consume new data and yield any lines found."""
@@ -375,8 +377,8 @@ class LineProtocol(pykka.ThreadingActor):
             return line.encode(self.encoding)
         except UnicodeError:
             logger.warning(
-                u'Stopping actor due to encode problem, data '
-                u'supplied by client was not valid %s',
+                'Stopping actor due to encode problem, data '
+                'supplied by client was not valid %s',
                 self.encoding)
             self.stop()
 
@@ -390,14 +392,14 @@ class LineProtocol(pykka.ThreadingActor):
             return line.decode(self.encoding)
         except UnicodeError:
             logger.warning(
-                u'Stopping actor due to decode problem, data '
-                u'supplied by client was not valid %s',
+                'Stopping actor due to decode problem, data '
+                'supplied by client was not valid %s',
                 self.encoding)
             self.stop()
 
     def join_lines(self, lines):
         if not lines:
-            return u''
+            return ''
         return self.terminator.join(lines) + self.terminator
 
     def send_lines(self, lines):

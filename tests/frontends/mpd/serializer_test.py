@@ -1,21 +1,23 @@
+from __future__ import unicode_literals
+
 import datetime
 import os
 
 from mopidy import settings
 from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
-from mopidy.models import Album, Artist, CpTrack, Playlist, Track
+from mopidy.models import Album, Artist, TlTrack, Playlist, Track
 
 from tests import unittest
 
 
 class TrackMpdFormatTest(unittest.TestCase):
     track = Track(
-        uri=u'a uri',
-        artists=[Artist(name=u'an artist')],
-        name=u'a name',
-        album=Album(name=u'an album', num_tracks=13,
-            artists=[Artist(name=u'an other artist')]),
+        uri='a uri',
+        artists=[Artist(name='an artist')],
+        name='a name',
+        album=Album(name='an album', num_tracks=13,
+            artists=[Artist(name='an other artist')]),
         track_no=7,
         date=datetime.date(1977, 1, 1),
         length=137000,
@@ -44,19 +46,19 @@ class TrackMpdFormatTest(unittest.TestCase):
         result = translator.track_to_mpd_format(Track(), position=1)
         self.assertNotIn(('Pos', 1), result)
 
-    def test_track_to_mpd_format_with_cpid(self):
-        result = translator.track_to_mpd_format(CpTrack(1, Track()))
+    def test_track_to_mpd_format_with_tlid(self):
+        result = translator.track_to_mpd_format(TlTrack(1, Track()))
         self.assertNotIn(('Id', 1), result)
 
-    def test_track_to_mpd_format_with_position_and_cpid(self):
+    def test_track_to_mpd_format_with_position_and_tlid(self):
         result = translator.track_to_mpd_format(
-            CpTrack(2, Track()), position=1)
+            TlTrack(2, Track()), position=1)
         self.assertIn(('Pos', 1), result)
         self.assertIn(('Id', 2), result)
 
     def test_track_to_mpd_format_for_nonempty_track(self):
         result = translator.track_to_mpd_format(
-            CpTrack(122, self.track), position=9)
+            TlTrack(122, self.track), position=9)
         self.assertIn(('file', 'a uri'), result)
         self.assertIn(('Time', 137), result)
         self.assertIn(('Artist', 'an artist'), result)
@@ -94,14 +96,14 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('MUSICBRAINZ_ARTISTID', 'foo'), result)
 
     def test_artists_to_mpd_format(self):
-        artists = [Artist(name=u'ABBA'), Artist(name=u'Beatles')]
+        artists = [Artist(name='ABBA'), Artist(name='Beatles')]
         translated = translator.artists_to_mpd_format(artists)
-        self.assertEqual(translated, u'ABBA, Beatles')
+        self.assertEqual(translated, 'ABBA, Beatles')
 
     def test_artists_to_mpd_format_artist_with_no_name(self):
         artists = [Artist(name=None)]
         translated = translator.artists_to_mpd_format(artists)
-        self.assertEqual(translated, u'')
+        self.assertEqual(translated, '')
 
 
 class PlaylistMpdFormatTest(unittest.TestCase):

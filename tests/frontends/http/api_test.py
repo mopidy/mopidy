@@ -14,10 +14,10 @@ class ApiResourceTest(unittest.TestCase):
         self.core = core.Core.start(backends=[self.backend]).proxy()
         self.api = api.ApiResource(core=self.core)
 
-        self.core.stored_playlists.create('x')
-        self.core.stored_playlists.create('y')
-        self.core.stored_playlists.create('z')
-        self.core.current_playlist.append([
+        self.core.playlists.create('x')
+        self.core.playlists.create('y')
+        self.core.playlists.create('z')
+        self.core.tracklist.append([
             Track(uri='dummy:a'),
             Track(uri='dummy:b'),
             Track(uri='dummy:c'),
@@ -86,30 +86,30 @@ class ApiResourceTest(unittest.TestCase):
 
         self.assertEqual(37, result['properties']['volume'])
 
-    def test_tracklist_returns_current_playlist(self):
+    def test_tracklist_returns_tracklist(self):
         result = self.api.tracklist.GET()
 
         self.assertIn('tracks', result)
         self.assertEqual(3, len(result['tracks']))
 
         self.assertEqual('dummy:a', result['tracks'][0]['uri'])
-        self.assertEqual(0, result['tracks'][0]['cpid'])
+        self.assertEqual(0, result['tracks'][0]['tlid'])
 
         self.assertEqual('dummy:b', result['tracks'][1]['uri'])
-        self.assertEqual(1, result['tracks'][1]['cpid'])
+        self.assertEqual(1, result['tracks'][1]['tlid'])
 
         self.assertEqual('dummy:c', result['tracks'][2]['uri'])
-        self.assertEqual(2, result['tracks'][2]['cpid'])
+        self.assertEqual(2, result['tracks'][2]['tlid'])
 
     def test_tracklist_includes_current_track(self):
         self.core.playback.play()
 
         result = self.api.tracklist.GET()
 
-        self.assertIn('currentTrackCpid', result)
-        self.assertEqual(0, result['currentTrackCpid'])
+        self.assertIn('currentTrackTlid', result)
+        self.assertEqual(0, result['currentTrackTlid'])
 
-    def test_playlists_returns_stored_playlists(self):
+    def test_playlists_returns_playlists(self):
         result = self.api.playlists.GET()
 
         self.assertIn('playlists', result)

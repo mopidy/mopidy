@@ -1,5 +1,8 @@
+from __future__ import unicode_literals
+
 import logging
 import sys
+
 
 logger = logging.getLogger('mopidy.utils')
 

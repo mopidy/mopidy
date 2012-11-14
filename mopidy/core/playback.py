@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import random
 import urlparse
@@ -28,13 +30,13 @@ class PlaybackState(object):
     """
 
     #: Constant representing the paused state.
-    PAUSED = u'paused'
+    PAUSED = 'paused'
 
     #: Constant representing the playing state.
-    PLAYING = u'playing'
+    PLAYING = 'playing'
 
     #: Constant representing the stopped state.
-    STOPPED = u'stopped'
+    STOPPED = 'stopped'
 
 
 class PlaybackController(object):
@@ -51,9 +53,9 @@ class PlaybackController(object):
 
     #: The currently playing or selected track.
     #:
-    #: A two-tuple of (CPID integer, :class:`mopidy.models.Track`) or
+    #: A two-tuple of (TLID integer, :class:`mopidy.models.Track`) or
     #: :class:`None`.
-    current_cp_track = None
+    current_tl_track = None
 
     #: :class:`True`
     #:     Tracks are selected at random from the playlist.
@@ -86,53 +88,52 @@ class PlaybackController(object):
         self._volume = None
 
     def _get_backend(self):
-        if self.current_cp_track is None:
+        if self.current_tl_track is None:
             return None
-        uri = self.current_cp_track.track.uri
+        uri = self.current_tl_track.track.uri
         uri_scheme = urlparse.urlparse(uri).scheme
-        return self.backends.by_uri_scheme[uri_scheme]
+        return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
 
-    def _get_cpid(self, cp_track):
-        if cp_track is None:
+    def _get_tlid(self, tl_track):
+        if tl_track is None:
             return None
-        return cp_track.cpid
+        return tl_track.tlid
 
-    def _get_track(self, cp_track):
-        if cp_track is None:
+    def _get_track(self, tl_track):
+        if tl_track is None:
             return None
-        return cp_track.track
+        return tl_track.track
 
     @property
-    def current_cpid(self):
+    def current_tlid(self):
         """
-        The CPID (current playlist ID) of the currently playing or selected
+        The TLID (tracklist ID) of the currently playing or selected
         track.
 
-        Read-only. Extracted from :attr:`current_cp_track` for convenience.
+        Read-only. Extracted from :attr:`current_tl_track` for convenience.
         """
-        return self._get_cpid(self.current_cp_track)
+        return self._get_tlid(self.current_tl_track)
 
     @property
     def current_track(self):
         """
         The currently playing or selected :class:`mopidy.models.Track`.
 
-        Read-only. Extracted from :attr:`current_cp_track` for convenience.
+        Read-only. Extracted from :attr:`current_tl_track` for convenience.
         """
-        return self._get_track(self.current_cp_track)
+        return self._get_track(self.current_tl_track)
 
     @property
-    def current_playlist_position(self):
+    def tracklist_position(self):
         """
-        The position of the current track in the current playlist.
+        The position of the current track in the tracklist.
 
         Read-only.
         """
-        if self.current_cp_track is None:
+        if self.current_tl_track is None:
             return None
         try:
-            return self.core.current_playlist.cp_tracks.index(
-                self.current_cp_track)
+            return self.core.tracklist.tl_tracks.index(self.current_tl_track)
         except ValueError:
             return None
 
@@ -142,49 +143,48 @@ class PlaybackController(object):
         The track that will be played at the end of the current track.
 
         Read-only. A :class:`mopidy.models.Track` extracted from
-        :attr:`cp_track_at_eot` for convenience.
+        :attr:`tl_track_at_eot` for convenience.
         """
-        return self._get_track(self.cp_track_at_eot)
+        return self._get_track(self.tl_track_at_eot)
 
     @property
-    def cp_track_at_eot(self):
+    def tl_track_at_eot(self):
         """
         The track that will be played at the end of the current track.
 
-        Read-only. A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
+        Read-only. A two-tuple of (TLID integer, :class:`mopidy.models.Track`).
 
-        Not necessarily the same track as :attr:`cp_track_at_next`.
+        Not necessarily the same track as :attr:`tl_track_at_next`.
         """
         # pylint: disable = R0911
         # Too many return statements
 
-        cp_tracks = self.core.current_playlist.cp_tracks
+        tl_tracks = self.core.tracklist.tl_tracks
 
-        if not cp_tracks:
+        if not tl_tracks:
             return None
 
         if self.random and not self._shuffled:
             if self.repeat or self._first_shuffle:
                 logger.debug('Shuffling tracks')
-                self._shuffled = cp_tracks
+                self._shuffled = tl_tracks
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
         if self.random and self._shuffled:
             return self._shuffled[0]
 
-        if self.current_cp_track is None:
-            return cp_tracks[0]
+        if self.current_tl_track is None:
+            return tl_tracks[0]
 
         if self.repeat and self.single:
-            return cp_tracks[self.current_playlist_position]
+            return tl_tracks[self.tracklist_position]
 
         if self.repeat and not self.single:
-            return cp_tracks[
-                (self.current_playlist_position + 1) % len(cp_tracks)]
+            return tl_tracks[(self.tracklist_position + 1) % len(tl_tracks)]
 
         try:
-            return cp_tracks[self.current_playlist_position + 1]
+            return tl_tracks[self.tracklist_position + 1]
         except IndexError:
             return None
 
@@ -194,46 +194,45 @@ class PlaybackController(object):
         The track that will be played if calling :meth:`next()`.
 
         Read-only. A :class:`mopidy.models.Track` extracted from
-        :attr:`cp_track_at_next` for convenience.
+        :attr:`tl_track_at_next` for convenience.
         """
-        return self._get_track(self.cp_track_at_next)
+        return self._get_track(self.tl_track_at_next)
 
     @property
-    def cp_track_at_next(self):
+    def tl_track_at_next(self):
         """
         The track that will be played if calling :meth:`next()`.
 
-        Read-only. A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
+        Read-only. A two-tuple of (TLID integer, :class:`mopidy.models.Track`).
 
         For normal playback this is the next track in the playlist. If repeat
         is enabled the next track can loop around the playlist. When random is
         enabled this should be a random track, all tracks should be played once
         before the list repeats.
         """
-        cp_tracks = self.core.current_playlist.cp_tracks
+        tl_tracks = self.core.tracklist.tl_tracks
 
-        if not cp_tracks:
+        if not tl_tracks:
             return None
 
         if self.random and not self._shuffled:
             if self.repeat or self._first_shuffle:
                 logger.debug('Shuffling tracks')
-                self._shuffled = cp_tracks
+                self._shuffled = tl_tracks
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
         if self.random and self._shuffled:
             return self._shuffled[0]
 
-        if self.current_cp_track is None:
-            return cp_tracks[0]
+        if self.current_tl_track is None:
+            return tl_tracks[0]
 
         if self.repeat:
-            return cp_tracks[
-                (self.current_playlist_position + 1) % len(cp_tracks)]
+            return tl_tracks[(self.tracklist_position + 1) % len(tl_tracks)]
 
         try:
-            return cp_tracks[self.current_playlist_position + 1]
+            return tl_tracks[self.tracklist_position + 1]
         except IndexError:
             return None
 
@@ -243,29 +242,28 @@ class PlaybackController(object):
         The track that will be played if calling :meth:`previous()`.
 
         Read-only. A :class:`mopidy.models.Track` extracted from
-        :attr:`cp_track_at_previous` for convenience.
+        :attr:`tl_track_at_previous` for convenience.
         """
-        return self._get_track(self.cp_track_at_previous)
+        return self._get_track(self.tl_track_at_previous)
 
     @property
-    def cp_track_at_previous(self):
+    def tl_track_at_previous(self):
         """
         The track that will be played if calling :meth:`previous()`.
 
-        A two-tuple of (CPID integer, :class:`mopidy.models.Track`).
+        A two-tuple of (TLID integer, :class:`mopidy.models.Track`).
 
         For normal playback this is the previous track in the playlist. If
         random and/or consume is enabled it should return the current track
         instead.
         """
         if self.repeat or self.consume or self.random:
-            return self.current_cp_track
+            return self.current_tl_track
 
-        if self.current_playlist_position in (None, 0):
+        if self.tracklist_position in (None, 0):
             return None
 
-        return self.core.current_playlist.cp_tracks[
-            self.current_playlist_position - 1]
+        return self.core.tracklist.tl_tracks[self.tracklist_position - 1]
 
     @property
     def state(self):
@@ -290,7 +288,7 @@ class PlaybackController(object):
     @state.setter  # noqa
     def state(self, new_state):
         (old_state, self._state) = (self.state, new_state)
-        logger.debug(u'Changing state: %s -> %s', old_state, new_state)
+        logger.debug('Changing state: %s -> %s', old_state, new_state)
 
         self._trigger_playback_state_changed(old_state, new_state)
 
@@ -298,9 +296,10 @@ class PlaybackController(object):
     def time_position(self):
         """Time position in milliseconds."""
         backend = self._get_backend()
-        if backend is None:
+        if backend:
+            return backend.playback.get_time_position().get()
+        else:
             return 0
-        return backend.playback.get_time_position().get()
 
     @property
     def volume(self):
@@ -319,12 +318,12 @@ class PlaybackController(object):
             # For testing
             self._volume = volume
 
-    def change_track(self, cp_track, on_error_step=1):
+    def change_track(self, tl_track, on_error_step=1):
         """
         Change to the given track, keeping the current playback state.
 
-        :param cp_track: track to change to
-        :type cp_track: two-tuple (CPID integer, :class:`mopidy.models.Track`)
+        :param tl_track: track to change to
+        :type tl_track: two-tuple (TLID integer, :class:`mopidy.models.Track`)
             or :class:`None`
         :param on_error_step: direction to step at play error, 1 for next
             track (default), -1 for previous track
@@ -333,7 +332,7 @@ class PlaybackController(object):
         """
         old_state = self.state
         self.stop()
-        self.current_cp_track = cp_track
+        self.current_tl_track = tl_track
         if old_state == PlaybackState.PLAYING:
             self.play(on_error_step=on_error_step)
         elif old_state == PlaybackState.PAUSED:
@@ -346,18 +345,18 @@ class PlaybackController(object):
         if self.state == PlaybackState.STOPPED:
             return
 
-        original_cp_track = self.current_cp_track
+        original_tl_track = self.current_tl_track
 
-        if self.cp_track_at_eot:
+        if self.tl_track_at_eot:
             self._trigger_track_playback_ended()
-            self.play(self.cp_track_at_eot)
+            self.play(self.tl_track_at_eot)
         else:
             self.stop(clear_current_track=True)
 
         if self.consume:
-            self.core.current_playlist.remove(cpid=original_cp_track.cpid)
+            self.core.tracklist.remove(tlid=original_tl_track.tlid)
 
-    def on_current_playlist_change(self):
+    def on_tracklist_change(self):
         """
         Tell the playback controller that the current playlist has changed.
 
@@ -366,9 +365,9 @@ class PlaybackController(object):
         self._first_shuffle = True
         self._shuffled = []
 
-        if (not self.core.current_playlist.cp_tracks or
-                self.current_cp_track not in
-                self.core.current_playlist.cp_tracks):
+        if (not self.core.tracklist.tl_tracks or
+                self.current_tl_track not in
+                self.core.tracklist.tl_tracks):
             self.stop(clear_current_track=True)
 
     def next(self):
@@ -378,58 +377,59 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        if self.cp_track_at_next:
+        if self.tl_track_at_next:
             self._trigger_track_playback_ended()
-            self.change_track(self.cp_track_at_next)
+            self.change_track(self.tl_track_at_next)
         else:
             self.stop(clear_current_track=True)
 
     def pause(self):
         """Pause playback."""
         backend = self._get_backend()
-        if backend is None or backend.playback.pause().get():
+        if not backend or backend.playback.pause().get():
             self.state = PlaybackState.PAUSED
             self._trigger_track_playback_paused()
 
-    def play(self, cp_track=None, on_error_step=1):
+    def play(self, tl_track=None, on_error_step=1):
         """
         Play the given track, or if the given track is :class:`None`, play the
         currently active track.
 
-        :param cp_track: track to play
-        :type cp_track: two-tuple (CPID integer, :class:`mopidy.models.Track`)
+        :param tl_track: track to play
+        :type tl_track: two-tuple (TLID integer, :class:`mopidy.models.Track`)
             or :class:`None`
         :param on_error_step: direction to step at play error, 1 for next
             track (default), -1 for previous track
         :type on_error_step: int, -1 or 1
         """
 
-        if cp_track is not None:
-            assert cp_track in self.core.current_playlist.cp_tracks
-        elif cp_track is None:
+        if tl_track is not None:
+            assert tl_track in self.core.tracklist.tl_tracks
+        elif tl_track is None:
             if self.state == PlaybackState.PAUSED:
                 return self.resume()
-            elif self.current_cp_track is not None:
-                cp_track = self.current_cp_track
-            elif self.current_cp_track is None and on_error_step == 1:
-                cp_track = self.cp_track_at_next
-            elif self.current_cp_track is None and on_error_step == -1:
-                cp_track = self.cp_track_at_previous
+            elif self.current_tl_track is not None:
+                tl_track = self.current_tl_track
+            elif self.current_tl_track is None and on_error_step == 1:
+                tl_track = self.tl_track_at_next
+            elif self.current_tl_track is None and on_error_step == -1:
+                tl_track = self.tl_track_at_previous
 
-        if cp_track is not None:
-            self.current_cp_track = cp_track
+        if tl_track is not None:
+            self.current_tl_track = tl_track
             self.state = PlaybackState.PLAYING
-            if not self._get_backend().playback.play(cp_track.track).get():
+            backend = self._get_backend()
+            if not backend or not backend.playback.play(tl_track.track).get():
                 # Track is not playable
                 if self.random and self._shuffled:
-                    self._shuffled.remove(cp_track)
+                    self._shuffled.remove(tl_track)
                 if on_error_step == 1:
                     self.next()
                 elif on_error_step == -1:
                     self.previous()
 
-        if self.random and self.current_cp_track in self._shuffled:
-            self._shuffled.remove(self.current_cp_track)
+        if self.random and self.current_tl_track in self._shuffled:
+            self._shuffled.remove(self.current_tl_track)
 
         self._trigger_track_playback_started()
 
@@ -441,12 +441,14 @@ class PlaybackController(object):
         will continue. If it was paused, it will still be paused, etc.
         """
         self._trigger_track_playback_ended()
-        self.change_track(self.cp_track_at_previous, on_error_step=-1)
+        self.change_track(self.tl_track_at_previous, on_error_step=-1)
 
     def resume(self):
         """If paused, resume playing the current track."""
-        if (self.state == PlaybackState.PAUSED and
-                self._get_backend().playback.resume().get()):
+        if self.state != PlaybackState.PAUSED:
+            return
+        backend = self._get_backend()
+        if backend and backend.playback.resume().get():
             self.state = PlaybackState.PLAYING
             self._trigger_track_playback_resumed()
 
@@ -458,7 +460,7 @@ class PlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        if not self.core.current_playlist.tracks:
+        if not self.core.tracklist.tracks:
             return False
 
         if self.state == PlaybackState.STOPPED:
@@ -472,7 +474,11 @@ class PlaybackController(object):
             self.next()
             return True
 
-        success = self._get_backend().playback.seek(time_position).get()
+        backend = self._get_backend()
+        if not backend:
+            return False
+
+        success = backend.playback.seek(time_position).get()
         if success:
             self._trigger_seeked(time_position)
         return success
@@ -486,14 +492,15 @@ class PlaybackController(object):
         :type clear_current_track: boolean
         """
         if self.state != PlaybackState.STOPPED:
-            if self._get_backend().playback.stop().get():
+            backend = self._get_backend()
+            if not backend or backend.playback.stop().get():
                 self._trigger_track_playback_ended()
                 self.state = PlaybackState.STOPPED
         if clear_current_track:
-            self.current_cp_track = None
+            self.current_tl_track = None
 
     def _trigger_track_playback_paused(self):
-        logger.debug(u'Triggering track playback paused event')
+        logger.debug('Triggering track playback paused event')
         if self.current_track is None:
             return
         listener.CoreListener.send(
@@ -501,7 +508,7 @@ class PlaybackController(object):
             track=self.current_track, time_position=self.time_position)
 
     def _trigger_track_playback_resumed(self):
-        logger.debug(u'Triggering track playback resumed event')
+        logger.debug('Triggering track playback resumed event')
         if self.current_track is None:
             return
         listener.CoreListener.send(
@@ -509,14 +516,14 @@ class PlaybackController(object):
             track=self.current_track, time_position=self.time_position)
 
     def _trigger_track_playback_started(self):
-        logger.debug(u'Triggering track playback started event')
+        logger.debug('Triggering track playback started event')
         if self.current_track is None:
             return
         listener.CoreListener.send(
             'track_playback_started', track=self.current_track)
 
     def _trigger_track_playback_ended(self):
-        logger.debug(u'Triggering track playback ended event')
+        logger.debug('Triggering track playback ended event')
         if self.current_track is None:
             return
         listener.CoreListener.send(
@@ -524,15 +531,15 @@ class PlaybackController(object):
             track=self.current_track, time_position=self.time_position)
 
     def _trigger_playback_state_changed(self, old_state, new_state):
-        logger.debug(u'Triggering playback state change event')
+        logger.debug('Triggering playback state change event')
         listener.CoreListener.send(
             'playback_state_changed',
             old_state=old_state, new_state=new_state)
 
     def _trigger_options_changed(self):
-        logger.debug(u'Triggering options changed event')
+        logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
 
     def _trigger_seeked(self, time_position):
-        logger.debug(u'Triggering seeked event')
+        logger.debug('Triggering seeked event')
         listener.CoreListener.send('seeked', time_position=time_position)

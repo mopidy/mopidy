@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 import pykka
@@ -18,13 +20,13 @@ class SpotifyBackend(pykka.ThreadingActor, base.Backend):
         from .library import SpotifyLibraryProvider
         from .playback import SpotifyPlaybackProvider
         from .session_manager import SpotifySessionManager
-        from .stored_playlists import SpotifyStoredPlaylistsProvider
+        from .playlists import SpotifyPlaylistsProvider
 
         self.library = SpotifyLibraryProvider(backend=self)
         self.playback = SpotifyPlaybackProvider(audio=audio, backend=self)
-        self.stored_playlists = SpotifyStoredPlaylistsProvider(backend=self)
+        self.playlists = SpotifyPlaylistsProvider(backend=self)
 
-        self.uri_schemes = [u'spotify']
+        self.uri_schemes = ['spotify']
 
         # Fail early if settings are not present
         username = settings.SPOTIFY_USERNAME
@@ -34,8 +36,8 @@ class SpotifyBackend(pykka.ThreadingActor, base.Backend):
             username, password, audio=audio, backend_ref=self.actor_ref)
 
     def on_start(self):
-        logger.info(u'Mopidy uses SPOTIFY(R) CORE')
-        logger.debug(u'Connecting to Spotify')
+        logger.info('Mopidy uses SPOTIFY(R) CORE')
+        logger.debug('Connecting to Spotify')
         self.spotify.start()
 
     def on_stop(self):

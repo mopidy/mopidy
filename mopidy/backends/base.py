@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import copy
 
 
@@ -9,19 +11,35 @@ class Backend(object):
     audio = None
 
     #: The library provider. An instance of
-    # :class:`mopidy.backends.base.BaseLibraryProvider`.
+    #: :class:`mopidy.backends.base.BaseLibraryProvider`, or :class:`None` if
+    #: the backend doesn't provide a library.
     library = None
 
     #: The playback provider. An instance of
-    #: :class:`mopidy.backends.base.BasePlaybackProvider`.
+    #: :class:`mopidy.backends.base.BasePlaybackProvider`, or :class:`None` if
+    #: the backend doesn't provide playback.
     playback = None
 
-    #: The stored playlists provider. An instance of
-    #: :class:`mopidy.backends.base.BaseStoredPlaylistsProvider`.
-    stored_playlists = None
+    #: The playlists provider. An instance of
+    #: :class:`mopidy.backends.base.BasePlaylistsProvider`, or class:`None` if
+    #: the backend doesn't provide playlists.
+    playlists = None
 
     #: List of URI schemes this backend can handle.
     uri_schemes = []
+
+    # Because the providers is marked as pykka_traversible, we can't get() them
+    # from another actor, and need helper methods to check if the providers are
+    # set or None.
+
+    def has_library(self):
+        return self.library is not None
+
+    def has_playback(self):
+        return self.playback is not None
+
+    def has_playlists(self):
+        return self.playlists is not None
 
 
 class BaseLibraryProvider(object):
@@ -149,7 +167,7 @@ class BasePlaybackProvider(object):
         return self.audio.get_position().get()
 
 
-class BaseStoredPlaylistsProvider(object):
+class BasePlaylistsProvider(object):
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backends.base.Backend`
@@ -164,7 +182,7 @@ class BaseStoredPlaylistsProvider(object):
     @property
     def playlists(self):
         """
-        Currently stored playlists.
+        Currently available playlists.
 
         Read/write. List of :class:`mopidy.models.Playlist`.
         """
@@ -176,7 +194,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def create(self, name):
         """
-        See :meth:`mopidy.core.StoredPlaylistsController.create`.
+        See :meth:`mopidy.core.PlaylistsController.create`.
 
         *MUST be implemented by subclass.*
         """
@@ -184,7 +202,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def delete(self, uri):
         """
-        See :meth:`mopidy.core.StoredPlaylistsController.delete`.
+        See :meth:`mopidy.core.PlaylistsController.delete`.
 
         *MUST be implemented by subclass.*
         """
@@ -192,7 +210,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def lookup(self, uri):
         """
-        See :meth:`mopidy.core.StoredPlaylistsController.lookup`.
+        See :meth:`mopidy.core.PlaylistsController.lookup`.
 
         *MUST be implemented by subclass.*
         """
@@ -200,7 +218,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def refresh(self):
         """
-        See :meth:`mopidy.core.StoredPlaylistsController.refresh`.
+        See :meth:`mopidy.core.PlaylistsController.refresh`.
 
         *MUST be implemented by subclass.*
         """
@@ -208,7 +226,7 @@ class BaseStoredPlaylistsProvider(object):
 
     def save(self, playlist):
         """
-        See :meth:`mopidy.core.StoredPlaylistsController.save`.
+        See :meth:`mopidy.core.PlaylistsController.save`.
 
         *MUST be implemented by subclass.*
         """
