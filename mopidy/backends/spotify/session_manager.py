@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+import pygst
+pygst.require('0.10')
+import gst
+
 import logging
 import os
 import threading
@@ -108,7 +112,10 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             'sample_rate': sample_rate,
             'channels': channels,
         }
-        self.audio.emit_data(capabilites, bytes(frames))
+        buffer_ = gst.Buffer(bytes(frames))
+        buffer_.set_caps(gst.caps_from_string(capabilites))
+
+        self.audio.emit_data(buffer_)
         return num_frames
 
     def play_token_lost(self, session):

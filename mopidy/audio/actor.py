@@ -225,22 +225,16 @@ class Audio(pykka.ThreadingActor):
         """
         self._playbin.set_property('uri', uri)
 
-    def emit_data(self, capabilities, data):
+    def emit_data(self, buffer_):
         """
         Call this to deliver raw audio data to be played.
 
         Note that the uri must be set to ``appsrc://`` for this to work.
 
-        :param capabilities: a GStreamer capabilities string
-        :type capabilities: string
-        :param data: raw audio data to be played
+        :param buffer_: buffer to pass to appsrc
+        :type buffer_: :class:`gst.Buffer`
         """
-        caps = gst.caps_from_string(capabilities)
-        buffer_ = gst.Buffer(buffer(data))
-        buffer_.set_caps(caps)
-
         source = self._playbin.get_property('source')
-        source.set_property('caps', caps)
         source.emit('push-buffer', buffer_)
 
     def emit_end_of_stream(self):
