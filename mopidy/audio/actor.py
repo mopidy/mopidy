@@ -42,8 +42,10 @@ class Audio(pykka.ThreadingActor):
         self._mixer = None
         self._mixer_track = None
         self._software_mixing = False
+        self._appsrc = None
 
         self._notify_source_signal_id = None
+        self._about_to_finish_id = None
         self._message_signal_id = None
 
     def on_start(self):
@@ -67,8 +69,13 @@ class Audio(pykka.ThreadingActor):
         fakesink = gst.element_factory_make('fakesink')
         self._playbin.set_property('video-sink', fakesink)
 
+        self._about_to_finish_id = self._playbin.connect(
+            'about-to-finish', self._on_about_to_finish)
         self._notify_source_signal_id = self._playbin.connect(
             'notify::source', self._on_new_source)
+
+    def _on_about_to_finish(self, element):
+        self._appsrc = None
 
     def _on_new_source(self, element, pad):
         uri = element.get_property('uri')
@@ -82,8 +89,13 @@ class Audio(pykka.ThreadingActor):
             b'rate=(int)44100')
         source = element.get_property('source')
         source.set_property('caps', default_caps)
+        source.set_property('format', b'time') # Gstreamer does not like unicode
+
+        self._appsrc = source
 
     def _teardown_playbin(self):
+        if self._about_to_finish_id:
+            self._playbin.disconnect(self._about_to_finish_id)
         if self._notify_source_signal_id:
             self._playbin.disconnect(self._notify_source_signal_id)
         self._playbin.set_state(gst.STATE_NULL)
@@ -237,8 +249,9 @@ class Audio(pykka.ThreadingActor):
         :type buffer_: :class:`gst.Buffer`
         :rtype: boolean
         """
-        source = self._playbin.get_property('source')
-        return source.emit('push-buffer', buffer_) == gst.FLOW_OK
+        if not self._appsrc:
+            return False
+        return self._appsrc.emit('push-buffer', buffer_) == gst.FLOW_OK
 
     def emit_end_of_stream(self):
         """
