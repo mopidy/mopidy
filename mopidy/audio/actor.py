@@ -231,11 +231,14 @@ class Audio(pykka.ThreadingActor):
 
         Note that the uri must be set to ``appsrc://`` for this to work.
 
+        Returns true if data was delivered.
+
         :param buffer_: buffer to pass to appsrc
         :type buffer_: :class:`gst.Buffer`
+        :rtype: boolean
         """
         source = self._playbin.get_property('source')
-        source.emit('push-buffer', buffer_)
+        return source.emit('push-buffer', buffer_) == gst.FLOW_OK
 
     def emit_end_of_stream(self):
         """

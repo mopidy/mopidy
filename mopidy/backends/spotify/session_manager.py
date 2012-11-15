@@ -115,8 +115,10 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         buffer_ = gst.Buffer(bytes(frames))
         buffer_.set_caps(gst.caps_from_string(capabilites))
 
-        self.audio.emit_data(buffer_)
-        return num_frames
+        if self.audio.emit_data(buffer_).get():
+            return num_frames
+        else:
+            return 0
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
