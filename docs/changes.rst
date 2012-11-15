@@ -56,23 +56,29 @@ backends:
   dummy/mocked lower layers easier than with the old variant, where
   dependencies where looked up in Pykka's actor registry.
 
-- The stored playlists part of the core API has been revised to be more focused
-  around the playlist URI, and some redundant functionality has been removed:
+- Renamed "current playlist" to "tracklist" everywhere, including the core API
+  used by frontends.
 
-  - :attr:`mopidy.core.StoredPlaylistsController.playlists` no longer supports
+- Renamed "stored playlists" to "playlists" everywhere, including the core API
+  used by frontends.
+
+- The playlists part of the core API has been revised to be more focused around
+  the playlist URI, and some redundant functionality has been removed:
+
+  - :attr:`mopidy.core.PlaylistsController.playlists` no longer supports
     assignment to it. The `playlists` property on the backend layer still does,
     and all functionality is maintained by assigning to the playlists
     collections at the backend level.
 
-  - :meth:`mopidy.core.StoredPlaylistsController.delete` now accepts an URI,
-    and not a playlist object.
+  - :meth:`mopidy.core.PlaylistsController.delete` now accepts an URI, and not
+    a playlist object.
 
-  - :meth:`mopidy.core.StoredPlaylistsController.save` now returns the saved
+  - :meth:`mopidy.core.PlaylistsController.save` now returns the saved
     playlist. The returned playlist may differ from the saved playlist, and
     should thus be used instead of the playlist passed to ``save()``.
 
-  - :meth:`mopidy.core.StoredPlaylistsController.rename` has been removed,
-    since renaming can be done with ``save()``.
+  - :meth:`mopidy.core.PlaylistsController.rename` has been removed, since
+    renaming can be done with ``save()``.
 
 **Changes**
 
@@ -104,12 +110,6 @@ backends:
 
 - The Spotify backend now returns the track if you search for the Spotify track
   URI. (Fixes: :issue:`233`)
-
-- Renamed "current playlist" to "tracklist" everywhere, including the core API
-  used by frontends.
-
-- Renamed "stored playlists" to "playlists" everywhere, including the core API
-  used by frontends.
 
 **Bug fixes**
 
