@@ -30,7 +30,7 @@ PLAYER_IFACE = 'org.mpris.MediaPlayer2.Player'
 
 
 class MprisObject(dbus.service.Object):
-    """Implements http://www.mpris.org/2.1/spec/"""
+    """Implements http://www.mpris.org/2.2/spec/"""
 
     properties = None
 
@@ -46,6 +46,8 @@ class MprisObject(dbus.service.Object):
     def _get_root_iface_properties(self):
         return {
             'CanQuit': (True, None),
+            'Fullscreen': (False, None),
+            'CanSetFullscreen': (False, None),
             'CanRaise': (False, None),
             # NOTE Change if adding optional track list support
             'HasTrackList': (False, None),

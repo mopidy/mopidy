@@ -31,6 +31,18 @@ class RootInterfaceTest(unittest.TestCase):
     def test_constructor_connects_to_dbus(self):
         self.assert_(self.mpris._connect_to_dbus.called)
 
+    def test_fullscreen_returns_false(self):
+        result = self.mpris.Get(objects.ROOT_IFACE, 'Fullscreen')
+        self.assertFalse(result)
+
+    def test_setting_fullscreen_fails_and_returns_none(self):
+        result = self.mpris.Set(objects.ROOT_IFACE, 'Fullscreen', 'True')
+        self.assertIsNone(result)
+
+    def test_can_set_fullscreen_returns_false(self):
+        result = self.mpris.Get(objects.ROOT_IFACE, 'CanSetFullscreen')
+        self.assertFalse(result)
+
     def test_can_raise_returns_false(self):
         result = self.mpris.Get(objects.ROOT_IFACE, 'CanRaise')
         self.assertFalse(result)
@@ -64,7 +76,7 @@ class RootInterfaceTest(unittest.TestCase):
         self.assertEquals(result, 'foo')
         settings.runtime.clear()
 
-    def test_supported_uri_schemes_is_empty(self):
+    def test_supported_uri_schemes_includes_backend_uri_schemes(self):
         result = self.mpris.Get(objects.ROOT_IFACE, 'SupportedUriSchemes')
         self.assertEquals(len(result), 1)
         self.assertEquals(result[0], 'dummy')
