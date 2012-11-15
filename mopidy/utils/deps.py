@@ -135,15 +135,9 @@ def _gstreamer_check_elements():
 
 
 def pykka_info():
-    if hasattr(pykka, '__version__'):
-        # Pykka >= 0.14
-        version = pykka.__version__
-    else:
-        # Pykka < 0.14
-        version = pykka.get_version()
     return {
         'name': 'Pykka',
-        'version': version,
+        'version': pykka.__version__,
         'path': pykka.__file__,
     }
 
