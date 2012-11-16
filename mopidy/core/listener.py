@@ -92,11 +92,14 @@ class CoreListener(object):
         """
         pass
 
-    def playlist_changed(self):
+    def playlist_changed(self, playlist):
         """
         Called whenever a playlist is changed.
 
         *MAY* be implemented by actor.
+
+        :param playlist: the changed playlist
+        :type playlist: :class:`mopidy.models.Playlist`
         """
         pass
 

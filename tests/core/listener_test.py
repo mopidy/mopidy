@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from mopidy.core import CoreListener, PlaybackState
-from mopidy.models import Track
+from mopidy.models import Playlist, Track
 
 from tests import unittest
 
@@ -30,7 +30,7 @@ class CoreListenerTest(unittest.TestCase):
         self.listener.tracklist_changed()
 
     def test_listener_has_default_impl_for_playlist_changed(self):
-        self.listener.playlist_changed()
+        self.listener.playlist_changed(Playlist())
 
     def test_listener_has_default_impl_for_options_changed(self):
         self.listener.options_changed()

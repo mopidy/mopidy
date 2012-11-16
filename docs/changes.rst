@@ -121,6 +121,9 @@ backends:
   triggered :meth:`mopidy.core.CoreListener.playlist_changed`, which is
   intended for stored playlists, not the tracklist.
 
+- The event :meth:`mopidy.core.CoreListener.playlist_changed` has been changed
+  to include the playlist that was changed.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
