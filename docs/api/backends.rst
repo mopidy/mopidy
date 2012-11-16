@@ -33,6 +33,13 @@ Library provider
     :members:
 
 
+Backend listener
+================
+
+.. autoclass:: mopidy.backends.listener.BackendListener
+    :members:
+
+
 .. _backend-implementations:
 
 Backend implementations
