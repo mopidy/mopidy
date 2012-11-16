@@ -45,7 +45,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def _create_app(self):
         root = RootResource()
         root.api = api.ApiResource(self.core)
-        root.ws = ws.WebSocketResource()
+        root.ws = ws.WebSocketResource(self.core)
 
         if settings.HTTP_SERVER_STATIC_DIR:
             static_dir = settings.HTTP_SERVER_STATIC_DIR

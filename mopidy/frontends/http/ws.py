@@ -15,9 +15,13 @@ logger = logging.getLogger('mopidy.frontends.http')
 
 
 class WebSocketResource(object):
+    def __init__(self, core):
+        self.core = core
+
     @cherrypy.expose
     def index(self):
         logger.debug('WebSocket handler created')
+        cherrypy.request.ws_handler.core = self.core
 
 
 class WebSocketHandler(WebSocket):
@@ -40,3 +44,6 @@ class WebSocketHandler(WebSocket):
             'Received WebSocket message from %s:%d: %s',
             remote.ip, remote.port, message)
         # This is where we would handle incoming messages from the clients
+
+        # This is just for demonstration purposes
+        self.send('Playback state: %s' % self.core.playback.state.get())
