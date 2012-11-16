@@ -116,6 +116,11 @@ backends:
   This makes it easier to start playing one of the tracks that was just
   appended to the tracklist.
 
+- When the tracklist is changed, we now trigger the new
+  :meth:`mopidy.core.CoreListener.tracklist_changed` event. Previously we
+  triggered :meth:`mopidy.core.CoreListener.playlist_changed`, which is
+  intended for stored playlists, not the tracklist.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

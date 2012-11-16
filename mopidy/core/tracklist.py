@@ -58,7 +58,7 @@ class TracklistController(object):
     def version(self, version):
         self._version = version
         self.core.playback.on_tracklist_change()
-        self._trigger_playlist_changed()
+        self._trigger_tracklist_changed()
 
     def add(self, track, at_position=None, increase_version=True):
         """
@@ -240,6 +240,6 @@ class TracklistController(object):
         """
         return [copy(tl_track) for tl_track in self._tl_tracks[start:end]]
 
-    def _trigger_playlist_changed(self):
-        logger.debug('Triggering playlist changed event')
-        listener.CoreListener.send('playlist_changed')
+    def _trigger_tracklist_changed(self):
+        logger.debug('Triggering event: tracklist_changed()')
+        listener.CoreListener.send('tracklist_changed')
