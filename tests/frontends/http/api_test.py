@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import pykka
 
 from tests import unittest
@@ -32,16 +34,16 @@ class ApiResourceTest(unittest.TestCase):
         self.assertIn('resources', result)
 
         self.assertIn('player', result['resources'])
-        self.assertEquals('/api/player/',
-            result['resources']['player']['href'])
+        self.assertEquals(
+            '/api/player/', result['resources']['player']['href'])
 
         self.assertIn('tracklist', result['resources'])
-        self.assertEquals('/api/tracklist/',
-            result['resources']['tracklist']['href'])
+        self.assertEquals(
+            '/api/tracklist/', result['resources']['tracklist']['href'])
 
         self.assertIn('playlists', result['resources'])
-        self.assertEquals('/api/playlists/',
-            result['resources']['playlists']['href'])
+        self.assertEquals(
+            '/api/playlists/', result['resources']['playlists']['href'])
 
     def test_player_get_returns_playback_properties(self):
         result = self.api.player.GET()
