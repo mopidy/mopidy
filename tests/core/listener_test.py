@@ -26,6 +26,9 @@ class CoreListenerTest(unittest.TestCase):
         self.listener.playback_state_changed(
             PlaybackState.STOPPED, PlaybackState.PLAYING)
 
+    def test_listener_has_default_impl_for_tracklist_changed(self):
+        self.listener.tracklist_changed()
+
     def test_listener_has_default_impl_for_playlist_changed(self):
         self.listener.playlist_changed()
 
