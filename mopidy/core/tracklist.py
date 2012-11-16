@@ -64,6 +64,9 @@ class TracklistController(object):
         """
         Add the track to the end of, or at the given position in the tracklist.
 
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
+
         :param track: track to add
         :type track: :class:`mopidy.models.Track`
         :param at_position: position in tracklist to add track
@@ -89,6 +92,9 @@ class TracklistController(object):
         """
         Append the given tracks to the tracklist.
 
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
+
         :param tracks: tracks to append
         :type tracks: list of :class:`mopidy.models.Track`
         :rtype: list of class:`mopidy.models.TlTrack`
@@ -103,7 +109,12 @@ class TracklistController(object):
         return tl_tracks
 
     def clear(self):
-        """Clear the tracklist."""
+        """
+        Clear the tracklist.
+
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
+        """
         self._tl_tracks = []
         self.version += 1
 
@@ -157,6 +168,9 @@ class TracklistController(object):
         """
         Move the tracks in the slice ``[start:end]`` to ``to_position``.
 
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
+
         :param start: position of first track to move
         :type start: int
         :param end: position after last track to move
@@ -190,6 +204,9 @@ class TracklistController(object):
 
         Uses :meth:`get()` to lookup the track to remove.
 
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
+
         :param criteria: on or more criteria to match by
         :type criteria: dict
         """
@@ -202,6 +219,9 @@ class TracklistController(object):
         """
         Shuffles the entire tracklist. If ``start`` and ``end`` is given only
         shuffles the slice ``[start:end]``.
+
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
 
         :param start: position of first track to shuffle
         :type start: int or :class:`None`
