@@ -78,8 +78,8 @@ class Backends(list):
         # the X_by_uri_scheme dicts below.
         self.with_library = [b for b in backends if b.has_library().get()]
         self.with_playback = [b for b in backends if b.has_playback().get()]
-        self.with_playlists = [b for b in backends
-            if b.has_playlists().get()]
+        self.with_playlists = [
+            b for b in backends if b.has_playlists().get()]
 
         self.by_uri_scheme = {}
         for backend in backends:
