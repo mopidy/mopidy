@@ -41,7 +41,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
         self.assertEqual(self.core.tracklist.tracks.get()[5], needle)
         self.assertInResponse(
-            'Id: %d' % self.core.tracklist.tl_tracks.get()[5][0])
+            'Id: %d' % self.core.tracklist.tl_tracks.get()[5].tlid)
         self.assertInResponse('OK')
 
     def test_addid_with_empty_uri_acks(self):
@@ -60,7 +60,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
         self.assertEqual(self.core.tracklist.tracks.get()[3], needle)
         self.assertInResponse(
-            'Id: %d' % self.core.tracklist.tl_tracks.get()[3][0])
+            'Id: %d' % self.core.tracklist.tl_tracks.get()[3].tlid)
         self.assertInResponse('OK')
 
     def test_addid_with_songpos_out_of_bounds_should_ack(self):
@@ -94,7 +94,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
         self.sendRequest(
-            'delete "%d"' % self.core.tracklist.tl_tracks.get()[2][0])
+            'delete "%d"' % self.core.tracklist.tl_tracks.get()[2].tlid)
         self.assertEqual(len(self.core.tracklist.tracks.get()), 4)
         self.assertInResponse('OK')
 
@@ -424,11 +424,11 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.sendRequest('plchangesposid "0"')
         tl_tracks = self.core.tracklist.tl_tracks.get()
         self.assertInResponse('cpos: 0')
-        self.assertInResponse('Id: %d' % tl_tracks[0][0])
+        self.assertInResponse('Id: %d' % tl_tracks[0].tlid)
         self.assertInResponse('cpos: 2')
-        self.assertInResponse('Id: %d' % tl_tracks[1][0])
+        self.assertInResponse('Id: %d' % tl_tracks[1].tlid)
         self.assertInResponse('cpos: 2')
-        self.assertInResponse('Id: %d' % tl_tracks[2][0])
+        self.assertInResponse('Id: %d' % tl_tracks[2].tlid)
         self.assertInResponse('OK')
 
     def test_shuffle_without_range(self):
