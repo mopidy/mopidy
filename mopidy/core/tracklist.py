@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from copy import copy
 import logging
 import random
 
@@ -28,7 +27,7 @@ class TracklistController(object):
 
         Read-only.
         """
-        return [copy(tl_track) for tl_track in self._tl_tracks]
+        return self._tl_tracks[:]
 
     @property
     def tracks(self):
@@ -258,7 +257,7 @@ class TracklistController(object):
         :type end: int
         :rtype: two-tuple of (TLID integer, :class:`mopidy.models.Track`)
         """
-        return [copy(tl_track) for tl_track in self._tl_tracks[start:end]]
+        return self._tl_tracks[start:end]
 
     def _trigger_tracklist_changed(self):
         logger.debug('Triggering event: tracklist_changed()')
