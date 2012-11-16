@@ -5,14 +5,16 @@ import itertools
 import pykka
 
 from mopidy.audio import AudioListener, PlaybackState
+from mopidy.backends.listener import BackendListener
 
 from .library import LibraryController
+from .listener import CoreListener
 from .playback import PlaybackController
 from .playlists import PlaylistsController
 from .tracklist import TracklistController
 
 
-class Core(pykka.ThreadingActor, AudioListener):
+class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     #: The library controller. An instance of
     # :class:`mopidy.core.LibraryController`.
     library = None
@@ -66,6 +68,10 @@ class Core(pykka.ThreadingActor, AudioListener):
                 and self.playback.state != PlaybackState.PAUSED):
             self.playback.state = new_state
             self.playback._trigger_track_playback_paused()
+
+    def playlists_loaded(self):
+        # Forward event from backend to frontends
+        CoreListener.send('playlists_loaded')
 
 
 class Backends(list):

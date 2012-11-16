@@ -20,6 +20,11 @@ class BackendEventsTest(unittest.TestCase):
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
+    def test_backends_playlists_loaded_forwards_event_to_frontends(self, send):
+        send.reset_mock()
+        self.core.playlists_loaded().get()
+        self.assertEqual(send.call_args[0][0], 'playlists_loaded')
+
     def test_pause_sends_track_playback_paused_event(self, send):
         self.core.tracklist.add(Track(uri='dummy:a'))
         self.core.playback.play().get()
