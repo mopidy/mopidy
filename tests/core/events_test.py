@@ -90,3 +90,26 @@ class BackendEventsTest(unittest.TestCase):
         send.reset_mock()
         self.core.tracklist.shuffle().get()
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
+
+    @unittest.SkipTest
+    def test_playlists_load_sends_playlists_loaded_event(self, send):
+        # TODO Figure out what type of event and how to send events when
+        # the backend finished loading playlists
+        pass
+
+    def test_playlists_create_sends_playlist_changed_event(self, send):
+        send.reset_mock()
+        self.core.playlists.create('foo').get()
+        self.assertEqual(send.call_args[0][0], 'playlist_changed')
+
+    @unittest.SkipTest
+    def test_playlists_delete_sends_playlist_deleted_event(self, send):
+        # TODO We should probably add a playlist_deleted event
+        pass
+
+    def test_playlists_save_sends_playlist_changed_event(self, send):
+        playlist = self.core.playlists.create('foo').get()
+        send.reset_mock()
+        playlist = playlist.copy(name='bar')
+        self.core.playlists.save(playlist).get()
+        self.assertEqual(send.call_args[0][0], 'playlist_changed')

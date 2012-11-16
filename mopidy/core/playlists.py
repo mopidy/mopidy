@@ -5,6 +5,8 @@ import urlparse
 
 import pykka
 
+from . import listener
+
 
 class PlaylistsController(object):
     pykka_traversable = True
@@ -47,7 +49,9 @@ class PlaylistsController(object):
             backend = self.backends.by_uri_scheme[uri_scheme]
         else:
             backend = self.backends.with_playlists[0]
-        return backend.playlists.create(name).get()
+        playlist = backend.playlists.create(name).get()
+        listener.CoreListener.send('playlist_changed', playlist=playlist)
+        return playlist
 
     def delete(self, uri):
         """
@@ -162,4 +166,6 @@ class PlaylistsController(object):
         backend = self.backends.with_playlists_by_uri_scheme.get(
             uri_scheme, None)
         if backend:
-            return backend.playlists.save(playlist).get()
+            playlist = backend.playlists.save(playlist).get()
+            listener.CoreListener.send('playlist_changed', playlist=playlist)
+            return playlist
