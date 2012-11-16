@@ -54,3 +54,39 @@ class BackendEventsTest(unittest.TestCase):
         send.reset_mock()
         self.core.playback.seek(1000).get()
         self.assertEqual(send.call_args[0][0], 'seeked')
+
+    def test_tracklist_add_sends_tracklist_changed_event(self, send):
+        send.reset_mock()
+        self.core.tracklist.add(Track(uri='dummy:a')).get()
+        self.assertEqual(send.call_args[0][0], 'tracklist_changed')
+
+    def test_tracklist_append_sends_tracklist_changed_event(self, send):
+        send.reset_mock()
+        self.core.tracklist.append([Track(uri='dummy:a')]).get()
+        self.assertEqual(send.call_args[0][0], 'tracklist_changed')
+
+    def test_tracklist_clear_sends_tracklist_changed_event(self, send):
+        self.core.tracklist.append([Track(uri='dummy:a')]).get()
+        send.reset_mock()
+        self.core.tracklist.clear().get()
+        self.assertEqual(send.call_args[0][0], 'tracklist_changed')
+
+    def test_tracklist_move_sends_tracklist_changed_event(self, send):
+        self.core.tracklist.append(
+            [Track(uri='dummy:a'), Track(uri='dummy:b')]).get()
+        send.reset_mock()
+        self.core.tracklist.move(0, 1, 1).get()
+        self.assertEqual(send.call_args[0][0], 'tracklist_changed')
+
+    def test_tracklist_remove_sends_tracklist_changed_event(self, send):
+        self.core.tracklist.append([Track(uri='dummy:a')]).get()
+        send.reset_mock()
+        self.core.tracklist.remove(uri='dummy:a').get()
+        self.assertEqual(send.call_args[0][0], 'tracklist_changed')
+
+    def test_tracklist_shuffle_sends_tracklist_changed_event(self, send):
+        self.core.tracklist.append(
+            [Track(uri='dummy:a'), Track(uri='dummy:b')]).get()
+        send.reset_mock()
+        self.core.tracklist.shuffle().get()
+        self.assertEqual(send.call_args[0][0], 'tracklist_changed')
