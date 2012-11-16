@@ -29,6 +29,9 @@ class CoreListenerTest(unittest.TestCase):
     def test_listener_has_default_impl_for_tracklist_changed(self):
         self.listener.tracklist_changed()
 
+    def test_listener_has_default_impl_for_playlists_loaded(self):
+        self.listener.playlists_loaded()
+
     def test_listener_has_default_impl_for_playlist_changed(self):
         self.listener.playlist_changed(Playlist())
 

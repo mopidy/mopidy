@@ -92,6 +92,14 @@ class CoreListener(object):
         """
         pass
 
+    def playlists_loaded(self):
+        """
+        Called when playlists are loaded or refreshed.
+
+        *MAY* be implemented by actor.
+        """
+        pass
+
     def playlist_changed(self, playlist):
         """
         Called whenever a playlist is changed.
