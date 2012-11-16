@@ -11,6 +11,7 @@ import threading
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from mopidy import settings
+from mopidy.backends.listener import BackendListener
 from mopidy.models import Playlist
 from mopidy.utils import process, versioning
 
@@ -155,6 +156,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         playlists = filter(None, playlists)
         self.backend.playlists.playlists = playlists
         logger.info('Loaded %d Spotify playlist(s)', len(playlists))
+        BackendListener.send('playlists_loaded')
 
     def search(self, query, queue):
         """Search method used by Mopidy backend"""
