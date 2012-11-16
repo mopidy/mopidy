@@ -20,8 +20,8 @@ class PlaylistsController(object):
 
         Read-only. List of :class:`mopidy.models.Playlist`.
         """
-        futures = [b.playlists.playlists
-            for b in self.backends.with_playlists]
+        futures = [
+            b.playlists.playlists for b in self.backends.with_playlists]
         results = pykka.get_all(futures)
         return list(itertools.chain(*results))
 
@@ -125,8 +125,8 @@ class PlaylistsController(object):
         :type uri_scheme: string
         """
         if uri_scheme is None:
-            futures = [b.playlists.refresh()
-                for b in self.backends.with_playlists]
+            futures = [
+                b.playlists.refresh() for b in self.backends.with_playlists]
             pykka.get_all(futures)
         else:
             backend = self.backends.with_playlists_by_uri_scheme.get(
