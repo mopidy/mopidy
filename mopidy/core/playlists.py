@@ -132,11 +132,13 @@ class PlaylistsController(object):
             futures = [
                 b.playlists.refresh() for b in self.backends.with_playlists]
             pykka.get_all(futures)
+            listener.CoreListener.send('playlists_loaded')
         else:
             backend = self.backends.with_playlists_by_uri_scheme.get(
                 uri_scheme, None)
             if backend:
                 backend.playlists.refresh().get()
+                listener.CoreListener.send('playlists_loaded')
 
     def save(self, playlist):
         """
