@@ -15,8 +15,8 @@ class TracklistController(object):
     pykka_traversable = True
 
     def __init__(self, core):
-        self.core = core
-        self.tlid = 0
+        self._core = core
+        self._next_tlid = 0
         self._tl_tracks = []
         self._version = 0
 
@@ -56,7 +56,7 @@ class TracklistController(object):
     @version.setter  # noqa
     def version(self, version):
         self._version = version
-        self.core.playback.on_tracklist_change()
+        self._core.playback.on_tracklist_change()
         self._trigger_tracklist_changed()
 
     def add(self, track, at_position=None, increase_version=True):
@@ -77,14 +77,14 @@ class TracklistController(object):
         """
         assert at_position <= len(self._tl_tracks), \
             'at_position can not be greater than tracklist length'
-        tl_track = TlTrack(self.tlid, track)
+        tl_track = TlTrack(self._next_tlid, track)
         if at_position is not None:
             self._tl_tracks.insert(at_position, tl_track)
         else:
             self._tl_tracks.append(tl_track)
         if increase_version:
             self.version += 1
-        self.tlid += 1
+        self._next_tlid += 1
         return tl_track
 
     def append(self, tracks):
