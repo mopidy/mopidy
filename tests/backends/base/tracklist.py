@@ -153,10 +153,13 @@ class TracklistControllerTest(object):
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
+    @populate_playlist
+    def test_append_returns_the_tl_tracks_that_was_added(self):
+        tl_tracks = self.controller.append(self.controller.tracks[1:2])
+        self.assertEqual(tl_tracks[0][1], self.controller.tracks[1])
+
     def test_index_returns_index_of_track(self):
-        tl_tracks = []
-        for track in self.tracks:
-            tl_tracks.append(self.controller.add(track))
+        tl_tracks = self.controller.append(self.tracks)
         self.assertEquals(0, self.controller.index(tl_tracks[0]))
         self.assertEquals(1, self.controller.index(tl_tracks[1]))
         self.assertEquals(2, self.controller.index(tl_tracks[2]))

@@ -111,6 +111,11 @@ backends:
 - The Spotify backend now returns the track if you search for the Spotify track
   URI. (Fixes: :issue:`233`)
 
+- :meth:`mopidy.core.TracklistController.append` now returns a list of the
+  :class:`mopidy.models.TlTrack` instances that was added to the tracklist.
+  This makes it easier to start playing one of the tracks that was just
+  appended to the tracklist.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

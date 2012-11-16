@@ -92,12 +92,16 @@ class TracklistController(object):
 
         :param tracks: tracks to append
         :type tracks: list of :class:`mopidy.models.Track`
+        :rtype: list of class:`mopidy.models.TlTrack`
         """
+        tl_tracks = []
         for track in tracks:
-            self.add(track, increase_version=False)
+            tl_tracks.append(self.add(track, increase_version=False))
 
         if tracks:
             self.version += 1
+
+        return tl_tracks
 
     def clear(self):
         """Clear the current playlist."""
