@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from collections import namedtuple
-
 
 class ImmutableObject(object):
     """
@@ -151,9 +149,6 @@ class Album(ImmutableObject):
         super(Album, self).__init__(*args, **kwargs)
 
 
-TlTrack = namedtuple('TlTrack', ['tlid', 'track'])
-
-
 class Track(ImmutableObject):
     """
     :param uri: track URI
@@ -206,6 +201,44 @@ class Track(ImmutableObject):
     def __init__(self, *args, **kwargs):
         self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
+
+
+class TlTrack(ImmutableObject):
+    """
+    A tracklist track. Wraps a regular track and it's tracklist ID.
+
+    The use of :class:`TlTrack` allows the same track to appear multiple times
+    in the tracklist.
+
+    This class also accepts it's parameters as positional arguments. Both
+    arguments must be provided, and they must appear in the order they are
+    listed here.
+
+    This class also supports iteration, so your extract its values like this::
+
+        (tlid, track) = tl_track
+
+    :param tlid: tracklist ID
+    :type tlid: int
+    :param track: the track
+    :type track: :class:`Track`
+    """
+
+    #: The tracklist ID. Read-only.
+    tlid = None
+
+    #: The track. Read-only.
+    track = None
+
+    def __init__(self, *args, **kwargs):
+        if len(args) == 2 and len(kwargs) == 0:
+            kwargs['tlid'] = args[0]
+            kwargs['track'] = args[1]
+            args = []
+        super(TlTrack, self).__init__(*args, **kwargs)
+
+    def __iter__(self):
+        return iter([self.tlid, self.track])
 
 
 class Playlist(ImmutableObject):
