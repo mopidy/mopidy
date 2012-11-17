@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import base64
 import logging
 import os
 
@@ -27,6 +28,7 @@ BUS_NAME = 'org.mpris.MediaPlayer2.mopidy'
 OBJECT_PATH = '/org/mpris/MediaPlayer2'
 ROOT_IFACE = 'org.mpris.MediaPlayer2'
 PLAYER_IFACE = 'org.mpris.MediaPlayer2.Player'
+PLAYLISTS_IFACE = 'org.mpris.MediaPlayer2.Playlists'
 
 
 class MprisObject(dbus.service.Object):
@@ -39,6 +41,7 @@ class MprisObject(dbus.service.Object):
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
             PLAYER_IFACE: self._get_player_iface_properties(),
+            PLAYLISTS_IFACE: self._get_playlists_iface_properties(),
         }
         bus_name = self._connect_to_dbus()
         dbus.service.Object.__init__(self, bus_name, OBJECT_PATH)
@@ -78,6 +81,13 @@ class MprisObject(dbus.service.Object):
             'CanControl': (self.get_CanControl, None),
         }
 
+    def _get_playlists_iface_properties(self):
+        return {
+            'PlaylistCount': (self.get_PlaylistCount, None),
+            'Orderings': (self.get_Orderings, None),
+            'ActivePlaylist': (self.get_ActivePlaylist, None),
+        }
+
     def _connect_to_dbus(self):
         logger.debug('Connecting to D-Bus...')
         mainloop = dbus.mainloop.glib.DBusGMainLoop()
@@ -86,10 +96,22 @@ class MprisObject(dbus.service.Object):
         logger.info('Connected to D-Bus')
         return bus_name
 
-    def _get_track_id(self, tl_track):
+    def get_playlist_id(self, playlist_uri):
+        # Only A-Za-z0-9_ is allowed, which is 63 chars, so we can't use
+        # base64. Luckily, D-Bus does not limit the length of object paths.
+        # Since base32 pads trailing bytes with "=" chars, we need to replace
+        # them with an allowed character such as "_".
+        encoded_uri = base64.b32encode(playlist_uri).replace('=', '_')
+        return '/com/mopidy/playlist/%s' % encoded_uri
+
+    def get_playlist_uri(self, playlist_id):
+        encoded_uri = playlist_id.split('/')[-1].replace('_', '=')
+        return base64.b32decode(encoded_uri)
+
+    def get_track_id(self, tl_track):
         return '/com/mopidy/track/%d' % tl_track.tlid
 
-    def _get_tlid(self, track_id):
+    def get_track_tlid(self, track_id):
         assert track_id.startswith('/com/mopidy/track/')
         return track_id.split('/')[-1]
 
@@ -239,7 +261,7 @@ class MprisObject(dbus.service.Object):
         current_tl_track = self.core.playback.current_tl_track.get()
         if current_tl_track is None:
             return
-        if track_id != self._get_track_id(current_tl_track):
+        if track_id != self.get_track_id(current_tl_track):
             return
         if position < 0:
             return
@@ -337,7 +359,7 @@ class MprisObject(dbus.service.Object):
             return {'mpris:trackid': ''}
         else:
             (_, track) = current_tl_track
-            metadata = {'mpris:trackid': self._get_track_id(current_tl_track)}
+            metadata = {'mpris:trackid': self.get_track_id(current_tl_track)}
             if track.length:
                 metadata['mpris:length'] = track.length * 1000
             if track.uri:
@@ -420,3 +442,58 @@ class MprisObject(dbus.service.Object):
     def get_CanControl(self):
         # NOTE This could be a setting for the end user to change.
         return True
+
+    ### Playlists interface methods
+
+    @dbus.service.method(dbus_interface=PLAYLISTS_IFACE)
+    def ActivatePlaylist(self, playlist_id):
+        logger.debug(
+            '%s.ActivatePlaylist(%r) called', PLAYLISTS_IFACE, playlist_id)
+        playlist_uri = self.get_playlist_uri(playlist_id)
+        playlist = self.core.playlists.lookup(playlist_uri).get()
+        if playlist and playlist.tracks:
+            tl_tracks = self.core.tracklist.append(playlist.tracks).get()
+            self.core.playback.play(tl_tracks[0])
+
+    @dbus.service.method(dbus_interface=PLAYLISTS_IFACE)
+    def GetPlaylists(self, index, max_count, order, reverse):
+        logger.debug(
+            '%s.GetPlaylists(%r, %r, %r, %r) called',
+            PLAYLISTS_IFACE, index, max_count, order, reverse)
+        playlists = self.core.playlists.playlists.get()
+        if order == 'Alphabetical':
+            playlists.sort(key=lambda p: p.name, reverse=reverse)
+        elif order == 'Modified':
+            playlists.sort(key=lambda p: p.last_modified, reverse=reverse)
+        elif order == 'User' and reverse:
+            playlists.reverse()
+        slice_end = index + max_count
+        playlists = playlists[index:slice_end]
+        results = [
+            (self.get_playlist_id(p.uri), p.name, '')
+            for p in playlists]
+        return dbus.Array(results, signature='(oss)')
+
+    ### Playlists interface signals
+
+    @dbus.service.signal(dbus_interface=PLAYLISTS_IFACE, signature='(oss)')
+    def PlaylistChanged(self, playlist):
+        logger.debug('%s.PlaylistChanged signaled', PLAYLISTS_IFACE)
+        # Do nothing, as just calling the method is enough to emit the signal.
+
+    ### Playlists interface properties
+
+    def get_PlaylistCount(self):
+        return len(self.core.playlists.playlists.get())
+
+    def get_Orderings(self):
+        return [
+            'Alphabetical',  # Order by playlist.name
+            'Modified',      # Order by playlist.last_modified
+            'User',          # Don't change order
+        ]
+
+    def get_ActivePlaylist(self):
+        playlist_is_valid = False
+        playlist = ('/', 'None', '')
+        return (playlist_is_valid, playlist)
