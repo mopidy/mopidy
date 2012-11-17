@@ -124,6 +124,10 @@ backends:
 - The event :meth:`mopidy.core.CoreListener.playlist_changed` has been changed
   to include the playlist that was changed.
 
+- The MPRIS playlists interface is now supported by our MPRIS frontend. This
+  means that you now can select playlists to queue and play from the Ubuntu
+  Sound Menu.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

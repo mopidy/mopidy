@@ -5,7 +5,7 @@ import sys
 import mock
 
 from mopidy.exceptions import OptionalDependencyError
-from mopidy.models import Track
+from mopidy.models import Playlist, Track
 
 try:
     from mopidy.frontends.mpris import MprisFrontend, objects
@@ -75,3 +75,19 @@ class BackendEventsTest(unittest.TestCase):
     def test_seeked_event_causes_mpris_seeked_event(self):
         self.mpris_frontend.seeked(31000)
         self.mpris_object.Seeked.assert_called_with(31000000)
+
+    def test_playlists_loaded_event_changes_playlist_count(self):
+        self.mpris_object.Get.return_value = 17
+        self.mpris_frontend.playlists_loaded()
+        self.assertListEqual(self.mpris_object.Get.call_args_list, [
+            ((objects.PLAYLISTS_IFACE, 'PlaylistCount'), {}),
+        ])
+        self.mpris_object.PropertiesChanged.assert_called_with(
+            objects.PLAYLISTS_IFACE, {'PlaylistCount': 17}, [])
+
+    def test_playlist_changed_event_causes_mpris_playlist_changed_event(self):
+        self.mpris_object.get_playlist_id.return_value = 'id-for-dummy:foo'
+        playlist = Playlist(uri='dummy:foo', name='foo')
+        self.mpris_frontend.playlist_changed(playlist)
+        self.mpris_object.PlaylistChanged.assert_called_with(
+            ('id-for-dummy:foo', 'foo', ''))
