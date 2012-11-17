@@ -11,7 +11,9 @@ class SpotifyPlaylistsProvider(base.BasePlaylistsProvider):
         pass  # TODO
 
     def lookup(self, uri):
-        pass  # TODO
+        for playlist in self._playlists:
+            if playlist.uri == uri:
+                return playlist
 
     def refresh(self):
         pass  # TODO
