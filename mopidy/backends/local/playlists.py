@@ -6,7 +6,7 @@ import os
 import shutil
 
 from mopidy import settings
-from mopidy.backends import base
+from mopidy.backends import base, listener
 from mopidy.models import Playlist
 from mopidy.utils import formatting, path
 
@@ -63,6 +63,7 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
             playlists.append(playlist)
 
         self.playlists = playlists
+        listener.BackendListener.send('playlists_loaded')
 
     def save(self, playlist):
         assert playlist.uri, 'Cannot save playlist without URI'
