@@ -99,8 +99,8 @@ class MprisObject(dbus.service.Object):
     def get_playlist_id(self, playlist_uri):
         # Only A-Za-z0-9_ is allowed, which is 63 chars, so we can't use
         # base64. Luckily, D-Bus does not limit the length of object paths.
-        # Since base32 pads trailing bytes with = chars, we need to replace
-        # them with the allow _ char.
+        # Since base32 pads trailing bytes with "=" chars, we need to replace
+        # them with an allowed character such as "_".
         encoded_uri = base64.b32encode(playlist_uri).replace('=', '_')
         return '/com/mopidy/playlist/%s' % encoded_uri
 
