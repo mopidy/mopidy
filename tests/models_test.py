@@ -7,7 +7,7 @@ from mopidy.models import Artist, Album, TlTrack, Track, Playlist
 from tests import unittest
 
 
-class GenericCopyTets(unittest.TestCase):
+class GenericCopyTest(unittest.TestCase):
     def compare(self, orig, other):
         self.assertEqual(orig, other)
         self.assertNotEqual(id(orig), id(other))
