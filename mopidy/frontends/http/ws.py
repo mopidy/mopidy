@@ -39,9 +39,11 @@ class WebSocketHandler(WebSocket):
             remote.ip, remote.port, code, reason)
 
     def received_message(self, message):
+        message = str(message)
+
         remote = cherrypy.request.remote
         logger.debug(
-            'Received WebSocket message from %s:%d: %s',
+            'Received WebSocket message from %s:%d: %r',
             remote.ip, remote.port, message)
         # This is where we would handle incoming messages from the clients
 
