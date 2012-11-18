@@ -50,7 +50,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         if settings.HTTP_SERVER_STATIC_DIR:
             static_dir = settings.HTTP_SERVER_STATIC_DIR
         else:
-            static_dir = os.path.dirname(__file__)
+            static_dir = os.path.join(os.path.dirname(__file__), 'data')
         logger.debug('HTTP server will serve "%s" at /', static_dir)
 
         config = {
