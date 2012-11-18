@@ -622,10 +622,10 @@ class TlTrackTest(unittest.TestCase):
             TlTrack(tlid=123, track=track).serialize())
 
     def test_to_json_and_back(self):
-        track1 = Track(uri='uri', name='name')
-        serialized = json.dumps(track1, cls=ModelJSONEncoder)
-        track2 = json.loads(serialized, object_hook=model_json_decoder)
-        self.assertEqual(track1, track2)
+        tl_track1 = TlTrack(tlid=123, track=Track(uri='uri', name='name'))
+        serialized = json.dumps(tl_track1, cls=ModelJSONEncoder)
+        tl_track2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(tl_track1, tl_track2)
 
     def test_eq(self):
         tlid = 123

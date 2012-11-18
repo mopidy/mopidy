@@ -131,6 +131,8 @@ def model_json_decoder(dct):
             return Artist(**dct)
         if obj_type == 'Playlist':
             return Playlist(**dct)
+        if obj_type == 'TlTrack':
+            return TlTrack(**dct)
         if obj_type == 'Track':
             return Track(**dct)
     return dct
