@@ -82,22 +82,30 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
 
 class DummyPlaylistsProvider(base.BasePlaylistsProvider):
     def create(self, name):
-        playlist = Playlist(name=name)
+        playlist = Playlist(name=name, uri='dummy:%s' % name)
         self._playlists.append(playlist)
         return playlist
 
-    def delete(self, playlist):
-        self._playlists.remove(playlist)
+    def delete(self, uri):
+        playlist = self.lookup(uri)
+        if playlist:
+            self._playlists.remove(playlist)
 
     def lookup(self, uri):
-        return filter(lambda p: p.uri == uri, self._playlists)
+        for playlist in self._playlists:
+            if playlist.uri == uri:
+                return playlist
 
     def refresh(self):
         pass
 
-    def rename(self, playlist, new_name):
-        self._playlists[self._playlists.index(playlist)] = \
-            playlist.copy(name=new_name)
-
     def save(self, playlist):
-        self._playlists.append(playlist)
+        old_playlist = self.lookup(playlist.uri)
+
+        if old_playlist is not None:
+            index = self._playlists.index(old_playlist)
+            self._playlists[index] = playlist
+        else:
+            self._playlists.append(playlist)
+
+        return playlist

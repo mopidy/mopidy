@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+import pygst
+pygst.require('0.10')
+import gst
+
 import logging
 import os
 import threading
@@ -7,6 +11,7 @@ import threading
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from mopidy import settings
+from mopidy.backends.listener import BackendListener
 from mopidy.models import Playlist
 from mopidy.utils import process, versioning
 
@@ -108,8 +113,13 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             'sample_rate': sample_rate,
             'channels': channels,
         }
-        self.audio.emit_data(capabilites, bytes(frames))
-        return num_frames
+        buffer_ = gst.Buffer(bytes(frames))
+        buffer_.set_caps(gst.caps_from_string(capabilites))
+
+        if self.audio.emit_data(buffer_).get():
+            return num_frames
+        else:
+            return 0
 
     def play_token_lost(self, session):
         """Callback used by pyspotify"""
@@ -146,6 +156,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         playlists = filter(None, playlists)
         self.backend.playlists.playlists = playlists
         logger.info('Loaded %d Spotify playlist(s)', len(playlists))
+        BackendListener.send('playlists_loaded')
 
     def search(self, query, queue):
         """Search method used by Mopidy backend"""

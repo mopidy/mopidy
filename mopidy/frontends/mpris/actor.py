@@ -57,35 +57,48 @@ class MprisFrontend(pykka.ThreadingActor, CoreListener):
         self.indicate_server.show()
         logger.debug('Startup notification sent')
 
-    def _emit_properties_changed(self, *changed_properties):
+    def _emit_properties_changed(self, interface, changed_properties):
         if self.mpris_object is None:
             return
         props_with_new_values = [
-            (p, self.mpris_object.Get(objects.PLAYER_IFACE, p))
+            (p, self.mpris_object.Get(interface, p))
             for p in changed_properties]
         self.mpris_object.PropertiesChanged(
-            objects.PLAYER_IFACE, dict(props_with_new_values), [])
+            interface, dict(props_with_new_values), [])
 
     def track_playback_paused(self, track, time_position):
-        logger.debug('Received track playback paused event')
-        self._emit_properties_changed('PlaybackStatus')
+        logger.debug('Received track_playback_paused event')
+        self._emit_properties_changed(objects.PLAYER_IFACE, ['PlaybackStatus'])
 
     def track_playback_resumed(self, track, time_position):
-        logger.debug('Received track playback resumed event')
-        self._emit_properties_changed('PlaybackStatus')
+        logger.debug('Received track_playback_resumed event')
+        self._emit_properties_changed(objects.PLAYER_IFACE, ['PlaybackStatus'])
 
     def track_playback_started(self, track):
-        logger.debug('Received track playback started event')
-        self._emit_properties_changed('PlaybackStatus', 'Metadata')
+        logger.debug('Received track_playback_started event')
+        self._emit_properties_changed(
+            objects.PLAYER_IFACE, ['PlaybackStatus', 'Metadata'])
 
     def track_playback_ended(self, track, time_position):
-        logger.debug('Received track playback ended event')
-        self._emit_properties_changed('PlaybackStatus', 'Metadata')
+        logger.debug('Received track_playback_ended event')
+        self._emit_properties_changed(
+            objects.PLAYER_IFACE, ['PlaybackStatus', 'Metadata'])
 
     def volume_changed(self):
-        logger.debug('Received volume changed event')
-        self._emit_properties_changed('Volume')
+        logger.debug('Received volume_changed event')
+        self._emit_properties_changed(objects.PLAYER_IFACE, ['Volume'])
 
     def seeked(self, time_position_in_ms):
         logger.debug('Received seeked event')
         self.mpris_object.Seeked(time_position_in_ms * 1000)
+
+    def playlists_loaded(self):
+        logger.debug('Received playlists_loaded event')
+        self._emit_properties_changed(
+            objects.PLAYLISTS_IFACE, ['PlaylistCount'])
+
+    def playlist_changed(self, playlist):
+        logger.debug('Received playlist_changed event')
+        playlist_id = self.mpris_object.get_playlist_id(playlist.uri)
+        playlist = (playlist_id, playlist.name, '')
+        self.mpris_object.PlaylistChanged(playlist)

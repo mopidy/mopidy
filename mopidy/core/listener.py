@@ -84,11 +84,30 @@ class CoreListener(object):
         """
         pass
 
-    def playlist_changed(self):
+    def tracklist_changed(self):
+        """
+        Called whenever the tracklist is changed.
+
+        *MAY* be implemented by actor.
+        """
+        pass
+
+    def playlists_loaded(self):
+        """
+        Called when playlists are loaded or refreshed.
+
+        *MAY* be implemented by actor.
+        """
+        pass
+
+    def playlist_changed(self, playlist):
         """
         Called whenever a playlist is changed.
 
         *MAY* be implemented by actor.
+
+        :param playlist: the changed playlist
+        :type playlist: :class:`mopidy.models.Playlist`
         """
         pass
 

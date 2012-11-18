@@ -4,15 +4,17 @@ import itertools
 
 import pykka
 
-from mopidy.audio import AudioListener
+from mopidy.audio import AudioListener, PlaybackState
+from mopidy.backends.listener import BackendListener
 
 from .library import LibraryController
+from .listener import CoreListener
 from .playback import PlaybackController
 from .playlists import PlaylistsController
 from .tracklist import TracklistController
 
 
-class Core(pykka.ThreadingActor, AudioListener):
+class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     #: The library controller. An instance of
     # :class:`mopidy.core.LibraryController`.
     library = None
@@ -55,6 +57,22 @@ class Core(pykka.ThreadingActor, AudioListener):
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()
 
+    def state_changed(self, old_state, new_state):
+        # XXX: This is a temporary fix for issue #232 while we wait for a more
+        # permanent solution with the implementation of issue #234. When the
+        # Spotify play token is lost, the Spotify backend pauses audio
+        # playback, but mopidy.core doesn't know this, so we need to update
+        # mopidy.core's state to match the actual state in mopidy.audio. If we
+        # don't do this, clients will think that we're still playing.
+        if (new_state == PlaybackState.PAUSED
+                and self.playback.state != PlaybackState.PAUSED):
+            self.playback.state = new_state
+            self.playback._trigger_track_playback_paused()
+
+    def playlists_loaded(self):
+        # Forward event from backend to frontends
+        CoreListener.send('playlists_loaded')
+
 
 class Backends(list):
     def __init__(self, backends):
@@ -66,8 +84,8 @@ class Backends(list):
         # the X_by_uri_scheme dicts below.
         self.with_library = [b for b in backends if b.has_library().get()]
         self.with_playback = [b for b in backends if b.has_playback().get()]
-        self.with_playlists = [b for b in backends
-            if b.has_playlists().get()]
+        self.with_playlists = [
+            b for b in backends if b.has_playlists().get()]
 
         self.by_uri_scheme = {}
         for backend in backends:

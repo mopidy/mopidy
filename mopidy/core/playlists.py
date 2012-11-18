@@ -5,6 +5,8 @@ import urlparse
 
 import pykka
 
+from . import listener
+
 
 class PlaylistsController(object):
     pykka_traversable = True
@@ -20,8 +22,8 @@ class PlaylistsController(object):
 
         Read-only. List of :class:`mopidy.models.Playlist`.
         """
-        futures = [b.playlists.playlists
-            for b in self.backends.with_playlists]
+        futures = [
+            b.playlists.playlists for b in self.backends.with_playlists]
         results = pykka.get_all(futures)
         return list(itertools.chain(*results))
 
@@ -47,7 +49,9 @@ class PlaylistsController(object):
             backend = self.backends.by_uri_scheme[uri_scheme]
         else:
             backend = self.backends.with_playlists[0]
-        return backend.playlists.create(name).get()
+        playlist = backend.playlists.create(name).get()
+        listener.CoreListener.send('playlist_changed', playlist=playlist)
+        return playlist
 
     def delete(self, uri):
         """
@@ -125,14 +129,16 @@ class PlaylistsController(object):
         :type uri_scheme: string
         """
         if uri_scheme is None:
-            futures = [b.playlists.refresh()
-                for b in self.backends.with_playlists]
+            futures = [
+                b.playlists.refresh() for b in self.backends.with_playlists]
             pykka.get_all(futures)
+            listener.CoreListener.send('playlists_loaded')
         else:
             backend = self.backends.with_playlists_by_uri_scheme.get(
                 uri_scheme, None)
             if backend:
                 backend.playlists.refresh().get()
+                listener.CoreListener.send('playlists_loaded')
 
     def save(self, playlist):
         """
@@ -162,4 +168,6 @@ class PlaylistsController(object):
         backend = self.backends.with_playlists_by_uri_scheme.get(
             uri_scheme, None)
         if backend:
-            return backend.playlists.save(playlist).get()
+            playlist = backend.playlists.save(playlist).get()
+            listener.CoreListener.send('playlist_changed', playlist=playlist)
+            return playlist

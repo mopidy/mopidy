@@ -13,6 +13,7 @@ from mopidy import settings
 from mopidy.utils import process
 
 from . import mixers
+from .constants import PlaybackState
 from .listener import AudioListener
 
 logger = logging.getLogger('mopidy.audio')
@@ -29,8 +30,10 @@ class Audio(pykka.ThreadingActor):
     - :attr:`mopidy.settings.OUTPUT`
     - :attr:`mopidy.settings.MIXER`
     - :attr:`mopidy.settings.MIXER_TRACK`
-
     """
+
+    #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
+    state = PlaybackState.STOPPED
 
     def __init__(self):
         super(Audio, self).__init__()
@@ -39,8 +42,11 @@ class Audio(pykka.ThreadingActor):
         self._mixer = None
         self._mixer_track = None
         self._software_mixing = False
+        self._appsrc = None
 
-        self._message_processor_set_up = False
+        self._notify_source_signal_id = None
+        self._about_to_finish_id = None
+        self._message_signal_id = None
 
     def on_start(self):
         try:
@@ -63,7 +69,13 @@ class Audio(pykka.ThreadingActor):
         fakesink = gst.element_factory_make('fakesink')
         self._playbin.set_property('video-sink', fakesink)
 
-        self._playbin.connect('notify::source', self._on_new_source)
+        self._about_to_finish_id = self._playbin.connect(
+            'about-to-finish', self._on_about_to_finish)
+        self._notify_source_signal_id = self._playbin.connect(
+            'notify::source', self._on_new_source)
+
+    def _on_about_to_finish(self, element):
+        self._appsrc = None
 
     def _on_new_source(self, element, pad):
         uri = element.get_property('uri')
@@ -77,8 +89,15 @@ class Audio(pykka.ThreadingActor):
             b'rate=(int)44100')
         source = element.get_property('source')
         source.set_property('caps', default_caps)
+        source.set_property('format', b'time') # Gstreamer does not like unicode
+
+        self._appsrc = source
 
     def _teardown_playbin(self):
+        if self._about_to_finish_id:
+            self._playbin.disconnect(self._about_to_finish_id)
+        if self._notify_source_signal_id:
+            self._playbin.disconnect(self._notify_source_signal_id)
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
@@ -151,17 +170,21 @@ class Audio(pykka.ThreadingActor):
     def _setup_message_processor(self):
         bus = self._playbin.get_bus()
         bus.add_signal_watch()
-        bus.connect('message', self._on_message)
-        self._message_processor_set_up = True
+        self._message_signal_id = bus.connect('message', self._on_message)
 
     def _teardown_message_processor(self):
-        if self._message_processor_set_up:
+        if self._message_signal_id:
             bus = self._playbin.get_bus()
+            bus.disconnect(self._message_signal_id)
             bus.remove_signal_watch()
 
     def _on_message(self, bus, message):
-        if message.type == gst.MESSAGE_EOS:
-            self._trigger_reached_end_of_stream_event()
+        if (message.type == gst.MESSAGE_STATE_CHANGED
+                and message.src == self._playbin):
+            old_state, new_state, pending_state = message.parse_state_changed()
+            self._on_playbin_state_changed(old_state, new_state, pending_state)
+        elif message.type == gst.MESSAGE_EOS:
+            self._on_end_of_stream()
         elif message.type == gst.MESSAGE_ERROR:
             error, debug = message.parse_error()
             logger.error('%s %s', error, debug)
@@ -170,8 +193,37 @@ class Audio(pykka.ThreadingActor):
             error, debug = message.parse_warning()
             logger.warning('%s %s', error, debug)
 
-    def _trigger_reached_end_of_stream_event(self):
-        logger.debug('Triggering reached end of stream event')
+    def _on_playbin_state_changed(self, old_state, new_state, pending_state):
+        if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
+            # XXX: We're not called on the last state change when going down to
+            # NULL, so we rewrite the second to last call to get the expected
+            # behavior.
+            new_state = gst.STATE_NULL
+            pending_state = gst.STATE_VOID_PENDING
+
+        if pending_state != gst.STATE_VOID_PENDING:
+            return  # Ignore intermediate state changes
+
+        if new_state == gst.STATE_READY:
+            return  # Ignore READY state as it's GStreamer specific
+
+        if new_state == gst.STATE_PLAYING:
+            new_state = PlaybackState.PLAYING
+        elif new_state == gst.STATE_PAUSED:
+            new_state = PlaybackState.PAUSED
+        elif new_state == gst.STATE_NULL:
+            new_state = PlaybackState.STOPPED
+
+        old_state, self.state = self.state, new_state
+
+        logger.debug(
+            'Triggering event: state_changed(old_state=%s, new_state=%s)',
+            old_state, new_state)
+        AudioListener.send('state_changed',
+            old_state=old_state, new_state=new_state)
+
+    def _on_end_of_stream(self):
+        logger.debug('Triggering reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
 
     def set_uri(self, uri):
@@ -185,23 +237,21 @@ class Audio(pykka.ThreadingActor):
         """
         self._playbin.set_property('uri', uri)
 
-    def emit_data(self, capabilities, data):
+    def emit_data(self, buffer_):
         """
         Call this to deliver raw audio data to be played.
 
         Note that the uri must be set to ``appsrc://`` for this to work.
 
-        :param capabilities: a GStreamer capabilities string
-        :type capabilities: string
-        :param data: raw audio data to be played
-        """
-        caps = gst.caps_from_string(capabilities)
-        buffer_ = gst.Buffer(buffer(data))
-        buffer_.set_caps(caps)
+        Returns true if data was delivered.
 
-        source = self._playbin.get_property('source')
-        source.set_property('caps', caps)
-        source.emit('push-buffer', buffer_)
+        :param buffer_: buffer to pass to appsrc
+        :type buffer_: :class:`gst.Buffer`
+        :rtype: boolean
+        """
+        if not self._appsrc:
+            return False
+        return self._appsrc.emit('push-buffer', buffer_) == gst.FLOW_OK
 
     def emit_end_of_stream(self):
         """

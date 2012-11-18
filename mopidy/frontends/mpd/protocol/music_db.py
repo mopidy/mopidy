@@ -112,9 +112,7 @@ def list_(context, field, mpd_query=None):
         ``artist``, ``date``, or ``genre``.
 
         ``ARTIST`` is an optional parameter when type is ``album``,
-        ``date``, or ``genre``.
-
-        This filters the result list by an artist.
+        ``date``, or ``genre``. This filters the result list by an artist.
 
     *Clarifications:*
 

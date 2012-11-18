@@ -314,21 +314,6 @@ class AlbumTest(unittest.TestCase):
         self.assertNotEqual(hash(album1), hash(album2))
 
 
-class TlTrackTest(unittest.TestCase):
-    def setUp(self):
-        self.tlid = 123
-        self.track = Track()
-        self.tl_track = TlTrack(self.tlid, self.track)
-
-    def test_tl_track_can_be_accessed_as_a_tuple(self):
-        self.assertEqual(self.tlid, self.tl_track[0])
-        self.assertEqual(self.track, self.tl_track[1])
-
-    def test_tl_track_can_be_accessed_by_attribute_names(self):
-        self.assertEqual(self.tlid, self.tl_track.tlid)
-        self.assertEqual(self.track, self.tl_track.track)
-
-
 class TrackTest(unittest.TestCase):
     def test_uri(self):
         uri = 'an_uri'
@@ -565,6 +550,75 @@ class TrackTest(unittest.TestCase):
             length=200, bitrate=200, musicbrainz_id='id2')
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
+
+
+class TlTrackTest(unittest.TestCase):
+    def test_tlid(self):
+        tlid = 123
+        tl_track = TlTrack(tlid=tlid)
+        self.assertEqual(tl_track.tlid, tlid)
+        self.assertRaises(AttributeError, setattr, tl_track, 'tlid', None)
+
+    def test_track(self):
+        track = Track()
+        tl_track = TlTrack(track=track)
+        self.assertEqual(tl_track.track, track)
+        self.assertRaises(AttributeError, setattr, tl_track, 'track', None)
+
+    def test_invalid_kwarg(self):
+        test = lambda: TlTrack(foo='baz')
+        self.assertRaises(TypeError, test)
+
+    def test_positional_args(self):
+        tlid = 123
+        track = Track()
+        tl_track = TlTrack(tlid, track)
+        self.assertEqual(tl_track.tlid, tlid)
+        self.assertEqual(tl_track.track, track)
+
+    def test_iteration(self):
+        tlid = 123
+        track = Track()
+        tl_track = TlTrack(tlid, track)
+        (tlid2, track2) = tl_track
+        self.assertEqual(tlid2, tlid)
+        self.assertEqual(track2, track)
+
+    def test_repr(self):
+        self.assertEquals(
+            "TlTrack(tlid=123, track=Track(artists=[], uri=u'uri'))",
+            repr(TlTrack(tlid=123, track=Track(uri='uri'))))
+
+    def test_serialize(self):
+        self.assertDictEqual(
+            {'tlid': 123, 'track': {'uri': 'uri', 'name': 'name'}},
+            TlTrack(tlid=123, track=Track(uri='uri', name='name')).serialize())
+
+    def test_eq(self):
+        tlid = 123
+        track = Track()
+        tl_track1 = TlTrack(tlid=tlid, track=track)
+        tl_track2 = TlTrack(tlid=tlid, track=track)
+        self.assertEqual(tl_track1, tl_track2)
+        self.assertEqual(hash(tl_track1), hash(tl_track2))
+
+    def test_eq_none(self):
+        self.assertNotEqual(TlTrack(), None)
+
+    def test_eq_other(self):
+        self.assertNotEqual(TlTrack(), 'other')
+
+    def test_ne_tlid(self):
+        tl_track1 = TlTrack(tlid=123)
+        tl_track2 = TlTrack(tlid=321)
+        self.assertNotEqual(tl_track1, tl_track2)
+        self.assertNotEqual(hash(tl_track1), hash(tl_track2))
+
+    def test_ne_track(self):
+        tl_track1 = TlTrack(track=Track(uri='a'))
+        tl_track2 = TlTrack(track=Track(uri='b'))
+        self.assertNotEqual(tl_track1, tl_track2)
+        self.assertNotEqual(hash(tl_track1), hash(tl_track2))
 
 
 class PlaylistTest(unittest.TestCase):

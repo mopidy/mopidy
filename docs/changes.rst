@@ -56,23 +56,29 @@ backends:
   dummy/mocked lower layers easier than with the old variant, where
   dependencies where looked up in Pykka's actor registry.
 
-- The stored playlists part of the core API has been revised to be more focused
-  around the playlist URI, and some redundant functionality has been removed:
+- Renamed "current playlist" to "tracklist" everywhere, including the core API
+  used by frontends.
 
-  - :attr:`mopidy.core.StoredPlaylistsController.playlists` no longer supports
+- Renamed "stored playlists" to "playlists" everywhere, including the core API
+  used by frontends.
+
+- The playlists part of the core API has been revised to be more focused around
+  the playlist URI, and some redundant functionality has been removed:
+
+  - :attr:`mopidy.core.PlaylistsController.playlists` no longer supports
     assignment to it. The `playlists` property on the backend layer still does,
     and all functionality is maintained by assigning to the playlists
     collections at the backend level.
 
-  - :meth:`mopidy.core.StoredPlaylistsController.delete` now accepts an URI,
-    and not a playlist object.
+  - :meth:`mopidy.core.PlaylistsController.delete` now accepts an URI, and not
+    a playlist object.
 
-  - :meth:`mopidy.core.StoredPlaylistsController.save` now returns the saved
+  - :meth:`mopidy.core.PlaylistsController.save` now returns the saved
     playlist. The returned playlist may differ from the saved playlist, and
     should thus be used instead of the playlist passed to ``save()``.
 
-  - :meth:`mopidy.core.StoredPlaylistsController.rename` has been removed,
-    since renaming can be done with ``save()``.
+  - :meth:`mopidy.core.PlaylistsController.rename` has been removed, since
+    renaming can be done with ``save()``.
 
 **Changes**
 
@@ -105,11 +111,22 @@ backends:
 - The Spotify backend now returns the track if you search for the Spotify track
   URI. (Fixes: :issue:`233`)
 
-- Renamed "current playlist" to "tracklist" everywhere, including the core API
-  used by frontends.
+- :meth:`mopidy.core.TracklistController.append` now returns a list of the
+  :class:`mopidy.models.TlTrack` instances that was added to the tracklist.
+  This makes it easier to start playing one of the tracks that was just
+  appended to the tracklist.
 
-- Renamed "stored playlists" to "playlists" everywhere, including the core API
-  used by frontends.
+- When the tracklist is changed, we now trigger the new
+  :meth:`mopidy.core.CoreListener.tracklist_changed` event. Previously we
+  triggered :meth:`mopidy.core.CoreListener.playlist_changed`, which is
+  intended for stored playlists, not the tracklist.
+
+- The event :meth:`mopidy.core.CoreListener.playlist_changed` has been changed
+  to include the playlist that was changed.
+
+- The MPRIS playlists interface is now supported by our MPRIS frontend. This
+  means that you now can select playlists to queue and play from the Ubuntu
+  Sound Menu.
 
 **Bug fixes**
 
@@ -121,6 +138,10 @@ backends:
 
 - MPD no longer lowercases search queries. This broke e.g. search by URI, where
   casing may be essential.
+
+- :issue:`236`: The ``mopidy-scan`` command failed to include tags from ALAC
+  files (Apple lossless) because it didn't support multiple tag messages from
+  GStreamer per track it scanned.
 
 
 v0.8.1 (2012-10-30)

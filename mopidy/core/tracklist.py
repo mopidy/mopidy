@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from copy import copy
 import logging
 import random
 
@@ -16,8 +15,8 @@ class TracklistController(object):
     pykka_traversable = True
 
     def __init__(self, core):
-        self.core = core
-        self.tlid = 0
+        self._core = core
+        self._next_tlid = 0
         self._tl_tracks = []
         self._version = 0
 
@@ -28,12 +27,12 @@ class TracklistController(object):
 
         Read-only.
         """
-        return [copy(tl_track) for tl_track in self._tl_tracks]
+        return self._tl_tracks[:]
 
     @property
     def tracks(self):
         """
-        List of :class:`mopidy.models.Track` in the current playlist.
+        List of :class:`mopidy.models.Track` in the tracklist.
 
         Read-only.
         """
@@ -42,78 +41,91 @@ class TracklistController(object):
     @property
     def length(self):
         """
-        Length of the current playlist.
+        Length of the tracklist.
         """
         return len(self._tl_tracks)
 
     @property
     def version(self):
         """
-        The current playlist version. Integer which is increased every time the
-        current playlist is changed. Is not reset before Mopidy is restarted.
+        The tracklist version. Integer which is increased every time the
+        tracklist is changed. Is not reset before Mopidy is restarted.
         """
         return self._version
 
     @version.setter  # noqa
     def version(self, version):
         self._version = version
-        self.core.playback.on_tracklist_change()
-        self._trigger_playlist_changed()
+        self._core.playback.on_tracklist_change()
+        self._trigger_tracklist_changed()
 
     def add(self, track, at_position=None, increase_version=True):
         """
-        Add the track to the end of, or at the given position in the current
-        playlist.
+        Add the track to the end of, or at the given position in the tracklist.
+
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
 
         :param track: track to add
         :type track: :class:`mopidy.models.Track`
-        :param at_position: position in current playlist to add track
+        :param at_position: position in tracklist to add track
         :type at_position: int or :class:`None`
-        :param increase_version: if the playlist version should be increased
+        :param increase_version: if the tracklist version should be increased
         :type increase_version: :class:`True` or :class:`False`
         :rtype: two-tuple of (TLID integer, :class:`mopidy.models.Track`) that
-            was added to the current playlist playlist
+            was added to the tracklist
         """
         assert at_position <= len(self._tl_tracks), \
-            'at_position can not be greater than playlist length'
-        tl_track = TlTrack(self.tlid, track)
+            'at_position can not be greater than tracklist length'
+        tl_track = TlTrack(self._next_tlid, track)
         if at_position is not None:
             self._tl_tracks.insert(at_position, tl_track)
         else:
             self._tl_tracks.append(tl_track)
         if increase_version:
             self.version += 1
-        self.tlid += 1
+        self._next_tlid += 1
         return tl_track
 
     def append(self, tracks):
         """
-        Append the given tracks to the current playlist.
+        Append the given tracks to the tracklist.
+
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
 
         :param tracks: tracks to append
         :type tracks: list of :class:`mopidy.models.Track`
+        :rtype: list of class:`mopidy.models.TlTrack`
         """
+        tl_tracks = []
         for track in tracks:
-            self.add(track, increase_version=False)
+            tl_tracks.append(self.add(track, increase_version=False))
 
         if tracks:
             self.version += 1
 
+        return tl_tracks
+
     def clear(self):
-        """Clear the current playlist."""
+        """
+        Clear the tracklist.
+
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
+        """
         self._tl_tracks = []
         self.version += 1
 
     def get(self, **criteria):
         """
-        Get track by given criterias from current playlist.
+        Get track by given criterias from tracklist.
 
         Raises :exc:`LookupError` if a unique match is not found.
 
         Examples::
 
-            get(tlid=7)             # Returns track with TLID 7
-                                    # (current playlist ID)
+            get(tlid=7)             # Returns track with TLID 7 (tracklist ID)
             get(id=1)               # Returns track with ID 1
             get(uri='xyz')          # Returns track with URI 'xyz'
             get(id=1, uri='xyz')    # Returns track with ID 1 and URI 'xyz'
@@ -141,7 +153,7 @@ class TracklistController(object):
     def index(self, tl_track):
         """
         Get index of the given (TLID integer, :class:`mopidy.models.Track`)
-        two-tuple in the current playlist.
+        two-tuple in the tracklist.
 
         Raises :exc:`ValueError` if not found.
 
@@ -154,6 +166,9 @@ class TracklistController(object):
     def move(self, start, end, to_position):
         """
         Move the tracks in the slice ``[start:end]`` to ``to_position``.
+
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
 
         :param start: position of first track to move
         :type start: int
@@ -170,10 +185,10 @@ class TracklistController(object):
         assert start < end, 'start must be smaller than end'
         assert start >= 0, 'start must be at least zero'
         assert end <= len(tl_tracks), \
-            'end can not be larger than playlist length'
+            'end can not be larger than tracklist length'
         assert to_position >= 0, 'to_position must be at least zero'
         assert to_position <= len(tl_tracks), \
-            'to_position can not be larger than playlist length'
+            'to_position can not be larger than tracklist length'
 
         new_tl_tracks = tl_tracks[:start] + tl_tracks[end:]
         for tl_track in tl_tracks[start:end]:
@@ -184,9 +199,12 @@ class TracklistController(object):
 
     def remove(self, **criteria):
         """
-        Remove the track from the current playlist.
+        Remove the track from the tracklist.
 
         Uses :meth:`get()` to lookup the track to remove.
+
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
@@ -198,8 +216,11 @@ class TracklistController(object):
 
     def shuffle(self, start=None, end=None):
         """
-        Shuffles the entire playlist. If ``start`` and ``end`` is given only
+        Shuffles the entire tracklist. If ``start`` and ``end`` is given only
         shuffles the slice ``[start:end]``.
+
+        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
+        event.
 
         :param start: position of first track to shuffle
         :type start: int or :class:`None`
@@ -216,7 +237,7 @@ class TracklistController(object):
 
         if end is not None:
             assert end <= len(tl_tracks), 'end can not be larger than ' + \
-                'playlist length'
+                'tracklist length'
 
         before = tl_tracks[:start or 0]
         shuffled = tl_tracks[start:end]
@@ -227,8 +248,8 @@ class TracklistController(object):
 
     def slice(self, start, end):
         """
-        Returns a slice of the current playlist, limited by the given
-        start and end positions.
+        Returns a slice of the tracklist, limited by the given start and end
+        positions.
 
         :param start: position of first track to include in slice
         :type start: int
@@ -236,8 +257,8 @@ class TracklistController(object):
         :type end: int
         :rtype: two-tuple of (TLID integer, :class:`mopidy.models.Track`)
         """
-        return [copy(tl_track) for tl_track in self._tl_tracks[start:end]]
+        return self._tl_tracks[start:end]
 
-    def _trigger_playlist_changed(self):
-        logger.debug('Triggering playlist changed event')
-        listener.CoreListener.send('playlist_changed')
+    def _trigger_tracklist_changed(self):
+        logger.debug('Triggering event: tracklist_changed()')
+        listener.CoreListener.send('tracklist_changed')

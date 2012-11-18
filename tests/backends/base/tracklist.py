@@ -88,7 +88,7 @@ class TracklistControllerTest(object):
     def test_get_by_uri_returns_unique_match(self):
         track = Track(uri='a')
         self.controller.append([Track(uri='z'), track, Track(uri='y')])
-        self.assertEqual(track, self.controller.get(uri='a')[1])
+        self.assertEqual(track, self.controller.get(uri='a').track)
 
     def test_get_by_uri_raises_error_if_multiple_matches(self):
         track = Track(uri='a')
@@ -113,16 +113,16 @@ class TracklistControllerTest(object):
         track2 = Track(uri='b', name='x')
         track3 = Track(uri='b', name='y')
         self.controller.append([track1, track2, track3])
-        self.assertEqual(track1, self.controller.get(uri='a', name='x')[1])
-        self.assertEqual(track2, self.controller.get(uri='b', name='x')[1])
-        self.assertEqual(track3, self.controller.get(uri='b', name='y')[1])
+        self.assertEqual(track1, self.controller.get(uri='a', name='x').track)
+        self.assertEqual(track2, self.controller.get(uri='b', name='x').track)
+        self.assertEqual(track3, self.controller.get(uri='b', name='y').track)
 
     def test_get_by_criteria_that_is_not_present_in_all_elements(self):
         track1 = Track()
         track2 = Track(uri='b')
         track3 = Track()
         self.controller.append([track1, track2, track3])
-        self.assertEqual(track2, self.controller.get(uri='b')[1])
+        self.assertEqual(track2, self.controller.get(uri='b').track)
 
     def test_append_appends_to_the_tracklist(self):
         self.controller.append([Track(uri='a'), Track(uri='b')])
@@ -153,10 +153,13 @@ class TracklistControllerTest(object):
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
+    @populate_playlist
+    def test_append_returns_the_tl_tracks_that_was_added(self):
+        tl_tracks = self.controller.append(self.controller.tracks[1:2])
+        self.assertEqual(tl_tracks[0].track, self.controller.tracks[1])
+
     def test_index_returns_index_of_track(self):
-        tl_tracks = []
-        for track in self.tracks:
-            tl_tracks.append(self.controller.add(track))
+        tl_tracks = self.controller.append(self.tracks)
         self.assertEquals(0, self.controller.index(tl_tracks[0]))
         self.assertEquals(1, self.controller.index(tl_tracks[1]))
         self.assertEquals(2, self.controller.index(tl_tracks[2]))
