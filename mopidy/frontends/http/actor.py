@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 
 import logging
+import json
 import os
 
 import pykka
 
-from mopidy import exceptions, settings
+from mopidy import exceptions, models, settings
 from mopidy.core import CoreListener
 
 try:
@@ -88,11 +89,45 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         cherrypy.engine.exit()
         logger.info('Stopped HTTP server')
 
-    def playback_state_changed(self, old_state, new_state):
-        cherrypy.engine.publish(
-            'websocket-broadcast',
-            TextMessage('playback_state_changed: %s -> %s' % (
-                old_state, new_state)))
+    def track_playback_paused(self, **data):
+        self._broadcast_event('track_playback_paused', data)
+
+    def track_playback_resumed(self, **data):
+        self._broadcast_event('track_playback_resumed', data)
+
+    def track_playback_started(self, **data):
+        self._broadcast_event('track_playback_started', data)
+
+    def track_playback_ended(self, **data):
+        self._broadcast_event('track_playback_ended', data)
+
+    def playback_state_changed(self, **data):
+        self._broadcast_event('playback_state_changed', data)
+
+    def tracklist_changed(self, **data):
+        self._broadcast_event('tracklist_changed', data)
+
+    def playlists_loaded(self, **data):
+        self._broadcast_event('playlists_loaded', data)
+
+    def playlist_changed(self, **data):
+        self._broadcast_event('playlist_changed', data)
+
+    def options_changed(self, **data):
+        self._broadcast_event('options_changed', data)
+
+    def volume_changed(self, **data):
+        self._broadcast_event('volume_changed', data)
+
+    def seeked(self, **data):
+        self._broadcast_event('seeked', data)
+
+    def _broadcast_event(self, name, data):
+        event = {}
+        event.update(data)
+        event['event'] = name
+        message = json.dumps(event, cls=models.ModelJSONEncoder)
+        cherrypy.engine.publish('websocket-broadcast', TextMessage(message))
 
 
 class RootResource(object):
