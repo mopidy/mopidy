@@ -1,8 +1,11 @@
 from __future__ import unicode_literals
 
 import datetime
+import json
 
-from mopidy.models import Artist, Album, TlTrack, Track, Playlist
+from mopidy.models import (
+    Artist, Album, TlTrack, Track, Playlist,
+    ModelJSONEncoder, model_json_decoder)
 
 from tests import unittest
 
@@ -85,6 +88,12 @@ class ArtistTest(unittest.TestCase):
         self.assertDictEqual(
             {'__type__': 'Artist', 'uri': 'uri', 'name': 'name'},
             Artist(uri='uri', name='name').serialize())
+
+    def test_to_json_and_Back(self):
+        artist1 = Artist(uri='uri', name='name')
+        serialized = json.dumps(artist1, cls=ModelJSONEncoder)
+        artist2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(artist1, artist2)
 
     def test_eq_name(self):
         artist1 = Artist(name='name')
@@ -204,6 +213,12 @@ class AlbumTest(unittest.TestCase):
             {'__type__': 'Album', 'uri': 'uri', 'name': 'name', 'artists':
                 [artist.serialize()]},
             Album(uri='uri', name='name', artists=[artist]).serialize())
+
+    def test_to_json_and_back(self):
+        album1 = Album(uri='uri', name='name', artists=[Artist(name='foo')])
+        serialized = json.dumps(album1, cls=ModelJSONEncoder)
+        album2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(album1, album2)
 
     def test_eq_name(self):
         album1 = Album(name='name')
@@ -404,6 +419,14 @@ class TrackTest(unittest.TestCase):
                 'album': album.serialize()},
             Track(uri='uri', name='name', album=album).serialize())
 
+    def test_to_json_and_back(self):
+        track1 = Track(
+            uri='uri', name='name', album=Album(name='foo'),
+            artists=[Artist(name='foo')])
+        serialized = json.dumps(track1, cls=ModelJSONEncoder)
+        track2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(track1, track2)
+
     def test_eq_uri(self):
         track1 = Track(uri='uri1')
         track2 = Track(uri='uri1')
@@ -598,6 +621,12 @@ class TlTrackTest(unittest.TestCase):
             {'__type__': 'TlTrack', 'tlid': 123, 'track': track.serialize()},
             TlTrack(tlid=123, track=track).serialize())
 
+    def test_to_json_and_back(self):
+        track1 = Track(uri='uri', name='name')
+        serialized = json.dumps(track1, cls=ModelJSONEncoder)
+        track2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(track1, track2)
+
     def test_eq(self):
         tlid = 123
         track = Track()
@@ -732,6 +761,12 @@ class PlaylistTest(unittest.TestCase):
             {'__type__': 'Playlist', 'uri': 'uri', 'name': 'name',
                 'tracks': [track.serialize()]},
             Playlist(uri='uri', name='name', tracks=[track]).serialize())
+
+    def test_to_json_and_back(self):
+        playlist1 = Playlist(uri='uri', name='name')
+        serialized = json.dumps(playlist1, cls=ModelJSONEncoder)
+        playlist2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(playlist1, playlist2)
 
     def test_eq_name(self):
         playlist1 = Playlist(name='name')
