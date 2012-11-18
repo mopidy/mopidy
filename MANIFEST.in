@@ -4,10 +4,10 @@ include LICENSE
 include MANIFEST.in
 include data/mopidy.desktop
 include mopidy/backends/spotify/spotify_appkey.key
-include mopidy/frontends/http/index.html
 include pylintrc
 recursive-include docs *
 prune docs/_build
+recursive-include mopidy/frontends/http/data/
 recursive-include requirements *
 recursive-include tests *.py
 recursive-include tests/data *
