@@ -1,13 +1,16 @@
 from __future__ import unicode_literals
 
 import datetime
+import json
 
-from mopidy.models import Artist, Album, TlTrack, Track, Playlist
+from mopidy.models import (
+    Artist, Album, TlTrack, Track, Playlist,
+    ModelJSONEncoder, model_json_decoder)
 
 from tests import unittest
 
 
-class GenericCopyTets(unittest.TestCase):
+class GenericCopyTest(unittest.TestCase):
     def compare(self, orig, other):
         self.assertEqual(orig, other)
         self.assertNotEqual(id(orig), id(other))
@@ -83,8 +86,14 @@ class ArtistTest(unittest.TestCase):
 
     def test_serialize(self):
         self.assertDictEqual(
-            {'uri': 'uri', 'name': 'name'},
+            {'__type__': 'Artist', 'uri': 'uri', 'name': 'name'},
             Artist(uri='uri', name='name').serialize())
+
+    def test_to_json_and_Back(self):
+        artist1 = Artist(uri='uri', name='name')
+        serialized = json.dumps(artist1, cls=ModelJSONEncoder)
+        artist2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(artist1, artist2)
 
     def test_eq_name(self):
         artist1 = Artist(name='name')
@@ -195,14 +204,21 @@ class AlbumTest(unittest.TestCase):
 
     def test_serialize_without_artists(self):
         self.assertDictEqual(
-            {'uri': 'uri', 'name': 'name'},
+            {'__type__': 'Album', 'uri': 'uri', 'name': 'name'},
             Album(uri='uri', name='name').serialize())
 
     def test_serialize_with_artists(self):
         artist = Artist(name='foo')
         self.assertDictEqual(
-            {'uri': 'uri', 'name': 'name', 'artists': [artist.serialize()]},
+            {'__type__': 'Album', 'uri': 'uri', 'name': 'name', 'artists':
+                [artist.serialize()]},
             Album(uri='uri', name='name', artists=[artist]).serialize())
+
+    def test_to_json_and_back(self):
+        album1 = Album(uri='uri', name='name', artists=[Artist(name='foo')])
+        serialized = json.dumps(album1, cls=ModelJSONEncoder)
+        album2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(album1, album2)
 
     def test_eq_name(self):
         album1 = Album(name='name')
@@ -386,20 +402,30 @@ class TrackTest(unittest.TestCase):
 
     def test_serialize_without_artists(self):
         self.assertDictEqual(
-            {'uri': 'uri', 'name': 'name'},
+            {'__type__': 'Track', 'uri': 'uri', 'name': 'name'},
             Track(uri='uri', name='name').serialize())
 
     def test_serialize_with_artists(self):
         artist = Artist(name='foo')
         self.assertDictEqual(
-            {'uri': 'uri', 'name': 'name', 'artists': [artist.serialize()]},
+            {'__type__': 'Track', 'uri': 'uri', 'name': 'name',
+                'artists': [artist.serialize()]},
             Track(uri='uri', name='name', artists=[artist]).serialize())
 
     def test_serialize_with_album(self):
         album = Album(name='foo')
         self.assertDictEqual(
-            {'uri': 'uri', 'name': 'name', 'album': album.serialize()},
+            {'__type__': 'Track', 'uri': 'uri', 'name': 'name',
+                'album': album.serialize()},
             Track(uri='uri', name='name', album=album).serialize())
+
+    def test_to_json_and_back(self):
+        track1 = Track(
+            uri='uri', name='name', album=Album(name='foo'),
+            artists=[Artist(name='foo')])
+        serialized = json.dumps(track1, cls=ModelJSONEncoder)
+        track2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(track1, track2)
 
     def test_eq_uri(self):
         track1 = Track(uri='uri1')
@@ -590,9 +616,16 @@ class TlTrackTest(unittest.TestCase):
             repr(TlTrack(tlid=123, track=Track(uri='uri'))))
 
     def test_serialize(self):
+        track = Track(uri='uri', name='name')
         self.assertDictEqual(
-            {'tlid': 123, 'track': {'uri': 'uri', 'name': 'name'}},
-            TlTrack(tlid=123, track=Track(uri='uri', name='name')).serialize())
+            {'__type__': 'TlTrack', 'tlid': 123, 'track': track.serialize()},
+            TlTrack(tlid=123, track=track).serialize())
+
+    def test_to_json_and_back(self):
+        tl_track1 = TlTrack(tlid=123, track=Track(uri='uri', name='name'))
+        serialized = json.dumps(tl_track1, cls=ModelJSONEncoder)
+        tl_track2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(tl_track1, tl_track2)
 
     def test_eq(self):
         tlid = 123
@@ -719,14 +752,21 @@ class PlaylistTest(unittest.TestCase):
 
     def test_serialize_without_tracks(self):
         self.assertDictEqual(
-            {'uri': 'uri', 'name': 'name'},
+            {'__type__': 'Playlist', 'uri': 'uri', 'name': 'name'},
             Playlist(uri='uri', name='name').serialize())
 
     def test_serialize_with_tracks(self):
         track = Track(name='foo')
         self.assertDictEqual(
-            {'uri': 'uri', 'name': 'name', 'tracks': [track.serialize()]},
+            {'__type__': 'Playlist', 'uri': 'uri', 'name': 'name',
+                'tracks': [track.serialize()]},
             Playlist(uri='uri', name='name', tracks=[track]).serialize())
+
+    def test_to_json_and_back(self):
+        playlist1 = Playlist(uri='uri', name='name')
+        serialized = json.dumps(playlist1, cls=ModelJSONEncoder)
+        playlist2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(playlist1, playlist2)
 
     def test_eq_name(self):
         playlist1 = Playlist(name='name')
