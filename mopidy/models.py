@@ -78,6 +78,7 @@ class ImmutableObject(object):
 
     def serialize(self):
         data = {}
+        data['__type__'] = self.__class__.__name__
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
             value = self.__dict__[key]
