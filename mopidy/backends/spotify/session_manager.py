@@ -33,8 +33,12 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % versioning.get_version()
 
-    def __init__(self, username, password, audio, backend_ref):
-        PyspotifySessionManager.__init__(self, username, password)
+    def __init__(self, username, password, audio, backend_ref, proxy=None,
+                 proxy_username=None, proxy_password=None):
+        PyspotifySessionManager.__init__(
+            self, username, password, proxy=proxy,
+            proxy_username=proxy_username,
+            proxy_password=proxy_password)
         process.BaseThread.__init__(self)
         self.name = 'SpotifyThread'
 
