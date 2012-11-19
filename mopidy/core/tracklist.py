@@ -23,7 +23,7 @@ class TracklistController(object):
     @property
     def tl_tracks(self):
         """
-        List of two-tuples of (TLID integer, :class:`mopidy.models.Track`).
+        List of :class:`mopidy.models.TlTrack`.
 
         Read-only.
         """
@@ -72,8 +72,7 @@ class TracklistController(object):
         :type at_position: int or :class:`None`
         :param increase_version: if the tracklist version should be increased
         :type increase_version: :class:`True` or :class:`False`
-        :rtype: two-tuple of (TLID integer, :class:`mopidy.models.Track`) that
-            was added to the tracklist
+        :rtype: :class:`mopidy.models.TlTrack` that was added to the tracklist
         """
         assert at_position <= len(self._tl_tracks), \
             'at_position can not be greater than tracklist length'
@@ -132,7 +131,7 @@ class TracklistController(object):
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
-        :rtype: two-tuple (TLID integer, :class:`mopidy.models.Track`)
+        :rtype: :class:`mopidy.models.TlTrack`
         """
         matches = self._tl_tracks
         for (key, value) in criteria.iteritems():
@@ -152,13 +151,12 @@ class TracklistController(object):
 
     def index(self, tl_track):
         """
-        Get index of the given (TLID integer, :class:`mopidy.models.Track`)
-        two-tuple in the tracklist.
+        Get index of the given :class:`mopidy.models.TlTrack` in the tracklist.
 
         Raises :exc:`ValueError` if not found.
 
         :param tl_track: track to find the index of
-        :type tl_track: two-tuple (TLID integer, :class:`mopidy.models.Track`)
+        :type tl_track: :class:`mopidy.models.TlTrack`
         :rtype: int
         """
         return self._tl_tracks.index(tl_track)
@@ -255,7 +253,7 @@ class TracklistController(object):
         :type start: int
         :param end: position after last track to include in slice
         :type end: int
-        :rtype: two-tuple of (TLID integer, :class:`mopidy.models.Track`)
+        :rtype: :class:`mopidy.models.TlTrack`
         """
         return self._tl_tracks[start:end]
 

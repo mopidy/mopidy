@@ -38,9 +38,7 @@ class PlaybackController(object):
     #:     Tracks are not removed from the playlist.
     consume = option_wrapper('_consume', False)
 
-    #: The currently playing or selected track.
-    #:
-    #: A two-tuple of (TLID integer, :class:`mopidy.models.Track`) or
+    #: The currently playing or selected :class:`mopidy.models.TlTrack`, or
     #: :class:`None`.
     current_tl_track = None
 
@@ -139,7 +137,7 @@ class PlaybackController(object):
         """
         The track that will be played at the end of the current track.
 
-        Read-only. A two-tuple of (TLID integer, :class:`mopidy.models.Track`).
+        Read-only. A :class:`mopidy.models.TlTrack`.
 
         Not necessarily the same track as :attr:`tl_track_at_next`.
         """
@@ -190,7 +188,7 @@ class PlaybackController(object):
         """
         The track that will be played if calling :meth:`next()`.
 
-        Read-only. A two-tuple of (TLID integer, :class:`mopidy.models.Track`).
+        Read-only. A :class:`mopidy.models.TlTrack`.
 
         For normal playback this is the next track in the playlist. If repeat
         is enabled the next track can loop around the playlist. When random is
@@ -238,7 +236,7 @@ class PlaybackController(object):
         """
         The track that will be played if calling :meth:`previous()`.
 
-        A two-tuple of (TLID integer, :class:`mopidy.models.Track`).
+        A :class:`mopidy.models.TlTrack`.
 
         For normal playback this is the previous track in the playlist. If
         random and/or consume is enabled it should return the current track
@@ -310,12 +308,10 @@ class PlaybackController(object):
         Change to the given track, keeping the current playback state.
 
         :param tl_track: track to change to
-        :type tl_track: two-tuple (TLID integer, :class:`mopidy.models.Track`)
-            or :class:`None`
+        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param on_error_step: direction to step at play error, 1 for next
             track (default), -1 for previous track
         :type on_error_step: int, -1 or 1
-
         """
         old_state = self.state
         self.stop()
@@ -383,8 +379,7 @@ class PlaybackController(object):
         currently active track.
 
         :param tl_track: track to play
-        :type tl_track: two-tuple (TLID integer, :class:`mopidy.models.Track`)
-            or :class:`None`
+        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param on_error_step: direction to step at play error, 1 for next
             track (default), -1 for previous track
         :type on_error_step: int, -1 or 1
