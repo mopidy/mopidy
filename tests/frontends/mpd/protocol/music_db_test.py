@@ -173,6 +173,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
             'list "artist" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
+    def test_list_artist_without_filter_value(self):
+        self.sendRequest('list "artist" "artist" ""')
+        self.assertInResponse('OK')
+
     ### Album
 
     def test_list_album_with_quotes(self):
@@ -189,6 +193,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list_album_with_artist_name(self):
         self.sendRequest('list "album" "anartist"')
+        self.assertInResponse('OK')
+
+    def test_list_album_with_artist_name_without_filter_value(self):
+        self.sendRequest('list "album" ""')
         self.assertInResponse('OK')
 
     def test_list_album_by_artist(self):
@@ -214,6 +222,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list_album_by_artist_and_album(self):
         self.sendRequest(
             'list "album" "artist" "anartist" "album" "analbum"')
+        self.assertInResponse('OK')
+
+    def test_list_album_without_filter_value(self):
+        self.sendRequest('list "album" "artist" ""')
         self.assertInResponse('OK')
 
     ### Date
@@ -259,6 +271,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.sendRequest('list "date" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
+    def test_list_date_without_filter_value(self):
+        self.sendRequest('list "date" "artist" ""')
+        self.assertInResponse('OK')
+
     ### Genre
 
     def test_list_genre_with_quotes(self):
@@ -301,6 +317,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list_genre_by_artist_and_album(self):
         self.sendRequest(
             'list "genre" "artist" "anartist" "album" "analbum"')
+        self.assertInResponse('OK')
+
+    def test_list_genre_without_filter_value(self):
+        self.sendRequest('list "genre" "artist" ""')
         self.assertInResponse('OK')
 
 
