@@ -89,7 +89,8 @@ class Audio(pykka.ThreadingActor):
             b'rate=(int)44100')
         source = element.get_property('source')
         source.set_property('caps', default_caps)
-        source.set_property('format', b'time') # Gstreamer does not like unicode
+        # GStreamer does not like unicode
+        source.set_property('format', b'time')
 
         self._appsrc = source
 
@@ -219,8 +220,8 @@ class Audio(pykka.ThreadingActor):
         logger.debug(
             'Triggering event: state_changed(old_state=%s, new_state=%s)',
             old_state, new_state)
-        AudioListener.send('state_changed',
-            old_state=old_state, new_state=new_state)
+        AudioListener.send(
+            'state_changed', old_state=old_state, new_state=new_state)
 
     def _on_end_of_stream(self):
         logger.debug('Triggering reached_end_of_stream event')

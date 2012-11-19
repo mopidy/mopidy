@@ -36,8 +36,8 @@ class LibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        futures = [b.library.find_exact(**query)
-            for b in self.backends.with_library]
+        futures = [
+            b.library.find_exact(**query) for b in self.backends.with_library]
         results = pykka.get_all(futures)
         return Playlist(tracks=[
             track for playlist in results for track in playlist.tracks])
@@ -68,8 +68,8 @@ class LibraryController(object):
             if backend:
                 backend.library.refresh(uri).get()
         else:
-            futures = [b.library.refresh(uri)
-                for b in self.backends.with_library]
+            futures = [
+                b.library.refresh(uri) for b in self.backends.with_library]
             pykka.get_all(futures)
 
     def search(self, **query):
@@ -89,8 +89,8 @@ class LibraryController(object):
         :type query: dict
         :rtype: :class:`mopidy.models.Playlist`
         """
-        futures = [b.library.search(**query)
-            for b in self.backends.with_library]
+        futures = [
+            b.library.search(**query) for b in self.backends.with_library]
         results = pykka.get_all(futures)
         track_lists = [playlist.tracks for playlist in results]
         tracks = list(itertools.chain(*track_lists))

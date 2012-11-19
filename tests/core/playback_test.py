@@ -58,8 +58,8 @@ class CorePlaybackTest(unittest.TestCase):
         self.playback1.play.assert_called_once_with(self.tracks[3])
         self.assertFalse(self.playback2.play.called)
 
-        self.assertEqual(self.core.playback.current_tl_track,
-            self.tl_tracks[3])
+        self.assertEqual(
+            self.core.playback.current_tl_track, self.tl_tracks[3])
 
     def test_pause_selects_dummy1_backend(self):
         self.core.playback.play(self.tl_tracks[0])
