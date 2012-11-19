@@ -5,7 +5,7 @@ import shlex
 
 from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
-from mopidy.frontends.mpd.translator import playlist_to_mpd_format
+from mopidy.frontends.mpd.translator import tracks_to_mpd_format
 
 
 def _build_query(mpd_query):
@@ -77,7 +77,7 @@ def find(context, mpd_query):
     - uses "file" instead of "filename".
     """
     query = _build_query(mpd_query)
-    return playlist_to_mpd_format(
+    return tracks_to_mpd_format(
         context.core.library.find_exact(**query).get())
 
 
@@ -235,8 +235,8 @@ def _list_build_query(field, mpd_query):
 
 def _list_artist(context, query):
     artists = set()
-    playlist = context.core.library.find_exact(**query).get()
-    for track in playlist.tracks:
+    tracks = context.core.library.find_exact(**query).get()
+    for track in tracks:
         for artist in track.artists:
             artists.add(('Artist', artist.name))
     return artists
@@ -244,8 +244,8 @@ def _list_artist(context, query):
 
 def _list_album(context, query):
     albums = set()
-    playlist = context.core.library.find_exact(**query).get()
-    for track in playlist.tracks:
+    tracks = context.core.library.find_exact(**query).get()
+    for track in tracks:
         if track.album is not None:
             albums.add(('Album', track.album.name))
     return albums
@@ -253,8 +253,8 @@ def _list_album(context, query):
 
 def _list_date(context, query):
     dates = set()
-    playlist = context.core.library.find_exact(**query).get()
-    for track in playlist.tracks:
+    tracks = context.core.library.find_exact(**query).get()
+    for track in tracks:
         if track.date is not None:
             dates.add(('Date', track.date))
     return dates
@@ -352,7 +352,7 @@ def search(context, mpd_query):
     - uses "file" instead of "filename".
     """
     query = _build_query(mpd_query)
-    return playlist_to_mpd_format(
+    return tracks_to_mpd_format(
         context.core.library.search(**query).get())
 
 

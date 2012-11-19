@@ -6,7 +6,7 @@ import Queue
 from spotify import Link, SpotifyError
 
 from mopidy.backends import base
-from mopidy.models import Track, Playlist
+from mopidy.models import Track
 
 from . import translator
 
@@ -72,7 +72,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             tracks = []
             for playlist in self.backend.playlists.playlists:
                 tracks += playlist.tracks
-            return Playlist(tracks=tracks)
+            return tracks
         spotify_query = []
         for (field, values) in query.iteritems():
             if field == 'uri':
@@ -81,7 +81,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
                     track = self.lookup(value)
                     if track:
                         tracks.append(track)
-                return Playlist(tracks=tracks)
+                return tracks
             elif field == 'track':
                 field = 'title'
             elif field == 'date':
@@ -103,4 +103,4 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         try:
             return queue.get(timeout=3)  # XXX What is an reasonable timeout?
         except Queue.Empty:
-            return Playlist(tracks=[])
+            return []

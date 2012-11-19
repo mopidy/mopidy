@@ -128,6 +128,10 @@ backends:
   means that you now can select playlists to queue and play from the Ubuntu
   Sound Menu.
 
+- :meth:`mopidy.core.LibraryController.find_exact` and
+  :meth:`mopidy.core.LibraryController.search` now returns plain lists of
+  tracks instead of playlist objects.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

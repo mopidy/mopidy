@@ -5,8 +5,6 @@ import urlparse
 
 import pykka
 
-from mopidy.models import Playlist
-
 
 class LibraryController(object):
     pykka_traversable = True
@@ -34,13 +32,12 @@ class LibraryController(object):
 
         :param query: one or more queries to search for
         :type query: dict
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: list of :class:`mopidy.models.Track`
         """
         futures = [
             b.library.find_exact(**query) for b in self.backends.with_library]
         results = pykka.get_all(futures)
-        return Playlist(tracks=[
-            track for playlist in results for track in playlist.tracks])
+        return list(itertools.chain(*results))
 
     def lookup(self, uri):
         """
@@ -87,11 +84,9 @@ class LibraryController(object):
 
         :param query: one or more queries to search for
         :type query: dict
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: list of :class:`mopidy.models.Track`
         """
         futures = [
             b.library.search(**query) for b in self.backends.with_library]
         results = pykka.get_all(futures)
-        track_lists = [playlist.tracks for playlist in results]
-        tracks = list(itertools.chain(*track_lists))
-        return Playlist(tracks=tracks)
+        return list(itertools.chain(*results))

@@ -4,7 +4,7 @@ import mock
 
 from mopidy.backends import base
 from mopidy.core import Core
-from mopidy.models import Playlist, Track
+from mopidy.models import Track
 
 from tests import unittest
 
@@ -75,29 +75,29 @@ class CoreLibraryTest(unittest.TestCase):
     def test_find_exact_combines_results_from_all_backends(self):
         track1 = Track(uri='dummy1:a')
         track2 = Track(uri='dummy2:a')
-        self.library1.find_exact().get.return_value = Playlist(tracks=[track1])
+        self.library1.find_exact().get.return_value = [track1]
         self.library1.find_exact.reset_mock()
-        self.library2.find_exact().get.return_value = Playlist(tracks=[track2])
+        self.library2.find_exact().get.return_value = [track2]
         self.library2.find_exact.reset_mock()
 
         result = self.core.library.find_exact(any=['a'])
 
-        self.assertIn(track1, result.tracks)
-        self.assertIn(track2, result.tracks)
+        self.assertIn(track1, result)
+        self.assertIn(track2, result)
         self.library1.find_exact.assert_called_once_with(any=['a'])
         self.library2.find_exact.assert_called_once_with(any=['a'])
 
     def test_search_combines_results_from_all_backends(self):
         track1 = Track(uri='dummy1:a')
         track2 = Track(uri='dummy2:a')
-        self.library1.search().get.return_value = Playlist(tracks=[track1])
+        self.library1.search().get.return_value = [track1]
         self.library1.search.reset_mock()
-        self.library2.search().get.return_value = Playlist(tracks=[track2])
+        self.library2.search().get.return_value = [track2]
         self.library2.search.reset_mock()
 
         result = self.core.library.search(any=['a'])
 
-        self.assertIn(track1, result.tracks)
-        self.assertIn(track2, result.tracks)
+        self.assertIn(track1, result)
+        self.assertIn(track2, result)
         self.library1.search.assert_called_once_with(any=['a'])
         self.library2.search.assert_called_once_with(any=['a'])
