@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import json
+
 
 class ImmutableObject(object):
     """
@@ -12,7 +14,7 @@ class ImmutableObject(object):
 
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
-            if not hasattr(self, key):
+            if not hasattr(self, key) or callable(getattr(self, key)):
                 raise TypeError(
                     '__init__() got an unexpected keyword argument "%s"' %
                     key)
@@ -78,6 +80,7 @@ class ImmutableObject(object):
 
     def serialize(self):
         data = {}
+        data['__type__'] = self.__class__.__name__
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
             value = self.__dict__[key]
@@ -88,6 +91,44 @@ class ImmutableObject(object):
             if value:
                 data[public_key] = value
         return data
+
+
+class ModelJSONEncoder(json.JSONEncoder):
+    """
+    Automatically serialize Mopidy models to JSON.
+
+    Usage::
+
+        >>> import json
+        >>> json.dumps({'a_track': Track(name='name')}, cls=ModelJSONEncoder)
+        '{"a_track": {"__type__": "Track", "name": "name"}}'
+
+    """
+    def default(self, obj):
+        if isinstance(obj, ImmutableObject):
+            return obj.serialize()
+        return json.JSONEncoder.default(self, obj)
+
+
+def model_json_decoder(dct):
+    """
+    Automatically deserialize Mopidy models from JSON.
+
+    Usage::
+
+        >>> import json
+        >>> json.loads(
+        ...     '{"a_track": {"__type__": "Track", "name": "name"}}',
+        ...     object_hook=model_json_decoder)
+        {u'a_track': Track(artists=[], name=u'name')}
+
+    """
+    if '__type__' in dct:
+        obj_type = dct.pop('__type__')
+        cls = globals().get(obj_type, None)
+        if issubclass(cls, ImmutableObject):
+            return cls(**dct)
+    return dct
 
 
 class Artist(ImmutableObject):
