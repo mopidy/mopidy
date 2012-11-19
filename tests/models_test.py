@@ -89,11 +89,32 @@ class ArtistTest(unittest.TestCase):
             {'__type__': 'Artist', 'uri': 'uri', 'name': 'name'},
             Artist(uri='uri', name='name').serialize())
 
-    def test_to_json_and_Back(self):
+    def test_to_json_and_back(self):
         artist1 = Artist(uri='uri', name='name')
         serialized = json.dumps(artist1, cls=ModelJSONEncoder)
         artist2 = json.loads(serialized, object_hook=model_json_decoder)
         self.assertEqual(artist1, artist2)
+
+    def test_to_json_and_back_with_unknown_field(self):
+        artist = Artist(uri='uri', name='name').serialize()
+        artist['foo'] = 'foo'
+        serialized = json.dumps(artist)
+        test = lambda: json.loads(serialized, object_hook=model_json_decoder)
+        self.assertRaises(TypeError, test)
+
+    def test_to_json_and_back_with_field_matching_method(self):
+        artist = Artist(uri='uri', name='name').serialize()
+        artist['copy'] = 'foo'
+        serialized = json.dumps(artist)
+        test = lambda: json.loads(serialized, object_hook=model_json_decoder)
+        self.assertRaises(TypeError, test)
+
+    def test_to_json_and_back_with_field_matching_internal_field(self):
+        artist = Artist(uri='uri', name='name').serialize()
+        artist['__mro__'] = 'foo'
+        serialized = json.dumps(artist)
+        test = lambda: json.loads(serialized, object_hook=model_json_decoder)
+        self.assertRaises(TypeError, test)
 
     def test_eq_name(self):
         artist1 = Artist(name='name')

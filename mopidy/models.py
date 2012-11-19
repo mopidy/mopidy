@@ -14,7 +14,7 @@ class ImmutableObject(object):
 
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
-            if not hasattr(self, key):
+            if not hasattr(self, key) or callable(getattr(self, key)):
                 raise TypeError(
                     '__init__() got an unexpected keyword argument "%s"' %
                     key)
