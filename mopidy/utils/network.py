@@ -317,7 +317,7 @@ class LineProtocol(pykka.ThreadingActor):
         super(LineProtocol, self).__init__()
         self.connection = connection
         self.prevent_timeout = False
-        self.recv_buffer = ''
+        self.recv_buffer = b''
 
         if self.delimiter:
             self.delimiter = re.compile(self.delimiter)
