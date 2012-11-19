@@ -79,6 +79,13 @@ class ArtistTest(unittest.TestCase):
         test = lambda: Artist(foo='baz')
         self.assertRaises(TypeError, test)
 
+    def test_invalid_kwarg_with_name_matching_method(self):
+        test = lambda: Artist(copy='baz')
+        self.assertRaises(TypeError, test)
+
+        test = lambda: Artist(serialize='baz')
+        self.assertRaises(TypeError, test)
+
     def test_repr(self):
         self.assertEquals(
             "Artist(name=u'name', uri=u'uri')",
