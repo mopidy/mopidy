@@ -334,7 +334,7 @@ def rescan(context, uri=None):
 
 @handle_request(
     r'^search (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
 def search(context, mpd_query):
     """
     *musicpd.org, music database section:*

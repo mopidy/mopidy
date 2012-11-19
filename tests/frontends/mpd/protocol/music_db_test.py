@@ -337,12 +337,20 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.sendRequest('search album "analbum"')
         self.assertInResponse('OK')
 
+    def test_search_album_without_filter_value(self):
+        self.sendRequest('search "album" ""')
+        self.assertInResponse('OK')
+
     def test_search_artist(self):
         self.sendRequest('search "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_search_artist_without_quotes(self):
         self.sendRequest('search artist "anartist"')
+        self.assertInResponse('OK')
+
+    def test_search_artist_without_filter_value(self):
+        self.sendRequest('search "artist" ""')
         self.assertInResponse('OK')
 
     def test_search_filename(self):
@@ -353,12 +361,20 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.sendRequest('search filename "afilename"')
         self.assertInResponse('OK')
 
+    def test_search_filename_without_filter_value(self):
+        self.sendRequest('search "filename" ""')
+        self.assertInResponse('OK')
+
     def test_search_file(self):
         self.sendRequest('search "file" "afilename"')
         self.assertInResponse('OK')
 
     def test_search_file_without_quotes(self):
         self.sendRequest('search file "afilename"')
+        self.assertInResponse('OK')
+
+    def test_search_file_without_filter_value(self):
+        self.sendRequest('search "file" ""')
         self.assertInResponse('OK')
 
     def test_search_title(self):
@@ -369,12 +385,20 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.sendRequest('search title "atitle"')
         self.assertInResponse('OK')
 
+    def test_search_title_without_filter_value(self):
+        self.sendRequest('search "title" ""')
+        self.assertInResponse('OK')
+
     def test_search_any(self):
         self.sendRequest('search "any" "anything"')
         self.assertInResponse('OK')
 
     def test_search_any_without_quotes(self):
         self.sendRequest('search any "anything"')
+        self.assertInResponse('OK')
+
+    def test_search_any_without_filter_value(self):
+        self.sendRequest('search "any" ""')
         self.assertInResponse('OK')
 
     def test_search_date(self):
@@ -387,6 +411,10 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
 
     def test_search_date_with_capital_d_and_incomplete_date(self):
         self.sendRequest('search Date "2005"')
+        self.assertInResponse('OK')
+
+    def test_search_date_without_filter_value(self):
+        self.sendRequest('search "date" ""')
         self.assertInResponse('OK')
 
     def test_search_else_should_fail(self):
