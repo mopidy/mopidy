@@ -160,6 +160,10 @@ backends:
   files (Apple lossless) because it didn't support multiple tag messages from
   GStreamer per track it scanned.
 
+- :issue:`246`: The MPD command ``list album artist ""`` and similar
+  ``search``, ``find``, and ``list`` commands with empty filter values caused a
+  :exc:`LookupError`, but should have been ignored by the MPD server.
+
 
 v0.8.1 (2012-10-30)
 ===================

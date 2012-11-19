@@ -28,6 +28,8 @@ def _build_query(mpd_query):
             field = 'uri'
         field = str(field)  # Needed for kwargs keys on OS X and Windows
         what = m.groupdict()['what']
+        if not what:
+            raise ValueError
         if field in query:
             query[field].append(what)
         else:
@@ -76,7 +78,10 @@ def find(context, mpd_query):
     - also uses the search type "date".
     - uses "file" instead of "filename".
     """
-    query = _build_query(mpd_query)
+    try:
+        query = _build_query(mpd_query)
+    except ValueError:
+        return
     return tracks_to_mpd_format(
         context.core.library.find_exact(**query).get())
 
@@ -185,7 +190,10 @@ def list_(context, field, mpd_query=None):
     - capitalizes the field argument.
     """
     field = field.lower()
-    query = _list_build_query(field, mpd_query)
+    try:
+        query = _list_build_query(field, mpd_query)
+    except ValueError:
+        return
     if field == 'artist':
         return _list_artist(context, query)
     elif field == 'album':
@@ -211,6 +219,8 @@ def _list_build_query(field, mpd_query):
     tokens = [t.decode('utf-8') for t in tokens]
     if len(tokens) == 1:
         if field == 'album':
+            if not tokens[0]:
+                raise ValueError
             return {'artist': [tokens[0]]}
         else:
             raise MpdArgError(
@@ -224,6 +234,8 @@ def _list_build_query(field, mpd_query):
             tokens = tokens[2:]
             if key not in ('artist', 'album', 'date', 'genre'):
                 raise MpdArgError('not able to parse args', command='list')
+            if not value:
+                raise ValueError
             if key in query:
                 query[key].append(value)
             else:
@@ -351,7 +363,10 @@ def search(context, mpd_query):
     - also uses the search type "date".
     - uses "file" instead of "filename".
     """
-    query = _build_query(mpd_query)
+    try:
+        query = _build_query(mpd_query)
+    except ValueError:
+        return
     return tracks_to_mpd_format(
         context.core.library.search(**query).get())
 
