@@ -5,7 +5,7 @@ import shlex
 
 from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
-from mopidy.frontends.mpd.translator import playlist_to_mpd_format
+from mopidy.frontends.mpd.translator import tracks_to_mpd_format
 
 
 def _build_query(mpd_query):
@@ -28,6 +28,8 @@ def _build_query(mpd_query):
             field = 'uri'
         field = str(field)  # Needed for kwargs keys on OS X and Windows
         what = m.groupdict()['what']
+        if not what:
+            raise ValueError
         if field in query:
             query[field].append(what)
         else:
@@ -76,8 +78,11 @@ def find(context, mpd_query):
     - also uses the search type "date".
     - uses "file" instead of "filename".
     """
-    query = _build_query(mpd_query)
-    return playlist_to_mpd_format(
+    try:
+        query = _build_query(mpd_query)
+    except ValueError:
+        return
+    return tracks_to_mpd_format(
         context.core.library.find_exact(**query).get())
 
 
@@ -185,7 +190,10 @@ def list_(context, field, mpd_query=None):
     - capitalizes the field argument.
     """
     field = field.lower()
-    query = _list_build_query(field, mpd_query)
+    try:
+        query = _list_build_query(field, mpd_query)
+    except ValueError:
+        return
     if field == 'artist':
         return _list_artist(context, query)
     elif field == 'album':
@@ -211,6 +219,8 @@ def _list_build_query(field, mpd_query):
     tokens = [t.decode('utf-8') for t in tokens]
     if len(tokens) == 1:
         if field == 'album':
+            if not tokens[0]:
+                raise ValueError
             return {'artist': [tokens[0]]}
         else:
             raise MpdArgError(
@@ -224,6 +234,8 @@ def _list_build_query(field, mpd_query):
             tokens = tokens[2:]
             if key not in ('artist', 'album', 'date', 'genre'):
                 raise MpdArgError('not able to parse args', command='list')
+            if not value:
+                raise ValueError
             if key in query:
                 query[key].append(value)
             else:
@@ -235,8 +247,8 @@ def _list_build_query(field, mpd_query):
 
 def _list_artist(context, query):
     artists = set()
-    playlist = context.core.library.find_exact(**query).get()
-    for track in playlist.tracks:
+    tracks = context.core.library.find_exact(**query).get()
+    for track in tracks:
         for artist in track.artists:
             artists.add(('Artist', artist.name))
     return artists
@@ -244,8 +256,8 @@ def _list_artist(context, query):
 
 def _list_album(context, query):
     albums = set()
-    playlist = context.core.library.find_exact(**query).get()
-    for track in playlist.tracks:
+    tracks = context.core.library.find_exact(**query).get()
+    for track in tracks:
         if track.album is not None:
             albums.add(('Album', track.album.name))
     return albums
@@ -253,8 +265,8 @@ def _list_album(context, query):
 
 def _list_date(context, query):
     dates = set()
-    playlist = context.core.library.find_exact(**query).get()
-    for track in playlist.tracks:
+    tracks = context.core.library.find_exact(**query).get()
+    for track in tracks:
         if track.date is not None:
             dates.add(('Date', track.date))
     return dates
@@ -351,8 +363,11 @@ def search(context, mpd_query):
     - also uses the search type "date".
     - uses "file" instead of "filename".
     """
-    query = _build_query(mpd_query)
-    return playlist_to_mpd_format(
+    try:
+        query = _build_query(mpd_query)
+    except ValueError:
+        return
+    return tracks_to_mpd_format(
         context.core.library.search(**query).get())
 
 

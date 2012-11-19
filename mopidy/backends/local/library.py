@@ -4,7 +4,7 @@ import logging
 
 from mopidy import settings
 from mopidy.backends import base
-from mopidy.models import Playlist, Album
+from mopidy.models import Album
 
 from .translator import parse_mpd_tag_cache
 
@@ -30,10 +30,10 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
 
     def lookup(self, uri):
         try:
-            return self._uri_mapping[uri]
+            return [self._uri_mapping[uri]]
         except KeyError:
             logger.debug('Failed to lookup %r', uri)
-            return None
+            return []
 
     def find_exact(self, **query):
         self._validate_query(query)
@@ -67,7 +67,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return Playlist(tracks=result_tracks)
+        return result_tracks
 
     def search(self, **query):
         self._validate_query(query)
@@ -101,7 +101,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return Playlist(tracks=result_tracks)
+        return result_tracks
 
     def _validate_query(self, query):
         for (_, values) in query.iteritems():

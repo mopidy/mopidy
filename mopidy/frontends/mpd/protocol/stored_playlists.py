@@ -23,11 +23,10 @@ def listplaylist(context, name):
         file: relative/path/to/file2.ogg
         file: relative/path/to/file3.mp3
     """
-    try:
-        playlist = context.core.playlists.get(name=name).get()
-        return ['file: %s' % t.uri for t in playlist.tracks]
-    except LookupError:
+    playlists = context.core.playlists.filter(name=name).get()
+    if not playlists:
         raise MpdNoExistError('No such playlist', command='listplaylist')
+    return ['file: %s' % t.uri for t in playlists[0].tracks]
 
 
 @handle_request(r'^listplaylistinfo (?P<name>\S+)$')
@@ -45,11 +44,10 @@ def listplaylistinfo(context, name):
         Standard track listing, with fields: file, Time, Title, Date,
         Album, Artist, Track
     """
-    try:
-        playlist = context.core.playlists.get(name=name).get()
-        return playlist_to_mpd_format(playlist)
-    except LookupError:
+    playlists = context.core.playlists.filter(name=name).get()
+    if not playlists:
         raise MpdNoExistError('No such playlist', command='listplaylistinfo')
+    return playlist_to_mpd_format(playlists[0])
 
 
 @handle_request(r'^listplaylists$')
@@ -100,11 +98,10 @@ def load(context, name):
 
     - ``load`` appends the given playlist to the current playlist.
     """
-    try:
-        playlist = context.core.playlists.get(name=name).get()
-        context.core.tracklist.append(playlist.tracks)
-    except LookupError:
+    playlists = context.core.playlists.filter(name=name).get()
+    if not playlists:
         raise MpdNoExistError('No such playlist', command='load')
+    context.core.tracklist.append(playlists[0].tracks)
 
 
 @handle_request(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')

@@ -214,6 +214,11 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqual(tracks[5].name, 'f')
         self.assertInResponse('OK')
 
+    def test_moveid_with_tlid_not_found_in_tracklist_should_ack(self):
+        self.sendRequest('moveid "9" "0"')
+        self.assertEqualResponse(
+            'ACK [50@0] {moveid} No such song')
+
     def test_playlist_returns_same_as_playlistinfo(self):
         playlist_response = self.sendRequest('playlist')
         playlistinfo_response = self.sendRequest('playlistinfo')
@@ -505,3 +510,15 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqual(tracks[4].name, 'b')
         self.assertEqual(tracks[5].name, 'f')
         self.assertInResponse('OK')
+
+    def test_swapid_with_first_id_unknown_should_ack(self):
+        self.core.tracklist.append([Track()])
+        self.sendRequest('swapid "0" "4"')
+        self.assertEqualResponse(
+            'ACK [50@0] {swapid} No such song')
+
+    def test_swapid_with_second_id_unknown_should_ack(self):
+        self.core.tracklist.append([Track()])
+        self.sendRequest('swapid "4" "0"')
+        self.assertEqualResponse(
+            'ACK [50@0] {swapid} No such song')

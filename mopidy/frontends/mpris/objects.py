@@ -279,13 +279,10 @@ class MprisObject(dbus.service.Object):
             return
         # NOTE Check if URI has MIME type known to the backend, if MIME support
         # is added to the backend.
-        uri_schemes = self.core.uri_schemes.get()
-        if not any([uri.startswith(uri_scheme) for uri_scheme in uri_schemes]):
-            return
-        track = self.core.library.lookup(uri).get()
-        if track is not None:
-            tl_track = self.core.tracklist.add(track).get()
-            self.core.playback.play(tl_track)
+        tracks = self.core.library.lookup(uri).get()
+        if tracks:
+            tl_tracks = self.core.tracklist.append(tracks).get()
+            self.core.playback.play(tl_tracks[0])
         else:
             logger.debug('Track with URI "%s" not found in library.', uri)
 

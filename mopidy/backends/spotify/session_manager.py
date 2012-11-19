@@ -12,7 +12,6 @@ from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
 from mopidy import settings
 from mopidy.backends.listener import BackendListener
-from mopidy.models import Playlist
 from mopidy.utils import process, versioning
 
 from . import translator
@@ -164,9 +163,9 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             # TODO Include results from results.albums(), etc. too
             # TODO Consider launching a second search if results.total_tracks()
             # is larger than len(results.tracks())
-            playlist = Playlist(tracks=[
-                translator.to_mopidy_track(t) for t in results.tracks()])
-            queue.put(playlist)
+            tracks = [
+                translator.to_mopidy_track(t) for t in results.tracks()]
+            queue.put(tracks)
         self.connected.wait()
         self.session.search(
             query, callback, track_count=100, album_count=0, artist_count=0)

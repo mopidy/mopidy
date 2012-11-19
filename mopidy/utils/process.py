@@ -16,7 +16,8 @@ from mopidy import exceptions
 logger = logging.getLogger('mopidy.utils.process')
 
 
-SIGNALS = dict((k, v) for v, k in signal.__dict__.iteritems()
+SIGNALS = dict(
+    (k, v) for v, k in signal.__dict__.iteritems()
     if v.startswith('SIG') and not v.startswith('SIG_'))
 
 
@@ -98,7 +99,8 @@ class DebugThread(threading.Thread):
             for ident, frame in sys._current_frames().items():
                 if self.ident != ident:
                     stack = ''.join(traceback.format_stack(frame))
-                    logger.debug('Current state of %s (%s):\n%s',
+                    logger.debug(
+                        'Current state of %s (%s):\n%s',
                         threads[ident], ident, stack)
                 del frame
 

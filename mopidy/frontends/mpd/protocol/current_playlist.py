@@ -22,9 +22,9 @@ def add(context, uri):
     """
     if not uri:
         return
-    track = context.core.library.lookup(uri).get()
-    if track:
-        context.core.tracklist.add(track)
+    tracks = context.core.library.lookup(uri).get()
+    if tracks:
+        context.core.tracklist.append(tracks)
         return
     raise MpdNoExistError('directory or file not found', command='add')
 
@@ -52,13 +52,19 @@ def addid(context, uri, songpos=None):
         raise MpdNoExistError('No such song', command='addid')
     if songpos is not None:
         songpos = int(songpos)
-    track = context.core.library.lookup(uri).get()
-    if track is None:
+    tracks = context.core.library.lookup(uri).get()
+    if not tracks:
         raise MpdNoExistError('No such song', command='addid')
     if songpos and songpos > context.core.tracklist.length.get():
         raise MpdArgError('Bad song index', command='addid')
-    tl_track = context.core.tracklist.add(track, at_position=songpos).get()
-    return ('Id', tl_track.tlid)
+    first_tl_track = None
+    for track in tracks:
+        tl_track = context.core.tracklist.add(track, at_position=songpos).get()
+        if songpos is not None:
+            songpos += 1
+        if first_tl_track is None:
+            first_tl_track = tl_track
+    return ('Id', first_tl_track.tlid)
 
 
 @handle_request(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
@@ -103,12 +109,11 @@ def deleteid(context, tlid):
 
         Deletes the song ``SONGID`` from the playlist
     """
-    try:
-        tlid = int(tlid)
-        if context.core.playback.current_tlid.get() == tlid:
-            context.core.playback.next()
-        return context.core.tracklist.remove(tlid=tlid).get()
-    except LookupError:
+    tlid = int(tlid)
+    if context.core.playback.current_tlid.get() == tlid:
+        context.core.playback.next()
+    tl_tracks = context.core.tracklist.remove(tlid=tlid).get()
+    if not tl_tracks:
         raise MpdNoExistError('No such song', command='deleteid')
 
 
@@ -163,8 +168,10 @@ def moveid(context, tlid, to):
     """
     tlid = int(tlid)
     to = int(to)
-    tl_track = context.core.tracklist.get(tlid=tlid).get()
-    position = context.core.tracklist.index(tl_track).get()
+    tl_tracks = context.core.tracklist.filter(tlid=tlid).get()
+    if not tl_tracks:
+        raise MpdNoExistError('No such song', command='moveid')
+    position = context.core.tracklist.index(tl_tracks[0]).get()
     context.core.tracklist.move(position, position + 1, to)
 
 
@@ -199,12 +206,11 @@ def playlistfind(context, tag, needle):
     - does not add quotes around the tag.
     """
     if tag == 'filename':
-        try:
-            tl_track = context.core.tracklist.get(uri=needle).get()
-            position = context.core.tracklist.index(tl_track).get()
-            return translator.track_to_mpd_format(tl_track, position=position)
-        except LookupError:
+        tl_tracks = context.core.tracklist.filter(uri=needle).get()
+        if not tl_tracks:
             return None
+        position = context.core.tracklist.index(tl_tracks[0]).get()
+        return translator.track_to_mpd_format(tl_tracks[0], position=position)
     raise MpdNotImplemented  # TODO
 
 
@@ -219,13 +225,12 @@ def playlistid(context, tlid=None):
         and specifies a single song to display info for.
     """
     if tlid is not None:
-        try:
-            tlid = int(tlid)
-            tl_track = context.core.tracklist.get(tlid=tlid).get()
-            position = context.core.tracklist.index(tl_track).get()
-            return translator.track_to_mpd_format(tl_track, position=position)
-        except LookupError:
+        tlid = int(tlid)
+        tl_tracks = context.core.tracklist.filter(tlid=tlid).get()
+        if not tl_tracks:
             raise MpdNoExistError('No such song', command='playlistid')
+        position = context.core.tracklist.index(tl_tracks[0]).get()
+        return translator.track_to_mpd_format(tl_tracks[0], position=position)
     else:
         return translator.tracks_to_mpd_format(
             context.core.tracklist.tl_tracks.get())
@@ -385,8 +390,10 @@ def swapid(context, tlid1, tlid2):
     """
     tlid1 = int(tlid1)
     tlid2 = int(tlid2)
-    tl_track1 = context.core.tracklist.get(tlid=tlid1).get()
-    tl_track2 = context.core.tracklist.get(tlid=tlid2).get()
-    position1 = context.core.tracklist.index(tl_track1).get()
-    position2 = context.core.tracklist.index(tl_track2).get()
+    tl_tracks1 = context.core.tracklist.filter(tlid=tlid1).get()
+    tl_tracks2 = context.core.tracklist.filter(tlid=tlid2).get()
+    if not tl_tracks1 or not tl_tracks2:
+        raise MpdNoExistError('No such song', command='swapid')
+    position1 = context.core.tracklist.index(tl_tracks1[0]).get()
+    position2 = context.core.tracklist.index(tl_tracks2[0]).get()
     swap(context, position1, position2)

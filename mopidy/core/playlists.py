@@ -69,35 +69,25 @@ class PlaylistsController(object):
         if backend:
             backend.playlists.delete(uri).get()
 
-    def get(self, **criteria):
+    def filter(self, **criteria):
         """
-        Get playlist by given criterias from the set of playlists.
-
-        Raises :exc:`LookupError` if a unique match is not found.
+        Filter playlists by the given criterias.
 
         Examples::
 
-            get(name='a')            # Returns track with name 'a'
-            get(uri='xyz')           # Returns track with URI 'xyz'
-            get(name='a', uri='xyz') # Returns track with name 'a' and URI
-                                     # 'xyz'
+            filter(name='a')            # Returns track with name 'a'
+            filter(uri='xyz')           # Returns track with URI 'xyz'
+            filter(name='a', uri='xyz') # Returns track with name 'a' and URI
+                                        # 'xyz'
 
         :param criteria: one or more criteria to match by
         :type criteria: dict
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: list of :class:`mopidy.models.Playlist`
         """
         matches = self.playlists
         for (key, value) in criteria.iteritems():
             matches = filter(lambda p: getattr(p, key) == value, matches)
-        if len(matches) == 1:
-            return matches[0]
-        criteria_string = ', '.join(
-            ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
-        if len(matches) == 0:
-            raise LookupError('"%s" match no playlists' % criteria_string)
-        else:
-            raise LookupError(
-                '"%s" match multiple playlists' % criteria_string)
+        return matches
 
     def lookup(self, uri):
         """

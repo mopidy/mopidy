@@ -236,8 +236,8 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest('play "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
-        self.assertEqual('dummy:a',
-            self.core.playback.current_track.get().uri)
+        self.assertEqual(
+            'dummy:a', self.core.playback.current_track.get().uri)
         self.assertInResponse('OK')
 
     def test_play_minus_one_plays_current_track_if_current_track_is_set(self):
@@ -253,8 +253,8 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest('play "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
-        self.assertEqual('dummy:b',
-            self.core.playback.current_track.get().uri)
+        self.assertEqual(
+            'dummy:b', self.core.playback.current_track.get().uri)
         self.assertInResponse('OK')
 
     def test_play_minus_one_on_empty_playlist_does_not_ack(self):
@@ -318,8 +318,8 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest('playid "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
-        self.assertEqual('dummy:a',
-            self.core.playback.current_track.get().uri)
+        self.assertEqual(
+            'dummy:a', self.core.playback.current_track.get().uri)
         self.assertInResponse('OK')
 
     def test_playid_minus_1_plays_current_track_if_current_track_is_set(self):
@@ -335,8 +335,8 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest('playid "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
-        self.assertEqual('dummy:b',
-            self.core.playback.current_track.get().uri)
+        self.assertEqual(
+            'dummy:b', self.core.playback.current_track.get().uri)
         self.assertInResponse('OK')
 
     def test_playid_minus_one_on_empty_playlist_does_not_ack(self):

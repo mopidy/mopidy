@@ -55,7 +55,7 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
                 try:
                     # TODO We must use core.library.lookup() to support tracks
                     # from other backends
-                    tracks.append(self.backend.library.lookup(track_uri))
+                    tracks += self.backend.library.lookup(track_uri)
                 except LookupError as ex:
                     logger.error('Playlist item could not be added: %s', ex)
 

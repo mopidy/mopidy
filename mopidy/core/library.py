@@ -5,8 +5,6 @@ import urlparse
 
 import pykka
 
-from mopidy.models import Playlist
-
 
 class LibraryController(object):
     pykka_traversable = True
@@ -34,27 +32,29 @@ class LibraryController(object):
 
         :param query: one or more queries to search for
         :type query: dict
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: list of :class:`mopidy.models.Track`
         """
-        futures = [b.library.find_exact(**query)
-            for b in self.backends.with_library]
+        futures = [
+            b.library.find_exact(**query) for b in self.backends.with_library]
         results = pykka.get_all(futures)
-        return Playlist(tracks=[
-            track for playlist in results for track in playlist.tracks])
+        return list(itertools.chain(*results))
 
     def lookup(self, uri):
         """
-        Lookup track with given URI. Returns :class:`None` if not found.
+        Lookup the given URI.
+
+        If the URI expands to multiple tracks, the returned list will contain
+        them all.
 
         :param uri: track URI
         :type uri: string
-        :rtype: :class:`mopidy.models.Track` or :class:`None`
+        :rtype: list of :class:`mopidy.models.Track`
         """
         backend = self._get_backend(uri)
         if backend:
             return backend.library.lookup(uri).get()
         else:
-            return None
+            return []
 
     def refresh(self, uri=None):
         """
@@ -68,8 +68,8 @@ class LibraryController(object):
             if backend:
                 backend.library.refresh(uri).get()
         else:
-            futures = [b.library.refresh(uri)
-                for b in self.backends.with_library]
+            futures = [
+                b.library.refresh(uri) for b in self.backends.with_library]
             pykka.get_all(futures)
 
     def search(self, **query):
@@ -87,11 +87,9 @@ class LibraryController(object):
 
         :param query: one or more queries to search for
         :type query: dict
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: list of :class:`mopidy.models.Track`
         """
-        futures = [b.library.search(**query)
-            for b in self.backends.with_library]
+        futures = [
+            b.library.search(**query) for b in self.backends.with_library]
         results = pykka.get_all(futures)
-        track_lists = [playlist.tracks for playlist in results]
-        tracks = list(itertools.chain(*track_lists))
-        return Playlist(tracks=tracks)
+        return list(itertools.chain(*results))
