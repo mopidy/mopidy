@@ -57,10 +57,10 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
     def lookup(self, uri):
         try:
-            return SpotifyTrack(uri)
+            return [SpotifyTrack(uri)]
         except SpotifyError as e:
             logger.debug('Failed to lookup "%s": %s', uri, e)
-            return None
+            return []
 
     def refresh(self, uri=None):
         pass  # TODO

@@ -22,9 +22,9 @@ def add(context, uri):
     """
     if not uri:
         return
-    track = context.core.library.lookup(uri).get()
-    if track:
-        context.core.tracklist.add(track)
+    tracks = context.core.library.lookup(uri).get()
+    if tracks:
+        context.core.tracklist.append(tracks)
         return
     raise MpdNoExistError('directory or file not found', command='add')
 
@@ -52,13 +52,19 @@ def addid(context, uri, songpos=None):
         raise MpdNoExistError('No such song', command='addid')
     if songpos is not None:
         songpos = int(songpos)
-    track = context.core.library.lookup(uri).get()
-    if track is None:
+    tracks = context.core.library.lookup(uri).get()
+    if not tracks:
         raise MpdNoExistError('No such song', command='addid')
     if songpos and songpos > context.core.tracklist.length.get():
         raise MpdArgError('Bad song index', command='addid')
-    tl_track = context.core.tracklist.add(track, at_position=songpos).get()
-    return ('Id', tl_track.tlid)
+    first_tl_track = None
+    for track in tracks:
+        tl_track = context.core.tracklist.add(track, at_position=songpos).get()
+        if songpos is not None:
+            songpos += 1
+        if first_tl_track is None:
+            first_tl_track = tl_track
+    return ('Id', first_tl_track.tlid)
 
 
 @handle_request(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')

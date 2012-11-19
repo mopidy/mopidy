@@ -41,17 +41,20 @@ class LibraryController(object):
 
     def lookup(self, uri):
         """
-        Lookup track with given URI. Returns :class:`None` if not found.
+        Lookup the given URI.
+
+        If the URI expands to multiple tracks, the returned list will contain
+        them all.
 
         :param uri: track URI
         :type uri: string
-        :rtype: :class:`mopidy.models.Track` or :class:`None`
+        :rtype: list of :class:`mopidy.models.Track`
         """
         backend = self._get_backend(uri)
         if backend:
             return backend.library.lookup(uri).get()
         else:
-            return None
+            return []
 
     def refresh(self, uri=None):
         """

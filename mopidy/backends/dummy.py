@@ -42,9 +42,7 @@ class DummyLibraryProvider(base.BaseLibraryProvider):
         return []
 
     def lookup(self, uri):
-        matches = filter(lambda t: uri == t.uri, self.dummy_library)
-        if matches:
-            return matches[0]
+        return filter(lambda t: uri == t.uri, self.dummy_library)
 
     def refresh(self, uri=None):
         pass

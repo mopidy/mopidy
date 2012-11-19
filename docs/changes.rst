@@ -141,6 +141,10 @@ backends:
 - :meth:`mopidy.core.TracklistController.remove` can now remove multiple
   tracks, and returns the tracks it removed.
 
+- :meth:`mopidy.core.LibraryController.lookup` now returns a list of tracks.
+  This makes it possible to support lookup of artist or album URIs which then
+  can expand to a list of tracks.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
