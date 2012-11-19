@@ -55,19 +55,56 @@ class TracklistControllerTest(object):
         self.assertRaises(AssertionError, test)
 
     @populate_playlist
-    def test_get_by_tlid(self):
+    def test_filter_by_tlid(self):
         tl_track = self.controller.tl_tracks[1]
-        self.assertEqual(tl_track, self.controller.get(tlid=tl_track.tlid))
+        self.assertEqual(
+            [tl_track], self.controller.filter(tlid=tl_track.tlid))
 
     @populate_playlist
-    def test_get_by_uri(self):
+    def test_filter_by_uri(self):
         tl_track = self.controller.tl_tracks[1]
-        self.assertEqual(tl_track, self.controller.get(uri=tl_track.track.uri))
+        self.assertEqual(
+            [tl_track], self.controller.filter(uri=tl_track.track.uri))
 
     @populate_playlist
-    def test_get_by_uri_raises_error_for_invalid_uri(self):
-        test = lambda: self.controller.get(uri='foobar')
-        self.assertRaises(LookupError, test)
+    def test_filter_by_uri_returns_nothing_for_invalid_uri(self):
+        self.assertEqual([], self.controller.filter(uri='foobar'))
+
+    def test_filter_by_uri_returns_single_match(self):
+        track = Track(uri='a')
+        self.controller.append([Track(uri='z'), track, Track(uri='y')])
+        self.assertEqual(track, self.controller.filter(uri='a')[0].track)
+
+    def test_filter_by_uri_returns_multiple_matches(self):
+        track = Track(uri='a')
+        self.controller.append([Track(uri='z'), track, track])
+        tl_tracks = self.controller.filter(uri='a')
+        self.assertEqual(track, tl_tracks[0].track)
+        self.assertEqual(track, tl_tracks[1].track)
+
+    def test_filter_by_uri_returns_nothing_if_no_match(self):
+        self.controller.playlist = Playlist(
+            tracks=[Track(uri='z'), Track(uri='y')])
+        self.assertEqual([], self.controller.filter(uri='a'))
+
+    def test_filter_by_multiple_criteria_returns_elements_matching_all(self):
+        track1 = Track(uri='a', name='x')
+        track2 = Track(uri='b', name='x')
+        track3 = Track(uri='b', name='y')
+        self.controller.append([track1, track2, track3])
+        self.assertEqual(
+            track1, self.controller.filter(uri='a', name='x')[0].track)
+        self.assertEqual(
+            track2, self.controller.filter(uri='b', name='x')[0].track)
+        self.assertEqual(
+            track3, self.controller.filter(uri='b', name='y')[0].track)
+
+    def test_filter_by_criteria_that_is_not_present_in_all_elements(self):
+        track1 = Track()
+        track2 = Track(uri='b')
+        track3 = Track()
+        self.controller.append([track1, track2, track3])
+        self.assertEqual(track2, self.controller.filter(uri='b')[0].track)
 
     @populate_playlist
     def test_clear(self):
@@ -84,45 +121,6 @@ class TracklistControllerTest(object):
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.controller.clear()
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
-
-    def test_get_by_uri_returns_unique_match(self):
-        track = Track(uri='a')
-        self.controller.append([Track(uri='z'), track, Track(uri='y')])
-        self.assertEqual(track, self.controller.get(uri='a').track)
-
-    def test_get_by_uri_raises_error_if_multiple_matches(self):
-        track = Track(uri='a')
-        self.controller.append([Track(uri='z'), track, track])
-        try:
-            self.controller.get(uri='a')
-            self.fail('Should raise LookupError if multiple matches')
-        except LookupError as e:
-            self.assertEqual('"uri=a" match multiple tracks', e[0])
-
-    def test_get_by_uri_raises_error_if_no_match(self):
-        self.controller.playlist = Playlist(
-            tracks=[Track(uri='z'), Track(uri='y')])
-        try:
-            self.controller.get(uri='a')
-            self.fail('Should raise LookupError if no match')
-        except LookupError as e:
-            self.assertEqual('"uri=a" match no tracks', e[0])
-
-    def test_get_by_multiple_criteria_returns_elements_matching_all(self):
-        track1 = Track(uri='a', name='x')
-        track2 = Track(uri='b', name='x')
-        track3 = Track(uri='b', name='y')
-        self.controller.append([track1, track2, track3])
-        self.assertEqual(track1, self.controller.get(uri='a', name='x').track)
-        self.assertEqual(track2, self.controller.get(uri='b', name='x').track)
-        self.assertEqual(track3, self.controller.get(uri='b', name='y').track)
-
-    def test_get_by_criteria_that_is_not_present_in_all_elements(self):
-        track1 = Track()
-        track2 = Track(uri='b')
-        track3 = Track()
-        self.controller.append([track1, track2, track3])
-        self.assertEqual(track2, self.controller.get(uri='b').track)
 
     def test_append_appends_to_the_tracklist(self):
         self.controller.append([Track(uri='a'), Track(uri='b')])
@@ -222,13 +220,11 @@ class TracklistControllerTest(object):
         self.assertEqual(track2, self.controller.tracks[1])
 
     @populate_playlist
-    def test_removing_track_that_does_not_exist(self):
-        test = lambda: self.controller.remove(uri='/nonexistant')
-        self.assertRaises(LookupError, test)
+    def test_removing_track_that_does_not_exist_does_nothing(self):
+        self.controller.remove(uri='/nonexistant')
 
-    def test_removing_from_empty_playlist(self):
-        test = lambda: self.controller.remove(uri='/nonexistant')
-        self.assertRaises(LookupError, test)
+    def test_removing_from_empty_playlist_does_nothing(self):
+        self.controller.remove(uri='/nonexistant')
 
     @populate_playlist
     def test_shuffle(self):

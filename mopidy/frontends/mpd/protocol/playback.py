@@ -151,11 +151,10 @@ def playid(context, tlid):
     tlid = int(tlid)
     if tlid == -1:
         return _play_minus_one(context)
-    try:
-        tl_track = context.core.tracklist.get(tlid=tlid).get()
-        return context.core.playback.play(tl_track).get()
-    except LookupError:
+    tl_tracks = context.core.tracklist.filter(tlid=tlid).get()
+    if not tl_tracks:
         raise MpdNoExistError('No such song', command='playid')
+    return context.core.playback.play(tl_tracks[0]).get()
 
 
 @handle_request(r'^play (?P<songpos>-?\d+)$')

@@ -132,6 +132,19 @@ backends:
   :meth:`mopidy.core.LibraryController.search` now returns plain lists of
   tracks instead of playlist objects.
 
+- :meth:`mopidy.core.TracklistController.get` has been replaced by
+  :meth:`mopidy.core.TracklistController.filter`.
+
+- :meth:`mopidy.core.PlaylistsController.get` has been replaced by
+  :meth:`mopidy.core.PlaylistsController.filter`.
+
+- :meth:`mopidy.core.TracklistController.remove` can now remove multiple
+  tracks, and returns the tracks it removed.
+
+- :meth:`mopidy.core.LibraryController.lookup` now returns a list of tracks.
+  This makes it possible to support lookup of artist or album URIs which then
+  can expand to a list of tracks.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now

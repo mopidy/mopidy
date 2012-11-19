@@ -41,10 +41,10 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertFalse(self.library1.lookup.called)
         self.library2.lookup.assert_called_once_with('dummy2:a')
 
-    def test_lookup_fails_for_dummy3_track(self):
+    def test_lookup_returns_nothing_for_dummy3_track(self):
         result = self.core.library.lookup('dummy3:a')
 
-        self.assertIsNone(result)
+        self.assertEqual(result, [])
         self.assertFalse(self.library1.lookup.called)
         self.assertFalse(self.library2.lookup.called)
 

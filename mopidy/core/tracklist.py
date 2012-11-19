@@ -116,22 +116,20 @@ class TracklistController(object):
         self._tl_tracks = []
         self.version += 1
 
-    def get(self, **criteria):
+    def filter(self, **criteria):
         """
-        Get track by given criterias from tracklist.
-
-        Raises :exc:`LookupError` if a unique match is not found.
+        Filter the tracklist by the given criterias.
 
         Examples::
 
-            get(tlid=7)             # Returns track with TLID 7 (tracklist ID)
-            get(id=1)               # Returns track with ID 1
-            get(uri='xyz')          # Returns track with URI 'xyz'
-            get(id=1, uri='xyz')    # Returns track with ID 1 and URI 'xyz'
+            filter(tlid=7)           # Returns track with TLID 7 (tracklist ID)
+            filter(id=1)             # Returns track with ID 1
+            filter(uri='xyz')        # Returns track with URI 'xyz'
+            filter(id=1, uri='xyz')  # Returns track with ID 1 and URI 'xyz'
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
-        :rtype: :class:`mopidy.models.TlTrack`
+        :rtype: list of :class:`mopidy.models.TlTrack`
         """
         matches = self._tl_tracks
         for (key, value) in criteria.iteritems():
@@ -140,14 +138,7 @@ class TracklistController(object):
             else:
                 matches = filter(
                     lambda ct: getattr(ct.track, key) == value, matches)
-        if len(matches) == 1:
-            return matches[0]
-        criteria_string = ', '.join(
-            ['%s=%s' % (k, v) for (k, v) in criteria.iteritems()])
-        if len(matches) == 0:
-            raise LookupError('"%s" match no tracks' % criteria_string)
-        else:
-            raise LookupError('"%s" match multiple tracks' % criteria_string)
+        return matches
 
     def index(self, tl_track):
         """
@@ -197,20 +188,23 @@ class TracklistController(object):
 
     def remove(self, **criteria):
         """
-        Remove the track from the tracklist.
+        Remove the matching tracks from the tracklist.
 
-        Uses :meth:`get()` to lookup the track to remove.
+        Uses :meth:`filter()` to lookup the tracks to remove.
 
         Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
         event.
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
+        :rtype: list of :class:`mopidy.models.TlTrack` that was removed
         """
-        tl_track = self.get(**criteria)
-        position = self._tl_tracks.index(tl_track)
-        del self._tl_tracks[position]
+        tl_tracks = self.filter(**criteria)
+        for tl_track in tl_tracks:
+            position = self._tl_tracks.index(tl_track)
+            del self._tl_tracks[position]
         self.version += 1
+        return tl_tracks
 
     def shuffle(self, start=None, end=None):
         """
