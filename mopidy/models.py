@@ -125,16 +125,9 @@ def model_json_decoder(dct):
     """
     if '__type__' in dct:
         obj_type = dct.pop('__type__')
-        if obj_type == 'Album':
-            return Album(**dct)
-        if obj_type == 'Artist':
-            return Artist(**dct)
-        if obj_type == 'Playlist':
-            return Playlist(**dct)
-        if obj_type == 'TlTrack':
-            return TlTrack(**dct)
-        if obj_type == 'Track':
-            return Track(**dct)
+        cls = globals().get(obj_type, None)
+        if issubclass(cls, ImmutableObject):
+            return cls(**dct)
     return dct
 
 
