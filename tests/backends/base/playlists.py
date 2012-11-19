@@ -58,43 +58,35 @@ class PlaylistsControllerTest(object):
 
         self.assertNotIn(playlist, self.core.playlists.playlists)
 
-    def test_get_without_criteria(self):
-        test = self.core.playlists.get
-        self.assertRaises(LookupError, test)
+    def test_filter_without_criteria(self):
+        self.assertEqual(
+            self.core.playlists.playlists, self.core.playlists.filter())
 
-    def test_get_with_wrong_cirteria(self):
-        test = lambda: self.core.playlists.get(name='foo')
-        self.assertRaises(LookupError, test)
+    def test_filter_with_wrong_criteria(self):
+        self.assertEqual([], self.core.playlists.filter(name='foo'))
 
-    def test_get_with_right_criteria(self):
-        playlist1 = self.core.playlists.create('test')
-        playlist2 = self.core.playlists.get(name='test')
-        self.assertEqual(playlist1, playlist2)
+    def test_filter_with_right_criteria(self):
+        playlist = self.core.playlists.create('test')
+        playlists = self.core.playlists.filter(name='test')
+        self.assertEqual([playlist], playlists)
 
-    def test_get_by_name_returns_unique_match(self):
+    def test_filter_by_name_returns_single_match(self):
         playlist = Playlist(name='b')
-        self.backend.playlists.playlists = [
-            Playlist(name='a'), playlist]
-        self.assertEqual(playlist, self.core.playlists.get(name='b'))
+        self.backend.playlists.playlists = [Playlist(name='a'), playlist]
+        self.assertEqual([playlist], self.core.playlists.filter(name='b'))
 
-    def test_get_by_name_returns_first_of_multiple_matches(self):
+    def test_filter_by_name_returns_multiple_matches(self):
         playlist = Playlist(name='b')
         self.backend.playlists.playlists = [
             playlist, Playlist(name='a'), Playlist(name='b')]
-        try:
-            self.core.playlists.get(name='b')
-            self.fail('Should raise LookupError if multiple matches')
-        except LookupError as e:
-            self.assertEqual('"name=b" match multiple playlists', e[0])
+        playlists = self.core.playlists.filter(name='b')
+        self.assertIn(playlist, playlists)
+        self.assertEqual(2, len(playlists))
 
-    def test_get_by_name_raises_keyerror_if_no_match(self):
+    def test_filter_by_name_returns_no_matches(self):
         self.backend.playlists.playlists = [
             Playlist(name='a'), Playlist(name='b')]
-        try:
-            self.core.playlists.get(name='c')
-            self.fail('Should raise LookupError if no match')
-        except LookupError as e:
-            self.assertEqual('"name=c" match no playlists', e[0])
+        self.assertEqual([], self.core.playlists.filter(name='c'))
 
     def test_lookup_finds_playlist_by_uri(self):
         original_playlist = self.core.playlists.create('test')
