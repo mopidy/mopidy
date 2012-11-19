@@ -119,6 +119,10 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
         self.sendRequest('find album "album_what" artist "artist_what"')
         self.assertInResponse('OK')
 
+    def test_find_without_filter_value(self):
+        self.sendRequest('find "album" ""')
+        self.assertInResponse('OK')
+
 
 class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list_foo_returns_ack(self):

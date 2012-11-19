@@ -52,7 +52,7 @@ def count(context, tag, needle):
 
 @handle_request(
     r'^find (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
 def find(context, mpd_query):
     """
     *musicpd.org, music database section:*
