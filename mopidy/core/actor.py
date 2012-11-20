@@ -46,13 +46,14 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
 
         self.tracklist = TracklistController(core=self)
 
-    @property
-    def uri_schemes(self):
-        """List of URI schemes we can handle"""
+    def get_uri_schemes(self):
         futures = [b.uri_schemes for b in self.backends]
         results = pykka.get_all(futures)
         uri_schemes = itertools.chain(*results)
         return sorted(uri_schemes)
+
+    uri_schemes = property(get_uri_schemes)
+    """List of URI schemes we can handle"""
 
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()
