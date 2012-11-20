@@ -152,6 +152,9 @@ backends:
 - Remove :attr:`mopidy.core.PlaybackController.track_at_next`. Use
   :attr:`mopidy.core.PlaybackController.tl_track_at_next` instead.
 
+- Remove :attr:`mopidy.core.PlaybackController.track_at_eot`. Use
+  :attr:`mopidy.core.PlaybackController.tl_track_at_eot` instead.
+
 - Added support for connecting to the Spotify service through an HTTP or SOCKS
   proxy, which is supported by pyspotify >= 1.9.
 

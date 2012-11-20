@@ -115,17 +115,6 @@ class PlaybackController(object):
     Read-only.
     """
 
-    def get_track_at_eot(self):
-        return self.tl_track_at_eot and self.tl_track_at_eot.track
-
-    track_at_eot = property(get_track_at_eot)
-    """
-    The track that will be played at the end of the current track.
-
-    Read-only. A :class:`mopidy.models.Track` extracted from
-    :attr:`tl_track_at_eot` for convenience.
-    """
-
     def get_tl_track_at_eot(self):
         # pylint: disable = R0911
         # Too many return statements
