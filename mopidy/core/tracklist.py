@@ -63,8 +63,7 @@ class TracklistController(object):
         """
         Add the track to the end of, or at the given position in the tracklist.
 
-        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
-        event.
+        Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param track: track to add
         :type track: :class:`mopidy.models.Track`
@@ -90,12 +89,11 @@ class TracklistController(object):
         """
         Append the given tracks to the tracklist.
 
-        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
-        event.
+        Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param tracks: tracks to append
         :type tracks: list of :class:`mopidy.models.Track`
-        :rtype: list of class:`mopidy.models.TlTrack`
+        :rtype: list of :class:`mopidy.models.TlTrack`
         """
         tl_tracks = []
         for track in tracks:
@@ -110,8 +108,7 @@ class TracklistController(object):
         """
         Clear the tracklist.
 
-        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
-        event.
+        Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
         """
         self._tl_tracks = []
         self.version += 1
@@ -156,8 +153,7 @@ class TracklistController(object):
         """
         Move the tracks in the slice ``[start:end]`` to ``to_position``.
 
-        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
-        event.
+        Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param start: position of first track to move
         :type start: int
@@ -192,8 +188,7 @@ class TracklistController(object):
 
         Uses :meth:`filter()` to lookup the tracks to remove.
 
-        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
-        event.
+        Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
@@ -211,8 +206,7 @@ class TracklistController(object):
         Shuffles the entire tracklist. If ``start`` and ``end`` is given only
         shuffles the slice ``[start:end]``.
 
-        Triggers the :method:`mopidy.core.CoreListener.tracklist_changed`
-        event.
+        Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param start: position of first track to shuffle
         :type start: int or :class:`None`

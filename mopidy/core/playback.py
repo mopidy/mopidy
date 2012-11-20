@@ -324,6 +324,8 @@ class PlaybackController(object):
     def on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
+
+        Used by event handler in :class:`mopidy.core.Core`.
         """
         if self.state == PlaybackState.STOPPED:
             return
@@ -343,7 +345,7 @@ class PlaybackController(object):
         """
         Tell the playback controller that the current playlist has changed.
 
-        Used by :class:`mopidy.core.CurrentPlaylistController`.
+        Used by :class:`mopidy.core.TracklistController`.
         """
         self._first_shuffle = True
         self._shuffled = []
