@@ -20,43 +20,47 @@ class TracklistController(object):
         self._tl_tracks = []
         self._version = 0
 
-    @property
-    def tl_tracks(self):
-        """
-        List of :class:`mopidy.models.TlTrack`.
-
-        Read-only.
-        """
+    def get_tl_tracks(self):
         return self._tl_tracks[:]
 
-    @property
-    def tracks(self):
-        """
-        List of :class:`mopidy.models.Track` in the tracklist.
+    tl_tracks = property(get_tl_tracks)
+    """
+    List of :class:`mopidy.models.TlTrack`.
 
-        Read-only.
-        """
+    Read-only.
+    """
+
+    def get_tracks(self):
         return [tl_track.track for tl_track in self._tl_tracks]
 
-    @property
-    def length(self):
-        """
-        Length of the tracklist.
-        """
+    tracks = property(get_tracks)
+    """
+    List of :class:`mopidy.models.Track` in the tracklist.
+
+    Read-only.
+    """
+
+    def get_length(self):
         return len(self._tl_tracks)
 
-    @property
-    def version(self):
-        """
-        The tracklist version. Integer which is increased every time the
-        tracklist is changed. Is not reset before Mopidy is restarted.
-        """
+    length = property(get_length)
+    """Length of the tracklist."""
+
+    def get_version(self):
         return self._version
 
     def _increase_version(self):
         self._version += 1
         self._core.playback.on_tracklist_change()
         self._trigger_tracklist_changed()
+
+    version = property(get_version)
+    """
+    The tracklist version.
+
+    Read-only. Integer which is increased every time the tracklist is changed.
+    Is not reset before Mopidy is restarted.
+    """
 
     def add(self, track, at_position=None, increase_version=True):
         """

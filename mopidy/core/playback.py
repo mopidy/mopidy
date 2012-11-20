@@ -79,42 +79,28 @@ class PlaybackController(object):
         uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
 
-    def _get_tlid(self, tl_track):
-        if tl_track is None:
-            return None
-        return tl_track.tlid
+    def get_current_tlid(self):
+        return self.current_tl_track and self.current_tl_track.tlid
 
-    def _get_track(self, tl_track):
-        if tl_track is None:
-            return None
-        return tl_track.track
+    current_tlid = property(get_current_tlid)
+    """
+    The TLID (tracklist ID) of the currently playing or selected
+    track.
 
-    @property
-    def current_tlid(self):
-        """
-        The TLID (tracklist ID) of the currently playing or selected
-        track.
+    Read-only. Extracted from :attr:`current_tl_track` for convenience.
+    """
 
-        Read-only. Extracted from :attr:`current_tl_track` for convenience.
-        """
-        return self._get_tlid(self.current_tl_track)
+    def get_current_track(self):
+        return self.current_tl_track and self.current_tl_track.track
 
-    @property
-    def current_track(self):
-        """
-        The currently playing or selected :class:`mopidy.models.Track`.
+    current_track = property(get_current_track)
+    """
+    The currently playing or selected :class:`mopidy.models.Track`.
 
-        Read-only. Extracted from :attr:`current_tl_track` for convenience.
-        """
-        return self._get_track(self.current_tl_track)
+    Read-only. Extracted from :attr:`current_tl_track` for convenience.
+    """
 
-    @property
-    def tracklist_position(self):
-        """
-        The position of the current track in the tracklist.
-
-        Read-only.
-        """
+    def get_tracklist_position(self):
         if self.current_tl_track is None:
             return None
         try:
@@ -122,25 +108,25 @@ class PlaybackController(object):
         except ValueError:
             return None
 
-    @property
-    def track_at_eot(self):
-        """
-        The track that will be played at the end of the current track.
+    tracklist_position = property(get_tracklist_position)
+    """
+    The position of the current track in the tracklist.
 
-        Read-only. A :class:`mopidy.models.Track` extracted from
-        :attr:`tl_track_at_eot` for convenience.
-        """
-        return self._get_track(self.tl_track_at_eot)
+    Read-only.
+    """
 
-    @property
-    def tl_track_at_eot(self):
-        """
-        The track that will be played at the end of the current track.
+    def get_track_at_eot(self):
+        return self.tl_track_at_eot and self.tl_track_at_eot.track
 
-        Read-only. A :class:`mopidy.models.TlTrack`.
+    track_at_eot = property(get_track_at_eot)
+    """
+    The track that will be played at the end of the current track.
 
-        Not necessarily the same track as :attr:`tl_track_at_next`.
-        """
+    Read-only. A :class:`mopidy.models.Track` extracted from
+    :attr:`tl_track_at_eot` for convenience.
+    """
+
+    def get_tl_track_at_eot(self):
         # pylint: disable = R0911
         # Too many return statements
 
@@ -173,28 +159,27 @@ class PlaybackController(object):
         except IndexError:
             return None
 
-    @property
-    def track_at_next(self):
-        """
-        The track that will be played if calling :meth:`next()`.
+    tl_track_at_eot = property(get_tl_track_at_eot)
+    """
+    The track that will be played at the end of the current track.
 
-        Read-only. A :class:`mopidy.models.Track` extracted from
-        :attr:`tl_track_at_next` for convenience.
-        """
-        return self._get_track(self.tl_track_at_next)
+    Read-only. A :class:`mopidy.models.TlTrack`.
 
-    @property
-    def tl_track_at_next(self):
-        """
-        The track that will be played if calling :meth:`next()`.
+    Not necessarily the same track as :attr:`tl_track_at_next`.
+    """
 
-        Read-only. A :class:`mopidy.models.TlTrack`.
+    def get_track_at_next(self):
+        return self.tl_track_at_next and self.tl_track_at_next.track
 
-        For normal playback this is the next track in the playlist. If repeat
-        is enabled the next track can loop around the playlist. When random is
-        enabled this should be a random track, all tracks should be played once
-        before the list repeats.
-        """
+    track_at_next = property(get_track_at_next)
+    """
+    The track that will be played if calling :meth:`next()`.
+
+    Read-only. A :class:`mopidy.models.Track` extracted from
+    :attr:`tl_track_at_next` for convenience.
+    """
+
+    def get_tl_track_at_next(self):
         tl_tracks = self.core.tracklist.tl_tracks
 
         if not tl_tracks:
@@ -221,27 +206,30 @@ class PlaybackController(object):
         except IndexError:
             return None
 
-    @property
-    def track_at_previous(self):
-        """
-        The track that will be played if calling :meth:`previous()`.
+    tl_track_at_next = property(get_tl_track_at_next)
+    """
+    The track that will be played if calling :meth:`next()`.
 
-        Read-only. A :class:`mopidy.models.Track` extracted from
-        :attr:`tl_track_at_previous` for convenience.
-        """
-        return self._get_track(self.tl_track_at_previous)
+    Read-only. A :class:`mopidy.models.TlTrack`.
 
-    @property
-    def tl_track_at_previous(self):
-        """
-        The track that will be played if calling :meth:`previous()`.
+    For normal playback this is the next track in the playlist. If repeat
+    is enabled the next track can loop around the playlist. When random is
+    enabled this should be a random track, all tracks should be played once
+    before the list repeats.
+    """
 
-        A :class:`mopidy.models.TlTrack`.
+    def get_track_at_previous(self):
+        return self.tl_track_at_previous and self.tl_track_at_previous.track
 
-        For normal playback this is the previous track in the playlist. If
-        random and/or consume is enabled it should return the current track
-        instead.
-        """
+    track_at_previous = property(get_track_at_previous)
+    """
+    The track that will be played if calling :meth:`previous()`.
+
+    Read-only. A :class:`mopidy.models.Track` extracted from
+    :attr:`tl_track_at_previous` for convenience.
+    """
+
+    def get_tl_track_at_previous(self):
         if self.repeat or self.consume or self.random:
             return self.current_tl_track
 
@@ -250,58 +238,70 @@ class PlaybackController(object):
 
         return self.core.tracklist.tl_tracks[self.tracklist_position - 1]
 
-    @property
-    def state(self):
-        """
-        The playback state. Must be :attr:`PLAYING`, :attr:`PAUSED`, or
-        :attr:`STOPPED`.
+    tl_track_at_previous = property(get_tl_track_at_previous)
+    """
+    The track that will be played if calling :meth:`previous()`.
 
-        Possible states and transitions:
+    A :class:`mopidy.models.TlTrack`.
 
-        .. digraph:: state_transitions
+    For normal playback this is the previous track in the playlist. If
+    random and/or consume is enabled it should return the current track
+    instead.
+    """
 
-            "STOPPED" -> "PLAYING" [ label="play" ]
-            "STOPPED" -> "PAUSED" [ label="pause" ]
-            "PLAYING" -> "STOPPED" [ label="stop" ]
-            "PLAYING" -> "PAUSED" [ label="pause" ]
-            "PLAYING" -> "PLAYING" [ label="play" ]
-            "PAUSED" -> "PLAYING" [ label="resume" ]
-            "PAUSED" -> "STOPPED" [ label="stop" ]
-        """
+    def get_state(self):
         return self._state
 
-    @state.setter  # noqa
-    def state(self, new_state):
+    def set_state(self, new_state):
         (old_state, self._state) = (self.state, new_state)
         logger.debug('Changing state: %s -> %s', old_state, new_state)
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-    @property
-    def time_position(self):
-        """Time position in milliseconds."""
+    state = property(get_state, set_state)
+    """
+    The playback state. Must be :attr:`PLAYING`, :attr:`PAUSED`, or
+    :attr:`STOPPED`.
+
+    Possible states and transitions:
+
+    .. digraph:: state_transitions
+
+        "STOPPED" -> "PLAYING" [ label="play" ]
+        "STOPPED" -> "PAUSED" [ label="pause" ]
+        "PLAYING" -> "STOPPED" [ label="stop" ]
+        "PLAYING" -> "PAUSED" [ label="pause" ]
+        "PLAYING" -> "PLAYING" [ label="play" ]
+        "PAUSED" -> "PLAYING" [ label="resume" ]
+        "PAUSED" -> "STOPPED" [ label="stop" ]
+    """
+
+    def get_time_position(self):
         backend = self._get_backend()
         if backend:
             return backend.playback.get_time_position().get()
         else:
             return 0
 
-    @property
-    def volume(self):
-        """Volume as int in range [0..100] or :class:`None`"""
+    time_position = property(get_time_position)
+    """Time position in milliseconds."""
+
+    def get_volume(self):
         if self.audio:
             return self.audio.get_volume().get()
         else:
             # For testing
             return self._volume
 
-    @volume.setter  # noqa
-    def volume(self, volume):
+    def set_volume(self, volume):
         if self.audio:
             self.audio.set_volume(volume)
         else:
             # For testing
             self._volume = volume
+
+    volume = property(get_volume, set_volume)
+    """Volume as int in range [0..100] or :class:`None`"""
 
     def change_track(self, tl_track, on_error_step=1):
         """
