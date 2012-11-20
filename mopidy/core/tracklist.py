@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import logging
 import random
 
-from mopidy.models import TlTrack
+from mopidy.models import TlTrack, Track
 
 from . import listener
 
@@ -62,9 +62,17 @@ class TracklistController(object):
     Is not reset before Mopidy is restarted.
     """
 
-    def add(self, track, at_position=None, increase_version=True):
+    def add(self, tracks, at_position=None):
         """
-        Add the track to the end of, or at the given position in the tracklist.
+        Add the track or list of tracks to the tracklist.
+
+        If ``at_position`` is given, the tracks placed at the given position in
+        the tracklist. If ``at_position`` is not given, the tracks are appended
+        to the end of the tracklist.
+
+        If ``tracks`` is a track object, a single
+        :class:`mopidy.models.TlTrack` object is returned. If ``tracks`` is a
+        list, a list of :class:`mopidy.models.TlTrack` is returned.
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
@@ -72,40 +80,39 @@ class TracklistController(object):
         :type track: :class:`mopidy.models.Track`
         :param at_position: position in tracklist to add track
         :type at_position: int or :class:`None`
-        :param increase_version: if the tracklist version should be increased
-        :type increase_version: :class:`True` or :class:`False`
-        :rtype: :class:`mopidy.models.TlTrack` that was added to the tracklist
+        :rtype: a single or a list of :class:`mopidy.models.TlTrack`
         """
-        assert at_position <= len(self._tl_tracks), \
+        assert at_position is None or at_position <= len(self._tl_tracks), \
             'at_position can not be greater than tracklist length'
-        tl_track = TlTrack(self._next_tlid, track)
-        if at_position is not None:
-            self._tl_tracks.insert(at_position, tl_track)
-        else:
-            self._tl_tracks.append(tl_track)
-        if increase_version:
-            self._increase_version()
-        self._next_tlid += 1
-        return tl_track
 
-    def append(self, tracks):
-        """
-        Append the given tracks to the tracklist.
+        single_add = False
+        if isinstance(tracks, Track):
+            tracks = [tracks]
+            single_add = True
 
-        Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
-
-        :param tracks: tracks to append
-        :type tracks: list of :class:`mopidy.models.Track`
-        :rtype: list of :class:`mopidy.models.TlTrack`
-        """
         tl_tracks = []
         for track in tracks:
-            tl_tracks.append(self.add(track, increase_version=False))
+            tl_track = TlTrack(self._next_tlid, track)
+            self._next_tlid += 1
+            if at_position is not None:
+                self._tl_tracks.insert(at_position, tl_track)
+                at_position += 1
+            else:
+                self._tl_tracks.append(tl_track)
+            tl_tracks.append(tl_track)
 
-        if tracks:
+        if tl_tracks:
             self._increase_version()
 
-        return tl_tracks
+        if single_add:
+            return tl_tracks[0]
+        else:
+            return tl_tracks
+
+    append = add
+    """
+    Alias for :meth:`add`.
+    """
 
     def clear(self):
         """
