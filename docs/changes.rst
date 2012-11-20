@@ -50,6 +50,9 @@ long time been our most requested feature. Finally, it's here!
 - Added support for connecting to the Spotify service through an HTTP or SOCKS
   proxy, which is supported by pyspotify >= 1.9.
 
+- Subscriptions to other Spotify user's "starred" playlists are ignored, as
+  they currently isn't fully supported by pyspotify.
+
 **Local backend**
 
 - :issue:`236`: The ``mopidy-scan`` command failed to include tags from ALAC

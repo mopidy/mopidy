@@ -56,6 +56,10 @@ def to_mopidy_playlist(spotify_playlist):
     uri = str(Link.from_playlist(spotify_playlist))
     if not spotify_playlist.is_loaded():
         return Playlist(uri=uri, name='[loading...]')
+    if not spotify_playlist.name():
+        # Other user's "starred" playlists isn't handled properly by pyspotify
+        # See https://github.com/mopidy/pyspotify/issues/81
+        return
     return Playlist(
         uri=uri,
         name=spotify_playlist.name(),
