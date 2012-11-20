@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import logging
 import random
 
-from mopidy.models import TlTrack, Track
+from mopidy.models import TlTrack
 
 from . import listener
 
@@ -70,25 +70,16 @@ class TracklistController(object):
         the tracklist. If ``at_position`` is not given, the tracks are appended
         to the end of the tracklist.
 
-        If ``tracks`` is a track object, a single
-        :class:`mopidy.models.TlTrack` object is returned. If ``tracks`` is a
-        list, a list of :class:`mopidy.models.TlTrack` is returned.
-
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
-        :param track: track to add
-        :type track: :class:`mopidy.models.Track`
+        :param tracks: tracks to add
+        :type tracks: list of :class:`mopidy.models.Track`
         :param at_position: position in tracklist to add track
         :type at_position: int or :class:`None`
-        :rtype: a single or a list of :class:`mopidy.models.TlTrack`
+        :rtype: list of :class:`mopidy.models.TlTrack`
         """
         assert at_position is None or at_position <= len(self._tl_tracks), \
             'at_position can not be greater than tracklist length'
-
-        single_add = False
-        if isinstance(tracks, Track):
-            tracks = [tracks]
-            single_add = True
 
         tl_tracks = []
         for track in tracks:
@@ -104,10 +95,7 @@ class TracklistController(object):
         if tl_tracks:
             self._increase_version()
 
-        if single_add:
-            return tl_tracks[0]
-        else:
-            return tl_tracks
+        return tl_tracks
 
     def clear(self):
         """

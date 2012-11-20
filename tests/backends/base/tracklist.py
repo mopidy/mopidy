@@ -36,17 +36,17 @@ class TracklistControllerTest(object):
 
     def test_add(self):
         for track in self.tracks:
-            tl_track = self.controller.add(track)
+            tl_tracks = self.controller.add([track])
             self.assertEqual(track, self.controller.tracks[-1])
-            self.assertEqual(tl_track, self.controller.tl_tracks[-1])
-            self.assertEqual(track, tl_track.track)
+            self.assertEqual(tl_tracks[0], self.controller.tl_tracks[-1])
+            self.assertEqual(track, tl_tracks[0].track)
 
     def test_add_at_position(self):
         for track in self.tracks[:-1]:
-            tl_track = self.controller.add(track, 0)
+            tl_tracks = self.controller.add([track], 0)
             self.assertEqual(track, self.controller.tracks[0])
-            self.assertEqual(tl_track, self.controller.tl_tracks[0])
-            self.assertEqual(track, tl_track.track)
+            self.assertEqual(tl_tracks[0], self.controller.tl_tracks[0])
+            self.assertEqual(track, tl_tracks[0].track)
 
     @populate_tracklist
     def test_add_at_position_outside_of_playlist(self):
