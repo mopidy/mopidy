@@ -109,11 +109,6 @@ class TracklistController(object):
         else:
             return tl_tracks
 
-    append = add
-    """
-    Alias for :meth:`add`.
-    """
-
     def clear(self):
         """
         Clear the tracklist.
