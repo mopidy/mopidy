@@ -79,17 +79,6 @@ class PlaybackController(object):
         uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
 
-    def get_current_tlid(self):
-        return self.current_tl_track and self.current_tl_track.tlid
-
-    current_tlid = property(get_current_tlid)
-    """
-    The TLID (tracklist ID) of the currently playing or selected
-    track.
-
-    Read-only. Extracted from :attr:`current_tl_track` for convenience.
-    """
-
     def get_current_track(self):
         return self.current_tl_track and self.current_tl_track.track
 
