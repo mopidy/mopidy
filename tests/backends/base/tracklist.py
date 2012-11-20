@@ -9,7 +9,7 @@ from mopidy import audio, core
 from mopidy.core import PlaybackState
 from mopidy.models import TlTrack, Playlist, Track
 
-from tests.backends.base import populate_playlist
+from tests.backends.base import populate_tracklist
 
 
 class TracklistControllerTest(object):
@@ -48,25 +48,25 @@ class TracklistControllerTest(object):
             self.assertEqual(tl_track, self.controller.tl_tracks[0])
             self.assertEqual(track, tl_track.track)
 
-    @populate_playlist
+    @populate_tracklist
     def test_add_at_position_outside_of_playlist(self):
         test = lambda: self.controller.add(
             self.tracks[0], len(self.tracks) + 2)
         self.assertRaises(AssertionError, test)
 
-    @populate_playlist
+    @populate_tracklist
     def test_filter_by_tlid(self):
         tl_track = self.controller.tl_tracks[1]
         self.assertEqual(
             [tl_track], self.controller.filter(tlid=tl_track.tlid))
 
-    @populate_playlist
+    @populate_tracklist
     def test_filter_by_uri(self):
         tl_track = self.controller.tl_tracks[1]
         self.assertEqual(
             [tl_track], self.controller.filter(uri=tl_track.track.uri))
 
-    @populate_playlist
+    @populate_tracklist
     def test_filter_by_uri_returns_nothing_for_invalid_uri(self):
         self.assertEqual([], self.controller.filter(uri='foobar'))
 
@@ -106,7 +106,7 @@ class TracklistControllerTest(object):
         self.controller.append([track1, track2, track3])
         self.assertEqual(track2, self.controller.filter(uri='b')[0].track)
 
-    @populate_playlist
+    @populate_tracklist
     def test_clear(self):
         self.controller.clear()
         self.assertEqual(len(self.controller.tracks), 0)
@@ -115,7 +115,7 @@ class TracklistControllerTest(object):
         self.controller.clear()
         self.assertEqual(len(self.controller.tracks), 0)
 
-    @populate_playlist
+    @populate_tracklist
     def test_clear_when_playing(self):
         self.playback.play()
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
@@ -137,7 +137,7 @@ class TracklistControllerTest(object):
         self.controller.append([])
         self.assertEqual(self.controller.version, version)
 
-    @populate_playlist
+    @populate_tracklist
     def test_append_preserves_playing_state(self):
         self.playback.play()
         track = self.playback.current_track
@@ -145,13 +145,13 @@ class TracklistControllerTest(object):
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.assertEqual(self.playback.current_track, track)
 
-    @populate_playlist
+    @populate_tracklist
     def test_append_preserves_stopped_state(self):
         self.controller.append(self.controller.tracks[1:2])
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
-    @populate_playlist
+    @populate_tracklist
     def test_append_returns_the_tl_tracks_that_was_added(self):
         tl_tracks = self.controller.append(self.controller.tracks[1:2])
         self.assertEqual(tl_tracks[0].track, self.controller.tracks[1])
@@ -166,14 +166,14 @@ class TracklistControllerTest(object):
         test = lambda: self.controller.index(TlTrack(0, Track()))
         self.assertRaises(ValueError, test)
 
-    @populate_playlist
+    @populate_tracklist
     def test_move_single(self):
         self.controller.move(0, 0, 2)
 
         tracks = self.controller.tracks
         self.assertEqual(tracks[2], self.tracks[0])
 
-    @populate_playlist
+    @populate_tracklist
     def test_move_group(self):
         self.controller.move(0, 2, 1)
 
@@ -181,25 +181,25 @@ class TracklistControllerTest(object):
         self.assertEqual(tracks[1], self.tracks[0])
         self.assertEqual(tracks[2], self.tracks[1])
 
-    @populate_playlist
+    @populate_tracklist
     def test_moving_track_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
         test = lambda: self.controller.move(0, 0, tracks + 5)
         self.assertRaises(AssertionError, test)
 
-    @populate_playlist
+    @populate_tracklist
     def test_move_group_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
         test = lambda: self.controller.move(0, 2, tracks + 5)
         self.assertRaises(AssertionError, test)
 
-    @populate_playlist
+    @populate_tracklist
     def test_move_group_out_of_range(self):
         tracks = len(self.controller.tracks)
         test = lambda: self.controller.move(tracks + 2, tracks + 3, 0)
         self.assertRaises(AssertionError, test)
 
-    @populate_playlist
+    @populate_tracklist
     def test_move_group_invalid_group(self):
         test = lambda: self.controller.move(2, 1, 0)
         self.assertRaises(AssertionError, test)
@@ -209,7 +209,7 @@ class TracklistControllerTest(object):
         tracks2 = self.controller.tracks
         self.assertNotEqual(id(tracks1), id(tracks2))
 
-    @populate_playlist
+    @populate_tracklist
     def test_remove(self):
         track1 = self.controller.tracks[1]
         track2 = self.controller.tracks[2]
@@ -219,14 +219,14 @@ class TracklistControllerTest(object):
         self.assertNotIn(track1, self.controller.tracks)
         self.assertEqual(track2, self.controller.tracks[1])
 
-    @populate_playlist
+    @populate_tracklist
     def test_removing_track_that_does_not_exist_does_nothing(self):
         self.controller.remove(uri='/nonexistant')
 
     def test_removing_from_empty_playlist_does_nothing(self):
         self.controller.remove(uri='/nonexistant')
 
-    @populate_playlist
+    @populate_tracklist
     def test_shuffle(self):
         random.seed(1)
         self.controller.shuffle()
@@ -236,7 +236,7 @@ class TracklistControllerTest(object):
         self.assertNotEqual(self.tracks, shuffled_tracks)
         self.assertEqual(set(self.tracks), set(shuffled_tracks))
 
-    @populate_playlist
+    @populate_tracklist
     def test_shuffle_subset(self):
         random.seed(1)
         self.controller.shuffle(1, 3)
@@ -247,18 +247,18 @@ class TracklistControllerTest(object):
         self.assertEqual(self.tracks[0], shuffled_tracks[0])
         self.assertEqual(set(self.tracks), set(shuffled_tracks))
 
-    @populate_playlist
+    @populate_tracklist
     def test_shuffle_invalid_subset(self):
         test = lambda: self.controller.shuffle(3, 1)
         self.assertRaises(AssertionError, test)
 
-    @populate_playlist
+    @populate_tracklist
     def test_shuffle_superset(self):
         tracks = len(self.controller.tracks)
         test = lambda: self.controller.shuffle(1, tracks + 5)
         self.assertRaises(AssertionError, test)
 
-    @populate_playlist
+    @populate_tracklist
     def test_shuffle_open_subset(self):
         random.seed(1)
         self.controller.shuffle(1)
@@ -269,14 +269,14 @@ class TracklistControllerTest(object):
         self.assertEqual(self.tracks[0], shuffled_tracks[0])
         self.assertEqual(set(self.tracks), set(shuffled_tracks))
 
-    @populate_playlist
+    @populate_tracklist
     def test_slice_returns_a_subset_of_tracks(self):
         track_slice = self.controller.slice(1, 3)
         self.assertEqual(2, len(track_slice))
         self.assertEqual(self.tracks[1], track_slice[0].track)
         self.assertEqual(self.tracks[2], track_slice[1].track)
 
-    @populate_playlist
+    @populate_tracklist
     def test_slice_returns_empty_list_if_indexes_outside_tracks_list(self):
         self.assertEqual(0, len(self.controller.slice(7, 8)))
         self.assertEqual(0, len(self.controller.slice(-1, 1)))

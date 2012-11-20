@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 
-def populate_playlist(func):
+def populate_tracklist(func):
     def wrapper(self):
         for track in self.tracks:
             self.core.tracklist.add(track)
