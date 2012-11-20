@@ -10,7 +10,7 @@ import threading
 
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
-from mopidy import settings
+from mopidy import audio, settings
 from mopidy.backends.listener import BackendListener
 from mopidy.utils import process, versioning
 
@@ -92,7 +92,8 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             logger.info('Spotify connection OK')
         else:
             logger.error('Spotify connection error: %s', error)
-            self.backend.playback.pause()
+            if self.audio.state.get() == audio.PlaybackState.PLAYING:
+                self.backend.playback.pause()
 
     def message_to_user(self, session, message):
         """Callback used by pyspotify"""
