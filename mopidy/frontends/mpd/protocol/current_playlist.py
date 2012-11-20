@@ -57,14 +57,8 @@ def addid(context, uri, songpos=None):
         raise MpdNoExistError('No such song', command='addid')
     if songpos and songpos > context.core.tracklist.length.get():
         raise MpdArgError('Bad song index', command='addid')
-    first_tl_track = None
-    for track in tracks:
-        tl_track = context.core.tracklist.add(track, at_position=songpos).get()
-        if songpos is not None:
-            songpos += 1
-        if first_tl_track is None:
-            first_tl_track = tl_track
-    return ('Id', first_tl_track.tlid)
+    tl_tracks = context.core.tracklist.add(tracks, at_position=songpos).get()
+    return ('Id', tl_tracks[0].tlid)
 
 
 @handle_request(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
