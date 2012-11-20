@@ -65,7 +65,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_load_known_playlist_appends_to_tracklist(self):
-        self.core.tracklist.append([Track(uri='a'), Track(uri='b')])
+        self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
         self.backend.playlists.playlists = [
             Playlist(name='A-list', tracks=[

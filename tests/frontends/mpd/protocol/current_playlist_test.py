@@ -10,7 +10,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         needle = Track(uri='dummy://foo')
         self.backend.library.dummy_library = [
             Track(), Track(), needle, Track()]
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -33,7 +33,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         needle = Track(uri='dummy://foo')
         self.backend.library.dummy_library = [
             Track(), Track(), needle, Track()]
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -52,7 +52,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         needle = Track(uri='dummy://foo')
         self.backend.library.dummy_library = [
             Track(), Track(), needle, Track()]
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -67,7 +67,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         needle = Track(uri='dummy://foo')
         self.backend.library.dummy_library = [
             Track(), Track(), needle, Track()]
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -79,7 +79,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('ACK [50@0] {addid} No such song')
 
     def test_clear(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -89,7 +89,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_delete_songpos(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -99,7 +99,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_delete_songpos_out_of_bounds(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -108,7 +108,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('ACK [2@0] {delete} Bad song index')
 
     def test_delete_open_range(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -117,7 +117,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_delete_closed_range(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -126,7 +126,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_delete_range_out_of_bounds(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(), Track(), Track(), Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
@@ -135,7 +135,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('ACK [2@0] {delete} Bad song index')
 
     def test_deleteid(self):
-        self.core.tracklist.append([Track(), Track()])
+        self.core.tracklist.add([Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
 
         self.sendRequest('deleteid "1"')
@@ -143,7 +143,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_deleteid_does_not_exist(self):
-        self.core.tracklist.append([Track(), Track()])
+        self.core.tracklist.add([Track(), Track()])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
 
         self.sendRequest('deleteid "12345"')
@@ -151,7 +151,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('ACK [50@0] {deleteid} No such song')
 
     def test_move_songpos(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -167,7 +167,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_move_open_range(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -183,7 +183,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_move_closed_range(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -199,7 +199,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_moveid(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -237,8 +237,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('OK')
 
     def test_playlistfind_by_filename_in_tracklist(self):
-        self.core.tracklist.append([
-            Track(uri='file:///exists')])
+        self.core.tracklist.add([Track(uri='file:///exists')])
 
         self.sendRequest('playlistfind filename "file:///exists"')
         self.assertInResponse('file: file:///exists')
@@ -247,7 +246,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playlistid_without_songid(self):
-        self.core.tracklist.append([Track(name='a'), Track(name='b')])
+        self.core.tracklist.add([Track(name='a'), Track(name='b')])
 
         self.sendRequest('playlistid')
         self.assertInResponse('Title: a')
@@ -255,7 +254,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playlistid_with_songid(self):
-        self.core.tracklist.append([Track(name='a'), Track(name='b')])
+        self.core.tracklist.add([Track(name='a'), Track(name='b')])
 
         self.sendRequest('playlistid "1"')
         self.assertNotInResponse('Title: a')
@@ -265,13 +264,13 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playlistid_with_not_existing_songid_fails(self):
-        self.core.tracklist.append([Track(name='a'), Track(name='b')])
+        self.core.tracklist.add([Track(name='a'), Track(name='b')])
 
         self.sendRequest('playlistid "25"')
         self.assertEqualResponse('ACK [50@0] {playlistid} No such song')
 
     def test_playlistinfo_without_songpos_or_range(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -294,7 +293,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
     def test_playlistinfo_with_songpos(self):
         # Make the track's CPID not match the playlist position
         self.core.tracklist.tlid = 17
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -320,7 +319,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqual(response1, response2)
 
     def test_playlistinfo_with_open_range(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -341,7 +340,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playlistinfo_with_closed_range(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -372,7 +371,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
     def test_plchanges_with_lower_version_returns_changes(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(name='a'), Track(name='b'), Track(name='c')])
 
         self.sendRequest('plchanges "0"')
@@ -382,7 +381,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_with_equal_version_returns_nothing(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(name='a'), Track(name='b'), Track(name='c')])
 
         self.assertEqual(self.core.tracklist.version.get(), 1)
@@ -393,7 +392,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_with_greater_version_returns_nothing(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(name='a'), Track(name='b'), Track(name='c')])
 
         self.assertEqual(self.core.tracklist.version.get(), 1)
@@ -404,7 +403,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_with_minus_one_returns_entire_playlist(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(name='a'), Track(name='b'), Track(name='c')])
 
         self.sendRequest('plchanges "-1"')
@@ -414,7 +413,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_without_quotes_works(self):
-        self.core.tracklist.append(
+        self.core.tracklist.add(
             [Track(name='a'), Track(name='b'), Track(name='c')])
 
         self.sendRequest('plchanges 0')
@@ -424,7 +423,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchangesposid(self):
-        self.core.tracklist.append([Track(), Track(), Track()])
+        self.core.tracklist.add([Track(), Track(), Track()])
 
         self.sendRequest('plchangesposid "0"')
         tl_tracks = self.core.tracklist.tl_tracks.get()
@@ -437,7 +436,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_shuffle_without_range(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -448,7 +447,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_shuffle_with_open_range(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -464,7 +463,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_shuffle_with_closed_range(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -480,7 +479,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_swap(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -496,7 +495,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_swapid(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(name='a'), Track(name='b'), Track(name='c'),
             Track(name='d'), Track(name='e'), Track(name='f'),
         ])
@@ -512,13 +511,13 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_swapid_with_first_id_unknown_should_ack(self):
-        self.core.tracklist.append([Track()])
+        self.core.tracklist.add([Track()])
         self.sendRequest('swapid "0" "4"')
         self.assertEqualResponse(
             'ACK [50@0] {swapid} No such song')
 
     def test_swapid_with_second_id_unknown_should_ack(self):
-        self.core.tracklist.append([Track()])
+        self.core.tracklist.add([Track()])
         self.sendRequest('swapid "4" "0"')
         self.assertEqualResponse(
             'ACK [50@0] {swapid} No such song')

@@ -101,7 +101,7 @@ def load(context, name):
     playlists = context.core.playlists.filter(name=name).get()
     if not playlists:
         raise MpdNoExistError('No such playlist', command='load')
-    context.core.tracklist.append(playlists[0].tracks)
+    context.core.tracklist.add(playlists[0].tracks)
 
 
 @handle_request(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')

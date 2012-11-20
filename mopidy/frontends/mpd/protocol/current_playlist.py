@@ -24,7 +24,7 @@ def add(context, uri):
         return
     tracks = context.core.library.lookup(uri).get()
     if tracks:
-        context.core.tracklist.append(tracks)
+        context.core.tracklist.add(tracks)
         return
     raise MpdNoExistError('directory or file not found', command='add')
 
@@ -57,14 +57,8 @@ def addid(context, uri, songpos=None):
         raise MpdNoExistError('No such song', command='addid')
     if songpos and songpos > context.core.tracklist.length.get():
         raise MpdArgError('Bad song index', command='addid')
-    first_tl_track = None
-    for track in tracks:
-        tl_track = context.core.tracklist.add(track, at_position=songpos).get()
-        if songpos is not None:
-            songpos += 1
-        if first_tl_track is None:
-            first_tl_track = tl_track
-    return ('Id', first_tl_track.tlid)
+    tl_tracks = context.core.tracklist.add(tracks, at_position=songpos).get()
+    return ('Id', tl_tracks[0].tlid)
 
 
 @handle_request(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
@@ -377,7 +371,7 @@ def swap(context, songpos1, songpos2):
     del tracks[songpos2]
     tracks.insert(songpos2, song1)
     context.core.tracklist.clear()
-    context.core.tracklist.append(tracks)
+    context.core.tracklist.add(tracks)
 
 
 @handle_request(r'^swapid "(?P<tlid1>\d+)" "(?P<tlid2>\d+)"$')
