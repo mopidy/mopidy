@@ -219,44 +219,33 @@ SPOTIFY_PASSWORD = ''
 #:     SPOTIFY_BITRATE = 160
 SPOTIFY_BITRATE = 160
 
-#: Spotify proxy host
+#: Spotify proxy host.
+#:
+#: Used by :mod:`mopidy.backends.spotify`.
 #:
 #: Example::
 #:
 #:     SPOTIFY_PROXY_HOST = u'protocol://host:port'
 #:
-#: Used by :mod:`mopidy.backends.spotify`
-#:
-#: Default ::
+#: Default::
 #:
 #:     SPOTIFY_PROXY_HOST = None
-#:
 SPOTIFY_PROXY_HOST = None
 
-#: Spotify proxy username
+#: Spotify proxy username.
 #:
-#: Example::
+#: Used by :mod:`mopidy.backends.spotify`.
 #:
-#:     SPOTIFY_PROXY_HOST = u'username'
-#:
-#: Used by :mod:`mopidy.backends.spotify`
-#:
-#: Default ::
+#: Default::
 #:
 #:     SPOTIFY_PROXY_USERNAME = None
-#:
 SPOTIFY_PROXY_USERNAME = None
 
-#: Spotify proxy password
-#:
-#: Example::
-#:
-#:     SPOTIFY_PROXY_HOST = u'password'
+#: Spotify proxy password.
 #:
 #: Used by :mod:`mopidy.backends.spotify`
 #:
-#: Default ::
+#: Default::
 #:
 #:     SPOTIFY_PROXY_PASSWORD = None
-#:
 SPOTIFY_PROXY_PASSWORD = None
