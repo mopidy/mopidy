@@ -53,9 +53,8 @@ class TracklistController(object):
         """
         return self._version
 
-    @version.setter  # noqa
-    def version(self, version):
-        self._version = version
+    def _increase_version(self):
+        self._version += 1
         self._core.playback.on_tracklist_change()
         self._trigger_tracklist_changed()
 
@@ -81,7 +80,7 @@ class TracklistController(object):
         else:
             self._tl_tracks.append(tl_track)
         if increase_version:
-            self.version += 1
+            self._increase_version()
         self._next_tlid += 1
         return tl_track
 
@@ -100,7 +99,7 @@ class TracklistController(object):
             tl_tracks.append(self.add(track, increase_version=False))
 
         if tracks:
-            self.version += 1
+            self._increase_version()
 
         return tl_tracks
 
@@ -111,7 +110,7 @@ class TracklistController(object):
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
         """
         self._tl_tracks = []
-        self.version += 1
+        self._increase_version()
 
     def filter(self, **criteria):
         """
@@ -180,7 +179,7 @@ class TracklistController(object):
             new_tl_tracks.insert(to_position, tl_track)
             to_position += 1
         self._tl_tracks = new_tl_tracks
-        self.version += 1
+        self._increase_version()
 
     def remove(self, **criteria):
         """
@@ -198,7 +197,7 @@ class TracklistController(object):
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]
-        self.version += 1
+        self._increase_version()
         return tl_tracks
 
     def shuffle(self, start=None, end=None):
@@ -230,7 +229,7 @@ class TracklistController(object):
         after = tl_tracks[end or len(tl_tracks):]
         random.shuffle(shuffled)
         self._tl_tracks = before + shuffled + after
-        self.version += 1
+        self._increase_version()
 
     def slice(self, start, end):
         """
