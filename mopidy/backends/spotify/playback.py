@@ -46,10 +46,11 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
 
     def resume(self):
         time_position = self.get_time_position()
-
         self._timer.resume()
-
-        return self.seek(time_position)
+        self.audio.prepare_change()
+        result = self.seek(time_position)
+        self.audio.start_playback()
+        return result
 
     def seek(self, time_position):
         self.backend.spotify.session.seek(time_position)
