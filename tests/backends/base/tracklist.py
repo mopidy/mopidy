@@ -50,9 +50,11 @@ class TracklistControllerTest(object):
 
     @populate_tracklist
     def test_add_at_position_outside_of_playlist(self):
-        test = lambda: self.controller.add(
-            self.tracks[0], len(self.tracks) + 2)
-        self.assertRaises(AssertionError, test)
+        for track in self.tracks:
+            tl_tracks = self.controller.add([track], len(self.tracks) + 2)
+            self.assertEqual(track, self.controller.tracks[-1])
+            self.assertEqual(tl_tracks[0], self.controller.tl_tracks[-1])
+            self.assertEqual(track, tl_tracks[0].track)
 
     @populate_tracklist
     def test_filter_by_tlid(self):

@@ -78,9 +78,6 @@ class TracklistController(object):
         :type at_position: int or :class:`None`
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
-        assert at_position is None or at_position <= len(self._tl_tracks), \
-            'at_position can not be greater than tracklist length'
-
         tl_tracks = []
         for track in tracks:
             tl_track = TlTrack(self._next_tlid, track)
