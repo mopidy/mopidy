@@ -18,7 +18,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
     - Press next until you get to the unplayable track
     """
     def test(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(uri='dummy:a'),
             Track(uri='dummy:b'),
             Track(uri='dummy:error'),
@@ -59,7 +59,7 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
         random.seed(1)
@@ -95,7 +95,7 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
         random.seed(1)
@@ -124,7 +124,7 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
 
     def test(self):
         self.core.playlists.create('foo')
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
 

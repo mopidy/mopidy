@@ -24,7 +24,7 @@ def add(context, uri):
         return
     tracks = context.core.library.lookup(uri).get()
     if tracks:
-        context.core.tracklist.append(tracks)
+        context.core.tracklist.add(tracks)
         return
     raise MpdNoExistError('directory or file not found', command='add')
 
@@ -371,7 +371,7 @@ def swap(context, songpos1, songpos2):
     del tracks[songpos2]
     tracks.insert(songpos2, song1)
     context.core.tracklist.clear()
-    context.core.tracklist.append(tracks)
+    context.core.tracklist.add(tracks)
 
 
 @handle_request(r'^swapid "(?P<tlid1>\d+)" "(?P<tlid2>\d+)"$')

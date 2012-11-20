@@ -30,7 +30,7 @@ class TracklistControllerTest(object):
     def test_length(self):
         self.assertEqual(0, len(self.controller.tl_tracks))
         self.assertEqual(0, self.controller.length)
-        self.controller.append(self.tracks)
+        self.controller.add(self.tracks)
         self.assertEqual(3, len(self.controller.tl_tracks))
         self.assertEqual(3, self.controller.length)
 
@@ -72,12 +72,12 @@ class TracklistControllerTest(object):
 
     def test_filter_by_uri_returns_single_match(self):
         track = Track(uri='a')
-        self.controller.append([Track(uri='z'), track, Track(uri='y')])
+        self.controller.add([Track(uri='z'), track, Track(uri='y')])
         self.assertEqual(track, self.controller.filter(uri='a')[0].track)
 
     def test_filter_by_uri_returns_multiple_matches(self):
         track = Track(uri='a')
-        self.controller.append([Track(uri='z'), track, track])
+        self.controller.add([Track(uri='z'), track, track])
         tl_tracks = self.controller.filter(uri='a')
         self.assertEqual(track, tl_tracks[0].track)
         self.assertEqual(track, tl_tracks[1].track)
@@ -91,7 +91,7 @@ class TracklistControllerTest(object):
         track1 = Track(uri='a', name='x')
         track2 = Track(uri='b', name='x')
         track3 = Track(uri='b', name='y')
-        self.controller.append([track1, track2, track3])
+        self.controller.add([track1, track2, track3])
         self.assertEqual(
             track1, self.controller.filter(uri='a', name='x')[0].track)
         self.assertEqual(
@@ -103,7 +103,7 @@ class TracklistControllerTest(object):
         track1 = Track()
         track2 = Track(uri='b')
         track3 = Track()
-        self.controller.append([track1, track2, track3])
+        self.controller.add([track1, track2, track3])
         self.assertEqual(track2, self.controller.filter(uri='b')[0].track)
 
     @populate_tracklist
@@ -122,42 +122,42 @@ class TracklistControllerTest(object):
         self.controller.clear()
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
-    def test_append_appends_to_the_tracklist(self):
-        self.controller.append([Track(uri='a'), Track(uri='b')])
+    def test_add_appends_to_the_tracklist(self):
+        self.controller.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.controller.tracks), 2)
-        self.controller.append([Track(uri='c'), Track(uri='d')])
+        self.controller.add([Track(uri='c'), Track(uri='d')])
         self.assertEqual(len(self.controller.tracks), 4)
         self.assertEqual(self.controller.tracks[0].uri, 'a')
         self.assertEqual(self.controller.tracks[1].uri, 'b')
         self.assertEqual(self.controller.tracks[2].uri, 'c')
         self.assertEqual(self.controller.tracks[3].uri, 'd')
 
-    def test_append_does_not_reset_version(self):
+    def test_add_does_not_reset_version(self):
         version = self.controller.version
-        self.controller.append([])
+        self.controller.add([])
         self.assertEqual(self.controller.version, version)
 
     @populate_tracklist
-    def test_append_preserves_playing_state(self):
+    def test_add_preserves_playing_state(self):
         self.playback.play()
         track = self.playback.current_track
-        self.controller.append(self.controller.tracks[1:2])
+        self.controller.add(self.controller.tracks[1:2])
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.assertEqual(self.playback.current_track, track)
 
     @populate_tracklist
-    def test_append_preserves_stopped_state(self):
-        self.controller.append(self.controller.tracks[1:2])
+    def test_add_preserves_stopped_state(self):
+        self.controller.add(self.controller.tracks[1:2])
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
     @populate_tracklist
-    def test_append_returns_the_tl_tracks_that_was_added(self):
-        tl_tracks = self.controller.append(self.controller.tracks[1:2])
+    def test_add_returns_the_tl_tracks_that_was_added(self):
+        tl_tracks = self.controller.add(self.controller.tracks[1:2])
         self.assertEqual(tl_tracks[0].track, self.controller.tracks[1])
 
     def test_index_returns_index_of_track(self):
-        tl_tracks = self.controller.append(self.tracks)
+        tl_tracks = self.controller.add(self.tracks)
         self.assertEquals(0, self.controller.index(tl_tracks[0]))
         self.assertEquals(1, self.controller.index(tl_tracks[1]))
         self.assertEquals(2, self.controller.index(tl_tracks[2]))
@@ -281,12 +281,12 @@ class TracklistControllerTest(object):
         self.assertEqual(0, len(self.controller.slice(7, 8)))
         self.assertEqual(0, len(self.controller.slice(-1, 1)))
 
-    def test_version_does_not_change_when_appending_nothing(self):
+    def test_version_does_not_change_when_adding_nothing(self):
         version = self.controller.version
-        self.controller.append([])
+        self.controller.add([])
         self.assertEquals(version, self.controller.version)
 
-    def test_version_increases_when_appending_something(self):
+    def test_version_increases_when_adding_something(self):
         version = self.controller.version
-        self.controller.append([Track()])
+        self.controller.add([Track()])
         self.assertLess(version, self.controller.version)

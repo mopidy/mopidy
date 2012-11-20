@@ -35,7 +35,7 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.core = Core(audio=None, backends=[
             self.backend1, self.backend2, self.backend3])
-        self.core.tracklist.append(self.tracks)
+        self.core.tracklist.add(self.tracks)
 
         self.tl_tracks = self.core.tracklist.tl_tracks
         self.unplayable_tl_track = self.tl_tracks[2]

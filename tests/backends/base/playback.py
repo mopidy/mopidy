@@ -301,7 +301,7 @@ class PlaybackControllerTest(object):
         random.seed(1)
         self.playback.random = True
         self.assertEqual(self.playback.tl_track_at_next, self.tl_tracks[2])
-        self.tracklist.append(self.tracks[:1])
+        self.tracklist.add(self.tracks[:1])
         self.assertEqual(self.playback.tl_track_at_next, self.tl_tracks[1])
 
     @populate_tracklist
@@ -429,7 +429,7 @@ class PlaybackControllerTest(object):
         random.seed(1)
         self.playback.random = True
         self.assertEqual(self.playback.tl_track_at_next, self.tl_tracks[2])
-        self.tracklist.append(self.tracks[:1])
+        self.tracklist.add(self.tracks[:1])
         self.assertEqual(self.playback.tl_track_at_next, self.tl_tracks[1])
 
     @populate_tracklist
@@ -521,7 +521,7 @@ class PlaybackControllerTest(object):
         wrapper.called = False
 
         self.playback.on_tracklist_change = wrapper
-        self.tracklist.append([Track()])
+        self.tracklist.add([Track()])
 
         self.assert_(wrapper.called)
 
@@ -538,13 +538,13 @@ class PlaybackControllerTest(object):
     def test_on_tracklist_change_when_playing(self):
         self.playback.play()
         current_track = self.playback.current_track
-        self.tracklist.append([self.tracks[2]])
+        self.tracklist.add([self.tracks[2]])
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.assertEqual(self.playback.current_track, current_track)
 
     @populate_tracklist
     def test_on_tracklist_change_when_stopped(self):
-        self.tracklist.append([self.tracks[2]])
+        self.tracklist.add([self.tracks[2]])
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
@@ -553,7 +553,7 @@ class PlaybackControllerTest(object):
         self.playback.play()
         self.playback.pause()
         current_track = self.playback.current_track
-        self.tracklist.append([self.tracks[2]])
+        self.tracklist.add([self.tracks[2]])
         self.assertEqual(self.playback.state, PlaybackState.PAUSED)
         self.assertEqual(self.playback.current_track, current_track)
 

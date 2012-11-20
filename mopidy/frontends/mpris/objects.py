@@ -281,7 +281,7 @@ class MprisObject(dbus.service.Object):
         # is added to the backend.
         tracks = self.core.library.lookup(uri).get()
         if tracks:
-            tl_tracks = self.core.tracklist.append(tracks).get()
+            tl_tracks = self.core.tracklist.add(tracks).get()
             self.core.playback.play(tl_tracks[0])
         else:
             logger.debug('Track with URI "%s" not found in library.', uri)
@@ -449,7 +449,7 @@ class MprisObject(dbus.service.Object):
         playlist_uri = self.get_playlist_uri(playlist_id)
         playlist = self.core.playlists.lookup(playlist_uri).get()
         if playlist and playlist.tracks:
-            tl_tracks = self.core.tracklist.append(playlist.tracks).get()
+            tl_tracks = self.core.tracklist.add(playlist.tracks).get()
             self.core.playback.play(tl_tracks[0])
 
     @dbus.service.method(dbus_interface=PLAYLISTS_IFACE)
