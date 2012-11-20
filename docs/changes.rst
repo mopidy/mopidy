@@ -149,6 +149,9 @@ backends:
   This makes it possible to support lookup of artist or album URIs which then
   can expand to a list of tracks.
 
+- Added support for connecting to the Spotify service through an HTTP or SOCKS
+  proxy, which is supported by pyspotify >= 1.9.
+
 **Bug fixes**
 
 - :issue:`218`: The MPD commands ``listplaylist`` and ``listplaylistinfo`` now
