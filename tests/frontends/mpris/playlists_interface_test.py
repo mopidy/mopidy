@@ -44,7 +44,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         pykka.ActorRegistry.stop_all()
 
     def test_activate_playlist_appends_tracks_to_tracklist(self):
-        self.core.tracklist.append([
+        self.core.tracklist.add([
             Track(uri='dummy:old-a'),
             Track(uri='dummy:old-b'),
         ])
