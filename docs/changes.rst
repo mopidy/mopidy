@@ -15,6 +15,18 @@ long time been our most requested feature. Finally, it's here!
 
 - pyspotify >= 1.9, < 1.10 is now required for Spotify support.
 
+**Documentation**
+
+- New :ref:`installation` guides, organized by OS and distribution so that you
+  can follow one concise list of instructions instead of jumping around the
+  docs to look for instructions for each dependency.
+
+- Moved :ref:`raspberrypi-installation` howto from the wiki to the docs.
+
+- Updated :ref:`mpd-clients` overview.
+
+- Added :ref:`mpris-clients` and :ref:`upnp-clients` overview.
+
 **Multiple backends support**
 
 - Both the local backend and the Spotify backend are now turned on by default.
@@ -109,6 +121,8 @@ backends and the future HTTP frontend.
   the audio layer. Any data flow in the opposite direction is done by
   broadcasting of events to listeners, through e.g.
   :class:`mopidy.core.CoreListener` and :class:`mopidy.audio.AudioListener`.
+
+  See :ref:`concepts` for more details and illustrations of all the relations.
 
 - All dependencies are now explicitly passed to the constructors of the
   frontends, core, and the backends. This makes testing each layer with
