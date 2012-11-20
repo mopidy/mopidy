@@ -8,6 +8,10 @@ This change log is used to track all major changes to Mopidy.
 v0.9.0 (in development)
 =======================
 
+**Dependencies**
+
+- pyspotify >= 1.9, < 1.10 is now required for Spotify support.
+
 **Multiple backends support**
 
 Support for using the local and Spotify backends simultaneously have for a very
