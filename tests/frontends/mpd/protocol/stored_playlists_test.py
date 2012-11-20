@@ -64,6 +64,15 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('Last-Modified: 2001-03-17T13:41:17Z')
         self.assertInResponse('OK')
 
+    def test_listplaylists_ignores_playlists_without_name(self):
+        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        self.backend.playlists.playlists = [
+            Playlist(name='', last_modified=last_modified)]
+
+        self.sendRequest('listplaylists')
+        self.assertNotInResponse('playlist: ')
+        self.assertInResponse('OK')
+
     def test_load_known_playlist_appends_to_tracklist(self):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)

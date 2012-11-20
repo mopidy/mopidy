@@ -70,9 +70,16 @@ def listplaylists(context):
         Last-Modified: 2010-02-06T02:10:25Z
         playlist: b
         Last-Modified: 2010-02-06T02:11:08Z
+
+    *Clarifications:*
+
+    - ncmpcpp 0.5.10 segfaults if we return 'playlist: ' on a line, so we must
+      ignore playlists without names, which isn't very useful anyway.
     """
     result = []
     for playlist in context.core.playlists.playlists.get():
+        if not playlist.name:
+            continue
         result.append(('playlist', playlist.name))
         last_modified = (
             playlist.last_modified or dt.datetime.now()).isoformat()
