@@ -424,7 +424,7 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
             [Track(uri='dummy:a', length=40000), seek_track])
 
         self.sendRequest('seekid "1" "30"')
-        self.assertEqual(1, self.core.playback.current_tlid.get())
+        self.assertEqual(1, self.core.playback.current_tl_track.get().tlid)
         self.assertEqual(seek_track, self.core.playback.current_track.get())
         self.assertInResponse('OK')
 
