@@ -419,8 +419,8 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanControl():
             return False
         return (
-            self.core.playback.current_track.get() is not None or
-            self.core.playback.track_at_next.get() is not None)
+            self.core.playback.current_tl_track.get() is not None or
+            self.core.playback.tl_track_at_next.get() is not None)
 
     def get_CanPause(self):
         if not self.get_CanControl():

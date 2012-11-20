@@ -168,17 +168,6 @@ class PlaybackController(object):
     Not necessarily the same track as :attr:`tl_track_at_next`.
     """
 
-    def get_track_at_next(self):
-        return self.tl_track_at_next and self.tl_track_at_next.track
-
-    track_at_next = property(get_track_at_next)
-    """
-    The track that will be played if calling :meth:`next()`.
-
-    Read-only. A :class:`mopidy.models.Track` extracted from
-    :attr:`tl_track_at_next` for convenience.
-    """
-
     def get_tl_track_at_next(self):
         tl_tracks = self.core.tracklist.tl_tracks
 
