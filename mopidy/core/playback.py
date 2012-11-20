@@ -12,55 +12,11 @@ from . import listener
 logger = logging.getLogger('mopidy.core')
 
 
-def option_wrapper(name, default):
-    def get_option(self):
-        return getattr(self, name, default)
-
-    def set_option(self, value):
-        if getattr(self, name, default) != value:
-            # pylint: disable = W0212
-            self._trigger_options_changed()
-            # pylint: enable = W0212
-        return setattr(self, name, value)
-
-    return property(get_option, set_option)
-
-
 class PlaybackController(object):
     # pylint: disable = R0902
     # Too many instance attributes
 
     pykka_traversable = True
-
-    #: :class:`True`
-    #:     Tracks are removed from the playlist when they have been played.
-    #: :class:`False`
-    #:     Tracks are not removed from the playlist.
-    consume = option_wrapper('_consume', False)
-
-    #: The currently playing or selected :class:`mopidy.models.TlTrack`, or
-    #: :class:`None`.
-    current_tl_track = None
-
-    #: :class:`True`
-    #:     Tracks are selected at random from the playlist.
-    #: :class:`False`
-    #:     Tracks are played in the order of the playlist.
-    random = option_wrapper('_random', False)
-
-    #: :class:`True`
-    #:     The current playlist is played repeatedly. To repeat a single track,
-    #:     select both :attr:`repeat` and :attr:`single`.
-    #: :class:`False`
-    #:     The current playlist is played once.
-    repeat = option_wrapper('_repeat', False)
-
-    #: :class:`True`
-    #:     Playback is stopped after current song, unless in :attr:`repeat`
-    #:     mode.
-    #: :class:`False`
-    #:     Playback continues after current song.
-    single = option_wrapper('_single', False)
 
     def __init__(self, audio, backends, core):
         self.audio = audio
@@ -79,6 +35,30 @@ class PlaybackController(object):
         uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
 
+    ### Properties
+
+    def get_consume(self):
+        return getattr(self, '_consume', False)
+
+    def set_consume(self, value):
+        if self.get_consume() != value:
+            self._trigger_options_changed()
+        return setattr(self, '_consume', value)
+
+    consume = property(get_consume, set_consume)
+    """
+    :class:`True`
+        Tracks are removed from the playlist when they have been played.
+    :class:`False`
+        Tracks are not removed from the playlist.
+    """
+
+    current_tl_track = None
+    """
+    The currently playing or selected :class:`mopidy.models.TlTrack`, or
+    :class:`None`.
+    """
+
     def get_current_track(self):
         return self.current_tl_track and self.current_tl_track.track
 
@@ -88,6 +68,93 @@ class PlaybackController(object):
 
     Read-only. Extracted from :attr:`current_tl_track` for convenience.
     """
+
+    def get_random(self):
+        return getattr(self, '_random', False)
+
+    def set_random(self, value):
+        if self.get_random() != value:
+            self._trigger_options_changed()
+        return setattr(self, '_random', value)
+
+    random = property(get_random, set_random)
+    """
+    :class:`True`
+        Tracks are selected at random from the playlist.
+    :class:`False`
+        Tracks are played in the order of the playlist.
+    """
+
+    def get_repeat(self):
+        return getattr(self, '_repeat', False)
+
+    def set_repeat(self, value):
+        if self.get_repeat() != value:
+            self._trigger_options_changed()
+        return setattr(self, '_repeat', value)
+
+    repeat = property(get_repeat, set_repeat)
+    """
+    :class:`True`
+        The current playlist is played repeatedly. To repeat a single track,
+        select both :attr:`repeat` and :attr:`single`.
+    :class:`False`
+        The current playlist is played once.
+    """
+
+    def get_single(self):
+        return getattr(self, '_single', False)
+
+    def set_single(self, value):
+        if self.get_single() != value:
+            self._trigger_options_changed()
+        return setattr(self, '_single', value)
+
+    single = property(get_single, set_single)
+    """
+    :class:`True`
+        Playback is stopped after current song, unless in :attr:`repeat`
+        mode.
+    :class:`False`
+        Playback continues after current song.
+    """
+
+    def get_state(self):
+        return self._state
+
+    def set_state(self, new_state):
+        (old_state, self._state) = (self.state, new_state)
+        logger.debug('Changing state: %s -> %s', old_state, new_state)
+
+        self._trigger_playback_state_changed(old_state, new_state)
+
+    state = property(get_state, set_state)
+    """
+    The playback state. Must be :attr:`PLAYING`, :attr:`PAUSED`, or
+    :attr:`STOPPED`.
+
+    Possible states and transitions:
+
+    .. digraph:: state_transitions
+
+        "STOPPED" -> "PLAYING" [ label="play" ]
+        "STOPPED" -> "PAUSED" [ label="pause" ]
+        "PLAYING" -> "STOPPED" [ label="stop" ]
+        "PLAYING" -> "PAUSED" [ label="pause" ]
+        "PLAYING" -> "PLAYING" [ label="play" ]
+        "PAUSED" -> "PLAYING" [ label="resume" ]
+        "PAUSED" -> "STOPPED" [ label="stop" ]
+    """
+
+    def get_time_position(self):
+        backend = self._get_backend()
+        if backend:
+            return backend.playback.get_time_position().get()
+        else:
+            return 0
+
+    time_position = property(get_time_position)
+    """Time position in milliseconds."""
 
     def get_tracklist_position(self):
         if self.current_tl_track is None:
@@ -205,43 +272,6 @@ class PlaybackController(object):
     instead.
     """
 
-    def get_state(self):
-        return self._state
-
-    def set_state(self, new_state):
-        (old_state, self._state) = (self.state, new_state)
-        logger.debug('Changing state: %s -> %s', old_state, new_state)
-
-        self._trigger_playback_state_changed(old_state, new_state)
-
-    state = property(get_state, set_state)
-    """
-    The playback state. Must be :attr:`PLAYING`, :attr:`PAUSED`, or
-    :attr:`STOPPED`.
-
-    Possible states and transitions:
-
-    .. digraph:: state_transitions
-
-        "STOPPED" -> "PLAYING" [ label="play" ]
-        "STOPPED" -> "PAUSED" [ label="pause" ]
-        "PLAYING" -> "STOPPED" [ label="stop" ]
-        "PLAYING" -> "PAUSED" [ label="pause" ]
-        "PLAYING" -> "PLAYING" [ label="play" ]
-        "PAUSED" -> "PLAYING" [ label="resume" ]
-        "PAUSED" -> "STOPPED" [ label="stop" ]
-    """
-
-    def get_time_position(self):
-        backend = self._get_backend()
-        if backend:
-            return backend.playback.get_time_position().get()
-        else:
-            return 0
-
-    time_position = property(get_time_position)
-    """Time position in milliseconds."""
-
     def get_volume(self):
         if self.audio:
             return self.audio.get_volume().get()
@@ -258,6 +288,8 @@ class PlaybackController(object):
 
     volume = property(get_volume, set_volume)
     """Volume as int in range [0..100] or :class:`None`"""
+
+    ### Methods
 
     def change_track(self, tl_track, on_error_step=1):
         """
