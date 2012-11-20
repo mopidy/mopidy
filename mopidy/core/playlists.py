@@ -15,17 +15,18 @@ class PlaylistsController(object):
         self.backends = backends
         self.core = core
 
-    @property
-    def playlists(self):
-        """
-        The available playlists.
-
-        Read-only. List of :class:`mopidy.models.Playlist`.
-        """
+    def get_playlists(self):
         futures = [
             b.playlists.playlists for b in self.backends.with_playlists]
         results = pykka.get_all(futures)
         return list(itertools.chain(*results))
+
+    playlists = property(get_playlists)
+    """
+    The available playlists.
+
+    Read-only. List of :class:`mopidy.models.Playlist`.
+    """
 
     def create(self, name, uri_scheme=None):
         """
