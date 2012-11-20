@@ -79,17 +79,6 @@ class PlaybackController(object):
         uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
 
-    def get_current_tlid(self):
-        return self.current_tl_track and self.current_tl_track.tlid
-
-    current_tlid = property(get_current_tlid)
-    """
-    The TLID (tracklist ID) of the currently playing or selected
-    track.
-
-    Read-only. Extracted from :attr:`current_tl_track` for convenience.
-    """
-
     def get_current_track(self):
         return self.current_tl_track and self.current_tl_track.track
 
@@ -113,17 +102,6 @@ class PlaybackController(object):
     The position of the current track in the tracklist.
 
     Read-only.
-    """
-
-    def get_track_at_eot(self):
-        return self.tl_track_at_eot and self.tl_track_at_eot.track
-
-    track_at_eot = property(get_track_at_eot)
-    """
-    The track that will be played at the end of the current track.
-
-    Read-only. A :class:`mopidy.models.Track` extracted from
-    :attr:`tl_track_at_eot` for convenience.
     """
 
     def get_tl_track_at_eot(self):
@@ -168,17 +146,6 @@ class PlaybackController(object):
     Not necessarily the same track as :attr:`tl_track_at_next`.
     """
 
-    def get_track_at_next(self):
-        return self.tl_track_at_next and self.tl_track_at_next.track
-
-    track_at_next = property(get_track_at_next)
-    """
-    The track that will be played if calling :meth:`next()`.
-
-    Read-only. A :class:`mopidy.models.Track` extracted from
-    :attr:`tl_track_at_next` for convenience.
-    """
-
     def get_tl_track_at_next(self):
         tl_tracks = self.core.tracklist.tl_tracks
 
@@ -216,17 +183,6 @@ class PlaybackController(object):
     is enabled the next track can loop around the playlist. When random is
     enabled this should be a random track, all tracks should be played once
     before the list repeats.
-    """
-
-    def get_track_at_previous(self):
-        return self.tl_track_at_previous and self.tl_track_at_previous.track
-
-    track_at_previous = property(get_track_at_previous)
-    """
-    The track that will be played if calling :meth:`previous()`.
-
-    Read-only. A :class:`mopidy.models.Track` extracted from
-    :attr:`tl_track_at_previous` for convenience.
     """
 
     def get_tl_track_at_previous(self):
