@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from mopidy.models import Album, Artist, Track
+
 from tests.frontends.mpd import protocol
 
 
@@ -181,6 +183,14 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.sendRequest('list "artist" "artist" ""')
         self.assertInResponse('OK')
 
+    def test_list_artist_should_not_return_artists_without_names(self):
+        self.backend.library.dummy_find_exact_result = [
+            Track(artists=[Artist(name='')])]
+
+        self.sendRequest('list "artist"')
+        self.assertNotInResponse('Artist: ')
+        self.assertInResponse('OK')
+
     ### Album
 
     def test_list_album_with_quotes(self):
@@ -232,6 +242,14 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.sendRequest('list "album" "artist" ""')
         self.assertInResponse('OK')
 
+    def test_list_album_should_not_return_albums_without_names(self):
+        self.backend.library.dummy_find_exact_result = [
+            Track(album=Album(name=''))]
+
+        self.sendRequest('list "album"')
+        self.assertNotInResponse('Album: ')
+        self.assertInResponse('OK')
+
     ### Date
 
     def test_list_date_with_quotes(self):
@@ -277,6 +295,13 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list_date_without_filter_value(self):
         self.sendRequest('list "date" "artist" ""')
+        self.assertInResponse('OK')
+
+    def test_list_date_should_not_return_blank_dates(self):
+        self.backend.library.dummy_find_exact_result = [Track(date='')]
+
+        self.sendRequest('list "date"')
+        self.assertNotInResponse('Date: ')
         self.assertInResponse('OK')
 
     ### Genre

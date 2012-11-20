@@ -82,6 +82,9 @@ long time been our most requested feature. Finally, it's here!
 - The MPD command ``listplaylists`` will no longer return playlists without a
   name. This could crash ncmpcpp.
 
+- The MPD command ``list`` will no longer return artist names, album names, or
+  dates that are blank.
+
 **MPRIS frontend**
 
 - The MPRIS playlists interface is now supported by our MPRIS frontend. This

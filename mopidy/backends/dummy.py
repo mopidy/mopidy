@@ -37,9 +37,11 @@ class DummyLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)
         self.dummy_library = []
+        self.dummy_find_exact_result = []
+        self.dummy_search_result = []
 
     def find_exact(self, **query):
-        return []
+        return self.dummy_find_exact_result
 
     def lookup(self, uri):
         return filter(lambda t: uri == t.uri, self.dummy_library)
@@ -48,7 +50,7 @@ class DummyLibraryProvider(base.BaseLibraryProvider):
         pass
 
     def search(self, **query):
-        return []
+        return self.dummy_search_result
 
 
 class DummyPlaybackProvider(base.BasePlaybackProvider):
