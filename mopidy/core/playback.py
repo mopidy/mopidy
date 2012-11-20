@@ -196,17 +196,6 @@ class PlaybackController(object):
     before the list repeats.
     """
 
-    def get_track_at_previous(self):
-        return self.tl_track_at_previous and self.tl_track_at_previous.track
-
-    track_at_previous = property(get_track_at_previous)
-    """
-    The track that will be played if calling :meth:`previous()`.
-
-    Read-only. A :class:`mopidy.models.Track` extracted from
-    :attr:`tl_track_at_previous` for convenience.
-    """
-
     def get_tl_track_at_previous(self):
         if self.repeat or self.consume or self.random:
             return self.current_tl_track
