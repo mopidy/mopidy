@@ -88,6 +88,10 @@ long time been our most requested feature. Finally, it's here!
 - The MPD command ``list`` will no longer return artist names, album names, or
   dates that are blank.
 
+- The MPD command ``decoders`` will now return an empty response instead of a
+  "not implemented" error to make the ncmpcpp browse view work the first time
+  it is opened.
+
 **MPRIS frontend**
 
 - The MPRIS playlists interface is now supported by our MPRIS frontend. This

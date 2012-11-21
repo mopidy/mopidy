@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 from mopidy.frontends.mpd.protocol import handle_request, mpd_commands
-from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
 
 @handle_request(r'^commands$', auth_required=False)
@@ -47,8 +46,15 @@ def decoders(context):
             mime_type: audio/mpeg
             plugin: mpcdec
             suffix: mpc
+
+    *Clarifications:*
+
+    - ncmpcpp asks for decoders the first time you open the browse view. By
+      returning nothing and OK instead of an not implemented error, we avoid
+      "Not implemented" showing up in the ncmpcpp interface, and we get the
+      list of playlists without having to enter the browse interface twice.
     """
-    raise MpdNotImplemented  # TODO
+    return  # TODO
 
 
 @handle_request(r'^notcommands$', auth_required=False)
