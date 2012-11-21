@@ -13,7 +13,9 @@ v0.10.0 (in development)
 
 **Bug fixes**
 
-- None yet
+- :issue:`256`: Fix crash caused by non-ASCII characters in paths returned from
+  ``glib``. The bug can be worked around by overriding the settings that
+  includes offending `$XDG_` variables.
 
 
 v0.9.0 (2012-11-21)

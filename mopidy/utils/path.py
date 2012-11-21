@@ -17,9 +17,10 @@ DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
 SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
 SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
 XDG_DIRS = {
-    'XDG_CACHE_DIR': glib.get_user_cache_dir(),
-    'XDG_DATA_DIR': glib.get_user_data_dir(),
-    'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
+    'XDG_CACHE_DIR': glib.get_user_cache_dir().decode('utf-8'),
+    'XDG_DATA_DIR': glib.get_user_data_dir().decode('utf-8'),
+    'XDG_MUSIC_DIR': (
+        glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC).decode('utf-8')),
 }
 
 
