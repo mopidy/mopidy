@@ -56,7 +56,7 @@ def handle_request(pattern, auth_required=True):
         if match is not None:
             mpd_commands.add(
                 MpdCommand(name=match.group(), auth_required=auth_required))
-        compiled_pattern = re.compile(pattern)
+        compiled_pattern = re.compile(pattern, flags=re.UNICODE)
         if compiled_pattern in request_handlers:
             raise ValueError('Tried to redefine handler for %s with %s' % (
                 pattern, func))
