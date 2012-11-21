@@ -4,6 +4,17 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.10.0 (in development)
+========================
+
+**Changes**
+
+- None yet
+
+**Bug fixes**
+
+- None yet
+
 
 v0.9.0 (2012-11-21)
 ===================
