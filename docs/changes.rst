@@ -5,8 +5,8 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.9.0 (in development)
-=======================
+v0.9.0 (2012-11-21)
+===================
 
 Support for using the local and Spotify backends simultaneously have for a very
 long time been our most requested feature. Finally, it's here!
