@@ -1,5 +1,8 @@
+from __future__ import unicode_literals
+
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+
 
 @handle_request(r'^disableoutput "(?P<outputid>\d+)"$')
 def disableoutput(context, outputid):
@@ -10,7 +13,8 @@ def disableoutput(context, outputid):
 
         Turns an output off.
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
+
 
 @handle_request(r'^enableoutput "(?P<outputid>\d+)"$')
 def enableoutput(context, outputid):
@@ -21,7 +25,8 @@ def enableoutput(context, outputid):
 
         Turns an output on.
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
+
 
 @handle_request(r'^outputs$')
 def outputs(context):

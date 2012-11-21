@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import platform
 
 import pygst
@@ -65,10 +67,12 @@ class DepsTest(unittest.TestCase):
         result = deps.gstreamer_info()
 
         self.assertEquals('GStreamer', result['name'])
-        self.assertEquals('.'.join(map(str, gst.get_gst_version())), result['version'])
+        self.assertEquals(
+            '.'.join(map(str, gst.get_gst_version())), result['version'])
         self.assertIn('gst', result['path'])
         self.assertIn('Python wrapper: gst-python', result['other'])
-        self.assertIn('.'.join(map(str, gst.get_pygst_version())), result['other'])
+        self.assertIn(
+            '.'.join(map(str, gst.get_pygst_version())), result['other'])
         self.assertIn('Relevant elements:', result['other'])
 
     def test_pykka_info(self):

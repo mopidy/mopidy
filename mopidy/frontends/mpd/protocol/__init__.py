@@ -10,24 +10,28 @@ implement our own MPD server which is compatible with the numerous existing
 `MPD clients <http://mpd.wikia.com/wiki/Clients>`_.
 """
 
+from __future__ import unicode_literals
+
 from collections import namedtuple
 import re
 
 #: The MPD protocol uses UTF-8 for encoding all data.
-ENCODING = u'UTF-8'
+ENCODING = 'UTF-8'
 
 #: The MPD protocol uses ``\n`` as line terminator.
-LINE_TERMINATOR = u'\n'
+LINE_TERMINATOR = '\n'
 
 #: The MPD protocol version is 0.16.0.
-VERSION = u'0.16.0'
+VERSION = '0.16.0'
 
 MpdCommand = namedtuple('MpdCommand', ['name', 'auth_required'])
 
-#: List of all available commands, represented as :class:`MpdCommand` objects.
+#: Set of all available commands, represented as :class:`MpdCommand` objects.
 mpd_commands = set()
 
+#: Map between request matchers and request handler functions.
 request_handlers = {}
+
 
 def handle_request(pattern, auth_required=True):
     """
@@ -52,11 +56,24 @@ def handle_request(pattern, auth_required=True):
         if match is not None:
             mpd_commands.add(
                 MpdCommand(name=match.group(), auth_required=auth_required))
-        if pattern in request_handlers:
-            raise ValueError(u'Tried to redefine handler for %s with %s' % (
+        compiled_pattern = re.compile(pattern, flags=re.UNICODE)
+        if compiled_pattern in request_handlers:
+            raise ValueError('Tried to redefine handler for %s with %s' % (
                 pattern, func))
-        request_handlers[pattern] = func
+        request_handlers[compiled_pattern] = func
         func.__doc__ = '    - *Pattern:* ``%s``\n\n%s' % (
             pattern, func.__doc__ or '')
         return func
     return decorator
+
+
+def load_protocol_modules():
+    """
+    The protocol modules must be imported to get them registered in
+    :attr:`request_handlers` and :attr:`mpd_commands`.
+    """
+    # pylint: disable = W0612
+    from . import (  # noqa
+        audio_output, command_list, connection, current_playlist, empty,
+        music_db, playback, reflection, status, stickers, stored_playlists)
+    # pylint: enable = W0612

@@ -7,34 +7,36 @@ All available settings and their default values.
     file called ``~/.config/mopidy/settings.py`` and redefine settings there.
 """
 
-#: List of playback backends to use. See :mod:`mopidy.backends` for all
+from __future__ import unicode_literals
+
+#: List of playback backends to use. See :ref:`backend-implementations` for all
 #: available backends.
+#:
+#: When results from multiple backends are combined, they are combined in the
+#: order the backends are listed here.
 #:
 #: Default::
 #:
-#:     BACKENDS = (u'mopidy.backends.spotify.SpotifyBackend',)
-#:
-#: Other typical values::
-#:
-#:     BACKENDS = (u'mopidy.backends.local.LocalBackend',)
-#:
-#: .. note::
-#:     Currently only the first backend in the list is used.
+#:     BACKENDS = (
+#:         u'mopidy.backends.local.LocalBackend',
+#:         u'mopidy.backends.spotify.SpotifyBackend',
+#:     )
 BACKENDS = (
-    u'mopidy.backends.spotify.SpotifyBackend',
+    'mopidy.backends.local.LocalBackend',
+    'mopidy.backends.spotify.SpotifyBackend',
 )
 
 #: The log format used for informational logging.
 #:
-#: See http://docs.python.org/library/logging.html#formatter-objects for
+#: See http://docs.python.org/2/library/logging.html#formatter-objects for
 #: details on the format.
-CONSOLE_LOG_FORMAT = u'%(levelname)-8s %(message)s'
+CONSOLE_LOG_FORMAT = '%(levelname)-8s %(message)s'
 
 #: The log format used for debug logging.
 #:
 #: See http://docs.python.org/library/logging.html#formatter-objects for
 #: details on the format.
-DEBUG_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
+DEBUG_LOG_FORMAT = '%(levelname)-8s %(asctime)s' + \
     ' [%(process)d:%(threadName)s] %(name)s\n  %(message)s'
 
 #: The file to dump debug log data to when Mopidy is run with the
@@ -43,7 +45,15 @@ DEBUG_LOG_FORMAT = u'%(levelname)-8s %(asctime)s' + \
 #: Default::
 #:
 #:     DEBUG_LOG_FILENAME = u'mopidy.log'
-DEBUG_LOG_FILENAME = u'mopidy.log'
+DEBUG_LOG_FILENAME = 'mopidy.log'
+
+#: If we should start a background thread that dumps thread's traceback when we
+#: get a SIGUSR1. Mainly a debug tool for figuring out deadlocks.
+#:
+#: Default::
+#:
+#:     DEBUG_THREAD = False
+DEBUG_THREAD = False
 
 #: Location of the Mopidy .desktop file.
 #:
@@ -52,9 +62,10 @@ DEBUG_LOG_FILENAME = u'mopidy.log'
 #: Default::
 #:
 #:     DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
-DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
+DESKTOP_FILE = '/usr/share/applications/mopidy.desktop'
 
-#: List of server frontends to use.
+#: List of server frontends to use. See :ref:`frontend-implementations` for
+#: available frontends.
 #:
 #: Default::
 #:
@@ -64,20 +75,20 @@ DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
 #:         u'mopidy.frontends.mpris.MprisFrontend',
 #:     )
 FRONTENDS = (
-    u'mopidy.frontends.mpd.MpdFrontend',
-    u'mopidy.frontends.lastfm.LastfmFrontend',
-    u'mopidy.frontends.mpris.MprisFrontend',
+    'mopidy.frontends.mpd.MpdFrontend',
+    'mopidy.frontends.lastfm.LastfmFrontend',
+    'mopidy.frontends.mpris.MprisFrontend',
 )
 
 #: Your `Last.fm <http://www.last.fm/>`_ username.
 #:
 #: Used by :mod:`mopidy.frontends.lastfm`.
-LASTFM_USERNAME = u''
+LASTFM_USERNAME = ''
 
 #: Your `Last.fm <http://www.last.fm/>`_ password.
 #:
 #: Used by :mod:`mopidy.frontends.lastfm`.
-LASTFM_PASSWORD = u''
+LASTFM_PASSWORD = ''
 
 #: Path to folder with local music.
 #:
@@ -86,7 +97,7 @@ LASTFM_PASSWORD = u''
 #: Default::
 #:
 #:    LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
-LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
+LOCAL_MUSIC_PATH = '$XDG_MUSIC_DIR'
 
 #: Path to playlist folder with m3u files for local music.
 #:
@@ -95,7 +106,7 @@ LOCAL_MUSIC_PATH = u'$XDG_MUSIC_DIR'
 #: Default::
 #:
 #:    LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
-LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
+LOCAL_PLAYLIST_PATH = '$XDG_DATA_DIR/mopidy/playlists'
 
 #: Path to tag cache for local music.
 #:
@@ -104,9 +115,9 @@ LOCAL_PLAYLIST_PATH = u'$XDG_DATA_DIR/mopidy/playlists'
 #: Default::
 #:
 #:    LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
-LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
+LOCAL_TAG_CACHE_FILE = '$XDG_DATA_DIR/mopidy/tag_cache'
 
-#: Sound mixer to use.
+#: Audio mixer to use.
 #:
 #: Expects a GStreamer mixer to use, typical values are:
 #: ``alsamixer``, ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
@@ -117,9 +128,9 @@ LOCAL_TAG_CACHE_FILE = u'$XDG_DATA_DIR/mopidy/tag_cache'
 #: Default::
 #:
 #:     MIXER = u'autoaudiomixer'
-MIXER = u'autoaudiomixer'
+MIXER = 'autoaudiomixer'
 
-#: Sound mixer track to use.
+#: Audio mixer track to use.
 #:
 #: Name of the mixer track to use. If this is not set we will try to find the
 #: master output track. As an example, using ``alsamixer`` you would
@@ -144,7 +155,7 @@ MIXER_TRACK = None
 #:     Listens on all IPv4 interfaces.
 #: ``::``
 #:     Listens on all interfaces, both IPv4 and IPv6.
-MPD_SERVER_HOSTNAME = u'127.0.0.1'
+MPD_SERVER_HOSTNAME = '127.0.0.1'
 
 #: Which TCP port Mopidy's MPD server should listen to.
 #:
@@ -167,12 +178,16 @@ MPD_SERVER_PASSWORD = None
 #: Default: 20
 MPD_SERVER_MAX_CONNECTIONS = 20
 
-#: Output to use. See :mod:`mopidy.outputs` for all available backends
+#: Audio output to use.
+#:
+#: Expects a GStreamer sink. Typical values are ``autoaudiosink``,
+#: ``alsasink``, ``osssink``, ``oss4sink``, ``pulsesink``, and ``shout2send``,
+#: and additional arguments specific to each sink.
 #:
 #: Default::
 #:
 #:     OUTPUT = u'autoaudiosink'
-OUTPUT = u'autoaudiosink'
+OUTPUT = 'autoaudiosink'
 
 #: Path to the Spotify cache.
 #:
@@ -181,17 +196,17 @@ OUTPUT = u'autoaudiosink'
 #: Default::
 #:
 #:     SPOTIFY_CACHE_PATH = u'$XDG_CACHE_DIR/mopidy/spotify'
-SPOTIFY_CACHE_PATH = u'$XDG_CACHE_DIR/mopidy/spotify'
+SPOTIFY_CACHE_PATH = '$XDG_CACHE_DIR/mopidy/spotify'
 
 #: Your Spotify Premium username.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-SPOTIFY_USERNAME = u''
+SPOTIFY_USERNAME = ''
 
 #: Your Spotify Premium password.
 #:
 #: Used by :mod:`mopidy.backends.spotify`.
-SPOTIFY_PASSWORD = u''
+SPOTIFY_PASSWORD = ''
 
 #: Spotify preferred bitrate.
 #:
@@ -203,3 +218,34 @@ SPOTIFY_PASSWORD = u''
 #:
 #:     SPOTIFY_BITRATE = 160
 SPOTIFY_BITRATE = 160
+
+#: Spotify proxy host.
+#:
+#: Used by :mod:`mopidy.backends.spotify`.
+#:
+#: Example::
+#:
+#:     SPOTIFY_PROXY_HOST = u'protocol://host:port'
+#:
+#: Default::
+#:
+#:     SPOTIFY_PROXY_HOST = None
+SPOTIFY_PROXY_HOST = None
+
+#: Spotify proxy username.
+#:
+#: Used by :mod:`mopidy.backends.spotify`.
+#:
+#: Default::
+#:
+#:     SPOTIFY_PROXY_USERNAME = None
+SPOTIFY_PROXY_USERNAME = None
+
+#: Spotify proxy password.
+#:
+#: Used by :mod:`mopidy.backends.spotify`
+#:
+#: Default::
+#:
+#:     SPOTIFY_PROXY_PASSWORD = None
+SPOTIFY_PROXY_PASSWORD = None

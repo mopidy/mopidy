@@ -1,13 +1,21 @@
-import glib
+from __future__ import unicode_literals
+
 import logging
 import os
 import re
+# pylint: disable = W0402
 import string
+# pylint: enable = W0402
 import sys
 import urllib
 
+import glib
+
 logger = logging.getLogger('mopidy.utils.path')
 
+DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
+SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
+SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
 XDG_DIRS = {
     'XDG_CACHE_DIR': glib.get_user_cache_dir(),
     'XDG_DATA_DIR': glib.get_user_data_dir(),
@@ -18,10 +26,11 @@ XDG_DIRS = {
 def get_or_create_folder(folder):
     folder = os.path.expanduser(folder)
     if os.path.isfile(folder):
-        raise OSError('A file with the same name as the desired ' \
-            'dir, "%s", already exists.' % folder)
+        raise OSError(
+            'A file with the same name as the desired dir, '
+            '"%s", already exists.' % folder)
     elif not os.path.isdir(folder):
-        logger.info(u'Creating dir %s', folder)
+        logger.info('Creating dir %s', folder)
         os.makedirs(folder, 0755)
     return folder
 
@@ -29,7 +38,7 @@ def get_or_create_folder(folder):
 def get_or_create_file(filename):
     filename = os.path.expanduser(filename)
     if not os.path.isfile(filename):
-        logger.info(u'Creating file %s', filename)
+        logger.info('Creating file %s', filename)
         open(filename, 'w')
     return filename
 
@@ -47,7 +56,7 @@ def uri_to_path(uri):
         path = urllib.url2pathname(re.sub('^file:', '', uri))
     else:
         path = urllib.url2pathname(re.sub('^file://', '', uri))
-    return path.encode('latin1').decode('utf-8') # Undo double encoding
+    return path.encode('latin1').decode('utf-8')  # Undo double encoding
 
 
 def split_path(path):
@@ -93,6 +102,25 @@ def find_files(path):
                     except UnicodeDecodeError:
                         filename = filename.decode('latin1')
                 yield filename
+
+
+def check_file_path_is_inside_base_dir(file_path, base_path):
+    assert not file_path.endswith(os.sep), (
+        'File path %s cannot end with a path separator' % file_path)
+
+    # Expand symlinks
+    real_base_path = os.path.realpath(base_path)
+    real_file_path = os.path.realpath(file_path)
+
+    # Use dir of file for prefix comparision, so we don't accept
+    # /tmp/foo.m3u as being inside /tmp/foo, simply because they have a
+    # common prefix, /tmp/foo, which matches the base path, /tmp/foo.
+    real_dir_path = os.path.dirname(real_file_path)
+
+    # Check if dir of file is the base path or a subdir
+    common_prefix = os.path.commonprefix([real_base_path, real_dir_path])
+    assert common_prefix == real_base_path, (
+        'File path %s must be in %s' % (real_file_path, real_base_path))
 
 
 # FIXME replace with mock usage in tests.

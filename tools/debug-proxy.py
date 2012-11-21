@@ -1,12 +1,14 @@
 #! /usr/bin/env python
 
+from __future__ import unicode_literals
+
 import argparse
 import difflib
 import sys
 
 from gevent import select, server, socket
 
-COLORS = ['\033[1;%dm' % (30+i) for i in range(8)]
+COLORS = ['\033[1;%dm' % (30 + i) for i in range(8)]
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = COLORS
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -53,7 +55,8 @@ def loop(client, address, reference, actual):
 
     # Consume banners from backends
     responses = dict()
-    disconnected = read([reference, actual], responses, find_response_end_token)
+    disconnected = read(
+        [reference, actual], responses, find_response_end_token)
     diff(address, '', responses[reference], responses[actual])
 
     # We lost a backend, might as well give up.
@@ -78,13 +81,15 @@ def loop(client, address, reference, actual):
         actual.sendall(responses[client])
 
         # Get the entire resonse from both backends.
-        disconnected = read([reference, actual], responses, find_response_end_token)
+        disconnected = read(
+            [reference, actual], responses, find_response_end_token)
 
         # Send the client the complete reference response
         client.sendall(responses[reference])
 
         # Compare our responses
-        diff(address, responses[client], responses[reference], responses[actual])
+        diff(address,
+             responses[client], responses[reference], responses[actual])
 
         # Give up if we lost a backend.
         if disconnected:

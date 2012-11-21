@@ -1,94 +1,36 @@
-import logging
+"""A backend for playing music from Spotify
 
-from pykka.actor import ThreadingActor
-from pykka.registry import ActorRegistry
+`Spotify <http://www.spotify.com/>`_ is a music streaming service. The backend
+uses the official `libspotify
+<http://developer.spotify.com/en/libspotify/overview/>`_ library and the
+`pyspotify <http://github.com/mopidy/pyspotify/>`_ Python bindings for
+libspotify. This backend handles URIs starting with ``spotify:``.
 
-from mopidy import audio, core, settings
-from mopidy.backends import base
+See :ref:`music-from-spotify` for further instructions on using this backend.
 
-logger = logging.getLogger('mopidy.backends.spotify')
+.. note::
 
-BITRATES = {96: 2, 160: 0, 320: 1}
+    This product uses SPOTIFY(R) CORE but is not endorsed, certified or
+    otherwise approved in any way by Spotify. Spotify is the registered
+    trade mark of the Spotify Group.
 
-class SpotifyBackend(ThreadingActor, base.Backend):
-    """
-    A backend for playing music from the `Spotify <http://www.spotify.com/>`_
-    music streaming service. The backend uses the official `libspotify
-    <http://developer.spotify.com/en/libspotify/overview/>`_ library and the
-    `pyspotify <http://github.com/winjer/pyspotify/>`_ Python bindings for
-    libspotify.
+**Issues:**
 
-    .. note::
+https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 
-        This product uses SPOTIFY(R) CORE but is not endorsed, certified or
-        otherwise approved in any way by Spotify. Spotify is the registered
-        trade mark of the Spotify Group.
+**Dependencies:**
 
-    **Issues:**
-    https://github.com/mopidy/mopidy/issues?labels=backend-spotify
+- libspotify >= 12, < 13 (libspotify12 package from apt.mopidy.com)
+- pyspotify >= 1.9, < 1.10 (python-spotify package from apt.mopidy.com)
 
-    **Dependencies:**
+**Settings:**
 
-    - libspotify >= 10, < 11 (libspotify10 package from apt.mopidy.com)
-    - pyspotify >= 1.5 (python-spotify package from apt.mopidy.com)
+- :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
+- :attr:`mopidy.settings.SPOTIFY_USERNAME`
+- :attr:`mopidy.settings.SPOTIFY_PASSWORD`
+"""
 
-    **Settings:**
+from __future__ import unicode_literals
 
-    - :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
-    - :attr:`mopidy.settings.SPOTIFY_USERNAME`
-    - :attr:`mopidy.settings.SPOTIFY_PASSWORD`
-    """
-
-    # Imports inside methods are to prevent loading of __init__.py to fail on
-    # missing spotify dependencies.
-
-    def __init__(self, *args, **kwargs):
-        from .library import SpotifyLibraryProvider
-        from .playback import SpotifyPlaybackProvider
-        from .stored_playlists import SpotifyStoredPlaylistsProvider
-
-        super(SpotifyBackend, self).__init__()
-
-        self.current_playlist = core.CurrentPlaylistController(backend=self)
-
-        library_provider = SpotifyLibraryProvider(backend=self)
-        self.library = core.LibraryController(backend=self,
-            provider=library_provider)
-
-        playback_provider = SpotifyPlaybackProvider(backend=self)
-        self.playback = core.PlaybackController(backend=self,
-            provider=playback_provider)
-
-        stored_playlists_provider = SpotifyStoredPlaylistsProvider(
-            backend=self)
-        self.stored_playlists = core.StoredPlaylistsController(backend=self,
-            provider=stored_playlists_provider)
-
-        self.uri_schemes = [u'spotify']
-
-        self.audio = None
-        self.spotify = None
-
-        # Fail early if settings are not present
-        self.username = settings.SPOTIFY_USERNAME
-        self.password = settings.SPOTIFY_PASSWORD
-
-    def on_start(self):
-        audio_refs = ActorRegistry.get_by_class(audio.Audio)
-        assert len(audio_refs) == 1, \
-            'Expected exactly one running Audio instance.'
-        self.audio = audio_refs[0].proxy()
-
-        logger.info(u'Mopidy uses SPOTIFY(R) CORE')
-        self.spotify = self._connect()
-
-    def on_stop(self):
-        self.spotify.logout()
-
-    def _connect(self):
-        from .session_manager import SpotifySessionManager
-
-        logger.debug(u'Connecting to Spotify')
-        spotify = SpotifySessionManager(self.username, self.password)
-        spotify.start()
-        return spotify
+# flake8: noqa
+from .actor import SpotifyBackend

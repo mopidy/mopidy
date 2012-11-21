@@ -1,14 +1,16 @@
-import logging
-import os
+from __future__ import unicode_literals
 
-logger = logging.getLogger('mopidy.backends.local.translator')
+import logging
 
 from mopidy.models import Track, Artist, Album
-from mopidy.utils import locale_decode
+from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri
 
+logger = logging.getLogger('mopidy.backends.local')
+
+
 def parse_m3u(file_path, music_folder):
-    """
+    r"""
     Convert M3U file list of uris
 
     Example M3U data::
@@ -51,6 +53,7 @@ def parse_m3u(file_path, music_folder):
 
     return uris
 
+
 def parse_mpd_tag_cache(tag_cache, music_dir=''):
     """
     Converts a MPD tag_cache into a lists of tracks, artists and albums.
@@ -67,19 +70,19 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
     current = {}
     state = None
 
-    for line in contents.split('\n'):
-        if line == 'songList begin':
+    for line in contents.split(b'\n'):
+        if line == b'songList begin':
             state = 'songs'
             continue
-        elif line == 'songList end':
+        elif line == b'songList end':
             state = None
             continue
         elif not state:
             continue
 
-        key, value = line.split(': ', 1)
+        key, value = line.split(b': ', 1)
 
-        if key == 'key':
+        if key == b'key':
             _convert_mpd_data(current, tracks, music_dir)
             current.clear()
 
@@ -88,6 +91,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
     _convert_mpd_data(current, tracks, music_dir)
 
     return tracks
+
 
 def _convert_mpd_data(data, tracks, music_dir):
     if not data:
@@ -128,7 +132,8 @@ def _convert_mpd_data(data, tracks, music_dir):
         artist_kwargs['musicbrainz_id'] = data['musicbrainz_artistid']
 
     if 'musicbrainz_albumartistid' in data:
-        albumartist_kwargs['musicbrainz_id'] = data['musicbrainz_albumartistid']
+        albumartist_kwargs['musicbrainz_id'] = (
+            data['musicbrainz_albumartistid'])
 
     if data['file'][0] == '/':
         path = data['file'][1:]
@@ -142,7 +147,7 @@ def _convert_mpd_data(data, tracks, music_dir):
     if albumartist_kwargs:
         albumartist = Artist(**albumartist_kwargs)
         album_kwargs['artists'] = [albumartist]
-    
+
     if album_kwargs:
         album = Album(**album_kwargs)
         track_kwargs['album'] = album

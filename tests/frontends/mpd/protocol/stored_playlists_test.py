@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 
 from mopidy.models import Track, Playlist
@@ -5,90 +7,118 @@ from mopidy.models import Track, Playlist
 from tests.frontends.mpd import protocol
 
 
-class StoredPlaylistsHandlerTest(protocol.BaseTestCase):
+class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylist(self):
-        self.backend.stored_playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+        self.backend.playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
 
-        self.sendRequest(u'listplaylist "name"')
-        self.assertInResponse(u'file: file:///dev/urandom')
-        self.assertInResponse(u'OK')
+        self.sendRequest('listplaylist "name"')
+        self.assertInResponse('file: dummy:a')
+        self.assertInResponse('OK')
+
+    def test_listplaylist_without_quotes(self):
+        self.backend.playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
+
+        self.sendRequest('listplaylist name')
+        self.assertInResponse('file: dummy:a')
+        self.assertInResponse('OK')
 
     def test_listplaylist_fails_if_no_playlist_is_found(self):
-        self.sendRequest(u'listplaylist "name"')
-        self.assertEqualResponse(u'ACK [50@0] {listplaylist} No such playlist')
+        self.sendRequest('listplaylist "name"')
+        self.assertEqualResponse('ACK [50@0] {listplaylist} No such playlist')
 
     def test_listplaylistinfo(self):
-        self.backend.stored_playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+        self.backend.playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
 
-        self.sendRequest(u'listplaylistinfo "name"')
-        self.assertInResponse(u'file: file:///dev/urandom')
-        self.assertInResponse(u'Track: 0')
-        self.assertNotInResponse(u'Pos: 0')
-        self.assertInResponse(u'OK')
+        self.sendRequest('listplaylistinfo "name"')
+        self.assertInResponse('file: dummy:a')
+        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Pos: 0')
+        self.assertInResponse('OK')
+
+    def test_listplaylistinfo_without_quotes(self):
+        self.backend.playlists.playlists = [
+            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
+
+        self.sendRequest('listplaylistinfo name')
+        self.assertInResponse('file: dummy:a')
+        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Pos: 0')
+        self.assertInResponse('OK')
 
     def test_listplaylistinfo_fails_if_no_playlist_is_found(self):
-        self.sendRequest(u'listplaylistinfo "name"')
+        self.sendRequest('listplaylistinfo "name"')
         self.assertEqualResponse(
-            u'ACK [50@0] {listplaylistinfo} No such playlist')
+            'ACK [50@0] {listplaylistinfo} No such playlist')
 
     def test_listplaylists(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
-        self.backend.stored_playlists.playlists = [Playlist(name='a',
-            last_modified=last_modified)]
+        self.backend.playlists.playlists = [
+            Playlist(name='a', last_modified=last_modified)]
 
-        self.sendRequest(u'listplaylists')
-        self.assertInResponse(u'playlist: a')
+        self.sendRequest('listplaylists')
+        self.assertInResponse('playlist: a')
         # Date without microseconds and with time zone information
-        self.assertInResponse(u'Last-Modified: 2001-03-17T13:41:17Z')
-        self.assertInResponse(u'OK')
+        self.assertInResponse('Last-Modified: 2001-03-17T13:41:17Z')
+        self.assertInResponse('OK')
 
-    def test_load_known_playlist_appends_to_current_playlist(self):
-        self.backend.current_playlist.append([Track(uri='a'), Track(uri='b')])
-        self.assertEqual(len(self.backend.current_playlist.tracks.get()), 2)
-        self.backend.stored_playlists.playlists = [Playlist(name='A-list',
-            tracks=[Track(uri='c'), Track(uri='d'), Track(uri='e')])]
+    def test_listplaylists_ignores_playlists_without_name(self):
+        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        self.backend.playlists.playlists = [
+            Playlist(name='', last_modified=last_modified)]
 
-        self.sendRequest(u'load "A-list"')
-        tracks = self.backend.current_playlist.tracks.get()
+        self.sendRequest('listplaylists')
+        self.assertNotInResponse('playlist: ')
+        self.assertInResponse('OK')
+
+    def test_load_known_playlist_appends_to_tracklist(self):
+        self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
+        self.backend.playlists.playlists = [
+            Playlist(name='A-list', tracks=[
+                Track(uri='c'), Track(uri='d'), Track(uri='e')])]
+
+        self.sendRequest('load "A-list"')
+        tracks = self.core.tracklist.tracks.get()
         self.assertEqual(5, len(tracks))
         self.assertEqual('a', tracks[0].uri)
         self.assertEqual('b', tracks[1].uri)
         self.assertEqual('c', tracks[2].uri)
         self.assertEqual('d', tracks[3].uri)
         self.assertEqual('e', tracks[4].uri)
-        self.assertInResponse(u'OK')
+        self.assertInResponse('OK')
 
     def test_load_unknown_playlist_acks(self):
-        self.sendRequest(u'load "unknown playlist"')
-        self.assertEqual(0, len(self.backend.current_playlist.tracks.get()))
-        self.assertEqualResponse(u'ACK [50@0] {load} No such playlist')
+        self.sendRequest('load "unknown playlist"')
+        self.assertEqual(0, len(self.core.tracklist.tracks.get()))
+        self.assertEqualResponse('ACK [50@0] {load} No such playlist')
 
     def test_playlistadd(self):
-        self.sendRequest(u'playlistadd "name" "file:///dev/urandom"')
-        self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
+        self.sendRequest('playlistadd "name" "dummy:a"')
+        self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
     def test_playlistclear(self):
-        self.sendRequest(u'playlistclear "name"')
-        self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
+        self.sendRequest('playlistclear "name"')
+        self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
     def test_playlistdelete(self):
-        self.sendRequest(u'playlistdelete "name" "5"')
-        self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
+        self.sendRequest('playlistdelete "name" "5"')
+        self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
     def test_playlistmove(self):
-        self.sendRequest(u'playlistmove "name" "5" "10"')
-        self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
+        self.sendRequest('playlistmove "name" "5" "10"')
+        self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
     def test_rename(self):
-        self.sendRequest(u'rename "old_name" "new_name"')
-        self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
+        self.sendRequest('rename "old_name" "new_name"')
+        self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
     def test_rm(self):
-        self.sendRequest(u'rm "name"')
-        self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
+        self.sendRequest('rm "name"')
+        self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
     def test_save(self):
-        self.sendRequest(u'save "name"')
-        self.assertEqualResponse(u'ACK [0@0] {} Not implemented')
+        self.sendRequest('save "name"')
+        self.assertEqualResponse('ACK [0@0] {} Not implemented')

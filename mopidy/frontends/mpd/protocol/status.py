@@ -1,4 +1,6 @@
-import pykka.future
+from __future__ import unicode_literals
+
+import pykka
 
 from mopidy.core import PlaybackState
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
@@ -6,8 +8,10 @@ from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.translator import track_to_mpd_format
 
 #: Subsystems that can be registered with idle command.
-SUBSYSTEMS = ['database', 'mixer', 'options', 'output',
-    'player', 'playlist', 'stored_playlist', 'update', ]
+SUBSYSTEMS = [
+    'database', 'mixer', 'options', 'output', 'player', 'playlist',
+    'stored_playlist', 'update']
+
 
 @handle_request(r'^clearerror$')
 def clearerror(context):
@@ -19,7 +23,8 @@ def clearerror(context):
         Clears the current error message in status (this is also
         accomplished by any command that starts playback).
     """
-    raise MpdNotImplemented # TODO
+    raise MpdNotImplemented  # TODO
+
 
 @handle_request(r'^currentsong$')
 def currentsong(context):
@@ -31,10 +36,11 @@ def currentsong(context):
         Displays the song info of the current song (same song that is
         identified in status).
     """
-    current_cp_track = context.backend.playback.current_cp_track.get()
-    if current_cp_track is not None:
-        position = context.backend.playback.current_playlist_position.get()
-        return track_to_mpd_format(current_cp_track, position=position)
+    current_tl_track = context.core.playback.current_tl_track.get()
+    if current_tl_track is not None:
+        position = context.core.playback.tracklist_position.get()
+        return track_to_mpd_format(current_tl_track, position=position)
+
 
 @handle_request(r'^idle$')
 @handle_request(r'^idle (?P<subsystems>.+)$')
@@ -90,8 +96,9 @@ def idle(context, subsystems=None):
     context.subscriptions = set()
 
     for subsystem in active:
-        response.append(u'changed: %s' % subsystem)
+        response.append('changed: %s' % subsystem)
     return response
+
 
 @handle_request(r'^noidle$')
 def noidle(context):
@@ -101,6 +108,7 @@ def noidle(context):
     context.subscriptions = set()
     context.events = set()
     context.session.prevent_timeout = False
+
 
 @handle_request(r'^stats$')
 def stats(context):
@@ -119,14 +127,15 @@ def stats(context):
         - ``playtime``: time length of music played
     """
     return {
-        'artists': 0, # TODO
-        'albums': 0, # TODO
-        'songs': 0, # TODO
-        'uptime': 0, # TODO
-        'db_playtime': 0, # TODO
-        'db_update': 0, # TODO
-        'playtime': 0, # TODO
+        'artists': 0,  # TODO
+        'albums': 0,  # TODO
+        'songs': 0,  # TODO
+        'uptime': 0,  # TODO
+        'db_playtime': 0,  # TODO
+        'db_update': 0,  # TODO
+        'playtime': 0,  # TODO
     }
+
 
 @handle_request(r'^status$')
 def status(context):
@@ -153,7 +162,7 @@ def status(context):
         - ``nextsongid``: playlist songid of the next song to be played
         - ``time``: total time elapsed (of current playing/paused song)
         - ``elapsed``: Total time elapsed within the current song, but with
-          higher resolution. 
+          higher resolution.
         - ``bitrate``: instantaneous bitrate in kbps
         - ``xfade``: crossfade in seconds
         - ``audio``: sampleRate``:bits``:channels
@@ -166,20 +175,20 @@ def status(context):
           decimal places for millisecond precision.
     """
     futures = {
-        'current_playlist.length': context.backend.current_playlist.length,
-        'current_playlist.version': context.backend.current_playlist.version,
-        'playback.volume': context.backend.playback.volume,
-        'playback.consume': context.backend.playback.consume,
-        'playback.random': context.backend.playback.random,
-        'playback.repeat': context.backend.playback.repeat,
-        'playback.single': context.backend.playback.single,
-        'playback.state': context.backend.playback.state,
-        'playback.current_cp_track': context.backend.playback.current_cp_track,
-        'playback.current_playlist_position':
-            context.backend.playback.current_playlist_position,
-        'playback.time_position': context.backend.playback.time_position,
+        'tracklist.length': context.core.tracklist.length,
+        'tracklist.version': context.core.tracklist.version,
+        'playback.volume': context.core.playback.volume,
+        'playback.consume': context.core.playback.consume,
+        'playback.random': context.core.playback.random,
+        'playback.repeat': context.core.playback.repeat,
+        'playback.single': context.core.playback.single,
+        'playback.state': context.core.playback.state,
+        'playback.current_tl_track': context.core.playback.current_tl_track,
+        'playback.tracklist_position': (
+            context.core.playback.tracklist_position),
+        'playback.time_position': context.core.playback.time_position,
     }
-    pykka.future.get_all(futures.values())
+    pykka.get_all(futures.values())
     result = [
         ('volume', _status_volume(futures)),
         ('repeat', _status_repeat(futures)),
@@ -191,20 +200,22 @@ def status(context):
         ('xfade', _status_xfade(futures)),
         ('state', _status_state(futures)),
     ]
-    if futures['playback.current_cp_track'].get() is not None:
+    if futures['playback.current_tl_track'].get() is not None:
         result.append(('song', _status_songpos(futures)))
         result.append(('songid', _status_songid(futures)))
-    if futures['playback.state'].get() in (PlaybackState.PLAYING,
-            PlaybackState.PAUSED):
+    if futures['playback.state'].get() in (
+            PlaybackState.PLAYING, PlaybackState.PAUSED):
         result.append(('time', _status_time(futures)))
         result.append(('elapsed', _status_time_elapsed(futures)))
         result.append(('bitrate', _status_bitrate(futures)))
     return result
 
+
 def _status_bitrate(futures):
-    current_cp_track = futures['playback.current_cp_track'].get()
-    if current_cp_track is not None:
-        return current_cp_track.track.bitrate
+    current_tl_track = futures['playback.current_tl_track'].get()
+    if current_tl_track is not None:
+        return current_tl_track.track.bitrate
+
 
 def _status_consume(futures):
     if futures['playback.consume'].get():
@@ -212,55 +223,68 @@ def _status_consume(futures):
     else:
         return 0
 
+
 def _status_playlist_length(futures):
-    return futures['current_playlist.length'].get()
+    return futures['tracklist.length'].get()
+
 
 def _status_playlist_version(futures):
-    return futures['current_playlist.version'].get()
+    return futures['tracklist.version'].get()
+
 
 def _status_random(futures):
     return int(futures['playback.random'].get())
 
+
 def _status_repeat(futures):
     return int(futures['playback.repeat'].get())
+
 
 def _status_single(futures):
     return int(futures['playback.single'].get())
 
+
 def _status_songid(futures):
-    current_cp_track = futures['playback.current_cp_track'].get()
-    if current_cp_track is not None:
-        return current_cp_track.cpid
+    current_tl_track = futures['playback.current_tl_track'].get()
+    if current_tl_track is not None:
+        return current_tl_track.tlid
     else:
         return _status_songpos(futures)
 
+
 def _status_songpos(futures):
-    return futures['playback.current_playlist_position'].get()
+    return futures['playback.tracklist_position'].get()
+
 
 def _status_state(futures):
     state = futures['playback.state'].get()
     if state == PlaybackState.PLAYING:
-        return u'play'
+        return 'play'
     elif state == PlaybackState.STOPPED:
-        return u'stop'
+        return 'stop'
     elif state == PlaybackState.PAUSED:
-        return u'pause'
+        return 'pause'
+
 
 def _status_time(futures):
-    return u'%d:%d' % (futures['playback.time_position'].get() // 1000,
+    return '%d:%d' % (
+        futures['playback.time_position'].get() // 1000,
         _status_time_total(futures) // 1000)
 
+
 def _status_time_elapsed(futures):
-    return u'%.3f' % (futures['playback.time_position'].get() / 1000.0)
+    return '%.3f' % (futures['playback.time_position'].get() / 1000.0)
+
 
 def _status_time_total(futures):
-    current_cp_track = futures['playback.current_cp_track'].get()
-    if current_cp_track is None:
+    current_tl_track = futures['playback.current_tl_track'].get()
+    if current_tl_track is None:
         return 0
-    elif current_cp_track.track.length is None:
+    elif current_tl_track.track.length is None:
         return 0
     else:
-        return current_cp_track.track.length
+        return current_tl_track.track.length
+
 
 def _status_volume(futures):
     volume = futures['playback.volume'].get()
@@ -269,5 +293,6 @@ def _status_volume(futures):
     else:
         return -1
 
+
 def _status_xfade(futures):
-    return 0 # Not supported
+    return 0  # Not supported

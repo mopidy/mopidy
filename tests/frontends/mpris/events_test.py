@@ -1,9 +1,11 @@
+from __future__ import unicode_literals
+
 import sys
 
 import mock
 
-from mopidy import OptionalDependencyError
-from mopidy.models import Track
+from mopidy.exceptions import OptionalDependencyError
+from mopidy.models import Playlist, Track
 
 try:
     from mopidy.frontends.mpris import MprisFrontend, objects
@@ -16,7 +18,8 @@ from tests import unittest
 @unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
-        self.mpris_frontend = MprisFrontend() # As a plain class, not an actor
+        # As a plain class, not an actor:
+        self.mpris_frontend = MprisFrontend(core=None)
         self.mpris_object = mock.Mock(spec=objects.MprisObject)
         self.mpris_frontend.mpris_object = self.mpris_object
 
@@ -38,7 +41,7 @@ class BackendEventsTest(unittest.TestCase):
         self.mpris_object.PropertiesChanged.assert_called_with(
             objects.PLAYER_IFACE, {'PlaybackStatus': 'Playing'}, [])
 
-    def test_track_playback_started_event_changes_playback_status_and_metadata(self):
+    def test_track_playback_started_changes_playback_status_and_metadata(self):
         self.mpris_object.Get.return_value = '...'
         self.mpris_frontend.track_playback_started(Track())
         self.assertListEqual(self.mpris_object.Get.call_args_list, [
@@ -49,7 +52,7 @@ class BackendEventsTest(unittest.TestCase):
             objects.PLAYER_IFACE,
             {'Metadata': '...', 'PlaybackStatus': '...'}, [])
 
-    def test_track_playback_ended_event_changes_playback_status_and_metadata(self):
+    def test_track_playback_ended_changes_playback_status_and_metadata(self):
         self.mpris_object.Get.return_value = '...'
         self.mpris_frontend.track_playback_ended(Track(), 0)
         self.assertListEqual(self.mpris_object.Get.call_args_list, [
@@ -70,9 +73,21 @@ class BackendEventsTest(unittest.TestCase):
             objects.PLAYER_IFACE, {'Volume': 1.0}, [])
 
     def test_seeked_event_causes_mpris_seeked_event(self):
-        self.mpris_object.Get.return_value = 31000000
-        self.mpris_frontend.seeked()
-        self.assertListEqual(self.mpris_object.Get.call_args_list, [
-            ((objects.PLAYER_IFACE, 'Position'), {}),
-        ])
+        self.mpris_frontend.seeked(31000)
         self.mpris_object.Seeked.assert_called_with(31000000)
+
+    def test_playlists_loaded_event_changes_playlist_count(self):
+        self.mpris_object.Get.return_value = 17
+        self.mpris_frontend.playlists_loaded()
+        self.assertListEqual(self.mpris_object.Get.call_args_list, [
+            ((objects.PLAYLISTS_IFACE, 'PlaylistCount'), {}),
+        ])
+        self.mpris_object.PropertiesChanged.assert_called_with(
+            objects.PLAYLISTS_IFACE, {'PlaylistCount': 17}, [])
+
+    def test_playlist_changed_event_causes_mpris_playlist_changed_event(self):
+        self.mpris_object.get_playlist_id.return_value = 'id-for-dummy:foo'
+        playlist = Playlist(uri='dummy:foo', name='foo')
+        self.mpris_frontend.playlist_changed(playlist)
+        self.mpris_object.PlaylistChanged.assert_called_with(
+            ('id-for-dummy:foo', 'foo', ''))

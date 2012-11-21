@@ -1,4 +1,6 @@
-from collections import namedtuple
+from __future__ import unicode_literals
+
+import json
 
 
 class ImmutableObject(object):
@@ -12,9 +14,10 @@ class ImmutableObject(object):
 
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
-            if not hasattr(self, key):
-                raise TypeError('__init__() got an unexpected keyword ' + \
-                    'argument \'%s\'' % key)
+            if not hasattr(self, key) or callable(getattr(self, key)):
+                raise TypeError(
+                    '__init__() got an unexpected keyword argument "%s"' %
+                    key)
             self.__dict__[key] = value
 
     def __setattr__(self, name, value):
@@ -71,12 +74,13 @@ class ImmutableObject(object):
             if hasattr(self, key):
                 data[key] = values.pop(key)
         if values:
-            raise TypeError("copy() got an unexpected keyword argument '%s'"
-                % key)
+            raise TypeError(
+                'copy() got an unexpected keyword argument "%s"' % key)
         return self.__class__(**data)
 
     def serialize(self):
         data = {}
+        data['__model__'] = self.__class__.__name__
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
             value = self.__dict__[key]
@@ -87,6 +91,44 @@ class ImmutableObject(object):
             if value:
                 data[public_key] = value
         return data
+
+
+class ModelJSONEncoder(json.JSONEncoder):
+    """
+    Automatically serialize Mopidy models to JSON.
+
+    Usage::
+
+        >>> import json
+        >>> json.dumps({'a_track': Track(name='name')}, cls=ModelJSONEncoder)
+        '{"a_track": {"__model__": "Track", "name": "name"}}'
+
+    """
+    def default(self, obj):
+        if isinstance(obj, ImmutableObject):
+            return obj.serialize()
+        return json.JSONEncoder.default(self, obj)
+
+
+def model_json_decoder(dct):
+    """
+    Automatically deserialize Mopidy models from JSON.
+
+    Usage::
+
+        >>> import json
+        >>> json.loads(
+        ...     '{"a_track": {"__model__": "Track", "name": "name"}}',
+        ...     object_hook=model_json_decoder)
+        {u'a_track': Track(artists=[], name=u'name')}
+
+    """
+    if '__model__' in dct:
+        model_name = dct.pop('__model__')
+        cls = globals().get(model_name, None)
+        if issubclass(cls, ImmutableObject):
+            return cls(**dct)
+    return dct
 
 
 class Artist(ImmutableObject):
@@ -119,6 +161,8 @@ class Album(ImmutableObject):
     :type artists: list of :class:`Artist`
     :param num_tracks: number of tracks in album
     :type num_tracks: integer
+    :param date: album release date (YYYY or YYYY-MM-DD)
+    :type date: string
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     """
@@ -135,15 +179,15 @@ class Album(ImmutableObject):
     #: The number of tracks in the album. Read-only.
     num_tracks = 0
 
+    #: The album release date. Read-only.
+    date = None
+
     #: The MusicBrainz ID of the album. Read-only.
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
         self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
         super(Album, self).__init__(*args, **kwargs)
-
-
-CpTrack = namedtuple('CpTrack', ['cpid', 'track'])
 
 
 class Track(ImmutableObject):
@@ -200,16 +244,54 @@ class Track(ImmutableObject):
         super(Track, self).__init__(*args, **kwargs)
 
 
+class TlTrack(ImmutableObject):
+    """
+    A tracklist track. Wraps a regular track and it's tracklist ID.
+
+    The use of :class:`TlTrack` allows the same track to appear multiple times
+    in the tracklist.
+
+    This class also accepts it's parameters as positional arguments. Both
+    arguments must be provided, and they must appear in the order they are
+    listed here.
+
+    This class also supports iteration, so your extract its values like this::
+
+        (tlid, track) = tl_track
+
+    :param tlid: tracklist ID
+    :type tlid: int
+    :param track: the track
+    :type track: :class:`Track`
+    """
+
+    #: The tracklist ID. Read-only.
+    tlid = None
+
+    #: The track. Read-only.
+    track = None
+
+    def __init__(self, *args, **kwargs):
+        if len(args) == 2 and len(kwargs) == 0:
+            kwargs['tlid'] = args[0]
+            kwargs['track'] = args[1]
+            args = []
+        super(TlTrack, self).__init__(*args, **kwargs)
+
+    def __iter__(self):
+        return iter([self.tlid, self.track])
+
+
 class Playlist(ImmutableObject):
     """
-        :param uri: playlist URI
-        :type uri: string
-        :param name: playlist name
-        :type name: string
-        :param tracks: playlist's tracks
-        :type tracks: list of :class:`Track` elements
-        :param last_modified: playlist's modification time
-        :type last_modified: :class:`datetime.datetime`
+    :param uri: playlist URI
+    :type uri: string
+    :param name: playlist name
+    :type name: string
+    :param tracks: playlist's tracks
+    :type tracks: list of :class:`Track` elements
+    :param last_modified: playlist's modification time
+    :type last_modified: :class:`datetime.datetime`
     """
 
     #: The playlist URI. Read-only.

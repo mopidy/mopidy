@@ -1,3 +1,8 @@
+from __future__ import unicode_literals
+
+import logging
+import datetime
+
 import gobject
 gobject.threads_init()
 
@@ -5,10 +10,41 @@ import pygst
 pygst.require('0.10')
 import gst
 
-import datetime
-
-from mopidy.utils.path import path_to_uri, find_files
+from mopidy import settings
+from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
+from mopidy.utils import log, path
+
+
+def main():
+    log.setup_root_logger()
+    log.setup_console_logging(2)
+
+    tracks = []
+
+    def store(data):
+        track = translator(data)
+        tracks.append(track)
+        logging.debug('Added %s', track.uri)
+
+    def debug(uri, error, debug):
+        logging.error('Failed %s: %s - %s', uri, error, debug)
+
+    logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+    scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
+    try:
+        scanner.start()
+    except KeyboardInterrupt:
+        scanner.stop()
+
+    logging.info('Done')
+
+    for row in mpd_translator.tracks_to_tag_cache_format(tracks):
+        if len(row) == 1:
+            print ('%s' % row).encode('utf-8')
+        else:
+            print ('%s: %s' % row).encode('utf-8')
+
 
 def translator(data):
     albumartist_kwargs = {}
@@ -37,7 +73,8 @@ def translator(data):
     _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
     _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
     _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
-    _retrieve('musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
+    _retrieve(
+        'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
@@ -52,51 +89,70 @@ def translator(data):
 
 class Scanner(object):
     def __init__(self, folder, data_callback, error_callback=None):
-        self.files = find_files(folder)
+        self.data = {}
+        self.files = path.find_files(folder)
         self.data_callback = data_callback
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
 
-        fakesink = gst.element_factory_make('fakesink')
+        self.fakesink = gst.element_factory_make('fakesink')
+        self.fakesink.set_property('signal-handoffs', True)
+        self.fakesink.connect('handoff', self.process_handoff)
 
         self.uribin = gst.element_factory_make('uridecodebin')
-        self.uribin.set_property('caps', gst.Caps('audio/x-raw-int'))
-        self.uribin.connect('pad-added', self.process_new_pad,
-            fakesink.get_pad('sink'))
+        self.uribin.set_property('caps', gst.Caps(b'audio/x-raw-int'))
+        self.uribin.connect('pad-added', self.process_new_pad)
 
         self.pipe = gst.element_factory_make('pipeline')
         self.pipe.add(self.uribin)
-        self.pipe.add(fakesink)
+        self.pipe.add(self.fakesink)
 
         bus = self.pipe.get_bus()
         bus.add_signal_watch()
+        bus.connect('message::application', self.process_application)
         bus.connect('message::tag', self.process_tags)
         bus.connect('message::error', self.process_error)
 
-    def process_new_pad(self, source, pad, target_pad):
-        pad.link(target_pad)
+    def process_handoff(self, fakesink, buffer_, pad):
+        # When this function is called the first buffer has reached the end of
+        # the pipeline, and we can continue with the next track. Since we're
+        # in another thread, we send a message back to the main thread using
+        # the bus.
+        structure = gst.Structure('handoff')
+        message = gst.message_new_application(fakesink, structure)
+        bus = self.pipe.get_bus()
+        bus.post(message)
+
+    def process_new_pad(self, source, pad):
+        pad.link(self.fakesink.get_pad('sink'))
+
+    def process_application(self, bus, message):
+        if message.src != self.fakesink:
+            return
+
+        if message.structure.get_name() != 'handoff':
+            return
+
+        self.data['uri'] = unicode(self.uribin.get_property('uri'))
+        self.data[gst.TAG_DURATION] = self.get_duration()
+
+        try:
+            self.data_callback(self.data)
+            self.next_uri()
+        except KeyboardInterrupt:
+            self.stop()
 
     def process_tags(self, bus, message):
         taglist = message.parse_tag()
-        data = {
-            'uri': unicode(self.uribin.get_property('uri')),
-            gst.TAG_DURATION: self.get_duration(),
-        }
 
         for key in taglist.keys():
             # XXX: For some crazy reason some wma files spit out lists here,
             # not sure if this is due to better data in headers or wma being
             # stupid. So ugly hack for now :/
             if type(taglist[key]) is list:
-                data[key] = taglist[key][0]
+                self.data[key] = taglist[key][0]
             else:
-                data[key] = taglist[key]
-
-        try:
-            self.data_callback(data)
-            self.next_uri()
-        except KeyboardInterrupt:
-            self.stop()
+                self.data[key] = taglist[key]
 
     def process_error(self, bus, message):
         if self.error_callback:
@@ -106,7 +162,7 @@ class Scanner(object):
         self.next_uri()
 
     def get_duration(self):
-        self.pipe.get_state() # Block until state change is done.
+        self.pipe.get_state()  # Block until state change is done.
         try:
             return self.pipe.query_duration(
                 gst.FORMAT_TIME, None)[0] // gst.MSECOND
@@ -114,14 +170,15 @@ class Scanner(object):
             return None
 
     def next_uri(self):
+        self.data = {}
         try:
-            uri = path_to_uri(self.files.next())
+            uri = path.path_to_uri(self.files.next())
         except StopIteration:
             self.stop()
             return False
         self.pipe.set_state(gst.STATE_NULL)
         self.uribin.set_property('uri', uri)
-        self.pipe.set_state(gst.STATE_PAUSED)
+        self.pipe.set_state(gst.STATE_PLAYING)
         return True
 
     def start(self):

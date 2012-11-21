@@ -1,7 +1,9 @@
-def populate_playlist(func):
+from __future__ import unicode_literals
+
+
+def populate_tracklist(func):
     def wrapper(self):
-        for track in self.tracks:
-            self.backend.current_playlist.add(track)
+        self.tl_tracks = self.core.tracklist.add(self.tracks)
         return func(self)
 
     wrapper.__name__ = func.__name__

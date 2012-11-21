@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from datetime import date
 
 from mopidy.scanner import Scanner, translator
@@ -17,14 +19,14 @@ class TranslatorTest(unittest.TestCase):
     def setUp(self):
         self.data = {
             'uri': 'uri',
-            'album': u'albumname',
+            'album': 'albumname',
             'track-number': 1,
-            'artist': u'name',
+            'artist': 'name',
             'album-artist': 'albumartistname',
-            'title': u'trackname',
+            'title': 'trackname',
             'track-count': 2,
             'date': FakeGstDate(2006, 1, 1,),
-            'container-format': u'ID3 tag',
+            'container-format': 'ID3 tag',
             'duration': 4531,
             'musicbrainz-trackid': 'mbtrackid',
             'musicbrainz-albumid': 'mbalbumid',
@@ -134,8 +136,8 @@ class ScannerTest(unittest.TestCase):
         self.data = {}
 
     def scan(self, path):
-        scanner = Scanner(path_to_data_dir(path),
-            self.data_callback, self.error_callback)
+        scanner = Scanner(
+            path_to_data_dir(path), self.data_callback, self.error_callback)
         scanner.start()
 
     def check(self, name, key, value):
@@ -160,8 +162,9 @@ class ScannerTest(unittest.TestCase):
 
     def test_uri_is_set(self):
         self.scan('scanner/simple')
-        self.check('scanner/simple/song1.mp3', 'uri', 'file://'
-            + path_to_data_dir('scanner/simple/song1.mp3'))
+        self.check(
+            'scanner/simple/song1.mp3', 'uri',
+            'file://%s' % path_to_data_dir('scanner/simple/song1.mp3'))
 
     def test_duration_is_set(self):
         self.scan('scanner/simple')

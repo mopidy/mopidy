@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import socket
 from mock import patch, Mock
 
@@ -42,15 +44,15 @@ class CreateSocketTest(unittest.TestCase):
     @patch('socket.socket')
     def test_ipv4_socket(self, socket_mock):
         network.create_socket()
-        self.assertEqual(socket_mock.call_args[0],
-            (socket.AF_INET, socket.SOCK_STREAM))
+        self.assertEqual(
+            socket_mock.call_args[0], (socket.AF_INET, socket.SOCK_STREAM))
 
     @patch('mopidy.utils.network.has_ipv6', True)
     @patch('socket.socket')
     def test_ipv6_socket(self, socket_mock):
         network.create_socket()
-        self.assertEqual(socket_mock.call_args[0],
-            (socket.AF_INET6, socket.SOCK_STREAM))
+        self.assertEqual(
+            socket_mock.call_args[0], (socket.AF_INET6, socket.SOCK_STREAM))
 
     @unittest.SkipTest
     def test_ipv6_only_is_set(self):

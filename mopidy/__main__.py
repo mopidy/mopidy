@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import optparse
 import os
@@ -24,127 +26,162 @@ sys.argv[1:] = gstreamer_args
 
 # Add ../ to the path so we can run Mopidy from a Git checkout without
 # installing it on the system.
-sys.path.insert(0,
-    os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from mopidy import (get_version, settings, OptionalDependencyError,
-    SettingsError, DATA_PATH, SETTINGS_PATH, SETTINGS_FILE)
+from mopidy import exceptions, settings
 from mopidy.audio import Audio
-from mopidy.utils import get_class
-from mopidy.utils.deps import list_deps_optparse_callback
-from mopidy.utils.log import setup_logging
-from mopidy.utils.path import get_or_create_folder, get_or_create_file
-from mopidy.utils.process import (exit_handler, stop_remaining_actors,
-    stop_actors_by_class)
-from mopidy.utils.settings import list_settings_optparse_callback
+from mopidy.core import Core
+from mopidy.utils import (
+    deps, importing, log, path, process, settings as settings_utils,
+    versioning)
 
 
 logger = logging.getLogger('mopidy.main')
 
 
 def main():
-    signal.signal(signal.SIGTERM, exit_handler)
+    signal.signal(signal.SIGTERM, process.exit_handler)
+
     loop = gobject.MainLoop()
     options = parse_options()
+
+    if options.debug_thread or settings.DEBUG_THREAD:
+        debug_thread = process.DebugThread()
+        debug_thread.start()
+        signal.signal(signal.SIGUSR1, debug_thread.handler)
+
     try:
-        setup_logging(options.verbosity_level, options.save_debug_log)
+        log.setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
-        setup_audio()
-        setup_backend()
-        setup_frontends()
+        audio = setup_audio()
+        backends = setup_backends(audio)
+        core = setup_core(audio, backends)
+        setup_frontends(core)
         loop.run()
-    except SettingsError as e:
-        logger.error(e.message)
+    except exceptions.SettingsError as ex:
+        logger.error(ex.message)
     except KeyboardInterrupt:
-        logger.info(u'Interrupted. Exiting...')
-    except Exception as e:
-        logger.exception(e)
+        logger.info('Interrupted. Exiting...')
+    except Exception as ex:
+        logger.exception(ex)
     finally:
         loop.quit()
         stop_frontends()
-        stop_backend()
+        stop_core()
+        stop_backends()
         stop_audio()
-        stop_remaining_actors()
+        process.stop_remaining_actors()
 
 
 def parse_options():
-    parser = optparse.OptionParser(version=u'Mopidy %s' % get_version())
-    parser.add_option('--help-gst',
+    parser = optparse.OptionParser(
+        version='Mopidy %s' % versioning.get_version())
+    parser.add_option(
+        '--help-gst',
         action='store_true', dest='help_gst',
         help='show GStreamer help options')
-    parser.add_option('-i', '--interactive',
+    parser.add_option(
+        '-i', '--interactive',
         action='store_true', dest='interactive',
         help='ask interactively for required settings which are missing')
-    parser.add_option('-q', '--quiet',
+    parser.add_option(
+        '-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
-    parser.add_option('-v', '--verbose',
+    parser.add_option(
+        '-v', '--verbose',
         action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
-    parser.add_option('--save-debug-log',
+    parser.add_option(
+        '--save-debug-log',
         action='store_true', dest='save_debug_log',
         help='save debug log to "./mopidy.log"')
-    parser.add_option('--list-settings',
-        action='callback', callback=list_settings_optparse_callback,
+    parser.add_option(
+        '--list-settings',
+        action='callback',
+        callback=settings_utils.list_settings_optparse_callback,
         help='list current settings')
-    parser.add_option('--list-deps',
-        action='callback', callback=list_deps_optparse_callback,
+    parser.add_option(
+        '--list-deps',
+        action='callback', callback=deps.list_deps_optparse_callback,
         help='list dependencies and their versions')
+    parser.add_option(
+        '--debug-thread',
+        action='store_true', dest='debug_thread',
+        help='run background thread that dumps tracebacks on SIGUSR1')
     return parser.parse_args(args=mopidy_args)[0]
 
 
 def check_old_folders():
-    old_settings_folder = os.path.expanduser(u'~/.mopidy')
+    old_settings_folder = os.path.expanduser('~/.mopidy')
 
     if not os.path.isdir(old_settings_folder):
         return
 
-    logger.warning(u'Old settings folder found at %s, settings.py should be '
-        'moved to %s, any cache data should be deleted. See release notes '
-        'for further instructions.', old_settings_folder, SETTINGS_PATH)
+    logger.warning(
+        'Old settings folder found at %s, settings.py should be moved '
+        'to %s, any cache data should be deleted. See release notes for '
+        'further instructions.', old_settings_folder, path.SETTINGS_PATH)
 
 
 def setup_settings(interactive):
-    get_or_create_folder(SETTINGS_PATH)
-    get_or_create_folder(DATA_PATH)
-    get_or_create_file(SETTINGS_FILE)
+    path.get_or_create_folder(path.SETTINGS_PATH)
+    path.get_or_create_folder(path.DATA_PATH)
+    path.get_or_create_file(path.SETTINGS_FILE)
     try:
         settings.validate(interactive)
-    except SettingsError, e:
-        logger.error(e.message)
+    except exceptions.SettingsError as ex:
+        logger.error(ex.message)
         sys.exit(1)
 
 
 def setup_audio():
-    Audio.start()
+    return Audio.start().proxy()
 
 
 def stop_audio():
-    stop_actors_by_class(Audio)
-
-def setup_backend():
-    get_class(settings.BACKENDS[0]).start()
+    process.stop_actors_by_class(Audio)
 
 
-def stop_backend():
-    stop_actors_by_class(get_class(settings.BACKENDS[0]))
+def setup_backends(audio):
+    backends = []
+    for backend_class_name in settings.BACKENDS:
+        backend_class = importing.get_class(backend_class_name)
+        backend = backend_class.start(audio=audio).proxy()
+        backends.append(backend)
+    return backends
 
 
-def setup_frontends():
+def stop_backends():
+    for backend_class_name in settings.BACKENDS:
+        process.stop_actors_by_class(importing.get_class(backend_class_name))
+
+
+def setup_core(audio, backends):
+    return Core.start(audio=audio, backends=backends).proxy()
+
+
+def stop_core():
+    process.stop_actors_by_class(Core)
+
+
+def setup_frontends(core):
     for frontend_class_name in settings.FRONTENDS:
         try:
-            get_class(frontend_class_name).start()
-        except OptionalDependencyError as e:
-            logger.info(u'Disabled: %s (%s)', frontend_class_name, e)
+            importing.get_class(frontend_class_name).start(core=core)
+        except exceptions.OptionalDependencyError as ex:
+            logger.info('Disabled: %s (%s)', frontend_class_name, ex)
 
 
 def stop_frontends():
     for frontend_class_name in settings.FRONTENDS:
         try:
-            stop_actors_by_class(get_class(frontend_class_name))
-        except OptionalDependencyError:
+            frontend_class = importing.get_class(frontend_class_name)
+            process.stop_actors_by_class(frontend_class)
+        except exceptions.OptionalDependencyError:
             pass
 
 

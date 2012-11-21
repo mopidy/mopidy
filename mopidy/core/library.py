@@ -1,16 +1,21 @@
-class LibraryController(object):
-    """
-    :param backend: backend the controller is a part of
-    :type backend: :class:`mopidy.backends.base.Backend`
-    :param provider: provider the controller should use
-    :type provider: instance of :class:`BaseLibraryProvider`
-    """
+from __future__ import unicode_literals
 
+import itertools
+import urlparse
+
+import pykka
+
+
+class LibraryController(object):
     pykka_traversable = True
 
-    def __init__(self, backend, provider):
-        self.backend = backend
-        self.provider = provider
+    def __init__(self, backends, core):
+        self.backends = backends
+        self.core = core
+
+    def _get_backend(self, uri):
+        uri_scheme = urlparse.urlparse(uri).scheme
+        return self.backends.with_library_by_uri_scheme.get(uri_scheme, None)
 
     def find_exact(self, **query):
         """
@@ -27,19 +32,29 @@ class LibraryController(object):
 
         :param query: one or more queries to search for
         :type query: dict
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: list of :class:`mopidy.models.Track`
         """
-        return self.provider.find_exact(**query)
+        futures = [
+            b.library.find_exact(**query) for b in self.backends.with_library]
+        results = pykka.get_all(futures)
+        return list(itertools.chain(*results))
 
     def lookup(self, uri):
         """
-        Lookup track with given URI. Returns :class:`None` if not found.
+        Lookup the given URI.
+
+        If the URI expands to multiple tracks, the returned list will contain
+        them all.
 
         :param uri: track URI
         :type uri: string
-        :rtype: :class:`mopidy.models.Track` or :class:`None`
+        :rtype: list of :class:`mopidy.models.Track`
         """
-        return self.provider.lookup(uri)
+        backend = self._get_backend(uri)
+        if backend:
+            return backend.library.lookup(uri).get()
+        else:
+            return []
 
     def refresh(self, uri=None):
         """
@@ -48,7 +63,14 @@ class LibraryController(object):
         :param uri: directory or track URI
         :type uri: string
         """
-        return self.provider.refresh(uri)
+        if uri is not None:
+            backend = self._get_backend(uri)
+            if backend:
+                backend.library.refresh(uri).get()
+        else:
+            futures = [
+                b.library.refresh(uri) for b in self.backends.with_library]
+            pykka.get_all(futures)
 
     def search(self, **query):
         """
@@ -65,6 +87,9 @@ class LibraryController(object):
 
         :param query: one or more queries to search for
         :type query: dict
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: list of :class:`mopidy.models.Track`
         """
-        return self.provider.search(**query)
+        futures = [
+            b.library.search(**query) for b in self.backends.with_library]
+        results = pykka.get_all(futures)
+        return list(itertools.chain(*results))
