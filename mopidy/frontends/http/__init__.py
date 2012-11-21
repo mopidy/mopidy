@@ -20,10 +20,9 @@ Frontend which lets you control Mopidy through HTTP and WebSockets.
 When this frontend is included in :attr:`mopidy.settings.FRONTENDS`, it starts
 a web server at the port specified by :attr:`mopidy.settings.HTTP_SERVER_PORT`.
 
-This web server exposes both a REST web service at the URL ``/api``, and a
-WebSocket at ``/ws``. The REST API gives you access to most Mopidy
-functionality, while the WebSocket enables Mopidy to instantly push events to
-the client, as they happen.
+This web server exposes a WebSocket at ``/ws``. The WebSocket gives you access
+to Mopidy's full API and enables Mopidy to instantly push events to the client,
+as they happen.
 
 The web server can also host any static files, for example the HTML, CSS,
 JavaScript and images needed by a web based Mopidy client. To host static

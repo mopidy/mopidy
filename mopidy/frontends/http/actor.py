@@ -16,7 +16,7 @@ try:
 except ImportError as import_error:
     raise exceptions.OptionalDependencyError(import_error)
 
-from . import api, ws
+from . import ws
 
 
 logger = logging.getLogger('mopidy.frontends.http')
@@ -45,7 +45,6 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
     def _create_app(self):
         root = RootResource()
-        root.api = api.ApiResource(self.core)
         root.ws = ws.WebSocketResource(self.core)
 
         if settings.HTTP_SERVER_STATIC_DIR:
@@ -59,9 +58,6 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 'tools.staticdir.on': True,
                 'tools.staticdir.index': 'index.html',
                 'tools.staticdir.dir': static_dir,
-            },
-            b'/api': {
-                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             },
             b'/ws': {
                 'tools.websocket.on': True,
