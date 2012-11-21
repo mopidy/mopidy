@@ -38,7 +38,7 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
 
     def test_decoders(self):
         self.sendRequest('decoders')
-        self.assertInResponse('ACK [0@0] {} Not implemented')
+        self.assertInResponse('OK')
 
     def test_notcommands_returns_only_kill_and_ok(self):
         response = self.sendRequest('notcommands')

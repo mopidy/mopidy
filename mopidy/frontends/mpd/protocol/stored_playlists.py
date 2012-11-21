@@ -7,7 +7,7 @@ from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.translator import playlist_to_mpd_format
 
 
-@handle_request(r'^listplaylist (?P<name>\S+)$')
+@handle_request(r'^listplaylist (?P<name>\w+)$')
 @handle_request(r'^listplaylist "(?P<name>[^"]+)"$')
 def listplaylist(context, name):
     """
@@ -29,7 +29,7 @@ def listplaylist(context, name):
     return ['file: %s' % t.uri for t in playlists[0].tracks]
 
 
-@handle_request(r'^listplaylistinfo (?P<name>\S+)$')
+@handle_request(r'^listplaylistinfo (?P<name>\w+)$')
 @handle_request(r'^listplaylistinfo "(?P<name>[^"]+)"$')
 def listplaylistinfo(context, name):
     """
@@ -70,9 +70,16 @@ def listplaylists(context):
         Last-Modified: 2010-02-06T02:10:25Z
         playlist: b
         Last-Modified: 2010-02-06T02:11:08Z
+
+    *Clarifications:*
+
+    - ncmpcpp 0.5.10 segfaults if we return 'playlist: ' on a line, so we must
+      ignore playlists without names, which isn't very useful anyway.
     """
     result = []
     for playlist in context.core.playlists.playlists.get():
+        if not playlist.name:
+            continue
         result.append(('playlist', playlist.name))
         last_modified = (
             playlist.last_modified or dt.datetime.now()).isoformat()
@@ -101,7 +108,7 @@ def load(context, name):
     playlists = context.core.playlists.filter(name=name).get()
     if not playlists:
         raise MpdNoExistError('No such playlist', command='load')
-    context.core.tracklist.append(playlists[0].tracks)
+    context.core.tracklist.add(playlists[0].tracks)
 
 
 @handle_request(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')

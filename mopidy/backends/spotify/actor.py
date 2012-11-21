@@ -31,9 +31,14 @@ class SpotifyBackend(pykka.ThreadingActor, base.Backend):
         # Fail early if settings are not present
         username = settings.SPOTIFY_USERNAME
         password = settings.SPOTIFY_PASSWORD
+        proxy = settings.SPOTIFY_PROXY_HOST
+        proxy_username = settings.SPOTIFY_PROXY_USERNAME
+        proxy_password = settings.SPOTIFY_PROXY_PASSWORD
 
         self.spotify = SpotifySessionManager(
-            username, password, audio=audio, backend_ref=self.actor_ref)
+            username, password, audio=audio, backend_ref=self.actor_ref,
+            proxy=proxy, proxy_username=proxy_username,
+            proxy_password=proxy_password)
 
     def on_start(self):
         logger.info('Mopidy uses SPOTIFY(R) CORE')

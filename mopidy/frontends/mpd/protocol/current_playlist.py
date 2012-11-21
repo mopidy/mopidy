@@ -24,7 +24,7 @@ def add(context, uri):
         return
     tracks = context.core.library.lookup(uri).get()
     if tracks:
-        context.core.tracklist.append(tracks)
+        context.core.tracklist.add(tracks)
         return
     raise MpdNoExistError('directory or file not found', command='add')
 
@@ -57,14 +57,8 @@ def addid(context, uri, songpos=None):
         raise MpdNoExistError('No such song', command='addid')
     if songpos and songpos > context.core.tracklist.length.get():
         raise MpdArgError('Bad song index', command='addid')
-    first_tl_track = None
-    for track in tracks:
-        tl_track = context.core.tracklist.add(track, at_position=songpos).get()
-        if songpos is not None:
-            songpos += 1
-        if first_tl_track is None:
-            first_tl_track = tl_track
-    return ('Id', first_tl_track.tlid)
+    tl_tracks = context.core.tracklist.add(tracks, at_position=songpos).get()
+    return ('Id', tl_tracks[0].tlid)
 
 
 @handle_request(r'^delete "(?P<start>\d+):(?P<end>\d+)*"$')
@@ -110,7 +104,8 @@ def deleteid(context, tlid):
         Deletes the song ``SONGID`` from the playlist
     """
     tlid = int(tlid)
-    if context.core.playback.current_tlid.get() == tlid:
+    tl_track = context.core.playback.current_tl_track.get()
+    if tl_track and tl_track.tlid == tlid:
         context.core.playback.next()
     tl_tracks = context.core.tracklist.remove(tlid=tlid).get()
     if not tl_tracks:
@@ -237,7 +232,6 @@ def playlistid(context, tlid=None):
 
 
 @handle_request(r'^playlistinfo$')
-@handle_request(r'^playlistinfo "-1"$')
 @handle_request(r'^playlistinfo "(?P<songpos>-?\d+)"$')
 @handle_request(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
 def playlistinfo(context, songpos=None, start=None, end=None):
@@ -255,6 +249,8 @@ def playlistinfo(context, songpos=None, start=None, end=None):
     - uses negative indexes, like ``playlistinfo "-1"``, to request
       the entire playlist
     """
+    if songpos == '-1':
+        songpos = None
     if songpos is not None:
         songpos = int(songpos)
         tl_track = context.core.tracklist.tl_tracks.get()[songpos]
@@ -274,7 +270,7 @@ def playlistinfo(context, songpos=None, start=None, end=None):
 
 
 @handle_request(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
-@handle_request(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
+@handle_request(r'^playlistsearch (?P<tag>\w+) "(?P<needle>[^"]+)"$')
 def playlistsearch(context, tag, needle):
     """
     *musicpd.org, current playlist section:*
@@ -376,7 +372,7 @@ def swap(context, songpos1, songpos2):
     del tracks[songpos2]
     tracks.insert(songpos2, song1)
     context.core.tracklist.clear()
-    context.core.tracklist.append(tracks)
+    context.core.tracklist.add(tracks)
 
 
 @handle_request(r'^swapid "(?P<tlid1>\d+)" "(?P<tlid2>\d+)"$')

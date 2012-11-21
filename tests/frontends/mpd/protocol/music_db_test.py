@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from mopidy.models import Album, Artist, Track
+
 from tests.frontends.mpd import protocol
 
 
@@ -119,6 +121,10 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
         self.sendRequest('find album "album_what" artist "artist_what"')
         self.assertInResponse('OK')
 
+    def test_find_without_filter_value(self):
+        self.sendRequest('find "album" ""')
+        self.assertInResponse('OK')
+
 
 class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list_foo_returns_ack(self):
@@ -173,6 +179,18 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
             'list "artist" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
+    def test_list_artist_without_filter_value(self):
+        self.sendRequest('list "artist" "artist" ""')
+        self.assertInResponse('OK')
+
+    def test_list_artist_should_not_return_artists_without_names(self):
+        self.backend.library.dummy_find_exact_result = [
+            Track(artists=[Artist(name='')])]
+
+        self.sendRequest('list "artist"')
+        self.assertNotInResponse('Artist: ')
+        self.assertInResponse('OK')
+
     ### Album
 
     def test_list_album_with_quotes(self):
@@ -189,6 +207,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list_album_with_artist_name(self):
         self.sendRequest('list "album" "anartist"')
+        self.assertInResponse('OK')
+
+    def test_list_album_with_artist_name_without_filter_value(self):
+        self.sendRequest('list "album" ""')
         self.assertInResponse('OK')
 
     def test_list_album_by_artist(self):
@@ -214,6 +236,18 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list_album_by_artist_and_album(self):
         self.sendRequest(
             'list "album" "artist" "anartist" "album" "analbum"')
+        self.assertInResponse('OK')
+
+    def test_list_album_without_filter_value(self):
+        self.sendRequest('list "album" "artist" ""')
+        self.assertInResponse('OK')
+
+    def test_list_album_should_not_return_albums_without_names(self):
+        self.backend.library.dummy_find_exact_result = [
+            Track(album=Album(name=''))]
+
+        self.sendRequest('list "album"')
+        self.assertNotInResponse('Album: ')
         self.assertInResponse('OK')
 
     ### Date
@@ -257,6 +291,17 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list_date_by_artist_and_album(self):
         self.sendRequest('list "date" "artist" "anartist" "album" "analbum"')
+        self.assertInResponse('OK')
+
+    def test_list_date_without_filter_value(self):
+        self.sendRequest('list "date" "artist" ""')
+        self.assertInResponse('OK')
+
+    def test_list_date_should_not_return_blank_dates(self):
+        self.backend.library.dummy_find_exact_result = [Track(date='')]
+
+        self.sendRequest('list "date"')
+        self.assertNotInResponse('Date: ')
         self.assertInResponse('OK')
 
     ### Genre
@@ -303,6 +348,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
             'list "genre" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
+    def test_list_genre_without_filter_value(self):
+        self.sendRequest('list "genre" "artist" ""')
+        self.assertInResponse('OK')
+
 
 class MusicDatabaseSearchTest(protocol.BaseTestCase):
     def test_search_album(self):
@@ -313,12 +362,20 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.sendRequest('search album "analbum"')
         self.assertInResponse('OK')
 
+    def test_search_album_without_filter_value(self):
+        self.sendRequest('search "album" ""')
+        self.assertInResponse('OK')
+
     def test_search_artist(self):
         self.sendRequest('search "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_search_artist_without_quotes(self):
         self.sendRequest('search artist "anartist"')
+        self.assertInResponse('OK')
+
+    def test_search_artist_without_filter_value(self):
+        self.sendRequest('search "artist" ""')
         self.assertInResponse('OK')
 
     def test_search_filename(self):
@@ -329,12 +386,20 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.sendRequest('search filename "afilename"')
         self.assertInResponse('OK')
 
+    def test_search_filename_without_filter_value(self):
+        self.sendRequest('search "filename" ""')
+        self.assertInResponse('OK')
+
     def test_search_file(self):
         self.sendRequest('search "file" "afilename"')
         self.assertInResponse('OK')
 
     def test_search_file_without_quotes(self):
         self.sendRequest('search file "afilename"')
+        self.assertInResponse('OK')
+
+    def test_search_file_without_filter_value(self):
+        self.sendRequest('search "file" ""')
         self.assertInResponse('OK')
 
     def test_search_title(self):
@@ -345,12 +410,20 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.sendRequest('search title "atitle"')
         self.assertInResponse('OK')
 
+    def test_search_title_without_filter_value(self):
+        self.sendRequest('search "title" ""')
+        self.assertInResponse('OK')
+
     def test_search_any(self):
         self.sendRequest('search "any" "anything"')
         self.assertInResponse('OK')
 
     def test_search_any_without_quotes(self):
         self.sendRequest('search any "anything"')
+        self.assertInResponse('OK')
+
+    def test_search_any_without_filter_value(self):
+        self.sendRequest('search "any" ""')
         self.assertInResponse('OK')
 
     def test_search_date(self):
@@ -363,6 +436,10 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
 
     def test_search_date_with_capital_d_and_incomplete_date(self):
         self.sendRequest('search Date "2005"')
+        self.assertInResponse('OK')
+
+    def test_search_date_without_filter_value(self):
+        self.sendRequest('search "date" ""')
         self.assertInResponse('OK')
 
     def test_search_else_should_fail(self):

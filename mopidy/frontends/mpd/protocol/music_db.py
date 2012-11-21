@@ -52,7 +52,7 @@ def count(context, tag, needle):
 
 @handle_request(
     r'^find (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
 def find(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -250,7 +250,8 @@ def _list_artist(context, query):
     tracks = context.core.library.find_exact(**query).get()
     for track in tracks:
         for artist in track.artists:
-            artists.add(('Artist', artist.name))
+            if artist.name:
+                artists.add(('Artist', artist.name))
     return artists
 
 
@@ -258,7 +259,7 @@ def _list_album(context, query):
     albums = set()
     tracks = context.core.library.find_exact(**query).get()
     for track in tracks:
-        if track.album is not None:
+        if track.album and track.album.name:
             albums.add(('Album', track.album.name))
     return albums
 
@@ -267,7 +268,7 @@ def _list_date(context, query):
     dates = set()
     tracks = context.core.library.find_exact(**query).get()
     for track in tracks:
-        if track.date is not None:
+        if track.date:
             dates.add(('Date', track.date))
     return dates
 
@@ -334,7 +335,7 @@ def rescan(context, uri=None):
 
 @handle_request(
     r'^search (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]+"\s?)+)$')
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
 def search(context, mpd_query):
     """
     *musicpd.org, music database section:*

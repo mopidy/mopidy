@@ -281,7 +281,7 @@ class MprisObject(dbus.service.Object):
         # is added to the backend.
         tracks = self.core.library.lookup(uri).get()
         if tracks:
-            tl_tracks = self.core.tracklist.append(tracks).get()
+            tl_tracks = self.core.tracklist.add(tracks).get()
             self.core.playback.play(tl_tracks[0])
         else:
             logger.debug('Track with URI "%s" not found in library.', uri)
@@ -419,8 +419,8 @@ class MprisObject(dbus.service.Object):
         if not self.get_CanControl():
             return False
         return (
-            self.core.playback.current_track.get() is not None or
-            self.core.playback.track_at_next.get() is not None)
+            self.core.playback.current_tl_track.get() is not None or
+            self.core.playback.tl_track_at_next.get() is not None)
 
     def get_CanPause(self):
         if not self.get_CanControl():
@@ -449,7 +449,7 @@ class MprisObject(dbus.service.Object):
         playlist_uri = self.get_playlist_uri(playlist_id)
         playlist = self.core.playlists.lookup(playlist_uri).get()
         if playlist and playlist.tracks:
-            tl_tracks = self.core.tracklist.append(playlist.tracks).get()
+            tl_tracks = self.core.tracklist.add(playlist.tracks).get()
             self.core.playback.play(tl_tracks[0])
 
     @dbus.service.method(dbus_interface=PLAYLISTS_IFACE)
