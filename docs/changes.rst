@@ -79,6 +79,9 @@ long time been our most requested feature. Finally, it's here!
 - The MPD commands ``search`` and ``find`` now allows the key ``file``, which
   is used by ncmpcpp instead of ``filename``.
 
+- The MPD commands ``search`` and ``find`` now allow search query values to be
+  empty strings.
+
 - The MPD command ``listplaylists`` will no longer return playlists without a
   name. This could crash ncmpcpp.
 
