@@ -232,7 +232,6 @@ def playlistid(context, tlid=None):
 
 
 @handle_request(r'^playlistinfo$')
-@handle_request(r'^playlistinfo "-1"$')
 @handle_request(r'^playlistinfo "(?P<songpos>-?\d+)"$')
 @handle_request(r'^playlistinfo "(?P<start>\d+):(?P<end>\d+)*"$')
 def playlistinfo(context, songpos=None, start=None, end=None):
@@ -250,6 +249,8 @@ def playlistinfo(context, songpos=None, start=None, end=None):
     - uses negative indexes, like ``playlistinfo "-1"``, to request
       the entire playlist
     """
+    if songpos == '-1':
+        songpos = None
     if songpos is not None:
         songpos = int(songpos)
         tl_track = context.core.tracklist.tl_tracks.get()[songpos]
