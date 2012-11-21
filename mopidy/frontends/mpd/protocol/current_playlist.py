@@ -270,7 +270,7 @@ def playlistinfo(context, songpos=None, start=None, end=None):
 
 
 @handle_request(r'^playlistsearch "(?P<tag>[^"]+)" "(?P<needle>[^"]+)"$')
-@handle_request(r'^playlistsearch (?P<tag>\S+) "(?P<needle>[^"]+)"$')
+@handle_request(r'^playlistsearch (?P<tag>\w+) "(?P<needle>[^"]+)"$')
 def playlistsearch(context, tag, needle):
     """
     *musicpd.org, current playlist section:*

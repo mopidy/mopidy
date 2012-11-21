@@ -7,7 +7,7 @@ from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.translator import playlist_to_mpd_format
 
 
-@handle_request(r'^listplaylist (?P<name>\S+)$')
+@handle_request(r'^listplaylist (?P<name>\w+)$')
 @handle_request(r'^listplaylist "(?P<name>[^"]+)"$')
 def listplaylist(context, name):
     """
@@ -29,7 +29,7 @@ def listplaylist(context, name):
     return ['file: %s' % t.uri for t in playlists[0].tracks]
 
 
-@handle_request(r'^listplaylistinfo (?P<name>\S+)$')
+@handle_request(r'^listplaylistinfo (?P<name>\w+)$')
 @handle_request(r'^listplaylistinfo "(?P<name>[^"]+)"$')
 def listplaylistinfo(context, name):
     """
