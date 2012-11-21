@@ -10,18 +10,18 @@ from tests.frontends.mpd import protocol
 class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylist(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylist "name"')
-        self.assertInResponse('file: file:///dev/urandom')
+        self.assertInResponse('file: dummy:a')
         self.assertInResponse('OK')
 
     def test_listplaylist_without_quotes(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylist name')
-        self.assertInResponse('file: file:///dev/urandom')
+        self.assertInResponse('file: dummy:a')
         self.assertInResponse('OK')
 
     def test_listplaylist_fails_if_no_playlist_is_found(self):
@@ -30,20 +30,20 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylistinfo(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylistinfo "name"')
-        self.assertInResponse('file: file:///dev/urandom')
+        self.assertInResponse('file: dummy:a')
         self.assertInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 
     def test_listplaylistinfo_without_quotes(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='file:///dev/urandom')])]
+            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylistinfo name')
-        self.assertInResponse('file: file:///dev/urandom')
+        self.assertInResponse('file: dummy:a')
         self.assertInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
@@ -96,7 +96,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('ACK [50@0] {load} No such playlist')
 
     def test_playlistadd(self):
-        self.sendRequest('playlistadd "name" "file:///dev/urandom"')
+        self.sendRequest('playlistadd "name" "dummy:a"')
         self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
     def test_playlistclear(self):
