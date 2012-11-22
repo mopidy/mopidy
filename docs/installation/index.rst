@@ -161,17 +161,23 @@ can install Mopidy from PyPI using Pip.
 
    This is how you install it on Debian/Ubuntu::
 
-       sudo apt-get install build-essential python-dev python-pip
+       sudo apt-get install build-essential python-dev pip-python
 
    And on Arch Linux from the official repository::
 
        sudo pacman -S base-devel python2-pip
+
+   And on Fedora Linux from the official repositories::
+
+       sudo yum install -y gcc python-devel python-pip
 
 #. Then you'll need to install all of Mopidy's hard dependencies:
 
    - Pykka >= 1.0::
 
          sudo pip install -U pykka
+         # On Fedora the binary is called pip-python:
+         # sudo pip-python install -U pykka
 
    - GStreamer 0.10.x, with Python bindings. GStreamer is packaged for most
      popular Linux distributions. Search for GStreamer in your package manager,
@@ -188,6 +194,12 @@ can install Mopidy from PyPI using Pip.
 
          sudo pacman -S gstreamer0.10-python gstreamer0.10-good-plugins \
              gstreamer0.10-ugly-plugins
+
+
+     If you use Fedora you can install GStreamer like this::
+
+         sudo yum install -y python-gst0.10 gstreamer0.10-plugins-good \
+             gstreamer0.10-plugins-ugly gstreamer0.10-tools
 
 #. Optional: If you want Spotify support in Mopidy, you'll need to install
    libspotify and the Python bindings, pyspotify.
@@ -212,14 +224,24 @@ can install Mopidy from PyPI using Pip.
       Remember to adjust the above example for the latest libspotify version
       supported by pyspotify, your OS, and your CPU architecture.
 
+   #. If you're on Fedora, you must add a configuration file so libspotify.so
+      can be found:
+
+          su -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/libspotify.conf'
+          sudo ldconfig
+
    #. Then get, build, and install the latest release of pyspotify using Pip::
 
           sudo pip install -U pyspotify
+          # Fedora: 
+          # sudo pip-python install -U pyspotify
 
 #. Optional: If you want to scrobble your played tracks to Last.fm, you need
    pylast::
 
       sudo pip install -U pylast
+      # Fedora:
+      # sudo pip-python install -U pylast
 
 #. Optional: To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound
    Menu or from an UPnP client via Rygel, you need some additional
@@ -233,6 +255,8 @@ can install Mopidy from PyPI using Pip.
 #. Then, to install the latest release of Mopidy::
 
        sudo pip install -U mopidy
+       # Fedora:
+       # sudo pip-python install -U mopidy
 
    To upgrade Mopidy to future releases, just rerun this command.
 
