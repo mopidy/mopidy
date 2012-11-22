@@ -29,7 +29,12 @@ class JsonRpcWrapper(object):
     For further details on the JSON-RPC 2.0 spec, see
     http://www.jsonrpc.org/specification
 
-    :param objects: dict of names mapped to objects to be exposed
+    :param obj: object to be exposed
+    :param decoders: object builders to be used by :func`json.loads`
+    :type decoders: list of functions taking a dict and returning a dict
+    :param encoders: object serializers to be used by :func:`json.dumps`
+    :type encoders: list of :class:`json.JSONEncoder` subclasses with the
+        method :meth:`default` implemented
     """
 
     def __init__(self, obj, decoders=None, encoders=None):
