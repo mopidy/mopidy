@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 import json
 import traceback
 
+import pykka
+
 
 class JsonRpcWrapper(object):
     """
@@ -167,7 +169,7 @@ class JsonRpcWrapper(object):
         return 'id' not in request
 
     def _is_future(self, result):
-        return callable(getattr(result, 'get', None))
+        return isinstance(result, pykka.Future)
 
 
 class JsonRpcError(Exception):

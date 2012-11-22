@@ -22,6 +22,12 @@ class Calculator(object):
     def sub(self, a, b):
         return a - b
 
+    def describe(self):
+        return {
+            'add': 'Returns the sum of the terms',
+            'sub': 'Returns the diff of the terms',
+        }
+
     def _secret(self):
         return 'Grand Unified Theory'
 
@@ -117,6 +123,20 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         self.assertEqual(response['id'], 1)
         self.assertNotIn('error', response)
         self.assertEqual(response['result'], 'TI83')
+
+    def test_call_method_which_returns_dict_from_plain_object(self):
+        request = {
+            'jsonrpc': '2.0',
+            'method': 'calculator.describe',
+            'id': 1,
+        }
+        response = self.jrw.handle_data(request)
+
+        self.assertEqual(response['jsonrpc'], '2.0')
+        self.assertEqual(response['id'], 1)
+        self.assertNotIn('error', response)
+        self.assertIn('add', response['result'])
+        self.assertIn('sub', response['result'])
 
     def test_call_method_on_actor_root(self):
         request = {
