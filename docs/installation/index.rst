@@ -161,7 +161,7 @@ can install Mopidy from PyPI using Pip.
 
    This is how you install it on Debian/Ubuntu::
 
-       sudo apt-get install build-essential python-dev pip-python
+       sudo apt-get install build-essential python-dev python-pip
 
    And on Arch Linux from the official repository::
 
