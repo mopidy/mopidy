@@ -12,6 +12,10 @@ from mopidy.utils import jsonrpc
 from tests import unittest
 
 
+class ExportedObject(object):
+    pass
+
+
 class Calculator(object):
     def model(self):
         return 'TI83'
@@ -36,11 +40,14 @@ class JsonRpcTestBase(unittest.TestCase):
     def setUp(self):
         self.backend = dummy.DummyBackend.start(audio=None).proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
+
+        exported = ExportedObject()
+        exported.hello = lambda: 'Hello, world!'
+        exported.core = self.core
+        exported.calculator = Calculator()
+
         self.jrw = jsonrpc.JsonRpcWrapper(
-            objects={
-                'core': self.core,
-                'calculator': Calculator(),
-            },
+            obj=exported,
             encoders=[models.ModelJSONEncoder],
             decoders=[models.model_json_decoder])
 
@@ -111,6 +118,19 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandTest(JsonRpcTestBase):
+    def test_call_method_on_root(self):
+        request = {
+            'jsonrpc': '2.0',
+            'method': 'hello',
+            'id': 1,
+        }
+        response = self.jrw.handle_data(request)
+
+        self.assertEqual(response['jsonrpc'], '2.0')
+        self.assertEqual(response['id'], 1)
+        self.assertNotIn('error', response)
+        self.assertEqual(response['result'], 'Hello, world!')
+
     def test_call_method_on_plain_object(self):
         request = {
             'jsonrpc': '2.0',

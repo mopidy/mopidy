@@ -8,18 +8,23 @@ import pykka
 
 class JsonRpcWrapper(object):
     """
-    Wraps objects and make them accessible through JSON-RPC 2.0 messaging.
+    Wraps an object and makes it accessible through JSON-RPC 2.0 messaging.
 
-    This class takes responsibility of communicating with the objects and
+    This class takes responsibility of communicating with the object and
     processing of JSON-RPC 2.0 messages. The transport of the messages over
     HTTP, WebSocket, TCP, or whatever is of no concern to this class.
 
-    The objects can either be Pykka actors or plain objects. Only their public
-    methods will be exposed, not any attributes.
+    Only the object's public methods will be exposed. Attributes are not
+    exposed by themself, but public methods on public attributes are exposed,
+    using dotted paths from the exposed object to the method at the end of the
+    path.
 
-    If a method returns an object with a ``get()`` method, it is assumed to be
-    a future object. Any futures is completed and their value unwrapped before
-    the JSON RPC wrapper returns the response.
+    To expose multiple objects, simply create a new "parent" object and assign
+    the other objects you want to expose to attributes on the "parent" object.
+    You then wrap the "parent" object.
+
+    If a method returns a :class:`pykka.Future`, the future will be completed
+    and its value unwrapped before the JSON-RPC wrapper returns the response.
 
     For further details on the JSON-RPC 2.0 spec, see
     http://www.jsonrpc.org/specification
@@ -27,8 +32,8 @@ class JsonRpcWrapper(object):
     :param objects: dict of names mapped to objects to be exposed
     """
 
-    def __init__(self, objects, decoders=None, encoders=None):
-        self.objects = objects
+    def __init__(self, obj, decoders=None, encoders=None):
+        self.obj = obj
         self.decoder = get_combined_json_decoder(decoders or [])
         self.encoder = get_combined_json_encoder(encoders or [])
 
@@ -155,8 +160,7 @@ class JsonRpcWrapper(object):
     def _get_method(self, name):
         try:
             path = name.split('.')
-            root = path.pop(0)
-            this = self.objects[root]
+            this = self.obj
             for part in path:
                 if part.startswith('_'):
                     raise AttributeError
