@@ -167,7 +167,6 @@ can install Mopidy from PyPI using Pip.
 
        sudo pacman -S base-devel python2-pip
 
-
    And on Fedora Linux from the official repositories::
 
        sudo yum install -y gcc python-devel python-pip
@@ -177,8 +176,9 @@ can install Mopidy from PyPI using Pip.
    - Pykka >= 1.0::
 
          sudo pip install -U pykka
+
          # On Fedora the binary is called pip-python:
-         # sudo pip-python install -U pykka
+         sudo pip-python install -U pykka
 
    - GStreamer 0.10.x, with Python bindings. GStreamer is packaged for most
      popular Linux distributions. Search for GStreamer in your package manager,
@@ -195,7 +195,6 @@ can install Mopidy from PyPI using Pip.
 
          sudo pacman -S gstreamer0.10-python gstreamer0.10-good-plugins \
              gstreamer0.10-ugly-plugins
-
 
      If you use Fedora you can install GStreamer like this::
 
@@ -234,15 +233,17 @@ can install Mopidy from PyPI using Pip.
    #. Then get, build, and install the latest release of pyspotify using Pip::
 
           sudo pip install -U pyspotify
-          # Fedora: 
-          # sudo python-pip install -U pyspotify
+
+          # Fedora:
+          sudo pip-python install -U pyspotify
 
 #. Optional: If you want to scrobble your played tracks to Last.fm, you need
    pylast::
 
       sudo pip install -U pylast
+
       # Fedora:
-      # sudo python-pip install -U pylast
+      sudo pip-python install -U pylast
 
 #. Optional: To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound
    Menu or from an UPnP client via Rygel, you need some additional
@@ -256,8 +257,9 @@ can install Mopidy from PyPI using Pip.
 #. Then, to install the latest release of Mopidy::
 
        sudo pip install -U mopidy
+
        # Fedora:
-       # sudo python-pip install -U mopidy
+       sudo pip-python install -U mopidy
 
    To upgrade Mopidy to future releases, just rerun this command.
 
