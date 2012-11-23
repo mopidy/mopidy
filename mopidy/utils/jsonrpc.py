@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import inspect
 import json
 import traceback
 
@@ -245,3 +246,84 @@ def get_combined_json_encoder(encoders):
                     pass  # Try next encoder
             return json.JSONEncoder.default(self, obj)
     return JsonRpcEncoder
+
+
+class JsonRpcInspector(object):
+    """
+    Inspects a group of objects to create a description of what methods they
+    can expose over JSON-RPC 2.0.
+
+    :param objects: mapping between mounts and exposed classes
+    :type objects: dict
+    """
+
+    def __init__(self, objects):
+        self.objects = objects
+
+    def describe(self):
+        """
+        Inspects the object and returns a data structure which describes the
+        available properties and methods.
+        """
+        methods = {}
+        for mount, obj in self.objects.iteritems():
+            if inspect.isroutine(obj):
+                methods[mount] = self._describe_method(obj)
+            else:
+                obj_methods = self._get_methods(obj)
+                for name, description in obj_methods.iteritems():
+                    if mount:
+                        name = '%s.%s' % (mount, name)
+                    methods[name] = description
+        return methods
+
+    def _get_methods(self, obj):
+        methods = {}
+        for name, value in inspect.getmembers(obj):
+            if name.startswith('_'):
+                continue
+            if not inspect.isroutine(value):
+                continue
+            method = self._describe_method(value)
+            if method:
+                methods[name] = method
+        return methods
+
+    def _describe_method(self, method):
+        return {
+            'description': inspect.getdoc(method),
+            'params': self._describe_params(method),
+        }
+
+    def _describe_params(self, method):
+        argspec = inspect.getargspec(method)
+
+        defaults = argspec.defaults and list(argspec.defaults) or []
+        num_args_without_default = len(argspec.args) - len(defaults)
+        no_defaults = [None] * num_args_without_default
+        defaults = no_defaults + defaults
+
+        params = []
+
+        for arg, default in zip(argspec.args, defaults):
+            if arg == 'self':
+                continue
+            params.append({'name': arg})
+
+        if argspec.defaults:
+            for i, default in enumerate(reversed(argspec.defaults)):
+                params[len(params) - i - 1]['default'] = default
+
+        if argspec.varargs:
+            params.append({
+                'name': argspec.varargs,
+                'varargs': True,
+            })
+
+        if argspec.keywords:
+            params.append({
+                'name': argspec.keywords,
+                'kwargs': True,
+            })
+
+        return params

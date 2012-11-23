@@ -21,6 +21,7 @@ class Calculator(object):
         return 'TI83'
 
     def add(self, a, b):
+        """Returns the sum of the given numbers"""
         return a + b
 
     def sub(self, a, b):
@@ -31,6 +32,9 @@ class Calculator(object):
             'add': 'Returns the sum of the terms',
             'sub': 'Returns the diff of the terms',
         }
+
+    def take_it_all(self, a, b, c=True, *args, **kwargs):
+        pass
 
     def _secret(self):
         return 'Grand Unified Theory'
@@ -491,3 +495,91 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         self.assertEqual(response[None]['error']['code'], -32600)
         self.assertEqual(response['5']['error']['code'], -32601)
         self.assertEqual(response['9']['result'], False)
+
+
+class JsonRpcInspectorTest(JsonRpcTestBase):
+    def test_can_describe_method_on_root(self):
+        inspector = jsonrpc.JsonRpcInspector({
+            'hello': lambda: 'Hello, world!',
+        })
+
+        methods = inspector.describe()
+
+        self.assertIn('hello', methods)
+        self.assertEqual(len(methods['hello']['params']), 0)
+
+    def test_inspector_can_describe_methods_on_the_root_class(self):
+        inspector = jsonrpc.JsonRpcInspector({
+            '': Calculator,
+        })
+
+        methods = inspector.describe()
+
+        self.assertIn('add', methods)
+        self.assertEqual(
+            methods['add']['description'],
+            'Returns the sum of the given numbers')
+
+        self.assertIn('sub', methods)
+        self.assertIn('take_it_all', methods)
+        self.assertNotIn('_secret', methods)
+        self.assertNotIn('__init__', methods)
+
+        method = methods['take_it_all']
+        self.assertIn('params', method)
+
+        params = method['params']
+
+        self.assertEqual(params[0]['name'], 'a')
+        self.assertNotIn('default', params[0])
+
+        self.assertEqual(params[1]['name'], 'b')
+        self.assertNotIn('default', params[1])
+
+        self.assertEqual(params[2]['name'], 'c')
+        self.assertEqual(params[2]['default'], True)
+
+        self.assertEqual(params[3]['name'], 'args')
+        self.assertNotIn('default', params[3])
+        self.assertEqual(params[3]['varargs'], True)
+
+        self.assertEqual(params[4]['name'], 'kwargs')
+        self.assertNotIn('default', params[4])
+        self.assertEqual(params[4]['kwargs'], True)
+
+    def test_inspector_can_describe_methods_not_on_the_root(self):
+        inspector = jsonrpc.JsonRpcInspector({
+            'calc': Calculator,
+        })
+
+        methods = inspector.describe()
+
+        self.assertIn('calc.add', methods)
+        self.assertIn('calc.sub', methods)
+
+    def test_inspector_can_describe_a_bunch_of_large_classes(self):
+        inspector = jsonrpc.JsonRpcInspector({
+            'core.library': core.LibraryController,
+            'core.playback': core.PlaybackController,
+            'core.playlists': core.PlaylistsController,
+            'core.tracklist':  core.TracklistController,
+        })
+
+        methods = inspector.describe()
+
+        self.assertIn('core.library.lookup', methods.keys())
+        self.assertEquals(
+            methods['core.library.lookup']['params'][0]['name'], 'uri')
+
+        self.assertIn('core.playback.next', methods)
+        self.assertEquals(len(methods['core.playback.next']['params']), 0)
+
+        self.assertIn('core.playlists.get_playlists', methods)
+        self.assertEquals(
+            len(methods['core.playlists.get_playlists']['params']), 0)
+
+        self.assertIn('core.tracklist.filter', methods.keys())
+        self.assertEquals(
+            methods['core.tracklist.filter']['params'][0]['name'], 'criteria')
+        self.assertEquals(
+            methods['core.tracklist.filter']['params'][0]['kwargs'], True)
