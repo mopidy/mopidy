@@ -260,7 +260,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
         self.assertEqual(len(response), 3)
 
-        response = {row['id']: row for row in response}
+        response = dict((row['id'], row) for row in response)
         self.assertEqual(response[1]['result'], False)
         self.assertEqual(response[2]['result'], True)
         self.assertEqual(response[3]['result'], False)
