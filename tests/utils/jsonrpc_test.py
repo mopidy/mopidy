@@ -45,6 +45,8 @@ class JsonRpcTestBase(unittest.TestCase):
             objects={
                 'hello': lambda: 'Hello, world!',
                 'core': self.core,
+                'core.playback': self.core.playback,
+                'core.tracklist': self.core.tracklist,
                 '': Calculator(),
             },
             encoders=[models.ModelJSONEncoder],
