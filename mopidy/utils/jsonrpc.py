@@ -23,7 +23,7 @@ class JsonRpcWrapper(object):
 
           jrw = JsonRpcWrapper(objects={'': my_object})
 
-      If ``my_object`` got a method named ``my_method()`` will be exported as
+      If ``my_object`` has a method named ``my_method()`` will be exported as
       the JSON-RPC 2.0 method name ``my_method``.
 
     - To expose multiple objects, add them all to the objects mapping. The key
