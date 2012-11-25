@@ -206,9 +206,10 @@ class JsonRpcWrapper(object):
             mount, method_name = method_path.rsplit('.', 1)
         else:
             mount, method_name = '', method_path
+        if method_name.startswith('_'):
+            raise JsonRpcMethodNotFoundError(
+                data='Private methods are not exported')
         try:
-            if method_name.startswith('_'):
-                raise AttributeError
             obj = self.objects[mount]
             return getattr(obj, method_name)
         except (AttributeError, KeyError):

@@ -405,6 +405,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         error = response['error']
         self.assertEqual(error['code'], -32601)
         self.assertEqual(error['message'], 'Method not found')
+        self.assertEqual(error['data'], 'Private methods are not exported')
 
     def test_invalid_params_causes_invalid_params_error(self):
         request = {
