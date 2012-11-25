@@ -187,10 +187,12 @@ class JsonRpcWrapper(object):
 
         # The mounted object contains the callable
 
-        if '.' in method_path:
-            mount, method_name = method_path.rsplit('.', 1)
-        else:
-            mount, method_name = '', method_path
+        if '.' not in method_path:
+            raise JsonRpcMethodNotFoundError(
+                data='Could not find object mount in method name "%s"' % (
+                    method_path))
+
+        mount, method_name = method_path.rsplit('.', 1)
 
         if method_name.startswith('_'):
             raise JsonRpcMethodNotFoundError(

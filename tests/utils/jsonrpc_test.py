@@ -387,6 +387,21 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         self.assertEqual(
             error['data'], '"params", if given, must be an array or an object')
 
+    def test_method_on_without_object_causes_unknown_method_error(self):
+        request = {
+            'jsonrpc': '2.0',
+            'method': 'bogus',
+            'id': 1,
+        }
+        response = self.jrw.handle_data(request)
+
+        error = response['error']
+        self.assertEqual(error['code'], -32601)
+        self.assertEqual(error['message'], 'Method not found')
+        self.assertEqual(
+            error['data'],
+            'Could not find object mount in method name "bogus"')
+
     def test_method_on_unknown_object_causes_unknown_method_error(self):
         request = {
             'jsonrpc': '2.0',
@@ -417,7 +432,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
     def test_private_method_causes_unknown_method_error(self):
         request = {
             'jsonrpc': '2.0',
-            'method': '_secret',
+            'method': 'core._secret',
             'id': 1,
         }
         response = self.jrw.handle_data(request)
