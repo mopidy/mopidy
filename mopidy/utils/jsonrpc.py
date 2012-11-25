@@ -202,18 +202,28 @@ class JsonRpcWrapper(object):
             return self.objects[method_path]
 
         # The mounted object contains the callable
+
         if '.' in method_path:
             mount, method_name = method_path.rsplit('.', 1)
         else:
             mount, method_name = '', method_path
+
         if method_name.startswith('_'):
             raise JsonRpcMethodNotFoundError(
                 data='Private methods are not exported')
+
         try:
             obj = self.objects[mount]
+        except KeyError:
+            raise JsonRpcMethodNotFoundError(
+                data='No object found at "%s"' % mount)
+
+        try:
             return getattr(obj, method_name)
-        except (AttributeError, KeyError):
-            raise JsonRpcMethodNotFoundError()
+        except AttributeError:
+            raise JsonRpcMethodNotFoundError(
+                data='Object mounted at "%s" has no member "%s"' % (
+                    mount, method_name))
 
     def _is_notification(self, request):
         return 'id' not in request
