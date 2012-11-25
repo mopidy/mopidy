@@ -4,6 +4,19 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.10.0 (in development)
+========================
+
+**Changes**
+
+- None yet
+
+**Bug fixes**
+
+- :issue:`256`: Fix crash caused by non-ASCII characters in paths returned from
+  ``glib``. The bug can be worked around by overriding the settings that
+  includes offending `$XDG_` variables.
+
 
 v0.9.0 (2012-11-21)
 ===================

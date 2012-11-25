@@ -13,14 +13,21 @@ import glib
 
 logger = logging.getLogger('mopidy.utils.path')
 
-DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
-SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
-SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
+XDG_CACHE_DIR = glib.get_user_cache_dir().decode('utf-8')
+XDG_CONFIG_DIR = glib.get_user_config_dir().decode('utf-8')
+XDG_DATA_DIR = glib.get_user_data_dir().decode('utf-8')
+XDG_MUSIC_DIR = glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC)
+if XDG_MUSIC_DIR:
+    XDG_MUSIC_DIR = XDG_MUSIC_DIR.decode('utf-8')
 XDG_DIRS = {
-    'XDG_CACHE_DIR': glib.get_user_cache_dir(),
-    'XDG_DATA_DIR': glib.get_user_data_dir(),
-    'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
+    'XDG_CACHE_DIR': XDG_CACHE_DIR,
+    'XDG_CONFIG_DIR': XDG_CONFIG_DIR,
+    'XDG_DATA_DIR': XDG_DATA_DIR,
+    'XDG_MUSIC_DIR': XDG_MUSIC_DIR,
 }
+DATA_PATH = os.path.join(XDG_DATA_DIR, 'mopidy')
+SETTINGS_PATH = os.path.join(XDG_CONFIG_DIR, 'mopidy')
+SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
 
 
 def get_or_create_folder(folder):
