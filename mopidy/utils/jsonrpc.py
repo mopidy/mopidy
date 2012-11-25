@@ -126,8 +126,7 @@ class JsonRpcWrapper(object):
                 if self._is_notification(request):
                     return None
 
-                if self._is_future(result):
-                    result = result.get()
+                result = self._unwrap_result(result)
 
                 return {
                     'jsonrpc': '2.0',
@@ -201,8 +200,10 @@ class JsonRpcWrapper(object):
     def _is_notification(self, request):
         return 'id' not in request
 
-    def _is_future(self, result):
-        return isinstance(result, pykka.Future)
+    def _unwrap_result(self, result):
+        if isinstance(result, pykka.Future):
+            result = result.get()
+        return result
 
 
 class JsonRpcError(Exception):
