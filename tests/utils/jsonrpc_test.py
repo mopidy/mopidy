@@ -12,10 +12,6 @@ from mopidy.utils import jsonrpc
 from tests import unittest
 
 
-class ExportedObject(object):
-    pass
-
-
 class Calculator(object):
     def model(self):
         return 'TI83'
@@ -45,13 +41,12 @@ class JsonRpcTestBase(unittest.TestCase):
         self.backend = dummy.DummyBackend.start(audio=None).proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
-        exported = ExportedObject()
-        exported.hello = lambda: 'Hello, world!'
-        exported.core = self.core
-        exported.calculator = Calculator()
-
         self.jrw = jsonrpc.JsonRpcWrapper(
-            obj=exported,
+            objects={
+                'hello': lambda: 'Hello, world!',
+                'core': self.core,
+                '': Calculator(),
+            },
             encoders=[models.ModelJSONEncoder],
             decoders=[models.model_json_decoder])
 
@@ -135,10 +130,10 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         self.assertNotIn('error', response)
         self.assertEqual(response['result'], 'Hello, world!')
 
-    def test_call_method_on_plain_object(self):
+    def test_call_method_on_plain_object_as_root(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'calculator.model',
+            'method': 'model',
             'id': 1,
         }
         response = self.jrw.handle_data(request)
@@ -151,7 +146,7 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
     def test_call_method_which_returns_dict_from_plain_object(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'calculator.describe',
+            'method': 'describe',
             'id': 1,
         }
         response = self.jrw.handle_data(request)
@@ -400,7 +395,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
     def test_private_method_causes_unknown_method_error(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'calculator._secret',
+            'method': '_secret',
             'id': 1,
         }
         response = self.jrw.handle_data(request)

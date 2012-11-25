@@ -9,20 +9,38 @@ import pykka
 
 class JsonRpcWrapper(object):
     """
-    Wraps an object and makes it accessible through JSON-RPC 2.0 messaging.
+    Wrap objects and make them accessible through JSON-RPC 2.0 messaging.
 
-    This class takes responsibility of communicating with the object and
+    This class takes responsibility of communicating with the objects and
     processing of JSON-RPC 2.0 messages. The transport of the messages over
     HTTP, WebSocket, TCP, or whatever is of no concern to this class.
 
-    Only the object's public methods will be exposed. Attributes are not
+    Only the public methods of the objects will be exposed. Attributes are not
     exposed by themself, but public methods on public attributes are exposed,
     using dotted paths from the exposed object to the method at the end of the
     path.
 
-    To expose multiple objects, simply create a new "parent" object and assign
-    the other objects you want to expose to attributes on the "parent" object.
-    You then wrap the "parent" object.
+    To expose a single object, add it to the objects mapping using the empty
+    string as the key::
+
+        jrw = JsonRpcWrapper(objects={'': my_object})
+
+    To expose multiple objects, add them all to the objects mapping. The key in
+    the mapping is used as the object's mounting point in the exposed API::
+
+        jrw = JsonRpcWrapper(objects={
+            '': foo,
+            'hello': lambda: 'Hello, world!',
+            'abc': abc,
+        })
+
+    This will create the following mapping between JSON-RPC 2.0 method names
+    and Python callables::
+
+        bar     -> foo.bar()
+        baz     -> foo.baz()
+        hello   -> lambda
+        abc.def -> abc.def()
 
     If a method returns a :class:`pykka.Future`, the future will be completed
     and its value unwrapped before the JSON-RPC wrapper returns the response.
@@ -30,7 +48,9 @@ class JsonRpcWrapper(object):
     For further details on the JSON-RPC 2.0 spec, see
     http://www.jsonrpc.org/specification
 
-    :param obj: object to be exposed
+    :param objects: mapping between mounting points and exposed functions or
+        class instances
+    :type objects: dict
     :param decoders: object builders to be used by :func`json.loads`
     :type decoders: list of functions taking a dict and returning a dict
     :param encoders: object serializers to be used by :func:`json.dumps`
@@ -38,10 +58,32 @@ class JsonRpcWrapper(object):
         method :meth:`default` implemented
     """
 
-    def __init__(self, obj, decoders=None, encoders=None):
-        self.obj = obj
+    def __init__(self, objects, decoders=None, encoders=None):
+        self.obj = self._build_exported_object(objects)
         self.decoder = get_combined_json_decoder(decoders or [])
         self.encoder = get_combined_json_encoder(encoders or [])
+
+    def _build_exported_object(self, objects):
+        class EmptyObject(object):
+            pass
+
+        if '' in objects:
+            exported_object = objects['']
+        else:
+            exported_object = EmptyObject()
+
+        mounts = sorted(objects.keys(), key=lambda x: len(x))
+        for mount in mounts:
+            parent = exported_object
+            path = mount.split('.')
+            for part in path[:-1]:
+                if not hasattr(parent, part):
+                    setattr(parent, part, EmptyObject())
+                parent = getattr(parent, part)
+            if path[-1]:
+                setattr(parent, path[-1], objects[mount])
+
+        return exported_object
 
     def handle_json(self, request):
         """
@@ -250,10 +292,24 @@ def get_combined_json_encoder(encoders):
 
 class JsonRpcInspector(object):
     """
-    Inspects a group of objects to create a description of what methods they
-    can expose over JSON-RPC 2.0.
+    Inspects a group of classes and functions to create a description of what
+    methods they can expose over JSON-RPC 2.0.
 
-    :param objects: mapping between mounts and exposed classes
+    To inspect a single class, add it to the objects mapping using the empty
+    string as the key::
+
+        jri = JsonRpcInspector(objects={'': MyClas})
+
+    To inspect multiple classes, add them all to the objects mapping. The key
+    in the mapping is used as the classes' mounting point in the exposed API::
+
+        jri = JsonRpcInspector(objects={
+            '': Foo,
+            'hello': lambda: 'Hello, world!',
+            'abc': Abc,
+        })
+
+    :param objects: mapping between mounts and exposed functions or classes
     :type objects: dict
     """
 
