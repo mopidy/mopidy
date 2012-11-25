@@ -15,29 +15,46 @@ class JsonRpcWrapper(object):
     processing of JSON-RPC 2.0 messages. The transport of the messages over
     HTTP, WebSocket, TCP, or whatever is of no concern to this class.
 
-    To expose a single object, add it to the objects mapping using the empty
-    string as the key::
+    The wrapper supports exporting the methods of multiple objects. If so, they
+    must be exported with different prefixes, called "mounts".
 
-        jrw = JsonRpcWrapper(objects={'': my_object})
+    - To expose a single object, add it to the objects mapping using the empty
+      string as the mount::
 
-    To expose multiple objects, add them all to the objects mapping. The key in
-    the mapping is used as the object's mounting point in the exposed API::
+          jrw = JsonRpcWrapper(objects={'': my_object})
 
-        jrw = JsonRpcWrapper(objects={
-            '': foo,
-            'hello': lambda: 'Hello, world!',
-            'abc': abc,
-        })
+      If ``my_object`` got a method named ``my_method()`` will be exported as
+      the JSON-RPC 2.0 method name ``my_method``.
 
-    This will create the following mapping between JSON-RPC 2.0 method names
-    and Python callables::
+    - To expose multiple objects, add them all to the objects mapping. The key
+      in the mapping is used as the object's mounting point in the exposed
+      API::
 
-        bar     -> foo.bar()
-        baz     -> foo.baz()
-        hello   -> lambda
-        abc.def -> abc.def()
+         jrw = JsonRpcWrapper(objects={
+             '': foo,
+             'hello': lambda: 'Hello, world!',
+             'abc': abc,
+         })
 
-    Only the public methods of the mounted objects will be exposed.
+      This will export the Python callables on the left as the JSON-RPC 2.0
+      method names on the right::
+
+          foo.bar() -> bar
+          foo.baz() -> baz
+          lambda    -> hello
+          abc.def() -> abc.def
+
+      If the ``foo`` object mounted at the root also got a method named
+      ``hello``, there will be a name collision between ``foo.hello()`` and the
+      lambda function mounted at ``hello``. In that case, the JSON-RPC 2.0
+      method name ``hello`` will refer to the lambda function, because it was
+      mounted explicitly as ``hello``.
+
+      It is recommended to avoid name collisions entirely by using non-empty
+      mounts for all objects.
+
+    Only the public methods of the mounted objects, or functions/methods
+    included directly in the mapping, will be exposed.
 
     If a method returns a :class:`pykka.Future`, the future will be completed
     and its value unwrapped before the JSON-RPC wrapper returns the response.
