@@ -313,7 +313,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
 
         data = error['data']
         self.assertEqual(data['type'], 'ValueError')
-        self.assertEqual(data['message'], "u'bogus' is not in list")
+        self.assertIn('not in list', data['message'])
         self.assertIn('traceback', data)
         self.assertIn('Traceback (most recent call last):', data['traceback'])
 
