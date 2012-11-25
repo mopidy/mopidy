@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 
 import logging
 
-from mopidy import exceptions
+from mopidy import core, exceptions, models
+from mopidy.utils import jsonrpc
 
 try:
     import cherrypy
@@ -15,13 +16,30 @@ logger = logging.getLogger('mopidy.frontends.http')
 
 
 class WebSocketResource(object):
-    def __init__(self, core):
-        self.core = core
+    def __init__(self, core_proxy):
+        self._core = core_proxy
+        inspector = jsonrpc.JsonRpcInspector(
+            objects={
+                'core.library': core.LibraryController,
+                'core.playback': core.PlaybackController,
+                'core.playlists': core.PlaylistsController,
+                'core.tracklist': core.TracklistController,
+            })
+        self.jsonrpc = jsonrpc.JsonRpcWrapper(
+            objects={
+                'core.describe': inspector.describe,
+                'core.library': self._core.library,
+                'core.playback': self._core.playback,
+                'core.playlists': self._core.playlists,
+                'core.tracklist': self._core.tracklist,
+            },
+            decoders=[models.model_json_decoder],
+            encoders=[models.ModelJSONEncoder])
 
     @cherrypy.expose
     def index(self):
         logger.debug('WebSocket handler created')
-        cherrypy.request.ws_handler.core = self.core
+        cherrypy.request.ws_handler.jsonrpc = self.jsonrpc
 
 
 class WebSocketHandler(WebSocket):
@@ -38,14 +56,17 @@ class WebSocketHandler(WebSocket):
             'with code %s and reason %r',
             remote.ip, remote.port, code, reason)
 
-    def received_message(self, message):
-        message = str(message)
-
+    def received_message(self, request):
         remote = cherrypy.request.remote
+        request = str(request)
+
         logger.debug(
             'Received WebSocket message from %s:%d: %r',
-            remote.ip, remote.port, message)
-        # This is where we would handle incoming messages from the clients
+            remote.ip, remote.port, request)
 
-        # This is just for demonstration purposes
-        self.send('Playback state: %s' % self.core.playback.state.get())
+        response = self.jsonrpc.handle_json(request)
+        if response:
+            self.send(response)
+            logger.debug(
+                'Sent WebSocket message to %s:%d: %r',
+                remote.ip, remote.port, response)
