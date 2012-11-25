@@ -15,11 +15,6 @@ class JsonRpcWrapper(object):
     processing of JSON-RPC 2.0 messages. The transport of the messages over
     HTTP, WebSocket, TCP, or whatever is of no concern to this class.
 
-    Only the public methods of the objects will be exposed. Attributes are not
-    exposed by themself, but public methods on public attributes are exposed,
-    using dotted paths from the exposed object to the method at the end of the
-    path.
-
     To expose a single object, add it to the objects mapping using the empty
     string as the key::
 
@@ -41,6 +36,11 @@ class JsonRpcWrapper(object):
         baz     -> foo.baz()
         hello   -> lambda
         abc.def -> abc.def()
+
+    Only the public methods of the objects will be exposed. Attributes are not
+    exposed by themself, but public methods on public attributes are exposed,
+    using dotted paths from the exposed object to the method at the end of the
+    path.
 
     If a method returns a :class:`pykka.Future`, the future will be completed
     and its value unwrapped before the JSON-RPC wrapper returns the response.
@@ -298,7 +298,7 @@ class JsonRpcInspector(object):
     To inspect a single class, add it to the objects mapping using the empty
     string as the key::
 
-        jri = JsonRpcInspector(objects={'': MyClas})
+        jri = JsonRpcInspector(objects={'': MyClass})
 
     To inspect multiple classes, add them all to the objects mapping. The key
     in the mapping is used as the classes' mounting point in the exposed API::
@@ -308,6 +308,14 @@ class JsonRpcInspector(object):
             'hello': lambda: 'Hello, world!',
             'abc': Abc,
         })
+
+    Since this inspector is based on inspecting classes and not instances, it
+    will not give you a complete picture of what is actually exported by
+    :class:`JsonRpcWrapper`. In particular:
+
+    - it will not include methods added dynamically, and
+    - it will not include public methods on attributes on the instances that
+      are to be exposed.
 
     :param objects: mapping between mounts and exposed functions or classes
     :type objects: dict
