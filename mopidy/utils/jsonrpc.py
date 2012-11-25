@@ -15,32 +15,27 @@ class JsonRpcWrapper(object):
     processing of JSON-RPC 2.0 messages. The transport of the messages over
     HTTP, WebSocket, TCP, or whatever is of no concern to this class.
 
-    To expose a single object, add it to the objects mapping using the empty
-    string as the key::
+    The wrapper supports exporting the methods of one or more objects. Either
+    way, the objects must be exported with method name prefixes, called
+    "mounts".
 
-        jrw = JsonRpcWrapper(objects={'': my_object})
+    To expose objects, add them all to the objects mapping. The key in the
+    mapping is used as the object's mounting point in the exposed API::
 
-    To expose multiple objects, add them all to the objects mapping. The key in
-    the mapping is used as the object's mounting point in the exposed API::
+       jrw = JsonRpcWrapper(objects={
+           'foo': foo,
+           'hello': lambda: 'Hello, world!',
+       })
 
-        jrw = JsonRpcWrapper(objects={
-            '': foo,
-            'hello': lambda: 'Hello, world!',
-            'abc': abc,
-        })
+    This will export the Python callables on the left as the JSON-RPC 2.0
+    method names on the right::
 
-    This will create the following mapping between JSON-RPC 2.0 method names
-    and Python callables::
+        foo.bar() -> foo.bar
+        foo.baz() -> foo.baz
+        lambda    -> hello
 
-        bar     -> foo.bar()
-        baz     -> foo.baz()
-        hello   -> lambda
-        abc.def -> abc.def()
-
-    Only the public methods of the objects will be exposed. Attributes are not
-    exposed by themself, but public methods on public attributes are exposed,
-    using dotted paths from the exposed object to the method at the end of the
-    path.
+    Only the public methods of the mounted objects, or functions/methods
+    included directly in the mapping, will be exposed.
 
     If a method returns a :class:`pykka.Future`, the future will be completed
     and its value unwrapped before the JSON-RPC wrapper returns the response.
@@ -59,31 +54,12 @@ class JsonRpcWrapper(object):
     """
 
     def __init__(self, objects, decoders=None, encoders=None):
-        self.obj = self._build_exported_object(objects)
+        if '' in objects.keys():
+            raise AttributeError(
+                'The empty string is not allowed as an object mount')
+        self.objects = objects
         self.decoder = get_combined_json_decoder(decoders or [])
         self.encoder = get_combined_json_encoder(encoders or [])
-
-    def _build_exported_object(self, objects):
-        class EmptyObject(object):
-            pass
-
-        if '' in objects:
-            exported_object = objects['']
-        else:
-            exported_object = EmptyObject()
-
-        mounts = sorted(objects.keys(), key=lambda x: len(x))
-        for mount in mounts:
-            parent = exported_object
-            path = mount.split('.')
-            for part in path[:-1]:
-                if not hasattr(parent, part):
-                    setattr(parent, part, EmptyObject())
-                parent = getattr(parent, part)
-            if path[-1]:
-                setattr(parent, path[-1], objects[mount])
-
-        return exported_object
 
     def handle_json(self, request):
         """
@@ -151,8 +127,7 @@ class JsonRpcWrapper(object):
                 if self._is_notification(request):
                     return None
 
-                if self._is_future(result):
-                    result = result.get()
+                result = self._unwrap_result(result)
 
                 return {
                     'jsonrpc': '2.0',
@@ -205,23 +180,44 @@ class JsonRpcWrapper(object):
             raise JsonRpcInvalidRequestError(
                 data='"params", if given, must be an array or an object')
 
-    def _get_method(self, name):
+    def _get_method(self, method_path):
+        if inspect.isroutine(self.objects.get(method_path, None)):
+            # The mounted object is the callable
+            return self.objects[method_path]
+
+        # The mounted object contains the callable
+
+        if '.' not in method_path:
+            raise JsonRpcMethodNotFoundError(
+                data='Could not find object mount in method name "%s"' % (
+                    method_path))
+
+        mount, method_name = method_path.rsplit('.', 1)
+
+        if method_name.startswith('_'):
+            raise JsonRpcMethodNotFoundError(
+                data='Private methods are not exported')
+
         try:
-            path = name.split('.')
-            this = self.obj
-            for part in path:
-                if part.startswith('_'):
-                    raise AttributeError
-                this = getattr(this, part)
-            return this
-        except (AttributeError, KeyError):
-            raise JsonRpcMethodNotFoundError()
+            obj = self.objects[mount]
+        except KeyError:
+            raise JsonRpcMethodNotFoundError(
+                data='No object found at "%s"' % mount)
+
+        try:
+            return getattr(obj, method_name)
+        except AttributeError:
+            raise JsonRpcMethodNotFoundError(
+                data='Object mounted at "%s" has no member "%s"' % (
+                    mount, method_name))
 
     def _is_notification(self, request):
         return 'id' not in request
 
-    def _is_future(self, result):
-        return isinstance(result, pykka.Future)
+    def _unwrap_result(self, result):
+        if isinstance(result, pykka.Future):
+            result = result.get()
+        return result
 
 
 class JsonRpcError(Exception):
@@ -295,33 +291,27 @@ class JsonRpcInspector(object):
     Inspects a group of classes and functions to create a description of what
     methods they can expose over JSON-RPC 2.0.
 
-    To inspect a single class, add it to the objects mapping using the empty
-    string as the key::
-
-        jri = JsonRpcInspector(objects={'': MyClass})
-
-    To inspect multiple classes, add them all to the objects mapping. The key
-    in the mapping is used as the classes' mounting point in the exposed API::
+    To inspect one or more classes, add them all to the objects mapping. The
+    key in the mapping is used as the classes' mounting point in the exposed
+    API::
 
         jri = JsonRpcInspector(objects={
-            '': Foo,
+            'foo': Foo,
             'hello': lambda: 'Hello, world!',
-            'abc': Abc,
         })
 
-    Since this inspector is based on inspecting classes and not instances, it
-    will not give you a complete picture of what is actually exported by
-    :class:`JsonRpcWrapper`. In particular:
-
-    - it will not include methods added dynamically, and
-    - it will not include public methods on attributes on the instances that
-      are to be exposed.
+    Since the inspector is based on inspecting classes and not instances, it
+    will not include methods added dynamically. The wrapper works with
+    instances, and it will thus export dynamically added methods as well.
 
     :param objects: mapping between mounts and exposed functions or classes
     :type objects: dict
     """
 
     def __init__(self, objects):
+        if '' in objects.keys():
+            raise AttributeError(
+                'The empty string is not allowed as an object mount')
         self.objects = objects
 
     def describe(self):
