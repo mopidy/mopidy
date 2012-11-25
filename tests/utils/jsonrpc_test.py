@@ -44,16 +44,22 @@ class JsonRpcTestBase(unittest.TestCase):
         self.jrw = jsonrpc.JsonRpcWrapper(
             objects={
                 'hello': lambda: 'Hello, world!',
+                'calc': Calculator(),
                 'core': self.core,
                 'core.playback': self.core.playback,
                 'core.tracklist': self.core.tracklist,
-                '': Calculator(),
             },
             encoders=[models.ModelJSONEncoder],
             decoders=[models.model_json_decoder])
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
+
+
+class JsonRpcSetupTest(JsonRpcTestBase):
+    def test_empty_object_mounts_is_not_allowed(self):
+        test = lambda: jsonrpc.JsonRpcWrapper(objects={'': Calculator()})
+        self.assertRaises(AttributeError, test)
 
 
 class JsonRpcSerializationTest(JsonRpcTestBase):
@@ -132,10 +138,10 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         self.assertNotIn('error', response)
         self.assertEqual(response['result'], 'Hello, world!')
 
-    def test_call_method_on_plain_object_as_root(self):
+    def test_call_method_on_plain_object(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'model',
+            'method': 'calc.model',
             'id': 1,
         }
         response = self.jrw.handle_data(request)
@@ -148,7 +154,7 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
     def test_call_method_which_returns_dict_from_plain_object(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'describe',
+            'method': 'calc.describe',
             'id': 1,
         }
         response = self.jrw.handle_data(request)
@@ -510,6 +516,10 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
 
 class JsonRpcInspectorTest(JsonRpcTestBase):
+    def test_empty_object_mounts_is_not_allowed(self):
+        test = lambda: jsonrpc.JsonRpcInspector(objects={'': Calculator})
+        self.assertRaises(AttributeError, test)
+
     def test_can_describe_method_on_root(self):
         inspector = jsonrpc.JsonRpcInspector({
             'hello': lambda: 'Hello, world!',
@@ -520,24 +530,24 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         self.assertIn('hello', methods)
         self.assertEqual(len(methods['hello']['params']), 0)
 
-    def test_inspector_can_describe_methods_on_the_root_class(self):
+    def test_inspector_can_describe_an_object_with_methods(self):
         inspector = jsonrpc.JsonRpcInspector({
-            '': Calculator,
+            'calc': Calculator,
         })
 
         methods = inspector.describe()
 
-        self.assertIn('add', methods)
+        self.assertIn('calc.add', methods)
         self.assertEqual(
-            methods['add']['description'],
+            methods['calc.add']['description'],
             'Returns the sum of the given numbers')
 
-        self.assertIn('sub', methods)
-        self.assertIn('take_it_all', methods)
-        self.assertNotIn('_secret', methods)
-        self.assertNotIn('__init__', methods)
+        self.assertIn('calc.sub', methods)
+        self.assertIn('calc.take_it_all', methods)
+        self.assertNotIn('calc._secret', methods)
+        self.assertNotIn('calc.__init__', methods)
 
-        method = methods['take_it_all']
+        method = methods['calc.take_it_all']
         self.assertIn('params', method)
 
         params = method['params']
@@ -558,16 +568,6 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         self.assertEqual(params[4]['name'], 'kwargs')
         self.assertNotIn('default', params[4])
         self.assertEqual(params[4]['kwargs'], True)
-
-    def test_inspector_can_describe_methods_not_on_the_root(self):
-        inspector = jsonrpc.JsonRpcInspector({
-            'calc': Calculator,
-        })
-
-        methods = inspector.describe()
-
-        self.assertIn('calc.add', methods)
-        self.assertIn('calc.sub', methods)
 
     def test_inspector_can_describe_a_bunch_of_large_classes(self):
         inspector = jsonrpc.JsonRpcInspector({

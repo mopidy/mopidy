@@ -15,43 +15,24 @@ class JsonRpcWrapper(object):
     processing of JSON-RPC 2.0 messages. The transport of the messages over
     HTTP, WebSocket, TCP, or whatever is of no concern to this class.
 
-    The wrapper supports exporting the methods of multiple objects. If so, they
-    must be exported with different prefixes, called "mounts".
+    The wrapper supports exporting the methods of one or more objects. Either
+    way, the objects must be exported with method name prefixes, called
+    "mounts".
 
-    - To expose a single object, add it to the objects mapping using the empty
-      string as the mount::
+    To expose objects, add them all to the objects mapping. The key in the
+    mapping is used as the object's mounting point in the exposed API::
 
-          jrw = JsonRpcWrapper(objects={'': my_object})
+       jrw = JsonRpcWrapper(objects={
+           'foo': foo,
+           'hello': lambda: 'Hello, world!',
+       })
 
-      If ``my_object`` has a method named ``my_method()`` will be exported as
-      the JSON-RPC 2.0 method name ``my_method``.
+    This will export the Python callables on the left as the JSON-RPC 2.0
+    method names on the right::
 
-    - To expose multiple objects, add them all to the objects mapping. The key
-      in the mapping is used as the object's mounting point in the exposed
-      API::
-
-         jrw = JsonRpcWrapper(objects={
-             '': foo,
-             'hello': lambda: 'Hello, world!',
-             'abc': abc,
-         })
-
-      This will export the Python callables on the left as the JSON-RPC 2.0
-      method names on the right::
-
-          foo.bar() -> bar
-          foo.baz() -> baz
-          lambda    -> hello
-          abc.def() -> abc.def
-
-      If the ``foo`` object mounted at the root also got a method named
-      ``hello``, there will be a name collision between ``foo.hello()`` and the
-      lambda function mounted at ``hello``. In that case, the JSON-RPC 2.0
-      method name ``hello`` will refer to the lambda function, because it was
-      mounted explicitly as ``hello``.
-
-      It is recommended to avoid name collisions entirely by using non-empty
-      mounts for all objects.
+        foo.bar() -> foo.bar
+        foo.baz() -> foo.baz
+        lambda    -> hello
 
     Only the public methods of the mounted objects, or functions/methods
     included directly in the mapping, will be exposed.
@@ -73,6 +54,9 @@ class JsonRpcWrapper(object):
     """
 
     def __init__(self, objects, decoders=None, encoders=None):
+        if '' in objects.keys():
+            raise AttributeError(
+                'The empty string is not allowed as an object mount')
         self.objects = objects
         self.decoder = get_combined_json_decoder(decoders or [])
         self.encoder = get_combined_json_encoder(encoders or [])
@@ -305,18 +289,13 @@ class JsonRpcInspector(object):
     Inspects a group of classes and functions to create a description of what
     methods they can expose over JSON-RPC 2.0.
 
-    To inspect a single class, add it to the objects mapping using the empty
-    string as the key::
-
-        jri = JsonRpcInspector(objects={'': MyClass})
-
-    To inspect multiple classes, add them all to the objects mapping. The key
-    in the mapping is used as the classes' mounting point in the exposed API::
+    To inspect one or more classes, add them all to the objects mapping. The
+    key in the mapping is used as the classes' mounting point in the exposed
+    API::
 
         jri = JsonRpcInspector(objects={
-            '': Foo,
+            'foo': Foo,
             'hello': lambda: 'Hello, world!',
-            'abc': Abc,
         })
 
     Since the inspector is based on inspecting classes and not instances, it
@@ -328,6 +307,9 @@ class JsonRpcInspector(object):
     """
 
     def __init__(self, objects):
+        if '' in objects.keys():
+            raise AttributeError(
+                'The empty string is not allowed as an object mount')
         self.objects = objects
 
     def describe(self):
