@@ -11,7 +11,7 @@ from tests import unittest
 @mock.patch.object(cherrypy.engine, 'publish')
 class HttpEventsTest(unittest.TestCase):
     def setUp(self):
-        self.http = HttpFrontend(None)
+        self.http = HttpFrontend(core=mock.Mock())
 
     def test_track_playback_paused_is_broadcasted(self, publish):
         publish.reset_mock()
