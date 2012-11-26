@@ -142,8 +142,9 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             # startup until the Spotify backend is ready from 35s to 12s in one
             # test with clean Spotify cache. In cases with an outdated cache
             # the time improvements should be a lot greater.
-            self._initial_data_receive_completed = True
-            self.refresh_playlists()
+            if not self._initial_data_receive_completed:
+                self._initial_data_receive_completed = True
+                self.refresh_playlists()
 
     def end_of_track(self, session):
         """Callback used by pyspotify"""
