@@ -69,3 +69,7 @@ code, pre {
 .center {
     text-align: center;
 }
+#ws-console {
+    height: 200px;
+    overflow: auto;
+}
