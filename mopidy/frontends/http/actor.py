@@ -54,11 +54,18 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             static_dir = os.path.join(os.path.dirname(__file__), 'data')
         logger.debug('HTTP server will serve "%s" at /', static_dir)
 
+        mopidy_dir = os.path.join(os.path.dirname(__file__), 'data')
+
         config = {
             b'/': {
                 'tools.staticdir.on': True,
                 'tools.staticdir.index': 'index.html',
                 'tools.staticdir.dir': static_dir,
+            },
+            b'/mopidy': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.index': 'mopidy.html',
+                'tools.staticdir.dir': mopidy_dir,
             },
             b'/mopidy/ws': {
                 'tools.websocket.on': True,
