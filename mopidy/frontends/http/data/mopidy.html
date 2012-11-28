@@ -38,15 +38,14 @@
       <p>For more information, please refer to the Mopidy documentation at
       <a href="http://docs.mopidy.com/">docs.mopidy.com</a>.</p>
     </div>
-    <script type="text/javascript" src="jquery-1.8.3.min.js"></script>
     <script type="text/javascript">
-      $(function () {
-        var ws = new WebSocket("ws://" + document.location.host + "/mopidy/ws/");
-        ws.onmessage = function (message) {
-          $("#ws-console").prepend(
-            (new Date()).toLocaleTimeString() + ": " + message.data + "\n");
-        };
-      });
+      var ws = new WebSocket("ws://" + document.location.host + "/mopidy/ws/");
+      ws.onmessage = function (message) {
+        var console = document.getElementById('ws-console');
+        var newLine = (new Date()).toLocaleTimeString() + ": " +
+          message.data + "\n";
+        console.innerHTML = newLine + console.innerHTML;
+      };
     </script>
   </body>
 </html>
