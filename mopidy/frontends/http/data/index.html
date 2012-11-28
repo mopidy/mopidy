@@ -82,7 +82,7 @@
     <div class="box">
       <h2>WebSocket endpoint</h2>
 
-      <p>Mopidy has a WebSocket endpoint at <a href="/ws/">/ws/</a>. You can
+      <p>Mopidy has a WebSocket endpoint at <code>/mopidy/ws/</code>. You can
       use WebSockets to get notified about events happening in Mopidy. The
       alternative would be to regularly poll the conventional web service for
       updates.</p>
@@ -90,7 +90,7 @@
       <p>To connect to the endpoint from a browser with WebSocket support,
       simply enter the following JavaScript code in the browser's console:</p>
 
-      <pre>var ws = new WebSocket("ws://myhost:myport/ws/');
+      <pre>var ws = new WebSocket("ws://myhost:myport/mopidy/ws/');
 ws.onmessage = function (event) {
   console.log("Incoming message: ", event.data);
 };
@@ -110,9 +110,10 @@ ws.send("Message to the server, ahoy!");</pre>
     <script type="text/javascript" src="jquery-1.8.3.min.js"></script>
     <script type="text/javascript">
       $(function () {
-        var ws = new WebSocket("ws://" + document.location.host + "/ws/");
-        ws.onmessage = function (event) {
-          $("#ws-console").prepend((new Date()).toLocaleTimeString() + ": " + event.data + "\n");
+        var ws = new WebSocket("ws://" + document.location.host + "/mopidy/ws/");
+        ws.onmessage = function (message) {
+          $("#ws-console").prepend(
+            (new Date()).toLocaleTimeString() + ": " + message.data + "\n");
         };
       });
     </script>

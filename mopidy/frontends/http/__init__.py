@@ -29,9 +29,9 @@ of Mopidy. Thus, you probably only want to make the web server available from
 your local network or place it behind a web proxy which takes care or user
 authentication. You have been warned.
 
-This web server exposes a WebSocket at ``/ws``. The WebSocket gives you access
-to Mopidy's full API and enables Mopidy to instantly push events to the client,
-as they happen.
+This web server exposes a WebSocket at ``/mopidy/ws/``. The WebSocket gives you
+access to Mopidy's full API and enables Mopidy to instantly push events to the
+client, as they happen.
 
 The web server can also host any static files, for example the HTML, CSS,
 JavaScript and images needed by a web based Mopidy client. To host static

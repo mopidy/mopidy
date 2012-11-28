@@ -45,7 +45,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
     def _create_app(self):
         root = RootResource()
-        root.ws = ws.WebSocketResource(self.core)
+        root.mopidy = MopidyResource()
+        root.mopidy.ws = ws.WebSocketResource(self.core)
 
         if settings.HTTP_SERVER_STATIC_DIR:
             static_dir = settings.HTTP_SERVER_STATIC_DIR
@@ -59,7 +60,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 'tools.staticdir.index': 'index.html',
                 'tools.staticdir.dir': static_dir,
             },
-            b'/ws': {
+            b'/mopidy/ws': {
                 'tools.websocket.on': True,
                 'tools.websocket.handler_cls': ws.WebSocketHandler,
             },
@@ -127,4 +128,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
 
 class RootResource(object):
+    pass
+
+
+class MopidyResource(object):
     pass
