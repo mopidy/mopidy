@@ -35,7 +35,7 @@ def parse_m3u(file_path, music_folder):
         with open(file_path) as m3u:
             contents = m3u.readlines()
     except IOError as error:
-        logger.error('Couldn\'t open m3u: %s', locale_decode(error))
+        logger.warning('Couldn\'t open m3u: %s', locale_decode(error))
         return uris
 
     for line in contents:
@@ -64,7 +64,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
         with open(tag_cache) as library:
             contents = library.read()
     except IOError as error:
-        logger.error('Could not open tag cache: %s', locale_decode(error))
+        logger.warning('Could not open tag cache: %s', locale_decode(error))
         return tracks
 
     current = {}
