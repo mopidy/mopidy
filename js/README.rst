@@ -53,7 +53,15 @@ Building from source
        cd js/
        npm install grunt-buster
 
-5. Run Grunt to lint, test, concatenate, and minify the source::
+5. Install `PhantomJS <http://phantomjs.org/>`_ so that we can run the tests
+   without a browser::
+
+       sudo apt-get install phantomjs
+
+   It is packaged in Ubuntu since 12.04, but I haven't tested with versions
+   older than 1.6 which is the one packaged in Ubuntu 12.10.
+
+6. Run Grunt to lint, test, concatenate, and minify the source::
 
        grunt
 
