@@ -38,6 +38,53 @@ JavaScript and images needed by a web based Mopidy client. To host static
 files, change :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point to the
 directory you want to serve.
 
+**WebSocket API**
+
+On the WebSocket we send two different kind of messages: The client can send
+JSON-RPC 2.0 requests, and the server will respond with JSON-RPC 2.0 responses.
+In addition, the server will send event messages when something happens on the
+server. Both message types are encoded as JSON objects.
+
+Event objects will always have a key named ``event`` whose value is the event
+type. Depending on the event type, the event may include additional fields for
+related data. The events maps directly to the :class:`mopidy.core.CoreListener`
+API. Refer to the ``CoreListener`` method names is the available event types.
+The ``CoreListener`` method's keyword arguments are all included as extra
+fields on the event objects. Example event message::
+
+    {"event": "track_playback_started", "track": {...}}
+
+JSON-RPC 2.0 messages can be recognized by checking for the key named
+``jsonrpc`` with the string value ``2.0``. For details on the messaging format,
+please refer to the `JSON-RPC 2.0 spec
+<http://www.jsonrpc.org/specification>`_.
+
+All methods (not attributes) in the :ref:`core-api` is made available through
+JSON-RPC calls over the WebSocket. For example,
+:meth:`mopidy.core.PlaybackController.play` is available as the JSON-RPC method
+``core.playback.play``.
+
+The core API's attributes is made available through setters and getters. For
+example, the attribute :attr:`mopidy.core.PlaybackController.current_track` is
+availableas the JSON-RPC method ``core.playback.get_current_track`.
+
+Example JSON-RPC request::
+
+    {"jsonrpc": "2.0", "id": 1, "method": "core.playback.get_current_track"}
+
+Example JSON-RPC response::
+
+    {"jsonrpc": "2.0", "id": 1, "result": {"__model__": "Track", ...}}
+
+The JSON-RPC method ``core.describe`` returns a data structure describing all
+available methods. If you're unsure how the core API maps to JSON-RPC, having a
+look at the ``core.describe`` response can be helpful.
+
+**JavaScript wrapper**
+
+A JavaScript library wrapping the JSON-RPC over WebSocket API is under
+development. Details on it will appear here when it's released.
+
 **API stability**
 
 This frontend is currently to be regarded as **experimental**, and we are not
