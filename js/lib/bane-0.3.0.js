@@ -1,3 +1,11 @@
+/**
+ * BANE - Browser globals, AMD and Node Events
+ *
+ * https://github.com/busterjs/bane
+ *
+ * @version 0.3.0
+ */
+
 ((typeof define === "function" && define.amd && function (m) { define(m); }) ||
  (typeof module === "object" && function (m) { module.exports = m(); }) ||
  function (m) { this.bane = m(); }
