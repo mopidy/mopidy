@@ -3,65 +3,27 @@
   <head>
     <meta charset="UTF-8">
     <title>Mopidy HTTP frontend</title>
-    <link rel="stylesheet" type="text/css" href="/mopidy.css">
+    <link rel="stylesheet" type="text/css" href="/mopidy/mopidy.css">
   </head>
   <body>
     <div class="box focus">
       <h1>Mopidy HTTP&nbsp;frontend</h1>
 
       <p>This web server is a part of the music server Mopidy. To learn more
-      about Mopidy, please visit <a
-        href="http://www.mopidy.com/">www.mopidy.com</a>.</p>
+      about Mopidy, please visit
+      <a href="http://www.mopidy.com/">www.mopidy.com</a>.</p>
     </div>
 
     <div class="box">
       <h2>Static content serving</h2>
 
-      <p>To see your own content here, change the setting
-      <tt>HTTP_SERVER_STATIC_DIR</tt> to point to the directory containing your
-      content. This can be used to host a web based Mopidy client here.</p>
+      <p>To see your own content instead of this placeholder page, change the
+      setting <tt>HTTP_SERVER_STATIC_DIR</tt> to point to the directory
+      containing your static files. This can be used to host e.g. a pure
+      HTML/CSS/JavaScript Mopidy client.</p>
 
-      <p>Even if you host your own content on the root of the web server,
-      you'll always have the following services available.</p>
+      <p>If you replace this page with your own content, the Mopidy resources
+      at <a href="/mopidy/">/mopidy/</a> will still be available.</p>
     </div>
-
-    <div class="box">
-      <h2>WebSocket endpoint</h2>
-
-      <p>Mopidy has a WebSocket endpoint at <code>/mopidy/ws/</code>. You can
-      use WebSockets to get notified about events happening in Mopidy. The
-      alternative would be to regularly poll the conventional web service for
-      updates.</p>
-
-      <p>To connect to the endpoint from a browser with WebSocket support,
-      simply enter the following JavaScript code in the browser's console:</p>
-
-      <pre>var ws = new WebSocket("ws://myhost:myport/mopidy/ws/');
-ws.onmessage = function (event) {
-  console.log("Incoming message: ", event.data);
-};
-ws.send("Message to the server, ahoy!");</pre>
-
-      <p>Here you can see events arriving from Mopidy in real time:</p>
-
-      <pre id="ws-console"></pre>
-    </div>
-
-    <div class="box focus">
-      <h2>Documentation</h2>
-
-      <p>For more information, please refer to the Mopidy documentation at
-      <a href="http://docs.mopidy.com/">docs.mopidy.com</a>.</p>
-    </div>
-    <script type="text/javascript" src="jquery-1.8.3.min.js"></script>
-    <script type="text/javascript">
-      $(function () {
-        var ws = new WebSocket("ws://" + document.location.host + "/mopidy/ws/");
-        ws.onmessage = function (message) {
-          $("#ws-console").prepend(
-            (new Date()).toLocaleTimeString() + ": " + message.data + "\n");
-        };
-      });
-    </script>
   </body>
 </html>
