@@ -1,5 +1,6 @@
 """
-Frontend which lets you control Mopidy through HTTP and WebSockets.
+The HTTP frontends lets you control Mopidy through HTTP and WebSockets, e.g.
+from a web based client.
 
 **Dependencies**
 
@@ -15,7 +16,9 @@ Frontend which lets you control Mopidy through HTTP and WebSockets.
 
 - :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR`
 
-**Usage**
+
+Setup
+=====
 
 When this frontend is included in :attr:`mopidy.settings.FRONTENDS`, it starts
 a web server at the port specified by :attr:`mopidy.settings.HTTP_SERVER_PORT`.
@@ -31,16 +34,28 @@ a web server at the port specified by :attr:`mopidy.settings.HTTP_SERVER_PORT`.
     available from your local network or place it behind a web proxy which
     takes care or user authentication. You have been warned.
 
-This web server exposes a WebSocket at ``/mopidy/ws/``. The WebSocket gives you
-access to Mopidy's full API and enables Mopidy to instantly push events to the
-client, as they happen.
+
+Using a web based Mopidy client
+===============================
 
 The web server can also host any static files, for example the HTML, CSS,
-JavaScript and images needed by a web based Mopidy client. To host static
+JavaScript, and images needed for a web based Mopidy client. To host static
 files, change :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point to the
-directory you want to serve.
+root directory of your web client, e.g.::
 
-**WebSocket API**
+    HTTP_SERVER_STATIC_DIR = u'/home/alice/dev/the-client'
+
+If the directory includes a file named ``index.html``, it will be served on the
+root of Mopidy's web server.
+
+If you're making a web based client and wants to do server side development as
+well, you are of course free to run your own web server and just use Mopidy's
+web server for the APIs. But, for clients implemented purely in JavaScript,
+letting Mopidy host the files is a simpler solution.
+
+
+WebSocket API
+=============
 
 .. warning:: API stability
 
@@ -54,10 +69,18 @@ directory you want to serve.
     From Mopidy 1.0 and onwards, we intend to keep the core API far more
     stable.
 
+The web server exposes a WebSocket at ``/mopidy/ws/``. The WebSocket gives you
+access to Mopidy's full API and enables Mopidy to instantly push events to the
+client, as they happen.
+
 On the WebSocket we send two different kind of messages: The client can send
 JSON-RPC 2.0 requests, and the server will respond with JSON-RPC 2.0 responses.
 In addition, the server will send event messages when something happens on the
 server. Both message types are encoded as JSON objects.
+
+
+Event messages
+--------------
 
 Event objects will always have a key named ``event`` whose value is the event
 type. Depending on the event type, the event may include additional fields for
@@ -67,6 +90,10 @@ The ``CoreListener`` method's keyword arguments are all included as extra
 fields on the event objects. Example event message::
 
     {"event": "track_playback_started", "track": {...}}
+
+
+JSON-RPC 2.0 messaging
+----------------------
 
 JSON-RPC 2.0 messages can be recognized by checking for the key named
 ``jsonrpc`` with the string value ``2.0``. For details on the messaging format,
@@ -80,7 +107,7 @@ JSON-RPC calls over the WebSocket. For example,
 
 The core API's attributes is made available through setters and getters. For
 example, the attribute :attr:`mopidy.core.PlaybackController.current_track` is
-availableas the JSON-RPC method ``core.playback.get_current_track`.
+available as the JSON-RPC method ``core.playback.get_current_track``.
 
 Example JSON-RPC request::
 
@@ -94,7 +121,8 @@ The JSON-RPC method ``core.describe`` returns a data structure describing all
 available methods. If you're unsure how the core API maps to JSON-RPC, having a
 look at the ``core.describe`` response can be helpful.
 
-**JavaScript wrapper**
+JavaScript wrapper
+==================
 
 A JavaScript library wrapping the JSON-RPC over WebSocket API is under
 development. Details on it will appear here when it's released.
