@@ -55,12 +55,17 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug('HTTP server will serve "%s" at /', static_dir)
 
         mopidy_dir = os.path.join(os.path.dirname(__file__), 'data')
+        favicon = os.path.join(mopidy_dir, 'favicon.png')
 
         config = {
             b'/': {
                 'tools.staticdir.on': True,
                 'tools.staticdir.index': 'index.html',
                 'tools.staticdir.dir': static_dir,
+            },
+            b'/favicon.ico': {
+                'tools.staticfile.on': True,
+                'tools.staticfile.filename': favicon,
             },
             b'/mopidy': {
                 'tools.staticdir.on': True,
