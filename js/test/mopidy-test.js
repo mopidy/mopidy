@@ -591,7 +591,11 @@ buster.testCase("Mopidy", {
             });
 
             assert.isFunction(this.mopidy.hello);
+            assert.equals(this.mopidy.hello.description, "Says hello");
+            assert.equals(this.mopidy.hello.params, []);
             assert.isFunction(this.mopidy.hi);
+            assert.equals(this.mopidy.hi.description, "Says hi");
+            assert.equals(this.mopidy.hi.params, []);
         },
 
         "can create an API with methods on a sub-object": function () {

@@ -263,6 +263,8 @@ Mopidy.prototype._createApi = function (methods) {
         var methodName = mopidy._snakeToCamel(methodPath.slice(-1)[0]);
         var object = createObjects(methodPath.slice(0, -1));
         object[methodName] = caller(fullMethodName);
+        object[methodName].description = methods[fullMethodName].description;
+        object[methodName].params = methods[fullMethodName].params;
     };
 
     Object.keys(methods).forEach(createMethod);
