@@ -20,14 +20,16 @@ Frontend which lets you control Mopidy through HTTP and WebSockets.
 When this frontend is included in :attr:`mopidy.settings.FRONTENDS`, it starts
 a web server at the port specified by :attr:`mopidy.settings.HTTP_SERVER_PORT`.
 
-As a simple security measure, the web server is by default only available from
-localhost. To make it available from other computers, change
-:attr:`mopidy.settings.HTTP_SERVER_HOSTNAME`. Before you do so, note that the
-HTTP frontend does not feature any form of user authentication or
-authorization. Anyone able to access the web server can use the full core API
-of Mopidy. Thus, you probably only want to make the web server available from
-your local network or place it behind a web proxy which takes care or user
-authentication. You have been warned.
+.. warning:: Security
+
+    As a simple security measure, the web server is by default only available
+    from localhost. To make it available from other computers, change
+    :attr:`mopidy.settings.HTTP_SERVER_HOSTNAME`. Before you do so, note that
+    the HTTP frontend does not feature any form of user authentication or
+    authorization. Anyone able to access the web server can use the full core
+    API of Mopidy. Thus, you probably only want to make the web server
+    available from your local network or place it behind a web proxy which
+    takes care or user authentication. You have been warned.
 
 This web server exposes a WebSocket at ``/mopidy/ws/``. The WebSocket gives you
 access to Mopidy's full API and enables Mopidy to instantly push events to the
@@ -39,6 +41,18 @@ files, change :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point to the
 directory you want to serve.
 
 **WebSocket API**
+
+.. warning:: API stability
+
+    Since this frontend exposes our internal core API directly it is to be
+    regarded as **experimental**. We cannot promise to keep any form of
+    backwards compatibility between releases as we will need to change the core
+    API while working out how to support new use cases. Thus, if you use this
+    API, you must expect to do small adjustments to your client for every
+    release of Mopidy.
+
+    From Mopidy 1.0 and onwards, we intend to keep the core API far more
+    stable.
 
 On the WebSocket we send two different kind of messages: The client can send
 JSON-RPC 2.0 requests, and the server will respond with JSON-RPC 2.0 responses.
@@ -84,16 +98,6 @@ look at the ``core.describe`` response can be helpful.
 
 A JavaScript library wrapping the JSON-RPC over WebSocket API is under
 development. Details on it will appear here when it's released.
-
-**API stability**
-
-Since this frontend exposes our internal core API directly it is to be regarded
-as **experimental**. We cannot promise to keep any form of backwards
-compatibility between releases as we will need to change the core API while
-working out how to support new use cases. Thus, if you use this API, you must
-expect to do small adjustments to your client for every release of Mopidy.
-
-From Mopidy 1.0 and onwards, we intend to keep the core API far more stable.
 """
 
 # flake8: noqa
