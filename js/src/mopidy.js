@@ -1,19 +1,17 @@
 /*global bane:false, when:false*/
 
 function Mopidy(settings) {
-    var mopidy = this;
+    this._settings = this._configure(settings || {});
 
-    mopidy._settings = mopidy._configure(settings || {});
+    this._backoffDelay = this._settings.backoffDelayMin;
+    this._pendingRequests = {};
+    this._webSocket = null;
 
-    mopidy._backoffDelay = mopidy._settings.backoffDelayMin;
-    mopidy._pendingRequests = {};
-    mopidy._webSocket = null;
+    bane.createEventEmitter(this);
+    this._delegateEvents();
 
-    bane.createEventEmitter(mopidy);
-    mopidy._delegateEvents();
-
-    if (mopidy._settings.autoConnect) {
-        mopidy._connect();
+    if (this._settings.autoConnect) {
+        this._connect();
     }
 }
 
@@ -32,92 +30,82 @@ Mopidy.prototype._configure = function (settings) {
 };
 
 Mopidy.prototype._delegateEvents = function () {
-    var mopidy = this;
-
     // Remove existing event handlers
-    mopidy.off("websocket:close");
-    mopidy.off("websocket:error");
-    mopidy.off("websocket:incomingMessage");
-    mopidy.off("websocket:open");
-    mopidy.off("state:offline");
+    this.off("websocket:close");
+    this.off("websocket:error");
+    this.off("websocket:incomingMessage");
+    this.off("websocket:open");
+    this.off("state:offline");
 
     // Register basic set of event handlers
-    mopidy.on("websocket:close", mopidy._cleanup);
-    mopidy.on("websocket:error", mopidy._handleWebSocketError);
-    mopidy.on("websocket:incomingMessage", mopidy._handleMessage);
-    mopidy.on("websocket:open", mopidy._resetBackoffDelay);
-    mopidy.on("websocket:open", mopidy._getApiSpec);
-    mopidy.on("state:offline", mopidy._reconnect);
+    this.on("websocket:close", this._cleanup);
+    this.on("websocket:error", this._handleWebSocketError);
+    this.on("websocket:incomingMessage", this._handleMessage);
+    this.on("websocket:open", this._resetBackoffDelay);
+    this.on("websocket:open", this._getApiSpec);
+    this.on("state:offline", this._reconnect);
 };
 
 Mopidy.prototype._connect = function () {
-    var mopidy = this;
-
-    if (mopidy._webSocket) {
-        if (mopidy._webSocket.readyState === WebSocket.OPEN) {
+    if (this._webSocket) {
+        if (this._webSocket.readyState === WebSocket.OPEN) {
             return;
         } else {
-            mopidy._webSocket.close();
+            this._webSocket.close();
         }
     }
 
-    mopidy._webSocket = mopidy._settings.webSocket ||
-        new WebSocket(mopidy._settings.webSocketUrl);
+    this._webSocket = this._settings.webSocket ||
+        new WebSocket(this._settings.webSocketUrl);
 
-    mopidy._webSocket.onclose = function (close) {
-        mopidy.emit("websocket:close", close);
-    };
+    this._webSocket.onclose = function (close) {
+        this.emit("websocket:close", close);
+    }.bind(this);
 
-    mopidy._webSocket.onerror = function (error) {
-        mopidy.emit("websocket:error", error);
-    };
+    this._webSocket.onerror = function (error) {
+        this.emit("websocket:error", error);
+    }.bind(this);
 
-    mopidy._webSocket.onopen = function () {
-        mopidy.emit("websocket:open");
-    };
+    this._webSocket.onopen = function () {
+        this.emit("websocket:open");
+    }.bind(this);
 
-    mopidy._webSocket.onmessage = function (message) {
-        mopidy.emit("websocket:incomingMessage", message);
-    };
+    this._webSocket.onmessage = function (message) {
+        this.emit("websocket:incomingMessage", message);
+    }.bind(this);
 };
 
 Mopidy.prototype._cleanup = function (closeEvent) {
-    var mopidy = this;
-
-    Object.keys(mopidy._pendingRequests).forEach(function (requestId) {
-        var resolver = mopidy._pendingRequests[requestId];
-        delete mopidy._pendingRequests[requestId];
+    Object.keys(this._pendingRequests).forEach(function (requestId) {
+        var resolver = this._pendingRequests[requestId];
+        delete this._pendingRequests[requestId];
         resolver.reject({
             message: "WebSocket closed",
             closeEvent: closeEvent
         });
-    });
+    }.bind(this));
 
-    mopidy.emit("state:offline");
+    this.emit("state:offline");
 };
 
 Mopidy.prototype._reconnect = function () {
-    var mopidy = this;
-
-    mopidy.emit("reconnectionPending", {
-        timeToAttempt: mopidy._backoffDelay
+    this.emit("reconnectionPending", {
+        timeToAttempt: this._backoffDelay
     });
 
     setTimeout(function () {
-        mopidy.emit("reconnecting");
-        mopidy._connect();
-    }, mopidy._backoffDelay);
+        this.emit("reconnecting");
+        this._connect();
+    }.bind(this), this._backoffDelay);
 
-    mopidy._backoffDelay = mopidy._backoffDelay * 2;
-    if (mopidy._backoffDelay > mopidy._settings.backoffDelayMax) {
-        mopidy._backoffDelay = mopidy._settings.backoffDelayMax;
+    this._backoffDelay = this._backoffDelay * 2;
+    if (this._backoffDelay > this._settings.backoffDelayMax) {
+        this._backoffDelay = this._settings.backoffDelayMax;
     }
 };
 
 Mopidy.prototype._resetBackoffDelay = function () {
-    var mopidy = this;
-
-    mopidy._backoffDelay = mopidy._settings.backoffDelayMin;
+    this._backoffDelay = this._settings.backoffDelayMin;
 };
 
 Mopidy.prototype._handleWebSocketError = function (error) {
@@ -125,10 +113,9 @@ Mopidy.prototype._handleWebSocketError = function (error) {
 };
 
 Mopidy.prototype._send = function (message) {
-    var mopidy = this;
     var deferred = when.defer();
 
-    switch (mopidy._webSocket.readyState) {
+    switch (this._webSocket.readyState) {
     case WebSocket.CONNECTING:
         deferred.resolver.reject({
             message: "WebSocket is still connecting"
@@ -146,10 +133,10 @@ Mopidy.prototype._send = function (message) {
         break;
     default:
         message.jsonrpc = "2.0";
-        message.id = mopidy._nextRequestId();
+        message.id = this._nextRequestId();
         this._pendingRequests[message.id] = deferred.resolver;
         this._webSocket.send(JSON.stringify(message));
-        mopidy.emit("websocket:outgoingMessage", message);
+        this.emit("websocket:outgoingMessage", message);
     }
 
     return deferred.promise;
@@ -164,14 +151,12 @@ Mopidy.prototype._nextRequestId = (function () {
 }());
 
 Mopidy.prototype._handleMessage = function (message) {
-    var mopidy = this;
-
     try {
         var data = JSON.parse(message.data);
         if (data.hasOwnProperty("id")) {
-            mopidy._handleResponse(data);
+            this._handleResponse(data);
         } else if (data.hasOwnProperty("event")) {
-            mopidy._handleEvent(data);
+            this._handleEvent(data);
         } else {
             console.warn(
                 "Unknown message type received. Message was: " +
@@ -189,15 +174,14 @@ Mopidy.prototype._handleMessage = function (message) {
 };
 
 Mopidy.prototype._handleResponse = function (responseMessage) {
-    var mopidy = this;
-
-    if (!mopidy._pendingRequests.hasOwnProperty(responseMessage.id)) {
+    if (!this._pendingRequests.hasOwnProperty(responseMessage.id)) {
         console.warn(
             "Unexpected response received. Message was:", responseMessage);
         return;
     }
-    var resolver = mopidy._pendingRequests[responseMessage.id];
-    delete mopidy._pendingRequests[responseMessage.id];
+
+    var resolver = this._pendingRequests[responseMessage.id];
+    delete this._pendingRequests[responseMessage.id];
 
     if (responseMessage.hasOwnProperty("result")) {
         resolver.resolve(responseMessage.result);
@@ -216,35 +200,29 @@ Mopidy.prototype._handleResponse = function (responseMessage) {
 };
 
 Mopidy.prototype._handleEvent = function (eventMessage) {
-    var mopidy = this;
-
     var type = eventMessage.event;
     var data = eventMessage;
     delete data.event;
 
-    mopidy.emit("event:" + mopidy._snakeToCamel(type), data); 
+    this.emit("event:" + this._snakeToCamel(type), data);
 };
 
 Mopidy.prototype._getApiSpec = function () {
-    var mopidy = this;
-
-    mopidy._send({method: "core.describe"})
-        .then(mopidy._createApi.bind(mopidy), mopidy._handleWebSocketError)
-        .then(null, mopidy._handleWebSocketError);
+    this._send({method: "core.describe"})
+        .then(this._createApi.bind(this), this._handleWebSocketError)
+        .then(null, this._handleWebSocketError);
 };
 
 Mopidy.prototype._createApi = function (methods) {
-    var mopidy = this;
-
     var caller = function (method) {
         return function () {
             var params = Array.prototype.slice.call(arguments);
-            return mopidy._send({
+            return this._send({
                 method: method,
                 params: params
             });
-        };
-    };
+        }.bind(this);
+    }.bind(this);
 
     var getPath = function (fullName) {
         var path = fullName.split(".");
@@ -255,26 +233,26 @@ Mopidy.prototype._createApi = function (methods) {
     };
 
     var createObjects = function (objPath) {
-        var parentObj = mopidy;
+        var parentObj = this;
         objPath.forEach(function (objName) {
-            objName = mopidy._snakeToCamel(objName);
+            objName = this._snakeToCamel(objName);
             parentObj[objName] = parentObj[objName] || {};
             parentObj = parentObj[objName];
-        });
+        }.bind(this));
         return parentObj;
-    };
+    }.bind(this);
 
     var createMethod = function (fullMethodName) {
         var methodPath = getPath(fullMethodName);
-        var methodName = mopidy._snakeToCamel(methodPath.slice(-1)[0]);
+        var methodName = this._snakeToCamel(methodPath.slice(-1)[0]);
         var object = createObjects(methodPath.slice(0, -1));
         object[methodName] = caller(fullMethodName);
         object[methodName].description = methods[fullMethodName].description;
         object[methodName].params = methods[fullMethodName].params;
-    };
+    }.bind(this);
 
     Object.keys(methods).forEach(createMethod);
-    mopidy.emit("state:online");
+    this.emit("state:online");
 };
 
 Mopidy.prototype._snakeToCamel = function (name) {
