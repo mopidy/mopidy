@@ -98,40 +98,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         cherrypy.engine.exit()
         logger.info('Stopped HTTP server')
 
-    def track_playback_paused(self, **data):
-        self._broadcast_event('track_playback_paused', data)
-
-    def track_playback_resumed(self, **data):
-        self._broadcast_event('track_playback_resumed', data)
-
-    def track_playback_started(self, **data):
-        self._broadcast_event('track_playback_started', data)
-
-    def track_playback_ended(self, **data):
-        self._broadcast_event('track_playback_ended', data)
-
-    def playback_state_changed(self, **data):
-        self._broadcast_event('playback_state_changed', data)
-
-    def tracklist_changed(self, **data):
-        self._broadcast_event('tracklist_changed', data)
-
-    def playlists_loaded(self, **data):
-        self._broadcast_event('playlists_loaded', data)
-
-    def playlist_changed(self, **data):
-        self._broadcast_event('playlist_changed', data)
-
-    def options_changed(self, **data):
-        self._broadcast_event('options_changed', data)
-
-    def volume_changed(self, **data):
-        self._broadcast_event('volume_changed', data)
-
-    def seeked(self, **data):
-        self._broadcast_event('seeked', data)
-
-    def _broadcast_event(self, name, data):
+    def on_event(self, name, **data):
         event = {}
         event.update(data)
         event['event'] = name
