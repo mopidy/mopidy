@@ -99,8 +99,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         logger.info('Stopped HTTP server')
 
     def on_event(self, name, **data):
-        event = {}
-        event.update(data)
+        event = data
         event['event'] = name
         message = json.dumps(event, cls=models.ModelJSONEncoder)
         cherrypy.engine.publish('websocket-broadcast', TextMessage(message))
