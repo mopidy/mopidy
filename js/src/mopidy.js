@@ -18,8 +18,7 @@ function Mopidy(settings) {
 }
 
 Mopidy.prototype._configure = function (settings) {
-    settings.webSocketUrl =
-        settings.webSocketUrl ||
+    settings.webSocketUrl = settings.webSocketUrl ||
         "ws://" + document.location.host + "/mopidy/ws/";
 
     if (settings.autoConnect !== false) {
