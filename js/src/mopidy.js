@@ -3,15 +3,7 @@
 function Mopidy(settings) {
     var mopidy = this;
 
-    mopidy._settings = settings || {};
-    mopidy._settings.webSocketUrl =
-        mopidy._settings.webSocketUrl ||
-        "ws://" + document.location.host + "/mopidy/ws/";
-    if (mopidy._settings.autoConnect !== false) {
-        mopidy._settings.autoConnect = true;
-    }
-    mopidy._settings.backoffDelayMin = mopidy._settings.backoffDelayMin || 1000;
-    mopidy._settings.backoffDelayMax = mopidy._settings.backoffDelayMax || 64000;
+    mopidy._configure(settings || {});
 
     mopidy._backoffDelay = mopidy._settings.backoffDelayMin;
     mopidy._pendingRequests = {};
@@ -24,6 +16,25 @@ function Mopidy(settings) {
         mopidy._connect();
     }
 }
+
+Mopidy.prototype._configure = function (settings) {
+    var mopidy = this;
+
+    mopidy._settings = settings;
+
+    mopidy._settings.webSocketUrl =
+        mopidy._settings.webSocketUrl ||
+        "ws://" + document.location.host + "/mopidy/ws/";
+
+    if (mopidy._settings.autoConnect !== false) {
+        mopidy._settings.autoConnect = true;
+    }
+
+    mopidy._settings.backoffDelayMin =
+        mopidy._settings.backoffDelayMin || 1000;
+    mopidy._settings.backoffDelayMax =
+        mopidy._settings.backoffDelayMax || 64000;
+};
 
 Mopidy.prototype._delegateEvents = function () {
     var mopidy = this;
