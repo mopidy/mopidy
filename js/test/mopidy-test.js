@@ -212,7 +212,7 @@ buster.testCase("Mopidy", {
             var connectStub = this.stub(this.mopidy, "_connect");
             var pendingSpy = this.spy();
             this.mopidy.on("reconnectionPending", pendingSpy);
-            this.mopidy._backoffDelay = this.mopidy._backoffDelayMax;
+            this.mopidy._backoffDelay = this.mopidy._settings.backoffDelayMax;
 
             refute.called(connectStub);
 
@@ -250,7 +250,7 @@ buster.testCase("Mopidy", {
             this.mopidy._resetBackoffDelay();
 
             assert.equals(this.mopidy._backoffDelay,
-                 this.mopidy._backoffDelayMin);
+                 this.mopidy._settings.backoffDelayMin);
         }
     },
 

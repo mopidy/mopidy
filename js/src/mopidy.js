@@ -3,12 +3,6 @@
 function Mopidy(settings) {
     var mopidy = this;
 
-    mopidy._webSocket = null;
-    mopidy._pendingRequests = {};
-    mopidy._backoffDelayMin = 1000;
-    mopidy._backoffDelayMax = 64000;
-    mopidy._backoffDelay = mopidy._backoffDelayMin;
-
     mopidy._settings = settings || {};
     mopidy._settings.webSocketUrl =
         mopidy._settings.webSocketUrl ||
@@ -16,6 +10,12 @@ function Mopidy(settings) {
     if (mopidy._settings.autoConnect !== false) {
         mopidy._settings.autoConnect = true;
     }
+    mopidy._settings.backoffDelayMin = mopidy._settings.backoffDelayMin || 1000;
+    mopidy._settings.backoffDelayMax = mopidy._settings.backoffDelayMax || 64000;
+
+    mopidy._backoffDelay = mopidy._settings.backoffDelayMin;
+    mopidy._pendingRequests = {};
+    mopidy._webSocket = null;
 
     bane.createEventEmitter(mopidy);
     mopidy._delegateEvents();
@@ -103,15 +103,15 @@ Mopidy.prototype._reconnect = function () {
     }, mopidy._backoffDelay);
 
     mopidy._backoffDelay = mopidy._backoffDelay * 2;
-    if (mopidy._backoffDelay > mopidy._backoffDelayMax) {
-        mopidy._backoffDelay = mopidy._backoffDelayMax;
+    if (mopidy._backoffDelay > mopidy._settings.backoffDelayMax) {
+        mopidy._backoffDelay = mopidy._settings.backoffDelayMax;
     }
 };
 
 Mopidy.prototype._resetBackoffDelay = function () {
     var mopidy = this;
 
-    mopidy._backoffDelay = mopidy._backoffDelayMin;
+    mopidy._backoffDelay = mopidy._settings.backoffDelayMin;
 };
 
 Mopidy.prototype._handleWebSocketError = function (error) {
