@@ -4,6 +4,10 @@ try:
     import cherrypy
 except ImportError:
     cherrypy = False
+try:
+    import ws4py
+except ImportError:
+    ws4py = False
 import mock
 
 from mopidy.exceptions import OptionalDependencyError
@@ -16,6 +20,7 @@ from tests import unittest
 
 
 @unittest.skipUnless(cherrypy, 'cherrypy not found')
+@unittest.skipUnless(ws4py, 'ws4py not found')
 @mock.patch('cherrypy.engine.publish')
 class HttpEventsTest(unittest.TestCase):
     def setUp(self):
