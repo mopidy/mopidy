@@ -1,14 +1,22 @@
 import json
 
-import cherrypy
+try:
+    import cherrypy
+except ImportError:
+    cherrypy = False
 import mock
 
-from mopidy.frontends.http import HttpFrontend
+from mopidy.exceptions import OptionalDependencyError
+try:
+    from mopidy.frontends.http import HttpFrontend
+except OptionalDependencyError:
+    pass
 
 from tests import unittest
 
 
-@mock.patch.object(cherrypy.engine, 'publish')
+@unittest.skipUnless(cherrypy, 'cherrypy not found')
+@mock.patch('cherrypy.engine.publish')
 class HttpEventsTest(unittest.TestCase):
     def setUp(self):
         self.http = HttpFrontend(core=mock.Mock())
