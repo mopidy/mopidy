@@ -80,6 +80,39 @@ FRONTENDS = (
     'mopidy.frontends.mpris.MprisFrontend',
 )
 
+#: Which address Mopidy's HTTP server should bind to.
+#:
+#: Used by :mod:`mopidy.frontends.http`.
+#:
+#: Examples:
+#:
+#: ``127.0.0.1``
+#:     Listens only on the IPv4 loopback interface. Default.
+#: ``::1``
+#:     Listens only on the IPv6 loopback interface.
+#: ``0.0.0.0``
+#:     Listens on all IPv4 interfaces.
+#: ``::``
+#:     Listens on all interfaces, both IPv4 and IPv6.
+HTTP_SERVER_HOSTNAME = u'127.0.0.1'
+
+#: Which TCP port Mopidy's HTTP server should listen to.
+#:
+#: Used by :mod:`mopidy.frontends.http`.
+#:
+#: Default: 6680
+HTTP_SERVER_PORT = 6680
+
+#: Which directory Mopidy's HTTP server should serve at /.
+#:
+#: Change this to have Mopidy serve e.g. files for your JavaScript client.
+#: /api and /ws will continue to work as usual even if you change this setting.
+#:
+#: Used by :mod:`mopidy.frontends.http`.
+#:
+#: Default: None
+HTTP_SERVER_STATIC_DIR = None
+
 #: Your `Last.fm <http://www.last.fm/>`_ username.
 #:
 #: Used by :mod:`mopidy.frontends.lastfm`.
