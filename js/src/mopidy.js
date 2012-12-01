@@ -2,6 +2,7 @@
 
 function Mopidy(settings) {
     this._settings = this._configure(settings || {});
+    this._console = this._getConsole();
 
     this._backoffDelay = this._settings.backoffDelayMin;
     this._pendingRequests = {};
@@ -27,6 +28,16 @@ Mopidy.prototype._configure = function (settings) {
     settings.backoffDelayMax = settings.backoffDelayMax || 64000;
 
     return settings;
+};
+
+Mopidy.prototype._getConsole = function () {
+    var console = window.console || {};
+
+    console.log = console.log || function () {};
+    console.warn = console.warn || function () {};
+    console.error = console.error || function () {};
+
+    return console;
 };
 
 Mopidy.prototype._delegateEvents = function () {
@@ -109,7 +120,7 @@ Mopidy.prototype._resetBackoffDelay = function () {
 };
 
 Mopidy.prototype._handleWebSocketError = function (error) {
-    console.warn("WebSocket error:", error.stack || error);
+    this._console.warn("WebSocket error:", error.stack || error);
 };
 
 Mopidy.prototype._send = function (message) {
@@ -158,13 +169,13 @@ Mopidy.prototype._handleMessage = function (message) {
         } else if (data.hasOwnProperty("event")) {
             this._handleEvent(data);
         } else {
-            console.warn(
+            this._console.warn(
                 "Unknown message type received. Message was: " +
                 message.data);
         }
     } catch (error) {
         if (error instanceof SyntaxError) {
-            console.warn(
+            this._console.warn(
                 "WebSocket message parsing failed. Message was: " +
                 message.data);
         } else {
@@ -175,7 +186,7 @@ Mopidy.prototype._handleMessage = function (message) {
 
 Mopidy.prototype._handleResponse = function (responseMessage) {
     if (!this._pendingRequests.hasOwnProperty(responseMessage.id)) {
-        console.warn(
+        this._console.warn(
             "Unexpected response received. Message was:", responseMessage);
         return;
     }
@@ -187,13 +198,13 @@ Mopidy.prototype._handleResponse = function (responseMessage) {
         resolver.resolve(responseMessage.result);
     } else if (responseMessage.hasOwnProperty("error")) {
         resolver.reject(responseMessage.error);
-        console.warn("Server returned error:", responseMessage.error);
+        this._console.warn("Server returned error:", responseMessage.error);
     } else {
         resolver.reject({
             message: "Response without 'result' or 'error' received",
             data: {response: responseMessage}
         });
-        console.warn(
+        this._console.warn(
             "Response without 'result' or 'error' received. Message was:",
             responseMessage);
     }

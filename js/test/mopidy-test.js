@@ -266,7 +266,7 @@ buster.testCase("Mopidy", {
         },
 
         "without stack logs the error to the console": function () {
-            var stub = this.stub(console, "warn");
+            var stub = this.stub(this.mopidy._console, "warn");
             var error = {};
 
             this.mopidy._handleWebSocketError(error);
@@ -275,7 +275,7 @@ buster.testCase("Mopidy", {
         },
 
         "with stack logs the error to the console": function () {
-            var stub = this.stub(console, "warn");
+            var stub = this.stub(this.mopidy._console, "warn");
             var error = {stack: "foo"};
 
             this.mopidy._handleWebSocketError(error);
@@ -421,7 +421,7 @@ buster.testCase("Mopidy", {
         },
 
         "logs unknown messages": function () {
-            var stub = this.stub(console, "warn");
+            var stub = this.stub(this.mopidy._console, "warn");
             var messageEvent = {data: JSON.stringify({foo: "bar"})};
 
             this.mopidy._handleMessage(messageEvent);
@@ -432,7 +432,7 @@ buster.testCase("Mopidy", {
         },
 
         "logs JSON parsing errors": function () {
-            var stub = this.stub(console, "warn");
+            var stub = this.stub(this.mopidy._console, "warn");
             var messageEvent = {data: "foobarbaz"};
 
             this.mopidy._handleMessage(messageEvent);
@@ -445,7 +445,7 @@ buster.testCase("Mopidy", {
 
     "._handleResponse": {
         "logs unexpected responses": function () {
-            var stub = this.stub(console, "warn");
+            var stub = this.stub(this.mopidy._console, "warn");
             var responseMessage = {
                 jsonrpc: "2.0",
                 id: 1337,
@@ -490,7 +490,7 @@ buster.testCase("Mopidy", {
         },
 
         "rejects and logs requests which get errors back": function (done) {
-            var stub = this.stub(console, "warn");
+            var stub = this.stub(this.mopidy._console, "warn");
             var promise = this.mopidy._send({method: "bar"});
             var responseError = {message: "Error", data: {}};
             var responseMessage = {
@@ -511,7 +511,7 @@ buster.testCase("Mopidy", {
         },
 
         "rejects and logs responses without result or error": function (done) {
-            var stub = this.stub(console, "warn");
+            var stub = this.stub(this.mopidy._console, "warn");
             var promise = this.mopidy._send({method: "bar"});
             var responseMessage = {
                 jsonrpc: "2.0",
