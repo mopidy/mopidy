@@ -55,12 +55,17 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug('HTTP server will serve "%s" at /', static_dir)
 
         mopidy_dir = os.path.join(os.path.dirname(__file__), 'data')
+        favicon = os.path.join(mopidy_dir, 'favicon.png')
 
         config = {
             b'/': {
                 'tools.staticdir.on': True,
                 'tools.staticdir.index': 'index.html',
                 'tools.staticdir.dir': static_dir,
+            },
+            b'/favicon.ico': {
+                'tools.staticfile.on': True,
+                'tools.staticfile.filename': favicon,
             },
             b'/mopidy': {
                 'tools.staticdir.on': True,
@@ -93,42 +98,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         cherrypy.engine.exit()
         logger.info('Stopped HTTP server')
 
-    def track_playback_paused(self, **data):
-        self._broadcast_event('track_playback_paused', data)
-
-    def track_playback_resumed(self, **data):
-        self._broadcast_event('track_playback_resumed', data)
-
-    def track_playback_started(self, **data):
-        self._broadcast_event('track_playback_started', data)
-
-    def track_playback_ended(self, **data):
-        self._broadcast_event('track_playback_ended', data)
-
-    def playback_state_changed(self, **data):
-        self._broadcast_event('playback_state_changed', data)
-
-    def tracklist_changed(self, **data):
-        self._broadcast_event('tracklist_changed', data)
-
-    def playlists_loaded(self, **data):
-        self._broadcast_event('playlists_loaded', data)
-
-    def playlist_changed(self, **data):
-        self._broadcast_event('playlist_changed', data)
-
-    def options_changed(self, **data):
-        self._broadcast_event('options_changed', data)
-
-    def volume_changed(self, **data):
-        self._broadcast_event('volume_changed', data)
-
-    def seeked(self, **data):
-        self._broadcast_event('seeked', data)
-
-    def _broadcast_event(self, name, data):
-        event = {}
-        event.update(data)
+    def on_event(self, name, **data):
+        event = data
         event['event'] = name
         message = json.dumps(event, cls=models.ModelJSONEncoder)
         cherrypy.engine.publish('websocket-broadcast', TextMessage(message))

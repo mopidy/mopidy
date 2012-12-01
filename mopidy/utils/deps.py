@@ -35,6 +35,8 @@ def format_dependency_list(adapters=None):
             pylast_info,
             dbus_info,
             serial_info,
+            cherrypy_info,
+            ws4py_info,
         ]
 
     lines = []
@@ -186,6 +188,28 @@ def serial_info():
         import serial
         dep_info['version'] = serial.VERSION
         dep_info['path'] = serial.__file__
+    except ImportError:
+        pass
+    return dep_info
+
+
+def cherrypy_info():
+    dep_info = {'name': 'cherrypy'}
+    try:
+        import cherrypy
+        dep_info['version'] = cherrypy.__version__
+        dep_info['path'] = cherrypy.__file__
+    except ImportError:
+        pass
+    return dep_info
+
+
+def ws4py_info():
+    dep_info = {'name': 'ws4py'}
+    try:
+        import ws4py
+        dep_info['version'] = ws4py.__version__
+        dep_info['path'] = ws4py.__file__
     except ImportError:
         pass
     return dep_info
