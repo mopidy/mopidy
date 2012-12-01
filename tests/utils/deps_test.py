@@ -27,6 +27,11 @@ try:
 except ImportError:
     spotify = False
 
+try:
+    import cherrypy
+except ImportError:
+    cherrypy = False
+
 from mopidy.utils import deps
 
 from tests import unittest
@@ -115,3 +120,11 @@ class DepsTest(unittest.TestCase):
         self.assertEquals('pyserial', result['name'])
         self.assertEquals(serial.VERSION, result['version'])
         self.assertIn('serial', result['path'])
+
+    @unittest.skipUnless(cherrypy, 'cherrypy not found')
+    def test_cherrypy_info(self):
+        result = deps.cherrypy_info()
+
+        self.assertEquals('cherrypy', result['name'])
+        self.assertEquals(cherrypy.__version__, result['version'])
+        self.assertIn('cherrypy', result['path'])
