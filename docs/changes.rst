@@ -7,9 +7,11 @@ This change log is used to track all major changes to Mopidy.
 v0.10.0 (in development)
 ========================
 
-**Changes**
+**HTTP frontend**
 
-- None yet
+- Added new optional HTTP frontend which exposes Mopidy's core API through
+  JSON-RPC 2.0 messages over a WebSocket. See :ref:`http-frontend` for further
+  details.
 
 **Bug fixes**
 
