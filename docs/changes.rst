@@ -7,6 +7,24 @@ This change log is used to track all major changes to Mopidy.
 v0.10.0 (in development)
 ========================
 
+**Documentation**
+
+- Added installation instructions for Fedora.
+
+**Spotify backend**
+
+- Save a lot of memory by reusing artist, album, and track models.
+
+- Make sure the playlist loading hack only runs once.
+
+**Local backend**
+
+- Change log level from error to warning on messages emitted when the tag cache
+  isn't found and a couple of similar cases.
+
+- Make ``mopidy-scan`` ignore invalid dates, e.g. dates in years outside the
+  range 1-9999.
+
 **HTTP frontend**
 
 - Added new optional HTTP frontend which exposes Mopidy's core API through
@@ -18,9 +36,6 @@ v0.10.0 (in development)
 - :issue:`256`: Fix crash caused by non-ASCII characters in paths returned from
   ``glib``. The bug can be worked around by overriding the settings that
   includes offending `$XDG_` variables.
-
-- Make ``mopidy-scan`` ignore invalid dates, e.g. dates in years outside the
-  range 1-9999.
 
 
 v0.9.0 (2012-11-21)
