@@ -127,6 +127,11 @@ class TranslatorTest(unittest.TestCase):
         del self.track['date']
         self.check()
 
+    def test_invalid_date(self):
+        self.data['date'] = FakeGstDate(65535, 1, 1)
+        del self.track['date']
+        self.check()
+
 
 class ScannerTest(unittest.TestCase):
     def setUp(self):
