@@ -19,6 +19,9 @@ v0.10.0 (in development)
   ``glib``. The bug can be worked around by overriding the settings that
   includes offending `$XDG_` variables.
 
+- Make ``mopidy-scan`` ignore invalid dates, e.g. dates in years outside the
+  range 1-9999.
+
 
 v0.9.0 (2012-11-21)
 ===================

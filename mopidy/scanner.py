@@ -62,8 +62,12 @@ def translator(data):
 
     if gst.TAG_DATE in data and data[gst.TAG_DATE]:
         date = data[gst.TAG_DATE]
-        date = datetime.date(date.year, date.month, date.day)
-        track_kwargs['date'] = date
+        try:
+            date = datetime.date(date.year, date.month, date.day)
+        except ValueError:
+            pass  # Ignore invalid dates
+        else:
+            track_kwargs['date'] = date.isoformat()
 
     _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
     _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
