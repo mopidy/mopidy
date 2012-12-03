@@ -252,6 +252,11 @@ by looking at the method's ``description`` and ``params`` attributes:
     console.log(mopidy.playback.next.params);
     console.log(mopidy.playback.next.description);
 
+JSON-RPC 2.0 limits method parameters to be sent *either* by-position or
+by-name. Combinations of both, like we're used to from Python, isn't supported
+by JSON-RPC 2.0. To further limit this, Mopidy.js currently only supports
+passing parameters by-position.
+
 Obviously, you'll want to get a return value from many of your method calls.
 Since everything is happening across the WebSocket and maybe even across the
 network, you'll get the results asynchronously. Instead of having to pass
