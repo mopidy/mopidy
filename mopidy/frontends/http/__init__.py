@@ -224,6 +224,10 @@ Once your Mopidy.js object has connected to the Mopidy server and emits the
         mopidy.playback.next();
     });
 
+Any calls you make before the ``state:online`` event is emitted will fail. If
+you've hooked up an errback (more on that a bit later) to the promise returned
+from the call, the errback will be called with an error message.
+
 All methods in Mopidy's :ref:`core-api` is available via Mopidy.js. The core
 API attributes is *not* available, but that shouldn't be a problem as we've
 added (undocumented) getters and setters for all of them, so you can access the
