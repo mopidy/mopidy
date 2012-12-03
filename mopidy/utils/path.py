@@ -106,30 +106,32 @@ def expand_path(path):
 
 
 def find_files(path):
+    """
+    Finds all files within a path.
+
+    Directories and files with names starting with ``.`` is ignored.
+
+    :returns: yields the full path to files as bytestrings
+    """
+    if isinstance(path, unicode):
+        path = path.encode('utf-8')
+
     if os.path.isfile(path):
-        if not isinstance(path, unicode):
-            path = path.decode('utf-8')
-        if not os.path.basename(path).startswith('.'):
+        if not os.path.basename(path).startswith(b'.'):
             yield path
     else:
         for dirpath, dirnames, filenames in os.walk(path):
-            # Filter out hidden folders by modifying dirnames in place.
             for dirname in dirnames:
-                if dirname.startswith('.'):
+                if dirname.startswith(b'.'):
+                    # Skip hidden folders by modifying dirnames inplace
                     dirnames.remove(dirname)
 
             for filename in filenames:
-                # Skip hidden files.
-                if filename.startswith('.'):
+                if filename.startswith(b'.'):
+                    # Skip hidden files
                     continue
 
-                filename = os.path.join(dirpath, filename)
-                if not isinstance(filename, unicode):
-                    try:
-                        filename = filename.decode('utf-8')
-                    except UnicodeDecodeError:
-                        filename = filename.decode('latin1')
-                yield filename
+                yield os.path.join(dirpath, filename)
 
 
 def check_file_path_is_inside_base_dir(file_path, base_path):
