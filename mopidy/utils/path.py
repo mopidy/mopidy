@@ -51,19 +51,40 @@ def get_or_create_file(filename):
 
 
 def path_to_uri(*paths):
+    """
+    Convert OS specific path to file:// URI.
+
+    Accepts either unicode strings or bytestrings. The encoding of any
+    bytestring will be maintained so that :func:`uri_to_path` can return the
+    same bytestring.
+
+    Returns a file:// URI as an unicode string.
+    """
     path = os.path.join(*paths)
-    path = path.encode('utf-8')
+    if isinstance(path, unicode):
+        path = path.encode('utf-8')
     if sys.platform == 'win32':
         return 'file:' + urllib.pathname2url(path)
     return 'file://' + urllib.pathname2url(path)
 
 
 def uri_to_path(uri):
+    """
+    Convert the file:// to a OS specific path.
+
+    Returns a bytestring, since the file path can contain chars with other
+    encoding than UTF-8.
+
+    If we had returned these paths as unicode strings, you wouldn't be able to
+    look up the matching dir or file on your file system because the exact path
+    would be lost by ignoring its encoding.
+    """
+    if isinstance(uri, unicode):
+        uri = uri.encode('utf-8')
     if sys.platform == 'win32':
-        path = urllib.url2pathname(re.sub('^file:', '', uri))
+        return urllib.url2pathname(re.sub(b'^file:', b'', uri))
     else:
-        path = urllib.url2pathname(re.sub('^file://', '', uri))
-    return path.encode('latin1').decode('utf-8')  # Undo double encoding
+        return urllib.url2pathname(re.sub(b'^file://', b'', uri))
 
 
 def split_path(path):
@@ -72,7 +93,7 @@ def split_path(path):
         path, part = os.path.split(path)
         if part:
             parts.insert(0, part)
-        if not path or path == '/':
+        if not path or path == b'/':
             break
     return parts
 
