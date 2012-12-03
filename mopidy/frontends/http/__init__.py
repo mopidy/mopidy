@@ -243,9 +243,9 @@ find the Mopidy core API exposed under ``mopidy.playback``,
 ``mopidy.tracklist``, ``mopidy.playlists``, and ``mopidy.library``.
 
 All methods in the JavaScript API have an associated data structure describing
-the params it expects, and most methods also have API documentation available.
-This is available right there in the browser console, by looking at the
-method's ``description`` and ``params`` attributes:
+the Python params it expects, and most methods also have the Python API
+documentation available. This is available right there in the browser console,
+by looking at the method's ``description`` and ``params`` attributes:
 
 .. code-block:: js
 
