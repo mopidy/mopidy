@@ -119,6 +119,11 @@ Mopidy.prototype._resetBackoffDelay = function () {
     this._backoffDelay = this._settings.backoffDelayMin;
 };
 
+Mopidy.prototype.close = function () {
+    this.off("state:offline", this._reconnect);
+    this._webSocket.close();
+};
+
 Mopidy.prototype._handleWebSocketError = function (error) {
     this._console.warn("WebSocket error:", error.stack || error);
 };

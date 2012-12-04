@@ -254,6 +254,23 @@ buster.testCase("Mopidy", {
         }
     },
 
+    "close": {
+        "unregisters reconnection hooks": function () {
+            this.stub(this.mopidy, "off");
+
+            this.mopidy.close();
+
+            assert.calledOnceWith(
+                this.mopidy.off, "state:offline", this.mopidy._reconnect);
+        },
+
+        "closes the WebSocket": function () {
+            this.mopidy.close();
+
+            assert.calledOnceWith(this.mopidy._webSocket.close);
+        }
+    },
+
     "._handleWebSocketError": {
         "is called on 'websocket:error' event": function () {
             var error = {};
