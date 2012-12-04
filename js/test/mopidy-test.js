@@ -156,7 +156,7 @@ buster.testCase("Mopidy", {
         "is called when the state changes to offline": function () {
             var stub = this.stub(this.mopidy, "_reconnect");
             this.mopidy._delegateEvents();
-            
+
             this.mopidy.emit("state:offline");
 
             assert.calledOnceWith(stub);
@@ -334,13 +334,13 @@ buster.testCase("Mopidy", {
             this.mopidy._webSocket.readyState = WebSocket.CONNECTING;
 
             var promise = this.mopidy._send({method: "foo"});
-            
+
             refute.called(this.mopidy._webSocket.send);
             promise.then(done(function () {
                 assert(false);
             }), done(function (error) {
                 assert.equals(
-                    error.message, "WebSocket is still connecting"); 
+                    error.message, "WebSocket is still connecting");
             }));
         },
 
@@ -348,13 +348,13 @@ buster.testCase("Mopidy", {
             this.mopidy._webSocket.readyState = WebSocket.CLOSING;
 
             var promise = this.mopidy._send({method: "foo"});
-            
+
             refute.called(this.mopidy._webSocket.send);
             promise.then(done(function () {
                 assert(false);
             }), done(function (error) {
                 assert.equals(
-                    error.message, "WebSocket is closing"); 
+                    error.message, "WebSocket is closing");
             }));
         },
 
@@ -362,13 +362,13 @@ buster.testCase("Mopidy", {
             this.mopidy._webSocket.readyState = WebSocket.CLOSED;
 
             var promise = this.mopidy._send({method: "foo"});
-            
+
             refute.called(this.mopidy._webSocket.send);
             promise.then(done(function () {
                 assert(false);
             }), done(function (error) {
                 assert.equals(
-                    error.message, "WebSocket is closed"); 
+                    error.message, "WebSocket is closed");
             }));
         }
     },
@@ -401,7 +401,7 @@ buster.testCase("Mopidy", {
                 result: null
             };
             var messageEvent = {data: JSON.stringify(message)};
-           
+
             this.mopidy._handleMessage(messageEvent);
 
             assert.calledOnceWith(stub, message);
@@ -414,7 +414,7 @@ buster.testCase("Mopidy", {
                 track: {}
             };
             var messageEvent = {data: JSON.stringify(message)};
-           
+
             this.mopidy._handleMessage(messageEvent);
 
             assert.calledOnceWith(stub, message);
