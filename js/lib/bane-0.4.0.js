@@ -3,7 +3,7 @@
  *
  * https://github.com/busterjs/bane
  *
- * @version 0.3.0
+ * @version 0.4.0
  */
 
 ((typeof define === "function" && define.amd && function (m) { define(m); }) ||
@@ -43,6 +43,11 @@
         return event ? object.listeners[event] : object.listeners;
     }
 
+    function errbacks(object) {
+        if (!object.errbacks) { object.errbacks = []; }
+        return object.errbacks;
+    }
+
     /**
      * @signature var emitter = bane.createEmitter([object]);
      * 
@@ -56,7 +61,7 @@
             try {
                 listener.listener.apply(listener.thisp || object, args);
             } catch (e) {
-                handleError(event, e, object.errbacks || []);
+                handleError(event, e, errbacks(object));
             }
         }
 
@@ -74,7 +79,24 @@
         };
 
         object.off = function (event, listener) {
-            var fns, i, l;
+            var fns, events, i, l;
+            if (!event) {
+                fns = supervisors(this);
+                fns.splice(0, fns.length);
+
+                events = listeners(this);
+                for (i in events) {
+                    if (events.hasOwnProperty(i)) {
+                        fns = listeners(this, i);
+                        fns.splice(0, fns.length);
+                    }
+                }
+
+                fns = errbacks(this);
+                fns.splice(0, fns.length);
+
+                return;
+            }
             if (typeof event === "function") {
                 fns = supervisors(this);
                 listener = event;
@@ -82,8 +104,8 @@
                 fns = listeners(this, event);
             }
             if (!listener) {
-               fns.splice(0, fns.length);
-               return;
+                fns.splice(0, fns.length);
+                return;
             }
             for (i = 0, l = fns.length; i < l; ++i) {
                 if (fns[i].listener === listener) {
@@ -123,15 +145,15 @@
         };
 
         object.emit = function (event) {
-            var toNotify = listeners(this, event).slice();
-            var args = slice.call(arguments, 1), i, l;
+            var toNotify = supervisors(this);
+            var args = slice.call(arguments), i, l;
 
-            for (i = 0, l = toNotify.length; i < l; i++) {
+            for (i = 0, l = toNotify.length; i < l; ++i) {
                 notifyListener(event, toNotify[i], args);
             }
 
-            toNotify = supervisors(this);
-            args = slice.call(arguments);
+            toNotify = listeners(this, event).slice()
+            args = slice.call(arguments, 1);
             for (i = 0, l = toNotify.length; i < l; ++i) {
                 notifyListener(event, toNotify[i], args);
             }
