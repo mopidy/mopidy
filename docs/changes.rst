@@ -31,6 +31,9 @@ v0.10.0 (in development)
   JSON-RPC 2.0 messages over a WebSocket. See :ref:`http-frontend` for further
   details.
 
+- Added a JavaScript library, Mopidy.js, to make it easier to develop web based
+  Mopidy clients using the new HTTP frontend.
+
 **Bug fixes**
 
 - :issue:`256`: Fix crash caused by non-ASCII characters in paths returned from
