@@ -305,6 +305,28 @@ refer to when.js' documentation or the standard for further details on how to
 work with promise objects.
 
 
+Cleaning up
+-----------
+
+If you for some reason want to clean up after Mopidy.js before the web page is
+closed or navigated away from, you can close the WebSocket, unregister all
+event listeners, and delete the object like this:
+
+.. code-block:: js
+
+    // Close the WebSocket without reconnecting. Letting the object be garbage
+    // collected will have the same effect, so this isn't striclty necessary.
+    mopidy.close();
+
+    // Unregister all event listeners. If you don't do this, you may have
+    // lingering references to the object causing the garbage collector to not
+    // clean up after it.
+    mopidy.off();
+
+    // Delete your reference to the object, so it can be garbage collected.
+    mopidy = null;
+
+
 Example to get started with
 ---------------------------
 
