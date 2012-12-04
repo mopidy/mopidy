@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@
+
+override_dh_clean:
+	make -C docs/ clean
+	dh_clean
+
+override_dh_installchangelogs:
+	dh_installchangelogs docs/changes.rst
+
+override_dh_installdocs:
+	make -C docs/ clean html
+	dh_installdocs

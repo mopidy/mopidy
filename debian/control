@@ -1,0 +1,57 @@
+Source: mopidy
+Section: sound
+Priority: optional
+Maintainer: Stein Magnus Jodal <stein.magnus@jodal.no>
+Build-Depends:
+    debhelper (>= 7.0.50~),
+    python-support,
+    python-sphinx (>= 1.0),
+    python-pygraphviz
+Standards-Version: 3.9.3
+Homepage: http://www.mopidy.com/
+Vcs-Git: git://github.com/mopidy/mopidy-deb.git
+Vcs-Browser: https://github.com/mopidy/mopidy-deb
+XS-Python-Version: >= 2.6
+X-Python-Version: >= 2.6
+X-Python3-Version: << 3
+
+Package: mopidy
+Architecture: all
+Depends:
+    ${misc:Depends},
+    ${python:Depends},
+    python-pykka (>= 1.0.0), python-pykka (<< 2),
+    python-gst0.10,
+    gstreamer0.10-plugins-good
+Recommends:
+    gstreamer0.10-alsa,
+    gstreamer0.10-plugins-ugly,
+    gstreamer0.10-tools,
+    python-spotify (>= 1.9), python-spotify (<< 1.10),
+    python-pylast (>= 0.5.7),
+    python-dbus,
+    python-indicate
+Suggests:
+    mopidy-doc,
+    python-serial
+Description: music server with MPD client support
+ Mopidy is a music server which can play music from Spotify or from your
+ local hard drive. To search for music in Spotify’s vast archive, manage
+ playlists, and play music, you can use any MPD client. MPD clients are
+ available for most platforms, including Windows, Mac OS X, Linux, and iPhone
+ and Android phones.
+
+Package: mopidy-doc
+Section: doc
+Architecture: all
+Depends:
+    ${misc:Depends},
+    libjs-jquery,
+    libjs-underscore
+Recommends: mopidy
+Replaces: mopidy (<< 0.7.3-2)
+Description: music server with MPD client support - documentation
+ Mopidy is a music server which can play music from Spotify or from your
+ local hard drive.
+ .
+ The packages includes documentation for Mopidy.
