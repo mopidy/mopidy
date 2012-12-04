@@ -9,8 +9,8 @@ Build-Depends:
     python-pygraphviz
 Standards-Version: 3.9.3
 Homepage: http://www.mopidy.com/
-Vcs-Git: git://github.com/mopidy/mopidy-deb.git
-Vcs-Browser: https://github.com/mopidy/mopidy-deb
+Vcs-Git: git://github.com/mopidy/mopidy.git
+Vcs-Browser: https://github.com/mopidy/mopidy
 XS-Python-Version: >= 2.6
 X-Python-Version: >= 2.6
 X-Python3-Version: << 3
