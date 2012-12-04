@@ -181,6 +181,15 @@ WebSocket end point:
         webSocketUrl: "ws://localhost:6680/mopidy/ws/"
     });
 
+It is also possible to create an instance first and connect to the WebSocket
+later:
+
+.. code-block:: js
+
+    var mopidy = new Mopidy({autoConnect: false});
+    // ... do other stuff, like hooking up events ...
+    mopidy.connect();
+
 
 Hooking up to events
 --------------------

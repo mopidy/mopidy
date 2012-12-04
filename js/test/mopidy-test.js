@@ -51,12 +51,22 @@ buster.testCase("Mopidy", {
         }
     },
 
-    "._connect": {
+    ".connect": {
+        "connects when autoConnect is false": function () {
+            var mopidy = new Mopidy({autoConnect: false});
+            refute.called(this.webSocketConstructorStub);
+
+            mopidy.connect();
+
+            assert.calledOnceWith(this.webSocketConstructorStub,
+                "ws://" + document.location.host + "/mopidy/ws/");
+        },
+
         "does nothing when the WebSocket is open": function () {
             this.webSocket.readyState = WebSocket.OPEN;
             var mopidy = new Mopidy({webSocket: this.webSocket});
 
-            mopidy._connect();
+            mopidy.connect();
 
             refute.called(this.webSocket.close);
             refute.called(this.webSocketConstructorStub);
@@ -164,7 +174,7 @@ buster.testCase("Mopidy", {
 
         "tries to connect after an increasing backoff delay": function () {
             var clock = this.useFakeTimers();
-            var connectStub = this.stub(this.mopidy, "_connect");
+            var connectStub = this.stub(this.mopidy, "connect");
             var pendingSpy = this.spy();
             this.mopidy.on("reconnectionPending", pendingSpy);
             var reconnectingSpy = this.spy();
@@ -209,7 +219,7 @@ buster.testCase("Mopidy", {
 
         "tries to connect at least about once per minute": function () {
             var clock = this.useFakeTimers();
-            var connectStub = this.stub(this.mopidy, "_connect");
+            var connectStub = this.stub(this.mopidy, "connect");
             var pendingSpy = this.spy();
             this.mopidy.on("reconnectionPending", pendingSpy);
             this.mopidy._backoffDelay = this.mopidy._settings.backoffDelayMax;

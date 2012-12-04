@@ -12,7 +12,7 @@ function Mopidy(settings) {
     this._delegateEvents();
 
     if (this._settings.autoConnect) {
-        this._connect();
+        this.connect();
     }
 }
 
@@ -57,7 +57,7 @@ Mopidy.prototype._delegateEvents = function () {
     this.on("state:offline", this._reconnect);
 };
 
-Mopidy.prototype._connect = function () {
+Mopidy.prototype.connect = function () {
     if (this._webSocket) {
         if (this._webSocket.readyState === WebSocket.OPEN) {
             return;
@@ -106,7 +106,7 @@ Mopidy.prototype._reconnect = function () {
 
     setTimeout(function () {
         this.emit("reconnecting");
-        this._connect();
+        this.connect();
     }.bind(this), this._backoffDelay);
 
     this._backoffDelay = this._backoffDelay * 2;
