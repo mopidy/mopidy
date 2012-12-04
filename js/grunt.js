@@ -23,7 +23,12 @@ module.exports = function (grunt) {
         },
         concat: {
             dist: {
-                src: ["<banner:meta.banner>", "lib/**/*.js", "src/mopidy.js"],
+                src: [
+                    "<banner:meta.banner>",
+                    "lib/bane-*.js",
+                    "lib/when-*.js",
+                    "src/mopidy.js"
+                ],
                 dest: "<%= dirs.dest %>/mopidy.js"
             }
         },
