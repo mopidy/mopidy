@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import os
 import re
+import urllib
 
 from mopidy import settings
 from mopidy.frontends.mpd import protocol
@@ -153,13 +154,16 @@ def tracks_to_tag_cache_format(tracks):
 
 
 def _add_to_tag_cache(result, folders, files):
-    music_folder = settings.LOCAL_MUSIC_PATH
+    base_path = settings.LOCAL_MUSIC_PATH.encode('utf-8')
 
     for path, entry in folders.items():
-        name = os.path.split(path)[1]
-        mtime = get_mtime(os.path.join(music_folder, path))
-        result.append(('directory', path))
-        result.append(('mtime', mtime))
+        try:
+            text_path = path.decode('utf-8')
+        except UnicodeDecodeError:
+            text_path = urllib.pathname2url(path).decode('utf-8')
+        name = os.path.split(text_path)[1]
+        result.append(('directory', text_path))
+        result.append(('mtime', get_mtime(os.path.join(base_path, path))))
         result.append(('begin', name))
         _add_to_tag_cache(result, *entry)
         result.append(('end', name))
@@ -167,9 +171,13 @@ def _add_to_tag_cache(result, folders, files):
     result.append(('songList begin',))
     for track in files:
         track_result = dict(track_to_mpd_format(track))
-        track_result['mtime'] = get_mtime(uri_to_path(track_result['file']))
-        track_result['file'] = track_result['file']
-        track_result['key'] = os.path.basename(track_result['file'])
+        path = uri_to_path(track_result['file'])
+        try:
+            text_path = path.decode('utf-8')
+        except UnicodeDecodeError:
+            text_path = urllib.pathname2url(path).decode('utf-8')
+        track_result['mtime'] = get_mtime(path)
+        track_result['key'] = os.path.basename(text_path)
         track_result = order_mpd_track_info(track_result.items())
         result.extend(track_result)
     result.append(('songList end',))
