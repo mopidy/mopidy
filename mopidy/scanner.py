@@ -58,19 +58,22 @@ def main():
         logging.debug('Debug info for %s: %s', uri, debug)
 
     logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+
     scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
         scanner.stop()
 
-    logging.info('Done')
+    logging.info('Done scanning; writing tag cache...')
 
     for row in mpd_translator.tracks_to_tag_cache_format(tracks):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
             print ('%s: %s' % row).encode('utf-8')
+
+    logging.info('Done writing tag cache')
 
 
 def parse_options():
