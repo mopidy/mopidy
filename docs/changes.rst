@@ -25,9 +25,9 @@ v0.10.0 (in development)
 - Make ``mopidy-scan`` ignore invalid dates, e.g. dates in years outside the
   range 1-9999.
 
-- Make ``mopidy-scan`` accept :opt:`-q`/:opt:`--quiet` and
-  :opt:`-v`/:opt:`--verbose` options to control the amount of logging output
-  when scanning.
+- Make ``mopidy-scan`` accept :option:`-q`/:option:`--quiet` and
+  :option:`-v`/:option:`--verbose` options to control the amount of logging
+  output when scanning.
 
 **HTTP frontend**
 
