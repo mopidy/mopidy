@@ -1,3 +1,10 @@
+mopidy (0.10.0-0mopidy1) unstable; urgency=low
+
+  * New upstream release.
+  * Update version range on python-spotify dependency.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Thu, 13 Dec 2012 00:29:10 +0100
+
 mopidy (0.9.0-1) unstable; urgency=low
 
   * New upstream release.
