@@ -4,8 +4,10 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-v0.10.0 (in development)
-========================
+v0.10.0 (2012-12-12)
+====================
+
+We've added an HTTP frontend for those wanting to build web clients for Mopidy!
 
 **Dependencies**
 
