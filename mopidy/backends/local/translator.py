@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import urllib
 
 from mopidy.models import Track, Artist, Album
 from mopidy.utils.encoding import locale_decode
@@ -139,6 +140,7 @@ def _convert_mpd_data(data, tracks, music_dir):
         path = data['file'][1:]
     else:
         path = data['file']
+    path = urllib.uri2pathname(path)
 
     if artist_kwargs:
         artist = Artist(**artist_kwargs)
