@@ -205,7 +205,7 @@ class FindFilesTest(unittest.TestCase):
         is_bytes = lambda f: isinstance(f, bytes)
         for name in self.find(''):
             self.assert_(
-                is_bytes(name), '%s is not unicode object' % repr(name))
+                is_bytes(name), '%s is not bytes object' % repr(name))
 
     def test_ignores_hidden_folders(self):
         self.assertEqual(self.find('.hidden'), [])
