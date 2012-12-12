@@ -169,17 +169,25 @@ def _add_to_tag_cache(result, folders, files):
         result.append(('end', name))
 
     result.append(('songList begin',))
+
     for track in files:
         track_result = dict(track_to_mpd_format(track))
+
         path = uri_to_path(track_result['file'])
         try:
             text_path = path.decode('utf-8')
         except UnicodeDecodeError:
             text_path = urllib.pathname2url(path).decode('utf-8')
+        relative_path = os.path.relpath(path, base_path)
+        relative_uri = urllib.pathname2url(relative_path)
+
+        track_result['file'] = relative_uri
         track_result['mtime'] = get_mtime(path)
         track_result['key'] = os.path.basename(text_path)
         track_result = order_mpd_track_info(track_result.items())
+
         result.extend(track_result)
+
     result.append(('songList end',))
 
 
