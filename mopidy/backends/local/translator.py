@@ -140,7 +140,7 @@ def _convert_mpd_data(data, tracks, music_dir):
         path = data['file'][1:]
     else:
         path = data['file']
-    path = urllib.uri2pathname(path)
+    path = urllib.url2pathname(path)
 
     if artist_kwargs:
         artist = Artist(**artist_kwargs)
