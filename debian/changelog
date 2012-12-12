@@ -1,3 +1,10 @@
+mopidy (0.10.0-0mopidy2) unstable; urgency=low
+
+  * Add Recommends on python-cherrypy3 and python-ws4py which are used by the
+    new HTTP frontend.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Thu, 13 Dec 2012 00:58:01 +0100
+
 mopidy (0.10.0-0mopidy1) unstable; urgency=low
 
   * New upstream release.

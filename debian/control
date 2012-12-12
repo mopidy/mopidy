@@ -30,7 +30,9 @@ Recommends:
     python-spotify (>= 1.9), python-spotify (<< 1.11),
     python-pylast (>= 0.5.7),
     python-dbus,
-    python-indicate
+    python-indicate,
+    python-cherrypy3,
+    python-ws4py
 Suggests:
     mopidy-doc,
     python-serial
