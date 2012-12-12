@@ -64,15 +64,19 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
 
         logger.info('Connected to Spotify')
 
+        # To work with both pyspotify 1.9 and 1.10
+        if not hasattr(self, 'session'):
+            self.session = session
+
         logger.debug(
             'Preferred Spotify bitrate is %s kbps',
             settings.SPOTIFY_BITRATE)
-        self.session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
+        session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
 
         self.container_manager = SpotifyContainerManager(self)
         self.playlist_manager = SpotifyPlaylistManager(self)
 
-        self.container_manager.watch(self.session.playlist_container())
+        self.container_manager.watch(session.playlist_container())
 
         self.connected.set()
 
@@ -177,5 +181,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     def logout(self):
         """Log out from spotify"""
         logger.debug('Logging out from Spotify')
-        if self.session:
+
+        # To work with both pyspotify 1.9 and 1.10
+        if getattr(self, 'session', None):
             self.session.logout()
