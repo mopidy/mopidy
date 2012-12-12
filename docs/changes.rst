@@ -7,6 +7,11 @@ This change log is used to track all major changes to Mopidy.
 v0.10.0 (in development)
 ========================
 
+**Dependencies**
+
+- pyspotify >= 1.9, < 1.11 is now required for Spotify support. In other words,
+  you're free to upgrade to pyspotify 1.10, but it isn't a requirement.
+
 **Documentation**
 
 - Added installation instructions for Fedora.
