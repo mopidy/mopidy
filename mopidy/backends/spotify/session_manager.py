@@ -46,7 +46,6 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.backend_ref = backend_ref
 
         self.connected = threading.Event()
-        self.session = None
 
         self.container_manager = None
         self.playlist_manager = None
@@ -64,17 +63,20 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             return
 
         logger.info('Connected to Spotify')
-        self.session = session
+
+        # To work with both pyspotify 1.9 and 1.10
+        if not hasattr(self, 'session'):
+            self.session = session
 
         logger.debug(
             'Preferred Spotify bitrate is %s kbps',
             settings.SPOTIFY_BITRATE)
-        self.session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
+        session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
 
         self.container_manager = SpotifyContainerManager(self)
         self.playlist_manager = SpotifyPlaylistManager(self)
 
-        self.container_manager.watch(self.session.playlist_container())
+        self.container_manager.watch(session.playlist_container())
 
         self.connected.set()
 
@@ -142,8 +144,9 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             # startup until the Spotify backend is ready from 35s to 12s in one
             # test with clean Spotify cache. In cases with an outdated cache
             # the time improvements should be a lot greater.
-            self._initial_data_receive_completed = True
-            self.refresh_playlists()
+            if not self._initial_data_receive_completed:
+                self._initial_data_receive_completed = True
+                self.refresh_playlists()
 
     def end_of_track(self, session):
         """Callback used by pyspotify"""
@@ -178,5 +181,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     def logout(self):
         """Log out from spotify"""
         logger.debug('Logging out from Spotify')
-        if self.session:
+
+        # To work with both pyspotify 1.9 and 1.10
+        if getattr(self, 'session', None):
             self.session.logout()

@@ -46,6 +46,9 @@ def setup_console_logging(verbosity_level):
     if verbosity_level < 3:
         logging.getLogger('pykka').setLevel(logging.INFO)
 
+    if verbosity_level < 2:
+        logging.getLogger('cherrypy').setLevel(logging.WARNING)
+
 
 def setup_debug_logging_to_file():
     formatter = logging.Formatter(settings.DEBUG_LOG_FORMAT)

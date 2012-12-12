@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Mopidy HTTP frontend</title>
+    <link rel="stylesheet" type="text/css" href="mopidy.css">
+  </head>
+  <body>
+    <div class="box focus">
+      <h1>Mopidy HTTP&nbsp;frontend</h1>
+
+      <p>This web server is a part of the music server Mopidy. To learn more
+      about Mopidy, please visit <a
+        href="http://www.mopidy.com/">www.mopidy.com</a>.</p>
+    </div>
+
+    <div class="box">
+      <h2>WebSocket endpoint</h2>
+
+      <p>Mopidy has a WebSocket endpoint at <tt>/mopidy/ws/</tt>. You can use
+      this end point to access Mopidy's full API, and to get notified about
+      events happening in Mopidy.</p>
+    </div>
+
+    <div class="box">
+      <h2>Example</h2>
+
+      <p>Here you can see events arriving from Mopidy in real time:</p>
+
+      <pre id="ws-console"></pre>
+
+      <p>Nothing to see? Try playing a track using your MPD client.</p>
+    </div>
+
+    <div class="box focus">
+      <h2>Documentation</h2>
+
+      <p>For more information, please refer to the Mopidy documentation at
+      <a href="http://docs.mopidy.com/">docs.mopidy.com</a>.</p>
+    </div>
+    <script type="text/javascript">
+      var ws = new WebSocket("ws://" + document.location.host + "/mopidy/ws/");
+      ws.onmessage = function (message) {
+        var console = document.getElementById('ws-console');
+        var newLine = (new Date()).toLocaleTimeString() + ": " +
+          message.data + "\n";
+        console.innerHTML = newLine + console.innerHTML;
+      };
+    </script>
+  </body>
+</html>

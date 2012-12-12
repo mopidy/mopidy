@@ -18,6 +18,7 @@ class LocalPlaybackControllerTest(PlaybackControllerTest, unittest.TestCase):
 
     def setUp(self):
         settings.BACKENDS = ('mopidy.backends.local.LocalBackend',)
+        settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('empty_tag_cache')
         super(LocalPlaybackControllerTest, self).setUp()
 
     def tearDown(self):

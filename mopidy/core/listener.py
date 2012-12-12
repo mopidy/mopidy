@@ -19,7 +19,20 @@ class CoreListener(object):
         """Helper to allow calling of core listener events"""
         listeners = pykka.ActorRegistry.get_by_class(CoreListener)
         for listener in listeners:
-            getattr(listener.proxy(), event)(**kwargs)
+            listener.proxy().on_event(event, **kwargs)
+
+    def on_event(self, event, **kwargs):
+        """
+        Called on all events.
+
+        *MAY* be implemented by actor. By default, this method forwards the
+        event to the specific event methods.
+
+        :param event: the event name
+        :type event: string
+        :param kwargs: any other arguments to the specific event handlers
+        """
+        getattr(self, event)(**kwargs)
 
     def track_playback_paused(self, track, time_position):
         """

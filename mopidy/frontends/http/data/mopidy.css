@@ -1,0 +1,75 @@
+html {
+    background: #e8ecef;
+    color: #555;
+    font-family: "Droid Serif", "Georgia", "Times New Roman", "Palatino",
+    "Hoefler Text", "Baskerville", serif;
+    font-size: 150%;
+    line-height: 1.4em;
+}
+body {
+    max-width: 20em;
+    margin: 0 auto;
+}
+div.box {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 5px 5px 5px #d8dcdf;
+    margin: 2em 0;
+    padding: 1em;
+}
+div.box.focus {
+    background: #465158;
+    color: #e8ecef;
+}
+div.icon {
+    float: right;
+}
+h1, h2 {
+    font-family: "Ubuntu", "Arial", "Helvetica", "Lucida Grande",
+    "Verdana", "Gill Sans", sans-serif;
+    line-height: 1.1em;
+}
+h2 {
+    margin: 0.2em 0 0;
+}
+p.next {
+    text-align: right;
+}
+a {
+    color: #555;
+    text-decoration: none;
+    border-bottom: 1px dotted;
+}
+img {
+    border: 0;
+}
+code, pre {
+    font-family: "Droid Sans Mono", Menlo, Courier New, Courier, Mono, monospace;
+    font-size: 9pt;
+    line-height: 1.2em;
+    padding: 0.5em 1em;
+    margin: 1em 0;
+    white-space: pre;
+    overflow: auto;
+}
+.box code,
+.box pre {
+    background: #e8ecef;
+    color: #555;
+}
+.box a {
+    color: #465158;
+}
+.box a:hover {
+    opacity: 0.8;
+}
+.box.focus a {
+    color: #e8ecef;
+}
+.center {
+    text-align: center;
+}
+#ws-console {
+    height: 200px;
+    overflow: auto;
+}

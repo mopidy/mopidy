@@ -131,10 +131,9 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         mtime.undo_fake()
 
     def translate(self, track):
-        folder = settings.LOCAL_MUSIC_PATH
+        base_path = settings.LOCAL_MUSIC_PATH.encode('utf-8')
         result = dict(translator.track_to_mpd_format(track))
-        result['file'] = uri_to_path(result['file'])
-        result['file'] = result['file'][len(folder) + 1:]
+        result['file'] = uri_to_path(result['file'])[len(base_path) + 1:]
         result['key'] = os.path.basename(result['file'])
         result['mtime'] = mtime('')
         return translator.order_mpd_track_info(result.items())
@@ -197,7 +196,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         result = self.consume_headers(result)
         song_list, result = self.consume_song_list(result)
 
-        self.assertEqual(song_list, formated)
+        self.assertEqual(formated, song_list)
         self.assertEqual(len(result), 0)
 
     def test_tag_cache_has_formated_track_with_key_and_mtime(self):
@@ -208,7 +207,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         result = self.consume_headers(result)
         song_list, result = self.consume_song_list(result)
 
-        self.assertEqual(song_list, formated)
+        self.assertEqual(formated, song_list)
         self.assertEqual(len(result), 0)
 
     def test_tag_cache_suports_directories(self):
@@ -224,7 +223,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
         song_list, result = self.consume_song_list(folder)
         self.assertEqual(len(result), 0)
-        self.assertEqual(song_list, formated)
+        self.assertEqual(formated, song_list)
 
     def test_tag_cache_diretory_header_is_right(self):
         track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
@@ -256,7 +255,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
         song_list, result = self.consume_song_list(folder)
         self.assertEqual(len(result), 0)
-        self.assertEqual(song_list, formated)
+        self.assertEqual(formated, song_list)
 
     def test_tag_cache_supports_multiple_tracks(self):
         tracks = [
@@ -273,7 +272,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         result = self.consume_headers(result)
         song_list, result = self.consume_song_list(result)
 
-        self.assertEqual(song_list, formated)
+        self.assertEqual(formated, song_list)
         self.assertEqual(len(result), 0)
 
     def test_tag_cache_supports_multiple_tracks_in_dirs(self):
@@ -292,12 +291,12 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         folder, result = self.consume_directory(result)
         song_list, song_result = self.consume_song_list(folder)
 
-        self.assertEqual(song_list, formated[1])
+        self.assertEqual(formated[1], song_list)
         self.assertEqual(len(song_result), 0)
 
         song_list, result = self.consume_song_list(result)
         self.assertEqual(len(result), 0)
-        self.assertEqual(song_list, formated[0])
+        self.assertEqual(formated[0], song_list)
 
 
 class TracksToDirectoryTreeTest(unittest.TestCase):

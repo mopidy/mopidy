@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from datetime import date
-
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
 
@@ -53,7 +51,7 @@ class TranslatorTest(unittest.TestCase):
         self.track = {
             'uri': 'uri',
             'name': 'trackname',
-            'date': date(2006, 1, 1),
+            'date': '2006-01-01',
             'track_no': 1,
             'length': 4531,
             'musicbrainz_id': 'mbtrackid',
@@ -126,6 +124,11 @@ class TranslatorTest(unittest.TestCase):
 
     def test_missing_date(self):
         del self.data['date']
+        del self.track['date']
+        self.check()
+
+    def test_invalid_date(self):
+        self.data['date'] = FakeGstDate(65535, 1, 1)
         del self.track['date']
         self.check()
 
