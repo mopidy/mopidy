@@ -46,7 +46,6 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.backend_ref = backend_ref
 
         self.connected = threading.Event()
-        self.session = None
 
         self.container_manager = None
         self.playlist_manager = None
@@ -64,7 +63,6 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             return
 
         logger.info('Connected to Spotify')
-        self.session = session
 
         logger.debug(
             'Preferred Spotify bitrate is %s kbps',
