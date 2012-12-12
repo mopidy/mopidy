@@ -4,7 +4,7 @@ import datetime
 import os
 
 from mopidy import settings
-from mopidy.utils.path import mtime
+from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, TlTrack, Playlist, Track
 
@@ -131,7 +131,9 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         mtime.undo_fake()
 
     def translate(self, track):
+        base_path = settings.LOCAL_MUSIC_PATH.encode('utf-8')
         result = dict(translator.track_to_mpd_format(track))
+        result['file'] = uri_to_path(result['file'])[len(base_path) + 1:]
         result['key'] = os.path.basename(result['file'])
         result['mtime'] = mtime('')
         return translator.order_mpd_track_info(result.items())

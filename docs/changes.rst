@@ -29,6 +29,10 @@ v0.10.0 (in development)
   :option:`-v`/:option:`--verbose` options to control the amount of logging
   output when scanning.
 
+- The scanner can now handle files with other encodings than UTF-8. Rebuild
+  your tag cache with ``mopidy-scan`` to include tracks that may have been
+  ignored previously.
+
 **HTTP frontend**
 
 - Added new optional HTTP frontend which exposes Mopidy's core API through
