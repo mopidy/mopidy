@@ -160,7 +160,7 @@ def _add_to_tag_cache(result, folders, files):
         try:
             text_path = path.decode('utf-8')
         except UnicodeDecodeError:
-            text_path = urllib.pathname2url(path).decode('utf-8')
+            text_path = urllib.quote(path).decode('utf-8')
         name = os.path.split(text_path)[1]
         result.append(('directory', text_path))
         result.append(('mtime', get_mtime(os.path.join(base_path, path))))
@@ -177,9 +177,9 @@ def _add_to_tag_cache(result, folders, files):
         try:
             text_path = path.decode('utf-8')
         except UnicodeDecodeError:
-            text_path = urllib.pathname2url(path).decode('utf-8')
+            text_path = urllib.quote(path).decode('utf-8')
         relative_path = os.path.relpath(path, base_path)
-        relative_uri = urllib.pathname2url(relative_path)
+        relative_uri = urllib.quote(relative_path)
 
         track_result['file'] = relative_uri
         track_result['mtime'] = get_mtime(path)

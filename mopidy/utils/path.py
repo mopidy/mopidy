@@ -64,8 +64,8 @@ def path_to_uri(*paths):
     if isinstance(path, unicode):
         path = path.encode('utf-8')
     if sys.platform == 'win32':
-        return 'file:' + urllib.pathname2url(path)
-    return 'file://' + urllib.pathname2url(path)
+        return 'file:' + urllib.quote(path)
+    return 'file://' + urllib.quote(path)
 
 
 def uri_to_path(uri):
@@ -82,9 +82,9 @@ def uri_to_path(uri):
     if isinstance(uri, unicode):
         uri = uri.encode('utf-8')
     if sys.platform == 'win32':
-        return urllib.url2pathname(re.sub(b'^file:', b'', uri))
+        return urllib.unquote(re.sub(b'^file:', b'', uri))
     else:
-        return urllib.url2pathname(re.sub(b'^file://', b'', uri))
+        return urllib.unquote(re.sub(b'^file://', b'', uri))
 
 
 def split_path(path):
