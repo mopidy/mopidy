@@ -4,6 +4,57 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.10.0 (2012-12-12)
+====================
+
+We've added an HTTP frontend for those wanting to build web clients for Mopidy!
+
+**Dependencies**
+
+- pyspotify >= 1.9, < 1.11 is now required for Spotify support. In other words,
+  you're free to upgrade to pyspotify 1.10, but it isn't a requirement.
+
+**Documentation**
+
+- Added installation instructions for Fedora.
+
+**Spotify backend**
+
+- Save a lot of memory by reusing artist, album, and track models.
+
+- Make sure the playlist loading hack only runs once.
+
+**Local backend**
+
+- Change log level from error to warning on messages emitted when the tag cache
+  isn't found and a couple of similar cases.
+
+- Make ``mopidy-scan`` ignore invalid dates, e.g. dates in years outside the
+  range 1-9999.
+
+- Make ``mopidy-scan`` accept :option:`-q`/:option:`--quiet` and
+  :option:`-v`/:option:`--verbose` options to control the amount of logging
+  output when scanning.
+
+- The scanner can now handle files with other encodings than UTF-8. Rebuild
+  your tag cache with ``mopidy-scan`` to include tracks that may have been
+  ignored previously.
+
+**HTTP frontend**
+
+- Added new optional HTTP frontend which exposes Mopidy's core API through
+  JSON-RPC 2.0 messages over a WebSocket. See :ref:`http-frontend` for further
+  details.
+
+- Added a JavaScript library, Mopidy.js, to make it easier to develop web based
+  Mopidy clients using the new HTTP frontend.
+
+**Bug fixes**
+
+- :issue:`256`: Fix crash caused by non-ASCII characters in paths returned from
+  ``glib``. The bug can be worked around by overriding the settings that
+  includes offending ``$XDG_`` variables.
+
 
 v0.9.0 (2012-11-21)
 ===================

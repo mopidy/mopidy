@@ -18,6 +18,14 @@ class LocalPlaylistsControllerTest(
 
     backend_class = LocalBackend
 
+    def setUp(self):
+        settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('empty_tag_cache')
+        super(LocalPlaylistsControllerTest, self).setUp()
+
+    def tearDown(self):
+        super(LocalPlaylistsControllerTest, self).tearDown()
+        settings.runtime.clear()
+
     def test_created_playlist_is_persisted(self):
         path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
         self.assertFalse(os.path.exists(path))

@@ -57,7 +57,7 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
                     # from other backends
                     tracks += self.backend.library.lookup(track_uri)
                 except LookupError as ex:
-                    logger.error('Playlist item could not be added: %s', ex)
+                    logger.warning('Playlist item could not be added: %s', ex)
 
             playlist = Playlist(uri=uri, name=name, tracks=tracks)
             playlists.append(playlist)

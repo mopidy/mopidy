@@ -6,32 +6,45 @@ from mopidy import settings
 from mopidy.models import Artist, Album, Track, Playlist
 
 
+artist_cache = {}
+album_cache = {}
+track_cache = {}
+
+
 def to_mopidy_artist(spotify_artist):
     if spotify_artist is None:
         return
     uri = str(Link.from_artist(spotify_artist))
+    if uri in artist_cache:
+        return artist_cache[uri]
     if not spotify_artist.is_loaded():
         return Artist(uri=uri, name='[loading...]')
-    return Artist(uri=uri, name=spotify_artist.name())
+    artist_cache[uri] = Artist(uri=uri, name=spotify_artist.name())
+    return artist_cache[uri]
 
 
 def to_mopidy_album(spotify_album):
     if spotify_album is None:
         return
     uri = str(Link.from_album(spotify_album))
+    if uri in album_cache:
+        return album_cache[uri]
     if not spotify_album.is_loaded():
         return Album(uri=uri, name='[loading...]')
-    return Album(
+    album_cache[uri] = Album(
         uri=uri,
         name=spotify_album.name(),
         artists=[to_mopidy_artist(spotify_album.artist())],
         date=spotify_album.year())
+    return album_cache[uri]
 
 
 def to_mopidy_track(spotify_track):
     if spotify_track is None:
         return
     uri = str(Link.from_track(spotify_track, 0))
+    if uri in track_cache:
+        return track_cache[uri]
     if not spotify_track.is_loaded():
         return Track(uri=uri, name='[loading...]')
     spotify_album = spotify_track.album()
@@ -39,7 +52,7 @@ def to_mopidy_track(spotify_track):
         date = spotify_album.year()
     else:
         date = None
-    return Track(
+    track_cache[uri] = Track(
         uri=uri,
         name=spotify_track.name(),
         artists=[to_mopidy_artist(a) for a in spotify_track.artists()],
@@ -48,6 +61,7 @@ def to_mopidy_track(spotify_track):
         date=date,
         length=spotify_track.duration(),
         bitrate=settings.SPOTIFY_BITRATE)
+    return track_cache[uri]
 
 
 def to_mopidy_playlist(spotify_playlist):

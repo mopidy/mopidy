@@ -13,14 +13,21 @@ import glib
 
 logger = logging.getLogger('mopidy.utils.path')
 
-DATA_PATH = os.path.join(str(glib.get_user_data_dir()), 'mopidy')
-SETTINGS_PATH = os.path.join(str(glib.get_user_config_dir()), 'mopidy')
-SETTINGS_FILE = os.path.join(SETTINGS_PATH, 'settings.py')
+XDG_CACHE_DIR = glib.get_user_cache_dir().decode('utf-8')
+XDG_CONFIG_DIR = glib.get_user_config_dir().decode('utf-8')
+XDG_DATA_DIR = glib.get_user_data_dir().decode('utf-8')
+XDG_MUSIC_DIR = glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC)
+if XDG_MUSIC_DIR:
+    XDG_MUSIC_DIR = XDG_MUSIC_DIR.decode('utf-8')
 XDG_DIRS = {
-    'XDG_CACHE_DIR': glib.get_user_cache_dir(),
-    'XDG_DATA_DIR': glib.get_user_data_dir(),
-    'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
+    'XDG_CACHE_DIR': XDG_CACHE_DIR,
+    'XDG_CONFIG_DIR': XDG_CONFIG_DIR,
+    'XDG_DATA_DIR': XDG_DATA_DIR,
+    'XDG_MUSIC_DIR': XDG_MUSIC_DIR,
 }
+DATA_PATH = os.path.join(unicode(XDG_DATA_DIR), 'mopidy')
+SETTINGS_PATH = os.path.join(unicode(XDG_CONFIG_DIR), 'mopidy')
+SETTINGS_FILE = os.path.join(unicode(SETTINGS_PATH), 'settings.py')
 
 
 def get_or_create_folder(folder):
@@ -44,19 +51,40 @@ def get_or_create_file(filename):
 
 
 def path_to_uri(*paths):
+    """
+    Convert OS specific path to file:// URI.
+
+    Accepts either unicode strings or bytestrings. The encoding of any
+    bytestring will be maintained so that :func:`uri_to_path` can return the
+    same bytestring.
+
+    Returns a file:// URI as an unicode string.
+    """
     path = os.path.join(*paths)
-    path = path.encode('utf-8')
+    if isinstance(path, unicode):
+        path = path.encode('utf-8')
     if sys.platform == 'win32':
-        return 'file:' + urllib.pathname2url(path)
-    return 'file://' + urllib.pathname2url(path)
+        return 'file:' + urllib.quote(path)
+    return 'file://' + urllib.quote(path)
 
 
 def uri_to_path(uri):
+    """
+    Convert the file:// to a OS specific path.
+
+    Returns a bytestring, since the file path can contain chars with other
+    encoding than UTF-8.
+
+    If we had returned these paths as unicode strings, you wouldn't be able to
+    look up the matching dir or file on your file system because the exact path
+    would be lost by ignoring its encoding.
+    """
+    if isinstance(uri, unicode):
+        uri = uri.encode('utf-8')
     if sys.platform == 'win32':
-        path = urllib.url2pathname(re.sub('^file:', '', uri))
+        return urllib.unquote(re.sub(b'^file:', b'', uri))
     else:
-        path = urllib.url2pathname(re.sub('^file://', '', uri))
-    return path.encode('latin1').decode('utf-8')  # Undo double encoding
+        return urllib.unquote(re.sub(b'^file://', b'', uri))
 
 
 def split_path(path):
@@ -65,7 +93,7 @@ def split_path(path):
         path, part = os.path.split(path)
         if part:
             parts.insert(0, part)
-        if not path or path == '/':
+        if not path or path == b'/':
             break
     return parts
 
@@ -78,30 +106,32 @@ def expand_path(path):
 
 
 def find_files(path):
+    """
+    Finds all files within a path.
+
+    Directories and files with names starting with ``.`` is ignored.
+
+    :returns: yields the full path to files as bytestrings
+    """
+    if isinstance(path, unicode):
+        path = path.encode('utf-8')
+
     if os.path.isfile(path):
-        if not isinstance(path, unicode):
-            path = path.decode('utf-8')
-        if not os.path.basename(path).startswith('.'):
+        if not os.path.basename(path).startswith(b'.'):
             yield path
     else:
         for dirpath, dirnames, filenames in os.walk(path):
-            # Filter out hidden folders by modifying dirnames in place.
             for dirname in dirnames:
-                if dirname.startswith('.'):
+                if dirname.startswith(b'.'):
+                    # Skip hidden folders by modifying dirnames inplace
                     dirnames.remove(dirname)
 
             for filename in filenames:
-                # Skip hidden files.
-                if filename.startswith('.'):
+                if filename.startswith(b'.'):
+                    # Skip hidden files
                     continue
 
-                filename = os.path.join(dirpath, filename)
-                if not isinstance(filename, unicode):
-                    try:
-                        filename = filename.decode('utf-8')
-                    except UnicodeDecodeError:
-                        filename = filename.decode('latin1')
-                yield filename
+                yield os.path.join(dirpath, filename)
 
 
 def check_file_path_is_inside_base_dir(file_path, base_path):

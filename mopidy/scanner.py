@@ -1,10 +1,34 @@
 from __future__ import unicode_literals
 
-import logging
 import datetime
+import logging
+import optparse
+import os
+import sys
 
 import gobject
 gobject.threads_init()
+
+
+# Extract any non-GStreamer arguments, and leave the GStreamer arguments for
+# processing by GStreamer. This needs to be done before GStreamer is imported,
+# so that GStreamer doesn't hijack e.g. ``--help``.
+# NOTE This naive fix does not support values like ``bar`` in
+# ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
+
+def is_gst_arg(argument):
+    return argument.startswith('--gst') or argument == '--help-gst'
+
+gstreamer_args = [arg for arg in sys.argv[1:] if is_gst_arg(arg)]
+mopidy_args = [arg for arg in sys.argv[1:] if not is_gst_arg(arg)]
+sys.argv[1:] = gstreamer_args
+
+
+# Add ../ to the path so we can run Mopidy from a Git checkout without
+# installing it on the system.
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+
 
 import pygst
 pygst.require('0.10')
@@ -13,12 +37,14 @@ import gst
 from mopidy import settings
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
-from mopidy.utils import log, path
+from mopidy.utils import log, path, versioning
 
 
 def main():
+    options = parse_options()
+
     log.setup_root_logger()
-    log.setup_console_logging(2)
+    log.setup_console_logging(options.verbosity_level)
 
     tracks = []
 
@@ -28,22 +54,40 @@ def main():
         logging.debug('Added %s', track.uri)
 
     def debug(uri, error, debug):
-        logging.error('Failed %s: %s - %s', uri, error, debug)
+        logging.warning('Failed %s: %s', uri, error)
+        logging.debug('Debug info for %s: %s', uri, debug)
 
     logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+
     scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
         scanner.stop()
 
-    logging.info('Done')
+    logging.info('Done scanning; writing tag cache...')
 
     for row in mpd_translator.tracks_to_tag_cache_format(tracks):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
             print ('%s: %s' % row).encode('utf-8')
+
+    logging.info('Done writing tag cache')
+
+
+def parse_options():
+    parser = optparse.OptionParser(
+        version='Mopidy %s' % versioning.get_version())
+    parser.add_option(
+        '-q', '--quiet',
+        action='store_const', const=0, dest='verbosity_level',
+        help='less output (warning level)')
+    parser.add_option(
+        '-v', '--verbose',
+        action='count', default=1, dest='verbosity_level',
+        help='more output (debug level)')
+    return parser.parse_args(args=mopidy_args)[0]
 
 
 def translator(data):
@@ -62,8 +106,12 @@ def translator(data):
 
     if gst.TAG_DATE in data and data[gst.TAG_DATE]:
         date = data[gst.TAG_DATE]
-        date = datetime.date(date.year, date.month, date.day)
-        track_kwargs['date'] = date
+        try:
+            date = datetime.date(date.year, date.month, date.day)
+        except ValueError:
+            pass  # Ignore invalid dates
+        else:
+            track_kwargs['date'] = date.isoformat()
 
     _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
     _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
@@ -188,3 +236,7 @@ class Scanner(object):
     def stop(self):
         self.pipe.set_state(gst.STATE_NULL)
         self.loop.quit()
+
+
+if __name__ == '__main__':
+    main()

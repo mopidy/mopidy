@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import os
 import re
+import urllib
 
 from mopidy import settings
 from mopidy.frontends.mpd import protocol
@@ -153,42 +154,56 @@ def tracks_to_tag_cache_format(tracks):
 
 
 def _add_to_tag_cache(result, folders, files):
-    music_folder = settings.LOCAL_MUSIC_PATH
-    regexp = '^' + re.escape(music_folder).rstrip('/') + '/?'
+    base_path = settings.LOCAL_MUSIC_PATH.encode('utf-8')
 
     for path, entry in folders.items():
-        name = os.path.split(path)[1]
-        mtime = get_mtime(os.path.join(music_folder, path))
-        result.append(('directory', path))
-        result.append(('mtime', mtime))
+        try:
+            text_path = path.decode('utf-8')
+        except UnicodeDecodeError:
+            text_path = urllib.quote(path).decode('utf-8')
+        name = os.path.split(text_path)[1]
+        result.append(('directory', text_path))
+        result.append(('mtime', get_mtime(os.path.join(base_path, path))))
         result.append(('begin', name))
         _add_to_tag_cache(result, *entry)
         result.append(('end', name))
 
     result.append(('songList begin',))
+
     for track in files:
         track_result = dict(track_to_mpd_format(track))
+
         path = uri_to_path(track_result['file'])
+        try:
+            text_path = path.decode('utf-8')
+        except UnicodeDecodeError:
+            text_path = urllib.quote(path).decode('utf-8')
+        relative_path = os.path.relpath(path, base_path)
+        relative_uri = urllib.quote(relative_path)
+
+        track_result['file'] = relative_uri
         track_result['mtime'] = get_mtime(path)
-        track_result['file'] = re.sub(regexp, '', path)
-        track_result['key'] = os.path.basename(track_result['file'])
+        track_result['key'] = os.path.basename(text_path)
         track_result = order_mpd_track_info(track_result.items())
+
         result.extend(track_result)
+
     result.append(('songList end',))
 
 
 def tracks_to_directory_tree(tracks):
     directories = ({}, [])
+
     for track in tracks:
-        path = ''
+        path = b''
         current = directories
 
-        local_folder = settings.LOCAL_MUSIC_PATH
-        track_path = uri_to_path(track.uri)
-        track_path = re.sub('^' + re.escape(local_folder), '', track_path)
-        track_dir = os.path.dirname(track_path)
+        absolute_track_dir_path = os.path.dirname(uri_to_path(track.uri))
+        relative_track_dir_path = re.sub(
+            '^' + re.escape(settings.LOCAL_MUSIC_PATH), b'',
+            absolute_track_dir_path)
 
-        for part in split_path(track_dir):
+        for part in split_path(relative_track_dir_path):
             path = os.path.join(path, part)
             if path not in current[0]:
                 current[0][path] = ({}, [])

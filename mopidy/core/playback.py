@@ -53,6 +53,9 @@ class PlaybackController(object):
         Tracks are not removed from the playlist.
     """
 
+    def get_current_tl_track(self):
+        return self.current_tl_track
+
     current_tl_track = None
     """
     The currently playing or selected :class:`mopidy.models.TlTrack`, or

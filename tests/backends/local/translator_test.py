@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import os
 import tempfile
 
-from mopidy.utils.path import path_to_uri
 from mopidy.backends.local.translator import parse_m3u, parse_mpd_tag_cache
 from mopidy.models import Track, Artist, Album
+from mopidy.utils.path import path_to_uri
 
 from tests import unittest, path_to_data_dir
 
