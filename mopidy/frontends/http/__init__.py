@@ -229,7 +229,7 @@ Once your Mopidy.js object has connected to the Mopidy server and emits the
 
 .. code-block:: js
 
-    mopidy.on("state:online", function () [
+    mopidy.on("state:online", function () {
         mopidy.playback.next();
     });
 
