@@ -324,7 +324,7 @@ event listeners, and delete the object like this:
 .. code-block:: js
 
     // Close the WebSocket without reconnecting. Letting the object be garbage
-    // collected will have the same effect, so this isn't striclty necessary.
+    // collected will have the same effect, so this isn't strictly necessary.
     mopidy.close();
 
     // Unregister all event listeners. If you don't do this, you may have
