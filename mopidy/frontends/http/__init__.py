@@ -452,7 +452,7 @@ Example to get started with
 
 9. The web page should now queue and play your first playlist every time your
    load it. See the browser's console for output from the function, any errors,
-   and a all events that are emitted.
+   and all events that are emitted.
 """
 
 # flake8: noqa
