@@ -14,6 +14,9 @@ v0.11.0 (in development)
 
 - Add support for ``config`` command added in MPD 0.17.
 
+- Add support for loading a range of tracks from a playlist to the ``load``
+  command, as added in MPD 0.17.
+
 
 v0.10.0 (2012-12-12)
 ====================

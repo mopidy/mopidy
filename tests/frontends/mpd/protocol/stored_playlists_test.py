@@ -73,7 +73,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertNotInResponse('playlist: ')
         self.assertInResponse('OK')
 
-    def test_load_known_playlist_appends_to_tracklist(self):
+    def test_load_appends_to_tracklist(self):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
         self.backend.playlists.playlists = [
@@ -81,6 +81,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
                 Track(uri='c'), Track(uri='d'), Track(uri='e')])]
 
         self.sendRequest('load "A-list"')
+
         tracks = self.core.tracklist.tracks.get()
         self.assertEqual(5, len(tracks))
         self.assertEqual('a', tracks[0].uri)
@@ -88,6 +89,39 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqual('c', tracks[2].uri)
         self.assertEqual('d', tracks[3].uri)
         self.assertEqual('e', tracks[4].uri)
+        self.assertInResponse('OK')
+
+    def test_load_with_range_loads_part_of_playlist(self):
+        self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
+        self.backend.playlists.playlists = [
+            Playlist(name='A-list', tracks=[
+                Track(uri='c'), Track(uri='d'), Track(uri='e')])]
+
+        self.sendRequest('load "A-list" "1:2"')
+
+        tracks = self.core.tracklist.tracks.get()
+        self.assertEqual(3, len(tracks))
+        self.assertEqual('a', tracks[0].uri)
+        self.assertEqual('b', tracks[1].uri)
+        self.assertEqual('d', tracks[2].uri)
+        self.assertInResponse('OK')
+
+    def test_load_with_range_without_end_loads_rest_of_playlist(self):
+        self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
+        self.backend.playlists.playlists = [
+            Playlist(name='A-list', tracks=[
+                Track(uri='c'), Track(uri='d'), Track(uri='e')])]
+
+        self.sendRequest('load "A-list" "1:"')
+
+        tracks = self.core.tracklist.tracks.get()
+        self.assertEqual(4, len(tracks))
+        self.assertEqual('a', tracks[0].uri)
+        self.assertEqual('b', tracks[1].uri)
+        self.assertEqual('d', tracks[2].uri)
+        self.assertEqual('e', tracks[3].uri)
         self.assertInResponse('OK')
 
     def test_load_unknown_playlist_acks(self):
