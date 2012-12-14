@@ -24,6 +24,18 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
         self.assertInResponse('OK')
 
+    def test_searchadd(self):
+        self.backend.library.dummy_search_result = [
+            Track(uri='dummy:a', name='A'),
+        ]
+        self.assertEqual(self.core.tracklist.length.get(), 0)
+
+        self.sendRequest('searchadd "title" "a"')
+
+        self.assertEqual(self.core.tracklist.length.get(), 1)
+        self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
+        self.assertInResponse('OK')
+
     def test_listall(self):
         self.sendRequest('listall "file:///dev/urandom"')
         self.assertEqualResponse('ACK [0@0] {} Not implemented')

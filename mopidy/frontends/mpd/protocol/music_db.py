@@ -340,17 +340,17 @@ def rescan(context, uri=None):
 
 
 @handle_request(
-    r'^search (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
+    r'^search '
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
     r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
 def search(context, mpd_query):
     """
     *musicpd.org, music database section:*
 
-        ``search {TYPE} {WHAT}``
+        ``search {TYPE} {WHAT} [...]``
 
-        Searches for any song that contains ``WHAT``. ``TYPE`` can be
-        ``title``, ``artist``, ``album`` or ``filename``. Search is not
-        case sensitive.
+        Searches for any song that contains ``WHAT``. Parameters have the same
+        meaning as for ``find``, except that search is not case sensitive.
 
     *GMPC:*
 
@@ -374,8 +374,32 @@ def search(context, mpd_query):
         query = _build_query(mpd_query)
     except ValueError:
         return
-    return tracks_to_mpd_format(
-        context.core.library.search(**query).get())
+    result = context.core.library.search(**query).get()
+    return tracks_to_mpd_format(result)
+
+
+@handle_request(
+    r'^searchadd '
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+def searchadd(context, mpd_query):
+    """
+    *musicpd.org, music database section:*
+
+        ``searchadd {TYPE} {WHAT} [...]``
+
+        Searches for any song that contains ``WHAT`` in tag ``TYPE`` and adds
+        them to current playlist.
+
+        Parameters have the same meaning as for ``find``, except that search is
+        not case sensitive.
+    """
+    try:
+        query = _build_query(mpd_query)
+    except ValueError:
+        return
+    result = context.core.library.search(**query).get()
+    context.core.tracklist.add(result)
 
 
 @handle_request(r'^update( "(?P<uri>[^"]+)")*$')
