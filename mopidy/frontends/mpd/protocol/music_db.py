@@ -51,7 +51,8 @@ def count(context, tag, needle):
 
 
 @handle_request(
-    r'^find (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
+    r'^find '
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
     r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
 def find(context, mpd_query):
     """
@@ -59,8 +60,10 @@ def find(context, mpd_query):
 
         ``find {TYPE} {WHAT}``
 
-        Finds songs in the db that are exactly ``WHAT``. ``TYPE`` should be
-        ``album``, ``artist``, or ``title``. ``WHAT`` is what to find.
+        Finds songs in the db that are exactly ``WHAT``. ``TYPE`` can be any
+        tag supported by MPD, or one of the two special parameters - ``file``
+        to search by full path (relative to database root), and ``any`` to
+        match against all available tags. ``WHAT`` is what to find.
 
     *GMPC:*
 
@@ -82,26 +85,29 @@ def find(context, mpd_query):
         query = _build_query(mpd_query)
     except ValueError:
         return
-    return tracks_to_mpd_format(
-        context.core.library.find_exact(**query).get())
+    result = context.core.library.find_exact(**query).get()
+    return tracks_to_mpd_format(result)
 
 
 @handle_request(
     r'^findadd '
-    r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? '
-    r'"[^"]+"\s?)+)$')
-def findadd(context, query):
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+def findadd(context, mpd_query):
     """
     *musicpd.org, music database section:*
 
         ``findadd {TYPE} {WHAT}``
 
         Finds songs in the db that are exactly ``WHAT`` and adds them to
-        current playlist. ``TYPE`` can be any tag supported by MPD.
-        ``WHAT`` is what to find.
+        current playlist. Parameters have the same meaning as for ``find``.
     """
-    # TODO Add result to current playlist
-    #result = context.find(query)
+    try:
+        query = _build_query(mpd_query)
+    except ValueError:
+        return
+    result = context.core.library.find_exact(**query).get()
+    context.core.tracklist.add(result)
 
 
 @handle_request(

@@ -13,7 +13,15 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_findadd(self):
-        self.sendRequest('findadd "album" "what"')
+        self.backend.library.dummy_find_exact_result = [
+            Track(uri='dummy:a', name='A'),
+        ]
+        self.assertEqual(self.core.tracklist.length.get(), 0)
+
+        self.sendRequest('findadd "title" "A"')
+
+        self.assertEqual(self.core.tracklist.length.get(), 1)
+        self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_listall(self):
