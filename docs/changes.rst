@@ -12,6 +12,8 @@ v0.11.0 (in development)
 
 - Add support for ``seekcur`` command added in MPD 0.17.
 
+- Add support for ``config`` command added in MPD 0.17.
+
 
 v0.10.0 (2012-12-12)
 ====================
