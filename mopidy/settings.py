@@ -103,10 +103,10 @@ HTTP_SERVER_HOSTNAME = u'127.0.0.1'
 #: Default: 6680
 HTTP_SERVER_PORT = 6680
 
-#: Which directory Mopidy's HTTP server should serve at /.
+#: Which directory Mopidy's HTTP server should serve at ``/``.
 #:
 #: Change this to have Mopidy serve e.g. files for your JavaScript client.
-#: /api and /ws will continue to work as usual even if you change this setting.
+#: ``/mopidy`` will continue to work as usual even if you change this setting.
 #:
 #: Used by :mod:`mopidy.frontends.http`.
 #:
