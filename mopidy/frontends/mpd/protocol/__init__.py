@@ -74,6 +74,7 @@ def load_protocol_modules():
     """
     # pylint: disable = W0612
     from . import (  # noqa
-        audio_output, command_list, connection, current_playlist, empty,
-        music_db, playback, reflection, status, stickers, stored_playlists)
+        audio_output, channels, command_list, connection, current_playlist,
+        empty, music_db, playback, reflection, status, stickers,
+        stored_playlists)
     # pylint: enable = W0612

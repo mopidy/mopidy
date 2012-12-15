@@ -23,6 +23,9 @@ v0.11.0 (in development)
 
 - Add support for ``searchaddpl`` command added in MPD 0.17.
 
+- Add empty stubs for channel commands for client to client communication,
+  which was added in MPD 0.17.
+
 
 v0.10.0 (2012-12-12)
 ====================
