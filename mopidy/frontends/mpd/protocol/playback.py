@@ -349,6 +349,26 @@ def seekid(context, tlid, seconds):
     context.core.playback.seek(int(seconds) * 1000).get()
 
 
+@handle_request(r'^seekcur "(?P<position>\d+)"$')
+@handle_request(r'^seekcur "(?P<diff>[-+]\d+)"$')
+def seekcur(context, position=None, diff=None):
+    """
+    *musicpd.org, playback section:*
+
+        ``seekcur {TIME}``
+
+        Seeks to the position ``TIME`` within the current song. If prefixed by
+        '+' or '-', then the time is relative to the current playing position.
+    """
+    if position is not None:
+        position = int(position) * 1000
+        context.core.playback.seek(position).get()
+    elif diff is not None:
+        position = context.core.playback.time_position.get()
+        position += int(diff) * 1000
+        context.core.playback.seek(position).get()
+
+
 @handle_request(r'^setvol (?P<volume>[-+]*\d+)$')
 @handle_request(r'^setvol "(?P<volume>[-+]*\d+)"$')
 def setvol(context, volume):

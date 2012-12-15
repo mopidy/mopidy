@@ -414,6 +414,37 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertEqual(seek_track, self.core.playback.current_track.get())
         self.assertInResponse('OK')
 
+    def test_seekcur_absolute_value(self):
+        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
+        self.core.playback.play()
+
+        self.sendRequest('seekcur "30"')
+
+        self.assertGreaterEqual(self.core.playback.time_position.get(), 30000)
+        self.assertInResponse('OK')
+
+    def test_seekcur_positive_diff(self):
+        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
+        self.core.playback.play()
+        self.core.playback.seek(10000)
+        self.assertGreaterEqual(self.core.playback.time_position.get(), 10000)
+
+        self.sendRequest('seekcur "+20"')
+
+        self.assertGreaterEqual(self.core.playback.time_position.get(), 30000)
+        self.assertInResponse('OK')
+
+    def test_seekcur_negative_diff(self):
+        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
+        self.core.playback.play()
+        self.core.playback.seek(30000)
+        self.assertGreaterEqual(self.core.playback.time_position.get(), 30000)
+
+        self.sendRequest('seekcur "-20"')
+
+        self.assertLessEqual(self.core.playback.time_position.get(), 15000)
+        self.assertInResponse('OK')
+
     def test_stop(self):
         self.sendRequest('stop')
         self.assertEqual(STOPPED, self.core.playback.state.get())
