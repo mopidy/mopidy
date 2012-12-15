@@ -8,6 +8,11 @@ from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 from mopidy.frontends.mpd.translator import tracks_to_mpd_format
 
 
+QUERY_RE = (
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+
+
 def _build_query(mpd_query):
     """
     Parses a MPD query string and converts it to the Mopidy query format.
@@ -50,10 +55,7 @@ def count(context, tag, needle):
     return [('songs', 0), ('playtime', 0)]  # TODO
 
 
-@handle_request(
-    r'^find '
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+@handle_request(r'^find ' + QUERY_RE)
 def find(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -89,10 +91,7 @@ def find(context, mpd_query):
     return tracks_to_mpd_format(result)
 
 
-@handle_request(
-    r'^findadd '
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+@handle_request(r'^findadd ' + QUERY_RE)
 def findadd(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -339,10 +338,7 @@ def rescan(context, uri=None):
     return update(context, uri, rescan_unmodified_files=True)
 
 
-@handle_request(
-    r'^search '
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+@handle_request(r'^search ' + QUERY_RE)
 def search(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -378,10 +374,7 @@ def search(context, mpd_query):
     return tracks_to_mpd_format(result)
 
 
-@handle_request(
-    r'^searchadd '
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+@handle_request(r'^searchadd ' + QUERY_RE)
 def searchadd(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -402,11 +395,7 @@ def searchadd(context, mpd_query):
     context.core.tracklist.add(result)
 
 
-@handle_request(
-    r'^searchaddpl '
-    r'"(?P<playlist_name>[^"]+)" '
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+@handle_request(r'^searchaddpl "(?P<playlist_name>[^"]+)" ' + QUERY_RE)
 def searchaddpl(context, playlist_name, mpd_query):
     """
     *musicpd.org, music database section:*
