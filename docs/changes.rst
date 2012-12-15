@@ -8,7 +8,24 @@ This change log is used to track all major changes to Mopidy.
 v0.11.0 (in development)
 ========================
 
-- No changes yet.
+**MPD frontend**
+
+- Add support for the ``findadd`` command.
+
+- Updated to match the MPD 0.17 protocol (Fixes: :issue:`228`):
+
+  - Add support for ``seekcur`` command.
+
+  - Add support for ``config`` command.
+
+  - Add support for loading a range of tracks from a playlist to the ``load``
+    command.
+
+  - Add support for ``searchadd`` command.
+
+  - Add support for ``searchaddpl`` command.
+
+  - Add empty stubs for channel commands for client to client communication.
 
 
 v0.10.0 (2012-12-12)

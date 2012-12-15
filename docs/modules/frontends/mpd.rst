@@ -30,6 +30,14 @@ Audio output
     :members:
 
 
+Channels
+--------
+
+.. automodule:: mopidy.frontends.mpd.protocol.channels
+    :synopsis: MPD protocol: channels -- client to client communication
+    :members:
+
+
 Command list
 ------------
 

@@ -21,8 +21,8 @@ ENCODING = 'UTF-8'
 #: The MPD protocol uses ``\n`` as line terminator.
 LINE_TERMINATOR = '\n'
 
-#: The MPD protocol version is 0.16.0.
-VERSION = '0.16.0'
+#: The MPD protocol version is 0.17.0.
+VERSION = '0.17.0'
 
 MpdCommand = namedtuple('MpdCommand', ['name', 'auth_required'])
 
@@ -74,6 +74,7 @@ def load_protocol_modules():
     """
     # pylint: disable = W0612
     from . import (  # noqa
-        audio_output, command_list, connection, current_playlist, empty,
-        music_db, playback, reflection, status, stickers, stored_playlists)
+        audio_output, channels, command_list, connection, current_playlist,
+        empty, music_db, playback, reflection, status, stickers,
+        stored_playlists)
     # pylint: enable = W0612
