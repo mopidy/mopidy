@@ -10,21 +10,22 @@ v0.11.0 (in development)
 
 **MPD frontend**
 
-- Add support for ``seekcur`` command added in MPD 0.17.
-
-- Add support for ``config`` command added in MPD 0.17.
-
-- Add support for loading a range of tracks from a playlist to the ``load``
-  command, as added in MPD 0.17.
-
 - Add support for the ``findadd`` command.
 
-- Add support for ``searchadd`` command added in MPD 0.17.
+- Updated to match the MPD 0.17 protocol (Fixes: :issue:`228`):
 
-- Add support for ``searchaddpl`` command added in MPD 0.17.
+  - Add support for ``seekcur`` command.
 
-- Add empty stubs for channel commands for client to client communication,
-  which was added in MPD 0.17.
+  - Add support for ``config`` command.
+
+  - Add support for loading a range of tracks from a playlist to the ``load``
+    command.
+
+  - Add support for ``searchadd`` command.
+
+  - Add support for ``searchaddpl`` command.
+
+  - Add empty stubs for channel commands for client to client communication.
 
 
 v0.10.0 (2012-12-12)
