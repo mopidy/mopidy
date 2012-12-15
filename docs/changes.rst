@@ -21,6 +21,8 @@ v0.11.0 (in development)
 
 - Add support for ``searchadd`` command added in MPD 0.17.
 
+- Add support for ``searchaddpl`` command added in MPD 0.17.
+
 
 v0.10.0 (2012-12-12)
 ====================

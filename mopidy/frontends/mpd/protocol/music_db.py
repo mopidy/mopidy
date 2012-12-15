@@ -402,6 +402,41 @@ def searchadd(context, mpd_query):
     context.core.tracklist.add(result)
 
 
+@handle_request(
+    r'^searchaddpl '
+    r'"(?P<playlist_name>[^"]+)" '
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+def searchaddpl(context, playlist_name, mpd_query):
+    """
+    *musicpd.org, music database section:*
+
+        ``searchaddpl {NAME} {TYPE} {WHAT} [...]``
+
+        Searches for any song that contains ``WHAT`` in tag ``TYPE`` and adds
+        them to the playlist named ``NAME``.
+
+        If a playlist by that name doesn't exist it is created.
+
+        Parameters have the same meaning as for ``find``, except that search is
+        not case sensitive.
+    """
+    try:
+        query = _build_query(mpd_query)
+    except ValueError:
+        return
+    result = context.core.library.search(**query).get()
+
+    playlists = context.core.playlists.filter(name=playlist_name).get()
+    if playlists:
+        playlist = playlists[0]
+    else:
+        playlist = context.core.playlists.create(playlist_name).get()
+    tracks = list(playlist.tracks) + result
+    playlist = playlist.copy(tracks=tracks)
+    context.core.playlists.save(playlist)
+
+
 @handle_request(r'^update( "(?P<uri>[^"]+)")*$')
 def update(context, uri=None, rescan_unmodified_files=False):
     """
