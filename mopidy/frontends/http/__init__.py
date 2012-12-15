@@ -4,9 +4,7 @@ from a web based client.
 
 **Dependencies**
 
-- ``cherrypy``
-
-- ``ws4py``
+.. literalinclude:: ../../../requirements/http.txt
 
 **Settings**
 

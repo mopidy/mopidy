@@ -8,7 +8,7 @@ Frontend which scrobbles the music you play to your `Last.fm
 
 **Dependencies:**
 
-- `pylast <http://code.google.com/p/pylast/>`_ >= 0.5.7
+.. literalinclude:: ../../../requirements/lastfm.txt
 
 **Settings:**
 
