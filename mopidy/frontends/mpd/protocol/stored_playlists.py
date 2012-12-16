@@ -82,11 +82,10 @@ def listplaylists(context):
             continue
         result.append(('playlist', playlist.name))
         last_modified = (
-            playlist.last_modified or dt.datetime.now()).isoformat()
+            playlist.last_modified or dt.datetime.utcnow()).isoformat()
         # Remove microseconds
         last_modified = last_modified.split('.')[0]
         # Add time zone information
-        # TODO Convert to UTC before adding Z
         last_modified = last_modified + 'Z'
         result.append(('Last-Modified', last_modified))
     return result

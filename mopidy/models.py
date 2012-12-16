@@ -290,7 +290,7 @@ class Playlist(ImmutableObject):
     :type name: string
     :param tracks: playlist's tracks
     :type tracks: list of :class:`Track` elements
-    :param last_modified: playlist's modification time
+    :param last_modified: playlist's modification time in UTC
     :type last_modified: :class:`datetime.datetime`
     """
 
@@ -303,7 +303,7 @@ class Playlist(ImmutableObject):
     #: The playlist's tracks. Read-only.
     tracks = tuple()
 
-    #: The playlist modification time. Read-only.
+    #: The playlist modification time in UTC. Read-only.
     #:
     #: :class:`datetime.datetime`, or :class:`None` if unknown.
     last_modified = None

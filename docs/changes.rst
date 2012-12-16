@@ -27,6 +27,12 @@ v0.11.0 (in development)
 
   - Add empty stubs for channel commands for client to client communication.
 
+**Internal changes**
+
+*Models:*
+
+- Specified that :attr:`mopidy.models.Playlist.last_modified` should be in UTC.
+
 
 v0.10.0 (2012-12-12)
 ====================
