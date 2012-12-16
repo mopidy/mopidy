@@ -283,6 +283,8 @@ class PlaybackController(object):
             return self._volume
 
     def set_volume(self, volume):
+        self._trigger_volume_changed()
+
         if self.audio:
             self.audio.set_volume(volume)
         else:
@@ -514,6 +516,10 @@ class PlaybackController(object):
     def _trigger_options_changed(self):
         logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
+
+    def _trigger_volume_changed(self):
+        logger.debug('Triggering volume changed event')
+        listener.CoreListener.send('volume_changed')
 
     def _trigger_seeked(self, time_position):
         logger.debug('Triggering seeked event')
