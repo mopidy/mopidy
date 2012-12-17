@@ -70,21 +70,29 @@ class PlaylistsController(object):
         if backend:
             backend.playlists.delete(uri).get()
 
-    def filter(self, **criteria):
+    def filter(self, criteria=None, **kwargs):
         """
         Filter playlists by the given criterias.
 
         Examples::
 
-            filter(name='a')            # Returns track with name 'a'
-            filter(uri='xyz')           # Returns track with URI 'xyz'
-            filter(name='a', uri='xyz') # Returns track with name 'a' and URI
-                                        # 'xyz'
+            # Returns track with name 'a'
+            filter({'name': 'a'})
+            filter(name='a')
+
+            # Returns track with URI 'xyz'
+            filter({'uri': 'xyz'})
+            filter(uri='xyz')
+
+            # Returns track with name 'a' and URI 'xyz'
+            filter({'name': 'a', 'uri': 'xyz'})
+            filter(name='a', uri='xyz')
 
         :param criteria: one or more criteria to match by
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.Playlist`
         """
+        criteria = criteria or kwargs
         matches = self.playlists
         for (key, value) in criteria.iteritems():
             matches = filter(lambda p: getattr(p, key) == value, matches)

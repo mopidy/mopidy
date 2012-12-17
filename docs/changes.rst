@@ -33,6 +33,18 @@ v0.11.0 (in development)
 
 - Specified that :attr:`mopidy.models.Playlist.last_modified` should be in UTC.
 
+*Core API:*
+
+- Change the following methods to accept either a dict with filters or kwargs.
+  Previously they only accepted kwargs, which made them impossible to use from
+  the Mopidy.js through JSON-RPC, which doesn't support kwargs.
+
+  - :meth:`mopidy.core.LibraryController.find_exact`
+  - :meth:`mopidy.core.LibraryController.search`
+  - :meth:`mopidy.core.PlaylistsController.filter`
+  - :meth:`mopidy.core.TracklistController.filter`
+  - :meth:`mopidy.core.TracklistController.remove`
+
 
 v0.10.0 (2012-12-12)
 ====================

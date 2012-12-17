@@ -17,23 +17,29 @@ class LibraryController(object):
         uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends.with_library_by_uri_scheme.get(uri_scheme, None)
 
-    def find_exact(self, **query):
+    def find_exact(self, query=None, **kwargs):
         """
         Search the library for tracks where ``field`` is ``values``.
 
         Examples::
 
             # Returns results matching 'a'
+            find_exact({'any': ['a']})
             find_exact(any=['a'])
+
             # Returns results matching artist 'xyz'
+            find_exact({'artist': ['xyz']})
             find_exact(artist=['xyz'])
+
             # Returns results matching 'a' and 'b' and artist 'xyz'
+            find_exact({'any': ['a', 'b'], 'artist': ['xyz']})
             find_exact(any=['a', 'b'], artist=['xyz'])
 
         :param query: one or more queries to search for
         :type query: dict
         :rtype: list of :class:`mopidy.models.Track`
         """
+        query = query or kwargs
         futures = [
             b.library.find_exact(**query) for b in self.backends.with_library]
         results = pykka.get_all(futures)
@@ -72,23 +78,29 @@ class LibraryController(object):
                 b.library.refresh(uri) for b in self.backends.with_library]
             pykka.get_all(futures)
 
-    def search(self, **query):
+    def search(self, query=None, **kwargs):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
         Examples::
 
             # Returns results matching 'a'
+            search({'any': ['a']})
             search(any=['a'])
+
             # Returns results matching artist 'xyz'
+            search({'artist': ['xyz']})
             search(artist=['xyz'])
+
             # Returns results matching 'a' and 'b' and artist 'xyz'
+            search({'any': ['a', 'b'], 'artist': ['xyz']})
             search(any=['a', 'b'], artist=['xyz'])
 
         :param query: one or more queries to search for
         :type query: dict
         :rtype: list of :class:`mopidy.models.Track`
         """
+        query = query or kwargs
         futures = [
             b.library.search(**query) for b in self.backends.with_library]
         results = pykka.get_all(futures)
