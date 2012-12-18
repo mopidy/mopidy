@@ -26,8 +26,8 @@ This is a non exhaustive list of MPD features that Mopidy doesn't support.
 Items on this list will probably not be supported in the near future.
 
 - Toggling of audio outputs is not supported
-- Channels for client-to-client communication is not supported
-- Stickers is not supported
+- Channels for client-to-client communication are not supported
+- Stickers are not supported
 - Crossfade is not supported
 - Replay gain is not supported
 - ``count`` does not provide any statistics
