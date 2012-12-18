@@ -19,6 +19,29 @@ original MPD server.
 Make sure :attr:`mopidy.settings.FRONTENDS` includes
 ``mopidy.frontends.mpd.MpdFrontend``. By default, the setting includes the MPD
 frontend.
+
+**Limitations:**
+
+This is a non exhaustive list of MPD features that Mopidy doesn't support.
+Items on this list will probably not be supported in the near future.
+
+- Toggling of audio outputs is not supported
+- Channels for client-to-client communication is not supported
+- Stickers is not supported
+- Crossfade is not supported
+- Replay gain is not supported
+- ``count`` does not provide any statistics
+- ``stats`` does not provide any statistics
+- ``list`` does not support listing tracks by genre
+- ``decoders`` does not provide information about available decoders
+
+The following items are currently not supported, but should be added in the
+near future:
+
+- Modifying stored playlists is not supported
+- ``tagtypes`` is not supported
+- Browsing the file system is not supported
+- Live update of the music database is not supported
 """
 
 from __future__ import unicode_literals
