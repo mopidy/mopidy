@@ -43,6 +43,7 @@ class Audio(pykka.ThreadingActor):
         self._mixer_track = None
         self._software_mixing = False
         self._appsrc = None
+        self._volume_set = -1
 
         self._notify_source_signal_id = None
         self._about_to_finish_id = None
@@ -388,10 +389,18 @@ class Audio(pykka.ThreadingActor):
         volumes = self._mixer.get_volume(self._mixer_track)
         avg_volume = float(sum(volumes)) / len(volumes)
 
-        new_scale = (0, 100)
-        old_scale = (
+        internal_scale = (0, 100)
+        mixer_scale = (
             self._mixer_track.min_volume, self._mixer_track.max_volume)
-        return self._rescale(avg_volume, old=old_scale, new=new_scale)
+
+        volume_set_scaled = self._rescale(
+            self._volume_set, old=internal_scale, new=mixer_scale)
+
+        if self._volume_set > 0 and volume_set_scaled == avg_volume:
+            return self._volume_set
+        else:
+            return self._rescale(
+                avg_volume, old=mixer_scale, new=internal_scale)
 
     def set_volume(self, volume):
         """
@@ -407,6 +416,8 @@ class Audio(pykka.ThreadingActor):
 
         if self._mixer is None:
             return False
+
+        self._volume_set = volume
 
         old_scale = (0, 100)
         new_scale = (
