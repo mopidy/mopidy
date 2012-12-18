@@ -283,13 +283,13 @@ class PlaybackController(object):
             return self._volume
 
     def set_volume(self, volume):
-        self._trigger_volume_changed()
-
         if self.audio:
             self.audio.set_volume(volume)
         else:
             # For testing
             self._volume = volume
+
+        self._trigger_volume_changed()
 
     volume = property(get_volume, set_volume)
     """Volume as int in range [0..100] or :class:`None`"""
