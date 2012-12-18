@@ -43,7 +43,7 @@ class Audio(pykka.ThreadingActor):
         self._mixer_track = None
         self._software_mixing = False
         self._appsrc = None
-        self._volume_set = -1
+        self._volume_set = None
 
         self._notify_source_signal_id = None
         self._about_to_finish_id = None
@@ -396,7 +396,7 @@ class Audio(pykka.ThreadingActor):
         volume_set_scaled = self._rescale(
             self._volume_set, old=internal_scale, new=mixer_scale)
 
-        if self._volume_set > 0 and volume_set_scaled == avg_volume:
+        if self._volume_set is not None and volume_set_scaled == avg_volume:
             return self._volume_set
         else:
             return self._rescale(
