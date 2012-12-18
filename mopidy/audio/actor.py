@@ -419,11 +419,11 @@ class Audio(pykka.ThreadingActor):
 
         self._volume_set = volume
 
-        old_scale = (0, 100)
-        new_scale = (
+        internal_scale = (0, 100)
+        mixer_scale = (
             self._mixer_track.min_volume, self._mixer_track.max_volume)
 
-        volume = self._rescale(volume, old=old_scale, new=new_scale)
+        volume = self._rescale(volume, old=internal_scale, new=mixer_scale)
 
         volumes = (volume,) * self._mixer_track.num_channels
         self._mixer.set_volume(self._mixer_track, volumes)
