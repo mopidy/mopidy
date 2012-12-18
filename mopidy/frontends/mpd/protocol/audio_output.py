@@ -39,6 +39,6 @@ def outputs(context):
     """
     return [
         ('outputid', 0),
-        ('outputname', None),
+        ('outputname', 'Default'),
         ('outputenabled', 1),
     ]
