@@ -117,9 +117,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
     def _translate_search_query(self, mopidy_query):
         spotify_query = []
         for (field, values) in mopidy_query.iteritems():
-            if field == 'track':
-                field = 'title'
-            elif field == 'date':
+            if field == 'date':
                 field = 'year'
             if not hasattr(values, '__iter__'):
                 values = [values]
