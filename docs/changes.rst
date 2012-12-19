@@ -45,6 +45,8 @@ v0.11.0 (in development)
   - :meth:`mopidy.core.TracklistController.filter`
   - :meth:`mopidy.core.TracklistController.remove`
 
+- Actually trigger the :meth:`mopidy.core.CoreListener.volume_changed` event.
+
 
 v0.10.0 (2012-12-12)
 ====================
