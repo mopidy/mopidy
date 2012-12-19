@@ -117,3 +117,9 @@ class BackendEventsTest(unittest.TestCase):
         playlist = playlist.copy(name='bar')
         self.core.playlists.save(playlist).get()
         self.assertEqual(send.call_args[0][0], 'playlist_changed')
+
+    def test_set_volume_sends_volume_changed_event(self, send):
+        self.core.playback.set_volume(10).get()
+        send.reset_mock()
+        self.core.playback.set_volume(20).get()
+        self.assertEqual(send.call_args[0][0], 'volume_changed')

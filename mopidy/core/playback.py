@@ -289,6 +289,8 @@ class PlaybackController(object):
             # For testing
             self._volume = volume
 
+        self._trigger_volume_changed()
+
     volume = property(get_volume, set_volume)
     """Volume as int in range [0..100] or :class:`None`"""
 
@@ -514,6 +516,10 @@ class PlaybackController(object):
     def _trigger_options_changed(self):
         logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
+
+    def _trigger_volume_changed(self):
+        logger.debug('Triggering volume changed event')
+        listener.CoreListener.send('volume_changed')
 
     def _trigger_seeked(self, time_position):
         logger.debug('Triggering seeked event')
