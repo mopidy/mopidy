@@ -4,13 +4,10 @@ import logging
 import Queue
 import time
 
-TIME_OUT = 10
-
 from spotify import Link, SpotifyError
 
 from mopidy.backends import base
 from mopidy.models import Track
-from mopidy.models import Playlist
 
 from . import translator
 
@@ -19,9 +16,14 @@ logger = logging.getLogger('mopidy.backends.spotify')
 
 class SpotifyTrack(Track):
     """Proxy object for unloaded Spotify tracks."""
-    def __init__(self, uri):
+    def __init__(self, uri=None, track=None):
         super(SpotifyTrack, self).__init__()
-        self._spotify_track = Link.from_string(uri).as_track()
+        if uri:
+            self._spotify_track = Link.from_string(uri).as_track()
+        elif track:
+            self._spotify_track = track
+        else:
+            raise AttributeError('uri or track must be provided')
         self._unloaded_track = Track(uri=uri, name='[loading...]')
         self._track = None
 
@@ -60,88 +62,52 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         return self.search(**query)
 
     def lookup(self, uri):
+        try:
             link = Link.from_string(uri)
-            #uri is an album
+            if link.type() == Link.LINK_TRACK:
+                return self._lookup_track(uri)
             if link.type() == Link.LINK_ALBUM:
-                try:
-                    spotify_album = Link.from_string(uri).as_album()
-                    # TODO Block until metadata_updated callback is called.
-                    # Before that the track will be unloaded, unless it's
-                    # already in the stored playlists.
-                    browser = self.backend.spotify.session.browse_album(
-                        spotify_album)
+                return self._lookup_album(uri)
+            elif link.type() == Link.LINK_ARTIST:
+                return self._lookup_artist(uri)
+            elif link.type() == Link.LINK_PLAYLIST:
+                return self._lookup_playlist(uri)
+            else:
+                return []
+        except SpotifyError as error:
+            logger.debug(u'Failed to lookup "%s": %s', uri, error)
+            return []
 
-                    #wait 5 seconds
-                    start = time.time()
-                    while not browser.is_loaded():
-                        time.sleep(0.1)
-                        if time.time() > (start + TIME_OUT):
-                            break
-                    album = translator.to_mopidy_album(spotify_album)
+    def _lookup_track(self, uri):
+        return [SpotifyTrack(uri)]
 
-                    #for track in browser:
-                    # track = translator.to_mopidy_track(track)
+    def _lookup_album(self, uri):
+        album = Link.from_string(uri).as_album()
+        album_browser = self.backend.spotify.session.browse_album(album)
+        self._wait_for_object_to_load(album_browser)
+        return [SpotifyTrack(track=t) for t in album_browser]
 
-                    #from translator
-                    tracks = [
-                        translator.to_mopidy_track(t)
-                        for t in browser if str(Link.from_track(t, 0))]
+    def _lookup_artist(self, uri):
+        artist = Link.from_string(uri).as_artist()
+        artist_browser = self.backend.spotify.session.browse_artist(artist)
+        self._wait_for_object_to_load(artist_browser)
+        return [SpotifyTrack(track=t) for t in artist_browser]
 
-                    playlist = Playlist(
-                        tracks=tracks, uri=uri, name=album.name)
-                    return playlist
+    def _lookup_playlist(self, uri):
+        playlist = Link.from_string(uri).as_playlist()
+        self._wait_for_object_to_load(playlist)
+        return [SpotifyTrack(track=t) for t in playlist]
 
-                except SpotifyError as e:
-                    logger.debug(u'Failed to lookup album "%s": %s', uri, e)
-                    return None
-
-            #uri is an album
-            if link.type() == Link.LINK_ARTIST:
-                try:
-                    spotify_artist = Link.from_string(uri).as_artist()
-                    # TODO Block until metadata_updated callback is called.
-                    # Before that the track will be unloaded, unless it's
-                    # already in the stored playlists.
-                    browser = self.backend.spotify.session.browse_artist(
-                        spotify_artist)
-                    #wait 5 seconds
-                    start = time.time()
-                    while not browser.is_loaded():
-                        time.sleep(0.1)
-                        if time.time() > (start + TIME_OUT):
-                            break
-                    artist = translator.to_mopidy_artist(spotify_artist)
-
-                    #for track in browser:
-                    # track = translator.to_mopidy_track(track)
-
-                    #from translator
-                    tracks = [
-                        translator.to_mopidy_track(t)
-                        for t in browser if str(Link.from_track(t, 0))]
-
-                    playlist = Playlist(
-                        tracks=tracks, uri=uri, name=artist.name)
-                    return playlist
-
-                except SpotifyError as e:
-                    logger.debug(u'Failed to lookup album "%s": %s', uri, e)
-                    return None
-
-            #uri is a playlist of another user
-    # if l.type() == Link.LINK_PLAYLIST:
-    # if l.type() == Link.LINK_USER:
-
-            #uri is a track
-            try:
-                spotify_track = Link.from_string(uri).as_track()
-                # TODO Block until metadata_updated callback is called. Before
-                # that the track will be unloaded, unless it's already in the
-                # stored playlists.
-                return translator.to_mopidy_track(spotify_track)
-            except SpotifyError as e:
-                logger.debug(u'Failed to lookup track "%s": %s', uri, e)
-                return None
+    def _wait_for_object_to_load(self, spotify_obj, timeout=10):
+        # XXX Sleeping to wait for the Spotify object to load is an ugly hack,
+        # but it works. We should look into other solutions for this.
+        start = time.time()
+        while not spotify_obj.is_loaded():
+            time.sleep(0.1)
+            if time.time() > (start + timeout):
+                logger.debug(
+                    'Timeout: Spotify object did not load in %ds', timeout)
+                return
 
     def refresh(self, uri=None):
         pass  # TODO
