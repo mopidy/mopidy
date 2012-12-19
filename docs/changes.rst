@@ -53,6 +53,14 @@ v0.11.0 (in development)
 - The ``track_playback_{paused,resumed,started,ended}`` events now include a
   :class:`mopidy.models.TlTrack` instead of a :class:`mopidy.models.Track`.
 
+*Audio:*
+
+- Mixers with fewer than 100 volume levels could report another volume level
+  than what you just set due to the conversion between Mopidy's 0-100 range and
+  the mixer's range. Now Mopidy returns the recently set volume if the mixer
+  reports a volume level that matches the recently set volume, otherwise the
+  mixer's volume level is rescaled to the 1-100 range and returned.
+
 
 v0.10.0 (2012-12-12)
 ====================
