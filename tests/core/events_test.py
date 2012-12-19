@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import mock
 import pykka
 
-from mopidy import audio, core
+from mopidy import core
 from mopidy.backends import dummy
 from mopidy.models import Track
 
@@ -13,8 +13,7 @@ from tests import unittest
 @mock.patch.object(core.CoreListener, 'send')
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
-        self.audio = mock.Mock(spec=audio.Audio)
-        self.backend = dummy.DummyBackend.start(audio=audio).proxy()
+        self.backend = dummy.DummyBackend.start(audio=None).proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
     def tearDown(self):
