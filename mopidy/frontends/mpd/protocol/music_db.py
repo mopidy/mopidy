@@ -1,45 +1,13 @@
 from __future__ import unicode_literals
 
-import re
-import shlex
-
-from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
+from mopidy.frontends.mpd import translator
+from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
-from mopidy.frontends.mpd.translator import tracks_to_mpd_format
 
 
 QUERY_RE = (
     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
     r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
-
-
-def _build_query(mpd_query):
-    """
-    Parses a MPD query string and converts it to the Mopidy query format.
-    """
-    query_pattern = (
-        r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny)"? "[^"]+"')
-    query_parts = re.findall(query_pattern, mpd_query)
-    query_part_pattern = (
-        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny))"? '
-        r'"(?P<what>[^"]+)"')
-    query = {}
-    for query_part in query_parts:
-        m = re.match(query_part_pattern, query_part)
-        field = m.groupdict()['field'].lower()
-        if field == 'title':
-            field = 'track'
-        elif field in ('file', 'filename'):
-            field = 'uri'
-        field = str(field)  # Needed for kwargs keys on OS X and Windows
-        what = m.groupdict()['what']
-        if not what:
-            raise ValueError
-        if field in query:
-            query[field].append(what)
-        else:
-            query[field] = [what]
-    return query
 
 
 @handle_request(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
@@ -84,11 +52,11 @@ def find(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = _build_query(mpd_query)
+        query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     result = context.core.library.find_exact(**query).get()
-    return tracks_to_mpd_format(result)
+    return translator.tracks_to_mpd_format(result)
 
 
 @handle_request(r'^findadd ' + QUERY_RE)
@@ -102,7 +70,7 @@ def findadd(context, mpd_query):
         current playlist. Parameters have the same meaning as for ``find``.
     """
     try:
-        query = _build_query(mpd_query)
+        query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     result = context.core.library.find_exact(**query).get()
@@ -196,7 +164,7 @@ def list_(context, field, mpd_query=None):
     """
     field = field.lower()
     try:
-        query = _list_build_query(field, mpd_query)
+        query = translator.query_from_mpd_list_format(field, mpd_query)
     except ValueError:
         return
     if field == 'artist':
@@ -207,47 +175,6 @@ def list_(context, field, mpd_query=None):
         return _list_date(context, query)
     elif field == 'genre':
         pass  # TODO We don't have genre in our internal data structures yet
-
-
-def _list_build_query(field, mpd_query):
-    """Converts a ``list`` query to a Mopidy query."""
-    if mpd_query is None:
-        return {}
-    try:
-        # shlex does not seem to be friends with unicode objects
-        tokens = shlex.split(mpd_query.encode('utf-8'))
-    except ValueError as error:
-        if str(error) == 'No closing quotation':
-            raise MpdArgError('Invalid unquoted character', command='list')
-        else:
-            raise
-    tokens = [t.decode('utf-8') for t in tokens]
-    if len(tokens) == 1:
-        if field == 'album':
-            if not tokens[0]:
-                raise ValueError
-            return {'artist': [tokens[0]]}
-        else:
-            raise MpdArgError(
-                'should be "Album" for 3 arguments', command='list')
-    elif len(tokens) % 2 == 0:
-        query = {}
-        while tokens:
-            key = tokens[0].lower()
-            key = str(key)  # Needed for kwargs keys on OS X and Windows
-            value = tokens[1]
-            tokens = tokens[2:]
-            if key not in ('artist', 'album', 'date', 'genre'):
-                raise MpdArgError('not able to parse args', command='list')
-            if not value:
-                raise ValueError
-            if key in query:
-                query[key].append(value)
-            else:
-                query[key] = [value]
-        return query
-    else:
-        raise MpdArgError('not able to parse args', command='list')
 
 
 def _list_artist(context, query):
@@ -367,11 +294,11 @@ def search(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = _build_query(mpd_query)
+        query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     result = context.core.library.search(**query).get()
-    return tracks_to_mpd_format(result)
+    return translator.tracks_to_mpd_format(result)
 
 
 @handle_request(r'^searchadd ' + QUERY_RE)
@@ -388,7 +315,7 @@ def searchadd(context, mpd_query):
         not case sensitive.
     """
     try:
-        query = _build_query(mpd_query)
+        query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     result = context.core.library.search(**query).get()
@@ -411,7 +338,7 @@ def searchaddpl(context, playlist_name, mpd_query):
         not case sensitive.
     """
     try:
-        query = _build_query(mpd_query)
+        query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     result = context.core.library.search(**query).get()
