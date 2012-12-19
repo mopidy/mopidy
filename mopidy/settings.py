@@ -282,3 +282,12 @@ SPOTIFY_PROXY_USERNAME = None
 #:
 #:     SPOTIFY_PROXY_PASSWORD = None
 SPOTIFY_PROXY_PASSWORD = None
+
+#: Max number of seconds to wait for Spotify operations to complete.
+#:
+#: Used by :mod:`mopidy.backends.spotify`
+#:
+#: Default::
+#:
+#:     SPOTIFY_TIMEOUT = 10
+SPOTIFY_TIMEOUT = 10

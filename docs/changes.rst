@@ -8,6 +8,11 @@ This change log is used to track all major changes to Mopidy.
 v0.11.0 (in development)
 ========================
 
+**Spotify backend**
+
+- Add :attr:`mopidy.settings.SPOTIFY_TIMEOUT` setting which allows you to
+  control how long we should wait before giving up on Spotify searches, etc.
+
 **MPD frontend**
 
 - Add support for the ``findadd`` command.
