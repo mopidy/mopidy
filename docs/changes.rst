@@ -50,6 +50,9 @@ v0.11.0 (in development)
 - Include the new volume level in the
   :meth:`mopidy.core.CoreListener.volume_changed` event.
 
+- The ``track_playback_{paused,resumed,started,ended}`` events now include a
+  :class:`mopidy.models.TlTrack` instead of a :class:`mopidy.models.Track`.
+
 
 v0.10.0 (2012-12-12)
 ====================
