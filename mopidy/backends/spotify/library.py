@@ -2,11 +2,16 @@ from __future__ import unicode_literals
 
 import logging
 import Queue
+import time
+
+TIME_OUT = 10
 
 from spotify import Link, SpotifyError
 
 from mopidy.backends import base
 from mopidy.models import Track
+from mopidy.backends.base import BaseLibraryProvider
+from mopidy.models import Playlist
 
 from . import translator
 
@@ -56,11 +61,82 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         return self.search(**query)
 
     def lookup(self, uri):
-        try:
-            return [SpotifyTrack(uri)]
-        except SpotifyError as e:
-            logger.debug('Failed to lookup "%s": %s', uri, e)
-            return []
+            link = Link.from_string(uri)
+            #uri is an album
+            if link.type() == Link.LINK_ALBUM:
+                try:
+                    spotify_album = Link.from_string(uri).as_album()
+                    # TODO Block until metadata_updated callback is called. Before that
+                    # the track will be unloaded, unless it's already in the stored
+                    # playlists.
+                    browser = self.backend.spotify.session.browse_album(spotify_album)
+
+                    #wait 5 seconds
+                    start = time.time()
+                    while not browser.is_loaded():
+                        time.sleep(0.1)
+                        if time.time() > (start + TIME_OUT):
+                            break
+                    album = translator.to_mopidy_album(spotify_album)
+
+                    #for track in browser:
+                    # track = translator.to_mopidy_track(track)
+                    
+                    #from translator
+                    tracks=[translator.to_mopidy_track(t) for t in browser
+                        if str(Link.from_track(t, 0))]
+                    
+                    playlist = Playlist(tracks=tracks, uri=uri, name=album.name)
+                    return playlist
+                
+                except SpotifyError as e:
+                    logger.debug(u'Failed to lookup album "%s": %s', uri, e)
+                    return None
+            
+            #uri is an album
+            if link.type() == Link.LINK_ARTIST:
+                try:
+                    spotify_artist = Link.from_string(uri).as_artist()
+                    # TODO Block until metadata_updated callback is called. Before that
+                    # the track will be unloaded, unless it's already in the stored
+                    # playlists.
+                    browser = self.backend.spotify.session.browse_artist(spotify_artist)
+                    #wait 5 seconds
+                    start = time.time()
+                    while not browser.is_loaded():
+                        time.sleep(0.1)
+                        if time.time() > (start + TIME_OUT):
+                            break
+                    artist = translator.to_mopidy_artist(spotify_artist)
+
+                    #for track in browser:
+                    # track = translator.to_mopidy_track(track)
+                    
+                    #from translator
+                    tracks=[translator.to_mopidy_track(t) for t in browser
+                        if str(Link.from_track(t, 0))]
+                    
+                    playlist = Playlist(tracks=tracks, uri=uri, name=artist.name)
+                    return playlist
+                
+                except SpotifyError as e:
+                    logger.debug(u'Failed to lookup album "%s": %s', uri, e)
+                    return None
+            
+            #uri is a playlist of another user
+    # if l.type() == Link.LINK_PLAYLIST:
+    # if l.type() == Link.LINK_USER:
+            
+            #uri is a track
+            try:
+                spotify_track = Link.from_string(uri).as_track()
+                # TODO Block until metadata_updated callback is called. Before that
+                # the track will be unloaded, unless it's already in the stored
+                # playlists.
+                return translator.to_mopidy_track(spotify_track)
+            except SpotifyError as e:
+                logger.debug(u'Failed to lookup track "%s": %s', uri, e)
+                return None
 
     def refresh(self, uri=None):
         pass  # TODO
