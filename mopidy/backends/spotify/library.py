@@ -70,6 +70,13 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         if not query:
             return self._get_all_tracks()
 
+        if 'uri' in query.keys():
+            result = []
+            for uri in query['uri']:
+                tracks = self.lookup(uri)
+                result += tracks
+            return result
+
         spotify_query = self._translate_search_query(query)
         logger.debug('Spotify search query: %s' % spotify_query)
 
@@ -110,14 +117,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
     def _translate_search_query(self, mopidy_query):
         spotify_query = []
         for (field, values) in mopidy_query.iteritems():
-            if field == 'uri':
-                tracks = []
-                for value in values:
-                    track = self.lookup(value)
-                    if track:
-                        tracks.append(track)
-                return tracks
-            elif field == 'track':
+            if field == 'track':
                 field = 'title'
             elif field == 'date':
                 field = 'year'
