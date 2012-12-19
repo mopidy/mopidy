@@ -8,6 +8,19 @@ This change log is used to track all major changes to Mopidy.
 v0.11.0 (in development)
 ========================
 
+**Spotify backend**
+
+- Add support for looking up albums, artists, and playlists by URI in addition
+  to tracks. (Fixes: :issue:`67`)
+
+  As an example of how this can be used, you can try the the following MPD
+  commands which now all adds one or more tracks to your tracklist::
+
+      add "spotify:track:1mwt9hzaH7idmC5UCoOUkz"
+      add "spotify:album:3gpHG5MGwnipnap32lFYvI"
+      add "spotify:artist:5TgQ66WuWkoQ2xYxaSTnVP"
+      add "spotify:user:p3.no:playlist:0XX6tamRiqEgh3t6FPFEkw"
+
 **MPD frontend**
 
 - Add support for the ``findadd`` command.
