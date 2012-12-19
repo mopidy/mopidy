@@ -99,7 +99,8 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         self._wait_for_object_to_load(playlist)
         return [SpotifyTrack(track=t) for t in playlist]
 
-    def _wait_for_object_to_load(self, spotify_obj, timeout=10):
+    def _wait_for_object_to_load(
+            self, spotify_obj, timeout=settings.SPOTIFY_TIMEOUT):
         # XXX Sleeping to wait for the Spotify object to load is an ugly hack,
         # but it works. We should look into other solutions for this.
         start = time.time()
