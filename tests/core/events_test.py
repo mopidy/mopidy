@@ -68,6 +68,7 @@ class BackendEventsTest(unittest.TestCase):
         self.core.playback.seek(1000).get()
 
         self.assertEqual(send.call_args[0][0], 'seeked')
+        self.assertEqual(send.call_args[1]['time_position'], 1000)
 
     def test_tracklist_add_sends_tracklist_changed_event(self, send):
         send.reset_mock()
