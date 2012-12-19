@@ -5,6 +5,7 @@ import logging
 import pykka
 from spotify import Link, SpotifyError
 
+from mopidy import settings
 from mopidy.backends import base
 from mopidy.models import Track
 
@@ -82,18 +83,20 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
                 translator.to_mopidy_track(t) for t in results.tracks()]
             future.set(tracks)
 
-        self.backend.spotify.connected.wait()
+        if not self.backend.spotify.connected.wait(settings.SPOTIFY_TIMEOUT):
+            logger.debug('Not connected: Spotify search cancelled')
+            return []
 
         self.backend.spotify.session.search(
             spotify_query, callback,
             track_count=100, album_count=0, artist_count=0)
 
-        timeout = 10  # TODO Make this a setting
         try:
-            return future.get(timeout=timeout)
+            return future.get(timeout=settings.SPOTIFY_TIMEOUT)
         except pykka.Timeout:
             logger.debug(
-                'Timeout: Spotify search did not return in %ds', timeout)
+                'Timeout: Spotify search did not return in %ds',
+                settings.SPOTIFY_TIMEOUT)
             return []
 
     def _get_all_tracks(self):
