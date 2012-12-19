@@ -15,6 +15,10 @@ v0.11.0 (in development)
 
 **MPD frontend**
 
+- Add :attr:`mopidy.settings.MPD_SERVER_CONNECTION_TIMEOUT` setting which
+  controls how long an MPD client can stay inactive before the connection is
+  closed by the server.
+
 - Add support for the ``findadd`` command.
 
 - Updated to match the MPD 0.17 protocol (Fixes: :issue:`228`):
