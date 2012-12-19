@@ -41,6 +41,7 @@ class Audio(pykka.ThreadingActor):
         self._playbin = None
         self._mixer = None
         self._mixer_track = None
+        self._mixer_scale = None
         self._software_mixing = False
         self._appsrc = None
         self._volume_set = None
@@ -150,6 +151,8 @@ class Audio(pykka.ThreadingActor):
 
         self._mixer = mixer
         self._mixer_track = track
+        self._mixer_scale = (
+            self._mixer_track.min_volume, self._mixer_track.max_volume)
         logger.info(
             'Audio mixer set to "%s" using track "%s"',
             mixer.get_factory().get_name(), track.label)
@@ -390,15 +393,18 @@ class Audio(pykka.ThreadingActor):
         avg_volume = float(sum(volumes)) / len(volumes)
 
         internal_scale = (0, 100)
-        mixer_scale = (
-            self._mixer_track.min_volume, self._mixer_track.max_volume)
 
-        if self._volume_set is not None and self._rescale(self._volume_set,
-                old=internal_scale, new=mixer_scale) == avg_volume:
+        if self._volume_set is not None:
+            volume_set_on_mixer_scale = self._rescale(
+                self._volume_set, old=internal_scale, new=self._mixer_scale)
+        else:
+            volume_set_on_mixer_scale = None
+
+        if volume_set_on_mixer_scale == avg_volume:
             return self._volume_set
         else:
             return self._rescale(
-                avg_volume, old=mixer_scale, new=internal_scale)
+                avg_volume, old=self._mixer_scale, new=internal_scale)
 
     def set_volume(self, volume):
         """
@@ -418,10 +424,9 @@ class Audio(pykka.ThreadingActor):
         self._volume_set = volume
 
         internal_scale = (0, 100)
-        mixer_scale = (
-            self._mixer_track.min_volume, self._mixer_track.max_volume)
 
-        volume = self._rescale(volume, old=internal_scale, new=mixer_scale)
+        volume = self._rescale(
+            volume, old=internal_scale, new=self._mixer_scale)
 
         volumes = (volume,) * self._mixer_track.num_channels
         self._mixer.set_volume(self._mixer_track, volumes)

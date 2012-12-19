@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 
 import logging
-import Queue
 import time
 
+import pykka
 from spotify import Link, SpotifyError
 
+from mopidy import settings
 from mopidy.backends import base
 from mopidy.models import Track
 
@@ -114,14 +115,48 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
     def search(self, **query):
         if not query:
-            # Since we can't search for the entire Spotify library, we return
-            # all tracks in the playlists when the query is empty.
-            tracks = []
-            for playlist in self.backend.playlists.playlists:
-                tracks += playlist.tracks
-            return tracks
+            return self._get_all_tracks()
+
+        spotify_query = self._translate_search_query(query)
+        logger.debug('Spotify search query: %s' % spotify_query)
+
+        future = pykka.ThreadingFuture()
+
+        def callback(results, userdata=None):
+            # TODO Include results from results.albums(), etc. too
+            # TODO Consider launching a second search if results.total_tracks()
+            # is larger than len(results.tracks())
+            tracks = [
+                translator.to_mopidy_track(t) for t in results.tracks()]
+            future.set(tracks)
+
+        if not self.backend.spotify.connected.wait(settings.SPOTIFY_TIMEOUT):
+            logger.debug('Not connected: Spotify search cancelled')
+            return []
+
+        self.backend.spotify.session.search(
+            spotify_query, callback,
+            track_count=100, album_count=0, artist_count=0)
+
+        try:
+            return future.get(timeout=settings.SPOTIFY_TIMEOUT)
+        except pykka.Timeout:
+            logger.debug(
+                'Timeout: Spotify search did not return in %ds',
+                settings.SPOTIFY_TIMEOUT)
+            return []
+
+    def _get_all_tracks(self):
+        # Since we can't search for the entire Spotify library, we return
+        # all tracks in the playlists when the query is empty.
+        tracks = []
+        for playlist in self.backend.playlists.playlists:
+            tracks += playlist.tracks
+        return tracks
+
+    def _translate_search_query(self, mopidy_query):
         spotify_query = []
-        for (field, values) in query.iteritems():
+        for (field, values) in mopidy_query.iteritems():
             if field == 'uri':
                 tracks = []
                 for value in values:
@@ -144,10 +179,4 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
                 else:
                     spotify_query.append('%s:"%s"' % (field, value))
         spotify_query = ' '.join(spotify_query)
-        logger.debug('Spotify search query: %s' % spotify_query)
-        queue = Queue.Queue()
-        self.backend.spotify.search(spotify_query, queue)
-        try:
-            return queue.get(timeout=3)  # XXX What is an reasonable timeout?
-        except Queue.Empty:
-            return []
+        return spotify_query

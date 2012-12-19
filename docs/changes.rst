@@ -10,6 +10,9 @@ v0.11.0 (in development)
 
 **Spotify backend**
 
+- Add :attr:`mopidy.settings.SPOTIFY_TIMEOUT` setting which allows you to
+  control how long we should wait before giving up on Spotify searches, etc.
+
 - Add support for looking up albums, artists, and playlists by URI in addition
   to tracks. (Fixes: :issue:`67`)
 
