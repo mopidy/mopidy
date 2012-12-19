@@ -65,7 +65,7 @@ class BackendEventsTest(unittest.TestCase):
 
     def test_volume_changed_event_changes_volume(self):
         self.mpris_object.Get.return_value = 1.0
-        self.mpris_frontend.volume_changed()
+        self.mpris_frontend.volume_changed(volume=100)
         self.assertListEqual(self.mpris_object.Get.call_args_list, [
             ((objects.PLAYER_IFACE, 'Volume'), {}),
         ])

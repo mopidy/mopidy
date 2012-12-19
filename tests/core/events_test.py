@@ -122,3 +122,4 @@ class BackendEventsTest(unittest.TestCase):
         send.reset_mock()
         self.core.playback.set_volume(20).get()
         self.assertEqual(send.call_args[0][0], 'volume_changed')
+        self.assertEqual(send.call_args[1]['volume'], 20)

@@ -47,6 +47,9 @@ v0.11.0 (in development)
 
 - Actually trigger the :meth:`mopidy.core.CoreListener.volume_changed` event.
 
+- Include the new volume level in the
+  :meth:`mopidy.core.CoreListener.volume_changed` event.
+
 
 v0.10.0 (2012-12-12)
 ====================

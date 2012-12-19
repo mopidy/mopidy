@@ -84,7 +84,7 @@ class MprisFrontend(pykka.ThreadingActor, CoreListener):
         self._emit_properties_changed(
             objects.PLAYER_IFACE, ['PlaybackStatus', 'Metadata'])
 
-    def volume_changed(self):
+    def volume_changed(self, volume):
         logger.debug('Received volume_changed event')
         self._emit_properties_changed(objects.PLAYER_IFACE, ['Volume'])
 
