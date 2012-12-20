@@ -80,7 +80,9 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             return []
 
     def _lookup_track(self, uri):
-        return [SpotifyTrack(uri)]
+        track = Link.from_string(uri).as_track()
+        self._wait_for_object_to_load(track)
+        return [SpotifyTrack(track=track)]
 
     def _lookup_album(self, uri):
         album = Link.from_string(uri).as_album()
