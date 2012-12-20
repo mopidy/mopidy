@@ -19,12 +19,12 @@ class SpotifyTrack(Track):
     """Proxy object for unloaded Spotify tracks."""
     def __init__(self, uri=None, track=None):
         super(SpotifyTrack, self).__init__()
-        if uri:
+        if (uri and track) or (not uri and not track):
+            raise AttributeError('uri or track must be provided')
+        elif uri:
             self._spotify_track = Link.from_string(uri).as_track()
         elif track:
             self._spotify_track = track
-        else:
-            raise AttributeError('uri or track must be provided')
         self._unloaded_track = Track(uri=uri, name='[loading...]')
         self._track = None
 
