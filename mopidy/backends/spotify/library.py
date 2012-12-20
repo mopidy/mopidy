@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import time
 
 import pykka
 from spotify import Link, SpotifyError
@@ -16,9 +17,14 @@ logger = logging.getLogger('mopidy.backends.spotify')
 
 class SpotifyTrack(Track):
     """Proxy object for unloaded Spotify tracks."""
-    def __init__(self, uri):
+    def __init__(self, uri=None, track=None):
         super(SpotifyTrack, self).__init__()
-        self._spotify_track = Link.from_string(uri).as_track()
+        if (uri and track) or (not uri and not track):
+            raise AttributeError('uri or track must be provided')
+        elif uri:
+            self._spotify_track = Link.from_string(uri).as_track()
+        elif track:
+            self._spotify_track = track
         self._unloaded_track = Track(uri=uri, name='[loading...]')
         self._track = None
 
@@ -58,10 +64,54 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
     def lookup(self, uri):
         try:
-            return [SpotifyTrack(uri)]
-        except SpotifyError as e:
-            logger.debug('Failed to lookup "%s": %s', uri, e)
+            link = Link.from_string(uri)
+            if link.type() == Link.LINK_TRACK:
+                return self._lookup_track(uri)
+            if link.type() == Link.LINK_ALBUM:
+                return self._lookup_album(uri)
+            elif link.type() == Link.LINK_ARTIST:
+                return self._lookup_artist(uri)
+            elif link.type() == Link.LINK_PLAYLIST:
+                return self._lookup_playlist(uri)
+            else:
+                return []
+        except SpotifyError as error:
+            logger.debug(u'Failed to lookup "%s": %s', uri, error)
             return []
+
+    def _lookup_track(self, uri):
+        track = Link.from_string(uri).as_track()
+        self._wait_for_object_to_load(track)
+        return [SpotifyTrack(track=track)]
+
+    def _lookup_album(self, uri):
+        album = Link.from_string(uri).as_album()
+        album_browser = self.backend.spotify.session.browse_album(album)
+        self._wait_for_object_to_load(album_browser)
+        return [SpotifyTrack(track=t) for t in album_browser]
+
+    def _lookup_artist(self, uri):
+        artist = Link.from_string(uri).as_artist()
+        artist_browser = self.backend.spotify.session.browse_artist(artist)
+        self._wait_for_object_to_load(artist_browser)
+        return [SpotifyTrack(track=t) for t in artist_browser]
+
+    def _lookup_playlist(self, uri):
+        playlist = Link.from_string(uri).as_playlist()
+        self._wait_for_object_to_load(playlist)
+        return [SpotifyTrack(track=t) for t in playlist]
+
+    def _wait_for_object_to_load(
+            self, spotify_obj, timeout=settings.SPOTIFY_TIMEOUT):
+        # XXX Sleeping to wait for the Spotify object to load is an ugly hack,
+        # but it works. We should look into other solutions for this.
+        wait_until = time.time() + timeout
+        while not spotify_obj.is_loaded():
+            time.sleep(0.1)
+            if time.time() > wait_until:
+                logger.debug(
+                    'Timeout: Spotify object did not load in %ds', timeout)
+                return
 
     def refresh(self, uri=None):
         pass  # TODO
