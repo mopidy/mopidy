@@ -60,11 +60,13 @@ class LibraryControllerTest(object):
         result = self.library.find_exact(album=['unknown artist'])
         self.assertEqual(result, [])
 
-    def test_find_exact_artist(self):
-        result = self.library.find_exact(artist=['artist1'])
+    def test_find_exact_uri(self):
+        track_1_uri = 'file://' + path_to_data_dir('uri1')
+        result = self.library.find_exact(uri=track_1_uri)
         self.assertEqual(result, self.tracks[:1])
 
-        result = self.library.find_exact(artist=['artist2'])
+        track_2_uri = 'file://' + path_to_data_dir('uri2')
+        result = self.library.find_exact(uri=track_2_uri)
         self.assertEqual(result, self.tracks[1:2])
 
     def test_find_exact_track(self):
@@ -74,20 +76,18 @@ class LibraryControllerTest(object):
         result = self.library.find_exact(track=['track2'])
         self.assertEqual(result, self.tracks[1:2])
 
+    def test_find_exact_artist(self):
+        result = self.library.find_exact(artist=['artist1'])
+        self.assertEqual(result, self.tracks[:1])
+
+        result = self.library.find_exact(artist=['artist2'])
+        self.assertEqual(result, self.tracks[1:2])
+
     def test_find_exact_album(self):
         result = self.library.find_exact(album=['album1'])
         self.assertEqual(result, self.tracks[:1])
 
         result = self.library.find_exact(album=['album2'])
-        self.assertEqual(result, self.tracks[1:2])
-
-    def test_find_exact_uri(self):
-        track_1_uri = 'file://' + path_to_data_dir('uri1')
-        result = self.library.find_exact(uri=track_1_uri)
-        self.assertEqual(result, self.tracks[:1])
-
-        track_2_uri = 'file://' + path_to_data_dir('uri2')
-        result = self.library.find_exact(uri=track_2_uri)
         self.assertEqual(result, self.tracks[1:2])
 
     def test_find_exact_wrong_type(self):
@@ -120,11 +120,11 @@ class LibraryControllerTest(object):
         result = self.library.search(any=['unknown'])
         self.assertEqual(result, [])
 
-    def test_search_artist(self):
-        result = self.library.search(artist=['Tist1'])
+    def test_search_uri(self):
+        result = self.library.search(uri=['RI1'])
         self.assertEqual(result, self.tracks[:1])
 
-        result = self.library.search(artist=['Tist2'])
+        result = self.library.search(uri=['RI2'])
         self.assertEqual(result, self.tracks[1:2])
 
     def test_search_track(self):
@@ -134,18 +134,18 @@ class LibraryControllerTest(object):
         result = self.library.search(track=['Rack2'])
         self.assertEqual(result, self.tracks[1:2])
 
+    def test_search_artist(self):
+        result = self.library.search(artist=['Tist1'])
+        self.assertEqual(result, self.tracks[:1])
+
+        result = self.library.search(artist=['Tist2'])
+        self.assertEqual(result, self.tracks[1:2])
+
     def test_search_album(self):
         result = self.library.search(album=['Bum1'])
         self.assertEqual(result, self.tracks[:1])
 
         result = self.library.search(album=['Bum2'])
-        self.assertEqual(result, self.tracks[1:2])
-
-    def test_search_uri(self):
-        result = self.library.search(uri=['RI1'])
-        self.assertEqual(result, self.tracks[:1])
-
-        result = self.library.search(uri=['RI2'])
         self.assertEqual(result, self.tracks[1:2])
 
     def test_search_any(self):
