@@ -174,6 +174,16 @@ MIXER = 'autoaudiomixer'
 #:     MIXER_TRACK = None
 MIXER_TRACK = None
 
+#: Number of seconds an MPD client can stay inactive before the connection is
+#: closed by the server.
+#:
+#: Used by :mod:`mopidy.frontends.mpd`.
+#:
+#: Default::
+#:
+#:     MPD_SERVER_CONNECTION_TIMEOUT = 60
+MPD_SERVER_CONNECTION_TIMEOUT = 60
+
 #: Which address Mopidy's MPD server should bind to.
 #:
 #: Used by :mod:`mopidy.frontends.mpd`.

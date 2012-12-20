@@ -2,10 +2,12 @@ from __future__ import unicode_literals
 
 import os
 import re
+import shlex
 import urllib
 
 from mopidy import settings
 from mopidy.frontends.mpd import protocol
+from mopidy.frontends.mpd.exceptions import MpdArgError
 from mopidy.models import TlTrack
 from mopidy.utils.path import mtime as get_mtime, uri_to_path, split_path
 
@@ -132,6 +134,82 @@ def playlist_to_mpd_format(playlist, *args, **kwargs):
     Arguments as for :func:`tracks_to_mpd_format`, except the first one.
     """
     return tracks_to_mpd_format(playlist.tracks, *args, **kwargs)
+
+
+def query_from_mpd_list_format(field, mpd_query):
+    """
+    Converts an MPD ``list`` query to a Mopidy query.
+    """
+    if mpd_query is None:
+        return {}
+    try:
+        # shlex does not seem to be friends with unicode objects
+        tokens = shlex.split(mpd_query.encode('utf-8'))
+    except ValueError as error:
+        if str(error) == 'No closing quotation':
+            raise MpdArgError('Invalid unquoted character', command='list')
+        else:
+            raise
+    tokens = [t.decode('utf-8') for t in tokens]
+    if len(tokens) == 1:
+        if field == 'album':
+            if not tokens[0]:
+                raise ValueError
+            return {'artist': [tokens[0]]}
+        else:
+            raise MpdArgError(
+                'should be "Album" for 3 arguments', command='list')
+    elif len(tokens) % 2 == 0:
+        query = {}
+        while tokens:
+            key = tokens[0].lower()
+            key = str(key)  # Needed for kwargs keys on OS X and Windows
+            value = tokens[1]
+            tokens = tokens[2:]
+            if key not in ('artist', 'album', 'date', 'genre'):
+                raise MpdArgError('not able to parse args', command='list')
+            if not value:
+                raise ValueError
+            if key in query:
+                query[key].append(value)
+            else:
+                query[key] = [value]
+        return query
+    else:
+        raise MpdArgError('not able to parse args', command='list')
+
+
+def query_from_mpd_search_format(mpd_query):
+    """
+    Parses an MPD ``search`` or ``find`` query and converts it to the Mopidy
+    query format.
+
+    :param mpd_query: the MPD search query
+    :type mpd_query: string
+    """
+    query_pattern = (
+        r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny)"? "[^"]+"')
+    query_parts = re.findall(query_pattern, mpd_query)
+    query_part_pattern = (
+        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny))"? '
+        r'"(?P<what>[^"]+)"')
+    query = {}
+    for query_part in query_parts:
+        m = re.match(query_part_pattern, query_part)
+        field = m.groupdict()['field'].lower()
+        if field == 'title':
+            field = 'track'
+        elif field in ('file', 'filename'):
+            field = 'uri'
+        field = str(field)  # Needed for kwargs keys on OS X and Windows
+        what = m.groupdict()['what']
+        if not what:
+            raise ValueError
+        if field in query:
+            query[field].append(what)
+        else:
+            query[field] = [what]
+    return query
 
 
 def tracks_to_tag_cache_format(tracks):
