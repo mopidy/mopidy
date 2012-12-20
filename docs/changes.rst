@@ -24,6 +24,9 @@ v0.11.0 (in development)
       add "spotify:artist:5TgQ66WuWkoQ2xYxaSTnVP"
       add "spotify:user:p3.no:playlist:0XX6tamRiqEgh3t6FPFEkw"
 
+- Increase max number of tracks returned by searches from 100 to 200, which
+  seems to be Spotify's current max limit.
+
 **Local backend**
 
 - Load track dates from tag cache.

@@ -146,7 +146,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
         self.backend.spotify.session.search(
             spotify_query, callback,
-            track_count=100, album_count=0, artist_count=0)
+            track_count=200, album_count=0, artist_count=0)
 
         try:
             return future.get(timeout=settings.SPOTIFY_TIMEOUT)
