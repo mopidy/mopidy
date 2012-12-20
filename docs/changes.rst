@@ -64,6 +64,9 @@ v0.11.0 (in development)
 
 - Specified that :attr:`mopidy.models.Playlist.last_modified` should be in UTC.
 
+- Added :class:`mopidy.models.SearchResult` model to encapsulate search results
+  consisting of more than just tracks.
+
 *Core API:*
 
 - Change the following methods to accept either a dict with filters or kwargs.
