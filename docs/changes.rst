@@ -24,6 +24,10 @@ v0.11.0 (in development)
       add "spotify:artist:5TgQ66WuWkoQ2xYxaSTnVP"
       add "spotify:user:p3.no:playlist:0XX6tamRiqEgh3t6FPFEkw"
 
+**Local backend**
+
+- Load track dates from tag cache.
+
 **MPD frontend**
 
 - Add :attr:`mopidy.settings.MPD_SERVER_CONNECTION_TIMEOUT` setting which

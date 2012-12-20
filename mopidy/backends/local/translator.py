@@ -123,6 +123,9 @@ def _convert_mpd_data(data, tracks, music_dir):
     if 'title' in data:
         track_kwargs['name'] = data['title']
 
+    if 'date' in data:
+        track_kwargs['date'] = data['date']
+
     if 'musicbrainz_trackid' in data:
         track_kwargs['musicbrainz_id'] = data['musicbrainz_trackid']
 
