@@ -53,6 +53,8 @@ v0.11.0 (in development)
 
   - Add empty stubs for channel commands for client to client communication.
 
+- Add support for search by date.
+
 **Internal changes**
 
 *Models:*

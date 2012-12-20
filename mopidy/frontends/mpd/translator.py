@@ -187,12 +187,15 @@ def query_from_mpd_search_format(mpd_query):
     :param mpd_query: the MPD search query
     :type mpd_query: string
     """
+    # XXX The regexps below should be refactored to reuse common patterns here
+    # and in mopidy.frontends.mpd.protocol.music_db.
     query_pattern = (
-        r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny)"? "[^"]+"')
+        r'"?(?:[Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
+        r'[Tt]itle|[Aa]ny)"? "[^"]+"')
     query_parts = re.findall(query_pattern, mpd_query)
     query_part_pattern = (
-        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny))"? '
-        r'"(?P<what>[^"]+)"')
+        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
+        r'[Tt]itle|[Aa]ny))"? "(?P<what>[^"]+)"')
     query = {}
     for query_part in query_parts:
         m = re.match(query_part_pattern, query_part)
