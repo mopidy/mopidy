@@ -28,6 +28,8 @@ v0.11.0 (in development)
 
 - Load track dates from tag cache.
 
+- Add support for searching by track date.
+
 **MPD frontend**
 
 - Add :attr:`mopidy.settings.MPD_SERVER_CONNECTION_TIMEOUT` setting which
