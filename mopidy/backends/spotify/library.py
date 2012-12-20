@@ -8,7 +8,7 @@ from spotify import Link, SpotifyError
 
 from mopidy import settings
 from mopidy.backends import base
-from mopidy.models import Track
+from mopidy.models import Track, SearchResult
 
 from . import translator
 
@@ -121,11 +121,10 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             return self._get_all_tracks()
 
         if 'uri' in query.keys():
-            result = []
+            tracks = []
             for uri in query['uri']:
-                tracks = self.lookup(uri)
-                result += tracks
-            return result
+                tracks += self.lookup(uri)
+            return SearchResult(tracks=tracks)
 
         spotify_query = self._translate_search_query(query)
         logger.debug('Spotify search query: %s' % spotify_query)
@@ -133,12 +132,14 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         future = pykka.ThreadingFuture()
 
         def callback(results, userdata=None):
-            # TODO Include results from results.albums(), etc. too
-            # TODO Consider launching a second search if results.total_tracks()
-            # is larger than len(results.tracks())
-            tracks = [
-                translator.to_mopidy_track(t) for t in results.tracks()]
-            future.set(tracks)
+            search_result = SearchResult(
+                albums=[
+                    translator.to_mopidy_album(a) for a in results.albums()],
+                artists=[
+                    translator.to_mopidy_artist(a) for a in results.artists()],
+                tracks=[
+                    translator.to_mopidy_track(t) for t in results.tracks()])
+            future.set(search_result)
 
         if not self.backend.spotify.connected.wait(settings.SPOTIFY_TIMEOUT):
             logger.debug('Not connected: Spotify search cancelled')
@@ -146,7 +147,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
         self.backend.spotify.session.search(
             spotify_query, callback,
-            track_count=200, album_count=0, artist_count=0)
+            album_count=200, artist_count=200, track_count=200)
 
         try:
             return future.get(timeout=settings.SPOTIFY_TIMEOUT)
@@ -154,7 +155,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             logger.debug(
                 'Timeout: Spotify search did not return in %ds',
                 settings.SPOTIFY_TIMEOUT)
-            return []
+            return SearchResult(uri='spotify:search')
 
     def _get_all_tracks(self):
         # Since we can't search for the entire Spotify library, we return

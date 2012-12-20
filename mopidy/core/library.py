@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import itertools
 import urlparse
 
 import pykka
@@ -37,13 +36,12 @@ class LibraryController(object):
 
         :param query: one or more queries to search for
         :type query: dict
-        :rtype: list of :class:`mopidy.models.Track`
+        :rtype: list of :class:`mopidy.models.SearchResult`
         """
         query = query or kwargs
         futures = [
             b.library.find_exact(**query) for b in self.backends.with_library]
-        results = pykka.get_all(futures)
-        return list(itertools.chain(*results))
+        return pykka.get_all(futures)
 
     def lookup(self, uri):
         """
@@ -98,10 +96,9 @@ class LibraryController(object):
 
         :param query: one or more queries to search for
         :type query: dict
-        :rtype: list of :class:`mopidy.models.Track`
+        :rtype: list of :class:`mopidy.models.SearchResult`
         """
         query = query or kwargs
         futures = [
             b.library.search(**query) for b in self.backends.with_library]
-        results = pykka.get_all(futures)
-        return list(itertools.chain(*results))
+        return pykka.get_all(futures)

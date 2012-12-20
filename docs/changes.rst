@@ -69,6 +69,12 @@ v0.11.0 (in development)
 
 *Core API:*
 
+- Change the following methods to return :class:`mopidy.models.SearchResult`
+  objects which can include both track results and other results:
+
+  - :meth:`mopidy.core.LibraryController.find_exact`
+  - :meth:`mopidy.core.LibraryController.search`
+
 - Change the following methods to accept either a dict with filters or kwargs.
   Previously they only accepted kwargs, which made them impossible to use from
   the Mopidy.js through JSON-RPC, which doesn't support kwargs.
