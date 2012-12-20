@@ -103,10 +103,10 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             self, spotify_obj, timeout=settings.SPOTIFY_TIMEOUT):
         # XXX Sleeping to wait for the Spotify object to load is an ugly hack,
         # but it works. We should look into other solutions for this.
-        start = time.time()
+        wait_until = time.time() + timeout
         while not spotify_obj.is_loaded():
             time.sleep(0.1)
-            if time.time() > (start + timeout):
+            if time.time() > wait_until:
                 logger.debug(
                     'Timeout: Spotify object did not load in %ds', timeout)
                 return
