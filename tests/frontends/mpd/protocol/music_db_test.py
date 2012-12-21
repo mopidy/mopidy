@@ -115,6 +115,23 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseFindTest(protocol.BaseTestCase):
+    def test_find(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            albums=[Album(uri='dummy:album:a', name='A')],
+            artists=[Artist(uri='dummy:artist:b', name='B')],
+            tracks=[Track(uri='dummy:track:c', name='C')])
+
+        self.sendRequest('find "any" "foo"')
+
+        self.assertInResponse('file: dummy:album:a')
+        self.assertInResponse('Title: Album: A')
+        self.assertInResponse('file: dummy:artist:b')
+        self.assertInResponse('Title: Artist: B')
+        self.assertInResponse('file: dummy:track:c')
+        self.assertInResponse('Title: C')
+
+        self.assertInResponse('OK')
+
     def test_find_album(self):
         self.sendRequest('find "album" "what"')
         self.assertInResponse('OK')
@@ -409,6 +426,23 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseSearchTest(protocol.BaseTestCase):
+    def test_search(self):
+        self.backend.library.dummy_search_result = SearchResult(
+            albums=[Album(uri='dummy:album:a', name='A')],
+            artists=[Artist(uri='dummy:artist:b', name='B')],
+            tracks=[Track(uri='dummy:track:c', name='C')])
+
+        self.sendRequest('search "any" "foo"')
+
+        self.assertInResponse('file: dummy:album:a')
+        self.assertInResponse('Title: Album: A')
+        self.assertInResponse('file: dummy:artist:b')
+        self.assertInResponse('Title: Artist: B')
+        self.assertInResponse('file: dummy:track:c')
+        self.assertInResponse('Title: C')
+
+        self.assertInResponse('OK')
+
     def test_search_album(self):
         self.sendRequest('search "album" "analbum"')
         self.assertInResponse('OK')

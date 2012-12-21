@@ -58,6 +58,11 @@ v0.11.0 (in development)
 
 - Add support for search by date.
 
+- Include fake tracks representing albums and artists in the search results.
+  When these are added to the tracklist, they expand to either all tracks in
+  the album or all tracks by the artist. This makes it easy to play full albums
+  in proper order, which is a feature that have been frequently requested.
+
 **Internal changes**
 
 *Models:*

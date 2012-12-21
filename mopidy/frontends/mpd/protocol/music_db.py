@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 
+import functools
 import itertools
 
+from mopidy.models import Track
 from mopidy.frontends.mpd import translator
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
@@ -12,8 +14,28 @@ QUERY_RE = (
     r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
 
 
-def _get_tracks(search_results):
-    return list(itertools.chain(*[r.tracks for r in search_results]))
+def _get_field(field, search_results):
+    return list(itertools.chain(*[getattr(r, field) for r in search_results]))
+
+
+_get_albums = functools.partial(_get_field, 'albums')
+_get_artists = functools.partial(_get_field, 'artists')
+_get_tracks = functools.partial(_get_field, 'tracks')
+
+
+def _album_as_track(album):
+    return Track(
+        uri=album.uri,
+        name='Album: ' + album.name,
+        album=album,
+        artists=album.artists)
+
+
+def _artist_as_track(artist):
+    return Track(
+        uri=artist.uri,
+        name='Artist: ' + artist.name,
+        artists=[artist])
 
 
 @handle_request(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
@@ -62,7 +84,10 @@ def find(context, mpd_query):
     except ValueError:
         return
     results = context.core.library.find_exact(**query).get()
-    return translator.tracks_to_mpd_format(_get_tracks(results))
+    albums = [_album_as_track(a) for a in _get_albums(results)]
+    artists = [_artist_as_track(a) for a in _get_artists(results)]
+    tracks = _get_tracks(results)
+    return translator.tracks_to_mpd_format(artists + albums + tracks)
 
 
 @handle_request(r'^findadd ' + QUERY_RE)
@@ -304,7 +329,10 @@ def search(context, mpd_query):
     except ValueError:
         return
     results = context.core.library.search(**query).get()
-    return translator.tracks_to_mpd_format(_get_tracks(results))
+    albums = [_album_as_track(a) for a in _get_albums(results)]
+    artists = [_artist_as_track(a) for a in _get_artists(results)]
+    tracks = _get_tracks(results)
+    return translator.tracks_to_mpd_format(artists + albums + tracks)
 
 
 @handle_request(r'^searchadd ' + QUERY_RE)
