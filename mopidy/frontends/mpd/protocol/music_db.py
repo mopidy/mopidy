@@ -38,6 +38,13 @@ def _artist_as_track(artist):
         artists=[artist])
 
 
+def _search_results_as_tracks(results):
+    albums = [_album_as_track(a) for a in _get_albums(results)]
+    artists = [_artist_as_track(a) for a in _get_artists(results)]
+    tracks = _get_tracks(results)
+    return artists + albums + tracks
+
+
 @handle_request(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
 def count(context, tag, needle):
     """
@@ -84,10 +91,7 @@ def find(context, mpd_query):
     except ValueError:
         return
     results = context.core.library.find_exact(**query).get()
-    albums = [_album_as_track(a) for a in _get_albums(results)]
-    artists = [_artist_as_track(a) for a in _get_artists(results)]
-    tracks = _get_tracks(results)
-    return translator.tracks_to_mpd_format(artists + albums + tracks)
+    return translator.tracks_to_mpd_format(_search_results_as_tracks(results))
 
 
 @handle_request(r'^findadd ' + QUERY_RE)
@@ -329,10 +333,7 @@ def search(context, mpd_query):
     except ValueError:
         return
     results = context.core.library.search(**query).get()
-    albums = [_album_as_track(a) for a in _get_albums(results)]
-    artists = [_artist_as_track(a) for a in _get_artists(results)]
-    tracks = _get_tracks(results)
-    return translator.tracks_to_mpd_format(artists + albums + tracks)
+    return translator.tracks_to_mpd_format(_search_results_as_tracks(results))
 
 
 @handle_request(r'^searchadd ' + QUERY_RE)
