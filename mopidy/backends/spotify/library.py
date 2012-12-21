@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 import time
+import urllib
 
 import pykka
 from spotify import Link, SpotifyError
@@ -124,7 +125,11 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             tracks = []
             for uri in query['uri']:
                 tracks += self.lookup(uri)
-            return SearchResult(tracks=tracks)
+            if len(query['uri']) == 1:
+                uri = query['uri']
+            else:
+                uri = 'spotify:search'
+            return SearchResult(uri=uri, tracks=tracks)
 
         spotify_query = self._translate_search_query(query)
         logger.debug('Spotify search query: %s' % spotify_query)
@@ -133,6 +138,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
         def callback(results, userdata=None):
             search_result = SearchResult(
+                uri='spotify:search:' + urllib.quote(results.query()),
                 albums=[
                     translator.to_mopidy_album(a) for a in results.albums()],
                 artists=[
