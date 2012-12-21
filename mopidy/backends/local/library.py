@@ -70,7 +70,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return SearchResult(tracks=result_tracks)
+        return SearchResult(uri='local:search', tracks=result_tracks)
 
     def search(self, **query):
         self._validate_query(query)
@@ -107,7 +107,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return SearchResult(tracks=result_tracks)
+        return SearchResult(uri='local:search', tracks=result_tracks)
 
     def _validate_query(self, query):
         for (_, values) in query.iteritems():

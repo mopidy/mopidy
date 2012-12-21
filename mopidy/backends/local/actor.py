@@ -20,4 +20,4 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
         self.playlists = LocalPlaylistsProvider(backend=self)
 
-        self.uri_schemes = ['file']
+        self.uri_schemes = ['file', 'local']
