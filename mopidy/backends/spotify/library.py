@@ -138,7 +138,8 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
         def callback(results, userdata=None):
             search_result = SearchResult(
-                uri='spotify:search:' + urllib.quote(results.query()),
+                uri='spotify:search:%s' % (
+                    urllib.quote(results.query().encode('utf-8'))),
                 albums=[
                     translator.to_mopidy_album(a) for a in results.albums()],
                 artists=[
