@@ -27,8 +27,9 @@ def _album_as_track(album):
     return Track(
         uri=album.uri,
         name='Album: ' + album.name,
+        artists=album.artists,
         album=album,
-        artists=album.artists)
+        date=album.date)
 
 
 def _artist_as_track(artist):
