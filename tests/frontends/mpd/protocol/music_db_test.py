@@ -115,7 +115,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseFindTest(protocol.BaseTestCase):
-    def test_find(self):
+    def test_find_includes_fake_artist_and_album_tracks(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             albums=[Album(uri='dummy:album:a', name='A', date='2001')],
             artists=[Artist(uri='dummy:artist:b', name='B')],
@@ -123,12 +123,52 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
         self.sendRequest('find "any" "foo"')
 
+        self.assertInResponse('file: dummy:artist:b')
+        self.assertInResponse('Title: Artist: B')
+
         self.assertInResponse('file: dummy:album:a')
         self.assertInResponse('Title: Album: A')
         self.assertInResponse('Date: 2001')
 
-        self.assertInResponse('file: dummy:artist:b')
-        self.assertInResponse('Title: Artist: B')
+        self.assertInResponse('file: dummy:track:c')
+        self.assertInResponse('Title: C')
+
+        self.assertInResponse('OK')
+
+    def test_find_artist_does_not_include_fake_artist_tracks(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            albums=[Album(uri='dummy:album:a', name='A', date='2001')],
+            artists=[Artist(uri='dummy:artist:b', name='B')],
+            tracks=[Track(uri='dummy:track:c', name='C')])
+
+        self.sendRequest('find "artist" "foo"')
+
+        self.assertNotInResponse('file: dummy:artist:b')
+        self.assertNotInResponse('Title: Artist: B')
+
+        self.assertInResponse('file: dummy:album:a')
+        self.assertInResponse('Title: Album: A')
+        self.assertInResponse('Date: 2001')
+
+        self.assertInResponse('file: dummy:track:c')
+        self.assertInResponse('Title: C')
+
+        self.assertInResponse('OK')
+
+    def test_find_artist_and_album_does_not_include_fake_tracks(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            albums=[Album(uri='dummy:album:a', name='A', date='2001')],
+            artists=[Artist(uri='dummy:artist:b', name='B')],
+            tracks=[Track(uri='dummy:track:c', name='C')])
+
+        self.sendRequest('find "artist" "foo" "album" "bar"')
+
+        self.assertNotInResponse('file: dummy:artist:b')
+        self.assertNotInResponse('Title: Artist: B')
+
+        self.assertNotInResponse('file: dummy:album:a')
+        self.assertNotInResponse('Title: Album: A')
+        self.assertNotInResponse('Date: 2001')
 
         self.assertInResponse('file: dummy:track:c')
         self.assertInResponse('Title: C')
