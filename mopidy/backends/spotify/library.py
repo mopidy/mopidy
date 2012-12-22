@@ -170,7 +170,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         tracks = []
         for playlist in self.backend.playlists.playlists:
             tracks += playlist.tracks
-        return tracks
+        return SearchResult(uri='spotify:search', tracks=tracks)
 
     def _translate_search_query(self, mopidy_query):
         spotify_query = []
