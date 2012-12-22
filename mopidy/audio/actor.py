@@ -274,13 +274,11 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: int
         """
-        if self._playbin.get_state()[1] == gst.STATE_NULL:
-            return 0
         try:
             position = self._playbin.query_position(gst.FORMAT_TIME)[0]
             return position // gst.MSECOND
-        except gst.QueryError, e:
-            logger.error('time_position failed: %s', e)
+        except gst.QueryError:
+            logger.debug('Position query failed')
             return 0
 
     def set_position(self, position):
@@ -291,12 +289,9 @@ class Audio(pykka.ThreadingActor):
         :type position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self._playbin.get_state()  # block until state changes are done
-        handeled = self._playbin.seek_simple(
+        return self._playbin.seek_simple(
             gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH,
             position * gst.MSECOND)
-        self._playbin.get_state()  # block until seek is done
-        return handeled
 
     def start_playback(self):
         """
