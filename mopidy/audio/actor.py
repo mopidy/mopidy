@@ -39,12 +39,16 @@ class Audio(pykka.ThreadingActor):
         super(Audio, self).__init__()
 
         self._playbin = None
+
         self._mixer = None
         self._mixer_track = None
         self._mixer_scale = None
         self._software_mixing = False
-        self._appsrc = None
         self._volume_set = None
+
+        self._appsrc = None
+        self._appsrc_seek_data_callback = None
+        self._appsrc_seek_data_id = None
 
         self._notify_source_signal_id = None
         self._about_to_finish_id = None
@@ -77,7 +81,12 @@ class Audio(pykka.ThreadingActor):
             'notify::source', self._on_new_source)
 
     def _on_about_to_finish(self, element):
-        self._appsrc = None
+        source, self._appsrc = self._appsrc, None
+        if source is None:
+            return
+        if self._appsrc_seek_data_id is not None:
+            source.disconnect(self._appsrc_seek_data_id)
+            self._appsrc_seek_data_id = None
 
     def _on_new_source(self, element, pad):
         uri = element.get_property('uri')
@@ -93,8 +102,18 @@ class Audio(pykka.ThreadingActor):
         source.set_property('caps', default_caps)
         # GStreamer does not like unicode
         source.set_property('format', b'time')
+        source.set_property('stream-type', b'seekable')
+
+        self._appsrc_seek_data_id = source.connect(
+            'seek-data', self._appsrc_on_seek_data)
 
         self._appsrc = source
+
+    def _appsrc_on_seek_data(self, appsrc, time_in_ns):
+        time_in_ms = time_in_ns // gst.MSECOND
+        if self._appsrc_seek_data_callback is not None:
+            self._appsrc_seek_data_callback(time_in_ms)
+        return True
 
     def _teardown_playbin(self):
         if self._about_to_finish_id:
@@ -241,6 +260,19 @@ class Audio(pykka.ThreadingActor):
         :type uri: string
         """
         self._playbin.set_property('uri', uri)
+
+    def set_appsrc(self, seek_data=None):
+        """
+        Switch to using appsrc for getting audio to be played.
+
+        You *MUST* call :meth:`prepare_change` before calling this method.
+
+        :param seek_data: callback for when data from a new position is needed
+            to continue playback
+        :type seek_data: callable which takes time position in ms
+        """
+        self._appsrc_seek_data_callback = seek_data
+        self._playbin.set_property('uri', 'appsrc://')
 
     def emit_data(self, buffer_):
         """
