@@ -4,7 +4,7 @@ import datetime
 import json
 
 from mopidy.models import (
-    Artist, Album, TlTrack, Track, Playlist,
+    Artist, Album, TlTrack, Track, Playlist, SearchResult,
     ModelJSONEncoder, model_json_decoder)
 
 from tests import unittest
@@ -862,10 +862,56 @@ class PlaylistTest(unittest.TestCase):
 
     def test_ne(self):
         playlist1 = Playlist(
-            uri='uri1', name='name2', tracks=[Track(uri='uri1')],
+            uri='uri1', name='name1', tracks=[Track(uri='uri1')],
             last_modified=1)
         playlist2 = Playlist(
             uri='uri2', name='name2', tracks=[Track(uri='uri2')],
             last_modified=2)
         self.assertNotEqual(playlist1, playlist2)
         self.assertNotEqual(hash(playlist1), hash(playlist2))
+
+
+class SearchResultTest(unittest.TestCase):
+    def test_uri(self):
+        uri = 'an_uri'
+        result = SearchResult(uri=uri)
+        self.assertEqual(result.uri, uri)
+        self.assertRaises(AttributeError, setattr, result, 'uri', None)
+
+    def test_tracks(self):
+        tracks = [Track(), Track(), Track()]
+        result = SearchResult(tracks=tracks)
+        self.assertEqual(list(result.tracks), tracks)
+        self.assertRaises(AttributeError, setattr, result, 'tracks', None)
+
+    def test_artists(self):
+        artists = [Artist(), Artist(), Artist()]
+        result = SearchResult(artists=artists)
+        self.assertEqual(list(result.artists), artists)
+        self.assertRaises(AttributeError, setattr, result, 'artists', None)
+
+    def test_albums(self):
+        albums = [Album(), Album(), Album()]
+        result = SearchResult(albums=albums)
+        self.assertEqual(list(result.albums), albums)
+        self.assertRaises(AttributeError, setattr, result, 'albums', None)
+
+    def test_invalid_kwarg(self):
+        test = lambda: SearchResult(foo='baz')
+        self.assertRaises(TypeError, test)
+
+    def test_repr_without_results(self):
+        self.assertEquals(
+            "SearchResult(albums=[], artists=[], tracks=[], uri=u'uri')",
+            repr(SearchResult(uri='uri')))
+
+    def test_serialize_without_results(self):
+        self.assertDictEqual(
+            {'__model__': 'SearchResult', 'uri': 'uri'},
+            SearchResult(uri='uri').serialize())
+
+    def test_to_json_and_back(self):
+        result1 = SearchResult(uri='uri')
+        serialized = json.dumps(result1, cls=ModelJSONEncoder)
+        result2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(result1, result2)

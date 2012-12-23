@@ -318,3 +318,34 @@ class Playlist(ImmutableObject):
     def length(self):
         """The number of tracks in the playlist. Read-only."""
         return len(self.tracks)
+
+
+class SearchResult(ImmutableObject):
+    """
+    :param uri: search result URI
+    :type uri: string
+    :param tracks: matching tracks
+    :type tracks: list of :class:`Track` elements
+    :param artists: matching artists
+    :type artists: list of :class:`Artist` elements
+    :param albums: matching albums
+    :type albums: list of :class:`Album` elements
+    """
+
+    # The search result URI. Read-only.
+    uri = None
+
+    # The tracks matching the search query. Read-only.
+    tracks = tuple()
+
+    # The artists matching the search query. Read-only.
+    artists = tuple()
+
+    # The albums matching the search query. Read-only.
+    albums = tuple()
+
+    def __init__(self, *args, **kwargs):
+        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
+        self.__dict__['artists'] = tuple(kwargs.pop('artists', []))
+        self.__dict__['albums'] = tuple(kwargs.pop('albums', []))
+        super(SearchResult, self).__init__(*args, **kwargs)
