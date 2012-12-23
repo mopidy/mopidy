@@ -11,6 +11,16 @@ from mopidy.backends import base
 logger = logging.getLogger('mopidy.backends.spotify')
 
 
+def need_data_callback(spotify_backend, length_hint):
+    logger.debug('need_data_callback(%d) called', length_hint)
+    spotify_backend.playback.on_need_data(length_hint)
+
+
+def enough_data_callback(spotify_backend):
+    logger.debug('enough_data_callback() called')
+    spotify_backend.playback.on_enough_data()
+
+
 def seek_data_callback(spotify_backend, time_position):
     logger.debug('seek_data_callback(%d) called', time_position)
     spotify_backend.playback.on_seek_data(time_position)
@@ -31,7 +41,10 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
             self.backend.spotify.session.play(1)
 
             self.audio.prepare_change()
-            self.audio.set_appsrc(seek_data=seek_data_callback_bound)
+            self.audio.set_appsrc(
+                need_data=None,
+                enough_data=None,
+                seek_data=seek_data_callback_bound)
             self.audio.start_playback()
             self.audio.set_metadata(track)
 
@@ -43,6 +56,14 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
     def stop(self):
         self.backend.spotify.session.play(0)
         return super(SpotifyPlaybackProvider, self).stop()
+
+    def on_need_data(self, length_hint):
+        logger.debug('playback.on_need_data(%d) called', length_hint)
+        self.backend.spotify.push_audio_data = True
+
+    def on_enough_data(self):
+        logger.debug('playback.on_enough_data() called')
+        self.backend.spotify.push_audio_data = False
 
     def on_seek_data(self, time_position):
         logger.debug('playback.on_seek_data(%d) called', time_position)
