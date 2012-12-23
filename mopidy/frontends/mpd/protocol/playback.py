@@ -329,6 +329,7 @@ def seek(context, songpos, seconds):
 
     - issues ``seek 1 120`` without quotes around the arguments.
     """
+    songpos = int(songpos)
     if context.core.playback.tracklist_position.get() != songpos:
         playpos(context, songpos)
     context.core.playback.seek(int(seconds) * 1000).get()
@@ -343,6 +344,7 @@ def seekid(context, tlid, seconds):
 
         Seeks to the position ``TIME`` (in seconds) of song ``SONGID``.
     """
+    tlid = int(tlid)
     tl_track = context.core.playback.current_tl_track.get()
     if not tl_track or tl_track.tlid != tlid:
         playid(context, tlid)

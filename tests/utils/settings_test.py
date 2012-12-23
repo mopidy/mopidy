@@ -87,6 +87,14 @@ class ValidateSettingsTest(unittest.TestCase):
         self.assertEqual(
             result['BACKENDS'], 'Must contain at least one value.')
 
+    def test_noniterable_multivalue_setting_returns_error(self):
+        result = setting_utils.validate_settings(
+            self.defaults, {'FRONTENDS': ('this is not a tuple')})
+        self.assertEqual(
+            result['FRONTENDS'],
+            'Must be a tuple. '
+            "Remember the comma after single values: (u'value',)")
+
 
 class SettingsProxyTest(unittest.TestCase):
     def setUp(self):

@@ -172,6 +172,10 @@ def validate_settings(defaults, settings):
                 'bin in OUTPUT.')
 
         elif setting in list_of_one_or_more:
+            if not hasattr(value, '__iter__'):
+                errors[setting] = (
+                    'Must be a tuple. '
+                    "Remember the comma after single values: (u'value',)")
             if not value:
                 errors[setting] = 'Must contain at least one value.'
 

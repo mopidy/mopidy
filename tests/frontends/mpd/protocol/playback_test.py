@@ -371,45 +371,58 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.sendRequest('previous')
         self.assertInResponse('OK')
 
-    def test_seek(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
+    def test_seek_in_current_track(self):
+        seek_track = Track(uri='dummy:a', length=40000)
+        self.core.tracklist.add([seek_track])
+        self.core.playback.play()
 
-        self.sendRequest('seek "0"')
         self.sendRequest('seek "0" "30"')
+
+        self.assertEqual(self.core.playback.current_track.get(), seek_track)
         self.assertGreaterEqual(self.core.playback.time_position, 30000)
         self.assertInResponse('OK')
 
-    def test_seek_with_songpos(self):
+    def test_seek_in_another_track(self):
         seek_track = Track(uri='dummy:b', length=40000)
         self.core.tracklist.add(
             [Track(uri='dummy:a', length=40000), seek_track])
+        self.core.playback.play()
+        self.assertNotEqual(self.core.playback.current_track.get(), seek_track)
 
         self.sendRequest('seek "1" "30"')
+
         self.assertEqual(self.core.playback.current_track.get(), seek_track)
         self.assertInResponse('OK')
 
     def test_seek_without_quotes(self):
         self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
+        self.core.playback.play()
 
-        self.sendRequest('seek 0')
         self.sendRequest('seek 0 30')
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
         self.assertInResponse('OK')
 
-    def test_seekid(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
+    def test_seekid_in_current_track(self):
+        seek_track = Track(uri='dummy:a', length=40000)
+        self.core.tracklist.add([seek_track])
+        self.core.playback.play()
+
         self.sendRequest('seekid "0" "30"')
+
+        self.assertEqual(self.core.playback.current_track.get(), seek_track)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
         self.assertInResponse('OK')
 
-    def test_seekid_with_tlid(self):
+    def test_seekid_in_another_track(self):
         seek_track = Track(uri='dummy:b', length=40000)
         self.core.tracklist.add(
             [Track(uri='dummy:a', length=40000), seek_track])
+        self.core.playback.play()
 
         self.sendRequest('seekid "1" "30"')
+
         self.assertEqual(1, self.core.playback.current_tl_track.get().tlid)
         self.assertEqual(seek_track, self.core.playback.current_track.get())
         self.assertInResponse('OK')

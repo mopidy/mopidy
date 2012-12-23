@@ -83,7 +83,10 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
     def _lookup_track(self, uri):
         track = Link.from_string(uri).as_track()
         self._wait_for_object_to_load(track)
-        return [SpotifyTrack(track=track)]
+        if track.is_loaded():
+            return [SpotifyTrack(track=track)]
+        else:
+            return [SpotifyTrack(uri=uri)]
 
     def _lookup_album(self, uri):
         album = Link.from_string(uri).as_album()
@@ -121,12 +124,13 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         if not query:
             return self._get_all_tracks()
 
-        if 'uri' in query.keys():
+        uris = query.get('uri', [])
+        if uris:
             tracks = []
-            for uri in query['uri']:
+            for uri in uris:
                 tracks += self.lookup(uri)
-            if len(query['uri']) == 1:
-                uri = query['uri']
+            if len(uris) == 1:
+                uri = uris[0]
             else:
                 uri = 'spotify:search'
             return SearchResult(uri=uri, tracks=tracks)
@@ -170,7 +174,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         tracks = []
         for playlist in self.backend.playlists.playlists:
             tracks += playlist.tracks
-        return tracks
+        return SearchResult(uri='spotify:search', tracks=tracks)
 
     def _translate_search_query(self, mopidy_query):
         spotify_query = []

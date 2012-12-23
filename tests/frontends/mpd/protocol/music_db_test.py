@@ -241,6 +241,17 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseListTest(protocol.BaseTestCase):
+    def test_list(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[
+                Track(uri='dummy:a', name='A', artists=[
+                    Artist(name='A Artist')])])
+
+        self.sendRequest('list "artist" "artist" "foo"')
+
+        self.assertInResponse('Artist: A Artist')
+        self.assertInResponse('OK')
+
     def test_list_foo_returns_ack(self):
         self.sendRequest('list "foo"')
         self.assertEqualResponse('ACK [2@0] {list} incorrect arguments')
