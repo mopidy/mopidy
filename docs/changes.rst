@@ -70,6 +70,12 @@ v0.11.0 (in development)
 - Make ``seek`` and ``seekid`` not restart the current track before seeking in
   it.
 
+- Include fake tracks representing albums and artists in the search results.
+  When these are added to the tracklist, they expand to either all tracks in
+  the album or all tracks by the artist. This makes it easy to play full albums
+  in proper order, which is a feature that have been frequently requested.
+  (Fixes: :issue:`67`, :issue:`148`)
+
 **Internal changes**
 
 *Models:*
