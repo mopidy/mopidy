@@ -207,6 +207,9 @@ class Audio(pykka.ThreadingActor):
                 and message.src == self._playbin):
             old_state, new_state, pending_state = message.parse_state_changed()
             self._on_playbin_state_changed(old_state, new_state, pending_state)
+        elif message.type == gst.MESSAGE_BUFFERING:
+            percent = message.parse_buffering()
+            logger.debug('Buffer %d%% full', percent)
         elif message.type == gst.MESSAGE_EOS:
             self._on_end_of_stream()
         elif message.type == gst.MESSAGE_ERROR:
