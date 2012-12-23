@@ -47,6 +47,10 @@ class Audio(pykka.ThreadingActor):
         self._volume_set = None
 
         self._appsrc = None
+        self._appsrc_need_data_callback = None
+        self._appsrc_need_data_id = None
+        self._appsrc_enough_data_callback = None
+        self._appsrc_enough_data_id = None
         self._appsrc_seek_data_callback = None
         self._appsrc_seek_data_id = None
 
@@ -84,6 +88,12 @@ class Audio(pykka.ThreadingActor):
         source, self._appsrc = self._appsrc, None
         if source is None:
             return
+        if self._appsrc_need_data_id is not None:
+            source.disconnect(self._appsrc_need_data_id)
+            self._appsrc_need_data_id = None
+        if self._appsrc_enough_data_id is not None:
+            source.disconnect(self._appsrc_enough_data_id)
+            self._appsrc_enough_data_id = None
         if self._appsrc_seek_data_id is not None:
             source.disconnect(self._appsrc_seek_data_id)
             self._appsrc_seek_data_id = None
@@ -104,10 +114,25 @@ class Audio(pykka.ThreadingActor):
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
 
+        self._appsrc_need_data_id = source.connect(
+            'need-data', self._appsrc_on_need_data)
+        self._appsrc_enough_data_id = source.connect(
+            'enough-data', self._appsrc_on_enough_data)
         self._appsrc_seek_data_id = source.connect(
             'seek-data', self._appsrc_on_seek_data)
 
         self._appsrc = source
+
+    def _appsrc_on_need_data(self, appsrc, length_hint_in_ns):
+        length_hint_in_ms = length_hint_in_ns // gst.MSECOND
+        if self._appsrc_need_data_callback is not None:
+            self._appsrc_need_data_callback(length_hint_in_ms)
+        return True
+
+    def _appsrc_on_enough_data(self, appsrc):
+        if self._appsrc_enough_data_callback is not None:
+            self._appsrc_enough_data_callback()
+        return True
 
     def _appsrc_on_seek_data(self, appsrc, time_in_ns):
         time_in_ms = time_in_ns // gst.MSECOND
@@ -264,16 +289,22 @@ class Audio(pykka.ThreadingActor):
         """
         self._playbin.set_property('uri', uri)
 
-    def set_appsrc(self, seek_data=None):
+    def set_appsrc(self, need_data=None, enough_data=None, seek_data=None):
         """
         Switch to using appsrc for getting audio to be played.
 
         You *MUST* call :meth:`prepare_change` before calling this method.
 
+        :param need_data: callback for when appsrc needs data
+        :type need_data: callable which takes data length hint in ms
+        :param enough_data: callback for when appsrc has enough data
+        :type enough_data: callable
         :param seek_data: callback for when data from a new position is needed
             to continue playback
         :type seek_data: callable which takes time position in ms
         """
+        self._appsrc_need_data_callback = need_data
+        self._appsrc_enough_data_callback = enough_data
         self._appsrc_seek_data_callback = seek_data
         self._playbin.set_property('uri', 'appsrc://')
 
