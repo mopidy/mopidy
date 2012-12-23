@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from mopidy.models import Album, Artist, Track
+from mopidy.models import Album, Artist, SearchResult, Track
 
 from tests.frontends.mpd import protocol
 
@@ -13,9 +13,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_findadd(self):
-        self.backend.library.dummy_find_exact_result = [
-            Track(uri='dummy:a', name='A'),
-        ]
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[Track(uri='dummy:a', name='A')])
         self.assertEqual(self.core.tracklist.length.get(), 0)
 
         self.sendRequest('findadd "title" "A"')
@@ -25,9 +24,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_searchadd(self):
-        self.backend.library.dummy_search_result = [
-            Track(uri='dummy:a', name='A'),
-        ]
+        self.backend.library.dummy_search_result = SearchResult(
+            tracks=[Track(uri='dummy:a', name='A')])
         self.assertEqual(self.core.tracklist.length.get(), 0)
 
         self.sendRequest('searchadd "title" "a"')
@@ -43,9 +41,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             Track(uri='dummy:y', name='y'),
         ])
         self.core.playlists.save(playlist)
-        self.backend.library.dummy_search_result = [
-            Track(uri='dummy:a', name='A'),
-        ]
+        self.backend.library.dummy_search_result = SearchResult(
+            tracks=[Track(uri='dummy:a', name='A')])
         playlists = self.core.playlists.filter(name='my favs').get()
         self.assertEqual(len(playlists), 1)
         self.assertEqual(len(playlists[0].tracks), 2)
@@ -61,9 +58,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_searchaddpl_creates_missing_playlist(self):
-        self.backend.library.dummy_search_result = [
-            Track(uri='dummy:a', name='A'),
-        ]
+        self.backend.library.dummy_search_result = SearchResult(
+            tracks=[Track(uri='dummy:a', name='A')])
         self.assertEqual(
             len(self.core.playlists.filter(name='my favs').get()), 0)
 
@@ -185,6 +181,17 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseListTest(protocol.BaseTestCase):
+    def test_list(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[
+                Track(uri='dummy:a', name='A', artists=[
+                    Artist(name='A Artist')])])
+
+        self.sendRequest('list "artist" "artist" "foo"')
+
+        self.assertInResponse('Artist: A Artist')
+        self.assertInResponse('OK')
+
     def test_list_foo_returns_ack(self):
         self.sendRequest('list "foo"')
         self.assertEqualResponse('ACK [2@0] {list} incorrect arguments')
@@ -242,8 +249,8 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_list_artist_should_not_return_artists_without_names(self):
-        self.backend.library.dummy_find_exact_result = [
-            Track(artists=[Artist(name='')])]
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[Track(artists=[Artist(name='')])])
 
         self.sendRequest('list "artist"')
         self.assertNotInResponse('Artist: ')
@@ -301,8 +308,8 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_list_album_should_not_return_albums_without_names(self):
-        self.backend.library.dummy_find_exact_result = [
-            Track(album=Album(name=''))]
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[Track(album=Album(name=''))])
 
         self.sendRequest('list "album"')
         self.assertNotInResponse('Album: ')
@@ -356,7 +363,8 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_list_date_should_not_return_blank_dates(self):
-        self.backend.library.dummy_find_exact_result = [Track(date='')]
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[Track(date='')])
 
         self.sendRequest('list "date"')
         self.assertNotInResponse('Date: ')

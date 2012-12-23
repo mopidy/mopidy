@@ -19,7 +19,7 @@ from __future__ import unicode_literals
 import pykka
 
 from mopidy.backends import base
-from mopidy.models import Playlist
+from mopidy.models import Playlist, SearchResult
 
 
 class DummyBackend(pykka.ThreadingActor, base.Backend):
@@ -37,8 +37,8 @@ class DummyLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)
         self.dummy_library = []
-        self.dummy_find_exact_result = []
-        self.dummy_search_result = []
+        self.dummy_find_exact_result = SearchResult()
+        self.dummy_search_result = SearchResult()
 
     def find_exact(self, **query):
         return self.dummy_find_exact_result
