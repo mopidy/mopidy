@@ -8,6 +8,15 @@ This change log is used to track all major changes to Mopidy.
 v0.11.0 (in development)
 ========================
 
+**Settings**
+
+- The settings validator now complains if a setting which expects a tuple of
+  values (e.g. :attr:`mopidy.settings.BACKENDS`,
+  :attr:`mopidy.settings.FRONTENDS`) has a non-iterable value. This typically
+  happens because the setting value contains a single value and one has
+  forgotten to add a comma after the string, making the value a tuple. (Fixes:
+  :issue:`278`)
+
 **Spotify backend**
 
 - Add :attr:`mopidy.settings.SPOTIFY_TIMEOUT` setting which allows you to
