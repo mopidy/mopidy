@@ -58,6 +58,9 @@ v0.11.0 (in development)
 
 - Add support for search by date.
 
+- Make ``seek`` and ``seekid`` not restart the current track before seeking in
+  it.
+
 **Internal changes**
 
 *Models:*
