@@ -110,9 +110,10 @@ class Audio(pykka.ThreadingActor):
             b'rate=(int)44100')
         source = element.get_property('source')
         source.set_property('caps', default_caps)
-        # GStreamer does not like unicode
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
+        source.set_property('max-bytes', 1024 * 1024)  # 1 MB
+        source.set_property('min-percent', 50)
 
         self._appsrc_need_data_id = source.connect(
             'need-data', self._appsrc_on_need_data)
