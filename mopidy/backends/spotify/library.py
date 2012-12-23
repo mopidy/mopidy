@@ -121,12 +121,13 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         if not query:
             return self._get_all_tracks()
 
-        if 'uri' in query.keys():
+        uris = query.get('uri', [])
+        if uris:
             tracks = []
-            for uri in query['uri']:
+            for uri in uris:
                 tracks += self.lookup(uri)
-            if len(query['uri']) == 1:
-                uri = query['uri']
+            if len(uris) == 1:
+                uri = uris[0]
             else:
                 uri = 'spotify:search'
             return SearchResult(uri=uri, tracks=tracks)
