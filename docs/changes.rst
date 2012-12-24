@@ -5,8 +5,32 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.11.0 (in development)
+v0.12.0 (in development)
 ========================
+
+(in development)
+
+**Spotify**
+
+- Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
+
+
+v0.11.0 (2012-12-24)
+====================
+
+In celebration of Mopidy's three year anniversary December 23, we're releasing
+Mopidy 0.11. This release brings several improvements, most notably better
+search which now includes matching artists and albums from Spotify in the
+search results.
+
+**Settings**
+
+- The settings validator now complains if a setting which expects a tuple of
+  values (e.g. :attr:`mopidy.settings.BACKENDS`,
+  :attr:`mopidy.settings.FRONTENDS`) has a non-iterable value. This typically
+  happens because the setting value contains a single value and one has
+  forgotten to add a comma after the string, making the value a tuple. (Fixes:
+  :issue:`278`)
 
 **Spotify backend**
 
@@ -61,13 +85,28 @@ v0.11.0 (in development)
 - Make ``seek`` and ``seekid`` not restart the current track before seeking in
   it.
 
+- Include fake tracks representing albums and artists in the search results.
+  When these are added to the tracklist, they expand to either all tracks in
+  the album or all tracks by the artist. This makes it easy to play full albums
+  in proper order, which is a feature that have been frequently requested.
+  (Fixes: :issue:`67`, :issue:`148`)
+
 **Internal changes**
 
 *Models:*
 
 - Specified that :attr:`mopidy.models.Playlist.last_modified` should be in UTC.
 
+- Added :class:`mopidy.models.SearchResult` model to encapsulate search results
+  consisting of more than just tracks.
+
 *Core API:*
+
+- Change the following methods to return :class:`mopidy.models.SearchResult`
+  objects which can include both track results and other results:
+
+  - :meth:`mopidy.core.LibraryController.find_exact`
+  - :meth:`mopidy.core.LibraryController.search`
 
 - Change the following methods to accept either a dict with filters or kwargs.
   Previously they only accepted kwargs, which made them impossible to use from

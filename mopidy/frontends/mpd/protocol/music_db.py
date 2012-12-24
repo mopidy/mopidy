@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+import functools
+import itertools
+
+from mopidy.models import Track
 from mopidy.frontends.mpd import translator
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
@@ -8,6 +12,31 @@ from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 QUERY_RE = (
     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
     r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+
+
+def _get_field(field, search_results):
+    return list(itertools.chain(*[getattr(r, field) for r in search_results]))
+
+
+_get_albums = functools.partial(_get_field, 'albums')
+_get_artists = functools.partial(_get_field, 'artists')
+_get_tracks = functools.partial(_get_field, 'tracks')
+
+
+def _album_as_track(album):
+    return Track(
+        uri=album.uri,
+        name='Album: ' + album.name,
+        artists=album.artists,
+        album=album,
+        date=album.date)
+
+
+def _artist_as_track(artist):
+    return Track(
+        uri=artist.uri,
+        name='Artist: ' + artist.name,
+        artists=[artist])
 
 
 @handle_request(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
@@ -55,8 +84,14 @@ def find(context, mpd_query):
         query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
-    result = context.core.library.find_exact(**query).get()
-    return translator.tracks_to_mpd_format(result)
+    results = context.core.library.find_exact(**query).get()
+    result_tracks = []
+    if 'artist' not in query:
+        result_tracks += [_artist_as_track(a) for a in _get_artists(results)]
+    if 'album' not in query:
+        result_tracks += [_album_as_track(a) for a in _get_albums(results)]
+    result_tracks += _get_tracks(results)
+    return translator.tracks_to_mpd_format(result_tracks)
 
 
 @handle_request(r'^findadd ' + QUERY_RE)
@@ -73,8 +108,8 @@ def findadd(context, mpd_query):
         query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
-    result = context.core.library.find_exact(**query).get()
-    context.core.tracklist.add(result)
+    results = context.core.library.find_exact(**query).get()
+    context.core.tracklist.add(_get_tracks(results))
 
 
 @handle_request(
@@ -179,8 +214,8 @@ def list_(context, field, mpd_query=None):
 
 def _list_artist(context, query):
     artists = set()
-    tracks = context.core.library.find_exact(**query).get()
-    for track in tracks:
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
         for artist in track.artists:
             if artist.name:
                 artists.add(('Artist', artist.name))
@@ -189,8 +224,8 @@ def _list_artist(context, query):
 
 def _list_album(context, query):
     albums = set()
-    tracks = context.core.library.find_exact(**query).get()
-    for track in tracks:
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
         if track.album and track.album.name:
             albums.add(('Album', track.album.name))
     return albums
@@ -198,8 +233,8 @@ def _list_album(context, query):
 
 def _list_date(context, query):
     dates = set()
-    tracks = context.core.library.find_exact(**query).get()
-    for track in tracks:
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
         if track.date:
             dates.add(('Date', track.date))
     return dates
@@ -297,8 +332,11 @@ def search(context, mpd_query):
         query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
-    result = context.core.library.search(**query).get()
-    return translator.tracks_to_mpd_format(result)
+    results = context.core.library.search(**query).get()
+    artists = [_artist_as_track(a) for a in _get_artists(results)]
+    albums = [_album_as_track(a) for a in _get_albums(results)]
+    tracks = _get_tracks(results)
+    return translator.tracks_to_mpd_format(artists + albums + tracks)
 
 
 @handle_request(r'^searchadd ' + QUERY_RE)
@@ -318,8 +356,8 @@ def searchadd(context, mpd_query):
         query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
-    result = context.core.library.search(**query).get()
-    context.core.tracklist.add(result)
+    results = context.core.library.search(**query).get()
+    context.core.tracklist.add(_get_tracks(results))
 
 
 @handle_request(r'^searchaddpl "(?P<playlist_name>[^"]+)" ' + QUERY_RE)
@@ -341,14 +379,14 @@ def searchaddpl(context, playlist_name, mpd_query):
         query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
-    result = context.core.library.search(**query).get()
+    results = context.core.library.search(**query).get()
 
     playlists = context.core.playlists.filter(name=playlist_name).get()
     if playlists:
         playlist = playlists[0]
     else:
         playlist = context.core.playlists.create(playlist_name).get()
-    tracks = list(playlist.tracks) + result
+    tracks = list(playlist.tracks) + _get_tracks(results)
     playlist = playlist.copy(tracks=tracks)
     context.core.playlists.save(playlist)
 

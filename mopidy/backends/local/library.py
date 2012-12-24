@@ -4,7 +4,7 @@ import logging
 
 from mopidy import settings
 from mopidy.backends import base
-from mopidy.models import Album
+from mopidy.models import Album, SearchResult
 
 from .translator import parse_mpd_tag_cache
 
@@ -70,7 +70,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return result_tracks
+        return SearchResult(uri='file:search', tracks=result_tracks)
 
     def search(self, **query):
         self._validate_query(query)
@@ -107,7 +107,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return result_tracks
+        return SearchResult(uri='file:search', tracks=result_tracks)
 
     def _validate_query(self, query):
         for (_, values) in query.iteritems():

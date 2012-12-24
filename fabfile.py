@@ -1,14 +1,15 @@
 from fabric.api import local
 
 
-def test():
-    local('nosetests tests/')
+def test(path=None):
+    path = path or 'tests/'
+    local('nosetests ' + path)
 
 
-def autotest():
+def autotest(path=None):
     while True:
         local('clear')
-        test()
+        test(path)
         local(
             'inotifywait -q -e create -e modify -e delete '
             '--exclude ".*\.(pyc|sw.)" -r mopidy/ tests/')
