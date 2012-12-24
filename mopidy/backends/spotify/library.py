@@ -84,7 +84,10 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         track = Link.from_string(uri).as_track()
         self._wait_for_object_to_load(track)
         if track.is_loaded():
-            return [SpotifyTrack(track=track)]
+            if track.availability() == 1:
+                return [SpotifyTrack(track=track)]
+            else:
+                return []
         else:
             return [SpotifyTrack(uri=uri)]
 
@@ -92,18 +95,24 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         album = Link.from_string(uri).as_album()
         album_browser = self.backend.spotify.session.browse_album(album)
         self._wait_for_object_to_load(album_browser)
-        return [SpotifyTrack(track=t) for t in album_browser]
+        return [
+            SpotifyTrack(track=t)
+            for t in album_browser if t.availability() == 1]
 
     def _lookup_artist(self, uri):
         artist = Link.from_string(uri).as_artist()
         artist_browser = self.backend.spotify.session.browse_artist(artist)
         self._wait_for_object_to_load(artist_browser)
-        return [SpotifyTrack(track=t) for t in artist_browser]
+        return [
+            SpotifyTrack(track=t)
+            for t in artist_browser if t.availability() == 1]
 
     def _lookup_playlist(self, uri):
         playlist = Link.from_string(uri).as_playlist()
         self._wait_for_object_to_load(playlist)
-        return [SpotifyTrack(track=t) for t in playlist]
+        return [
+            SpotifyTrack(track=t)
+            for t in playlist if t.availability() == 1]
 
     def _wait_for_object_to_load(
             self, spotify_obj, timeout=settings.SPOTIFY_TIMEOUT):
