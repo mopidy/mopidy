@@ -21,6 +21,9 @@ logger = logging.getLogger('mopidy.audio')
 mixers.register_mixers()
 
 
+MB = 1 << 20
+
+
 class Audio(pykka.ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
@@ -109,7 +112,7 @@ class Audio(pykka.ThreadingActor):
         source.set_property('caps', self._appsrc_caps)
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
-        source.set_property('max-bytes', 1024 * 1024)  # 1 MB
+        source.set_property('max-bytes', 1 * MB)
         source.set_property('min-percent', 50)
 
         self._appsrc_need_data_id = source.connect(
