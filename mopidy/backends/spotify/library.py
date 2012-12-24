@@ -15,6 +15,8 @@ from . import translator
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
+TRACK_AVAILABLE = 1
+
 
 class SpotifyTrack(Track):
     """Proxy object for unloaded Spotify tracks."""
@@ -84,7 +86,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         track = Link.from_string(uri).as_track()
         self._wait_for_object_to_load(track)
         if track.is_loaded():
-            if track.availability() == 1:
+            if track.availability() == TRACK_AVAILABLE:
                 return [SpotifyTrack(track=track)]
             else:
                 return []
@@ -97,7 +99,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         self._wait_for_object_to_load(album_browser)
         return [
             SpotifyTrack(track=t)
-            for t in album_browser if t.availability() == 1]
+            for t in album_browser if t.availability() == TRACK_AVAILABLE]
 
     def _lookup_artist(self, uri):
         artist = Link.from_string(uri).as_artist()
@@ -105,14 +107,14 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
         self._wait_for_object_to_load(artist_browser)
         return [
             SpotifyTrack(track=t)
-            for t in artist_browser if t.availability() == 1]
+            for t in artist_browser if t.availability() == TRACK_AVAILABLE]
 
     def _lookup_playlist(self, uri):
         playlist = Link.from_string(uri).as_playlist()
         self._wait_for_object_to_load(playlist)
         return [
             SpotifyTrack(track=t)
-            for t in playlist if t.availability() == 1]
+            for t in playlist if t.availability() == TRACK_AVAILABLE]
 
     def _wait_for_object_to_load(
             self, spotify_obj, timeout=settings.SPOTIFY_TIMEOUT):
