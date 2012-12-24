@@ -154,7 +154,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
         if not self.backend.spotify.connected.wait(settings.SPOTIFY_TIMEOUT):
             logger.debug('Not connected: Spotify search cancelled')
-            return []
+            return SearchResult(uri='spotify:search')
 
         self.backend.spotify.session.search(
             spotify_query, callback,
