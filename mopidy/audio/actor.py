@@ -47,6 +47,7 @@ class Audio(pykka.ThreadingActor):
         self._volume_set = None
 
         self._appsrc = None
+        self._appsrc_caps = None
         self._appsrc_seek_data_callback = None
         self._appsrc_seek_data_id = None
 
@@ -84,6 +85,7 @@ class Audio(pykka.ThreadingActor):
         source, self._appsrc = self._appsrc, None
         if source is None:
             return
+        self._appsrc_caps = None
         if self._appsrc_seek_data_id is not None:
             source.disconnect(self._appsrc_seek_data_id)
             self._appsrc_seek_data_id = None
@@ -93,14 +95,8 @@ class Audio(pykka.ThreadingActor):
         if not uri or not uri.startswith('appsrc://'):
             return
 
-        # These caps matches the audio data provided by libspotify
-        default_caps = gst.Caps(
-            b'audio/x-raw-int, endianness=(int)1234, channels=(int)2, '
-            b'width=(int)16, depth=(int)16, signed=(boolean)true, '
-            b'rate=(int)44100')
         source = element.get_property('source')
-        source.set_property('caps', default_caps)
-        # GStreamer does not like unicode
+        source.set_property('caps', self._appsrc_caps)
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
 
@@ -261,16 +257,22 @@ class Audio(pykka.ThreadingActor):
         """
         self._playbin.set_property('uri', uri)
 
-    def set_appsrc(self, seek_data=None):
+    def set_appsrc(self, caps, seek_data=None):
         """
         Switch to using appsrc for getting audio to be played.
 
         You *MUST* call :meth:`prepare_change` before calling this method.
 
+        :param caps: GStreamer caps string describing the audio format to
+            expect
+        :type caps: string
         :param seek_data: callback for when data from a new position is needed
             to continue playback
         :type seek_data: callable which takes time position in ms
         """
+        if isinstance(caps, unicode):
+            caps = caps.encode('utf-8')
+        self._appsrc_caps = gst.Caps(caps)
         self._appsrc_seek_data_callback = seek_data
         self._playbin.set_property('uri', 'appsrc://')
 
