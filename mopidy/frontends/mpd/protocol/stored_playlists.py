@@ -82,33 +82,45 @@ def listplaylists(context):
             continue
         result.append(('playlist', playlist.name))
         last_modified = (
-            playlist.last_modified or dt.datetime.now()).isoformat()
+            playlist.last_modified or dt.datetime.utcnow()).isoformat()
         # Remove microseconds
         last_modified = last_modified.split('.')[0]
         # Add time zone information
-        # TODO Convert to UTC before adding Z
         last_modified = last_modified + 'Z'
         result.append(('Last-Modified', last_modified))
     return result
 
 
-@handle_request(r'^load "(?P<name>[^"]+)"$')
-def load(context, name):
+@handle_request(r'^load "(?P<name>[^"]+)"( "(?P<start>\d+):(?P<end>\d+)*")*$')
+def load(context, name, start=None, end=None):
     """
     *musicpd.org, stored playlists section:*
 
-        ``load {NAME}``
+        ``load {NAME} [START:END]``
 
-        Loads the playlist ``NAME.m3u`` from the playlist directory.
+        Loads the playlist into the current queue. Playlist plugins are
+        supported. A range may be specified to load only a part of the
+        playlist.
 
     *Clarifications:*
 
     - ``load`` appends the given playlist to the current playlist.
+
+    - MPD 0.17.1 does not support open-ended ranges, i.e. without end
+      specified, for the ``load`` command, even though MPD's general range docs
+      allows open-ended ranges.
+
+    - MPD 0.17.1 does not fail if the specified range is outside the playlist,
+      in either or both ends.
     """
     playlists = context.core.playlists.filter(name=name).get()
     if not playlists:
         raise MpdNoExistError('No such playlist', command='load')
-    context.core.tracklist.add(playlists[0].tracks)
+    if start is not None:
+        start = int(start)
+    if end is not None:
+        end = int(end)
+    context.core.tracklist.add(playlists[0].tracks[start:end])
 
 
 @handle_request(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')

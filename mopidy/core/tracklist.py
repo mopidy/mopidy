@@ -103,21 +103,33 @@ class TracklistController(object):
         self._tl_tracks = []
         self._increase_version()
 
-    def filter(self, **criteria):
+    def filter(self, criteria=None, **kwargs):
         """
         Filter the tracklist by the given criterias.
 
         Examples::
 
-            filter(tlid=7)           # Returns track with TLID 7 (tracklist ID)
-            filter(id=1)             # Returns track with ID 1
-            filter(uri='xyz')        # Returns track with URI 'xyz'
-            filter(id=1, uri='xyz')  # Returns track with ID 1 and URI 'xyz'
+            # Returns track with TLID 7 (tracklist ID)
+            filter({'tlid': 7})
+            filter(tlid=7)
+
+            # Returns track with ID 1
+            filter({'id': 1})
+            filter(id=1)
+
+            # Returns track with URI 'xyz'
+            filter({'uri': 'xyz'})
+            filter(uri='xyz')
+
+            # Returns track with ID 1 and URI 'xyz'
+            filter({'id': 1, 'uri': 'xyz'})
+            filter(id=1, uri='xyz')
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
+        criteria = criteria or kwargs
         matches = self._tl_tracks
         for (key, value) in criteria.iteritems():
             if key == 'tlid':
@@ -172,7 +184,7 @@ class TracklistController(object):
         self._tl_tracks = new_tl_tracks
         self._increase_version()
 
-    def remove(self, **criteria):
+    def remove(self, criteria=None, **kwargs):
         """
         Remove the matching tracks from the tracklist.
 
@@ -184,7 +196,7 @@ class TracklistController(object):
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.TlTrack` that was removed
         """
-        tl_tracks = self.filter(**criteria)
+        tl_tracks = self.filter(criteria, **kwargs)
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]

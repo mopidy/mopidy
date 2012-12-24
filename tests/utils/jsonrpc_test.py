@@ -609,4 +609,6 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         self.assertEquals(
             methods['core.tracklist.filter']['params'][0]['name'], 'criteria')
         self.assertEquals(
-            methods['core.tracklist.filter']['params'][0]['kwargs'], True)
+            methods['core.tracklist.filter']['params'][1]['name'], 'kwargs')
+        self.assertEquals(
+            methods['core.tracklist.filter']['params'][1]['kwargs'], True)

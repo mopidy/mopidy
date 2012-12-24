@@ -6,6 +6,11 @@ from tests.frontends.mpd import protocol
 
 
 class ReflectionHandlerTest(protocol.BaseTestCase):
+    def test_config_is_not_allowed_across_the_network(self):
+        self.sendRequest('config')
+        self.assertEqualResponse(
+            'ACK [4@0] {config} you don\'t have permission for "config"')
+
     def test_commands_returns_list_of_all_commands(self):
         self.sendRequest('commands')
         # Check if some random commands are included
@@ -13,6 +18,7 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('command: play')
         self.assertInResponse('command: status')
         # Check if commands you do not have access to are not present
+        self.assertNotInResponse('command: config')
         self.assertNotInResponse('command: kill')
         # Check if the blacklisted commands are not present
         self.assertNotInResponse('command: command_list_begin')
@@ -40,9 +46,10 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
         self.sendRequest('decoders')
         self.assertInResponse('OK')
 
-    def test_notcommands_returns_only_kill_and_ok(self):
+    def test_notcommands_returns_only_config_and_kill_and_ok(self):
         response = self.sendRequest('notcommands')
-        self.assertEqual(2, len(response))
+        self.assertEqual(3, len(response))
+        self.assertInResponse('command: config')
         self.assertInResponse('command: kill')
         self.assertInResponse('OK')
 

@@ -1,6 +1,21 @@
 from __future__ import unicode_literals
 
+from mopidy.frontends.mpd.exceptions import MpdPermissionError
 from mopidy.frontends.mpd.protocol import handle_request, mpd_commands
+
+
+@handle_request(r'^config$', auth_required=False)
+def config(context):
+    """
+    *musicpd.org, reflection section:*
+
+        ``config``
+
+        Dumps configuration values that may be interesting for the client. This
+        command is only permitted to "local" clients (connected via UNIX domain
+        socket).
+    """
+    raise MpdPermissionError(command='config')
 
 
 @handle_request(r'^commands$', auth_required=False)
@@ -19,10 +34,10 @@ def commands(context):
             command.name for command in mpd_commands
             if not command.auth_required])
 
-    # No one is permited to use kill, rest of commands are not listed by MPD,
-    # so we shouldn't either.
+    # No one is permited to use 'config' or 'kill', rest of commands are not
+    # listed by MPD, so we shouldn't either.
     command_names = command_names - set([
-        'kill', 'command_list_begin', 'command_list_ok_begin',
+        'config', 'kill', 'command_list_begin', 'command_list_ok_begin',
         'command_list_ok_begin', 'command_list_end', 'idle', 'noidle',
         'sticker'])
 
@@ -73,6 +88,7 @@ def notcommands(context):
             command.name for command in mpd_commands if command.auth_required]
 
     # No permission to use
+    command_names.append('config')
     command_names.append('kill')
 
     return [

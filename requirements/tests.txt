@@ -5,4 +5,3 @@ nose
 pylint
 tox
 unittest2
-yappi

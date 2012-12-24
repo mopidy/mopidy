@@ -44,6 +44,7 @@ The following requirements applies to any frontend implementation:
 Frontend implementations
 ========================
 
+* :mod:`mopidy.frontends.http`
 * :mod:`mopidy.frontends.lastfm`
 * :mod:`mopidy.frontends.mpd`
 * :mod:`mopidy.frontends.mpris`

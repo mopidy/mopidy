@@ -291,7 +291,7 @@ class Connection(object):
         return True
 
     def timeout_callback(self):
-        self.stop('Client timeout out after %s seconds' % self.timeout)
+        self.stop('Client inactive for %ds; closing connection' % self.timeout)
         return False
 
 

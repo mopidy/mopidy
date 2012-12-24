@@ -15,6 +15,6 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
     def test_outputs(self):
         self.sendRequest('outputs')
         self.assertInResponse('outputid: 0')
-        self.assertInResponse('outputname: None')
+        self.assertInResponse('outputname: Default')
         self.assertInResponse('outputenabled: 1')
         self.assertInResponse('OK')

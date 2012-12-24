@@ -165,19 +165,6 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         logger.info('Loaded %d Spotify playlist(s)', len(playlists))
         BackendListener.send('playlists_loaded')
 
-    def search(self, query, queue):
-        """Search method used by Mopidy backend"""
-        def callback(results, userdata=None):
-            # TODO Include results from results.albums(), etc. too
-            # TODO Consider launching a second search if results.total_tracks()
-            # is larger than len(results.tracks())
-            tracks = [
-                translator.to_mopidy_track(t) for t in results.tracks()]
-            queue.put(tracks)
-        self.connected.wait()
-        self.session.search(
-            query, callback, track_count=100, album_count=0, artist_count=0)
-
     def logout(self):
         """Log out from spotify"""
         logger.debug('Logging out from Spotify')
