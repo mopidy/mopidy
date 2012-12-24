@@ -1,40 +1,42 @@
 from __future__ import unicode_literals
 
-import re
-import shlex
+import functools
+import itertools
 
-from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
+from mopidy.models import Track
+from mopidy.frontends.mpd import translator
+from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
-from mopidy.frontends.mpd.translator import tracks_to_mpd_format
 
 
-def _build_query(mpd_query):
-    """
-    Parses a MPD query string and converts it to the Mopidy query format.
-    """
-    query_pattern = (
-        r'"?(?:[Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny)"? "[^"]+"')
-    query_parts = re.findall(query_pattern, mpd_query)
-    query_part_pattern = (
-        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Ff]ile[name]*|[Tt]itle|[Aa]ny))"? '
-        r'"(?P<what>[^"]+)"')
-    query = {}
-    for query_part in query_parts:
-        m = re.match(query_part_pattern, query_part)
-        field = m.groupdict()['field'].lower()
-        if field == 'title':
-            field = 'track'
-        elif field in ('file', 'filename'):
-            field = 'uri'
-        field = str(field)  # Needed for kwargs keys on OS X and Windows
-        what = m.groupdict()['what']
-        if not what:
-            raise ValueError
-        if field in query:
-            query[field].append(what)
-        else:
-            query[field] = [what]
-    return query
+QUERY_RE = (
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
+    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+
+
+def _get_field(field, search_results):
+    return list(itertools.chain(*[getattr(r, field) for r in search_results]))
+
+
+_get_albums = functools.partial(_get_field, 'albums')
+_get_artists = functools.partial(_get_field, 'artists')
+_get_tracks = functools.partial(_get_field, 'tracks')
+
+
+def _album_as_track(album):
+    return Track(
+        uri=album.uri,
+        name='Album: ' + album.name,
+        artists=album.artists,
+        album=album,
+        date=album.date)
+
+
+def _artist_as_track(artist):
+    return Track(
+        uri=artist.uri,
+        name='Artist: ' + artist.name,
+        artists=[artist])
 
 
 @handle_request(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
@@ -50,17 +52,17 @@ def count(context, tag, needle):
     return [('songs', 0), ('playtime', 0)]  # TODO
 
 
-@handle_request(
-    r'^find (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+@handle_request(r'^find ' + QUERY_RE)
 def find(context, mpd_query):
     """
     *musicpd.org, music database section:*
 
         ``find {TYPE} {WHAT}``
 
-        Finds songs in the db that are exactly ``WHAT``. ``TYPE`` should be
-        ``album``, ``artist``, or ``title``. ``WHAT`` is what to find.
+        Finds songs in the db that are exactly ``WHAT``. ``TYPE`` can be any
+        tag supported by MPD, or one of the two special parameters - ``file``
+        to search by full path (relative to database root), and ``any`` to
+        match against all available tags. ``WHAT`` is what to find.
 
     *GMPC:*
 
@@ -79,29 +81,35 @@ def find(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = _build_query(mpd_query)
+        query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
-    return tracks_to_mpd_format(
-        context.core.library.find_exact(**query).get())
+    results = context.core.library.find_exact(**query).get()
+    result_tracks = []
+    if 'artist' not in query:
+        result_tracks += [_artist_as_track(a) for a in _get_artists(results)]
+    if 'album' not in query:
+        result_tracks += [_album_as_track(a) for a in _get_albums(results)]
+    result_tracks += _get_tracks(results)
+    return translator.tracks_to_mpd_format(result_tracks)
 
 
-@handle_request(
-    r'^findadd '
-    r'(?P<query>("?([Aa]lbum|[Aa]rtist|[Ff]ilename|[Tt]itle|[Aa]ny)"? '
-    r'"[^"]+"\s?)+)$')
-def findadd(context, query):
+@handle_request(r'^findadd ' + QUERY_RE)
+def findadd(context, mpd_query):
     """
     *musicpd.org, music database section:*
 
         ``findadd {TYPE} {WHAT}``
 
         Finds songs in the db that are exactly ``WHAT`` and adds them to
-        current playlist. ``TYPE`` can be any tag supported by MPD.
-        ``WHAT`` is what to find.
+        current playlist. Parameters have the same meaning as for ``find``.
     """
-    # TODO Add result to current playlist
-    #result = context.find(query)
+    try:
+        query = translator.query_from_mpd_search_format(mpd_query)
+    except ValueError:
+        return
+    results = context.core.library.find_exact(**query).get()
+    context.core.tracklist.add(_get_tracks(results))
 
 
 @handle_request(
@@ -191,7 +199,7 @@ def list_(context, field, mpd_query=None):
     """
     field = field.lower()
     try:
-        query = _list_build_query(field, mpd_query)
+        query = translator.query_from_mpd_list_format(field, mpd_query)
     except ValueError:
         return
     if field == 'artist':
@@ -204,51 +212,10 @@ def list_(context, field, mpd_query=None):
         pass  # TODO We don't have genre in our internal data structures yet
 
 
-def _list_build_query(field, mpd_query):
-    """Converts a ``list`` query to a Mopidy query."""
-    if mpd_query is None:
-        return {}
-    try:
-        # shlex does not seem to be friends with unicode objects
-        tokens = shlex.split(mpd_query.encode('utf-8'))
-    except ValueError as error:
-        if str(error) == 'No closing quotation':
-            raise MpdArgError('Invalid unquoted character', command='list')
-        else:
-            raise
-    tokens = [t.decode('utf-8') for t in tokens]
-    if len(tokens) == 1:
-        if field == 'album':
-            if not tokens[0]:
-                raise ValueError
-            return {'artist': [tokens[0]]}
-        else:
-            raise MpdArgError(
-                'should be "Album" for 3 arguments', command='list')
-    elif len(tokens) % 2 == 0:
-        query = {}
-        while tokens:
-            key = tokens[0].lower()
-            key = str(key)  # Needed for kwargs keys on OS X and Windows
-            value = tokens[1]
-            tokens = tokens[2:]
-            if key not in ('artist', 'album', 'date', 'genre'):
-                raise MpdArgError('not able to parse args', command='list')
-            if not value:
-                raise ValueError
-            if key in query:
-                query[key].append(value)
-            else:
-                query[key] = [value]
-        return query
-    else:
-        raise MpdArgError('not able to parse args', command='list')
-
-
 def _list_artist(context, query):
     artists = set()
-    tracks = context.core.library.find_exact(**query).get()
-    for track in tracks:
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
         for artist in track.artists:
             if artist.name:
                 artists.add(('Artist', artist.name))
@@ -257,8 +224,8 @@ def _list_artist(context, query):
 
 def _list_album(context, query):
     albums = set()
-    tracks = context.core.library.find_exact(**query).get()
-    for track in tracks:
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
         if track.album and track.album.name:
             albums.add(('Album', track.album.name))
     return albums
@@ -266,8 +233,8 @@ def _list_album(context, query):
 
 def _list_date(context, query):
     dates = set()
-    tracks = context.core.library.find_exact(**query).get()
-    for track in tracks:
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
         if track.date:
             dates.add(('Date', track.date))
     return dates
@@ -333,18 +300,15 @@ def rescan(context, uri=None):
     return update(context, uri, rescan_unmodified_files=True)
 
 
-@handle_request(
-    r'^search (?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile[name]*|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+@handle_request(r'^search ' + QUERY_RE)
 def search(context, mpd_query):
     """
     *musicpd.org, music database section:*
 
-        ``search {TYPE} {WHAT}``
+        ``search {TYPE} {WHAT} [...]``
 
-        Searches for any song that contains ``WHAT``. ``TYPE`` can be
-        ``title``, ``artist``, ``album`` or ``filename``. Search is not
-        case sensitive.
+        Searches for any song that contains ``WHAT``. Parameters have the same
+        meaning as for ``find``, except that search is not case sensitive.
 
     *GMPC:*
 
@@ -365,11 +329,66 @@ def search(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = _build_query(mpd_query)
+        query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
-    return tracks_to_mpd_format(
-        context.core.library.search(**query).get())
+    results = context.core.library.search(**query).get()
+    artists = [_artist_as_track(a) for a in _get_artists(results)]
+    albums = [_album_as_track(a) for a in _get_albums(results)]
+    tracks = _get_tracks(results)
+    return translator.tracks_to_mpd_format(artists + albums + tracks)
+
+
+@handle_request(r'^searchadd ' + QUERY_RE)
+def searchadd(context, mpd_query):
+    """
+    *musicpd.org, music database section:*
+
+        ``searchadd {TYPE} {WHAT} [...]``
+
+        Searches for any song that contains ``WHAT`` in tag ``TYPE`` and adds
+        them to current playlist.
+
+        Parameters have the same meaning as for ``find``, except that search is
+        not case sensitive.
+    """
+    try:
+        query = translator.query_from_mpd_search_format(mpd_query)
+    except ValueError:
+        return
+    results = context.core.library.search(**query).get()
+    context.core.tracklist.add(_get_tracks(results))
+
+
+@handle_request(r'^searchaddpl "(?P<playlist_name>[^"]+)" ' + QUERY_RE)
+def searchaddpl(context, playlist_name, mpd_query):
+    """
+    *musicpd.org, music database section:*
+
+        ``searchaddpl {NAME} {TYPE} {WHAT} [...]``
+
+        Searches for any song that contains ``WHAT`` in tag ``TYPE`` and adds
+        them to the playlist named ``NAME``.
+
+        If a playlist by that name doesn't exist it is created.
+
+        Parameters have the same meaning as for ``find``, except that search is
+        not case sensitive.
+    """
+    try:
+        query = translator.query_from_mpd_search_format(mpd_query)
+    except ValueError:
+        return
+    results = context.core.library.search(**query).get()
+
+    playlists = context.core.playlists.filter(name=playlist_name).get()
+    if playlists:
+        playlist = playlists[0]
+    else:
+        playlist = context.core.playlists.create(playlist_name).get()
+    tracks = list(playlist.tracks) + _get_tracks(results)
+    playlist = playlist.copy(tracks=tracks)
+    context.core.playlists.save(playlist)
 
 
 @handle_request(r'^update( "(?P<uri>[^"]+)")*$')

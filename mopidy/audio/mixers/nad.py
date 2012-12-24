@@ -1,11 +1,11 @@
 """Mixer that controls volume using a NAD amplifier.
 
+The NAD amplifier must be connected to the machine running Mopidy using a
+serial cable.
+
 **Dependencies:**
 
-- pyserial (python-serial in Debian/Ubuntu)
-
-- The NAD amplifier must be connected to the machine running Mopidy using a
-  serial cable.
+.. literalinclude:: ../../../../requirements/external_mixers.txt
 
 **Settings:**
 

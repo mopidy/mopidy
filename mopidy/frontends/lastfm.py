@@ -8,7 +8,7 @@ Frontend which scrobbles the music you play to your `Last.fm
 
 **Dependencies:**
 
-- `pylast <http://code.google.com/p/pylast/>`_ >= 0.5.7
+.. literalinclude:: ../../../requirements/lastfm.txt
 
 **Settings:**
 
@@ -66,7 +66,8 @@ class LastfmFrontend(pykka.ThreadingActor, CoreListener):
             logger.error('Error during Last.fm setup: %s', e)
             self.stop()
 
-    def track_playback_started(self, track):
+    def track_playback_started(self, tl_track):
+        track = tl_track.track
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
         self.last_start_time = int(time.time())
@@ -83,7 +84,8 @@ class LastfmFrontend(pykka.ThreadingActor, CoreListener):
                 pylast.MalformedResponseError, pylast.WSError) as e:
             logger.warning('Error submitting playing track to Last.fm: %s', e)
 
-    def track_playback_ended(self, track, time_position):
+    def track_playback_ended(self, tl_track, time_position):
+        track = tl_track.track
         artists = ', '.join([a.name for a in track.artists])
         duration = track.length and track.length // 1000 or 0
         time_position = time_position // 1000

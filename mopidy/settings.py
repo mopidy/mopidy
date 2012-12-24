@@ -103,10 +103,10 @@ HTTP_SERVER_HOSTNAME = u'127.0.0.1'
 #: Default: 6680
 HTTP_SERVER_PORT = 6680
 
-#: Which directory Mopidy's HTTP server should serve at /.
+#: Which directory Mopidy's HTTP server should serve at ``/``.
 #:
 #: Change this to have Mopidy serve e.g. files for your JavaScript client.
-#: /api and /ws will continue to work as usual even if you change this setting.
+#: ``/mopidy`` will continue to work as usual even if you change this setting.
 #:
 #: Used by :mod:`mopidy.frontends.http`.
 #:
@@ -173,6 +173,16 @@ MIXER = 'autoaudiomixer'
 #:
 #:     MIXER_TRACK = None
 MIXER_TRACK = None
+
+#: Number of seconds an MPD client can stay inactive before the connection is
+#: closed by the server.
+#:
+#: Used by :mod:`mopidy.frontends.mpd`.
+#:
+#: Default::
+#:
+#:     MPD_SERVER_CONNECTION_TIMEOUT = 60
+MPD_SERVER_CONNECTION_TIMEOUT = 60
 
 #: Which address Mopidy's MPD server should bind to.
 #:
@@ -282,3 +292,12 @@ SPOTIFY_PROXY_USERNAME = None
 #:
 #:     SPOTIFY_PROXY_PASSWORD = None
 SPOTIFY_PROXY_PASSWORD = None
+
+#: Max number of seconds to wait for Spotify operations to complete.
+#:
+#: Used by :mod:`mopidy.backends.spotify`
+#:
+#: Default::
+#:
+#:     SPOTIFY_TIMEOUT = 10
+SPOTIFY_TIMEOUT = 10

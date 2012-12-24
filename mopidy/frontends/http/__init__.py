@@ -4,9 +4,7 @@ from a web based client.
 
 **Dependencies**
 
-- ``cherrypy``
-
-- ``ws4py``
+.. literalinclude:: ../../../requirements/http.txt
 
 **Settings**
 
@@ -229,7 +227,7 @@ Once your Mopidy.js object has connected to the Mopidy server and emits the
 
 .. code-block:: js
 
-    mopidy.on("state:online", function () [
+    mopidy.on("state:online", function () {
         mopidy.playback.next();
     });
 
@@ -324,7 +322,7 @@ event listeners, and delete the object like this:
 .. code-block:: js
 
     // Close the WebSocket without reconnecting. Letting the object be garbage
-    // collected will have the same effect, so this isn't striclty necessary.
+    // collected will have the same effect, so this isn't strictly necessary.
     mopidy.close();
 
     // Unregister all event listeners. If you don't do this, you may have
@@ -452,7 +450,7 @@ Example to get started with
 
 9. The web page should now queue and play your first playlist every time your
    load it. See the browser's console for output from the function, any errors,
-   and a all events that are emitted.
+   and all events that are emitted.
 """
 
 # flake8: noqa

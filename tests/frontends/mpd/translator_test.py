@@ -121,6 +121,20 @@ class PlaylistMpdFormatTest(unittest.TestCase):
         self.assertEqual(dict(result[0])['Track'], 2)
 
 
+class QueryFromMpdSearchFormatTest(unittest.TestCase):
+    def test_dates_are_extracted(self):
+        result = translator.query_from_mpd_search_format(
+            'Date "1974-01-02" Date "1975"')
+        self.assertEqual(result['date'][0], '1974-01-02')
+        self.assertEqual(result['date'][1], '1975')
+
+    # TODO Test more mappings
+
+
+class QueryFromMpdListFormatTest(unittest.TestCase):
+    pass  # TODO
+
+
 class TracksToTagCacheFormatTest(unittest.TestCase):
     def setUp(self):
         settings.LOCAL_MUSIC_PATH = '/dir/subdir'

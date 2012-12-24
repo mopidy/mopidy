@@ -66,25 +66,25 @@ class MprisFrontend(pykka.ThreadingActor, CoreListener):
         self.mpris_object.PropertiesChanged(
             interface, dict(props_with_new_values), [])
 
-    def track_playback_paused(self, track, time_position):
+    def track_playback_paused(self, tl_track, time_position):
         logger.debug('Received track_playback_paused event')
         self._emit_properties_changed(objects.PLAYER_IFACE, ['PlaybackStatus'])
 
-    def track_playback_resumed(self, track, time_position):
+    def track_playback_resumed(self, tl_track, time_position):
         logger.debug('Received track_playback_resumed event')
         self._emit_properties_changed(objects.PLAYER_IFACE, ['PlaybackStatus'])
 
-    def track_playback_started(self, track):
+    def track_playback_started(self, tl_track):
         logger.debug('Received track_playback_started event')
         self._emit_properties_changed(
             objects.PLAYER_IFACE, ['PlaybackStatus', 'Metadata'])
 
-    def track_playback_ended(self, track, time_position):
+    def track_playback_ended(self, tl_track, time_position):
         logger.debug('Received track_playback_ended event')
         self._emit_properties_changed(
             objects.PLAYER_IFACE, ['PlaybackStatus', 'Metadata'])
 
-    def volume_changed(self):
+    def volume_changed(self, volume):
         logger.debug('Received volume_changed event')
         self._emit_properties_changed(objects.PLAYER_IFACE, ['Volume'])
 

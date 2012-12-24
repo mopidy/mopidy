@@ -289,6 +289,8 @@ class PlaybackController(object):
             # For testing
             self._volume = volume
 
+        self._trigger_volume_changed(volume)
+
     volume = property(get_volume, set_volume)
     """Volume as int in range [0..100] or :class:`None`"""
 
@@ -480,7 +482,7 @@ class PlaybackController(object):
             return
         listener.CoreListener.send(
             'track_playback_paused',
-            track=self.current_track, time_position=self.time_position)
+            tl_track=self.current_tl_track, time_position=self.time_position)
 
     def _trigger_track_playback_resumed(self):
         logger.debug('Triggering track playback resumed event')
@@ -488,22 +490,23 @@ class PlaybackController(object):
             return
         listener.CoreListener.send(
             'track_playback_resumed',
-            track=self.current_track, time_position=self.time_position)
+            tl_track=self.current_tl_track, time_position=self.time_position)
 
     def _trigger_track_playback_started(self):
         logger.debug('Triggering track playback started event')
-        if self.current_track is None:
+        if self.current_tl_track is None:
             return
         listener.CoreListener.send(
-            'track_playback_started', track=self.current_track)
+            'track_playback_started',
+            tl_track=self.current_tl_track)
 
     def _trigger_track_playback_ended(self):
         logger.debug('Triggering track playback ended event')
-        if self.current_track is None:
+        if self.current_tl_track is None:
             return
         listener.CoreListener.send(
             'track_playback_ended',
-            track=self.current_track, time_position=self.time_position)
+            tl_track=self.current_tl_track, time_position=self.time_position)
 
     def _trigger_playback_state_changed(self, old_state, new_state):
         logger.debug('Triggering playback state change event')
@@ -514,6 +517,10 @@ class PlaybackController(object):
     def _trigger_options_changed(self):
         logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
+
+    def _trigger_volume_changed(self, volume):
+        logger.debug('Triggering volume changed event')
+        listener.CoreListener.send('volume_changed', volume=volume)
 
     def _trigger_seeked(self, time_position):
         logger.debug('Triggering seeked event')

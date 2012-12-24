@@ -4,6 +4,8 @@ import pygst
 pygst.require('0.10')
 import gst
 
+import pykka
+
 from mopidy import audio, settings
 from mopidy.utils.path import path_to_uri
 
@@ -18,7 +20,7 @@ class AudioTest(unittest.TestCase):
         self.audio = audio.Audio.start().proxy()
 
     def tearDown(self):
-        self.audio.stop()
+        pykka.ActorRegistry.stop_all()
         settings.runtime.clear()
 
     def prepare_uri(self, uri):
@@ -52,6 +54,14 @@ class AudioTest(unittest.TestCase):
         pass  # TODO
 
     def test_set_volume(self):
+        for value in range(0, 101):
+            self.assertTrue(self.audio.set_volume(value).get())
+            self.assertEqual(value, self.audio.get_volume().get())
+
+    def test_set_volume_with_mixer_max_below_100(self):
+        settings.MIXER = 'fakemixer track_max_volume=40'
+        self.audio = audio.Audio.start().proxy()
+
         for value in range(0, 101):
             self.assertTrue(self.audio.set_volume(value).get())
             self.assertEqual(value, self.audio.get_volume().get())

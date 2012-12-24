@@ -23,7 +23,8 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
             network.Server(
                 hostname, port,
                 protocol=session.MpdSession, protocol_kwargs={'core': core},
-                max_connections=settings.MPD_SERVER_MAX_CONNECTIONS)
+                max_connections=settings.MPD_SERVER_MAX_CONNECTIONS,
+                timeout=settings.MPD_SERVER_CONNECTION_TIMEOUT)
         except IOError as error:
             logger.error(
                 'MPD server startup failed: %s',
@@ -49,5 +50,5 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
     def options_changed(self):
         self.send_idle('options')
 
-    def volume_changed(self):
+    def volume_changed(self, volume):
         self.send_idle('mixer')

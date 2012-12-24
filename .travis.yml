@@ -5,7 +5,6 @@ install:
   - "sudo wget -q -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list"
   - "sudo apt-get update || true"
   - "sudo apt-get install $(apt-cache depends mopidy | awk '$2 !~ /mopidy/ {print $2}')"
-  - "pip install -r requirements/http.txt"  # Until ws4py is packaged as a .deb
 
 before_script:
   - "rm $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt"

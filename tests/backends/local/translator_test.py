@@ -99,8 +99,8 @@ expected_tracks = []
 def generate_track(path, ident):
     uri = path_to_uri(path_to_data_dir(path))
     track = Track(
-        name='trackname', artists=expected_artists, track_no=1,
-        album=expected_albums[0], length=4000, uri=uri)
+        uri=uri, name='trackname', artists=expected_artists,
+        album=expected_albums[0], track_no=1, date='2006', length=4000)
     expected_tracks.append(track)
 
 
@@ -126,8 +126,8 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
             path_to_data_dir('simple_tag_cache'), path_to_data_dir(''))
         uri = path_to_uri(path_to_data_dir('song1.mp3'))
         track = Track(
-            name='trackname', artists=expected_artists, track_no=1,
-            album=expected_albums[0], length=4000, uri=uri)
+            uri=uri, name='trackname', artists=expected_artists, track_no=1,
+            album=expected_albums[0], date='2006', length=4000)
         self.assertEqual(set([track]), tracks)
 
     def test_advanced_cache(self):
@@ -182,6 +182,6 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         artist = Artist(name='albumartistname')
         album = expected_albums[0].copy(artists=[artist])
         track = Track(
-            name='trackname', artists=expected_artists, track_no=1,
-            album=album, length=4000, uri=uri)
+            uri=uri, name='trackname', artists=expected_artists, track_no=1,
+            album=album, date='2006', length=4000)
         self.assertEqual(track, list(tracks)[0])

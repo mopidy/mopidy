@@ -27,12 +27,12 @@ class PlaylistsTest(unittest.TestCase):
         self.backend3.has_playlists().get.return_value = False
         self.backend3.playlists = None
 
-        self.pl1a = Playlist(tracks=[Track(uri='dummy1:a')])
-        self.pl1b = Playlist(tracks=[Track(uri='dummy1:b')])
+        self.pl1a = Playlist(name='A', tracks=[Track(uri='dummy1:a')])
+        self.pl1b = Playlist(name='B', tracks=[Track(uri='dummy1:b')])
         self.sp1.playlists.get.return_value = [self.pl1a, self.pl1b]
 
-        self.pl2a = Playlist(tracks=[Track(uri='dummy2:a')])
-        self.pl2b = Playlist(tracks=[Track(uri='dummy2:b')])
+        self.pl2a = Playlist(name='A', tracks=[Track(uri='dummy2:a')])
+        self.pl2b = Playlist(name='B', tracks=[Track(uri='dummy2:b')])
         self.sp2.playlists.get.return_value = [self.pl2a, self.pl2b]
 
         self.core = Core(audio=None, backends=[
@@ -102,6 +102,16 @@ class PlaylistsTest(unittest.TestCase):
 
         self.assertFalse(self.sp1.delete.called)
         self.assertFalse(self.sp2.delete.called)
+
+    def test_filter_returns_matching_playlists(self):
+        result = self.core.playlists.filter(name='A')
+
+        self.assertEqual(2, len(result))
+
+    def test_filter_accepts_dict_instead_of_kwargs(self):
+        result = self.core.playlists.filter({'name': 'A'})
+
+        self.assertEqual(2, len(result))
 
     def test_lookup_selects_the_dummy1_backend(self):
         self.core.playlists.lookup('dummy1:a')
