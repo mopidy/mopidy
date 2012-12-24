@@ -27,6 +27,12 @@ def seek_data_callback(spotify_backend, time_position):
 
 
 class SpotifyPlaybackProvider(base.BasePlaybackProvider):
+    # These GStreamer caps matches the audio data provided by libspotify
+    _caps = (
+        'audio/x-raw-int, endianness=(int)1234, channels=(int)2, '
+        'width=(int)16, depth=(int)16, signed=(boolean)true, '
+        'rate=(int)44100')
+
     def play(self, track):
         if track.uri is None:
             return False
@@ -42,6 +48,7 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
 
             self.audio.prepare_change()
             self.audio.set_appsrc(
+                self._caps,
                 need_data=None,
                 enough_data=None,
                 seek_data=seek_data_callback_bound)
