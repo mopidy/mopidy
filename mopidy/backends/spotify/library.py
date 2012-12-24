@@ -163,7 +163,9 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
                     translator.to_mopidy_track(t) for t in results.tracks()])
             future.set(search_result)
 
-        if not self.backend.spotify.connected.wait(settings.SPOTIFY_TIMEOUT):
+        # Wait always returns None on python 2.6 :/
+        self.backend.spotify.connected.wait(settings.SPOTIFY_TIMEOUT)
+        if not self.backend.spotify.connected.is_set():
             logger.debug('Not connected: Spotify search cancelled')
             return SearchResult(uri='spotify:search')
 
