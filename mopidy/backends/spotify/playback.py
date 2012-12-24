@@ -12,17 +12,14 @@ logger = logging.getLogger('mopidy.backends.spotify')
 
 
 def need_data_callback(spotify_backend, length_hint):
-    logger.debug('need_data_callback(%d) called', length_hint)
     spotify_backend.playback.on_need_data(length_hint)
 
 
 def enough_data_callback(spotify_backend):
-    logger.debug('enough_data_callback() called')
     spotify_backend.playback.on_enough_data()
 
 
 def seek_data_callback(spotify_backend, time_position):
-    logger.debug('seek_data_callback(%d) called', time_position)
     spotify_backend.playback.on_seek_data(time_position)
 
 
