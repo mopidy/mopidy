@@ -10,6 +10,10 @@ v0.12.0 (in development)
 
 (in development)
 
+**Spotify**
+
+- Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
+
 
 v0.11.0 (2012-12-24)
 ====================
