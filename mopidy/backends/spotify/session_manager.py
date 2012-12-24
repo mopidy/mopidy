@@ -84,6 +84,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     def logged_out(self, session):
         """Callback used by pyspotify"""
         logger.info('Disconnected from Spotify')
+        self.connected.clear()
 
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
