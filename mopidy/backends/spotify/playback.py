@@ -38,6 +38,10 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
             return False
 
         spotify_backend = self.backend.actor_ref.proxy()
+        need_data_callback_bound = functools.partial(
+            need_data_callback, spotify_backend)
+        enough_data_callback_bound = functools.partial(
+            enough_data_callback, spotify_backend)
         seek_data_callback_bound = functools.partial(
             seek_data_callback, spotify_backend)
 
@@ -49,8 +53,8 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
             self.audio.prepare_change()
             self.audio.set_appsrc(
                 self._caps,
-                need_data=None,
-                enough_data=None,
+                need_data=need_data_callback_bound,
+                enough_data=enough_data_callback_bound,
                 seek_data=seek_data_callback_bound)
             self.audio.start_playback()
             self.audio.set_metadata(track)
