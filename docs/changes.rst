@@ -5,8 +5,13 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.11.0 (in development)
-========================
+v0.11.0 (2012-12-24)
+====================
+
+In celebration of Mopidy's three year anniversary December 23, we're releasing
+Mopidy 0.11. This release brings several improvements, most notably better
+search which now includes matching artists and albums from Spotify in the
+search results.
 
 **Settings**
 
