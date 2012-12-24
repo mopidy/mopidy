@@ -87,7 +87,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             if track.availability() == 1:
                 return [SpotifyTrack(track=track)]
             else:
-                return None
+                return []
         else:
             return [SpotifyTrack(uri=uri)]
 
