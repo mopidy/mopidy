@@ -46,7 +46,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.backend_ref = backend_ref
 
         self.connected = threading.Event()
-        self.next_buffer_timestamp = None
+        self.buffer_timestamp = 0
 
         self.container_manager = None
         self.playlist_manager = None
@@ -121,11 +121,13 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             'sample_rate': sample_rate,
             'channels': channels,
         }
+
         buffer_ = gst.Buffer(bytes(frames))
         buffer_.set_caps(gst.caps_from_string(capabilites))
-        if self.next_buffer_timestamp is not None:
-            buffer_.timestamp = self.next_buffer_timestamp * gst.MSECOND
-            self.next_buffer_timestamp = None
+        buffer_.timestamp = self.buffer_timestamp
+        buffer_.duration = num_frames * gst.SECOND / sample_rate
+
+        self.buffer_timestamp += buffer_.duration
 
         if self.audio.emit_data(buffer_).get():
             return num_frames
