@@ -124,7 +124,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
 
         buffer_ = gst.Buffer(bytes(frames))
         buffer_.set_caps(gst.caps_from_string(capabilites))
-        buffer_.timestamp = self.buffer_timestamp
+        buffer_.timestamp = self.buffer_timestamp * gst.MSECOND
         buffer_.duration = num_frames * gst.SECOND / sample_rate
 
         self.buffer_timestamp += buffer_.duration

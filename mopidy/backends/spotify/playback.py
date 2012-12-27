@@ -1,9 +1,5 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import logging
 import functools
 
@@ -59,5 +55,5 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
 
     def on_seek_data(self, time_position):
         logger.debug('playback.on_seek_data(%d) called', time_position)
-        self.backend.spotify.buffer_timestamp = time_position * gst.MSECOND
+        self.backend.spotify.buffer_timestamp = time_position
         self.backend.spotify.session.seek(time_position)
