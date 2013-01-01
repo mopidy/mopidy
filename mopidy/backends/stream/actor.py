@@ -1,15 +1,12 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import logging
 import urlparse
 
 import pykka
 
 from mopidy import settings
+from mopidy.audio import utils
 from mopidy.backends import base
 from mopidy.models import SearchResult, Track
 
@@ -24,15 +21,8 @@ class StreamBackend(pykka.ThreadingActor, base.Backend):
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
-        available_protocols = set()
-
-        registry = gst.registry_get_default()
-        for factory in registry.get_feature_list(gst.TYPE_ELEMENT_FACTORY):
-            for uri in factory.get_uri_protocols():
-                if uri in settings.STREAM_PROTOCOLS:
-                    available_protocols.add(uri)
-
-        self.uri_schemes = list(available_protocols)
+        self.uri_schemes = utils.supported_uri_schemes(
+            settings.STREAM_PROTOCOLS)
 
 
 # TODO: Should we consider letting lookup know how to expand common playlist
