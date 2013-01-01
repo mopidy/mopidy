@@ -46,12 +46,3 @@ class StreamLibraryProvider(base.BaseLibraryProvider):
         # Note that we would only want the stream metadata at this stage,
         # not the currently playing track's.
         return [Track(uri=uri, name=uri)]
-
-    def find_exact(self, **query):
-        return SearchResult()
-
-    def search(self, **query):
-        return SearchResult()
-
-    def refresh(self, uri=None):
-        pass
