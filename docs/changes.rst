@@ -8,6 +8,11 @@ This change log is used to track all major changes to Mopidy.
 v0.11.2 (UNRELEASED)
 ====================
 
+(in development)
+
+- Make Mopidy work on Python 2.6 versions less than 2.6.2rc1. (Fixes:
+  :issue:`302`)
+
 **Local backend**
 
 - Make ``mopidy-scan`` support symlinks.
