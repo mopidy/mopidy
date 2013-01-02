@@ -14,6 +14,10 @@ v0.12.0 (in development)
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
 
+**Local backend**
+
+- Make ``mopidy-scan`` support symlinks.
+
 
 v0.11.0 (2012-12-24)
 ====================

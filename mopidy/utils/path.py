@@ -120,7 +120,7 @@ def find_files(path):
         if not os.path.basename(path).startswith(b'.'):
             yield path
     else:
-        for dirpath, dirnames, filenames in os.walk(path):
+        for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
             for dirname in dirnames:
                 if dirname.startswith(b'.'):
                     # Skip hidden folders by modifying dirnames inplace
