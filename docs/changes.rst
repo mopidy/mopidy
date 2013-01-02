@@ -5,6 +5,14 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+v0.11.2 (UNRELEASED)
+====================
+
+**Local backend**
+
+- Make ``mopidy-scan`` support symlinks.
+
+
 v0.11.1 (2012-12-24)
 ====================
 
