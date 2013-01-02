@@ -12,7 +12,7 @@ def supported_uri_schemes(uri_schemes):
     :type uri_schemes: list or set or URI schemes as strings.
     :rtype: set of URI schemes we can support via this GStreamer install.
     """
-    supported_schemes= set()
+    supported_schemes = set()
     registry = gst.registry_get_default()
 
     for factory in registry.get_feature_list(gst.TYPE_ELEMENT_FACTORY):

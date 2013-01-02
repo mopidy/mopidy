@@ -8,7 +8,7 @@ import pykka
 from mopidy import settings
 from mopidy.audio import utils
 from mopidy.backends import base
-from mopidy.models import SearchResult, Track
+from mopidy.models import Track
 
 logger = logging.getLogger('mopidy.backends.stream')
 
