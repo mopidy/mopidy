@@ -26,6 +26,23 @@ v0.12.0 (UNRELEASED)
 
 - Make ``mopidy-scan`` support symlinks.
 
+**Stream backend**
+
+We've added a new backend for playing audio streams, the :mod:`stream backend
+<mopidy.backends.stream>`. It is activated by default.
+
+The stream backend supports the intersection of what your GStreamer
+installation supports and what protocols are included in the
+:attr:`mopidy.settings.STREAM_PROTOCOLS` settings.
+
+Current limitations:
+
+- No metadata about the current track in the stream is available.
+
+- Playlists are not parsed, so you can't play e.g. a M3U or PLS file which
+  contains stream URIs. You need to extract the stream URL from the playlist
+  yourself. See :issue:`303` for progress on this.
+
 **Core API**
 
 - :meth:`mopidy.core.PlaylistsController.get_playlists` now accepts an argument
