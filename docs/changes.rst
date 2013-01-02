@@ -10,6 +10,9 @@ v0.12.0 (in development)
 
 (in development)
 
+- Make Mopidy work on Python 2.6 versions less than 2.6.2rc1. (Fixes:
+  :issue:`302`)
+
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
