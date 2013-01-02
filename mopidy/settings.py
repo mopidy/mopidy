@@ -288,7 +288,7 @@ SPOTIFY_PROXY_USERNAME = None
 
 #: Spotify proxy password.
 #:
-#: Used by :mod:`mopidy.backends.spotify`
+#: Used by :mod:`mopidy.backends.spotify`.
 #:
 #: Default::
 #:
@@ -297,7 +297,7 @@ SPOTIFY_PROXY_PASSWORD = None
 
 #: Max number of seconds to wait for Spotify operations to complete.
 #:
-#: Used by :mod:`mopidy.backends.spotify`
+#: Used by :mod:`mopidy.backends.spotify`.
 #:
 #: Default::
 #:
