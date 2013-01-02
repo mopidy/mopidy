@@ -306,7 +306,7 @@ SPOTIFY_TIMEOUT = 10
 
 #: Whitelist of URIs to support streaming from.
 #:
-#: Used by :mod:`mopidy.backends.stream`
+#: Used by :mod:`mopidy.backends.stream`.
 #:
 #: Default::
 #:
