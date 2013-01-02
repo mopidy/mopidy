@@ -10,13 +10,30 @@ v0.12.0 (in development)
 
 (in development)
 
-**Spotify**
+**Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
 
 **Local backend**
 
 - Make ``mopidy-scan`` support symlinks.
+
+**Stream backend**
+
+We've added a new backend for playing audio streams, the :mod:`stream backend
+<mopidy.backends.stream>`. It is activated by default.
+
+The stream backend supports the intersection of what your GStreamer
+installation supports and what protocols are included in the
+:attr:`mopidy.settings.STREAM_PROTOCOLS` settings.
+
+Current limitations:
+
+- No metadata about the current track in the stream is available.
+
+- Playlists are not parsed, so you can't play e.g. a M3U or PLS file which
+  contains stream URIs. You need to extract the stream URL from the playlist
+  yourself. See :issue:`303` for progress on this.
 
 
 v0.11.0 (2012-12-24)
