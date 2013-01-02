@@ -79,13 +79,13 @@ class ValidateSettingsTest(unittest.TestCase):
         result = setting_utils.validate_settings(
             self.defaults, {'FRONTENDS': []})
         self.assertEqual(
-            result['FRONTENDS'], 'Must contain at least one value.')
+            result['FRONTENDS'], 'Must be set.')
 
     def test_empty_backends_list_returns_error(self):
         result = setting_utils.validate_settings(
             self.defaults, {'BACKENDS': []})
         self.assertEqual(
-            result['BACKENDS'], 'Must contain at least one value.')
+            result['BACKENDS'], 'Must be set.')
 
     def test_noniterable_multivalue_setting_returns_error(self):
         result = setting_utils.validate_settings(
