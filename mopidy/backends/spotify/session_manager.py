@@ -1,9 +1,5 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import logging
 import os
 import threading
@@ -47,7 +43,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
 
         self.connected = threading.Event()
         self.push_audio_data = True
-        self.next_buffer_timestamp = None
+        self.buffer_timestamp = 0
 
         self.container_manager = None
         self.playlist_manager = None
@@ -85,6 +81,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     def logged_out(self, session):
         """Callback used by pyspotify"""
         logger.info('Disconnected from Spotify')
+        self.connected.clear()
 
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
@@ -125,11 +122,14 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             'sample_rate': sample_rate,
             'channels': channels,
         }
-        buffer_ = gst.Buffer(bytes(frames))
-        buffer_.set_caps(gst.caps_from_string(capabilites))
-        if self.next_buffer_timestamp is not None:
-            buffer_.timestamp = self.next_buffer_timestamp * gst.MSECOND
-            self.next_buffer_timestamp = None
+
+        duration = audio.calculate_duration(num_frames, sample_rate)
+        buffer_ = audio.create_buffer(bytes(frames),
+                                      capabilites=capabilites,
+                                      timestamp=self.buffer_timestamp,
+                                      duration=duration)
+
+        self.buffer_timestamp += duration
 
         if self.audio.emit_data(buffer_).get():
             return num_frames
