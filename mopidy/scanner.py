@@ -96,9 +96,13 @@ def translator(data):
     artist_kwargs = {}
     track_kwargs = {}
 
+    # NOTE: kwargs are explicitly made bytestrings to work on Python
+    # 2.6.0/2.6.1. See https://github.com/mopidy/mopidy/issues/302 for
+    # details.
+
     def _retrieve(source_key, target_key, target):
         if source_key in data:
-            target[target_key] = data[source_key]
+            target[str(target_key)] = data[source_key]
 
     _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
@@ -111,7 +115,7 @@ def translator(data):
         except ValueError:
             pass  # Ignore invalid dates
         else:
-            track_kwargs['date'] = date.isoformat()
+            track_kwargs[b'date'] = date.isoformat()
 
     _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
     _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
@@ -125,7 +129,7 @@ def translator(data):
         'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if albumartist_kwargs:
-        album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
+        album_kwargs[b'artists'] = [Artist(**albumartist_kwargs)]
 
     track_kwargs['uri'] = data['uri']
     track_kwargs['length'] = data[gst.TAG_DURATION]
