@@ -46,6 +46,13 @@ Current limitations:
   yourself. See :issue:`303` for progress on this.
 
 
+v0.11.1 (2012-12-24)
+====================
+
+Spotify search was broken in 0.11.0 for users of Python 2.6. This release fixes
+it. If you're using Python 2.7, v0.11.0 and v0.11.1 should be equivalent.
+
+
 v0.11.0 (2012-12-24)
 ====================
 
