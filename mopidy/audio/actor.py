@@ -173,15 +173,23 @@ class Audio(pykka.ThreadingActor):
             mixer.get_factory().get_name(), track.label)
 
     def _select_mixer_track(self, mixer, track_label):
-        # Look for track with label == MIXER_TRACK, otherwise fallback to
-        # master track which is also an output.
+        # Ignore tracks without volumes, then look for track with
+        # label == settings.MIXER_TRACK, otherwise fallback to first usable
+        # track hoping the mixer gave them to us in a sensible order.
+
+        usable_tracks = []
         for track in mixer.list_tracks():
-            if track_label:
-                if track.label == track_label:
-                    return track
+            if not mixer.get_volume(track):
+                continue
+
+            if track_label and track.label == track_label:
+                return track
             elif track.flags & (gst.interfaces.MIXER_TRACK_MASTER |
                                 gst.interfaces.MIXER_TRACK_OUTPUT):
-                return track
+                usable_tracks.append(track)
+
+        if usable_tracks:
+            return usable_tracks[0]
 
     def _teardown_mixer(self):
         if self._mixer is not None:
