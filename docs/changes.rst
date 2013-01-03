@@ -18,6 +18,8 @@ v0.12.0 (in development)
   - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
     < 2.6.5rc1.
 
+- Improve selection of mixer tracks for volume control. (Fixes: :issuse:`307`)
+
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
