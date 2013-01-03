@@ -1,0 +1,15 @@
+{
+    "name": "mopidy",
+    "version": "0.0.0",
+    "devDependencies": {
+        "buster": "*",
+        "grunt": "*",
+        "grunt-buster": "*",
+        "phantomjs": "*"
+    },
+    "scripts": {
+        "test": "grunt test",
+        "build": "grunt build",
+        "watch": "grunt watch"
+    }
+}
