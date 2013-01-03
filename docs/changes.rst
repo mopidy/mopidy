@@ -18,6 +18,8 @@ v0.11.2 (UNRELEASED)
   - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
     < 2.6.5rc1.
 
+- Improve selection of mixer tracks for volume control. (Fixes: :issuse:`307`)
+
 **Local backend**
 
 - Make ``mopidy-scan`` support symlinks.
