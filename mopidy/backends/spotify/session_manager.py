@@ -1,9 +1,5 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import logging
 import os
 import threading
@@ -46,6 +42,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.backend_ref = backend_ref
 
         self.connected = threading.Event()
+        self.buffer_timestamp = 0
 
         self.container_manager = None
         self.playlist_manager = None
@@ -83,6 +80,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     def logged_out(self, session):
         """Callback used by pyspotify"""
         logger.info('Disconnected from Spotify')
+        self.connected.clear()
 
     def metadata_updated(self, session):
         """Callback used by pyspotify"""
@@ -119,8 +117,14 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             'sample_rate': sample_rate,
             'channels': channels,
         }
-        buffer_ = gst.Buffer(bytes(frames))
-        buffer_.set_caps(gst.caps_from_string(capabilites))
+
+        duration = audio.calculate_duration(num_frames, sample_rate)
+        buffer_ = audio.create_buffer(bytes(frames),
+                                      capabilites=capabilites,
+                                      timestamp=self.buffer_timestamp,
+                                      duration=duration)
+
+        self.buffer_timestamp += duration
 
         if self.audio.emit_data(buffer_).get():
             return num_frames
@@ -164,19 +168,6 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.backend.playlists.playlists = playlists
         logger.info('Loaded %d Spotify playlist(s)', len(playlists))
         BackendListener.send('playlists_loaded')
-
-    def search(self, query, queue):
-        """Search method used by Mopidy backend"""
-        def callback(results, userdata=None):
-            # TODO Include results from results.albums(), etc. too
-            # TODO Consider launching a second search if results.total_tracks()
-            # is larger than len(results.tracks())
-            tracks = [
-                translator.to_mopidy_track(t) for t in results.tracks()]
-            queue.put(tracks)
-        self.connected.wait()
-        self.session.search(
-            query, callback, track_count=100, album_count=0, artist_count=0)
 
     def logout(self):
         """Log out from spotify"""

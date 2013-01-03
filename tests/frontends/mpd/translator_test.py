@@ -4,7 +4,7 @@ import datetime
 import os
 
 from mopidy import settings
-from mopidy.utils.path import mtime
+from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, TlTrack, Playlist, Track
 
@@ -121,6 +121,20 @@ class PlaylistMpdFormatTest(unittest.TestCase):
         self.assertEqual(dict(result[0])['Track'], 2)
 
 
+class QueryFromMpdSearchFormatTest(unittest.TestCase):
+    def test_dates_are_extracted(self):
+        result = translator.query_from_mpd_search_format(
+            'Date "1974-01-02" Date "1975"')
+        self.assertEqual(result['date'][0], '1974-01-02')
+        self.assertEqual(result['date'][1], '1975')
+
+    # TODO Test more mappings
+
+
+class QueryFromMpdListFormatTest(unittest.TestCase):
+    pass  # TODO
+
+
 class TracksToTagCacheFormatTest(unittest.TestCase):
     def setUp(self):
         settings.LOCAL_MUSIC_PATH = '/dir/subdir'
@@ -131,7 +145,9 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         mtime.undo_fake()
 
     def translate(self, track):
+        base_path = settings.LOCAL_MUSIC_PATH.encode('utf-8')
         result = dict(translator.track_to_mpd_format(track))
+        result['file'] = uri_to_path(result['file'])[len(base_path) + 1:]
         result['key'] = os.path.basename(result['file'])
         result['mtime'] = mtime('')
         return translator.order_mpd_track_info(result.items())

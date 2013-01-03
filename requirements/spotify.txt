@@ -1,1 +1,8 @@
-pyspotify >= 1.9, < 1.10
+pyspotify >= 1.9, < 1.11
+# The libspotify Python wrapper
+# Available as the python-spotify package from apt.mopidy.com
+
+# libspotify >= 12, < 13
+# The libspotify C library from
+# https://developer.spotify.com/technologies/libspotify/
+# Available as the libspotify12 package from apt.mopidy.com

@@ -39,10 +39,17 @@ class Audio(pykka.ThreadingActor):
         super(Audio, self).__init__()
 
         self._playbin = None
+
         self._mixer = None
         self._mixer_track = None
+        self._mixer_scale = None
         self._software_mixing = False
+        self._volume_set = None
+
         self._appsrc = None
+        self._appsrc_caps = None
+        self._appsrc_seek_data_callback = None
+        self._appsrc_seek_data_id = None
 
         self._notify_source_signal_id = None
         self._about_to_finish_id = None
@@ -75,7 +82,13 @@ class Audio(pykka.ThreadingActor):
             'notify::source', self._on_new_source)
 
     def _on_about_to_finish(self, element):
-        self._appsrc = None
+        source, self._appsrc = self._appsrc, None
+        if source is None:
+            return
+        self._appsrc_caps = None
+        if self._appsrc_seek_data_id is not None:
+            source.disconnect(self._appsrc_seek_data_id)
+            self._appsrc_seek_data_id = None
 
         # TODO: this is just a horrible hack to get us started. the
         # comunication is correct, but this way of hooking it up is not.
@@ -90,16 +103,20 @@ class Audio(pykka.ThreadingActor):
         if source.get_factory().get_name() != 'appsrc':
             return
 
-        # These caps matches the audio data provided by libspotify
-        default_caps = gst.Caps(
-            b'audio/x-raw-int, endianness=(int)1234, channels=(int)2, '
-            b'width=(int)16, depth=(int)16, signed=(boolean)true, '
-            b'rate=(int)44100')
-        source.set_property('caps', default_caps)
-        # GStreamer does not like unicode
+        source.set_property('caps', self._appsrc_caps)
         source.set_property('format', b'time')
+        source.set_property('stream-type', b'seekable')
+
+        self._appsrc_seek_data_id = source.connect(
+            'seek-data', self._appsrc_on_seek_data)
 
         self._appsrc = source
+
+    def _appsrc_on_seek_data(self, appsrc, time_in_ns):
+        time_in_ms = time_in_ns // gst.MSECOND
+        if self._appsrc_seek_data_callback is not None:
+            self._appsrc_seek_data_callback(time_in_ms)
+        return True
 
     def _teardown_playbin(self):
         if self._about_to_finish_id:
@@ -156,6 +173,8 @@ class Audio(pykka.ThreadingActor):
 
         self._mixer = mixer
         self._mixer_track = track
+        self._mixer_scale = (
+            self._mixer_track.min_volume, self._mixer_track.max_volume)
         logger.info(
             'Audio mixer set to "%s" using track "%s"',
             mixer.get_factory().get_name(), track.label)
@@ -245,6 +264,25 @@ class Audio(pykka.ThreadingActor):
         """
         self._playbin.set_property('uri', uri)
 
+    def set_appsrc(self, caps, seek_data=None):
+        """
+        Switch to using appsrc for getting audio to be played.
+
+        You *MUST* call :meth:`prepare_change` before calling this method.
+
+        :param caps: GStreamer caps string describing the audio format to
+            expect
+        :type caps: string
+        :param seek_data: callback for when data from a new position is needed
+            to continue playback
+        :type seek_data: callable which takes time position in ms
+        """
+        if isinstance(caps, unicode):
+            caps = caps.encode('utf-8')
+        self._appsrc_caps = gst.Caps(caps)
+        self._appsrc_seek_data_callback = seek_data
+        self._playbin.set_property('uri', 'appsrc://')
+
     def emit_data(self, buffer_):
         """
         Call this to deliver raw audio data to be played.
@@ -277,13 +315,11 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: int
         """
-        if self._playbin.get_state()[1] == gst.STATE_NULL:
-            return 0
         try:
             position = self._playbin.query_position(gst.FORMAT_TIME)[0]
             return position // gst.MSECOND
-        except gst.QueryError, e:
-            logger.error('time_position failed: %s', e)
+        except gst.QueryError:
+            logger.debug('Position query failed')
             return 0
 
     def set_position(self, position):
@@ -294,12 +330,9 @@ class Audio(pykka.ThreadingActor):
         :type position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self._playbin.get_state()  # block until state changes are done
-        handeled = self._playbin.seek_simple(
+        return self._playbin.seek_simple(
             gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH,
             position * gst.MSECOND)
-        self._playbin.get_state()  # block until seek is done
-        return handeled
 
     def start_playback(self):
         """
@@ -395,10 +428,19 @@ class Audio(pykka.ThreadingActor):
         volumes = self._mixer.get_volume(self._mixer_track)
         avg_volume = float(sum(volumes)) / len(volumes)
 
-        new_scale = (0, 100)
-        old_scale = (
-            self._mixer_track.min_volume, self._mixer_track.max_volume)
-        return self._rescale(avg_volume, old=old_scale, new=new_scale)
+        internal_scale = (0, 100)
+
+        if self._volume_set is not None:
+            volume_set_on_mixer_scale = self._rescale(
+                self._volume_set, old=internal_scale, new=self._mixer_scale)
+        else:
+            volume_set_on_mixer_scale = None
+
+        if volume_set_on_mixer_scale == avg_volume:
+            return self._volume_set
+        else:
+            return self._rescale(
+                avg_volume, old=self._mixer_scale, new=internal_scale)
 
     def set_volume(self, volume):
         """
@@ -415,11 +457,12 @@ class Audio(pykka.ThreadingActor):
         if self._mixer is None:
             return False
 
-        old_scale = (0, 100)
-        new_scale = (
-            self._mixer_track.min_volume, self._mixer_track.max_volume)
+        self._volume_set = volume
 
-        volume = self._rescale(volume, old=old_scale, new=new_scale)
+        internal_scale = (0, 100)
+
+        volume = self._rescale(
+            volume, old=internal_scale, new=self._mixer_scale)
 
         volumes = (volume,) * self._mixer_track.num_channels
         self._mixer.set_volume(self._mixer_track, volumes)

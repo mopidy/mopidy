@@ -94,7 +94,7 @@ setup(
     scripts=['bin/mopidy', 'bin/mopidy-scan'],
     url='http://www.mopidy.com/',
     license='Apache License, Version 2.0',
-    description='MPD server with Spotify support',
+    description='Music server with MPD and Spotify support',
     long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 4 - Beta',

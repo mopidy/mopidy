@@ -4,8 +4,175 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
-v0.10.0 (in development)
+
+v0.12.0 (in development)
 ========================
+
+(in development)
+
+- Make Mopidy work on early Python 2.6 versions. (Fixes: :issue:`302`)
+
+  - ``optparse`` fails if the first argument to ``add_option`` is a unicode
+    string on Python < 2.6.2rc1.
+
+  - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
+    < 2.6.5rc1.
+
+**Spotify backend**
+
+- Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
+
+**Local backend**
+
+- Make ``mopidy-scan`` support symlinks.
+
+**Stream backend**
+
+We've added a new backend for playing audio streams, the :mod:`stream backend
+<mopidy.backends.stream>`. It is activated by default.
+
+The stream backend supports the intersection of what your GStreamer
+installation supports and what protocols are included in the
+:attr:`mopidy.settings.STREAM_PROTOCOLS` settings.
+
+Current limitations:
+
+- No metadata about the current track in the stream is available.
+
+- Playlists are not parsed, so you can't play e.g. a M3U or PLS file which
+  contains stream URIs. You need to extract the stream URL from the playlist
+  yourself. See :issue:`303` for progress on this.
+
+
+v0.11.0 (2012-12-24)
+====================
+
+In celebration of Mopidy's three year anniversary December 23, we're releasing
+Mopidy 0.11. This release brings several improvements, most notably better
+search which now includes matching artists and albums from Spotify in the
+search results.
+
+**Settings**
+
+- The settings validator now complains if a setting which expects a tuple of
+  values (e.g. :attr:`mopidy.settings.BACKENDS`,
+  :attr:`mopidy.settings.FRONTENDS`) has a non-iterable value. This typically
+  happens because the setting value contains a single value and one has
+  forgotten to add a comma after the string, making the value a tuple. (Fixes:
+  :issue:`278`)
+
+**Spotify backend**
+
+- Add :attr:`mopidy.settings.SPOTIFY_TIMEOUT` setting which allows you to
+  control how long we should wait before giving up on Spotify searches, etc.
+
+- Add support for looking up albums, artists, and playlists by URI in addition
+  to tracks. (Fixes: :issue:`67`)
+
+  As an example of how this can be used, you can try the the following MPD
+  commands which now all adds one or more tracks to your tracklist::
+
+      add "spotify:track:1mwt9hzaH7idmC5UCoOUkz"
+      add "spotify:album:3gpHG5MGwnipnap32lFYvI"
+      add "spotify:artist:5TgQ66WuWkoQ2xYxaSTnVP"
+      add "spotify:user:p3.no:playlist:0XX6tamRiqEgh3t6FPFEkw"
+
+- Increase max number of tracks returned by searches from 100 to 200, which
+  seems to be Spotify's current max limit.
+
+**Local backend**
+
+- Load track dates from tag cache.
+
+- Add support for searching by track date.
+
+**MPD frontend**
+
+- Add :attr:`mopidy.settings.MPD_SERVER_CONNECTION_TIMEOUT` setting which
+  controls how long an MPD client can stay inactive before the connection is
+  closed by the server.
+
+- Add support for the ``findadd`` command.
+
+- Updated to match the MPD 0.17 protocol (Fixes: :issue:`228`):
+
+  - Add support for ``seekcur`` command.
+
+  - Add support for ``config`` command.
+
+  - Add support for loading a range of tracks from a playlist to the ``load``
+    command.
+
+  - Add support for ``searchadd`` command.
+
+  - Add support for ``searchaddpl`` command.
+
+  - Add empty stubs for channel commands for client to client communication.
+
+- Add support for search by date.
+
+- Make ``seek`` and ``seekid`` not restart the current track before seeking in
+  it.
+
+- Include fake tracks representing albums and artists in the search results.
+  When these are added to the tracklist, they expand to either all tracks in
+  the album or all tracks by the artist. This makes it easy to play full albums
+  in proper order, which is a feature that have been frequently requested.
+  (Fixes: :issue:`67`, :issue:`148`)
+
+**Internal changes**
+
+*Models:*
+
+- Specified that :attr:`mopidy.models.Playlist.last_modified` should be in UTC.
+
+- Added :class:`mopidy.models.SearchResult` model to encapsulate search results
+  consisting of more than just tracks.
+
+*Core API:*
+
+- Change the following methods to return :class:`mopidy.models.SearchResult`
+  objects which can include both track results and other results:
+
+  - :meth:`mopidy.core.LibraryController.find_exact`
+  - :meth:`mopidy.core.LibraryController.search`
+
+- Change the following methods to accept either a dict with filters or kwargs.
+  Previously they only accepted kwargs, which made them impossible to use from
+  the Mopidy.js through JSON-RPC, which doesn't support kwargs.
+
+  - :meth:`mopidy.core.LibraryController.find_exact`
+  - :meth:`mopidy.core.LibraryController.search`
+  - :meth:`mopidy.core.PlaylistsController.filter`
+  - :meth:`mopidy.core.TracklistController.filter`
+  - :meth:`mopidy.core.TracklistController.remove`
+
+- Actually trigger the :meth:`mopidy.core.CoreListener.volume_changed` event.
+
+- Include the new volume level in the
+  :meth:`mopidy.core.CoreListener.volume_changed` event.
+
+- The ``track_playback_{paused,resumed,started,ended}`` events now include a
+  :class:`mopidy.models.TlTrack` instead of a :class:`mopidy.models.Track`.
+
+*Audio:*
+
+- Mixers with fewer than 100 volume levels could report another volume level
+  than what you just set due to the conversion between Mopidy's 0-100 range and
+  the mixer's range. Now Mopidy returns the recently set volume if the mixer
+  reports a volume level that matches the recently set volume, otherwise the
+  mixer's volume level is rescaled to the 1-100 range and returned.
+
+
+v0.10.0 (2012-12-12)
+====================
+
+We've added an HTTP frontend for those wanting to build web clients for Mopidy!
+
+**Dependencies**
+
+- pyspotify >= 1.9, < 1.11 is now required for Spotify support. In other words,
+  you're free to upgrade to pyspotify 1.10, but it isn't a requirement.
 
 **Documentation**
 
@@ -28,6 +195,10 @@ v0.10.0 (in development)
 - Make ``mopidy-scan`` accept :option:`-q`/:option:`--quiet` and
   :option:`-v`/:option:`--verbose` options to control the amount of logging
   output when scanning.
+
+- The scanner can now handle files with other encodings than UTF-8. Rebuild
+  your tag cache with ``mopidy-scan`` to include tracks that may have been
+  ignored previously.
 
 **HTTP frontend**
 

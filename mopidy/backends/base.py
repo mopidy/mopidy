@@ -57,9 +57,9 @@ class BaseLibraryProvider(object):
         """
         See :meth:`mopidy.core.LibraryController.find_exact`.
 
-        *MUST be implemented by subclass.*
+        *MAY be implemented by subclass.*
         """
-        raise NotImplementedError
+        pass
 
     def lookup(self, uri):
         """
@@ -73,17 +73,17 @@ class BaseLibraryProvider(object):
         """
         See :meth:`mopidy.core.LibraryController.refresh`.
 
-        *MUST be implemented by subclass.*
+        *MAY be implemented by subclass.*
         """
-        raise NotImplementedError
+        pass
 
     def search(self, **query):
         """
         See :meth:`mopidy.core.LibraryController.search`.
 
-        *MUST be implemented by subclass.*
+        *MAY be implemented by subclass.*
         """
-        raise NotImplementedError
+        pass
 
 
 class BasePlaybackProvider(object):

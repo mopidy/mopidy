@@ -1,1 +1,2 @@
 Pykka >= 1.0
+# Available as python-pykka from apt.mopidy.com

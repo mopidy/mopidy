@@ -1,23 +1,33 @@
 from __future__ import unicode_literals
 
 import logging
-import Queue
+import time
+import urllib
 
+import pykka
 from spotify import Link, SpotifyError
 
+from mopidy import settings
 from mopidy.backends import base
-from mopidy.models import Track
+from mopidy.models import Track, SearchResult
 
 from . import translator
 
 logger = logging.getLogger('mopidy.backends.spotify')
 
+TRACK_AVAILABLE = 1
+
 
 class SpotifyTrack(Track):
     """Proxy object for unloaded Spotify tracks."""
-    def __init__(self, uri):
+    def __init__(self, uri=None, track=None):
         super(SpotifyTrack, self).__init__()
-        self._spotify_track = Link.from_string(uri).as_track()
+        if (uri and track) or (not uri and not track):
+            raise AttributeError('uri or track must be provided')
+        elif uri:
+            self._spotify_track = Link.from_string(uri).as_track()
+        elif track:
+            self._spotify_track = track
         self._unloaded_track = Track(uri=uri, name='[loading...]')
         self._track = None
 
@@ -57,34 +67,132 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
 
     def lookup(self, uri):
         try:
-            return [SpotifyTrack(uri)]
-        except SpotifyError as e:
-            logger.debug('Failed to lookup "%s": %s', uri, e)
+            link = Link.from_string(uri)
+            if link.type() == Link.LINK_TRACK:
+                return self._lookup_track(uri)
+            if link.type() == Link.LINK_ALBUM:
+                return self._lookup_album(uri)
+            elif link.type() == Link.LINK_ARTIST:
+                return self._lookup_artist(uri)
+            elif link.type() == Link.LINK_PLAYLIST:
+                return self._lookup_playlist(uri)
+            else:
+                return []
+        except SpotifyError as error:
+            logger.debug(u'Failed to lookup "%s": %s', uri, error)
             return []
+
+    def _lookup_track(self, uri):
+        track = Link.from_string(uri).as_track()
+        self._wait_for_object_to_load(track)
+        if track.is_loaded():
+            if track.availability() == TRACK_AVAILABLE:
+                return [SpotifyTrack(track=track)]
+            else:
+                return []
+        else:
+            return [SpotifyTrack(uri=uri)]
+
+    def _lookup_album(self, uri):
+        album = Link.from_string(uri).as_album()
+        album_browser = self.backend.spotify.session.browse_album(album)
+        self._wait_for_object_to_load(album_browser)
+        return [
+            SpotifyTrack(track=t)
+            for t in album_browser if t.availability() == TRACK_AVAILABLE]
+
+    def _lookup_artist(self, uri):
+        artist = Link.from_string(uri).as_artist()
+        artist_browser = self.backend.spotify.session.browse_artist(artist)
+        self._wait_for_object_to_load(artist_browser)
+        return [
+            SpotifyTrack(track=t)
+            for t in artist_browser if t.availability() == TRACK_AVAILABLE]
+
+    def _lookup_playlist(self, uri):
+        playlist = Link.from_string(uri).as_playlist()
+        self._wait_for_object_to_load(playlist)
+        return [
+            SpotifyTrack(track=t)
+            for t in playlist if t.availability() == TRACK_AVAILABLE]
+
+    def _wait_for_object_to_load(
+            self, spotify_obj, timeout=settings.SPOTIFY_TIMEOUT):
+        # XXX Sleeping to wait for the Spotify object to load is an ugly hack,
+        # but it works. We should look into other solutions for this.
+        wait_until = time.time() + timeout
+        while not spotify_obj.is_loaded():
+            time.sleep(0.1)
+            if time.time() > wait_until:
+                logger.debug(
+                    'Timeout: Spotify object did not load in %ds', timeout)
+                return
 
     def refresh(self, uri=None):
         pass  # TODO
 
     def search(self, **query):
         if not query:
-            # Since we can't search for the entire Spotify library, we return
-            # all tracks in the playlists when the query is empty.
+            return self._get_all_tracks()
+
+        uris = query.get('uri', [])
+        if uris:
             tracks = []
-            for playlist in self.backend.playlists.playlists:
-                tracks += playlist.tracks
-            return tracks
+            for uri in uris:
+                tracks += self.lookup(uri)
+            if len(uris) == 1:
+                uri = uris[0]
+            else:
+                uri = 'spotify:search'
+            return SearchResult(uri=uri, tracks=tracks)
+
+        spotify_query = self._translate_search_query(query)
+        logger.debug('Spotify search query: %s' % spotify_query)
+
+        future = pykka.ThreadingFuture()
+
+        def callback(results, userdata=None):
+            search_result = SearchResult(
+                uri='spotify:search:%s' % (
+                    urllib.quote(results.query().encode('utf-8'))),
+                albums=[
+                    translator.to_mopidy_album(a) for a in results.albums()],
+                artists=[
+                    translator.to_mopidy_artist(a) for a in results.artists()],
+                tracks=[
+                    translator.to_mopidy_track(t) for t in results.tracks()])
+            future.set(search_result)
+
+        # Wait always returns None on python 2.6 :/
+        self.backend.spotify.connected.wait(settings.SPOTIFY_TIMEOUT)
+        if not self.backend.spotify.connected.is_set():
+            logger.debug('Not connected: Spotify search cancelled')
+            return SearchResult(uri='spotify:search')
+
+        self.backend.spotify.session.search(
+            spotify_query, callback,
+            album_count=200, artist_count=200, track_count=200)
+
+        try:
+            return future.get(timeout=settings.SPOTIFY_TIMEOUT)
+        except pykka.Timeout:
+            logger.debug(
+                'Timeout: Spotify search did not return in %ds',
+                settings.SPOTIFY_TIMEOUT)
+            return SearchResult(uri='spotify:search')
+
+    def _get_all_tracks(self):
+        # Since we can't search for the entire Spotify library, we return
+        # all tracks in the playlists when the query is empty.
+        tracks = []
+        for playlist in self.backend.playlists.playlists:
+            tracks += playlist.tracks
+        return SearchResult(uri='spotify:search', tracks=tracks)
+
+    def _translate_search_query(self, mopidy_query):
         spotify_query = []
-        for (field, values) in query.iteritems():
-            if field == 'uri':
-                tracks = []
-                for value in values:
-                    track = self.lookup(value)
-                    if track:
-                        tracks.append(track)
-                return tracks
-            elif field == 'track':
-                field = 'title'
-            elif field == 'date':
+        for (field, values) in mopidy_query.iteritems():
+            if field == 'date':
                 field = 'year'
             if not hasattr(values, '__iter__'):
                 values = [values]
@@ -97,10 +205,4 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
                 else:
                     spotify_query.append('%s:"%s"' % (field, value))
         spotify_query = ' '.join(spotify_query)
-        logger.debug('Spotify search query: %s' % spotify_query)
-        queue = Queue.Queue()
-        self.backend.spotify.search(spotify_query, queue)
-        try:
-            return queue.get(timeout=3)  # XXX What is an reasonable timeout?
-        except Queue.Empty:
-            return []
+        return spotify_query

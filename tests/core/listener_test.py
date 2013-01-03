@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import mock
 
 from mopidy.core import CoreListener, PlaybackState
-from mopidy.models import Playlist, Track
+from mopidy.models import Playlist, TlTrack
 
 from tests import unittest
 
@@ -16,22 +16,22 @@ class CoreListenerTest(unittest.TestCase):
         self.listener.track_playback_paused = mock.Mock()
 
         self.listener.on_event(
-            'track_playback_paused', track=Track(), position=0)
+            'track_playback_paused', track=TlTrack(), position=0)
 
         self.listener.track_playback_paused.assert_called_with(
-            track=Track(), position=0)
+            track=TlTrack(), position=0)
 
     def test_listener_has_default_impl_for_track_playback_paused(self):
-        self.listener.track_playback_paused(Track(), 0)
+        self.listener.track_playback_paused(TlTrack(), 0)
 
     def test_listener_has_default_impl_for_track_playback_resumed(self):
-        self.listener.track_playback_resumed(Track(), 0)
+        self.listener.track_playback_resumed(TlTrack(), 0)
 
     def test_listener_has_default_impl_for_track_playback_started(self):
-        self.listener.track_playback_started(Track())
+        self.listener.track_playback_started(TlTrack())
 
     def test_listener_has_default_impl_for_track_playback_ended(self):
-        self.listener.track_playback_ended(Track(), 0)
+        self.listener.track_playback_ended(TlTrack(), 0)
 
     def test_listener_has_default_impl_for_playback_state_changed(self):
         self.listener.playback_state_changed(
