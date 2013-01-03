@@ -19,10 +19,12 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         hostname = network.format_hostname(settings.MPD_SERVER_HOSTNAME)
         port = settings.MPD_SERVER_PORT
 
+        # NOTE: dict key must be bytestring to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
         try:
             network.Server(
                 hostname, port,
-                protocol=session.MpdSession, protocol_kwargs={'core': core},
+                protocol=session.MpdSession, protocol_kwargs={b'core': core},
                 max_connections=settings.MPD_SERVER_MAX_CONNECTIONS,
                 timeout=settings.MPD_SERVER_CONNECTION_TIMEOUT)
         except IOError as error:
