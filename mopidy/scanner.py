@@ -131,10 +131,10 @@ def translator(data):
     if albumartist_kwargs:
         album_kwargs[b'artists'] = [Artist(**albumartist_kwargs)]
 
-    track_kwargs['uri'] = data['uri']
-    track_kwargs['length'] = data[gst.TAG_DURATION]
-    track_kwargs['album'] = Album(**album_kwargs)
-    track_kwargs['artists'] = [Artist(**artist_kwargs)]
+    track_kwargs[b'uri'] = data['uri']
+    track_kwargs[b'length'] = data[gst.TAG_DURATION]
+    track_kwargs[b'album'] = Album(**album_kwargs)
+    track_kwargs[b'artists'] = [Artist(**artist_kwargs)]
 
     return Track(**track_kwargs)
 
