@@ -17,8 +17,7 @@ class StreamBackend(pykka.ThreadingActor, base.Backend):
         super(StreamBackend, self).__init__()
 
         self.library = StreamLibraryProvider(backend=self)
-        self.playback = base.BasePlaybackProvider(audio=audio,
-                                                  backend=self)
+        self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
         self.uri_schemes = audio_lib.supported_uri_schemes(
