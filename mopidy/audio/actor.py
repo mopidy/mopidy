@@ -12,7 +12,7 @@ import pykka
 from mopidy import settings
 from mopidy.utils import process
 
-from . import mixers
+from . import mixers, utils
 from .constants import PlaybackState
 from .listener import AudioListener
 
@@ -124,10 +124,10 @@ class Audio(pykka.ThreadingActor):
 
         self._appsrc = source
 
-    def _appsrc_on_need_data(self, appsrc, length_hint_in_ns):
-        length_hint_in_ms = length_hint_in_ns // gst.MSECOND
+    def _appsrc_on_need_data(self, appsrc, gst_length_hint):
+        length_hint = utils.clocktime_to_millisecond(gst_length_hint)
         if self._appsrc_need_data_callback is not None:
-            self._appsrc_need_data_callback(length_hint_in_ms)
+            self._appsrc_need_data_callback(length_hint)
         return True
 
     def _appsrc_on_enough_data(self, appsrc):
@@ -135,10 +135,10 @@ class Audio(pykka.ThreadingActor):
             self._appsrc_enough_data_callback()
         return True
 
-    def _appsrc_on_seek_data(self, appsrc, time_in_ns):
-        time_in_ms = time_in_ns // gst.MSECOND
+    def _appsrc_on_seek_data(self, appsrc, gst_position):
+        position = utils.clocktime_to_millisecond(gst_position)
         if self._appsrc_seek_data_callback is not None:
-            self._appsrc_seek_data_callback(time_in_ms)
+            self._appsrc_seek_data_callback(position)
         return True
 
     def _teardown_playbin(self):
@@ -349,8 +349,8 @@ class Audio(pykka.ThreadingActor):
         :rtype: int
         """
         try:
-            position = self._playbin.query_position(gst.FORMAT_TIME)[0]
-            return position // gst.MSECOND
+            gst_position = self._playbin.query_position(gst.FORMAT_TIME)[0]
+            return utils.clocktime_to_millisecond(gst_position)
         except gst.QueryError:
             logger.debug('Position query failed')
             return 0
@@ -363,9 +363,9 @@ class Audio(pykka.ThreadingActor):
         :type position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        gst_position = utils.millisecond_to_clocktime(position)
         return self._playbin.seek_simple(
-            gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH,
-            position * gst.MSECOND)
+            gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH, gst_position)
 
     def start_playback(self):
         """
