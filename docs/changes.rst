@@ -10,8 +10,13 @@ v0.11.2 (UNRELEASED)
 
 (in development)
 
-- Make Mopidy work on Python 2.6 versions less than 2.6.2rc1. (Fixes:
-  :issue:`302`)
+- Make Mopidy work on early Python 2.6 versions. (Fixes: :issue:`302`)
+
+  - ``optparse`` fails if the first argument to ``add_option`` is a unicode
+    string on Python < 2.6.2rc1.
+
+  - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
+    < 2.6.5rc1.
 
 **Local backend**
 
