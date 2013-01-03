@@ -198,7 +198,7 @@ them:
 
 .. code-block:: js
 
-    mopidy.on(console.log);
+    mopidy.on(console.log.bind(console));
 
 Several types of events are emitted:
 
@@ -289,7 +289,8 @@ Instead, typical usage will look like this:
         }
     };
 
-    mopidy.playback.getCurrentTrack().then(printCurrentTrack, console.error);
+    mopidy.playback.getCurrentTrack().then(
+        printCurrentTrack, console.error.bind(console));
 
 The first function passed to ``then()``, ``printCurrentTrack``, is the callback
 that will be called if the method call succeeds. The second function,
@@ -303,7 +304,7 @@ callback:
 
 .. code-block:: js
 
-    mopidy.playback.next().then(null, console.error);
+    mopidy.playback.next().then(null, console.error.bind(console));
 
 The promise objects returned by Mopidy.js adheres to the `CommonJS Promises/A
 <http://wiki.commonjs.org/wiki/Promises/A>`_ standard. We use the
@@ -368,6 +369,8 @@ Example to get started with
 
    .. code-block:: js
 
+        var consoleError = console.error.bind(error);
+
         var trackDesc = function (track) {
             return track.name + " by " + track.artists[0].name +
                 " from " + track.album.name;
@@ -381,20 +384,22 @@ Example to get started with
                     mopidy.playback.play(tlTracks[0]).then(function () {
                         mopidy.playback.getCurrentTrack().then(function (track) {
                             console.log("Now playing:", trackDesc(track));
-                        }, console.error);
-                    }, console.error);
-                }, console.error);
-            }, console.error);
+                        }, consoleError);
+                    }, consoleError);
+                }, consoleError);
+            }, consoleError);
         };
 
-        var mopidy = new Mopidy();  // Connect to server
-        mopidy.on(console.log);     // Log all events
+        var mopidy = new Mopidy();             // Connect to server
+        mopidy.on(console.log.bind(console));  // Log all events
         mopidy.on("state:online", queueAndPlayFirstPlaylist);
 
    Approximately the same behavior in a more functional style, using chaining
    of promisies.
 
    .. code-block:: js
+
+        var consoleError = console.error.bind(error);
 
         var getFirst = function (list) {
             return list[0];
@@ -429,23 +434,23 @@ Example to get started with
         var queueAndPlayFirstPlaylist = function () {
             mopidy.playlists.getPlaylists()
                 // => list of Playlists
-                .then(getFirst, console.error)
+                .then(getFirst, consoleError)
                 // => Playlist
-                .then(printTypeAndName, console.error)
+                .then(printTypeAndName, consoleError)
                 // => Playlist
-                .then(extractTracks, console.error)
+                .then(extractTracks, consoleError)
                 // => list of Tracks
-                .then(mopidy.tracklist.add, console.error)
+                .then(mopidy.tracklist.add, consoleError)
                 // => list of TlTracks
-                .then(getFirst, console.error)
+                .then(getFirst, consoleError)
                 // => TlTrack
-                .then(mopidy.playback.play, console.error)
+                .then(mopidy.playback.play, consoleError)
                 // => null
-                .then(printNowPlaying, console.error);
+                .then(printNowPlaying, consoleError);
         };
 
-        var mopidy = new Mopidy();  // Connect to server
-        mopidy.on(console.log);     // Log all events
+        var mopidy = new Mopidy();             // Connect to server
+        mopidy.on(console.log.bind(console));  // Log all events
         mopidy.on("state:online", queueAndPlayFirstPlaylist);
 
 9. The web page should now queue and play your first playlist every time your
