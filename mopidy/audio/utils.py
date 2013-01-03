@@ -6,7 +6,7 @@ import gst
 
 
 def calculate_duration(num_samples, sample_rate):
-    """Determine duration of samples using GStremer helper for precise math."""
+    """Determine duration of samples using GStreamer helper for precise math."""
     return gst.util_uint64_scale(num_samples, gst.SECOND, sample_rate)
 
 
