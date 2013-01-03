@@ -1,14 +1,11 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import logging
 import functools
 
 from spotify import Link, SpotifyError
 
+from mopidy import audio
 from mopidy.backends import base
 
 
@@ -71,5 +68,6 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
             logger.debug('Skipping seek due to issue #300')
             return
 
-        self.backend.spotify.buffer_timestamp = time_position * gst.MSECOND
+        self.backend.spotify.buffer_timestamp = audio.millisecond_to_clocktime(
+            time_position)
         self.backend.spotify.session.seek(time_position)

@@ -1,9 +1,5 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import logging
 import os
 import threading
@@ -122,12 +118,13 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             'channels': channels,
         }
 
-        buffer_ = gst.Buffer(bytes(frames))
-        buffer_.set_caps(gst.caps_from_string(capabilites))
-        buffer_.timestamp = self.buffer_timestamp
-        buffer_.duration = num_frames * gst.SECOND / sample_rate
+        duration = audio.calculate_duration(num_frames, sample_rate)
+        buffer_ = audio.create_buffer(bytes(frames),
+                                      capabilites=capabilites,
+                                      timestamp=self.buffer_timestamp,
+                                      duration=duration)
 
-        self.buffer_timestamp += buffer_.duration
+        self.buffer_timestamp += duration
 
         if self.audio.emit_data(buffer_).get():
             return num_frames

@@ -5,6 +5,33 @@ pygst.require('0.10')
 import gst
 
 
+def calculate_duration(num_samples, sample_rate):
+    """Determine duration of samples using a gst helper for preciese math."""
+    return gst.util_uint64_scale(num_samples, gst.SECOND, sample_rate)
+
+
+def create_buffer(data, capabilites=None, timestamp=None, duration=None):
+    """Create a new gstreamer buffer based on provided data.
+
+    Mainly intended to keep gst imports out of non audio modules.
+    """
+    buffer_ = gst.Buffer(data)
+    if capabilites:
+        if isinstance(capabilites, basestring):
+            capabilites = gst.caps_from_string(capabilites)
+        buffer_.set_caps(capabilites)
+    if timestamp:
+        buffer_.timestamp = timestamp
+    if duration:
+        buffer_.duration = duration
+    return buffer_
+
+
+def millisecond_to_clocktime(value):
+    """Convert a millisecond time to internal gstreamer time."""
+    return value * gst.MSECOND
+
+
 def supported_uri_schemes(uri_schemes):
     """Determine which URIs we can actually support from provided whitelist.
 
