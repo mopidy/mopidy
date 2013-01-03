@@ -34,7 +34,7 @@ def millisecond_to_clocktime(value):
 
 
 def clocktime_to_millisecond(value):
-    """Convert a millisecond time to internal GStreamer time."""
+    """Convert an internal GStreamer time to millisecond time."""
     return value // gst.MSECOND
 
 
