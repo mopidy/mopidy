@@ -6,14 +6,14 @@ import gst
 
 
 def calculate_duration(num_samples, sample_rate):
-    """Determine duration of samples using a gst helper for preciese math."""
+    """Determine duration of samples using GStremer helper for precise math."""
     return gst.util_uint64_scale(num_samples, gst.SECOND, sample_rate)
 
 
 def create_buffer(data, capabilites=None, timestamp=None, duration=None):
-    """Create a new gstreamer buffer based on provided data.
+    """Create a new GStreamer buffer based on provided data.
 
-    Mainly intended to keep gst imports out of non audio modules.
+    Mainly intended to keep gst imports out of non-audio modules.
     """
     buffer_ = gst.Buffer(data)
     if capabilites:
