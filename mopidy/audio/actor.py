@@ -42,6 +42,7 @@ class Audio(pykka.ThreadingActor):
         super(Audio, self).__init__()
 
         self._playbin = None
+        self._signal_ids = {}  # {(element, event): signal_id}
 
         self._mixer = None
         self._mixer_track = None
@@ -52,15 +53,8 @@ class Audio(pykka.ThreadingActor):
         self._appsrc = None
         self._appsrc_caps = None
         self._appsrc_need_data_callback = None
-        self._appsrc_need_data_id = None
         self._appsrc_enough_data_callback = None
-        self._appsrc_enough_data_id = None
         self._appsrc_seek_data_callback = None
-        self._appsrc_seek_data_id = None
-
-        self._notify_source_signal_id = None
-        self._about_to_finish_id = None
-        self._message_signal_id = None
 
     def on_start(self):
         try:
@@ -77,31 +71,36 @@ class Audio(pykka.ThreadingActor):
         self._teardown_mixer()
         self._teardown_playbin()
 
+    def _connect(self, element, event, *args):
+        """Helper to keep track of signal ids based on element+event"""
+        self._signal_ids[(element, event)] = element.connect(event, *args)
+
+    def _disconnect(self, element, event):
+        """Helper to disconnect signals created with _connect helper."""
+        signal_id = self._signal_ids.pop((element, event), None)
+        if signal_id is not None:
+            element.disconnect(signal_id)
+
     def _setup_playbin(self):
-        self._playbin = gst.element_factory_make('playbin2')
+        playbin = gst.element_factory_make('playbin2')
 
         fakesink = gst.element_factory_make('fakesink')
-        self._playbin.set_property('video-sink', fakesink)
+        playbin.set_property('video-sink', fakesink)
 
-        self._about_to_finish_id = self._playbin.connect(
-            'about-to-finish', self._on_about_to_finish)
-        self._notify_source_signal_id = self._playbin.connect(
-            'notify::source', self._on_new_source)
+        self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
+        self._connect(playbin, 'notify::source', self._on_new_source)
+
+        self._playbin = playbin
 
     def _on_about_to_finish(self, element):
         source, self._appsrc = self._appsrc, None
         if source is None:
             return
         self._appsrc_caps = None
-        if self._appsrc_need_data_id is not None:
-            source.disconnect(self._appsrc_need_data_id)
-            self._appsrc_need_data_id = None
-        if self._appsrc_enough_data_id is not None:
-            source.disconnect(self._appsrc_enough_data_id)
-            self._appsrc_enough_data_id = None
-        if self._appsrc_seek_data_id is not None:
-            source.disconnect(self._appsrc_seek_data_id)
-            self._appsrc_seek_data_id = None
+
+        self._disconnect(source, 'need-data')
+        self._disconnect(source, 'enough-data')
+        self._disconnect(source, 'seek-data')
 
     def _on_new_source(self, element, pad):
         uri = element.get_property('uri')
@@ -115,12 +114,9 @@ class Audio(pykka.ThreadingActor):
         source.set_property('max-bytes', 1 * MB)
         source.set_property('min-percent', 50)
 
-        self._appsrc_need_data_id = source.connect(
-            'need-data', self._appsrc_on_need_data)
-        self._appsrc_enough_data_id = source.connect(
-            'enough-data', self._appsrc_on_enough_data)
-        self._appsrc_seek_data_id = source.connect(
-            'seek-data', self._appsrc_on_seek_data)
+        self._connect(source, 'need-data', self._appsrc_on_need_data)
+        self._connect(source, 'enough-data', self._appsrc_on_enough_data)
+        self._connect(source, 'seek-data', self._appsrc_on_seek_data)
 
         self._appsrc = source
 
@@ -142,10 +138,8 @@ class Audio(pykka.ThreadingActor):
         return True
 
     def _teardown_playbin(self):
-        if self._about_to_finish_id:
-            self._playbin.disconnect(self._about_to_finish_id)
-        if self._notify_source_signal_id:
-            self._playbin.disconnect(self._notify_source_signal_id)
+        self._disconnect(self._playbin, 'about-to-finish')
+        self._disconnect(self._playbin, 'notify::source')
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
@@ -228,13 +222,12 @@ class Audio(pykka.ThreadingActor):
     def _setup_message_processor(self):
         bus = self._playbin.get_bus()
         bus.add_signal_watch()
-        self._message_signal_id = bus.connect('message', self._on_message)
+        self._connect(bus, 'message', self._on_message)
 
     def _teardown_message_processor(self):
-        if self._message_signal_id:
-            bus = self._playbin.get_bus()
-            bus.disconnect(self._message_signal_id)
-            bus.remove_signal_watch()
+        bus = self._playbin.get_bus()
+        self._disconnect(bus, 'message')
+        bus.remove_signal_watch()
 
     def _on_message(self, bus, message):
         if (message.type == gst.MESSAGE_STATE_CHANGED
