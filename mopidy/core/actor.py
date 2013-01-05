@@ -46,9 +46,10 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
 
         self.tracklist = TracklistController(core=self)
 
-        # Hook up blocking on end of track handler to audio sub-system.
-        audio.set_on_end_of_track(
-            lambda: self.actor_ref.proxy().playback.on_end_of_track().get())
+        if audio:
+            # Hook up blocking on end of track handler to audio sub-system.
+            audio.set_on_end_of_track(
+                lambda: self.actor_ref.proxy().playback.on_end_of_track().get())
 
     def get_uri_schemes(self):
         futures = [b.uri_schemes for b in self.backends]
