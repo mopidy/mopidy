@@ -49,6 +49,8 @@ class Audio(pykka.ThreadingActor):
         self._software_mixing = False
         self._volume_set = None
 
+        self._end_of_track_callback = None
+
         self._appsrc = None
         self._appsrc_caps = None
         self._appsrc_need_data_callback = None
@@ -101,17 +103,12 @@ class Audio(pykka.ThreadingActor):
 
         self._appsrc_caps = None
 
-        # TODO: this is just a horrible hack to get us started. the
-        # comunication is correct, but this way of hooking it up is not.
-        from mopidy.core import Core
-        logger.debug(u'Triggering reached end of track event')
-        core = pykka.ActorRegistry.get_by_class(Core)[0].proxy()
-
         # Note that we can not let this function return until we have the next
         # URI set for gapless / EOS free playback. This means all the
         # subsequent remote calls to backends etc. down this code path need to
         # block.
-        core.playback.on_end_of_track().get()
+        if self._end_of_track_callback:
+            self._end_of_track_callback()
 
     def _on_new_source(self, element, pad):
         source = element.get_property('source')
@@ -290,6 +287,10 @@ class Audio(pykka.ThreadingActor):
     def _on_end_of_stream(self):
         logger.debug('Triggering reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
+
+    def set_on_end_of_track(self, callback):
+        """Set callback to be called on end of track."""
+        self._end_of_track_callback = callback
 
     def set_uri(self, uri):
         """
