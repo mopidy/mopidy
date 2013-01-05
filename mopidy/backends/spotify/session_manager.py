@@ -42,6 +42,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.backend_ref = backend_ref
 
         self.connected = threading.Event()
+        self.push_audio_data = True
         self.buffer_timestamp = 0
 
         self.container_manager = None
@@ -104,6 +105,10 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         """Callback used by pyspotify"""
         # pylint: disable = R0913
         # Too many arguments (8/5)
+
+        if not self.push_audio_data:
+            return 0
+
         assert sample_type == 0, 'Expects 16-bit signed integer samples'
         capabilites = """
             audio/x-raw-int,

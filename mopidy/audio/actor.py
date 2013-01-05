@@ -12,13 +12,16 @@ import pykka
 from mopidy import settings
 from mopidy.utils import process
 
-from . import mixers
+from . import mixers, utils
 from .constants import PlaybackState
 from .listener import AudioListener
 
 logger = logging.getLogger('mopidy.audio')
 
 mixers.register_mixers()
+
+
+MB = 1 << 20
 
 
 class Audio(pykka.ThreadingActor):
@@ -48,6 +51,10 @@ class Audio(pykka.ThreadingActor):
 
         self._appsrc = None
         self._appsrc_caps = None
+        self._appsrc_need_data_callback = None
+        self._appsrc_need_data_id = None
+        self._appsrc_enough_data_callback = None
+        self._appsrc_enough_data_id = None
         self._appsrc_seek_data_callback = None
         self._appsrc_seek_data_id = None
 
@@ -86,6 +93,12 @@ class Audio(pykka.ThreadingActor):
         if source is None:
             return
         self._appsrc_caps = None
+        if self._appsrc_need_data_id is not None:
+            source.disconnect(self._appsrc_need_data_id)
+            self._appsrc_need_data_id = None
+        if self._appsrc_enough_data_id is not None:
+            source.disconnect(self._appsrc_enough_data_id)
+            self._appsrc_enough_data_id = None
         if self._appsrc_seek_data_id is not None:
             source.disconnect(self._appsrc_seek_data_id)
             self._appsrc_seek_data_id = None
@@ -99,16 +112,33 @@ class Audio(pykka.ThreadingActor):
         source.set_property('caps', self._appsrc_caps)
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
+        source.set_property('max-bytes', 1 * MB)
+        source.set_property('min-percent', 50)
 
+        self._appsrc_need_data_id = source.connect(
+            'need-data', self._appsrc_on_need_data)
+        self._appsrc_enough_data_id = source.connect(
+            'enough-data', self._appsrc_on_enough_data)
         self._appsrc_seek_data_id = source.connect(
             'seek-data', self._appsrc_on_seek_data)
 
         self._appsrc = source
 
-    def _appsrc_on_seek_data(self, appsrc, time_in_ns):
-        time_in_ms = time_in_ns // gst.MSECOND
+    def _appsrc_on_need_data(self, appsrc, gst_length_hint):
+        length_hint = utils.clocktime_to_millisecond(gst_length_hint)
+        if self._appsrc_need_data_callback is not None:
+            self._appsrc_need_data_callback(length_hint)
+        return True
+
+    def _appsrc_on_enough_data(self, appsrc):
+        if self._appsrc_enough_data_callback is not None:
+            self._appsrc_enough_data_callback()
+        return True
+
+    def _appsrc_on_seek_data(self, appsrc, gst_position):
+        position = utils.clocktime_to_millisecond(gst_position)
         if self._appsrc_seek_data_callback is not None:
-            self._appsrc_seek_data_callback(time_in_ms)
+            self._appsrc_seek_data_callback(position)
         return True
 
     def _teardown_playbin(self):
@@ -211,6 +241,9 @@ class Audio(pykka.ThreadingActor):
                 and message.src == self._playbin):
             old_state, new_state, pending_state = message.parse_state_changed()
             self._on_playbin_state_changed(old_state, new_state, pending_state)
+        elif message.type == gst.MESSAGE_BUFFERING:
+            percent = message.parse_buffering()
+            logger.debug('Buffer %d%% full', percent)
         elif message.type == gst.MESSAGE_EOS:
             self._on_end_of_stream()
         elif message.type == gst.MESSAGE_ERROR:
@@ -265,7 +298,8 @@ class Audio(pykka.ThreadingActor):
         """
         self._playbin.set_property('uri', uri)
 
-    def set_appsrc(self, caps, seek_data=None):
+    def set_appsrc(
+            self, caps, need_data=None, enough_data=None, seek_data=None):
         """
         Switch to using appsrc for getting audio to be played.
 
@@ -274,6 +308,10 @@ class Audio(pykka.ThreadingActor):
         :param caps: GStreamer caps string describing the audio format to
             expect
         :type caps: string
+        :param need_data: callback for when appsrc needs data
+        :type need_data: callable which takes data length hint in ms
+        :param enough_data: callback for when appsrc has enough data
+        :type enough_data: callable
         :param seek_data: callback for when data from a new position is needed
             to continue playback
         :type seek_data: callable which takes time position in ms
@@ -281,6 +319,8 @@ class Audio(pykka.ThreadingActor):
         if isinstance(caps, unicode):
             caps = caps.encode('utf-8')
         self._appsrc_caps = gst.Caps(caps)
+        self._appsrc_need_data_callback = need_data
+        self._appsrc_enough_data_callback = enough_data
         self._appsrc_seek_data_callback = seek_data
         self._playbin.set_property('uri', 'appsrc://')
 
@@ -317,8 +357,8 @@ class Audio(pykka.ThreadingActor):
         :rtype: int
         """
         try:
-            position = self._playbin.query_position(gst.FORMAT_TIME)[0]
-            return position // gst.MSECOND
+            gst_position = self._playbin.query_position(gst.FORMAT_TIME)[0]
+            return utils.clocktime_to_millisecond(gst_position)
         except gst.QueryError:
             logger.debug('Position query failed')
             return 0
@@ -331,9 +371,9 @@ class Audio(pykka.ThreadingActor):
         :type position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        gst_position = utils.millisecond_to_clocktime(position)
         return self._playbin.seek_simple(
-            gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH,
-            position * gst.MSECOND)
+            gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH, gst_position)
 
     def start_playback(self):
         """
