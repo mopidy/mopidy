@@ -334,8 +334,8 @@ class PlaybackController(object):
         # the calls to the backend are blocking or gapless / EOS free playback
         # will break.
         if self.tl_track_at_eot:
-            self.current_tl_track = self.tl_track_at_eot
             self._trigger_track_playback_ended()
+            self.current_tl_track = self.tl_track_at_eot
             self._get_backend().playback.change_track(self.current_track).get()
             self._trigger_track_playback_started()
 
