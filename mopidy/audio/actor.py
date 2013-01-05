@@ -95,6 +95,11 @@ class Audio(pykka.ThreadingActor):
         from mopidy.core import Core
         logger.debug(u'Triggering reached end of track event')
         core = pykka.ActorRegistry.get_by_class(Core)[0].proxy()
+
+        # Note that we can not let this function return until we have the next
+        # URI set for gapless / EOS free playback. This means all the
+        # subsequent remote calls to backends etc. down this code path need to
+        # block.
         core.playback.on_end_of_track().get()
 
     def _on_new_source(self, element, pad):
