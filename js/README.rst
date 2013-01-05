@@ -36,40 +36,27 @@ Building from source
        sudo apt-get update
        sudo apt-get install nodejs npm
 
-2. Assuming you install from PPA, setup your ``NODE_PATH`` environment variable
-   to include ``/usr/lib/node_modules``. Add the following to your
-   ``~/.bashrc`` or equivalent::
-
-       export NODE_PATH=/usr/lib/node_modules:$NODE_PATH
-
-3. Install `Buster.js <http://busterjs.org/>`_ and `Grunt
-   <http://gruntjs.com/>`_ globally (or locally, and make sure you get their
-   binaries on your ``PATH``)::
-
-       sudo npm -g install buster grunt
-
-4. Install the grunt-buster Grunt plugin locally, when in the ``js/`` dir::
+2. Enter the ``js/`` dir and install development dependencies::
 
        cd js/
-       npm install grunt-buster
+       npm install
 
-5. Install `PhantomJS <http://phantomjs.org/>`_ so that we can run the tests
-   without a browser::
+That's it.
 
-       sudo apt-get install phantomjs
+You can now run the tests::
 
-   It is packaged in Ubuntu since 12.04, but I haven't tested with versions
-   older than 1.6 which is the one packaged in Ubuntu 12.10.
+    npm test
 
-6. Run Grunt to lint, test, concatenate, and minify the source::
+To run tests automatically when you save a file::
 
-       grunt
+    npm run-script watch
 
-   The files in ``../mopidy/frontends/http/data/`` should now be up to date.
+To run tests, concatenate, minify the source, and update the JavaScript files
+in ``mopidy/frontends/http/data/``::
 
+    npm run-script build
 
-Development tips
-================
+To run other `grunt <http://gruntjs.com/>`_ targets which isn't predefined in
+``package.json`` and thus isn't available through ``npm run-script``::
 
-If you're coding on the JavaScript library, you should know about ``grunt
-watch``. It lints and tests the code every time you save a file.
+    PATH=./node_modules/.bin:$PATH grunt foo

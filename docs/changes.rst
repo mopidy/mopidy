@@ -18,6 +18,8 @@ v0.12.0 (in development)
   - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
     < 2.6.5rc1.
 
+- Improve selection of mixer tracks for volume control. (Fixes: :issuse:`307`)
+
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
@@ -42,6 +44,13 @@ Current limitations:
 - Playlists are not parsed, so you can't play e.g. a M3U or PLS file which
   contains stream URIs. You need to extract the stream URL from the playlist
   yourself. See :issue:`303` for progress on this.
+
+
+v0.11.1 (2012-12-24)
+====================
+
+Spotify search was broken in 0.11.0 for users of Python 2.6. This release fixes
+it. If you're using Python 2.7, v0.11.0 and v0.11.1 should be equivalent.
 
 
 v0.11.0 (2012-12-24)

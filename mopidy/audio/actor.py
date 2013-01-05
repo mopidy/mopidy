@@ -12,13 +12,15 @@ import pykka
 from mopidy import settings
 from mopidy.utils import process
 
-from . import mixers
+from . import mixers, utils
 from .constants import PlaybackState
 from .listener import AudioListener
 
 logger = logging.getLogger('mopidy.audio')
 
 mixers.register_mixers()
+
+MB = 1 << 20
 
 
 class Audio(pykka.ThreadingActor):
@@ -39,6 +41,7 @@ class Audio(pykka.ThreadingActor):
         super(Audio, self).__init__()
 
         self._playbin = None
+        self._signal_ids = {}  # {(element, event): signal_id}
 
         self._mixer = None
         self._mixer_track = None
@@ -48,12 +51,9 @@ class Audio(pykka.ThreadingActor):
 
         self._appsrc = None
         self._appsrc_caps = None
+        self._appsrc_need_data_callback = None
+        self._appsrc_enough_data_callback = None
         self._appsrc_seek_data_callback = None
-        self._appsrc_seek_data_id = None
-
-        self._notify_source_signal_id = None
-        self._about_to_finish_id = None
-        self._message_signal_id = None
 
     def on_start(self):
         try:
@@ -70,26 +70,36 @@ class Audio(pykka.ThreadingActor):
         self._teardown_mixer()
         self._teardown_playbin()
 
+    def _connect(self, element, event, *args):
+        """Helper to keep track of signal ids based on element+event"""
+        self._signal_ids[(element, event)] = element.connect(event, *args)
+
+    def _disconnect(self, element, event):
+        """Helper to disconnect signals created with _connect helper."""
+        signal_id = self._signal_ids.pop((element, event), None)
+        if signal_id is not None:
+            element.disconnect(signal_id)
+
     def _setup_playbin(self):
-        self._playbin = gst.element_factory_make('playbin2')
+        playbin = gst.element_factory_make('playbin2')
 
         fakesink = gst.element_factory_make('fakesink')
-        self._playbin.set_property('video-sink', fakesink)
+        playbin.set_property('video-sink', fakesink)
 
-        self._about_to_finish_id = self._playbin.connect(
-            'about-to-finish', self._on_about_to_finish)
-        self._notify_source_signal_id = self._playbin.connect(
-            'notify::source', self._on_new_source)
+        self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
+        self._connect(playbin, 'notify::source', self._on_new_source)
+
+        self._playbin = playbin
 
     def _on_about_to_finish(self, element):
         # Cleanup appsrc related stuff.
         old_appsrc, self._appsrc = self._appsrc, None
 
-        if self._appsrc_seek_data_id is not None and old_appsrc:
-            old_appsrc.disconnect(self._appsrc_seek_data_id)
+        self._disconnect(old_appsrc, 'need-data')
+        self._disconnect(old_appsrc, 'enough-data')
+        self._disconnect(old_appsrc, 'seek-data')
 
         self._appsrc_caps = None
-        self._appsrc_seek_data_id = None
 
         # TODO: this is just a horrible hack to get us started. the
         # comunication is correct, but this way of hooking it up is not.
@@ -112,23 +122,35 @@ class Audio(pykka.ThreadingActor):
         source.set_property('caps', self._appsrc_caps)
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
+        source.set_property('max-bytes', 1 * MB)
+        source.set_property('min-percent', 50)
 
-        self._appsrc_seek_data_id = source.connect(
-            'seek-data', self._appsrc_on_seek_data)
+        self._connect(source, 'need-data', self._appsrc_on_need_data)
+        self._connect(source, 'enough-data', self._appsrc_on_enough_data)
+        self._connect(source, 'seek-data', self._appsrc_on_seek_data)
 
         self._appsrc = source
 
-    def _appsrc_on_seek_data(self, appsrc, time_in_ns):
-        time_in_ms = time_in_ns // gst.MSECOND
+    def _appsrc_on_need_data(self, appsrc, gst_length_hint):
+        length_hint = utils.clocktime_to_millisecond(gst_length_hint)
+        if self._appsrc_need_data_callback is not None:
+            self._appsrc_need_data_callback(length_hint)
+        return True
+
+    def _appsrc_on_enough_data(self, appsrc):
+        if self._appsrc_enough_data_callback is not None:
+            self._appsrc_enough_data_callback()
+        return True
+
+    def _appsrc_on_seek_data(self, appsrc, gst_position):
+        position = utils.clocktime_to_millisecond(gst_position)
         if self._appsrc_seek_data_callback is not None:
-            self._appsrc_seek_data_callback(time_in_ms)
+            self._appsrc_seek_data_callback(position)
         return True
 
     def _teardown_playbin(self):
-        if self._about_to_finish_id:
-            self._playbin.disconnect(self._about_to_finish_id)
-        if self._notify_source_signal_id:
-            self._playbin.disconnect(self._notify_source_signal_id)
+        self._disconnect(self._playbin, 'about-to-finish')
+        self._disconnect(self._playbin, 'notify::source')
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
@@ -186,15 +208,23 @@ class Audio(pykka.ThreadingActor):
             mixer.get_factory().get_name(), track.label)
 
     def _select_mixer_track(self, mixer, track_label):
-        # Look for track with label == MIXER_TRACK, otherwise fallback to
-        # master track which is also an output.
+        # Ignore tracks without volumes, then look for track with
+        # label == settings.MIXER_TRACK, otherwise fallback to first usable
+        # track hoping the mixer gave them to us in a sensible order.
+
+        usable_tracks = []
         for track in mixer.list_tracks():
-            if track_label:
-                if track.label == track_label:
-                    return track
+            if not mixer.get_volume(track):
+                continue
+
+            if track_label and track.label == track_label:
+                return track
             elif track.flags & (gst.interfaces.MIXER_TRACK_MASTER |
                                 gst.interfaces.MIXER_TRACK_OUTPUT):
-                return track
+                usable_tracks.append(track)
+
+        if usable_tracks:
+            return usable_tracks[0]
 
     def _teardown_mixer(self):
         if self._mixer is not None:
@@ -203,19 +233,21 @@ class Audio(pykka.ThreadingActor):
     def _setup_message_processor(self):
         bus = self._playbin.get_bus()
         bus.add_signal_watch()
-        self._message_signal_id = bus.connect('message', self._on_message)
+        self._connect(bus, 'message', self._on_message)
 
     def _teardown_message_processor(self):
-        if self._message_signal_id:
-            bus = self._playbin.get_bus()
-            bus.disconnect(self._message_signal_id)
-            bus.remove_signal_watch()
+        bus = self._playbin.get_bus()
+        self._disconnect(bus, 'message')
+        bus.remove_signal_watch()
 
     def _on_message(self, bus, message):
         if (message.type == gst.MESSAGE_STATE_CHANGED
                 and message.src == self._playbin):
             old_state, new_state, pending_state = message.parse_state_changed()
             self._on_playbin_state_changed(old_state, new_state, pending_state)
+        elif message.type == gst.MESSAGE_BUFFERING:
+            percent = message.parse_buffering()
+            logger.debug('Buffer %d%% full', percent)
         elif message.type == gst.MESSAGE_EOS:
             self._on_end_of_stream()
         elif message.type == gst.MESSAGE_ERROR:
@@ -270,7 +302,8 @@ class Audio(pykka.ThreadingActor):
         """
         self._playbin.set_property('uri', uri)
 
-    def set_appsrc(self, caps, seek_data=None):
+    def set_appsrc(
+            self, caps, need_data=None, enough_data=None, seek_data=None):
         """
         Switch to using appsrc for getting audio to be played.
 
@@ -279,6 +312,10 @@ class Audio(pykka.ThreadingActor):
         :param caps: GStreamer caps string describing the audio format to
             expect
         :type caps: string
+        :param need_data: callback for when appsrc needs data
+        :type need_data: callable which takes data length hint in ms
+        :param enough_data: callback for when appsrc has enough data
+        :type enough_data: callable
         :param seek_data: callback for when data from a new position is needed
             to continue playback
         :type seek_data: callable which takes time position in ms
@@ -286,6 +323,8 @@ class Audio(pykka.ThreadingActor):
         if isinstance(caps, unicode):
             caps = caps.encode('utf-8')
         self._appsrc_caps = gst.Caps(caps)
+        self._appsrc_need_data_callback = need_data
+        self._appsrc_enough_data_callback = enough_data
         self._appsrc_seek_data_callback = seek_data
         self._playbin.set_property('uri', 'appsrc://')
 
@@ -322,8 +361,8 @@ class Audio(pykka.ThreadingActor):
         :rtype: int
         """
         try:
-            position = self._playbin.query_position(gst.FORMAT_TIME)[0]
-            return position // gst.MSECOND
+            gst_position = self._playbin.query_position(gst.FORMAT_TIME)[0]
+            return utils.clocktime_to_millisecond(gst_position)
         except gst.QueryError:
             logger.debug('Position query failed')
             return 0
@@ -336,9 +375,9 @@ class Audio(pykka.ThreadingActor):
         :type position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        gst_position = utils.millisecond_to_clocktime(position)
         return self._playbin.seek_simple(
-            gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH,
-            position * gst.MSECOND)
+            gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH, gst_position)
 
     def start_playback(self):
         """

@@ -64,7 +64,9 @@ module.exports = function (grunt) {
         uglify: {}
     });
 
-    grunt.registerTask("default", "lint buster concat min");
+    grunt.registerTask("test", "lint buster");
+    grunt.registerTask("build", "lint buster concat min");
+    grunt.registerTask("default", "build");
 
     grunt.loadNpmTasks("grunt-buster");
 };
