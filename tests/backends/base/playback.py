@@ -363,16 +363,6 @@ class PlaybackControllerTest(object):
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     @populate_tracklist
-    def test_end_of_track_skips_to_next_track_on_failure(self):
-        # If backend's play() returns False, it is a failure.
-        self.backend.playback.play = lambda track: track != self.tracks[1]
-        self.playback.play()
-        self.assertEqual(self.playback.current_track, self.tracks[0])
-        self.playback.on_end_of_track()
-        self.assertNotEqual(self.playback.current_track, self.tracks[1])
-        self.assertEqual(self.playback.current_track, self.tracks[2])
-
-    @populate_tracklist
     def test_end_of_track_track_before_play(self):
         self.assertEqual(self.playback.tl_track_at_next, self.tl_tracks[0])
 
