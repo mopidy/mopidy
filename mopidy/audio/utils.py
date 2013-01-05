@@ -6,7 +6,8 @@ import gst
 
 
 def calculate_duration(num_samples, sample_rate):
-    """Determine duration of samples using GStreamer helper for precise math."""
+    """Determine duration of samples using GStreamer helper for precise
+    math."""
     return gst.util_uint64_scale(num_samples, gst.SECOND, sample_rate)
 
 
@@ -28,8 +29,13 @@ def create_buffer(data, capabilites=None, timestamp=None, duration=None):
 
 
 def millisecond_to_clocktime(value):
-    """Convert a millisecond time to internal gstreamer time."""
+    """Convert a millisecond time to internal GStreamer time."""
     return value * gst.MSECOND
+
+
+def clocktime_to_millisecond(value):
+    """Convert an internal GStreamer time to millisecond time."""
+    return value // gst.MSECOND
 
 
 def supported_uri_schemes(uri_schemes):
