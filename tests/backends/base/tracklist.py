@@ -18,7 +18,7 @@ class TracklistControllerTest(object):
     def setUp(self):
         self.audio = mock.Mock(spec=audio.Audio)
         self.backend = self.backend_class.start(audio=self.audio).proxy()
-        self.core = core.Core(audio=audio, backends=[self.backend])
+        self.core = core.Core(audio=self.audio, backends=[self.backend])
         self.controller = self.core.tracklist
         self.playback = self.core.playback
 
