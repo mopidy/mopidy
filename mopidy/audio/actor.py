@@ -82,13 +82,14 @@ class Audio(pykka.ThreadingActor):
             'notify::source', self._on_new_source)
 
     def _on_about_to_finish(self, element):
-        source, self._appsrc = self._appsrc, None
-        if source is None:
-            return
+        # Cleanup appsrc related stuff.
+        old_appsrc, self._appsrc = self._appsrc, None
+
+        if self._appsrc_seek_data_id is not None and old_appsrc:
+            old_appsrc.disconnect(self._appsrc_seek_data_id)
+
         self._appsrc_caps = None
-        if self._appsrc_seek_data_id is not None:
-            source.disconnect(self._appsrc_seek_data_id)
-            self._appsrc_seek_data_id = None
+        self._appsrc_seek_data_id = None
 
         # TODO: this is just a horrible hack to get us started. the
         # comunication is correct, but this way of hooking it up is not.
