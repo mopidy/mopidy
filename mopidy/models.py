@@ -66,13 +66,15 @@ class ImmutableObject(object):
         :type values: dict
         :rtype: new instance of the model being copied
         """
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
         data = {}
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
-            data[public_key] = values.pop(public_key, self.__dict__[key])
+            data[str(public_key)] = values.pop(public_key, self.__dict__[key])
         for key in values.keys():
             if hasattr(self, key):
-                data[key] = values.pop(key)
+                data[str(key)] = values.pop(key)
         if values:
             raise TypeError(
                 'copy() got an unexpected keyword argument "%s"' % key)
@@ -186,7 +188,9 @@ class Album(ImmutableObject):
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
+        self.__dict__[b'artists'] = frozenset(kwargs.pop('artists', []))
         super(Album, self).__init__(*args, **kwargs)
 
 
@@ -240,7 +244,9 @@ class Track(ImmutableObject):
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
+        self.__dict__[b'artists'] = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
 
 
@@ -272,9 +278,11 @@ class TlTrack(ImmutableObject):
     track = None
 
     def __init__(self, *args, **kwargs):
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
         if len(args) == 2 and len(kwargs) == 0:
-            kwargs['tlid'] = args[0]
-            kwargs['track'] = args[1]
+            kwargs[b'tlid'] = args[0]
+            kwargs[b'track'] = args[1]
             args = []
         super(TlTrack, self).__init__(*args, **kwargs)
 
@@ -309,7 +317,9 @@ class Playlist(ImmutableObject):
     last_modified = None
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
+        self.__dict__[b'tracks'] = tuple(kwargs.pop('tracks', []))
         super(Playlist, self).__init__(*args, **kwargs)
 
     # TODO: def insert(self, pos, track): ... ?
@@ -345,7 +355,9 @@ class SearchResult(ImmutableObject):
     albums = tuple()
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
-        self.__dict__['artists'] = tuple(kwargs.pop('artists', []))
-        self.__dict__['albums'] = tuple(kwargs.pop('albums', []))
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
+        self.__dict__[b'tracks'] = tuple(kwargs.pop('tracks', []))
+        self.__dict__[b'artists'] = tuple(kwargs.pop('artists', []))
+        self.__dict__[b'albums'] = tuple(kwargs.pop('albums', []))
         super(SearchResult, self).__init__(*args, **kwargs)

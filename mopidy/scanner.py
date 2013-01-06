@@ -79,8 +79,7 @@ def main():
 def parse_options():
     parser = optparse.OptionParser(
         version='Mopidy %s' % versioning.get_version())
-    # NOTE Python 2.6: To support Python versions < 2.6.2rc1 we must use
-    # bytestrings for the first argument to ``add_option``
+    # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
     # See https://github.com/mopidy/mopidy/issues/302 for details
     parser.add_option(
         b'-q', '--quiet',
@@ -99,9 +98,8 @@ def translator(data):
     artist_kwargs = {}
     track_kwargs = {}
 
-    # NOTE: kwargs are explicitly made bytestrings to work on Python
-    # 2.6.0/2.6.1. See https://github.com/mopidy/mopidy/issues/302 for
-    # details.
+    # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+    # See https://github.com/mopidy/mopidy/issues/302 for details.
 
     def _retrieve(source_key, target_key, target):
         if source_key in data:
