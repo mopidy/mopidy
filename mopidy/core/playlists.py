@@ -15,11 +15,14 @@ class PlaylistsController(object):
         self.backends = backends
         self.core = core
 
-    def get_playlists(self):
+    def get_playlists(self, include_tracks=True):
         futures = [
             b.playlists.playlists for b in self.backends.with_playlists]
         results = pykka.get_all(futures)
-        return list(itertools.chain(*results))
+        playlists = list(itertools.chain(*results))
+        if not include_tracks:
+            playlists = [p.copy(tracks=[]) for p in playlists]
+        return playlists
 
     playlists = property(get_playlists)
     """

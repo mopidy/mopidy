@@ -24,6 +24,15 @@ v0.11.2 (UNRELEASED)
 
 - Make ``mopidy-scan`` support symlinks.
 
+**Core API**
+
+- :meth:`mopidy.core.PlaylistsController.get_playlists` now accepts an argument
+  ``include_tracks``. This defaults to :class:`True`, which has the same old
+  behavior. If set to :class:`False`, the tracks are stripped from the
+  playlists before they are returned. This can be used to limit the amount of
+  data returned if the response is to be passed out of the application, e.g. to
+  a web client. (Fixes: :issue:`297`)
+
 
 v0.11.1 (2012-12-24)
 ====================
