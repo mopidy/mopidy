@@ -20,7 +20,6 @@ logger = logging.getLogger('mopidy.audio')
 
 mixers.register_mixers()
 
-
 MB = 1 << 20
 
 
@@ -49,6 +48,8 @@ class Audio(pykka.ThreadingActor):
         self._mixer_scale = None
         self._software_mixing = False
         self._volume_set = None
+
+        self._end_of_track_callback = None
 
         self._appsrc = None
         self._appsrc_caps = None
@@ -93,21 +94,28 @@ class Audio(pykka.ThreadingActor):
         self._playbin = playbin
 
     def _on_about_to_finish(self, element):
-        source, self._appsrc = self._appsrc, None
-        if source is None:
-            return
+        # Cleanup appsrc related stuff.
+        old_appsrc, self._appsrc = self._appsrc, None
+
+        self._disconnect(old_appsrc, 'need-data')
+        self._disconnect(old_appsrc, 'enough-data')
+        self._disconnect(old_appsrc, 'seek-data')
+
         self._appsrc_caps = None
 
-        self._disconnect(source, 'need-data')
-        self._disconnect(source, 'enough-data')
-        self._disconnect(source, 'seek-data')
+        # Note that we can not let this function return until we have the next
+        # URI set for gapless / EOS free playback. This means all the
+        # subsequent remote calls to backends etc. down this code path need to
+        # block.
+        if self._end_of_track_callback:
+            self._end_of_track_callback()
 
     def _on_new_source(self, element, pad):
-        uri = element.get_property('uri')
-        if not uri or not uri.startswith('appsrc://'):
+        source = element.get_property('source')
+
+        if source.get_factory().get_name() != 'appsrc':
             return
 
-        source = element.get_property('source')
         source.set_property('caps', self._appsrc_caps)
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
@@ -279,6 +287,10 @@ class Audio(pykka.ThreadingActor):
     def _on_end_of_stream(self):
         logger.debug('Triggering reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
+
+    def set_on_end_of_track(self, callback):
+        """Set callback to be called on end of track."""
+        self._end_of_track_callback = callback
 
     def set_uri(self, uri):
         """
