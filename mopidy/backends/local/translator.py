@@ -98,8 +98,8 @@ def _convert_mpd_data(data, tracks, music_dir):
     if not data:
         return
 
-    # NOTE: kwargs are explicitly made bytestrings to work on Python
-    # 2.6.0/2.6.1. See https://github.com/mopidy/mopidy/issues/302 for details.
+    # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+    # See https://github.com/mopidy/mopidy/issues/302 for details.
 
     track_kwargs = {}
     album_kwargs = {}
