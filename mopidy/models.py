@@ -87,7 +87,9 @@ class ImmutableObject(object):
             public_key = key.lstrip('_')
             value = self.__dict__[key]
             if isinstance(value, (set, frozenset, list, tuple)):
-                value = [o.serialize() for o in value]
+                value = [
+                    v.serialize() if isinstance(v, ImmutableObject) else v
+                    for v in value]
             elif isinstance(value, ImmutableObject):
                 value = value.serialize()
             if value:
