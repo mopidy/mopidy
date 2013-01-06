@@ -46,6 +46,22 @@ class PlaylistsTest(unittest.TestCase):
         self.assertIn(self.pl2a, result)
         self.assertIn(self.pl2b, result)
 
+    def test_get_playlists_includes_tracks_by_default(self):
+        result = self.core.playlists.get_playlists()
+
+        self.assertEqual(result[0].name, 'A')
+        self.assertEqual(len(result[0].tracks), 1)
+        self.assertEqual(result[1].name, 'B')
+        self.assertEqual(len(result[1].tracks), 1)
+
+    def test_get_playlist_can_strip_tracks_from_returned_playlists(self):
+        result = self.core.playlists.get_playlists(include_tracks=False)
+
+        self.assertEqual(result[0].name, 'A')
+        self.assertEqual(len(result[0].tracks), 0)
+        self.assertEqual(result[1].name, 'B')
+        self.assertEqual(len(result[1].tracks), 0)
+
     def test_create_without_uri_scheme_uses_first_backend(self):
         playlist = Playlist()
         self.sp1.create().get.return_value = playlist
