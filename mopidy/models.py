@@ -163,6 +163,8 @@ class Album(ImmutableObject):
     :type artists: list of :class:`Artist`
     :param num_tracks: number of tracks in album
     :type num_tracks: integer
+    :param num_discs: number of discs in album
+    :type num_discs: integer or :class:`None` if unknown
     :param date: album release date (YYYY or YYYY-MM-DD)
     :type date: string
     :param musicbrainz_id: MusicBrainz ID
@@ -182,6 +184,9 @@ class Album(ImmutableObject):
 
     #: The number of tracks in the album. Read-only.
     num_tracks = 0
+
+    #: The number of discs in the album. Read-only.
+    num_discs = None
 
     #: The album release date. Read-only.
     date = None
