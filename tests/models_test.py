@@ -216,18 +216,25 @@ class AlbumTest(unittest.TestCase):
         self.assertRaises(
             AttributeError, setattr, album, 'musicbrainz_id', None)
 
+    def test_images(self):
+        image = 'data:foobar'
+        album = Album(images=[image])
+        self.assertIn(image, album.images)
+        self.assertRaises(AttributeError, setattr, album, 'images', None)
+
     def test_invalid_kwarg(self):
         test = lambda: Album(foo='baz')
         self.assertRaises(TypeError, test)
 
     def test_repr_without_artists(self):
         self.assertEquals(
-            "Album(artists=[], name=u'name', uri=u'uri')",
+            "Album(artists=[], images=[], name=u'name', uri=u'uri')",
             repr(Album(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEquals(
-            "Album(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
+            "Album(artists=[Artist(name=u'foo')], images=[], name=u'name', "
+            "uri=u'uri')",
             repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):

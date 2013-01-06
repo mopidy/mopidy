@@ -33,6 +33,11 @@ v0.11.2 (UNRELEASED)
   data returned if the response is to be passed out of the application, e.g. to
   a web client. (Fixes: :issue:`297`)
 
+**Models**
+
+- Add :attr:`mopidy.models.Album.images` field for including album art URIs.
+  (Partly fixes :issue:`263`)
+
 
 v0.11.1 (2012-12-24)
 ====================

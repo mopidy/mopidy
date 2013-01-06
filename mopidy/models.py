@@ -167,6 +167,8 @@ class Album(ImmutableObject):
     :type date: string
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
+    :param images: album image URIs
+    :type images: list of strings
     """
 
     #: The album URI. Read-only.
@@ -187,10 +189,14 @@ class Album(ImmutableObject):
     #: The MusicBrainz ID of the album. Read-only.
     musicbrainz_id = None
 
+    #: The album image URIs. Read-only.
+    images = frozenset()
+
     def __init__(self, *args, **kwargs):
         # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
         # See https://github.com/mopidy/mopidy/issues/302 for details
         self.__dict__[b'artists'] = frozenset(kwargs.pop('artists', []))
+        self.__dict__[b'images'] = frozenset(kwargs.pop('images', []))
         super(Album, self).__init__(*args, **kwargs)
 
 
