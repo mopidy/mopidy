@@ -396,6 +396,12 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track.track_no, track_no)
         self.assertRaises(AttributeError, setattr, track, 'track_no', None)
 
+    def test_disc_no(self):
+        disc_no = 2
+        track = Track(disc_no=disc_no)
+        self.assertEqual(track.disc_no, disc_no)
+        self.assertRaises(AttributeError, setattr, track, 'disc_no', None)
+
     def test_date(self):
         date = '1977-01-01'
         track = Track(date=date)

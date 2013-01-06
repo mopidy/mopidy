@@ -38,6 +38,8 @@ v0.11.2 (UNRELEASED)
 - Add :attr:`mopidy.models.Album.images` field for including album art URIs.
   (Partly fixes :issue:`263`)
 
+- Add :attr:`mopidy.models.Track.disc_no` field. (Partly fixes: :issue:`286`)
+
 
 v0.11.1 (2012-12-24)
 ====================
