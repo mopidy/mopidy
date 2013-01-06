@@ -249,6 +249,13 @@ class AlbumTest(unittest.TestCase):
                 'artists': [artist.serialize()]},
             Album(uri='uri', name='name', artists=[artist]).serialize())
 
+    def test_serialize_with_images(self):
+        image = 'data:foobar'
+        self.assertDictEqual(
+            {'__model__': 'Album', 'uri': 'uri', 'name': 'name',
+                'images': [image]},
+            Album(uri='uri', name='name', images=[image]).serialize())
+
     def test_to_json_and_back(self):
         album1 = Album(uri='uri', name='name', artists=[Artist(name='foo')])
         serialized = json.dumps(album1, cls=ModelJSONEncoder)
