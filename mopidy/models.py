@@ -212,6 +212,8 @@ class Track(ImmutableObject):
     :type album: :class:`Album`
     :param track_no: track number in album
     :type track_no: integer
+    :param disc_no: disc number in album
+    :type disc_no: integer or :class:`None` if unknown
     :param date: track release date (YYYY or YYYY-MM-DD)
     :type date: string
     :param length: track length in milliseconds
@@ -234,8 +236,11 @@ class Track(ImmutableObject):
     #: The track :class:`Album`. Read-only.
     album = None
 
-    #: The track number in album. Read-only.
+    #: The track number in the album. Read-only.
     track_no = 0
+
+    #: The disc number in the album. Read-only.
+    disc_no = None
 
     #: The track release date. Read-only.
     date = None
