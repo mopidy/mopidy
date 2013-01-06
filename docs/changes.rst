@@ -18,7 +18,29 @@ v0.12.0 (in development)
   - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
     < 2.6.5rc1.
 
+**Audio sub-system**
+
 - Improve selection of mixer tracks for volume control. (Fixes: :issuse:`307`)
+
+- EOT (end of track) and EOS (end of stream) handling has finally been fixed.
+  Problem with the old code was that we simply used EOS for everything, and let
+  the EOS propagate for the end of each track. What this means is basically that
+  we would disrupt the pipeline at the end of every track. This work was
+  concluded in the pull request :issue:`231`. Changes and issues fixed by this
+  include:
+
+  - A new method ``change_track(track)`` for playback provider which is where
+    doing everything like setting the URI and starting to push data should be
+    done. The ``play(track)`` method and EOT track changing uses this new
+    method.
+
+  - We've started using the about to finish signal from playbin2 to ensure
+    gapless playback as part of our EOT cleanup. (Fixes: :issue:`160`)
+
+  - Mopidy now distinguishes between EOT and EOS properly. (Fixes: :issue:`222`)
+
+  - Since we no longer let EOS disrupt the pipeline streaming OGG via SHOUTcast
+    now works. (Fixes: :issue:`168`)
 
 **Spotify backend**
 
