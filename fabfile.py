@@ -1,4 +1,4 @@
-from fabric.api import local
+from fabric.api import local, settings
 
 
 def test(path=None):
@@ -9,7 +9,8 @@ def test(path=None):
 def autotest(path=None):
     while True:
         local('clear')
-        test(path)
+        with settings(warn_only=True):
+            test(path)
         local(
             'inotifywait -q -e create -e modify -e delete '
             '--exclude ".*\.(pyc|sw.)" -r mopidy/ tests/')
