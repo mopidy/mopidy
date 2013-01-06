@@ -83,6 +83,8 @@ Current limitations:
 
 - Add :attr:`mopidy.models.Track.disc_no` field. (Partly fixes: :issue:`286`)
 
+- Add :attr:`mopidy.models.Album.num_discs` field. (Partly fixes: :issue:`286`)
+
 
 v0.11.1 (2012-12-24)
 ====================

@@ -199,9 +199,15 @@ class AlbumTest(unittest.TestCase):
 
     def test_num_tracks(self):
         num_tracks = 11
-        album = Album(num_tracks=11)
+        album = Album(num_tracks=num_tracks)
         self.assertEqual(album.num_tracks, num_tracks)
         self.assertRaises(AttributeError, setattr, album, 'num_tracks', None)
+
+    def test_num_discs(self):
+        num_discs = 2
+        album = Album(num_discs=num_discs)
+        self.assertEqual(album.num_discs, num_discs)
+        self.assertRaises(AttributeError, setattr, album, 'num_discs', None)
 
     def test_date(self):
         date = '1977-01-01'
