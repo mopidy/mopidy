@@ -20,7 +20,7 @@ v0.12.0 (in development)
 
 **Audio sub-system**
 
-- Improve selection of mixer tracks for volume control. (Fixes: :issuse:`307`)
+- Improve selection of mixer tracks for volume control. (Fixes: :issue:`307`)
 
 - EOT (end of track) and EOS (end of stream) handling has finally been fixed.
   Problem with the old code was that we simply used EOS for everything, and let
@@ -53,11 +53,9 @@ v0.12.0 (in development)
 **Stream backend**
 
 We've added a new backend for playing audio streams, the :mod:`stream backend
-<mopidy.backends.stream>`. It is activated by default.
-
-The stream backend supports the intersection of what your GStreamer
-installation supports and what protocols are included in the
-:attr:`mopidy.settings.STREAM_PROTOCOLS` settings.
+<mopidy.backends.stream>`. It is activated by default. The stream backend
+supports the intersection of what your GStreamer installation supports and what
+protocols are included in the :attr:`mopidy.settings.STREAM_PROTOCOLS` setting.
 
 Current limitations:
 
