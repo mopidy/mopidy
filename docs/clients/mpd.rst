@@ -318,3 +318,9 @@ purchased from `MPaD at iTunes Store
 
 - The server menu can be very slow top open, and there is no visible feedback
   when waiting for the connection to a server to succeed.
+
+
+Web clients
+===========
+
+See :ref:`http-clients`.
