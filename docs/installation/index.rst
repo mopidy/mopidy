@@ -177,7 +177,8 @@ can install Mopidy from PyPI using Pip.
 
          sudo pip install -U pykka
 
-         # On Fedora the binary is called pip-python:
+     On Fedora the binary is called ``pip-python``::
+
          sudo pip-python install -U pykka
 
    - GStreamer 0.10.x, with Python bindings. GStreamer is packaged for most
@@ -209,8 +210,8 @@ can install Mopidy from PyPI using Pip.
       versions of libspotify and pyspotify are tightly coupled, so you'll need
       to get this right.
 
-   #. Download and install the appropriate version of libspotify for your OS and
-      CPU architecture from `Spotify
+   #. Download and install the appropriate version of libspotify for your OS
+      and CPU architecture from `Spotify
       <https://developer.spotify.com/technologies/libspotify/>`_.
 
       For libspotify 12.1.51 for 64-bit Linux the process is as follows::
@@ -225,7 +226,7 @@ can install Mopidy from PyPI using Pip.
       supported by pyspotify, your OS, and your CPU architecture.
 
    #. If you're on Fedora, you must add a configuration file so libspotify.so
-      can be found:
+      can be found::
 
           su -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/libspotify.conf'
           sudo ldconfig
