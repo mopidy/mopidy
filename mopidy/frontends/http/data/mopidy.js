@@ -1,6 +1,6 @@
-/*! Mopidy.js - built 2012-12-04
+/*! Mopidy.js - built 2013-01-16
  * http://www.mopidy.com/
- * Copyright (c) 2012 Stein Magnus Jodal and contributors
+ * Copyright (c) 2013 Stein Magnus Jodal and contributors
  * Licensed under the Apache License, Version 2.0 */
 
 /**
@@ -910,6 +910,10 @@ define(['module'], function () {
 /*global bane:false, when:false*/
 
 function Mopidy(settings) {
+    if (!(this instanceof Mopidy)) {
+        return new Mopidy(settings);
+    }
+
     this._settings = this._configure(settings || {});
     this._console = this._getConsole();
 

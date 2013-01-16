@@ -48,6 +48,15 @@ buster.testCase("Mopidy", {
             new Mopidy({webSocket: {}});
 
             refute.called(this.webSocketConstructorStub);
+        },
+
+        "works without 'new' keyword": function () {
+            var mopidyConstructor = Mopidy; // To trick jshint into submission
+
+            var mopidy = mopidyConstructor({webSocket: {}});
+
+            assert.isObject(mopidy);
+            assert(mopidy instanceof Mopidy);
         }
     },
 
