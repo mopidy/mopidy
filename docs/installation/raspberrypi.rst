@@ -10,10 +10,9 @@ significant drawbacks to doing so. This document is intended to help you get
 Mopidy running on your Raspberry Pi and to document the progress made and
 issues surrounding running Mopidy on the Raspberry Pi.
 
-Mopidy will not currently run with Spotify support on the foundation-provided
-`Raspbian <http://www.raspbian.org>`_ distribution. See :ref:`not-raspbian` for
-details. However, Mopidy should run with Spotify support on any ARM Debian
-image that has hardware floating-point support **disabled**.
+As of January 2013, Mopidy will run with Spotify support on both the armel
+(soft-float) and armhf (hard-float) architectures, which includes the Raspbian
+distribution.
 
 .. image:: /_static/raspberry-pi-by-jwrodgers.jpg
     :width: 640
@@ -215,11 +214,8 @@ software packages, as Wheezy is going to be the next release of Debian.
    booting.
 
 
-Known Issues
-============
-
-Audio Quality
--------------
+Audio quality issues
+====================
 
 The Raspberry Pi's audio quality can be sub-par through the analog output. This
 is known and unlikely to be fixed as including any higher-quality hardware
@@ -228,31 +224,9 @@ skipping audio, you may want to try a USB sound card. Additionally, you could
 lower your default ALSA sampling rate to 22KHz, though this will lead to a
 substantial decrease in sound quality.
 
-
-.. _not-raspbian:
-
-Why Not Raspbian?
------------------
-
-Mopidy with Spotify support is currently unavailable on the recommended
-`Raspbian <http://www.raspbian.org>`_ Debian distribution that the Raspberry Pi
-foundation has made available. This is due to Raspbian's hardware
-floating-point support. The Raspberry Pi comes with a co-processor designed
-specifically for floating-point computations (commonly called an FPU). Taking
-advantage of the FPU can speed up many computations significantly over
-software-emulated floating point routines. Most of Mopidy's dependencies are
-open-source and have been (or can be) compiled to support the ``armhf``
-architecture. However, there is one component of Mopidy's stack which is
-closed-source and crucial to Mopidy's Spotify support: libspotify.
-
-The ARM distributions of libspotify available on `Spotify's developer website
-<http://developer.spotify.com>`_ are compiled for the ``armel`` architecture,
-which has software floating-point support. ``armel`` and ``armhf`` software
-cannot be mixed, and pyspotify links with libspotify as C extensions.  Thus,
-Mopidy will not run with Spotify support on ``armhf`` distributions.
-
-If the Spotify folks ever release builds of libspotify with ``armhf`` support,
-Mopidy *should* work on Raspbian.
+As of January 2013, some reports also indicate that pushing the audio through
+PulseAudio may help. We hope to, in the future, provide a complete set of
+instructions here leading to acceptable analog audio quality.
 
 
 Support
