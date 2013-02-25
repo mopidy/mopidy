@@ -1,3 +1,9 @@
+"""A dummy audio actor for use in tests.
+
+This class implements the audio API in the simplest way possible. It is used in
+tests of the core and backends.
+"""
+
 from __future__ import unicode_literals
 
 import pykka
