@@ -112,7 +112,7 @@ squeeze distribution.
    - Add ``ipv6`` to ``/etc/modules`` to ensure the IPv6 kernel module is
      loaded on boot::
 
-         echo ipv6 | sudo tee /etc/modules
+         echo ipv6 | sudo tee -a /etc/modules
 
 8. Installing Mopidy and its dependencies from `apt.mopidy.com
    <http://apt.mopidy.com/>`_, as described in :ref:`installation`. In short::
@@ -188,7 +188,7 @@ software packages, as Wheezy is going to be the next release of Debian.
    - Add ``ipv6`` to ``/etc/modules`` to ensure the IPv6 kernel module is
      loaded on boot::
 
-         echo ipv6 | sudo tee /etc/modules
+         echo ipv6 | sudo tee -a /etc/modules
 
 8. Installing Mopidy and its dependencies from `apt.mopidy.com
    <http://apt.mopidy.com/>`_, as described in :ref:`installation`. In short::
