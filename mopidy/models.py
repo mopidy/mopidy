@@ -66,13 +66,15 @@ class ImmutableObject(object):
         :type values: dict
         :rtype: new instance of the model being copied
         """
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
         data = {}
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
-            data[public_key] = values.pop(public_key, self.__dict__[key])
+            data[str(public_key)] = values.pop(public_key, self.__dict__[key])
         for key in values.keys():
             if hasattr(self, key):
-                data[key] = values.pop(key)
+                data[str(key)] = values.pop(key)
         if values:
             raise TypeError(
                 'copy() got an unexpected keyword argument "%s"' % key)
@@ -85,7 +87,9 @@ class ImmutableObject(object):
             public_key = key.lstrip('_')
             value = self.__dict__[key]
             if isinstance(value, (set, frozenset, list, tuple)):
-                value = [o.serialize() for o in value]
+                value = [
+                    v.serialize() if isinstance(v, ImmutableObject) else v
+                    for v in value]
             elif isinstance(value, ImmutableObject):
                 value = value.serialize()
             if value:
@@ -123,11 +127,16 @@ def model_json_decoder(dct):
         {u'a_track': Track(artists=[], name=u'name')}
 
     """
+    # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+    # See https://github.com/mopidy/mopidy/issues/302 for details.
     if '__model__' in dct:
         model_name = dct.pop('__model__')
         cls = globals().get(model_name, None)
         if issubclass(cls, ImmutableObject):
-            return cls(**dct)
+            kwargs = {}
+            for key, value in dct.items():
+                kwargs[str(key)] = value
+            return cls(**kwargs)
     return dct
 
 
@@ -161,10 +170,14 @@ class Album(ImmutableObject):
     :type artists: list of :class:`Artist`
     :param num_tracks: number of tracks in album
     :type num_tracks: integer
+    :param num_discs: number of discs in album
+    :type num_discs: integer or :class:`None` if unknown
     :param date: album release date (YYYY or YYYY-MM-DD)
     :type date: string
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
+    :param images: album image URIs
+    :type images: list of strings
     """
 
     #: The album URI. Read-only.
@@ -179,14 +192,23 @@ class Album(ImmutableObject):
     #: The number of tracks in the album. Read-only.
     num_tracks = 0
 
+    #: The number of discs in the album. Read-only.
+    num_discs = None
+
     #: The album release date. Read-only.
     date = None
 
     #: The MusicBrainz ID of the album. Read-only.
     musicbrainz_id = None
 
+    #: The album image URIs. Read-only.
+    images = frozenset()
+
     def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
+        self.__dict__[b'artists'] = frozenset(kwargs.pop('artists', []))
+        self.__dict__[b'images'] = frozenset(kwargs.pop('images', []))
         super(Album, self).__init__(*args, **kwargs)
 
 
@@ -202,6 +224,8 @@ class Track(ImmutableObject):
     :type album: :class:`Album`
     :param track_no: track number in album
     :type track_no: integer
+    :param disc_no: disc number in album
+    :type disc_no: integer or :class:`None` if unknown
     :param date: track release date (YYYY or YYYY-MM-DD)
     :type date: string
     :param length: track length in milliseconds
@@ -224,8 +248,11 @@ class Track(ImmutableObject):
     #: The track :class:`Album`. Read-only.
     album = None
 
-    #: The track number in album. Read-only.
+    #: The track number in the album. Read-only.
     track_no = 0
+
+    #: The disc number in the album. Read-only.
+    disc_no = None
 
     #: The track release date. Read-only.
     date = None
@@ -240,7 +267,9 @@ class Track(ImmutableObject):
     musicbrainz_id = None
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
+        self.__dict__[b'artists'] = frozenset(kwargs.pop('artists', []))
         super(Track, self).__init__(*args, **kwargs)
 
 
@@ -272,9 +301,11 @@ class TlTrack(ImmutableObject):
     track = None
 
     def __init__(self, *args, **kwargs):
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
         if len(args) == 2 and len(kwargs) == 0:
-            kwargs['tlid'] = args[0]
-            kwargs['track'] = args[1]
+            kwargs[b'tlid'] = args[0]
+            kwargs[b'track'] = args[1]
             args = []
         super(TlTrack, self).__init__(*args, **kwargs)
 
@@ -309,7 +340,9 @@ class Playlist(ImmutableObject):
     last_modified = None
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
+        self.__dict__[b'tracks'] = tuple(kwargs.pop('tracks', []))
         super(Playlist, self).__init__(*args, **kwargs)
 
     # TODO: def insert(self, pos, track): ... ?
@@ -345,7 +378,9 @@ class SearchResult(ImmutableObject):
     albums = tuple()
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
-        self.__dict__['artists'] = tuple(kwargs.pop('artists', []))
-        self.__dict__['albums'] = tuple(kwargs.pop('albums', []))
+        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+        # See https://github.com/mopidy/mopidy/issues/302 for details
+        self.__dict__[b'tracks'] = tuple(kwargs.pop('tracks', []))
+        self.__dict__[b'artists'] = tuple(kwargs.pop('artists', []))
+        self.__dict__[b'albums'] = tuple(kwargs.pop('albums', []))
         super(SearchResult, self).__init__(*args, **kwargs)

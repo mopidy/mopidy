@@ -20,10 +20,12 @@ from __future__ import unicode_literals
 #:     BACKENDS = (
 #:         u'mopidy.backends.local.LocalBackend',
 #:         u'mopidy.backends.spotify.SpotifyBackend',
+#:         u'mopidy.backends.spotify.StreamBackend',
 #:     )
 BACKENDS = (
     'mopidy.backends.local.LocalBackend',
     'mopidy.backends.spotify.SpotifyBackend',
+    'mopidy.backends.stream.StreamBackend',
 )
 
 #: The log format used for informational logging.
@@ -286,7 +288,7 @@ SPOTIFY_PROXY_USERNAME = None
 
 #: Spotify proxy password.
 #:
-#: Used by :mod:`mopidy.backends.spotify`
+#: Used by :mod:`mopidy.backends.spotify`.
 #:
 #: Default::
 #:
@@ -295,9 +297,32 @@ SPOTIFY_PROXY_PASSWORD = None
 
 #: Max number of seconds to wait for Spotify operations to complete.
 #:
-#: Used by :mod:`mopidy.backends.spotify`
+#: Used by :mod:`mopidy.backends.spotify`.
 #:
 #: Default::
 #:
 #:     SPOTIFY_TIMEOUT = 10
 SPOTIFY_TIMEOUT = 10
+
+#: Whitelist of URIs to support streaming from.
+#:
+#: Used by :mod:`mopidy.backends.stream`.
+#:
+#: Default::
+#:
+#:     STREAM_PROTOCOLS = (
+#:         u'http',
+#:         u'https',
+#:         u'mms',
+#:         u'rtmp',
+#:         u'rtmps',
+#:         u'rtsp',
+#:     )
+STREAM_PROTOCOLS = (
+    'http',
+    'https',
+    'mms',
+    'rtmp',
+    'rtmps',
+    'rtsp',
+)

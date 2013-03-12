@@ -79,12 +79,14 @@ def main():
 def parse_options():
     parser = optparse.OptionParser(
         version='Mopidy %s' % versioning.get_version())
+    # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
+    # See https://github.com/mopidy/mopidy/issues/302 for details
     parser.add_option(
-        '-q', '--quiet',
+        b'-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
     parser.add_option(
-        '-v', '--verbose',
+        b'-v', '--verbose',
         action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
     return parser.parse_args(args=mopidy_args)[0]
@@ -96,9 +98,12 @@ def translator(data):
     artist_kwargs = {}
     track_kwargs = {}
 
+    # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
+    # See https://github.com/mopidy/mopidy/issues/302 for details.
+
     def _retrieve(source_key, target_key, target):
         if source_key in data:
-            target[target_key] = data[source_key]
+            target[str(target_key)] = data[source_key]
 
     _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
@@ -111,7 +116,7 @@ def translator(data):
         except ValueError:
             pass  # Ignore invalid dates
         else:
-            track_kwargs['date'] = date.isoformat()
+            track_kwargs[b'date'] = date.isoformat()
 
     _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
     _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
@@ -125,12 +130,12 @@ def translator(data):
         'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if albumartist_kwargs:
-        album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
+        album_kwargs[b'artists'] = [Artist(**albumartist_kwargs)]
 
-    track_kwargs['uri'] = data['uri']
-    track_kwargs['length'] = data[gst.TAG_DURATION]
-    track_kwargs['album'] = Album(**album_kwargs)
-    track_kwargs['artists'] = [Artist(**artist_kwargs)]
+    track_kwargs[b'uri'] = data['uri']
+    track_kwargs[b'length'] = data[gst.TAG_DURATION]
+    track_kwargs[b'album'] = Album(**album_kwargs)
+    track_kwargs[b'artists'] = [Artist(**artist_kwargs)]
 
     return Track(**track_kwargs)
 

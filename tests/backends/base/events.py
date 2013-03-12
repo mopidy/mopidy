@@ -11,7 +11,7 @@ from mopidy.backends import listener
 class BackendEventsTest(object):
     def setUp(self):
         self.audio = mock.Mock(spec=audio.Audio)
-        self.backend = self.backend_class.start(audio=audio).proxy()
+        self.backend = self.backend_class.start(audio=self.audio).proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
     def tearDown(self):

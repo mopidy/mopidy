@@ -101,7 +101,7 @@ class DebugThread(threading.Thread):
                     stack = ''.join(traceback.format_stack(frame))
                     logger.debug(
                         'Current state of %s (%s):\n%s',
-                        threads[ident], ident, stack)
+                        threads.get(ident, '?'), ident, stack)
                 del frame
 
             self.event.clear()

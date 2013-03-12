@@ -1,6 +1,10 @@
 /*global bane:false, when:false*/
 
 function Mopidy(settings) {
+    if (!(this instanceof Mopidy)) {
+        return new Mopidy(settings);
+    }
+
     this._settings = this._configure(settings || {});
     this._console = this._getConsole();
 

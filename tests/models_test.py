@@ -199,9 +199,15 @@ class AlbumTest(unittest.TestCase):
 
     def test_num_tracks(self):
         num_tracks = 11
-        album = Album(num_tracks=11)
+        album = Album(num_tracks=num_tracks)
         self.assertEqual(album.num_tracks, num_tracks)
         self.assertRaises(AttributeError, setattr, album, 'num_tracks', None)
+
+    def test_num_discs(self):
+        num_discs = 2
+        album = Album(num_discs=num_discs)
+        self.assertEqual(album.num_discs, num_discs)
+        self.assertRaises(AttributeError, setattr, album, 'num_discs', None)
 
     def test_date(self):
         date = '1977-01-01'
@@ -216,18 +222,25 @@ class AlbumTest(unittest.TestCase):
         self.assertRaises(
             AttributeError, setattr, album, 'musicbrainz_id', None)
 
+    def test_images(self):
+        image = 'data:foobar'
+        album = Album(images=[image])
+        self.assertIn(image, album.images)
+        self.assertRaises(AttributeError, setattr, album, 'images', None)
+
     def test_invalid_kwarg(self):
         test = lambda: Album(foo='baz')
         self.assertRaises(TypeError, test)
 
     def test_repr_without_artists(self):
         self.assertEquals(
-            "Album(artists=[], name=u'name', uri=u'uri')",
+            "Album(artists=[], images=[], name=u'name', uri=u'uri')",
             repr(Album(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEquals(
-            "Album(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
+            "Album(artists=[Artist(name=u'foo')], images=[], name=u'name', "
+            "uri=u'uri')",
             repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):
@@ -241,6 +254,13 @@ class AlbumTest(unittest.TestCase):
             {'__model__': 'Album', 'uri': 'uri', 'name': 'name',
                 'artists': [artist.serialize()]},
             Album(uri='uri', name='name', artists=[artist]).serialize())
+
+    def test_serialize_with_images(self):
+        image = 'data:foobar'
+        self.assertDictEqual(
+            {'__model__': 'Album', 'uri': 'uri', 'name': 'name',
+                'images': [image]},
+            Album(uri='uri', name='name', images=[image]).serialize())
 
     def test_to_json_and_back(self):
         album1 = Album(uri='uri', name='name', artists=[Artist(name='foo')])
@@ -388,6 +408,12 @@ class TrackTest(unittest.TestCase):
         track = Track(track_no=track_no)
         self.assertEqual(track.track_no, track_no)
         self.assertRaises(AttributeError, setattr, track, 'track_no', None)
+
+    def test_disc_no(self):
+        disc_no = 2
+        track = Track(disc_no=disc_no)
+        self.assertEqual(track.disc_no, disc_no)
+        self.assertRaises(AttributeError, setattr, track, 'disc_no', None)
 
     def test_date(self):
         date = '1977-01-01'
