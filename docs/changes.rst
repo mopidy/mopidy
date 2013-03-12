@@ -5,22 +5,12 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.12.0 (in development)
+v0.13.0 (in development)
 ========================
 
 (in development)
 
-- Make Mopidy work on early Python 2.6 versions. (Fixes: :issue:`302`)
-
-  - ``optparse`` fails if the first argument to ``add_option`` is a unicode
-    string on Python < 2.6.2rc1.
-
-  - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
-    < 2.6.5rc1.
-
 **Audio sub-system**
-
-- Improve selection of mixer tracks for volume control. (Fixes: :issue:`307`)
 
 - EOT (end of track) and EOS (end of stream) handling has finally been fixed.
   Problem with the old code was that we simply used EOS for everything, and let
@@ -45,6 +35,29 @@ v0.12.0 (in development)
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
+
+
+v0.12.0 (2013-03-12)
+====================
+
+The 0.12 release has been delayed for a while because of some issues related
+some ongoing GStreamer cleanup we didn't invest enough time to finish. Finally,
+we've come to our senses and have now cherry-picked the good parts to bring you
+a new release, while postponing the GStreamer changes to 0.13. The release adds
+a new backend for playing audio streams, as well as various minor improvements
+throughout Mopidy.
+
+- Make Mopidy work on early Python 2.6 versions. (Fixes: :issue:`302`)
+
+  - ``optparse`` fails if the first argument to ``add_option`` is a unicode
+    string on Python < 2.6.2rc1.
+
+  - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
+    < 2.6.5rc1.
+
+**Audio sub-system**
+
+- Improve selection of mixer tracks for volume control. (Fixes: :issue:`307`)
 
 **Local backend**
 
