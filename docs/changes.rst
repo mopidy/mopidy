@@ -5,10 +5,15 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.12.0 (UNRELEASED)
+v0.12.0 (2013-03-12)
 ====================
 
-(in development)
+The 0.12 release has been delayed for a while because of some issues related
+some ongoing GStreamer cleanup we didn't invest enough time to finish. Finally,
+we've come to our senses and have now cherry-picked the good parts to bring you
+a new release, while postponing the GStreamer changes to 0.13. The release adds
+a new backend for playing audio streams, as well as various minor improvements
+throughout Mopidy.
 
 - Make Mopidy work on early Python 2.6 versions. (Fixes: :issue:`302`)
 
