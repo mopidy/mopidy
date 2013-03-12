@@ -5,6 +5,66 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+v0.12.0 (2013-03-12)
+====================
+
+The 0.12 release has been delayed for a while because of some issues related
+some ongoing GStreamer cleanup we didn't invest enough time to finish. Finally,
+we've come to our senses and have now cherry-picked the good parts to bring you
+a new release, while postponing the GStreamer changes to 0.13. The release adds
+a new backend for playing audio streams, as well as various minor improvements
+throughout Mopidy.
+
+- Make Mopidy work on early Python 2.6 versions. (Fixes: :issue:`302`)
+
+  - ``optparse`` fails if the first argument to ``add_option`` is a unicode
+    string on Python < 2.6.2rc1.
+
+  - ``foo(**data)`` fails if the keys in ``data`` is unicode strings on Python
+    < 2.6.5rc1.
+
+**Audio sub-system**
+
+- Improve selection of mixer tracks for volume control. (Fixes: :issue:`307`)
+
+**Local backend**
+
+- Make ``mopidy-scan`` support symlinks.
+
+**Stream backend**
+
+We've added a new backend for playing audio streams, the :mod:`stream backend
+<mopidy.backends.stream>`. It is activated by default. The stream backend
+supports the intersection of what your GStreamer installation supports and what
+protocols are included in the :attr:`mopidy.settings.STREAM_PROTOCOLS` setting.
+
+Current limitations:
+
+- No metadata about the current track in the stream is available.
+
+- Playlists are not parsed, so you can't play e.g. a M3U or PLS file which
+  contains stream URIs. You need to extract the stream URL from the playlist
+  yourself. See :issue:`303` for progress on this.
+
+**Core API**
+
+- :meth:`mopidy.core.PlaylistsController.get_playlists` now accepts an argument
+  ``include_tracks``. This defaults to :class:`True`, which has the same old
+  behavior. If set to :class:`False`, the tracks are stripped from the
+  playlists before they are returned. This can be used to limit the amount of
+  data returned if the response is to be passed out of the application, e.g. to
+  a web client. (Fixes: :issue:`297`)
+
+**Models**
+
+- Add :attr:`mopidy.models.Album.images` field for including album art URIs.
+  (Partly fixes :issue:`263`)
+
+- Add :attr:`mopidy.models.Track.disc_no` field. (Partly fixes: :issue:`286`)
+
+- Add :attr:`mopidy.models.Album.num_discs` field. (Partly fixes: :issue:`286`)
+
+
 v0.11.1 (2012-12-24)
 ====================
 
