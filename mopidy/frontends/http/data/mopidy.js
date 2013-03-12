@@ -1,16 +1,7 @@
-/*! Mopidy.js - built 2013-01-16
+/*! Mopidy.js - built 2013-03-12
  * http://www.mopidy.com/
  * Copyright (c) 2013 Stein Magnus Jodal and contributors
  * Licensed under the Apache License, Version 2.0 */
-
-/**
- * BANE - Browser globals, AMD and Node Events
- *
- * https://github.com/busterjs/bane
- *
- * @version 0.4.0
- */
-
 ((typeof define === "function" && define.amd && function (m) { define(m); }) ||
  (typeof module === "object" && function (m) { module.exports = m(); }) ||
  function (m) { this.bane = m(); }
@@ -174,8 +165,6 @@
 
     return { createEventEmitter: createEventEmitter };
 });
-
-/** @license MIT License (c) copyright B Cavalier & J Hann */
 
 /**
  * A lightweight CommonJS Promises/A and when() implementation
@@ -906,8 +895,6 @@ define(['module'], function () {
 	}
 	// Boilerplate for AMD, Node, and browser global
 );
-
-/*global bane:false, when:false*/
 
 function Mopidy(settings) {
     if (!(this instanceof Mopidy)) {
