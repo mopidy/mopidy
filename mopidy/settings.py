@@ -21,11 +21,13 @@ from __future__ import unicode_literals
 #:         u'mopidy.backends.local.LocalBackend',
 #:         u'mopidy.backends.spotify.SpotifyBackend',
 #:         u'mopidy.backends.spotify.StreamBackend',
+#:         u'mopidy.backends.beets.BeetsBackend',
 #:     )
 BACKENDS = (
     'mopidy.backends.local.LocalBackend',
     'mopidy.backends.spotify.SpotifyBackend',
     'mopidy.backends.stream.StreamBackend',
+    'mopidy.backends.beets.BeetsBackend',
 )
 
 #: The log format used for informational logging.
@@ -326,3 +328,16 @@ STREAM_PROTOCOLS = (
     'rtmps',
     'rtsp',
 )
+
+#: Beets remote host.
+#:
+#: Used by :mod:`mopidy.backends.beets`.
+#:
+#: Example::
+#:
+#:     BEETS_SERVER_URI = u'http://host:port'
+#:
+#: Default::
+#:
+#:     BEETS_SERVER_URI = None
+BEETS_SERVER_URI = None
