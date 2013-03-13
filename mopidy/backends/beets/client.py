@@ -54,12 +54,12 @@ class BeetsRemoteClient(object):
     track_ids = self._get("/item/").get("item_ids")
     tracks = []
     for track_id in track_ids:
-      tracks.append(self._convert_json_data(self.get_track(track_id)))
+      tracks.append(self.get_track(track_id))
     return tracks
 
   @cache()
-  def get_track(self, id):
-    return self._get("/item/%s" % id)
+  def get_track(self, id, remote_url = False):
+    return self._convert_json_data(self._get("/item/%s" % id), remote_url)
 
   @cache()
   def get_item_by(self, name):
@@ -86,7 +86,7 @@ class BeetsRemoteClient(object):
       return tracks
     return None
 
-  def _convert_json_data(self, data):
+  def _convert_json_data(self, data, remote_url=False):
       if not data:
           return
       # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
@@ -145,7 +145,10 @@ class BeetsRemoteClient(object):
           album = Album(**album_kwargs)
           track_kwargs[b'album'] = album
 
-      track_kwargs[b'uri'] = "%s/item/%s/file" % (self.api_endpoint, data['id'])
+      if remote_url:
+        track_kwargs[b'uri'] = "%s/item/%s/file" % (self.api_endpoint, data['id'])
+      else:
+        track_kwargs[b'uri'] = "beets://%s" % data['id']
       track_kwargs[b'length'] = int(data.get('length', 0)) * 1000
 
       track = Track(**track_kwargs)

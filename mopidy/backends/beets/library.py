@@ -31,6 +31,17 @@ class BeetsLibraryProvider(base.BaseLibraryProvider):
                 return SearchResult(uri='beets:search', tracks=self.remote.get_item_by(values[0]))
             if field == "any":
                 return SearchResult(uri='beets:search', tracks=self.remote.get_item_by(values[0])) 
+            else:
+                raise LookupError('Invalid lookup field: %s' % field)
+
+    def lookup(self, uri):
+        try:
+            id = uri.split("//")[1]
+            logger.debug(u'Beets track id for "%s": %s', id, uri)
+            return [self.remote.get_track(id, True)]
+        except Exception as error:
+            logger.debug(u'Failed to lookup "%s": %s', uri, error)
+            return []
 
     def _validate_query(self, query):
         for (_, values) in query.iteritems():
