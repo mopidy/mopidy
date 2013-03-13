@@ -1,4 +1,4 @@
-"""A backend for playing music from a remote beets music archive.
+"""A backend for playing music from a remote Beets music archive.
 
 This backend handles URIs starting with ``beets:``.
 
