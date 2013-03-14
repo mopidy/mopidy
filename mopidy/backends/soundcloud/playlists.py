@@ -36,8 +36,15 @@ class SoundcloudPlaylistsProvider(base.BasePlaylistsProvider):
         )
         playlists.append(playlist)
         
-        # TODO Sets, User stream
-        
+        # TODO User stream? is it even possible?
+        for (name, uri, tracks) in self.backend.sc_api.get_sets():
+            scset = Playlist(
+                uri='soundcloud:%s' % uri,
+                name=name,
+                tracks=tracks
+            )
+            playlists.append(scset)
+
         self._playlists = playlists
         listener.BackendListener.send('playlists_loaded')
 

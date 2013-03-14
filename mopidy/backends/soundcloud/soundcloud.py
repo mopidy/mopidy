@@ -49,6 +49,7 @@ class SoundcloudClient(object):
 
     CLIENT_ID = '93e33e327fd8a9b77becd179652272e2'
     CLIENT_SECRET = 'f1a2e1ff740f3e1e340e6993ceb18583'
+    BRAND = u'☁'
 
     def __init__(self, username):
         super(SoundcloudClient, self).__init__()
@@ -72,6 +73,20 @@ class SoundcloudClient(object):
     @cache(ctl=100)
     def get_track(self, id, streamable=False):
         return self.parse_track(self._get('tracks/%s.json' % id), streamable)
+
+    @cache()
+    def get_sets(self):
+        playlists = self._get('users/%s/playlists.json' % self.user_id)
+        tplaylists = []
+        for playlist in playlists:
+
+            name = '%s %s' % (playlist.get('title'), self.BRAND)
+            uri = playlist.get('permalink')
+            tracks = self.parse_results(playlist.get('tracks'), True)
+            logger.info('Fetched set %s with id %s' % (name, uri))
+            logger.debug(tracks)
+            tplaylists.append((name, uri, tracks))
+        return tplaylists
 
     @cache()
     def search(self, query):
@@ -144,7 +159,7 @@ class SoundcloudClient(object):
                     artist_kwargs[b'name'] = data.get('user').get('username')
             else:
                 ## NOTE mpdroid removes ☁ from track name
-                track_kwargs[b'name'] = u'☁ ' + name
+                track_kwargs[b'name'] = '%s %s' % (self.BRAND, name)
 
         if 'date' in data:
             track_kwargs[b'date'] = data['date']
@@ -158,7 +173,8 @@ class SoundcloudClient(object):
         track_kwargs[b'length'] = int(data.get('duration', 0))
 
         if artist_kwargs:
-            artist_kwargs[b'name'] = u'☁ ' + artist_kwargs[b'name']
+            artist_kwargs[b'name'] = '%s %s' % (
+                self.BRAND, artist_kwargs[b'name'])
             artist = Artist(**artist_kwargs)
             track_kwargs[b'artists'] = [artist]
 
