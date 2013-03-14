@@ -60,7 +60,6 @@ class SoundcloudClient(object):
             raise logger.error("Can't get id for %s, status code %s" % (
                 username, user.status_code))
 
-    @cache()
     def get_favorites(self):
         favorites = self._get('users/%s/favorites.json' % self.user_id)
         return self.parse_results(favorites, True)
@@ -126,10 +125,17 @@ class SoundcloudClient(object):
 
             # NOTE On some clients search UI would group results by artist
             # thus prevent user from selecting track
-            if ' - ' in name and not is_search:
-                name = name.split(' - ')
-                track_kwargs[b'name'] = name[1]
-                artist_kwargs[b'name'] = name[0]
+            if not is_search:
+                if ' - ' in name:
+                    name = name.split(' - ')
+                    track_kwargs[b'name'] = name[1]
+                    artist_kwargs[b'name'] = name[0]
+                elif 'label_name' in data and data['label_name'] != '':
+                    track_kwargs[b'name'] = name
+                    artist_kwargs[b'name'] = data['label_name']
+                else:
+                    track_kwargs[b'name'] = name
+                    artist_kwargs[b'name'] = data.get("user").get("username")
             else:
                 track_kwargs[b'name'] = name
 
