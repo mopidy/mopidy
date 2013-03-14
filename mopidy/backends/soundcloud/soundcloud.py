@@ -108,6 +108,8 @@ class SoundcloudClient(object):
     def parse_track(self, data, remote_url=False, is_search=False):
         if not data:
             return
+        if not data["streamable"]:
+            return
         if not data["kind"] == "track":
             return
         # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
