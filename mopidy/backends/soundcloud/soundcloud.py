@@ -75,7 +75,10 @@ class SoundcloudClient(object):
     def search(self, query):
 
         res = self._get('tracks.json?q=%s&filter=all&order=hotness' % query)
-        return self.parse_results(res)
+        tracks = []
+        for track in res:
+            tracks.append(self.parse_track(track, False, True))
+        return tracks
 
     def parse_results(self, res, streamable=False):
         tracks = []
@@ -102,7 +105,7 @@ class SoundcloudClient(object):
         except Exception:
             return req
 
-    def parse_track(self, data, remote_url=False):
+    def parse_track(self, data, remote_url=False, is_search=False):
         if not data:
             return
         if not data["kind"] == "track":
@@ -115,7 +118,7 @@ class SoundcloudClient(object):
 
         if 'title' in data:
             name = data['title']
-            if " - " in name:
+            if " - " in name and not is_search:
                 name = name.split(" - ")
                 track_kwargs[b'name'] = name[1]
                 artist_kwargs[b'name'] = name[0]
