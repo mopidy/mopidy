@@ -13,6 +13,7 @@ logger = logging.getLogger('mopidy.backends.beets.client')
 
 
 class cache(object):
+    ## TODO: merge this to util library
     def __init__(self, ctl=8, ttl=3600):
         self.cache = {}
         self.ctl = ctl
@@ -48,37 +49,49 @@ class BeetsRemoteClient(object):
 
     def __init__(self, endpoint):
         super(BeetsRemoteClient, self).__init__()
-        self.api_endpoint = endpoint
-        logger.info('Connecting to Beets remote library %s', endpoint)
+        if endpoint:
+            self.api_endpoint = endpoint
+            logger.info('Connecting to Beets remote library %s', endpoint)
+        else:
+            raise logger.error('Beets API url is not defined')
 
     @cache()
     def get_tracks(self):
-        track_ids = self._get("/item/").get("item_ids")
+        track_ids = self._get('/item/').get('item_ids')
         tracks = []
         for track_id in track_ids:
             tracks.append(self.get_track(track_id))
         return tracks
 
-    @cache()
+    @cache(ctl=16)
     def get_track(self, id, remote_url=False):
-        return self._convert_json_data(self._get("/item/%s" % id), remote_url)
+        return self._convert_json_data(self._get('/item/%s' % id), remote_url)
 
     @cache()
     def get_item_by(self, name):
-        res = self._get("/item/query/%s" % name).get("results")
+        res = self._get('/item/query/%s' % name).get('results')
         return self._parse_query(res)
 
     @cache()
     def get_album_by(self, name):
-        res = self._get("/album/query/%s" % name).get("results")
-        return self._parse_query(res[0]["items"])
+        res = self._get('/album/query/%s' % name).get('results')
+        return self._parse_query(res[0]['items'])
 
     def _get(self, url):
-        if self.api_endpoint:
-            url = self.api_endpoint + url
-            logger.debug('Requesting %s', url)
-            req = requests.get(url)
+
+        url = self.api_endpoint + url
+        logger.debug('Requesting %s' % url)
+        req = requests.get(url)
+        if req.status_code != 200:
+            raise logger.error('Request %s, failed with status code %s' % (
+                url, req.status_code))
+            return
+        try:
             return req.json()
+        except Exception as e:
+            raise logger.error('Request %s, failed with json parsing %s' % (
+                url, e))
+            return
 
     def _parse_query(self, res):
         if len(res) > 0:
@@ -134,6 +147,11 @@ class BeetsRemoteClient(object):
             albumartist_kwargs[b'musicbrainz_id'] = (
                 data['mb_albumartistid'])
 
+        if 'album_id' in data:
+            album_art_url = '%s/album/%s/art' % (
+                self.api_endpoint, data['album_id'])
+            album_kwargs[b'images'] = [album_art_url]
+
         if artist_kwargs:
             artist = Artist(**artist_kwargs)
             track_kwargs[b'artists'] = [artist]
@@ -147,10 +165,10 @@ class BeetsRemoteClient(object):
             track_kwargs[b'album'] = album
 
         if remote_url:
-            track_kwargs[b'uri'] = "%s/item/%s/file" % (
+            track_kwargs[b'uri'] = '%s/item/%s/file' % (
                 self.api_endpoint, data['id'])
         else:
-            track_kwargs[b'uri'] = "beets://%s" % data['id']
+            track_kwargs[b'uri'] = 'beets://%s' % data['id']
         track_kwargs[b'length'] = int(data.get('length', 0)) * 1000
 
         track = Track(**track_kwargs)
