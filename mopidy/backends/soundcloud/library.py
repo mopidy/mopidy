@@ -20,16 +20,20 @@ class SoundcloudLibraryProvider(base.BaseLibraryProvider):
             return
 
         for (field, val) in query.iteritems():
-            if field == "any":
+            # NOTE other search queries or multi queries are not supported
+            # any method is only used for blank searches and must return
+            # ungruped results. Multiple queries are not observed for this
+            # method nor excepted.
+            if field == 'any':
                 return SearchResult(uri='soundcloud:search',
                                     tracks=self.backend.sc_api.search(val[0]))
         return SearchResult(uri='soundcloud:search', tracks=[])
 
     def lookup(self, uri):
         try:
-            id = uri.split("//")[1]
-            logger.debug(u'Soundcloud track id for "%s": %s', id, uri)
+            id = uri.split('//')[1]
+            logger.debug(u'Soundcloud track id for %s: %s', id, uri)
             return [self.backend.sc_api.get_track(id, True)]
         except Exception as error:
-            logger.debug(u'Failed to lookup "%s": %s', uri, error)
+            logger.debug(u'Failed to lookup %s: %s', uri, error)
             return []

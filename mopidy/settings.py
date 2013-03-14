@@ -327,7 +327,7 @@ STREAM_PROTOCOLS = (
     'rtsp',
 )
 
-#: Your `Soundcloud.comLast.fm <http://www.soundcloud.com/>`_ username.
+#: Your `SoundCloud.com <http://www.soundcloud.com/>`_ username.
 #:
 #: Used by :mod:`mopidy.frontends.soundcloud`.
 SOUNDCLOUD_USERNAME = ''

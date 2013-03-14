@@ -1,6 +1,3 @@
-#!/usr/local/bin/python
-# -*- coding: utf-8 -*-
-#
 from __future__ import unicode_literals
 
 import logging
@@ -27,8 +24,8 @@ class cache(object):
             try:
                 value, last_update = self.cache[args]
                 age = now - last_update
-                if self._call_count >= self.ctl or \
-                        age > self.ttl:
+                if (self._call_count >= self.ctrl
+                        or age > self.ttl):
                     self._call_count = 1
                     raise AttributeError
 
@@ -47,24 +44,25 @@ class cache(object):
 
 class SoundcloudClient(object):
 
-    CLIENT_ID = "93e33e327fd8a9b77becd179652272e2"
-    CLIENT_SECRET = "f1a2e1ff740f3e1e340e6993ceb18583"
+    CLIENT_ID = '93e33e327fd8a9b77becd179652272e2'
+    CLIENT_SECRET = 'f1a2e1ff740f3e1e340e6993ceb18583'
 
     def __init__(self, username):
         super(SoundcloudClient, self).__init__()
-        self.user_id = self.get_userid(username)
+        self.user_id = self.get_user_id(username)
 
-    def get_userid(self, username):
+    def get_user_id(self, username):
         try:
-            user = self._get("resolve.json?url=http://soundcloud.com/%s" % username)
-            return user.get("id")
+            user = self._get(
+                'resolve.json?url=http://soundcloud.com/%s' % username)
+            return user.get('id')
         except Exception:
-            raise logger.error('Can\'t get id for %s, status code %s' % (
+            raise logger.error("Can't get id for %s, status code %s" % (
                 username, user.status_code))
 
     @cache()
     def get_favorites(self):
-        favorites = self._get("users/%s/favorites.json" % self.user_id)
+        favorites = self._get('users/%s/favorites.json' % self.user_id)
         return self.parse_results(favorites, True)
 
     @cache(ctl=100)
@@ -73,8 +71,11 @@ class SoundcloudClient(object):
 
     @cache()
     def search(self, query):
-
-        res = self._get('tracks.json?q=%s&filter=all&order=hotness' % query)
+        "SoundCloud API only supports basic query no artist,"
+        "album queries are possible"
+        # TODO: add genre filter
+        res = self._get(
+            'tracks.json?q=%s&filter=streamable&order=hotness' % query)
         tracks = []
         for track in res:
             tracks.append(self.parse_track(track, False, True))
@@ -88,10 +89,11 @@ class SoundcloudClient(object):
 
     def _get(self, url):
 
+        # TODO: Optimize
         if '?' in url:
-            url = "%s&client_id=%s" % (url, self.CLIENT_ID)
+            url = '%s&client_id=%s' % (url, self.CLIENT_ID)
         else:
-            url = "%s?client_id=%s" % (url, self.CLIENT_ID)
+            url = '%s?client_id=%s' % (url, self.CLIENT_ID)
 
         url = 'https://api.soundcloud.com/%s' % url
 
@@ -102,15 +104,16 @@ class SoundcloudClient(object):
                 url, req.status_code))
         try:
             return req.json()
-        except Exception:
-            return req
+        except Exception as e:
+            raise logger.error('Request %s, failed with error %s' % (
+                url, e))
 
     def parse_track(self, data, remote_url=False, is_search=False):
         if not data:
             return
-        if not data["streamable"]:
+        if not data['streamable']:
             return
-        if not data["kind"] == "track":
+        if not data['kind'] == 'track':
             return
         # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
         # See https://github.com/mopidy/mopidy/issues/302 for details.
@@ -120,8 +123,11 @@ class SoundcloudClient(object):
 
         if 'title' in data:
             name = data['title']
-            if " - " in name and not is_search:
-                name = name.split(" - ")
+
+            # NOTE On some clients search UI would group results by artist
+            # thus prevent user from selecting track
+            if ' - ' in name and not is_search:
+                name = name.split(' - ')
                 track_kwargs[b'name'] = name[1]
                 artist_kwargs[b'name'] = name[0]
             else:
@@ -131,7 +137,7 @@ class SoundcloudClient(object):
             track_kwargs[b'date'] = data['date']
 
         if remote_url:
-            track_kwargs[b'uri'] = "%s?client_id=%s" % (
+            track_kwargs[b'uri'] = '%s?client_id=%s' % (
                 data['stream_url'], self.CLIENT_ID)
         else:
             track_kwargs[b'uri'] = 'soundcloud://%s' % data['id']

@@ -25,18 +25,18 @@ class SoundcloudPlaylistsProvider(base.BasePlaylistsProvider):
                 return playlist
 
     def refresh(self):
-        logger.info('Loading playlists from Soundcloud')
+        logger.info('Loading playlists from SoundCloud')
 
         playlists = []
 
         playlist = Playlist(
-            uri="soundcloud://playlists/liked",
-            name="Liked on Soundcloud",
+            uri="soundcloud:playlist-liked",
+            name="Liked on SoundCloud",
             tracks=self.backend.sc_api.get_favorites()
         )
         playlists.append(playlist)
         
-        # TODO Sets
+        # TODO Sets, User stream
         
         self._playlists = playlists
         listener.BackendListener.send('playlists_loaded')
