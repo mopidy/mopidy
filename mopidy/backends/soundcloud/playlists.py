@@ -30,8 +30,8 @@ class SoundcloudPlaylistsProvider(base.BasePlaylistsProvider):
         playlists = []
 
         playlist = Playlist(
-            uri="soundcloud:playlist-liked",
-            name="Liked on SoundCloud",
+            uri='soundcloud:playlist-liked',
+            name='Liked on SoundCloud',
             tracks=self.backend.sc_api.get_favorites()
         )
         playlists.append(playlist)

@@ -1,3 +1,6 @@
+#!/usr/local/bin/python
+# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 import logging
@@ -55,9 +58,11 @@ class SoundcloudClient(object):
         try:
             user = self._get(
                 'resolve.json?url=http://soundcloud.com/%s' % username)
+            logger.info('User id for username %s is %s' % (
+                username, user.get('id')))
             return user.get('id')
         except Exception:
-            raise logger.error("Can't get id for %s, status code %s" % (
+            raise logger.error('No id for %s, status code %s' % (
                 username, user.status_code))
 
     def get_favorites(self):
@@ -70,8 +75,8 @@ class SoundcloudClient(object):
 
     @cache()
     def search(self, query):
-        "SoundCloud API only supports basic query no artist,"
-        "album queries are possible"
+        'SoundCloud API only supports basic query no artist,'
+        'album queries are possible'
         # TODO: add genre filter
         res = self._get(
             'tracks.json?q=%s&filter=streamable&order=hotness' % query)
@@ -114,6 +119,7 @@ class SoundcloudClient(object):
             return
         if not data['kind'] == 'track':
             return
+
         # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
         # See https://github.com/mopidy/mopidy/issues/302 for details.
 
@@ -135,9 +141,10 @@ class SoundcloudClient(object):
                     artist_kwargs[b'name'] = data['label_name']
                 else:
                     track_kwargs[b'name'] = name
-                    artist_kwargs[b'name'] = data.get("user").get("username")
+                    artist_kwargs[b'name'] = data.get('user').get('username')
             else:
-                track_kwargs[b'name'] = name
+                ## NOTE mpdroid removes ☁ from track name
+                track_kwargs[b'name'] = u'☁ ' + name
 
         if 'date' in data:
             track_kwargs[b'date'] = data['date']
@@ -151,9 +158,9 @@ class SoundcloudClient(object):
         track_kwargs[b'length'] = int(data.get('duration', 0))
 
         if artist_kwargs:
+            artist_kwargs[b'name'] = u'☁ ' + artist_kwargs[b'name']
             artist = Artist(**artist_kwargs)
             track_kwargs[b'artists'] = [artist]
 
         track = Track(**track_kwargs)
-
         return track
