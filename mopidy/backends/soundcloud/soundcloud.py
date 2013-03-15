@@ -87,7 +87,7 @@ class SoundcloudClient(object):
                 if data.get('track'):
                     tracks.append(self.parse_track(data.get('track'), True))
                 if data.get('playlist'):
-                    tracks.extend(self.parse_results(data.get('playlist').get('tracks'), True))
+                    ttracks.extend(self.parse_results(data.get('playlist').get('tracks'), True))
         return self.sanitize_tracks(tracks)
 
     @cache()
@@ -96,7 +96,7 @@ class SoundcloudClient(object):
         tplaylists = []
         for playlist in playlists:
 
-            name = '%s %s' % (playlist.get('title'), self.BRAND)
+            name = '%s on SoundCloud' % playlist.get('title')
             uri = playlist.get('permalink')
             tracks = self.parse_results(playlist.get('tracks'), True)
             logger.info('Fetched set %s with id %s' % (name, uri))
@@ -180,7 +180,7 @@ class SoundcloudClient(object):
 
                 album_kwargs[b'name'] = 'SoundCloud'
             else:
-                ## NOTE mpdroid removes ☁ from track name
+                ## NOTE mpdroid removes ☁ from track name, probably others too
                 track_kwargs[b'name'] = '%s %s' % (self.BRAND, name)
 
         if 'date' in data:
