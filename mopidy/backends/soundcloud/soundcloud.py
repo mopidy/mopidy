@@ -7,7 +7,7 @@ import logging
 import requests
 import time
 
-from mopidy.models import Track, Artist
+from mopidy.models import Track, Artist, Album
 
 logger = logging.getLogger('mopidy.backends.soundcloud.client')
 
@@ -75,6 +75,22 @@ class SoundcloudClient(object):
         return self.parse_track(self._get('tracks/%s.json' % id), streamable)
 
     @cache()
+    def get_user_stream(self):
+        # User timeline like playlist which uses undocumented api
+        # https://api.soundcloud.com/e1/users/USER_ID/stream.json?offset=0
+        # returns five elements per request
+        tracks = []
+        for sid in xrange(0, 4):
+            stream = self._get('e1/users/%s/stream.json?offset=%s' % (
+                self.user_id, sid * 5))
+            for data in stream:
+                if data.get('track'):
+                    tracks.append(self.parse_track(data.get('track'), True))
+                if data.get('playlist'):
+                    tracks.extend(self.parse_results(data.get('playlist').get('tracks'), True))
+        return self.sanitize_tracks(tracks)
+
+    @cache()
     def get_sets(self):
         playlists = self._get('users/%s/playlists.json' % self.user_id)
         tplaylists = []
@@ -87,7 +103,7 @@ class SoundcloudClient(object):
             logger.debug(tracks)
             tplaylists.append((name, uri, tracks))
         return tplaylists
-
+    
     @cache()
     def search(self, query):
         'SoundCloud API only supports basic query no artist,'
@@ -98,13 +114,13 @@ class SoundcloudClient(object):
         tracks = []
         for track in res:
             tracks.append(self.parse_track(track, False, True))
-        return tracks
+        return self.sanitize_tracks(tracks)
 
     def parse_results(self, res, streamable=False):
         tracks = []
         for track in res:
             tracks.append(self.parse_track(track, streamable))
-        return tracks
+        return self.sanitize_tracks(tracks)
 
     def _get(self, url):
 
@@ -127,6 +143,9 @@ class SoundcloudClient(object):
             raise logger.error('Request %s, failed with error %s' % (
                 url, e))
 
+    def sanitize_tracks(self, tracks):
+        return filter(None, tracks)
+
     def parse_track(self, data, remote_url=False, is_search=False):
         if not data:
             return
@@ -140,6 +159,7 @@ class SoundcloudClient(object):
 
         track_kwargs = {}
         artist_kwargs = {}
+        album_kwargs = {}
 
         if 'title' in data:
             name = data['title']
@@ -157,6 +177,8 @@ class SoundcloudClient(object):
                 else:
                     track_kwargs[b'name'] = name
                     artist_kwargs[b'name'] = data.get('user').get('username')
+
+                album_kwargs[b'name'] = 'SoundCloud'
             else:
                 ## NOTE mpdroid removes ☁ from track name
                 track_kwargs[b'name'] = '%s %s' % (self.BRAND, name)
@@ -173,10 +195,15 @@ class SoundcloudClient(object):
         track_kwargs[b'length'] = int(data.get('duration', 0))
 
         if artist_kwargs:
-            artist_kwargs[b'name'] = '%s %s' % (
-                self.BRAND, artist_kwargs[b'name'])
             artist = Artist(**artist_kwargs)
             track_kwargs[b'artists'] = [artist]
+
+        if 'artwork_url' in data:
+            album_kwargs[b'images'] = [data['artwork_url']]
+
+        if album_kwargs:
+            album = Album(**album_kwargs)
+            track_kwargs[b'album'] = album
 
         track = Track(**track_kwargs)
         return track

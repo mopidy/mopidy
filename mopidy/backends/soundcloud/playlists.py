@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
+from mopidy import settings
 from mopidy.backends import base, listener
 from mopidy.models import Playlist
 
@@ -26,17 +27,23 @@ class SoundcloudPlaylistsProvider(base.BasePlaylistsProvider):
 
     def refresh(self):
         logger.info('Loading playlists from SoundCloud')
-
+        username = settings.SOUNDCLOUD_USERNAME
         playlists = []
 
-        playlist = Playlist(
+        liked = Playlist(
             uri='soundcloud:playlist-liked',
-            name='Liked on SoundCloud',
+            name="%s's liked on SoundCloud" % username,
             tracks=self.backend.sc_api.get_favorites()
         )
-        playlists.append(playlist)
+        playlists.append(liked)
         
-        # TODO User stream? is it even possible?
+        stream = Playlist(
+            uri='soundcloud:playlist-user',
+            name="%s's stream on SoundCloud" % username,
+            tracks=self.backend.sc_api.get_user_stream()
+        )
+        playlists.append(stream)
+
         for (name, uri, tracks) in self.backend.sc_api.get_sets():
             scset = Playlist(
                 uri='soundcloud:%s' % uri,
