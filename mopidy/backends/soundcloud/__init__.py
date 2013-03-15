@@ -15,7 +15,8 @@ https://github.com/mopidy/mopidy/issues?labels=Soundcloud+backend
 
 **Settings:**
 
-- :attr:`mopidy.settings.SOUNDCLOUD_USERNAME`
+- :attr:`mopidy.settings.SOUNDCLOUD_AUTHTOKEN`
+- :attr:`mopidy.settings.SOUNDCLOUD_EXPLORE`
 """
 
 from __future__ import unicode_literals

@@ -48,26 +48,25 @@ class cache(object):
 class SoundcloudClient(object):
 
     CLIENT_ID = '93e33e327fd8a9b77becd179652272e2'
-    CLIENT_SECRET = 'f1a2e1ff740f3e1e340e6993ceb18583'
-    BRAND = u'☁'
+    BRAND = u'on ♪☁'
 
-    def __init__(self, username):
+    def __init__(self, token):
         super(SoundcloudClient, self).__init__()
-        self.user_id = self.get_user_id(username)
+        self.SC = requests.Session()
+        self.SC.headers.update({'Authorization': 'OAuth %s' % token})
+        self.user = self.get_user()
+        logger.info('User id for username %s is %s' % (
+            self.user.get('username'), self.user.get('id')))
 
-    def get_user_id(self, username):
+    @cache()
+    def get_user(self):
         try:
-            user = self._get(
-                'resolve.json?url=http://soundcloud.com/%s' % username)
-            logger.info('User id for username %s is %s' % (
-                username, user.get('id')))
-            return user.get('id')
-        except Exception:
-            raise logger.error('No id for %s, status code %s' % (
-                username, user.status_code))
+            return self._get('me.json')
+        except Exception as e:
+            logger.error('SoundCloud Authentication error: %s' % e)
 
     def get_favorites(self):
-        favorites = self._get('users/%s/favorites.json' % self.user_id)
+        favorites = self._get('users/%s/favorites.json' % self.user.get('id'))
         return self.parse_results(favorites, True)
 
     @cache(ctl=100)
@@ -75,24 +74,44 @@ class SoundcloudClient(object):
         return self.parse_track(self._get('tracks/%s.json' % id), streamable)
 
     @cache()
+    def get_explore_category(self, category, section):
+        # Most liked by category in explore section
+        tracks = []
+        for sid in xrange(0, 1):
+            stream = self._get('explore/sounds/category/%s?offset=%s' % (
+                category.lower(), sid * 20))
+            for data in stream.get('collection'):
+                if data.get('name') == section:
+                    for track in data.get('tracks'):
+                        tracks.append(self.get_track(track.get('id'), True))
+        return tracks
+
+    @cache()
     def get_user_stream(self):
         # User timeline like playlist which uses undocumented api
-        # https://api.soundcloud.com/e1/users/USER_ID/stream.json?offset=0
+        # https://api.soundcloud.com/e1/me/stream.json?offset=0
         # returns five elements per request
         tracks = []
-        for sid in xrange(0, 4):
-            stream = self._get('e1/users/%s/stream.json?offset=%s' % (
-                self.user_id, sid * 5))
-            for data in stream:
-                if data.get('track'):
-                    tracks.append(self.parse_track(data.get('track'), True))
-                if data.get('playlist'):
-                    ttracks.extend(self.parse_results(data.get('playlist').get('tracks'), True))
+        for sid in xrange(0, 1):
+            stream = self._get('e1/me/stream.json?offset=%s' % sid * 5)
+            for data in stream.get('collection'):
+                try:
+                    kind = data.get('type')
+                    # multiple types of track with same data
+                    if 'track' in kind:
+                        tracks.append(self.parse_track(data.get('track'), True))
+                    if kind == 'playlist':
+                        tracks.extend(self.parse_results(
+                            data.get('playlist').get('tracks'), True))
+                except Exception:
+                    # Type not supported or SC changed API
+                    pass
+
         return self.sanitize_tracks(tracks)
 
     @cache()
     def get_sets(self):
-        playlists = self._get('users/%s/playlists.json' % self.user_id)
+        playlists = self._get('users/%s/playlists.json' % self.user.get('id'))
         tplaylists = []
         for playlist in playlists:
 
@@ -103,7 +122,7 @@ class SoundcloudClient(object):
             logger.debug(tracks)
             tplaylists.append((name, uri, tracks))
         return tplaylists
-    
+
     @cache()
     def search(self, query):
         'SoundCloud API only supports basic query no artist,'
@@ -133,14 +152,14 @@ class SoundcloudClient(object):
         url = 'https://api.soundcloud.com/%s' % url
 
         logger.debug('Requesting %s' % url)
-        req = requests.get(url)
+        req = self.SC.get(url)
         if req.status_code != 200:
             raise logger.error('Request %s, failed with status code %s' % (
                 url, req.status_code))
         try:
             return req.json()
         except Exception as e:
-            raise logger.error('Request %s, failed with error %s' % (
+            logger.error('Request %s, failed with error %s' % (
                 url, e))
 
     def sanitize_tracks(self, tracks):

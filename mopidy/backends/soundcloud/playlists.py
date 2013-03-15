@@ -10,6 +10,7 @@ logger = logging.getLogger('mopidy.backends.soundcloud.playlists')
 
 
 class SoundcloudPlaylistsProvider(base.BasePlaylistsProvider):
+
     def __init__(self, *args, **kwargs):
         super(SoundcloudPlaylistsProvider, self).__init__(*args, **kwargs)
         self.refresh()
@@ -27,7 +28,7 @@ class SoundcloudPlaylistsProvider(base.BasePlaylistsProvider):
 
     def refresh(self):
         logger.info('Loading playlists from SoundCloud')
-        username = settings.SOUNDCLOUD_USERNAME
+        username = self.backend.sc_api.get_user().get('username')
         playlists = []
 
         liked = Playlist(
@@ -51,6 +52,20 @@ class SoundcloudPlaylistsProvider(base.BasePlaylistsProvider):
                 tracks=tracks
             )
             playlists.append(scset)
+
+        for cat in settings.SOUNDCLOUD_EXPLORE:
+
+            (category, section) = cat.split('/')
+            logger.info('Fetching Explore playlist %s from SoundCloud' % section)
+            tracks = self.backend.sc_api.get_explore_category(
+                category, section)
+
+            exp = Playlist(
+                uri='soundcloud:cat-%s' % section.lower(),
+                name='Explore %s on SoundCloud' % section,
+                tracks=tracks
+            )
+            playlists.append(exp)
 
         self._playlists = playlists
         listener.BackendListener.send('playlists_loaded')
