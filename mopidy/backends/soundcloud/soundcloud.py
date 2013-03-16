@@ -71,7 +71,12 @@ class SoundcloudClient(object):
 
     @cache(ctl=100)
     def get_track(self, id, streamable=False):
-        return self.parse_track(self._get('tracks/%s.json' % id), streamable)
+        try:
+            # TODO better way to handle deleted tracks
+            return self.parse_track(self._get('tracks/%s.json' % id), streamable)
+        except Exception:
+            return
+        
 
     @cache()
     def get_explore_category(self, category, section):
