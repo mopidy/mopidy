@@ -9,7 +9,7 @@ from mopidy.backends import base
 
 from .library import SoundcloudLibraryProvider
 from .playlists import SoundcloudPlaylistsProvider
-from .soundcloud import SoundcloudClient
+from .soundcloud import SoundCloudClient
 
 logger = logging.getLogger('mopidy.backends.soundcloud')
 
@@ -23,7 +23,7 @@ class SoundcloudBackend(pykka.ThreadingActor, base.Backend):
                           "you must provide settings.SOUNDCLOUD_AUTHTOKEN. "
                           "Get yours at http://www.mopidy.com/authenticate.html"))
         else:
-            self.sc_api = SoundcloudClient(
+            self.sc_api = SoundCloudClient(
                 settings.SOUNDCLOUD_AUTHTOKEN)
 
         self.library = SoundcloudLibraryProvider(backend=self)

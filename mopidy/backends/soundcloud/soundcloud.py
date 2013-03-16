@@ -7,6 +7,7 @@ import logging
 import requests
 import time
 
+from requests.exceptions import RequestException
 from mopidy.models import Track, Artist, Album
 
 logger = logging.getLogger('mopidy.backends.soundcloud.client')
@@ -45,13 +46,13 @@ class cache(object):
         return _memoized
 
 
-class SoundcloudClient(object):
+class SoundCloudClient(object):
 
     CLIENT_ID = '93e33e327fd8a9b77becd179652272e2'
     BRAND = u'on ♪☁'
 
     def __init__(self, token):
-        super(SoundcloudClient, self).__init__()
+        super(SoundCloudClient, self).__init__()
         self.SC = requests.Session()
         self.SC.headers.update({'Authorization': 'OAuth %s' % token})
         self.user = self.get_user()
@@ -76,13 +77,12 @@ class SoundcloudClient(object):
             return self.parse_track(self._get('tracks/%s.json' % id), streamable)
         except Exception:
             return
-        
 
     @cache()
     def get_explore_category(self, category, section):
         # Most liked by category in explore section
         tracks = []
-        for sid in xrange(0, 1):
+        for sid in xrange(0, 2):
             stream = self._get('explore/sounds/category/%s?offset=%s' % (
                 category.lower(), sid * 20))
             for data in stream.get('collection'):
@@ -97,7 +97,7 @@ class SoundcloudClient(object):
         # https://api.soundcloud.com/e1/me/stream.json?offset=0
         # returns five elements per request
         tracks = []
-        for sid in xrange(0, 1):
+        for sid in xrange(0, 2):
             stream = self._get('e1/me/stream.json?offset=%s' % sid * 5)
             for data in stream.get('collection'):
                 try:
@@ -163,7 +163,7 @@ class SoundcloudClient(object):
                 url, req.status_code))
         try:
             return req.json()
-        except Exception as e:
+        except RequestException as e:
             logger.error('Request %s, failed with error %s' % (
                 url, e))
 
