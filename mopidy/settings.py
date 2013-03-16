@@ -331,7 +331,7 @@ STREAM_PROTOCOLS = (
 #:
 #: Get yours at http://www.mopidy.com/authenticate.html
 #:
-#: Used by :mod:`mopidy.frontends.soundcloud`.
+#: Used by :mod:`mopidy.backends.soundcloud`.
 SOUNDCLOUD_AUTHTOKEN = None
 
 #: Extra playlists from `SoundCloud.com <http://www.soundcloud.com/explore>`
@@ -348,7 +348,7 @@ SOUNDCLOUD_AUTHTOKEN = None
 #:         u'pop/New Wave',
 #:         u'rock/Indie',
 #:     ]
-#: Used by :mod:`mopidy.frontends.soundcloud`.
+#: Used by :mod:`mopidy.backends.soundcloud`.
 SOUNDCLOUD_EXPLORE = [
     u'electronic/Ambient',
     u'pop/New Wave',

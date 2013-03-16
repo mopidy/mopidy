@@ -84,7 +84,7 @@ class SoundcloudClient(object):
                 if data.get('name') == section:
                     for track in data.get('tracks'):
                         tracks.append(self.get_track(track.get('id'), True))
-        return tracks
+        return self.sanitize_tracks(tracks)
 
     @cache()
     def get_user_stream(self):
