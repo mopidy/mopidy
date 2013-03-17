@@ -7,6 +7,7 @@ import logging
 import requests
 import time
 
+from requests.exceptions import RequestException
 from mopidy.models import Track, Album, Artist
 
 logger = logging.getLogger('mopidy.backends.beets.client')
@@ -49,11 +50,16 @@ class BeetsRemoteClient(object):
 
     def __init__(self, endpoint):
         super(BeetsRemoteClient, self).__init__()
+        self.api = requests.Session()
         if endpoint:
             self.api_endpoint = endpoint
             logger.info('Connecting to Beets remote library %s', endpoint)
+            try:
+                self._get('/')
+            except Exception as e:
+                logger.error('SoundCloud Authentication error: %s' % e)
         else:
-            raise logger.error('Beets API url is not defined')
+            logger.error('Beets API url is not defined')
 
     @cache()
     def get_tracks(self):
@@ -78,20 +84,18 @@ class BeetsRemoteClient(object):
         return self._parse_query(res[0]['items'])
 
     def _get(self, url):
-
-        url = self.api_endpoint + url
-        logger.debug('Requesting %s' % url)
-        req = requests.get(url)
-        if req.status_code != 200:
-            raise logger.error('Request %s, failed with status code %s' % (
-                url, req.status_code))
-            return
         try:
+            url = self.api_endpoint + url
+            logger.debug('Requesting %s' % url)
+            req = self.api.get(url)
+            if req.status_code != 200:
+                raise logger.error('Request %s, failed with status code %s' % (
+                    url, req.status_code))
+
             return req.json()
         except Exception as e:
-            raise logger.error('Request %s, failed with json parsing %s' % (
+            logger.error('Request %s, failed with error %s' % (
                 url, e))
-            return
 
     def _parse_query(self, res):
         if len(res) > 0:
