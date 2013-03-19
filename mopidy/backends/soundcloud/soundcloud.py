@@ -9,6 +9,7 @@ import time
 
 from requests.exceptions import RequestException
 from mopidy.models import Track, Artist, Album
+from urllib import quote_plus
 
 logger = logging.getLogger('mopidy.backends.soundcloud.client')
 
@@ -134,10 +135,12 @@ class SoundCloudClient(object):
         'album queries are possible'
         # TODO: add genre filter
         res = self._get(
-            'tracks.json?q=%s&filter=streamable&order=hotness' % query)
+            'tracks.json?q=%s&filter=streamable&order=hotness' %
+            quote_plus(query))
+        
         tracks = []
         for track in res:
-            tracks.append(self.parse_track(track, False, True))
+            tracks.append(self.parse_track(track, False, False))
         return self.sanitize_tracks(tracks)
 
     def parse_results(self, res, streamable=False):
@@ -190,22 +193,19 @@ class SoundCloudClient(object):
 
             # NOTE On some clients search UI would group results by artist
             # thus prevent user from selecting track
-            if not is_search:
-                if ' - ' in name:
-                    name = name.split(' - ')
-                    track_kwargs[b'name'] = name[1]
-                    artist_kwargs[b'name'] = name[0]
-                elif 'label_name' in data and data['label_name'] != '':
-                    track_kwargs[b'name'] = name
-                    artist_kwargs[b'name'] = data['label_name']
-                else:
-                    track_kwargs[b'name'] = name
-                    artist_kwargs[b'name'] = data.get('user').get('username')
 
-                album_kwargs[b'name'] = 'SoundCloud'
+            if ' - ' in name:
+                name = name.split(' - ')
+                track_kwargs[b'name'] = name[1]
+                artist_kwargs[b'name'] = name[0]
+            elif 'label_name' in data and data['label_name'] != '':
+                track_kwargs[b'name'] = name
+                artist_kwargs[b'name'] = data['label_name']
             else:
-                ## NOTE mpdroid removes ☁ from track name, probably others too
-                track_kwargs[b'name'] = '%s %s' % (self.BRAND, name)
+                track_kwargs[b'name'] = name
+                artist_kwargs[b'name'] = data.get('user').get('username')
+
+            album_kwargs[b'name'] = 'SoundCloud'
 
         if 'date' in data:
             track_kwargs[b'date'] = data['date']
@@ -224,6 +224,9 @@ class SoundCloudClient(object):
 
         if 'artwork_url' in data:
             album_kwargs[b'images'] = [data['artwork_url']]
+        else:
+            image = data.get('user').get('avatar_url')
+            album_kwargs[b'images'] = [image]
 
         if album_kwargs:
             album = Album(**album_kwargs)

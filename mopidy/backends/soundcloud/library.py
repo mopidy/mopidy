@@ -16,19 +16,22 @@ class SoundcloudLibraryProvider(base.BaseLibraryProvider):
         return self.search(**query)
 
     def search(self, **query):
+        print(query)
         if not query:
             return
 
         for (field, val) in query.iteritems():
-            # NOTE other search queries or multi queries are not supported
-            # any method is only used for blank searches and must return
-            # ungruped results. Multiple queries are not observed for this
-            # method nor excepted.
-            if field == 'any':
-                return SearchResult(uri='soundcloud:search',
-                                    tracks=self.backend.sc_api.search(val[0]))
 
-        return SearchResult(uri='soundcloud:search', tracks=[])
+            if field == "album" and query['album'] == "SoundCloud":
+                return SearchResult(
+                    uri='soundcloud:search',
+                    tracks=self.backend.sc_api.search(query['artist']) or [])
+            elif field == "any":
+                return SearchResult(
+                    uri='soundcloud:search',
+                    tracks=self.backend.sc_api.search(val[0]) or [])
+            else:
+                return []
 
     def lookup(self, uri):
         try:
