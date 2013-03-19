@@ -115,6 +115,7 @@ class PlaybackControllerTest(object):
     def test_current_track_after_completed_playlist(self):
         self.playback.play(self.tracklist.tl_tracks[-1])
         self.playback.on_end_of_track()
+        self.playback.on_end_of_stream()
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
@@ -343,6 +344,8 @@ class PlaybackControllerTest(object):
 
             self.playback.on_end_of_track()
 
+        self.playback.on_end_of_stream()
+
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     @populate_tracklist
@@ -351,6 +354,7 @@ class PlaybackControllerTest(object):
 
         for _ in self.tracks:
             self.playback.on_end_of_track()
+        self.playback.on_end_of_stream()
 
         self.assertEqual(self.playback.current_track, None)
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
@@ -362,16 +366,6 @@ class PlaybackControllerTest(object):
     def test_end_of_track_for_empty_playlist(self):
         self.playback.on_end_of_track()
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
-
-    @populate_tracklist
-    def test_end_of_track_skips_to_next_track_on_failure(self):
-        # If backend's play() returns False, it is a failure.
-        self.backend.playback.play = lambda track: track != self.tracks[1]
-        self.playback.play()
-        self.assertEqual(self.playback.current_track, self.tracks[0])
-        self.playback.on_end_of_track()
-        self.assertNotEqual(self.playback.current_track, self.tracks[1])
-        self.assertEqual(self.playback.current_track, self.tracks[2])
 
     @populate_tracklist
     def test_end_of_track_track_before_play(self):
@@ -515,6 +509,7 @@ class PlaybackControllerTest(object):
     def test_tracklist_position_at_end_of_playlist(self):
         self.playback.play(self.tracklist.tl_tracks[-1])
         self.playback.on_end_of_track()
+        self.playback.on_end_of_stream()
         self.assertEqual(self.playback.tracklist_position, None)
 
     def test_on_tracklist_change_gets_called(self):
@@ -820,6 +815,7 @@ class PlaybackControllerTest(object):
     def test_end_of_playlist_stops(self):
         self.playback.play(self.tracklist.tl_tracks[-1])
         self.playback.on_end_of_track()
+        self.playback.on_end_of_stream()
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     def test_repeat_off_by_default(self):

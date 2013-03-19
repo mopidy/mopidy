@@ -35,11 +35,9 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
         super(SpotifyPlaybackProvider, self).__init__(*args, **kwargs)
         self._first_seek = False
 
-    def play(self, track):
-        if track.uri is None:
-            return False
-
+    def change_track(self, track):
         spotify_backend = self.backend.actor_ref.proxy()
+
         need_data_callback_bound = functools.partial(
             need_data_callback, spotify_backend)
         enough_data_callback_bound = functools.partial(
@@ -49,21 +47,18 @@ class SpotifyPlaybackProvider(base.BasePlaybackProvider):
 
         self._first_seek = True
 
+        self.audio.set_appsrc(
+            self._caps,
+            need_data=need_data_callback_bound,
+            enough_data=enough_data_callback_bound,
+            seek_data=seek_data_callback_bound)
+        self.audio.set_metadata(track)
+
         try:
             self.backend.spotify.session.load(
                 Link.from_string(track.uri).as_track())
-            self.backend.spotify.session.play(1)
             self.backend.spotify.buffer_timestamp = 0
-
-            self.audio.prepare_change()
-            self.audio.set_appsrc(
-                self._caps,
-                need_data=need_data_callback_bound,
-                enough_data=enough_data_callback_bound,
-                seek_data=seek_data_callback_bound)
-            self.audio.start_playback()
-            self.audio.set_metadata(track)
-
+            self.backend.spotify.session.play(1)
             return True
         except SpotifyError as e:
             logger.info('Playback of %s failed: %s', track.uri, e)

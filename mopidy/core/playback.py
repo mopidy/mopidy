@@ -314,6 +314,11 @@ class PlaybackController(object):
         elif old_state == PlaybackState.PAUSED:
             self.pause()
 
+    def on_end_of_stream(self):
+        self._trigger_track_playback_ended()
+        self.state = PlaybackState.STOPPED
+        self.current_tl_track = None
+
     def on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
@@ -325,11 +330,14 @@ class PlaybackController(object):
 
         original_tl_track = self.current_tl_track
 
+        # As noted in mopidy.audio which calls this code, we need to make sure
+        # the calls to the backend are blocking or gapless / EOS free playback
+        # will break.
         if self.tl_track_at_eot:
             self._trigger_track_playback_ended()
-            self.play(self.tl_track_at_eot)
-        else:
-            self.stop(clear_current_track=True)
+            self.current_tl_track = self.tl_track_at_eot
+            self._get_backend().playback.change_track(self.current_track).get()
+            self._trigger_track_playback_started()
 
         if self.consume:
             self.core.tracklist.remove(tlid=original_tl_track.tlid)
