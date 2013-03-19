@@ -18,13 +18,13 @@ class SoundcloudBackend(pykka.ThreadingActor, base.Backend):
     def __init__(self, audio):
         super(SoundcloudBackend, self).__init__()
 
-        if not settings.SOUNDCLOUD_AUTHTOKEN:
+        if not settings.SOUNDCLOUD_AUTH_TOKEN:
             logger.error(("In order to use SoundCloud backend "
-                          "you must provide settings.SOUNDCLOUD_AUTHTOKEN. "
-                          "Get yours at http://www.mopidy.com/authenticate.html"))
+                          "you must provide settings.SOUNDCLOUD_AUTH_TOKEN. "
+                          "Get yours at http://www.mopidy.com/authenticate"))
         else:
             self.sc_api = SoundCloudClient(
-                settings.SOUNDCLOUD_AUTHTOKEN)
+                settings.SOUNDCLOUD_AUTH_TOKEN)
 
         self.library = SoundcloudLibraryProvider(backend=self)
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)

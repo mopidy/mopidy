@@ -15,7 +15,7 @@ https://github.com/mopidy/mopidy/issues?labels=Soundcloud+backend
 
 **Settings:**
 
-- :attr:`mopidy.settings.SOUNDCLOUD_AUTHTOKEN`
+- :attr:`mopidy.settings.SOUNDCLOUD_AUTH_TOKEN`
 - :attr:`mopidy.settings.SOUNDCLOUD_EXPLORE`
 """
 

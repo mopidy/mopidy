@@ -329,10 +329,10 @@ STREAM_PROTOCOLS = (
 
 #: Your `SoundCloud.com <http://www.soundcloud.com/>`_ authentication token.
 #:
-#: Get yours at http://www.mopidy.com/authenticate.html
+#: Get yours at http://www.mopidy.com/authenticate
 #:
 #: Used by :mod:`mopidy.backends.soundcloud`.
-SOUNDCLOUD_AUTHTOKEN = None
+SOUNDCLOUD_AUTH_TOKEN = None
 
 #: Extra playlists from `SoundCloud.com <http://www.soundcloud.com/explore>`
 #:
