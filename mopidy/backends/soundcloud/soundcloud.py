@@ -140,7 +140,7 @@ class SoundCloudClient(object):
         
         tracks = []
         for track in res:
-            tracks.append(self.parse_track(track, False, False))
+            tracks.append(self.parse_track(track, False, True))
         return self.sanitize_tracks(tracks)
 
     def parse_results(self, res, streamable=False):
@@ -187,25 +187,28 @@ class SoundCloudClient(object):
         track_kwargs = {}
         artist_kwargs = {}
         album_kwargs = {}
-
+ 
         if 'title' in data:
             name = data['title']
 
             # NOTE On some clients search UI would group results by artist
             # thus prevent user from selecting track
+            if not is_search:
+                if ' - ' in name:
+                    name = name.split(' - ')
+                    track_kwargs[b'name'] = name[1]
+                    artist_kwargs[b'name'] = name[0]
+                elif 'label_name' in data and data['label_name'] != '':
+                    track_kwargs[b'name'] = name
+                    artist_kwargs[b'name'] = data['label_name']
+                else:
+                    track_kwargs[b'name'] = name
+                    artist_kwargs[b'name'] = data.get('user').get('username')
 
-            if ' - ' in name:
-                name = name.split(' - ')
-                track_kwargs[b'name'] = name[1]
-                artist_kwargs[b'name'] = name[0]
-            elif 'label_name' in data and data['label_name'] != '':
-                track_kwargs[b'name'] = name
-                artist_kwargs[b'name'] = data['label_name']
+                album_kwargs[b'name'] = 'SoundCloud'
             else:
-                track_kwargs[b'name'] = name
-                artist_kwargs[b'name'] = data.get('user').get('username')
-
-            album_kwargs[b'name'] = 'SoundCloud'
+                ## NOTE mpdroid removes ☁ from track name, probably others too
+                track_kwargs[b'name'] = '%s %s' % (self.BRAND, name)
 
         if 'date' in data:
             track_kwargs[b'date'] = data['date']

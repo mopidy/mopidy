@@ -22,6 +22,7 @@ class SoundcloudLibraryProvider(base.BaseLibraryProvider):
 
         for (field, val) in query.iteritems():
 
+            # TODO: Devise method for searching SoundCloud via artists
             if field == "album" and query['album'] == "SoundCloud":
                 return SearchResult(
                     uri='soundcloud:search',
