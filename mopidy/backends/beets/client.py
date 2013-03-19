@@ -76,12 +76,18 @@ class BeetsRemoteClient(object):
     @cache()
     def get_item_by(self, name):
         res = self._get('/item/query/%s' % name).get('results')
-        return self._parse_query(res)
+        try:
+            return self._parse_query(res)
+        except Exception:
+            return False
 
     @cache()
     def get_album_by(self, name):
         res = self._get('/album/query/%s' % name).get('results')
-        return self._parse_query(res[0]['items'])
+        try:
+            return self._parse_query(res[0]['items'])
+        except Exception:
+            return False
 
     def _get(self, url):
         try:

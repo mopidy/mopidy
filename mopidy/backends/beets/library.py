@@ -22,17 +22,28 @@ class BeetsLibraryProvider(base.BaseLibraryProvider):
     def search(self, **query):
         self._validate_query(query)
         if not query:
-            return SearchResult(uri='beets:search', tracks=self.remote.get_tracks()) 
+            # Fetch all data(browse library)
+            return SearchResult(
+                uri='beets:search',
+                tracks=self.remote.get_tracks())
 
-        for (field, values) in query.iteritems():
+        for (field, val) in query.iteritems():
             if field == "album":
-                return SearchResult(uri='beets:search', tracks=self.remote.get_album_by(values[0])) 
-            if field == "artist":
-                return SearchResult(uri='beets:search', tracks=self.remote.get_item_by(values[0]))
-            if field == "any":
-                return SearchResult(uri='beets:search', tracks=self.remote.get_item_by(values[0])) 
+                return SearchResult(
+                    uri='beets:search',
+                    tracks=self.remote.get_album_by(val[0]) or [])
+            elif field == "artist":
+                return SearchResult(
+                    uri='beets:search',
+                    tracks=self.remote.get_item_by(val[0]) or [])
+            elif field == "any":
+                return SearchResult(
+                    uri='beets:search',
+                    tracks=self.remote.get_item_by(val[0]) or [])
             else:
                 raise LookupError('Invalid lookup field: %s' % field)
+
+        return []
 
     def lookup(self, uri):
         try:
