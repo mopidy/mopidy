@@ -14,6 +14,12 @@ v0.13.0 (in development)
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
 
+**HTTP frontend**
+
+- Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
+
+- Upgrade Mopidy.js' dependencies when.js from 1.6.1 to 1.8.1.
+
 
 v0.12.0 (2013-03-12)
 ====================
