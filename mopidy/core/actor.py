@@ -46,6 +46,11 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
 
         self.tracklist = TracklistController(core=self)
 
+        if audio:
+            # Hook up blocking on end of track handler to audio sub-system.
+            audio.set_on_end_of_track(
+                lambda: self.actor_ref.proxy().playback.on_end_of_track().get())
+
     def get_uri_schemes(self):
         futures = [b.uri_schemes for b in self.backends]
         results = pykka.get_all(futures)
@@ -56,7 +61,7 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     """List of URI schemes we can handle"""
 
     def reached_end_of_stream(self):
-        self.playback.on_end_of_track()
+        self.playback.on_end_of_stream()
 
     def state_changed(self, old_state, new_state):
         # XXX: This is a temporary fix for issue #232 while we wait for a more
