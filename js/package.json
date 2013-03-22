@@ -1,15 +1,19 @@
 {
-    "name": "mopidy",
-    "version": "0.0.0",
-    "devDependencies": {
-        "buster": "*",
-        "grunt": "*",
-        "grunt-buster": "*",
-        "phantomjs": "*"
-    },
-    "scripts": {
-        "test": "grunt test",
-        "build": "grunt build",
-        "watch": "grunt watch"
-    }
+  "name": "mopidy",
+  "version": "0.0.0",
+  "devDependencies": {
+    "buster": "~0.6.12",
+    "grunt": "~0.4.0",
+    "grunt-buster": "~0.1.2",
+    "grunt-contrib-concat": "~0.1.3",
+    "grunt-contrib-jshint": "~0.2.0",
+    "grunt-contrib-uglify": "~0.1.2",
+    "grunt-contrib-watch": "~0.3.1",
+    "phantomjs": "~1.8.2"
+  },
+  "scripts": {
+    "test": "grunt test",
+    "build": "grunt build",
+    "watch": "grunt watch"
+  }
 }

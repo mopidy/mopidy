@@ -10,31 +10,15 @@ v0.13.0 (in development)
 
 (in development)
 
-**Audio sub-system**
-
-- EOT (end of track) and EOS (end of stream) handling has finally been fixed.
-  Problem with the old code was that we simply used EOS for everything, and let
-  the EOS propagate for the end of each track. What this means is basically that
-  we would disrupt the pipeline at the end of every track. This work was
-  concluded in the pull request :issue:`231`. Changes and issues fixed by this
-  include:
-
-  - A new method ``change_track(track)`` for playback provider which is where
-    doing everything like setting the URI and starting to push data should be
-    done. The ``play(track)`` method and EOT track changing uses this new
-    method.
-
-  - We've started using the about to finish signal from playbin2 to ensure
-    gapless playback as part of our EOT cleanup. (Fixes: :issue:`160`)
-
-  - Mopidy now distinguishes between EOT and EOS properly. (Fixes: :issue:`222`)
-
-  - Since we no longer let EOS disrupt the pipeline streaming OGG via SHOUTcast
-    now works. (Fixes: :issue:`168`)
-
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
+
+**HTTP frontend**
+
+- Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
+
+- Upgrade Mopidy.js' dependencies when.js from 1.6.1 to 1.8.1.
 
 
 v0.12.0 (2013-03-12)

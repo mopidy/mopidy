@@ -18,6 +18,10 @@ Data model relations
     Track -> Artist [ label="has 0..n" ]
     Album -> Artist [ label="has 0..n" ]
 
+    SearchResult -> Artist [ label="has 0..n" ]
+    SearchResult -> Album [ label="has 0..n" ]
+    SearchResult -> Track [ label="has 0..n" ]
+
 
 Data model API
 ==============
