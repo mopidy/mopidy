@@ -159,7 +159,7 @@ class SoundCloudClient(object):
 
         url = 'https://api.soundcloud.com/%s' % url
 
-        logger.debug('Requesting %s' % url)
+        logger.info('Requesting %s' % url)
         req = self.SC.get(url)
         if req.status_code != 200:
             raise logger.error('Request %s, failed with status code %s' % (
@@ -217,7 +217,7 @@ class SoundCloudClient(object):
             track_kwargs[b'uri'] = '%s?client_id=%s' % (
                 data['stream_url'], self.CLIENT_ID)
         else:
-            track_kwargs[b'uri'] = 'soundcloud://%s' % data['id']
+            track_kwargs[b'uri'] = 'soundcloud:%s' % data['id']
 
         track_kwargs[b'length'] = int(data.get('duration', 0))
 
