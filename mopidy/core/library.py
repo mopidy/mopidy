@@ -20,6 +20,9 @@ class LibraryController(object):
         """
         Search the library for tracks where ``field`` is ``values``.
 
+        If the query is empty, and the backend can support it, all available
+        tracks are returned.
+
         Examples::
 
             # Returns results matching 'a'
@@ -79,6 +82,9 @@ class LibraryController(object):
     def search(self, query=None, **kwargs):
         """
         Search the library for tracks where ``field`` contains ``values``.
+
+        If the query is empty, and the backend can support it, all available
+        tracks are returned.
 
         Examples::
 
