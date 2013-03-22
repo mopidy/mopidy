@@ -9,9 +9,11 @@ from mopidy.models import Playlist
 logger = logging.getLogger('mopidy.backends.soundcloud.playlists')
 
 
+class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
 class SoundcloudPlaylistsProvider(base.BasePlaylistsProvider):
 
     def __init__(self, *args, **kwargs):
+        super(SoundCloudPlaylistsProvider, self).__init__(*args, **kwargs)
         super(SoundcloudPlaylistsProvider, self).__init__(*args, **kwargs)
         self.refresh()
 

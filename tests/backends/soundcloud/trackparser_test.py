@@ -7,7 +7,7 @@ from tests import unittest
 from mopidy.backends.soundcloud import soundcloud
 
 
-class SoundcloudClientTest(unittest.TestCase):
+class SoundCloudClientTest(unittest.TestCase):
 
     def setUp(self):
         with patch.object(soundcloud.SoundCloudClient, '_get') as get:

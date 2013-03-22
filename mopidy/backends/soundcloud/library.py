@@ -8,15 +8,14 @@ from mopidy.models import SearchResult
 logger = logging.getLogger('mopidy.backends.soundcloud')
 
 
-class SoundcloudLibraryProvider(base.BaseLibraryProvider):
+class SoundCloudLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
-        super(SoundcloudLibraryProvider, self).__init__(*args, **kwargs)
+        super(SoundCloudLibraryProvider, self).__init__(*args, **kwargs)
 
     def find_exact(self, **query):
         return self.search(**query)
 
     def search(self, **query):
-        print(query)
         if not query:
             return
 

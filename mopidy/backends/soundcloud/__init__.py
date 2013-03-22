@@ -1,4 +1,4 @@
-"""A backend for playing music from Soundcloud.
+"""A backend for playing music from SoundCloud.
 
 This backend handles URIs starting with ``soundcloud:``.
 
@@ -7,7 +7,7 @@ backend.
 
 **Issues:**
 
-https://github.com/mopidy/mopidy/issues?labels=Soundcloud+backend
+https://github.com/mopidy/mopidy/issues?labels=SoundCloud+backend
 
 **Dependencies:**
 
@@ -22,4 +22,4 @@ https://github.com/mopidy/mopidy/issues?labels=Soundcloud+backend
 from __future__ import unicode_literals
 
 # flake8: noqa
-from .actor import SoundcloudBackend
+from .actor import SoundCloudBackend

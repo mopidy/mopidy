@@ -7,16 +7,16 @@ from mopidy import settings
 from mopidy.backends import base
 
 
-from .library import SoundcloudLibraryProvider
-from .playlists import SoundcloudPlaylistsProvider
+from .library import SoundCloudLibraryProvider
+from .playlists import SoundCloudPlaylistsProvider
 from .soundcloud import SoundCloudClient
 
 logger = logging.getLogger('mopidy.backends.soundcloud')
 
 
-class SoundcloudBackend(pykka.ThreadingActor, base.Backend):
+class SoundCloudBackend(pykka.ThreadingActor, base.Backend):
     def __init__(self, audio):
-        super(SoundcloudBackend, self).__init__()
+        super(SoundCloudBackend, self).__init__()
 
         if not settings.SOUNDCLOUD_AUTH_TOKEN:
             logger.error(("In order to use SoundCloud backend "
@@ -26,8 +26,8 @@ class SoundcloudBackend(pykka.ThreadingActor, base.Backend):
             self.sc_api = SoundCloudClient(
                 settings.SOUNDCLOUD_AUTH_TOKEN)
 
-        self.library = SoundcloudLibraryProvider(backend=self)
+        self.library = SoundCloudLibraryProvider(backend=self)
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
-        self.playlists = SoundcloudPlaylistsProvider(backend=self)
+        self.playlists = SoundCloudPlaylistsProvider(backend=self)
 
         self.uri_schemes = ['soundcloud']
