@@ -1,0 +1,5 @@
+requests >= 1.1.0
+# Requests is an Apache2 Licensed HTTP library, written in Python, for human beings.
+# Available as the python-requests package from Ubuntu universe.
+
+
