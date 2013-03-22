@@ -51,13 +51,15 @@ class BeetsRemoteClient(object):
     def __init__(self, endpoint):
         super(BeetsRemoteClient, self).__init__()
         self.api = requests.Session()
+        self.has_connection = False
         if endpoint:
             self.api_endpoint = endpoint
             logger.info('Connecting to Beets remote library %s', endpoint)
             try:
-                self._get('/')
-            except Exception as e:
-                logger.error('SoundCloud Authentication error: %s' % e)
+                self.api.get(self.api_endpoint)
+                self.has_connection = True
+            except RequestException as e:
+                logger.error('Beets error: %s' % e)
         else:
             logger.error('Beets API url is not defined')
 
@@ -100,6 +102,7 @@ class BeetsRemoteClient(object):
 
             return req.json()
         except Exception as e:
+            return False
             logger.error('Request %s, failed with error %s' % (
                 url, e))
 

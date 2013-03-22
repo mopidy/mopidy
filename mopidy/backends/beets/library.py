@@ -21,6 +21,10 @@ class BeetsLibraryProvider(base.BaseLibraryProvider):
 
     def search(self, **query):
         self._validate_query(query)
+
+        if not self.remote.has_connection:
+            return []
+            
         if not query:
             # Fetch all data(browse library)
             return SearchResult(
@@ -47,7 +51,7 @@ class BeetsLibraryProvider(base.BaseLibraryProvider):
 
     def lookup(self, uri):
         try:
-            id = uri.split("//")[1]
+            id = uri.split(":")[1]
             logger.debug(u'Beets track id for "%s": %s', id, uri)
             return [self.remote.get_track(id, True)]
         except Exception as error:
