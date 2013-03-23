@@ -40,6 +40,7 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
         logger.info('Searching for %s in SoundCloud', uri)
         for playlist in self._playlists:
             if playlist.uri == uri:
+                logger.info('Resolving with %s', playlist.name)
                 return self.lookup_get_tracks(uri)
             else:
                 print('strange error', uri, playlist.uri, playlist.uri == uri)

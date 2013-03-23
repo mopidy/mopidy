@@ -159,6 +159,7 @@ class SoundCloudClient(object):
 
         url = 'https://api.soundcloud.com/%s' % url
 
+        logger.debug('Requesting %s' % url)
         logger.info('Requesting %s' % url)
         req = self.SC.get(url)
         if req.status_code != 200:
