@@ -67,6 +67,7 @@ Development documentation
     :maxdepth: 3
 
     development
+    extensiondev
 
 
 Indices and tables
