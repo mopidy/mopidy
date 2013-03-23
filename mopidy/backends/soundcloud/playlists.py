@@ -28,24 +28,30 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
         # track-list. Until then stream-able is set to TRUE in create_playsits
         # methods
         if 'soundcloud:exp-' in uri:
+            logger.info('Detected lookup for explore %s' % uri)
             return self.create_explore_playlist(uri, True)
         elif 'soundcloud:u-liked' in uri:
-            return self.create_liked_playlist(uri, True)
+            logger.info('Detected lookup for liked %s' % uri)
+            return self.create_user_liked_playlist(True)
         elif 'soundcloud:u-stream' in uri:
-            return self.create_user_stream_playlist(uri, True)
+            logger.info('Detected lookup for user stream %s' % uri)
+            return self.create_user_stream_playlist(True)
         else:
+            logger.info('Detected FAILED lookup for %s' % uri)
             return []
 
     def lookup(self, uri):
         logger.info('Searching for %s in SoundCloud', uri)
         for playlist in self._playlists:
             if playlist.uri == uri:
+                # Special case with sets, which already contain all data
+                if 'soundcloud:set-' in uri:
+                    logger.info('Resolved with %s', playlist.name)
+                    return playlist
                 logger.info('Resolving with %s', playlist.name)
                 return self.lookup_get_tracks(uri)
-            else:
-                print('strange error', uri, playlist.uri, playlist.uri == uri)
 
-    def create_explore_playlist(self, uri, streamable=True):
+    def create_explore_playlist(self, uri, streamable=False):
         uri = uri.replace('soundcloud:exp-', '')
         (category, section) = uri.split(';')
         logger.info('Fetching Explore playlist %s from SoundCloud' % section)
@@ -56,15 +62,15 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
                 category, section) if streamable else []
         )
 
-    def create_user_liked_playlist(self, streamable=True):
+    def create_user_liked_playlist(self, streamable=False):
         logger.info('Fetching Liked playlist for %s' % self.username)
         return Playlist(
             uri='soundcloud:u-liked',
             name="%s's liked on SoundCloud" % self.username,
-            tracks=self.backend.sc_api.get_favorites() if streamable else []
+            tracks=self.backend.sc_api.get_user_favorites() if streamable else []
         )
 
-    def create_user_stream_playlist(self, streamable=True):
+    def create_user_stream_playlist(self, streamable=False):
         logger.info('Fetching Stream playlist for %s' % self.username)
         return Playlist(
             uri='soundcloud:u-stream',
