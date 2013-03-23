@@ -305,10 +305,27 @@ Debugging deadlocks
 
 Between the numerous Pykka threads and GStreamer interactions there can
 sometimes be a potential for deadlocks. In an effort to make these slightly
-simpler to debug the setting :attr:`mopidy.settings.DEBUG_THREAD` or the option
-``--debug-thread`` can be used to turn on an extra debug thread. This thread is
-not linked to the regular program flow, and it's only task is to dump traceback
-showing the other threads state when we get a ``SIGUSR1``.
+simpler to debug Mopidy registers a ``SIGUSR1`` signal handler which logs the
+traceback of all alive threads.
+
+To trigger the signal handler, you need the process ID (PID) of Mopidy. This
+can for example be found by running ``ps``::
+
+    $ ps aux | grep mopidy
+    jodal     4313  2.0  1.7 2573592 69804 pts/14  Sl+  00:15   0:02 python
+    mopidy
+    jodal     4700  0.0  0.0   9392   924 pts/10   S+   00:17   0:00 grep
+    mopidy
+    $
+
+In this example, Mopidy's PID is 4313. You can then use the ``kill`` command to
+send the ``SIGUSR1`` signal to the Mopidy proces::
+
+    $ kill -SIGUSR1 4313
+    $
+
+If you check the log, you should now find one log record with a full traceback
+for each of the currently alive threads in Mopidy.
 
 
 Writing documentation

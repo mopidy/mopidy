@@ -19,6 +19,11 @@ v0.13.0 (in development)
 - Log a warning if a track isn't playable to make it more obvious that backend
   X needs backend Y to be present for playback to work.
 
+- Removed the :attr:`mopidy.settings.DEBUG_THREAD` setting and the
+  :option:`--debug-thread` command line option. Sending SIGUSR1 to
+  the Mopidy process will now always make it log tracebacks for all alive
+  threads.
+
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)

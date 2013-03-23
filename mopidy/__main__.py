@@ -45,12 +45,10 @@ logger = logging.getLogger('mopidy.main')
 
 def main():
     signal.signal(signal.SIGTERM, process.exit_handler)
+    signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
     loop = gobject.MainLoop()
     options = parse_options()
-
-    if options.debug_thread or settings.DEBUG_THREAD:
-        signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
     try:
         log.setup_logging(options.verbosity_level, options.save_debug_log)
