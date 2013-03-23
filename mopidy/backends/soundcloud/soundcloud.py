@@ -228,14 +228,17 @@ class SoundCloudClient(object):
         if artist_kwargs:
             artist = Artist(**artist_kwargs)
             track_kwargs[b'artists'] = [artist]
-
-        if 'artwork_url' in data:
-            album_kwargs[b'images'] = [data['artwork_url']]
-        else:
-            image = data.get('user').get('avatar_url')
-            album_kwargs[b'images'] = [image]
-
+            
         if album_kwargs:
+            if 'artwork_url' in data and data['artwork_url']:
+                album_kwargs[b'images'] = [data['artwork_url']]
+            else:
+                image = data.get('user').get('avatar_url')
+                if image:
+                    album_kwargs[b'images'] = [image]
+                else:
+                    album_kwargs[b'images'] = []
+            print(album_kwargs[b'images'])
             album = Album(**album_kwargs)
             track_kwargs[b'album'] = album
 
