@@ -10,6 +10,10 @@ v0.13.0 (in development)
 
 (in development)
 
+**Dependencies**
+
+- Pykka >= 1.1 is now required.
+
 **Core**
 
 - Log a warning if a track isn't playable to make it more obvious that backend
