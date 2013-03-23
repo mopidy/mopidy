@@ -10,6 +10,11 @@ v0.13.0 (in development)
 
 (in development)
 
+**Core**
+
+- Log a warning if a track isn't playable to make it more obvious that backend
+  X needs backend Y to be present for playback to work.
+
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
