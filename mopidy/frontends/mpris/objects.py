@@ -379,6 +379,8 @@ class MprisObject(dbus.service.Object):
                 url = list(track.album.images)[0]
                 if url:
                     metadata['mpris:artUrl'] = url
+            if track.disc_no:
+                metadata['xesam:discNumber'] = track.disc_no
             if track.track_no:
                 metadata['xesam:trackNumber'] = track.track_no
             return dbus.Dictionary(metadata, signature='sv')

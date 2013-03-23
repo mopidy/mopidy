@@ -24,6 +24,8 @@ v0.13.0 (in development)
 
 - Publish album art URIs if available.
 
+- Publish disc number of track if available.
+
 
 v0.12.0 (2013-03-12)
 ====================

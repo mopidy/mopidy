@@ -224,6 +224,13 @@ class PlayerInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
         self.assertNotIn('mpris:artUrl', result.keys())
 
+    def test_get_metadata_has_disc_number_in_album(self):
+        self.core.tracklist.add([Track(disc_no=2)])
+        self.core.playback.play()
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
+        self.assertIn('xesam:discNumber', result.keys())
+        self.assertEqual(result['xesam:discNumber'], 2)
+
     def test_get_metadata_has_track_number_in_album(self):
         self.core.tracklist.add([Track(track_no=7)])
         self.core.playback.play()
