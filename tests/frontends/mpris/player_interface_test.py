@@ -200,6 +200,30 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertIn('xesam:albumArtist', result.keys())
         self.assertEqual(result['xesam:albumArtist'], ['a', 'b'])
 
+    def test_get_metadata_use_first_album_image_as_art_url(self):
+        # XXX Currently, the album image order isn't preserved because they
+        # are stored as a frozenset(). We pick the first in the set, which is
+        # sorted alphabetically, thus we get 'bar.jpg', not 'foo.jpg', which
+        # would probably make more sense.
+        self.core.tracklist.add([Track(album=Album(images=[
+            'http://example.com/foo.jpg', 'http://example.com/bar.jpg']))])
+        self.core.playback.play()
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
+        self.assertIn('mpris:artUrl', result.keys())
+        self.assertEqual(result['mpris:artUrl'], 'http://example.com/bar.jpg')
+
+    def test_get_metadata_has_no_art_url_if_no_album(self):
+        self.core.tracklist.add([Track()])
+        self.core.playback.play()
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
+        self.assertNotIn('mpris:artUrl', result.keys())
+
+    def test_get_metadata_has_no_art_url_if_no_album_images(self):
+        self.core.tracklist.add([Track(Album(images=[]))])
+        self.core.playback.play()
+        result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
+        self.assertNotIn('mpris:artUrl', result.keys())
+
     def test_get_metadata_has_track_number_in_album(self):
         self.core.tracklist.add([Track(track_no=7)])
         self.core.playback.play()

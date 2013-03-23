@@ -375,6 +375,10 @@ class MprisObject(dbus.service.Object):
                 artists.sort(key=lambda a: a.name)
                 metadata['xesam:albumArtist'] = dbus.Array(
                     [a.name for a in artists if a.name], signature='s')
+            if track.album and track.album.images:
+                url = list(track.album.images)[0]
+                if url:
+                    metadata['mpris:artUrl'] = url
             if track.track_no:
                 metadata['xesam:trackNumber'] = track.track_no
             return dbus.Dictionary(metadata, signature='sv')

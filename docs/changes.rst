@@ -20,6 +20,10 @@ v0.13.0 (in development)
 
 - Upgrade Mopidy.js' dependencies when.js from 1.6.1 to 1.8.1.
 
+**MPRIS frontend**
+
+- Publish album art URIs if available.
+
 
 v0.12.0 (2013-03-12)
 ====================
