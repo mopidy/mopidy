@@ -13,7 +13,6 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
 
     def __init__(self, *args, **kwargs):
         super(SoundCloudPlaylistsProvider, self).__init__(*args, **kwargs)
-        self.username = self.backend.sc_api.get_user().get('username')
         self._playlists = []
         self.refresh()
 
@@ -25,8 +24,8 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
 
     def lookup_get_tracks(self, uri):
         # TODO: Figure out why some sort of internal cache is used for retrieving
-        # track-list. Until then stream-able is set to TRUE in create_playsits
-        # methods
+        # track-list on mobile clients. If you wan't this to work with mobile
+        # clients change defaults to streamable=True
         if 'soundcloud:exp-' in uri:
             logger.info('Detected lookup for explore %s' % uri)
             return self.create_explore_playlist(uri, True)
@@ -63,18 +62,20 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
         )
 
     def create_user_liked_playlist(self, streamable=False):
-        logger.info('Fetching Liked playlist for %s' % self.username)
+        username = self.backend.sc_api.get_user().get('username')
+        logger.info('Fetching Liked playlist for %s' % username)
         return Playlist(
             uri='soundcloud:u-liked',
-            name="%s's liked on SoundCloud" % self.username,
+            name="%s's liked on SoundCloud" % username,
             tracks=self.backend.sc_api.get_user_favorites() if streamable else []
         )
 
     def create_user_stream_playlist(self, streamable=False):
-        logger.info('Fetching Stream playlist for %s' % self.username)
+        username = self.backend.sc_api.get_user().get('username')
+        logger.info('Fetching Stream playlist for %s' % username)
         return Playlist(
             uri='soundcloud:u-stream',
-            name="%s's stream on SoundCloud" % self.username,
+            name="%s's stream on SoundCloud" % username,
             tracks=self.backend.sc_api.get_user_stream() if streamable else []
         )
 
