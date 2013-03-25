@@ -70,13 +70,16 @@ def to_mopidy_playlist(spotify_playlist):
     uri = str(Link.from_playlist(spotify_playlist))
     if not spotify_playlist.is_loaded():
         return Playlist(uri=uri, name='[loading...]')
-    if not spotify_playlist.name():
+    name = spotify_playlist.name()
+    if not name:
         # Other user's "starred" playlists isn't handled properly by pyspotify
         # See https://github.com/mopidy/pyspotify/issues/81
         return
+    if spotify_playlist.owner().canonical_name() != settings.SPOTIFY_USERNAME:
+        name += ' by ' + spotify_playlist.owner().canonical_name()
     return Playlist(
         uri=uri,
-        name=spotify_playlist.name(),
+        name=name,
         tracks=[
             to_mopidy_track(spotify_track)
             for spotify_track in spotify_playlist
