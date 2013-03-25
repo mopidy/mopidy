@@ -172,22 +172,29 @@ class ScannerTest(unittest.TestCase):
         self.check(
             'scanner/simple/song1.mp3', 'uri',
             'file://%s' % path_to_data_dir('scanner/simple/song1.mp3'))
+        self.check(
+            'scanner/simple/song1.ogg', 'uri',
+            'file://%s' % path_to_data_dir('scanner/simple/song1.ogg'))
 
     def test_duration_is_set(self):
         self.scan('scanner/simple')
         self.check('scanner/simple/song1.mp3', 'duration', 4680)
+        self.check('scanner/simple/song1.ogg', 'duration', 4608)
 
     def test_artist_is_set(self):
         self.scan('scanner/simple')
         self.check('scanner/simple/song1.mp3', 'artist', 'name')
+        self.check('scanner/simple/song1.ogg', 'artist', 'name')
 
     def test_album_is_set(self):
         self.scan('scanner/simple')
         self.check('scanner/simple/song1.mp3', 'album', 'albumname')
+        self.check('scanner/simple/song1.ogg', 'album', 'albumname')
 
     def test_track_is_set(self):
         self.scan('scanner/simple')
         self.check('scanner/simple/song1.mp3', 'title', 'trackname')
+        self.check('scanner/simple/song1.ogg', 'title', 'trackname')
 
     def test_nonexistant_folder_does_not_fail(self):
         self.scan('scanner/does-not-exist')
