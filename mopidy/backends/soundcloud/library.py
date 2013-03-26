@@ -37,7 +37,7 @@ class SoundCloudLibraryProvider(base.BaseLibraryProvider):
         try:
             id = uri.split(':')[1]
             logger.info(u'SoundCloud track id for %s: %s' % (uri, id))
-            return [self.backend.sc_api.get_track(id, True)]
+            return [self.backend.sc_api.get_track(id)]
         except Exception as error:
             logger.error(u'Failed to lookup %s: %s', uri, error)
             return []

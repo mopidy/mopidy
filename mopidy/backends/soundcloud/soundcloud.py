@@ -15,7 +15,8 @@ logger = logging.getLogger('mopidy.backends.soundcloud.client')
 
 
 class cache(object):
-    ## TODO: merge this to util library
+    # TODO: merge this to util library
+
     def __init__(self, ctl=8, ttl=3600):
         self.cache = {}
         self.ctl = ctl
@@ -66,7 +67,7 @@ class SoundCloudClient(object):
         except Exception as e:
             logger.error('SoundCloud Authentication error: %s' % e)
 
-    ## Private
+    # Private
 
     @cache()
     def get_user_stream(self):
@@ -81,7 +82,7 @@ class SoundCloudClient(object):
                     kind = data.get('type')
                     # multiple types of track with same data
                     if 'track' in kind:
-                        tracks.append(self.parse_track(data.get('track'), True))
+                        tracks.append(self.parse_track(data.get('track')))
                     if kind == 'playlist':
                         tracks.extend(self.parse_results(
                             data.get('playlist').get('tracks')))
@@ -98,22 +99,21 @@ class SoundCloudClient(object):
         for playlist in playlists:
             name = '%s on SoundCloud' % playlist.get('title')
             uri = playlist.get('permalink')
-            tracks = self.parse_results(playlist.get('tracks'), True)
+            tracks = self.parse_results(playlist.get('tracks'))
             logger.info('Fetched set %s with id %s' % (name, uri))
             tplaylists.append((name, uri, tracks))
         return tplaylists
 
     def get_user_favorites(self):
         favorites = self._get('users/%s/favorites.json' % self.user.get('id'))
-        return self.parse_results(favorites, True)
+        return self.parse_results(favorites)
 
-    ## Public
+    # Public
 
     @cache(ctl=100)
     def get_track(self, id, streamable=False):
         try:
             # TODO better way to handle deleted tracks
-            logger.info('Getting track %s with streamble %s' % (id, streamable))
             return self.parse_track(self._get('tracks/%s.json' % id), streamable)
         except Exception:
             return
@@ -129,7 +129,7 @@ class SoundCloudClient(object):
             for data in stream.get('collection'):
                 if data.get('name') == section:
                     for track in data.get('tracks'):
-                        tracks.append(self.get_track(track.get('id'), True))
+                        tracks.append(self.get_track(track.get('id')))
         return self.sanitize_tracks(tracks)
 
     @cache()
@@ -146,10 +146,10 @@ class SoundCloudClient(object):
             tracks.append(self.parse_track(track, False, True))
         return self.sanitize_tracks(tracks)
 
-    def parse_results(self, res, streamable=False):
+    def parse_results(self, res):
         tracks = []
         for track in res:
-            tracks.append(self.parse_track(track, streamable))
+            tracks.append(self.parse_track(track))
         return self.sanitize_tracks(tracks)
 
     def _get(self, url):
@@ -183,6 +183,8 @@ class SoundCloudClient(object):
             return
         if not data['kind'] == 'track':
             return
+        if not self.can_be_streamed(data['stream_url']):
+            return
 
         # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
         # See https://github.com/mopidy/mopidy/issues/302 for details.
@@ -214,14 +216,9 @@ class SoundCloudClient(object):
             track_kwargs[b'date'] = data['date']
 
         if remote_url:
-            logger.info("Adding streamable track %s" % track_kwargs[b'name'])
-            track_kwargs[b'uri'] = '%s?client_id=%s' % (
-                data['stream_url'], self.CLIENT_ID)
-            if not self.can_be_streamed(track_kwargs[b'uri']):
-                return
+            track_kwargs[b'uri'] = self.get_streamble_url(data['stream_url'])
         else:
-            logger.info("Adding unstreamable track %s" % track_kwargs[b'name'])
-            track_kwargs[b'uri'] = 'soundcloud:%s' % data['id']
+            track_kwargs[b'uri'] = 'soundcloud:song;%s' % data['id']
 
         track_kwargs[b'length'] = int(data.get('duration', 0))
 
@@ -246,5 +243,8 @@ class SoundCloudClient(object):
         return track
 
     def can_be_streamed(self, url):
-        req = self.SC.head(url)
+        req = self.SC.head(self.get_streamble_url(url))
         return req.status_code == 302
+
+    def get_streamble_url(self, url):
+        return '%s?client_id=%s' % (url, self.CLIENT_ID)

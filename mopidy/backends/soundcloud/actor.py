@@ -15,6 +15,7 @@ logger = logging.getLogger('mopidy.backends.soundcloud')
 
 
 class SoundCloudBackend(pykka.ThreadingActor, base.Backend):
+
     def __init__(self, audio):
         super(SoundCloudBackend, self).__init__()
 
@@ -25,7 +26,16 @@ class SoundCloudBackend(pykka.ThreadingActor, base.Backend):
         else:
             self.sc_api = SoundCloudClient(settings.SOUNDCLOUD_AUTH_TOKEN)
             self.library = SoundCloudLibraryProvider(backend=self)
-            self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
+            self.playback = SoundCloudPlaybackProvider(audio=audio, backend=self)
             self.playlists = SoundCloudPlaylistsProvider(backend=self)
 
             self.uri_schemes = ['soundcloud']
+
+
+class SoundCloudPlaybackProvider(base.BasePlaybackProvider):
+
+    def play(self, track):
+        id = track.uri.split(';')[1]
+        logger.info('Getting info for track %s with id %s' % (track.uri, id))
+        track = self.backend.sc_api.get_track(id, True)
+        return super(SoundCloudPlaybackProvider, self).play(track)
