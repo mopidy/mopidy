@@ -9,6 +9,7 @@ from mopidy.models import Artist, Album, Track, Playlist
 artist_cache = {}
 album_cache = {}
 track_cache = {}
+playlist_names = {}
 
 
 def to_mopidy_artist(spotify_artist):
@@ -77,6 +78,13 @@ def to_mopidy_playlist(spotify_playlist):
         return
     if spotify_playlist.owner().canonical_name() != settings.SPOTIFY_USERNAME:
         name += ' by ' + spotify_playlist.owner().canonical_name()
+    if name in playlist_names:
+        if uri not in playlist_names[name]:
+            playlist_names[name][uri] = len(playlist_names[name])
+        if playlist_names[name][uri] > 0:
+            name += '[' + str(playlist_names[name][uri]) + ']'
+    else:
+        playlist_names[name] = { uri : 0 }
     return Playlist(
         uri=uri,
         name=name,
