@@ -27,33 +27,27 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
         # track-list on mobile clients. If you wan't this to work with mobile
         # clients change defaults to streamable=True
         if 'soundcloud:exp-' in uri:
-            logger.info('Detected lookup for explore %s' % uri)
             return self.create_explore_playlist(uri, True)
-        elif 'soundcloud:u-liked' in uri:
-            logger.info('Detected lookup for liked %s' % uri)
+        elif 'soundcloud:user-liked' in uri:
             return self.create_user_liked_playlist(True)
-        elif 'soundcloud:u-stream' in uri:
-            logger.info('Detected lookup for user stream %s' % uri)
+        elif 'soundcloud:user-stream' in uri:
             return self.create_user_stream_playlist(True)
         else:
-            logger.info('Detected FAILED lookup for %s' % uri)
             return []
 
     def lookup(self, uri):
-        logger.info('Searching for %s in SoundCloud', uri)
         for playlist in self._playlists:
             if playlist.uri == uri:
                 # Special case with sets, which already contain all data
                 if 'soundcloud:set-' in uri:
-                    logger.info('Resolved with %s', playlist.name)
                     return playlist
-                logger.info('Resolving with %s', playlist.name)
+                logger.debug('Resolving with %s', playlist.name)
                 return self.lookup_get_tracks(uri)
 
     def create_explore_playlist(self, uri, streamable=False):
         uri = uri.replace('soundcloud:exp-', '')
         (category, section) = uri.split(';')
-        logger.info('Fetching Explore playlist %s from SoundCloud' % section)
+        logger.debug('Fetching Explore playlist %s from SoundCloud' % section)
         return Playlist(
             uri='soundcloud:exp-%s' % uri,
             name='Explore %s on SoundCloud' % section,
@@ -63,25 +57,23 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
 
     def create_user_liked_playlist(self, streamable=False):
         username = self.backend.sc_api.get_user().get('username')
-        logger.info('Fetching Liked playlist for %s' % username)
+        logger.debug('Fetching Liked playlist for %s' % username)
         return Playlist(
-            uri='soundcloud:u-liked',
+            uri='soundcloud:user-liked',
             name="%s's liked on SoundCloud" % username,
             tracks=self.backend.sc_api.get_user_favorites() if streamable else []
         )
 
     def create_user_stream_playlist(self, streamable=False):
         username = self.backend.sc_api.get_user().get('username')
-        logger.info('Fetching Stream playlist for %s' % username)
+        logger.debug('Fetching Stream playlist for %s' % username)
         return Playlist(
-            uri='soundcloud:u-stream',
+            uri='soundcloud:user-stream',
             name="%s's stream on SoundCloud" % username,
             tracks=self.backend.sc_api.get_user_stream() if streamable else []
         )
 
     def refresh(self):
-        logger.info('Loading playlists from SoundCloud')
-
         self._playlists.append(self.create_user_liked_playlist())
         self._playlists.append(self.create_user_stream_playlist())
 
@@ -96,7 +88,7 @@ class SoundCloudPlaylistsProvider(base.BasePlaylistsProvider):
         for cat in settings.SOUNDCLOUD_EXPLORE:
             exp = self.create_explore_playlist(cat.replace('/', ';'))
             self._playlists.append(exp)
-        logger.info('Loaded %d Soundcloud playlist(s)', len(self._playlists))
+        logger.info('Loaded %d SoundCloud playlist(s)', len(self._playlists))
         listener.BackendListener.send('playlists_loaded')
 
     def save(self, playlist):

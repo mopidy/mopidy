@@ -54,10 +54,10 @@ class SoundCloudClient(object):
 
     def __init__(self, token):
         super(SoundCloudClient, self).__init__()
-        self.SC = requests.Session()
-        self.SC.headers.update({'Authorization': 'OAuth %s' % token})
+        self.http_client = requests.Session()
+        self.http_client.headers.update({'Authorization': 'OAuth %s' % token})
         self.user = self.get_user()
-        logger.info('User id for username %s is %s' % (
+        logger.debug('User id for username %s is %s' % (
             self.user.get('username'), self.user.get('id')))
 
     @cache()
@@ -100,7 +100,7 @@ class SoundCloudClient(object):
             name = '%s on SoundCloud' % playlist.get('title')
             uri = playlist.get('permalink')
             tracks = self.parse_results(playlist.get('tracks'))
-            logger.info('Fetched set %s with id %s' % (name, uri))
+            logger.debug('Fetched set %s with id %s' % (name, uri))
             tplaylists.append((name, uri, tracks))
         return tplaylists
 
@@ -120,7 +120,7 @@ class SoundCloudClient(object):
 
     @cache()
     def get_explore_category(self, category, section):
-        logger.info("get_explore_category %s %s" % (category, section))
+        logger.debug("get_explore_category %s %s" % (category, section))
         # Most liked by category in explore section
         tracks = []
         for sid in xrange(0, 2):
@@ -163,7 +163,7 @@ class SoundCloudClient(object):
         url = 'https://api.soundcloud.com/%s' % url
 
         logger.debug('Requesting %s' % url)
-        req = self.SC.get(url)
+        req = self.http_client.get(url)
         if req.status_code != 200:
             raise logger.error('Request %s, failed with status code %s' % (
                 url, req.status_code))
@@ -243,7 +243,7 @@ class SoundCloudClient(object):
         return track
 
     def can_be_streamed(self, url):
-        req = self.SC.head(self.get_streamble_url(url))
+        req = self.http_client.head(self.get_streamble_url(url))
         return req.status_code == 302
 
     def get_streamble_url(self, url):
