@@ -144,16 +144,27 @@ An extension wants to:
 - Be automatically found if installed
   - Either register a setuptools entry points on installation, or
   - Require a line of configuration to activate the extension
+
 - Provide default config
+
 - Validate configuration
+
   - Pass all configuration to every extension, let the extension complain on
     anything it wants to
+
 - Validate presence of dependencies
+
   - Python packages (e.g. pyspotify)
+
   - Other software
+
   - The presence of other extensions can be validated in the configuration
     validation step
+
 - Validate that needed TCP ports are free
+
 - Register new GStreamer elements
+
 - Be asked to start running
+
 - Be asked to shut down
