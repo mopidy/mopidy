@@ -49,10 +49,92 @@ Mopidy-Soundspot==dev``.
 
 Mopidy extensions must be licensed under an Apache 2.0 (like Mopidy itself),
 BSD, MIT or more liberal license to be able to be enlisted in the Mopidy
-Extension Registry. Keep in mind that the Mopidy Extension Registry is a
-moderated place and libraries will be reviewed upfront if they behave as
-required.
+Extension Registry. The license text should be included in the ``LICENSE`` file
+in the root of the extension's Git repo.
 
+Combining this together, we get the following folder structure for our
+extension, Mopidy-Soundspot::
+
+    mopidy-soundspot/           # The Git repo root
+        mopidy_soundspot/       # The Python package
+            __init__.py
+        LICENSE                 # The license text
+        README.rst              # Document what it is and how to use it
+        setup.py                # Installation script
+
+Example content for the most important files follows below.
+
+README.rst
+----------
+
+.. code-block:: rst
+
+    Mopidy-Soundspot
+    ================
+
+    `Mopidy <http://www.mopidy.com/>`_ extension for playing music from
+    `Soundspot <http://soundspot.example.com/>`_.
+
+    Usage
+    -----
+
+    Requires a Soundspot Platina subscription and the pysoundspot library.
+
+    Install by running::
+
+        sudo pip install Mopidy-Soundspot
+
+    Or install the Debian/Ubuntu package from `apt.mopidy.com
+    <http://apt.mopidy.com/>`_.
+
+    Before starting Mopidy, you must add your Soundspot username and password
+    to the Mopidy configuration file::
+
+        [soundspot]
+        username = alice
+        password = secret
+
+    Project resources
+    -----------------
+
+    - `Source code <https://github.com/mopidy/mopidy-soundspot>`_
+    - `Issue tracker <https://github.com/mopidy/mopidy-soundspot/issues>`_
+    - `Download development snapshot <https://github.com/mopidy/mopidy-soundspot/tarball/develop#egg=mopidy-soundspot-dev>`_
+
+
+setup.py
+--------
+
+::
+
+    from setuptools import setup
+
+    setup(
+        name='Mopidy-Soundspot',
+        version='1.0',
+        url='http://example.com/mopidy-soundspot/',
+        license='Apache License, Version 2.0',
+        author='Your Name',
+        author_email='your-email@example.com',
+        description='Very short description',
+        long_description=open('README.rst').read(),
+        packages=['mopidy_soundspot'],
+        zip_safe=False,
+        include_package_data=True,
+        platforms='any',
+        install_requires=[
+            'Mopidy',
+            'pysoundspot',
+        ],
+        classifiers=[
+            'Environment :: No Input/Output (Daemon)',
+            'Intended Audience :: End Users/Desktop',
+            'License :: OSI Approved :: Apache Software License',
+            'Operating System :: OS Independent',
+            'Programming Language :: Python',
+            'Topic :: Multimedia :: Sound/Audio :: Players',
+        ],
+    )
 
 Notes
 =====
