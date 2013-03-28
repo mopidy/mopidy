@@ -56,13 +56,15 @@ Combining this together, we get the following folder structure for our
 extension, Mopidy-Soundspot::
 
     mopidy-soundspot/           # The Git repo root
-        mopidy_soundspot/       # The Python package
-            __init__.py
         LICENSE                 # The license text
         README.rst              # Document what it is and how to use it
+        mopidy_soundspot/       # Your code
+            __init__.py
+            ...
         setup.py                # Installation script
 
 Example content for the most important files follows below.
+
 
 README.rst
 ----------
@@ -107,11 +109,17 @@ setup.py
 
 ::
 
+    import re
     from setuptools import setup
+
+    def get_version(filename):
+        content = open(filename).read()
+        metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", content))
+        return metadata['version']
 
     setup(
         name='Mopidy-Soundspot',
-        version='1.0',
+        version=get_version('mopidy_soundspot/__init__.py'),
         url='http://example.com/mopidy-soundspot/',
         license='Apache License, Version 2.0',
         author='Your Name',
@@ -119,22 +127,125 @@ setup.py
         description='Very short description',
         long_description=open('README.rst').read(),
         packages=['mopidy_soundspot'],
+        # If you ship package instead of a single module instead, use
+        # 'py_modules' instead of 'packages':
+        #py_modules=['mopidy_soundspot'],
         zip_safe=False,
         include_package_data=True,
         platforms='any',
         install_requires=[
+            'setuptools',
             'Mopidy',
             'pysoundspot',
+        ],
+        entry_points=[
+            'mopidy.extension': [
+                'mopidy_soundspot = mopidy_soundspot:EntryPoint',
+            ],
         ],
         classifiers=[
             'Environment :: No Input/Output (Daemon)',
             'Intended Audience :: End Users/Desktop',
             'License :: OSI Approved :: Apache Software License',
             'Operating System :: OS Independent',
-            'Programming Language :: Python',
+            'Programming Language :: Python :: 2',
             'Topic :: Multimedia :: Sound/Audio :: Players',
         ],
     )
+
+
+mopidy_soundspot/__init__.py
+----------------------------
+
+::
+
+    from mopidy.exceptions import ExtensionError
+
+    __version__ = '0.1'
+
+
+    class EntryPoint(object):
+
+        name = 'Mopidy-Soundspot'
+        version = __version__
+
+        @classmethod
+        def get_default_config(cls):
+            return """
+                [soundspot]
+                enabled = true
+                username =
+                password =
+            """
+
+        @classmethod
+        def validate_config(cls, config):
+            if not config.getboolean('soundspot', 'enabled'):
+                return
+            if not config.get('soundspot', 'username'):
+                raise ExtensionError('Config soundspot.username not set')
+            if not config.get('soundspot', 'password'):
+                raise ExtensionError('Config soundspot.password not set')
+
+        @classmethod
+        def validate_environment(cls):
+            try:
+                import pysoundspot
+            except ImportError as e:
+                raise ExtensionError('pysoundspot library not found', e)
+
+        @classmethod
+        def start_frontend(cls, core):
+            from .frontend import SoundspotFrontend
+            cls._frontend = SoundspotFrontend.start(core=core)
+
+        @classmethod
+        def stop_frontend(cls):
+            cls._frontend.stop()
+
+        @classmethod
+        def start_backend(cls, audio):
+            from .backend import SoundspotBackend
+            cls._backend = SoundspotBackend.start(audio=audio)
+
+        @classmethod
+        def stop_backend(cls):
+            cls._backend.stop()
+
+
+mopidy_soundspot/frontend.py
+----------------------------
+
+::
+
+    import pykka
+
+    from mopidy.core import CoreListener
+
+    class SoundspotFrontend(pykka.ThreadingActor, CoreListener):
+        def __init__(self, core):
+            super(SoundspotFrontend, self).__init__()
+            self.core = core
+
+        # Your frontend implementation
+
+
+mopidy_soundspot/backend.py
+---------------------------
+
+::
+
+    import pykka
+
+    from mopidy.backends import base
+
+    class SoundspotBackend(pykka.ThreadingActor, base.BaseBackend):
+        def __init__(self, audio):
+            super(SoundspotBackend, self).__init__()
+            self.audio = audio
+
+        # Your backend implementation
+
 
 Notes
 =====
