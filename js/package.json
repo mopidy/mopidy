@@ -1,6 +1,11 @@
 {
   "name": "mopidy",
   "version": "0.0.0",
+  "dependencies": {
+    "bane": "~0.4.0",
+    "faye-websocket": "~0.4.4",
+    "when": "~1.8.1"
+  },
   "devDependencies": {
     "buster": "~0.6.12",
     "grunt": "~0.4.0",
