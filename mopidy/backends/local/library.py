@@ -35,7 +35,9 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             logger.debug('Failed to lookup %r', uri)
             return []
 
-    def find_exact(self, query=None):
+    def find_exact(self, query=None, uris=None):
+        # TODO Only return results within URI roots given by ``uris``
+
         if query is None:
             query = {}
         self._validate_query(query)
@@ -74,7 +76,9 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     raise LookupError('Invalid lookup field: %s' % field)
         return SearchResult(uri='file:search', tracks=result_tracks)
 
-    def search(self, query=None):
+    def search(self, query=None, uris=None):
+        # TODO Only return results within URI roots given by ``uris``
+
         if query is None:
             query = {}
         self._validate_query(query)
