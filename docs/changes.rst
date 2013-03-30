@@ -33,6 +33,9 @@ v0.13.0 (in development)
 
 - Make ``mopidy-scan`` work with Ogg Vorbis files. (Fixes: :issue:`275`)
 
+- Fix playback of files with non-ASCII chars in their file path. (Fixes:
+  :issue:`353`)
+
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
