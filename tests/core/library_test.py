@@ -88,9 +88,26 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertIn(result2, result)
         self.library1.find_exact.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
         self.library2.find_exact.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
+
+    def test_find_exact_with_uris_selects_dummy1_backend(self):
+        self.core.library.find_exact(
+            any=['a'], uris=['dummy1:', 'dummy1:foo', 'dummy3:'])
+
+        self.library1.find_exact.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'])
+        self.assertFalse(self.library2.find_exact.called)
+
+    def test_find_exact_with_uris_selects_both_backends(self):
+        self.core.library.find_exact(
+            any=['a'], uris=['dummy1:', 'dummy1:foo', 'dummy2:'])
+
+        self.library1.find_exact.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'])
+        self.library2.find_exact.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy2:'])
 
     def test_find_exact_filters_out_none(self):
         track1 = Track(uri='dummy1:a')
@@ -106,9 +123,9 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertNotIn(None, result)
         self.library1.find_exact.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
         self.library2.find_exact.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
 
     def test_find_accepts_query_dict_instead_of_kwargs(self):
         track1 = Track(uri='dummy1:a')
@@ -126,9 +143,9 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertIn(result2, result)
         self.library1.find_exact.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
         self.library2.find_exact.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
 
     def test_search_combines_results_from_all_backends(self):
         track1 = Track(uri='dummy1:a')
@@ -146,9 +163,26 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertIn(result2, result)
         self.library1.search.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
         self.library2.search.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
+
+    def test_search_with_uris_selects_dummy1_backend(self):
+        self.core.library.search(
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo', 'dummy3:'])
+
+        self.library1.search.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'])
+        self.assertFalse(self.library2.search.called)
+
+    def test_search_with_uris_selects_both_backends(self):
+        self.core.library.search(
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo', 'dummy2:'])
+
+        self.library1.search.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'])
+        self.library2.search.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy2:'])
 
     def test_search_filters_out_none(self):
         track1 = Track(uri='dummy1:a')
@@ -164,9 +198,9 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertNotIn(None, result)
         self.library1.search.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
         self.library2.search.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
 
     def test_search_accepts_query_dict_instead_of_kwargs(self):
         track1 = Track(uri='dummy1:a')
@@ -184,6 +218,6 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertIn(result2, result)
         self.library1.search.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
         self.library2.search.assert_called_once_with(
-            query=dict(any=['a']))
+            query=dict(any=['a']), uris=None)
