@@ -28,6 +28,9 @@ v0.13.0 (in development)
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
 
+- For all playlists owned by other Spotify users, we now append the owner's
+  username to the playlist name. (Partly fixes: :issue:`114`)
+
 **HTTP frontend**
 
 - Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
