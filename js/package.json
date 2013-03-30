@@ -1,6 +1,18 @@
 {
   "name": "mopidy",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "description": "Client lib for controlling a Mopidy music server over a WebSocket",
+  "homepage": "http://www.mopidy.com/",
+  "author": {
+    "name": "Stein Magnus Jodal",
+    "email": "stein.magnus@jodal.no",
+    "url": "http://www.jodal.no"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mopidy/mopidy.git"
+  },
+  "main": "src/mopidy.js",
   "dependencies": {
     "bane": "~0.4.0",
     "faye-websocket": "~0.4.4",
