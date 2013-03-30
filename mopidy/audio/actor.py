@@ -241,11 +241,19 @@ class Audio(pykka.ThreadingActor):
             self._on_end_of_stream()
         elif message.type == gst.MESSAGE_ERROR:
             error, debug = message.parse_error()
-            logger.error('%s %s', error, debug)
+            logger.error(
+                '%s\nError message: %s\nDebug message: %s',
+                str(error).decode('utf-8'),
+                error.message.decode('utf-8') or 'None',
+                debug.decode('utf-8') or 'None')
             self.stop_playback()
         elif message.type == gst.MESSAGE_WARNING:
             error, debug = message.parse_warning()
-            logger.warning('%s %s', error, debug)
+            logger.warning(
+                '%s\nError message: %s\nDebug message: %s',
+                str(error).decode('utf-8'),
+                error.message.decode('utf-8') or 'None',
+                debug.decode('utf-8') or 'None')
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:

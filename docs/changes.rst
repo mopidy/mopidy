@@ -24,6 +24,11 @@ v0.13.0 (in development)
   the Mopidy process will now always make it log tracebacks for all alive
   threads.
 
+**Audio sub-system**
+
+- Make audio error logging handle log messages with non-ASCII chars. (Fixes:
+  :issue:`347`)
+
 **Local backend**
 
 - Make ``mopidy-scan`` work with Ogg Vorbis files. (Fixes: :issue:`275`)
