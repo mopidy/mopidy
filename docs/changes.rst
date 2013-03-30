@@ -24,6 +24,10 @@ v0.13.0 (in development)
   the Mopidy process will now always make it log tracebacks for all alive
   threads.
 
+**Local backend**
+
+- Make ``mopidy-scan`` work with Ogg Vorbis files. (Fixes: :issue:`275`)
+
 **Spotify backend**
 
 - Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
