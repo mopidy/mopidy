@@ -20,7 +20,7 @@ from __future__ import unicode_literals
 #:     BACKENDS = (
 #:         u'mopidy.backends.local.LocalBackend',
 #:         u'mopidy.backends.spotify.SpotifyBackend',
-#:         u'mopidy.backends.spotify.StreamBackend',
+#:         u'mopidy.backends.stream.StreamBackend',
 #:     )
 BACKENDS = (
     'mopidy.backends.local.LocalBackend',
