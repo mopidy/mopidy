@@ -45,6 +45,11 @@ v0.13.0 (in development)
 
 **HTTP frontend**
 
+- Mopidy.js now works both from browsers and from Node.js environments. This
+  means that you now can make Mopidy clients in Node.js. Mopidy.js has been
+  published to the `npm registry <https://npmjs.org/package/mopidy>`_ for easy
+  installation in Node.js projects.
+
 - Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
 
 - Upgrade Mopidy.js' dependencies when.js from 1.6.1 to 1.8.1.
