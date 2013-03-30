@@ -53,7 +53,7 @@ class BaseLibraryProvider(object):
     def __init__(self, backend):
         self.backend = backend
 
-    def find_exact(self, **query):
+    def find_exact(self, query=None):
         """
         See :meth:`mopidy.core.LibraryController.find_exact`.
 
@@ -77,7 +77,7 @@ class BaseLibraryProvider(object):
         """
         pass
 
-    def search(self, **query):
+    def search(self, query=None):
         """
         See :meth:`mopidy.core.LibraryController.search`.
 

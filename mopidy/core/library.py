@@ -43,7 +43,8 @@ class LibraryController(object):
         """
         query = query or kwargs
         futures = [
-            b.library.find_exact(**query) for b in self.backends.with_library]
+            b.library.find_exact(query=query)
+            for b in self.backends.with_library]
         return [result for result in pykka.get_all(futures) if result]
 
     def lookup(self, uri):
@@ -106,5 +107,5 @@ class LibraryController(object):
         """
         query = query or kwargs
         futures = [
-            b.library.search(**query) for b in self.backends.with_library]
+            b.library.search(query=query) for b in self.backends.with_library]
         return [result for result in pykka.get_all(futures) if result]

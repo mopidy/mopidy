@@ -62,8 +62,8 @@ class SpotifyTrack(Track):
 
 
 class SpotifyLibraryProvider(base.BaseLibraryProvider):
-    def find_exact(self, **query):
-        return self.search(**query)
+    def find_exact(self, query=None):
+        return self.search(query=query)
 
     def lookup(self, uri):
         try:
@@ -131,7 +131,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
     def refresh(self, uri=None):
         pass  # TODO
 
-    def search(self, **query):
+    def search(self, query=None):
         if not query:
             return self._get_all_tracks()
 
