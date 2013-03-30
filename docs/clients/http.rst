@@ -18,8 +18,8 @@ woutervanwijk/Mopidy-Webclient
 ==============================
 
 .. image:: /_static/woutervanwijk-mopidy-webclient.png
-    :width: 410
-    :height: 511
+    :width: 382
+    :height: 621
 
 The first web client for Mopidy is still under development, but is already very
 usable. It targets both desktop and mobile browsers.
