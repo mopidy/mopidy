@@ -1,4 +1,10 @@
-/*global bane:false, when:false*/
+/*global exports:false, require:false*/
+
+if (typeof module === "object" && typeof require === "function") {
+    var bane = require("bane");
+    var websocket = require("faye-websocket");
+    var when = require("when");
+}
 
 function Mopidy(settings) {
     if (!(this instanceof Mopidy)) {
@@ -20,9 +26,17 @@ function Mopidy(settings) {
     }
 }
 
+if (typeof module === "object" && typeof require === "function") {
+    Mopidy.WebSocket = websocket.Client;
+} else {
+    Mopidy.WebSocket = window.WebSocket;
+}
+
 Mopidy.prototype._configure = function (settings) {
+    var currentHost = (typeof document !== "undefined" &&
+        document.location.host) || "localhost";
     settings.webSocketUrl = settings.webSocketUrl ||
-        "ws://" + document.location.host + "/mopidy/ws/";
+        "ws://" + currentHost + "/mopidy/ws/";
 
     if (settings.autoConnect !== false) {
         settings.autoConnect = true;
@@ -35,7 +49,7 @@ Mopidy.prototype._configure = function (settings) {
 };
 
 Mopidy.prototype._getConsole = function () {
-    var console = window.console || {};
+    var console = typeof console !== "undefined" && console || {};
 
     console.log = console.log || function () {};
     console.warn = console.warn || function () {};
@@ -63,7 +77,7 @@ Mopidy.prototype._delegateEvents = function () {
 
 Mopidy.prototype.connect = function () {
     if (this._webSocket) {
-        if (this._webSocket.readyState === WebSocket.OPEN) {
+        if (this._webSocket.readyState === Mopidy.WebSocket.OPEN) {
             return;
         } else {
             this._webSocket.close();
@@ -71,7 +85,7 @@ Mopidy.prototype.connect = function () {
     }
 
     this._webSocket = this._settings.webSocket ||
-        new WebSocket(this._settings.webSocketUrl);
+        new Mopidy.WebSocket(this._settings.webSocketUrl);
 
     this._webSocket.onclose = function (close) {
         this.emit("websocket:close", close);
@@ -136,17 +150,17 @@ Mopidy.prototype._send = function (message) {
     var deferred = when.defer();
 
     switch (this._webSocket.readyState) {
-    case WebSocket.CONNECTING:
+    case Mopidy.WebSocket.CONNECTING:
         deferred.resolver.reject({
             message: "WebSocket is still connecting"
         });
         break;
-    case WebSocket.CLOSING:
+    case Mopidy.WebSocket.CLOSING:
         deferred.resolver.reject({
             message: "WebSocket is closing"
         });
         break;
-    case WebSocket.CLOSED:
+    case Mopidy.WebSocket.CLOSED:
         deferred.resolver.reject({
             message: "WebSocket is closed"
         });
@@ -280,3 +294,7 @@ Mopidy.prototype._snakeToCamel = function (name) {
         return match.toUpperCase().replace("_", "");
     });
 };
+
+if (typeof exports === "object") {
+    exports.Mopidy = Mopidy;
+}

@@ -128,8 +128,8 @@ you quickly started with working on your client instead of figuring out how to
 communicate with Mopidy.
 
 
-Getting the library
--------------------
+Getting the library for browser use
+-----------------------------------
 
 Regular and minified versions of Mopidy.js, ready for use, is installed
 together with Mopidy. When the HTTP frontend is running, the files are
@@ -154,6 +154,25 @@ the Git repo at:
 - ``mopidy/frontends/http/data/mopidy.js``
 - ``mopidy/frontends/http/data/mopidy.min.js``
 
+
+Getting the library for Node.js use
+-----------------------------------
+
+If you want to use Mopidy.js from Node.js instead of a browser, you can install
+Mopidy.js using npm::
+
+    npm install mopidy
+
+After npm completes, you can import Mopidy.js using ``require()``:
+
+.. code-block:: js
+
+    var Mopidy = require("mopidy").Mopidy;
+
+
+Getting the library for development on the library
+--------------------------------------------------
+
 If you want to work on the Mopidy.js library itself, you'll find a complete
 development setup in the ``js/`` dir in our repo. The instructions in
 ``js/README.rst`` will guide you on your way.
@@ -170,8 +189,8 @@ Once you got Mopidy.js loaded, you need to create an instance of the wrapper:
 
 When you instantiate ``Mopidy()`` without arguments, it will connect to
 the WebSocket at ``/mopidy/ws/`` on the current host. Thus, if you don't host
-your web client using Mopidy's web server, you'll need to pass the URL to the
-WebSocket end point:
+your web client using Mopidy's web server, or if you use Mopidy.js from a
+Node.js environment, you'll need to pass the URL to the WebSocket end point:
 
 .. code-block:: js
 
