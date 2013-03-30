@@ -24,6 +24,12 @@ v0.13.0 (in development)
   the Mopidy process will now always make it log tracebacks for all alive
   threads.
 
+- :meth:`mopidy.core.TracklistController.add` now accepts an ``uri`` which it
+  will lookup in the libraries and then add to the tracklist. This is helpful
+  for e.g. web clients that doesn't want to transfer all track meta data back
+  to the server just to add it to the tracklist when the server already got all
+  the needed information easily available. (Fixes: :issue:`325`)
+
 **Audio sub-system**
 
 - Make audio error logging handle log messages with non-ASCII chars. (Fixes:
