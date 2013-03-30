@@ -146,7 +146,7 @@ def _convert_mpd_data(data, tracks, music_dir):
         path = data['file'][1:]
     else:
         path = data['file']
-    path = urllib.unquote(path)
+    path = urllib.unquote(path.encode('ascii')).decode('utf-8')
 
     if artist_kwargs:
         artist = Artist(**artist_kwargs)
