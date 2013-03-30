@@ -40,6 +40,13 @@ New web client developed by Janez Troha. See
 https://github.com/dz0ny/mopidy-lux for details.
 
 
+JukePi
+======
+
+New web client developed by Meantime IT in the UK for their office jukebox. See
+https://github.com/meantimeit/jukepi for details.
+
+
 Rompr
 =====
 
