@@ -1,5 +1,8 @@
 from __future__ import unicode_literals
 
+import mock
+
+from mopidy.backends import base
 from mopidy.core import Core
 from mopidy.models import Track
 
@@ -9,12 +12,30 @@ from tests import unittest
 class TracklistTest(unittest.TestCase):
     def setUp(self):
         self.tracks = [
-            Track(uri='a', name='foo'),
-            Track(uri='b', name='foo'),
-            Track(uri='c', name='bar')
+            Track(uri='dummy1:a', name='foo'),
+            Track(uri='dummy1:b', name='foo'),
+            Track(uri='dummy1:c', name='bar'),
         ]
-        self.core = Core(audio=None, backends=[])
+
+        self.backend = mock.Mock()
+        self.backend.uri_schemes.get.return_value = ['dummy1']
+        self.library = mock.Mock(spec=base.BaseLibraryProvider)
+        self.backend.library = self.library
+
+        self.core = Core(audio=None, backends=[self.backend])
         self.tl_tracks = self.core.tracklist.add(self.tracks)
+
+    def test_add_by_uri_looks_up_uri_in_library(self):
+        track = Track(uri='dummy1:x', name='x')
+        self.library.lookup().get.return_value = [track]
+        self.library.lookup.reset_mock()
+
+        tl_tracks = self.core.tracklist.add(uri='dummy1:x')
+
+        self.library.lookup.assert_called_once_with('dummy1:x')
+        self.assertEqual(1, len(tl_tracks))
+        self.assertEqual(track, tl_tracks[0].track)
+        self.assertEqual(tl_tracks, self.core.tracklist.tl_tracks[-1:])
 
     def test_remove_removes_tl_tracks_matching_query(self):
         tl_tracks = self.core.tracklist.remove(name='foo')
