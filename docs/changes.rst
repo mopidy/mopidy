@@ -16,16 +16,16 @@ v0.13.0 (in development)
 
 **Core**
 
-- Log a warning if a track isn't playable to make it more obvious that backend
-  X needs backend Y to be present for playback to work.
-
 - Removed the :attr:`mopidy.settings.DEBUG_THREAD` setting and the
   :option:`--debug-thread` command line option. Sending SIGUSR1 to
   the Mopidy process will now always make it log tracebacks for all alive
   threads.
 
+- Log a warning if a track isn't playable to make it more obvious that backend
+  X needs backend Y to be present for playback to work.
+
 - :meth:`mopidy.core.TracklistController.add` now accepts an ``uri`` which it
-  will lookup in the libraries and then add to the tracklist. This is helpful
+  will lookup in the library and then add to the tracklist. This is helpful
   for e.g. web clients that doesn't want to transfer all track meta data back
   to the server just to add it to the tracklist when the server already got all
   the needed information easily available. (Fixes: :issue:`325`)
