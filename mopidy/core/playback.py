@@ -296,16 +296,24 @@ class PlaybackController(object):
 
     ### Methods
 
-    def change_track(self, tl_track, on_error_step=1):
+    def change_track(self, tl_track=None, uri=None, on_error_step=1):
         """
         Change to the given track, keeping the current playback state.
 
         :param tl_track: track to change to
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
+        :param uri: uri of track to change to
+        :type uri: :string:`URI` or :class:`None`
         :param on_error_step: direction to step at play error, 1 for next
             track (default), -1 for previous track
         :type on_error_step: int, -1 or 1
         """
+        if uri:
+            tl_tracks = self.core.tracklist.tl_tracks
+            if tl_tracks:
+                tl_track = next((tl_track for tl_track in tl_tracks
+                                 if tl_track.track.uri == uri), None)
+
         old_state = self.state
         self.stop()
         self.current_tl_track = tl_track
