@@ -20,7 +20,7 @@ from __future__ import unicode_literals
 #:     BACKENDS = (
 #:         u'mopidy.backends.local.LocalBackend',
 #:         u'mopidy.backends.spotify.SpotifyBackend',
-#:         u'mopidy.backends.spotify.StreamBackend',
+#:         u'mopidy.backends.stream.StreamBackend',
 #:     )
 BACKENDS = (
     'mopidy.backends.local.LocalBackend',
@@ -48,14 +48,6 @@ DEBUG_LOG_FORMAT = '%(levelname)-8s %(asctime)s' + \
 #:
 #:     DEBUG_LOG_FILENAME = u'mopidy.log'
 DEBUG_LOG_FILENAME = 'mopidy.log'
-
-#: If we should start a background thread that dumps thread's traceback when we
-#: get a SIGUSR1. Mainly a debug tool for figuring out deadlocks.
-#:
-#: Default::
-#:
-#:     DEBUG_THREAD = False
-DEBUG_THREAD = False
 
 #: Location of the Mopidy .desktop file.
 #:

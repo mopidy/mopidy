@@ -2,10 +2,8 @@ from __future__ import unicode_literals
 
 import logging
 import signal
-import sys
 import thread
 import threading
-import traceback
 
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
@@ -79,29 +77,3 @@ class BaseThread(threading.Thread):
 
     def run_inside_try(self):
         raise NotImplementedError
-
-
-class DebugThread(threading.Thread):
-    daemon = True
-    name = 'DebugThread'
-
-    event = threading.Event()
-
-    def handler(self, signum, frame):
-        logger.info('Got %s signal', SIGNALS[signum])
-        self.event.set()
-
-    def run(self):
-        while True:
-            self.event.wait()
-            threads = dict((t.ident, t.name) for t in threading.enumerate())
-
-            for ident, frame in sys._current_frames().items():
-                if self.ident != ident:
-                    stack = ''.join(traceback.format_stack(frame))
-                    logger.debug(
-                        'Current state of %s (%s):\n%s',
-                        threads.get(ident, '?'), ident, stack)
-                del frame
-
-            self.event.clear()

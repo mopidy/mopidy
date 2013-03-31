@@ -17,9 +17,10 @@ including Windows, Mac OS X, Linux, Android, and iOS.
 To install Mopidy, start by reading :ref:`installation`.
 
 If you get stuck, we usually hang around at ``#mopidy`` at `irc.freenode.net
-<http://freenode.net/>`_. If you stumble into a bug or got a feature request,
-please create an issue in the `issue tracker
-<https://github.com/mopidy/mopidy/issues>`_.
+<http://freenode.net/>`_ and also got a `mailing list at Google Groups
+<https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_. If you stumble
+into a bug or got a feature request, please create an issue in the `issue
+tracker <https://github.com/mopidy/mopidy/issues>`_.
 
 
 Project resources
@@ -30,6 +31,7 @@ Project resources
 - `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
 - `CI server <https://travis-ci.org/mopidy/mopidy>`_
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
+- Mailing list: `mopidy@googlegroups.com <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
 
 
 User documentation
@@ -65,6 +67,7 @@ Development documentation
     :maxdepth: 3
 
     development
+    extensiondev
 
 
 Indices and tables

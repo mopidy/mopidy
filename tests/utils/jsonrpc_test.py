@@ -48,6 +48,7 @@ class JsonRpcTestBase(unittest.TestCase):
                 'core': self.core,
                 'core.playback': self.core.playback,
                 'core.tracklist': self.core.tracklist,
+                'get_uri_schemes': self.core.get_uri_schemes,
             },
             encoders=[models.ModelJSONEncoder],
             decoders=[models.model_json_decoder])
@@ -187,6 +188,23 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         response = self.jrw.handle_data(request)
 
         self.assertEqual(response['result'], None)
+
+    def test_call_method_which_is_a_directly_mounted_actor_member(self):
+        # 'get_uri_schemes' isn't a regular callable, but a Pykka
+        # CallableProxy. This test checks that CallableProxy objects are
+        # threated by JsonRpcWrapper like any other callable.
+
+        request = {
+            'jsonrpc': '2.0',
+            'method': 'get_uri_schemes',
+            'id': 1,
+        }
+        response = self.jrw.handle_data(request)
+
+        self.assertEqual(response['jsonrpc'], '2.0')
+        self.assertEqual(response['id'], 1)
+        self.assertNotIn('error', response)
+        self.assertEqual(response['result'], ['dummy'])
 
     def test_call_method_with_positional_params(self):
         request = {
@@ -588,6 +606,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
 
     def test_inspector_can_describe_a_bunch_of_large_classes(self):
         inspector = jsonrpc.JsonRpcInspector({
+            'core.get_uri_schemes': core.Core.get_uri_schemes,
             'core.library': core.LibraryController,
             'core.playback': core.PlaybackController,
             'core.playlists': core.PlaylistsController,
@@ -595,6 +614,9 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         })
 
         methods = inspector.describe()
+
+        self.assertIn('core.get_uri_schemes', methods)
+        self.assertEquals(len(methods['core.get_uri_schemes']['params']), 0)
 
         self.assertIn('core.library.lookup', methods.keys())
         self.assertEquals(

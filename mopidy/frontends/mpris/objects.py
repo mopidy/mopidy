@@ -279,9 +279,8 @@ class MprisObject(dbus.service.Object):
             return
         # NOTE Check if URI has MIME type known to the backend, if MIME support
         # is added to the backend.
-        tracks = self.core.library.lookup(uri).get()
-        if tracks:
-            tl_tracks = self.core.tracklist.add(tracks).get()
+        tl_tracks = self.core.tracklist.add(uri=uri).get()
+        if tl_tracks:
             self.core.playback.play(tl_tracks[0])
         else:
             logger.debug('Track with URI "%s" not found in library.', uri)
@@ -375,6 +374,12 @@ class MprisObject(dbus.service.Object):
                 artists.sort(key=lambda a: a.name)
                 metadata['xesam:albumArtist'] = dbus.Array(
                     [a.name for a in artists if a.name], signature='s')
+            if track.album and track.album.images:
+                url = list(track.album.images)[0]
+                if url:
+                    metadata['mpris:artUrl'] = url
+            if track.disc_no:
+                metadata['xesam:discNumber'] = track.disc_no
             if track.track_no:
                 metadata['xesam:trackNumber'] = track.track_no
             return dbus.Dictionary(metadata, signature='sv')
