@@ -38,7 +38,7 @@ User documentation
 ==================
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     installation/index
     installation/raspberrypi
@@ -54,7 +54,7 @@ Reference documentation
 =======================
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     api/index
     modules/index
@@ -64,7 +64,7 @@ Development documentation
 =========================
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     development
     extensiondev
