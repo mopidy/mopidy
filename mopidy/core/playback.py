@@ -314,14 +314,13 @@ class PlaybackController(object):
                 tl_track = next((tl_track for tl_track in tl_tracks
                                  if tl_track.track.uri == uri), None)
 
-        if tl_track:
-            old_state = self.state
-            self.stop()
-            self.current_tl_track = tl_track
-            if old_state == PlaybackState.PLAYING:
-                self.play(on_error_step=on_error_step)
-            elif old_state == PlaybackState.PAUSED:
-                self.pause()
+        old_state = self.state
+        self.stop()
+        self.current_tl_track = tl_track
+        if old_state == PlaybackState.PLAYING:
+            self.play(on_error_step=on_error_step)
+        elif old_state == PlaybackState.PAUSED:
+            self.pause()
 
     def on_end_of_track(self):
         """
