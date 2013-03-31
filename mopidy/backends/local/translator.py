@@ -142,12 +142,6 @@ def _convert_mpd_data(data, tracks, music_dir):
         albumartist_kwargs[b'musicbrainz_id'] = (
             data['musicbrainz_albumartistid'])
 
-    if data['file'][0] == '/':
-        path = data['file'][1:]
-    else:
-        path = data['file']
-    path = urllib.unquote(path.encode('ascii')).decode('utf-8')
-
     if artist_kwargs:
         artist = Artist(**artist_kwargs)
         track_kwargs[b'artists'] = [artist]
@@ -160,7 +154,19 @@ def _convert_mpd_data(data, tracks, music_dir):
         album = Album(**album_kwargs)
         track_kwargs[b'album'] = album
 
+    if data['file'][0] == '/':
+        path = data['file'][1:]
+    else:
+        path = data['file']
+    path = urllib.unquote(path.encode('utf-8'))
+
+    if isinstance(music_dir, unicode):
+        music_dir = music_dir.encode('utf-8')
+
+    # Make sure we only pass bytestrings to path_to_uri to avoid implicit
+    # decoding of bytestrings to unicode strings
     track_kwargs[b'uri'] = path_to_uri(music_dir, path)
+
     track_kwargs[b'length'] = int(data.get('time', 0)) * 1000
 
     track = Track(**track_kwargs)
