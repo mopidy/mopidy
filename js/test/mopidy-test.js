@@ -610,16 +610,16 @@ buster.testCase("Mopidy", {
             assert.calledOnceWith(stub);
         },
 
-        "gets Api description from server and calls _createApi": function () {
+        "gets Api description from server and calls _createApi": function (done) {
             var methods = {};
             var sendStub = this.stub(this.mopidy, "_send");
             sendStub.returns(when.resolve(methods));
             var _createApiStub = this.stub(this.mopidy, "_createApi");
 
-            this.mopidy._getApiSpec();
-
-            assert.calledOnceWith(sendStub, {method: "core.describe"});
-            assert.calledOnceWith(_createApiStub, methods);
+            this.mopidy._getApiSpec().then(done(function () {
+                assert.calledOnceWith(sendStub, {method: "core.describe"});
+                assert.calledOnceWith(_createApiStub, methods);
+            }));
         }
     },
 

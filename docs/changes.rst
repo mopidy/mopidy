@@ -71,7 +71,7 @@ v0.13.0 (in development)
 
 - Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
 
-- Upgrade Mopidy.js' dependencies when.js from 1.6.1 to 1.8.1.
+- Upgrade Mopidy.js' dependencies when.js from 1.6.1 to 2.0.0.
 
 - Expose :meth:`mopidy.core.Core.get_uri_schemes` to HTTP clients. It is
   available through Mopidy.js as ``mopidy.getUriSchemes()``.

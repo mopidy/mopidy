@@ -24,6 +24,7 @@ module.exports = function (grunt) {
                 files: {
                     "<%= meta.files.concat %>": [
                         "lib/bane-*.js",
+                        "lib/when-define-shim.js",
                         "lib/when-*.js",
                         "src/mopidy.js"
                     ]
