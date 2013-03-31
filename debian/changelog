@@ -1,3 +1,10 @@
+mopidy (0.13.0-0mopidy1) unstable; urgency=low
+
+  * New upstream release.
+  * Update version range on python-pykka dependency.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sun, 31 Mar 2013 17:03:48 +0200
+
 mopidy (0.12.0-0mopidy1) unstable; urgency=low
 
   * New upstream release.

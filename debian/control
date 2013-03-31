@@ -20,7 +20,7 @@ Architecture: all
 Depends:
     ${misc:Depends},
     ${python:Depends},
-    python-pykka (>= 1.0.0), python-pykka (<< 2),
+    python-pykka (>= 1.1.0), python-pykka (<< 2),
     python-gst0.10,
     gstreamer0.10-plugins-good
 Recommends:
