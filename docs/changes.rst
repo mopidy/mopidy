@@ -30,6 +30,19 @@ v0.13.0 (in development)
   to the server just to add it to the tracklist when the server already got all
   the needed information easily available. (Fixes: :issue:`325`)
 
+- Change the following methods to accept an ``uris`` keyword argument:
+
+  - :meth:`mopidy.core.LibraryController.find_exact`
+  - :meth:`mopidy.core.LibraryController.search`
+
+  Search queries will only be forwarded to backends handling the given URI
+  roots, and the backends may use the URI roots to further limit what results
+  are returned. For example, a search with ``uris=['file:']`` will only be
+  processed by the local backend. A search with
+  ``uris=['file:///media/music']`` will only be processed by the local backend,
+  and, if such filtering is supported by the backend, will only return results
+  with URIs within the given URI root.
+
 **Audio sub-system**
 
 - Make audio error logging handle log messages with non-ASCII chars. (Fixes:
