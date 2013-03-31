@@ -5,10 +5,9 @@ import urlparse
 
 import pykka
 
-from mopidy import settings
-from mopidy.audio import utils
+from mopidy import audio as audio_lib, settings
 from mopidy.backends import base
-from mopidy.models import SearchResult, Track
+from mopidy.models import Track
 
 logger = logging.getLogger('mopidy.backends.stream')
 
@@ -21,7 +20,7 @@ class StreamBackend(pykka.ThreadingActor, base.Backend):
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
-        self.uri_schemes = utils.supported_uri_schemes(
+        self.uri_schemes = audio_lib.supported_uri_schemes(
             settings.STREAM_PROTOCOLS)
 
 

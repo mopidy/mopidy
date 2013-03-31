@@ -209,8 +209,12 @@ software packages, as Wheezy is going to be the next release of Debian.
 
        aplay /usr/share/sounds/alsa/Front_Center.wav
 
-   To make the change to analog output stick, you can add the ``amixer`` command
-   to e.g. ``/etc/rc.local``, which will be executed when the system is
+   If you hear a voice saying "Front Center", then your sound is working. Don't
+   be concerned if this test sound includes static. Test your sound with
+   GStreamer to determine the sound quality of Mopidy.
+
+   To make the change to analog output stick, you can add the ``amixer``
+   command to e.g. ``/etc/rc.local``, which will be executed when the system is
    booting.
 
 

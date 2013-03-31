@@ -18,8 +18,8 @@ woutervanwijk/Mopidy-Webclient
 ==============================
 
 .. image:: /_static/woutervanwijk-mopidy-webclient.png
-    :width: 410
-    :height: 511
+    :width: 382
+    :height: 621
 
 The first web client for Mopidy is still under development, but is already very
 usable. It targets both desktop and mobile browsers.
@@ -27,6 +27,24 @@ usable. It targets both desktop and mobile browsers.
 To try it out, get a copy of https://github.com/woutervanwijk/Mopidy-WebClient
 and point the :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` setting towards
 your copy of the web client.
+
+
+Mopidy Lux
+==========
+
+.. image:: /_static/dz0ny-mopidy-lux.png
+    :width: 1000
+    :height: 645
+
+New web client developed by Janez Troha. See
+https://github.com/dz0ny/mopidy-lux for details.
+
+
+JukePi
+======
+
+New web client developed by Meantime IT in the UK for their office jukebox. See
+https://github.com/meantimeit/jukepi for details.
 
 
 Rompr

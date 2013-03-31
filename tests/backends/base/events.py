@@ -10,7 +10,7 @@ from mopidy.backends import listener
 @mock.patch.object(listener.BackendListener, 'send')
 class BackendEventsTest(object):
     def setUp(self):
-        self.audio = mock.Mock(spec=audio.Audio)
+        self.audio = audio.DummyAudio.start().proxy()
         self.backend = self.backend_class.start(audio=self.audio).proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 

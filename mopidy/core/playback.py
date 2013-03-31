@@ -397,13 +397,14 @@ class PlaybackController(object):
             self.state = PlaybackState.PLAYING
             backend = self._get_backend()
             if not backend or not backend.playback.play(tl_track.track).get():
-                # Track is not playable
+                logger.warning('Track is not playable: %s', tl_track.track.uri)
                 if self.random and self._shuffled:
                     self._shuffled.remove(tl_track)
                 if on_error_step == 1:
                     self.next()
                 elif on_error_step == -1:
                     self.previous()
+                return
 
         if self.random and self.current_tl_track in self._shuffled:
             self._shuffled.remove(self.current_tl_track)

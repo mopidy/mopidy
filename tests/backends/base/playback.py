@@ -4,6 +4,8 @@ import mock
 import random
 import time
 
+import pykka
+
 from mopidy import audio, core
 from mopidy.core import PlaybackState
 from mopidy.models import Track
@@ -18,7 +20,7 @@ class PlaybackControllerTest(object):
     tracks = []
 
     def setUp(self):
-        self.audio = mock.Mock(spec=audio.Audio)
+        self.audio = audio.DummyAudio.start().proxy()
         self.backend = self.backend_class.start(audio=self.audio).proxy()
         self.core = core.Core(backends=[self.backend])
         self.playback = self.core.playback
@@ -28,6 +30,9 @@ class PlaybackControllerTest(object):
             'Need at least three tracks to run tests.'
         assert self.tracks[0].length >= 2000, \
             'First song needs to be at least 2000 miliseconds'
+
+    def tearDown(self):
+        pykka.ActorRegistry.stop_all()
 
     def test_initial_state_is_stopped(self):
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)

@@ -142,7 +142,13 @@ def validate_settings(defaults, settings):
         'SPOTIFY_LIB_CACHE': 'SPOTIFY_CACHE_PATH',
     }
 
-    list_of_one_or_more = [
+    must_be_iterable = [
+        'BACKENDS',
+        'FRONTENDS',
+        'STREAM_PROTOCOLS',
+    ]
+
+    must_have_value_set = [
         'BACKENDS',
         'FRONTENDS',
     ]
@@ -171,13 +177,13 @@ def validate_settings(defaults, settings):
                 'Deprecated setting, please set the value via the GStreamer '
                 'bin in OUTPUT.')
 
-        elif setting in list_of_one_or_more:
-            if not hasattr(value, '__iter__'):
-                errors[setting] = (
-                    'Must be a tuple. '
-                    "Remember the comma after single values: (u'value',)")
-            if not value:
-                errors[setting] = 'Must contain at least one value.'
+        elif setting in must_be_iterable and not hasattr(value, '__iter__'):
+            errors[setting] = (
+                'Must be a tuple. '
+                "Remember the comma after single values: (u'value',)")
+
+        elif setting in must_have_value_set and not value:
+            errors[setting] = 'Must be set.'
 
         elif setting not in defaults and not setting.startswith('CUSTOM_'):
             errors[setting] = 'Unknown setting.'

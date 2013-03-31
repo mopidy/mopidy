@@ -153,7 +153,8 @@ class Scanner(object):
         self.fakesink.connect('handoff', self.process_handoff)
 
         self.uribin = gst.element_factory_make('uridecodebin')
-        self.uribin.set_property('caps', gst.Caps(b'audio/x-raw-int'))
+        self.uribin.set_property('caps',
+            gst.Caps(b'audio/x-raw-int; audio/x-raw-float'))
         self.uribin.connect('pad-added', self.process_new_pad)
 
         self.pipe = gst.element_factory_make('pipeline')

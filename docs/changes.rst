@@ -5,6 +5,86 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
+v0.13.0 (2013-03-31)
+====================
+
+The 0.13 release brings small improvements and bugfixes throughout Mopidy.
+There are no major new features, just incremental improvement of what we
+already have.
+
+**Dependencies**
+
+- Pykka >= 1.1 is now required.
+
+**Core**
+
+- Removed the :attr:`mopidy.settings.DEBUG_THREAD` setting and the
+  :option:`--debug-thread` command line option. Sending SIGUSR1 to
+  the Mopidy process will now always make it log tracebacks for all alive
+  threads.
+
+- Log a warning if a track isn't playable to make it more obvious that backend
+  X needs backend Y to be present for playback to work.
+
+- :meth:`mopidy.core.TracklistController.add` now accepts an ``uri`` which it
+  will lookup in the library and then add to the tracklist. This is helpful
+  for e.g. web clients that doesn't want to transfer all track meta data back
+  to the server just to add it to the tracklist when the server already got all
+  the needed information easily available. (Fixes: :issue:`325`)
+
+- Change the following methods to accept an ``uris`` keyword argument:
+
+  - :meth:`mopidy.core.LibraryController.find_exact`
+  - :meth:`mopidy.core.LibraryController.search`
+
+  Search queries will only be forwarded to backends handling the given URI
+  roots, and the backends may use the URI roots to further limit what results
+  are returned. For example, a search with ``uris=['file:']`` will only be
+  processed by the local backend. A search with
+  ``uris=['file:///media/music']`` will only be processed by the local backend,
+  and, if such filtering is supported by the backend, will only return results
+  with URIs within the given URI root.
+
+**Audio sub-system**
+
+- Make audio error logging handle log messages with non-ASCII chars. (Fixes:
+  :issue:`347`)
+
+**Local backend**
+
+- Make ``mopidy-scan`` work with Ogg Vorbis files. (Fixes: :issue:`275`)
+
+- Fix playback of files with non-ASCII chars in their file path. (Fixes:
+  :issue:`353`)
+
+**Spotify backend**
+
+- Let GStreamer handle time position tracking and seeks. (Fixes: :issue:`191`)
+
+- For all playlists owned by other Spotify users, we now append the owner's
+  username to the playlist name. (Partly fixes: :issue:`114`)
+
+**HTTP frontend**
+
+- Mopidy.js now works both from browsers and from Node.js environments. This
+  means that you now can make Mopidy clients in Node.js. Mopidy.js has been
+  published to the `npm registry <https://npmjs.org/package/mopidy>`_ for easy
+  installation in Node.js projects.
+
+- Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
+
+- Upgrade Mopidy.js' dependencies when.js from 1.6.1 to 2.0.0.
+
+- Expose :meth:`mopidy.core.Core.get_uri_schemes` to HTTP clients. It is
+  available through Mopidy.js as ``mopidy.getUriSchemes()``.
+
+**MPRIS frontend**
+
+- Publish album art URIs if available.
+
+- Publish disc number of track if available.
+
+
 v0.12.0 (2013-03-12)
 ====================
 

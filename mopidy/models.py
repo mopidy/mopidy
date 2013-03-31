@@ -203,6 +203,9 @@ class Album(ImmutableObject):
 
     #: The album image URIs. Read-only.
     images = frozenset()
+    # XXX If we want to keep the order of images we shouldn't use frozenset()
+    # as it doesn't preserve order. I'm deferring this issue until we got
+    # actual usage of this field with more than one image.
 
     def __init__(self, *args, **kwargs):
         # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
