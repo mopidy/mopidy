@@ -220,14 +220,12 @@ raising :exc:`ImportError` exceptions for missing dependencies, etc.
         name = 'Mopidy-Soundspot'
         version = __version__
 
-        @classmethod
-        def get_default_config(cls):
+        def get_default_config(self):
             config_file = os.path.join(
                 os.path.dirname(__file__), 'config.ini')
             return open(config_file).read()
 
-        @classmethod
-        def validate_config(cls, config):
+        def validate_config(self, config):
             # ``config`` is the complete config document for the Mopidy
             # instance. The extension is free to check any config value it is
             # interested in, not just its own config values.
@@ -239,8 +237,7 @@ raising :exc:`ImportError` exceptions for missing dependencies, etc.
             if not config.get('soundspot', 'password'):
                 raise ExtensionError('Config soundspot.password not set')
 
-        @classmethod
-        def validate_environment(cls):
+        def validate_environment(self):
             # This method can validate anything it wants about the environment
             # the extension is running in. Examples include checking if all
             # dependencies are installed.
@@ -253,18 +250,15 @@ raising :exc:`ImportError` exceptions for missing dependencies, etc.
         # You will typically only implement one of the next three methods
         # in a single extension.
 
-        @classmethod
-        def get_frontend_class(cls):
+        def get_frontend_class(self):
             from .frontend import SoundspotFrontend
             return SoundspotFrontend
 
-        @classmethod
-        def get_backend_class(cls):
+        def get_backend_class(self):
             from .backend import SoundspotBackend
             return SoundspotBackend
 
-        @classmethod
-        def register_gstreamer_elements(cls):
+        def register_gstreamer_elements(self):
             from .mixer import SoundspotMixer
 
             gobject.type_register(SoundspotMixer)
