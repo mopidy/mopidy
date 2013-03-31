@@ -175,7 +175,7 @@ Getting the library for development on the library
 
 If you want to work on the Mopidy.js library itself, you'll find a complete
 development setup in the ``js/`` dir in our repo. The instructions in
-``js/README.rst`` will guide you on your way.
+``js/README.md`` will guide you on your way.
 
 
 Creating an instance
