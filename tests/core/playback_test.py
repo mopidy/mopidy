@@ -178,3 +178,15 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertFalse(self.playback1.get_time_position.called)
         self.assertFalse(self.playback2.get_time_position.called)
+
+    def test_change_track_with_track_model(self):
+        self.core.playback.change_track(self.tl_tracks[1])
+
+        self.assertEqual(self.core.playback.state, PlaybackState.STOPPED)
+        self.assertEqual(self.core.playback.current_tl_track, self.tl_tracks[1])
+
+    def test_change_track_from_track_uri(self):
+
+        self.core.playback.change_track(None, self.tl_tracks[3].track.uri)
+        self.assertEqual(self.core.playback.state, PlaybackState.STOPPED)
+        self.assertEqual(self.core.playback.current_tl_track, self.tl_tracks[3])
