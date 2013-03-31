@@ -5,10 +5,12 @@ Changes
 This change log is used to track all major changes to Mopidy.
 
 
-v0.13.0 (in development)
-========================
+v0.13.0 (2013-03-31)
+====================
 
-(in development)
+The 0.13 release brings small improvements and bugfixes throughout Mopidy.
+There are no major new features, just incremental improvement of what we
+already have.
 
 **Dependencies**
 
