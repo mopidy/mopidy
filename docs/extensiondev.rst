@@ -49,8 +49,8 @@ Mopidy-Soundspot==dev``.
 
 Mopidy extensions must be licensed under an Apache 2.0 (like Mopidy itself),
 BSD, MIT or more liberal license to be able to be enlisted in the Mopidy
-Extension Registry. The license text should be included in the ``LICENSE`` file
-in the root of the extension's Git repo.
+documentation. The license text should be included in the ``LICENSE`` file in
+the root of the extension's Git repo.
 
 Combining this together, we get the following folder structure for our
 extension, Mopidy-Soundspot::
@@ -60,14 +60,21 @@ extension, Mopidy-Soundspot::
         README.rst              # Document what it is and how to use it
         mopidy_soundspot/       # Your code
             __init__.py
+            config.ini          # Default configuration for the extension
             ...
         setup.py                # Installation script
 
 Example content for the most important files follows below.
 
 
-README.rst
-----------
+Example README.rst
+==================
+
+The README file should quickly tell what the extension does, how to install it,
+and how to configure it. The README should contain a development snapshot link
+to a tarball of the latest development version of the extension. It's important
+that the development snapshot link ends with ``#egg=mopidy-something-dev`` for
+installation using ``pip install mopidy-something==dev`` to work.
 
 .. code-block:: rst
 
@@ -104,18 +111,40 @@ README.rst
     - `Download development snapshot <https://github.com/mopidy/mopidy-soundspot/tarball/develop#egg=mopidy-soundspot-dev>`_
 
 
-setup.py
---------
+Example setup.py
+================
+
+The ``setup.py`` file must use setuptools/distribute, and not distutils. This
+is because Mopidy extensions use setuptools' entry point functionality to
+register themselves as available Mopidy extensions when they are installed on
+your system.
+
+The example below also includes a couple of convenient tricks for reading the
+package version from the source code so that it it's just defined in a single
+place, and to reuse the README file as the long description of the package for
+the PyPI registration.
+
+The package must have ``install_requires`` on ``setuptools`` and ``Mopidy``, in
+addition to any other dependencies required by your extension. The
+``entry_points`` part must be included. The ``mopidy.extension`` part cannot be
+changed, but the innermost string should be changed. It's format is
+``my_ext_name = my_py_module:MyExtClass``. ``my_ext_name`` should be a short
+name for your extension, typically the part after "Mopidy-" in lowercase. This
+name is used e.g. to name the config section for your extension. The
+``my_py_module:MyExtClass`` part is simply the Python path to the extension
+class that will connect the rest of the dots.
 
 ::
 
     import re
     from setuptools import setup
 
+
     def get_version(filename):
         content = open(filename).read()
         metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", content))
         return metadata['version']
+
 
     setup(
         name='Mopidy-Soundspot',
@@ -138,11 +167,11 @@ setup.py
             'Mopidy',
             'pysoundspot',
         ],
-        entry_points=[
+        entry_points={
             'mopidy.extension': [
-                'mopidy_soundspot = mopidy_soundspot:EntryPoint',
+                'soundspot = mopidy_soundspot:Extension',
             ],
-        ],
+        },
         classifiers=[
             'Environment :: No Input/Output (Daemon)',
             'Intended Audience :: End Users/Desktop',
@@ -154,32 +183,46 @@ setup.py
     )
 
 
-mopidy_soundspot/__init__.py
-----------------------------
+Example __init__.py
+===================
+
+The ``__init__.py`` file should be placed inside the ``mopidy_soundspot``
+Python package.  The root of your Python package should have an ``__version__``
+attribute with a :pep:`386` compliant version number, for example "0.1". Next,
+it should have a class named ``Extension`` which inherits from Mopidy's
+extension base class. This is the class referred to in the ``entry_points``
+part of ``setup.py``. Any imports of other files in your extension should be
+kept inside methods.  This ensures that this file can be imported without
+raising :exc:`ImportError` exceptions for missing dependencies, etc.
 
 ::
 
+    import os
+
     from mopidy.exceptions import ExtensionError
+    from mopidy.utils import ext
+
 
     __version__ = '0.1'
 
 
-    class EntryPoint(object):
+    class Extension(ext.Extension):
 
         name = 'Mopidy-Soundspot'
         version = __version__
 
         @classmethod
         def get_default_config(cls):
-            return """
-                [soundspot]
-                enabled = true
-                username =
-                password =
-            """
+            config_file = os.path.join(
+                os.path.dirname(__file__), 'config.ini')
+            return open(config_file).read()
 
         @classmethod
         def validate_config(cls, config):
+            # ``config`` is the complete config document for the Mopidy
+            # instance. The extension is free to check any config value it is
+            # interested in, not just its own config values.
+
             if not config.getboolean('soundspot', 'enabled'):
                 return
             if not config.get('soundspot', 'username'):
@@ -189,38 +232,70 @@ mopidy_soundspot/__init__.py
 
         @classmethod
         def validate_environment(cls):
+            # This method can validate anything it wants about the environment
+            # the extension is running in. Examples include checking if all
+            # dependencies are installed.
+
             try:
                 import pysoundspot
             except ImportError as e:
                 raise ExtensionError('pysoundspot library not found', e)
 
+        # You will typically only implement one of the next three methods
+        # in a single extension.
+
         @classmethod
-        def start_frontend(cls, core):
+        def get_frontend_class(cls):
             from .frontend import SoundspotFrontend
-            cls._frontend = SoundspotFrontend.start(core=core)
+            return SoundspotFrontend
 
         @classmethod
-        def stop_frontend(cls):
-            cls._frontend.stop()
-
-        @classmethod
-        def start_backend(cls, audio):
+        def get_backend_class(cls):
             from .backend import SoundspotBackend
-            cls._backend = SoundspotBackend.start(audio=audio)
+            return SoundspotBackend
 
         @classmethod
-        def stop_backend(cls):
-            cls._backend.stop()
+        def get_gstreamer_element_classes(cls):
+            from .mixer import SoundspotMixer
+            return [SoundspotMixer]
 
 
-mopidy_soundspot/frontend.py
-----------------------------
+Example config.ini
+==================
+
+The default configuration for the extension is located in a ``config.ini`` file
+inside the Python package. It contains a single config section, with a name
+matching the short name used for the extension in the ``entry_points`` part of
+``setup.py``.
+
+All extensions should include an ``enabled`` config which should default to
+``true``. Leave any configurations that doesn't have meaningful defaults blank,
+like ``username`` and ``password``.
+
+.. code-block:: ini
+
+    [soundspot]
+    enabled = true
+    username =
+    password =
+
+
+Example frontend
+================
+
+If you want to *use* Mopidy's core API from your extension, then you want to
+implement a frontend.
+
+The skeleton of a frontend would look like this. Notice that the frontend gets
+passed a reference to the core API when it's created. See the
+:ref:`frontend-api` for more details.
 
 ::
 
     import pykka
 
     from mopidy.core import CoreListener
+
 
     class SoundspotFrontend(pykka.ThreadingActor, CoreListener):
         def __init__(self, core):
@@ -230,14 +305,22 @@ mopidy_soundspot/frontend.py
         # Your frontend implementation
 
 
-mopidy_soundspot/backend.py
----------------------------
+Example backend
+===============
+
+If you want to extend Mopidy to support new music and playlist sources, you
+want to implement a backend. A backend does not have access to Mopidy's core
+API at all and got a bunch of interfaces to implement.
+
+The skeleton of a backend would look like this. See :ref:`backend-api` for more
+details.
 
 ::
 
     import pykka
 
     from mopidy.backends import base
+
 
     class SoundspotBackend(pykka.ThreadingActor, base.BaseBackend):
         def __init__(self, audio):
@@ -247,35 +330,67 @@ mopidy_soundspot/backend.py
         # Your backend implementation
 
 
-Notes
-=====
+Example GStreamer element
+=========================
 
-An extension wants to:
+If you want to extend Mopidy's GStreamer pipeline with new custom GStreamer
+elements, you'll need to get Mopidy to register them in GStreamer before they
+can be used.
 
-- Be automatically found if installed
-  - Either register a setuptools entry points on installation, or
-  - Require a line of configuration to activate the extension
+Basically, you just implement your GStreamer element in Python and then make
+your :meth:`Extension.get_gstreamer_element_classes` method return a list with
+the classes of all your custom GStreamer elements.
 
-- Provide default config
+For examples of custom GStreamer elements implemented in Python, see
+:mod:`mopidy.audio.mixers`.
 
-- Validate configuration
 
-  - Pass all configuration to every extension, let the extension complain on
-    anything it wants to
+Implementation steps
+====================
 
-- Validate presence of dependencies
+A rough plan of how to make the above document the reality of how Mopidy
+extensions work.
 
-  - Python packages (e.g. pyspotify)
+1. Implement :class:`mopidy.utils.ext.Extension` base class and the
+   :exc:`mopidy.exceptions.ExtensionError` exception class.
 
-  - Other software
+2. Switch from using distutils to setuptools to package and install Mopidy so
+   that we can register entry points for the bundled extensions and get
+   information about all extensions available on the system from
+   :mod:`pkg_resources`.
 
-  - The presence of other extensions can be validated in the configuration
-    validation step
+3. Add :class:`Extension` classes for all existing frontends and backends. Make
+   sure to add default config files and config validation, even though this
+   will not be used at this implementation stage.
 
-- Validate that needed TCP ports are free
+4. Add entry points for the existing extensions in the ``setup.py`` file.
 
-- Register new GStreamer elements
+5. Rewrite the startup procedure to find extensions and thus frontends and
+   backends via :mod:`pkg_resouces` instead of the ``FRONTENDS`` and
+   ``BACKENDS`` settings.
 
-- Be asked to start running
+6. Remove the ``FRONTENDS`` and ``BACKENDS`` settings.
 
-- Be asked to shut down
+7. Switch to ini file based configuration, using :mod:`ConfigParser`. The
+   default config is the combination of a core config file plus the config from
+   each installed extension. To find the effective config for the system, the
+   following config sources are added together, with the later ones overriding
+   the earlier ones:
+
+   - the default config,
+
+   - ``/etc/mopidy.conf``,
+
+   - ``~/.config/mopidy.conf``, and
+
+   - any config file provided via command line arguments.
+
+8. Add command line options for:
+
+   - printing the effective config,
+
+   - overriding a config temporarily,
+
+   - loading an additional config file, and
+
+   - write a config value permanently to ``~/.config/mopidy.conf``.

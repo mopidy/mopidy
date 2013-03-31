@@ -24,6 +24,12 @@ v0.13.0 (in development)
   the Mopidy process will now always make it log tracebacks for all alive
   threads.
 
+- :meth:`mopidy.core.TracklistController.add` now accepts an ``uri`` which it
+  will lookup in the libraries and then add to the tracklist. This is helpful
+  for e.g. web clients that doesn't want to transfer all track meta data back
+  to the server just to add it to the tracklist when the server already got all
+  the needed information easily available. (Fixes: :issue:`325`)
+
 - Change the following methods to accept an ``uris`` keyword argument:
 
   - :meth:`mopidy.core.LibraryController.find_exact`
@@ -57,6 +63,11 @@ v0.13.0 (in development)
   username to the playlist name. (Partly fixes: :issue:`114`)
 
 **HTTP frontend**
+
+- Mopidy.js now works both from browsers and from Node.js environments. This
+  means that you now can make Mopidy clients in Node.js. Mopidy.js has been
+  published to the `npm registry <https://npmjs.org/package/mopidy>`_ for easy
+  installation in Node.js projects.
 
 - Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
 
