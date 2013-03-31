@@ -73,6 +73,9 @@ v0.13.0 (in development)
 
 - Upgrade Mopidy.js' dependencies when.js from 1.6.1 to 1.8.1.
 
+- Expose :meth:`mopidy.core.Core.get_uri_schemes` to HTTP clients. It is
+  available through Mopidy.js as ``mopidy.getUriSchemes()``.
+
 **MPRIS frontend**
 
 - Publish album art URIs if available.

@@ -181,7 +181,7 @@ class JsonRpcWrapper(object):
                 data='"params", if given, must be an array or an object')
 
     def _get_method(self, method_path):
-        if inspect.isroutine(self.objects.get(method_path, None)):
+        if callable(self.objects.get(method_path, None)):
             # The mounted object is the callable
             return self.objects[method_path]
 
