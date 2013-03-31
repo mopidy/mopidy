@@ -136,6 +136,8 @@ class that will connect the rest of the dots.
 
 ::
 
+    from __future__ import unicode_literals
+
     import re
     from setuptools import setup
 
@@ -197,7 +199,14 @@ raising :exc:`ImportError` exceptions for missing dependencies, etc.
 
 ::
 
+    from __future__ import unicode_literals
+
     import os
+
+    import pygst
+    pygst.require('0.10')
+    import gst
+    import gobject
 
     from mopidy.exceptions import ExtensionError
     from mopidy.utils import ext
@@ -255,9 +264,13 @@ raising :exc:`ImportError` exceptions for missing dependencies, etc.
             return SoundspotBackend
 
         @classmethod
-        def get_gstreamer_element_classes(cls):
+        def register_gstreamer_elements(cls):
             from .mixer import SoundspotMixer
-            return [SoundspotMixer]
+
+            gobject.type_register(SoundspotMixer)
+            gst.element_register(
+                SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
+
 
 
 Example config.ini
@@ -334,12 +347,11 @@ Example GStreamer element
 =========================
 
 If you want to extend Mopidy's GStreamer pipeline with new custom GStreamer
-elements, you'll need to get Mopidy to register them in GStreamer before they
-can be used.
+elements, you'll need to register them in GStreamer before they can be used.
 
 Basically, you just implement your GStreamer element in Python and then make
-your :meth:`Extension.get_gstreamer_element_classes` method return a list with
-the classes of all your custom GStreamer elements.
+your :meth:`Extension.register_gstreamer_elements` method register all your
+custom GStreamer elements.
 
 For examples of custom GStreamer elements implemented in Python, see
 :mod:`mopidy.audio.mixers`.
@@ -377,20 +389,22 @@ extensions work.
    following config sources are added together, with the later ones overriding
    the earlier ones:
 
-   - the default config,
+   - the default config built from Mopidy core and all installed extensions,
 
    - ``/etc/mopidy.conf``,
 
-   - ``~/.config/mopidy.conf``, and
+   - ``~/.config/mopidy.conf``,
 
-   - any config file provided via command line arguments.
+   - any config file provided via command line arguments, and
+
+   - any config values provided via command line arguments.
 
 8. Add command line options for:
 
-   - printing the effective config,
+   - loading an additional config file for this execution of Mopidy,
 
-   - overriding a config temporarily,
+   - setting a config value for this execution of Mopidy,
 
-   - loading an additional config file, and
+   - printing the effective config and exit, and
 
-   - write a config value permanently to ``~/.config/mopidy.conf``.
+   - write a config value permanently to ``~/.config/mopidy.conf`` and exit.
