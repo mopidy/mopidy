@@ -9,6 +9,8 @@ import sys
 import gobject
 gobject.threads_init()
 
+import pykka.debug
+
 
 # Extract any non-GStreamer arguments, and leave the GStreamer arguments for
 # processing by GStreamer. This needs to be done before GStreamer is imported,
@@ -43,14 +45,10 @@ logger = logging.getLogger('mopidy.main')
 
 def main():
     signal.signal(signal.SIGTERM, process.exit_handler)
+    signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
     loop = gobject.MainLoop()
     options = parse_options()
-
-    if options.debug_thread or settings.DEBUG_THREAD:
-        debug_thread = process.DebugThread()
-        debug_thread.start()
-        signal.signal(signal.SIGUSR1, debug_thread.handler)
 
     try:
         log.setup_logging(options.verbosity_level, options.save_debug_log)

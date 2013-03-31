@@ -1,4 +1,10 @@
-/*global buster:false, assert:false, refute:false, when:false, Mopidy:false*/
+/*global require:false, assert:false, refute:false*/
+
+if (typeof module === "object" && typeof require === "function") {
+    var buster = require("buster");
+    var Mopidy = require("../src/mopidy").Mopidy;
+    var when = require("when");
+}
 
 buster.testCase("Mopidy", {
     setUp: function () {
@@ -14,10 +20,11 @@ buster.testCase("Mopidy", {
         fakeWebSocket.OPEN = 1;
         fakeWebSocket.CLOSING = 2;
         fakeWebSocket.CLOSED = 3;
-        this.realWebSocket = WebSocket;
-        window.WebSocket = fakeWebSocket;
 
-        this.webSocketConstructorStub = this.stub(window, "WebSocket");
+        this.realWebSocket = Mopidy.WebSocket;
+        Mopidy.WebSocket = fakeWebSocket;
+
+        this.webSocketConstructorStub = this.stub(Mopidy, "WebSocket");
 
         this.webSocket = {
             close: this.stub(),
@@ -27,15 +34,18 @@ buster.testCase("Mopidy", {
     },
 
     tearDown: function () {
-        window.WebSocket = this.realWebSocket;
+        Mopidy.WebSocket = this.realWebSocket;
     },
 
     "constructor": {
         "connects when autoConnect is true": function () {
             new Mopidy({autoConnect: true});
 
+            var currentHost = typeof document !== "undefined" &&
+                document.location.host || "localhost";
+
             assert.calledOnceWith(this.webSocketConstructorStub,
-                "ws://" + document.location.host + "/mopidy/ws/");
+                "ws://" + currentHost + "/mopidy/ws/");
         },
 
         "does not connect when autoConnect is false": function () {
@@ -67,12 +77,15 @@ buster.testCase("Mopidy", {
 
             mopidy.connect();
 
+            var currentHost = typeof document !== "undefined" &&
+                document.location.host || "localhost";
+
             assert.calledOnceWith(this.webSocketConstructorStub,
-                "ws://" + document.location.host + "/mopidy/ws/");
+                "ws://" + currentHost + "/mopidy/ws/");
         },
 
         "does nothing when the WebSocket is open": function () {
-            this.webSocket.readyState = WebSocket.OPEN;
+            this.webSocket.readyState = Mopidy.WebSocket.OPEN;
             var mopidy = new Mopidy({webSocket: this.webSocket});
 
             mopidy.connect();
@@ -367,7 +380,7 @@ buster.testCase("Mopidy", {
         },
 
         "immediately rejects request if CONNECTING": function (done) {
-            this.mopidy._webSocket.readyState = WebSocket.CONNECTING;
+            this.mopidy._webSocket.readyState = Mopidy.WebSocket.CONNECTING;
 
             var promise = this.mopidy._send({method: "foo"});
 
@@ -381,7 +394,7 @@ buster.testCase("Mopidy", {
         },
 
         "immediately rejects request if CLOSING": function (done) {
-            this.mopidy._webSocket.readyState = WebSocket.CLOSING;
+            this.mopidy._webSocket.readyState = Mopidy.WebSocket.CLOSING;
 
             var promise = this.mopidy._send({method: "foo"});
 
@@ -395,7 +408,7 @@ buster.testCase("Mopidy", {
         },
 
         "immediately rejects request if CLOSED": function (done) {
-            this.mopidy._webSocket.readyState = WebSocket.CLOSED;
+            this.mopidy._webSocket.readyState = Mopidy.WebSocket.CLOSED;
 
             var promise = this.mopidy._send({method: "foo"});
 
@@ -597,16 +610,16 @@ buster.testCase("Mopidy", {
             assert.calledOnceWith(stub);
         },
 
-        "gets Api description from server and calls _createApi": function () {
+        "gets Api description from server and calls _createApi": function (done) {
             var methods = {};
             var sendStub = this.stub(this.mopidy, "_send");
             sendStub.returns(when.resolve(methods));
             var _createApiStub = this.stub(this.mopidy, "_createApi");
 
-            this.mopidy._getApiSpec();
-
-            assert.calledOnceWith(sendStub, {method: "core.describe"});
-            assert.calledOnceWith(_createApiStub, methods);
+            this.mopidy._getApiSpec().then(done(function () {
+                assert.calledOnceWith(sendStub, {method: "core.describe"});
+                assert.calledOnceWith(_createApiStub, methods);
+            }));
         }
     },
 

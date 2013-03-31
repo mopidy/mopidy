@@ -1,9 +1,5 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import logging
 import os
 import threading
@@ -46,6 +42,8 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.backend_ref = backend_ref
 
         self.connected = threading.Event()
+        self.push_audio_data = True
+        self.buffer_timestamp = 0
 
         self.container_manager = None
         self.playlist_manager = None
@@ -107,6 +105,10 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         """Callback used by pyspotify"""
         # pylint: disable = R0913
         # Too many arguments (8/5)
+
+        if not self.push_audio_data:
+            return 0
+
         assert sample_type == 0, 'Expects 16-bit signed integer samples'
         capabilites = """
             audio/x-raw-int,
@@ -120,8 +122,14 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             'sample_rate': sample_rate,
             'channels': channels,
         }
-        buffer_ = gst.Buffer(bytes(frames))
-        buffer_.set_caps(gst.caps_from_string(capabilites))
+
+        duration = audio.calculate_duration(num_frames, sample_rate)
+        buffer_ = audio.create_buffer(bytes(frames),
+                                      capabilites=capabilites,
+                                      timestamp=self.buffer_timestamp,
+                                      duration=duration)
+
+        self.buffer_timestamp += duration
 
         if self.audio.emit_data(buffer_).get():
             return num_frames
