@@ -1,6 +1,6 @@
 {
   "name": "mopidy",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Client lib for controlling a Mopidy music server over a WebSocket",
   "homepage": "http://www.mopidy.com/",
   "author": {
