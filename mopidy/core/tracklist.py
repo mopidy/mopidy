@@ -62,9 +62,12 @@ class TracklistController(object):
     Is not reset before Mopidy is restarted.
     """
 
-    def add(self, tracks, at_position=None):
+    def add(self, tracks=None, at_position=None, uri=None):
         """
         Add the track or list of tracks to the tracklist.
+
+        If ``uri`` is given instead of ``tracks``, the URI is looked up in the
+        library and the resulting tracks are added to the tracklist.
 
         If ``at_position`` is given, the tracks placed at the given position in
         the tracklist. If ``at_position`` is not given, the tracks are appended
@@ -76,9 +79,18 @@ class TracklistController(object):
         :type tracks: list of :class:`mopidy.models.Track`
         :param at_position: position in tracklist to add track
         :type at_position: int or :class:`None`
+        :param uri: URI for tracks to add
+        :type uri: string
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
+        assert tracks is not None or uri is not None, \
+            'tracks or uri must be provided'
+
+        if tracks is None and uri is not None:
+            tracks = self._core.library.lookup(uri)
+
         tl_tracks = []
+
         for track in tracks:
             tl_track = TlTrack(self._next_tlid, track)
             self._next_tlid += 1
