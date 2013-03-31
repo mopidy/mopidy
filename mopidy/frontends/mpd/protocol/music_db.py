@@ -336,7 +336,8 @@ def search(context, mpd_query):
     artists = [_artist_as_track(a) for a in _get_artists(results)]
     albums = [_album_as_track(a) for a in _get_albums(results)]
     tracks = _get_tracks(results)
-    return translator.tracks_to_mpd_format(artists + albums + tracks)
+    # FIXME "mpd search" fails if artists and albums just prepending to function call below
+    return translator.tracks_to_mpd_format(tracks)
 
 
 @handle_request(r'^searchadd ' + QUERY_RE)
