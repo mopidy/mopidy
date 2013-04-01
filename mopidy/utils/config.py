@@ -91,6 +91,10 @@ class ConfigValue(object):
 
 
 class String(ConfigValue):
+    """String values.
+
+    Supports: optional choices and secret.
+    """
     def deserialize(self, value):
         value = value.strip()
         validate_required(value, not self.optional)
@@ -104,6 +108,10 @@ class String(ConfigValue):
 
 
 class Integer(ConfigValue):
+    """Integer values.
+
+    Supports: choices, minimum, maximum and secret.
+    """
     def deserialize(self, value):
         value = int(value)
         validate_choice(value, self.choices)
@@ -113,6 +121,10 @@ class Integer(ConfigValue):
 
 
 class Boolean(ConfigValue):
+    """Boolean values.
+
+    Supports: secret.
+    """
     true_values = ('1', 'yes', 'true', 'on')
     false_values = ('0', 'no', 'false', 'off')
 
@@ -132,6 +144,10 @@ class Boolean(ConfigValue):
 
 
 class List(ConfigValue):
+    """List values split by comma or newline.
+
+    Supports: optional and secret.
+    """
     def deserialize(self, value):
         validate_required(value, not self.optional)
         if '\n' in value:
@@ -145,6 +161,10 @@ class List(ConfigValue):
 
 
 class LogLevel(ConfigValue):
+    """Log level values.
+
+    Supports: secret.
+    """
     levels = {'critical' : logging.CRITICAL,
               'error' : logging.ERROR,
               'warning' : logging.WARNING,
@@ -160,6 +180,10 @@ class LogLevel(ConfigValue):
 
 
 class Hostname(ConfigValue):
+    """Hostname values.
+
+    Supports: optional and secret.
+    """
     def deserialize(self, value):
         validate_required(value, not self.optional)
         if not value.strip():
@@ -172,6 +196,10 @@ class Hostname(ConfigValue):
 
 
 class Port(Integer):
+    """Port values limited to 1-65535.
+
+    Supports: choices and secret.
+    """
     # TODO: consider probing if port is free or not?
     def __init__(self, **kwargs):
         super(Port, self).__init__(**kwargs)
