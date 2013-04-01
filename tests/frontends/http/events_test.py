@@ -12,7 +12,7 @@ import mock
 
 from mopidy.exceptions import OptionalDependencyError
 try:
-    from mopidy.frontends.http import HttpFrontend
+    from mopidy.frontends.http import actor
 except OptionalDependencyError:
     pass
 
@@ -24,7 +24,7 @@ from tests import unittest
 @mock.patch('cherrypy.engine.publish')
 class HttpEventsTest(unittest.TestCase):
     def setUp(self):
-        self.http = HttpFrontend(core=mock.Mock())
+        self.http = actor.HttpFrontend(core=mock.Mock())
 
     def test_track_playback_paused_is_broadcasted(self, publish):
         publish.reset_mock()

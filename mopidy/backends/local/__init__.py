@@ -27,10 +27,6 @@ https://github.com/mopidy/mopidy/issues?labels=Local+backend
 """
 
 
-# TODO Move import into method when BACKENDS setting is removed
-from .actor import LocalBackend
-
-
 class Extension(ext.Extension):
 
     name = 'Mopidy-Local'
@@ -46,4 +42,5 @@ class Extension(ext.Extension):
         pass
 
     def get_backend_classes(self):
+        from .actor import LocalBackend
         return [LocalBackend]

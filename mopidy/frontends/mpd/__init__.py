@@ -51,10 +51,6 @@ near future:
 """
 
 
-# TODO Move import into method when FRONTENDS setting is removed
-from .actor import MpdFrontend
-
-
 class Extension(ext.Extension):
 
     name = 'Mopidy-MPD'
@@ -70,4 +66,5 @@ class Extension(ext.Extension):
         pass
 
     def get_frontend_classes(self):
+        from .actor import MpdFrontend
         return [MpdFrontend]

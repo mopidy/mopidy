@@ -65,10 +65,6 @@ https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 """ % {'config': indent(config)}
 
 
-# TODO Move import into method when BACKENDS setting is removed
-from .actor import SpotifyBackend
-
-
 class Extension(ext.Extension):
 
     name = 'Mopidy-Spotify'
@@ -92,4 +88,5 @@ class Extension(ext.Extension):
             raise ExtensionError('pyspotify library not found', e)
 
     def get_backend_classes(self):
+        from .actor import SpotifyBackend
         return [SpotifyBackend]
