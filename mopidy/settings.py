@@ -39,22 +39,6 @@ DEBUG_LOG_FILENAME = 'mopidy.log'
 #:     DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
 DESKTOP_FILE = '/usr/share/applications/mopidy.desktop'
 
-#: List of server frontends to use. See :ref:`frontend-implementations` for
-#: available frontends.
-#:
-#: Default::
-#:
-#:     FRONTENDS = (
-#:         u'mopidy.frontends.mpd.MpdFrontend',
-#:         u'mopidy.frontends.lastfm.LastfmFrontend',
-#:         u'mopidy.frontends.mpris.MprisFrontend',
-#:     )
-FRONTENDS = (
-    'mopidy.frontends.mpd.MpdFrontend',
-    'mopidy.frontends.lastfm.LastfmFrontend',
-    'mopidy.frontends.mpris.MprisFrontend',
-)
-
 #: Which address Mopidy's HTTP server should bind to.
 #:
 #: Used by :mod:`mopidy.frontends.http`.

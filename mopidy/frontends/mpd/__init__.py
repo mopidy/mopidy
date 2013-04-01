@@ -22,9 +22,7 @@ original MPD server.
 
 **Usage:**
 
-Make sure :attr:`mopidy.settings.FRONTENDS` includes
-``mopidy.frontends.mpd.MpdFrontend``. By default, the setting includes the MPD
-frontend.
+The frontend is enabled by default.
 
 **Limitations:**
 

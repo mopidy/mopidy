@@ -32,9 +32,7 @@ An example of an MPRIS client is the `Ubuntu Sound Menu
 
 **Usage:**
 
-Make sure :attr:`mopidy.settings.FRONTENDS` includes
-``mopidy.frontends.mpris.MprisFrontend``. By default, the setting includes the
-MPRIS frontend.
+The frontend is enabled by default if all dependencies are available.
 
 **Testing the frontend**
 

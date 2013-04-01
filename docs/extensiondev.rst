@@ -1,3 +1,5 @@
+.. _extensiondev:
+
 *********************
 Extension development
 *********************

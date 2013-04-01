@@ -20,8 +20,8 @@ The following requirements applies to any frontend implementation:
 - It MAY use additional actors to implement whatever it does, and using actors
   in frontend implementations is encouraged.
 
-- The frontend is activated by including its main actor in the
-  :attr:`mopidy.settings.FRONTENDS` setting.
+- The frontend is enabled if the extension it is part of is enabled. See
+  :ref:`extensiondev` for more information.
 
 - The main actor MUST be able to start and stop the frontend when the main
   actor is started and stopped.
