@@ -37,8 +37,7 @@ from mopidy import exceptions, settings
 from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.utils import (
-    deps, importing, log, path, process, settings as settings_utils,
-    versioning)
+    deps, log, path, process, settings as settings_utils, versioning)
 
 
 logger = logging.getLogger('mopidy.main')
