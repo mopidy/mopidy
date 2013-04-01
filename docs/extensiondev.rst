@@ -382,7 +382,9 @@ extensions work.
 
    - any config values provided via command line arguments.
 
-9. Add command line options for:
+9. Replace all use of ``mopidy.settings`` with the new config object.
+
+10. Add command line options for:
 
    - loading an additional config file for this execution of Mopidy,
 
@@ -392,3 +394,5 @@ extensions work.
 
    - write a config value permanently to ``~/.config/mopidy/mopidy.conf``, or
      ``/etc/mopidy/mopidy.conf`` if root, and exit.
+
+11. Reimplement ``--list-deps`` based upon information provided by extensions.
