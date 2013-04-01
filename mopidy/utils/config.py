@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 import re
+import socket
 
 
 def validate_choice(value, choices):
@@ -139,3 +140,19 @@ class LogLevel(ConfigValue):
 
     def serialize(self, value):
         return dict((v, k) for k, v in self.levels.items()).get(value)
+
+
+class Hostname(ConfigValue):
+    def deserialize(self, value):
+        try:
+            socket.getaddrinfo(value, None)
+        except socket.error:
+            raise ValueError('must be a resolveable hostname or valid IP.')
+        return value
+
+
+class Port(Integer):
+    def __init__(self, **kwargs):
+        super(Port, self).__init__(**kwargs)
+        self.minimum = 1
+        self.maximum = 2**16 - 1

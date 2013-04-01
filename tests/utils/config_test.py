@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 import logging
+import mock
+import socket
 
 from mopidy.utils import config
 
@@ -209,3 +211,33 @@ class BooleanTest(unittest.TestCase):
     def test_serialize_unknown_level(self):
         value = config.LogLevel()
         self.assertIsNone(value.serialize(1337))
+
+
+class HostnameTest(unittest.TestCase):
+    @mock.patch('socket.getaddrinfo')
+    def test_deserialize_checks_addrinfo(self, getaddrinfo_mock):
+        value = config.Hostname()
+        value.deserialize('example.com')
+        getaddrinfo_mock.assert_called_once_with('example.com', None)
+
+    @mock.patch('socket.getaddrinfo')
+    def test_deserialize_handles_failures(self, getaddrinfo_mock):
+        value = config.Hostname()
+        getaddrinfo_mock.side_effect = socket.error
+        self.assertRaises(ValueError, value.deserialize, 'example.com')
+
+
+class PortTest(unittest.TestCase):
+    def test_valid_ports(self):
+        value = config.Port()
+        self.assertEqual(1, value.deserialize('1'))
+        self.assertEqual(80, value.deserialize('80'))
+        self.assertEqual(6600, value.deserialize('6600'))
+        self.assertEqual(65535, value.deserialize('65535'))
+
+    def test_invalid_ports(self):
+        value = config.Port()
+        self.assertRaises(ValueError, value.deserialize, '65536')
+        self.assertRaises(ValueError, value.deserialize, '100000')
+        self.assertRaises(ValueError, value.deserialize, '0')
+        self.assertRaises(ValueError, value.deserialize, '-1')
