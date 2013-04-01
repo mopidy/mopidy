@@ -51,3 +51,38 @@ class ValidateMaximumTest(unittest.TestCase):
     def test_to_large_value_fails_with_zero_as_maximum(self):
         with self.assertRaises(ValueError):
             config.validate_maximum(5, 0)
+
+
+class ConfigValueTest(unittest.TestCase):
+    def test_init(self):
+        value = config.ConfigValue()
+        self.assertIsNone(value.choices)
+        self.assertIsNone(value.minimum)
+        self.assertIsNone(value.maximum)
+        self.assertIsNone(value.secret)
+
+    def test_init_with_params(self):
+        value = config.ConfigValue(
+            choices=['foo'], minimum=0, maximum=10, secret=True)
+        self.assertEqual(['foo'], value.choices)
+        self.assertEqual(0, value.minimum)
+        self.assertEqual(10, value.maximum)
+        self.assertEqual(True, value.secret)
+
+    def test_deserialize_passes_through(self):
+        value = config.ConfigValue()
+        obj = object()
+        self.assertEqual(obj, value.deserialize(obj))
+
+    def test_serialize_converts_to_string(self):
+        value = config.ConfigValue()
+        self.assertIsInstance(value.serialize(object()), basestring)
+
+    def test_format_uses_serialize(self):
+        value = config.ConfigValue()
+        obj = object()
+        self.assertEqual(value.serialize(obj), value.format(obj))
+
+    def test_format_masks_secrets(self):
+        value = config.ConfigValue(secret=True)
+        self.assertEqual('********', value.format(object()))
