@@ -1,2 +1,5 @@
+setuptools
+# Available as python-setuptools in Debian/Ubuntu
+
 Pykka >= 1.1
 # Available as python-pykka from apt.mopidy.com
