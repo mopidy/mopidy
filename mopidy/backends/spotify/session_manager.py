@@ -169,6 +169,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             return
         playlists = map(
             translator.to_mopidy_playlist, self.session.playlist_container())
+        playlists.append(translator.to_mopidy_playlist(self.session.starred()))
         playlists = filter(None, playlists)
         self.backend.playlists.playlists = playlists
         logger.info('Loaded %d Spotify playlist(s)', len(playlists))
