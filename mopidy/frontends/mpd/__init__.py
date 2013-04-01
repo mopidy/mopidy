@@ -1,4 +1,10 @@
-"""The MPD server frontend.
+from __future__ import unicode_literals
+
+import mopidy
+from mopidy import ext
+
+
+__doc__ = """The MPD server frontend.
 
 MPD stands for Music Player Daemon. MPD is an independent project and server.
 Mopidy implements the MPD protocol, and is thus compatible with clients for the
@@ -44,7 +50,24 @@ near future:
 - Live update of the music database is not supported
 """
 
-from __future__ import unicode_literals
 
-# flake8: noqa
+# TODO Move import into method when FRONTENDS setting is removed
 from .actor import MpdFrontend
+
+
+class Extension(ext.Extension):
+
+    name = 'Mopidy-MPD'
+    version = mopidy.__version__
+
+    def get_default_config(self):
+        return '[mpd]'
+
+    def validate_config(self, config):
+        pass
+
+    def validate_environment(self):
+        pass
+
+    def get_frontend_classes(self):
+        return [MpdFrontend]
