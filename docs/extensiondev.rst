@@ -265,13 +265,13 @@ meaningful defaults blank, like ``username`` and ``password``.
         # You will typically only implement one of the next three methods
         # in a single extension.
 
-        def get_frontend_class(self):
+        def get_frontend_classes(self):
             from .frontend import SoundspotFrontend
-            return SoundspotFrontend
+            return [SoundspotFrontend]
 
-        def get_backend_class(self):
+        def get_backend_classes(self):
             from .backend import SoundspotBackend
-            return SoundspotBackend
+            return [SoundspotBackend]
 
         def register_gstreamer_elements(self):
             from .mixer import SoundspotMixer
