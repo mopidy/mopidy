@@ -144,6 +144,8 @@ def load_extensions():
     for entry_point in pkg_resources.iter_entry_points('mopidy.extension'):
         logger.debug('Loading extension %s', entry_point.name)
 
+        # TODO Filter out disabled extensions
+
         try:
             extension_class = entry_point.load()
         except pkg_resources.DistributionNotFound as ex:
@@ -154,7 +156,7 @@ def load_extensions():
 
         extension = extension_class()
 
-        # TODO Validate configuration, filter out disabled extensions
+        # TODO Validate configuration
 
         try:
             extension.validate_environment()
