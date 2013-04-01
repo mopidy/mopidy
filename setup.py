@@ -47,6 +47,7 @@ setup(
         b'mopidy.extension': [
             'local = mopidy.backends.local:Extension',
             'spotify = mopidy.backends.spotify:Extension',
+            'stream = mopidy.backends.stream:Extension',
         ],
     },
     classifiers=[

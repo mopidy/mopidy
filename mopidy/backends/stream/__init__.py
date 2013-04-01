@@ -1,4 +1,10 @@
-"""A backend for playing music for streaming music.
+from __future__ import unicode_literals
+
+import mopidy
+from mopidy import ext
+
+
+__doc__ = """A backend for playing music for streaming music.
 
 This backend will handle streaming of URIs in
 :attr:`mopidy.settings.STREAM_PROTOCOLS` assuming the right plugins are
@@ -17,7 +23,24 @@ https://github.com/mopidy/mopidy/issues?labels=Stream+backend
 - :attr:`mopidy.settings.STREAM_PROTOCOLS`
 """
 
-from __future__ import unicode_literals
 
-# flake8: noqa
+# TODO Move import into method when BACKENDS setting is removed
 from .actor import StreamBackend
+
+
+class Extension(ext.Extension):
+
+    name = 'Mopidy-Stream'
+    version = mopidy.__version__
+
+    def get_default_config(self):
+        return '[stream]'
+
+    def validate_config(self, config):
+        pass
+
+    def validate_environment(self):
+        pass
+
+    def get_backend_classes(self):
+        return [StreamBackend]
