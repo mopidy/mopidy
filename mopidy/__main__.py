@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
 
+import codecs
+import ConfigParser
 import logging
 import optparse
 import os
 import signal
+import StringIO
 import sys
 
 import gobject
@@ -35,6 +38,7 @@ sys.path.insert(
 
 from mopidy import exceptions, settings
 from mopidy.audio import Audio
+from mopidy.config import default_config, config_schemas
 from mopidy.core import Core
 from mopidy.utils import (
     deps, log, path, process, settings as settings_utils, versioning)
@@ -54,6 +58,7 @@ def main():
         log.setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         extensions = load_extensions()
+        load_config(options, extensions)
         setup_settings(options.interactive)
         audio = setup_audio()
         backends = setup_backends(extensions, audio)
@@ -166,6 +171,62 @@ def load_extensions():
             entry_point.name, extension.dist_name, extension.version)
         extensions.append(extension)
     return extensions
+
+
+def load_config(options, extensions):
+    parser = ConfigParser.RawConfigParser()
+
+    files = [
+        '/etc/mopidy/mopidy.conf',
+        '~/.config/mopidy/mopidy.conf',
+    ]
+    # TODO Add config file given through `options` to `files`
+    # TODO Replace `files` with single file given through `options`
+
+    # Read default core config
+    parser.readfp(StringIO.StringIO(default_config))
+
+    # Read default extension config
+    for extension in extensions:
+        parser.readfp(StringIO.StringIO(extension.get_default_config()))
+
+    # Load config from a series of config files
+    for filename in files:
+        filename = os.path.expanduser(filename)
+        try:
+            filehandle = codecs.open(filename, encoding='utf-8')
+            parser.readfp(filehandle)
+        except IOError:
+            logger.debug('Config file %s not found; skipping', filename)
+            continue
+        except UnicodeDecodeError:
+            logger.error('Config file %s is not UTF-8 encoded', filename)
+            process.exit_process()
+
+    # TODO Merge config values given through `options` into `config`
+
+    # Collect config schemas to validate against
+    sections_and_schemas = config_schemas.items()
+    for extension in extensions:
+        section_name = 'ext.%s' % extension.ext_name
+        if parser.getboolean(section_name, 'enabled'):
+            sections_and_schemas.append(
+                (section_name, extension.get_config_schema()))
+
+    # Get validated config
+    config = {}
+    for section_name, schema in sections_and_schemas:
+        if not parser.has_section(section_name):
+            logger.error('Config section %s not found', section_name)
+            process.exit_process()
+        try:
+            config[section_name] = schema.convert(parser.items(section_name))
+        except exceptions.ConfigError as error:
+            for key in error:
+                logger.error('Config error: %s: %s', key, error[key])
+            process.exit_process()
+
+    return config
 
 
 def setup_settings(interactive):
