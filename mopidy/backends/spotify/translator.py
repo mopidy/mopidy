@@ -71,14 +71,19 @@ def to_mopidy_playlist(spotify_playlist):
     if not spotify_playlist.is_loaded():
         return Playlist(uri=uri, name='[loading...]')
     name = spotify_playlist.name()
+    tracks=[
+        to_mopidy_track(spotify_track)
+        for spotify_track in spotify_playlist
+        if not spotify_track.is_local()
+    ]
     if not name:
         name = "Starred"
+        # Tracks in the Starred playlist are in reverse order from the official
+        # client.
+        tracks.reverse()
     if spotify_playlist.owner().canonical_name() != settings.SPOTIFY_USERNAME:
         name += ' by ' + spotify_playlist.owner().canonical_name()
     return Playlist(
         uri=uri,
         name=name,
-        tracks=[
-            to_mopidy_track(spotify_track)
-            for spotify_track in spotify_playlist
-            if not spotify_track.is_local()])
+        tracks=tracks)
