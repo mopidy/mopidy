@@ -143,10 +143,22 @@ def setup_settings(interactive):
 def load_extensions():
     extensions = []
     for entry_point in pkg_resources.iter_entry_points('mopidy.extension'):
+        logger.debug('Loading extension %s', entry_point.name)
         extension_class = entry_point.load()
         extension = extension_class()
+
+        # TODO Validate configuration, filter out disabled extensions
+
+        try:
+            extension.validate_environment()
+        except exceptions.ExtensionError as ex:
+            logger.info(
+                'Disabled extension: %s (%s)', extension.name, ex.message)
+            continue
+
         logger.info(
-            'Loading extension: %s %s', extension.name, extension.version)
+            'Loaded extension %s: %s %s',
+            entry_point.name, extension.name, extension.version)
         extensions.append(extension)
     return extensions
 
