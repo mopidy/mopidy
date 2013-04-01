@@ -24,10 +24,6 @@ https://github.com/mopidy/mopidy/issues?labels=Stream+backend
 """
 
 
-# TODO Move import into method when BACKENDS setting is removed
-from .actor import StreamBackend
-
-
 class Extension(ext.Extension):
 
     name = 'Mopidy-Stream'
@@ -43,4 +39,5 @@ class Extension(ext.Extension):
         pass
 
     def get_backend_classes(self):
+        from .actor import StreamBackend
         return [StreamBackend]

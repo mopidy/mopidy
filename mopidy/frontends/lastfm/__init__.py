@@ -30,10 +30,6 @@ the Last.fm frontend.
 """
 
 
-# TODO Move import into method when FRONTENDS setting is removed
-from .actor import LastfmFrontend
-
-
 class Extension(ext.Extension):
 
     name = 'Mopidy-Lastfm'
@@ -52,4 +48,5 @@ class Extension(ext.Extension):
             raise ExtensionError('pylast library not found', e)
 
     def get_frontend_classes(self):
+        from .actor import LastfmFrontend
         return [LastfmFrontend]

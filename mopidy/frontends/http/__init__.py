@@ -485,10 +485,6 @@ Example to get started with
 """
 
 
-# TODO Move import into method when FRONTENDS setting is removed
-from .actor import HttpFrontend
-
-
 class Extension(ext.Extension):
 
     name = 'Mopidy-HTTP'
@@ -512,4 +508,5 @@ class Extension(ext.Extension):
             raise ExtensionError('Library ws4py not found', e)
 
     def get_frontend_classes(self):
+        from .actor import HttpFrontend
         return [HttpFrontend]
