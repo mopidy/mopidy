@@ -182,11 +182,11 @@ class ListTest(unittest.TestCase):
 
 
 class BooleanTest(unittest.TestCase):
-    levels = {'critical' : logging.CRITICAL,
-              'error' : logging.ERROR,
-              'warning' : logging.WARNING,
-              'info' : logging.INFO,
-              'debug' : logging.DEBUG}
+    levels = {'critical': logging.CRITICAL,
+              'error': logging.ERROR,
+              'warning': logging.WARNING,
+              'info': logging.INFO,
+              'debug': logging.DEBUG}
 
     def test_deserialize_converts_to_numeric_loglevel(self):
         value = config.LogLevel()

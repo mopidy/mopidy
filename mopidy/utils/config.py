@@ -87,6 +87,9 @@ class String(ConfigValue):
         validate_choice(value, self.choices)
         return value
 
+    def serialize(self, value):
+        return value.encode('utf-8')
+
 
 class Integer(ConfigValue):
     def deserialize(self, value):
@@ -121,10 +124,10 @@ class List(ConfigValue):
         if '\n' in value:
             return re.split(r'\s*\n\s*', value.strip())
         else:
-            return re.split(r',\s*', value.strip())
+            return re.split(r'\s*,\s*', value.strip())
 
     def serialize(self, value):
-        return '\n  '.join(value)
+        return '\n  '.join(v.encode('utf-8') for v in value)
 
 
 class LogLevel(ConfigValue):
@@ -148,7 +151,7 @@ class Hostname(ConfigValue):
         try:
             socket.getaddrinfo(value, None)
         except socket.error:
-            raise ValueError('must be a resolveable hostname or valid IP.')
+            raise ValueError('must be a resolveable hostname or valid IP')
         return value
 
 
@@ -160,13 +163,14 @@ class Port(Integer):
 
 
 class ConfigSchema(object):
-    """Logical group of config values that corespond to a config section.
+    """Logical group of config values that correspond to a config section.
 
-    Schemas are setup by assigning config keys with config values to instances.
-    Once setup `convert` can be called with a list of `(key, value)` tuples to
-    process. For convienience we also support a `format` method that can used
+    Schemas are set up by assigning config keys with config values to instances.
+    Once setup :meth:`convert` can be called with a list of `(key, value)` tuples to
+    process. For convienience we also support :meth:`format` method that can used
     for printing out the converted values.
     """
+    # TODO: Use collections.OrderedDict once 2.6 support is gone (#344)
     def __init__(self):
         self._schema = {}
         self._order = []
@@ -212,7 +216,7 @@ class ConfigSchema(object):
 
 
 class ExtensionConfigSchema(ConfigSchema):
-    """Sub-classed ConfigSchema for use in extensions.
+    """Sub-classed :class:`ConfigSchema` for use in extensions.
 
     Ensures that `enabled` config value is present and that section name is
     prefixed with ext.
@@ -229,17 +233,17 @@ class LogLevelConfigSchema(object):
     """Special cased schema for handling a config section with loglevels.
 
     Expects the config keys to be logger names and the values to be log levels
-    as understood by the LogLevel config value. Does not sub-class ConfigSchema,
-    but implements the same interface.
+    as understood by the :class:`LogLevel` config value. Does not sub-class
+    :class:`ConfigSchema`, but implements the same interface.
     """
     def __init__(self):
-        self._configvalue = LogLevel()
+        self._config_value = LogLevel()
 
     def format(self, name, values):
         lines = ['[%s]' % name]
         for key, value in sorted(values.items()):
             if value is not None:
-                lines.append('%s = %s' % (key, self._configvalue.format(value)))
+                lines.append('%s = %s' % (key, self._config_value.format(value)))
         return '\n'.join(lines)
 
     def convert(self, items):
@@ -249,7 +253,7 @@ class LogLevelConfigSchema(object):
         for key, value in items:
             try:
                 if value.strip():
-                    values[key] = self._configvalue.deserialize(value)
+                    values[key] = self._config_value.deserialize(value)
             except ValueError as e:  # deserialization failed
                 errors[key] = str(e)
 
