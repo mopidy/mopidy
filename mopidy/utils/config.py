@@ -9,7 +9,7 @@ from mopidy import exceptions
 
 def validate_choice(value, choices):
     """Choice validation, normally called in config value's validate()."""
-    if choices is not None and value not in choices :
+    if choices is not None and value not in choices:
         names = ', '.join(repr(c) for c in choices)
         raise ValueError('must be one of %s, not %s.' % (names, value))
 
@@ -131,15 +131,18 @@ class List(ConfigValue):
 
 
 class LogLevel(ConfigValue):
-    levels = {'critical' : logging.CRITICAL,
-              'error' : logging.ERROR,
-              'warning' : logging.WARNING,
-              'info' : logging.INFO,
-              'debug' : logging.DEBUG}
+    levels = {
+        'critical': logging.CRITICAL,
+        'error': logging.ERROR,
+        'warning': logging.WARNING,
+        'info': logging.INFO,
+        'debug': logging.DEBUG,
+    }
 
     def deserialize(self, value):
         if value.lower() not in self.levels:
-            raise ValueError('%r must be one of %s.' % (value, ', '.join(self.levels)))
+            raise ValueError('%r must be one of %s.' % (
+                value, ', '.join(self.levels)))
         return self.levels.get(value.lower())
 
     def serialize(self, value):
@@ -159,16 +162,16 @@ class Port(Integer):
     def __init__(self, **kwargs):
         super(Port, self).__init__(**kwargs)
         self.minimum = 1
-        self.maximum = 2**16 - 1
+        self.maximum = 2 ** 16 - 1
 
 
 class ConfigSchema(object):
     """Logical group of config values that correspond to a config section.
 
-    Schemas are set up by assigning config keys with config values to instances.
-    Once setup :meth:`convert` can be called with a list of `(key, value)` tuples to
-    process. For convienience we also support :meth:`format` method that can used
-    for printing out the converted values.
+    Schemas are set up by assigning config keys with config values to
+    instances.  Once setup :meth:`convert` can be called with a list of `(key,
+    value)` tuples to process. For convienience we also support :meth:`format`
+    method that can used for printing out the converted values.
     """
     # TODO: Use collections.OrderedDict once 2.6 support is gone (#344)
     def __init__(self):
@@ -188,7 +191,8 @@ class ConfigSchema(object):
         for key in self._order:
             value = values.get(key)
             if value is not None:
-                lines.append('%s = %s' % (key, self._schema[key].format(value)))
+                lines.append('%s = %s' % (
+                    key, self._schema[key].format(value)))
         return '\n'.join(lines)
 
     def convert(self, items):
@@ -226,7 +230,8 @@ class ExtensionConfigSchema(ConfigSchema):
         self['enabled'] = Boolean()
 
     def format(self, name, values):
-        return super(ExtensionConfigSchema, self).format('ext.%s' % name, values)
+        return super(ExtensionConfigSchema, self).format(
+            'ext.%s' % name, values)
 
 
 class LogLevelConfigSchema(object):
@@ -243,7 +248,8 @@ class LogLevelConfigSchema(object):
         lines = ['[%s]' % name]
         for key, value in sorted(values.items()):
             if value is not None:
-                lines.append('%s = %s' % (key, self._config_value.format(value)))
+                lines.append('%s = %s' % (
+                    key, self._config_value.format(value)))
         return '\n'.join(lines)
 
     def convert(self, items):
