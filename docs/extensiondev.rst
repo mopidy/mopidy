@@ -203,7 +203,8 @@ The default configuration for the extension is defined by the
 ``get_default_config()`` method in the ``Extension`` class which returns a
 :mod:`ConfigParser` compatible config section. The config section's name should
 be the same as the extension's short name, as defined in the ``entry_points``
-part of ``setup.py``. All extensions should include an ``enabled`` config which
+part of ``setup.py``, but prefixed with ``ext.``, for example
+``ext.soundspot``. All extensions should include an ``enabled`` config which
 should default to ``true``. Provide good defaults for all config values so that
 as few users as possible will need to change them. The exception is if the
 config value has security implications; in that case you should default to the
@@ -235,7 +236,7 @@ meaningful defaults blank, like ``username`` and ``password``.
 
         def get_default_config(self):
             return """
-                [soundspot]
+                [ext.soundspot]
                 enabled = true
                 username =
                 password =
