@@ -16,14 +16,12 @@ class ValidateChoiceTest(unittest.TestCase):
         config.validate_choice(1, [1, 2, 3])
 
     def test_empty_choices_fails(self):
-        with self.assertRaises(ValueError):
-            config.validate_choice('foo', [])
+        self.assertRaises(ValueError, config.validate_choice, 'foo', [])
 
     def test_invalid_value_fails(self):
-        with self.assertRaises(ValueError):
-            config.validate_choice('foobar', ['foo', 'bar', 'baz'])
-        with self.assertRaises(ValueError):
-            config.validate_choice(5, [1, 2, 3])
+        words = ['foo', 'bar', 'baz']
+        self.assertRaises(ValueError, config.validate_choice, 'foobar', words)
+        self.assertRaises(ValueError, config.validate_choice, 5, [1, 2, 3])
 
 
 class ValidateMinimumTest(unittest.TestCase):
@@ -34,12 +32,10 @@ class ValidateMinimumTest(unittest.TestCase):
         config.validate_minimum(10, 5)
 
     def test_to_small_value_fails(self):
-        with self.assertRaises(ValueError):
-            config.validate_minimum(10, 20)
+        self.assertRaises(ValueError, config.validate_minimum, 10, 20)
 
     def test_to_small_value_fails_with_zero_as_minimum(self):
-        with self.assertRaises(ValueError):
-            config.validate_minimum(-1, 0)
+        self.assertRaises(ValueError, config.validate_minimum, -1, 0)
 
 
 class ValidateMaximumTest(unittest.TestCase):
@@ -50,12 +46,10 @@ class ValidateMaximumTest(unittest.TestCase):
         config.validate_maximum(5, 10)
 
     def test_to_large_value_fails(self):
-        with self.assertRaises(ValueError):
-            config.validate_maximum(10, 5)
+        self.assertRaises(ValueError, config.validate_maximum, 10, 5)
 
     def test_to_large_value_fails_with_zero_as_maximum(self):
-        with self.assertRaises(ValueError):
-            config.validate_maximum(5, 0)
+        self.assertRaises(ValueError, config.validate_maximum, 5, 0)
 
 
 class ConfigValueTest(unittest.TestCase):
@@ -101,8 +95,7 @@ class StringTest(unittest.TestCase):
     def test_deserialize_enforces_choices(self):
         value = config.String(choices=['foo', 'bar', 'baz'])
         self.assertEqual('foo', value.deserialize('foo'))
-        with self.assertRaises(ValueError):
-            value.deserialize('foobar')
+        self.assertRaises(ValueError, value.deserialize, 'foobar')
 
     def test_serialize_strips_whitespace(self):
         value = config.String()
@@ -122,28 +115,23 @@ class IntegerTest(unittest.TestCase):
 
     def test_deserialize_fails_on_bad_data(self):
         value = config.Integer()
-        with self.assertRaises(ValueError):
-            value.deserialize('asd')
-        with self.assertRaises(ValueError):
-            value.deserialize('3.14')
+        self.assertRaises(ValueError, value.deserialize, 'asd')
+        self.assertRaises(ValueError, value.deserialize, '3.14')
 
     def test_deserialize_enforces_choices(self):
         value = config.Integer(choices=[1, 2, 3])
         self.assertEqual(3, value.deserialize('3'))
-        with self.assertRaises(ValueError):
-            value.deserialize('5')
+        self.assertRaises(ValueError, value.deserialize, '5')
 
     def test_deserialize_enforces_minimum(self):
         value = config.Integer(minimum=10)
         self.assertEqual(15, value.deserialize('15'))
-        with self.assertRaises(ValueError):
-            value.deserialize('5')
+        self.assertRaises(ValueError, value.deserialize, '5')
 
     def test_deserialize_enforces_maximum(self):
         value = config.Integer(maximum=10)
         self.assertEqual(5, value.deserialize('5'))
-        with self.assertRaises(ValueError):
-            value.deserialize('15')
+        self.assertRaises(ValueError, value.deserialize, '15')
 
     def test_format_masks_secrets(self):
         value = config.Integer(secret=True)
@@ -164,10 +152,8 @@ class BooleanTest(unittest.TestCase):
 
     def test_deserialize_fails_on_bad_data(self):
         value = config.Boolean()
-        with self.assertRaises(ValueError):
-            value.deserialize('nope')
-        with self.assertRaises(ValueError):
-            value.deserialize('sure')
+        self.assertRaises(ValueError, value.deserialize, 'nope')
+        self.assertRaises(ValueError, value.deserialize, 'sure')
 
     def test_serialize_normalises_strings(self):
         value = config.Boolean()
@@ -212,10 +198,8 @@ class BooleanTest(unittest.TestCase):
 
     def test_deserialize_fails_on_bad_data(self):
         value = config.LogLevel()
-        with self.assertRaises(ValueError):
-            value.deserialize('nope')
-        with self.assertRaises(ValueError):
-            value.deserialize('sure')
+        self.assertRaises(ValueError, value.deserialize, 'nope')
+        self.assertRaises(ValueError, value.deserialize, 'sure')
 
     def test_serialize_converts_to_string(self):
         value = config.LogLevel()
