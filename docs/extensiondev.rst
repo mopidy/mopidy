@@ -159,9 +159,6 @@ class that will connect the rest of the dots.
         description='Very short description',
         long_description=open('README.rst').read(),
         packages=['mopidy_soundspot'],
-        # If you ship package instead of a single module instead, use
-        # 'py_modules' instead of 'packages':
-        #py_modules=['mopidy_soundspot'],
         zip_safe=False,
         include_package_data=True,
         install_requires=[

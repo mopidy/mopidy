@@ -165,11 +165,13 @@ class LogLevel(ConfigValue):
 
     Supports: secret.
     """
-    levels = {'critical' : logging.CRITICAL,
-              'error' : logging.ERROR,
-              'warning' : logging.WARNING,
-              'info' : logging.INFO,
-              'debug' : logging.DEBUG}
+    levels = {
+        'critical': logging.CRITICAL,
+        'error': logging.ERROR,
+        'warning': logging.WARNING,
+        'info': logging.INFO,
+        'debug': logging.DEBUG,
+    }
 
     def deserialize(self, value):
         validate_choice(value.lower(), self.levels.keys())
@@ -204,16 +206,16 @@ class Port(Integer):
     def __init__(self, **kwargs):
         super(Port, self).__init__(**kwargs)
         self.minimum = 1
-        self.maximum = 2**16 - 1
+        self.maximum = 2 ** 16 - 1
 
 
 class ConfigSchema(object):
     """Logical group of config values that correspond to a config section.
 
-    Schemas are set up by assigning config keys with config values to instances.
-    Once setup :meth:`convert` can be called with a list of `(key, value)` tuples to
-    process. For convienience we also support :meth:`format` method that can used
-    for printing out the converted values.
+    Schemas are set up by assigning config keys with config values to
+    instances.  Once setup :meth:`convert` can be called with a list of `(key,
+    value)` tuples to process. For convienience we also support :meth:`format`
+    method that can used for printing out the converted values.
     """
     # TODO: Use collections.OrderedDict once 2.6 support is gone (#344)
     def __init__(self):
@@ -233,7 +235,8 @@ class ConfigSchema(object):
         for key in self._order:
             value = values.get(key)
             if value is not None:
-                lines.append('%s = %s' % (key, self._schema[key].format(value)))
+                lines.append('%s = %s' % (
+                    key, self._schema[key].format(value)))
         return '\n'.join(lines)
 
     def convert(self, items):
@@ -268,7 +271,8 @@ class ExtensionConfigSchema(ConfigSchema):
         self['enabled'] = Boolean()
 
     def format(self, name, values):
-        return super(ExtensionConfigSchema, self).format('ext.%s' % name, values)
+        return super(ExtensionConfigSchema, self).format(
+            'ext.%s' % name, values)
 
 
 class LogLevelConfigSchema(object):
@@ -285,7 +289,8 @@ class LogLevelConfigSchema(object):
         lines = ['[%s]' % name]
         for key, value in sorted(values.items()):
             if value is not None:
-                lines.append('%s = %s' % (key, self._config_value.format(value)))
+                lines.append('%s = %s' % (
+                    key, self._config_value.format(value)))
         return '\n'.join(lines)
 
     def convert(self, items):
