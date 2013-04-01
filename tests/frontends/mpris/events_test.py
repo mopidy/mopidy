@@ -8,7 +8,7 @@ from mopidy.exceptions import OptionalDependencyError
 from mopidy.models import Playlist, TlTrack
 
 try:
-    from mopidy.frontends.mpris import MprisFrontend, objects
+    from mopidy.frontends.mpris import actor, objects
 except OptionalDependencyError:
     pass
 
@@ -19,7 +19,7 @@ from tests import unittest
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
         # As a plain class, not an actor:
-        self.mpris_frontend = MprisFrontend(core=None)
+        self.mpris_frontend = actor.MprisFrontend(core=None)
         self.mpris_object = mock.Mock(spec=objects.MprisObject)
         self.mpris_frontend.mpris_object = self.mpris_object
 

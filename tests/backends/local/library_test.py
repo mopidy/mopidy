@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from mopidy import settings
-from mopidy.backends.local import LocalBackend
+from mopidy.backends.local import actor
 
 from tests import unittest, path_to_data_dir
 from tests.backends.base.library import LibraryControllerTest
@@ -9,7 +9,7 @@ from tests.backends.base.library import LibraryControllerTest
 
 class LocalLibraryControllerTest(LibraryControllerTest, unittest.TestCase):
 
-    backend_class = LocalBackend
+    backend_class = actor.LocalBackend
 
     def setUp(self):
         settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('library_tag_cache')

@@ -58,10 +58,6 @@ Now you can control Mopidy through the player object. Examples:
 """
 
 
-# TODO Move import into method when FRONTENDS setting is removed
-from .actor import MprisFrontend
-
-
 class Extension(ext.Extension):
 
     name = 'Mopidy-MPRIS'
@@ -80,4 +76,5 @@ class Extension(ext.Extension):
             raise ExtensionError('Library dbus not found', e)
 
     def get_frontend_classes(self):
+        from .actor import MprisFrontend
         return [MprisFrontend]
