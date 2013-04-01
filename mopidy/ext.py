@@ -17,11 +17,11 @@ class Extension(object):
     def validate_environment(self):
         pass
 
-    def get_frontend_class(self):
-        pass
+    def get_frontend_classes(self):
+        return []
 
-    def get_backend_class(self):
-        pass
+    def get_backend_classes(self):
+        return []
 
     def register_gstreamer_elements(self):
         pass
