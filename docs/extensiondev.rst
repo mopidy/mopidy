@@ -220,8 +220,8 @@ meaningful defaults blank, like ``username`` and ``password``.
     import gst
     import gobject
 
-    from mopidy.exceptions import ExtensionError
     from mopidy import ext
+    from mopidy.exceptions import ExtensionError
 
 
     __version__ = '0.1'
