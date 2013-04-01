@@ -2,7 +2,40 @@ from __future__ import unicode_literals
 
 import mopidy
 from mopidy import ext
+from mopidy.utils import config, formatting
 
+
+default_config = """
+[ext.mpd]
+
+# If the MPD extension should be enabled or not
+enabled = true
+
+# Which address the MPD server should bind to
+#
+# 127.0.0.1
+#     Listens only on the IPv4 loopback interface
+# ::1
+#     Listens only on the IPv6 loopback interface
+# 0.0.0.0
+#     Listens on all IPv4 interfaces
+# ::
+#     Listens on all interfaces, both IPv4 and IPv6
+hostname = 127.0.0.1
+
+# Which TCP port the MPD server should listen to
+port = 6600
+
+# The password required for connecting to the MPD server
+password =
+
+# The maximum number of concurrent connections the MPD server will accept
+max_connections = 20
+
+# Number of seconds an MPD client can stay inactive before the connection is
+# closed by the server
+connection_timeout = 60
+"""
 
 __doc__ = """The MPD server frontend.
 
@@ -10,15 +43,19 @@ MPD stands for Music Player Daemon. MPD is an independent project and server.
 Mopidy implements the MPD protocol, and is thus compatible with clients for the
 original MPD server.
 
-**Dependencies:**
+**Issues**
 
-- None
+https://github.com/mopidy/mopidy/issues?labels=MPD+frontend
 
-**Settings:**
+**Dependencies**
 
-- :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`
-- :attr:`mopidy.settings.MPD_SERVER_PORT`
-- :attr:`mopidy.settings.MPD_SERVER_PASSWORD`
+None
+
+**Default config**
+
+.. code-block:: ini
+
+%(config)s
 
 **Usage:**
 
@@ -46,7 +83,7 @@ near future:
 - ``tagtypes`` is not supported
 - Browsing the file system is not supported
 - Live update of the music database is not supported
-"""
+""" % {'config': formatting.indent(default_config)}
 
 
 class Extension(ext.Extension):
@@ -55,10 +92,16 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return '[ext.mpd]'
+        return default_config
 
-    def validate_config(self, config):
-        pass
+    def get_config_schema(self):
+        schema = config.ExtensionConfigSchema()
+        schema['hostname'] = config.Hostname()
+        schema['port'] = config.Port()
+        schema['password'] = config.String(optional=True, secret=True)
+        schema['max_connections'] = config.Integer(minimum=1)
+        schema['connection_timeout'] = config.Integer(minimum=1)
+        return schema
 
     def validate_environment(self):
         pass

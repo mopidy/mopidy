@@ -1,12 +1,12 @@
 """Fake mixer for use in tests.
 
-**Dependencies:**
+**Dependencies**
 
-- None
+None
 
-**Settings:**
+**Settings**
 
-- Set :attr:`mopidy.settings.MIXER` to ``fakemixer`` to use this mixer.
+Set :attr:`mopidy.settings.MIXER` to ``fakemixer`` to use this mixer.
 """
 
 from __future__ import unicode_literals

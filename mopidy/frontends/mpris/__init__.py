@@ -1,9 +1,19 @@
 from __future__ import unicode_literals
 
 import mopidy
-from mopidy import ext
-from mopidy.exceptions import ExtensionError
+from mopidy import exceptions, ext
+from mopidy.utils import formatting, config
 
+
+default_config = """
+[ext.mpris]
+
+# If the MPRIS extension should be enabled or not
+enabled = true
+
+# Location of the Mopidy .desktop file
+desktop_file = /usr/share/applications/mopidy.desktop
+"""
 
 __doc__ = """
 Frontend which lets you control Mopidy through the Media Player Remote
@@ -13,7 +23,7 @@ interface.
 An example of an MPRIS client is the `Ubuntu Sound Menu
 <https://wiki.ubuntu.com/SoundMenu>`_.
 
-**Dependencies:**
+**Dependencies**
 
 - D-Bus Python bindings. The package is named ``python-dbus`` in
   Ubuntu/Debian.
@@ -26,11 +36,13 @@ An example of an MPRIS client is the `Ubuntu Sound Menu
   :attr:`mopidy.settings.DESKTOP_FILE`. See :ref:`install-desktop-file` for
   details.
 
-**Settings:**
+**Default config**
 
-- :attr:`mopidy.settings.DESKTOP_FILE`
+.. code-block:: ini
 
-**Usage:**
+%(config)s
+
+**Usage**
 
 The frontend is enabled by default if all dependencies are available.
 
@@ -53,7 +65,7 @@ Now you can control Mopidy through the player object. Examples:
 - To quit Mopidy through D-Bus, run::
 
     player.Quit(dbus_interface='org.mpris.MediaPlayer2')
-"""
+""" % {'config': formatting.indent(default_config)}
 
 
 class Extension(ext.Extension):
@@ -62,16 +74,18 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return '[ext.mpris]'
+        return default_config
 
-    def validate_config(self, config):
-        pass
+    def get_config_schema(self):
+        schema = config.ExtensionConfigSchema()
+        schema['desktop_file'] = config.String()
+        return schema
 
     def validate_environment(self):
         try:
             import dbus  # noqa
         except ImportError as e:
-            raise ExtensionError('Library dbus not found', e)
+            raise exceptions.ExtensionError('dbus library not found', e)
 
     def get_frontend_classes(self):
         from .actor import MprisFrontend

@@ -219,12 +219,18 @@ meaningful defaults blank, like ``username`` and ``password``.
     import gst
     import gobject
 
-    from mopidy import exceptions
-    from mopidy import ext
+    from mopidy import exceptions, ext
     from mopidy.utils import config
 
 
     __version__ = '0.1'
+
+    default_config = """
+    [ext.soundspot]
+    enabled = true
+    username =
+    password =
+    """
 
 
     class Extension(ext.Extension):
@@ -233,12 +239,7 @@ meaningful defaults blank, like ``username`` and ``password``.
         version = __version__
 
         def get_default_config(self):
-            return """
-                [ext.soundspot]
-                enabled = true
-                username =
-                password =
-            """
+            return default_config
 
         def get_config_schema(self):
             schema = config.ExtensionConfigSchema()
@@ -269,7 +270,6 @@ meaningful defaults blank, like ``username`` and ``password``.
 
         def register_gstreamer_elements(self):
             from .mixer import SoundspotMixer
-
             gobject.type_register(SoundspotMixer)
             gst.element_register(
                 SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
