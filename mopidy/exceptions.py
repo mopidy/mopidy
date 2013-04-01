@@ -27,6 +27,9 @@ class ConfigError(MopidyException):
     def __getitem__(self, key):
         return self._errors[key]
 
+    def __iter__(self):
+        return self._errors.iterkeys()
+
     @property
     def message(self):
         lines = []
