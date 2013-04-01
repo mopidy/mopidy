@@ -72,9 +72,7 @@ def to_mopidy_playlist(spotify_playlist):
         return Playlist(uri=uri, name='[loading...]')
     name = spotify_playlist.name()
     if not name:
-        # Other user's "starred" playlists isn't handled properly by pyspotify
-        # See https://github.com/mopidy/pyspotify/issues/81
-        return
+        name = "Starred"
     if spotify_playlist.owner().canonical_name() != settings.SPOTIFY_USERNAME:
         name += ' by ' + spotify_playlist.owner().canonical_name()
     return Playlist(
