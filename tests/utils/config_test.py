@@ -4,6 +4,7 @@ import logging
 import mock
 import socket
 
+from mopidy import exceptions
 from mopidy.utils import config
 
 from tests import unittest
@@ -98,10 +99,6 @@ class StringTest(unittest.TestCase):
         value = config.String(choices=['foo', 'bar', 'baz'])
         self.assertEqual('foo', value.deserialize('foo'))
         self.assertRaises(ValueError, value.deserialize, 'foobar')
-
-    def test_serialize_strips_whitespace(self):
-        value = config.String()
-        self.assertEqual('foo', value.serialize(' foo '))
 
     def test_format_masks_secrets(self):
         value = config.String(secret=True)
@@ -241,3 +238,85 @@ class PortTest(unittest.TestCase):
         self.assertRaises(ValueError, value.deserialize, '100000')
         self.assertRaises(ValueError, value.deserialize, '0')
         self.assertRaises(ValueError, value.deserialize, '-1')
+
+
+class ConfigSchemaTest(unittest.TestCase):
+    def setUp(self):
+        self.schema = config.ConfigSchema()
+        self.schema['foo'] = mock.Mock()
+        self.schema['bar'] = mock.Mock()
+        self.schema['baz'] = mock.Mock()
+        self.values = {'bar': '123', 'foo': '456', 'baz': '678'}
+
+    def test_format(self):
+        self.schema['foo'].format.return_value = 'qwe'
+        self.schema['bar'].format.return_value = 'asd'
+        self.schema['baz'].format.return_value = 'zxc'
+
+        expected = ['[qwerty]', 'foo = qwe', 'bar = asd', 'baz = zxc']
+        result = self.schema.format('qwerty', self.values)
+        self.assertEqual('\n'.join(expected), result)
+
+    def test_format_unkwown_value(self):
+        self.schema['foo'].format.return_value = 'qwe'
+        self.schema['bar'].format.return_value = 'asd'
+        self.schema['baz'].format.return_value = 'zxc'
+        self.values['unknown'] = 'rty'
+
+        result = self.schema.format('qwerty', self.values)
+        self.assertNotIn('unknown = rty', result)
+
+    def test_convert(self):
+        self.schema.convert(self.values.items())
+
+    def test_convert_with_missing_value(self):
+        del self.values['foo']
+
+        with self.assertRaises(exceptions.ConfigError) as cm:
+            self.schema.convert(self.values.items())
+
+        self.assertIn('not found', cm.exception['foo'])
+
+    def test_convert_with_extra_value(self):
+        self.values['extra'] = '123'
+
+        with self.assertRaises(exceptions.ConfigError) as cm:
+            self.schema.convert(self.values.items())
+
+        self.assertIn('unknown', cm.exception['extra'])
+
+    def test_convert_with_blank_value(self):
+        self.values['foo'] = ''
+        result = self.schema.convert(self.values.items())
+        self.assertIsNone(result['foo'])
+
+    def test_convert_with_deserialization_error(self):
+        self.schema['foo'].deserialize.side_effect = ValueError('failure')
+
+        with self.assertRaises(exceptions.ConfigError) as cm:
+            self.schema.convert(self.values.items())
+
+        self.assertIn('failure', cm.exception['foo'])
+
+    def test_convert_with_multiple_deserialization_errors(self):
+        self.schema['foo'].deserialize.side_effect = ValueError('failure')
+        self.schema['bar'].deserialize.side_effect = ValueError('other')
+
+        with self.assertRaises(exceptions.ConfigError) as cm:
+            self.schema.convert(self.values.items())
+
+        self.assertIn('failure', cm.exception['foo'])
+        self.assertIn('other', cm.exception['bar'])
+
+    def test_convert_deserialization_unknown_and_missing_errors(self):
+        self.values['extra'] = '123'
+        self.schema['bar'].deserialize.side_effect = ValueError('failure')
+        del self.values['baz']
+
+        with self.assertRaises(exceptions.ConfigError) as cm:
+            self.schema.convert(self.values.items())
+
+        self.assertIn('unknown', cm.exception['extra'])
+        self.assertNotIn('foo', cm.exception)
+        self.assertIn('failure', cm.exception['bar'])
+        self.assertIn('not found', cm.exception['baz'])

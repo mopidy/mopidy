@@ -4,12 +4,14 @@ import logging
 import re
 import socket
 
+from mopidy import exceptions
+
 
 def validate_choice(value, choices):
     """Choice validation, normally called in config value's validate()."""
     if choices is not None and value not in choices :
         names = ', '.join(repr(c) for c in choices)
-        raise ValueError('%r must be one of %s.' % (value, names))
+        raise ValueError('must be one of %s, not %s.' % (names, value))
 
 
 def validate_minimum(value, minimum):
@@ -68,11 +70,13 @@ class ConfigValue(object):
 
     def serialize(self, value):
         """Convert value back to string for saving."""
+        if value is None:
+            return ''
         return str(value)
 
     def format(self, value):
         """Format value for display."""
-        if self.secret:
+        if self.secret and value is not None:
             return '********'
         return self.serialize(value)
 
@@ -82,9 +86,6 @@ class String(ConfigValue):
         value = value.strip()
         validate_choice(value, self.choices)
         return value
-
-    def serialize(self, value):
-        return value.strip()
 
 
 class Integer(ConfigValue):
@@ -156,3 +157,55 @@ class Port(Integer):
         super(Port, self).__init__(**kwargs)
         self.minimum = 1
         self.maximum = 2**16 - 1
+
+
+class ConfigSchema(object):
+    """Logical group of config values that corespond to a config section.
+
+    Schemas are setup by assigning config keys with config values to instances.
+    Once setup `convert` can be called with a list of `(key, value)` tuples to
+    process. For convienience we also support a `format` method that can used
+    for printing out the converted values.
+    """
+    def __init__(self):
+        self._schema = {}
+        self._order = []
+
+    def __setitem__(self, key, value):
+        if key not in self._schema:
+            self._order.append(key)
+        self._schema[key] = value
+
+    def __getitem__(self, key):
+        return self._schema[key]
+
+    def format(self, name, values):
+        lines = ['[%s]' % name]
+        for key in self._order:
+            value = values.get(key)
+            if value is not None:
+                lines.append('%s = %s' % (key, self._schema[key].format(value)))
+        return '\n'.join(lines)
+
+    def convert(self, items):
+        errors = {}
+        values = {}
+
+        for key, value in items:
+            try:
+                if value.strip():
+                    values[key] = self._schema[key].deserialize(value)
+                else:  # treat blank entries as none
+                    values[key] = None
+            except KeyError:  # not in our schema
+                errors[key] = 'unknown config key.'
+            except ValueError as e:  # deserialization failed
+                errors[key] = str(e)
+
+        for key in self._schema:
+            if key not in values and key not in errors:
+                errors[key] = 'config key not found.'
+
+        if errors:
+            raise exceptions.ConfigError(errors)
+        return values

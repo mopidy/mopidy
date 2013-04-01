@@ -20,5 +20,23 @@ class SettingsError(MopidyException):
     pass
 
 
+class ConfigError(MopidyException):
+    def __init__(self, errors):
+        self._errors = errors
+
+    def __getitem__(self, key):
+        return self._errors[key]
+
+    def __iter__(self):
+        return self._errors.iterkeys()
+
+    @property
+    def message(self):
+        lines = []
+        for key, msg in self._errors.items():
+            lines.append('%s: %s' % (key, msg))
+        return '\n'.join(lines)
+
+
 class OptionalDependencyError(MopidyException):
     pass
