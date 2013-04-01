@@ -26,17 +26,17 @@ Frontend which scrobbles the music you play to your `Last.fm
 
     This frontend requires a free user account at Last.fm.
 
-**Dependencies:**
+**Dependencies**
 
 .. literalinclude:: ../../../requirements/lastfm.txt
 
-**Default config:**
+**Default config**
 
 .. code-block:: ini
 
 %(config)s
 
-**Usage:**
+**Usage**
 
 The frontend is enabled by default if all dependencies are available.
 """ % {'config': formatting.indent(default_config)}

@@ -23,7 +23,7 @@ interface.
 An example of an MPRIS client is the `Ubuntu Sound Menu
 <https://wiki.ubuntu.com/SoundMenu>`_.
 
-**Dependencies:**
+**Dependencies**
 
 - D-Bus Python bindings. The package is named ``python-dbus`` in
   Ubuntu/Debian.
@@ -36,13 +36,13 @@ An example of an MPRIS client is the `Ubuntu Sound Menu
   :attr:`mopidy.settings.DESKTOP_FILE`. See :ref:`install-desktop-file` for
   details.
 
-**Default config:**
+**Default config**
 
 .. code-block:: ini
 
 %(config)s
 
-**Usage:**
+**Usage**
 
 The frontend is enabled by default if all dependencies are available.
 

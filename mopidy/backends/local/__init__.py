@@ -28,15 +28,15 @@ This backend handles URIs starting with ``file:``.
 See :ref:`music-from-local-storage` for further instructions on using this
 backend.
 
-**Issues:**
+**Issues**
 
 https://github.com/mopidy/mopidy/issues?labels=Local+backend
 
-**Dependencies:**
+**Dependencies**
 
-- None
+None
 
-**Default config:**
+**Default config**
 
 .. code-block:: ini
 

@@ -38,11 +38,15 @@ __doc__ = """
 The HTTP frontends lets you control Mopidy through HTTP and WebSockets, e.g.
 from a web based client.
 
-**Dependencies:**
+**Issues**
+
+https://github.com/mopidy/mopidy/issues?labels=HTTP+frontend
+
+**Dependencies**
 
 .. literalinclude:: ../../../requirements/http.txt
 
-**Default config:**
+**Default config**
 
 .. code-block:: ini
 

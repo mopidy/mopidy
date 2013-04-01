@@ -49,15 +49,15 @@ See :ref:`music-from-spotify` for further instructions on using this backend.
     otherwise approved in any way by Spotify. Spotify is the registered
     trade mark of the Spotify Group.
 
-**Issues:**
+**Issues**
 
 https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 
-**Dependencies:**
+**Dependencies**
 
 .. literalinclude:: ../../../requirements/spotify.txt
 
-**Default config:**
+**Default config**
 
 .. code-block:: ini
 

@@ -5,13 +5,13 @@ used in tests of the frontends.
 
 The backend handles URIs starting with ``dummy:``.
 
-**Dependencies:**
+**Dependencies**
 
-- None
+None
 
-**Settings:**
+**Default config**
 
-- None
+None
 """
 
 from __future__ import unicode_literals

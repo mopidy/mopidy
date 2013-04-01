@@ -27,15 +27,15 @@ This backend will handle streaming of URIs in
 :attr:`mopidy.settings.STREAM_PROTOCOLS` assuming the right plugins are
 installed.
 
-**Issues:**
+**Issues**
 
 https://github.com/mopidy/mopidy/issues?labels=Stream+backend
 
-**Dependencies:**
+**Dependencies**
 
-- None
+None
 
-**Default config:**
+**Default config**
 
 .. code-block:: ini
 

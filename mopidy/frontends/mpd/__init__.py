@@ -43,11 +43,15 @@ MPD stands for Music Player Daemon. MPD is an independent project and server.
 Mopidy implements the MPD protocol, and is thus compatible with clients for the
 original MPD server.
 
-**Dependencies:**
+**Issues**
 
-- None
+https://github.com/mopidy/mopidy/issues?labels=MPD+frontend
 
-**Default config:**
+**Dependencies**
+
+None
+
+**Default config**
 
 .. code-block:: ini
 
