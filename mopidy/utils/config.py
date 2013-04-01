@@ -81,3 +81,12 @@ class String(ConfigValue):
 
     def serialize(self, value):
         return value.strip()
+
+
+class Integer(ConfigValue):
+    def deserialize(self, value):
+        value = int(value.strip())
+        validate_choice(value, self.choices)
+        validate_minimum(value, self.minimum)
+        validate_maximum(value, self.maximum)
+        return value
