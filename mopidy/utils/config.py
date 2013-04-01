@@ -70,3 +70,13 @@ class ConfigValue(object):
         if self.secret:
             return '********'
         return self.serialize(value)
+
+
+class String(ConfigValue):
+    def deserialize(self, value):
+        value = value.strip()
+        validate_choice(value, self.choices)
+        return value
+
+    def serialize(self, value):
+        return value.strip()

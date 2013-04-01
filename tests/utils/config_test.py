@@ -86,3 +86,24 @@ class ConfigValueTest(unittest.TestCase):
     def test_format_masks_secrets(self):
         value = config.ConfigValue(secret=True)
         self.assertEqual('********', value.format(object()))
+
+
+class StringTest(unittest.TestCase):
+    def test_deserialize_strips_whitespace(self):
+        value = config.String()
+        self.assertEqual('foo', value.deserialize(' foo '))
+
+    def test_deserialize_enforces_choices(self):
+        value = config.String(choices=['foo', 'bar', 'baz'])
+
+        self.assertEqual('foo', value.deserialize('foo'))
+        with self.assertRaises(ValueError):
+            value.deserialize('foobar')
+
+    def test_serialize_strips_whitespace(self):
+        value = config.String()
+        self.assertEqual('foo', value.serialize(' foo '))
+
+    def test_format_masks_secrets(self):
+        value = config.String(secret=True)
+        self.assertEqual('********', value.format('s3cret'))
