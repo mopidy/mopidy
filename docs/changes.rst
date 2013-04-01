@@ -13,6 +13,11 @@ v0.14.0 (UNRELEASED)
   use setuptools' entry points functionality to find installed Mopidy
   extensions.
 
+**Spotify backend**
+
+- Add support for starred playlists, both your own and those owned by other
+  users. (Fixes: :issue:`326`)
+
 
 v0.13.0 (2013-03-31)
 ====================
