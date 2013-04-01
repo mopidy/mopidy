@@ -55,20 +55,38 @@ class ValidateMaximumTest(unittest.TestCase):
         self.assertRaises(ValueError, config.validate_maximum, 5, 0)
 
 
+class ValidateRequiredTest(unittest.TestCase):
+    def test_passes_when_false(self):
+        config.validate_required('foo', False)
+        config.validate_required('', False)
+        config.validate_required('  ', False)
+
+    def test_passes_when_required_and_set(self):
+        config.validate_required('foo', True)
+        config.validate_required(' foo ', True)
+
+    def test_blocks_when_required_and_emtpy(self):
+        self.assertRaises(ValueError, config.validate_required, '', True)
+        self.assertRaises(ValueError, config.validate_required, '  ', True)
+
+
 class ConfigValueTest(unittest.TestCase):
     def test_init(self):
         value = config.ConfigValue()
         self.assertIsNone(value.choices)
-        self.assertIsNone(value.minimum)
         self.assertIsNone(value.maximum)
+        self.assertIsNone(value.minimum)
+        self.assertIsNone(value.optional)
         self.assertIsNone(value.secret)
 
     def test_init_with_params(self):
-        value = config.ConfigValue(
-            choices=['foo'], minimum=0, maximum=10, secret=True)
+        kwargs = {'choices': ['foo'], 'minimum': 0, 'maximum': 10,
+                  'secret': True, 'optional': True}
+        value = config.ConfigValue(**kwargs)
         self.assertEqual(['foo'], value.choices)
         self.assertEqual(0, value.minimum)
         self.assertEqual(10, value.maximum)
+        self.assertEqual(True, value.optional)
         self.assertEqual(True, value.secret)
 
     def test_deserialize_passes_through(self):
@@ -76,7 +94,7 @@ class ConfigValueTest(unittest.TestCase):
         obj = object()
         self.assertEqual(obj, value.deserialize(obj))
 
-    def test_serialize_converts_to_string(self):
+    def test_serialize_conversion_to_string(self):
         value = config.ConfigValue()
         self.assertIsInstance(value.serialize(object()), basestring)
 
@@ -91,7 +109,7 @@ class ConfigValueTest(unittest.TestCase):
 
 
 class StringTest(unittest.TestCase):
-    def test_deserialize_strips_whitespace(self):
+    def test_deserialize_conversion_success(self):
         value = config.String()
         self.assertEqual('foo', value.deserialize(' foo '))
 
@@ -100,22 +118,34 @@ class StringTest(unittest.TestCase):
         self.assertEqual('foo', value.deserialize('foo'))
         self.assertRaises(ValueError, value.deserialize, 'foobar')
 
+    def test_deserialize_enforces_required(self):
+        value = config.String()
+        self.assertRaises(ValueError, value.deserialize, '')
+        self.assertRaises(ValueError, value.deserialize, ' ')
+
+    def test_deserialize_respects_optional(self):
+        value = config.String(optional=True)
+        self.assertIsNone(value.deserialize(''))
+        self.assertIsNone(value.deserialize(' '))
+
     def test_format_masks_secrets(self):
         value = config.String(secret=True)
         self.assertEqual('********', value.format('s3cret'))
 
 
 class IntegerTest(unittest.TestCase):
-    def test_deserialize_converts_to_int(self):
+    def test_deserialize_conversion_success(self):
         value = config.Integer()
         self.assertEqual(123, value.deserialize('123'))
         self.assertEqual(0, value.deserialize('0'))
         self.assertEqual(-10, value.deserialize('-10'))
 
-    def test_deserialize_fails_on_bad_data(self):
+    def test_deserialize_conversion_failure(self):
         value = config.Integer()
         self.assertRaises(ValueError, value.deserialize, 'asd')
         self.assertRaises(ValueError, value.deserialize, '3.14')
+        self.assertRaises(ValueError, value.deserialize, '')
+        self.assertRaises(ValueError, value.deserialize, ' ')
 
     def test_deserialize_enforces_choices(self):
         value = config.Integer(choices=[1, 2, 3])
@@ -138,7 +168,7 @@ class IntegerTest(unittest.TestCase):
 
 
 class BooleanTest(unittest.TestCase):
-    def test_deserialize_converts_to_bool(self):
+    def test_deserialize_conversion_success(self):
         value = config.Boolean()
         for true in ('1', 'yes', 'true', 'on'):
             self.assertIs(value.deserialize(true), True)
@@ -149,12 +179,13 @@ class BooleanTest(unittest.TestCase):
             self.assertIs(value.deserialize(false.upper()), False)
             self.assertIs(value.deserialize(false.capitalize()), False)
 
-    def test_deserialize_fails_on_bad_data(self):
+    def test_deserialize_conversion_failure(self):
         value = config.Boolean()
         self.assertRaises(ValueError, value.deserialize, 'nope')
         self.assertRaises(ValueError, value.deserialize, 'sure')
+        self.assertRaises(ValueError, value.deserialize, '')
 
-    def test_serialize_normalises_strings(self):
+    def test_serialize(self):
         value = config.Boolean()
         self.assertEqual('true', value.serialize(True))
         self.assertEqual('false', value.serialize(False))
@@ -165,20 +196,29 @@ class BooleanTest(unittest.TestCase):
 
 
 class ListTest(unittest.TestCase):
-    def test_deserialize_splits_commas(self):
+    def test_deserialize_conversion_success(self):
         value = config.List()
-        self.assertEqual(['foo', 'bar', 'baz'],
-                         value.deserialize('foo, bar,baz'))
 
-    def test_deserialize_splits_newlines(self):
-        value = config.List()
-        self.assertEqual(['foo,bar', 'bar', 'baz'],
-                         value.deserialize('foo,bar\nbar\nbaz'))
+        expected = ['foo', 'bar', 'baz']
+        self.assertEqual(expected, value.deserialize('foo, bar ,baz '))
 
-    def test_serialize_joins_by_newlines(self):
+        expected = ['foo,bar', 'bar', 'baz']
+        self.assertEqual(expected, value.deserialize(' foo,bar\nbar\nbaz'))
+
+    def test_deserialize_enforces_required(self):
         value = config.List()
-        self.assertRegexpMatches(value.serialize(['foo', 'bar', 'baz']),
-                                                 r'foo\n\s*bar\n\s*baz')
+        self.assertRaises(ValueError, value.deserialize, '')
+        self.assertRaises(ValueError, value.deserialize, ' ')
+
+    def test_deserialize_respects_optional(self):
+        value = config.List(optional=True)
+        self.assertEqual([], value.deserialize(''))
+        self.assertEqual([], value.deserialize(' '))
+
+    def test_serialize(self):
+        value = config.List()
+        result = value.serialize(['foo', 'bar', 'baz'])
+        self.assertRegexpMatches(result, r'foo\n\s*bar\n\s*baz')
 
 
 class BooleanTest(unittest.TestCase):
@@ -188,40 +228,53 @@ class BooleanTest(unittest.TestCase):
               'info': logging.INFO,
               'debug': logging.DEBUG}
 
-    def test_deserialize_converts_to_numeric_loglevel(self):
+    def test_deserialize_conversion_success(self):
         value = config.LogLevel()
         for name, level in self.levels.items():
             self.assertEqual(level, value.deserialize(name))
             self.assertEqual(level, value.deserialize(name.upper()))
             self.assertEqual(level, value.deserialize(name.capitalize()))
 
-    def test_deserialize_fails_on_bad_data(self):
+    def test_deserialize_conversion_failure(self):
         value = config.LogLevel()
         self.assertRaises(ValueError, value.deserialize, 'nope')
         self.assertRaises(ValueError, value.deserialize, 'sure')
+        self.assertRaises(ValueError, value.deserialize, '')
+        self.assertRaises(ValueError, value.deserialize, ' ')
 
-    def test_serialize_converts_to_string(self):
+    def test_serialize(self):
         value = config.LogLevel()
         for name, level in self.levels.items():
             self.assertEqual(name, value.serialize(level))
-
-    def test_serialize_unknown_level(self):
-        value = config.LogLevel()
         self.assertIsNone(value.serialize(1337))
 
 
 class HostnameTest(unittest.TestCase):
     @mock.patch('socket.getaddrinfo')
-    def test_deserialize_checks_addrinfo(self, getaddrinfo_mock):
+    def test_deserialize_conversion_success(self, getaddrinfo_mock):
         value = config.Hostname()
         value.deserialize('example.com')
         getaddrinfo_mock.assert_called_once_with('example.com', None)
 
     @mock.patch('socket.getaddrinfo')
-    def test_deserialize_handles_failures(self, getaddrinfo_mock):
+    def test_deserialize_conversion_failure(self, getaddrinfo_mock):
         value = config.Hostname()
         getaddrinfo_mock.side_effect = socket.error
         self.assertRaises(ValueError, value.deserialize, 'example.com')
+
+    @mock.patch('socket.getaddrinfo')
+    def test_deserialize_enforces_required(self, getaddrinfo_mock):
+        value = config.Hostname()
+        self.assertRaises(ValueError, value.deserialize, '')
+        self.assertRaises(ValueError, value.deserialize, ' ')
+        self.assertEqual(0, getaddrinfo_mock.call_count)
+
+    @mock.patch('socket.getaddrinfo')
+    def test_deserialize_respects_optional(self, getaddrinfo_mock):
+        value = config.Hostname(optional=True)
+        self.assertIsNone(value.deserialize(''))
+        self.assertIsNone(value.deserialize(' '))
+        self.assertEqual(0, getaddrinfo_mock.call_count)
 
 
 class PortTest(unittest.TestCase):
@@ -238,6 +291,7 @@ class PortTest(unittest.TestCase):
         self.assertRaises(ValueError, value.deserialize, '100000')
         self.assertRaises(ValueError, value.deserialize, '0')
         self.assertRaises(ValueError, value.deserialize, '-1')
+        self.assertRaises(ValueError, value.deserialize, '')
 
 
 class ConfigSchemaTest(unittest.TestCase):
@@ -284,11 +338,6 @@ class ConfigSchemaTest(unittest.TestCase):
             self.schema.convert(self.values.items())
 
         self.assertIn('unknown', cm.exception['extra'])
-
-    def test_convert_with_blank_value(self):
-        self.values['foo'] = ''
-        result = self.schema.convert(self.values.items())
-        self.assertIsNone(result['foo'])
 
     def test_convert_with_deserialization_error(self):
         self.schema['foo'].deserialize.side_effect = ValueError('failure')
