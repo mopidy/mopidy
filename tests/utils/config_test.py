@@ -94,7 +94,7 @@ class ConfigValueTest(unittest.TestCase):
         obj = object()
         self.assertEqual(obj, value.deserialize(obj))
 
-    def test_serialize_converts_to_string(self):
+    def test_serialize_conversion_to_string(self):
         value = config.ConfigValue()
         self.assertIsInstance(value.serialize(object()), basestring)
 
@@ -109,7 +109,7 @@ class ConfigValueTest(unittest.TestCase):
 
 
 class StringTest(unittest.TestCase):
-    def test_deserialize_converts_success(self):
+    def test_deserialize_conversion_success(self):
         value = config.String()
         self.assertEqual('foo', value.deserialize(' foo '))
 
@@ -134,7 +134,7 @@ class StringTest(unittest.TestCase):
 
 
 class IntegerTest(unittest.TestCase):
-    def test_deserialize_converts_success(self):
+    def test_deserialize_conversion_success(self):
         value = config.Integer()
         self.assertEqual(123, value.deserialize('123'))
         self.assertEqual(0, value.deserialize('0'))
@@ -168,7 +168,7 @@ class IntegerTest(unittest.TestCase):
 
 
 class BooleanTest(unittest.TestCase):
-    def test_deserialize_converts_success(self):
+    def test_deserialize_conversion_success(self):
         value = config.Boolean()
         for true in ('1', 'yes', 'true', 'on'):
             self.assertIs(value.deserialize(true), True)
@@ -196,7 +196,7 @@ class BooleanTest(unittest.TestCase):
 
 
 class ListTest(unittest.TestCase):
-    def test_deserialize_converts_success(self):
+    def test_deserialize_conversion_success(self):
         value = config.List()
 
         expected = ['foo', 'bar', 'baz']
@@ -228,7 +228,7 @@ class BooleanTest(unittest.TestCase):
               'info': logging.INFO,
               'debug': logging.DEBUG}
 
-    def test_deserialize_converts_success(self):
+    def test_deserialize_conversion_success(self):
         value = config.LogLevel()
         for name, level in self.levels.items():
             self.assertEqual(level, value.deserialize(name))
@@ -251,7 +251,7 @@ class BooleanTest(unittest.TestCase):
 
 class HostnameTest(unittest.TestCase):
     @mock.patch('socket.getaddrinfo')
-    def test_deserialize_converts_success(self, getaddrinfo_mock):
+    def test_deserialize_conversion_success(self, getaddrinfo_mock):
         value = config.Hostname()
         value.deserialize('example.com')
         getaddrinfo_mock.assert_called_once_with('example.com', None)
