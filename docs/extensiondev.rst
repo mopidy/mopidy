@@ -60,7 +60,6 @@ extension, Mopidy-Soundspot::
         README.rst              # Document what it is and how to use it
         mopidy_soundspot/       # Your code
             __init__.py
-            config.ini          # Default configuration for the extension
             ...
         setup.py                # Installation script
 
@@ -189,13 +188,26 @@ Example __init__.py
 ===================
 
 The ``__init__.py`` file should be placed inside the ``mopidy_soundspot``
-Python package.  The root of your Python package should have an ``__version__``
-attribute with a :pep:`386` compliant version number, for example "0.1". Next,
-it should have a class named ``Extension`` which inherits from Mopidy's
-extension base class. This is the class referred to in the ``entry_points``
-part of ``setup.py``. Any imports of other files in your extension should be
-kept inside methods.  This ensures that this file can be imported without
-raising :exc:`ImportError` exceptions for missing dependencies, etc.
+Python package.
+
+The root of your Python package should have an ``__version__`` attribute with a
+:pep:`386` compliant version number, for example "0.1". Next, it should have a
+class named ``Extension`` which inherits from Mopidy's extension base class.
+This is the class referred to in the ``entry_points`` part of ``setup.py``. Any
+imports of other files in your extension should be kept inside methods.  This
+ensures that this file can be imported without raising :exc:`ImportError`
+exceptions for missing dependencies, etc.
+
+The default configuration for the extension is defined by the
+``get_default_config()`` method in the ``Extension`` class which returns a
+:mod:`ConfigParser` compatible config section. The config section's name should
+be the same as the extension's short name, as defined in the ``entry_points``
+part of ``setup.py``. All extensions should include an ``enabled`` config which
+should default to ``true``. Provide good defaults for all config values so that
+as few users as possible will need to change them. The exception is if the
+config value has security implications; in that case you should default to the
+most secure configuration. Leave any configurations that doesn't have
+meaningful defaults blank, like ``username`` and ``password``.
 
 ::
 
@@ -209,7 +221,7 @@ raising :exc:`ImportError` exceptions for missing dependencies, etc.
     import gobject
 
     from mopidy.exceptions import ExtensionError
-    from mopidy.utils import ext
+    from mopidy import ext
 
 
     __version__ = '0.1'
@@ -221,9 +233,12 @@ raising :exc:`ImportError` exceptions for missing dependencies, etc.
         version = __version__
 
         def get_default_config(self):
-            config_file = os.path.join(
-                os.path.dirname(__file__), 'config.ini')
-            return open(config_file).read()
+            return """
+                [soundspot]
+                enabled = true
+                username =
+                password =
+            """
 
         def validate_config(self, config):
             # ``config`` is the complete config document for the Mopidy
@@ -264,27 +279,6 @@ raising :exc:`ImportError` exceptions for missing dependencies, etc.
             gobject.type_register(SoundspotMixer)
             gst.element_register(
                 SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
-
-
-
-Example config.ini
-==================
-
-The default configuration for the extension is located in a ``config.ini`` file
-inside the Python package. It contains a single config section, with a name
-matching the short name used for the extension in the ``entry_points`` part of
-``setup.py``.
-
-All extensions should include an ``enabled`` config which should default to
-``true``. Leave any configurations that doesn't have meaningful defaults blank,
-like ``username`` and ``password``.
-
-.. code-block:: ini
-
-    [soundspot]
-    enabled = true
-    username =
-    password =
 
 
 Example frontend
@@ -365,9 +359,8 @@ extensions work.
    information about all extensions available on the system from
    :mod:`pkg_resources`.
 
-3. Add :class:`Extension` classes for all existing frontends and backends. Make
-   sure to add default config files and config validation, even though this
-   will not be used at this implementation stage.
+3. Add :class:`Extension` classes for all existing frontends and backends. Skip
+   any default config and config validation for now.
 
 4. Add entry points for the existing extensions in the ``setup.py`` file.
 
@@ -377,7 +370,9 @@ extensions work.
 
 6. Remove the ``FRONTENDS`` and ``BACKENDS`` settings.
 
-7. Switch to ini file based configuration, using :mod:`ConfigParser`. The
+7. Add default config files and config validation to all existing extensions.
+
+8. Switch to ini file based configuration, using :mod:`ConfigParser`. The
    default config is the combination of a core config file plus the config from
    each installed extension. To find the effective config for the system, the
    following config sources are added together, with the later ones overriding
@@ -385,15 +380,15 @@ extensions work.
 
    - the default config built from Mopidy core and all installed extensions,
 
-   - ``/etc/mopidy.conf``,
+   - ``/etc/mopidy/mopidy.conf``,
 
-   - ``~/.config/mopidy.conf``,
+   - ``~/.config/mopidy/mopidy.conf``,
 
    - any config file provided via command line arguments, and
 
    - any config values provided via command line arguments.
 
-8. Add command line options for:
+9. Add command line options for:
 
    - loading an additional config file for this execution of Mopidy,
 
@@ -401,4 +396,5 @@ extensions work.
 
    - printing the effective config and exit, and
 
-   - write a config value permanently to ``~/.config/mopidy.conf`` and exit.
+   - write a config value permanently to ``~/.config/mopidy/mopidy.conf``, or
+     ``/etc/mopidy/mopidy.conf`` if root, and exit.
