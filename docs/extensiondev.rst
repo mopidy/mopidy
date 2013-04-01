@@ -222,8 +222,9 @@ meaningful defaults blank, like ``username`` and ``password``.
     import gst
     import gobject
 
+    from mopidy import exceptions
     from mopidy import ext
-    from mopidy.exceptions import ExtensionError
+    from mopidy.utils import config
 
 
     __version__ = '0.1'
@@ -242,17 +243,11 @@ meaningful defaults blank, like ``username`` and ``password``.
                 password =
             """
 
-        def validate_config(self, config):
-            # ``config`` is the complete config document for the Mopidy
-            # instance. The extension is free to check any config value it is
-            # interested in, not just its own config values.
-
-            if not config.getboolean('soundspot', 'enabled'):
-                return
-            if not config.get('soundspot', 'username'):
-                raise ExtensionError('Config soundspot.username not set')
-            if not config.get('soundspot', 'password'):
-                raise ExtensionError('Config soundspot.password not set')
+        def get_config_schema(self):
+            schema = config.ExtensionConfigSchema()
+            schema['username'] = config.String(required=True)
+            schema['password'] = config.String(required=True, secret=True)
+            return schema
 
         def validate_environment(self):
             # This method can validate anything it wants about the environment
@@ -262,7 +257,7 @@ meaningful defaults blank, like ``username`` and ``password``.
             try:
                 import pysoundspot
             except ImportError as e:
-                raise ExtensionError('pysoundspot library not found', e)
+                raise exceptions.ExtensionError('pysoundspot library not found', e)
 
         # You will typically only implement one of the next three methods
         # in a single extension.
