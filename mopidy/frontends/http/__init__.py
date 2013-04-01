@@ -25,8 +25,10 @@ from a web based client.
 Setup
 =====
 
-When this frontend is included in :attr:`mopidy.settings.FRONTENDS`, it starts
-a web server at the port specified by :attr:`mopidy.settings.HTTP_SERVER_PORT`.
+The frontend is enabled by default if all dependencies are available.
+
+When it is enabled it starts a web server at the port specified by
+:attr:`mopidy.settings.HTTP_SERVER_PORT`.
 
 .. warning:: Security
 
@@ -364,14 +366,13 @@ event listeners, and delete the object like this:
 Example to get started with
 ---------------------------
 
-1. Create an empty directory for your web client.
+1. Make sure that you've installed all dependencies required by the HTTP
+   frontend.
 
-2. Change the setting :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point
+2. Create an empty directory for your web client.
+
+3. Change the setting :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point
    to your new directory.
-
-3. Make sure that you've included
-   ``mopidy.frontends.http.HttpFrontend`` in
-   :attr:`mopidy.settings.FRONTENDS`.
 
 4. Start/restart Mopidy.
 

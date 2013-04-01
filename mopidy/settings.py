@@ -9,25 +9,6 @@ All available settings and their default values.
 
 from __future__ import unicode_literals
 
-#: List of playback backends to use. See :ref:`backend-implementations` for all
-#: available backends.
-#:
-#: When results from multiple backends are combined, they are combined in the
-#: order the backends are listed here.
-#:
-#: Default::
-#:
-#:     BACKENDS = (
-#:         u'mopidy.backends.local.LocalBackend',
-#:         u'mopidy.backends.spotify.SpotifyBackend',
-#:         u'mopidy.backends.stream.StreamBackend',
-#:     )
-BACKENDS = (
-    'mopidy.backends.local.LocalBackend',
-    'mopidy.backends.spotify.SpotifyBackend',
-    'mopidy.backends.stream.StreamBackend',
-)
-
 #: The log format used for informational logging.
 #:
 #: See http://docs.python.org/2/library/logging.html#formatter-objects for
@@ -57,22 +38,6 @@ DEBUG_LOG_FILENAME = 'mopidy.log'
 #:
 #:     DESKTOP_FILE = u'/usr/share/applications/mopidy.desktop'
 DESKTOP_FILE = '/usr/share/applications/mopidy.desktop'
-
-#: List of server frontends to use. See :ref:`frontend-implementations` for
-#: available frontends.
-#:
-#: Default::
-#:
-#:     FRONTENDS = (
-#:         u'mopidy.frontends.mpd.MpdFrontend',
-#:         u'mopidy.frontends.lastfm.LastfmFrontend',
-#:         u'mopidy.frontends.mpris.MprisFrontend',
-#:     )
-FRONTENDS = (
-    'mopidy.frontends.mpd.MpdFrontend',
-    'mopidy.frontends.lastfm.LastfmFrontend',
-    'mopidy.frontends.mpris.MprisFrontend',
-)
 
 #: Which address Mopidy's HTTP server should bind to.
 #:
