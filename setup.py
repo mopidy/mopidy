@@ -44,7 +44,9 @@ setup(
             'mopidy = mopidy.__main__:main',
             'mopidy-scan = mopidy.scanner:main',
         ],
-        b'mopidy.extension': [],
+        b'mopidy.extension': [
+            'spotify = mopidy.backends.spotify:Extension',
+        ],
     },
     classifiers=[
         'Development Status :: 4 - Beta',
