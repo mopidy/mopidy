@@ -11,7 +11,6 @@ from tests import unittest
 class ValidateSettingsTest(unittest.TestCase):
     def setUp(self):
         self.defaults = {
-            'BACKENDS': ['a'],
             'FRONTENDS': ['a'],
             'MPD_SERVER_HOSTNAME': '::',
             'MPD_SERVER_PORT': 6600,
@@ -80,12 +79,6 @@ class ValidateSettingsTest(unittest.TestCase):
             self.defaults, {'FRONTENDS': []})
         self.assertEqual(
             result['FRONTENDS'], 'Must be set.')
-
-    def test_empty_backends_list_returns_error(self):
-        result = setting_utils.validate_settings(
-            self.defaults, {'BACKENDS': []})
-        self.assertEqual(
-            result['BACKENDS'], 'Must be set.')
 
     def test_noniterable_multivalue_setting_returns_error(self):
         result = setting_utils.validate_settings(

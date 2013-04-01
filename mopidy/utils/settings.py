@@ -143,13 +143,11 @@ def validate_settings(defaults, settings):
     }
 
     must_be_iterable = [
-        'BACKENDS',
         'FRONTENDS',
         'STREAM_PROTOCOLS',
     ]
 
     must_have_value_set = [
-        'BACKENDS',
         'FRONTENDS',
     ]
 
