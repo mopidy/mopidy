@@ -135,7 +135,7 @@ Pip.
 
        sudo easy_install pip
 
-#. Then get, build, and install the latest releast of pyspotify, pylast,
+#. Then get, build, and install the latest release of pyspotify, pylast,
    and Mopidy using Pip::
 
        sudo pip install -U pyspotify pylast mopidy
