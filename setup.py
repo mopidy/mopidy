@@ -40,6 +40,10 @@ setup(
         'unittest2',
     ],
     entry_points={
+        b'console_scripts': [
+            'mopidy = mopidy.__main__:main',
+            'mopidy-scan = mopidy.scanner:main',
+        ],
         b'mopidy.extension': [],
     },
     classifiers=[
