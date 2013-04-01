@@ -1,9 +1,22 @@
 from __future__ import unicode_literals
 
 import mopidy
-from mopidy import ext
-from mopidy.exceptions import ExtensionError
+from mopidy import exceptions, ext
+from mopidy.utils import config, formatting
 
+
+default_config = """
+[ext.lastfm]
+
+# If the Last.fm extension should be enabled or not
+enabled = true
+
+# Your Last.fm username
+username =
+
+# Your Last.fm password
+password =
+"""
 
 __doc__ = """
 Frontend which scrobbles the music you play to your `Last.fm
@@ -17,15 +30,16 @@ Frontend which scrobbles the music you play to your `Last.fm
 
 .. literalinclude:: ../../../requirements/lastfm.txt
 
-**Settings:**
+**Default config:**
 
-- :attr:`mopidy.settings.LASTFM_USERNAME`
-- :attr:`mopidy.settings.LASTFM_PASSWORD`
+.. code-block:: ini
+
+%(config)s
 
 **Usage:**
 
 The frontend is enabled by default if all dependencies are available.
-"""
+""" % {'config': formatting.indent(default_config)}
 
 
 class Extension(ext.Extension):
@@ -34,16 +48,19 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return '[ext.lastfm]'
+        return default_config
 
-    def validate_config(self, config):
-        pass
+    def get_config_schema(self):
+        schema = config.ExtensionConfigSchema()
+        schema['username'] = config.String()
+        schema['password'] = config.String(secret=True)
+        return schema
 
     def validate_environment(self):
         try:
             import pylast  # noqa
         except ImportError as e:
-            raise ExtensionError('pylast library not found', e)
+            raise exceptions.ExtensionError('pylast library not found', e)
 
     def get_frontend_classes(self):
         from .actor import LastfmFrontend
