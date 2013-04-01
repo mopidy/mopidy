@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import re
+
 
 def validate_choice(value, choices):
     """Choice validation, normally called in config value's validate()."""
@@ -109,3 +111,14 @@ class Boolean(ConfigValue):
             return 'true'
         else:
             return 'false'
+
+
+class List(ConfigValue):
+    def deserialize(self, value):
+        if '\n' in value:
+            return re.split(r'\s*\n\s*', value.strip())
+        else:
+            return re.split(r',\s*', value.strip())
+
+    def serialize(self, value):
+        return '\n  '.join(value)

@@ -175,3 +175,20 @@ class BooleanTest(unittest.TestCase):
     def test_format_masks_secrets(self):
         value = config.Boolean(secret=True)
         self.assertEqual('********', value.format('true'))
+
+
+class ListTest(unittest.TestCase):
+    def test_deserialize_splits_commas(self):
+        value = config.List()
+        self.assertEqual(['foo', 'bar', 'baz'],
+                         value.deserialize('foo, bar,baz'))
+
+    def test_deserialize_splits_newlines(self):
+        value = config.List()
+        self.assertEqual(['foo,bar', 'bar', 'baz'],
+                         value.deserialize('foo,bar\nbar\nbaz'))
+
+    def test_serialize_joins_by_newlines(self):
+        value = config.List()
+        self.assertRegexpMatches(value.serialize(['foo', 'bar', 'baz']),
+                                                 r'foo\n\s*bar\n\s*baz')
