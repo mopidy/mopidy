@@ -146,3 +146,32 @@ class IntegerTest(unittest.TestCase):
     def test_format_masks_secrets(self):
         value = config.Integer(secret=True)
         self.assertEqual('********', value.format('1337'))
+
+
+class BooleanTest(unittest.TestCase):
+    def test_deserialize_converts_to_bool(self):
+        value = config.Boolean()
+        for true in ('1', 'yes', 'true', 'on'):
+            self.assertIs(value.deserialize(true), True)
+            self.assertIs(value.deserialize(true.upper()), True)
+            self.assertIs(value.deserialize(true.capitalize()), True)
+        for false in ('0', 'no', 'false', 'off'):
+            self.assertIs(value.deserialize(false), False)
+            self.assertIs(value.deserialize(false.upper()), False)
+            self.assertIs(value.deserialize(false.capitalize()), False)
+
+    def test_deserialize_fails_on_bad_data(self):
+        value = config.Boolean()
+        with self.assertRaises(ValueError):
+            value.deserialize('nope')
+        with self.assertRaises(ValueError):
+            value.deserialize('sure')
+
+    def test_serialize_normalises_strings(self):
+        value = config.Boolean()
+        self.assertEqual('true', value.serialize(True))
+        self.assertEqual('false', value.serialize(False))
+
+    def test_format_masks_secrets(self):
+        value = config.Boolean(secret=True)
+        self.assertEqual('********', value.format('true'))

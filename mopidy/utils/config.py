@@ -90,3 +90,22 @@ class Integer(ConfigValue):
         validate_minimum(value, self.minimum)
         validate_maximum(value, self.maximum)
         return value
+
+
+class Boolean(ConfigValue):
+    true_values = ('1', 'yes', 'true', 'on')
+    false_values = ('0', 'no', 'false', 'off')
+
+    def deserialize(self, value):
+        if value.lower() in self.true_values:
+            return True
+        elif value.lower() in self.false_values:
+            return False
+
+        raise ValueError('invalid value for boolean: %r' % value)
+
+    def serialize(self, value):
+        if value:
+            return 'true'
+        else:
+            return 'false'
