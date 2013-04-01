@@ -45,6 +45,7 @@ setup(
             'mopidy-scan = mopidy.scanner:main',
         ],
         b'mopidy.extension': [
+            'local = mopidy.backends.local:Extension',
             'spotify = mopidy.backends.spotify:Extension',
         ],
     },
