@@ -1,25 +1,40 @@
+from __future__ import unicode_literals
+
 from mopidy.utils import config
 
-schemas = {}  # TODO: use ordered dict?
-schemas['logging'] = config.ConfigSchema()
-schemas['logging']['config_file'] = config.String()
-schemas['logging']['console_format'] = config.String()
-schemas['logging']['debug_format'] = config.String()
-schemas['logging']['debug_file'] = config.String()
-schemas['logging']['debug_thread'] = config.Boolean()
 
-schemas['logging.levels'] = config.LogLevelConfigSchema()
+default_config = """
+[logging]
+console_format = %(levelname)-8s $(message)s
+debug_format = %(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n  %(message)s
+debug_file = mopidy.log
 
-schemas['audio'] = config.ConfigSchema()
-schemas['audio']['mixer'] = config.String()
-schemas['audio']['mixer_track'] = config.String()
-schemas['audio']['output'] = config.String()
+[logging.levels]
+
+[audio]
+mixer = autoaudiomixer
+mixer_track =
+output = autoaudiosink
+"""
+
+config_schemas = {}  # TODO: use ordered dict?
+config_schemas['logging'] = config.ConfigSchema()
+config_schemas['logging']['console_format'] = config.String()
+config_schemas['logging']['debug_format'] = config.String()
+config_schemas['logging']['debug_file'] = config.String()
+
+config_schemas['logging.levels'] = config.LogLevelConfigSchema()
+
+config_schemas['audio'] = config.ConfigSchema()
+config_schemas['audio']['mixer'] = config.String()
+config_schemas['audio']['mixer_track'] = config.String(optional=True)
+config_schemas['audio']['output'] = config.String()
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
-#schemas['audio.outputs'] = config.AudioOutputConfigSchema()
+#config_schemas['audio.outputs'] = config.AudioOutputConfigSchema()
 
 
 def register_schema(name, schema):
-    if name in schemas:
+    if name in config_schemas:
         raise Exception
-    schemas[name] = schema
+    config_schemas[name] = schema
