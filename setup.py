@@ -45,6 +45,7 @@ setup(
             'mopidy-scan = mopidy.scanner:main',
         ],
         b'mopidy.extension': [
+            'http = mopidy.frontends.http:Extension',
             'local = mopidy.backends.local:Extension',
             'mpd = mopidy.frontends.mpd:Extension',
             'mpris = mopidy.frontends.mpris:Extension',
