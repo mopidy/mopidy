@@ -19,3 +19,7 @@ class ExceptionsTest(unittest.TestCase):
     def test_optional_dependency_error_is_a_mopidy_exception(self):
         self.assert_(issubclass(
             exceptions.OptionalDependencyError, exceptions.MopidyException))
+
+    def test_extension_error_is_a_mopidy_exception(self):
+        self.assert_(issubclass(
+            exceptions.ExtensionError, exceptions.MopidyException))
