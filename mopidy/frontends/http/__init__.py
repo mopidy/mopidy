@@ -495,7 +495,7 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return '[http]'
+        return '[ext.http]'
 
     def validate_config(self, config):
         pass

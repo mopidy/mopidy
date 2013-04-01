@@ -40,7 +40,7 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return '[lastfm]'
+        return '[ext.lastfm]'
 
     def validate_config(self, config):
         pass

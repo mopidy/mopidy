@@ -37,7 +37,7 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return '[local]'
+        return '[ext.local]'
 
     def validate_config(self, config):
         pass

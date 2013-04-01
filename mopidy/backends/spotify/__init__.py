@@ -7,7 +7,7 @@ from mopidy.utils.formatting import indent
 
 
 config = """
-[spotify]
+[ext.spotify]
 
 # If the Spotify extension should be enabled or not
 enabled = true
