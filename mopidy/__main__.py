@@ -9,6 +9,7 @@ import sys
 import gobject
 gobject.threads_init()
 
+import pkg_resources
 import pykka.debug
 
 
@@ -54,10 +55,11 @@ def main():
         log.setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
         setup_settings(options.interactive)
+        extensions = load_extensions()
         audio = setup_audio()
-        backends = setup_backends(audio)
+        backends = setup_backends(extensions, audio)
         core = setup_core(audio, backends)
-        setup_frontends(core)
+        setup_frontends(extensions, core)
         loop.run()
     except exceptions.SettingsError as ex:
         logger.error(ex.message)
@@ -67,9 +69,9 @@ def main():
         logger.exception(ex)
     finally:
         loop.quit()
-        stop_frontends()
+        stop_frontends(extensions)
         stop_core()
-        stop_backends()
+        stop_backends(extensions)
         stop_audio()
         process.stop_remaining_actors()
 
@@ -138,6 +140,17 @@ def setup_settings(interactive):
         sys.exit(1)
 
 
+def load_extensions():
+    extensions = []
+    for entry_point in pkg_resources.iter_entry_points('mopidy.extension'):
+        extension_class = entry_point.load()
+        extension = extension_class()
+        logger.info(
+            'Loading extension: %s %s', extension.name, extension.version)
+        extensions.append(extension)
+    return extensions
+
+
 def setup_audio():
     return Audio.start().proxy()
 
@@ -146,18 +159,19 @@ def stop_audio():
     process.stop_actors_by_class(Audio)
 
 
-def setup_backends(audio):
+def setup_backends(extensions, audio):
     backends = []
-    for backend_class_name in settings.BACKENDS:
-        backend_class = importing.get_class(backend_class_name)
-        backend = backend_class.start(audio=audio).proxy()
-        backends.append(backend)
+    for extension in extensions:
+        for backend_class in extension.get_backend_classes():
+            backend = backend_class.start(audio=audio).proxy()
+            backends.append(backend)
     return backends
 
 
-def stop_backends():
-    for backend_class_name in settings.BACKENDS:
-        process.stop_actors_by_class(importing.get_class(backend_class_name))
+def stop_backends(extensions):
+    for extension in extensions:
+        for backend_class in extension.get_backend_classes():
+            process.stop_actors_by_class(backend_class)
 
 
 def setup_core(audio, backends):
@@ -168,21 +182,16 @@ def stop_core():
     process.stop_actors_by_class(Core)
 
 
-def setup_frontends(core):
-    for frontend_class_name in settings.FRONTENDS:
-        try:
-            importing.get_class(frontend_class_name).start(core=core)
-        except exceptions.OptionalDependencyError as ex:
-            logger.info('Disabled: %s (%s)', frontend_class_name, ex)
+def setup_frontends(extensions, core):
+    for extension in extensions:
+        for frontend_class in extension.get_frontend_classes():
+            frontend_class.start(core=core)
 
 
-def stop_frontends():
-    for frontend_class_name in settings.FRONTENDS:
-        try:
-            frontend_class = importing.get_class(frontend_class_name)
+def stop_frontends(extensions):
+    for extension in extensions:
+        for frontend_class in extension.get_frontend_classes():
             process.stop_actors_by_class(frontend_class)
-        except exceptions.OptionalDependencyError:
-            pass
 
 
 if __name__ == '__main__':
