@@ -209,3 +209,17 @@ class ConfigSchema(object):
         if errors:
             raise exceptions.ConfigError(errors)
         return values
+
+
+class ExtensionConfigSchema(ConfigSchema):
+    """Sub-classed ConfigSchema for use in extensions.
+
+    Ensures that `enabled` config value is present and that section name is
+    prefixed with ext.
+    """
+    def __init__(self):
+        super(ExtensionConfigSchema, self).__init__()
+        self['enabled'] = Boolean()
+
+    def format(self, name, values):
+        return super(ExtensionConfigSchema, self).format('ext.%s' % name, values)

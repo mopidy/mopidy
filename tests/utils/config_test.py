@@ -320,3 +320,13 @@ class ConfigSchemaTest(unittest.TestCase):
         self.assertNotIn('foo', cm.exception)
         self.assertIn('failure', cm.exception['bar'])
         self.assertIn('not found', cm.exception['baz'])
+
+
+class ExtensionConfigSchemaTest(unittest.TestCase):
+    def test_schema_includes_enabled(self):
+        schema = config.ExtensionConfigSchema()
+        self.assertIsInstance(schema['enabled'], config.Boolean)
+
+    def test_section_name_is_prefixed(self):
+        schema = config.ExtensionConfigSchema()
+        self.assertEqual('[ext.foo]', schema.format('foo', {}))
