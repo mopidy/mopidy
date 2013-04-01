@@ -1,27 +1,3 @@
-"""
-Frontend which scrobbles the music you play to your `Last.fm
-<http://www.last.fm>`_ profile.
-
-.. note::
-
-    This frontend requires a free user account at Last.fm.
-
-**Dependencies:**
-
-.. literalinclude:: ../../../requirements/lastfm.txt
-
-**Settings:**
-
-- :attr:`mopidy.settings.LASTFM_USERNAME`
-- :attr:`mopidy.settings.LASTFM_PASSWORD`
-
-**Usage:**
-
-Make sure :attr:`mopidy.settings.FRONTENDS` includes
-``mopidy.frontends.lastfm.LastfmFrontend``. By default, the setting includes
-the Last.fm frontend.
-"""
-
 from __future__ import unicode_literals
 
 import logging
