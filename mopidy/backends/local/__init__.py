@@ -57,6 +57,7 @@ class Extension(ext.Extension):
         schema['music_path'] = config.String()
         schema['playlist_path'] = config.String()
         schema['tag_cache_file'] = config.String()
+        return schema
 
     def validate_environment(self):
         pass
