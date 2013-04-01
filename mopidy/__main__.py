@@ -53,8 +53,8 @@ def main():
     try:
         log.setup_logging(options.verbosity_level, options.save_debug_log)
         check_old_folders()
-        setup_settings(options.interactive)
         extensions = load_extensions()
+        setup_settings(options.interactive)
         audio = setup_audio()
         backends = setup_backends(extensions, audio)
         core = setup_core(audio, backends)
@@ -128,17 +128,6 @@ def check_old_folders():
         'further instructions.', old_settings_folder, path.SETTINGS_PATH)
 
 
-def setup_settings(interactive):
-    path.get_or_create_folder(path.SETTINGS_PATH)
-    path.get_or_create_folder(path.DATA_PATH)
-    path.get_or_create_file(path.SETTINGS_FILE)
-    try:
-        settings.validate(interactive)
-    except exceptions.SettingsError as ex:
-        logger.error(ex.message)
-        sys.exit(1)
-
-
 def load_extensions():
     extensions = []
     for entry_point in pkg_resources.iter_entry_points('mopidy.extension'):
@@ -170,6 +159,17 @@ def load_extensions():
             entry_point.name, extension.name, extension.version)
         extensions.append(extension)
     return extensions
+
+
+def setup_settings(interactive):
+    path.get_or_create_folder(path.SETTINGS_PATH)
+    path.get_or_create_folder(path.DATA_PATH)
+    path.get_or_create_file(path.SETTINGS_FILE)
+    try:
+        settings.validate(interactive)
+    except exceptions.SettingsError as ex:
+        logger.error(ex.message)
+        sys.exit(1)
 
 
 def setup_audio():
