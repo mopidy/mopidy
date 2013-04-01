@@ -7,9 +7,16 @@ import socket
 from mopidy import exceptions
 
 
+def validate_required(value, required):
+    """Required validation, normally called in config value's validate() on the
+    raw string, _not_ the converted value."""
+    if required and not value.strip():
+        raise ValueError('must be set.')
+
+
 def validate_choice(value, choices):
     """Choice validation, normally called in config value's validate()."""
-    if choices is not None and value not in choices :
+    if choices is not None and value not in choices:
         names = ', '.join(repr(c) for c in choices)
         raise ValueError('must be one of %s, not %s.' % (names, value))
 
@@ -55,14 +62,18 @@ class ConfigValue(object):
     #: :function:`validate_maximum` in :method:`validate` do any thing.
     maximum = None
 
+    #: Indicate if this field is required.
+    opitional = None
+
     #: Indicate if we should mask the when printing for human consumption.
     secret = None
 
-    def __init__(self, choices=None, minimum=None, maximum=None, secret=None):
-        self.choices = choices
-        self.minimum = minimum
-        self.maximum = maximum
-        self.secret = secret
+    def __init__(self, **kwargs):
+        self.choices = kwargs.get('choices')
+        self.minimum = kwargs.get('minimum')
+        self.maximum = kwargs.get('maximum')
+        self.optional = kwargs.get('optional')
+        self.secret = kwargs.get('secret')
 
     def deserialize(self, value):
         """Cast raw string to appropriate type."""
@@ -70,8 +81,6 @@ class ConfigValue(object):
 
     def serialize(self, value):
         """Convert value back to string for saving."""
-        if value is None:
-            return ''
         return str(value)
 
     def format(self, value):
@@ -84,7 +93,10 @@ class ConfigValue(object):
 class String(ConfigValue):
     def deserialize(self, value):
         value = value.strip()
+        validate_required(value, not self.optional)
         validate_choice(value, self.choices)
+        if not value:
+            return None
         return value
 
     def serialize(self, value):
@@ -93,7 +105,7 @@ class String(ConfigValue):
 
 class Integer(ConfigValue):
     def deserialize(self, value):
-        value = int(value.strip())
+        value = int(value)
         validate_choice(value, self.choices)
         validate_minimum(value, self.minimum)
         validate_maximum(value, self.maximum)
@@ -121,10 +133,12 @@ class Boolean(ConfigValue):
 
 class List(ConfigValue):
     def deserialize(self, value):
+        validate_required(value, not self.optional)
         if '\n' in value:
-            return re.split(r'\s*\n\s*', value.strip())
+            values = re.split(r'\s*\n\s*', value.strip())
         else:
-            return re.split(r'\s*,\s*', value.strip())
+            values = re.split(r'\s*,\s*', value.strip())
+        return [v for v in values if v]
 
     def serialize(self, value):
         return '\n  '.join(v.encode('utf-8') for v in value)
@@ -138,8 +152,7 @@ class LogLevel(ConfigValue):
               'debug' : logging.DEBUG}
 
     def deserialize(self, value):
-        if value.lower() not in self.levels:
-            raise ValueError('%r must be one of %s.' % (value, ', '.join(self.levels)))
+        validate_choice(value.lower(), self.levels.keys())
         return self.levels.get(value.lower())
 
     def serialize(self, value):
@@ -148,6 +161,9 @@ class LogLevel(ConfigValue):
 
 class Hostname(ConfigValue):
     def deserialize(self, value):
+        validate_required(value, not self.optional)
+        if not value.strip():
+            return None
         try:
             socket.getaddrinfo(value, None)
         except socket.error:
@@ -156,6 +172,7 @@ class Hostname(ConfigValue):
 
 
 class Port(Integer):
+    # TODO: consider probing if port is free or not?
     def __init__(self, **kwargs):
         super(Port, self).__init__(**kwargs)
         self.minimum = 1
@@ -197,10 +214,7 @@ class ConfigSchema(object):
 
         for key, value in items:
             try:
-                if value.strip():
-                    values[key] = self._schema[key].deserialize(value)
-                else:  # treat blank entries as none
-                    values[key] = None
+                values[key] = self._schema[key].deserialize(value)
             except KeyError:  # not in our schema
                 errors[key] = 'unknown config key.'
             except ValueError as e:  # deserialization failed
