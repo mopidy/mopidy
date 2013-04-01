@@ -63,7 +63,7 @@ class ConfigValue(object):
     maximum = None
 
     #: Indicate if this field is required.
-    opitional = None
+    optional = None
 
     #: Indicate if we should mask the when printing for human consumption.
     secret = None
