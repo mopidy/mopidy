@@ -2,7 +2,24 @@ from __future__ import unicode_literals
 
 import mopidy
 from mopidy import ext
+from mopidy.utils import config, formatting
 
+
+default_config = """
+[ext.stream]
+
+# If the stream extension should be enabled or not
+enabled = true
+
+# Whitelist of URI schemas to support streaming from
+protocols =
+    http
+    https
+    mms
+    rtmp
+    rtmps
+    rtsp
+"""
 
 __doc__ = """A backend for playing music for streaming music.
 
@@ -18,10 +35,12 @@ https://github.com/mopidy/mopidy/issues?labels=Stream+backend
 
 - None
 
-**Settings:**
+**Default config:**
 
-- :attr:`mopidy.settings.STREAM_PROTOCOLS`
-"""
+.. code-block:: ini
+
+%(config)s
+""" % {'config': formatting.indent(default_config)}
 
 
 class Extension(ext.Extension):
@@ -30,10 +49,12 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return '[ext.stream]'
+        return default_config
 
-    def validate_config(self, config):
-        pass
+    def get_config_schema(self):
+        schema = config.ExtensionConfigSchema()
+        schema['protocols'] = config.List()
+        return schema
 
     def validate_environment(self):
         pass
