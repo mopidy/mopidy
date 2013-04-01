@@ -46,6 +46,7 @@ setup(
         ],
         b'mopidy.extension': [
             'http = mopidy.frontends.http:Extension',
+            'lastfm = mopidy.frontends.lastfm:Extension',
             'local = mopidy.backends.local:Extension',
             'mpd = mopidy.frontends.mpd:Extension',
             'mpris = mopidy.frontends.mpris:Extension',
