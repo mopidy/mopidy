@@ -4,6 +4,15 @@ Changes
 
 This change log is used to track all major changes to Mopidy.
 
+v0.14.0 (UNRELEASED)
+====================
+
+**Dependencies**
+
+- setuptools or distribute is now required. We've introduced this dependency to
+  use setuptools' entry points functionality to find installed Mopidy
+  extensions.
+
 
 v0.13.0 (2013-03-31)
 ====================

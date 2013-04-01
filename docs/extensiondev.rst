@@ -162,14 +162,13 @@ class that will connect the rest of the dots.
         #py_modules=['mopidy_soundspot'],
         zip_safe=False,
         include_package_data=True,
-        platforms='any',
         install_requires=[
             'setuptools',
             'Mopidy',
             'pysoundspot',
         ],
         entry_points={
-            'mopidy.extension': [
+            b'mopidy.extension': [
                 'soundspot = mopidy_soundspot:Extension',
             ],
         },
