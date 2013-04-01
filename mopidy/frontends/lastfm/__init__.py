@@ -24,9 +24,7 @@ Frontend which scrobbles the music you play to your `Last.fm
 
 **Usage:**
 
-Make sure :attr:`mopidy.settings.FRONTENDS` includes
-``mopidy.frontends.lastfm.LastfmFrontend``. By default, the setting includes
-the Last.fm frontend.
+The frontend is enabled by default if all dependencies are available.
 """
 
 
