@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 import mopidy
 from mopidy import ext
 from mopidy.exceptions import ExtensionError
-from mopidy.utils.formatting import indent
+from mopidy.utils import config, formatting
 
 
-config = """
+default_config = """
 [ext.spotify]
 
 # If the Spotify extension should be enabled or not
@@ -49,20 +49,20 @@ See :ref:`music-from-spotify` for further instructions on using this backend.
     otherwise approved in any way by Spotify. Spotify is the registered
     trade mark of the Spotify Group.
 
-**Issues:**
+**Issues**
 
 https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 
-**Dependencies:**
+**Dependencies**
 
 .. literalinclude:: ../../../requirements/spotify.txt
 
-**Default config:**
+**Default config**
 
 .. code-block:: ini
 
 %(config)s
-""" % {'config': indent(config)}
+""" % {'config': formatting.indent(default_config)}
 
 
 class Extension(ext.Extension):
@@ -71,15 +71,19 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return config
+        return default_config
 
-    def validate_config(self, config):
-        if not config.getboolean('spotify', 'enabled'):
-            return
-        if not config.get('spotify', 'username'):
-            raise ExtensionError('Config spotify.username not set')
-        if not config.get('spotify', 'password'):
-            raise ExtensionError('Config spotify.password not set')
+    def get_config_schema(self):
+        schema = config.ExtensionConfigSchema()
+        schema['username'] = config.String()
+        schema['password'] = config.String(secret=True)
+        schema['bitrate'] = config.Integer(choices=(96, 160, 320))
+        schema['timeout'] = config.Integer(minimum=0)
+        schema['cache_path'] = config.String()
+        schema['proxy_host'] = config.Hostname(optional=True)
+        schema['proxy_username'] = config.String(optional=True)
+        schema['proxy_password'] = config.String(optional=True, secret=True)
+        return schema
 
     def validate_environment(self):
         try:

@@ -1,25 +1,56 @@
 from __future__ import unicode_literals
 
 import mopidy
-from mopidy import ext
-from mopidy.exceptions import ExtensionError
+from mopidy import exceptions, ext
+from mopidy.utils import config, formatting
 
+
+default_config = """
+[ext.http]
+
+# If the HTTP extension should be enabled or not
+enabled = true
+
+# Which address the HTTP server should bind to
+#
+# 127.0.0.1
+#     Listens only on the IPv4 loopback interface
+# ::1
+#     Listens only on the IPv6 loopback interface
+# 0.0.0.0
+#     Listens on all IPv4 interfaces
+# ::
+#     Listens on all interfaces, both IPv4 and IPv6
+hostname = 127.0.0.1
+
+# Which TCP port the HTTP server should listen to
+port = 6680
+
+# Which directory the HTTP server should serve at "/"
+#
+# Change this to have Mopidy serve e.g. files for your JavaScript client.
+# "/mopidy" will continue to work as usual even if you change this setting.
+#
+static_dir =
+"""
 
 __doc__ = """
 The HTTP frontends lets you control Mopidy through HTTP and WebSockets, e.g.
 from a web based client.
 
+**Issues**
+
+https://github.com/mopidy/mopidy/issues?labels=HTTP+frontend
+
 **Dependencies**
 
 .. literalinclude:: ../../../requirements/http.txt
 
-**Settings**
+**Default config**
 
-- :attr:`mopidy.settings.HTTP_SERVER_HOSTNAME`
+.. code-block:: ini
 
-- :attr:`mopidy.settings.HTTP_SERVER_PORT`
-
-- :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR`
+%(config)s
 
 
 Setup
@@ -483,7 +514,7 @@ Example to get started with
 9. The web page should now queue and play your first playlist every time your
    load it. See the browser's console for output from the function, any errors,
    and all events that are emitted.
-"""
+""" % {'config': formatting.indent(default_config)}
 
 
 class Extension(ext.Extension):
@@ -492,21 +523,25 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return '[ext.http]'
+        return default_config
 
-    def validate_config(self, config):
-        pass
+    def get_config_schema(self):
+        schema = config.ExtensionConfigSchema()
+        schema['hostname'] = config.Hostname()
+        schema['port'] = config.Port()
+        schema['static_dir'] = config.String(optional=True)
+        return schema
 
     def validate_environment(self):
         try:
             import cherrypy  # noqa
         except ImportError as e:
-            raise ExtensionError('Library cherrypy not found', e)
+            raise exceptions.ExtensionError('cherrypy library not found', e)
 
         try:
             import ws4py  # noqa
         except ImportError as e:
-            raise ExtensionError('Library ws4py not found', e)
+            raise exceptions.ExtensionError('ws4py library not found', e)
 
     def get_frontend_classes(self):
         from .actor import HttpFrontend
