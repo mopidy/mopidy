@@ -11,6 +11,7 @@ class ValidateChoiceTest(unittest.TestCase):
 
     def test_valid_value_passes(self):
         config.validate_choice('foo', ['foo', 'bar', 'baz'])
+        config.validate_choice(1, [1, 2, 3])
 
     def test_empty_choices_fails(self):
         with self.assertRaises(ValueError):
@@ -19,6 +20,8 @@ class ValidateChoiceTest(unittest.TestCase):
     def test_invalid_value_fails(self):
         with self.assertRaises(ValueError):
             config.validate_choice('foobar', ['foo', 'bar', 'baz'])
+        with self.assertRaises(ValueError):
+            config.validate_choice(5, [1, 2, 3])
 
 
 class ValidateMinimumTest(unittest.TestCase):
@@ -95,7 +98,6 @@ class StringTest(unittest.TestCase):
 
     def test_deserialize_enforces_choices(self):
         value = config.String(choices=['foo', 'bar', 'baz'])
-
         self.assertEqual('foo', value.deserialize('foo'))
         with self.assertRaises(ValueError):
             value.deserialize('foobar')

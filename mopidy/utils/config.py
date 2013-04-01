@@ -4,19 +4,20 @@ from __future__ import unicode_literals
 def validate_choice(value, choices):
     """Choice validation, normally called in config value's validate()."""
     if choices is not None and value not in choices :
-        raise ValueError('must be one of %s.' % ', '.join(choices))
+        names = ', '.join(repr(c) for c in choices)
+        raise ValueError('%r must be one of %s.' % (value, names))
 
 
 def validate_minimum(value, minimum):
     """Minimum validation, normally called in config value's validate()."""
     if minimum is not None and value < minimum:
-        raise ValueError('must be larger than %s.' % minimum)
+        raise ValueError('%r must be larger than %r.' % (value, minimum))
 
 
 def validate_maximum(value, maximum):
     """Maximum validation, normally called in config value's validate()."""
     if maximum is not None and value > maximum:
-        raise ValueError('must be smaller than %s.' % maximum)
+        raise ValueError('%r must be smaller than %r.' % (value, maximum))
 
 
 class ConfigValue(object):
