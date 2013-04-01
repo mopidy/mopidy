@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import logging
 import re
 
 
@@ -122,3 +123,19 @@ class List(ConfigValue):
 
     def serialize(self, value):
         return '\n  '.join(value)
+
+
+class LogLevel(ConfigValue):
+    levels = {'critical' : logging.CRITICAL,
+              'error' : logging.ERROR,
+              'warning' : logging.WARNING,
+              'info' : logging.INFO,
+              'debug' : logging.DEBUG}
+
+    def deserialize(self, value):
+        if value.lower() not in self.levels:
+            raise ValueError('%r must be one of %s.' % (value, ', '.join(self.levels)))
+        return self.levels.get(value.lower())
+
+    def serialize(self, value):
+        return dict((v, k) for k, v in self.levels.items()).get(value)

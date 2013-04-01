@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import logging
+
 from mopidy.utils import config
 
 from tests import unittest
@@ -192,3 +194,34 @@ class ListTest(unittest.TestCase):
         value = config.List()
         self.assertRegexpMatches(value.serialize(['foo', 'bar', 'baz']),
                                                  r'foo\n\s*bar\n\s*baz')
+
+
+class BooleanTest(unittest.TestCase):
+    levels = {'critical' : logging.CRITICAL,
+              'error' : logging.ERROR,
+              'warning' : logging.WARNING,
+              'info' : logging.INFO,
+              'debug' : logging.DEBUG}
+
+    def test_deserialize_converts_to_numeric_loglevel(self):
+        value = config.LogLevel()
+        for name, level in self.levels.items():
+            self.assertEqual(level, value.deserialize(name))
+            self.assertEqual(level, value.deserialize(name.upper()))
+            self.assertEqual(level, value.deserialize(name.capitalize()))
+
+    def test_deserialize_fails_on_bad_data(self):
+        value = config.LogLevel()
+        with self.assertRaises(ValueError):
+            value.deserialize('nope')
+        with self.assertRaises(ValueError):
+            value.deserialize('sure')
+
+    def test_serialize_converts_to_string(self):
+        value = config.LogLevel()
+        for name, level in self.levels.items():
+            self.assertEqual(name, value.serialize(level))
+
+    def test_serialize_unknown_level(self):
+        value = config.LogLevel()
+        self.assertIsNone(value.serialize(1337))
