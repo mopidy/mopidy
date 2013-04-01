@@ -37,3 +37,7 @@ class ConfigError(MopidyException):
 
 class OptionalDependencyError(MopidyException):
     pass
+
+
+class ExtensionError(MopidyException):
+    pass

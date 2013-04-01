@@ -1,4 +1,11 @@
-"""
+from __future__ import unicode_literals
+
+import mopidy
+from mopidy import ext
+from mopidy.exceptions import ExtensionError
+
+
+__doc__ = """
 Frontend which lets you control Mopidy through the Media Player Remote
 Interfacing Specification (`MPRIS <http://www.mpris.org/>`_) D-Bus
 interface.
@@ -25,9 +32,7 @@ An example of an MPRIS client is the `Ubuntu Sound Menu
 
 **Usage:**
 
-Make sure :attr:`mopidy.settings.FRONTENDS` includes
-``mopidy.frontends.mpris.MprisFrontend``. By default, the setting includes the
-MPRIS frontend.
+The frontend is enabled by default if all dependencies are available.
 
 **Testing the frontend**
 
@@ -50,7 +55,24 @@ Now you can control Mopidy through the player object. Examples:
     player.Quit(dbus_interface='org.mpris.MediaPlayer2')
 """
 
-from __future__ import unicode_literals
 
-# flake8: noqa
-from .actor import MprisFrontend
+class Extension(ext.Extension):
+
+    name = 'Mopidy-MPRIS'
+    version = mopidy.__version__
+
+    def get_default_config(self):
+        return '[ext.mpris]'
+
+    def validate_config(self, config):
+        pass
+
+    def validate_environment(self):
+        try:
+            import dbus  # noqa
+        except ImportError as e:
+            raise ExtensionError('Library dbus not found', e)
+
+    def get_frontend_classes(self):
+        from .actor import MprisFrontend
+        return [MprisFrontend]

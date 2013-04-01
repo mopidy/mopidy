@@ -1,4 +1,10 @@
-"""A backend for playing music from a local music archive.
+from __future__ import unicode_literals
+
+import mopidy
+from mopidy import ext
+
+
+__doc__ = """A backend for playing music from a local music archive.
 
 This backend handles URIs starting with ``file:``.
 
@@ -20,7 +26,21 @@ https://github.com/mopidy/mopidy/issues?labels=Local+backend
 - :attr:`mopidy.settings.LOCAL_TAG_CACHE_FILE`
 """
 
-from __future__ import unicode_literals
 
-# flake8: noqa
-from .actor import LocalBackend
+class Extension(ext.Extension):
+
+    name = 'Mopidy-Local'
+    version = mopidy.__version__
+
+    def get_default_config(self):
+        return '[ext.local]'
+
+    def validate_config(self, config):
+        pass
+
+    def validate_environment(self):
+        pass
+
+    def get_backend_classes(self):
+        from .actor import LocalBackend
+        return [LocalBackend]

@@ -1,4 +1,39 @@
-"""A backend for playing music from Spotify
+from __future__ import unicode_literals
+
+import mopidy
+from mopidy import ext
+from mopidy.exceptions import ExtensionError
+from mopidy.utils.formatting import indent
+
+
+config = """
+[ext.spotify]
+
+# If the Spotify extension should be enabled or not
+enabled = true
+
+# Your Spotify Premium username
+username =
+
+# Your Spotify Premium password
+password =
+
+# The preferred audio bitrate. Valid values are 96, 160, 320
+bitrate = 160
+
+# Max number of seconds to wait for Spotify operations to complete
+timeout = 10
+
+# Path to the Spotify data cache. Cannot be shared with other Spotify apps
+cache_path = $XDG_CACHE_DIR/mopidy/spotify
+
+# Connect to Spotify through a proxy
+proxy_host =
+proxy_username =
+proxy_password =
+"""
+
+__doc__ = """A backend for playing music from Spotify
 
 `Spotify <http://www.spotify.com/>`_ is a music streaming service. The backend
 uses the official `libspotify
@@ -22,14 +57,36 @@ https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 
 .. literalinclude:: ../../../requirements/spotify.txt
 
-**Settings:**
+**Default config:**
 
-- :attr:`mopidy.settings.SPOTIFY_CACHE_PATH`
-- :attr:`mopidy.settings.SPOTIFY_USERNAME`
-- :attr:`mopidy.settings.SPOTIFY_PASSWORD`
-"""
+.. code-block:: ini
 
-from __future__ import unicode_literals
+%(config)s
+""" % {'config': indent(config)}
 
-# flake8: noqa
-from .actor import SpotifyBackend
+
+class Extension(ext.Extension):
+
+    name = 'Mopidy-Spotify'
+    version = mopidy.__version__
+
+    def get_default_config(self):
+        return config
+
+    def validate_config(self, config):
+        if not config.getboolean('spotify', 'enabled'):
+            return
+        if not config.get('spotify', 'username'):
+            raise ExtensionError('Config spotify.username not set')
+        if not config.get('spotify', 'password'):
+            raise ExtensionError('Config spotify.password not set')
+
+    def validate_environment(self):
+        try:
+            import spotify  # noqa
+        except ImportError as e:
+            raise ExtensionError('pyspotify library not found', e)
+
+    def get_backend_classes(self):
+        from .actor import SpotifyBackend
+        return [SpotifyBackend]

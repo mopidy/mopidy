@@ -1,4 +1,11 @@
-"""
+from __future__ import unicode_literals
+
+import mopidy
+from mopidy import ext
+from mopidy.exceptions import ExtensionError
+
+
+__doc__ = """
 The HTTP frontends lets you control Mopidy through HTTP and WebSockets, e.g.
 from a web based client.
 
@@ -18,8 +25,10 @@ from a web based client.
 Setup
 =====
 
-When this frontend is included in :attr:`mopidy.settings.FRONTENDS`, it starts
-a web server at the port specified by :attr:`mopidy.settings.HTTP_SERVER_PORT`.
+The frontend is enabled by default if all dependencies are available.
+
+When it is enabled it starts a web server at the port specified by
+:attr:`mopidy.settings.HTTP_SERVER_PORT`.
 
 .. warning:: Security
 
@@ -357,14 +366,13 @@ event listeners, and delete the object like this:
 Example to get started with
 ---------------------------
 
-1. Create an empty directory for your web client.
+1. Make sure that you've installed all dependencies required by the HTTP
+   frontend.
 
-2. Change the setting :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point
+2. Create an empty directory for your web client.
+
+3. Change the setting :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point
    to your new directory.
-
-3. Make sure that you've included
-   ``mopidy.frontends.http.HttpFrontend`` in
-   :attr:`mopidy.settings.FRONTENDS`.
 
 4. Start/restart Mopidy.
 
@@ -477,5 +485,29 @@ Example to get started with
    and all events that are emitted.
 """
 
-# flake8: noqa
-from .actor import HttpFrontend
+
+class Extension(ext.Extension):
+
+    name = 'Mopidy-HTTP'
+    version = mopidy.__version__
+
+    def get_default_config(self):
+        return '[ext.http]'
+
+    def validate_config(self, config):
+        pass
+
+    def validate_environment(self):
+        try:
+            import cherrypy  # noqa
+        except ImportError as e:
+            raise ExtensionError('Library cherrypy not found', e)
+
+        try:
+            import ws4py  # noqa
+        except ImportError as e:
+            raise ExtensionError('Library ws4py not found', e)
+
+    def get_frontend_classes(self):
+        from .actor import HttpFrontend
+        return [HttpFrontend]

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import os
 
 from mopidy import settings
-from mopidy.backends.local import LocalBackend
+from mopidy.backends.local import actor
 from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
@@ -16,7 +16,7 @@ from tests.backends.local import generate_song
 class LocalPlaylistsControllerTest(
         PlaylistsControllerTest, unittest.TestCase):
 
-    backend_class = LocalBackend
+    backend_class = actor.LocalBackend
 
     def setUp(self):
         settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('empty_tag_cache')

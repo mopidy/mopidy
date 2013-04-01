@@ -123,7 +123,6 @@ def validate_settings(defaults, settings):
     changed = {
         'DUMP_LOG_FILENAME': 'DEBUG_LOG_FILENAME',
         'DUMP_LOG_FORMAT': 'DEBUG_LOG_FORMAT',
-        'FRONTEND': 'FRONTENDS',
         'GSTREAMER_AUDIO_SINK': 'OUTPUT',
         'LOCAL_MUSIC_FOLDER': 'LOCAL_MUSIC_PATH',
         'LOCAL_OUTPUT_OVERRIDE': 'OUTPUT',
@@ -143,14 +142,7 @@ def validate_settings(defaults, settings):
     }
 
     must_be_iterable = [
-        'BACKENDS',
-        'FRONTENDS',
         'STREAM_PROTOCOLS',
-    ]
-
-    must_have_value_set = [
-        'BACKENDS',
-        'FRONTENDS',
     ]
 
     for setting, value in settings.iteritems():
@@ -181,9 +173,6 @@ def validate_settings(defaults, settings):
             errors[setting] = (
                 'Must be a tuple. '
                 "Remember the comma after single values: (u'value',)")
-
-        elif setting in must_have_value_set and not value:
-            errors[setting] = 'Must be set.'
 
         elif setting not in defaults and not setting.startswith('CUSTOM_'):
             errors[setting] = 'Unknown setting.'
