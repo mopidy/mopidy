@@ -318,3 +318,31 @@ STREAM_PROTOCOLS = (
     'rtmps',
     'rtsp',
 )
+
+#: Your `SoundCloud.com <http://www.soundcloud.com/>`_ authentication token.
+#:
+#: Get yours at http://www.mopidy.com/authenticate
+#:
+#: Used by :mod:`mopidy.backends.soundcloud`.
+SOUNDCLOUD_AUTH_TOKEN = None
+
+#: Extra playlists from `SoundCloud.com <http://www.soundcloud.com/explore>`
+#:
+#: Note: this might take a while to load. You can add more if you want,
+#: for example:
+#: if you want Smooth Jazz from https://soundcloud.com/explore/jazz%2Bblues
+#: your entry would be u'jazz%2Bblues/Smooth Jazz'
+#:
+#: Default::
+#:
+#:     SOUNDCLOUD_EXPLORE = [
+#:         u'electronic/Ambient',
+#:         u'pop/New Wave',
+#:         u'rock/Indie',
+#:     ]
+#: Used by :mod:`mopidy.backends.soundcloud`.
+SOUNDCLOUD_EXPLORE = [
+    u'electronic/Ambient',
+    u'pop/New Wave',
+    u'rock/Indie',
+]
