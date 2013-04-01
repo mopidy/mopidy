@@ -330,3 +330,19 @@ class ExtensionConfigSchemaTest(unittest.TestCase):
     def test_section_name_is_prefixed(self):
         schema = config.ExtensionConfigSchema()
         self.assertEqual('[ext.foo]', schema.format('foo', {}))
+
+
+class LogLevelConfigSchemaTest(unittest.TestCase):
+    def test_conversion(self):
+        schema = config.LogLevelConfigSchema()
+        result = schema.convert([('foo.bar', 'DEBUG'), ('baz', 'INFO')])
+
+        self.assertEqual(logging.DEBUG, result['foo.bar'])
+        self.assertEqual(logging.INFO, result['baz'])
+
+    def test_format(self):
+        schema = config.LogLevelConfigSchema()
+        expected = ['[levels]', 'baz = info', 'foo.bar = debug']
+        result = schema.format('levels', {'foo.bar': logging.DEBUG, 'baz': logging.INFO})
+        self.assertEqual('\n'.join(expected), result)
+

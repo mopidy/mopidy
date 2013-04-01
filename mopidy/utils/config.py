@@ -223,3 +223,36 @@ class ExtensionConfigSchema(ConfigSchema):
 
     def format(self, name, values):
         return super(ExtensionConfigSchema, self).format('ext.%s' % name, values)
+
+
+class LogLevelConfigSchema(object):
+    """Special cased schema for handling a config section with loglevels.
+
+    Expects the config keys to be logger names and the values to be log levels
+    as understood by the LogLevel config value. Does not sub-class ConfigSchema,
+    but implements the same interface.
+    """
+    def __init__(self):
+        self._configvalue = LogLevel()
+
+    def format(self, name, values):
+        lines = ['[%s]' % name]
+        for key, value in sorted(values.items()):
+            if value is not None:
+                lines.append('%s = %s' % (key, self._configvalue.format(value)))
+        return '\n'.join(lines)
+
+    def convert(self, items):
+        errors = {}
+        values = {}
+
+        for key, value in items:
+            try:
+                if value.strip():
+                    values[key] = self._configvalue.deserialize(value)
+            except ValueError as e:  # deserialization failed
+                errors[key] = str(e)
+
+        if errors:
+            raise exceptions.ConfigError(errors)
+        return values
