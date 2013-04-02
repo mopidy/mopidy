@@ -138,7 +138,7 @@ def check_old_folders():
 def load_extensions():
     extensions = []
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
-        logger.debug('Loading extension %s', entry_point.name)
+        logger.debug('Loading entrypoint: %s', entry_point)
 
         try:
             extension_class = entry_point.load()
@@ -149,6 +149,9 @@ def load_extensions():
             continue
 
         extension = extension_class()
+
+        logger.debug(
+            'Loaded extension: %s %s', extension.dist_name, extension.version)
 
         if entry_point.name != extension.ext_name:
             logger.warning(
@@ -164,14 +167,8 @@ def load_extensions():
                 'Disabled extension %s: %s', entry_point.name, ex.message)
             continue
 
-        # TODO: due to order we do things in we can't know for sure if we are
-        # going to use it at this point, should we perhaps just log a single
-        # line with all extenions we found and then log an enabled line for
-        # each one after we check configs etc?
-        logger.info(
-            'Loaded extension %s: %s %s',
-            entry_point.name, extension.dist_name, extension.version)
         extensions.append(extension)
+    logging.info('Loaded extensions: %s', ', '.join(e.ext_name for e in extensions))
     return extensions
 
 
