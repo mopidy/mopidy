@@ -16,18 +16,10 @@ import pkg_resources
 import pykka.debug
 
 
-# Extract any non-GStreamer arguments, and leave the GStreamer arguments for
-# processing by GStreamer. This needs to be done before GStreamer is imported,
-# so that GStreamer doesn't hijack e.g. ``--help``.
-# NOTE This naive fix does not support values like ``bar`` in
-# ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
-
-def is_gst_arg(argument):
-    return argument.startswith('--gst') or argument == '--help-gst'
-
-gstreamer_args = [arg for arg in sys.argv[1:] if is_gst_arg(arg)]
-mopidy_args = [arg for arg in sys.argv[1:] if not is_gst_arg(arg)]
-sys.argv[1:] = gstreamer_args
+# Extract any command line arguments. This needs to be done before GStreamer is
+# imported, so that GStreamer doesn't hijack e.g. ``--help``.
+mopidy_args = sys.argv[1:]
+sys.argv[1:] = []
 
 
 from mopidy import exceptions, settings
@@ -101,10 +93,6 @@ def parse_options():
 
     # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
     # See https://github.com/mopidy/mopidy/issues/302 for details
-    parser.add_option(
-        b'--help-gst',
-        action='store_true', dest='help_gst',
-        help='show GStreamer help options')
     parser.add_option(
         b'-i', '--interactive',
         action='store_true', dest='interactive',

@@ -17,7 +17,6 @@ class HelpTest(unittest.TestCase):
         output = process.communicate()[0]
         self.assertIn('--version', output)
         self.assertIn('--help', output)
-        self.assertIn('--help-gst', output)
         self.assertIn('--interactive', output)
         self.assertIn('--quiet', output)
         self.assertIn('--verbose', output)
@@ -25,10 +24,3 @@ class HelpTest(unittest.TestCase):
         self.assertIn('--show-config', output)
         self.assertIn('--config', output)
         self.assertIn('--option', output)
-
-    def test_help_gst_has_gstreamer_options(self):
-        mopidy_dir = os.path.dirname(mopidy.__file__)
-        args = [sys.executable, mopidy_dir, '--help-gst']
-        process = subprocess.Popen(args, stdout=subprocess.PIPE)
-        output = process.communicate()[0]
-        self.assertIn('--gst-version', output)
