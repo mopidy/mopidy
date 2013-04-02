@@ -148,6 +148,8 @@ def parse_options():
 
 
 def show_config_callback(option, opt, value, parser):
+    # TODO: don't use callback for this as --config or -o set after
+    # --show-config will be ignored.
     files = getattr(parser.values, 'config', '').split(':')
     overrides = getattr(parser.values, 'overrides', [])
 
