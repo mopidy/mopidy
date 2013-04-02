@@ -158,7 +158,7 @@ def show_config_callback(option, opt, value, parser):
     enabled_extensions = filter_enabled_extensions(raw_config, extensions)
     config = validate_config(raw_config, enabled_extensions)
 
-    output = ['# Config for disabled extensions are not shown.']
+    output = []
     for section_name, schema in config_schemas.items():
         options = config.get(section_name, {})
         if not options:
@@ -171,7 +171,9 @@ def show_config_callback(option, opt, value, parser):
             options = config.get(extension.ext_name, {})
             output.append(schema.format(extension.ext_name, options))
         else:
-            output.append('[%s]\nenabled = false' % extension.ext_name)
+            lines = ['[%s]' % extension.ext_name, 'enabled = false',
+                     '# Config hidden as extension is disabled']
+            output.append('\n'.join(lines))
 
     print '\n\n'.join(output)
     sys.exit(0)
