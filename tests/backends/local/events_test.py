@@ -7,6 +7,7 @@ from tests.backends.base import events
 
 class LocalBackendEventsTest(events.BackendEventsTest, unittest.TestCase):
     backend_class = actor.LocalBackend
+    # TODO: setup config
 
     def setUp(self):
         settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('empty_tag_cache')

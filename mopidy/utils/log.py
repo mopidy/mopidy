@@ -7,7 +7,7 @@ from mopidy import settings
 from . import deps, versioning
 
 
-def setup_logging(verbosity_level, save_debug_log):
+def setup_logging(config, verbosity_level, save_debug_log):
     setup_root_logger()
     setup_console_logging(verbosity_level)
     if save_debug_log:

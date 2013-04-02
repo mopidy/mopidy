@@ -23,7 +23,7 @@ from tests import unittest
 class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):
         objects.MprisObject._connect_to_dbus = mock.Mock()
-        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
         self.mpris = objects.MprisObject(core=self.core)
 

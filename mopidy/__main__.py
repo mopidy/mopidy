@@ -53,17 +53,18 @@ def main():
 
     loop = gobject.MainLoop()
     options = parse_options()
+    config = {}  # TODO: replace dummy placeholder 
 
     try:
-        log.setup_logging(options.verbosity_level, options.save_debug_log)
+        log.setup_logging(config, options.verbosity_level, options.save_debug_log)
         check_old_folders()
         extensions = load_extensions()
         load_config(options, extensions)
         setup_settings(options.interactive)
-        audio = setup_audio()
-        backends = setup_backends(extensions, audio)
+        audio = setup_audio(config)
+        backends = setup_backends(config, extensions, audio)
         core = setup_core(audio, backends)
-        setup_frontends(extensions, core)
+        setup_frontends(config, extensions, core)
         loop.run()
     except exceptions.SettingsError as ex:
         logger.error(ex.message)
@@ -122,6 +123,7 @@ def parse_options():
 
 
 def check_old_folders():
+    # TODO: add old settings and pre extension storage locations?
     old_settings_folder = os.path.expanduser('~/.mopidy')
 
     if not os.path.isdir(old_settings_folder):
@@ -137,8 +139,6 @@ def load_extensions():
     extensions = []
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
         logger.debug('Loading extension %s', entry_point.name)
-
-        # TODO Filter out disabled extensions
 
         try:
             extension_class = entry_point.load()
@@ -157,8 +157,6 @@ def load_extensions():
                 {'ep': entry_point.name, 'ext': extension.ext_name})
             continue
 
-        # TODO Validate configuration
-
         try:
             extension.validate_environment()
         except exceptions.ExtensionError as ex:
@@ -166,6 +164,10 @@ def load_extensions():
                 'Disabled extension %s: %s', entry_point.name, ex.message)
             continue
 
+        # TODO: due to order we do things in we can't know for sure if we are
+        # going to use it at this point, should we perhaps just log a single
+        # line with all extenions we found and then log an enabled line for
+        # each one after we check configs etc?
         logger.info(
             'Loaded extension %s: %s %s',
             entry_point.name, extension.dist_name, extension.version)
@@ -240,9 +242,9 @@ def setup_settings(interactive):
         sys.exit(1)
 
 
-def setup_audio():
+def setup_audio(config):
     logger.info('Starting Mopidy audio')
-    return Audio.start().proxy()
+    return Audio.start(config=config).proxy()
 
 
 def stop_audio():
@@ -250,12 +252,12 @@ def stop_audio():
     process.stop_actors_by_class(Audio)
 
 
-def setup_backends(extensions, audio):
+def setup_backends(config, extensions, audio):
     logger.info('Starting Mopidy backends')
     backends = []
     for extension in extensions:
         for backend_class in extension.get_backend_classes():
-            backend = backend_class.start(audio=audio).proxy()
+            backend = backend_class.start(config=config, audio=audio).proxy()
             backends.append(backend)
     return backends
 
@@ -277,11 +279,11 @@ def stop_core():
     process.stop_actors_by_class(Core)
 
 
-def setup_frontends(extensions, core):
+def setup_frontends(config, extensions, core):
     logger.info('Starting Mopidy frontends')
     for extension in extensions:
         for frontend_class in extension.get_frontend_classes():
-            frontend_class.start(core=core)
+            frontend_class.start(config=config, core=core)
 
 
 def stop_frontends(extensions):

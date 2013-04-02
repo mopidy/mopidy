@@ -23,7 +23,7 @@ logger = logging.getLogger('mopidy.frontends.http')
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
-    def __init__(self, core):
+    def __init__(self, config, core):
         super(HttpFrontend, self).__init__()
         self.core = core
         self._setup_server()

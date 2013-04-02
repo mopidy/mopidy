@@ -14,7 +14,7 @@ logger = logging.getLogger('mopidy.frontends.mpd')
 
 
 class MpdFrontend(pykka.ThreadingActor, CoreListener):
-    def __init__(self, core):
+    def __init__(self, config, core):
         super(MpdFrontend, self).__init__()
         hostname = network.format_hostname(settings.MPD_SERVER_HOSTNAME)
         port = settings.MPD_SERVER_PORT

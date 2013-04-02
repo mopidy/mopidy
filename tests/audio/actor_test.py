@@ -17,7 +17,7 @@ class AudioTest(unittest.TestCase):
         settings.MIXER = 'fakemixer track_max_volume=65536'
         settings.OUTPUT = 'fakesink'
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.audio = audio.Audio.start().proxy()
+        self.audio = audio.Audio.start(None).proxy()
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
@@ -60,7 +60,7 @@ class AudioTest(unittest.TestCase):
 
     def test_set_volume_with_mixer_max_below_100(self):
         settings.MIXER = 'fakemixer track_max_volume=40'
-        self.audio = audio.Audio.start().proxy()
+        self.audio = audio.Audio.start(None).proxy()
 
         for value in range(0, 101):
             self.assertTrue(self.audio.set_volume(value).get())
@@ -81,7 +81,7 @@ class AudioTest(unittest.TestCase):
 
 class AudioStateTest(unittest.TestCase):
     def setUp(self):
-        self.audio = audio.Audio()
+        self.audio = audio.Audio(None)
 
     def test_state_starts_as_stopped(self):
         self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
