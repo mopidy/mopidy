@@ -54,13 +54,14 @@ def main():
 
     loop = gobject.MainLoop()
     options = parse_options()
+    config_overrides = getattr(options, 'overrides', [])
 
     try:
         # TODO: we need a two stage logging setup as we want logging for
         # extension loading and config loading.
         log.setup_logging(None, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
-        raw_config = load_config(options, extensions)
+        raw_config = load_config(config_overrides, extensions)
         extensions = filter_enabled_extensions(raw_config, extensions)
         config = validate_config(raw_config, extensions)
         check_old_folders()
@@ -87,12 +88,12 @@ def main():
 
 def check_config_override(option, opt, override):
     try:
-        section, remainder = override.split(':', 1)
+        section, remainder = override.split('/', 1)
         key, value = remainder.split('=', 1)
         return (section, key, value)
     except ValueError:
         raise optparse.OptionValueError(
-            'option %s: must have the format section:key=value' % opt)
+            'option %s: must have the format section/key=value' % opt)
 
 
 def parse_options():
@@ -100,8 +101,8 @@ def parse_options():
         version='Mopidy %s' % versioning.get_version())
 
     # Ugly extension of optparse type checking magic :/
-    optparse.Option.TYPES += ('setting',)
-    optparse.Option.TYPE_CHECKER['setting'] = check_config_override
+    optparse.Option.TYPES += ('config_override',)
+    optparse.Option.TYPE_CHECKER['config_override'] = check_config_override
 
     # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
     # See https://github.com/mopidy/mopidy/issues/302 for details
@@ -138,15 +139,17 @@ def parse_options():
         action='store_true', dest='debug_thread',
         help='run background thread that dumps tracebacks on SIGUSR1')
     parser.add_option(
-        b'-s', b'--setting',
-        action='append', dest='settings', type='setting',
-        help='`section_name:setting_key=value` values to override settings.')
+        b'-o', b'--option',
+        action='append', dest='overrides', type='config_override',
+        help='`section/key=value` values to override config options.')
     return parser.parse_args(args=mopidy_args)[0]
 
 
 def list_settings_callback(option, opt, value, parser):
+    overrides = getattr(parser.values, 'overrides', [])
+
     extensions = load_extensions()
-    raw_config = load_config(parser.values, extensions)
+    raw_config = load_config(overrides, extensions)
     extensions = filter_enabled_extensions(raw_config, extensions)
     config = validate_config(raw_config, extensions)
 
@@ -268,7 +271,7 @@ def load_config(options, extensions):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
-    for section, key, value in options.settings or []:
+    for section, key, value in options or []:
         raw_config.setdefault(section, {})[key] = value
 
     return raw_config
