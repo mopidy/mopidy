@@ -227,23 +227,28 @@ def load_extensions():
         extensions.append(extension)
 
     names = (e.ext_name for e in extensions)
-    logging.info('Found following runnable extensions: %s', ', '.join(names))
+    logging.debug('Discovered extensions: %s', ', '.join(names))
     return extensions
 
 
 def filter_enabled_extensions(raw_config, extensions):
     boolean = config_utils.Boolean()
-    filtered_extensions = []
+    enabled_extensions = []
+    enabled_names = []
+    disabled_names = []
 
     for extension in extensions:
         # TODO: handle key and value errors.
         enabled = raw_config[extension.ext_name]['enabled']
         if boolean.deserialize(enabled):
-            filtered_extensions.append(extension)
+            enabled_extensions.append(extension)
+            enabled_names.append(extension.ext_name)
+        else:
+            disabled_names.append(extension.ext_name)
 
-    names = (e.ext_name for e in filtered_extensions)
-    logging.info('Following extensions will be started: %s', ', '.join(names))
-    return filtered_extensions
+    logging.info('Enabled extensions: %s', ', '.join(enabled_names))
+    logging.info('Disabled extensions: %s', ', '.join(disabled_names))
+    return enabled_extensions
 
 
 def load_config(files, overrides, extensions):
