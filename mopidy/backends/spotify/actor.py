@@ -14,7 +14,7 @@ class SpotifyBackend(pykka.ThreadingActor, base.Backend):
     # Imports inside methods are to prevent loading of __init__.py to fail on
     # missing spotify dependencies.
 
-    def __init__(self, audio):
+    def __init__(self, config, audio):
         super(SpotifyBackend, self).__init__()
 
         from .library import SpotifyLibraryProvider

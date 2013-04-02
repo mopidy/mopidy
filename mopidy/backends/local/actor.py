@@ -13,7 +13,7 @@ logger = logging.getLogger('mopidy.backends.local')
 
 
 class LocalBackend(pykka.ThreadingActor, base.Backend):
-    def __init__(self, audio):
+    def __init__(self, config, audio):
         super(LocalBackend, self).__init__()
 
         self.library = LocalLibraryProvider(backend=self)

@@ -18,7 +18,7 @@ except ImportError as import_error:
 
 
 class MprisFrontend(pykka.ThreadingActor, CoreListener):
-    def __init__(self, core):
+    def __init__(self, config, core):
         super(MprisFrontend, self).__init__()
         self.core = core
         self.indicate_server = None

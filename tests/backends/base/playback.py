@@ -18,10 +18,12 @@ from tests.backends.base import populate_tracklist
 
 class PlaybackControllerTest(object):
     tracks = []
+    config = {}
 
     def setUp(self):
         self.audio = audio.DummyAudio.start().proxy()
-        self.backend = self.backend_class.start(audio=self.audio).proxy()
+        self.backend = self.backend_class.start(
+            config=self.config, audio=self.audio).proxy()
         self.core = core.Core(backends=[self.backend])
         self.playback = self.core.playback
         self.tracklist = self.core.tracklist

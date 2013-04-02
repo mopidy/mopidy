@@ -20,7 +20,7 @@ API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
 
 class LastfmFrontend(pykka.ThreadingActor, CoreListener):
-    def __init__(self, core):
+    def __init__(self, config, core):
         super(LastfmFrontend, self).__init__()
         self.lastfm = None
         self.last_start_time = None

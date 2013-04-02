@@ -8,8 +8,8 @@ from tests.backends.base.library import LibraryControllerTest
 
 
 class LocalLibraryControllerTest(LibraryControllerTest, unittest.TestCase):
-
     backend_class = actor.LocalBackend
+    # TODO: setup config
 
     def setUp(self):
         settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('library_tag_cache')

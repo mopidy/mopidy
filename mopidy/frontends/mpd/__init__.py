@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.mpd]
+[mpd]
 
 # If the MPD extension should be enabled or not
 enabled = true

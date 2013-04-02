@@ -22,8 +22,12 @@ from mopidy.backends import base
 from mopidy.models import Playlist, SearchResult
 
 
+def create_dummy_backend_proxy(config=None, audio=None):
+    return DummyBackend.start(config=config, audio=audio).proxy()
+
+
 class DummyBackend(pykka.ThreadingActor, base.Backend):
-    def __init__(self, audio):
+    def __init__(self, config, audio):
         super(DummyBackend, self).__init__()
 
         self.library = DummyLibraryProvider(backend=self)

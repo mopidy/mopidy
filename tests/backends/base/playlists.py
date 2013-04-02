@@ -13,13 +13,16 @@ from tests import unittest, path_to_data_dir
 
 
 class PlaylistsControllerTest(object):
+    config = {}
+
     def setUp(self):
         settings.LOCAL_PLAYLIST_PATH = tempfile.mkdtemp()
         settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('library_tag_cache')
         settings.LOCAL_MUSIC_PATH = path_to_data_dir('')
 
         self.audio = audio.DummyAudio.start().proxy()
-        self.backend = self.backend_class.start(audio=self.audio).proxy()
+        self.backend = self.backend_class.start(
+            config=self.config, audio=self.audio).proxy()
         self.core = core.Core(backends=[self.backend])
 
     def tearDown(self):
