@@ -427,7 +427,7 @@ Example to get started with
 
    .. code-block:: js
 
-        var consoleError = console.error.bind(error);
+        var consoleError = console.error.bind(console);
 
         var trackDesc = function (track) {
             return track.name + " by " + track.artists[0].name +
@@ -457,7 +457,7 @@ Example to get started with
 
    .. code-block:: js
 
-        var consoleError = console.error.bind(error);
+        var consoleError = console.error.bind(console);
 
         var getFirst = function (list) {
             return list[0];
