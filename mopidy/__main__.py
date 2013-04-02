@@ -85,9 +85,24 @@ def main():
         process.stop_remaining_actors()
 
 
+def check_config_override(option, opt, override):
+    try:
+        section, remainder = override.split(':', 1)
+        key, value = remainder.split('=', 1)
+        return (section, key, value)
+    except ValueError:
+        raise optparse.OptionValueError(
+            'option %s: must have the format section:key=value' % opt)
+
+
 def parse_options():
     parser = optparse.OptionParser(
         version='Mopidy %s' % versioning.get_version())
+
+    # Ugly extension of optparse type checking magic :/
+    optparse.Option.TYPES += ('setting',)
+    optparse.Option.TYPE_CHECKER['setting'] = check_config_override
+
     # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
     # See https://github.com/mopidy/mopidy/issues/302 for details
     parser.add_option(
@@ -112,8 +127,7 @@ def parse_options():
         help='save debug log to "./mopidy.log"')
     parser.add_option(
         b'--list-settings',
-        action='callback',
-        callback=list_settings_callback,
+        action='callback', callback=list_settings_callback,
         help='list current settings')
     parser.add_option(
         b'--list-deps',
@@ -123,12 +137,16 @@ def parse_options():
         b'--debug-thread',
         action='store_true', dest='debug_thread',
         help='run background thread that dumps tracebacks on SIGUSR1')
+    parser.add_option(
+        b'-s', b'--setting',
+        action='append', dest='settings', type='setting',
+        help='`section_name:setting_key=value` values to override settings.')
     return parser.parse_args(args=mopidy_args)[0]
 
 
-def list_settings_callback(options, opt, value, parser):
+def list_settings_callback(option, opt, value, parser):
     extensions = load_extensions()
-    raw_config = load_config(options, extensions)
+    raw_config = load_config(parser.values, extensions)
     extensions = filter_enabled_extensions(raw_config, extensions)
     config = validate_config(raw_config, extensions)
 
@@ -221,8 +239,10 @@ def load_config(options, extensions):
     ]
     # TODO Add config file given through `options` to `files`
     # TODO Replace `files` with single file given through `options`
+    # TODO expand_path and use xdg when loading.
 
-    logging.info('Loading config from: builtin-defaults, %s', ', '.join(files))
+    sources = ['builtin-defaults'] + files + ['command-line']
+    logging.info('Loading config from: %s', ', '.join(sources))
 
     # Read default core config
     parser.readfp(StringIO.StringIO(default_config))
@@ -248,7 +268,9 @@ def load_config(options, extensions):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
-    # TODO Merge config values given through `options` into `raw_config`
+    for section, key, value in options.settings or []:
+        raw_config.setdefault(section, {})[key] = value
+
     return raw_config
 
 
