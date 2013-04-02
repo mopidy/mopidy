@@ -254,6 +254,7 @@ def filter_enabled_extensions(raw_config, extensions):
 def load_config(files, overrides, extensions):
     parser = configparser.RawConfigParser()
 
+    files = [path.expand_path(f) for f in files]
     sources = ['builtin-defaults'] + files + ['command-line']
     logging.info('Loading config from: %s', ', '.join(sources))
 
@@ -266,7 +267,6 @@ def load_config(files, overrides, extensions):
 
     # Load config from a series of config files
     for filename in files:
-        filename = path.expand_path(filename)
         try:
             filehandle = codecs.open(filename, encoding='utf-8')
             parser.readfp(filehandle)
