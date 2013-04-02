@@ -193,7 +193,7 @@ def check_old_folders():
 def load_extensions():
     extensions = []
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
-        logger.debug('Loading entrypoint: %s', entry_point)
+        logger.debug('Loading entry point: %s', entry_point)
 
         try:
             extension_class = entry_point.load()
@@ -292,8 +292,7 @@ def validate_config(raw_config, extensions):
     errors = {}
     for section_name, schema in sections_and_schemas:
         if section_name not in raw_config:
-            logger.error('Config section %s not found', section_name)
-            process.exit_process()
+            errors[section_name] = {section_name: 'section not found'}
         try:
             items = raw_config[section_name].items()
             config[section_name] = schema.convert(items)
@@ -305,7 +304,7 @@ def validate_config(raw_config, extensions):
             logger.error('[%s] config errors:', section_name)
             for key in error:
                 logger.error('%s %s', key, error[key])
-        process.exit_process()
+        sys.exit(1)
 
     return config
 

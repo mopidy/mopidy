@@ -263,7 +263,7 @@ class ConfigSchema(object):
 class ExtensionConfigSchema(ConfigSchema):
     """Sub-classed :class:`ConfigSchema` for use in extensions.
 
-    Ensures that `enabled` config value is present.
+    Ensures that ``enabled`` config value is present.
     """
     def __init__(self):
         super(ExtensionConfigSchema, self).__init__()
