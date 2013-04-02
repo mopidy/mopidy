@@ -16,18 +16,10 @@ import pkg_resources
 import pykka.debug
 
 
-# Extract any non-GStreamer arguments, and leave the GStreamer arguments for
-# processing by GStreamer. This needs to be done before GStreamer is imported,
-# so that GStreamer doesn't hijack e.g. ``--help``.
-# NOTE This naive fix does not support values like ``bar`` in
-# ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
-
-def is_gst_arg(argument):
-    return argument.startswith('--gst') or argument == '--help-gst'
-
-gstreamer_args = [arg for arg in sys.argv[1:] if is_gst_arg(arg)]
-mopidy_args = [arg for arg in sys.argv[1:] if not is_gst_arg(arg)]
-sys.argv[1:] = gstreamer_args
+# Extract any command line arguments. This needs to be done before GStreamer is
+# imported, so that GStreamer doesn't hijack e.g. ``--help``.
+mopidy_args = sys.argv[1:]
+sys.argv[1:] = []
 
 
 # Add ../ to the path so we can run Mopidy from a Git checkout without
@@ -41,8 +33,7 @@ from mopidy.audio import Audio
 from mopidy.config import default_config, config_schemas
 from mopidy.core import Core
 from mopidy.utils import (
-    config as config_utils, deps, log, path, process,
-    settings as settings_utils, versioning)
+    config as config_utils, deps, log, path, process, versioning)
 
 
 logger = logging.getLogger('mopidy.main')
@@ -60,13 +51,14 @@ def main():
     try:
         # TODO: we need a two stage logging setup as we want logging for
         # extension loading and config loading.
-        log.setup_logging(None, options.verbosity_level, options.save_debug_log)
+        log.setup_logging(
+            None, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
         raw_config = load_config(config_files, config_overrides, extensions)
         extensions = filter_enabled_extensions(raw_config, extensions)
         config = validate_config(raw_config, extensions)
         check_old_folders()
-        setup_settings(options.interactive)
+        setup_settings()
         audio = setup_audio(config)
         backends = setup_backends(config, extensions, audio)
         core = setup_core(audio, backends)
@@ -107,14 +99,6 @@ def parse_options():
 
     # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
     # See https://github.com/mopidy/mopidy/issues/302 for details
-    parser.add_option(
-        b'--help-gst',
-        action='store_true', dest='help_gst',
-        help='show GStreamer help options')
-    parser.add_option(
-        b'-i', '--interactive',
-        action='store_true', dest='interactive',
-        help='ask interactively for required settings which are missing')
     parser.add_option(
         b'-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
@@ -316,12 +300,12 @@ def validate_config(raw_config, extensions):
     return config
 
 
-def setup_settings(interactive):
+def setup_settings():
     path.get_or_create_folder(path.SETTINGS_PATH)
     path.get_or_create_folder(path.DATA_PATH)
     path.get_or_create_file(path.SETTINGS_FILE)
     try:
-        settings.validate(interactive)
+        settings.validate()
     except exceptions.SettingsError as ex:
         logger.error(ex.message)
         sys.exit(1)
