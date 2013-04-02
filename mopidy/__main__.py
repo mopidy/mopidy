@@ -136,7 +136,7 @@ def parse_options():
         action='callback', callback=deps.list_deps_optparse_callback,
         help='list dependencies and their versions')
     parser.add_option(
-        b'-c', b'--config',
+        b'--config',
         action='store', dest='config',
         default='/etc/mopidy/mopidy.conf:$XDG_CONFIG_DIR/mopidy/mopidy.conf',
         help='config files to use, colon seperated, later files override')
