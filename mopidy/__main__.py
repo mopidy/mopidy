@@ -150,18 +150,24 @@ def list_settings_callback(option, opt, value, parser):
 
     extensions = load_extensions()
     raw_config = load_config(overrides, extensions)
-    extensions = filter_enabled_extensions(raw_config, extensions)
-    config = validate_config(raw_config, extensions)
-
-    # TODO: this code is duplicated, figure out a way to reuse it?
-    sections_and_schemas = config_schemas.items()
-    for extension in extensions:
-        sections_and_schemas.append(
-            (extension.ext_name, extension.get_config_schema()))
+    enabled_extensions = filter_enabled_extensions(raw_config, extensions)
+    config = validate_config(raw_config, enabled_extensions)
 
     output = ['# Settings for disabled extensions are not shown.']
-    for section_name, schema in sections_and_schemas:
-        output.append(schema.format(section_name, config.get(section_name, {})))
+    for section_name, schema in config_schemas.items():
+        options = config.get(section_name, {})
+        if not options:
+            continue
+        output.append(schema.format(section_name, options))
+
+    for extension in extensions:
+        if extension in enabled_extensions:
+            schema = extension.get_config_schema()
+            options = config.get(extension.ext_name, {})
+            output.append(schema.format(extension.ext_name, options))
+        else:
+            output.append('[%s]\nenabled = false' % extension.ext_name)
+
     print '\n\n'.join(output)
     sys.exit(0)
 
