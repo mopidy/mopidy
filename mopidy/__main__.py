@@ -54,14 +54,15 @@ def main():
 
     loop = gobject.MainLoop()
     options = parse_options()
-    config_overrides = getattr(options, 'overrides', [])
+    config_files = options.config.split(':')
+    config_overrides = options.overrides
 
     try:
         # TODO: we need a two stage logging setup as we want logging for
         # extension loading and config loading.
         log.setup_logging(None, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
-        raw_config = load_config(config_overrides, extensions)
+        raw_config = load_config(config_files, config_overrides, extensions)
         extensions = filter_enabled_extensions(raw_config, extensions)
         config = validate_config(raw_config, extensions)
         check_old_folders()
@@ -135,6 +136,11 @@ def parse_options():
         action='callback', callback=deps.list_deps_optparse_callback,
         help='list dependencies and their versions')
     parser.add_option(
+        b'-c', b'--config',
+        action='store', dest='config',
+        default='/etc/mopidy/mopidy.conf:$XDG_CONFIG_DIR/mopidy/mopidy.conf',
+        help='config files to use, colon seperated, later files override')
+    parser.add_option(
         b'-o', b'--option',
         action='append', dest='overrides', type='config_override',
         help='`section/key=value` values to override config options')
@@ -142,10 +148,11 @@ def parse_options():
 
 
 def show_config_callback(option, opt, value, parser):
+    files = getattr(parser.values, 'config', '').split(':')
     overrides = getattr(parser.values, 'overrides', [])
 
     extensions = load_extensions()
-    raw_config = load_config(overrides, extensions)
+    raw_config = load_config(files, overrides, extensions)
     enabled_extensions = filter_enabled_extensions(raw_config, extensions)
     config = validate_config(raw_config, enabled_extensions)
 
@@ -235,16 +242,8 @@ def filter_enabled_extensions(raw_config, extensions):
     return filtered_extensions
 
 
-def load_config(options, extensions):
+def load_config(files, overrides, extensions):
     parser = configparser.RawConfigParser()
-
-    files = [
-        '/etc/mopidy/mopidy.conf',
-        '$XDG_CONFIG_DIR/mopidy/mopidy.conf',
-    ]
-    # TODO Add config file given through `options` to `files`
-    # TODO Replace `files` with single file given through `options`
-    # TODO expand_path and use xdg when loading.
 
     sources = ['builtin-defaults'] + files + ['command-line']
     logging.info('Loading config from: %s', ', '.join(sources))
@@ -273,7 +272,7 @@ def load_config(options, extensions):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
-    for section, key, value in options or []:
+    for section, key, value in overrides or []:
         raw_config.setdefault(section, {})[key] = value
 
     return raw_config
