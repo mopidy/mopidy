@@ -130,7 +130,7 @@ def check_old_folders():
 
 def load_extensions():
     extensions = []
-    for entry_point in pkg_resources.iter_entry_points('mopidy.extension'):
+    for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
         logger.debug('Loading extension %s', entry_point.name)
 
         # TODO Filter out disabled extensions

@@ -126,7 +126,7 @@ the PyPI registration.
 
 The package must have ``install_requires`` on ``setuptools`` and ``Mopidy``, in
 addition to any other dependencies required by your extension. The
-``entry_points`` part must be included. The ``mopidy.extension`` part cannot be
+``entry_points`` part must be included. The ``mopidy.ext`` part cannot be
 changed, but the innermost string should be changed. It's format is
 ``ext_name = package_name:Extension``. ``ext_name`` should be a short
 name for your extension, typically the part after "Mopidy-" in lowercase. This
@@ -166,7 +166,7 @@ class that will connect the rest of the dots.
             'pysoundspot',
         ],
         entry_points={
-            b'mopidy.extension': [
+            b'mopidy.ext': [
                 'soundspot = mopidy_soundspot:Extension',
             ],
         },
