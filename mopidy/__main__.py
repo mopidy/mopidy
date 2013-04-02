@@ -286,6 +286,7 @@ def validate_config(raw_config, extensions):
 
     # Get validated config
     config = {}
+    errors = {}
     for section_name, schema in sections_and_schemas:
         if section_name not in raw_config:
             logger.error('Config section %s not found', section_name)
@@ -294,9 +295,14 @@ def validate_config(raw_config, extensions):
             items = raw_config[section_name].items()
             config[section_name] = schema.convert(items)
         except exceptions.ConfigError as error:
+            errors[section_name] = error
+
+    if errors:
+        for section_name, error in errors.items():
+            logger.error('[%s] config errors:', section_name)
             for key in error:
-                logger.error('Config error: %s:%s %s', section_name, key, error[key])
-            process.exit_process()
+                logger.error('%s %s', key, error[key])
+        process.exit_process()
 
     return config
 
