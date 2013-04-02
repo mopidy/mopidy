@@ -32,6 +32,9 @@ port = 6680
 # "/mopidy" will continue to work as usual even if you change this setting.
 #
 static_dir =
+
+[logging.levels]
+cherrypy = warning
 """
 
 __doc__ = """

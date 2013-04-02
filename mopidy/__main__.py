@@ -49,16 +49,18 @@ def main():
     config_overrides = options.overrides
 
     try:
-        # TODO: we need a two stage logging setup as we want logging for
-        # extension loading and config loading.
+        logging_config = load_config(config_files, config_overrides)
         log.setup_logging(
-            None, options.verbosity_level, options.save_debug_log)
+            logging_config, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
         raw_config = load_config(config_files, config_overrides, extensions)
         extensions = filter_enabled_extensions(raw_config, extensions)
-        config = validate_config(raw_config, extensions)
+        config = validate_config(raw_config, config_schemas, extensions)
+        log.setup_log_levels(config)
         check_old_folders()
         setup_settings()
+        # Anything that wants to exit after this point must use
+        # process.exit_proces as actors have been started.
         audio = setup_audio(config)
         backends = setup_backends(config, extensions, audio)
         core = setup_core(audio, backends)
@@ -140,7 +142,7 @@ def show_config_callback(option, opt, value, parser):
     extensions = load_extensions()
     raw_config = load_config(files, overrides, extensions)
     enabled_extensions = filter_enabled_extensions(raw_config, extensions)
-    config = validate_config(raw_config, enabled_extensions)
+    config = validate_config(raw_config, config_schemas, enabled_extensions)
 
     output = []
     for section_name, schema in config_schemas.items():
@@ -235,22 +237,24 @@ def filter_enabled_extensions(raw_config, extensions):
     return enabled_extensions
 
 
-def load_config(files, overrides, extensions):
+def load_config(files, overrides, extensions=None):
     parser = configparser.RawConfigParser()
 
     files = [path.expand_path(f) for f in files]
     sources = ['builtin-defaults'] + files + ['command-line']
-    logging.info('Loading config from: %s', ', '.join(sources))
+    logger.info('Loading config from: %s', ', '.join(sources))
 
     # Read default core config
     parser.readfp(StringIO.StringIO(default_config))
 
     # Read default extension config
-    for extension in extensions:
+    for extension in extensions or []:
         parser.readfp(StringIO.StringIO(extension.get_default_config()))
 
     # Load config from a series of config files
     for filename in files:
+        # TODO: if this is the initial load of logging config we might not have
+        # a logger at this point, we might want to handle this better.
         try:
             filehandle = codecs.open(filename, encoding='utf-8')
             parser.readfp(filehandle)
@@ -259,7 +263,7 @@ def load_config(files, overrides, extensions):
             continue
         except UnicodeDecodeError:
             logger.error('Config file %s is not UTF-8 encoded', filename)
-            process.exit_process()
+            sys.exit(1)
 
     raw_config = {}
     for section in parser.sections():
@@ -271,10 +275,10 @@ def load_config(files, overrides, extensions):
     return raw_config
 
 
-def validate_config(raw_config, extensions):
+def validate_config(raw_config, schemas, extensions=None):
     # Collect config schemas to validate against
-    sections_and_schemas = config_schemas.items()
-    for extension in extensions:
+    sections_and_schemas = schemas.items()
+    for extension in extensions or []:
         sections_and_schemas.append(
             (extension.ext_name, extension.get_config_schema()))
 
