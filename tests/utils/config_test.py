@@ -199,10 +199,10 @@ class ListTest(unittest.TestCase):
     def test_deserialize_conversion_success(self):
         value = config.List()
 
-        expected = ['foo', 'bar', 'baz']
+        expected = ('foo', 'bar', 'baz')
         self.assertEqual(expected, value.deserialize('foo, bar ,baz '))
 
-        expected = ['foo,bar', 'bar', 'baz']
+        expected = ('foo,bar', 'bar', 'baz')
         self.assertEqual(expected, value.deserialize(' foo,bar\nbar\nbaz'))
 
     def test_deserialize_enforces_required(self):
@@ -212,12 +212,12 @@ class ListTest(unittest.TestCase):
 
     def test_deserialize_respects_optional(self):
         value = config.List(optional=True)
-        self.assertEqual([], value.deserialize(''))
-        self.assertEqual([], value.deserialize(' '))
+        self.assertEqual(tuple(), value.deserialize(''))
+        self.assertEqual(tuple(), value.deserialize(' '))
 
     def test_serialize(self):
         value = config.List()
-        result = value.serialize(['foo', 'bar', 'baz'])
+        result = value.serialize(('foo', 'bar', 'baz'))
         self.assertRegexpMatches(result, r'foo\n\s*bar\n\s*baz')
 
 

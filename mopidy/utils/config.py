@@ -154,7 +154,7 @@ class List(ConfigValue):
             values = re.split(r'\s*\n\s*', value.strip())
         else:
             values = re.split(r'\s*,\s*', value.strip())
-        return [v for v in values if v]
+        return tuple([v for v in values if v])
 
     def serialize(self, value):
         return '\n  '.join(v.encode('utf-8') for v in value)
