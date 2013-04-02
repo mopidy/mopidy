@@ -41,8 +41,7 @@ from mopidy.audio import Audio
 from mopidy.config import default_config, config_schemas
 from mopidy.core import Core
 from mopidy.utils import (
-    config as config_utils, deps, log, path, process,
-    settings as settings_utils, versioning)
+    config as config_utils, deps, log, path, process, versioning)
 
 
 logger = logging.getLogger('mopidy.main')
@@ -60,7 +59,8 @@ def main():
     try:
         # TODO: we need a two stage logging setup as we want logging for
         # extension loading and config loading.
-        log.setup_logging(None, options.verbosity_level, options.save_debug_log)
+        log.setup_logging(
+            None, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
         raw_config = load_config(config_files, config_overrides, extensions)
         extensions = filter_enabled_extensions(raw_config, extensions)
