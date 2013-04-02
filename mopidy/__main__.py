@@ -127,9 +127,9 @@ def parse_options():
         action='store_true', dest='save_debug_log',
         help='save debug log to "./mopidy.log"')
     parser.add_option(
-        b'--list-settings',
-        action='callback', callback=list_settings_callback,
-        help='list current settings')
+        b'--show-config',
+        action='callback', callback=show_config_callback,
+        help='show current config')
     parser.add_option(
         b'--list-deps',
         action='callback', callback=deps.list_deps_optparse_callback,
@@ -145,7 +145,7 @@ def parse_options():
     return parser.parse_args(args=mopidy_args)[0]
 
 
-def list_settings_callback(option, opt, value, parser):
+def show_config_callback(option, opt, value, parser):
     overrides = getattr(parser.values, 'overrides', [])
 
     extensions = load_extensions()
