@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from mopidy.utils import config
+
 
 class Extension(object):
 
@@ -10,9 +12,8 @@ class Extension(object):
         raise NotImplementedError(
             'Add at least a config section with "enabled = true"')
 
-    def validate_config(self, config):
-        raise NotImplementedError(
-            'You must explicitly pass config validation if not needed')
+    def get_config_schema(self):
+        return config.ExtensionConfigSchema()
 
     def validate_environment(self):
         pass
