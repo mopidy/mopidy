@@ -53,13 +53,14 @@ def main():
 
     loop = gobject.MainLoop()
     options = parse_options()
-    config = {}  # TODO: replace dummy placeholder 
 
     try:
-        log.setup_logging(config, options.verbosity_level, options.save_debug_log)
-        check_old_folders()
+        # TODO: we need a two stage logging setup as we want logging for
+        # extension loading and config loading.
+        log.setup_logging(None, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
-        load_config(options, extensions)
+        config = load_config(options, extensions)
+        check_old_folders()
         setup_settings(options.interactive)
         audio = setup_audio(config)
         backends = setup_backends(config, extensions, audio)
