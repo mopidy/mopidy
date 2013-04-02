@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 import codecs
-import ConfigParser
+import ConfigParser as configparser
 import logging
 import optparse
 import os
@@ -41,7 +41,8 @@ from mopidy.audio import Audio
 from mopidy.config import default_config, config_schemas
 from mopidy.core import Core
 from mopidy.utils import (
-    deps, log, path, process, settings as settings_utils, versioning)
+    config as config_utils, deps, log, path, process,
+    settings as settings_utils, versioning)
 
 
 logger = logging.getLogger('mopidy.main')
@@ -53,17 +54,23 @@ def main():
 
     loop = gobject.MainLoop()
     options = parse_options()
+    config_files = options.config.split(':')
+    config_overrides = options.overrides
 
     try:
-        log.setup_logging(options.verbosity_level, options.save_debug_log)
-        check_old_folders()
+        # TODO: we need a two stage logging setup as we want logging for
+        # extension loading and config loading.
+        log.setup_logging(None, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
-        load_config(options, extensions)
+        raw_config = load_config(config_files, config_overrides, extensions)
+        extensions = filter_enabled_extensions(raw_config, extensions)
+        config = validate_config(raw_config, extensions)
+        check_old_folders()
         setup_settings(options.interactive)
-        audio = setup_audio()
-        backends = setup_backends(extensions, audio)
+        audio = setup_audio(config)
+        backends = setup_backends(config, extensions, audio)
         core = setup_core(audio, backends)
-        setup_frontends(extensions, core)
+        setup_frontends(config, extensions, core)
         loop.run()
     except exceptions.SettingsError as ex:
         logger.error(ex.message)
@@ -80,9 +87,24 @@ def main():
         process.stop_remaining_actors()
 
 
+def check_config_override(option, opt, override):
+    try:
+        section, remainder = override.split('/', 1)
+        key, value = remainder.split('=', 1)
+        return (section, key, value)
+    except ValueError:
+        raise optparse.OptionValueError(
+            'option %s: must have the format section/key=value' % opt)
+
+
 def parse_options():
     parser = optparse.OptionParser(
         version='Mopidy %s' % versioning.get_version())
+
+    # Ugly extension of optparse type checking magic :/
+    optparse.Option.TYPES += ('config_override',)
+    optparse.Option.TYPE_CHECKER['config_override'] = check_config_override
+
     # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
     # See https://github.com/mopidy/mopidy/issues/302 for details
     parser.add_option(
@@ -106,22 +128,59 @@ def parse_options():
         action='store_true', dest='save_debug_log',
         help='save debug log to "./mopidy.log"')
     parser.add_option(
-        b'--list-settings',
-        action='callback',
-        callback=settings_utils.list_settings_optparse_callback,
-        help='list current settings')
+        b'--show-config',
+        action='callback', callback=show_config_callback,
+        help='show current config')
     parser.add_option(
         b'--list-deps',
         action='callback', callback=deps.list_deps_optparse_callback,
         help='list dependencies and their versions')
     parser.add_option(
-        b'--debug-thread',
-        action='store_true', dest='debug_thread',
-        help='run background thread that dumps tracebacks on SIGUSR1')
+        b'--config',
+        action='store', dest='config',
+        default='/etc/mopidy/mopidy.conf:$XDG_CONFIG_DIR/mopidy/mopidy.conf',
+        help='config files to use, colon seperated, later files override')
+    parser.add_option(
+        b'-o', b'--option',
+        action='append', dest='overrides', type='config_override',
+        help='`section/key=value` values to override config options')
     return parser.parse_args(args=mopidy_args)[0]
 
 
+def show_config_callback(option, opt, value, parser):
+    # TODO: don't use callback for this as --config or -o set after
+    # --show-config will be ignored.
+    files = getattr(parser.values, 'config', '').split(':')
+    overrides = getattr(parser.values, 'overrides', [])
+
+    extensions = load_extensions()
+    raw_config = load_config(files, overrides, extensions)
+    enabled_extensions = filter_enabled_extensions(raw_config, extensions)
+    config = validate_config(raw_config, enabled_extensions)
+
+    output = []
+    for section_name, schema in config_schemas.items():
+        options = config.get(section_name, {})
+        if not options:
+            continue
+        output.append(schema.format(section_name, options))
+
+    for extension in extensions:
+        if extension in enabled_extensions:
+            schema = extension.get_config_schema()
+            options = config.get(extension.ext_name, {})
+            output.append(schema.format(extension.ext_name, options))
+        else:
+            lines = ['[%s]' % extension.ext_name, 'enabled = false',
+                     '# Config hidden as extension is disabled']
+            output.append('\n'.join(lines))
+
+    print '\n\n'.join(output)
+    sys.exit(0)
+
+
 def check_old_folders():
+    # TODO: add old settings and pre extension storage locations?
     old_settings_folder = os.path.expanduser('~/.mopidy')
 
     if not os.path.isdir(old_settings_folder):
@@ -136,9 +195,7 @@ def check_old_folders():
 def load_extensions():
     extensions = []
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
-        logger.debug('Loading extension %s', entry_point.name)
-
-        # TODO Filter out disabled extensions
+        logger.debug('Loading entry point: %s', entry_point)
 
         try:
             extension_class = entry_point.load()
@@ -150,14 +207,15 @@ def load_extensions():
 
         extension = extension_class()
 
+        logger.debug(
+            'Loaded extension: %s %s', extension.dist_name, extension.version)
+
         if entry_point.name != extension.ext_name:
             logger.warning(
                 'Disabled extension %(ep)s: entry point name (%(ep)s) '
                 'does not match extension name (%(ext)s)',
                 {'ep': entry_point.name, 'ext': extension.ext_name})
             continue
-
-        # TODO Validate configuration
 
         try:
             extension.validate_environment()
@@ -166,22 +224,39 @@ def load_extensions():
                 'Disabled extension %s: %s', entry_point.name, ex.message)
             continue
 
-        logger.info(
-            'Loaded extension %s: %s %s',
-            entry_point.name, extension.dist_name, extension.version)
         extensions.append(extension)
+
+    names = (e.ext_name for e in extensions)
+    logging.debug('Discovered extensions: %s', ', '.join(names))
     return extensions
 
 
-def load_config(options, extensions):
-    parser = ConfigParser.RawConfigParser()
+def filter_enabled_extensions(raw_config, extensions):
+    boolean = config_utils.Boolean()
+    enabled_extensions = []
+    enabled_names = []
+    disabled_names = []
 
-    files = [
-        '/etc/mopidy/mopidy.conf',
-        '~/.config/mopidy/mopidy.conf',
-    ]
-    # TODO Add config file given through `options` to `files`
-    # TODO Replace `files` with single file given through `options`
+    for extension in extensions:
+        # TODO: handle key and value errors.
+        enabled = raw_config[extension.ext_name]['enabled']
+        if boolean.deserialize(enabled):
+            enabled_extensions.append(extension)
+            enabled_names.append(extension.ext_name)
+        else:
+            disabled_names.append(extension.ext_name)
+
+    logging.info('Enabled extensions: %s', ', '.join(enabled_names))
+    logging.info('Disabled extensions: %s', ', '.join(disabled_names))
+    return enabled_extensions
+
+
+def load_config(files, overrides, extensions):
+    parser = configparser.RawConfigParser()
+
+    files = [path.expand_path(f) for f in files]
+    sources = ['builtin-defaults'] + files + ['command-line']
+    logging.info('Loading config from: %s', ', '.join(sources))
 
     # Read default core config
     parser.readfp(StringIO.StringIO(default_config))
@@ -192,7 +267,6 @@ def load_config(options, extensions):
 
     # Load config from a series of config files
     for filename in files:
-        filename = os.path.expanduser(filename)
         try:
             filehandle = codecs.open(filename, encoding='utf-8')
             parser.readfp(filehandle)
@@ -203,28 +277,41 @@ def load_config(options, extensions):
             logger.error('Config file %s is not UTF-8 encoded', filename)
             process.exit_process()
 
-    # TODO Merge config values given through `options` into `config`
+    raw_config = {}
+    for section in parser.sections():
+        raw_config[section] = dict(parser.items(section))
 
+    for section, key, value in overrides or []:
+        raw_config.setdefault(section, {})[key] = value
+
+    return raw_config
+
+
+def validate_config(raw_config, extensions):
     # Collect config schemas to validate against
     sections_and_schemas = config_schemas.items()
     for extension in extensions:
-        section_name = 'ext.%s' % extension.ext_name
-        if parser.getboolean(section_name, 'enabled'):
-            sections_and_schemas.append(
-                (section_name, extension.get_config_schema()))
+        sections_and_schemas.append(
+            (extension.ext_name, extension.get_config_schema()))
 
     # Get validated config
     config = {}
+    errors = {}
     for section_name, schema in sections_and_schemas:
-        if not parser.has_section(section_name):
-            logger.error('Config section %s not found', section_name)
-            process.exit_process()
+        if section_name not in raw_config:
+            errors[section_name] = {section_name: 'section not found'}
         try:
-            config[section_name] = schema.convert(parser.items(section_name))
+            items = raw_config[section_name].items()
+            config[section_name] = schema.convert(items)
         except exceptions.ConfigError as error:
+            errors[section_name] = error
+
+    if errors:
+        for section_name, error in errors.items():
+            logger.error('[%s] config errors:', section_name)
             for key in error:
-                logger.error('Config error: %s: %s', key, error[key])
-            process.exit_process()
+                logger.error('%s %s', key, error[key])
+        sys.exit(1)
 
     return config
 
@@ -240,9 +327,9 @@ def setup_settings(interactive):
         sys.exit(1)
 
 
-def setup_audio():
+def setup_audio(config):
     logger.info('Starting Mopidy audio')
-    return Audio.start().proxy()
+    return Audio.start(config=config).proxy()
 
 
 def stop_audio():
@@ -250,12 +337,12 @@ def stop_audio():
     process.stop_actors_by_class(Audio)
 
 
-def setup_backends(extensions, audio):
+def setup_backends(config, extensions, audio):
     logger.info('Starting Mopidy backends')
     backends = []
     for extension in extensions:
         for backend_class in extension.get_backend_classes():
-            backend = backend_class.start(audio=audio).proxy()
+            backend = backend_class.start(config=config, audio=audio).proxy()
             backends.append(backend)
     return backends
 
@@ -277,11 +364,11 @@ def stop_core():
     process.stop_actors_by_class(Core)
 
 
-def setup_frontends(extensions, core):
+def setup_frontends(config, extensions, core):
     logger.info('Starting Mopidy frontends')
     for extension in extensions:
         for frontend_class in extension.get_frontend_classes():
-            frontend_class.start(core=core)
+            frontend_class.start(config=config, core=core)
 
 
 def stop_frontends(extensions):

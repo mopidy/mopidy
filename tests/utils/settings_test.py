@@ -59,20 +59,6 @@ class ValidateSettingsTest(unittest.TestCase):
             self.defaults, {'FOO': '', 'BAR': ''})
         self.assertEqual(len(result), 2)
 
-    def test_masks_value_if_secret(self):
-        secret = setting_utils.mask_value_if_secret('SPOTIFY_PASSWORD', 'bar')
-        self.assertEqual('********', secret)
-
-    def test_does_not_mask_value_if_not_secret(self):
-        not_secret = setting_utils.mask_value_if_secret(
-            'SPOTIFY_USERNAME', 'foo')
-        self.assertEqual('foo', not_secret)
-
-    def test_does_not_mask_value_if_none(self):
-        not_secret = setting_utils.mask_value_if_secret(
-            'SPOTIFY_USERNAME', None)
-        self.assertEqual(None, not_secret)
-
 
 class SettingsProxyTest(unittest.TestCase):
     def setUp(self):
@@ -177,54 +163,6 @@ class SettingsProxyTest(unittest.TestCase):
         self.settings._read_from_stdin = lambda _: self.fail(
             'Should not read from stdin')
         self.settings.validate(interactive=True)
-
-
-class FormatSettingListTest(unittest.TestCase):
-    def setUp(self):
-        self.settings = setting_utils.SettingsProxy(settings)
-
-    def test_contains_the_setting_name(self):
-        self.settings.TEST = 'test'
-        result = setting_utils.format_settings_list(self.settings)
-        self.assertIn('TEST:', result, result)
-
-    def test_repr_of_a_string_value(self):
-        self.settings.TEST = 'test'
-        result = setting_utils.format_settings_list(self.settings)
-        self.assertIn("TEST: u'test'", result, result)
-
-    def test_repr_of_an_int_value(self):
-        self.settings.TEST = 123
-        result = setting_utils.format_settings_list(self.settings)
-        self.assertIn("TEST: 123", result, result)
-
-    def test_repr_of_a_tuple_value(self):
-        self.settings.TEST = (123, 'abc')
-        result = setting_utils.format_settings_list(self.settings)
-        self.assertIn("TEST: (123, u'abc')", result, result)
-
-    def test_passwords_are_masked(self):
-        self.settings.TEST_PASSWORD = 'secret'
-        result = setting_utils.format_settings_list(self.settings)
-        self.assertNotIn("TEST_PASSWORD: u'secret'", result, result)
-        self.assertIn("TEST_PASSWORD: u'********'", result, result)
-
-    def test_short_values_are_not_pretty_printed(self):
-        self.settings.FRONTEND = ('mopidy.frontends.mpd.MpdFrontend',)
-        result = setting_utils.format_settings_list(self.settings)
-        self.assertIn(
-            "FRONTEND: (u'mopidy.frontends.mpd.MpdFrontend',)", result)
-
-    def test_long_values_are_pretty_printed(self):
-        self.settings.FRONTEND = (
-            u'mopidy.frontends.mpd.MpdFrontend',
-            u'mopidy.frontends.lastfm.LastfmFrontend')
-        result = setting_utils.format_settings_list(self.settings)
-        self.assertIn(
-            "FRONTEND: \n"
-            "  (u'mopidy.frontends.mpd.MpdFrontend',\n"
-            "   u'mopidy.frontends.lastfm.LastfmFrontend')",
-            result)
 
 
 class DidYouMeanTest(unittest.TestCase):

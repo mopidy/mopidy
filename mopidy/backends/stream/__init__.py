@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.stream]
+[stream]
 
 # If the stream extension should be enabled or not
 enabled = true

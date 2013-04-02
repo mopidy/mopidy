@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.http]
+[http]
 
 # If the HTTP extension should be enabled or not
 enabled = true

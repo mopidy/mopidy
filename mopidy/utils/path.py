@@ -99,6 +99,7 @@ def split_path(path):
 
 
 def expand_path(path):
+    # TODO: expandvars as well?
     path = string.Template(path).safe_substitute(XDG_DIRS)
     path = os.path.expanduser(path)
     path = os.path.abspath(path)

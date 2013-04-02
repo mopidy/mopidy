@@ -23,9 +23,11 @@ class LibraryControllerTest(object):
             uri='file://' + path_to_data_dir('uri2'), name='track2',
             artists=artists[1:2], album=albums[1], date='2002', length=4000),
         Track()]
+    config = {}
 
     def setUp(self):
-        self.backend = self.backend_class.start(audio=None).proxy()
+        self.backend = self.backend_class.start(
+            config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
         self.library = self.core.library
 

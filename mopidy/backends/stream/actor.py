@@ -13,7 +13,7 @@ logger = logging.getLogger('mopidy.backends.stream')
 
 
 class StreamBackend(pykka.ThreadingActor, base.Backend):
-    def __init__(self, audio):
+    def __init__(self, config, audio):
         super(StreamBackend, self).__init__()
 
         self.library = StreamLibraryProvider(backend=self)

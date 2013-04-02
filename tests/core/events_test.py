@@ -13,7 +13,7 @@ from tests import unittest
 @mock.patch.object(core.CoreListener, 'send')
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
-        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
     def tearDown(self):

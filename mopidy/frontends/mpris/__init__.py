@@ -6,7 +6,7 @@ from mopidy.utils import formatting, config
 
 
 default_config = """
-[ext.mpris]
+[mpris]
 
 # If the MPRIS extension should be enabled or not
 enabled = true
