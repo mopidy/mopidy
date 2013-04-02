@@ -128,6 +128,10 @@ class StringTest(unittest.TestCase):
         self.assertIsNone(value.deserialize(''))
         self.assertIsNone(value.deserialize(' '))
 
+    def test_serialize_string_escapes(self):
+        value = config.String()
+        self.assertEqual(r'\r\n\t', value.serialize('\r\n\t'))
+
     def test_format_masks_secrets(self):
         value = config.String(secret=True)
         self.assertEqual('********', value.format('s3cret'))

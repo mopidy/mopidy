@@ -104,7 +104,7 @@ class String(ConfigValue):
         return value
 
     def serialize(self, value):
-        return value.encode('utf-8')
+        return value.encode('utf-8').encode('string-escape')
 
 
 class Integer(ConfigValue):
