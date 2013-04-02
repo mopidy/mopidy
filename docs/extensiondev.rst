@@ -32,22 +32,21 @@ extension to behave.
 Anatomy of an extension
 =======================
 
-Extensions are all located in a Python package called ``mopidy_something``
-where "something" is the name of the application, library or web service you
-want to integrated with Mopidy. So for example if you plan to add support for a
-service named Soundspot to Mopidy, you would name your extension's Python
-package ``mopidy_soundspot``.
+Extensions are located in a Python package called ``mopidy_something`` where
+"something" is the name of the application, library or web service you want to
+integrated with Mopidy. So for example if you plan to add support for a service
+named Soundspot to Mopidy, you would name your extension's Python package
+``mopidy_soundspot``.
 
-The name of the actual extension (the human readable name) however would be
-something like "Mopidy-Soundspot". Make sure to include the name "Mopidy"
+The extension must be shipped with a ``setup.py`` file and be registered on
+`PyPI <https://pypi.python.org/>`_.  The name of the distribution on PyPI would
+be something like "Mopidy-Soundspot". Make sure to include the name "Mopidy"
 somewhere in that name and that you check the capitalization. This is the name
 users will use when they install your extension from PyPI.
 
-The extension must be shipped with a ``setup.py`` file and be registered on
-`PyPI <https://pypi.python.org/>`_. Also make sure the development version link
-in your package details work so that people can easily install the development
-version into their virtualenv simply by running e.g. ``pip install
-Mopidy-Soundspot==dev``.
+Also make sure the development version link in your package details work so
+that people can easily install the development version into their virtualenv
+simply by running e.g. ``pip install Mopidy-Soundspot==dev``.
 
 Mopidy extensions must be licensed under an Apache 2.0 (like Mopidy itself),
 BSD, MIT or more liberal license to be able to be enlisted in the Mopidy
@@ -74,8 +73,8 @@ Example README.rst
 The README file should quickly tell what the extension does, how to install it,
 and how to configure it. The README should contain a development snapshot link
 to a tarball of the latest development version of the extension. It's important
-that the development snapshot link ends with ``#egg=mopidy-something-dev`` for
-installation using ``pip install mopidy-something==dev`` to work.
+that the development snapshot link ends with ``#egg=Mopidy-Something-dev`` for
+installation using ``pip install Mopidy-Something==dev`` to work.
 
 .. code-block:: rst
 
@@ -100,7 +99,7 @@ installation using ``pip install mopidy-something==dev`` to work.
     Before starting Mopidy, you must add your Soundspot username and password
     to the Mopidy configuration file::
 
-        [soundspot]
+        [ext.soundspot]
         username = alice
         password = secret
 
@@ -109,7 +108,7 @@ installation using ``pip install mopidy-something==dev`` to work.
 
     - `Source code <https://github.com/mopidy/mopidy-soundspot>`_
     - `Issue tracker <https://github.com/mopidy/mopidy-soundspot/issues>`_
-    - `Download development snapshot <https://github.com/mopidy/mopidy-soundspot/tarball/develop#egg=mopidy-soundspot-dev>`_
+    - `Download development snapshot <https://github.com/mopidy/mopidy-soundspot/tarball/develop#egg=Mopidy-Soundspot-dev>`_
 
 
 Example setup.py
@@ -129,10 +128,10 @@ The package must have ``install_requires`` on ``setuptools`` and ``Mopidy``, in
 addition to any other dependencies required by your extension. The
 ``entry_points`` part must be included. The ``mopidy.extension`` part cannot be
 changed, but the innermost string should be changed. It's format is
-``my_ext_name = my_py_module:MyExtClass``. ``my_ext_name`` should be a short
+``ext_name = package_name:Extension``. ``ext_name`` should be a short
 name for your extension, typically the part after "Mopidy-" in lowercase. This
 name is used e.g. to name the config section for your extension. The
-``my_py_module:MyExtClass`` part is simply the Python path to the extension
+``package_name:Extension`` part is simply the Python path to the extension
 class that will connect the rest of the dots.
 
 ::
