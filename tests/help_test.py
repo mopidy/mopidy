@@ -17,7 +17,6 @@ class HelpTest(unittest.TestCase):
         output = process.communicate()[0]
         self.assertIn('--version', output)
         self.assertIn('--help', output)
-        self.assertIn('--interactive', output)
         self.assertIn('--quiet', output)
         self.assertIn('--verbose', output)
         self.assertIn('--save-debug-log', output)

@@ -150,20 +150,6 @@ class SettingsProxyTest(unittest.TestCase):
         self.settings.TEST_PATH = None
         self.assertEqual(self.settings.TEST_PATH, None)
 
-    def test_interactive_input_of_missing_defaults(self):
-        self.settings.default['TEST'] = ''
-        interactive_input = 'input'
-        self.settings._read_from_stdin = lambda _: interactive_input
-        self.settings.validate(interactive=True)
-        self.assertEqual(interactive_input, self.settings.TEST)
-
-    def test_interactive_input_not_needed_when_setting_is_set_locally(self):
-        self.settings.default['TEST'] = ''
-        self.settings.local['TEST'] = 'test'
-        self.settings._read_from_stdin = lambda _: self.fail(
-            'Should not read from stdin')
-        self.settings.validate(interactive=True)
-
 
 class DidYouMeanTest(unittest.TestCase):
     def testSuggestoins(self):

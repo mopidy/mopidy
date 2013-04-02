@@ -52,7 +52,7 @@ def main():
         extensions = filter_enabled_extensions(raw_config, extensions)
         config = validate_config(raw_config, extensions)
         check_old_folders()
-        setup_settings(options.interactive)
+        setup_settings()
         audio = setup_audio(config)
         backends = setup_backends(config, extensions, audio)
         core = setup_core(audio, backends)
@@ -93,10 +93,6 @@ def parse_options():
 
     # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
     # See https://github.com/mopidy/mopidy/issues/302 for details
-    parser.add_option(
-        b'-i', '--interactive',
-        action='store_true', dest='interactive',
-        help='ask interactively for required settings which are missing')
     parser.add_option(
         b'-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
@@ -298,12 +294,12 @@ def validate_config(raw_config, extensions):
     return config
 
 
-def setup_settings(interactive):
+def setup_settings():
     path.get_or_create_folder(path.SETTINGS_PATH)
     path.get_or_create_folder(path.DATA_PATH)
     path.get_or_create_file(path.SETTINGS_FILE)
     try:
-        settings.validate(interactive)
+        settings.validate()
     except exceptions.SettingsError as ex:
         logger.error(ex.message)
         sys.exit(1)

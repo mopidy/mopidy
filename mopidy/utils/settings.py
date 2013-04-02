@@ -70,19 +70,12 @@ class SettingsProxy(object):
         else:
             super(SettingsProxy, self).__setattr__(attr, value)
 
-    def validate(self, interactive):
-        if interactive:
-            self._read_missing_settings_from_stdin(self.current, self.runtime)
+    def validate(self):
         if self.get_errors():
             logger.error(
                 'Settings validation errors: %s',
                 formatting.indent(self.get_errors_as_string()))
             raise exceptions.SettingsError('Settings validation failed.')
-
-    def _read_missing_settings_from_stdin(self, current, runtime):
-        for setting, value in sorted(current.iteritems()):
-            if isinstance(value, basestring) and len(value) == 0:
-                runtime[setting] = self._read_from_stdin(setting + ': ')
 
     def _read_from_stdin(self, prompt):
         if '_PASSWORD' in prompt:
