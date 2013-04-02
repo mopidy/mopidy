@@ -67,7 +67,8 @@ https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 
 class Extension(ext.Extension):
 
-    name = 'Mopidy-Spotify'
+    dist_name = 'Mopidy-Spotify'
+    ext_name = 'spotify'
     version = mopidy.__version__
 
     def get_default_config(self):
