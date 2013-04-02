@@ -141,7 +141,7 @@ def parse_options():
     parser.add_option(
         b'-o', b'--option',
         action='append', dest='overrides', type='config_override',
-        help='`section/key=value` values to override config options.')
+        help='`section/key=value` values to override config options')
     return parser.parse_args(args=mopidy_args)[0]
 
 
@@ -153,7 +153,7 @@ def show_config_callback(option, opt, value, parser):
     enabled_extensions = filter_enabled_extensions(raw_config, extensions)
     config = validate_config(raw_config, enabled_extensions)
 
-    output = ['# Settings for disabled extensions are not shown.']
+    output = ['# Config for disabled extensions are not shown.']
     for section_name, schema in config_schemas.items():
         options = config.get(section_name, {})
         if not options:
