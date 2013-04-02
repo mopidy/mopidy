@@ -70,7 +70,8 @@ Now you can control Mopidy through the player object. Examples:
 
 class Extension(ext.Extension):
 
-    name = 'Mopidy-MPRIS'
+    dist_name = 'Mopidy-MPRIS'
+    ext_name = 'mpris'
     version = mopidy.__version__
 
     def get_default_config(self):

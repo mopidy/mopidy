@@ -5,7 +5,8 @@ from mopidy.utils import config
 
 class Extension(object):
 
-    name = None
+    dist_name = None
+    ext_name = None
     version = None
 
     def get_default_config(self):

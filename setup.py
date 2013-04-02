@@ -44,7 +44,7 @@ setup(
             'mopidy = mopidy.__main__:main',
             'mopidy-scan = mopidy.scanner:main',
         ],
-        b'mopidy.extension': [
+        b'mopidy.ext': [
             'http = mopidy.frontends.http:Extension [http]',
             'lastfm = mopidy.frontends.lastfm:Extension [lastfm]',
             'local = mopidy.backends.local:Extension',

@@ -45,7 +45,8 @@ None
 
 class Extension(ext.Extension):
 
-    name = 'Mopidy-Stream'
+    dist_name = 'Mopidy-Stream'
+    ext_name = 'stream'
     version = mopidy.__version__
 
     def get_default_config(self):
