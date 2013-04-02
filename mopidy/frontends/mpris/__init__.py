@@ -6,7 +6,7 @@ from mopidy.utils import formatting, config
 
 
 default_config = """
-[ext.mpris]
+[mpris]
 
 # If the MPRIS extension should be enabled or not
 enabled = true
@@ -71,7 +71,7 @@ Now you can control Mopidy through the player object. Examples:
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-MPRIS'
-    name = 'mpris'
+    ext_name = 'mpris'
     version = mopidy.__version__
 
     def get_default_config(self):

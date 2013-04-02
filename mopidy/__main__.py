@@ -194,11 +194,11 @@ def load_extensions():
         logger.debug(
             'Loaded extension: %s %s', extension.dist_name, extension.version)
 
-        if entry_point.name != extension.name:
+        if entry_point.name != extension.ext_name:
             logger.warning(
                 'Disabled extension %(ep)s: entry point name (%(ep)s) '
                 'does not match extension name (%(ext)s)',
-                {'ep': entry_point.name, 'ext': extension.name})
+                {'ep': entry_point.name, 'ext': extension.ext_name})
             continue
 
         try:
@@ -210,7 +210,7 @@ def load_extensions():
 
         extensions.append(extension)
 
-    names = (e.name for e in extensions)
+    names = (e.ext_name for e in extensions)
     logging.info('Found following runnable extensions: %s', ', '.join(names))
     return extensions
 
@@ -225,7 +225,7 @@ def filter_enabled_extensions(raw_config, extensions):
         if boolean.deserialize(enabled):
             filtered_extensions.append(extension)
 
-    names = (e.name for e in filtered_extensions)
+    names = (e.ext_name for e in filtered_extensions)
     logging.info('Following extensions will be started: %s', ', '.join(names))
     return filtered_extensions
 

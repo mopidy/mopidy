@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.local]
+[local]
 
 # If the local extension should be enabled or not
 enabled = true
@@ -47,7 +47,7 @@ None
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-Local'
-    name = 'local'
+    ext_name = 'local'
     version = mopidy.__version__
 
     def get_default_config(self):

@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.stream]
+[stream]
 
 # If the stream extension should be enabled or not
 enabled = true
@@ -46,7 +46,7 @@ None
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-Stream'
-    name = 'stream'
+    ext_name = 'stream'
     version = mopidy.__version__
 
     def get_default_config(self):

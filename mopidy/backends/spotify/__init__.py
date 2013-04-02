@@ -7,7 +7,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.spotify]
+[spotify]
 
 # If the Spotify extension should be enabled or not
 enabled = true
@@ -68,7 +68,7 @@ https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-Spotify'
-    name = 'spotify'
+    ext_name = 'spotify'
     version = mopidy.__version__
 
     def get_default_config(self):

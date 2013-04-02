@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.lastfm]
+[lastfm]
 
 # If the Last.fm extension should be enabled or not
 enabled = true
@@ -45,7 +45,7 @@ The frontend is enabled by default if all dependencies are available.
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-Lastfm'
-    name = 'lastfm'
+    ext_name = 'lastfm'
     version = mopidy.__version__
 
     def get_default_config(self):
