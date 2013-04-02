@@ -135,10 +135,6 @@ def parse_options():
         action='callback', callback=deps.list_deps_optparse_callback,
         help='list dependencies and their versions')
     parser.add_option(
-        b'--debug-thread',
-        action='store_true', dest='debug_thread',
-        help='run background thread that dumps tracebacks on SIGUSR1')
-    parser.add_option(
         b'-o', b'--option',
         action='append', dest='overrides', type='config_override',
         help='`section/key=value` values to override config options')
