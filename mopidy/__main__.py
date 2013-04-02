@@ -22,6 +22,12 @@ mopidy_args = sys.argv[1:]
 sys.argv[1:] = []
 
 
+# Add ../ to the path so we can run Mopidy from a Git checkout without
+# installing it on the system.
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+
+
 from mopidy import exceptions, settings
 from mopidy.audio import Audio
 from mopidy.config import default_config, config_schemas
