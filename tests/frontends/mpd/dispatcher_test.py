@@ -13,7 +13,7 @@ from tests import unittest
 
 class MpdDispatcherTest(unittest.TestCase):
     def setUp(self):
-        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = MpdDispatcher()
 

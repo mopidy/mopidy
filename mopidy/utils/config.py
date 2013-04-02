@@ -154,10 +154,10 @@ class List(ConfigValue):
             values = re.split(r'\s*\n\s*', value.strip())
         else:
             values = re.split(r'\s*,\s*', value.strip())
-        return [v for v in values if v]
+        return tuple([v for v in values if v])
 
     def serialize(self, value):
-        return '\n  '.join(v.encode('utf-8') for v in value)
+        return '\n  ' + '\n  '.join(v.encode('utf-8') for v in value)
 
 
 class LogLevel(ConfigValue):
@@ -213,9 +213,9 @@ class ConfigSchema(object):
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
-    instances.  Once setup :meth:`convert` can be called with a list of `(key,
-    value)` tuples to process. For convienience we also support :meth:`format`
-    method that can used for printing out the converted values.
+    instances.  Once setup :meth:`convert` can be called with a list of 
+    ``(key, value)`` tuples to process. For convienience we also support
+    :meth:`format` method that can used for printing out the converted values.
     """
     # TODO: Use collections.OrderedDict once 2.6 support is gone (#344)
     def __init__(self):
@@ -263,16 +263,11 @@ class ConfigSchema(object):
 class ExtensionConfigSchema(ConfigSchema):
     """Sub-classed :class:`ConfigSchema` for use in extensions.
 
-    Ensures that `enabled` config value is present and that section name is
-    prefixed with ext.
+    Ensures that ``enabled`` config value is present.
     """
     def __init__(self):
         super(ExtensionConfigSchema, self).__init__()
         self['enabled'] = Boolean()
-
-    def format(self, name, values):
-        return super(ExtensionConfigSchema, self).format(
-            'ext.%s' % name, values)
 
 
 class LogLevelConfigSchema(object):

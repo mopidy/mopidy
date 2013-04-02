@@ -17,6 +17,7 @@ class LocalPlaylistsControllerTest(
         PlaylistsControllerTest, unittest.TestCase):
 
     backend_class = actor.LocalBackend
+    # TODO: setup config
 
     def setUp(self):
         settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('empty_tag_cache')
@@ -96,7 +97,7 @@ class LocalPlaylistsControllerTest(
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        backend = self.backend_class(audio=self.audio)
+        backend = self.backend_class(config=self.config, audio=self.audio)
 
         self.assert_(backend.playlists.playlists)
         self.assertEqual(

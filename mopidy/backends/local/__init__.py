@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.local]
+[local]
 
 # If the local extension should be enabled or not
 enabled = true

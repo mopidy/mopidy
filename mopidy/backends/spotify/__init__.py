@@ -7,7 +7,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.spotify]
+[spotify]
 
 # If the Spotify extension should be enabled or not
 enabled = true

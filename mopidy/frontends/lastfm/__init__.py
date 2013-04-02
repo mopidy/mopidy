@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[ext.lastfm]
+[lastfm]
 
 # If the Last.fm extension should be enabled or not
 enabled = true

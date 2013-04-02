@@ -38,7 +38,7 @@ class Audio(pykka.ThreadingActor):
     #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
     state = PlaybackState.STOPPED
 
-    def __init__(self):
+    def __init__(self, config):
         super(Audio, self).__init__()
 
         self._playbin = None
