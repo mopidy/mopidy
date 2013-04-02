@@ -10,8 +10,11 @@ class ExtensionTest(unittest.TestCase):
     def setUp(self):
         self.ext = Extension()
 
-    def test_name_is_none(self):
-        self.assertIsNone(self.ext.name)
+    def test_dist_name_is_none(self):
+        self.assertIsNone(self.ext.dist_name)
+
+    def test_ext_name_is_none(self):
+        self.assertIsNone(self.ext.ext_name)
 
     def test_version_is_none(self):
         self.assertIsNone(self.ext.version)

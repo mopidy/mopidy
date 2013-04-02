@@ -234,7 +234,8 @@ meaningful defaults blank, like ``username`` and ``password``.
 
     class Extension(ext.Extension):
 
-        name = 'Mopidy-Soundspot'
+        dist_name = 'Mopidy-Soundspot'
+        ext_name = 'soundspot'
         version = __version__
 
         def get_default_config(self):
