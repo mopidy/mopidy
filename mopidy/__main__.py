@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 import codecs
-import ConfigParser
+import ConfigParser as configparser
 import logging
 import optparse
 import os
@@ -240,7 +240,7 @@ def filter_enabled_extensions(raw_config, extensions):
 
 
 def load_config(options, extensions):
-    parser = ConfigParser.RawConfigParser()
+    parser = configparser.RawConfigParser()
 
     files = [
         '/etc/mopidy/mopidy.conf',
