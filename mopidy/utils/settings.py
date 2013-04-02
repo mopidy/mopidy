@@ -184,42 +184,6 @@ def validate_settings(defaults, settings):
     return errors
 
 
-def list_settings_optparse_callback(*args):
-    """
-    Prints a list of all settings.
-
-    Called by optparse when Mopidy is run with the :option:`--list-settings`
-    option.
-    """
-    from mopidy import settings
-    print format_settings_list(settings)
-    sys.exit(0)
-
-
-def format_settings_list(settings):
-    errors = settings.get_errors()
-    lines = []
-    for (key, value) in sorted(settings.current.iteritems()):
-        default_value = settings.default.get(key)
-        masked_value = mask_value_if_secret(key, value)
-        lines.append('%s: %s' % (
-            key, formatting.indent(pprint.pformat(masked_value), places=2)))
-        if value != default_value and default_value is not None:
-            lines.append(
-                '  Default: %s' %
-                formatting.indent(pprint.pformat(default_value), places=4))
-        if errors.get(key) is not None:
-            lines.append('  Error: %s' % errors[key])
-    return '\n'.join(lines)
-
-
-def mask_value_if_secret(key, value):
-    if key.endswith('PASSWORD') and value:
-        return '********'
-    else:
-        return value
-
-
 def did_you_mean(setting, defaults):
     """Suggest most likely setting based on levenshtein."""
     if not defaults:
