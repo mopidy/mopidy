@@ -59,7 +59,8 @@ def main():
         # extension loading and config loading.
         log.setup_logging(None, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
-        config = load_config(options, extensions)
+        raw_config = load_config(options, extensions)
+        config = validate_config(raw_config, extensions)
         check_old_folders()
         setup_settings(options.interactive)
         audio = setup_audio(config)
@@ -169,7 +170,9 @@ def load_extensions():
             continue
 
         extensions.append(extension)
-    logging.info('Loaded extensions: %s', ', '.join(e.ext_name for e in extensions))
+
+    names = (e.ext_name for e in extensions)
+    logging.info('Found following runnable extensions: %s', ', '.join(names))
     return extensions
 
 
@@ -205,24 +208,31 @@ def load_config(options, extensions):
             logger.error('Config file %s is not UTF-8 encoded', filename)
             process.exit_process()
 
-    # TODO Merge config values given through `options` into `config`
+    raw_config = {}
+    for section in parser.sections():
+        raw_config[section] = dict(parser.items(section))
 
+    # TODO Merge config values given through `options` into `raw_config`
+    return raw_config
+
+
+def validate_config(raw_config, extensions):
     # Collect config schemas to validate against
     sections_and_schemas = config_schemas.items()
     for extension in extensions:
         section_name = 'ext.%s' % extension.ext_name
-        if parser.getboolean(section_name, 'enabled'):
-            sections_and_schemas.append(
-                (section_name, extension.get_config_schema()))
+        sections_and_schemas.append(
+            (section_name, extension.get_config_schema()))
 
     # Get validated config
     config = {}
     for section_name, schema in sections_and_schemas:
-        if not parser.has_section(section_name):
+        if section_name not in raw_config:
             logger.error('Config section %s not found', section_name)
             process.exit_process()
         try:
-            config[section_name] = schema.convert(parser.items(section_name))
+            items = raw_config[section_name].items()
+            config[section_name] = schema.convert(items)
         except exceptions.ConfigError as error:
             for key in error:
                 logger.error('Config error: %s:%s %s', section_name, key, error[key])
