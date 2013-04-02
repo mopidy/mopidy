@@ -182,6 +182,8 @@ def load_config(options, extensions):
     # TODO Add config file given through `options` to `files`
     # TODO Replace `files` with single file given through `options`
 
+    logging.info('Loading config from: builtin-defaults, %s', ', '.join(files))
+
     # Read default core config
     parser.readfp(StringIO.StringIO(default_config))
 
@@ -222,7 +224,7 @@ def load_config(options, extensions):
             config[section_name] = schema.convert(parser.items(section_name))
         except exceptions.ConfigError as error:
             for key in error:
-                logger.error('Config error: %s: %s', key, error[key])
+                logger.error('Config error: %s:%s %s', section_name, key, error[key])
             process.exit_process()
 
     return config
