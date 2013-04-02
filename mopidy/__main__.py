@@ -244,7 +244,7 @@ def load_config(options, extensions):
 
     files = [
         '/etc/mopidy/mopidy.conf',
-        '~/.config/mopidy/mopidy.conf',
+        '$XDG_CONFIG_DIR/mopidy/mopidy.conf',
     ]
     # TODO Add config file given through `options` to `files`
     # TODO Replace `files` with single file given through `options`
@@ -262,7 +262,7 @@ def load_config(options, extensions):
 
     # Load config from a series of config files
     for filename in files:
-        filename = os.path.expanduser(filename)
+        filename = path.expand_path(filename)
         try:
             filehandle = codecs.open(filename, encoding='utf-8')
             parser.readfp(filehandle)
