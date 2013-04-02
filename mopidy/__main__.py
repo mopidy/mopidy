@@ -113,7 +113,7 @@ def parse_options():
     parser.add_option(
         b'--list-settings',
         action='callback',
-        callback=settings_utils.list_settings_optparse_callback,
+        callback=list_settings_callback,
         help='list current settings')
     parser.add_option(
         b'--list-deps',
@@ -124,6 +124,25 @@ def parse_options():
         action='store_true', dest='debug_thread',
         help='run background thread that dumps tracebacks on SIGUSR1')
     return parser.parse_args(args=mopidy_args)[0]
+
+
+def list_settings_callback(options, opt, value, parser):
+    extensions = load_extensions()
+    raw_config = load_config(options, extensions)
+    extensions = filter_enabled_extensions(raw_config, extensions)
+    config = validate_config(raw_config, extensions)
+
+    # TODO: this code is duplicated, figure out a way to reuse it?
+    sections_and_schemas = config_schemas.items()
+    for extension in extensions:
+        sections_and_schemas.append(
+            (extension.ext_name, extension.get_config_schema()))
+
+    output = ['# Settings for disabled extensions are not shown.']
+    for section_name, schema in sections_and_schemas:
+        output.append(schema.format(section_name, config.get(section_name, {})))
+    print '\n\n'.join(output)
+    sys.exit(0)
 
 
 def check_old_folders():

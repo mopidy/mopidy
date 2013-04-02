@@ -376,10 +376,6 @@ class ExtensionConfigSchemaTest(unittest.TestCase):
         schema = config.ExtensionConfigSchema()
         self.assertIsInstance(schema['enabled'], config.Boolean)
 
-    def test_section_name_is_prefixed(self):
-        schema = config.ExtensionConfigSchema()
-        self.assertEqual('[ext.foo]', schema.format('foo', {}))
-
 
 class LogLevelConfigSchemaTest(unittest.TestCase):
     def test_conversion(self):

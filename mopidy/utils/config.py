@@ -157,7 +157,7 @@ class List(ConfigValue):
         return tuple([v for v in values if v])
 
     def serialize(self, value):
-        return '\n  '.join(v.encode('utf-8') for v in value)
+        return '\n  ' + '\n  '.join(v.encode('utf-8') for v in value)
 
 
 class LogLevel(ConfigValue):
@@ -269,10 +269,6 @@ class ExtensionConfigSchema(ConfigSchema):
     def __init__(self):
         super(ExtensionConfigSchema, self).__init__()
         self['enabled'] = Boolean()
-
-    def format(self, name, values):
-        return super(ExtensionConfigSchema, self).format(
-            'ext.%s' % name, values)
 
 
 class LogLevelConfigSchema(object):
