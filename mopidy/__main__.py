@@ -41,7 +41,8 @@ from mopidy.audio import Audio
 from mopidy.config import default_config, config_schemas
 from mopidy.core import Core
 from mopidy.utils import (
-    deps, log, path, process, settings as settings_utils, versioning)
+    config as config_utils, deps, log, path, process,
+    settings as settings_utils, versioning)
 
 
 logger = logging.getLogger('mopidy.main')
@@ -60,6 +61,7 @@ def main():
         log.setup_logging(None, options.verbosity_level, options.save_debug_log)
         extensions = load_extensions()
         raw_config = load_config(options, extensions)
+        extensions = filter_enabled_extensions(raw_config, extensions)
         config = validate_config(raw_config, extensions)
         check_old_folders()
         setup_settings(options.interactive)
@@ -174,6 +176,21 @@ def load_extensions():
     names = (e.ext_name for e in extensions)
     logging.info('Found following runnable extensions: %s', ', '.join(names))
     return extensions
+
+
+def filter_enabled_extensions(raw_config, extensions):
+    boolean = config_utils.Boolean()
+    filtered_extensions = []
+
+    for extension in extensions:
+        # TODO: handle key and value errors.
+        enabled = raw_config['ext.%s' % extension.ext_name]['enabled']
+        if boolean.deserialize(enabled):
+            filtered_extensions.append(extension)
+
+    names = (e.ext_name for e in filtered_extensions)
+    logging.info('Following extensions will be started: %s', ', '.join(names))
+    return filtered_extensions
 
 
 def load_config(options, extensions):
