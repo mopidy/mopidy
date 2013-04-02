@@ -157,11 +157,11 @@ def load_extensions():
         logger.debug(
             'Loaded extension: %s %s', extension.dist_name, extension.version)
 
-        if entry_point.name != extension.ext_name:
+        if entry_point.name != extension.name:
             logger.warning(
                 'Disabled extension %(ep)s: entry point name (%(ep)s) '
                 'does not match extension name (%(ext)s)',
-                {'ep': entry_point.name, 'ext': extension.ext_name})
+                {'ep': entry_point.name, 'ext': extension.name})
             continue
 
         try:
@@ -173,7 +173,7 @@ def load_extensions():
 
         extensions.append(extension)
 
-    names = (e.ext_name for e in extensions)
+    names = (e.name for e in extensions)
     logging.info('Found following runnable extensions: %s', ', '.join(names))
     return extensions
 
@@ -184,11 +184,11 @@ def filter_enabled_extensions(raw_config, extensions):
 
     for extension in extensions:
         # TODO: handle key and value errors.
-        enabled = raw_config['ext.%s' % extension.ext_name]['enabled']
+        enabled = raw_config[extension.ext_name]['enabled']
         if boolean.deserialize(enabled):
             filtered_extensions.append(extension)
 
-    names = (e.ext_name for e in filtered_extensions)
+    names = (e.name for e in filtered_extensions)
     logging.info('Following extensions will be started: %s', ', '.join(names))
     return filtered_extensions
 
@@ -237,9 +237,8 @@ def validate_config(raw_config, extensions):
     # Collect config schemas to validate against
     sections_and_schemas = config_schemas.items()
     for extension in extensions:
-        section_name = 'ext.%s' % extension.ext_name
         sections_and_schemas.append(
-            (section_name, extension.get_config_schema()))
+            (extension.ext_name, extension.get_config_schema()))
 
     # Get validated config
     config = {}

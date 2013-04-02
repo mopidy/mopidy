@@ -89,7 +89,7 @@ near future:
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-MPD'
-    ext_name = 'mpd'
+    name = 'mpd'
     version = mopidy.__version__
 
     def get_default_config(self):

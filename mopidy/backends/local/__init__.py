@@ -47,7 +47,7 @@ None
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-Local'
-    ext_name = 'local'
+    name = 'local'
     version = mopidy.__version__
 
     def get_default_config(self):

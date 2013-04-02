@@ -6,8 +6,14 @@ from mopidy.utils import config
 class Extension(object):
 
     dist_name = None
-    ext_name = None
+    name = None
     version = None
+
+    @property
+    def ext_name(self):
+        if self.name is None:
+            return None
+        return 'ext.%s' % self.name
 
     def get_default_config(self):
         raise NotImplementedError(

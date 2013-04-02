@@ -520,7 +520,7 @@ Example to get started with
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-HTTP'
-    ext_name = 'http'
+    name = 'http'
     version = mopidy.__version__
 
     def get_default_config(self):

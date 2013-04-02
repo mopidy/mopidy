@@ -45,7 +45,7 @@ The frontend is enabled by default if all dependencies are available.
 class Extension(ext.Extension):
 
     dist_name = 'Mopidy-Lastfm'
-    ext_name = 'lastfm'
+    name = 'lastfm'
     version = mopidy.__version__
 
     def get_default_config(self):
