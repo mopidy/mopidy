@@ -60,7 +60,7 @@ def main():
         check_old_folders()
         setup_settings()
         # Anything that wants to exit after this point must use
-        # process.exit_proces as actors have been started.
+        # mopidy.utils.process.exit_process as actors have been started.
         audio = setup_audio(config)
         backends = setup_backends(config, extensions, audio)
         core = setup_core(audio, backends)
