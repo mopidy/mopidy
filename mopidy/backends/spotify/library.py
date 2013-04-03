@@ -7,7 +7,6 @@ import urllib
 import pykka
 from spotify import Link, SpotifyError
 
-from mopidy import settings
 from mopidy.backends import base
 from mopidy.models import Track, SearchResult
 
@@ -62,6 +61,10 @@ class SpotifyTrack(Track):
 
 
 class SpotifyLibraryProvider(base.BaseLibraryProvider):
+    def __init__(self, *args, **kwargs):
+        super(SpotifyLibraryProvider).__init__(*args, **kwargs)
+        self._timeout = self.backend.config['spotify']['timeout']
+
     def find_exact(self, query=None, uris=None):
         return self.search(query=query, uris=uris)
 
@@ -116,10 +119,11 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             SpotifyTrack(track=t)
             for t in playlist if t.availability() == TRACK_AVAILABLE]
 
-    def _wait_for_object_to_load(
-            self, spotify_obj, timeout=settings.SPOTIFY_TIMEOUT):
+    def _wait_for_object_to_load(self, spotify_obj, timeout=None):
         # XXX Sleeping to wait for the Spotify object to load is an ugly hack,
         # but it works. We should look into other solutions for this.
+        if timeout is None:
+            timeout = self._timeout
         wait_until = time.time() + timeout
         while not spotify_obj.is_loaded():
             time.sleep(0.1)
@@ -166,7 +170,7 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             future.set(search_result)
 
         # Wait always returns None on python 2.6 :/
-        self.backend.spotify.connected.wait(settings.SPOTIFY_TIMEOUT)
+        self.backend.spotify.connected.wait(self._timeout)
         if not self.backend.spotify.connected.is_set():
             logger.debug('Not connected: Spotify search cancelled')
             return SearchResult(uri='spotify:search')
@@ -176,11 +180,10 @@ class SpotifyLibraryProvider(base.BaseLibraryProvider):
             album_count=200, artist_count=200, track_count=200)
 
         try:
-            return future.get(timeout=settings.SPOTIFY_TIMEOUT)
+            return future.get(timeout=self._timeout)
         except pykka.Timeout:
             logger.debug(
-                'Timeout: Spotify search did not return in %ds',
-                settings.SPOTIFY_TIMEOUT)
+                'Timeout: Spotify search did not return in %ds', self._timeout)
             return SearchResult(uri='spotify:search')
 
     def _get_all_tracks(self):
