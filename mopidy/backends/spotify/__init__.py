@@ -28,7 +28,7 @@ timeout = 10
 cache_path = $XDG_CACHE_DIR/mopidy/spotify
 
 # Connect to Spotify through a proxy
-proxy_host =
+proxy_hostname =
 proxy_username =
 proxy_password =
 """
@@ -81,7 +81,7 @@ class Extension(ext.Extension):
         schema['bitrate'] = config.Integer(choices=(96, 160, 320))
         schema['timeout'] = config.Integer(minimum=0)
         schema['cache_path'] = config.String()
-        schema['proxy_host'] = config.Hostname(optional=True)
+        schema['proxy_hostname'] = config.Hostname(optional=True)
         schema['proxy_username'] = config.String(optional=True)
         schema['proxy_password'] = config.String(optional=True, secret=True)
         return schema
