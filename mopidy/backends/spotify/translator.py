@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from spotify import Link
 
-from mopidy import settings
 from mopidy.models import Artist, Album, Track, Playlist
 
 
@@ -39,7 +38,7 @@ def to_mopidy_album(spotify_album):
     return album_cache[uri]
 
 
-def to_mopidy_track(spotify_track):
+def to_mopidy_track(spotify_track, bitrate=None):
     if spotify_track is None:
         return
     uri = str(Link.from_track(spotify_track, 0))
@@ -60,11 +59,11 @@ def to_mopidy_track(spotify_track):
         track_no=spotify_track.index(),
         date=date,
         length=spotify_track.duration(),
-        bitrate=settings.SPOTIFY_BITRATE)
+        bitrate=bitrate)
     return track_cache[uri]
 
 
-def to_mopidy_playlist(spotify_playlist):
+def to_mopidy_playlist(spotify_playlist, bitrate=None, username=None):
     if spotify_playlist is None or spotify_playlist.type() != 'playlist':
         return
     uri = str(Link.from_playlist(spotify_playlist))
@@ -72,7 +71,7 @@ def to_mopidy_playlist(spotify_playlist):
         return Playlist(uri=uri, name='[loading...]')
     name = spotify_playlist.name()
     tracks = [
-        to_mopidy_track(spotify_track)
+        to_mopidy_track(spotify_track, bitrate=bitrate)
         for spotify_track in spotify_playlist
         if not spotify_track.is_local()
     ]
@@ -81,9 +80,6 @@ def to_mopidy_playlist(spotify_playlist):
         # Tracks in the Starred playlist are in reverse order from the official
         # client.
         tracks.reverse()
-    if spotify_playlist.owner().canonical_name() != settings.SPOTIFY_USERNAME:
+    if spotify_playlist.owner().canonical_name() != username:
         name += ' by ' + spotify_playlist.owner().canonical_name()
-    return Playlist(
-        uri=uri,
-        name=name,
-        tracks=tracks)
+    return Playlist(uri=uri, name=name, tracks=tracks)
