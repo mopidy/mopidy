@@ -5,11 +5,12 @@ from mopidy.utils import config
 
 default_config = """
 [logging]
-console_format = %(levelname)-8s $(message)s
+console_format = %(levelname)-8s %(message)s
 debug_format = %(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n  %(message)s
 debug_file = mopidy.log
 
 [logging.levels]
+pykka = info
 
 [audio]
 mixer = autoaudiomixer
