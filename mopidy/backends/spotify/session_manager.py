@@ -24,13 +24,14 @@ BITRATES = {96: 2, 160: 0, 320: 1}
 
 class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     cache_location = None
-    settings_location = cache_location
+    settings_location = None
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % versioning.get_version()
 
     def __init__(self, config, audio, backend_ref):
 
         self.cache_location = config['spotify']['cache_path']
+        self.settings_location = config['spotify']['cache_path']
 
         PyspotifySessionManager.__init__(
             self, config['spotify']['username'], config['spotify']['password'],

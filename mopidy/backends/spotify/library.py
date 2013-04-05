@@ -62,7 +62,7 @@ class SpotifyTrack(Track):
 
 class SpotifyLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
-        super(SpotifyLibraryProvider).__init__(*args, **kwargs)
+        super(SpotifyLibraryProvider, self).__init__(*args, **kwargs)
         self._timeout = self.backend.config['spotify']['timeout']
 
     def find_exact(self, query=None, uris=None):
