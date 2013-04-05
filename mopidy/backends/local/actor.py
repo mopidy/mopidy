@@ -16,6 +16,8 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
     def __init__(self, config, audio):
         super(LocalBackend, self).__init__()
 
+        self.config = config
+
         self.library = LocalLibraryProvider(backend=self)
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
         self.playlists = LocalPlaylistsProvider(backend=self)
