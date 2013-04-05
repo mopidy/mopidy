@@ -36,6 +36,7 @@ config_schemas['audio']['mixer'] = config.String()
 config_schemas['audio']['mixer_track'] = config.String(optional=True)
 config_schemas['audio']['output'] = config.String()
 
+config_schemas['proxy'] = config.ConfigSchema()
 config_schemas['proxy']['hostname'] = config.Hostname(optional=True)
 config_schemas['proxy']['username'] = config.String(optional=True)
 config_schemas['proxy']['password'] = config.String(optional=True, secret=True)
