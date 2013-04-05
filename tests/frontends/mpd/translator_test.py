@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import datetime
 import os
 
-from mopidy import settings
 from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, TlTrack, Playlist, Track
@@ -24,11 +23,10 @@ class TrackMpdFormatTest(unittest.TestCase):
     )
 
     def setUp(self):
-        settings.LOCAL_MUSIC_PATH = '/dir/subdir'
+        self.music_path = '/dir/subdir'
         mtime.set_fake_time(1234567)
 
     def tearDown(self):
-        settings.runtime.clear()
         mtime.undo_fake()
 
     def test_track_to_mpd_format_for_empty_track(self):
@@ -137,15 +135,14 @@ class QueryFromMpdListFormatTest(unittest.TestCase):
 
 class TracksToTagCacheFormatTest(unittest.TestCase):
     def setUp(self):
-        settings.LOCAL_MUSIC_PATH = '/dir/subdir'
+        self.music_path = '/dir/subdir'
         mtime.set_fake_time(1234567)
 
     def tearDown(self):
-        settings.runtime.clear()
         mtime.undo_fake()
 
     def translate(self, track):
-        base_path = settings.LOCAL_MUSIC_PATH.encode('utf-8')
+        base_path = self.music_path.encode('utf-8')
         result = dict(translator.track_to_mpd_format(track))
         result['file'] = uri_to_path(result['file'])[len(base_path) + 1:]
         result['key'] = os.path.basename(result['file'])
@@ -177,11 +174,11 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         self.fail("Couldn't find end %s in result" % directory)
 
     def test_empty_tag_cache_has_header(self):
-        result = translator.tracks_to_tag_cache_format([])
+        result = translator.tracks_to_tag_cache_format([], self.music_path)
         result = self.consume_headers(result)
 
     def test_empty_tag_cache_has_song_list(self):
-        result = translator.tracks_to_tag_cache_format([])
+        result = translator.tracks_to_tag_cache_format([], self.music_path)
         result = self.consume_headers(result)
         song_list, result = self.consume_song_list(result)
 
@@ -190,12 +187,12 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_has_header(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
-        result = translator.tracks_to_tag_cache_format([track])
+        result = translator.tracks_to_tag_cache_format([track], self.music_path)
         result = self.consume_headers(result)
 
     def test_tag_cache_has_song_list(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
-        result = translator.tracks_to_tag_cache_format([track])
+        result = translator.tracks_to_tag_cache_format([track], self.music_path)
         result = self.consume_headers(result)
         song_list, result = self.consume_song_list(result)
 
@@ -205,7 +202,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
     def test_tag_cache_has_formated_track(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
         formated = self.translate(track)
-        result = translator.tracks_to_tag_cache_format([track])
+        result = translator.tracks_to_tag_cache_format([track], self.music_path)
 
         result = self.consume_headers(result)
         song_list, result = self.consume_song_list(result)
@@ -216,7 +213,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
     def test_tag_cache_has_formated_track_with_key_and_mtime(self):
         track = Track(uri='file:///dir/subdir/song.mp3')
         formated = self.translate(track)
-        result = translator.tracks_to_tag_cache_format([track])
+        result = translator.tracks_to_tag_cache_format([track], self.music_path)
 
         result = self.consume_headers(result)
         song_list, result = self.consume_song_list(result)
@@ -227,7 +224,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
     def test_tag_cache_suports_directories(self):
         track = Track(uri='file:///dir/subdir/folder/song.mp3')
         formated = self.translate(track)
-        result = translator.tracks_to_tag_cache_format([track])
+        result = translator.tracks_to_tag_cache_format([track], self.music_path)
 
         result = self.consume_headers(result)
         folder, result = self.consume_directory(result)
@@ -241,7 +238,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
     def test_tag_cache_diretory_header_is_right(self):
         track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
-        result = translator.tracks_to_tag_cache_format([track])
+        result = translator.tracks_to_tag_cache_format([track], self.music_path)
 
         result = self.consume_headers(result)
         folder, result = self.consume_directory(result)
@@ -253,7 +250,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
     def test_tag_cache_suports_sub_directories(self):
         track = Track(uri='file:///dir/subdir/folder/sub/song.mp3')
         formated = self.translate(track)
-        result = translator.tracks_to_tag_cache_format([track])
+        result = translator.tracks_to_tag_cache_format([track], self.music_path)
 
         result = self.consume_headers(result)
 
@@ -281,7 +278,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         formated.extend(self.translate(tracks[0]))
         formated.extend(self.translate(tracks[1]))
 
-        result = translator.tracks_to_tag_cache_format(tracks)
+        result = translator.tracks_to_tag_cache_format(tracks, self.music_path)
 
         result = self.consume_headers(result)
         song_list, result = self.consume_song_list(result)
@@ -299,7 +296,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
         formated.append(self.translate(tracks[0]))
         formated.append(self.translate(tracks[1]))
 
-        result = translator.tracks_to_tag_cache_format(tracks)
+        result = translator.tracks_to_tag_cache_format(tracks, self.music_path)
 
         result = self.consume_headers(result)
         folder, result = self.consume_directory(result)
@@ -315,13 +312,10 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
 class TracksToDirectoryTreeTest(unittest.TestCase):
     def setUp(self):
-        settings.LOCAL_MUSIC_PATH = '/root/'
-
-    def tearDown(self):
-        settings.runtime.clear()
+        self.music_path = '/root/'
 
     def test_no_tracks_gives_emtpy_tree(self):
-        tree = translator.tracks_to_directory_tree([])
+        tree = translator.tracks_to_directory_tree([], self.music_path)
         self.assertEqual(tree, ({}, []))
 
     def test_top_level_files(self):
@@ -330,18 +324,18 @@ class TracksToDirectoryTreeTest(unittest.TestCase):
             Track(uri='file:///root/file2.mp3'),
             Track(uri='file:///root/file3.mp3'),
         ]
-        tree = translator.tracks_to_directory_tree(tracks)
+        tree = translator.tracks_to_directory_tree(tracks, self.music_path)
         self.assertEqual(tree, ({}, tracks))
 
     def test_single_file_in_subdir(self):
         tracks = [Track(uri='file:///root/dir/file1.mp3')]
-        tree = translator.tracks_to_directory_tree(tracks)
+        tree = translator.tracks_to_directory_tree(tracks, self.music_path)
         expected = ({'dir': ({}, tracks)}, [])
         self.assertEqual(tree, expected)
 
     def test_single_file_in_sub_subdir(self):
         tracks = [Track(uri='file:///root/dir1/dir2/file1.mp3')]
-        tree = translator.tracks_to_directory_tree(tracks)
+        tree = translator.tracks_to_directory_tree(tracks, self.music_path)
         expected = ({'dir1': ({'dir1/dir2': ({}, tracks)}, [])}, [])
         self.assertEqual(tree, expected)
 
@@ -353,7 +347,7 @@ class TracksToDirectoryTreeTest(unittest.TestCase):
             Track(uri='file:///root/dir2/file4.mp3'),
             Track(uri='file:///root/dir2/sub/file5.mp3'),
         ]
-        tree = translator.tracks_to_directory_tree(tracks)
+        tree = translator.tracks_to_directory_tree(tracks, self.music_path)
         expected = (
             {
                 'dir1': ({}, [tracks[1], tracks[2]]),

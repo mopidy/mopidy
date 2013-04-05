@@ -42,6 +42,7 @@ from mopidy.utils import log, path, versioning
 
 def main():
     options = parse_options()
+    config = {}  # TODO Read config from new config system
 
     log.setup_root_logger()
     log.setup_console_logging(options.verbosity_level)
@@ -67,7 +68,8 @@ def main():
 
     logging.info('Done scanning; writing tag cache...')
 
-    for row in mpd_translator.tracks_to_tag_cache_format(tracks):
+    for row in mpd_translator.tracks_to_tag_cache_format(
+            tracks, config['mpd']['music_path']):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:

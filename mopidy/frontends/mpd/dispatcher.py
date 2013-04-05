@@ -5,7 +5,6 @@ import re
 
 import pykka
 
-from mopidy import settings
 from mopidy.frontends.mpd import exceptions, protocol
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
@@ -22,13 +21,15 @@ class MpdDispatcher(object):
 
     _noidle = re.compile(r'^noidle$')
 
-    def __init__(self, session=None, core=None):
+    def __init__(self, session=None, config=None, core=None):
+        self.config = config
         self.authenticated = False
         self.command_list_receiving = False
         self.command_list_ok = False
         self.command_list = []
         self.command_list_index = None
-        self.context = MpdContext(self, session=session, core=core)
+        self.context = MpdContext(
+            self, session=session, config=config, core=core)
 
     def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -82,7 +83,7 @@ class MpdDispatcher(object):
     def _authenticate_filter(self, request, response, filter_chain):
         if self.authenticated:
             return self._call_next_filter(request, response, filter_chain)
-        elif settings.MPD_SERVER_PASSWORD is None:
+        elif self.config['mpd']['password'] is None:
             self.authenticated = True
             return self._call_next_filter(request, response, filter_chain)
         else:
@@ -223,6 +224,9 @@ class MpdContext(object):
     #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
+    #: The Mopidy configuration.
+    config = None
+
     #: The Mopidy core API. An instance of :class:`mopidy.core.Core`.
     core = None
 
@@ -232,9 +236,10 @@ class MpdContext(object):
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    def __init__(self, dispatcher, session=None, core=None):
+    def __init__(self, dispatcher, session=None, config=None, core=None):
         self.dispatcher = dispatcher
         self.session = session
+        self.config = config
         self.core = core
         self.events = set()
         self.subscriptions = set()

@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from mopidy import settings
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import (
     MpdPasswordError, MpdPermissionError)
@@ -40,7 +39,7 @@ def password_(context, password):
         This is used for authentication with the server. ``PASSWORD`` is
         simply the plaintext password.
     """
-    if password == settings.MPD_SERVER_PASSWORD:
+    if password == context.config['mpd']['password']:
         context.dispatcher.authenticated = True
     else:
         raise MpdPasswordError('incorrect password', command='password')
