@@ -13,15 +13,15 @@ try:
 except ImportError as import_error:
     raise exceptions.OptionalDependencyError(import_error)
 
-logger = logging.getLogger('mopidy.frontends.lastfm')
+logger = logging.getLogger('mopidy.frontends.scrobbler')
 
 API_KEY = '2236babefa8ebb3d93ea467560d00d04'
 API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 
 
-class LastfmFrontend(pykka.ThreadingActor, CoreListener):
+class ScrobblerFrontend(pykka.ThreadingActor, CoreListener):
     def __init__(self, config, core):
-        super(LastfmFrontend, self).__init__()
+        super(ScrobblerFrontend, self).__init__()
         self.lastfm = None
         self.last_start_time = None
 
