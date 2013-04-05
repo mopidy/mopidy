@@ -23,9 +23,8 @@ protocols =
 
 __doc__ = """A backend for playing music for streaming music.
 
-This backend will handle streaming of URIs in
-:attr:`mopidy.settings.STREAM_PROTOCOLS` assuming the right plugins are
-installed.
+This backend will handle streaming of URIs matching the ``stream/protocols``
+config value, assuming the needed GStreamer plugins are installed.
 
 **Issues**
 
