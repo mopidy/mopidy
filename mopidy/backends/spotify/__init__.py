@@ -26,11 +26,6 @@ timeout = 10
 
 # Path to the Spotify data cache. Cannot be shared with other Spotify apps
 cache_path = $XDG_CACHE_DIR/mopidy/spotify
-
-# Connect to Spotify through a proxy
-proxy_hostname =
-proxy_username =
-proxy_password =
 """
 
 __doc__ = """A backend for playing music from Spotify
@@ -81,9 +76,6 @@ class Extension(ext.Extension):
         schema['bitrate'] = config.Integer(choices=(96, 160, 320))
         schema['timeout'] = config.Integer(minimum=0)
         schema['cache_path'] = config.String()
-        schema['proxy_hostname'] = config.Hostname(optional=True)
-        schema['proxy_username'] = config.String(optional=True)
-        schema['proxy_password'] = config.String(optional=True, secret=True)
         return schema
 
     def validate_environment(self):
