@@ -49,6 +49,7 @@ def main():
     config_overrides = options.overrides
 
     try:
+        extensions = []  # Make sure it is defined before the finally block
         logging_config = load_config(config_files, config_overrides)
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
@@ -59,6 +60,7 @@ def main():
         log.setup_log_levels(config)
         check_old_folders()
         setup_settings()
+
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors have been started.
         audio = setup_audio(config)
