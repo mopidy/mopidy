@@ -4,7 +4,6 @@ import logging
 
 import pykka
 
-from mopidy import settings
 from mopidy.core import CoreListener
 from mopidy.frontends.mpris import objects
 
@@ -20,13 +19,14 @@ except ImportError as import_error:
 class MprisFrontend(pykka.ThreadingActor, CoreListener):
     def __init__(self, config, core):
         super(MprisFrontend, self).__init__()
+        self.config = config
         self.core = core
         self.indicate_server = None
         self.mpris_object = None
 
     def on_start(self):
         try:
-            self.mpris_object = objects.MprisObject(self.core)
+            self.mpris_object = objects.MprisObject(self.config, self.core)
             self._send_startup_notification()
         except Exception as e:
             logger.error('MPRIS frontend setup failed (%s)', e)
@@ -53,7 +53,8 @@ class MprisFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug('Sending startup notification...')
         self.indicate_server = indicate.Server()
         self.indicate_server.set_type('music.mopidy')
-        self.indicate_server.set_desktop_file(settings.DESKTOP_FILE)
+        self.indicate_server.set_desktop_file(
+            self.config['mpris']['desktop_file'])
         self.indicate_server.show()
         logger.debug('Startup notification sent')
 

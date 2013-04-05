@@ -5,7 +5,7 @@ import sys
 import mock
 import pykka
 
-from mopidy import core, exceptions, settings
+from mopidy import core, exceptions
 from mopidy.backends import dummy
 
 try:
@@ -19,11 +19,17 @@ from tests import unittest
 @unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
 class RootInterfaceTest(unittest.TestCase):
     def setUp(self):
+        config = {
+            'mpris': {
+                'desktop_file': '/tmp/foo.desktop',
+            }
+        }
+
         objects.exit_process = mock.Mock()
         objects.MprisObject._connect_to_dbus = mock.Mock()
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
-        self.mpris = objects.MprisObject(core=self.core)
+        self.mpris = objects.MprisObject(config=config, core=self.core)
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
@@ -66,15 +72,9 @@ class RootInterfaceTest(unittest.TestCase):
         result = self.mpris.Get(objects.ROOT_IFACE, 'Identity')
         self.assertEquals(result, 'Mopidy')
 
-    def test_desktop_entry_is_mopidy(self):
-        result = self.mpris.Get(objects.ROOT_IFACE, 'DesktopEntry')
-        self.assertEquals(result, 'mopidy')
-
     def test_desktop_entry_is_based_on_DESKTOP_FILE_setting(self):
-        settings.runtime['DESKTOP_FILE'] = '/tmp/foo.desktop'
         result = self.mpris.Get(objects.ROOT_IFACE, 'DesktopEntry')
         self.assertEquals(result, 'foo')
-        settings.runtime.clear()
 
     def test_supported_uri_schemes_includes_backend_uri_schemes(self):
         result = self.mpris.Get(objects.ROOT_IFACE, 'SupportedUriSchemes')
