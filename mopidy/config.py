@@ -22,7 +22,7 @@ config_schemas = {}  # TODO: use ordered dict?
 config_schemas['logging'] = config.ConfigSchema()
 config_schemas['logging']['console_format'] = config.String()
 config_schemas['logging']['debug_format'] = config.String()
-config_schemas['logging']['debug_file'] = config.String()
+config_schemas['logging']['debug_file'] = config.Path()
 
 config_schemas['logging.levels'] = config.LogLevelConfigSchema()
 

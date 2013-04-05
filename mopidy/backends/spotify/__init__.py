@@ -80,7 +80,7 @@ class Extension(ext.Extension):
         schema['password'] = config.String(secret=True)
         schema['bitrate'] = config.Integer(choices=(96, 160, 320))
         schema['timeout'] = config.Integer(minimum=0)
-        schema['cache_path'] = config.String()
+        schema['cache_path'] = config.Path()
         schema['proxy_hostname'] = config.Hostname(optional=True)
         schema['proxy_username'] = config.String(optional=True)
         schema['proxy_password'] = config.String(optional=True, secret=True)
