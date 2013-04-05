@@ -6,7 +6,7 @@ from mopidy.utils import config, formatting
 
 
 default_config = """
-[lastfm]
+[scrobbler]
 
 # If the Last.fm extension should be enabled or not
 enabled = true
@@ -28,7 +28,7 @@ Frontend which scrobbles the music you play to your `Last.fm
 
 **Dependencies**
 
-.. literalinclude:: ../../../requirements/lastfm.txt
+.. literalinclude:: ../../../requirements/scrobbler.txt
 
 **Default config**
 
@@ -44,8 +44,8 @@ The frontend is enabled by default if all dependencies are available.
 
 class Extension(ext.Extension):
 
-    dist_name = 'Mopidy-Lastfm'
-    ext_name = 'lastfm'
+    dist_name = 'Mopidy-Scrobbler'
+    ext_name = 'scrobbler'
     version = mopidy.__version__
 
     def get_default_config(self):
@@ -64,5 +64,5 @@ class Extension(ext.Extension):
             raise exceptions.ExtensionError('pylast library not found', e)
 
     def get_frontend_classes(self):
-        from .actor import LastfmFrontend
-        return [LastfmFrontend]
+        from .actor import ScrobblerFrontend
+        return [ScrobblerFrontend]

@@ -29,7 +29,7 @@ setup(
     ],
     extras_require={
         b'spotify': ['pyspotify >= 1.9, < 1.11'],
-        b'lastfm': ['pylast >= 0.5.7'],
+        b'scrobbler': ['pylast >= 0.5.7'],
         b'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
         b'external_mixers': ['pyserial'],
     },
@@ -46,7 +46,7 @@ setup(
         ],
         b'mopidy.ext': [
             'http = mopidy.frontends.http:Extension [http]',
-            'lastfm = mopidy.frontends.lastfm:Extension [lastfm]',
+            'scrobbler = mopidy.frontends.scrobbler:Extension [scrobbler]',
             'local = mopidy.backends.local:Extension',
             'mpd = mopidy.frontends.mpd:Extension',
             'mpris = mopidy.frontends.mpris:Extension',
