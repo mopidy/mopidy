@@ -35,9 +35,9 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
 
         PyspotifySessionManager.__init__(
             self, config['spotify']['username'], config['spotify']['password'],
-            proxy=config['spotify']['proxy_hostname'],
-            proxy_username=config['spotify']['proxy_username'],
-            proxy_password=config['spotify']['proxy_password'])
+            proxy=config['proxy']['hostname'],
+            proxy_username=config['proxy']['username'],
+            proxy_password=config['proxy']['password'])
 
         process.BaseThread.__init__(self)
         self.name = 'SpotifyThread'

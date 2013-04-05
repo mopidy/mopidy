@@ -16,6 +16,11 @@ pykka = info
 mixer = autoaudiomixer
 mixer_track =
 output = autoaudiosink
+
+[proxy]
+hostname =
+username =
+password =
 """
 
 config_schemas = {}  # TODO: use ordered dict?
@@ -30,6 +35,10 @@ config_schemas['audio'] = config.ConfigSchema()
 config_schemas['audio']['mixer'] = config.String()
 config_schemas['audio']['mixer_track'] = config.String(optional=True)
 config_schemas['audio']['output'] = config.String()
+
+config_schemas['proxy']['hostname'] = config.Hostname(optional=True)
+config_schemas['proxy']['username'] = config.String(optional=True)
+config_schemas['proxy']['password'] = config.String(optional=True, secret=True)
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 #config_schemas['audio.outputs'] = config.AudioOutputConfigSchema()
