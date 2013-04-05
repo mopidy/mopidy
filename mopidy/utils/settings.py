@@ -169,41 +169,5 @@ def validate_settings(defaults, settings):
 
         elif setting not in defaults and not setting.startswith('CUSTOM_'):
             errors[setting] = 'Unknown setting.'
-            suggestion = did_you_mean(setting, defaults)
-
-            if suggestion:
-                errors[setting] += ' Did you mean %s?' % suggestion
 
     return errors
-
-
-def did_you_mean(setting, defaults):
-    """Suggest most likely setting based on levenshtein."""
-    if not defaults:
-        return None
-
-    setting = setting.upper()
-    candidates = [(levenshtein(setting, d), d) for d in defaults]
-    candidates.sort()
-
-    if candidates[0][0] <= 3:
-        return candidates[0][1]
-    return None
-
-
-def levenshtein(a, b):
-    """Calculates the Levenshtein distance between a and b."""
-    n, m = len(a), len(b)
-    if n > m:
-        return levenshtein(b, a)
-
-    current = xrange(n + 1)
-    for i in xrange(1, m + 1):
-        previous, current = current, [i] + [0] * n
-        for j in xrange(1, n + 1):
-            add, delete = previous[j] + 1, current[j - 1] + 1
-            change = previous[j - 1]
-            if a[j - 1] != b[i - 1]:
-                change += 1
-            current[j] = min(add, delete, change)
-    return current[n]

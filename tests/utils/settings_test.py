@@ -24,8 +24,7 @@ class ValidateSettingsTest(unittest.TestCase):
         result = setting_utils.validate_settings(
             self.defaults, {'MPD_SERVER_HOSTNMAE': '127.0.0.1'})
         self.assertEqual(
-            result['MPD_SERVER_HOSTNMAE'],
-            'Unknown setting. Did you mean MPD_SERVER_HOSTNAME?')
+            result['MPD_SERVER_HOSTNMAE'], 'Unknown setting.')
 
     def test_custom_settings_does_not_return_errors(self):
         result = setting_utils.validate_settings(
