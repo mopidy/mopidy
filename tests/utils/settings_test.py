@@ -24,8 +24,7 @@ class ValidateSettingsTest(unittest.TestCase):
         result = setting_utils.validate_settings(
             self.defaults, {'MPD_SERVER_HOSTNMAE': '127.0.0.1'})
         self.assertEqual(
-            result['MPD_SERVER_HOSTNMAE'],
-            'Unknown setting. Did you mean MPD_SERVER_HOSTNAME?')
+            result['MPD_SERVER_HOSTNMAE'], 'Unknown setting.')
 
     def test_custom_settings_does_not_return_errors(self):
         result = setting_utils.validate_settings(
@@ -149,27 +148,3 @@ class SettingsProxyTest(unittest.TestCase):
     def test_value_ending_in_path_can_be_none(self):
         self.settings.TEST_PATH = None
         self.assertEqual(self.settings.TEST_PATH, None)
-
-
-class DidYouMeanTest(unittest.TestCase):
-    def testSuggestoins(self):
-        defaults = {
-            'MPD_SERVER_HOSTNAME': '::',
-            'MPD_SERVER_PORT': 6600,
-            'SPOTIFY_BITRATE': 160,
-        }
-
-        suggestion = setting_utils.did_you_mean('spotify_bitrate', defaults)
-        self.assertEqual(suggestion, 'SPOTIFY_BITRATE')
-
-        suggestion = setting_utils.did_you_mean('SPOTIFY_BITROTE', defaults)
-        self.assertEqual(suggestion, 'SPOTIFY_BITRATE')
-
-        suggestion = setting_utils.did_you_mean('SPITIFY_BITROT', defaults)
-        self.assertEqual(suggestion, 'SPOTIFY_BITRATE')
-
-        suggestion = setting_utils.did_you_mean('SPTIFY_BITROT', defaults)
-        self.assertEqual(suggestion, 'SPOTIFY_BITRATE')
-
-        suggestion = setting_utils.did_you_mean('SPTIFY_BITRO', defaults)
-        self.assertEqual(suggestion, None)
