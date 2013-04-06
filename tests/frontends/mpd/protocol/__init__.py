@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import mock
 import pykka
 
-from mopidy import core, settings
+from mopidy import core
 from mopidy.backends import dummy
 from mopidy.frontends.mpd import session
 
@@ -42,7 +42,6 @@ class BaseTestCase(unittest.TestCase):
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
-        settings.runtime.clear()
 
     def sendRequest(self, request):
         self.connection.response = []
