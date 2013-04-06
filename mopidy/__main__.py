@@ -28,7 +28,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from mopidy import exceptions, settings
+from mopidy import exceptions
 from mopidy.audio import Audio
 from mopidy.config import default_config, config_schemas
 from mopidy.core import Core
@@ -48,8 +48,10 @@ def main():
     config_files = options.config.split(':')
     config_overrides = options.overrides
 
+    extensions = []  # Make sure it is defined before the finally block
+
     try:
-        extensions = []  # Make sure it is defined before the finally block
+        create_file_structures()
         logging_config = load_config(config_files, config_overrides)
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
@@ -58,8 +60,7 @@ def main():
         extensions = filter_enabled_extensions(raw_config, extensions)
         config = validate_config(raw_config, config_schemas, extensions)
         log.setup_log_levels(config)
-        check_old_folders()
-        setup_settings()
+        check_old_locations()
 
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors have been started.
@@ -68,8 +69,6 @@ def main():
         core = setup_core(audio, backends)
         setup_frontends(config, extensions, core)
         loop.run()
-    except exceptions.SettingsError as ex:
-        logger.error(ex.message)
     except KeyboardInterrupt:
         logger.info('Interrupted. Exiting...')
     except Exception as ex:
@@ -167,17 +166,20 @@ def show_config_callback(option, opt, value, parser):
     sys.exit(0)
 
 
-def check_old_folders():
-    # TODO: add old settings and pre extension storage locations?
-    old_settings_folder = os.path.expanduser('~/.mopidy')
+def check_old_locations():
+    dot_mopidy_dir = path.expand_path('~/.mopidy')
+    if os.path.isdir(dot_mopidy_dir):
+        logger.warning(
+            'Old Mopidy dot dir found at %s. Please migrate your config to '
+            'the ini-file based config format. See release notes for further '
+            'instructions.', dot_mopidy_dir)
 
-    if not os.path.isdir(old_settings_folder):
-        return
-
-    logger.warning(
-        'Old settings folder found at %s, settings.py should be moved '
-        'to %s, any cache data should be deleted. See release notes for '
-        'further instructions.', old_settings_folder, path.SETTINGS_PATH)
+    old_settings_file = path.expand_path('$XDG_CONFIG_DIR/mopidy/settings.py')
+    if os.path.isfile(old_settings_file):
+        logger.warning(
+            'Old Mopidy settings file found at %s. Please migrate your '
+            'config to the ini-file based config format. See release notes '
+            'for further instructions.', old_settings_file)
 
 
 def load_extensions():
@@ -306,15 +308,10 @@ def validate_config(raw_config, schemas, extensions=None):
     return config
 
 
-def setup_settings():
-    path.get_or_create_folder(path.SETTINGS_PATH)
+def create_file_structures():
     path.get_or_create_folder(path.DATA_PATH)
-    path.get_or_create_file(path.SETTINGS_FILE)
-    try:
-        settings.validate()
-    except exceptions.SettingsError as ex:
-        logger.error(ex.message)
-        sys.exit(1)
+    path.get_or_create_folder(path.CONFIG_PATH)
+    path.get_or_create_file(path.CONFIG_FILE)
 
 
 def setup_audio(config):
