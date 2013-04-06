@@ -312,7 +312,7 @@ class TracksToTagCacheFormatTest(unittest.TestCase):
 
 class TracksToDirectoryTreeTest(unittest.TestCase):
     def setUp(self):
-        self.music_path = '/root/'
+        self.music_path = '/root'
 
     def test_no_tracks_gives_emtpy_tree(self):
         tree = translator.tracks_to_directory_tree([], self.music_path)
