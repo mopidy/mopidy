@@ -298,6 +298,55 @@ class PortTest(unittest.TestCase):
         self.assertRaises(ValueError, value.deserialize, '')
 
 
+class ExpandedPathTest(unittest.TestCase):
+    def test_is_bytes(self):
+        self.assertIsInstance(config.ExpandedPath('/tmp'), bytes)
+
+    @mock.patch('mopidy.utils.path.expand_path')
+    def test_defaults_to_expanded(self, expand_path_mock):
+        expand_path_mock.return_value = 'expanded_path'
+        self.assertEqual('expanded_path', config.ExpandedPath('~'))
+
+    @mock.patch('mopidy.utils.path.expand_path')
+    def test_orginal_stores_unexpanded(self, expand_path_mock):
+        self.assertEqual('~', config.ExpandedPath('~').original)
+
+
+class PathTest(unittest.TestCase):
+    def test_deserialize_conversion_success(self):
+        result = config.Path().deserialize('/foo')
+        self.assertEqual('/foo', result)
+        self.assertIsInstance(result, config.ExpandedPath)
+        self.assertIsInstance(result, bytes)
+
+    def test_deserialize_enforces_choices(self):
+        value = config.Path(choices=['/foo', '/bar', '/baz'])
+        self.assertEqual('/foo', value.deserialize('/foo'))
+        self.assertRaises(ValueError, value.deserialize, '/foobar')
+
+    def test_deserialize_enforces_required(self):
+        value = config.Path()
+        self.assertRaises(ValueError, value.deserialize, '')
+        self.assertRaises(ValueError, value.deserialize, ' ')
+
+    def test_deserialize_respects_optional(self):
+        value = config.Path(optional=True)
+        self.assertIsNone(value.deserialize(''))
+        self.assertIsNone(value.deserialize(' '))
+
+    @mock.patch('mopidy.utils.path.expand_path')
+    def test_serialize_uses_original(self, expand_path_mock):
+        expand_path_mock.return_value = 'expanded_path'
+        path = config.ExpandedPath('original_path')
+        value = config.Path()
+        self.assertEqual('expanded_path', path)
+        self.assertEqual('original_path', value.serialize(path))
+
+    def test_serialize_plain_string(self):
+        value = config.Path()
+        self.assertEqual('path', value.serialize('path'))
+
+
 class ConfigSchemaTest(unittest.TestCase):
     def setUp(self):
         self.schema = config.ConfigSchema()
