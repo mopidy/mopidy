@@ -245,20 +245,21 @@ class MpdContext(object):
         self.core = core
         self.events = set()
         self.subscriptions = set()
-        self.to_uri = dict()
-        self.from_uri = dict()
-        self.refresh_maps()
+        self.to_uri = {}
+        self.from_uri = {}
+        self.refresh_playlists_mapping()
 
-    def refresh_maps(self):
-        self.to_uri.clear()
-        self.from_uri.clear()
-        for playlist in self.core.playlists.playlists.get():
-            if not playlist.name:
-                continue
-            name = playlist.name
-            i = 1
-            while name in self.to_uri:
-                name = '%s [%d]' % playlist.name % i
-                i += 1
-            self.to_uri[name] = playlist.uri
-            self.from_uri[playlist.uri] = name
+    def refresh_playlists_mapping(self):
+        if self.core is not None:
+            self.to_uri.clear()
+            self.from_uri.clear()
+            for playlist in self.core.playlists.playlists.get():
+                if not playlist.name:
+                    continue
+                name = playlist.name
+                i = 1
+                while name in self.to_uri:
+                    name = '%s [%d]' % playlist.name % i
+                    i += 1
+                self.to_uri[name] = playlist.uri
+                self.from_uri[playlist.uri] = name
