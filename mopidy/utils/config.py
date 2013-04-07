@@ -5,6 +5,7 @@ import re
 import socket
 
 from mopidy import exceptions
+from mopidy.utils import path
 
 
 def validate_required(value, required):
@@ -126,7 +127,7 @@ class ConfigValue(object):
 class String(ConfigValue):
     """String values.
 
-    Supports: optional choices and secret.
+    Supports: optional, choices and secret.
     """
     def deserialize(self, value):
         value = value.strip()
@@ -242,6 +243,34 @@ class Port(Integer):
         self.maximum = 2 ** 16 - 1
 
 
+class ExpandedPath(bytes):
+    def __new__(self, value):
+        expanded = path.expand_path(value)
+        return super(ExpandedPath, self).__new__(self, expanded)
+
+    def __init__(self, value):
+        self.original = value
+
+
+class Path(ConfigValue):
+    """File system path that will be expanded with mopidy.utils.path.expand_path
+
+    Supports: optional, choices and secret.
+    """
+    def deserialize(self, value):
+        value = value.strip()
+        validate_required(value, not self.optional)
+        validate_choice(value, self.choices)
+        if not value:
+            return None
+        return ExpandedPath(value)
+
+    def serialize(self, value):
+        if isinstance(value, ExpandedPath):
+            return value.original
+        return value
+
+
 class ConfigSchema(object):
     """Logical group of config values that correspond to a config section.
 
@@ -264,6 +293,8 @@ class ConfigSchema(object):
         return self._schema[key]
 
     def format(self, name, values):
+        # TODO: should the output be encoded utf-8 since we use that in
+        # serialize for strings?
         lines = ['[%s]' % name]
         for key in self._order:
             value = values.get(key)
