@@ -444,3 +444,22 @@ class LogLevelConfigSchemaTest(unittest.TestCase):
         result = schema.format('levels', {'foo.bar': logging.DEBUG, 'baz': logging.INFO})
         self.assertEqual('\n'.join(expected), result)
 
+
+class DidYouMeanTest(unittest.TestCase):
+    def testSuggestoins(self):
+        choices = ('enabled', 'username', 'password', 'bitrate', 'timeout')
+
+        suggestion = config.did_you_mean('bitrate', choices)
+        self.assertEqual(suggestion, 'bitrate')
+
+        suggestion = config.did_you_mean('bitrote', choices)
+        self.assertEqual(suggestion, 'bitrate')
+
+        suggestion = config.did_you_mean('Bitrot', choices)
+        self.assertEqual(suggestion, 'bitrate')
+
+        suggestion = config.did_you_mean('BTROT', choices)
+        self.assertEqual(suggestion, 'bitrate')
+
+        suggestion = config.did_you_mean('btro', choices)
+        self.assertEqual(suggestion, None)
