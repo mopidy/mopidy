@@ -8,23 +8,11 @@ from mopidy.utils import config, formatting
 
 default_config = """
 [spotify]
-
-# If the Spotify extension should be enabled or not
 enabled = true
-
-# Your Spotify Premium username
 username =
-
-# Your Spotify Premium password
 password =
-
-# The preferred audio bitrate. Valid values are 96, 160, 320
 bitrate = 160
-
-# Max number of seconds to wait for Spotify operations to complete
 timeout = 10
-
-# Path to the Spotify data cache. Cannot be shared with other Spotify apps
 cache_dir = $XDG_CACHE_DIR/mopidy/spotify
 """
 
@@ -51,6 +39,32 @@ https://github.com/mopidy/mopidy/issues?labels=Spotify+backend
 **Dependencies**
 
 .. literalinclude:: ../../../requirements/spotify.txt
+
+**Configuration**
+
+.. confval:: spotify/enabled
+
+    If the Spotify extension should be enabled or not.
+
+.. confval:: spotify/username
+
+    Your Spotify Premium username.
+
+.. confval:: spotify/password
+
+    Your Spotify Premium password.
+
+.. confval:: spotify/bitrate
+
+    The preferred audio bitrate. Valid values are 96, 160, 320.
+
+.. confval:: spotify/timeout
+
+    Max number of seconds to wait for Spotify operations to complete.
+
+.. confval:: spotify/cache_dir
+
+    Path to the Spotify data cache. Cannot be shared with other Spotify apps.
 
 **Default config**
 

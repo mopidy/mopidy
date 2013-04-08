@@ -9,8 +9,9 @@ serial cable.
 
 **Configuration**
 
-Set the ``audio/mixer`` config value to ``nadmixer`` to use it. You probably
-also needs to add some properties to the ``audio/mixer`` config value.
+Set the :confval:`audio/mixer` config value to ``nadmixer`` to use it. You
+probably also needs to add some properties to the :confval:`audio/mixer` config
+value.
 
 Supported properties includes:
 

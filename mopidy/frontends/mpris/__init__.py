@@ -7,11 +7,7 @@ from mopidy.utils import formatting, config
 
 default_config = """
 [mpris]
-
-# If the MPRIS extension should be enabled or not
 enabled = true
-
-# Location of the Mopidy .desktop file
 desktop_file = /usr/share/applications/mopidy.desktop
 """
 
@@ -33,8 +29,18 @@ An example of an MPRIS client is the `Ubuntu Sound Menu
   Ubuntu/Debian.
 
 - An ``.desktop`` file for Mopidy installed at the path set in the
-  ``mpris/desktop_file`` config value. See :ref:`install-desktop-file` for
-  details.
+  :confval:`mpris/desktop_file` config value. See :ref:`install-desktop-file`
+  for details.
+
+**Configuration**
+
+.. confval:: mpris/enabled
+
+    If the MPRIS extension should be enabled or not.
+
+.. confval:: mpris/desktop_file
+
+    Location of the Mopidy ``.desktop`` file.
 
 **Default config**
 

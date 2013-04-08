@@ -7,17 +7,9 @@ from mopidy.utils import config, formatting
 
 default_config = """
 [local]
-
-# If the local extension should be enabled or not
 enabled = true
-
-# Path to directory with local media files
 media_dir = $XDG_MUSIC_DIR
-
-# Path to playlists directory with m3u files for local media
 playlists_dir = $XDG_DATA_DIR/mopidy/playlists
-
-# Path to tag cache for local media
 tag_cache_file = $XDG_DATA_DIR/mopidy/tag_cache
 """
 
@@ -35,6 +27,24 @@ https://github.com/mopidy/mopidy/issues?labels=Local+backend
 **Dependencies**
 
 None
+
+**Configuration**
+
+.. confval:: local/enabled
+
+    If the local extension should be enabled or not.
+
+.. confval:: local/media_dir
+
+    Path to directory with local media files.
+
+.. confval:: local/playlists_dir
+
+    Path to playlists directory with m3u files for local media.
+
+.. confval:: local/tag_cache_file
+
+    Path to tag cache for local media.
 
 **Default config**
 

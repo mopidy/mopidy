@@ -7,20 +7,14 @@ from mopidy.utils import config, formatting
 
 default_config = """
 [scrobbler]
-
-# If the Last.fm extension should be enabled or not
 enabled = true
-
-# Your Last.fm username
 username =
-
-# Your Last.fm password
 password =
 """
 
 __doc__ = """
-Frontend which scrobbles the music you play to your `Last.fm
-<http://www.last.fm>`_ profile.
+Frontend which scrobbles the music you play to your
+`Last.fm <http://www.last.fm>`_ profile.
 
 .. note::
 
@@ -29,6 +23,20 @@ Frontend which scrobbles the music you play to your `Last.fm
 **Dependencies**
 
 .. literalinclude:: ../../../requirements/scrobbler.txt
+
+**Configuration**
+
+.. confval:: scrobbler/enabled
+
+    If the scrobbler extension should be enabled or not.
+
+.. confval:: scrobbler/username
+
+    Your Last.fm username.
+
+.. confval:: scrobbler/password
+
+    Your Last.fm password.
 
 **Default config**
 

@@ -7,11 +7,7 @@ from mopidy.utils import config, formatting
 
 default_config = """
 [stream]
-
-# If the stream extension should be enabled or not
 enabled = true
-
-# Whitelist of URI schemas to support streaming from
 protocols =
     http
     https
@@ -21,10 +17,12 @@ protocols =
     rtsp
 """
 
-__doc__ = """A backend for playing music for streaming music.
+__doc__ = """
+A backend for playing music for streaming music.
 
-This backend will handle streaming of URIs matching the ``stream/protocols``
-config value, assuming the needed GStreamer plugins are installed.
+This backend will handle streaming of URIs matching the
+:confval:`stream/protocols` config value, assuming the needed GStreamer plugins
+are installed.
 
 **Issues**
 
@@ -33,6 +31,16 @@ https://github.com/mopidy/mopidy/issues?labels=Stream+backend
 **Dependencies**
 
 None
+
+**Configuration**
+
+.. confval:: stream/enabled
+
+    If the stream extension should be enabled or not.
+
+.. confval:: stream/protocols
+
+    Whitelist of URI schemas to allow streaming from.
 
 **Default config**
 
