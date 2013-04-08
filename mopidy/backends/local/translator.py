@@ -10,7 +10,7 @@ from mopidy.utils.path import path_to_uri
 logger = logging.getLogger('mopidy.backends.local')
 
 
-def parse_m3u(file_path, music_folder):
+def parse_m3u(file_path, media_dir):
     r"""
     Convert M3U file list of uris
 
@@ -49,7 +49,7 @@ def parse_m3u(file_path, music_folder):
         if line.startswith('file://'):
             uris.append(line)
         else:
-            path = path_to_uri(music_folder, line)
+            path = path_to_uri(media_dir, line)
             uris.append(path)
 
     return uris

@@ -35,7 +35,7 @@ class M3UToUriTest(unittest.TestCase):
         uris = parse_m3u(path_to_data_dir('comment.m3u'), data_dir)
         self.assertEqual([song1_uri], uris)
 
-    def test_file_is_relative_to_correct_folder(self):
+    def test_file_is_relative_to_correct_dir(self):
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write('song1.mp3')
         try:

@@ -215,14 +215,14 @@ def query_from_mpd_search_format(mpd_query):
     return query
 
 
-def tracks_to_tag_cache_format(tracks, music_path):
+def tracks_to_tag_cache_format(tracks, media_dir):
     """
     Format list of tracks for output to MPD tag cache
 
     :param tracks: the tracks
     :type tracks: list of :class:`mopidy.models.Track`
-    :param music_path: the path to the music dir
-    :type music_path: string
+    :param media_dir: the path to the music dir
+    :type media_dir: string
     :rtype: list of lists of two-tuples
     """
     result = [
@@ -232,15 +232,15 @@ def tracks_to_tag_cache_format(tracks, music_path):
         ('info_end',)
     ]
     tracks.sort(key=lambda t: t.uri)
-    folders, files = tracks_to_directory_tree(tracks, music_path)
-    _add_to_tag_cache(result, folders, files, music_path)
+    dirs, files = tracks_to_directory_tree(tracks, media_dir)
+    _add_to_tag_cache(result, dirs, files, media_dir)
     return result
 
 
-def _add_to_tag_cache(result, folders, files, music_path):
-    base_path = music_path.encode('utf-8')
+def _add_to_tag_cache(result, dirs, files, media_dir):
+    base_path = media_dir.encode('utf-8')
 
-    for path, (entry_folders, entry_files) in folders.items():
+    for path, (entry_dirs, entry_files) in dirs.items():
         try:
             text_path = path.decode('utf-8')
         except UnicodeDecodeError:
@@ -249,7 +249,7 @@ def _add_to_tag_cache(result, folders, files, music_path):
         result.append(('directory', text_path))
         result.append(('mtime', get_mtime(os.path.join(base_path, path))))
         result.append(('begin', name))
-        _add_to_tag_cache(result, entry_folders, entry_files, music_path)
+        _add_to_tag_cache(result, entry_dirs, entry_files, media_dir)
         result.append(('end', name))
 
     result.append(('songList begin',))
@@ -275,7 +275,7 @@ def _add_to_tag_cache(result, folders, files, music_path):
     result.append(('songList end',))
 
 
-def tracks_to_directory_tree(tracks, music_path):
+def tracks_to_directory_tree(tracks, media_dir):
     directories = ({}, [])
 
     for track in tracks:
@@ -284,7 +284,7 @@ def tracks_to_directory_tree(tracks, music_path):
 
         absolute_track_dir_path = os.path.dirname(uri_to_path(track.uri))
         relative_track_dir_path = re.sub(
-            '^' + re.escape(music_path), b'', absolute_track_dir_path)
+            '^' + re.escape(media_dir), b'', absolute_track_dir_path)
 
         for part in split_path(relative_track_dir_path):
             path = os.path.join(path, part)

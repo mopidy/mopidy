@@ -13,7 +13,7 @@ from mopidy.utils import path
 from tests import unittest, path_to_data_dir
 
 
-class GetOrCreateFolderTest(unittest.TestCase):
+class GetOrCreateDirTest(unittest.TestCase):
     def setUp(self):
         self.parent = tempfile.mkdtemp()
 
@@ -21,40 +21,40 @@ class GetOrCreateFolderTest(unittest.TestCase):
         if os.path.isdir(self.parent):
             shutil.rmtree(self.parent)
 
-    def test_creating_folder(self):
-        folder = os.path.join(self.parent, 'test')
-        self.assert_(not os.path.exists(folder))
-        self.assert_(not os.path.isdir(folder))
-        created = path.get_or_create_folder(folder)
-        self.assert_(os.path.exists(folder))
-        self.assert_(os.path.isdir(folder))
-        self.assertEqual(created, folder)
+    def test_creating_dir(self):
+        dir_path = os.path.join(self.parent, 'test')
+        self.assert_(not os.path.exists(dir_path))
+        self.assert_(not os.path.isdir(dir_path))
+        created = path.get_or_create_dir(dir_path)
+        self.assert_(os.path.exists(dir_path))
+        self.assert_(os.path.isdir(dir_path))
+        self.assertEqual(created, dir_path)
 
-    def test_creating_nested_folders(self):
-        level2_folder = os.path.join(self.parent, 'test')
-        level3_folder = os.path.join(self.parent, 'test', 'test')
-        self.assert_(not os.path.exists(level2_folder))
-        self.assert_(not os.path.isdir(level2_folder))
-        self.assert_(not os.path.exists(level3_folder))
-        self.assert_(not os.path.isdir(level3_folder))
-        created = path.get_or_create_folder(level3_folder)
-        self.assert_(os.path.exists(level2_folder))
-        self.assert_(os.path.isdir(level2_folder))
-        self.assert_(os.path.exists(level3_folder))
-        self.assert_(os.path.isdir(level3_folder))
-        self.assertEqual(created, level3_folder)
+    def test_creating_nested_dirs(self):
+        level2_dir = os.path.join(self.parent, 'test')
+        level3_dir = os.path.join(self.parent, 'test', 'test')
+        self.assert_(not os.path.exists(level2_dir))
+        self.assert_(not os.path.isdir(level2_dir))
+        self.assert_(not os.path.exists(level3_dir))
+        self.assert_(not os.path.isdir(level3_dir))
+        created = path.get_or_create_dir(level3_dir)
+        self.assert_(os.path.exists(level2_dir))
+        self.assert_(os.path.isdir(level2_dir))
+        self.assert_(os.path.exists(level3_dir))
+        self.assert_(os.path.isdir(level3_dir))
+        self.assertEqual(created, level3_dir)
 
-    def test_creating_existing_folder(self):
-        created = path.get_or_create_folder(self.parent)
+    def test_creating_existing_dir(self):
+        created = path.get_or_create_dir(self.parent)
         self.assert_(os.path.exists(self.parent))
         self.assert_(os.path.isdir(self.parent))
         self.assertEqual(created, self.parent)
 
-    def test_create_folder_with_name_of_existing_file_throws_oserror(self):
+    def test_create_dir_with_name_of_existing_file_throws_oserror(self):
         conflicting_file = os.path.join(self.parent, 'test')
         open(conflicting_file, 'w').close()
-        folder = os.path.join(self.parent, 'test')
-        self.assertRaises(OSError, path.get_or_create_folder, folder)
+        dir_path = os.path.join(self.parent, 'test')
+        self.assertRaises(OSError, path.get_or_create_dir, dir_path)
 
 
 class PathToFileURITest(unittest.TestCase):
@@ -66,7 +66,7 @@ class PathToFileURITest(unittest.TestCase):
             result = path.path_to_uri('/etc/fstab')
             self.assertEqual(result, 'file:///etc/fstab')
 
-    def test_folder_and_path(self):
+    def test_dir_and_path(self):
         if sys.platform == 'win32':
             result = path.path_to_uri('C:/WINDOWS/', 'clock.avi')
             self.assertEqual(result, 'file:///C://WINDOWS/clock.avi')
@@ -145,10 +145,10 @@ class SplitPathTest(unittest.TestCase):
     def test_empty_path(self):
         self.assertEqual([], path.split_path(''))
 
-    def test_single_folder(self):
+    def test_single_dir(self):
         self.assertEqual(['foo'], path.split_path('foo'))
 
-    def test_folders(self):
+    def test_dirs(self):
         self.assertEqual(['foo', 'bar', 'baz'], path.split_path('foo/bar/baz'))
 
     def test_initial_slash_is_ignored(self):
@@ -190,10 +190,10 @@ class FindFilesTest(unittest.TestCase):
     def find(self, value):
         return list(path.find_files(path_to_data_dir(value)))
 
-    def test_basic_folder(self):
+    def test_basic_dir(self):
         self.assert_(self.find(''))
 
-    def test_nonexistant_folder(self):
+    def test_nonexistant_dir(self):
         self.assertEqual(self.find('does-not-exist'), [])
 
     def test_file(self):
@@ -207,7 +207,7 @@ class FindFilesTest(unittest.TestCase):
             self.assert_(
                 is_bytes(name), '%s is not bytes object' % repr(name))
 
-    def test_ignores_hidden_folders(self):
+    def test_ignores_hidden_dirs(self):
         self.assertEqual(self.find('.hidden'), [])
 
     def test_ignores_hidden_files(self):
