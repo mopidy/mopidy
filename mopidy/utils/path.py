@@ -28,7 +28,7 @@ XDG_DIRS = {
 
 
 def get_or_create_dir(dir_path):
-    dir_path = os.path.expanduser(dir_path)
+    dir_path = expand_path(dir_path)
     if os.path.isfile(dir_path):
         raise OSError(
             'A file with the same name as the desired dir, '
@@ -40,7 +40,7 @@ def get_or_create_dir(dir_path):
 
 
 def get_or_create_file(filename):
-    filename = os.path.expanduser(filename)
+    filename = expand_path(filename)
     if not os.path.isfile(filename):
         logger.info('Creating file %s', filename)
         open(filename, 'w')
