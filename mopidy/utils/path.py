@@ -25,11 +25,6 @@ XDG_DIRS = {
     'XDG_DATA_DIR': XDG_DATA_DIR,
     'XDG_MUSIC_DIR': XDG_MUSIC_DIR,
 }
-DATA_PATH = os.path.join(unicode(XDG_DATA_DIR), 'mopidy')
-CONFIG_PATH = os.path.join(unicode(XDG_CONFIG_DIR), 'mopidy')
-CONFIG_FILE = os.path.join(unicode(CONFIG_PATH), 'mopidy.conf')
-SETTINGS_PATH = os.path.join(unicode(XDG_CONFIG_DIR), 'mopidy')
-SETTINGS_FILE = os.path.join(unicode(SETTINGS_PATH), 'settings.py')
 
 
 def get_or_create_folder(folder):
