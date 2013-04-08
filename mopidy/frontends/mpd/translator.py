@@ -232,15 +232,15 @@ def tracks_to_tag_cache_format(tracks, media_dir):
         ('info_end',)
     ]
     tracks.sort(key=lambda t: t.uri)
-    folders, files = tracks_to_directory_tree(tracks, media_dir)
-    _add_to_tag_cache(result, folders, files, media_dir)
+    dirs, files = tracks_to_directory_tree(tracks, media_dir)
+    _add_to_tag_cache(result, dirs, files, media_dir)
     return result
 
 
-def _add_to_tag_cache(result, folders, files, media_dir):
+def _add_to_tag_cache(result, dirs, files, media_dir):
     base_path = media_dir.encode('utf-8')
 
-    for path, (entry_folders, entry_files) in folders.items():
+    for path, (entry_dirs, entry_files) in dirs.items():
         try:
             text_path = path.decode('utf-8')
         except UnicodeDecodeError:
@@ -249,7 +249,7 @@ def _add_to_tag_cache(result, folders, files, media_dir):
         result.append(('directory', text_path))
         result.append(('mtime', get_mtime(os.path.join(base_path, path))))
         result.append(('begin', name))
-        _add_to_tag_cache(result, entry_folders, entry_files, media_dir)
+        _add_to_tag_cache(result, entry_dirs, entry_files, media_dir)
         result.append(('end', name))
 
     result.append(('songList begin',))

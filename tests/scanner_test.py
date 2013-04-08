@@ -196,7 +196,7 @@ class ScannerTest(unittest.TestCase):
         self.check('scanner/simple/song1.mp3', 'title', 'trackname')
         self.check('scanner/simple/song1.ogg', 'title', 'trackname')
 
-    def test_nonexistant_folder_does_not_fail(self):
+    def test_nonexistant_dir_does_not_fail(self):
         self.scan('scanner/does-not-exist')
         self.assert_(not self.errors)
 

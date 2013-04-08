@@ -123,5 +123,5 @@ class LocalPlaylistsControllerTest(
         pass
 
     @unittest.SkipTest
-    def test_playlist_folder_is_createad(self):
+    def test_playlist_dir_is_created(self):
         pass

@@ -27,16 +27,16 @@ XDG_DIRS = {
 }
 
 
-def get_or_create_folder(folder):
-    folder = os.path.expanduser(folder)
-    if os.path.isfile(folder):
+def get_or_create_dir(dir_path):
+    dir_path = os.path.expanduser(dir_path)
+    if os.path.isfile(dir_path):
         raise OSError(
             'A file with the same name as the desired dir, '
-            '"%s", already exists.' % folder)
-    elif not os.path.isdir(folder):
-        logger.info('Creating dir %s', folder)
-        os.makedirs(folder, 0755)
-    return folder
+            '"%s", already exists.' % dir_path)
+    elif not os.path.isdir(dir_path):
+        logger.info('Creating dir %s', dir_path)
+        os.makedirs(dir_path, 0755)
+    return dir_path
 
 
 def get_or_create_file(filename):
@@ -121,7 +121,7 @@ def find_files(path):
         for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
             for dirname in dirnames:
                 if dirname.startswith(b'.'):
-                    # Skip hidden folders by modifying dirnames inplace
+                    # Skip hidden dirs by modifying dirnames inplace
                     dirnames.remove(dirname)
 
             for filename in filenames:
