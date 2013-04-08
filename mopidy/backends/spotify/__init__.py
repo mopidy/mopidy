@@ -25,7 +25,7 @@ bitrate = 160
 timeout = 10
 
 # Path to the Spotify data cache. Cannot be shared with other Spotify apps
-cache_path = $XDG_CACHE_DIR/mopidy/spotify
+cache_dir = $XDG_CACHE_DIR/mopidy/spotify
 """
 
 __doc__ = """A backend for playing music from Spotify
@@ -75,7 +75,7 @@ class Extension(ext.Extension):
         schema['password'] = config.String(secret=True)
         schema['bitrate'] = config.Integer(choices=(96, 160, 320))
         schema['timeout'] = config.Integer(minimum=0)
-        schema['cache_path'] = config.Path()
+        schema['cache_dir'] = config.Path()
         return schema
 
     def validate_environment(self):
