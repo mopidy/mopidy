@@ -11,13 +11,13 @@ default_config = """
 # If the local extension should be enabled or not
 enabled = true
 
-# Path to folder with local music
-music_path = $XDG_MUSIC_DIR
+# Path to directory with local media files
+media_dir = $XDG_MUSIC_DIR
 
-# Path to playlist folder with m3u files for local music
-playlist_path = $XDG_DATA_DIR/mopidy/playlists
+# Path to playlists directory with m3u files for local media
+playlists_dir = $XDG_DATA_DIR/mopidy/playlists
 
-# Path to tag cache for local music
+# Path to tag cache for local media
 tag_cache_file = $XDG_DATA_DIR/mopidy/tag_cache
 """
 
@@ -55,8 +55,8 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = config.ExtensionConfigSchema()
-        schema['music_path'] = config.Path()
-        schema['playlist_path'] = config.Path()
+        schema['media_dir'] = config.Path()
+        schema['playlists_dir'] = config.Path()
         schema['tag_cache_file'] = config.Path()
         return schema
 

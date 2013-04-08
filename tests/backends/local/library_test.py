@@ -10,8 +10,8 @@ class LocalLibraryControllerTest(LibraryControllerTest, unittest.TestCase):
     backend_class = actor.LocalBackend
     config = {
         'local': {
-            'music_path': path_to_data_dir(''),
-            'playlist_path': '',
+            'media_dir': path_to_data_dir(''),
+            'playlists_dir': '',
             'tag_cache_file': path_to_data_dir('library_tag_cache'),
         }
     }

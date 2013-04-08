@@ -14,17 +14,16 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(LocalLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
-        self._music_path = self.backend.config['local']['music_path']
-        self._playlist_path = self.backend.config['local']['playlist_path']
+        self._media_dir = self.backend.config['local']['media_dir']
         self._tag_cache_file = self.backend.config['local']['tag_cache_file']
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(self._tag_cache_file, self._music_path)
+        tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
 
         logger.info(
             'Loading tracks from %s using %s',
-            self._music_path, self._tag_cache_file)
+            self._media_dir, self._tag_cache_file)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track

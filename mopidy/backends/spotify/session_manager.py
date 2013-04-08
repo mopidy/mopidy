@@ -30,8 +30,8 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
 
     def __init__(self, config, audio, backend_ref):
 
-        self.cache_location = config['spotify']['cache_path']
-        self.settings_location = config['spotify']['cache_path']
+        self.cache_location = config['spotify']['cache_dir']
+        self.settings_location = config['spotify']['cache_dir']
 
         PyspotifySessionManager.__init__(
             self, config['spotify']['username'], config['spotify']['password'],
