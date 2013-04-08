@@ -6,7 +6,7 @@ import gst
 
 import pykka
 
-from mopidy import audio, settings
+from mopidy import audio
 from mopidy.utils.path import path_to_uri
 
 from tests import unittest, path_to_data_dir
@@ -14,14 +14,18 @@ from tests import unittest, path_to_data_dir
 
 class AudioTest(unittest.TestCase):
     def setUp(self):
-        settings.MIXER = 'fakemixer track_max_volume=65536'
-        settings.OUTPUT = 'fakesink'
+        config = {
+            'audio': {
+                'mixer': 'fakemixer track_max_volume=65536',
+                'mixer_track': None,
+                'output': 'fakesink',
+            }
+        }
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.audio = audio.Audio.start(config=None).proxy()
+        self.audio = audio.Audio.start(config=config).proxy()
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
-        settings.runtime.clear()
 
     def prepare_uri(self, uri):
         self.audio.prepare_change()
@@ -59,8 +63,14 @@ class AudioTest(unittest.TestCase):
             self.assertEqual(value, self.audio.get_volume().get())
 
     def test_set_volume_with_mixer_max_below_100(self):
-        settings.MIXER = 'fakemixer track_max_volume=40'
-        self.audio = audio.Audio.start(config=None).proxy()
+        config = {
+            'audio': {
+                'mixer': 'fakemixer track_max_volume=40',
+                'mixer_track': None,
+                'output': 'fakesink',
+            }
+        }
+        self.audio = audio.Audio.start(config=config).proxy()
 
         for value in range(0, 101):
             self.assertTrue(self.audio.set_volume(value).get())

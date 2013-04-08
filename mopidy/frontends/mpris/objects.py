@@ -13,7 +13,6 @@ except ImportError as import_error:
     from mopidy.exceptions import OptionalDependencyError
     raise OptionalDependencyError(import_error)
 
-from mopidy import settings
 from mopidy.core import PlaybackState
 from mopidy.utils.process import exit_process
 
@@ -36,7 +35,8 @@ class MprisObject(dbus.service.Object):
 
     properties = None
 
-    def __init__(self, core):
+    def __init__(self, config, core):
+        self.config = config
         self.core = core
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
@@ -175,7 +175,8 @@ class MprisObject(dbus.service.Object):
     ### Root interface properties
 
     def get_DesktopEntry(self):
-        return os.path.splitext(os.path.basename(settings.DESKTOP_FILE))[0]
+        return os.path.splitext(os.path.basename(
+            self.config['mpris']['desktop_file']))[0]
 
     def get_SupportedUriSchemes(self):
         return dbus.Array(self.core.uri_schemes.get(), signature='s')

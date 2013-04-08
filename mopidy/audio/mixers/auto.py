@@ -6,9 +6,9 @@ This is Mopidy's default mixer.
 
 None
 
-**Settings**
+**Configuration**
 
-If this wasn't the default, you would set :attr:`mopidy.settings.MIXER` to
+If this wasn't the default, you would set the ``audio/mixer`` config value to
 ``autoaudiomixer`` to use this mixer.
 """
 

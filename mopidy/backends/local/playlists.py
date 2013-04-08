@@ -5,7 +5,6 @@ import logging
 import os
 import shutil
 
-from mopidy import settings
 from mopidy.backends import base, listener
 from mopidy.models import Playlist
 from mopidy.utils import formatting, path
@@ -19,7 +18,8 @@ logger = logging.getLogger('mopidy.backends.local')
 class LocalPlaylistsProvider(base.BasePlaylistsProvider):
     def __init__(self, *args, **kwargs):
         super(LocalPlaylistsProvider, self).__init__(*args, **kwargs)
-        self._path = settings.LOCAL_PLAYLIST_PATH
+        self._music_path = self.backend.config['local']['music_path']
+        self._playlist_path = self.backend.config['local']['playlist_path']
         self.refresh()
 
     def create(self, name):
@@ -42,16 +42,16 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
                 return playlist
 
     def refresh(self):
-        logger.info('Loading playlists from %s', self._path)
+        logger.info('Loading playlists from %s', self._playlist_path)
 
         playlists = []
 
-        for m3u in glob.glob(os.path.join(self._path, '*.m3u')):
+        for m3u in glob.glob(os.path.join(self._playlist_path, '*.m3u')):
             uri = path.path_to_uri(m3u)
             name = os.path.splitext(os.path.basename(m3u))[0]
 
             tracks = []
-            for track_uri in parse_m3u(m3u, settings.LOCAL_MUSIC_PATH):
+            for track_uri in parse_m3u(m3u, self._music_path):
                 try:
                     # TODO We must use core.library.lookup() to support tracks
                     # from other backends
@@ -86,13 +86,13 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
 
     def _get_m3u_path(self, name):
         name = formatting.slugify(name)
-        file_path = os.path.join(self._path, name + '.m3u')
-        path.check_file_path_is_inside_base_dir(file_path, self._path)
+        file_path = os.path.join(self._playlist_path, name + '.m3u')
+        path.check_file_path_is_inside_base_dir(file_path, self._playlist_path)
         return file_path
 
     def _save_m3u(self, playlist):
         file_path = path.uri_to_path(playlist.uri)
-        path.check_file_path_is_inside_base_dir(file_path, self._path)
+        path.check_file_path_is_inside_base_dir(file_path, self._playlist_path)
         with open(file_path, 'w') as file_handle:
             for track in playlist.tracks:
                 if track.uri.startswith('file://'):
@@ -103,16 +103,18 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
 
     def _delete_m3u(self, uri):
         file_path = path.uri_to_path(uri)
-        path.check_file_path_is_inside_base_dir(file_path, self._path)
+        path.check_file_path_is_inside_base_dir(file_path, self._playlist_path)
         if os.path.exists(file_path):
             os.remove(file_path)
 
     def _rename_m3u(self, playlist):
         src_file_path = path.uri_to_path(playlist.uri)
-        path.check_file_path_is_inside_base_dir(src_file_path, self._path)
+        path.check_file_path_is_inside_base_dir(
+            src_file_path, self._playlist_path)
 
         dst_file_path = self._get_m3u_path(playlist.name)
-        path.check_file_path_is_inside_base_dir(dst_file_path, self._path)
+        path.check_file_path_is_inside_base_dir(
+            dst_file_path, self._playlist_path)
 
         shutil.move(src_file_path, dst_file_path)
 

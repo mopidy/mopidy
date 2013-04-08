@@ -8,11 +8,6 @@ if sys.version_info < (2, 7):
 else:
     import unittest  # noqa
 
-from mopidy import settings
-
-# Nuke any local settings to ensure same test env all over
-settings.local.clear()
-
 
 def path_to_data_dir(name):
     path = os.path.dirname(__file__)
