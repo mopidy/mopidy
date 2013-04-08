@@ -30,8 +30,7 @@ port = 6680
 #
 # Change this to have Mopidy serve e.g. files for your JavaScript client.
 # "/mopidy" will continue to work as usual even if you change this setting.
-#
-static_path =
+static_dir =
 
 [logging.levels]
 cherrypy = warning
@@ -533,7 +532,7 @@ class Extension(ext.Extension):
         schema = config.ExtensionConfigSchema()
         schema['hostname'] = config.Hostname()
         schema['port'] = config.Port()
-        schema['static_path'] = config.Path(optional=True)
+        schema['static_dir'] = config.Path(optional=True)
         return schema
 
     def validate_environment(self):
