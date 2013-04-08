@@ -42,7 +42,7 @@ in the same way as you get updates to the rest of your distribution.
        sudo apt-get update
        sudo apt-get install mopidy
 
-#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
+#. Finally, you need to set a couple of :doc:`config values </config>`, and then
    you're ready to :doc:`run Mopidy </running>`.
 
 When a new release of Mopidy is out, and you can't wait for you system to
@@ -89,8 +89,8 @@ package found in AUR.
    install `python2-pylast
    <https://aur.archlinux.org/packages/python2-pylast/>`_ from AUR.
 
-#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
-   you're ready to :doc:`run Mopidy </running>`.
+#. Finally, you need to set a couple of :doc:`config values </config>`, and
+   then you're ready to :doc:`run Mopidy </running>`.
 
 
 OS X: Install from Homebrew and Pip
@@ -140,8 +140,8 @@ Pip.
 
        sudo pip install -U pyspotify pylast mopidy
 
-#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
-   you're ready to :doc:`run Mopidy </running>`.
+#. Finally, you need to set a couple of :doc:`config values </config>`, and
+   then you're ready to :doc:`run Mopidy </running>`.
 
 
 Otherwise: Install from source using Pip
@@ -264,5 +264,5 @@ can install Mopidy from PyPI using Pip.
 
         sudo pip install mopidy==dev
 
-#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
-   you're ready to :doc:`run Mopidy </running>`.
+#. Finally, you need to set a couple of :doc:`config values </config>`, and
+   then you're ready to :doc:`run Mopidy </running>`.
