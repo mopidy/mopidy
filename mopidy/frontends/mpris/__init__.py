@@ -79,7 +79,7 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = config.ExtensionConfigSchema()
-        schema['desktop_file'] = config.String()
+        schema['desktop_file'] = config.Path()
         return schema
 
     def validate_environment(self):
