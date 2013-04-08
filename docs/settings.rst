@@ -218,6 +218,4 @@ used at the same time without any danger of naming collisions.
 Available settings
 ==================
 
-.. automodule:: mopidy.settings
-    :synopsis: Available settings and their default values
-    :members:
+.. note:: TODO: Document config values of the new config system

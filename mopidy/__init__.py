@@ -24,8 +24,3 @@ warnings.filterwarnings('ignore', 'could not open display')
 
 
 __version__ = '0.13.0'
-
-
-from mopidy import settings as default_settings_module
-from mopidy.utils.settings import SettingsProxy
-settings = SettingsProxy(default_settings_module)

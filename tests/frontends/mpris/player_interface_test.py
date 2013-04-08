@@ -28,7 +28,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         objects.MprisObject._connect_to_dbus = mock.Mock()
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
-        self.mpris = objects.MprisObject(core=self.core)
+        self.mpris = objects.MprisObject(config={}, core=self.core)
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()

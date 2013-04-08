@@ -5,7 +5,6 @@ import re
 import shlex
 import urllib
 
-from mopidy import settings
 from mopidy.frontends.mpd import protocol
 from mopidy.frontends.mpd.exceptions import MpdArgError
 from mopidy.models import TlTrack
@@ -216,12 +215,14 @@ def query_from_mpd_search_format(mpd_query):
     return query
 
 
-def tracks_to_tag_cache_format(tracks):
+def tracks_to_tag_cache_format(tracks, music_path):
     """
     Format list of tracks for output to MPD tag cache
 
     :param tracks: the tracks
     :type tracks: list of :class:`mopidy.models.Track`
+    :param music_path: the path to the music dir
+    :type music_path: string
     :rtype: list of lists of two-tuples
     """
     result = [
@@ -231,14 +232,15 @@ def tracks_to_tag_cache_format(tracks):
         ('info_end',)
     ]
     tracks.sort(key=lambda t: t.uri)
-    _add_to_tag_cache(result, *tracks_to_directory_tree(tracks))
+    folders, files = tracks_to_directory_tree(tracks, music_path)
+    _add_to_tag_cache(result, folders, files, music_path)
     return result
 
 
-def _add_to_tag_cache(result, folders, files):
-    base_path = settings.LOCAL_MUSIC_PATH.encode('utf-8')
+def _add_to_tag_cache(result, folders, files, music_path):
+    base_path = music_path.encode('utf-8')
 
-    for path, entry in folders.items():
+    for path, (entry_folders, entry_files) in folders.items():
         try:
             text_path = path.decode('utf-8')
         except UnicodeDecodeError:
@@ -247,7 +249,7 @@ def _add_to_tag_cache(result, folders, files):
         result.append(('directory', text_path))
         result.append(('mtime', get_mtime(os.path.join(base_path, path))))
         result.append(('begin', name))
-        _add_to_tag_cache(result, *entry)
+        _add_to_tag_cache(result, entry_folders, entry_files, music_path)
         result.append(('end', name))
 
     result.append(('songList begin',))
@@ -273,7 +275,7 @@ def _add_to_tag_cache(result, folders, files):
     result.append(('songList end',))
 
 
-def tracks_to_directory_tree(tracks):
+def tracks_to_directory_tree(tracks, music_path):
     directories = ({}, [])
 
     for track in tracks:
@@ -282,8 +284,7 @@ def tracks_to_directory_tree(tracks):
 
         absolute_track_dir_path = os.path.dirname(uri_to_path(track.uri))
         relative_track_dir_path = re.sub(
-            '^' + re.escape(settings.LOCAL_MUSIC_PATH), b'',
-            absolute_track_dir_path)
+            '^' + re.escape(music_path), b'', absolute_track_dir_path)
 
         for part in split_path(relative_track_dir_path):
             path = os.path.join(path, part)

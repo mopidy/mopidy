@@ -32,8 +32,8 @@ An example of an MPRIS client is the `Ubuntu Sound Menu
   Ubuntu Sound Menu. The package is named ``python-indicate`` in
   Ubuntu/Debian.
 
-- An ``.desktop`` file for Mopidy installed at the path set in
-  :attr:`mopidy.settings.DESKTOP_FILE`. See :ref:`install-desktop-file` for
+- An ``.desktop`` file for Mopidy installed at the path set in the
+  ``mpris/desktop_file`` config value. See :ref:`install-desktop-file` for
   details.
 
 **Default config**

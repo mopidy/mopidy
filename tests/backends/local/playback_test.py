@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from mopidy import settings
 from mopidy.backends.local import actor
 from mopidy.core import PlaybackState
 from mopidy.models import Track
@@ -13,17 +12,15 @@ from tests.backends.local import generate_song
 
 class LocalPlaybackControllerTest(PlaybackControllerTest, unittest.TestCase):
     backend_class = actor.LocalBackend
+    config = {
+        'local': {
+            'music_path': path_to_data_dir(''),
+            'playlist_path': '',
+            'tag_cache_file': path_to_data_dir('empty_tag_cache'),
+        }
+    }
     tracks = [
         Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
-    # TODO: setup config
-
-    def setUp(self):
-        settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('empty_tag_cache')
-        super(LocalPlaybackControllerTest, self).setUp()
-
-    def tearDown(self):
-        super(LocalPlaybackControllerTest, self).tearDown()
-        settings.runtime.clear()
 
     def add_track(self, path):
         uri = path_to_uri(path_to_data_dir(path))

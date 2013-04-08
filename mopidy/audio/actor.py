@@ -9,7 +9,6 @@ import logging
 
 import pykka
 
-from mopidy import settings
 from mopidy.utils import process
 
 from . import mixers, utils
@@ -28,11 +27,14 @@ class Audio(pykka.ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
 
-    **Settings:**
+    **Default config:**
 
-    - :attr:`mopidy.settings.OUTPUT`
-    - :attr:`mopidy.settings.MIXER`
-    - :attr:`mopidy.settings.MIXER_TRACK`
+    .. code-block:: ini
+
+        [audio]
+        mixer = autoaudiomixer
+        mixer_track =
+        output = autoaudiosink
     """
 
     #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
@@ -40,6 +42,8 @@ class Audio(pykka.ThreadingActor):
 
     def __init__(self, config):
         super(Audio, self).__init__()
+
+        self._config = config
 
         self._playbin = None
         self._signal_ids = {}  # {(element, event): signal_id}
@@ -143,47 +147,51 @@ class Audio(pykka.ThreadingActor):
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
+        output_desc = self._config['audio']['output']
         try:
             output = gst.parse_bin_from_description(
-                settings.OUTPUT, ghost_unconnected_pads=True)
+                output_desc, ghost_unconnected_pads=True)
             self._playbin.set_property('audio-sink', output)
-            logger.info('Audio output set to "%s"', settings.OUTPUT)
+            logger.info('Audio output set to "%s"', output_desc)
         except gobject.GError as ex:
             logger.error(
-                'Failed to create audio output "%s": %s', settings.OUTPUT, ex)
+                'Failed to create audio output "%s": %s', output_desc, ex)
             process.exit_process()
 
     def _setup_mixer(self):
-        if not settings.MIXER:
+        mixer_desc = self._config['audio']['mixer']
+        track_desc = self._config['audio']['mixer_track']
+
+        if mixer_desc is None:
             logger.info('Not setting up audio mixer')
             return
 
-        if settings.MIXER == 'software':
+        if mixer_desc == 'software':
             self._software_mixing = True
             logger.info('Audio mixer is using software mixing')
             return
 
         try:
             mixerbin = gst.parse_bin_from_description(
-                settings.MIXER, ghost_unconnected_pads=False)
+                mixer_desc, ghost_unconnected_pads=False)
         except gobject.GError as ex:
             logger.warning(
-                'Failed to create audio mixer "%s": %s', settings.MIXER, ex)
+                'Failed to create audio mixer "%s": %s', mixer_desc, ex)
             return
 
         # We assume that the bin will contain a single mixer.
         mixer = mixerbin.get_by_interface(b'GstMixer')
         if not mixer:
             logger.warning(
-                'Did not find any audio mixers in "%s"', settings.MIXER)
+                'Did not find any audio mixers in "%s"', mixer_desc)
             return
 
         if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
             logger.warning(
-                'Setting audio mixer "%s" to READY failed', settings.MIXER)
+                'Setting audio mixer "%s" to READY failed', mixer_desc)
             return
 
-        track = self._select_mixer_track(mixer, settings.MIXER_TRACK)
+        track = self._select_mixer_track(mixer, track_desc)
         if not track:
             logger.warning('Could not find usable audio mixer track')
             return
@@ -198,8 +206,9 @@ class Audio(pykka.ThreadingActor):
 
     def _select_mixer_track(self, mixer, track_label):
         # Ignore tracks without volumes, then look for track with
-        # label == settings.MIXER_TRACK, otherwise fallback to first usable
-        # track hoping the mixer gave them to us in a sensible order.
+        # label equal to the audio/mixer_track config value, otherwise fallback
+        # to first usable track hoping the mixer gave them to us in a sensible
+        # order.
 
         usable_tracks = []
         for track in mixer.list_tracks():

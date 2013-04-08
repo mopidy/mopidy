@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from mopidy import settings
 from mopidy.backends import base
 from mopidy.models import Album, SearchResult
 
@@ -15,15 +14,17 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(LocalLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
+        self._music_path = self.backend.config['local']['music_path']
+        self._playlist_path = self.backend.config['local']['playlist_path']
+        self._tag_cache_file = self.backend.config['local']['tag_cache_file']
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(
-            settings.LOCAL_TAG_CACHE_FILE, settings.LOCAL_MUSIC_PATH)
+        tracks = parse_mpd_tag_cache(self._tag_cache_file, self._music_path)
 
         logger.info(
             'Loading tracks from %s using %s',
-            settings.LOCAL_MUSIC_PATH, settings.LOCAL_TAG_CACHE_FILE)
+            self._music_path, self._tag_cache_file)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track

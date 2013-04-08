@@ -34,7 +34,6 @@ import pygst
 pygst.require('0.10')
 import gst
 
-from mopidy import settings
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
@@ -42,6 +41,7 @@ from mopidy.utils import log, path, versioning
 
 def main():
     options = parse_options()
+    config = {}  # TODO Read config from new config system
 
     log.setup_root_logger()
     log.setup_console_logging(options.verbosity_level)
@@ -57,9 +57,9 @@ def main():
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-    logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+    logging.info('Scanning %s', config['local']['music_path'])
 
-    scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
+    scanner = Scanner(config['local']['music_path'], store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
@@ -67,7 +67,8 @@ def main():
 
     logging.info('Done scanning; writing tag cache...')
 
-    for row in mpd_translator.tracks_to_tag_cache_format(tracks):
+    for row in mpd_translator.tracks_to_tag_cache_format(
+            tracks, config['mpd']['music_path']):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
