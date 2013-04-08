@@ -57,9 +57,9 @@ def main():
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-    logging.info('Scanning %s', config['local']['music_path'])
+    logging.info('Scanning %s', config['local']['media_dir'])
 
-    scanner = Scanner(config['local']['music_path'], store, debug)
+    scanner = Scanner(config['local']['media_dir'], store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
@@ -68,7 +68,7 @@ def main():
     logging.info('Done scanning; writing tag cache...')
 
     for row in mpd_translator.tracks_to_tag_cache_format(
-            tracks, config['mpd']['music_path']):
+            tracks, config['mpd']['media_dir']):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
