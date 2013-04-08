@@ -6,7 +6,8 @@ None
 
 **Configuration**
 
-Set the :confval:`audio/mixe:` config value to ``fakemixer`` to use this mixer.
+Set the :confval:`audio/mixer:` config value to ``fakemixer`` to use this
+mixer.
 """
 
 from __future__ import unicode_literals
