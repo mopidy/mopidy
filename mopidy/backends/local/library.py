@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 
 from mopidy.backends import base
 from mopidy.models import Album, SearchResult
+from mopidy.utils.encoding import locale_decode
 
 from .translator import parse_mpd_tag_cache
 
@@ -19,11 +21,22 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
+        try:
+            if not os.path.exists(self._tag_cache_file):
+                basedir = os.path.dirname(self._tag_cache_file)
+                if not os.path.exists(basedir):
+                    os.makedirs(basedir)
+                open(self._tag_cache_file, 'a').close()
+        except IOError as error:
+            logger.warning(
+                'Could not create empty tag cache: %s', locale_decode(error))
+            return
 
         logger.info(
             'Loading tracks from %s using %s',
             self._media_dir, self._tag_cache_file)
+
+        tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
