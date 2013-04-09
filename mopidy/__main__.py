@@ -327,12 +327,19 @@ def stop_audio():
 
 
 def setup_backends(config, extensions, audio):
-    logger.info('Starting Mopidy backends')
-    backends = []
+    backend_classes = []
     for extension in extensions:
-        for backend_class in extension.get_backend_classes():
-            backend = backend_class.start(config=config, audio=audio).proxy()
-            backends.append(backend)
+        backend_classes.extend(extension.get_backend_classes())
+
+    logger.info(
+        'Starting Mopidy backends: %s',
+        ', '.join(b.__name__ for b in backend_classes))
+
+    backends = []
+    for backend_class in backend_classes:
+        backend = backend_class.start(config=config, audio=audio).proxy()
+        backends.append(backend)
+
     return backends
 
 
@@ -354,10 +361,16 @@ def stop_core():
 
 
 def setup_frontends(config, extensions, core):
-    logger.info('Starting Mopidy frontends')
+    frontend_classes = []
     for extension in extensions:
-        for frontend_class in extension.get_frontend_classes():
-            frontend_class.start(config=config, core=core)
+        frontend_classes.extend(extension.get_frontend_classes())
+
+    logger.info(
+        'Starting Mopidy frontends: %s',
+        ', '.join(f.__name__ for f in frontend_classes))
+
+    for frontend_class in frontend_classes:
+        frontend_class.start(config=config, core=core)
 
 
 def stop_frontends(extensions):
