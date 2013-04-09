@@ -71,7 +71,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.sendRequest('listplaylists')
         self.assertInResponse('playlist: a')
-        self.assertInResponse('playlist: a [1]')
+        self.assertInResponse('playlist: a [2]')
         self.assertInResponse('OK')
 
     def test_listplaylists_ignores_playlists_without_name(self):

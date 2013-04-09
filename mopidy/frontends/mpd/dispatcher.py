@@ -248,7 +248,7 @@ class MpdContext(object):
 
     def create_unique_name(self, playlist_name):
         name = playlist_name
-        i = 1
+        i = 2
         while name in self.playlist_uri_from_name:
             name = '%s [%d]' % (playlist_name, i)
             i += 1
