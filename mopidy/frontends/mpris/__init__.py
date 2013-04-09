@@ -7,11 +7,7 @@ from mopidy.utils import formatting, config
 
 default_config = """
 [mpris]
-
-# If the MPRIS extension should be enabled or not
 enabled = true
-
-# Location of the Mopidy .desktop file
 desktop_file = /usr/share/applications/mopidy.desktop
 """
 
@@ -32,9 +28,19 @@ An example of an MPRIS client is the `Ubuntu Sound Menu
   Ubuntu Sound Menu. The package is named ``python-indicate`` in
   Ubuntu/Debian.
 
-- An ``.desktop`` file for Mopidy installed at the path set in
-  :attr:`mopidy.settings.DESKTOP_FILE`. See :ref:`install-desktop-file` for
-  details.
+- An ``.desktop`` file for Mopidy installed at the path set in the
+  :confval:`mpris/desktop_file` config value. See :ref:`install-desktop-file`
+  for details.
+
+**Configuration**
+
+.. confval:: mpris/enabled
+
+    If the MPRIS extension should be enabled or not.
+
+.. confval:: mpris/desktop_file
+
+    Location of the Mopidy ``.desktop`` file.
 
 **Default config**
 
@@ -79,7 +85,7 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = config.ExtensionConfigSchema()
-        schema['desktop_file'] = config.String()
+        schema['desktop_file'] = config.Path()
         return schema
 
     def validate_environment(self):

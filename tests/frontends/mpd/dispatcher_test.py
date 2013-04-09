@@ -13,9 +13,14 @@ from tests import unittest
 
 class MpdDispatcherTest(unittest.TestCase):
     def setUp(self):
+        config = {
+            'mpd': {
+                'password': None,
+            }
+        }
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
-        self.dispatcher = MpdDispatcher()
+        self.dispatcher = MpdDispatcher(config=config)
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()

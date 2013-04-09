@@ -7,10 +7,11 @@ serial cable.
 
 .. literalinclude:: ../../../../requirements/external_mixers.txt
 
-**Settings**
+**Configuration**
 
-Set :attr:`mopidy.settings.MIXER` to ``nadmixer`` to use it. You probably also
-needs to add some properties to the ``MIXER`` setting.
+Set the :confval:`audio/mixer` config value to ``nadmixer`` to use it. You
+probably also needs to add some properties to the :confval:`audio/mixer` config
+value.
 
 Supported properties includes:
 
@@ -34,15 +35,13 @@ Supported properties includes:
 Configuration examples::
 
     # Minimum configuration, if the amplifier is available at /dev/ttyUSB0
-    MIXER = u'nadmixer'
+    mixer = nadmixer
 
     # Minimum configuration, if the amplifier is available elsewhere
-    MIXER = u'nadmixer port=/dev/ttyUSB3'
+    mixer = nadmixer port=/dev/ttyUSB3
 
     # Full configuration
-    MIXER = (
-        u'nadmixer port=/dev/ttyUSB0 '
-        u'source=aux speakers-a=on speakers-b=off')
+    mixer = nadmixer port=/dev/ttyUSB0 source=aux speakers-a=on speakers-b=off
 """
 
 from __future__ import unicode_literals
@@ -132,7 +131,7 @@ class NadTalker(pykka.ThreadingActor):
     calibrating the NAD amplifier's volume.
     """
 
-    # Serial link settings
+    # Serial link config
     BAUDRATE = 115200
     BYTESIZE = 8
     PARITY = 'N'

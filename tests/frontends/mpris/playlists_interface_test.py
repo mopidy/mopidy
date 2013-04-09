@@ -25,7 +25,7 @@ class PlayerInterfaceTest(unittest.TestCase):
         objects.MprisObject._connect_to_dbus = mock.Mock()
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
-        self.mpris = objects.MprisObject(core=self.core)
+        self.mpris = objects.MprisObject(config={}, core=self.core)
 
         foo = self.core.playlists.create('foo').get()
         foo = foo.copy(last_modified=datetime.datetime(2012, 3, 1, 6, 0, 0))

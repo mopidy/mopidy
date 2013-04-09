@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import json
 
 try:
@@ -24,7 +26,14 @@ from tests import unittest
 @mock.patch('cherrypy.engine.publish')
 class HttpEventsTest(unittest.TestCase):
     def setUp(self):
-        self.http = actor.HttpFrontend(config=None, core=mock.Mock())
+        config = {
+            'http': {
+                'hostname': '127.0.0.1',
+                'port': 6680,
+                'static_dir': None,
+            }
+        }
+        self.http = actor.HttpFrontend(config=config, core=mock.Mock())
 
     def test_track_playback_paused_is_broadcasted(self, publish):
         publish.reset_mock()

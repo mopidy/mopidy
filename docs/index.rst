@@ -42,7 +42,7 @@ User documentation
 
     installation/index
     installation/raspberrypi
-    settings
+    config
     running
     clients/index
     authors

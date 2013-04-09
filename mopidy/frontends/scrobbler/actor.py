@@ -5,7 +5,7 @@ import time
 
 import pykka
 
-from mopidy import exceptions, settings
+from mopidy import exceptions
 from mopidy.core import CoreListener
 
 try:
@@ -22,21 +22,17 @@ API_SECRET = '94d9a09c0cd5be955c4afaeaffcaefcd'
 class ScrobblerFrontend(pykka.ThreadingActor, CoreListener):
     def __init__(self, config, core):
         super(ScrobblerFrontend, self).__init__()
+        self.config = config
         self.lastfm = None
         self.last_start_time = None
 
     def on_start(self):
         try:
-            username = settings.LASTFM_USERNAME
-            password_hash = pylast.md5(settings.LASTFM_PASSWORD)
             self.lastfm = pylast.LastFMNetwork(
                 api_key=API_KEY, api_secret=API_SECRET,
-                username=username, password_hash=password_hash)
-            logger.info('Connected to Last.fm')
-        except exceptions.SettingsError as e:
-            logger.info('Last.fm scrobbler not started')
-            logger.debug('Last.fm settings error: %s', e)
-            self.stop()
+                username=self.config['scrobbler']['username'],
+                password_hash=pylast.md5(self.config['scrobbler']['password']))
+            logger.info('Scrobbler connected to Last.fm')
         except (pylast.NetworkError, pylast.MalformedResponseError,
                 pylast.WSError) as e:
             logger.error('Error during Last.fm setup: %s', e)

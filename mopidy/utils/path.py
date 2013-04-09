@@ -25,29 +25,27 @@ XDG_DIRS = {
     'XDG_DATA_DIR': XDG_DATA_DIR,
     'XDG_MUSIC_DIR': XDG_MUSIC_DIR,
 }
-DATA_PATH = os.path.join(unicode(XDG_DATA_DIR), 'mopidy')
-SETTINGS_PATH = os.path.join(unicode(XDG_CONFIG_DIR), 'mopidy')
-SETTINGS_FILE = os.path.join(unicode(SETTINGS_PATH), 'settings.py')
 
 
-def get_or_create_folder(folder):
-    folder = os.path.expanduser(folder)
-    if os.path.isfile(folder):
+def get_or_create_dir(dir_path):
+    dir_path = expand_path(dir_path)
+    if os.path.isfile(dir_path):
         raise OSError(
             'A file with the same name as the desired dir, '
-            '"%s", already exists.' % folder)
-    elif not os.path.isdir(folder):
-        logger.info('Creating dir %s', folder)
-        os.makedirs(folder, 0755)
-    return folder
+            '"%s", already exists.' % dir_path)
+    elif not os.path.isdir(dir_path):
+        logger.info('Creating dir %s', dir_path)
+        os.makedirs(dir_path, 0755)
+    return dir_path
 
 
-def get_or_create_file(filename):
-    filename = os.path.expanduser(filename)
-    if not os.path.isfile(filename):
-        logger.info('Creating file %s', filename)
-        open(filename, 'w')
-    return filename
+def get_or_create_file(file_path):
+    file_path = expand_path(file_path)
+    get_or_create_dir(os.path.dirname(file_path))
+    if not os.path.isfile(file_path):
+        logger.info('Creating file %s', file_path)
+        open(file_path, 'w').close()
+    return file_path
 
 
 def path_to_uri(*paths):
@@ -124,7 +122,7 @@ def find_files(path):
         for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
             for dirname in dirnames:
                 if dirname.startswith(b'.'):
-                    # Skip hidden folders by modifying dirnames inplace
+                    # Skip hidden dirs by modifying dirnames inplace
                     dirnames.remove(dirname)
 
             for filename in filenames:

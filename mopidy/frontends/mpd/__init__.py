@@ -7,33 +7,11 @@ from mopidy.utils import config, formatting
 
 default_config = """
 [mpd]
-
-# If the MPD extension should be enabled or not
 enabled = true
-
-# Which address the MPD server should bind to
-#
-# 127.0.0.1
-#     Listens only on the IPv4 loopback interface
-# ::1
-#     Listens only on the IPv6 loopback interface
-# 0.0.0.0
-#     Listens on all IPv4 interfaces
-# ::
-#     Listens on all interfaces, both IPv4 and IPv6
 hostname = 127.0.0.1
-
-# Which TCP port the MPD server should listen to
 port = 6600
-
-# The password required for connecting to the MPD server
 password =
-
-# The maximum number of concurrent connections the MPD server will accept
 max_connections = 20
-
-# Number of seconds an MPD client can stay inactive before the connection is
-# closed by the server
 connection_timeout = 60
 """
 
@@ -50,6 +28,43 @@ https://github.com/mopidy/mopidy/issues?labels=MPD+frontend
 **Dependencies**
 
 None
+
+**Configuration**
+
+.. confval:: mpd/enabled
+
+    If the MPD extension should be enabled or not.
+
+.. confval:: mpd/hostname
+
+    Which address the MPD server should bind to.
+
+    ``127.0.0.1``
+        Listens only on the IPv4 loopback interface
+    ``::1``
+        Listens only on the IPv6 loopback interface
+    ``0.0.0.0``
+        Listens on all IPv4 interfaces
+    ``::``
+        Listens on all interfaces, both IPv4 and IPv6
+
+.. confval:: mpd/port
+
+    Which TCP port the MPD server should listen to.
+
+.. confval:: mpd/password
+
+    The password required for connecting to the MPD server. If blank, no
+    password is required.
+
+.. confval:: mpd/max_connections
+
+    The maximum number of concurrent connections the MPD server will accept.
+
+.. confval:: mpd/connection_timeout
+
+    Number of seconds an MPD client can stay inactive before the connection is
+    closed by the server.
 
 **Default config**
 

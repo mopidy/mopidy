@@ -7,30 +7,9 @@ from mopidy.utils import config, formatting
 
 default_config = """
 [http]
-
-# If the HTTP extension should be enabled or not
 enabled = true
-
-# Which address the HTTP server should bind to
-#
-# 127.0.0.1
-#     Listens only on the IPv4 loopback interface
-# ::1
-#     Listens only on the IPv6 loopback interface
-# 0.0.0.0
-#     Listens on all IPv4 interfaces
-# ::
-#     Listens on all interfaces, both IPv4 and IPv6
 hostname = 127.0.0.1
-
-# Which TCP port the HTTP server should listen to
 port = 6680
-
-# Which directory the HTTP server should serve at "/"
-#
-# Change this to have Mopidy serve e.g. files for your JavaScript client.
-# "/mopidy" will continue to work as usual even if you change this setting.
-#
 static_dir =
 
 [logging.levels]
@@ -49,6 +28,36 @@ https://github.com/mopidy/mopidy/issues?labels=HTTP+frontend
 
 .. literalinclude:: ../../../requirements/http.txt
 
+**Configuration**
+
+.. confval:: http/enabled
+
+    If the HTTP extension should be enabled or not.
+
+.. confval:: http/hostname
+
+    Which address the HTTP server should bind to.
+
+    ``127.0.0.1``
+        Listens only on the IPv4 loopback interface
+    ``::1``
+        Listens only on the IPv6 loopback interface
+    ``0.0.0.0``
+        Listens on all IPv4 interfaces
+    ``::``
+        Listens on all interfaces, both IPv4 and IPv6
+
+.. confval:: http/port
+
+    Which TCP port the HTTP server should listen to.
+
+.. confval:: http/static_dir
+
+    Which directory the HTTP server should serve at "/"
+
+    Change this to have Mopidy serve e.g. files for your JavaScript client.
+    "/mopidy" will continue to work as usual even if you change this setting.
+
 **Default config**
 
 .. code-block:: ini
@@ -61,19 +70,19 @@ Setup
 
 The frontend is enabled by default if all dependencies are available.
 
-When it is enabled it starts a web server at the port specified by
-:attr:`mopidy.settings.HTTP_SERVER_PORT`.
+When it is enabled it starts a web server at the port specified by the
+:confval:`http/port` config value.
 
 .. warning:: Security
 
     As a simple security measure, the web server is by default only available
-    from localhost. To make it available from other computers, change
-    :attr:`mopidy.settings.HTTP_SERVER_HOSTNAME`. Before you do so, note that
-    the HTTP frontend does not feature any form of user authentication or
-    authorization. Anyone able to access the web server can use the full core
-    API of Mopidy. Thus, you probably only want to make the web server
-    available from your local network or place it behind a web proxy which
-    takes care or user authentication. You have been warned.
+    from localhost. To make it available from other computers, change the
+    :confval:`http/hostname` config value. Before you do so, note that the HTTP
+    frontend does not feature any form of user authentication or authorization.
+    Anyone able to access the web server can use the full core API of Mopidy.
+    Thus, you probably only want to make the web server available from your
+    local network or place it behind a web proxy which takes care or user
+    authentication. You have been warned.
 
 
 Using a web based Mopidy client
@@ -81,10 +90,11 @@ Using a web based Mopidy client
 
 The web server can also host any static files, for example the HTML, CSS,
 JavaScript, and images needed for a web based Mopidy client. To host static
-files, change :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point to the
-root directory of your web client, e.g.::
+files, change the ``http/static_dir`` to point to the root directory of your
+web client, e.g.::
 
-    HTTP_SERVER_STATIC_DIR = u'/home/alice/dev/the-client'
+    [http]
+    static_dir = /home/alice/dev/the-client
 
 If the directory includes a file named ``index.html``, it will be served on the
 root of Mopidy's web server.
@@ -405,8 +415,8 @@ Example to get started with
 
 2. Create an empty directory for your web client.
 
-3. Change the setting :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` to point
-   to your new directory.
+3. Change the :confval:`http/static_dir` config value to point to your new
+   directory.
 
 4. Start/restart Mopidy.
 
@@ -533,7 +543,7 @@ class Extension(ext.Extension):
         schema = config.ExtensionConfigSchema()
         schema['hostname'] = config.Hostname()
         schema['port'] = config.Port()
-        schema['static_dir'] = config.String(optional=True)
+        schema['static_dir'] = config.Path(optional=True)
         return schema
 
     def validate_environment(self):

@@ -30,8 +30,8 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
 
     def __init__(self, config, audio, backend_ref):
 
-        self.cache_location = config['spotify']['cache_path']
-        self.settings_location = config['spotify']['cache_path']
+        self.cache_location = config['spotify']['cache_dir']
+        self.settings_location = config['spotify']['cache_dir']
 
         PyspotifySessionManager.__init__(
             self, config['spotify']['username'], config['spotify']['password'],
@@ -182,7 +182,7 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             bitrate=self.bitrate, username=self.username))
         playlists = filter(None, playlists)
         self.backend.playlists.playlists = playlists
-        logger.info('Loaded %d Spotify playlist(s)', len(playlists))
+        logger.info('Loaded %d Spotify playlists', len(playlists))
         BackendListener.send('playlists_loaded')
 
     def logout(self):

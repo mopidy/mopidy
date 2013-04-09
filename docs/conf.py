@@ -32,7 +32,8 @@ class Mock(object):
     def __getattr__(self, name):
         if name in ('__file__', '__path__'):
             return '/dev/null'
-        elif name[0] == name[0].upper() and not name.startswith('MIXER_TRACK'):
+        elif (name[0] == name[0].upper()
+                and not name.startswith('MIXER_TRACK_')):
             return type(name, (), {})
         else:
             return Mock()
@@ -266,3 +267,12 @@ latex_documents = [
 needs_sphinx = '1.0'
 
 extlinks = {'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#')}
+
+
+def setup(app):
+    from sphinx.ext.autodoc import cut_lines
+    app.connect(b'autodoc-process-docstring', cut_lines(4, what=['module']))
+    app.add_object_type(
+        b'confval', 'confval',
+        objname='configuration value',
+        indextemplate='pair: %s; configuration value')

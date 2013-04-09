@@ -7,18 +7,10 @@ from mopidy.utils import config, formatting
 
 default_config = """
 [local]
-
-# If the local extension should be enabled or not
 enabled = true
-
-# Path to folder with local music
-music_path = $XDG_MUSIC_DIR
-
-# Path to playlist folder with m3u files for local music
-playlist_path = $XDG_DATA_DIR/mopidy/playlists
-
-# Path to tag cache for local music
-tag_cache_file = $XDG_DATA_DIR/mopidy/tag_cache
+media_dir = $XDG_MUSIC_DIR
+playlists_dir = $XDG_DATA_DIR/mopidy/local/playlists
+tag_cache_file = $XDG_DATA_DIR/mopidy/local/tag_cache
 """
 
 __doc__ = """A backend for playing music from a local music archive.
@@ -35,6 +27,24 @@ https://github.com/mopidy/mopidy/issues?labels=Local+backend
 **Dependencies**
 
 None
+
+**Configuration**
+
+.. confval:: local/enabled
+
+    If the local extension should be enabled or not.
+
+.. confval:: local/media_dir
+
+    Path to directory with local media files.
+
+.. confval:: local/playlists_dir
+
+    Path to playlists directory with m3u files for local media.
+
+.. confval:: local/tag_cache_file
+
+    Path to tag cache for local media.
 
 **Default config**
 
@@ -55,9 +65,9 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = config.ExtensionConfigSchema()
-        schema['music_path'] = config.String()
-        schema['playlist_path'] = config.String()
-        schema['tag_cache_file'] = config.String()
+        schema['media_dir'] = config.Path()
+        schema['playlists_dir'] = config.Path()
+        schema['tag_cache_file'] = config.Path()
         return schema
 
     def validate_environment(self):

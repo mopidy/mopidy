@@ -34,7 +34,6 @@ import pygst
 pygst.require('0.10')
 import gst
 
-from mopidy import settings
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
@@ -42,6 +41,7 @@ from mopidy.utils import log, path, versioning
 
 def main():
     options = parse_options()
+    config = {}  # TODO Read config from new config system
 
     log.setup_root_logger()
     log.setup_console_logging(options.verbosity_level)
@@ -57,9 +57,9 @@ def main():
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-    logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+    logging.info('Scanning %s', config['local']['media_dir'])
 
-    scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
+    scanner = Scanner(config['local']['media_dir'], store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
@@ -67,7 +67,8 @@ def main():
 
     logging.info('Done scanning; writing tag cache...')
 
-    for row in mpd_translator.tracks_to_tag_cache_format(tracks):
+    for row in mpd_translator.tracks_to_tag_cache_format(
+            tracks, config['mpd']['media_dir']):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
@@ -141,9 +142,9 @@ def translator(data):
 
 
 class Scanner(object):
-    def __init__(self, folder, data_callback, error_callback=None):
+    def __init__(self, base_dir, data_callback, error_callback=None):
         self.data = {}
-        self.files = path.find_files(folder)
+        self.files = path.find_files(base_dir)
         self.data_callback = data_callback
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
