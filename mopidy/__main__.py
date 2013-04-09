@@ -312,7 +312,6 @@ def validate_config(raw_config, schemas, extensions=None):
 
 def create_file_structures():
     path.get_or_create_dir('$XDG_DATA_DIR/mopidy')
-    path.get_or_create_dir('$XDG_CONFIG_DIR/mopidy')
     path.get_or_create_file('$XDG_CONFIG_DIR/mopidy/mopidy.conf')
 
 
