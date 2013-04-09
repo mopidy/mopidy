@@ -232,9 +232,9 @@ class MpdContext(object):
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    _playlist_uri_from_name = None
+    playlist_uri_from_name = None
 
-    _playlist_name_from_uri = None
+    playlist_name_from_uri = None
 
     def __init__(self, dispatcher, session=None, core=None):
         self.dispatcher = dispatcher
@@ -242,14 +242,14 @@ class MpdContext(object):
         self.core = core
         self.events = set()
         self.subscriptions = set()
-        self._playlist_uri_from_name = {}
-        self._playlist_name_from_uri = {}
+        self.playlist_uri_from_name = {}
+        self.playlist_name_from_uri = {}
         self.refresh_playlists_mapping()
 
     def create_unique_name(self, playlist_name):
         name = playlist_name
         i = 1
-        while name in self._playlist_uri_from_name:
+        while name in self.playlist_uri_from_name:
             name = '%s [%d]' % (playlist_name, i)
             i += 1
         return name
@@ -260,11 +260,11 @@ class MpdContext(object):
         MPD
         """
         if self.core is not None:
-            self._playlist_uri_from_name.clear()
-            self._playlist_name_from_uri.clear()
+            self.playlist_uri_from_name.clear()
+            self.playlist_name_from_uri.clear()
             for playlist in self.core.playlists.playlists.get():
                 if not playlist.name:
                     continue
                 name = self.create_unique_name(playlist.name)
-                self._playlist_uri_from_name[name] = playlist.uri
-                self._playlist_name_from_uri[playlist.uri] = name
+                self.playlist_uri_from_name[name] = playlist.uri
+                self.playlist_name_from_uri[playlist.uri] = name
