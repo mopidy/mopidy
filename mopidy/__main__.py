@@ -236,8 +236,10 @@ def filter_enabled_extensions(raw_config, extensions):
         else:
             disabled_names.append(extension.ext_name)
 
-    logging.info('Enabled extensions: %s', ', '.join(enabled_names))
-    logging.info('Disabled extensions: %s', ', '.join(disabled_names))
+    logging.info(
+        'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
+    logging.info(
+        'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
     return enabled_extensions
 
 
@@ -310,7 +312,6 @@ def validate_config(raw_config, schemas, extensions=None):
 
 def create_file_structures():
     path.get_or_create_dir('$XDG_DATA_DIR/mopidy')
-    path.get_or_create_dir('$XDG_CONFIG_DIR/mopidy')
     path.get_or_create_file('$XDG_CONFIG_DIR/mopidy/mopidy.conf')
 
 
@@ -325,12 +326,19 @@ def stop_audio():
 
 
 def setup_backends(config, extensions, audio):
-    logger.info('Starting Mopidy backends')
-    backends = []
+    backend_classes = []
     for extension in extensions:
-        for backend_class in extension.get_backend_classes():
-            backend = backend_class.start(config=config, audio=audio).proxy()
-            backends.append(backend)
+        backend_classes.extend(extension.get_backend_classes())
+
+    logger.info(
+        'Starting Mopidy backends: %s',
+        ', '.join(b.__name__ for b in backend_classes) or 'none')
+
+    backends = []
+    for backend_class in backend_classes:
+        backend = backend_class.start(config=config, audio=audio).proxy()
+        backends.append(backend)
+
     return backends
 
 
@@ -352,10 +360,16 @@ def stop_core():
 
 
 def setup_frontends(config, extensions, core):
-    logger.info('Starting Mopidy frontends')
+    frontend_classes = []
     for extension in extensions:
-        for frontend_class in extension.get_frontend_classes():
-            frontend_class.start(config=config, core=core)
+        frontend_classes.extend(extension.get_frontend_classes())
+
+    logger.info(
+        'Starting Mopidy frontends: %s',
+        ', '.join(f.__name__ for f in frontend_classes) or 'none')
+
+    for frontend_class in frontend_classes:
+        frontend_class.start(config=config, core=core)
 
 
 def stop_frontends(extensions):

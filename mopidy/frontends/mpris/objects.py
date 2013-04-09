@@ -93,7 +93,7 @@ class MprisObject(dbus.service.Object):
         mainloop = dbus.mainloop.glib.DBusGMainLoop()
         bus_name = dbus.service.BusName(
             BUS_NAME, dbus.SessionBus(mainloop=mainloop))
-        logger.info('Connected to D-Bus')
+        logger.info('MPRIS server connected to D-Bus')
         return bus_name
 
     def get_playlist_id(self, playlist_uri):

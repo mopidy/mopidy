@@ -39,12 +39,13 @@ def get_or_create_dir(dir_path):
     return dir_path
 
 
-def get_or_create_file(filename):
-    filename = expand_path(filename)
-    if not os.path.isfile(filename):
-        logger.info('Creating file %s', filename)
-        open(filename, 'w')
-    return filename
+def get_or_create_file(file_path):
+    file_path = expand_path(file_path)
+    get_or_create_dir(os.path.dirname(file_path))
+    if not os.path.isfile(file_path):
+        logger.info('Creating file %s', file_path)
+        open(file_path, 'w').close()
+    return file_path
 
 
 def path_to_uri(*paths):
