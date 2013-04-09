@@ -9,8 +9,8 @@ default_config = """
 [local]
 enabled = true
 media_dir = $XDG_MUSIC_DIR
-playlists_dir = $XDG_DATA_DIR/mopidy/playlists
-tag_cache_file = $XDG_DATA_DIR/mopidy/tag_cache
+playlists_dir = $XDG_DATA_DIR/mopidy/local/playlists
+tag_cache_file = $XDG_DATA_DIR/mopidy/local/tag_cache
 """
 
 __doc__ = """A backend for playing music from a local music archive.
