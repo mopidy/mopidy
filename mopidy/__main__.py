@@ -236,8 +236,10 @@ def filter_enabled_extensions(raw_config, extensions):
         else:
             disabled_names.append(extension.ext_name)
 
-    logging.info('Enabled extensions: %s', ', '.join(enabled_names))
-    logging.info('Disabled extensions: %s', ', '.join(disabled_names))
+    logging.info(
+        'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
+    logging.info(
+        'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
     return enabled_extensions
 
 
