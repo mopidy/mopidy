@@ -80,7 +80,11 @@ def listplaylists(context):
     for playlist in context.core.playlists.playlists.get():
         if not playlist.name:
             continue
-        result.append(('playlist', playlist.name))
+        if playlist.uri not in context.playlist_name_from_uri:
+            # the maps are not synced, we refresh them
+            context.refresh_playlists_mapping()
+        name = context.playlist_name_from_uri[playlist.uri]
+        result.append(('playlist', name))
         last_modified = (
             playlist.last_modified or dt.datetime.utcnow()).isoformat()
         # Remove microseconds
