@@ -333,7 +333,7 @@ def setup_backends(config, extensions, audio):
 
     logger.info(
         'Starting Mopidy backends: %s',
-        ', '.join(b.__name__ for b in backend_classes))
+        ', '.join(b.__name__ for b in backend_classes) or 'none')
 
     backends = []
     for backend_class in backend_classes:
@@ -367,7 +367,7 @@ def setup_frontends(config, extensions, core):
 
     logger.info(
         'Starting Mopidy frontends: %s',
-        ', '.join(f.__name__ for f in frontend_classes))
+        ', '.join(f.__name__ for f in frontend_classes) or 'none')
 
     for frontend_class in frontend_classes:
         frontend_class.start(config=config, core=core)
