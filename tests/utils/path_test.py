@@ -70,6 +70,18 @@ class GetOrCreateFileTest(unittest.TestCase):
         self.assert_(os.path.isfile(file_path))
         self.assertEqual(created, file_path)
 
+    def test_creating_nested_file(self):
+        level2_dir = os.path.join(self.parent, 'test')
+        file_path = os.path.join(self.parent, 'test', 'test')
+        self.assert_(not os.path.exists(level2_dir))
+        self.assert_(not os.path.exists(file_path))
+        created = path.get_or_create_file(file_path)
+        self.assert_(os.path.exists(level2_dir))
+        self.assert_(os.path.isdir(level2_dir))
+        self.assert_(os.path.exists(file_path))
+        self.assert_(os.path.isfile(file_path))
+        self.assertEqual(created, file_path)
+
     def test_creating_existing_file(self):
         file_path = os.path.join(self.parent, 'test')
         path.get_or_create_file(file_path)
