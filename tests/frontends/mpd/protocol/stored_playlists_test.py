@@ -64,6 +64,16 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('Last-Modified: 2001-03-17T13:41:17Z')
         self.assertInResponse('OK')
 
+    def test_listplaylists_duplicate(self):
+        playlist1 = Playlist(name='a', uri='dummy:a1')
+        playlist2 = Playlist(name='a', uri='dummy:a2')
+        self.backend.playlists.playlists = [ playlist1 , playlist2 ]
+
+        self.sendRequest('listplaylists')
+        self.assertInResponse('playlist: a')
+        self.assertInResponse('playlist: a [1]')
+        self.assertInResponse('OK')
+
     def test_listplaylists_ignores_playlists_without_name(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
         self.backend.playlists.playlists = [
