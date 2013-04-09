@@ -24,7 +24,6 @@ class GetOrCreateDirTest(unittest.TestCase):
     def test_creating_dir(self):
         dir_path = os.path.join(self.parent, 'test')
         self.assert_(not os.path.exists(dir_path))
-        self.assert_(not os.path.isdir(dir_path))
         created = path.get_or_create_dir(dir_path)
         self.assert_(os.path.exists(dir_path))
         self.assert_(os.path.isdir(dir_path))
@@ -34,9 +33,7 @@ class GetOrCreateDirTest(unittest.TestCase):
         level2_dir = os.path.join(self.parent, 'test')
         level3_dir = os.path.join(self.parent, 'test', 'test')
         self.assert_(not os.path.exists(level2_dir))
-        self.assert_(not os.path.isdir(level2_dir))
         self.assert_(not os.path.exists(level3_dir))
-        self.assert_(not os.path.isdir(level3_dir))
         created = path.get_or_create_dir(level3_dir)
         self.assert_(os.path.exists(level2_dir))
         self.assert_(os.path.isdir(level2_dir))
@@ -55,6 +52,35 @@ class GetOrCreateDirTest(unittest.TestCase):
         open(conflicting_file, 'w').close()
         dir_path = os.path.join(self.parent, 'test')
         self.assertRaises(OSError, path.get_or_create_dir, dir_path)
+
+
+class GetOrCreateFileTest(unittest.TestCase):
+    def setUp(self):
+        self.parent = tempfile.mkdtemp()
+
+    def tearDown(self):
+        if os.path.isdir(self.parent):
+            shutil.rmtree(self.parent)
+
+    def test_creating_file(self):
+        file_path = os.path.join(self.parent, 'test')
+        self.assert_(not os.path.exists(file_path))
+        created = path.get_or_create_file(file_path)
+        self.assert_(os.path.exists(file_path))
+        self.assert_(os.path.isfile(file_path))
+        self.assertEqual(created, file_path)
+
+    def test_creating_existing_file(self):
+        file_path = os.path.join(self.parent, 'test')
+        path.get_or_create_file(file_path)
+        created = path.get_or_create_file(file_path)
+        self.assert_(os.path.exists(file_path))
+        self.assert_(os.path.isfile(file_path))
+        self.assertEqual(created, file_path)
+
+    def test_create_file_with_name_of_existing_dir_throws_ioerror(self):
+        conflicting_dir = os.path.join(self.parent)
+        self.assertRaises(IOError, path.get_or_create_file, conflicting_dir)
 
 
 class PathToFileURITest(unittest.TestCase):
