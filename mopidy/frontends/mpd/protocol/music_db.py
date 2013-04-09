@@ -381,11 +381,12 @@ def searchaddpl(context, playlist_name, mpd_query):
         return
     results = context.core.library.search(**query).get()
 
-    if len(context.to_uri) == 0:
+    if len(context.playlist_uri_from_name) == 0:
         context.refresh_playlists_mapping()
 
-    if playlist_name in context.to_uri:
-        playlist = context.core.playlists.lookup(context.to_uri[playlist_name]).get()
+    if playlist_name in context.playlist_uri_from_name:
+        uri = context.playlist_uri_from_name[playlist_name]
+        playlist = context.core.playlists.lookup(uri).get()
     else:
         playlist = context.core.playlists.create(playlist_name).get()
     tracks = list(playlist.tracks) + _get_tracks(results)

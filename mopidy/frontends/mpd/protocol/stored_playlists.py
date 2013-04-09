@@ -80,9 +80,11 @@ def listplaylists(context):
     for playlist in context.core.playlists.playlists.get():
         if not playlist.name:
             continue
-        if playlist.uri not in context.from_uri:
-            context.refresh_playlists_mapping() # the maps are not synced, we refresh them
-        result.append(('playlist', context.from_uri[playlist.uri]))
+        if playlist.uri not in context.playlist_name_from_uri:
+            # the maps are not synced, we refresh them
+            context.refresh_playlists_mapping()
+        name = context.playlist_name_from_uri[playlist.uri]
+        result.append(('playlist', name))
         last_modified = (
             playlist.last_modified or dt.datetime.utcnow()).isoformat()
         # Remove microseconds
@@ -91,7 +93,6 @@ def listplaylists(context):
         last_modified = last_modified + 'Z'
         result.append(('Last-Modified', last_modified))
     return result
-
 
 @handle_request(r'^load "(?P<name>[^"]+)"( "(?P<start>\d+):(?P<end>\d+)*")*$')
 def load(context, name, start=None, end=None):
