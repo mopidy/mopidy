@@ -32,14 +32,14 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 'Could not create empty tag cache: %s', locale_decode(error))
             return
 
-        logger.info(
-            'Loading tracks from %s using %s',
-            self._media_dir, self._tag_cache_file)
-
         tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
+
+        logger.info(
+            'Loaded %d local tracks from %s using %s',
+            len(tracks), self._media_dir, self._tag_cache_file)
 
     def lookup(self, uri):
         try:

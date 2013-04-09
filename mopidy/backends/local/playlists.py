@@ -42,8 +42,6 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
                 return playlist
 
     def refresh(self):
-        logger.info('Loading playlists from %s', self._playlists_dir)
-
         playlists = []
 
         for m3u in glob.glob(os.path.join(self._playlists_dir, '*.m3u')):
@@ -64,6 +62,10 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
 
         self.playlists = playlists
         listener.BackendListener.send('playlists_loaded')
+
+        logger.info(
+            'Loaded %d local playlists from %s',
+            len(playlists), self._playlists_dir)
 
     def save(self, playlist):
         assert playlist.uri, 'Cannot save playlist without URI'
