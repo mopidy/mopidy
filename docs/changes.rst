@@ -18,6 +18,14 @@ v0.14.0 (UNRELEASED)
 - Add support for starred playlists, both your own and those owned by other
   users. (Fixes: :issue:`326`)
 
+**MPD frontend**
+
+- Playlists with identical names are now handled properly by the MPD frontend
+  by suffixing the duplicate names with e.g. ``[2]``. This is needed because
+  MPD identify playlists by name only, while Mopidy and Spotify supports
+  multiple playlists with the same name, and identify them using an URI.
+  (Fixes: :issue:`114`)
+
 
 v0.13.0 (2013-03-31)
 ====================
