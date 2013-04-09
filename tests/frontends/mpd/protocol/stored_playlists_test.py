@@ -67,7 +67,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylists_duplicate(self):
         playlist1 = Playlist(name='a', uri='dummy:a1')
         playlist2 = Playlist(name='a', uri='dummy:a2')
-        self.backend.playlists.playlists = [ playlist1 , playlist2 ]
+        self.backend.playlists.playlists = [playlist1, playlist2]
 
         self.sendRequest('listplaylists')
         self.assertInResponse('playlist: a')
