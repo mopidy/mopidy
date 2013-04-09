@@ -246,10 +246,11 @@ class MpdContext(object):
         self.playlist_name_from_uri = {}
         self.refresh_playlists_mapping()
 
-    def create_unique_name(self, name):
+    def create_unique_name(self, playlist_name):
+        name = playlist_name
         i = 1
         while name in self.playlist_uri_from_name:
-            name = '%s [%d]' % playlist.name % i
+            name = '%s [%d]' % (playlist_name, i)
             i += 1
         return name
 
