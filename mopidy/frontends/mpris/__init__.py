@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import os
+
 import mopidy
 from mopidy import exceptions, ext
 from mopidy.utils import formatting, config
@@ -89,6 +91,10 @@ class Extension(ext.Extension):
         return schema
 
     def validate_environment(self):
+        if 'DISPLAY' not in os.environ:
+            raise exceptions.ExtensionError(
+                'An X11 $DISPLAY is needed to use D-Bus')
+
         try:
             import dbus  # noqa
         except ImportError as e:
