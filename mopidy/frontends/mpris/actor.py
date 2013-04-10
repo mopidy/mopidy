@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 
 import pykka
 
@@ -10,10 +11,14 @@ from mopidy.frontends.mpris import objects
 logger = logging.getLogger('mopidy.frontends.mpris')
 
 try:
-    import indicate
-except ImportError as import_error:
-    indicate = None  # noqa
-    logger.debug('Startup notification will not be sent (%s)', import_error)
+    indicate = None
+    if 'DISPLAY' in os.environ:
+        import indicate
+except ImportError:
+    pass
+
+if indicate is None:
+    logger.debug('Startup notification will not be sent')
 
 
 class MprisFrontend(pykka.ThreadingActor, CoreListener):
