@@ -4,7 +4,7 @@ import logging
 import pkg_resources
 
 from mopidy import exceptions
-from mopidy.utils import config as config_utils
+from mopidy import config as config_utils
 
 
 logger = logging.getLogger('mopidy.ext')

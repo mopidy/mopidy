@@ -30,6 +30,7 @@ sys.path.insert(
 from mopidy import exceptions, ext
 from mopidy.audio import Audio
 from mopidy.config import default_config, config_schemas
+from mopidy import config as config_utils # TODO: cleanup
 from mopidy.core import Core
 from mopidy.utils import deps, log, path, process, versioning
 

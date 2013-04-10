@@ -1,14 +1,13 @@
 from __future__ import unicode_literals
 
-from mopidy.ext import Extension
-from mopidy.utils import config
+from mopidy import config, ext
 
 from tests import unittest
 
 
 class ExtensionTest(unittest.TestCase):
     def setUp(self):
-        self.ext = Extension()
+        self.ext = ext.Extension()
 
     def test_dist_name_is_none(self):
         self.assertIsNone(self.ext.dist_name)

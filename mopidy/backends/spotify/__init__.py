@@ -1,9 +1,8 @@
 from __future__ import unicode_literals
 
 import mopidy
-from mopidy import ext
-from mopidy.exceptions import ExtensionError
-from mopidy.utils import config, formatting
+from mopidy import config, exceptions, ext
+from mopidy.utils import formatting
 
 
 default_config = """
@@ -96,7 +95,7 @@ class Extension(ext.Extension):
         try:
             import spotify  # noqa
         except ImportError as e:
-            raise ExtensionError('pyspotify library not found', e)
+            raise exceptions.ExtensionError('pyspotify library not found', e)
 
     def get_backend_classes(self):
         from .actor import SpotifyBackend

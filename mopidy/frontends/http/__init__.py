@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
 import mopidy
-from mopidy import exceptions, ext
-from mopidy.utils import config, formatting
+from mopidy import config, exceptions, ext
+from mopidy.utils import formatting
 
 
 default_config = """

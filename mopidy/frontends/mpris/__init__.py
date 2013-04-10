@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 import os
 
 import mopidy
-from mopidy import exceptions, ext
-from mopidy.utils import formatting, config
+from mopidy import config, exceptions, ext
+from mopidy.utils import formatting
 
 
 default_config = """
