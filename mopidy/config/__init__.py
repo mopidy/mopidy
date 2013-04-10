@@ -43,9 +43,3 @@ config_schemas['proxy']['password'] = config.String(optional=True, secret=True)
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 #config_schemas['audio.outputs'] = config.AudioOutputConfigSchema()
-
-
-def register_schema(name, schema):
-    if name in config_schemas:
-        raise Exception
-    config_schemas[name] = schema
