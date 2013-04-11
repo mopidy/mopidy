@@ -4,7 +4,7 @@ Mopidy
 
 Mopidy is a music server which can play music both from multiple sources, like
 your :ref:`local hard drive <local-backend>`, :ref:`radio streams
-<stream-backend>`, and from :ref:`Spotify <spotify-backend>` and SoundCloud.
+<stream-backend>`, and from :ref:`Spotify <ext-spotify>` and SoundCloud.
 Searches combines results from all music sources, and you can mix tracks from
 all sources in your play queue. Your playlists from Spotify or SoundCloud are
 also available for use.
