@@ -31,20 +31,15 @@ Introduction
 ============
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
 
     installation/index
     installation/raspberrypi
     config
     running
+    ext/index
     clients/index
     troubleshooting
-
-
-Extensions
-==========
-
-TODO
 
 
 About
