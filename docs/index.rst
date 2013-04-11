@@ -61,6 +61,14 @@ Development
     contributing
     development
     extensiondev
+
+
+Reference
+=========
+
+.. toctree::
+    :maxdepth: 2
+
     api/index
     modules/index
 
