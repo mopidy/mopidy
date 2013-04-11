@@ -2,17 +2,18 @@
 Mopidy
 ******
 
-Mopidy is a music server which can play music both from your :ref:`local hard
-drive <local-backend>` and from :ref:`Spotify <spotify-backend>`. Searches
-returns results from both your local hard drive and from Spotify, and you can
-mix tracks from both sources in your play queue. Your Spotify playlists are
-also available for use, though we don't support modifying them yet.
+Mopidy is a music server which can play music both from multiple sources, like
+your :ref:`local hard drive <local-backend>`, :ref:`radio streams
+<stream-backend>`, and from :ref:`Spotify <spotify-backend>` and SoundCloud.
+Searches combines results from all music sources, and you can mix tracks from
+all sources in your play queue. Your playlists from Spotify or SoundCloud are
+also available for use.
 
-To control your music server, you can use the :ref:`Ubuntu Sound Menu
-<ubuntu-sound-menu>` on the machine running Mopidy, any device on the same
-network which can control UPnP MediaRenderers (see :ref:`upnp-clients`), or any
-:ref:`MPD client <mpd-clients>`. MPD clients are available for most platforms,
-including Windows, Mac OS X, Linux, Android, and iOS.
+To control your Mopidy music server, you can use one of Mopidy's :ref:`web
+clients <http-clients>`, the :ref:`Ubuntu Sound Menu <ubuntu-sound-menu>`, any
+device on the same network which can control :ref:`UPnP MediaRenderers
+<upnp-clients>`, or any :ref:`MPD client <mpd-clients>`. MPD clients are
+available for many platforms, including Windows, OS X, Linux, Android and iOS.
 
 To get started with Mopidy, start by reading :ref:`installation`.
 
@@ -21,7 +22,9 @@ If you get stuck, we usually hang around at ``#mopidy`` at `irc.freenode.net
 <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_. If you stumble
 into a bug or got a feature request, please create an issue in the `issue
 tracker <https://github.com/mopidy/mopidy/issues>`_. The `source code
-<https://github.com/mopidy/mopidy>`_ may also be of help.
+<https://github.com/mopidy/mopidy>`_ may also be of help. If you want to stay
+up to date on Mopidy developments, you can follow `@mopidy
+<https://twitter.com/mopidy/>`_ on Twitter.
 
 
 Introduction
