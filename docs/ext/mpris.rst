@@ -21,8 +21,8 @@ Dependencies
   Ubuntu/Debian.
 
 - An ``.desktop`` file for Mopidy installed at the path set in the
-  :confval:`mpris/desktop_file` config value. See :ref:`install-desktop-file`
-  for details.
+  :confval:`mpris/desktop_file` config value. See usage section below for
+  details.
 
 
 Configuration values
