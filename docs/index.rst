@@ -45,6 +45,7 @@ User documentation
     config
     running
     clients/index
+    troubleshooting
     authors
     licenses
     changes
