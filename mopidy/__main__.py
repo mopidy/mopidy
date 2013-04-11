@@ -12,7 +12,6 @@ import sys
 import gobject
 gobject.threads_init()
 
-import pkg_resources
 import pykka.debug
 
 
@@ -28,12 +27,11 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from mopidy import exceptions
+from mopidy import exceptions, ext
 from mopidy.audio import Audio
 from mopidy.config import default_config, config_schemas
 from mopidy.core import Core
-from mopidy.utils import (
-    config as config_utils, deps, log, path, process, versioning)
+from mopidy.utils import deps, log, path, process, versioning
 
 
 logger = logging.getLogger('mopidy.main')
@@ -55,9 +53,9 @@ def main():
         logging_config = load_config(config_files, config_overrides)
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
-        extensions = load_extensions()
+        extensions = ext.load_extensions()
         raw_config = load_config(config_files, config_overrides, extensions)
-        extensions = filter_enabled_extensions(raw_config, extensions)
+        extensions = ext.filter_enabled_extensions(raw_config, extensions)
         config = validate_config(raw_config, config_schemas, extensions)
         log.setup_log_levels(config)
         check_old_locations()
@@ -140,9 +138,9 @@ def show_config_callback(option, opt, value, parser):
     files = getattr(parser.values, 'config', '').split(':')
     overrides = getattr(parser.values, 'overrides', [])
 
-    extensions = load_extensions()
+    extensions = ext.load_extensions()
     raw_config = load_config(files, overrides, extensions)
-    enabled_extensions = filter_enabled_extensions(raw_config, extensions)
+    enabled_extensions = ext.filter_enabled_extensions(raw_config, extensions)
     config = validate_config(raw_config, config_schemas, enabled_extensions)
 
     output = []
@@ -180,67 +178,6 @@ def check_old_locations():
             'Old Mopidy settings file found at %s. Please migrate your '
             'config to the ini-file based config format. See release notes '
             'for further instructions.', old_settings_file)
-
-
-def load_extensions():
-    extensions = []
-    for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
-        logger.debug('Loading entry point: %s', entry_point)
-
-        try:
-            extension_class = entry_point.load()
-        except pkg_resources.DistributionNotFound as ex:
-            logger.info(
-                'Disabled extension %s: Dependency %s not found',
-                entry_point.name, ex)
-            continue
-
-        extension = extension_class()
-
-        logger.debug(
-            'Loaded extension: %s %s', extension.dist_name, extension.version)
-
-        if entry_point.name != extension.ext_name:
-            logger.warning(
-                'Disabled extension %(ep)s: entry point name (%(ep)s) '
-                'does not match extension name (%(ext)s)',
-                {'ep': entry_point.name, 'ext': extension.ext_name})
-            continue
-
-        try:
-            extension.validate_environment()
-        except exceptions.ExtensionError as ex:
-            logger.info(
-                'Disabled extension %s: %s', entry_point.name, ex.message)
-            continue
-
-        extensions.append(extension)
-
-    names = (e.ext_name for e in extensions)
-    logging.debug('Discovered extensions: %s', ', '.join(names))
-    return extensions
-
-
-def filter_enabled_extensions(raw_config, extensions):
-    boolean = config_utils.Boolean()
-    enabled_extensions = []
-    enabled_names = []
-    disabled_names = []
-
-    for extension in extensions:
-        # TODO: handle key and value errors.
-        enabled = raw_config[extension.ext_name]['enabled']
-        if boolean.deserialize(enabled):
-            enabled_extensions.append(extension)
-            enabled_names.append(extension.ext_name)
-        else:
-            disabled_names.append(extension.ext_name)
-
-    logging.info(
-        'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
-    logging.info(
-        'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
-    return enabled_extensions
 
 
 def load_config(files, overrides, extensions=None):
