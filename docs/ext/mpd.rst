@@ -103,5 +103,21 @@ Usage
 =====
 
 The extension is enabled by default. To connect to the server, use an :ref:`MPD
-client <mpd-clients>`. If you want to connect to the server from another host,
-you'll need to adjust the value of :confval:`mpd/hostname`.
+client <mpd-clients>`.
+
+
+.. _use-mpd-on-a-network:
+
+Connecting from other machines on the network
+---------------------------------------------
+
+As a secure default, Mopidy only accepts connections from ``localhost``. If you
+want to open it for connections from other machines on your network, see
+the documentation for the :confval:`mpd/hostname` config value.
+
+If you open up Mopidy for your local network, you should consider turning on
+MPD password authentication by setting the :confval:`mpd/password` config value
+to the password you want to use.  If the password is set, Mopidy will require
+MPD clients to provide the password before they can do anything else. Mopidy
+only supports a single password, and do not support different permission
+schemes like the original MPD server.

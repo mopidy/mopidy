@@ -12,8 +12,6 @@ uses the official `libspotify
 `pyspotify <http://github.com/mopidy/pyspotify/>`_ Python bindings for
 libspotify. This backend handles URIs starting with ``spotify:``.
 
-See :ref:`music-from-spotify` for further instructions on using this backend.
-
 .. note::
 
     This product uses SPOTIFY(R) CORE but is not endorsed, certified or
@@ -66,3 +64,20 @@ Default configuration
 
 .. literalinclude:: ../../mopidy/backends/spotify/ext.conf
     :language: ini
+
+
+Usage
+=====
+
+If you are using the Spotify backend, which is the default, enter your Spotify
+Premium account's username and password into ``~/.config/mopidy/mopidy.conf``,
+like this:
+
+.. code-block:: ini
+
+    [spotify]
+    username = myusername
+    password = mysecret
+
+This will only work if you have the Spotify Premium subscription. Spotify
+Unlimited will not work.

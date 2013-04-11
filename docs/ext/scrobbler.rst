@@ -43,4 +43,11 @@ Usage
 =====
 
 The extension is enabled by default if all dependencies are available. You just
-need to add your Last.fm username and password to the config file.
+need to add your Last.fm username and password to the
+``~/.config/mopidy/mopidy.conf`` file:
+
+.. code-block:: ini
+
+    [scrobbler]
+    username = myusername
+    password = mysecret
