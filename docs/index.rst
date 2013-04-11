@@ -26,8 +26,8 @@ up to date on Mopidy developments, you can follow `@mopidy
 <https://twitter.com/mopidy/>`_ on Twitter.
 
 
-Introduction
-============
+Usage
+=====
 
 .. toctree::
     :maxdepth: 3
