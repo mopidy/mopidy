@@ -5,7 +5,6 @@ from mopidy.config import validators
 from tests import unittest
 
 
-
 class ValidateChoiceTest(unittest.TestCase):
     def test_no_choices_passes(self):
         validators.validate_choice('foo', None)

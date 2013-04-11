@@ -1,5 +1,6 @@
-from mopidy import exceptions
+from __future__ import unicode_literals
 
+from mopidy import exceptions
 from mopidy.config import values
 
 
