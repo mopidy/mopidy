@@ -35,8 +35,8 @@ Usage
     installation/index
     installation/raspberrypi
     config
-    running
     ext/index
+    running
     clients/index
     troubleshooting
 

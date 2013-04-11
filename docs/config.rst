@@ -2,24 +2,9 @@
 Configuration
 *************
 
-Mopidy has quite a few config values to tweak. Luckily, you only need to change
-a few, and stay ignorant of the rest. Below you can find guides for typical
-configuration changes you may want to do, and a listing of the available config
-values.
-
-Mopidy primarily reads config from the file ``~/.config/mopidy/mopidy.conf``,
-where ``~`` means your *home directory*. If your username is ``alice`` and you
-are running Linux, the settings file should probably be at
-``/home/alice/.config/mopidy/mopidy.conf``.
-
-You can either create the configuration file yourself, or run the ``mopidy``
-command, and it will create an empty settings file for you.
-
-When you have created the configuration file, open it in a text editor, and add
-settings you want to change. If you want to keep the default value for a
-setting, you should *not* redefine it in your own settings file.
-
-A complete ``~/.config/mopidy/mopidy.conf`` may look as simple as this:
+Mopidy has a lot of config values you can tweak, but you only need to change a
+few to get up and running. A complete ``~/.config/mopidy/mopidy.conf`` may be
+as simple as this:
 
 .. code-block:: ini
 
@@ -29,6 +14,28 @@ A complete ``~/.config/mopidy/mopidy.conf`` may look as simple as this:
     [spotify]
     username = alice
     password = mysecret
+
+Mopidy primarily reads config from the file ``~/.config/mopidy/mopidy.conf``,
+where ``~`` means your *home directory*. If your username is ``alice`` and you
+are running Linux, the settings file should probably be at
+``/home/alice/.config/mopidy/mopidy.conf``. You can either create the
+configuration file yourself, or run the ``mopidy`` command, and it will create
+an empty settings file for you and print what config values must be set
+to successfully start Mopidy.
+
+When you have created the configuration file, open it in a text editor, and add
+the config values you want to change. If you want to keep the default for a
+config value, you **should not** add it to ``~/.config/mopidy/mopidy.conf``.
+
+To see what's the effective configuration for your Mopidy installation, you can
+run ``mopidy --show-config``. It will print your full effective config with
+passwords masked out so that you safely can share the output with others for
+debugging.
+
+You can find a description of all config values belonging to Mopidy's core
+below, together with their default values. In addition, all :ref:`extensions
+<ext>` got additional config values. The extension's config values and config
+defaults are documented on the :ref:`extension pages <ext>`.
 
 
 Core configuration values
