@@ -34,13 +34,83 @@ A complete ``~/.config/mopidy/mopidy.conf`` may look as simple as this:
 Core configuration values
 =========================
 
-TODO
+.. confval:: audio/mixer
+
+    Audio mixer to use.
+
+    Expects a GStreamer mixer to use, typical values are: ``alsamixer``,
+    ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
+
+    Setting this to blank turns off volume control. ``software`` can be used to
+    force software mixing in the application.
+
+.. confval:: audio/mixer_track
+
+    Audio mixer track to use.
+
+    Name of the mixer track to use. If this is not set we will try to find the
+    master output track. As an example, using ``alsamixer`` you would typically
+    set this to ``Master`` or ``PCM``.
+
+.. confval:: audio/output
+
+    Audio output to use.
+
+    Expects a GStreamer sink. Typical values are ``autoaudiosink``,
+    ``alsasink``, ``osssink``, ``oss4sink``, ``pulsesink``, and ``shout2send``,
+    and additional arguments specific to each sink. You can use the command
+    ``gst-inspect-0.10`` to see what output properties can be set on the sink.
+    For example: ``gst-inspect-0.10 shout2send``
+
+.. confval:: logging/console_format
+
+    The log format used for informational logging.
+
+    See `the Python logging docs
+    <http://docs.python.org/2/library/logging.html#formatter-objects>`_ for
+    details on the format.
+
+.. confval:: logging/debug_format
+
+    The log format used for debug logging.
+
+    See `the Python logging docs
+    <http://docs.python.org/2/library/logging.html#formatter-objects>`_ for
+    details on the format.
+
+.. confval:: logging/debug_file
+
+    The file to dump debug log data to when Mopidy is run with the
+    :option:`--save-debug-log` option.
+
+.. confval:: logging.levels/*
+
+    The ``logging.levels`` config section can be used to change the log level
+    for specific parts of Mopidy during development or debugging. Each key in
+    the config section should match the name of a logger. The value is the log
+    level to use for that logger, one of ``debug``, ``info``, ``warning``,
+    ``error``, or ``critical``.
+
+.. confval:: proxy/hostname
+
+    Proxy server to use for communication with the Internet.
+
+    Currently only used by the Spotify extension.
+
+.. confval:: proxy/username
+
+    Username for the proxy server, if required.
+
+.. confval:: proxy/password
+
+    Password for the proxy server, if required.
 
 
 Default core configuration
 ==========================
 
-TODO
+.. literalinclude:: ../mopidy/default.conf
+    :language: ini
 
 
 Advanced configurations

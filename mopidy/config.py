@@ -1,27 +1,13 @@
 from __future__ import unicode_literals
 
+import os
+
 from mopidy.utils import config
 
 
-default_config = """
-[logging]
-console_format = %(levelname)-8s %(message)s
-debug_format = %(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n  %(message)s
-debug_file = mopidy.log
+default_config_file = os.path.join(os.path.dirname(__file__), 'default.conf')
+default_config = open(default_config_file).read()
 
-[logging.levels]
-pykka = info
-
-[audio]
-mixer = autoaudiomixer
-mixer_track =
-output = autoaudiosink
-
-[proxy]
-hostname =
-username =
-password =
-"""
 
 config_schemas = {}  # TODO: use ordered dict?
 config_schemas['logging'] = config.ConfigSchema()
