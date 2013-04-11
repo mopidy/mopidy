@@ -61,6 +61,7 @@ Development
 .. toctree::
     :maxdepth: 2
 
+    contributing
     development
     extensiondev
     api/index
