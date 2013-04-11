@@ -7,7 +7,7 @@ import logging
 import sys
 
 from mopidy.config.schemas import *
-from mopidy.config.values import *
+from mopidy.config.types import *
 from mopidy.utils import path
 
 logger = logging.getLogger('mopdiy.config')

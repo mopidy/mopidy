@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from mopidy import exceptions
-from mopidy.config import values
+from mopidy.config import types
 
 
 def _did_you_mean(name, choices):
@@ -101,7 +101,7 @@ class ExtensionConfigSchema(ConfigSchema):
     """
     def __init__(self):
         super(ExtensionConfigSchema, self).__init__()
-        self['enabled'] = values.Boolean()
+        self['enabled'] = types.Boolean()
 
 
 class LogLevelConfigSchema(object):
@@ -112,7 +112,7 @@ class LogLevelConfigSchema(object):
     :class:`ConfigSchema`, but implements the same interface.
     """
     def __init__(self):
-        self._config_value = values.LogLevel()
+        self._config_value = types.LogLevel()
 
     def format(self, name, values):
         lines = ['[%s]' % name]
