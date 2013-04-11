@@ -60,7 +60,7 @@ Music from local storage
 
 If you want use Mopidy to play music you have locally at your machine instead
 of or in addition to using Spotify, you need to review and maybe change some of
-the local backend config values. See :ref:`local-backend`, for a complete list.
+the local backend config values. See :ref:`ext-local`, for a complete list.
 Then you need to generate a tag cache for your local music...
 
 
