@@ -48,7 +48,7 @@ User documentation
     troubleshooting
     authors
     licenses
-    changes
+    changelog
 
 
 Reference documentation

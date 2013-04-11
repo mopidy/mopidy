@@ -1,8 +1,8 @@
-*******
-Changes
-*******
+*********
+Changelog
+*********
 
-This change log is used to track all major changes to Mopidy.
+This changelog is used to track all major changes to Mopidy.
 
 v0.14.0 (UNRELEASED)
 ====================
