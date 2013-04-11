@@ -26,15 +26,6 @@ MB = 1 << 20
 class Audio(pykka.ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
-
-    **Default config:**
-
-    .. code-block:: ini
-
-        [audio]
-        mixer = autoaudiomixer
-        mixer_track =
-        output = autoaudiosink
     """
 
     #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
