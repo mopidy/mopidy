@@ -15,6 +15,7 @@ These extensions are created and maintained by Mopidy's core developers. They
 are installed together with Mopidy and are enabled by default.
 
 .. toctree::
+    :maxdepth: 2
     :glob:
 
     **
