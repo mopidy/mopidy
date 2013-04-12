@@ -99,3 +99,5 @@ well, you are of course free to run your own web server and just use Mopidy's
 web server for the APIs. But, for clients implemented purely in JavaScript,
 letting Mopidy host the files is a simpler solution.
 
+If you're looking for a web based client for Mopidy, go check out
+:ref:`http-clients`.
