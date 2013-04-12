@@ -61,6 +61,7 @@ Development
 
     contributing
     development
+    codestyle
     extensiondev
 
 
