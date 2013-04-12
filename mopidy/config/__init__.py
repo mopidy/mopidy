@@ -103,23 +103,8 @@ def validate(raw_config, schemas, extensions=None):
     for extension in extensions or []:
         sections_and_schemas.append(
             (extension.ext_name, extension.get_config_schema()))
-    return _validate(raw_config, sections_and_schemas)
 
-
-# TODO: replace validate() with this version of API.
-def _validate(raw_config, schemas):
-    # Get validated config
-    config = {}
-    errors = {}
-    for name, schema in schemas:
-        if name not in raw_config:
-            errors[name] = {name: 'section not found'}
-        try:
-            items = raw_config[name].items()
-            config[name] = schema.convert(items)
-        # TODO: convert to ConfigSchemaError
-        except exceptions.ConfigError as error:
-            errors[name] = error
+    config, errors = _validate(raw_config, sections_and_schemas)
 
     if errors:
         # TODO: raise error instead.
@@ -131,6 +116,24 @@ def _validate(raw_config, schemas):
         sys.exit(1)
 
     return config
+
+
+# TODO: replace validate() with this version of API.
+def _validate(raw_config, schemas):
+    # Get validated config
+    config = {}
+    errors = []
+    for name, schema in schemas:
+        try:
+            items = raw_config[name].items()
+            config[name] = schema.convert(items)
+        except KeyError:
+            errors.append('%s: section not found.' % name)
+        except exceptions.ConfigError as error:
+            for key in error:
+                errors.append('%s/%s: %s' % (name, key, error[key]))
+    # TODO: raise errors instead of return
+    return config, errors
 
 
 def parse_override(override):
