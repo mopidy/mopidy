@@ -37,10 +37,35 @@ Making changes
    - Improvements to the documentation get the prefix ``docs/``
 
 
+.. _run-from-git:
+
+Running Mopidy from Git
+=======================
+
+If you want to hack on Mopidy, you should run Mopidy directly from the Git
+repo.
+
+1. Go to the Git repo root::
+
+       cd mopidy/
+
+2. To get a ``mopidy`` executable, run::
+
+      python setup.py develop
+
+3. Now you can run the Mopidy command, and it will run using the code
+   in the Git repo::
+
+      mopidy
+
+   If you do any changes to the code, you'll just need to restart ``mopidy``
+   to see the changes take effect.
+
+
 Testing
 =======
 
-Mopidy got quite good test coverage, and we would like all new code going into
+Mopidy has quite good test coverage, and we would like all new code going into
 Mopidy to come with tests.
 
 1. To run tests, you need a couple of dependencies. They can be installed using
@@ -78,6 +103,8 @@ Submitting changes
 
 Additional resources
 ====================
+
+- IRC channel: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
 
 - `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
 
