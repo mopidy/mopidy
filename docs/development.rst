@@ -161,50 +161,6 @@ Commit guidelines
 - Merge feature branches with ``--no-ff`` to keep track of the merge.
 
 
-Running tests
-=============
-
-To run tests, you need a couple of dependencies. They can be installed through
-Debian/Ubuntu package management::
-
-    sudo apt-get install python-coverage python-mock python-nose
-
-Or, they can be installed using ``pip``::
-
-    sudo pip install -r requirements/tests.txt
-
-Then, to run all tests, go to the project directory and run::
-
-    nosetests
-
-For example::
-
-    $ nosetests
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................................
-    .............................................................
-    -----------------------------------------------------------------------------
-    1062 tests run in 7.4 seconds (1062 tests passed)
-
-To run tests with test coverage statistics, remember to specify the tests dir::
-
-    nosetests --with-coverage tests/
-
-For more documentation on testing, check out the `nose documentation
-<http://nose.readthedocs.org/>`_.
-
-
 Continuous integration
 ======================
 
