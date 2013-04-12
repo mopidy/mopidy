@@ -95,8 +95,8 @@ Submitting changes
 
 - One branch per feature or fix.
 
-- Follow the style guide, especially make sure ``flake8`` does not complain
-  about anything.
+- Follow the :ref:`style guide <codestyle>`_, especially make sure ``flake8``
+  does not complain about anything.
 
 - Send a pull request to the ``develop`` branch.
 

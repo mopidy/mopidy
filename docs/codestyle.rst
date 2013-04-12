@@ -1,3 +1,5 @@
+.. _codestyle:
+
 **********
 Code style
 **********
