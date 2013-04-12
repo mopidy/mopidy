@@ -59,7 +59,7 @@ def load(files, overrides, extensions=None):
     defaults = [default_config]
     if extensions:
         defaults.extend(e.get_default_config() for e in extensions)
-    return _load(files, defaults, extensions)
+    return _load(files, defaults, overrides)
 
 
 # TODO: replace load() with this version of API.
@@ -70,8 +70,8 @@ def _load(files, defaults, overrides):
     sources = ['builtin-defaults'] + files + ['command-line']
     logger.info('Loading config from: %s', ', '.join(sources))
 
-    for default in defaults:
-        parser.readfp(io.StringIO(default))
+    for default in defaults: # TODO: remove decoding
+        parser.readfp(io.StringIO(default.decode('utf-8')))
 
     # Load config from a series of config files
     for filename in files:
@@ -109,10 +109,8 @@ def validate(raw_config, schemas, extensions=None):
     if errors:
         # TODO: raise error instead.
         #raise exceptions.ConfigError(errors)
-        for name, error in errors.items():
-            logger.error('[%s] config errors:', name)
-            for key in error:
-                logger.error('%s %s', key, error[key])
+        for error in errors:
+            logger.error(error)
         sys.exit(1)
 
     return config
