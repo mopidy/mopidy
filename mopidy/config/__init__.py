@@ -55,29 +55,31 @@ config_schemas['proxy']['password'] = String(optional=True, secret=True)
 #config_schemas['audio.outputs'] = config.AudioOutputConfigSchema()
 
 
-# TODO: update API to load(files, defaults, overrides) this should not need to
-# know about extensions
 def load(files, overrides, extensions=None):
+    defaults = [default_config]
+    if extensions:
+        defaults.extend(e.get_default_config() for e in extensions)
+    return _load(files, defaults, extensions)
+
+
+# TODO: replace load() with this version of API.
+def _load(files, defaults, overrides):
     parser = configparser.RawConfigParser()
 
     files = [path.expand_path(f) for f in files]
     sources = ['builtin-defaults'] + files + ['command-line']
     logger.info('Loading config from: %s', ', '.join(sources))
 
-    # Read default core config
-    parser.readfp(io.StringIO(default_config))
-
-    # Read default extension config
-    for extension in extensions or []:
-        parser.readfp(io.StringIO(extension.get_default_config()))
+    for default in defaults:
+        parser.readfp(io.StringIO(default))
 
     # Load config from a series of config files
     for filename in files:
         # TODO: if this is the initial load of logging config we might not have
         # a logger at this point, we might want to handle this better.
         try:
-            filehandle = codecs.open(filename, encoding='utf-8')
-            parser.readfp(filehandle)
+            with codecs.open(filename, encoding='utf-8') as filehandle:
+                parser.readfp(filehandle)
         except IOError:
             logger.debug('Config file %s not found; skipping', filename)
             continue
@@ -89,39 +91,41 @@ def load(files, overrides, extensions=None):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
-    # TODO: move out of file loading code?
     for section, key, value in overrides or []:
         raw_config.setdefault(section, {})[key] = value
 
     return raw_config
 
 
-# TODO: switch API to validate(raw_config, schemas) this should not need to
-# know about extensions
 def validate(raw_config, schemas, extensions=None):
     # Collect config schemas to validate against
     sections_and_schemas = schemas.items()
     for extension in extensions or []:
         sections_and_schemas.append(
             (extension.ext_name, extension.get_config_schema()))
+    return _validate(raw_config, sections_and_schemas)
 
+
+# TODO: replace validate() with this version of API.
+def _validate(raw_config, schemas):
     # Get validated config
     config = {}
     errors = {}
-    for section_name, schema in sections_and_schemas:
-        if section_name not in raw_config:
-            errors[section_name] = {section_name: 'section not found'}
+    for name, schema in schemas:
+        if name not in raw_config:
+            errors[name] = {name: 'section not found'}
         try:
-            items = raw_config[section_name].items()
-            config[section_name] = schema.convert(items)
+            items = raw_config[name].items()
+            config[name] = schema.convert(items)
+        # TODO: convert to ConfigSchemaError
         except exceptions.ConfigError as error:
-            errors[section_name] = error
+            errors[name] = error
 
     if errors:
         # TODO: raise error instead.
         #raise exceptions.ConfigError(errors)
-        for section_name, error in errors.items():
-            logger.error('[%s] config errors:', section_name)
+        for name, error in errors.items():
+            logger.error('[%s] config errors:', name)
             for key in error:
                 logger.error('%s %s', key, error[key])
         sys.exit(1)
