@@ -93,7 +93,7 @@ For more documentation on testing, check out the `nose documentation
 Submitting changes
 ==================
 
-- One branch per feature or fix.
+- One branch per feature or fix. Keep branches small and on topic.
 
 - Follow the :ref:`style guide <codestyle>`_, especially make sure ``flake8``
   does not complain about anything.

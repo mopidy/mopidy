@@ -1,19 +1,8 @@
-***********
-Development
-***********
+*****************
+Development tools
+*****************
 
-Commit guidelines
-=================
-
-- We follow the development process described at
-  `nvie.com <http://nvie.com/posts/a-successful-git-branching-model/>`_.
-
-- Keep commits small and on topic.
-
-- If a commit looks too big you should be working in a feature branch not a
-  single commit.
-
-- Merge feature branches with ``--no-ff`` to keep track of the merge.
+Here you'll find description of the development tools we use.
 
 
 Continuous integration
@@ -38,8 +27,8 @@ code. So, if you're out of work, the code coverage and pylint data at the CI
 server should give you a place to start.
 
 
-Protocol debugging
-==================
+Protocol debugger
+=================
 
 Since the main interface provided to Mopidy is through the MPD protocol, it is
 crucial that we try and stay in sync with protocol developments. In an attempt
@@ -82,35 +71,12 @@ both to use ``tests/data/advanced_tag_cache`` for their tag cache and
 playlists.
 
 
-Setting profiles during development
-===================================
-
-While developing Mopidy switching settings back and forth can become an all too
-frequent occurrence. As a quick hack to get around this you can structure your
-settings file in the following way::
-
-    import os
-    profile = os.environ.get('PROFILE', '').split(',')
-
-    if 'shoutcast' in profile:
-        OUTPUT = u'lame ! shout2send mount="/stream"'
-    elif 'silent' in profile:
-        OUTPUT = u'fakesink'
-        MIXER = None
-
-    SPOTIFY_USERNAME = u'xxxxx'
-    SPOTIFY_PASSWORD = u'xxxxx'
-
-Using this setup you can now run Mopidy with ``PROFILE=silent mopidy``
-if you for instance want to test Spotify without any actual audio output.
-
-
-Writing documentation
+Documentation writing
 =====================
 
 To write documentation, we use `Sphinx <http://sphinx-doc.org/>`_. See their
-site for lots of documentation on how to use Sphinx. To generate HTML or LaTeX
-from the documentation files, you need some additional dependencies.
+site for lots of documentation on how to use Sphinx. To generate HTML from the
+documentation files, you need some additional dependencies.
 
 You can install them through Debian/Ubuntu package management::
 
