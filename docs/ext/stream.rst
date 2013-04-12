@@ -23,6 +23,13 @@ Dependencies
 None. The extension just needs Mopidy.
 
 
+Default configuration
+=====================
+
+.. literalinclude:: ../../mopidy/backends/stream/ext.conf
+    :language: ini
+
+
 Configuration values
 ====================
 
@@ -33,10 +40,3 @@ Configuration values
 .. confval:: stream/protocols
 
     Whitelist of URI schemas to allow streaming from.
-
-
-Default configuration
-=====================
-
-.. literalinclude:: ../../mopidy/backends/stream/ext.conf
-    :language: ini

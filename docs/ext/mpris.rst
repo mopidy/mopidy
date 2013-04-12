@@ -25,6 +25,13 @@ Dependencies
   details.
 
 
+Default configuration
+=====================
+
+.. literalinclude:: ../../mopidy/frontends/mpris/ext.conf
+    :language: ini
+
+
 Configuration values
 ====================
 
@@ -35,13 +42,6 @@ Configuration values
 .. confval:: mpris/desktop_file
 
     Location of the Mopidy ``.desktop`` file.
-
-
-Default configuration
-=====================
-
-.. literalinclude:: ../../mopidy/frontends/mpris/ext.conf
-    :language: ini
 
 
 Usage

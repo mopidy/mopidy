@@ -31,6 +31,13 @@ Dependencies
 .. literalinclude:: ../../requirements/spotify.txt
 
 
+Default configuration
+=====================
+
+.. literalinclude:: ../../mopidy/backends/spotify/ext.conf
+    :language: ini
+
+
 Configuration values
 ====================
 
@@ -57,13 +64,6 @@ Configuration values
 .. confval:: spotify/cache_dir
 
     Path to the Spotify data cache. Cannot be shared with other Spotify apps.
-
-
-Default configuration
-=====================
-
-.. literalinclude:: ../../mopidy/backends/spotify/ext.conf
-    :language: ini
 
 
 Usage

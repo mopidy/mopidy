@@ -53,6 +53,13 @@ Dependencies
 None. The extension just needs Mopidy.
 
 
+Default configuration
+=====================
+
+.. literalinclude:: ../../mopidy/frontends/mpd/ext.conf
+    :language: ini
+
+
 Configuration values
 ====================
 
@@ -90,13 +97,6 @@ Configuration values
 
     Number of seconds an MPD client can stay inactive before the connection is
     closed by the server.
-
-
-Default configuration
-=====================
-
-.. literalinclude:: ../../mopidy/frontends/mpd/ext.conf
-    :language: ini
 
 
 Usage

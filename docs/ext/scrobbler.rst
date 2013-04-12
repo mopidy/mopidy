@@ -16,6 +16,13 @@ Dependencies
 .. literalinclude:: ../../requirements/scrobbler.txt
 
 
+Default configuration
+=====================
+
+.. literalinclude:: ../../mopidy/frontends/scrobbler/ext.conf
+    :language: ini
+
+
 Configuration values
 ====================
 
@@ -30,13 +37,6 @@ Configuration values
 .. confval:: scrobbler/password
 
     Your Last.fm password.
-
-
-Default configuration
-=====================
-
-.. literalinclude:: ../../mopidy/frontends/scrobbler/ext.conf
-    :language: ini
 
 
 Usage

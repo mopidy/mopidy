@@ -38,6 +38,13 @@ below, together with their default values. In addition, all :ref:`extensions
 defaults are documented on the :ref:`extension pages <ext>`.
 
 
+Default core configuration
+==========================
+
+.. literalinclude:: ../mopidy/default.conf
+    :language: ini
+
+
 Core configuration values
 =========================
 
@@ -111,13 +118,6 @@ Core configuration values
 .. confval:: proxy/password
 
     Password for the proxy server, if required.
-
-
-Default core configuration
-==========================
-
-.. literalinclude:: ../mopidy/default.conf
-    :language: ini
 
 
 Advanced configurations

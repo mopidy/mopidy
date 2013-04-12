@@ -21,6 +21,13 @@ Dependencies
 .. literalinclude:: ../../requirements/http.txt
 
 
+Default configuration
+=====================
+
+.. literalinclude:: ../../mopidy/frontends/http/ext.conf
+    :language: ini
+
+
 Configuration values
 ====================
 
@@ -53,14 +60,7 @@ Configuration values
     "/mopidy" will continue to work as usual even if you change this setting.
 
 
-Default configuration
-=====================
-
-.. literalinclude:: ../../mopidy/frontends/http/ext.conf
-    :language: ini
-
-
-Setup
+Usage
 =====
 
 The extension is enabled by default if all dependencies are available.
@@ -81,7 +81,7 @@ When it is enabled it starts a web server at the port specified by the
 
 
 Using a web based Mopidy client
-===============================
+-------------------------------
 
 The web server can also host any static files, for example the HTML, CSS,
 JavaScript, and images needed for a web based Mopidy client. To host static

@@ -21,6 +21,13 @@ Dependencies
 None. The extension just needs Mopidy.
 
 
+Default configuration
+=====================
+
+.. literalinclude:: ../../mopidy/backends/local/ext.conf
+    :language: ini
+
+
 Configuration values
 ====================
 
@@ -39,13 +46,6 @@ Configuration values
 .. confval:: local/tag_cache_file
 
     Path to tag cache for local media.
-
-
-Default configuration
-=====================
-
-.. literalinclude:: ../../mopidy/backends/local/ext.conf
-    :language: ini
 
 
 Usage
