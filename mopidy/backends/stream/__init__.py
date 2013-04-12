@@ -1,53 +1,9 @@
 from __future__ import unicode_literals
 
+import os
+
 import mopidy
 from mopidy import config, ext
-from mopidy.utils import formatting
-
-
-default_config = """
-[stream]
-enabled = true
-protocols =
-    http
-    https
-    mms
-    rtmp
-    rtmps
-    rtsp
-"""
-
-__doc__ = """
-A backend for playing music for streaming music.
-
-This backend will handle streaming of URIs matching the
-:confval:`stream/protocols` config value, assuming the needed GStreamer plugins
-are installed.
-
-**Issues**
-
-https://github.com/mopidy/mopidy/issues?labels=Stream+backend
-
-**Dependencies**
-
-None
-
-**Configuration**
-
-.. confval:: stream/enabled
-
-    If the stream extension should be enabled or not.
-
-.. confval:: stream/protocols
-
-    Whitelist of URI schemas to allow streaming from.
-
-**Default config**
-
-.. code-block:: ini
-
-%(config)s
-""" % {'config': formatting.indent(default_config)}
 
 
 class Extension(ext.Extension):
@@ -57,7 +13,8 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return default_config
+        conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
+        return open(conf_file).read()
 
     def get_config_schema(self):
         schema = config.ExtensionConfigSchema()

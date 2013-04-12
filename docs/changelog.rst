@@ -1,8 +1,8 @@
-*******
-Changes
-*******
+*********
+Changelog
+*********
 
-This change log is used to track all major changes to Mopidy.
+This changelog is used to track all major changes to Mopidy.
 
 v0.14.0 (UNRELEASED)
 ====================
@@ -333,7 +333,7 @@ We've added an HTTP frontend for those wanting to build web clients for Mopidy!
 **HTTP frontend**
 
 - Added new optional HTTP frontend which exposes Mopidy's core API through
-  JSON-RPC 2.0 messages over a WebSocket. See :ref:`http-frontend` for further
+  JSON-RPC 2.0 messages over a WebSocket. See :ref:`http-api` for further
   details.
 
 - Added a JavaScript library, Mopidy.js, to make it easier to develop web based

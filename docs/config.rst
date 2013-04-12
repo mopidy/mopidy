@@ -2,28 +2,9 @@
 Configuration
 *************
 
-Mopidy has quite a few config values to tweak. Luckily, you only need to change
-a few, and stay ignorant of the rest. Below you can find guides for typical
-configuration changes you may want to do, and a listing of the available config
-values.
-
-
-Changing configuration
-======================
-
-Mopidy primarily reads config from the file ``~/.config/mopidy/mopidy.conf``,
-where ``~`` means your *home directory*. If your username is ``alice`` and you
-are running Linux, the settings file should probably be at
-``/home/alice/.config/mopidy/mopidy.conf``.
-
-You can either create the configuration file yourself, or run the ``mopidy``
-command, and it will create an empty settings file for you.
-
-When you have created the configuration file, open it in a text editor, and add
-settings you want to change. If you want to keep the default value for a
-setting, you should *not* redefine it in your own settings file.
-
-A complete ``~/.config/mopidy/mopidy.conf`` may look as simple as this:
+Mopidy has a lot of config values you can tweak, but you only need to change a
+few to get up and running. A complete ``~/.config/mopidy/mopidy.conf`` may be
+as simple as this:
 
 .. code-block:: ini
 
@@ -34,126 +15,116 @@ A complete ``~/.config/mopidy/mopidy.conf`` may look as simple as this:
     username = alice
     password = mysecret
 
+Mopidy primarily reads config from the file ``~/.config/mopidy/mopidy.conf``,
+where ``~`` means your *home directory*. If your username is ``alice`` and you
+are running Linux, the settings file should probably be at
+``/home/alice/.config/mopidy/mopidy.conf``. You can either create the
+configuration file yourself, or run the ``mopidy`` command, and it will create
+an empty settings file for you and print what config values must be set
+to successfully start Mopidy.
 
-.. _music-from-spotify:
+When you have created the configuration file, open it in a text editor, and add
+the config values you want to change. If you want to keep the default for a
+config value, you **should not** add it to ``~/.config/mopidy/mopidy.conf``.
 
-Music from Spotify
-==================
+To see what's the effective configuration for your Mopidy installation, you can
+run ``mopidy --show-config``. It will print your full effective config with
+passwords masked out so that you safely can share the output with others for
+debugging.
 
-If you are using the Spotify backend, which is the default, enter your Spotify
-Premium account's username and password into the file, like this:
-
-.. code-block:: ini
-
-    [spotify]
-    username = myusername
-    password = mysecret
-
-This will only work if you have the Spotify Premium subscription. Spotify
-Unlimited will not work.
-
-
-.. _music-from-local-storage:
-
-Music from local storage
-========================
-
-If you want use Mopidy to play music you have locally at your machine instead
-of or in addition to using Spotify, you need to review and maybe change some of
-the local backend config values. See :ref:`local-backend`, for a complete list.
-Then you need to generate a tag cache for your local music...
+You can find a description of all config values belonging to Mopidy's core
+below, together with their default values. In addition, all :ref:`extensions
+<ext>` got additional config values. The extension's config values and config
+defaults are documented on the :ref:`extension pages <ext>`.
 
 
-.. _generating-a-tag-cache:
+Default core configuration
+==========================
 
-Generating a tag cache
-----------------------
-
-The program :command:`mopidy-scan` will scan the path set in the
-:confval:`local/media_dir` config value for any media files and build a MPD
-compatible ``tag_cache``.
-
-To make a ``tag_cache`` of your local music available for Mopidy:
-
-#. Ensure that the :confval:`local/media_dir` config value points to where your
-   music is located. Check the current setting by running::
-
-    mopidy --show-config
-
-#. Scan your media library. The command outputs the ``tag_cache`` to
-   standard output, which means that you will need to redirect the output to a
-   file yourself::
-
-    mopidy-scan > tag_cache
-
-#. Move the ``tag_cache`` file to the location
-   set in the :confval:`local/tag_cache_file` config value, or change the
-   config value to point to where your ``tag_cache`` file is.
-
-#. Start Mopidy, find the music library in a client, and play some local music!
+.. literalinclude:: ../mopidy/default.conf
+    :language: ini
 
 
-.. _use-mpd-on-a-network:
-
-Connecting from other machines on the network
-=============================================
-
-As a secure default, Mopidy only accepts connections from ``localhost``. If you
-want to open it for connections from other machines on your network, see
-the documentation for the :confval:`mpd/hostname` config value.
-
-If you open up Mopidy for your local network, you should consider turning on
-MPD password authentication by setting the :confval:`mpd/password` config value
-to the password you want to use.  If the password is set, Mopidy will require
-MPD clients to provide the password before they can do anything else. Mopidy
-only supports a single password, and do not support different permission
-schemes like the original MPD server.
-
-
-Scrobbling tracks to Last.fm
-============================
-
-If you want to submit the tracks you are playing to your `Last.fm
-<http://www.last.fm/>`_ profile, make sure you've installed the dependencies
-found at :mod:`mopidy.frontends.scrobbler` and add the following to your
-settings file:
-
-.. code-block:: ini
-
-    [scrobbler]
-    username = myusername
-    password = mysecret
-
-
-.. _install-desktop-file:
-
-Controlling Mopidy through the Ubuntu Sound Menu
-================================================
-
-If you are running Ubuntu and installed Mopidy using the Debian package from
-APT you should be able to control Mopidy through the `Ubuntu Sound Menu
-<https://wiki.ubuntu.com/SoundMenu>`_ without any changes.
-
-If you installed Mopidy in any other way and want to control Mopidy through the
-Ubuntu Sound Menu, you must install the ``mopidy.desktop`` file which can be
-found in the ``data/`` dir of the Mopidy source into the
-``/usr/share/applications`` dir by hand::
-
-    cd /path/to/mopidy/source
-    sudo cp data/mopidy.desktop /usr/share/applications/
-
-After you have installed the file, start Mopidy in any way, and Mopidy should
-appear in the Ubuntu Sound Menu. When you quit Mopidy, it will still be listed
-in the Ubuntu Sound Menu, and may be restarted by selecting it there.
-
-The Ubuntu Sound Menu interacts with Mopidy's MPRIS frontend,
-:mod:`mopidy.frontends.mpris`. The MPRIS frontend supports the minimum
-requirements of the `MPRIS specification <http://www.mpris.org/>`_. The
-``TrackList`` interface of the spec is not supported.
-
-
-Using a custom audio sink
+Core configuration values
 =========================
+
+.. confval:: audio/mixer
+
+    Audio mixer to use.
+
+    Expects a GStreamer mixer to use, typical values are: ``alsamixer``,
+    ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
+
+    Setting this to blank turns off volume control. ``software`` can be used to
+    force software mixing in the application.
+
+.. confval:: audio/mixer_track
+
+    Audio mixer track to use.
+
+    Name of the mixer track to use. If this is not set we will try to find the
+    master output track. As an example, using ``alsamixer`` you would typically
+    set this to ``Master`` or ``PCM``.
+
+.. confval:: audio/output
+
+    Audio output to use.
+
+    Expects a GStreamer sink. Typical values are ``autoaudiosink``,
+    ``alsasink``, ``osssink``, ``oss4sink``, ``pulsesink``, and ``shout2send``,
+    and additional arguments specific to each sink. You can use the command
+    ``gst-inspect-0.10`` to see what output properties can be set on the sink.
+    For example: ``gst-inspect-0.10 shout2send``
+
+.. confval:: logging/console_format
+
+    The log format used for informational logging.
+
+    See `the Python logging docs
+    <http://docs.python.org/2/library/logging.html#formatter-objects>`_ for
+    details on the format.
+
+.. confval:: logging/debug_format
+
+    The log format used for debug logging.
+
+    See `the Python logging docs
+    <http://docs.python.org/2/library/logging.html#formatter-objects>`_ for
+    details on the format.
+
+.. confval:: logging/debug_file
+
+    The file to dump debug log data to when Mopidy is run with the
+    :option:`--save-debug-log` option.
+
+.. confval:: logging.levels/*
+
+    The ``logging.levels`` config section can be used to change the log level
+    for specific parts of Mopidy during development or debugging. Each key in
+    the config section should match the name of a logger. The value is the log
+    level to use for that logger, one of ``debug``, ``info``, ``warning``,
+    ``error``, or ``critical``.
+
+.. confval:: proxy/hostname
+
+    Proxy server to use for communication with the Internet.
+
+    Currently only used by the Spotify extension.
+
+.. confval:: proxy/username
+
+    Username for the proxy server, if required.
+
+.. confval:: proxy/password
+
+    Password for the proxy server, if required.
+
+
+Advanced configurations
+=======================
+
+Custom audio sink
+-----------------
 
 If you have successfully installed GStreamer, and then run the ``gst-inspect``
 or ``gst-inspect-0.10`` command, you should see a long listing of installed
@@ -190,8 +161,8 @@ this work first::
     gst-launch-0.10 audiotestsrc ! audioresample ! oss4sink
 
 
-Streaming audio through a SHOUTcast/Icecast server
-==================================================
+Streaming through SHOUTcast/Icecast
+-----------------------------------
 
 If you want to play the audio on another computer than the one running Mopidy,
 you can stream the audio from Mopidy through an SHOUTcast or Icecast audio
@@ -219,8 +190,8 @@ can use with the ``gst-launch-0.10`` command can be plugged into
 :confval:`audio/output`.
 
 
-Custom configuration values
-===========================
+New configuration values
+------------------------
 
 Mopidy's settings validator will stop you from defining any config values in
 your settings file that Mopidy doesn't know about. This may sound obnoxious,
@@ -232,9 +203,3 @@ system, you can add new sections to the config without triggering the config
 validator. We recommend that you choose a good and unique name for the config
 section so that multiple extensions to Mopidy can be used at the same time
 without any danger of naming collisions.
-
-
-Available settings
-==================
-
-.. note:: TODO: Document config values of the new config system

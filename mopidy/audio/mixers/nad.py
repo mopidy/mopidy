@@ -3,11 +3,15 @@
 The NAD amplifier must be connected to the machine running Mopidy using a
 serial cable.
 
-**Dependencies**
+
+Dependencies
+============
 
 .. literalinclude:: ../../../../requirements/external_mixers.txt
 
-**Configuration**
+
+Configuration
+=============
 
 Set the :confval:`audio/mixer` config value to ``nadmixer`` to use it. You
 probably also needs to add some properties to the :confval:`audio/mixer` config

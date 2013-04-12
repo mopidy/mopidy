@@ -8,9 +8,9 @@ MPRIS clients
 Specification. It's a spec that describes a standard D-Bus interface for making
 media players available to other applications on the same system.
 
-Mopidy's :ref:`MPRIS frontend <mpris-frontend>` currently implements all
-required parts of the MPRIS spec, plus the optional playlist interface. It does
-not implement the optional tracklist interface.
+Mopidy's :ref:`MPRIS frontend <ext-mpris>` currently implements all required
+parts of the MPRIS spec, plus the optional playlist interface. It does not
+implement the optional tracklist interface.
 
 
 .. _ubuntu-sound-menu:

@@ -1,53 +1,9 @@
 from __future__ import unicode_literals
 
+import os
+
 import mopidy
 from mopidy import config, exceptions, ext
-from mopidy.utils import formatting
-
-
-default_config = """
-[scrobbler]
-enabled = true
-username =
-password =
-"""
-
-__doc__ = """
-Frontend which scrobbles the music you play to your
-`Last.fm <http://www.last.fm>`_ profile.
-
-.. note::
-
-    This frontend requires a free user account at Last.fm.
-
-**Dependencies**
-
-.. literalinclude:: ../../../requirements/scrobbler.txt
-
-**Configuration**
-
-.. confval:: scrobbler/enabled
-
-    If the scrobbler extension should be enabled or not.
-
-.. confval:: scrobbler/username
-
-    Your Last.fm username.
-
-.. confval:: scrobbler/password
-
-    Your Last.fm password.
-
-**Default config**
-
-.. code-block:: ini
-
-%(config)s
-
-**Usage**
-
-The frontend is enabled by default if all dependencies are available.
-""" % {'config': formatting.indent(default_config)}
 
 
 class Extension(ext.Extension):
@@ -57,7 +13,8 @@ class Extension(ext.Extension):
     version = mopidy.__version__
 
     def get_default_config(self):
-        return default_config
+        conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
+        return open(conf_file).read()
 
     def get_config_schema(self):
         schema = config.ExtensionConfigSchema()
