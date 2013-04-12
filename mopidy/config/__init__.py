@@ -137,4 +137,4 @@ def parse_override(override):
     """Parse section/key=value override."""
     section, remainder = override.split('/', 1)
     key, value = remainder.split('=', 1)
-    return (section, key, value)
+    return (section.strip(), key.strip(), value.strip())

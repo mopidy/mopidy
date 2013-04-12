@@ -47,3 +47,22 @@ class LoadConfigTest(unittest.TestCase):
         expected = {'foo': {'bar': 'baz'}, 'foo2': {'bar': 'baz'}}
         result = config._load([file1, file2], [], [])
         self.assertEqual(expected, result)
+
+
+class ParseOverrideTest(unittest.TestCase):
+    def test_valid_override(self):
+        expected = ('section', 'key', 'value')
+        self.assertEqual(expected, config.parse_override('section/key=value'))
+        self.assertEqual(expected, config.parse_override('section/key=value '))
+        self.assertEqual(expected, config.parse_override('section/key =value'))
+        self.assertEqual(expected, config.parse_override('section /key=value'))
+
+    def test_empty_override(self):
+        expected = ('section', 'key', '')
+        self.assertEqual(expected, config.parse_override('section/key='))
+        self.assertEqual(expected, config.parse_override('section/key=  '))
+
+    def test_invalid_override(self):
+        self.assertRaises(ValueError, config.parse_override, 'section/key')
+        self.assertRaises(ValueError, config.parse_override, 'section=')
+        self.assertRaises(ValueError, config.parse_override, 'section')
