@@ -13,11 +13,11 @@ extensions <extensiondev>`.
 Bundled with Mopidy
 ===================
 
-These extensions are created and maintained by Mopidy's core developers. They
-are installed together with Mopidy and are enabled by default.
+These extensions are maintained by Mopidy's core developers. They are installed
+together with Mopidy and are enabled by default.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :glob:
 
     **
@@ -26,11 +26,19 @@ are installed together with Mopidy and are enabled by default.
 External extensions
 ===================
 
-These extensions are created and maintained by other developers.
+These extensions are maintained outside Mopidy's core, often by other
+developers.
 
 
 Mopidy-SoundCloud
 -----------------
 
-To play music from `SoundCloud <http://www.soundcloud.com/>`_ check out
-`Mopidy-SoundCloud <https://pypi.python.org/pypi/Mopidy-SoundCloud>`_.
+Provides a backend for playing music from the `SoundCloud
+<http://www.soundcloud.com/>`_ service.
+
+Author:
+    Janez Troha
+PyPI:
+    `Mopidy-SoundCloud <https://pypi.python.org/pypi/Mopidy-SoundCloud>`_
+GitHub:
+    `dz0ny/mopidy-soundcloud <https://github.com/dz0ny/mopidy-soundcloud>`_
