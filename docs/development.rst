@@ -6,23 +6,6 @@ Development of Mopidy is coordinated through the IRC channel ``#mopidy`` at
 ``irc.freenode.net`` and through `GitHub <https://github.com/>`_.
 
 
-Release schedule
-================
-
-We intend to have about one timeboxed feature release every month
-in periods of active development. The feature releases are numbered 0.x.0. The
-features added is a mix of what we feel is most important/requested of the
-missing features, and features we develop just because we find them fun to
-make, even though they may be useful for very few users or for a limited use
-case.
-
-Bugfix releases, numbered 0.x.y, will be released whenever we discover bugs
-that are too serious to wait for the next feature release. We will only release
-bugfix releases for the last feature release. E.g. when 0.3.0 is released, we
-will no longer provide bugfix releases for the 0.2 series. In other words,
-there will be just a single supported release at any point in time.
-
-
 Feature wishlist
 ================
 

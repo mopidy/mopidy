@@ -50,6 +50,7 @@ About
     authors
     licenses
     changelog
+    versioning
 
 
 Development
