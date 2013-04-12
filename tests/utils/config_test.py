@@ -441,7 +441,8 @@ class LogLevelConfigSchemaTest(unittest.TestCase):
     def test_format(self):
         schema = config.LogLevelConfigSchema()
         expected = ['[levels]', 'baz = info', 'foo.bar = debug']
-        result = schema.format('levels', {'foo.bar': logging.DEBUG, 'baz': logging.INFO})
+        result = schema.format(
+            'levels', {'foo.bar': logging.DEBUG, 'baz': logging.INFO})
         self.assertEqual('\n'.join(expected), result)
 
 

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import logging
 import logging.handlers
 
-from . import deps, versioning
+from . import versioning
 
 
 def setup_logging(config, verbosity_level, save_debug_log):
