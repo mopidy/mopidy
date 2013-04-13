@@ -143,19 +143,20 @@ def show_config_callback(option, opt, value, parser):
 
     # TODO: create mopidy.config.format?
     output = []
-    for section_name, schema in config_lib.config_schemas.items():
-        options = config.get(section_name, {})
+    for schema in config_lib.core_schemas:
+        options = config.get(schema.name, {})
         if not options:
             continue
-        output.append(schema.format(section_name, options))
+        output.append(schema.format(options))
 
     for extension in extensions:
+        schema = extension.get_config_schema()
+
         if extension in enabled_extensions:
-            schema = extension.get_config_schema()
-            options = config.get(extension.ext_name, {})
-            output.append(schema.format(extension.ext_name, options))
+            options = config.get(schema.name, {})
+            output.append(schema.format(options))
         else:
-            lines = ['[%s]' % extension.ext_name, 'enabled = false',
+            lines = ['[%s]' % schema.name, 'enabled = false',
                      '# Config hidden as extension is disabled']
             output.append('\n'.join(lines))
 
