@@ -24,7 +24,7 @@ class Extension(object):
 
     def get_config_schema(self):
         """TODO"""
-        return config_lib.ExtensionConfigSchema()
+        return config_lib.ExtensionConfigSchema(self.ext_name)
 
     def validate_environment(self):
         """TODO"""
