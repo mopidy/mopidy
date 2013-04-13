@@ -69,8 +69,7 @@ def _load(files, defaults, overrides):
     files = [path.expand_path(f) for f in files]
     sources = ['builtin-defaults'] + files + ['command-line']
     logger.info('Loading config from: %s', ', '.join(sources))
-
-    for default in defaults: # TODO: remove decoding
+    for default in defaults:  # TODO: remove decoding
         parser.readfp(io.StringIO(default.decode('utf-8')))
 
     # Load config from a series of config files

@@ -36,13 +36,11 @@ def _levenshtein(a, b):
     return current[n]
 
 
-
-
 class ConfigSchema(object):
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
-    instances.  Once setup :meth:`convert` can be called with a list of 
+    instances.  Once setup :meth:`convert` can be called with a list of
     ``(key, value)`` tuples to process. For convienience we also support
     :meth:`format` method that can used for printing out the converted values.
     """

@@ -194,7 +194,7 @@ class ExpandedPath(bytes):
 
 
 class Path(ConfigValue):
-    """File system path that will be expanded with mopidy.utils.path.expand_path
+    """File system path that will be expanded.
 
     Supports: optional, choices and secret.
     """

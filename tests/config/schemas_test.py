@@ -4,7 +4,7 @@ import logging
 import mock
 
 from mopidy import exceptions
-from mopidy.config import schemas
+from mopidy.config import schemas, types
 
 from tests import unittest
 
@@ -89,7 +89,7 @@ class ConfigSchemaTest(unittest.TestCase):
 class ExtensionConfigSchemaTest(unittest.TestCase):
     def test_schema_includes_enabled(self):
         schema = schemas.ExtensionConfigSchema()
-        self.assertIsInstance(schema['enabled'], values.Boolean)
+        self.assertIsInstance(schema['enabled'], types.Boolean)
 
 
 class LogLevelConfigSchemaTest(unittest.TestCase):
@@ -102,8 +102,9 @@ class LogLevelConfigSchemaTest(unittest.TestCase):
 
     def test_format(self):
         schema = schemas.LogLevelConfigSchema()
+        values = {'foo.bar': logging.DEBUG, 'baz': logging.INFO}
         expected = ['[levels]', 'baz = info', 'foo.bar = debug']
-        result = schema.format('levels', {'foo.bar': logging.DEBUG, 'baz': logging.INFO})
+        result = schema.format('levels', values)
         self.assertEqual('\n'.join(expected), result)
 
 

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 # TODO: add validate regexp?
 
+
 def validate_required(value, required):
     """Required validation, normally called in config value's validate() on the
     raw string, _not_ the converted value."""

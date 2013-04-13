@@ -14,12 +14,14 @@ class ValidateChoiceTest(unittest.TestCase):
         validators.validate_choice(1, [1, 2, 3])
 
     def test_empty_choices_fails(self):
-        self.assertRaises(ValueError,validators.validate_choice, 'foo', [])
+        self.assertRaises(ValueError, validators.validate_choice, 'foo', [])
 
     def test_invalid_value_fails(self):
         words = ['foo', 'bar', 'baz']
-        self.assertRaises(ValueError, validators.validate_choice, 'foobar', words)
-        self.assertRaises(ValueError, validators.validate_choice, 5, [1, 2, 3])
+        self.assertRaises(
+            ValueError, validators.validate_choice, 'foobar', words)
+        self.assertRaises(
+            ValueError, validators.validate_choice, 5, [1, 2, 3])
 
 
 class ValidateMinimumTest(unittest.TestCase):

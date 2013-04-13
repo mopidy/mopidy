@@ -4,7 +4,6 @@ import logging
 import mock
 import socket
 
-from mopidy import exceptions
 from mopidy.config import types
 
 from tests import unittest
@@ -165,7 +164,7 @@ class ListTest(unittest.TestCase):
         self.assertRegexpMatches(result, r'foo\n\s*bar\n\s*baz')
 
 
-class BooleanTest(unittest.TestCase):
+class LogLevelTest(unittest.TestCase):
     levels = {'critical': logging.CRITICAL,
               'error': logging.ERROR,
               'warning': logging.WARNING,

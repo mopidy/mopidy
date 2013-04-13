@@ -24,7 +24,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from mopidy import exceptions, ext
+from mopidy import ext
 from mopidy.audio import Audio
 from mopidy import config as config_lib
 from mopidy.core import Core
@@ -136,12 +136,14 @@ def show_config_callback(option, opt, value, parser):
     overrides = getattr(parser.values, 'overrides', [])
 
     extensions = ext.load_extensions()
-    raw_config = load_config(files, overrides, extensions)
+    raw_config = config_lib.load(files, overrides, extensions)
     enabled_extensions = ext.filter_enabled_extensions(raw_config, extensions)
-    config = validate_config(raw_config, config_schemas, enabled_extensions)
+    config = config_lib.validate(
+        raw_config, config_lib.config_schemas, enabled_extensions)
 
+    # TODO: create mopidy.config.format?
     output = []
-    for section_name, schema in config_schemas.items():
+    for section_name, schema in config_lib.config_schemas.items():
         options = config.get(section_name, {})
         if not options:
             continue
