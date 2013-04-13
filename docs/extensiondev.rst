@@ -4,16 +4,9 @@
 Extension development
 *********************
 
-.. warning:: Draft
-
-    This document is a draft open for discussion. It shows how we imagine that
-    development of Mopidy extensions should become in the future, not how to
-    currently develop an extension for Mopidy.
-
-
 Mopidy started as simply an MPD server that could play music from Spotify.
 Early on Mopidy got multiple "frontends" to expose Mopidy to more than just MPD
-clients: for example the Last.fm frontend what scrobbles what you've listened
+clients: for example the scrobbler frontend what scrobbles what you've listened
 to to your Last.fm account, the MPRIS frontend that integrates Mopidy into the
 Ubuntu Sound Menu, and the HTTP server and JavaScript player API making web
 based Mopidy clients possible. In Mopidy 0.9 we added support for multiple
@@ -120,9 +113,9 @@ register themselves as available Mopidy extensions when they are installed on
 your system.
 
 The example below also includes a couple of convenient tricks for reading the
-package version from the source code so that it it's just defined in a single
-place, and to reuse the README file as the long description of the package for
-the PyPI registration.
+package version from the source code so that it is defined in a single place,
+and to reuse the README file as the long description of the package for the
+PyPI registration.
 
 The package must have ``install_requires`` on ``setuptools`` and ``Mopidy``, in
 addition to any other dependencies required by your extension. The
@@ -189,17 +182,18 @@ Python package.
 
 The root of your Python package should have an ``__version__`` attribute with a
 :pep:`386` compliant version number, for example "0.1". Next, it should have a
-class named ``Extension`` which inherits from Mopidy's extension base class.
-This is the class referred to in the ``entry_points`` part of ``setup.py``. Any
-imports of other files in your extension should be kept inside methods.  This
-ensures that this file can be imported without raising :exc:`ImportError`
-exceptions for missing dependencies, etc.
+class named ``Extension`` which inherits from Mopidy's extension base class,
+:class:`mopidy.ext.Extension`. This is the class referred to in the
+``entry_points`` part of ``setup.py``. Any imports of other files in your
+extension should be kept inside methods.  This ensures that this file can be
+imported without raising :exc:`ImportError` exceptions for missing
+dependencies, etc.
 
 The default configuration for the extension is defined by the
 ``get_default_config()`` method in the ``Extension`` class which returns a
-:mod:`ConfigParser` compatible config section. The config section's name should
+:mod:`ConfigParser` compatible config section. The config section's name must
 be the same as the extension's short name, as defined in the ``entry_points``
-part of ``setup.py``, for example ``soundspot``. All extensions should include
+part of ``setup.py``, for example ``soundspot``. All extensions must include
 an ``enabled`` config which should default to ``true``. Provide good defaults
 for all config values so that as few users as possible will need to change
 them. The exception is if the config value has security implications; in that
@@ -210,8 +204,6 @@ and ``password``.
 ::
 
     from __future__ import unicode_literals
-
-    import os
 
     import pygst
     pygst.require('0.10')
@@ -332,67 +324,48 @@ If you want to extend Mopidy's GStreamer pipeline with new custom GStreamer
 elements, you'll need to register them in GStreamer before they can be used.
 
 Basically, you just implement your GStreamer element in Python and then make
-your :meth:`Extension.register_gstreamer_elements` method register all your
-custom GStreamer elements.
+your :meth:`~mopidy.ext.Extension.register_gstreamer_elements` method register
+all your custom GStreamer elements.
 
 For examples of custom GStreamer elements implemented in Python, see
 :mod:`mopidy.audio.mixers`.
 
 
-Implementation steps
-====================
+Use of Mopidy APIs
+==================
 
-A rough plan of how to make the above document the reality of how Mopidy
-extensions work.
+When writing an extension, you should only use APIs documented at
+:ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils`, may change at
+any time, and is not something extensions should rely on being stable.
 
-1. Implement :class:`mopidy.utils.ext.Extension` base class and the
-   :exc:`mopidy.exceptions.ExtensionError` exception class.
 
-2. Switch from using distutils to setuptools to package and install Mopidy so
-   that we can register entry points for the bundled extensions and get
-   information about all extensions available on the system from
-   :mod:`pkg_resources`.
+Logging in extensions
+=====================
 
-3. Add :class:`Extension` classes for all existing frontends and backends. Skip
-   any default config and config validation for now.
+When making servers like Mopidy, logging is essential for understanding what's
+going on. We use the :mod:`logging` module from Python's standard library. When
+creating a logger, always namespace the logger using your Python package name
+as this will be visible in Mopidy's debug log::
 
-4. Add entry points for the existing extensions in the ``setup.py`` file.
+    import logging
 
-5. Rewrite the startup procedure to find extensions and thus frontends and
-   backends via :mod:`pkg_resouces` instead of the ``FRONTENDS`` and
-   ``BACKENDS`` settings.
+    logger = logging.getLogger('mopidy_soundspot')
 
-6. Remove the ``FRONTENDS`` and ``BACKENDS`` settings.
+When logging at logging level ``info`` or higher (i.e. ``warning``, ``error``,
+and ``critical``, but not ``debug``) the log message will be displayed to all
+Mopidy users. Thus, the log messages at those levels should be well written and
+easy to understand.
 
-7. Add default config files and config validation to all existing extensions.
+As the logger name is not included in Mopidy's default logging format, you
+should make it obvious from the log message who is the source of the log
+message. For example::
 
-8. Switch to ini file based configuration, using :mod:`ConfigParser`. The
-   default config is the combination of a core config file plus the config from
-   each installed extension. To find the effective config for the system, the
-   following config sources are added together, with the later ones overriding
-   the earlier ones:
+    Loaded 17 Soundspot playlists
 
-   - the default config built from Mopidy core and all installed extensions,
+Is much better than::
 
-   - ``/etc/mopidy/mopidy.conf``,
+    Loaded 17 playlists
 
-   - ``~/.config/mopidy/mopidy.conf``,
-
-   - any config file provided via command line arguments, and
-
-   - any config values provided via command line arguments.
-
-9. Replace all use of ``mopidy.settings`` with the new config object.
-
-10. Add command line options for:
-
-   - loading an additional config file for this execution of Mopidy,
-
-   - setting a config value for this execution of Mopidy,
-
-   - printing the effective config and exit, and
-
-   - write a config value permanently to ``~/.config/mopidy/mopidy.conf``, or
-     ``/etc/mopidy/mopidy.conf`` if root, and exit.
-
-11. Reimplement ``--list-deps`` based upon information provided by extensions.
+If you want to turn on debug logging for your own extension, but not for
+everything else due to the amount of noise, see the docs for the
+:confval:`logging.levels/*` config section.

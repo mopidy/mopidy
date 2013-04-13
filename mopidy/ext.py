@@ -11,28 +11,35 @@ logger = logging.getLogger('mopidy.ext')
 
 
 class Extension(object):
+    """Base class for Mopidy extensions"""
 
     dist_name = None
     ext_name = None
     version = None
 
     def get_default_config(self):
+        """TODO"""
         raise NotImplementedError(
             'Add at least a config section with "enabled = true"')
 
     def get_config_schema(self):
+        """TODO"""
         return config_lib.ExtensionConfigSchema()
 
     def validate_environment(self):
+        """TODO"""
         pass
 
     def get_frontend_classes(self):
+        """TODO"""
         return []
 
     def get_backend_classes(self):
+        """TODO"""
         return []
 
     def register_gstreamer_elements(self):
+        """TODO"""
         pass
 
 
