@@ -27,8 +27,8 @@ Making changes
 
 2. Install dependencies as described in the :ref:`installation` section.
 
-3. Checkout a new branch (usually based on develop) and name it accordingly to
-   what you intend to do.
+3. Checkout a new branch (usually based on ``develop``) and name it accordingly
+   to what you intend to do.
 
    - Features get the prefix ``feature/``
 
@@ -95,10 +95,22 @@ Submitting changes
 
 - One branch per feature or fix. Keep branches small and on topic.
 
-- Follow the :ref:`style guide <codestyle>`_, especially make sure ``flake8``
+- Follow the :ref:`code style <codestyle>`, especially make sure ``flake8``
   does not complain about anything.
 
-- Send a pull request to the ``develop`` branch.
+- Write good commit messages. Here's three blog posts on how to do it right:
+
+  - `Writing Git commit messages
+    <http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
+
+  - `A Note About Git Commit Messages
+    <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_
+
+  - `On commit messages
+    <http://who-t.blogspot.ch/2009/12/on-commit-messages.html>`_
+
+- Send a pull request to the ``develop`` branch. See the `GitHub pull request
+  docs <https://help.github.com/articles/using-pull-requests>`_ for help.
 
 
 Additional resources
@@ -110,7 +122,4 @@ Additional resources
 
 - `Mailing List <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
 
-- `General GitHub documentation <https://help.github.com/>`_
-
-- `GitHub pull request documentation
-  <https://help.github.com/articles/using-pull-requests>`_
+- `GitHub documentation <https://help.github.com/>`_
