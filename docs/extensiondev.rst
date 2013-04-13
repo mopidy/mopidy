@@ -4,13 +4,6 @@
 Extension development
 *********************
 
-.. warning:: Draft
-
-    This document is a draft open for discussion. It shows how we imagine that
-    development of Mopidy extensions should become in the future, not how to
-    currently develop an extension for Mopidy.
-
-
 Mopidy started as simply an MPD server that could play music from Spotify.
 Early on Mopidy got multiple "frontends" to expose Mopidy to more than just MPD
 clients: for example the Last.fm frontend what scrobbles what you've listened
