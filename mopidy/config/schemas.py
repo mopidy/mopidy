@@ -45,7 +45,8 @@ class ConfigSchema(object):
     :meth:`format` method that can used for printing out the converted values.
     """
     # TODO: Use collections.OrderedDict once 2.6 support is gone (#344)
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self._schema = {}
         self._order = []
 
@@ -57,10 +58,10 @@ class ConfigSchema(object):
     def __getitem__(self, key):
         return self._schema[key]
 
-    def format(self, name, values):
+    def format(self, values):
         # TODO: should the output be encoded utf-8 since we use that in
         # serialize for strings?
-        lines = ['[%s]' % name]
+        lines = ['[%s]' % self.name]
         for key in self._order:
             value = values.get(key)
             if value is not None:
@@ -97,8 +98,8 @@ class ExtensionConfigSchema(ConfigSchema):
 
     Ensures that ``enabled`` config value is present.
     """
-    def __init__(self):
-        super(ExtensionConfigSchema, self).__init__()
+    def __init__(self, name):
+        super(ExtensionConfigSchema, self).__init__(name)
         self['enabled'] = types.Boolean()
 
 
@@ -109,11 +110,12 @@ class LogLevelConfigSchema(object):
     as understood by the :class:`LogLevel` config value. Does not sub-class
     :class:`ConfigSchema`, but implements the same interface.
     """
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self._config_value = types.LogLevel()
 
-    def format(self, name, values):
-        lines = ['[%s]' % name]
+    def format(self, values):
+        lines = ['[%s]' % self.name]
         for key, value in sorted(values.items()):
             if value is not None:
                 lines.append('%s = %s' % (
