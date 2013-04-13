@@ -17,7 +17,7 @@ class Extension(ext.Extension):
         return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = config.ExtensionConfigSchema()
+        schema = super(Extension, self).get_config_schema()
         schema['username'] = config.String()
         schema['password'] = config.String(secret=True)
         schema['bitrate'] = config.Integer(choices=(96, 160, 320))

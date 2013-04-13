@@ -17,7 +17,7 @@ class Extension(ext.Extension):
         return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = config.ExtensionConfigSchema()
+        schema = super(Extension, self).get_config_schema()
         schema['media_dir'] = config.Path()
         schema['playlists_dir'] = config.Path()
         schema['tag_cache_file'] = config.Path()

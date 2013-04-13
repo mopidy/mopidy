@@ -17,7 +17,7 @@ class Extension(ext.Extension):
         return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = config.ExtensionConfigSchema()
+        schema = super(Extension, self).get_config_schema()
         schema['hostname'] = config.Hostname()
         schema['port'] = config.Port()
         schema['password'] = config.String(optional=True, secret=True)
