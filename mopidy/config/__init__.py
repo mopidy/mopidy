@@ -19,7 +19,7 @@ config_schemas['logging']['console_format'] = String()
 config_schemas['logging']['debug_format'] = String()
 config_schemas['logging']['debug_file'] = Path()
 
-config_schemas['logging.levels'] = LogLevelConfigSchema('loglevels')
+config_schemas['logging.levels'] = LogLevelConfigSchema('logging.levels')
 
 config_schemas['audio'] = ConfigSchema('audio')
 config_schemas['audio']['mixer'] = String()
@@ -85,12 +85,8 @@ def _load(files, defaults, overrides):
 
 def validate(raw_config, schemas, extensions=None):
     # Collect config schemas to validate against
-    sections_and_schemas = schemas.items()
-    for extension in extensions or []:
-        sections_and_schemas.append(
-            (extension.ext_name, extension.get_config_schema()))
-
-    config, errors = _validate(raw_config, sections_and_schemas)
+    extension_schemas = [e.get_config_schema() for e in extensions or []]
+    config, errors = _validate(raw_config, schemas.values() + extension_schemas)
 
     if errors:
         # TODO: raise error instead.
@@ -107,10 +103,10 @@ def _validate(raw_config, schemas):
     # Get validated config
     config = {}
     errors = []
-    for name, schema in schemas:
+    for schema in schemas:
         try:
-            items = raw_config[name].items()
-            config[name] = schema.convert(items)
+            items = raw_config[schema.name].items()
+            config[schema.name] = schema.convert(items)
         except KeyError:
             errors.append('%s: section not found.' % name)
         except exceptions.ConfigError as error:
