@@ -11,7 +11,7 @@ from tests import unittest
 
 class ConfigSchemaTest(unittest.TestCase):
     def setUp(self):
-        self.schema = schemas.ConfigSchema()
+        self.schema = schemas.ConfigSchema('test')
         self.schema['foo'] = mock.Mock()
         self.schema['bar'] = mock.Mock()
         self.schema['baz'] = mock.Mock()
@@ -22,8 +22,8 @@ class ConfigSchemaTest(unittest.TestCase):
         self.schema['bar'].format.return_value = 'asd'
         self.schema['baz'].format.return_value = 'zxc'
 
-        expected = ['[qwerty]', 'foo = qwe', 'bar = asd', 'baz = zxc']
-        result = self.schema.format('qwerty', self.values)
+        expected = ['[test]', 'foo = qwe', 'bar = asd', 'baz = zxc']
+        result = self.schema.format(self.values)
         self.assertEqual('\n'.join(expected), result)
 
     def test_format_unkwown_value(self):
@@ -32,7 +32,7 @@ class ConfigSchemaTest(unittest.TestCase):
         self.schema['baz'].format.return_value = 'zxc'
         self.values['unknown'] = 'rty'
 
-        result = self.schema.format('qwerty', self.values)
+        result = self.schema.format(self.values)
         self.assertNotIn('unknown = rty', result)
 
     def test_convert(self):
@@ -88,7 +88,7 @@ class ConfigSchemaTest(unittest.TestCase):
 
 class ExtensionConfigSchemaTest(unittest.TestCase):
     def test_schema_includes_enabled(self):
-        schema = schemas.ExtensionConfigSchema()
+        schema = schemas.ExtensionConfigSchema('test')
         self.assertIsInstance(schema['enabled'], types.Boolean)
 
 
@@ -101,10 +101,10 @@ class LogLevelConfigSchemaTest(unittest.TestCase):
         self.assertEqual(logging.INFO, result['baz'])
 
     def test_format(self):
-        schema = schemas.LogLevelConfigSchema()
+        schema = schemas.LogLevelConfigSchema('test')
         values = {'foo.bar': logging.DEBUG, 'baz': logging.INFO}
-        expected = ['[levels]', 'baz = info', 'foo.bar = debug']
-        result = schema.format('levels', values)
+        expected = ['[test]', 'baz = info', 'foo.bar = debug']
+        result = schema.format(values)
         self.assertEqual('\n'.join(expected), result)
 
 

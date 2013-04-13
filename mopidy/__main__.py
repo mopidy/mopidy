@@ -53,7 +53,7 @@ def main():
         raw_config = config_lib.load(config_files, config_overrides, extensions)
         extensions = ext.filter_enabled_extensions(raw_config, extensions)
         config = config_lib.validate(
-            raw_config, config_lib.config_schemas, extensions)
+            raw_config, config_lib.core_schemas, extensions)
         log.setup_log_levels(config)
         check_old_locations()
 
@@ -139,23 +139,24 @@ def show_config_callback(option, opt, value, parser):
     raw_config = config_lib.load(files, overrides, extensions)
     enabled_extensions = ext.filter_enabled_extensions(raw_config, extensions)
     config = config_lib.validate(
-        raw_config, config_lib.config_schemas, enabled_extensions)
+        raw_config, config_lib.core_schemas, enabled_extensions)
 
     # TODO: create mopidy.config.format?
     output = []
-    for section_name, schema in config_lib.config_schemas.items():
-        options = config.get(section_name, {})
+    for schema in config_lib.core_schemas:
+        options = config.get(schema.name, {})
         if not options:
             continue
-        output.append(schema.format(section_name, options))
+        output.append(schema.format(options))
 
     for extension in extensions:
+        schema = extension.get_config_schema()
+
         if extension in enabled_extensions:
-            schema = extension.get_config_schema()
-            options = config.get(extension.ext_name, {})
-            output.append(schema.format(extension.ext_name, options))
+            options = config.get(schema.name, {})
+            output.append(schema.format(options))
         else:
-            lines = ['[%s]' % extension.ext_name, 'enabled = false',
+            lines = ['[%s]' % schema.name, 'enabled = false',
                      '# Config hidden as extension is disabled']
             output.append('\n'.join(lines))
 
