@@ -35,10 +35,15 @@ config_schemas['proxy']['password'] = String(optional=True, secret=True)
 #config_schemas['audio.outputs'] = config.AudioOutputConfigSchema()
 
 
+def read(config_file):
+    """Helper to load defaults in same way across core and extensions."""
+    with io.open(config_file, 'rb') as filehandle:
+        return filehandle.read()
+
+
 def load(files, overrides, extensions=None):
-    default_config_file = os.path.join(
-        os.path.dirname(__file__), 'default.conf')
-    defaults = [open(default_config_file).read()]
+    config_dir = os.path.dirname(__file__)
+    defaults = [read(os.path.join(config_dir, 'default.conf'))]
     if extensions:
         defaults.extend(e.get_default_config() for e in extensions)
     return _load(files, defaults, overrides)
