@@ -329,3 +329,11 @@ all your custom GStreamer elements.
 
 For examples of custom GStreamer elements implemented in Python, see
 :mod:`mopidy.audio.mixers`.
+
+
+Use of Mopidy APIs
+==================
+
+When writing an extension, you should only use APIs documented at
+:ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils` may change at
+any time, and is not something extensions should rely on being stable.
