@@ -6,7 +6,7 @@ Extension development
 
 Mopidy started as simply an MPD server that could play music from Spotify.
 Early on Mopidy got multiple "frontends" to expose Mopidy to more than just MPD
-clients: for example the Last.fm frontend what scrobbles what you've listened
+clients: for example the scrobbler frontend what scrobbles what you've listened
 to to your Last.fm account, the MPRIS frontend that integrates Mopidy into the
 Ubuntu Sound Menu, and the HTTP server and JavaScript player API making web
 based Mopidy clients possible. In Mopidy 0.9 we added support for multiple
@@ -113,9 +113,9 @@ register themselves as available Mopidy extensions when they are installed on
 your system.
 
 The example below also includes a couple of convenient tricks for reading the
-package version from the source code so that it it's just defined in a single
-place, and to reuse the README file as the long description of the package for
-the PyPI registration.
+package version from the source code so that it is defined in a single place,
+and to reuse the README file as the long description of the package for the
+PyPI registration.
 
 The package must have ``install_requires`` on ``setuptools`` and ``Mopidy``, in
 addition to any other dependencies required by your extension. The
@@ -182,17 +182,18 @@ Python package.
 
 The root of your Python package should have an ``__version__`` attribute with a
 :pep:`386` compliant version number, for example "0.1". Next, it should have a
-class named ``Extension`` which inherits from Mopidy's extension base class.
-This is the class referred to in the ``entry_points`` part of ``setup.py``. Any
-imports of other files in your extension should be kept inside methods.  This
-ensures that this file can be imported without raising :exc:`ImportError`
-exceptions for missing dependencies, etc.
+class named ``Extension`` which inherits from Mopidy's extension base class,
+:class:`mopidy.ext.Extension`. This is the class referred to in the
+``entry_points`` part of ``setup.py``. Any imports of other files in your
+extension should be kept inside methods.  This ensures that this file can be
+imported without raising :exc:`ImportError` exceptions for missing
+dependencies, etc.
 
 The default configuration for the extension is defined by the
 ``get_default_config()`` method in the ``Extension`` class which returns a
-:mod:`ConfigParser` compatible config section. The config section's name should
+:mod:`ConfigParser` compatible config section. The config section's name must
 be the same as the extension's short name, as defined in the ``entry_points``
-part of ``setup.py``, for example ``soundspot``. All extensions should include
+part of ``setup.py``, for example ``soundspot``. All extensions must include
 an ``enabled`` config which should default to ``true``. Provide good defaults
 for all config values so that as few users as possible will need to change
 them. The exception is if the config value has security implications; in that
@@ -203,8 +204,6 @@ and ``password``.
 ::
 
     from __future__ import unicode_literals
-
-    import os
 
     import pygst
     pygst.require('0.10')
@@ -325,8 +324,8 @@ If you want to extend Mopidy's GStreamer pipeline with new custom GStreamer
 elements, you'll need to register them in GStreamer before they can be used.
 
 Basically, you just implement your GStreamer element in Python and then make
-your :meth:`Extension.register_gstreamer_elements` method register all your
-custom GStreamer elements.
+your :meth:`~mopidy.ext.Extension.register_gstreamer_elements` method register
+all your custom GStreamer elements.
 
 For examples of custom GStreamer elements implemented in Python, see
 :mod:`mopidy.audio.mixers`.
