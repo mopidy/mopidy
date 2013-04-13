@@ -112,7 +112,7 @@ def _validate(raw_config, schemas):
             errors.append('%s: section not found.' % name)
         except exceptions.ConfigError as error:
             for key in error:
-                errors.append('%s/%s: %s' % (name, key, error[key]))
+                errors.append('%s/%s: %s' % (schema.name, key, error[key]))
     # TODO: raise errors instead of return
     return config, errors
 
