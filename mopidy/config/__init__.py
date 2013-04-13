@@ -4,6 +4,7 @@ import codecs
 import ConfigParser as configparser
 import io
 import logging
+import os.path
 import sys
 
 from mopidy.config.schemas import *
@@ -12,28 +13,7 @@ from mopidy.utils import path
 
 logger = logging.getLogger('mopdiy.config')
 
-
-default_config = """
-[logging]
-console_format = %(levelname)-8s %(message)s
-debug_format = %(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n  %(message)s
-debug_file = mopidy.log
-
-[logging.levels]
-pykka = info
-
-[audio]
-mixer = autoaudiomixer
-mixer_track =
-output = autoaudiosink
-
-[proxy]
-hostname =
-username =
-password =
-"""
-
-config_schemas = {}  # TODO: use ordered dict?
+config_schemas = {}  # TODO: use ordered dict or list?
 config_schemas['logging'] = ConfigSchema()
 config_schemas['logging']['console_format'] = String()
 config_schemas['logging']['debug_format'] = String()
@@ -56,7 +36,9 @@ config_schemas['proxy']['password'] = String(optional=True, secret=True)
 
 
 def load(files, overrides, extensions=None):
-    defaults = [default_config]
+    default_config_file = os.path.join(
+        os.path.dirname(__file__), 'default.conf')
+    defaults = [open(default_config_file).read()]
     if extensions:
         defaults.extend(e.get_default_config() for e in extensions)
     return _load(files, defaults, overrides)
