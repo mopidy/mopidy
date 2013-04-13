@@ -335,5 +335,37 @@ Use of Mopidy APIs
 ==================
 
 When writing an extension, you should only use APIs documented at
-:ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils` may change at
+:ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils`, may change at
 any time, and is not something extensions should rely on being stable.
+
+
+Logging in extensions
+=====================
+
+When making servers like Mopidy, logging is essential for understanding what's
+going on. We use the :mod:`logging` module from Python's standard library. When
+creating a logger, always namespace the logger using your Python package name
+as this will be visible in Mopidy's debug log::
+
+    import logging
+
+    logger = logging.getLogger('mopidy_soundspot')
+
+When logging at logging level ``info`` or higher (i.e. ``warning``, ``error``,
+and ``critical``, but not ``debug``) the log message will be displayed to all
+Mopidy users. Thus, the log messages at those levels should be well written and
+easy to understand.
+
+As the logger name is not included in Mopidy's default logging format, you
+should make it obvious from the log message who is the source of the log
+message. For example::
+
+    Loaded 17 Soundspot playlists
+
+Is much better than::
+
+    Loaded 17 playlists
+
+If you want to turn on debug logging for your own extension, but not for
+everything else due to the amount of noise, see the docs for the
+:confval:`logging.levels/*` config section.
