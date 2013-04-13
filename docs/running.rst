@@ -18,3 +18,19 @@ using ``kill``::
     kill `ps ax | grep mopidy | grep -v grep | cut -d' ' -f1`
 
 This can be useful e.g. if you create init script for managing Mopidy.
+
+
+mopidy command
+==============
+
+.. program:: mopidy
+
+TODO: Document all command line options
+
+
+mopidy-scan command
+===================
+
+.. program:: mopidy-scan
+
+TODO: Document all command line options
