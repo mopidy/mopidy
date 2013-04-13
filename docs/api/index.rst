@@ -11,4 +11,5 @@ API reference
     core
     audio
     frontends
+    ext
     http
