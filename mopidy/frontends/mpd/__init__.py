@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 import os
 
 import mopidy
-from mopidy import ext
-from mopidy.utils import config
+from mopidy import config, ext
 
 
 class Extension(ext.Extension):
@@ -15,10 +14,10 @@ class Extension(ext.Extension):
 
     def get_default_config(self):
         conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
-        return open(conf_file).read()
+        return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = config.ExtensionConfigSchema()
+        schema = super(Extension, self).get_config_schema()
         schema['hostname'] = config.Hostname()
         schema['port'] = config.Port()
         schema['password'] = config.String(optional=True, secret=True)

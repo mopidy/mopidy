@@ -4,7 +4,7 @@ import logging
 import pkg_resources
 
 from mopidy import exceptions
-from mopidy.utils import config as config_utils
+from mopidy import config as config_lib
 
 
 logger = logging.getLogger('mopidy.ext')
@@ -24,7 +24,7 @@ class Extension(object):
 
     def get_config_schema(self):
         """TODO"""
-        return config_utils.ExtensionConfigSchema()
+        return config_lib.ExtensionConfigSchema()
 
     def validate_environment(self):
         """TODO"""
@@ -83,7 +83,7 @@ def load_extensions():
 
 
 def filter_enabled_extensions(raw_config, extensions):
-    boolean = config_utils.Boolean()
+    boolean = config_lib.Boolean()
     enabled_extensions = []
     enabled_names = []
     disabled_names = []

@@ -1,12 +1,9 @@
 from __future__ import unicode_literals
 
-import codecs
-import ConfigParser as configparser
 import logging
 import optparse
 import os
 import signal
-import StringIO
 import sys
 
 import gobject
@@ -27,12 +24,11 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from mopidy import exceptions, ext
+from mopidy import ext
 from mopidy.audio import Audio
-from mopidy.config import default_config, config_schemas
+from mopidy import config as config_lib
 from mopidy.core import Core
 from mopidy.utils import deps, log, path, process, versioning
-
 
 logger = logging.getLogger('mopidy.main')
 
@@ -50,15 +46,18 @@ def main():
 
     try:
         create_file_structures()
-        logging_config = load_config(config_files, config_overrides)
+        logging_config = config_lib.load(config_files, config_overrides)
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
         extensions = ext.load_extensions()
-        raw_config = load_config(config_files, config_overrides, extensions)
+        raw_config = config_lib.load(config_files, config_overrides, extensions)
         extensions = ext.filter_enabled_extensions(raw_config, extensions)
-        config = validate_config(raw_config, config_schemas, extensions)
+        config = config_lib.validate(
+            raw_config, config_lib.config_schemas, extensions)
         log.setup_log_levels(config)
         check_old_locations()
+
+        # TODO: wrap config in RO proxy.
 
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors have been started.
@@ -82,9 +81,7 @@ def main():
 
 def check_config_override(option, opt, override):
     try:
-        section, remainder = override.split('/', 1)
-        key, value = remainder.split('=', 1)
-        return (section, key, value)
+        return config_lib.parse_override(override)
     except ValueError:
         raise optparse.OptionValueError(
             'option %s: must have the format section/key=value' % opt)
@@ -139,12 +136,14 @@ def show_config_callback(option, opt, value, parser):
     overrides = getattr(parser.values, 'overrides', [])
 
     extensions = ext.load_extensions()
-    raw_config = load_config(files, overrides, extensions)
+    raw_config = config_lib.load(files, overrides, extensions)
     enabled_extensions = ext.filter_enabled_extensions(raw_config, extensions)
-    config = validate_config(raw_config, config_schemas, enabled_extensions)
+    config = config_lib.validate(
+        raw_config, config_lib.config_schemas, enabled_extensions)
 
+    # TODO: create mopidy.config.format?
     output = []
-    for section_name, schema in config_schemas.items():
+    for section_name, schema in config_lib.config_schemas.items():
         options = config.get(section_name, {})
         if not options:
             continue
@@ -178,73 +177,6 @@ def check_old_locations():
             'Old Mopidy settings file found at %s. Please migrate your '
             'config to the ini-file based config format. See release notes '
             'for further instructions.', old_settings_file)
-
-
-def load_config(files, overrides, extensions=None):
-    parser = configparser.RawConfigParser()
-
-    files = [path.expand_path(f) for f in files]
-    sources = ['builtin-defaults'] + files + ['command-line']
-    logger.info('Loading config from: %s', ', '.join(sources))
-
-    # Read default core config
-    parser.readfp(StringIO.StringIO(default_config))
-
-    # Read default extension config
-    for extension in extensions or []:
-        parser.readfp(StringIO.StringIO(extension.get_default_config()))
-
-    # Load config from a series of config files
-    for filename in files:
-        # TODO: if this is the initial load of logging config we might not have
-        # a logger at this point, we might want to handle this better.
-        try:
-            filehandle = codecs.open(filename, encoding='utf-8')
-            parser.readfp(filehandle)
-        except IOError:
-            logger.debug('Config file %s not found; skipping', filename)
-            continue
-        except UnicodeDecodeError:
-            logger.error('Config file %s is not UTF-8 encoded', filename)
-            sys.exit(1)
-
-    raw_config = {}
-    for section in parser.sections():
-        raw_config[section] = dict(parser.items(section))
-
-    for section, key, value in overrides or []:
-        raw_config.setdefault(section, {})[key] = value
-
-    return raw_config
-
-
-def validate_config(raw_config, schemas, extensions=None):
-    # Collect config schemas to validate against
-    sections_and_schemas = schemas.items()
-    for extension in extensions or []:
-        sections_and_schemas.append(
-            (extension.ext_name, extension.get_config_schema()))
-
-    # Get validated config
-    config = {}
-    errors = {}
-    for section_name, schema in sections_and_schemas:
-        if section_name not in raw_config:
-            errors[section_name] = {section_name: 'section not found'}
-        try:
-            items = raw_config[section_name].items()
-            config[section_name] = schema.convert(items)
-        except exceptions.ConfigError as error:
-            errors[section_name] = error
-
-    if errors:
-        for section_name, error in errors.items():
-            logger.error('[%s] config errors:', section_name)
-            for key in error:
-                logger.error('%s %s', key, error[key])
-        sys.exit(1)
-
-    return config
 
 
 def create_file_structures():
