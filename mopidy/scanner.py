@@ -34,6 +34,7 @@ import pygst
 pygst.require('0.10')
 import gst
 
+from mopidy import config as config_lib, ext
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
@@ -41,10 +42,22 @@ from mopidy.utils import log, path, versioning
 
 def main():
     options = parse_options()
-    config = {}  # TODO Read config from new config system
+    # TODO: support config files and overrides (shared from main?)
+    config_files = ['/etc/mopidy/mopidy.conf',
+                    '$XDG_CONFIG_DIR/mopidy/mopidy.conf']
+    config_overrides = []
 
+    # TODO: decide if we want to avoid this boilerplate some how.
+    logging_config = config_lib.load(config_files, config_overrides)
     log.setup_root_logger()
-    log.setup_console_logging(options.verbosity_level)
+    log.setup_console_logging(logging_config, options.verbosity_level)
+
+    extensions = ext.load_extensions()
+    raw_config = config_lib.load(config_files, config_overrides, extensions)
+    extensions = ext.filter_enabled_extensions(raw_config, extensions)
+    config = config_lib.validate(
+        raw_config, config_lib.core_schemas, extensions)
+    log.setup_log_levels(config)
 
     tracks = []
 
@@ -68,7 +81,7 @@ def main():
     logging.info('Done scanning; writing tag cache...')
 
     for row in mpd_translator.tracks_to_tag_cache_format(
-            tracks, config['mpd']['media_dir']):
+            tracks, config['local']['media_dir']):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
