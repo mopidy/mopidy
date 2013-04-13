@@ -13,26 +13,27 @@ from mopidy.utils import path
 
 logger = logging.getLogger('mopdiy.config')
 
-config_schemas = {}  # TODO: use ordered dict or list?
-config_schemas['logging'] = ConfigSchema('logging')
-config_schemas['logging']['console_format'] = String()
-config_schemas['logging']['debug_format'] = String()
-config_schemas['logging']['debug_file'] = Path()
+_logging_schema = ConfigSchema('logging')
+_logging_schema['console_format'] = String()
+_logging_schema['debug_format'] = String()
+_logging_schema['debug_file'] = Path()
 
-config_schemas['logging.levels'] = LogLevelConfigSchema('logging.levels')
+_loglevels_schema = LogLevelConfigSchema('logging.levels')
 
-config_schemas['audio'] = ConfigSchema('audio')
-config_schemas['audio']['mixer'] = String()
-config_schemas['audio']['mixer_track'] = String(optional=True)
-config_schemas['audio']['output'] = String()
+_audio_schema = ConfigSchema('audio')
+_audio_schema['mixer'] = String()
+_audio_schema['mixer_track'] = String(optional=True)
+_audio_schema['output'] = String()
 
-config_schemas['proxy'] = ConfigSchema('proxy')
-config_schemas['proxy']['hostname'] = Hostname(optional=True)
-config_schemas['proxy']['username'] = String(optional=True)
-config_schemas['proxy']['password'] = String(optional=True, secret=True)
+_proxy_schema = ConfigSchema('proxy')
+_proxy_schema['hostname'] = Hostname(optional=True)
+_proxy_schema['username'] = String(optional=True)
+_proxy_schema['password'] = String(optional=True, secret=True)
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
-#config_schemas['audio.outputs'] = config.AudioOutputConfigSchema()
+#_outputs_schema = config.AudioOutputConfigSchema()
+
+core_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
 
 
 def read(config_file):
@@ -86,7 +87,7 @@ def _load(files, defaults, overrides):
 def validate(raw_config, schemas, extensions=None):
     # Collect config schemas to validate against
     extension_schemas = [e.get_config_schema() for e in extensions or []]
-    config, errors = _validate(raw_config, schemas.values() + extension_schemas)
+    config, errors = _validate(raw_config, schemas + extension_schemas)
 
     if errors:
         # TODO: raise error instead.

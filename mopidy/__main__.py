@@ -53,7 +53,7 @@ def main():
         raw_config = config_lib.load(config_files, config_overrides, extensions)
         extensions = ext.filter_enabled_extensions(raw_config, extensions)
         config = config_lib.validate(
-            raw_config, config_lib.config_schemas, extensions)
+            raw_config, config_lib.core_schemas, extensions)
         log.setup_log_levels(config)
         check_old_locations()
 
@@ -139,7 +139,7 @@ def show_config_callback(option, opt, value, parser):
     raw_config = config_lib.load(files, overrides, extensions)
     enabled_extensions = ext.filter_enabled_extensions(raw_config, extensions)
     config = config_lib.validate(
-        raw_config, config_lib.config_schemas, enabled_extensions)
+        raw_config, config_lib.core_schemas, enabled_extensions)
 
     # TODO: create mopidy.config.format?
     output = []
