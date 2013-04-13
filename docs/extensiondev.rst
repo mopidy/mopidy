@@ -210,8 +210,7 @@ and ``password``.
     import gst
     import gobject
 
-    from mopidy import exceptions, ext
-    from mopidy.utils import config
+    from mopidy import config, exceptions, ext
 
 
     __version__ = '0.1'
@@ -234,7 +233,7 @@ and ``password``.
             return default_config
 
         def get_config_schema(self):
-            schema = config.ExtensionConfigSchema()
+            schema = super(Extension, self).get_config_schema()
             schema['username'] = config.String(required=True)
             schema['password'] = config.String(required=True, secret=True)
             return schema
