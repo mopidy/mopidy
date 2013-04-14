@@ -54,7 +54,7 @@ class Extension(object):
         For example, this method can be used to check if all dependencies that
         are needed are installed.
 
-        :raises: :class:`mopidy.exceptions.ExtensionsError`
+        :raises: :class:`~mopidy.exceptions.ExtensionError`
         :returns: :class:`None`
         """
         pass
@@ -69,7 +69,7 @@ class Extension(object):
     def get_backend_classes(self):
         """List of backend actor classes to start
 
-        :returns: list of :class:`mopidy.backends.base.Backend` subclasses
+        :returns: list of :class:`~mopidy.backends.base.Backend` subclasses
         """
         return []
 
