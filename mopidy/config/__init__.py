@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import codecs
 import ConfigParser as configparser
 import io
 import logging
@@ -57,22 +56,21 @@ def _load(files, defaults, overrides):
     files = [path.expand_path(f) for f in files]
     sources = ['builtin-defaults'] + files + ['command-line']
     logger.info('Loading config from: %s', ', '.join(sources))
-    for default in defaults:  # TODO: remove decoding
-        parser.readfp(io.StringIO(default.decode('utf-8')))
+
+    # TODO: simply return path to config file for defaults so we can load it
+    # all in the same way?
+    for default in defaults:
+        parser.readfp(io.BytesIO(default))
 
     # Load config from a series of config files
     for filename in files:
-        # TODO: if this is the initial load of logging config we might not have
-        # a logger at this point, we might want to handle this better.
         try:
-            with codecs.open(filename, encoding='utf-8') as filehandle:
+            with io.open(filename, 'rb') as filehandle:
                 parser.readfp(filehandle)
         except IOError:
+            # TODO: if this is the initial load of logging config we might not
+            # have a logger at this point, we might want to handle this better.
             logger.debug('Config file %s not found; skipping', filename)
-            continue
-        except UnicodeDecodeError:
-            logger.error('Config file %s is not UTF-8 encoded', filename)
-            sys.exit(1)
 
     raw_config = {}
     for section in parser.sections():
