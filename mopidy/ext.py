@@ -14,32 +14,79 @@ class Extension(object):
     """Base class for Mopidy extensions"""
 
     dist_name = None
+    """The extension's distribution name, as registered on PyPI
+
+    Example: ``Mopidy-Soundspot``
+    """
+
     ext_name = None
+    """The extension's short name, as used in setup.py and as config section
+    name
+
+    Example: ``soundspot``
+    """
+
     version = None
+    """The extension's version
+
+    Should match the :attr:`__version__` attribute on the extension's main
+    Python module and the version registered on PyPI.
+    """
 
     def get_default_config(self):
-        """TODO"""
+        """The extension's default config as a string
+
+        :returns: string
+        """
         raise NotImplementedError(
             'Add at least a config section with "enabled = true"')
 
     def get_config_schema(self):
-        """TODO"""
+        """The extension's config validation schema
+
+        :returns: :class:`mopidy.config.ExtensionConfigSchema`
+        """
         return config_lib.ExtensionConfigSchema(self.ext_name)
 
     def validate_environment(self):
-        """TODO"""
+        """Checks if the extension can run in the current environment
+
+        For example, this method can be used to check if all dependencies that
+        are needed are installed.
+
+        :raises: :class:`mopidy.exceptions.ExtensionsError`
+        :returns: :class:`None`
+        """
         pass
 
     def get_frontend_classes(self):
-        """TODO"""
+        """List of frontend actor classes to start
+
+        :returns: list of :class:`pykka.Actor` subclasses
+        """
         return []
 
     def get_backend_classes(self):
-        """TODO"""
+        """List of backend actor classes to start
+
+        :returns: list of :class:`mopidy.backends.base.Backend` subclasses
+        """
         return []
 
     def register_gstreamer_elements(self):
-        """TODO"""
+        """Hook for registering custom GStreamer elements
+
+        Register custom GStreamer elements by implementing this method.
+        Example::
+
+            def register_gstreamer_elements(self):
+                from .mixer import SoundspotMixer
+                gobject.type_register(SoundspotMixer)
+                gst.element_register(
+                    SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
+
+        :returns: :class:`None`
+        """
         pass
 
 

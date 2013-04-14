@@ -239,10 +239,6 @@ and ``password``.
             return schema
 
         def validate_environment(self):
-            # This method can validate anything it wants about the environment
-            # the extension is running in. Examples include checking if all
-            # dependencies are installed.
-
             try:
                 import pysoundspot
             except ImportError as e:
@@ -264,6 +260,8 @@ and ``password``.
             gobject.type_register(SoundspotMixer)
             gst.element_register(
                 SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
+
+For more detailed documentation, see the :ref:`ext-api`.
 
 
 Example frontend
