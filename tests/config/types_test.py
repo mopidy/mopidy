@@ -65,7 +65,10 @@ class StringTest(unittest.TestCase):
         result = value.deserialize('æøå')
         self.assertEqual('æøå', result)
 
-    # TODO: add test_deserialize_decodes_string_escapes
+    def test_deserialize_handles_escapes(self):
+        value = types.String(optional=True)
+        result = value.deserialize(b'a\\t\\nb')
+        self.assertEqual('a\t\nb', result)
 
     def test_deserialize_enforces_choices(self):
         value = types.String(choices=['foo', 'bar', 'baz'])
@@ -88,9 +91,23 @@ class StringTest(unittest.TestCase):
         self.assertRaises(
             ValueError, value.deserialize, incorrectly_encoded_bytes)
 
-    def test_serialize_string_escapes(self):
+    def test_serialize_encodes_utf8(self):
         value = types.String()
-        self.assertEqual(r'\r\n\t', value.serialize('\r\n\t'))
+        result = value.serialize('æøå')
+        self.assertIsInstance(result, bytes)
+        self.assertEqual('æøå'.encode('utf-8'), result)
+
+    def test_serialize_does_not_encode_bytes(self):
+        value = types.String()
+        result = value.serialize('æøå'.encode('utf-8'))
+        self.assertIsInstance(result, bytes)
+        self.assertEqual('æøå'.encode('utf-8'), result)
+
+    def test_serialize_handles_escapes(self):
+        value = types.String()
+        result = value.serialize('a\n\tb')
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(r'a\n\tb'.encode('utf-8'), result)
 
     def test_format_masks_secrets(self):
         value = types.String(secret=True)

@@ -81,7 +81,8 @@ class String(ConfigValue):
     """
     def deserialize(self, value):
         if not isinstance(value, unicode):
-            value = value.decode('utf-8')
+            # TODO: only unescape \n \t and \\?
+            value = value.decode('string-escape').decode('utf-8')
         value = value.strip()
         validators.validate_required(value, not self.optional)
         validators.validate_choice(value, self.choices)
@@ -90,7 +91,11 @@ class String(ConfigValue):
         return value
 
     def serialize(self, value):
-        return value.encode('utf-8').encode('string-escape')
+        if isinstance(value, unicode):
+            for char in ('\\', '\n', '\t'):  # TODO: more escapes?
+                value = value.replace(char, char.encode('unicode-escape'))
+            value = value.encode('utf-8')
+        return value
 
 
 class Integer(ConfigValue):
