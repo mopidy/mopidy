@@ -236,7 +236,7 @@ class MpdContext(object):
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    playlist_uri_from_name = None
+    _playlist_uri_from_name = None
     playlist_name_from_uri = None
 
     def __init__(self, dispatcher, session=None, config=None, core=None):
@@ -246,14 +246,14 @@ class MpdContext(object):
         self.core = core
         self.events = set()
         self.subscriptions = set()
-        self.playlist_uri_from_name = {}
+        self._playlist_uri_from_name = {}
         self.playlist_name_from_uri = {}
         self.refresh_playlists_mapping()
 
     def create_unique_name(self, playlist_name):
         name = playlist_name
         i = 2
-        while name in self.playlist_uri_from_name:
+        while name in self._playlist_uri_from_name:
             name = '%s [%d]' % (playlist_name, i)
             i += 1
         return name
@@ -264,11 +264,23 @@ class MpdContext(object):
         MPD
         """
         if self.core is not None:
-            self.playlist_uri_from_name.clear()
+            self._playlist_uri_from_name.clear()
             self.playlist_name_from_uri.clear()
             for playlist in self.core.playlists.playlists.get():
                 if not playlist.name:
                     continue
                 name = self.create_unique_name(playlist.name)
-                self.playlist_uri_from_name[name] = playlist.uri
+                self._playlist_uri_from_name[name] = playlist.uri
                 self.playlist_name_from_uri[playlist.uri] = name
+        logger.info("Refreshed name mappings for %u playlists" % len(self.playlist_name_from_uri))
+
+    def lookup_playlist_from_name(self, name):
+        """
+        Helper function to retrieve a playlist from it's unique MPD name.
+        """
+        if len(self._playlist_uri_from_name) == 0:
+            self.refresh_playlists_mapping()
+        if name not in self._playlist_uri_from_name:
+            return None;
+        uri = self._playlist_uri_from_name[name]
+        return self.core.playlists.lookup(uri).get()

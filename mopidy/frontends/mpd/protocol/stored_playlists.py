@@ -23,10 +23,10 @@ def listplaylist(context, name):
         file: relative/path/to/file2.ogg
         file: relative/path/to/file3.mp3
     """
-    playlists = context.core.playlists.filter(name=name).get()
-    if not playlists:
+    playlist = context.lookup_playlist_from_name(name)
+    if not playlist:
         raise MpdNoExistError('No such playlist', command='listplaylist')
-    return ['file: %s' % t.uri for t in playlists[0].tracks]
+    return ['file: %s' % t.uri for t in playlist.tracks]
 
 
 @handle_request(r'^listplaylistinfo (?P<name>\w+)$')
@@ -44,10 +44,10 @@ def listplaylistinfo(context, name):
         Standard track listing, with fields: file, Time, Title, Date,
         Album, Artist, Track
     """
-    playlists = context.core.playlists.filter(name=name).get()
-    if not playlists:
+    playlist = context.lookup_playlist_from_name(name)
+    if not playlist:
         raise MpdNoExistError('No such playlist', command='listplaylistinfo')
-    return playlist_to_mpd_format(playlists[0])
+    return playlist_to_mpd_format(playlist)
 
 
 @handle_request(r'^listplaylists$')
@@ -117,14 +117,14 @@ def load(context, name, start=None, end=None):
     - MPD 0.17.1 does not fail if the specified range is outside the playlist,
       in either or both ends.
     """
-    playlists = context.core.playlists.filter(name=name).get()
-    if not playlists:
+    playlist = context.lookup_playlist_from_name(name)
+    if not playlist:
         raise MpdNoExistError('No such playlist', command='load')
     if start is not None:
         start = int(start)
     if end is not None:
         end = int(end)
-    context.core.tracklist.add(playlists[0].tracks[start:end])
+    context.core.tracklist.add(playlist.tracks[start:end])
 
 
 @handle_request(r'^playlistadd "(?P<name>[^"]+)" "(?P<uri>[^"]+)"$')
