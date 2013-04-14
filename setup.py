@@ -28,10 +28,10 @@ setup(
         'Pykka >= 1.1',
     ],
     extras_require={
-        b'spotify': ['pyspotify >= 1.9, < 1.11'],
-        b'scrobbler': ['pylast >= 0.5.7'],
-        b'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
-        b'external_mixers': ['pyserial'],
+        'spotify': ['pyspotify >= 1.9, < 1.11'],
+        'scrobbler': ['pylast >= 0.5.7'],
+        'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
+        'external_mixers': ['pyserial'],
     },
     test_suite='nose.collector',
     tests_require=[
@@ -40,11 +40,11 @@ setup(
         'unittest2',
     ],
     entry_points={
-        b'console_scripts': [
+        'console_scripts': [
             'mopidy = mopidy.__main__:main',
             'mopidy-scan = mopidy.scanner:main',
         ],
-        b'mopidy.ext': [
+        'mopidy.ext': [
             'http = mopidy.frontends.http:Extension [http]',
             'scrobbler = mopidy.frontends.scrobbler:Extension [scrobbler]',
             'local = mopidy.backends.local:Extension',
