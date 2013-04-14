@@ -49,7 +49,7 @@ and improved.
 
 **Command line options**
 
-- The command option :option:`mopody --list-settings` is now named
+- The command option :option:`mopidy --list-settings` is now named
   :option:`mopidy --show-config`.
 
 - What configuration files to use can now be specified through the command
