@@ -11,23 +11,24 @@ that’s great. Here are some tips to get you started.
 Getting started
 ===============
 
-1. Make sure you have a `GitHub account <https://github.com/signup/free>`_.
+#. Make sure you have a `GitHub account <https://github.com/signup/free>`_.
 
-2. `Submit <https://github.com/mopidy/mopidy/issues/new>`_ a ticket for your
+#. `Submit <https://github.com/mopidy/mopidy/issues/new>`_ a ticket for your
    issue, assuming one does not already exist. Clearly describe the issue
    including steps to reproduce when it is a bug.
 
-3. Fork the repository on GitHub.
+#. Fork the repository on GitHub.
 
 
 Making changes
 ==============
 
-1. Clone your fork on GitHub to your computer.
+#. Clone your fork on GitHub to your computer.
 
-2. Install dependencies as described in the :ref:`installation` section.
 
-3. Checkout a new branch (usually based on ``develop``) and name it accordingly
+#. Install dependencies as described in the :ref:`installation` section.
+
+#. Checkout a new branch (usually based on ``develop``) and name it accordingly
    to what you intend to do.
 
    - Features get the prefix ``feature/``
@@ -45,11 +46,11 @@ Running Mopidy from Git
 If you want to hack on Mopidy, you should run Mopidy directly from the Git
 repo.
 
-1. Go to the Git repo root::
+#. Go to the Git repo root::
 
        cd mopidy/
 
-2. To get a ``mopidy`` executable and register all bundled extensions with
+#. To get a ``mopidy`` executable and register all bundled extensions with
    setuptools, run::
 
       python setup.py develop
@@ -59,7 +60,7 @@ repo.
    extensions bundled with Mopidy isn't registered with setuptools, so Mopidy
    will start without any frontends or backends, making it quite useless.
 
-3. Now you can run the Mopidy command, and it will run using the code
+#. Now you can run the Mopidy command, and it will run using the code
    in the Git repo::
 
       mopidy
@@ -74,12 +75,12 @@ Testing
 Mopidy has quite good test coverage, and we would like all new code going into
 Mopidy to come with tests.
 
-1. To run tests, you need a couple of dependencies. They can be installed using
+#. To run tests, you need a couple of dependencies. They can be installed using
    ``pip``::
 
        pip install -r requirements/tests.txt
 
-2. Then, to run all tests, go to the project directory and run::
+#. Then, to run all tests, go to the project directory and run::
 
        nosetests
 
@@ -88,7 +89,7 @@ Mopidy to come with tests.
 
        nosetests --with-coverage tests/
 
-3. Check the code for errors and style issues using flake8::
+#. Check the code for errors and style issues using flake8::
 
        flake8 .
 
