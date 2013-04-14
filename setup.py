@@ -42,6 +42,7 @@ setup(
         'console_scripts': [
             'mopidy = mopidy.__main__:main',
             'mopidy-scan = mopidy.scanner:main',
+            'mopidy-convert-config = mopidy.config.convert:main',
         ],
         'mopidy.ext': [
             'http = mopidy.frontends.http:Extension [http]',
