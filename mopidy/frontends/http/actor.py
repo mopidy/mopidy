@@ -4,18 +4,13 @@ import logging
 import json
 import os
 
+import cherrypy
 import pykka
+from ws4py.messaging import TextMessage
+from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 
-from mopidy import exceptions, models
+from mopidy import models
 from mopidy.core import CoreListener
-
-try:
-    import cherrypy
-    from ws4py.messaging import TextMessage
-    from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
-except ImportError as import_error:
-    raise exceptions.OptionalDependencyError(import_error)
-
 from . import ws
 
 

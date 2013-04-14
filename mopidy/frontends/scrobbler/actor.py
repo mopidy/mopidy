@@ -4,14 +4,10 @@ import logging
 import time
 
 import pykka
+import pylast
 
-from mopidy import exceptions
 from mopidy.core import CoreListener
 
-try:
-    import pylast
-except ImportError as import_error:
-    raise exceptions.OptionalDependencyError(import_error)
 
 logger = logging.getLogger('mopidy.frontends.scrobbler')
 

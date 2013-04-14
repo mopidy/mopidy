@@ -34,9 +34,5 @@ class ConfigError(MopidyException):
         return '\n'.join(lines)
 
 
-class OptionalDependencyError(MopidyException):
-    pass
-
-
 class ExtensionError(MopidyException):
     pass

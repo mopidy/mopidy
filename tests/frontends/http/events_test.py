@@ -6,18 +6,16 @@ try:
     import cherrypy
 except ImportError:
     cherrypy = False
+
 try:
     import ws4py
 except ImportError:
     ws4py = False
-import mock
 
-from mopidy.exceptions import OptionalDependencyError
-try:
+if cherrypy and ws4py:
     from mopidy.frontends.http import actor
-except OptionalDependencyError:
-    pass
 
+import mock
 from tests import unittest
 
 

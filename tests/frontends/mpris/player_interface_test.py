@@ -1,19 +1,20 @@
 from __future__ import unicode_literals
 
-import sys
-
 import mock
 import pykka
 
-from mopidy import core, exceptions
+try:
+    import dbus
+except ImportError:
+    dbus = False
+
+from mopidy import core
 from mopidy.backends import dummy
 from mopidy.core import PlaybackState
 from mopidy.models import Album, Artist, Track
 
-try:
+if dbus:
     from mopidy.frontends.mpris import objects
-except exceptions.OptionalDependencyError:
-    pass
 
 from tests import unittest
 
@@ -22,7 +23,7 @@ PAUSED = PlaybackState.PAUSED
 STOPPED = PlaybackState.STOPPED
 
 
-@unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
+@unittest.skipUnless(dbus, 'dbus not found')
 class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):
         objects.MprisObject._connect_to_dbus = mock.Mock()

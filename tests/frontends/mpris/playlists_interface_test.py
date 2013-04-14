@@ -1,25 +1,27 @@
 from __future__ import unicode_literals
 
 import datetime
-import sys
 
 import mock
 import pykka
 
-from mopidy import core, exceptions
+try:
+    import dbus
+except ImportError:
+    dbus = False
+
+from mopidy import core
 from mopidy.audio import PlaybackState
 from mopidy.backends import dummy
 from mopidy.models import Track
 
-try:
+if dbus:
     from mopidy.frontends.mpris import objects
-except exceptions.OptionalDependencyError:
-    pass
 
 from tests import unittest
 
 
-@unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
+@unittest.skipUnless(dbus, 'dbus not found')
 class PlayerInterfaceTest(unittest.TestCase):
     def setUp(self):
         objects.MprisObject._connect_to_dbus = mock.Mock()

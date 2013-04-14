@@ -4,14 +4,10 @@ import base64
 import logging
 import os
 
-try:
-    import dbus
-    import dbus.mainloop.glib
-    import dbus.service
-    import gobject
-except ImportError as import_error:
-    from mopidy.exceptions import OptionalDependencyError
-    raise OptionalDependencyError(import_error)
+import dbus
+import dbus.mainloop.glib
+import dbus.service
+import gobject
 
 from mopidy.core import PlaybackState
 from mopidy.utils.process import exit_process

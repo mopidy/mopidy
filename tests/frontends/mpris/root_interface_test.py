@@ -1,22 +1,23 @@
 from __future__ import unicode_literals
 
-import sys
-
 import mock
 import pykka
 
-from mopidy import core, exceptions
+try:
+    import dbus
+except ImportError:
+    dbus = False
+
+from mopidy import core
 from mopidy.backends import dummy
 
-try:
+if dbus:
     from mopidy.frontends.mpris import objects
-except exceptions.OptionalDependencyError:
-    pass
 
 from tests import unittest
 
 
-@unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
+@unittest.skipUnless(dbus, 'dbus not found')
 class RootInterfaceTest(unittest.TestCase):
     def setUp(self):
         config = {
