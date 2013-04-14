@@ -37,7 +37,7 @@ core_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema
 
 
 def read(config_file):
-    """Helper to load defaults in same way across core and extensions."""
+    """Helper to load config defaults in same way across core and extensions"""
     with io.open(config_file, 'rb') as filehandle:
         return filehandle.read()
 
@@ -118,7 +118,7 @@ def _validate(raw_config, schemas):
 
 
 def parse_override(override):
-    """Parse section/key=value override."""
+    """Parse ``section/key=value`` command line overrides"""
     section, remainder = override.split('/', 1)
     key, value = remainder.split('=', 1)
     return (section.strip(), key.strip(), value.strip())

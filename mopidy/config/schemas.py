@@ -59,6 +59,8 @@ class ConfigSchema(object):
         return self._schema[key]
 
     def format(self, values):
+        """Returns the schema as a config section with the given ``values``
+        filled in"""
         # TODO: should the output be encoded utf-8 since we use that in
         # serialize for strings?
         lines = ['[%s]' % self.name]
@@ -70,6 +72,8 @@ class ConfigSchema(object):
         return '\n'.join(lines)
 
     def convert(self, items):
+        """Validates the given ``items`` using the config schema and returns
+        clean values"""
         errors = {}
         values = {}
 

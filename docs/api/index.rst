@@ -14,4 +14,5 @@ API reference
     audio
     frontends
     ext
+    config
     http

@@ -25,23 +25,32 @@ class ConfigValue(object):
     the code interacting with the config should simply skip None config values.
     """
 
-    #: Collection of valid choices for converted value. Must be combined with
-    #: :function:`validate_choices` in :method:`validate` do any thing.
     choices = None
+    """
+    Collection of valid choices for converted value. Must be combined with
+    :func:`~mopidy.config.validators.validate_choice` in :meth:`deserialize`
+    do any thing.
+    """
 
-    #: Minimum of converted value. Must be combined with
-    #: :function:`validate_minimum` in :method:`validate` do any thing.
     minimum = None
+    """
+    Minimum of converted value. Must be combined with
+    :func:`~mopidy.config.validators.validate_minimum` in :meth:`deserialize`
+    do any thing.
+    """
 
-    #: Maximum of converted value. Must be combined with
-    #: :function:`validate_maximum` in :method:`validate` do any thing.
     maximum = None
+    """
+    Maximum of converted value. Must be combined with
+    :func:`~mopidy.config.validators.validate_maximum` in :meth:`deserialize`
+    do any thing.
+    """
 
-    #: Indicate if this field is required.
     optional = None
+    """Indicate if this field is required."""
 
-    #: Indicate if we should mask the when printing for human consumption.
     secret = None
+    """Indicate if we should mask the when printing for human consumption."""
 
     def __init__(self, **kwargs):
         self.choices = kwargs.get('choices')
@@ -66,9 +75,9 @@ class ConfigValue(object):
 
 
 class String(ConfigValue):
-    """String values.
+    """String value
 
-    Supports: optional, choices and secret.
+    Supported kwargs: ``optional``, ``choices``, and ``secret``.
     """
     def deserialize(self, value):
         value = value.strip()
@@ -83,9 +92,9 @@ class String(ConfigValue):
 
 
 class Integer(ConfigValue):
-    """Integer values.
+    """Integer value
 
-    Supports: choices, minimum, maximum and secret.
+    Supported kwargs: ``choices``, ``minimum``, ``maximum``, and ``secret``
     """
     def deserialize(self, value):
         value = int(value)
@@ -96,9 +105,15 @@ class Integer(ConfigValue):
 
 
 class Boolean(ConfigValue):
-    """Boolean values.
+    """Boolean value
 
-    Supports: secret.
+    Accepts ``1``, ``yes``, ``true``, and ``on`` with any casing as
+    :class:`True`.
+
+    Accepts ``0``, ``no``, ``false``, and ``off`` with any casing as
+    :class:`False`.
+
+    Supported kwargs: ``secret``
     """
     true_values = ('1', 'yes', 'true', 'on')
     false_values = ('0', 'no', 'false', 'off')
@@ -119,9 +134,11 @@ class Boolean(ConfigValue):
 
 
 class List(ConfigValue):
-    """List values split by comma or newline.
+    """List value
 
-    Supports: optional and secret.
+    Supports elements split by commas or newlines.
+
+    Supported kwargs: ``optional`` and ``secret``
     """
     def deserialize(self, value):
         validators.validate_required(value, not self.optional)
@@ -136,9 +153,12 @@ class List(ConfigValue):
 
 
 class LogLevel(ConfigValue):
-    """Log level values.
+    """Log level value
 
-    Supports: secret.
+    Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``
+    with any casing.
+
+    Supported kwargs: ``secret``
     """
     levels = {
         'critical': logging.CRITICAL,
@@ -157,9 +177,9 @@ class LogLevel(ConfigValue):
 
 
 class Hostname(ConfigValue):
-    """Hostname values.
+    """Hostname value
 
-    Supports: optional and secret.
+    Supported kwargs: ``optional`` and ``secret``
     """
     def deserialize(self, value):
         validators.validate_required(value, not self.optional)
@@ -173,9 +193,11 @@ class Hostname(ConfigValue):
 
 
 class Port(Integer):
-    """Port values limited to 1-65535.
+    """Port value
 
-    Supports: choices and secret.
+    Expects integer in the range 1-65535
+
+    Supported kwargs: ``choices`` and ``secret``
     """
     # TODO: consider probing if port is free or not?
     def __init__(self, **kwargs):
@@ -194,9 +216,21 @@ class ExpandedPath(bytes):
 
 
 class Path(ConfigValue):
-    """File system path that will be expanded.
+    """File system path
 
-    Supports: optional, choices and secret.
+    The following expansions of the path will be done:
+
+    - ``~`` to the current user's home directory
+
+    - ``$XDG_CACHE_DIR`` according to the XDG spec
+
+    - ``$XDG_CONFIG_DIR`` according to the XDG spec
+
+    - ``$XDG_DATA_DIR`` according to the XDG spec
+
+    - ``$XDG_MUSIC_DIR`` according to the XDG spec
+
+    Supported kwargs: ``optional``, ``choices``, and ``secret``
     """
     def deserialize(self, value):
         value = value.strip()
