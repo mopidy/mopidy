@@ -49,9 +49,15 @@ repo.
 
        cd mopidy/
 
-2. To get a ``mopidy`` executable, run::
+2. To get a ``mopidy`` executable and register all bundled extensions with
+   setuptools, run::
 
       python setup.py develop
+
+   It still works to run ``python mopidy`` directly on the ``mopidy`` Python
+   package directory, but if you have never run ``python setup.py develop`` the
+   extensions bundled with Mopidy isn't registered with setuptools, so Mopidy
+   will start without any frontends or backends, making it quite useless.
 
 3. Now you can run the Mopidy command, and it will run using the code
    in the Git repo::
