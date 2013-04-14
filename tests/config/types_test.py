@@ -14,24 +14,6 @@ from tests import unittest
 
 
 class ConfigValueTest(unittest.TestCase):
-    def test_init(self):
-        value = types.ConfigValue()
-        self.assertIsNone(value.choices)
-        self.assertIsNone(value.maximum)
-        self.assertIsNone(value.minimum)
-        self.assertIsNone(value.optional)
-        self.assertIsNone(value.secret)
-
-    def test_init_with_params(self):
-        kwargs = {'choices': ['foo'], 'minimum': 0, 'maximum': 10,
-                  'secret': True, 'optional': True}
-        value = types.ConfigValue(**kwargs)
-        self.assertEqual(['foo'], value.choices)
-        self.assertEqual(0, value.minimum)
-        self.assertEqual(10, value.maximum)
-        self.assertEqual(True, value.optional)
-        self.assertEqual(True, value.secret)
-
     def test_deserialize_passes_through(self):
         value = types.ConfigValue()
         sentinel = object()
@@ -45,10 +27,6 @@ class ConfigValueTest(unittest.TestCase):
         value = types.ConfigValue()
         obj = object()
         self.assertEqual(value.serialize(obj), value.format(obj))
-
-    def test_format_masks_secrets(self):
-        value = types.ConfigValue(secret=True)
-        self.assertEqual('********', value.format(object()))
 
 
 class StringTest(unittest.TestCase):
@@ -80,7 +58,6 @@ class StringTest(unittest.TestCase):
     def test_deserialize_enforces_required(self):
         value = types.String()
         self.assertRaises(ValueError, value.deserialize, b'')
-        self.assertRaises(ValueError, value.deserialize, b' ')
 
     def test_deserialize_respects_optional(self):
         value = types.String(optional=True)
@@ -111,8 +88,24 @@ class StringTest(unittest.TestCase):
         self.assertIsInstance(result, bytes)
         self.assertEqual(r'a\n\tb'.encode('utf-8'), result)
 
-    def test_format_masks_secrets(self):
-        value = types.String(secret=True)
+
+class SecretTest(unittest.TestCase):
+    def test_deserialize_passes_through(self):
+        value = types.Secret()
+        result = value.deserialize(b'foo')
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'foo', result)
+
+    def test_deserialize_enforces_required(self):
+        value = types.Secret()
+        self.assertRaises(ValueError, value.deserialize, b'')
+
+    def test_serialize_conversion_to_string(self):
+        value = types.Secret()
+        self.assertIsInstance(value.serialize(object()), bytes)
+
+    def test_format_masks_value(self):
+        value = types.Secret()
         self.assertEqual('********', value.format('s3cret'))
 
 
@@ -145,10 +138,6 @@ class IntegerTest(unittest.TestCase):
         self.assertEqual(5, value.deserialize('5'))
         self.assertRaises(ValueError, value.deserialize, '15')
 
-    def test_format_masks_secrets(self):
-        value = types.Integer(secret=True)
-        self.assertEqual('********', value.format('1337'))
-
 
 class BooleanTest(unittest.TestCase):
     def test_deserialize_conversion_success(self):
@@ -172,10 +161,6 @@ class BooleanTest(unittest.TestCase):
         value = types.Boolean()
         self.assertEqual('true', value.serialize(True))
         self.assertEqual('false', value.serialize(False))
-
-    def test_format_masks_secrets(self):
-        value = types.Boolean(secret=True)
-        self.assertEqual('********', value.format('true'))
 
 
 class ListTest(unittest.TestCase):
@@ -218,12 +203,10 @@ class ListTest(unittest.TestCase):
     def test_deserialize_enforces_required(self):
         value = types.List()
         self.assertRaises(ValueError, value.deserialize, b'')
-        self.assertRaises(ValueError, value.deserialize, b' ')
 
     def test_deserialize_respects_optional(self):
         value = types.List(optional=True)
         self.assertEqual(tuple(), value.deserialize(b''))
-        self.assertEqual(tuple(), value.deserialize(b' '))
 
     def test_serialize(self):
         value = types.List()
@@ -277,7 +260,6 @@ class HostnameTest(unittest.TestCase):
     def test_deserialize_enforces_required(self, getaddrinfo_mock):
         value = types.Hostname()
         self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
         self.assertEqual(0, getaddrinfo_mock.call_count)
 
     @mock.patch('socket.getaddrinfo')
@@ -291,6 +273,7 @@ class HostnameTest(unittest.TestCase):
 class PortTest(unittest.TestCase):
     def test_valid_ports(self):
         value = types.Port()
+        self.assertEqual(0, value.deserialize('0'))
         self.assertEqual(1, value.deserialize('1'))
         self.assertEqual(80, value.deserialize('80'))
         self.assertEqual(6600, value.deserialize('6600'))
@@ -300,7 +283,6 @@ class PortTest(unittest.TestCase):
         value = types.Port()
         self.assertRaises(ValueError, value.deserialize, '65536')
         self.assertRaises(ValueError, value.deserialize, '100000')
-        self.assertRaises(ValueError, value.deserialize, '0')
         self.assertRaises(ValueError, value.deserialize, '-1')
         self.assertRaises(ValueError, value.deserialize, '')
 
@@ -334,7 +316,6 @@ class PathTest(unittest.TestCase):
     def test_deserialize_enforces_required(self):
         value = types.Path()
         self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
 
     def test_deserialize_respects_optional(self):
         value = types.Path(optional=True)
