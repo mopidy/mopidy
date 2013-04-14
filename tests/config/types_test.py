@@ -10,6 +10,8 @@ from mopidy.config import types
 
 from tests import unittest
 
+# TODO: DecodeTest and EncodeTest
+
 
 class ConfigValueTest(unittest.TestCase):
     def test_init(self):

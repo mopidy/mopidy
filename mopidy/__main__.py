@@ -44,8 +44,12 @@ def main():
 
     extensions = []  # Make sure it is defined before the finally block
 
+    # TODO: figure out a way to make the boilerplate in this file reusable in
+    # scanner and other places we need it.
+
     try:
         create_file_structures()
+        # TODO: run raw logging config trough escape code etc, or just validate?
         logging_config = config_lib.load(config_files, config_overrides)
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
