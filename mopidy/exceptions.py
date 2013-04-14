@@ -16,10 +16,6 @@ class MopidyException(Exception):
         self._message = message
 
 
-class SettingsError(MopidyException):
-    pass
-
-
 class ConfigError(MopidyException):
     def __init__(self, errors):
         self._errors = errors

@@ -12,10 +12,6 @@ class ExceptionsTest(unittest.TestCase):
         self.assertEqual(exc.message, 'foo')
         self.assertEqual(str(exc), 'foo')
 
-    def test_settings_error_is_a_mopidy_exception(self):
-        self.assert_(issubclass(
-            exceptions.SettingsError, exceptions.MopidyException))
-
     def test_optional_dependency_error_is_a_mopidy_exception(self):
         self.assert_(issubclass(
             exceptions.OptionalDependencyError, exceptions.MopidyException))

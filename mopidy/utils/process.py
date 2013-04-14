@@ -65,8 +65,6 @@ class BaseThread(threading.Thread):
             self.run_inside_try()
         except KeyboardInterrupt:
             logger.info('Interrupted by user')
-        except exceptions.SettingsError as e:
-            logger.error(e.message)
         except ImportError as e:
             logger.error(e)
         except ActorDeadError as e:
