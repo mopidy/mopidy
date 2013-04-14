@@ -12,6 +12,13 @@ backend. If you are working on a frontend and need to access the backend, see
 the :ref:`core-api`.
 
 
+Backend class
+=============
+
+.. autoclass:: mopidy.backends.base.Backend
+    :members:
+
+
 Playback provider
 =================
 
