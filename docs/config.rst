@@ -41,7 +41,7 @@ defaults are documented on the :ref:`extension pages <ext>`.
 Default core configuration
 ==========================
 
-.. literalinclude:: ../mopidy/default.conf
+.. literalinclude:: ../mopidy/config/default.conf
     :language: ini
 
 
