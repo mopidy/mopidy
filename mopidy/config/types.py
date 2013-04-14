@@ -157,14 +157,15 @@ class List(ConfigValue):
     """
     def deserialize(self, value):
         validators.validate_required(value, not self.optional)
-        if '\n' in value:
-            values = re.split(r'\s*\n\s*', value.strip())
+        if b'\n' in value:
+            values = re.split(r'\s*\n\s*', value)
         else:
-            values = re.split(r'\s*,\s*', value.strip())
-        return tuple([v for v in values if v])
+            values = re.split(r'\s*,\s*', value)
+        values = (decode(v).strip() for v in values)
+        return tuple(v for v in values if v)
 
     def serialize(self, value):
-        return '\n  ' + '\n  '.join(v.encode('utf-8') for v in value)
+        return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 
 class LogLevel(ConfigValue):

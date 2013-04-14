@@ -179,28 +179,56 @@ class BooleanTest(unittest.TestCase):
 
 
 class ListTest(unittest.TestCase):
+    # TODO: add test_deserialize_ignores_blank
+    # TODO: add test_serialize_ignores_blank
+    # TODO: add test_deserialize_handles_escapes
+
     def test_deserialize_conversion_success(self):
         value = types.List()
 
         expected = ('foo', 'bar', 'baz')
-        self.assertEqual(expected, value.deserialize('foo, bar ,baz '))
+        self.assertEqual(expected, value.deserialize(b'foo, bar ,baz '))
 
         expected = ('foo,bar', 'bar', 'baz')
-        self.assertEqual(expected, value.deserialize(' foo,bar\nbar\nbaz'))
+        self.assertEqual(expected, value.deserialize(b' foo,bar\nbar\nbaz'))
+
+    def test_deserialize_creates_tuples(self):
+        value = types.List(optional=True)
+        self.assertIsInstance(value.deserialize(b'foo,bar,baz'), tuple)
+        self.assertIsInstance(value.deserialize(b''), tuple)
+
+    def test_deserialize_decodes_utf8(self):
+        value = types.List()
+
+        result = value.deserialize('æ, ø, å'.encode('utf-8'))
+        self.assertEqual(('æ', 'ø', 'å'), result)
+
+        result = value.deserialize('æ\nø\nå'.encode('utf-8'))
+        self.assertEqual(('æ', 'ø', 'å'), result)
+
+    def test_deserialize_does_not_double_encode_unicode(self):
+        value = types.List()
+
+        result = value.deserialize('æ, ø, å')
+        self.assertEqual(('æ', 'ø', 'å'), result)
+
+        result = value.deserialize('æ\nø\nå')
+        self.assertEqual(('æ', 'ø', 'å'), result)
 
     def test_deserialize_enforces_required(self):
         value = types.List()
-        self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
+        self.assertRaises(ValueError, value.deserialize, b'')
+        self.assertRaises(ValueError, value.deserialize, b' ')
 
     def test_deserialize_respects_optional(self):
         value = types.List(optional=True)
-        self.assertEqual(tuple(), value.deserialize(''))
-        self.assertEqual(tuple(), value.deserialize(' '))
+        self.assertEqual(tuple(), value.deserialize(b''))
+        self.assertEqual(tuple(), value.deserialize(b' '))
 
     def test_serialize(self):
         value = types.List()
         result = value.serialize(('foo', 'bar', 'baz'))
+        self.assertIsInstance(result, bytes)
         self.assertRegexpMatches(result, r'foo\n\s*bar\n\s*baz')
 
 
