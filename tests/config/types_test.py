@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from __future__ import unicode_literals
 
 import logging
@@ -30,12 +32,12 @@ class ConfigValueTest(unittest.TestCase):
 
     def test_deserialize_passes_through(self):
         value = types.ConfigValue()
-        obj = object()
-        self.assertEqual(obj, value.deserialize(obj))
+        sentinel = object()
+        self.assertEqual(sentinel, value.deserialize(sentinel))
 
     def test_serialize_conversion_to_string(self):
         value = types.ConfigValue()
-        self.assertIsInstance(value.serialize(object()), basestring)
+        self.assertIsInstance(value.serialize(object()), bytes)
 
     def test_format_uses_serialize(self):
         value = types.ConfigValue()
@@ -50,22 +52,41 @@ class ConfigValueTest(unittest.TestCase):
 class StringTest(unittest.TestCase):
     def test_deserialize_conversion_success(self):
         value = types.String()
-        self.assertEqual('foo', value.deserialize(' foo '))
+        self.assertEqual('foo', value.deserialize(b' foo '))
+        self.assertIsInstance(value.deserialize(b'foo'), unicode)
+
+    def test_deserialize_decodes_utf8(self):
+        value = types.String()
+        result = value.deserialize('æøå'.encode('utf-8'))
+        self.assertEqual('æøå', result)
+
+    def test_deserialize_does_not_double_encode_unicode(self):
+        value = types.String()
+        result = value.deserialize('æøå')
+        self.assertEqual('æøå', result)
+
+    # TODO: add test_deserialize_decodes_string_escapes
 
     def test_deserialize_enforces_choices(self):
         value = types.String(choices=['foo', 'bar', 'baz'])
-        self.assertEqual('foo', value.deserialize('foo'))
-        self.assertRaises(ValueError, value.deserialize, 'foobar')
+        self.assertEqual('foo', value.deserialize(b'foo'))
+        self.assertRaises(ValueError, value.deserialize, b'foobar')
 
     def test_deserialize_enforces_required(self):
         value = types.String()
-        self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
+        self.assertRaises(ValueError, value.deserialize, b'')
+        self.assertRaises(ValueError, value.deserialize, b' ')
 
     def test_deserialize_respects_optional(self):
         value = types.String(optional=True)
-        self.assertIsNone(value.deserialize(''))
-        self.assertIsNone(value.deserialize(' '))
+        self.assertIsNone(value.deserialize(b''))
+        self.assertIsNone(value.deserialize(b' '))
+
+    def test_deserialize_decode_failure(self):
+        value = types.String()
+        incorrectly_encoded_bytes = u'æøå'.encode('iso-8859-1')
+        self.assertRaises(
+            ValueError, value.deserialize, incorrectly_encoded_bytes)
 
     def test_serialize_string_escapes(self):
         value = types.String()

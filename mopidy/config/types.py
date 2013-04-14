@@ -80,6 +80,8 @@ class String(ConfigValue):
     Supported kwargs: ``optional``, ``choices``, and ``secret``.
     """
     def deserialize(self, value):
+        if not isinstance(value, unicode):
+            value = value.decode('utf-8')
         value = value.strip()
         validators.validate_required(value, not self.optional)
         validators.validate_choice(value, self.choices)
