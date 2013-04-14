@@ -9,7 +9,7 @@ def validate_required(value, required):
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize` on
     the raw string, _not_ the converted value.
     """
-    if required and not value.strip():
+    if required and not value:
         raise ValueError('must be set.')
 
 
