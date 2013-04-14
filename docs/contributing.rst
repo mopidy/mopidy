@@ -25,6 +25,13 @@ Making changes
 
 #. Clone your fork on GitHub to your computer.
 
+#. Consider making a Python `virtualenv <http://www.virtualenv.org/>`_ for
+   Mopidy development to wall of Mopidy and it's dependencies from the rest of
+   your system. If you do so, create the virtualenv with the
+   ``--system-site-packages`` flag so that Mopidy can use globally installed
+   dependencies like GStreamer. If you don't use a virtualenv, you may need to
+   run the following ``pip`` and ``python setup.py`` commands with ``sudo`` to
+   install stuff globally on your computer.
 
 #. Install dependencies as described in the :ref:`installation` section.
 
