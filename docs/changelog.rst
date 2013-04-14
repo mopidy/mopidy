@@ -7,11 +7,62 @@ This changelog is used to track all major changes to Mopidy.
 v0.14.0 (UNRELEASED)
 ====================
 
+The 0.14 release has a clear focus on two things: the new configuration system
+and extension support. Mopidy's documentation has also been greatly extended
+and improved.
+
 **Dependencies**
 
 - setuptools or distribute is now required. We've introduced this dependency to
   use setuptools' entry points functionality to find installed Mopidy
   extensions.
+
+**New configuration system**
+
+- Mopidy got a new configuration system based on ini-style files instead of a
+  Python file. This makes configuration easier for users, and also makes it
+  possible for Mopidy extensions to have their own config sections.
+
+- Many config values got slightly modified names. We've made a configuration
+  conversion tool to convert the old ``settings.py`` to a new ``mopidy.conf``
+  file. This tool takes care of all the renamed config values as well.
+
+  TODO: Describe how to use the configuration conversion tool.
+
+- A long wanted feature: You can now enable or disable specific frontends or
+  backends without having to redefine :attr:`~mopidy.settings.FRONTENDS` or
+  :attr:`~mopidy.settings.BACKENDS` in your config. Those config values are
+  gone completely.
+
+**Extension support**
+
+- Mopidy now supports extensions. This means that any developer now easily can
+  create a Mopidy extension to add new control interfaces or music backends.
+  This helps spread the maintenance burden across more developers, and also
+  makes it possible to create Mopidy features not necessarily wanted by the
+  core developers. If you're interested in creating an extension for Mopidy,
+  read up on :ref:`extensiondev`.
+
+- All of Mopidy's existing frontends and backends are now plugged into Mopidy
+  as extensions, but they are still distributed together with Mopidy and are
+  enabled by default.
+
+**Command line options**
+
+- The command option :option:`mopody --list-settings` is now named
+  :option:`mopidy --show-config`.
+
+- What configuration files to use can now be specified through the command
+  option :option:`mopidy --config`.
+
+- Configuration values can now be overridden through the command option
+  :option:`mopidy --option`. For example: ``mopidy --option
+  spotify/enabled=false``.
+
+- The GStreamer command line options, :option:`mopidy --gst-*` and
+  :option:`mopidy --help-gst` are no longer supported. To set GStreamer debug
+  flags, you can use environment variables, like :envvar:`GST_DEBUG`. Refer to
+  GStreamer's documentation for details.
 
 **Spotify backend**
 
@@ -25,6 +76,12 @@ v0.14.0 (UNRELEASED)
   MPD identify playlists by name only, while Mopidy and Spotify supports
   multiple playlists with the same name, and identify them using an URI.
   (Fixes: :issue:`114`)
+
+**MPRIS frontend**
+
+- The frontend is now disabled if the :envvar:`DISPLAY` environment variable is
+  unset. This prevents some harmless error messages to appear, and thus
+  to confuse users debugging other problems.
 
 
 v0.13.0 (2013-03-31)
