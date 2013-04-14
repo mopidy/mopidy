@@ -159,7 +159,7 @@ class that will connect the rest of the dots.
             'pysoundspot',
         ],
         entry_points={
-            b'mopidy.ext': [
+            'mopidy.ext': [
                 'soundspot = mopidy_soundspot:Extension',
             ],
         },
