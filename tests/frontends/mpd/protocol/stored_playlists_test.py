@@ -30,6 +30,15 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.sendRequest('listplaylist "name"')
         self.assertEqualResponse('ACK [50@0] {listplaylist} No such playlist')
 
+    def test_listplaylist_duplicate(self):
+        playlist1 = Playlist(name='a', uri='dummy:a1', tracks=[Track(uri='b')])
+        playlist2 = Playlist(name='a', uri='dummy:a2', tracks=[Track(uri='c')])
+        self.backend.playlists.playlists = [playlist1, playlist2]
+
+        self.sendRequest('listplaylist "a [2]"')
+        self.assertInResponse('file: c')
+        self.assertInResponse('OK')
+
     def test_listplaylistinfo(self):
         self.backend.playlists.playlists = [
             Playlist(name='name', uri='dummy:name', 
@@ -56,6 +65,17 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.sendRequest('listplaylistinfo "name"')
         self.assertEqualResponse(
             'ACK [50@0] {listplaylistinfo} No such playlist')
+
+    def test_listplaylistinfo_duplicate(self):
+        playlist1 = Playlist(name='a', uri='dummy:a1', tracks=[Track(uri='b')])
+        playlist2 = Playlist(name='a', uri='dummy:a2', tracks=[Track(uri='c')])
+        self.backend.playlists.playlists = [playlist1, playlist2]
+
+        self.sendRequest('listplaylistinfo "a [2]"')
+        self.assertInResponse('file: c')
+        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Pos: 0')
+        self.assertInResponse('OK')
 
     def test_listplaylists(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
