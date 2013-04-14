@@ -8,6 +8,21 @@ from mopidy.utils import path
 from mopidy.config import validators
 
 
+def decode(value):
+    if isinstance(value, unicode):
+        return value
+    # TODO: only unescape \n \t and \\?
+    return value.decode('string-escape').decode('utf-8')
+
+
+def encode(value):
+    if not isinstance(value, unicode):
+        return value
+    for char in ('\\', '\n', '\t'):  # TODO: more escapes?
+        value = value.replace(char, char.encode('unicode-escape'))
+    return value.encode('utf-8')
+
+
 class ConfigValue(object):
     """Represents a config key's value and how to handle it.
 
@@ -80,7 +95,7 @@ class String(ConfigValue):
     Supported kwargs: ``optional``, ``choices``, and ``secret``.
     """
     def deserialize(self, value):
-        value = value.strip()
+        value = decode(value).strip()
         validators.validate_required(value, not self.optional)
         validators.validate_choice(value, self.choices)
         if not value:
@@ -88,7 +103,7 @@ class String(ConfigValue):
         return value
 
     def serialize(self, value):
-        return value.encode('utf-8').encode('string-escape')
+        return encode(value)
 
 
 class Integer(ConfigValue):
@@ -142,14 +157,15 @@ class List(ConfigValue):
     """
     def deserialize(self, value):
         validators.validate_required(value, not self.optional)
-        if '\n' in value:
-            values = re.split(r'\s*\n\s*', value.strip())
+        if b'\n' in value:
+            values = re.split(r'\s*\n\s*', value)
         else:
-            values = re.split(r'\s*,\s*', value.strip())
-        return tuple([v for v in values if v])
+            values = re.split(r'\s*,\s*', value)
+        values = (decode(v).strip() for v in values)
+        return tuple(v for v in values if v)
 
     def serialize(self, value):
-        return '\n  ' + '\n  '.join(v.encode('utf-8') for v in value)
+        return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 
 class LogLevel(ConfigValue):
