@@ -94,7 +94,7 @@ class ExtensionConfigSchemaTest(unittest.TestCase):
 
 class LogLevelConfigSchemaTest(unittest.TestCase):
     def test_conversion(self):
-        schema = schemas.LogLevelConfigSchema()
+        schema = schemas.LogLevelConfigSchema('test')
         result = schema.convert([('foo.bar', 'DEBUG'), ('baz', 'INFO')])
 
         self.assertEqual(logging.DEBUG, result['foo.bar'])

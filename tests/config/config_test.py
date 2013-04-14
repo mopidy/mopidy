@@ -12,14 +12,14 @@ class LoadConfigTest(unittest.TestCase):
         self.assertEqual({}, config._load([], [], []))
 
     def test_load_single_default(self):
-        default = '[foo]\nbar = baz'
+        default = b'[foo]\nbar = baz'
         expected = {'foo': {'bar': 'baz'}}
         result = config._load([], [default], [])
         self.assertEqual(expected, result)
 
     def test_load_defaults(self):
-        default1 = '[foo]\nbar = baz'
-        default2 = '[foo2]\n'
+        default1 = b'[foo]\nbar = baz'
+        default2 = b'[foo2]\n'
         expected = {'foo': {'bar': 'baz'}, 'foo2': {}}
         result = config._load([], [default1, default2], [])
         self.assertEqual(expected, result)

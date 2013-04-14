@@ -107,7 +107,7 @@ def _validate(raw_config, schemas):
             items = raw_config[schema.name].items()
             config[schema.name] = schema.convert(items)
         except KeyError:
-            errors.append('%s: section not found.' % name)
+            errors.append('%s: section not found.' % schema.name)
         except exceptions.ConfigError as error:
             for key in error:
                 errors.append('%s/%s: %s' % (schema.name, key, error[key]))
