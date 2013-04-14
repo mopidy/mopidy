@@ -44,7 +44,7 @@ class Extension(object):
     def get_config_schema(self):
         """The extension's config validation schema
 
-        :returns: :class:`mopidy.config.ExtensionConfigSchema`
+        :returns: :class:`~mopidy.config.schema.ExtensionConfigSchema`
         """
         return config_lib.ExtensionConfigSchema(self.ext_name)
 
