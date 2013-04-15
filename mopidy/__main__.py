@@ -49,7 +49,7 @@ def main():
 
     try:
         # Initial config without extensions to bootstrap logging.
-        logging_config, _ = get_config(config_files, [], config_overrides)
+        logging_config, _ = config_lib.load(config_files, [], config_overrides)
 
         # TODO: setup_logging needs defaults in-case config values are None
         log.setup_logging(
@@ -58,7 +58,7 @@ def main():
         installed_extensions = ext.load_extensions()
 
         # TODO: wrap config in RO proxy.
-        config, config_errors = get_config(
+        config, config_errors = config_lib.load(
             config_files, installed_extensions, config_overrides)
 
         # Filter out disabled extensions and remove any config errors for them.
@@ -94,19 +94,6 @@ def main():
         stop_backends(enabled_extensions)
         stop_audio()
         process.stop_remaining_actors()
-
-
-# TODO: move to config
-def get_config(files, extensions, overrides):
-    # Helper to get configs, as our config system should not need to know about
-    # extensions.
-    defaults = [config_lib.core_defaults]
-    defaults.extend(e.get_default_config() for e in extensions)
-    raw_config = config_lib._load(files, defaults, overrides)
-
-    schemas = config_lib.core_schemas[:]
-    schemas.extend(e.get_config_schema() for e in extensions)
-    return config_lib._validate(raw_config, schemas)
 
 
 def log_extension_info(all_extensions, enabled_extensions):
@@ -185,14 +172,19 @@ def show_config_callback(option, opt, value, parser):
     overrides = getattr(parser.values, 'overrides', [])
 
     extensions = ext.load_extensions()
-    raw_config = config_lib.load(files, overrides, extensions)
-    enabled_extensions = ext.filter_enabled_extensions(raw_config, extensions)
-    config = config_lib.validate(
-        raw_config, config_lib.core_schemas, enabled_extensions)
+    enabled_extensions = []
+
+    config, errors = config_lib.load(files, extensions, overrides)
+
+    for extension in extensions:
+        if ext.validate_extension(extension, config):
+            enabled_extensions.append(extension)
+        elif extension.ext_name in errors:
+            del errors[extension.ext_name]
 
     # TODO: create mopidy.config.format?
     output = []
-    for schema in config_lib.core_schemas:
+    for schema in config_lib._schemas:
         options = config.get(schema.name, {})
         if not options:
             continue
@@ -205,7 +197,7 @@ def show_config_callback(option, opt, value, parser):
             options = config.get(schema.name, {})
             output.append(schema.format(options))
         else:
-            lines = ['[%s]' % schema.name, 'enabled = false',
+            lines = ['[%s]' % schema.name,
                      '# Config hidden as extension is disabled']
             output.append('\n'.join(lines))
 

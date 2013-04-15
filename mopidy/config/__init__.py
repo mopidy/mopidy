@@ -12,8 +12,6 @@ from mopidy.utils import path
 
 logger = logging.getLogger('mopidy.config')
 
-_config_dir = os.path.dirname(__file__)
-
 _logging_schema = ConfigSchema('logging')
 _logging_schema['console_format'] = String()
 _logging_schema['debug_format'] = String()
@@ -34,11 +32,7 @@ _proxy_schema['password'] = Secret(optional=True)
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 #_outputs_schema = config.AudioOutputConfigSchema()
 
-#: Config schemas used by mopidy itself.
-core_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
-
-#: Config default used by mopidy itself.
-core_defaults = io.open(os.path.join(_config_dir, 'default.conf'), 'rb').read()
+_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
 
 
 def read(config_file):
@@ -47,15 +41,19 @@ def read(config_file):
         return filehandle.read()
 
 
-def load(files, overrides, extensions=None):
+def load(files, extensions, overrides):
+    # Helper to get configs, as the rest of our config system should not need
+    # to know about extensions.
     config_dir = os.path.dirname(__file__)
     defaults = [read(os.path.join(config_dir, 'default.conf'))]
-    if extensions:
-        defaults.extend(e.get_default_config() for e in extensions)
-    return _load(files, defaults, overrides)
+    defaults.extend(e.get_default_config() for e in extensions)
+    raw_config = _load(files, defaults, overrides)
+
+    schemas = _schemas[:]
+    schemas.extend(e.get_config_schema() for e in extensions)
+    return _validate(raw_config, schemas)
 
 
-# TODO: replace load() with this version of API.
 def _load(files, defaults, overrides):
     parser = configparser.RawConfigParser()
 
@@ -88,21 +86,6 @@ def _load(files, defaults, overrides):
     return raw_config
 
 
-def validate(raw_config, schemas, extensions=None):
-    # Collect config schemas to validate against
-    extension_schemas = [e.get_config_schema() for e in extensions or []]
-    config, errors = _validate(raw_config, schemas + extension_schemas)
-
-    if errors:
-        for section in errors:
-            for key, error in errors[section].items():
-                logger.error('Config value %s/%s %s', section, key, error)
-        sys.exit(1)
-
-    return config
-
-
-# TODO: replace validate() with this version of API.
 def _validate(raw_config, schemas):
     # Get validated config
     config = {}
