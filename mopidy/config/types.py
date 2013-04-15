@@ -184,19 +184,22 @@ class LogLevel(ConfigValue):
     with any casing.
     """
     levels = {
-        'critical': logging.CRITICAL,
-        'error': logging.ERROR,
-        'warning': logging.WARNING,
-        'info': logging.INFO,
-        'debug': logging.DEBUG,
+        b'critical': logging.CRITICAL,
+        b'error': logging.ERROR,
+        b'warning': logging.WARNING,
+        b'info': logging.INFO,
+        b'debug': logging.DEBUG,
     }
 
     def deserialize(self, value):
         validators.validate_choice(value.lower(), self.levels.keys())
         return self.levels.get(value.lower())
 
-    def serialize(self, value):
-        return dict((v, k) for k, v in self.levels.items()).get(value)
+    def serialize(self, value, display=False):
+        lookup = dict((v, k) for k, v in self.levels.items())
+        if value in lookup:
+            return lookup[value]
+        return b''
 
 
 class Hostname(ConfigValue):

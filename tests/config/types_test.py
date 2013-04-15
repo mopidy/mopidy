@@ -261,7 +261,7 @@ class LogLevelTest(unittest.TestCase):
         value = types.LogLevel()
         for name, level in self.levels.items():
             self.assertEqual(name, value.serialize(level))
-        self.assertIsNone(value.serialize(1337))
+        self.assertEqual(b'', value.serialize(1337))
 
 
 class HostnameTest(unittest.TestCase):
