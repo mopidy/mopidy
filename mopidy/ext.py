@@ -153,6 +153,18 @@ def validate_extensions(installed_extensions):
     return valid_extensions
 
 
+def register_gstreamer_elements(enabled_extensions):
+    """Registers custom GStreamer elements from extensions.
+
+    :params enabled_extensions: list of enabled extensions
+    """
+
+    for extension in enabled_extensions:
+        logger.debug(
+            'Registering GStreamer elements for: %s', extension.ext_name)
+        extension.register_gstreamer_elements()
+
+
 def filter_enabled_extensions(raw_config, extensions):
     boolean = config_lib.Boolean()
     enabled_extensions = []

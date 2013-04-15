@@ -61,6 +61,7 @@ def main():
             raw_config, config_lib.core_schemas, extensions)
         log.setup_log_levels(config)
         check_old_locations()
+        ext.register_gstreamer_elements(extensions)
 
         # TODO: wrap config in RO proxy.
 
