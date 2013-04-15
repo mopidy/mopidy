@@ -80,23 +80,36 @@ class String(ConfigValue):
         return value
 
     def serialize(self, value):
+        if value is None:
+            return b''
         return encode(value)
 
 
 class Secret(ConfigValue):
-    """String value.
+    """Secret value.
 
-    Masked when being displayed, and is not decoded.
+    Should be used for passwords, auth tokens etc. Deserializing will not
+    convert to unicode. Will mask value when being displayed.
     """
     def __init__(self, optional=False, choices=None):
         self._required = not optional
 
     def deserialize(self, value):
+        value = value.strip()
         validators.validate_required(value, self._required)
+        if not value:
+            return None
+        return value
+
+    def serialize(self, value):
+        if value is None:
+            return b''
         return value
 
     def format(self, value):
-        return '********'
+        if value is None:
+            return b''
+        return b'********'
 
 
 class Integer(ConfigValue):

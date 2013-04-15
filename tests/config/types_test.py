@@ -88,6 +88,12 @@ class StringTest(unittest.TestCase):
         self.assertIsInstance(result, bytes)
         self.assertEqual(r'a\n\tb'.encode('utf-8'), result)
 
+    def test_serialize_none(self):
+        value = types.String()
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
+
 
 class SecretTest(unittest.TestCase):
     def test_deserialize_passes_through(self):
@@ -100,13 +106,28 @@ class SecretTest(unittest.TestCase):
         value = types.Secret()
         self.assertRaises(ValueError, value.deserialize, b'')
 
-    def test_serialize_conversion_to_string(self):
+    def test_deserialize_respects_optional(self):
+        value = types.Secret(optional=True)
+        self.assertIsNone(value.deserialize(b''))
+        self.assertIsNone(value.deserialize(b' '))
+
+    def test_serialize_none(self):
         value = types.Secret()
-        self.assertIsInstance(value.serialize(object()), bytes)
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
 
     def test_format_masks_value(self):
         value = types.Secret()
-        self.assertEqual('********', value.format('s3cret'))
+        result = value.format('s3cret')
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'********', result)
+
+    def test_format_none(self):
+        value = types.Secret()
+        result = value.format(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
 
 
 class IntegerTest(unittest.TestCase):
