@@ -127,25 +127,3 @@ def load_extensions():
     names = (e.ext_name for e in extensions)
     logging.debug('Discovered extensions: %s', ', '.join(names))
     return extensions
-
-
-def filter_enabled_extensions(raw_config, extensions):
-    boolean = config_lib.Boolean()
-    enabled_extensions = []
-    enabled_names = []
-    disabled_names = []
-
-    for extension in extensions:
-        # TODO: handle key and value errors.
-        enabled = raw_config[extension.ext_name]['enabled']
-        if boolean.deserialize(enabled):
-            enabled_extensions.append(extension)
-            enabled_names.append(extension.ext_name)
-        else:
-            disabled_names.append(extension.ext_name)
-
-    logging.info(
-        'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
-    logging.info(
-        'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
-    return enabled_extensions
