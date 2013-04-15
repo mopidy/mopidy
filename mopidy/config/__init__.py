@@ -12,6 +12,8 @@ from mopidy.utils import path
 
 logger = logging.getLogger('mopdiy.config')
 
+_config_dir = os.path.dirname(__file__)
+
 _logging_schema = ConfigSchema('logging')
 _logging_schema['console_format'] = String()
 _logging_schema['debug_format'] = String()
@@ -32,7 +34,11 @@ _proxy_schema['password'] = Secret(optional=True)
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 #_outputs_schema = config.AudioOutputConfigSchema()
 
+#: Config schemas used by mopidy itself.
 core_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
+
+#: Config default used by mopidy itself.
+core_defaults = io.open(os.path.join(_config_dir, 'default.conf'), 'rb').read()
 
 
 def read(config_file):
