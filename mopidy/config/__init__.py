@@ -10,7 +10,7 @@ from mopidy.config.schemas import *
 from mopidy.config.types import *
 from mopidy.utils import path
 
-logger = logging.getLogger('mopdiy.config')
+logger = logging.getLogger('mopidy.config')
 
 _logging_schema = ConfigSchema('logging')
 _logging_schema['console_format'] = String()
