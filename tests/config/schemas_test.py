@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import logging
 import mock
 
-from mopidy import exceptions
 from mopidy.config import schemas, types
 
 from tests import unittest

@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from mopidy import exceptions
 from mopidy.config import types
 
 
@@ -99,7 +98,6 @@ class ConfigSchema(object):
                 lines.append('%s = %s' % (
                     key, self._schema[key].format(value)))
         return '\n'.join(lines)
-
 
 
 class ExtensionConfigSchema(ConfigSchema):

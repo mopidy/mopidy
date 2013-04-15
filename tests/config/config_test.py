@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import mock
 
-from mopidy import config, exceptions
+from mopidy import config
 
 from tests import unittest, path_to_data_dir
 

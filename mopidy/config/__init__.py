@@ -94,8 +94,6 @@ def validate(raw_config, schemas, extensions=None):
     config, errors = _validate(raw_config, schemas + extension_schemas)
 
     if errors:
-        # TODO: raise error instead.
-        #raise exceptions.ConfigError(errors)
         for section in errors:
             for key, error in errors[section].items():
                 logger.error('Config value %s/%s %s', section, key, error)
