@@ -63,7 +63,8 @@ def main():
 
         # Filter out disabled extensions and remove any config errors for them.
         for extension in installed_extensions:
-            if ext.validate_extension(extension, config):
+            enabled = config[extension.ext_name]['enabled']
+            if ext.validate_extension(extension) and enabled:
                 enabled_extensions.append(extension)
             elif extension.ext_name in config_errors:
                 del config_errors[extension.ext_name]
@@ -177,7 +178,8 @@ def show_config_callback(option, opt, value, parser):
     config, errors = config_lib.load(files, extensions, overrides)
 
     for extension in extensions:
-        if ext.validate_extension(extension, config):
+        enabled = config[extension.ext_name]['enabled']
+        if ext.validate_extension(extension) and enabled:
             enabled_extensions.append(extension)
         elif extension.ext_name in errors:
             del errors[extension.ext_name]

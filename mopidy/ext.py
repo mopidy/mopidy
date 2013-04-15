@@ -112,11 +112,10 @@ def load_extensions():
     return installed_extensions
 
 
-def validate_extension(extension, config):
+def validate_extension(extension):
     """Verify extension's dependencies and environment.
 
     :param extensions: and extension to check
-    :param config: config to check enabled status in
     :returns: if extensions should be run
     """
 
@@ -144,7 +143,7 @@ def validate_extension(extension, config):
             'Disabled extension %s: %s', extension.ext_name, ex.message)
         return False
 
-    return config[extension.ext_name]['enabled']
+    return True
 
 
 def register_gstreamer_elements(enabled_extensions):
