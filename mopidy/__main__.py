@@ -56,27 +56,24 @@ def main():
             logging_config, options.verbosity_level, options.save_debug_log)
 
         installed_extensions = ext.load_extensions()
-        all_extensions = ext.validate_extensions(installed_extensions)
 
         # TODO: wrap config in RO proxy.
         config, config_errors = get_config(
-            config_files, all_extensions, config_overrides)
+            config_files, installed_extensions, config_overrides)
 
         # Filter out disabled extensions and remove any config errors for them.
-        # TODO: extension.should_install(config)
-        for extension in all_extensions:
-            if config[extension.ext_name]['enabled']:
+        for extension in installed_extensions:
+            if ext.validate_extension(extension, config):
                 enabled_extensions.append(extension)
             elif extension.ext_name in config_errors:
                 del config_errors[extension.ext_name]
 
-        log_extension_info(all_extensions, enabled_extensions)
+        log_extension_info(installed_extensions, enabled_extensions)
         check_config_errors(config_errors)
 
         log.setup_log_levels(config)
         create_file_structures()
         check_old_locations()
-
         ext.register_gstreamer_elements(enabled_extensions)
 
         # Anything that wants to exit after this point must use
@@ -99,6 +96,7 @@ def main():
         process.stop_remaining_actors()
 
 
+# TODO: move to config
 def get_config(files, extensions, overrides):
     # Helper to get configs, as our config system should not need to know about
     # extensions.
