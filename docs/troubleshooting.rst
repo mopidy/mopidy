@@ -56,3 +56,21 @@ system is deadlocking. If you have the ``pkill`` command installed, you can use
 this by simply running::
 
     pkill -SIGUSR1 mopidy
+
+
+Debugging GStreamer
+===================
+
+If you really want to dig in and debug GStreamer behaviour, then check out the
+`Debugging section
+<http://gstreamer.freedesktop.org/data/doc/gstreamer/head/manual/html/section-checklist-debug.html>`_
+of GStreamer's documentation for your options. Note that Mopidy does not
+support the GStreamer command line options, like ``--gst-debug-level=3``, but
+setting GStreamer environment variables, like :envvar:`GST_DEBUG`, works with
+Mopidy. For example, to run Mopidy with debug logging and GStreamer logging at
+level 3, you can run::
+
+    GST_DEBUG=3 mopidy -v
+
+This will produce a lot of output, but given some GStreamer knowledge this is
+very useful for debugging GStreamer pipeline issues.
