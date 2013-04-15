@@ -91,42 +91,78 @@ class Extension(object):
 
 
 def load_extensions():
-    extensions = []
+    """Find all installed extensions.
+
+    :returns: list of installed extensions
+    """
+
+    installed_extensions = []
+
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
         logger.debug('Loading entry point: %s', entry_point)
-
-        try:
-            extension_class = entry_point.load()
-        except pkg_resources.DistributionNotFound as ex:
-            logger.info(
-                'Disabled extension %s: Dependency %s not found',
-                entry_point.name, ex)
-            continue
-
+        extension_class = entry_point.load(require=False)
         extension = extension_class()
-
+        extension.entry_point = entry_point
+        installed_extensions.append(extension)
         logger.debug(
             'Loaded extension: %s %s', extension.dist_name, extension.version)
 
-        if entry_point.name != extension.ext_name:
+    names = (e.ext_name for e in installed_extensions)
+    logging.debug('Discovered extensions: %s', ', '.join(names))
+    return installed_extensions
+
+
+def validate_extensions(installed_extensions):
+    """Verify extension's dependencies and environment.
+
+    :param installed_extensions: list of installed extensions
+    :returns: list of valid extensions
+    """
+
+    valid_extensions = []
+
+    for extension in installed_extensions:
+        logger.debug('Validating extension: %s', extension.ext_name)
+
+        if extension.ext_name != extension.entry_point.name:
             logger.warning(
                 'Disabled extension %(ep)s: entry point name (%(ep)s) '
                 'does not match extension name (%(ext)s)',
-                {'ep': entry_point.name, 'ext': extension.ext_name})
+                {'ep': extension.entry_point.name, 'ext': extension.ext_name})
+            continue
+
+        try:
+            extension.entry_point.require()
+        except pkg_resources.DistributionNotFound as ex:
+            logger.info(
+                'Disabled extension %s: Dependency %s not found',
+                extension.ext_name, ex)
             continue
 
         try:
             extension.validate_environment()
         except exceptions.ExtensionError as ex:
             logger.info(
-                'Disabled extension %s: %s', entry_point.name, ex.message)
+                'Disabled extension %s: %s', extension.ext_name, ex.message)
             continue
 
-        extensions.append(extension)
+        valid_extensions.append(extension)
 
-    names = (e.ext_name for e in extensions)
-    logging.debug('Discovered extensions: %s', ', '.join(names))
-    return extensions
+    names = (e.ext_name for e in valid_extensions)
+    logger.debug('Valid extensions: %s', ', '.join(names))
+    return valid_extensions
+
+
+def register_gstreamer_elements(enabled_extensions):
+    """Registers custom GStreamer elements from extensions.
+
+    :params enabled_extensions: list of enabled extensions
+    """
+
+    for extension in enabled_extensions:
+        logger.debug(
+            'Registering GStreamer elements for: %s', extension.ext_name)
+        extension.register_gstreamer_elements()
 
 
 def filter_enabled_extensions(raw_config, extensions):
