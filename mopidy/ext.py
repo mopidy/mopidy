@@ -34,9 +34,9 @@ class Extension(object):
     """
 
     def get_default_config(self):
-        """The extension's default config as a string
+        """The extension's default config as a bytestring
 
-        :returns: string
+        :returns: bytes
         """
         raise NotImplementedError(
             'Add at least a config section with "enabled = true"')
