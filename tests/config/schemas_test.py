@@ -36,54 +36,49 @@ class ConfigSchemaTest(unittest.TestCase):
         self.assertNotIn('unknown = rty', result)
 
     def test_convert(self):
-        self.schema.convert(self.values.items())
+        self.schema.convert(self.values)
 
     def test_convert_with_missing_value(self):
         del self.values['foo']
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
-
-        self.assertIn('not found', cm.exception['foo'])
+        result, errors = self.schema.convert(self.values)
+        self.assertIn('not found', errors['foo'])
+        self.assertItemsEqual(['bar', 'baz'], result.keys())
 
     def test_convert_with_extra_value(self):
         self.values['extra'] = '123'
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
-
-        self.assertIn('unknown', cm.exception['extra'])
+        result, errors = self.schema.convert(self.values)
+        self.assertIn('unknown', errors['extra'])
+        self.assertItemsEqual(['foo', 'bar', 'baz'], result.keys())
 
     def test_convert_with_deserialization_error(self):
         self.schema['foo'].deserialize.side_effect = ValueError('failure')
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
-
-        self.assertIn('failure', cm.exception['foo'])
+        result, errors = self.schema.convert(self.values)
+        self.assertIn('failure', errors['foo'])
+        self.assertItemsEqual(['bar', 'baz'], result.keys())
 
     def test_convert_with_multiple_deserialization_errors(self):
         self.schema['foo'].deserialize.side_effect = ValueError('failure')
         self.schema['bar'].deserialize.side_effect = ValueError('other')
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
-
-        self.assertIn('failure', cm.exception['foo'])
-        self.assertIn('other', cm.exception['bar'])
+        result, errors = self.schema.convert(self.values)
+        self.assertIn('failure', errors['foo'])
+        self.assertIn('other', errors['bar'])
+        self.assertItemsEqual(['baz'], result.keys())
 
     def test_convert_deserialization_unknown_and_missing_errors(self):
         self.values['extra'] = '123'
         self.schema['bar'].deserialize.side_effect = ValueError('failure')
         del self.values['baz']
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
-
-        self.assertIn('unknown', cm.exception['extra'])
-        self.assertNotIn('foo', cm.exception)
-        self.assertIn('failure', cm.exception['bar'])
-        self.assertIn('not found', cm.exception['baz'])
+        result, errors = self.schema.convert(self.values)
+        self.assertIn('unknown', errors['extra'])
+        self.assertNotIn('foo', errors)
+        self.assertIn('failure', errors['bar'])
+        self.assertIn('not found', errors['baz'])
+        self.assertItemsEqual(['foo'], result.keys())
 
 
 class ExtensionConfigSchemaTest(unittest.TestCase):
@@ -95,7 +90,7 @@ class ExtensionConfigSchemaTest(unittest.TestCase):
 class LogLevelConfigSchemaTest(unittest.TestCase):
     def test_conversion(self):
         schema = schemas.LogLevelConfigSchema('test')
-        result = schema.convert([('foo.bar', 'DEBUG'), ('baz', 'INFO')])
+        result, errors = schema.convert({'foo.bar': 'DEBUG', 'baz': 'INFO'})
 
         self.assertEqual(logging.DEBUG, result['foo.bar'])
         self.assertEqual(logging.INFO, result['baz'])

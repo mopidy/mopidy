@@ -90,8 +90,9 @@ def validate(raw_config, schemas, extensions=None):
     if errors:
         # TODO: raise error instead.
         #raise exceptions.ConfigError(errors)
-        for error in errors:
-            logger.error(error)
+        for section in errors:
+            for key, error in errors[section].items():
+                logger.error('Config value %s/%s %s', section, key, error)
         sys.exit(1)
 
     return config
@@ -101,17 +102,13 @@ def validate(raw_config, schemas, extensions=None):
 def _validate(raw_config, schemas):
     # Get validated config
     config = {}
-    errors = []
+    errors = {}
     for schema in schemas:
-        try:
-            items = raw_config[schema.name].items()
-            config[schema.name] = schema.convert(items)
-        except KeyError:
-            errors.append('%s: section not found.' % schema.name)
-        except exceptions.ConfigError as error:
-            for key in error:
-                errors.append('%s/%s: %s' % (schema.name, key, error[key]))
-    # TODO: raise errors instead of return
+        values = raw_config.get(schema.name, {})
+        result, error = schema.convert(values)
+        if error:
+            errors[schema.name] = error
+        config[schema.name] = result
     return config, errors
 
 

@@ -71,15 +71,16 @@ class ConfigSchema(object):
                     key, self._schema[key].format(value)))
         return '\n'.join(lines)
 
-    def convert(self, items):
-        """Validates the given ``items`` using the config schema and returns
-        clean values"""
-        errors = {}
-        values = {}
+    def convert(self, values):
+        """Validates the given ``values`` using the config schema.
 
-        for key, value in items:
+         Returns a tuple with cleaned values and errors."""
+        errors = {}
+        result = {}
+
+        for key, value in values.items():
             try:
-                values[key] = self._schema[key].deserialize(value)
+                result[key] = self._schema[key].deserialize(value)
             except KeyError:  # not in our schema
                 errors[key] = 'unknown config key.'
                 suggestion = _did_you_mean(key, self._schema.keys())
@@ -89,12 +90,10 @@ class ConfigSchema(object):
                 errors[key] = str(e)
 
         for key in self._schema:
-            if key not in values and key not in errors:
+            if key not in result and key not in errors:
                 errors[key] = 'config key not found.'
 
-        if errors:
-            raise exceptions.ConfigError(errors)
-        return values
+        return result, errors
 
 
 class ExtensionConfigSchema(ConfigSchema):
@@ -105,6 +104,8 @@ class ExtensionConfigSchema(ConfigSchema):
     def __init__(self, name):
         super(ExtensionConfigSchema, self).__init__(name)
         self['enabled'] = types.Boolean()
+
+    # TODO: override convert to gate on enabled=true?
 
 
 class LogLevelConfigSchema(object):
@@ -126,17 +127,13 @@ class LogLevelConfigSchema(object):
                     key, self._config_value.format(value)))
         return '\n'.join(lines)
 
-    def convert(self, items):
+    def convert(self, values):
         errors = {}
-        values = {}
+        result = {}
 
-        for key, value in items:
+        for key, value in values.items():
             try:
-                if value.strip():
-                    values[key] = self._config_value.deserialize(value)
+                result[key] = self._config_value.deserialize(value)
             except ValueError as e:  # deserialization failed
                 errors[key] = str(e)
-
-        if errors:
-            raise exceptions.ConfigError(errors)
-        return values
+        return result, errors
