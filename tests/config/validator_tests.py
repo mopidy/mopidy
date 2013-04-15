@@ -57,11 +57,13 @@ class ValidateRequiredTest(unittest.TestCase):
         validators.validate_required('foo', False)
         validators.validate_required('', False)
         validators.validate_required('  ', False)
+        validators.validate_required([], False)
 
     def test_passes_when_required_and_set(self):
         validators.validate_required('foo', True)
         validators.validate_required(' foo ', True)
+        validators.validate_required([1], True)
 
     def test_blocks_when_required_and_emtpy(self):
         self.assertRaises(ValueError, validators.validate_required, '', True)
-        self.assertRaises(ValueError, validators.validate_required, '  ', True)
+        self.assertRaises(ValueError, validators.validate_required, [], True)
