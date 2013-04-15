@@ -55,7 +55,8 @@ def main():
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
 
-        all_extensions = ext.load_extensions()
+        installed_extensions = ext.load_extensions()
+        all_extensions = ext.validate_extensions(installed_extensions)
 
         # TODO: wrap config in RO proxy.
         config, config_errors = get_config(
@@ -75,6 +76,8 @@ def main():
         log.setup_log_levels(config)
         create_file_structures()
         check_old_locations()
+
+        ext.register_gstreamer_elements(enabled_extensions)
 
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors have been started.

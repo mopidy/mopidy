@@ -10,7 +10,7 @@ from mopidy.config.schemas import *
 from mopidy.config.types import *
 from mopidy.utils import path
 
-logger = logging.getLogger('mopdiy.config')
+logger = logging.getLogger('mopidy.config')
 
 _config_dir = os.path.dirname(__file__)
 
