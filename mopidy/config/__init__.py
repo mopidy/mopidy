@@ -105,10 +105,11 @@ def _validate(raw_config, schemas):
     errors = {}
     for schema in schemas:
         values = raw_config.get(schema.name, {})
-        result, error = schema.convert(values)
+        result, error = schema.deserialize(values)
         if error:
             errors[schema.name] = error
-        config[schema.name] = result
+        if result:
+            config[schema.name] = result
     return config, errors
 
 

@@ -40,9 +40,11 @@ class ConfigSchema(object):
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
-    instances.  Once setup :meth:`convert` can be called with a list of
-    ``(key, value)`` tuples to process. For convienience we also support
-    :meth:`format` method that can used for printing out the converted values.
+    instances.  Once setup :meth:`deserialize` can be called with a dict of
+    values to process. For convienience we also support :meth:`format` method
+    that can used for converting the values to a dict that can be printed and
+    :meth:`serialize` for converting the values to a form suitable for
+    persistence.
     """
     # TODO: Use collections.OrderedDict once 2.6 support is gone (#344)
     def __init__(self, name):
@@ -58,20 +60,7 @@ class ConfigSchema(object):
     def __getitem__(self, key):
         return self._schema[key]
 
-    def format(self, values):
-        """Returns the schema as a config section with the given ``values``
-        filled in"""
-        # TODO: should the output be encoded utf-8 since we use that in
-        # serialize for strings?
-        lines = ['[%s]' % self.name]
-        for key in self._order:
-            value = values.get(key)
-            if value is not None:
-                lines.append('%s = %s' % (
-                    key, self._schema[key].format(value)))
-        return '\n'.join(lines)
-
-    def convert(self, values):
+    def deserialize(self, values):
         """Validates the given ``values`` using the config schema.
 
          Returns a tuple with cleaned values and errors."""
@@ -95,6 +84,23 @@ class ConfigSchema(object):
 
         return result, errors
 
+    def serialize(self, values):
+        pass
+
+    def format(self, values):
+        """Returns the schema as a config section with the given ``values``
+        filled in"""
+        # TODO: should the output be encoded utf-8 since we use that in
+        # serialize for strings?
+        lines = ['[%s]' % self.name]
+        for key in self._order:
+            value = values.get(key)
+            if value is not None:
+                lines.append('%s = %s' % (
+                    key, self._schema[key].format(value)))
+        return '\n'.join(lines)
+
+
 
 class ExtensionConfigSchema(ConfigSchema):
     """Sub-classed :class:`ConfigSchema` for use in extensions.
@@ -105,7 +111,7 @@ class ExtensionConfigSchema(ConfigSchema):
         super(ExtensionConfigSchema, self).__init__(name)
         self['enabled'] = types.Boolean()
 
-    # TODO: override convert to gate on enabled=true?
+    # TODO: override serialize to gate on enabled=true?
 
 
 class LogLevelConfigSchema(object):
@@ -119,15 +125,7 @@ class LogLevelConfigSchema(object):
         self.name = name
         self._config_value = types.LogLevel()
 
-    def format(self, values):
-        lines = ['[%s]' % self.name]
-        for key, value in sorted(values.items()):
-            if value is not None:
-                lines.append('%s = %s' % (
-                    key, self._config_value.format(value)))
-        return '\n'.join(lines)
-
-    def convert(self, values):
+    def deserialize(self, values):
         errors = {}
         result = {}
 
@@ -137,3 +135,14 @@ class LogLevelConfigSchema(object):
             except ValueError as e:  # deserialization failed
                 errors[key] = str(e)
         return result, errors
+
+    def serialize(self, values):
+        pass
+
+    def format(self, values):
+        lines = ['[%s]' % self.name]
+        for key, value in sorted(values.items()):
+            if value is not None:
+                lines.append('%s = %s' % (
+                    key, self._config_value.format(value)))
+        return '\n'.join(lines)
