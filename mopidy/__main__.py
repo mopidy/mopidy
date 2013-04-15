@@ -53,7 +53,8 @@ def main():
         logging_config = config_lib.load(config_files, config_overrides)
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
-        extensions = ext.load_extensions()
+        installed_extensions = ext.load_extensions()
+        extensions = ext.validate_extensions(installed_extensions)
         raw_config = config_lib.load(config_files, config_overrides, extensions)
         extensions = ext.filter_enabled_extensions(raw_config, extensions)
         config = config_lib.validate(
