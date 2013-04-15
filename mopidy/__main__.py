@@ -53,13 +53,15 @@ def main():
         logging_config = config_lib.load(config_files, config_overrides)
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
-        extensions = ext.load_extensions()
+        installed_extensions = ext.load_extensions()
+        extensions = ext.validate_extensions(installed_extensions)
         raw_config = config_lib.load(config_files, config_overrides, extensions)
         extensions = ext.filter_enabled_extensions(raw_config, extensions)
         config = config_lib.validate(
             raw_config, config_lib.core_schemas, extensions)
         log.setup_log_levels(config)
         check_old_locations()
+        ext.register_gstreamer_elements(extensions)
 
         # TODO: wrap config in RO proxy.
 
