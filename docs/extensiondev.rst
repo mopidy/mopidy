@@ -230,12 +230,12 @@ and ``password``.
         version = __version__
 
         def get_default_config(self):
-            return default_config
+            return bytes(default_config)
 
         def get_config_schema(self):
             schema = super(Extension, self).get_config_schema()
-            schema['username'] = config.String(required=True)
-            schema['password'] = config.String(required=True, secret=True)
+            schema['username'] = config.String()
+            schema['password'] = config.Secret()
             return schema
 
         def validate_environment(self):

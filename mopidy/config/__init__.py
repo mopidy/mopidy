@@ -27,7 +27,7 @@ _audio_schema['output'] = String()
 _proxy_schema = ConfigSchema('proxy')
 _proxy_schema['hostname'] = Hostname(optional=True)
 _proxy_schema['username'] = String(optional=True)
-_proxy_schema['password'] = String(optional=True, secret=True)
+_proxy_schema['password'] = Secret(optional=True)
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 #_outputs_schema = config.AudioOutputConfigSchema()

@@ -19,7 +19,7 @@ class Extension(ext.Extension):
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
         schema['username'] = config.String()
-        schema['password'] = config.String(secret=True)
+        schema['password'] = config.Secret()
         schema['bitrate'] = config.Integer(choices=(96, 160, 320))
         schema['timeout'] = config.Integer(minimum=0)
         schema['cache_dir'] = config.Path()
