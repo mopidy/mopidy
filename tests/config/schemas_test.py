@@ -17,18 +17,18 @@ class ConfigSchemaTest(unittest.TestCase):
         self.values = {'bar': '123', 'foo': '456', 'baz': '678'}
 
     def test_format(self):
-        self.schema['foo'].format.return_value = 'qwe'
-        self.schema['bar'].format.return_value = 'asd'
-        self.schema['baz'].format.return_value = 'zxc'
+        self.schema['foo'].serialize.return_value = 'qwe'
+        self.schema['bar'].serialize.return_value = 'asd'
+        self.schema['baz'].serialize.return_value = 'zxc'
 
         expected = ['[test]', 'foo = qwe', 'bar = asd', 'baz = zxc']
         result = self.schema.format(self.values)
         self.assertEqual('\n'.join(expected), result)
 
     def test_format_unkwown_value(self):
-        self.schema['foo'].format.return_value = 'qwe'
-        self.schema['bar'].format.return_value = 'asd'
-        self.schema['baz'].format.return_value = 'zxc'
+        self.schema['foo'].serialize.return_value = 'qwe'
+        self.schema['bar'].serialize.return_value = 'asd'
+        self.schema['baz'].serialize.return_value = 'zxc'
         self.values['unknown'] = 'rty'
 
         result = self.schema.format(self.values)

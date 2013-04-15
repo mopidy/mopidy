@@ -96,7 +96,7 @@ class ConfigSchema(object):
             value = values.get(key)
             if value is not None:
                 lines.append('%s = %s' % (
-                    key, self._schema[key].format(value)))
+                    key, self._schema[key].serialize(value, display=True)))
         return '\n'.join(lines)
 
 
@@ -142,5 +142,5 @@ class LogLevelConfigSchema(object):
         for key, value in sorted(values.items()):
             if value is not None:
                 lines.append('%s = %s' % (
-                    key, self._config_value.format(value)))
+                    key, self._config_value.serialize(value, display=True)))
         return '\n'.join(lines)

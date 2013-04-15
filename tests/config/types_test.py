@@ -23,10 +23,9 @@ class ConfigValueTest(unittest.TestCase):
         value = types.ConfigValue()
         self.assertIsInstance(value.serialize(object()), bytes)
 
-    def test_format_uses_serialize(self):
+    def test_serialize_supports_display(self):
         value = types.ConfigValue()
-        obj = object()
-        self.assertEqual(value.serialize(obj), value.format(obj))
+        self.assertIsInstance(value.serialize(object(), display=True), bytes)
 
 
 class StringTest(unittest.TestCase):
@@ -117,15 +116,15 @@ class SecretTest(unittest.TestCase):
         self.assertIsInstance(result, bytes)
         self.assertEqual(b'', result)
 
-    def test_format_masks_value(self):
+    def test_serialize_for_display_masks_value(self):
         value = types.Secret()
-        result = value.format('s3cret')
+        result = value.serialize('s3cret', display=True)
         self.assertIsInstance(result, bytes)
         self.assertEqual(b'********', result)
 
-    def test_format_none(self):
+    def test_serialize_none_for_display(self):
         value = types.Secret()
-        result = value.format(None)
+        result = value.serialize(None, display=True)
         self.assertIsInstance(result, bytes)
         self.assertEqual(b'', result)
 

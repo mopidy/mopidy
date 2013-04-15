@@ -53,13 +53,9 @@ class ConfigValue(object):
         """Cast raw string to appropriate type."""
         return value
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         """Convert value back to string for saving."""
         return bytes(value)
-
-    def format(self, value):
-        """Format value for display."""
-        return self.serialize(value)
 
 
 class String(ConfigValue):
@@ -79,7 +75,7 @@ class String(ConfigValue):
             return None
         return value
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         if value is None:
             return b''
         return encode(value)
@@ -101,15 +97,12 @@ class Secret(ConfigValue):
             return None
         return value
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         if value is None:
             return b''
+        elif display:
+            return b'********'
         return value
-
-    def format(self, value):
-        if value is None:
-            return b''
-        return b'********'
 
 
 class Integer(ConfigValue):
@@ -147,7 +140,7 @@ class Boolean(ConfigValue):
             return False
         raise ValueError('invalid value for boolean: %r' % value)
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         if value:
             return 'true'
         else:
@@ -173,7 +166,7 @@ class List(ConfigValue):
         validators.validate_required(values, self._required)
         return tuple(values)
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 
@@ -208,7 +201,7 @@ class Hostname(ConfigValue):
     def __init__(self, optional=False):
         self._required = not optional
 
-    def deserialize(self, value):
+    def deserialize(self, value, display=False):
         validators.validate_required(value, self._required)
         if not value.strip():
             return None
@@ -259,7 +252,7 @@ class Path(ConfigValue):
             return None
         return ExpandedPath(value)
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         if isinstance(value, ExpandedPath):
             return value.original
         return value
