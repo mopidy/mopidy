@@ -97,11 +97,11 @@ Core configuration values
     The file to dump debug log data to when Mopidy is run with the
     :option:`mopidy --save-debug-log` option.
 
-.. confval:: logging.levels/*
+.. confval:: loglevels/*
 
-    The ``logging.levels`` config section can be used to change the log level
-    for specific parts of Mopidy during development or debugging. Each key in
-    the config section should match the name of a logger. The value is the log
+    The ``loglevels`` config section can be used to change the log level for
+    specific parts of Mopidy during development or debugging. Each key in the
+    config section should match the name of a logger. The value is the log
     level to use for that logger, one of ``debug``, ``info``, ``warning``,
     ``error``, or ``critical``.
 

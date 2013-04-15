@@ -17,7 +17,7 @@ _logging_schema['console_format'] = String()
 _logging_schema['debug_format'] = String()
 _logging_schema['debug_file'] = Path()
 
-_loglevels_schema = LogLevelConfigSchema('logging.levels')
+_loglevels_schema = LogLevelConfigSchema('loglevels')
 
 _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()

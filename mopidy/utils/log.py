@@ -20,7 +20,7 @@ def setup_logging(config, verbosity_level, save_debug_log):
 
 
 def setup_log_levels(config):
-    for name, level in config['logging.levels'].items():
+    for name, level in config['loglevels'].items():
         logging.getLogger(name).setLevel(level)
 
 

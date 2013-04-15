@@ -365,4 +365,4 @@ Is much better than::
 
 If you want to turn on debug logging for your own extension, but not for
 everything else due to the amount of noise, see the docs for the
-:confval:`logging.levels/*` config section.
+:confval:`loglevels/*` config section.

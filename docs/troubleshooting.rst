@@ -42,7 +42,7 @@ run :option:`mopidy --save-debug-log`, it will save the debug log to the file
 ``mopidy.log`` in the directory you ran the command from.
 
 If you want to turn on more or less logging for some component, see the
-docs for the :confval:`logging.levels/*` config section.
+docs for the :confval:`loglevels/*` config section.
 
 
 Debugging deadlocks
