@@ -28,9 +28,9 @@ the config values you want to change. If you want to keep the default for a
 config value, you **should not** add it to ``~/.config/mopidy/mopidy.conf``.
 
 To see what's the effective configuration for your Mopidy installation, you can
-run ``mopidy --show-config``. It will print your full effective config with
-passwords masked out so that you safely can share the output with others for
-debugging.
+run :option:`mopidy --show-config`. It will print your full effective config
+with passwords masked out so that you safely can share the output with others
+for debugging.
 
 You can find a description of all config values belonging to Mopidy's core
 below, together with their default values. In addition, all :ref:`extensions
@@ -95,7 +95,7 @@ Core configuration values
 .. confval:: logging/debug_file
 
     The file to dump debug log data to when Mopidy is run with the
-    :option:`--save-debug-log` option.
+    :option:`mopidy --save-debug-log` option.
 
 .. confval:: logging.levels/*
 
