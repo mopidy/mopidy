@@ -42,33 +42,46 @@ def main():
     config_files = options.config.split(':')
     config_overrides = options.overrides
 
-    extensions = []  # Make sure it is defined before the finally block
+    enabled_extensions = []  # Make sure it is defined before the finally block
 
     # TODO: figure out a way to make the boilerplate in this file reusable in
     # scanner and other places we need it.
 
     try:
-        create_file_structures()
-        # TODO: run raw logging config trough escape code etc, or just validate?
-        logging_config = config_lib.load(config_files, config_overrides)
+        # Initial config without extensions to bootstrap logging.
+        logging_config, _ = get_config(config_files, [], config_overrides)
+
+        # TODO: setup_logging needs defaults in-case config values are None
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
-        extensions = ext.load_extensions()
-        raw_config = config_lib.load(config_files, config_overrides, extensions)
-        extensions = ext.filter_enabled_extensions(raw_config, extensions)
-        config = config_lib.validate(
-            raw_config, config_lib.core_schemas, extensions)
-        log.setup_log_levels(config)
-        check_old_locations()
+
+        all_extensions = ext.load_extensions()
 
         # TODO: wrap config in RO proxy.
+        config, config_errors = get_config(
+            config_files, all_extensions, config_overrides)
+
+        # Filter out disabled extensions and remove any config errors for them.
+        # TODO: extension.should_install(config)
+        for extension in all_extensions:
+            if config[extension.ext_name]['enabled']:
+                enabled_extensions.append(extension)
+            elif extension.ext_name in config_errors:
+                del config_errors[extension.ext_name]
+
+        log_extension_info(all_extensions, enabled_extensions)
+        check_config_errors(config_errors)
+
+        log.setup_log_levels(config)
+        create_file_structures()
+        check_old_locations()
 
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors have been started.
         audio = setup_audio(config)
-        backends = setup_backends(config, extensions, audio)
+        backends = setup_backends(config, enabled_extensions, audio)
         core = setup_core(audio, backends)
-        setup_frontends(config, extensions, core)
+        setup_frontends(config, enabled_extensions, core)
         loop.run()
     except KeyboardInterrupt:
         logger.info('Interrupted. Exiting...')
@@ -76,11 +89,42 @@ def main():
         logger.exception(ex)
     finally:
         loop.quit()
-        stop_frontends(extensions)
+        stop_frontends(enabled_extensions)
         stop_core()
-        stop_backends(extensions)
+        stop_backends(enabled_extensions)
         stop_audio()
         process.stop_remaining_actors()
+
+
+def get_config(files, extensions, overrides):
+    # Helper to get configs, as our config system should not need to know about
+    # extensions.
+    defaults = [config_lib.core_defaults]
+    defaults.extend(e.get_default_config() for e in extensions)
+    raw_config = config_lib._load(files, defaults, overrides)
+
+    schemas = config_lib.core_schemas[:]
+    schemas.extend(e.get_config_schema() for e in extensions)
+    return config_lib._validate(raw_config, schemas)
+
+
+def log_extension_info(all_extensions, enabled_extensions):
+    # TODO: distinguish disabled vs blocked by env?
+    enabled_names = set(e.ext_name for e in enabled_extensions)
+    disabled_names = set(e.ext_name for e in all_extensions) - enabled_names
+    logging.info(
+        'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
+    logging.info(
+        'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
+
+
+def check_config_errors(errors):
+    if not errors:
+        return
+    for section in errors:
+        for key, msg in errors[section].items():
+            logger.error('Config value %s/%s %s', section, key, msg)
+    sys.exit(1)
 
 
 def check_config_override(option, opt, override):
