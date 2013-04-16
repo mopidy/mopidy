@@ -54,6 +54,14 @@ def load(files, extensions, overrides):
     return _validate(raw_config, schemas)
 
 
+def format(config, extensions, comments=None, display=True):
+    # Helper to format configs, as the rest of our config system should not
+    # need to know about extensions.
+    schemas = _schemas[:]
+    schemas.extend(e.get_config_schema() for e in extensions)
+    return _format(config, comments or {}, schemas, display)
+
+
 def _load(files, defaults, overrides):
     parser = configparser.RawConfigParser()
 
@@ -98,6 +106,22 @@ def _validate(raw_config, schemas):
         if result:
             config[schema.name] = result
     return config, errors
+
+
+def _format(config, comments, schemas, display):
+    output = []
+    for schema in schemas:
+        serialized = schema.serialize(config.get(schema.name, {}), display=display)
+        output.append(b'[%s]' % schema.name)
+        for key, value in serialized.items():
+            comment = comments.get(schema.name, {}).get(key, b'')
+            output.append(b'%s =' % key)
+            if value is not None:
+                output[-1] += b' ' + value
+            if comment:
+                output[-1] += b'  # ' + comment.capitalize()
+        output.append(b'')
+    return b'\n'.join(output)
 
 
 def parse_override(override):

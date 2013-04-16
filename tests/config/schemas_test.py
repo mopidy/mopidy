@@ -16,24 +16,6 @@ class ConfigSchemaTest(unittest.TestCase):
         self.schema['baz'] = mock.Mock()
         self.values = {'bar': '123', 'foo': '456', 'baz': '678'}
 
-    def test_format(self):
-        self.schema['foo'].serialize.return_value = 'qwe'
-        self.schema['bar'].serialize.return_value = 'asd'
-        self.schema['baz'].serialize.return_value = 'zxc'
-
-        expected = ['[test]', 'foo = qwe', 'bar = asd', 'baz = zxc']
-        result = self.schema.format(self.values)
-        self.assertEqual('\n'.join(expected), result)
-
-    def test_format_unkwown_value(self):
-        self.schema['foo'].serialize.return_value = 'qwe'
-        self.schema['bar'].serialize.return_value = 'asd'
-        self.schema['baz'].serialize.return_value = 'zxc'
-        self.values['unknown'] = 'rty'
-
-        result = self.schema.format(self.values)
-        self.assertNotIn('unknown = rty', result)
-
     def test_deserialize(self):
         self.schema.deserialize(self.values)
 
@@ -108,13 +90,6 @@ class LogLevelConfigSchemaTest(unittest.TestCase):
 
         self.assertEqual(logging.DEBUG, result['foo.bar'])
         self.assertEqual(logging.INFO, result['baz'])
-
-    def test_format(self):
-        schema = schemas.LogLevelConfigSchema('test')
-        values = {'foo.bar': logging.DEBUG, 'baz': logging.INFO}
-        expected = ['[test]', 'baz = info', 'foo.bar = debug']
-        result = schema.format(values)
-        self.assertEqual('\n'.join(expected), result)
 
 
 class DidYouMeanTest(unittest.TestCase):

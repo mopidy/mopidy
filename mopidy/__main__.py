@@ -177,33 +177,18 @@ def show_config_callback(option, opt, value, parser):
 
     config, errors = config_lib.load(files, extensions, overrides)
 
+    # Clear out any config for disabled extensions.
     for extension in extensions:
-        enabled = config[extension.ext_name]['enabled']
-        if ext.validate_extension(extension) and enabled:
-            enabled_extensions.append(extension)
-        elif extension.ext_name in errors:
-            del errors[extension.ext_name]
+        if not ext.validate_extension(extension):
+            config[extension.ext_name] = {b'enabled': False}
+            errors[extension.ext_name] = {
+                b'enabled': b'extension disabled its self.'}
+        elif not config[extension.ext_name]['enabled']:
+            config[extension.ext_name] = {b'enabled': False}
+            errors[extension.ext_name] = {
+                b'enabled': b'extension disabled by config.'}
 
-    # TODO: create mopidy.config.format?
-    output = []
-    for schema in config_lib._schemas:
-        options = config.get(schema.name, {})
-        if not options:
-            continue
-        output.append(schema.format(options))
-
-    for extension in extensions:
-        schema = extension.get_config_schema()
-
-        if extension in enabled_extensions:
-            options = config.get(schema.name, {})
-            output.append(schema.format(options))
-        else:
-            lines = ['[%s]' % schema.name,
-                     '# Config hidden as extension is disabled']
-            output.append('\n'.join(lines))
-
-    print '\n\n'.join(output)
+    print config_lib.format(config, extensions, errors)
     sys.exit(0)
 
 

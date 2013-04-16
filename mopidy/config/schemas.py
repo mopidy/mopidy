@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import collections
+
 from mopidy.config import types
 
 
@@ -85,21 +87,12 @@ class ConfigSchema(object):
 
         return result, errors
 
-    def serialize(self, values):
-        pass
-
-    def format(self, values):
-        """Returns the schema as a config section with the given ``values``
-        filled in"""
-        # TODO: should the output be encoded utf-8 since we use that in
-        # serialize for strings?
-        lines = ['[%s]' % self.name]
+    def serialize(self, values, display=False):
+        result = getattr(collections, 'OrderedDict', dict)() # TODO: 2.6 cleanup
         for key in self._order:
-            value = values.get(key)
-            if value is not None:
-                lines.append('%s = %s' % (
-                    key, self._schema[key].serialize(value, display=True)))
-        return '\n'.join(lines)
+            if key in values:
+                result[key] = self._schema[key].serialize(values[key], display)
+        return result
 
 
 class ExtensionConfigSchema(ConfigSchema):
@@ -137,13 +130,8 @@ class LogLevelConfigSchema(object):
                 errors[key] = str(e)
         return result, errors
 
-    def serialize(self, values):
-        pass
-
-    def format(self, values):
-        lines = ['[%s]' % self.name]
-        for key, value in sorted(values.items()):
-            if value is not None:
-                lines.append('%s = %s' % (
-                    key, self._config_value.serialize(value, display=True)))
-        return '\n'.join(lines)
+    def serialize(self, values, display=False):
+        result = getattr(collections, 'OrderedDict', dict)() # TODO: 2.6 cleanup
+        for key in sorted(values.keys()):
+            result[key] = self._config_value.serialize(values[key], display)
+        return result
