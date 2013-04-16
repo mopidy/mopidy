@@ -53,13 +53,11 @@ class ConfigValue(object):
         """Cast raw string to appropriate type."""
         return value
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         """Convert value back to string for saving."""
+        if value is None:
+            return b''
         return bytes(value)
-
-    def format(self, value):
-        """Format value for display."""
-        return self.serialize(value)
 
 
 class String(ConfigValue):
@@ -79,24 +77,34 @@ class String(ConfigValue):
             return None
         return value
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
+        if value is None:
+            return b''
         return encode(value)
 
 
 class Secret(ConfigValue):
-    """String value.
+    """Secret value.
 
-    Masked when being displayed, and is not decoded.
+    Should be used for passwords, auth tokens etc. Deserializing will not
+    convert to unicode. Will mask value when being displayed.
     """
     def __init__(self, optional=False, choices=None):
         self._required = not optional
 
     def deserialize(self, value):
+        value = value.strip()
         validators.validate_required(value, self._required)
+        if not value:
+            return None
         return value
 
-    def format(self, value):
-        return '********'
+    def serialize(self, value, display=False):
+        if value is None:
+            return b''
+        elif display:
+            return b'********'
+        return value
 
 
 class Integer(ConfigValue):
@@ -134,11 +142,11 @@ class Boolean(ConfigValue):
             return False
         raise ValueError('invalid value for boolean: %r' % value)
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         if value:
-            return 'true'
+            return b'true'
         else:
-            return 'false'
+            return b'false'
 
 
 class List(ConfigValue):
@@ -160,7 +168,7 @@ class List(ConfigValue):
         validators.validate_required(values, self._required)
         return tuple(values)
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 
@@ -171,19 +179,22 @@ class LogLevel(ConfigValue):
     with any casing.
     """
     levels = {
-        'critical': logging.CRITICAL,
-        'error': logging.ERROR,
-        'warning': logging.WARNING,
-        'info': logging.INFO,
-        'debug': logging.DEBUG,
+        b'critical': logging.CRITICAL,
+        b'error': logging.ERROR,
+        b'warning': logging.WARNING,
+        b'info': logging.INFO,
+        b'debug': logging.DEBUG,
     }
 
     def deserialize(self, value):
         validators.validate_choice(value.lower(), self.levels.keys())
         return self.levels.get(value.lower())
 
-    def serialize(self, value):
-        return dict((v, k) for k, v in self.levels.items()).get(value)
+    def serialize(self, value, display=False):
+        lookup = dict((v, k) for k, v in self.levels.items())
+        if value in lookup:
+            return lookup[value]
+        return b''
 
 
 class Hostname(ConfigValue):
@@ -192,7 +203,7 @@ class Hostname(ConfigValue):
     def __init__(self, optional=False):
         self._required = not optional
 
-    def deserialize(self, value):
+    def deserialize(self, value, display=False):
         validators.validate_required(value, self._required)
         if not value.strip():
             return None
@@ -243,7 +254,7 @@ class Path(ConfigValue):
             return None
         return ExpandedPath(value)
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         if isinstance(value, ExpandedPath):
             return value.original
         return value

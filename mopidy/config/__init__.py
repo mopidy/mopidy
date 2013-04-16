@@ -4,7 +4,6 @@ import ConfigParser as configparser
 import io
 import logging
 import os.path
-import sys
 
 from mopidy.config.schemas import *
 from mopidy.config.types import *
@@ -32,7 +31,7 @@ _proxy_schema['password'] = Secret(optional=True)
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 #_outputs_schema = config.AudioOutputConfigSchema()
 
-core_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
+_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
 
 
 def read(config_file):
@@ -41,15 +40,27 @@ def read(config_file):
         return filehandle.read()
 
 
-def load(files, overrides, extensions=None):
+def load(files, extensions, overrides):
+    # Helper to get configs, as the rest of our config system should not need
+    # to know about extensions.
     config_dir = os.path.dirname(__file__)
     defaults = [read(os.path.join(config_dir, 'default.conf'))]
-    if extensions:
-        defaults.extend(e.get_default_config() for e in extensions)
-    return _load(files, defaults, overrides)
+    defaults.extend(e.get_default_config() for e in extensions)
+    raw_config = _load(files, defaults, overrides)
+
+    schemas = _schemas[:]
+    schemas.extend(e.get_config_schema() for e in extensions)
+    return _validate(raw_config, schemas)
 
 
-# TODO: replace load() with this version of API.
+def format(config, extensions, comments=None, display=True):
+    # Helper to format configs, as the rest of our config system should not
+    # need to know about extensions.
+    schemas = _schemas[:]
+    schemas.extend(e.get_config_schema() for e in extensions)
+    return _format(config, comments or {}, schemas, display)
+
+
 def _load(files, defaults, overrides):
     parser = configparser.RawConfigParser()
 
@@ -82,37 +93,34 @@ def _load(files, defaults, overrides):
     return raw_config
 
 
-def validate(raw_config, schemas, extensions=None):
-    # Collect config schemas to validate against
-    extension_schemas = [e.get_config_schema() for e in extensions or []]
-    config, errors = _validate(raw_config, schemas + extension_schemas)
-
-    if errors:
-        # TODO: raise error instead.
-        #raise exceptions.ConfigError(errors)
-        for error in errors:
-            logger.error(error)
-        sys.exit(1)
-
-    return config
-
-
-# TODO: replace validate() with this version of API.
 def _validate(raw_config, schemas):
     # Get validated config
     config = {}
-    errors = []
+    errors = {}
     for schema in schemas:
-        try:
-            items = raw_config[schema.name].items()
-            config[schema.name] = schema.convert(items)
-        except KeyError:
-            errors.append('%s: section not found.' % schema.name)
-        except exceptions.ConfigError as error:
-            for key in error:
-                errors.append('%s/%s: %s' % (schema.name, key, error[key]))
-    # TODO: raise errors instead of return
+        values = raw_config.get(schema.name, {})
+        result, error = schema.deserialize(values)
+        if error:
+            errors[schema.name] = error
+        if result:
+            config[schema.name] = result
     return config, errors
+
+
+def _format(config, comments, schemas, display):
+    output = []
+    for schema in schemas:
+        serialized = schema.serialize(config.get(schema.name, {}), display=display)
+        output.append(b'[%s]' % schema.name)
+        for key, value in serialized.items():
+            comment = comments.get(schema.name, {}).get(key, b'')
+            output.append(b'%s =' % key)
+            if value is not None:
+                output[-1] += b' ' + value
+            if comment:
+                output[-1] += b'  # ' + comment.capitalize()
+        output.append(b'')
+    return b'\n'.join(output)
 
 
 def parse_override(override):

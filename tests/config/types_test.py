@@ -23,10 +23,15 @@ class ConfigValueTest(unittest.TestCase):
         value = types.ConfigValue()
         self.assertIsInstance(value.serialize(object()), bytes)
 
-    def test_format_uses_serialize(self):
+    def test_serialize_none(self):
         value = types.ConfigValue()
-        obj = object()
-        self.assertEqual(value.serialize(obj), value.format(obj))
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
+
+    def test_serialize_supports_display(self):
+        value = types.ConfigValue()
+        self.assertIsInstance(value.serialize(object(), display=True), bytes)
 
 
 class StringTest(unittest.TestCase):
@@ -88,6 +93,12 @@ class StringTest(unittest.TestCase):
         self.assertIsInstance(result, bytes)
         self.assertEqual(r'a\n\tb'.encode('utf-8'), result)
 
+    def test_serialize_none(self):
+        value = types.String()
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
+
 
 class SecretTest(unittest.TestCase):
     def test_deserialize_passes_through(self):
@@ -100,13 +111,28 @@ class SecretTest(unittest.TestCase):
         value = types.Secret()
         self.assertRaises(ValueError, value.deserialize, b'')
 
-    def test_serialize_conversion_to_string(self):
-        value = types.Secret()
-        self.assertIsInstance(value.serialize(object()), bytes)
+    def test_deserialize_respects_optional(self):
+        value = types.Secret(optional=True)
+        self.assertIsNone(value.deserialize(b''))
+        self.assertIsNone(value.deserialize(b' '))
 
-    def test_format_masks_value(self):
+    def test_serialize_none(self):
         value = types.Secret()
-        self.assertEqual('********', value.format('s3cret'))
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
+
+    def test_serialize_for_display_masks_value(self):
+        value = types.Secret()
+        result = value.serialize('s3cret', display=True)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'********', result)
+
+    def test_serialize_none_for_display(self):
+        value = types.Secret()
+        result = value.serialize(None, display=True)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
 
 
 class IntegerTest(unittest.TestCase):
@@ -157,10 +183,19 @@ class BooleanTest(unittest.TestCase):
         self.assertRaises(ValueError, value.deserialize, 'sure')
         self.assertRaises(ValueError, value.deserialize, '')
 
-    def test_serialize(self):
+    def test_serialize_true(self):
         value = types.Boolean()
-        self.assertEqual('true', value.serialize(True))
-        self.assertEqual('false', value.serialize(False))
+        result = value.serialize(True)
+        self.assertEqual(b'true', result)
+        self.assertIsInstance(result, bytes)
+
+    def test_serialize_false(self):
+        value = types.Boolean()
+        result = value.serialize(False)
+        self.assertEqual(b'false', result)
+        self.assertIsInstance(result, bytes)
+
+    # TODO: test None or other invalid values into serialize?
 
 
 class ListTest(unittest.TestCase):
@@ -240,7 +275,7 @@ class LogLevelTest(unittest.TestCase):
         value = types.LogLevel()
         for name, level in self.levels.items():
             self.assertEqual(name, value.serialize(level))
-        self.assertIsNone(value.serialize(1337))
+        self.assertEqual(b'', value.serialize(1337))
 
 
 class HostnameTest(unittest.TestCase):
