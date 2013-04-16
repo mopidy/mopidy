@@ -47,6 +47,9 @@ and improved.
   as extensions, but they are still distributed together with Mopidy and are
   enabled by default.
 
+- The NAD mixer have been moved out of Mopidy core to its own project,
+  Mopidy-NAD. See :ref:`ext` for more information.
+
 **Command line options**
 
 - The command option :option:`mopidy --list-settings` is now named
