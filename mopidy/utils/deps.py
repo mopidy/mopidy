@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import functools
 import os
 import platform
 import sys
@@ -8,6 +9,7 @@ import pygst
 pygst.require('0.10')
 import gst
 
+import pkg_resources
 import pykka
 
 from . import formatting
@@ -37,7 +39,16 @@ def format_dependency_list(adapters=None):
             serial_info,
             cherrypy_info,
             ws4py_info,
+            functools.partial(pkg_info, 'Mopidy', True),
         ]
+
+        dist_names = set([
+            ep.dist.project_name for ep in
+            pkg_resources.iter_entry_points('mopidy.ext')
+            if ep.dist.project_name != 'Mopidy'])
+        for dist_name in dist_names:
+            adapters.append(
+                functools.partial(pkg_info, dist_name))
 
     return '\n'.join([_format_dependency(a()) for a in adapters])
 
@@ -80,6 +91,21 @@ def python_info():
         'version': '%s %s' % (
             platform.python_implementation(), platform.python_version()),
         'path': platform.__file__,
+    }
+
+
+def pkg_info(project_name=None, include_extras=False):
+    if project_name is None:
+        project_name = 'Mopidy'
+    distribution = pkg_resources.get_distribution(project_name)
+    extras = include_extras and distribution.extras or []
+    dependencies = [
+        pkg_info(d) for d in distribution.requires(extras)]
+    return {
+        'name': distribution.project_name,
+        'version': distribution.version,
+        'path': distribution.location,
+        'dependencies': dependencies,
     }
 
 

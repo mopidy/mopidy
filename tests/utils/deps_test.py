@@ -5,6 +5,8 @@ import platform
 import pygst
 pygst.require('0.10')
 import gst
+
+import mock
 import pykka
 
 try:
@@ -156,3 +158,40 @@ class DepsTest(unittest.TestCase):
         self.assertEquals('ws4py', result['name'])
         self.assertEquals(ws4py.__version__, result['version'])
         self.assertIn('ws4py', result['path'])
+
+    @mock.patch('pkg_resources.get_distribution')
+    def test_pkg_info(self, get_distribution_mock):
+        dist_mopidy = mock.Mock()
+        dist_mopidy.project_name = 'Mopidy'
+        dist_mopidy.version = '0.13'
+        dist_mopidy.location = '/tmp/example/mopidy'
+        dist_mopidy.requires.return_value = ['Pykka']
+
+        dist_pykka = mock.Mock()
+        dist_pykka.project_name = 'Pykka'
+        dist_pykka.version = '1.1'
+        dist_pykka.location = '/tmp/example/pykka'
+        dist_pykka.requires.return_value = ['setuptools']
+
+        dist_setuptools = mock.Mock()
+        dist_setuptools.project_name = 'setuptools'
+        dist_setuptools.version = '0.6'
+        dist_setuptools.location = '/tmp/example/setuptools'
+        dist_setuptools.requires.return_value = []
+
+        get_distribution_mock.side_effect = [
+            dist_mopidy, dist_pykka, dist_setuptools]
+
+        result = deps.pkg_info()
+
+        self.assertEquals('Mopidy', result['name'])
+        self.assertEquals('0.13', result['version'])
+        self.assertIn('mopidy', result['path'])
+
+        dep_info_pykka = result['dependencies'][0]
+        self.assertEquals('Pykka', dep_info_pykka['name'])
+        self.assertEquals('1.1', dep_info_pykka['version'])
+
+        dep_info_setuptools = dep_info_pykka['dependencies'][0]
+        self.assertEquals('setuptools', dep_info_setuptools['name'])
+        self.assertEquals('0.6', dep_info_setuptools['version'])
