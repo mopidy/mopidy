@@ -112,45 +112,38 @@ def load_extensions():
     return installed_extensions
 
 
-def validate_extensions(installed_extensions):
+def validate_extension(extension):
     """Verify extension's dependencies and environment.
 
-    :param installed_extensions: list of installed extensions
-    :returns: list of valid extensions
+    :param extensions: an extension to check
+    :returns: if extension should be run
     """
 
-    valid_extensions = []
+    logger.debug('Validating extension: %s', extension.ext_name)
 
-    for extension in installed_extensions:
-        logger.debug('Validating extension: %s', extension.ext_name)
+    if extension.ext_name != extension.entry_point.name:
+        logger.warning(
+            'Disabled extension %(ep)s: entry point name (%(ep)s) '
+            'does not match extension name (%(ext)s)',
+            {'ep': extension.entry_point.name, 'ext': extension.ext_name})
+        return False
 
-        if extension.ext_name != extension.entry_point.name:
-            logger.warning(
-                'Disabled extension %(ep)s: entry point name (%(ep)s) '
-                'does not match extension name (%(ext)s)',
-                {'ep': extension.entry_point.name, 'ext': extension.ext_name})
-            continue
+    try:
+        extension.entry_point.require()
+    except pkg_resources.DistributionNotFound as ex:
+        logger.info(
+            'Disabled extension %s: Dependency %s not found',
+            extension.ext_name, ex)
+        return False
 
-        try:
-            extension.entry_point.require()
-        except pkg_resources.DistributionNotFound as ex:
-            logger.info(
-                'Disabled extension %s: Dependency %s not found',
-                extension.ext_name, ex)
-            continue
+    try:
+        extension.validate_environment()
+    except exceptions.ExtensionError as ex:
+        logger.info(
+            'Disabled extension %s: %s', extension.ext_name, ex.message)
+        return False
 
-        try:
-            extension.validate_environment()
-        except exceptions.ExtensionError as ex:
-            logger.info(
-                'Disabled extension %s: %s', extension.ext_name, ex.message)
-            continue
-
-        valid_extensions.append(extension)
-
-    names = (e.ext_name for e in valid_extensions)
-    logger.debug('Valid extensions: %s', ', '.join(names))
-    return valid_extensions
+    return True
 
 
 def register_gstreamer_elements(enabled_extensions):
@@ -163,25 +156,3 @@ def register_gstreamer_elements(enabled_extensions):
         logger.debug(
             'Registering GStreamer elements for: %s', extension.ext_name)
         extension.register_gstreamer_elements()
-
-
-def filter_enabled_extensions(raw_config, extensions):
-    boolean = config_lib.Boolean()
-    enabled_extensions = []
-    enabled_names = []
-    disabled_names = []
-
-    for extension in extensions:
-        # TODO: handle key and value errors.
-        enabled = raw_config[extension.ext_name]['enabled']
-        if boolean.deserialize(enabled):
-            enabled_extensions.append(extension)
-            enabled_names.append(extension.ext_name)
-        else:
-            disabled_names.append(extension.ext_name)
-
-    logging.info(
-        'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
-    logging.info(
-        'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
-    return enabled_extensions

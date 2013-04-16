@@ -48,16 +48,16 @@ def main():
     config_overrides = []
 
     # TODO: decide if we want to avoid this boilerplate some how.
-    logging_config = config_lib.load(config_files, config_overrides)
+    # Initial config without extensions to bootstrap logging.
+    logging_config, _ = config_lib.load(config_files, [], config_overrides)
     log.setup_root_logger()
     log.setup_console_logging(logging_config, options.verbosity_level)
 
     extensions = ext.load_extensions()
-    raw_config = config_lib.load(config_files, config_overrides, extensions)
-    extensions = ext.filter_enabled_extensions(raw_config, extensions)
-    config = config_lib.validate(
-        raw_config, config_lib.core_schemas, extensions)
+    config, errors = config_lib.load(config_files, extensions, config_overrides)
     log.setup_log_levels(config)
+
+    # TODO: missing error checking and other default setup code.
 
     tracks = []
 

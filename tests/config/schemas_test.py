@@ -3,10 +3,9 @@ from __future__ import unicode_literals
 import logging
 import mock
 
-from mopidy import exceptions
 from mopidy.config import schemas, types
 
-from tests import unittest
+from tests import unittest, any_unicode
 
 
 class ConfigSchemaTest(unittest.TestCase):
@@ -17,73 +16,65 @@ class ConfigSchemaTest(unittest.TestCase):
         self.schema['baz'] = mock.Mock()
         self.values = {'bar': '123', 'foo': '456', 'baz': '678'}
 
-    def test_format(self):
-        self.schema['foo'].format.return_value = 'qwe'
-        self.schema['bar'].format.return_value = 'asd'
-        self.schema['baz'].format.return_value = 'zxc'
+    def test_deserialize(self):
+        self.schema.deserialize(self.values)
 
-        expected = ['[test]', 'foo = qwe', 'bar = asd', 'baz = zxc']
-        result = self.schema.format(self.values)
-        self.assertEqual('\n'.join(expected), result)
-
-    def test_format_unkwown_value(self):
-        self.schema['foo'].format.return_value = 'qwe'
-        self.schema['bar'].format.return_value = 'asd'
-        self.schema['baz'].format.return_value = 'zxc'
-        self.values['unknown'] = 'rty'
-
-        result = self.schema.format(self.values)
-        self.assertNotIn('unknown = rty', result)
-
-    def test_convert(self):
-        self.schema.convert(self.values.items())
-
-    def test_convert_with_missing_value(self):
+    def test_deserialize_with_missing_value(self):
         del self.values['foo']
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
+        result, errors = self.schema.deserialize(self.values)
+        self.assertEqual({'foo': any_unicode}, errors)
+        self.assertIsNone(result.pop('foo'))
+        self.assertIsNotNone(result.pop('bar'))
+        self.assertIsNotNone(result.pop('baz'))
+        self.assertEqual({}, result)
 
-        self.assertIn('not found', cm.exception['foo'])
-
-    def test_convert_with_extra_value(self):
+    def test_deserialize_with_extra_value(self):
         self.values['extra'] = '123'
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
+        result, errors = self.schema.deserialize(self.values)
+        self.assertEqual({'extra': any_unicode}, errors)
+        self.assertIsNotNone(result.pop('foo'))
+        self.assertIsNotNone(result.pop('bar'))
+        self.assertIsNotNone(result.pop('baz'))
+        self.assertEqual({}, result)
 
-        self.assertIn('unknown', cm.exception['extra'])
-
-    def test_convert_with_deserialization_error(self):
+    def test_deserialize_with_deserialization_error(self):
         self.schema['foo'].deserialize.side_effect = ValueError('failure')
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
+        result, errors = self.schema.deserialize(self.values)
+        self.assertEqual({'foo': 'failure'}, errors)
+        self.assertIsNone(result.pop('foo'))
+        self.assertIsNotNone(result.pop('bar'))
+        self.assertIsNotNone(result.pop('baz'))
+        self.assertEqual({}, result)
 
-        self.assertIn('failure', cm.exception['foo'])
-
-    def test_convert_with_multiple_deserialization_errors(self):
+    def test_deserialize_with_multiple_deserialization_errors(self):
         self.schema['foo'].deserialize.side_effect = ValueError('failure')
         self.schema['bar'].deserialize.side_effect = ValueError('other')
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
+        result, errors = self.schema.deserialize(self.values)
+        self.assertEqual({'foo': 'failure', 'bar': 'other'}, errors)
+        self.assertIsNone(result.pop('foo'))
+        self.assertIsNone(result.pop('bar'))
+        self.assertIsNotNone(result.pop('baz'))
+        self.assertEqual({}, result)
 
-        self.assertIn('failure', cm.exception['foo'])
-        self.assertIn('other', cm.exception['bar'])
-
-    def test_convert_deserialization_unknown_and_missing_errors(self):
+    def test_deserialize_deserialization_unknown_and_missing_errors(self):
         self.values['extra'] = '123'
         self.schema['bar'].deserialize.side_effect = ValueError('failure')
         del self.values['baz']
 
-        with self.assertRaises(exceptions.ConfigError) as cm:
-            self.schema.convert(self.values.items())
+        result, errors = self.schema.deserialize(self.values)
+        self.assertIn('unknown', errors['extra'])
+        self.assertNotIn('foo', errors)
+        self.assertIn('failure', errors['bar'])
+        self.assertIn('not found', errors['baz'])
 
-        self.assertIn('unknown', cm.exception['extra'])
-        self.assertNotIn('foo', cm.exception)
-        self.assertIn('failure', cm.exception['bar'])
-        self.assertIn('not found', cm.exception['baz'])
+        self.assertNotIn('unknown', result)
+        self.assertIn('foo', result)
+        self.assertIsNone(result['bar'])
+        self.assertIsNone(result['baz'])
 
 
 class ExtensionConfigSchemaTest(unittest.TestCase):
@@ -95,17 +86,10 @@ class ExtensionConfigSchemaTest(unittest.TestCase):
 class LogLevelConfigSchemaTest(unittest.TestCase):
     def test_conversion(self):
         schema = schemas.LogLevelConfigSchema('test')
-        result = schema.convert([('foo.bar', 'DEBUG'), ('baz', 'INFO')])
+        result, errors = schema.deserialize({'foo.bar': 'DEBUG', 'baz': 'INFO'})
 
         self.assertEqual(logging.DEBUG, result['foo.bar'])
         self.assertEqual(logging.INFO, result['baz'])
-
-    def test_format(self):
-        schema = schemas.LogLevelConfigSchema('test')
-        values = {'foo.bar': logging.DEBUG, 'baz': logging.INFO}
-        expected = ['[test]', 'baz = info', 'foo.bar = debug']
-        result = schema.format(values)
-        self.assertEqual('\n'.join(expected), result)
 
 
 class DidYouMeanTest(unittest.TestCase):
