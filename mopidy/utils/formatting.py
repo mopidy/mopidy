@@ -4,13 +4,15 @@ import re
 import unicodedata
 
 
-def indent(string, places=4, linebreak='\n'):
+def indent(string, places=4, linebreak='\n', singles=False):
     lines = string.split(linebreak)
-    if len(lines) == 1:
+    if not singles and len(lines) == 1:
         return string
-    result = ''
-    for line in lines:
-        result += linebreak + ' ' * places + line
+    for i, line in enumerate(lines):
+        lines[i] = ' ' * places + line
+    result = linebreak.join(lines)
+    if not singles:
+        result = linebreak + result
     return result
 
 
