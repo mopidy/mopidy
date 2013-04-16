@@ -39,19 +39,31 @@ def format_dependency_list(adapters=None):
             ws4py_info,
         ]
 
+    return '\n'.join([_format_dependency(a()) for a in adapters])
+
+
+def _format_dependency(dep_info):
     lines = []
-    for adapter in adapters:
-        dep_info = adapter()
-        lines.append('%(name)s: %(version)s' % {
-            'name': dep_info['name'],
-            'version': dep_info.get('version', 'not found'),
-        })
-        if 'path' in dep_info:
-            lines.append('  Imported from: %s' % (
-                os.path.dirname(dep_info['path'])))
-        if 'other' in dep_info:
-            lines.append('  Other: %s' % (
-                formatting.indent(dep_info['other'])),)
+
+    if 'version' not in dep_info:
+        lines.append('%s: not found' % dep_info['name'])
+    else:
+        lines.append('%s: %s from %s' % (
+            dep_info['name'],
+            dep_info['version'],
+            os.path.dirname(dep_info.get('path', 'none')),
+        ))
+
+    if 'other' in dep_info:
+        lines.append('  Detailed information: %s' % (
+            formatting.indent(dep_info['other'], places=4)),)
+
+    if dep_info.get('dependencies', []):
+        for sub_dep_info in dep_info['dependencies']:
+            sub_dep_lines = _format_dependency(sub_dep_info)
+            lines.append(
+                formatting.indent(sub_dep_lines, places=2, singles=True))
+
     return '\n'.join(lines)
 
 

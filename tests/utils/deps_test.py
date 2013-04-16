@@ -47,17 +47,32 @@ class DepsTest(unittest.TestCase):
         adapters = [
             lambda: dict(name='Python', version='FooPython 2.7.3'),
             lambda: dict(name='Platform', version='Loonix 4.0.1'),
-            lambda: dict(name='Pykka', path='/foo/bar/baz.py', other='Quux')
+            lambda: dict(
+                name='Pykka', version='1.1',
+                path='/foo/bar/baz.py', other='Quux'),
+            lambda: dict(name='Foo'),
+            lambda: dict(name='Mopidy', version='0.13', dependencies=[
+                dict(name='pylast', version='0.5', dependencies=[
+                    dict(name='setuptools', version='0.6')
+                ])
+            ])
         ]
 
         result = deps.format_dependency_list(adapters)
 
         self.assertIn('Python: FooPython 2.7.3', result)
+
         self.assertIn('Platform: Loonix 4.0.1', result)
-        self.assertIn('Pykka: not found', result)
-        self.assertIn('Imported from: /foo/bar', result)
+
+        self.assertIn('Pykka: 1.1 from /foo/bar', result)
         self.assertNotIn('/baz.py', result)
-        self.assertIn('Quux', result)
+        self.assertIn('Detailed information: Quux', result)
+
+        self.assertIn('Foo: not found', result)
+
+        self.assertIn('Mopidy: 0.13', result)
+        self.assertIn('  pylast: 0.5', result)
+        self.assertIn('    setuptools: 0.6', result)
 
     def test_platform_info(self):
         result = deps.platform_info()
