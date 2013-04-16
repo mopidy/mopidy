@@ -27,20 +27,21 @@ def list_deps_optparse_callback(*args):
 
 def format_dependency_list(adapters=None):
     if adapters is None:
-        adapters = [
-            platform_info,
-            python_info,
-            gstreamer_info,
-            functools.partial(pkg_info, 'Mopidy', True),
-        ]
-
         dist_names = set([
             ep.dist.project_name for ep in
             pkg_resources.iter_entry_points('mopidy.ext')
             if ep.dist.project_name != 'Mopidy'])
-        for dist_name in dist_names:
-            adapters.append(
-                functools.partial(pkg_info, dist_name))
+        dist_infos = [
+            functools.partial(pkg_info, dist_name)
+            for dist_name in dist_names]
+
+        adapters = [
+            platform_info,
+            python_info,
+            functools.partial(pkg_info, 'Mopidy', True)
+        ] + dist_infos + [
+            gstreamer_info,
+        ]
 
     return '\n'.join([_format_dependency(a()) for a in adapters])
 
