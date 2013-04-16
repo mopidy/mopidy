@@ -4,6 +4,9 @@ import collections
 
 from mopidy.config import types
 
+# TODO: 2.6 cleanup (#344).
+ordered_dict = getattr(collections, 'OrderedDict', dict)
+
 
 def _did_you_mean(name, choices):
     """Suggest most likely setting based on levenshtein."""
@@ -88,7 +91,7 @@ class ConfigSchema(object):
         return result, errors
 
     def serialize(self, values, display=False):
-        result = getattr(collections, 'OrderedDict', dict)() # TODO: 2.6 cleanup
+        result = ordered_dict()  # TODO: 2.6 cleanup (#344).
         for key in self._order:
             if key in values:
                 result[key] = self._schema[key].serialize(values[key], display)
@@ -131,7 +134,7 @@ class LogLevelConfigSchema(object):
         return result, errors
 
     def serialize(self, values, display=False):
-        result = getattr(collections, 'OrderedDict', dict)() # TODO: 2.6 cleanup
+        result = ordered_dict()  # TODO: 2.6 cleanup (#344)
         for key in sorted(values.keys()):
             result[key] = self._config_value.serialize(values[key], display)
         return result

@@ -4,7 +4,6 @@ import ConfigParser as configparser
 import io
 import logging
 import os.path
-import sys
 
 from mopidy.config.schemas import *
 from mopidy.config.types import *

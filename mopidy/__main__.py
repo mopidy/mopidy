@@ -173,8 +173,6 @@ def show_config_callback(option, opt, value, parser):
     overrides = getattr(parser.values, 'overrides', [])
 
     extensions = ext.load_extensions()
-    enabled_extensions = []
-
     config, errors = config_lib.load(files, extensions, overrides)
 
     # Clear out any config for disabled extensions.
