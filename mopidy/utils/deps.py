@@ -106,9 +106,27 @@ def gstreamer_info():
     other = []
     other.append('Python wrapper: gst-python %s' % (
         '.'.join(map(str, gst.get_pygst_version()))))
-    other.append('Relevant elements:')
+
+    found_elements = []
+    missing_elements = []
     for name, status in _gstreamer_check_elements():
-        other.append('  %s: %s' % (name, 'OK' if status else 'not found'))
+        if status:
+            found_elements.append(name)
+        else:
+            missing_elements.append(name)
+
+    other.append('Relevant elements:')
+    other.append('  Found:')
+    for element in found_elements:
+        other.append('    %s' % element)
+    else:
+        other.append('    none')
+    other.append('  Not found:')
+    for element in missing_elements:
+        other.append('    %s' % element)
+    else:
+        other.append('    none')
+
     return {
         'name': 'GStreamer',
         'version': '.'.join(map(str, gst.get_gst_version())),
