@@ -42,7 +42,7 @@ PyPI:
 GitHub:
     `mopidy/mopidy-nad <https://github.com/mopidy/mopidy-nad>`_
 Issues:
-    `mopidy/mopidy <https://github.com/mopidy/mopidy/issues>`_
+    https://github.com/mopidy/mopidy/issues
 
 
 Mopidy-SoundCloud
@@ -58,4 +58,4 @@ PyPI:
 GitHub:
     `dz0ny/mopidy-soundcloud <https://github.com/dz0ny/mopidy-soundcloud>`_
 Issues:
-    `dz0ny/mopidy-soundcloud <https://github.com/dz0ny/mopidy-soundcloud/issues>`_
+    https://github.com/dz0ny/mopidy-soundcloud/issues
