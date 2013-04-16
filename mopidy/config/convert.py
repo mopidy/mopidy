@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
 
+import io
+import os.path
+import sys
+
 from mopidy import config as config_lib, ext
 from mopidy.utils import path
 
@@ -104,3 +108,18 @@ def main():
 
     print b'Converted config:\n'
     print config_lib.format(config, extensions)
+
+    conf_file = path.expand_path('$XDG_CONFIG_DIR/mopidy/mopidy.conf')
+    if os.path.exists(conf_file):
+        print '%s exists, exiting.' % conf_file
+        sys.exit(1)
+
+    print 'Write new config to %s? [yN]' % conf_file,
+    if raw_input() != 'y':
+        print 'Not saving, exiting.'
+        sys.exit(0)
+
+    serialized_config = config_lib.format(config, extensions, display=False)
+    with io.open(conf_file, 'wb') as filehandle:
+        filehandle.write(serialized_config)
+    print 'Done.'
