@@ -113,10 +113,10 @@ def _format(config, comments, schemas, display):
         serialized = schema.serialize(config.get(schema.name, {}), display=display)
         if not serialized:
             continue
-        output.append(b'[%s]' % schema.name)
+        output.append(b'[%s]' % bytes(schema.name))
         for key, value in serialized.items():
-            comment = comments.get(schema.name, {}).get(key, b'')
-            output.append(b'%s =' % key)
+            comment = bytes(comments.get(schema.name, {}).get(key, ''))
+            output.append(b'%s =' % bytes(key))
             if value is not None:
                 output[-1] += b' ' + value
             if comment:
