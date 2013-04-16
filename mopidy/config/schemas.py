@@ -75,10 +75,12 @@ class ConfigSchema(object):
                 if suggestion:
                     errors[key] += ' Did you mean %s?' % suggestion
             except ValueError as e:  # deserialization failed
+                result[key] = None
                 errors[key] = str(e)
 
         for key in self._schema:
             if key not in result and key not in errors:
+                result[key] = None
                 errors[key] = 'config key not found.'
 
         return result, errors
@@ -131,6 +133,7 @@ class LogLevelConfigSchema(object):
             try:
                 result[key] = self._config_value.deserialize(value)
             except ValueError as e:  # deserialization failed
+                result[key] = None
                 errors[key] = str(e)
         return result, errors
 

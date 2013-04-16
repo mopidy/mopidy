@@ -5,7 +5,7 @@ import mock
 
 from mopidy.config import schemas, types
 
-from tests import unittest
+from tests import unittest, any_unicode
 
 
 class ConfigSchemaTest(unittest.TestCase):
@@ -41,30 +41,42 @@ class ConfigSchemaTest(unittest.TestCase):
         del self.values['foo']
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertIn('not found', errors['foo'])
-        self.assertItemsEqual(['bar', 'baz'], result.keys())
+        self.assertEqual({'foo': any_unicode}, errors)
+        self.assertIsNone(result.pop('foo'))
+        self.assertIsNotNone(result.pop('bar'))
+        self.assertIsNotNone(result.pop('baz'))
+        self.assertEqual({}, result)
 
     def test_deserialize_with_extra_value(self):
         self.values['extra'] = '123'
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertIn('unknown', errors['extra'])
-        self.assertItemsEqual(['foo', 'bar', 'baz'], result.keys())
+        self.assertEqual({'extra': any_unicode}, errors)
+        self.assertIsNotNone(result.pop('foo'))
+        self.assertIsNotNone(result.pop('bar'))
+        self.assertIsNotNone(result.pop('baz'))
+        self.assertEqual({}, result)
 
     def test_deserialize_with_deserialization_error(self):
         self.schema['foo'].deserialize.side_effect = ValueError('failure')
+
         result, errors = self.schema.deserialize(self.values)
-        self.assertIn('failure', errors['foo'])
-        self.assertItemsEqual(['bar', 'baz'], result.keys())
+        self.assertEqual({'foo': 'failure'}, errors)
+        self.assertIsNone(result.pop('foo'))
+        self.assertIsNotNone(result.pop('bar'))
+        self.assertIsNotNone(result.pop('baz'))
+        self.assertEqual({}, result)
 
     def test_deserialize_with_multiple_deserialization_errors(self):
         self.schema['foo'].deserialize.side_effect = ValueError('failure')
         self.schema['bar'].deserialize.side_effect = ValueError('other')
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertIn('failure', errors['foo'])
-        self.assertIn('other', errors['bar'])
-        self.assertItemsEqual(['baz'], result.keys())
+        self.assertEqual({'foo': 'failure', 'bar': 'other'}, errors)
+        self.assertIsNone(result.pop('foo'))
+        self.assertIsNone(result.pop('bar'))
+        self.assertIsNotNone(result.pop('baz'))
+        self.assertEqual({}, result)
 
     def test_deserialize_deserialization_unknown_and_missing_errors(self):
         self.values['extra'] = '123'
@@ -76,7 +88,11 @@ class ConfigSchemaTest(unittest.TestCase):
         self.assertNotIn('foo', errors)
         self.assertIn('failure', errors['bar'])
         self.assertIn('not found', errors['baz'])
-        self.assertItemsEqual(['foo'], result.keys())
+
+        self.assertNotIn('unknown', result)
+        self.assertIn('foo', result)
+        self.assertIsNone(result['bar'])
+        self.assertIsNone(result['baz'])
 
 
 class ExtensionConfigSchemaTest(unittest.TestCase):

@@ -69,7 +69,7 @@ class ValidateTest(unittest.TestCase):
 
     def test_empty_config_single_schema(self):
         conf, errors = config._validate({}, [self.schema])
-        self.assertEqual({}, conf)
+        self.assertEqual({'foo': {'bar': None}}, conf)
         self.assertEqual({'foo': {'bar': 'config key not found.'}}, errors)
 
     def test_config_single_schema(self):
@@ -83,7 +83,7 @@ class ValidateTest(unittest.TestCase):
         self.schema['bar'] = mock.Mock()
         self.schema['bar'].deserialize.side_effect = ValueError('bad')
         conf, errors = config._validate(raw_config, [self.schema])
-        self.assertEqual({}, conf)
+        self.assertEqual({'foo': {'bar': None}}, conf)
         self.assertEqual({'foo': {'bar': 'bad'}}, errors)
 
     # TODO: add more tests
