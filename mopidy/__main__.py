@@ -151,9 +151,9 @@ def parse_options():
         action='callback', callback=show_config_callback,
         help='show current config')
     parser.add_option(
-        b'--list-deps',
-        action='callback', callback=deps.list_deps_optparse_callback,
-        help='list dependencies and their versions')
+        b'--show-deps',
+        action='callback', callback=deps.show_deps_optparse_callback,
+        help='show dependencies and their versions')
     parser.add_option(
         b'--config',
         action='store', dest='config',

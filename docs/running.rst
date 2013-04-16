@@ -52,9 +52,9 @@ mopidy command
     together to show the effective document. Secret values like passwords are
     masked out. Config for disabled extensions are not included.
 
-.. cmdoption:: --list-deps
+.. cmdoption:: --show-deps
 
-    List dependencies and their versions.
+    Show dependencies, their versions and installation location.
 
 .. cmdoption:: --config <file>
 
