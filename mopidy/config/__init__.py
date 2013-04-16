@@ -111,6 +111,8 @@ def _format(config, comments, schemas, display):
     output = []
     for schema in schemas:
         serialized = schema.serialize(config.get(schema.name, {}), display=display)
+        if not serialized:
+            continue
         output.append(b'[%s]' % schema.name)
         for key, value in serialized.items():
             comment = comments.get(schema.name, {}).get(key, b'')
