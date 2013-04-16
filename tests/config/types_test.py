@@ -23,6 +23,12 @@ class ConfigValueTest(unittest.TestCase):
         value = types.ConfigValue()
         self.assertIsInstance(value.serialize(object()), bytes)
 
+    def test_serialize_none(self):
+        value = types.ConfigValue()
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
+
     def test_serialize_supports_display(self):
         value = types.ConfigValue()
         self.assertIsInstance(value.serialize(object(), display=True), bytes)
@@ -177,10 +183,19 @@ class BooleanTest(unittest.TestCase):
         self.assertRaises(ValueError, value.deserialize, 'sure')
         self.assertRaises(ValueError, value.deserialize, '')
 
-    def test_serialize(self):
+    def test_serialize_true(self):
         value = types.Boolean()
-        self.assertEqual('true', value.serialize(True))
-        self.assertEqual('false', value.serialize(False))
+        result = value.serialize(True)
+        self.assertEqual(b'true', result)
+        self.assertIsInstance(result, bytes)
+
+    def test_serialize_false(self):
+        value = types.Boolean()
+        result = value.serialize(False)
+        self.assertEqual(b'false', result)
+        self.assertIsInstance(result, bytes)
+
+    # TODO: test None or other invalid values into serialize?
 
 
 class ListTest(unittest.TestCase):

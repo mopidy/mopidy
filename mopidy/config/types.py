@@ -55,6 +55,8 @@ class ConfigValue(object):
 
     def serialize(self, value, display=False):
         """Convert value back to string for saving."""
+        if value is None:
+            return b''
         return bytes(value)
 
 
@@ -142,9 +144,9 @@ class Boolean(ConfigValue):
 
     def serialize(self, value, display=False):
         if value:
-            return 'true'
+            return b'true'
         else:
-            return 'false'
+            return b'false'
 
 
 class List(ConfigValue):
