@@ -100,6 +100,8 @@ class Secret(ConfigValue):
         return value
 
     def serialize(self, value, display=False):
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
         if value is None:
             return b''
         elif display:
