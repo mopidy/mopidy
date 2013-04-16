@@ -10,7 +10,6 @@ pygst.require('0.10')
 import gst
 
 import pkg_resources
-import pykka
 
 from . import formatting
 
@@ -32,13 +31,6 @@ def format_dependency_list(adapters=None):
             platform_info,
             python_info,
             gstreamer_info,
-            pykka_info,
-            pyspotify_info,
-            pylast_info,
-            dbus_info,
-            serial_info,
-            cherrypy_info,
-            ws4py_info,
             functools.partial(pkg_info, 'Mopidy', True),
         ]
 
@@ -172,82 +164,3 @@ def _gstreamer_check_elements():
         gst.registry_get_default().get_feature_list(gst.TYPE_ELEMENT_FACTORY)]
     return [
         (element, element in known_elements) for element in elements_to_check]
-
-
-def pykka_info():
-    return {
-        'name': 'Pykka',
-        'version': pykka.__version__,
-        'path': pykka.__file__,
-    }
-
-
-def pyspotify_info():
-    dep_info = {'name': 'pyspotify'}
-    try:
-        import spotify
-        if hasattr(spotify, '__version__'):
-            dep_info['version'] = spotify.__version__
-        else:
-            dep_info['version'] = '< 1.3'
-        dep_info['path'] = spotify.__file__
-        dep_info['other'] = 'Built for libspotify API version %d' % (
-            spotify.api_version,)
-    except ImportError:
-        pass
-    return dep_info
-
-
-def pylast_info():
-    dep_info = {'name': 'pylast'}
-    try:
-        import pylast
-        dep_info['version'] = pylast.__version__
-        dep_info['path'] = pylast.__file__
-    except ImportError:
-        pass
-    return dep_info
-
-
-def dbus_info():
-    dep_info = {'name': 'dbus-python'}
-    try:
-        import dbus
-        dep_info['version'] = dbus.__version__
-        dep_info['path'] = dbus.__file__
-    except ImportError:
-        pass
-    return dep_info
-
-
-def serial_info():
-    dep_info = {'name': 'pyserial'}
-    try:
-        import serial
-        dep_info['version'] = serial.VERSION
-        dep_info['path'] = serial.__file__
-    except ImportError:
-        pass
-    return dep_info
-
-
-def cherrypy_info():
-    dep_info = {'name': 'cherrypy'}
-    try:
-        import cherrypy
-        dep_info['version'] = cherrypy.__version__
-        dep_info['path'] = cherrypy.__file__
-    except ImportError:
-        pass
-    return dep_info
-
-
-def ws4py_info():
-    dep_info = {'name': 'ws4py'}
-    try:
-        import ws4py
-        dep_info['version'] = ws4py.__version__
-        dep_info['path'] = ws4py.__file__
-    except ImportError:
-        pass
-    return dep_info

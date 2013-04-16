@@ -7,37 +7,6 @@ pygst.require('0.10')
 import gst
 
 import mock
-import pykka
-
-try:
-    import dbus
-except ImportError:
-    dbus = False
-
-try:
-    import pylast
-except ImportError:
-    pylast = False
-
-try:
-    import serial
-except ImportError:
-    serial = False
-
-try:
-    import spotify
-except ImportError:
-    spotify = False
-
-try:
-    import cherrypy
-except ImportError:
-    cherrypy = False
-
-try:
-    import ws4py
-except ImportError:
-    ws4py = False
 
 from mopidy.utils import deps
 
@@ -101,63 +70,6 @@ class DepsTest(unittest.TestCase):
         self.assertIn(
             '.'.join(map(str, gst.get_pygst_version())), result['other'])
         self.assertIn('Relevant elements:', result['other'])
-
-    def test_pykka_info(self):
-        result = deps.pykka_info()
-
-        self.assertEquals('Pykka', result['name'])
-        self.assertEquals(pykka.__version__, result['version'])
-        self.assertIn('pykka', result['path'])
-
-    @unittest.skipUnless(spotify, 'pyspotify not found')
-    def test_pyspotify_info(self):
-        result = deps.pyspotify_info()
-
-        self.assertEquals('pyspotify', result['name'])
-        self.assertEquals(spotify.__version__, result['version'])
-        self.assertIn('spotify', result['path'])
-        self.assertIn('Built for libspotify API version', result['other'])
-        self.assertIn(str(spotify.api_version), result['other'])
-
-    @unittest.skipUnless(pylast, 'pylast not found')
-    def test_pylast_info(self):
-        result = deps.pylast_info()
-
-        self.assertEquals('pylast', result['name'])
-        self.assertEquals(pylast.__version__, result['version'])
-        self.assertIn('pylast', result['path'])
-
-    @unittest.skipUnless(dbus, 'dbus not found')
-    def test_dbus_info(self):
-        result = deps.dbus_info()
-
-        self.assertEquals('dbus-python', result['name'])
-        self.assertEquals(dbus.__version__, result['version'])
-        self.assertIn('dbus', result['path'])
-
-    @unittest.skipUnless(serial, 'serial not found')
-    def test_serial_info(self):
-        result = deps.serial_info()
-
-        self.assertEquals('pyserial', result['name'])
-        self.assertEquals(serial.VERSION, result['version'])
-        self.assertIn('serial', result['path'])
-
-    @unittest.skipUnless(cherrypy, 'cherrypy not found')
-    def test_cherrypy_info(self):
-        result = deps.cherrypy_info()
-
-        self.assertEquals('cherrypy', result['name'])
-        self.assertEquals(cherrypy.__version__, result['version'])
-        self.assertIn('cherrypy', result['path'])
-
-    @unittest.skipUnless(ws4py, 'ws4py not found')
-    def test_ws4py_info(self):
-        result = deps.ws4py_info()
-
-        self.assertEquals('ws4py', result['name'])
-        self.assertEquals(ws4py.__version__, result['version'])
-        self.assertIn('ws4py', result['path'])
 
     @mock.patch('pkg_resources.get_distribution')
     def test_pkg_info(self, get_distribution_mock):
