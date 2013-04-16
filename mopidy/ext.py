@@ -115,8 +115,8 @@ def load_extensions():
 def validate_extension(extension):
     """Verify extension's dependencies and environment.
 
-    :param extensions: and extension to check
-    :returns: if extensions should be run
+    :param extensions: an extension to check
+    :returns: if extension should be run
     """
 
     logger.debug('Validating extension: %s', extension.ext_name)
