@@ -55,6 +55,9 @@ and improved.
 - The command option :option:`mopidy --list-settings` is now named
   :option:`mopidy --show-config`.
 
+- The command option :option:`mopidy --list-deps` is now named
+  :option:`mopidy --show-deps`.
+
 - What configuration files to use can now be specified through the command
   option :option:`mopidy --config`.
 

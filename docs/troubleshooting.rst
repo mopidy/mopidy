@@ -27,7 +27,7 @@ with others for debugging.
 Installed dependencies
 ======================
 
-The command :option:`mopidy --list-deps` will list the paths to and versions of
+The command :option:`mopidy --show-deps` will list the paths to and versions of
 any dependency Mopidy or the extensions might need to work. This is very useful
 data for checking that you're using the right versions, and that you're using
 the right installation if you have multiple installations of a dependency on
