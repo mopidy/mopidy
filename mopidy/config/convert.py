@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from mopidy import config as config_lib, ext
 from mopidy.utils import path
 
 
@@ -96,3 +97,10 @@ def main():
         return
 
     config = convert(settings)
+
+    known = [
+        'spotify', 'scrobbler', 'mpd', 'mpris', 'local', 'stream', 'http']
+    extensions = [e for e in ext.load_extensions() if e.ext_name in known]
+
+    print b'Converted config:\n'
+    print config_lib.format(config, extensions)
