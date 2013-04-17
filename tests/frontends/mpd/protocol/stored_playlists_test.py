@@ -10,7 +10,8 @@ from tests.frontends.mpd import protocol
 class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylist(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
+            Playlist(name='name', uri='dummy:name',
+                tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylist "name"')
         self.assertInResponse('file: dummy:a')
@@ -18,7 +19,8 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylist_without_quotes(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
+            Playlist(name='name', uri='dummy:name', 
+                tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylist name')
         self.assertInResponse('file: dummy:a')
@@ -28,9 +30,19 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.sendRequest('listplaylist "name"')
         self.assertEqualResponse('ACK [50@0] {listplaylist} No such playlist')
 
+    def test_listplaylist_duplicate(self):
+        playlist1 = Playlist(name='a', uri='dummy:a1', tracks=[Track(uri='b')])
+        playlist2 = Playlist(name='a', uri='dummy:a2', tracks=[Track(uri='c')])
+        self.backend.playlists.playlists = [playlist1, playlist2]
+
+        self.sendRequest('listplaylist "a [2]"')
+        self.assertInResponse('file: c')
+        self.assertInResponse('OK')
+
     def test_listplaylistinfo(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
+            Playlist(name='name', uri='dummy:name', 
+                tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylistinfo "name"')
         self.assertInResponse('file: dummy:a')
@@ -40,7 +52,8 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylistinfo_without_quotes(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', tracks=[Track(uri='dummy:a')])]
+            Playlist(name='name', uri='dummy:name', 
+                tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylistinfo name')
         self.assertInResponse('file: dummy:a')
@@ -53,10 +66,21 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse(
             'ACK [50@0] {listplaylistinfo} No such playlist')
 
+    def test_listplaylistinfo_duplicate(self):
+        playlist1 = Playlist(name='a', uri='dummy:a1', tracks=[Track(uri='b')])
+        playlist2 = Playlist(name='a', uri='dummy:a2', tracks=[Track(uri='c')])
+        self.backend.playlists.playlists = [playlist1, playlist2]
+
+        self.sendRequest('listplaylistinfo "a [2]"')
+        self.assertInResponse('file: c')
+        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Pos: 0')
+        self.assertInResponse('OK')
+
     def test_listplaylists(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
         self.backend.playlists.playlists = [
-            Playlist(name='a', last_modified=last_modified)]
+            Playlist(name='a', uri='dummy:a', last_modified=last_modified)]
 
         self.sendRequest('listplaylists')
         self.assertInResponse('playlist: a')
@@ -77,7 +101,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylists_ignores_playlists_without_name(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
         self.backend.playlists.playlists = [
-            Playlist(name='', last_modified=last_modified)]
+            Playlist(name='', uri='dummy:', last_modified=last_modified)]
 
         self.sendRequest('listplaylists')
         self.assertNotInResponse('playlist: ')
@@ -87,7 +111,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
         self.backend.playlists.playlists = [
-            Playlist(name='A-list', tracks=[
+            Playlist(name='A-list', uri='dummy:A-list', tracks=[
                 Track(uri='c'), Track(uri='d'), Track(uri='e')])]
 
         self.sendRequest('load "A-list"')
@@ -105,7 +129,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
         self.backend.playlists.playlists = [
-            Playlist(name='A-list', tracks=[
+            Playlist(name='A-list', uri='dummy:A-list', tracks=[
                 Track(uri='c'), Track(uri='d'), Track(uri='e')])]
 
         self.sendRequest('load "A-list" "1:2"')
@@ -121,7 +145,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
         self.backend.playlists.playlists = [
-            Playlist(name='A-list', tracks=[
+            Playlist(name='A-list', uri='dummy:A-list', tracks=[
                 Track(uri='c'), Track(uri='d'), Track(uri='e')])]
 
         self.sendRequest('load "A-list" "1:"')
