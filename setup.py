@@ -35,7 +35,7 @@ setup(
     test_suite='nose.collector',
     tests_require=[
         'nose',
-        'mock >= 0.7',
+        'mock >= 1.0',
         'unittest2',
     ],
     entry_points={
