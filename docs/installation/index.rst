@@ -107,13 +107,19 @@ Pip.
        brew update
        brew upgrade
 
+#. Mopidy requires GStreamer 0.10, but Homebrew's main formula repo has
+   upgraded its GStreamer packages to 1.0. Thus, you'll need to add an
+   alternative formula repo (aka "tap") that has the old GStreamer formulas::
+
+       brew tap homebrew/versions
+
 #. Install the required packages from Homebrew::
 
-       brew install gst-python gst-plugins-good gst-plugins-ugly libspotify
+       brew install gst-python010 gst-plugins-good010 gst-plugins-ugly010 libspotify
 
 #. Make sure to include Homebrew's Python ``site-packages`` directory in your
    ``PYTHONPATH``. If you don't include this, Mopidy will not find GStreamer
-   and crash.
+   and it will crash.
 
    You can either amend your ``PYTHONPATH`` permanently, by adding the
    following statement to your shell's init file, e.g. ``~/.bashrc``::
@@ -138,7 +144,7 @@ Pip.
 #. Then get, build, and install the latest release of pyspotify, pylast,
    and Mopidy using Pip::
 
-       sudo pip install -U pyspotify pylast mopidy
+       sudo pip install -U pyspotify pylast cherrypy ws4py mopidy
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
@@ -239,6 +245,15 @@ can install Mopidy from PyPI using Pip.
    On Fedora the binary is called ``pip-python``::
 
       sudo pip-python install -U pylast
+
+#. Optional: If you want to use the HTTP frontend and web clients, you need
+   cherrypy and ws4py::
+
+      sudo pip install -U cherrypy ws4py
+
+   On Fedora the binary is called ``pip-python``::
+
+      sudo pip-python install -U cherrypy ws4py
 
 #. Optional: To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound
    Menu or from an UPnP client via Rygel, you need some additional
