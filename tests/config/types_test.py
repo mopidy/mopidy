@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from __future__ import unicode_literals
 
 import logging
@@ -8,72 +10,129 @@ from mopidy.config import types
 
 from tests import unittest
 
+# TODO: DecodeTest and EncodeTest
+
 
 class ConfigValueTest(unittest.TestCase):
-    def test_init(self):
-        value = types.ConfigValue()
-        self.assertIsNone(value.choices)
-        self.assertIsNone(value.maximum)
-        self.assertIsNone(value.minimum)
-        self.assertIsNone(value.optional)
-        self.assertIsNone(value.secret)
-
-    def test_init_with_params(self):
-        kwargs = {'choices': ['foo'], 'minimum': 0, 'maximum': 10,
-                  'secret': True, 'optional': True}
-        value = types.ConfigValue(**kwargs)
-        self.assertEqual(['foo'], value.choices)
-        self.assertEqual(0, value.minimum)
-        self.assertEqual(10, value.maximum)
-        self.assertEqual(True, value.optional)
-        self.assertEqual(True, value.secret)
-
     def test_deserialize_passes_through(self):
         value = types.ConfigValue()
-        obj = object()
-        self.assertEqual(obj, value.deserialize(obj))
+        sentinel = object()
+        self.assertEqual(sentinel, value.deserialize(sentinel))
 
     def test_serialize_conversion_to_string(self):
         value = types.ConfigValue()
-        self.assertIsInstance(value.serialize(object()), basestring)
+        self.assertIsInstance(value.serialize(object()), bytes)
 
-    def test_format_uses_serialize(self):
+    def test_serialize_none(self):
         value = types.ConfigValue()
-        obj = object()
-        self.assertEqual(value.serialize(obj), value.format(obj))
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
 
-    def test_format_masks_secrets(self):
-        value = types.ConfigValue(secret=True)
-        self.assertEqual('********', value.format(object()))
+    def test_serialize_supports_display(self):
+        value = types.ConfigValue()
+        self.assertIsInstance(value.serialize(object(), display=True), bytes)
 
 
 class StringTest(unittest.TestCase):
     def test_deserialize_conversion_success(self):
         value = types.String()
-        self.assertEqual('foo', value.deserialize(' foo '))
+        self.assertEqual('foo', value.deserialize(b' foo '))
+        self.assertIsInstance(value.deserialize(b'foo'), unicode)
+
+    def test_deserialize_decodes_utf8(self):
+        value = types.String()
+        result = value.deserialize('æøå'.encode('utf-8'))
+        self.assertEqual('æøå', result)
+
+    def test_deserialize_does_not_double_encode_unicode(self):
+        value = types.String()
+        result = value.deserialize('æøå')
+        self.assertEqual('æøå', result)
+
+    def test_deserialize_handles_escapes(self):
+        value = types.String(optional=True)
+        result = value.deserialize(b'a\\t\\nb')
+        self.assertEqual('a\t\nb', result)
 
     def test_deserialize_enforces_choices(self):
         value = types.String(choices=['foo', 'bar', 'baz'])
-        self.assertEqual('foo', value.deserialize('foo'))
-        self.assertRaises(ValueError, value.deserialize, 'foobar')
+        self.assertEqual('foo', value.deserialize(b'foo'))
+        self.assertRaises(ValueError, value.deserialize, b'foobar')
 
     def test_deserialize_enforces_required(self):
         value = types.String()
-        self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
+        self.assertRaises(ValueError, value.deserialize, b'')
 
     def test_deserialize_respects_optional(self):
         value = types.String(optional=True)
-        self.assertIsNone(value.deserialize(''))
-        self.assertIsNone(value.deserialize(' '))
+        self.assertIsNone(value.deserialize(b''))
+        self.assertIsNone(value.deserialize(b' '))
 
-    def test_serialize_string_escapes(self):
+    def test_deserialize_decode_failure(self):
         value = types.String()
-        self.assertEqual(r'\r\n\t', value.serialize('\r\n\t'))
+        incorrectly_encoded_bytes = u'æøå'.encode('iso-8859-1')
+        self.assertRaises(
+            ValueError, value.deserialize, incorrectly_encoded_bytes)
 
-    def test_format_masks_secrets(self):
-        value = types.String(secret=True)
-        self.assertEqual('********', value.format('s3cret'))
+    def test_serialize_encodes_utf8(self):
+        value = types.String()
+        result = value.serialize('æøå')
+        self.assertIsInstance(result, bytes)
+        self.assertEqual('æøå'.encode('utf-8'), result)
+
+    def test_serialize_does_not_encode_bytes(self):
+        value = types.String()
+        result = value.serialize('æøå'.encode('utf-8'))
+        self.assertIsInstance(result, bytes)
+        self.assertEqual('æøå'.encode('utf-8'), result)
+
+    def test_serialize_handles_escapes(self):
+        value = types.String()
+        result = value.serialize('a\n\tb')
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(r'a\n\tb'.encode('utf-8'), result)
+
+    def test_serialize_none(self):
+        value = types.String()
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
+
+
+class SecretTest(unittest.TestCase):
+    def test_deserialize_passes_through(self):
+        value = types.Secret()
+        result = value.deserialize(b'foo')
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'foo', result)
+
+    def test_deserialize_enforces_required(self):
+        value = types.Secret()
+        self.assertRaises(ValueError, value.deserialize, b'')
+
+    def test_deserialize_respects_optional(self):
+        value = types.Secret(optional=True)
+        self.assertIsNone(value.deserialize(b''))
+        self.assertIsNone(value.deserialize(b' '))
+
+    def test_serialize_none(self):
+        value = types.Secret()
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
+
+    def test_serialize_for_display_masks_value(self):
+        value = types.Secret()
+        result = value.serialize('s3cret', display=True)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'********', result)
+
+    def test_serialize_none_for_display(self):
+        value = types.Secret()
+        result = value.serialize(None, display=True)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(b'', result)
 
 
 class IntegerTest(unittest.TestCase):
@@ -105,10 +164,6 @@ class IntegerTest(unittest.TestCase):
         self.assertEqual(5, value.deserialize('5'))
         self.assertRaises(ValueError, value.deserialize, '15')
 
-    def test_format_masks_secrets(self):
-        value = types.Integer(secret=True)
-        self.assertEqual('********', value.format('1337'))
-
 
 class BooleanTest(unittest.TestCase):
     def test_deserialize_conversion_success(self):
@@ -128,39 +183,70 @@ class BooleanTest(unittest.TestCase):
         self.assertRaises(ValueError, value.deserialize, 'sure')
         self.assertRaises(ValueError, value.deserialize, '')
 
-    def test_serialize(self):
+    def test_serialize_true(self):
         value = types.Boolean()
-        self.assertEqual('true', value.serialize(True))
-        self.assertEqual('false', value.serialize(False))
+        result = value.serialize(True)
+        self.assertEqual(b'true', result)
+        self.assertIsInstance(result, bytes)
 
-    def test_format_masks_secrets(self):
-        value = types.Boolean(secret=True)
-        self.assertEqual('********', value.format('true'))
+    def test_serialize_false(self):
+        value = types.Boolean()
+        result = value.serialize(False)
+        self.assertEqual(b'false', result)
+        self.assertIsInstance(result, bytes)
+
+    # TODO: test None or other invalid values into serialize?
 
 
 class ListTest(unittest.TestCase):
+    # TODO: add test_deserialize_ignores_blank
+    # TODO: add test_serialize_ignores_blank
+    # TODO: add test_deserialize_handles_escapes
+
     def test_deserialize_conversion_success(self):
         value = types.List()
 
         expected = ('foo', 'bar', 'baz')
-        self.assertEqual(expected, value.deserialize('foo, bar ,baz '))
+        self.assertEqual(expected, value.deserialize(b'foo, bar ,baz '))
 
         expected = ('foo,bar', 'bar', 'baz')
-        self.assertEqual(expected, value.deserialize(' foo,bar\nbar\nbaz'))
+        self.assertEqual(expected, value.deserialize(b' foo,bar\nbar\nbaz'))
+
+    def test_deserialize_creates_tuples(self):
+        value = types.List(optional=True)
+        self.assertIsInstance(value.deserialize(b'foo,bar,baz'), tuple)
+        self.assertIsInstance(value.deserialize(b''), tuple)
+
+    def test_deserialize_decodes_utf8(self):
+        value = types.List()
+
+        result = value.deserialize('æ, ø, å'.encode('utf-8'))
+        self.assertEqual(('æ', 'ø', 'å'), result)
+
+        result = value.deserialize('æ\nø\nå'.encode('utf-8'))
+        self.assertEqual(('æ', 'ø', 'å'), result)
+
+    def test_deserialize_does_not_double_encode_unicode(self):
+        value = types.List()
+
+        result = value.deserialize('æ, ø, å')
+        self.assertEqual(('æ', 'ø', 'å'), result)
+
+        result = value.deserialize('æ\nø\nå')
+        self.assertEqual(('æ', 'ø', 'å'), result)
 
     def test_deserialize_enforces_required(self):
         value = types.List()
-        self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
+        self.assertRaises(ValueError, value.deserialize, b'')
 
     def test_deserialize_respects_optional(self):
         value = types.List(optional=True)
-        self.assertEqual(tuple(), value.deserialize(''))
-        self.assertEqual(tuple(), value.deserialize(' '))
+        self.assertEqual(tuple(), value.deserialize(b''))
 
     def test_serialize(self):
         value = types.List()
         result = value.serialize(('foo', 'bar', 'baz'))
+        self.assertIsInstance(result, bytes)
         self.assertRegexpMatches(result, r'foo\n\s*bar\n\s*baz')
 
 
@@ -189,7 +275,7 @@ class LogLevelTest(unittest.TestCase):
         value = types.LogLevel()
         for name, level in self.levels.items():
             self.assertEqual(name, value.serialize(level))
-        self.assertIsNone(value.serialize(1337))
+        self.assertEqual(b'', value.serialize(1337))
 
 
 class HostnameTest(unittest.TestCase):
@@ -209,7 +295,6 @@ class HostnameTest(unittest.TestCase):
     def test_deserialize_enforces_required(self, getaddrinfo_mock):
         value = types.Hostname()
         self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
         self.assertEqual(0, getaddrinfo_mock.call_count)
 
     @mock.patch('socket.getaddrinfo')
@@ -223,6 +308,7 @@ class HostnameTest(unittest.TestCase):
 class PortTest(unittest.TestCase):
     def test_valid_ports(self):
         value = types.Port()
+        self.assertEqual(0, value.deserialize('0'))
         self.assertEqual(1, value.deserialize('1'))
         self.assertEqual(80, value.deserialize('80'))
         self.assertEqual(6600, value.deserialize('6600'))
@@ -232,7 +318,6 @@ class PortTest(unittest.TestCase):
         value = types.Port()
         self.assertRaises(ValueError, value.deserialize, '65536')
         self.assertRaises(ValueError, value.deserialize, '100000')
-        self.assertRaises(ValueError, value.deserialize, '0')
         self.assertRaises(ValueError, value.deserialize, '-1')
         self.assertRaises(ValueError, value.deserialize, '')
 
@@ -266,7 +351,6 @@ class PathTest(unittest.TestCase):
     def test_deserialize_enforces_required(self):
         value = types.Path()
         self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
 
     def test_deserialize_respects_optional(self):
         value = types.Path(optional=True)

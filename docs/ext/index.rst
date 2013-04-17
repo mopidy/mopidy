@@ -30,6 +30,21 @@ These extensions are maintained outside Mopidy's core, often by other
 developers.
 
 
+Mopidy-NAD
+----------
+
+Extension for controlling volume using an external NAD amplifier.
+
+Author:
+    Stein Magnus Jodal
+PyPI:
+    `Mopidy-NAD <https://pypi.python.org/pypi/Mopidy-NAD>`_
+GitHub:
+    `mopidy/mopidy-nad <https://github.com/mopidy/mopidy-nad>`_
+Issues:
+    https://github.com/mopidy/mopidy/issues
+
+
 Mopidy-SoundCloud
 -----------------
 
@@ -42,3 +57,5 @@ PyPI:
     `Mopidy-SoundCloud <https://pypi.python.org/pypi/Mopidy-SoundCloud>`_
 GitHub:
     `dz0ny/mopidy-soundcloud <https://github.com/dz0ny/mopidy-soundcloud>`_
+Issues:
+    https://github.com/dz0ny/mopidy-soundcloud/issues

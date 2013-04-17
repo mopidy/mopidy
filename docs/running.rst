@@ -25,7 +25,48 @@ mopidy command
 
 .. program:: mopidy
 
-TODO: Document all command line options
+.. cmdoption:: --version
+
+    Show Mopidy's version number and exit.
+
+.. cmdoption:: -h, --help
+
+    Show help message and exit.
+
+.. cmdoption:: -q, --quite
+
+    Show less output: warning level and higher.
+
+.. cmdoption:: -v, --verbose
+
+    Show more output: debug level and higher.
+
+.. cmdoption:: --save-debug-log
+
+    Save debug log to the file specified in the :confval:`logging/debug_file`
+    config value, typically ``./mopidy.conf``.
+
+.. cmdoption:: --show-config
+
+    Show the current effective config. All configuration sources are merged
+    together to show the effective document. Secret values like passwords are
+    masked out. Config for disabled extensions are not included.
+
+.. cmdoption:: --show-deps
+
+    Show dependencies, their versions and installation location.
+
+.. cmdoption:: --config <file>
+
+    Specify config file to use. To use multiple config files, separate them
+    with colon. The later files override the earlier ones if there's a
+    conflict.
+
+.. cmdoption:: -o <option>, --option <option>
+
+    Specify additional config values in the ``section/key=value`` format. Can
+    be provided multiple times.
+
 
 
 mopidy-scan command
@@ -33,4 +74,18 @@ mopidy-scan command
 
 .. program:: mopidy-scan
 
-TODO: Document all command line options
+.. cmdoption:: --version
+
+    Show Mopidy's version number and exit.
+
+.. cmdoption:: -h, --help
+
+    Show help message and exit.
+
+.. cmdoption:: -q, --quite
+
+    Show less output: warning level and higher.
+
+.. cmdoption:: -v, --verbose
+
+    Show more output: debug level and higher.

@@ -34,9 +34,9 @@ class Extension(object):
     """
 
     def get_default_config(self):
-        """The extension's default config as a string
+        """The extension's default config as a bytestring
 
-        :returns: string
+        :returns: bytes
         """
         raise NotImplementedError(
             'Add at least a config section with "enabled = true"')
@@ -91,61 +91,68 @@ class Extension(object):
 
 
 def load_extensions():
-    extensions = []
+    """Find all installed extensions.
+
+    :returns: list of installed extensions
+    """
+
+    installed_extensions = []
+
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
         logger.debug('Loading entry point: %s', entry_point)
-
-        try:
-            extension_class = entry_point.load()
-        except pkg_resources.DistributionNotFound as ex:
-            logger.info(
-                'Disabled extension %s: Dependency %s not found',
-                entry_point.name, ex)
-            continue
-
+        extension_class = entry_point.load(require=False)
         extension = extension_class()
-
+        extension.entry_point = entry_point
+        installed_extensions.append(extension)
         logger.debug(
             'Loaded extension: %s %s', extension.dist_name, extension.version)
 
-        if entry_point.name != extension.ext_name:
-            logger.warning(
-                'Disabled extension %(ep)s: entry point name (%(ep)s) '
-                'does not match extension name (%(ext)s)',
-                {'ep': entry_point.name, 'ext': extension.ext_name})
-            continue
-
-        try:
-            extension.validate_environment()
-        except exceptions.ExtensionError as ex:
-            logger.info(
-                'Disabled extension %s: %s', entry_point.name, ex.message)
-            continue
-
-        extensions.append(extension)
-
-    names = (e.ext_name for e in extensions)
+    names = (e.ext_name for e in installed_extensions)
     logging.debug('Discovered extensions: %s', ', '.join(names))
-    return extensions
+    return installed_extensions
 
 
-def filter_enabled_extensions(raw_config, extensions):
-    boolean = config_lib.Boolean()
-    enabled_extensions = []
-    enabled_names = []
-    disabled_names = []
+def validate_extension(extension):
+    """Verify extension's dependencies and environment.
 
-    for extension in extensions:
-        # TODO: handle key and value errors.
-        enabled = raw_config[extension.ext_name]['enabled']
-        if boolean.deserialize(enabled):
-            enabled_extensions.append(extension)
-            enabled_names.append(extension.ext_name)
-        else:
-            disabled_names.append(extension.ext_name)
+    :param extensions: an extension to check
+    :returns: if extension should be run
+    """
 
-    logging.info(
-        'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
-    logging.info(
-        'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
-    return enabled_extensions
+    logger.debug('Validating extension: %s', extension.ext_name)
+
+    if extension.ext_name != extension.entry_point.name:
+        logger.warning(
+            'Disabled extension %(ep)s: entry point name (%(ep)s) '
+            'does not match extension name (%(ext)s)',
+            {'ep': extension.entry_point.name, 'ext': extension.ext_name})
+        return False
+
+    try:
+        extension.entry_point.require()
+    except pkg_resources.DistributionNotFound as ex:
+        logger.info(
+            'Disabled extension %s: Dependency %s not found',
+            extension.ext_name, ex)
+        return False
+
+    try:
+        extension.validate_environment()
+    except exceptions.ExtensionError as ex:
+        logger.info(
+            'Disabled extension %s: %s', extension.ext_name, ex.message)
+        return False
+
+    return True
+
+
+def register_gstreamer_elements(enabled_extensions):
+    """Registers custom GStreamer elements from extensions.
+
+    :params enabled_extensions: list of enabled extensions
+    """
+
+    for extension in enabled_extensions:
+        logger.debug(
+            'Registering GStreamer elements for: %s', extension.ext_name)
+        extension.register_gstreamer_elements()

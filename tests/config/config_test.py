@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import mock
 
-from mopidy import config, exceptions
+from mopidy import config
 
 from tests import unittest, path_to_data_dir
 
@@ -12,14 +12,14 @@ class LoadConfigTest(unittest.TestCase):
         self.assertEqual({}, config._load([], [], []))
 
     def test_load_single_default(self):
-        default = '[foo]\nbar = baz'
+        default = b'[foo]\nbar = baz'
         expected = {'foo': {'bar': 'baz'}}
         result = config._load([], [default], [])
         self.assertEqual(expected, result)
 
     def test_load_defaults(self):
-        default1 = '[foo]\nbar = baz'
-        default2 = '[foo2]\n'
+        default1 = b'[foo]\nbar = baz'
+        default2 = b'[foo2]\n'
         expected = {'foo': {'bar': 'baz'}, 'foo2': {}}
         result = config._load([], [default1, default2], [])
         self.assertEqual(expected, result)
@@ -53,38 +53,38 @@ class LoadConfigTest(unittest.TestCase):
 
 class ValidateTest(unittest.TestCase):
     def setUp(self):
-        self.schema = mock.Mock()
-        self.schema.name = 'foo'
+        self.schema = config.ConfigSchema('foo')
+        self.schema['bar'] = config.ConfigValue()
 
     def test_empty_config_no_schemas(self):
         conf, errors = config._validate({}, [])
         self.assertEqual({}, conf)
-        self.assertEqual([], errors)
+        self.assertEqual({}, errors)
 
     def test_config_no_schemas(self):
         raw_config = {'foo': {'bar': 'baz'}}
         conf, errors = config._validate(raw_config, [])
         self.assertEqual({}, conf)
-        self.assertEqual([], errors)
+        self.assertEqual({}, errors)
 
     def test_empty_config_single_schema(self):
         conf, errors = config._validate({}, [self.schema])
-        self.assertEqual({}, conf)
-        self.assertEqual(['foo: section not found.'], errors)
+        self.assertEqual({'foo': {'bar': None}}, conf)
+        self.assertEqual({'foo': {'bar': 'config key not found.'}}, errors)
 
     def test_config_single_schema(self):
         raw_config = {'foo': {'bar': 'baz'}}
-        self.schema.convert.return_value = {'baz': 'bar'}
         conf, errors = config._validate(raw_config, [self.schema])
-        self.assertEqual({'foo': {'baz': 'bar'}}, conf)
-        self.assertEqual([], errors)
+        self.assertEqual({'foo': {'bar': 'baz'}}, conf)
+        self.assertEqual({}, errors)
 
     def test_config_single_schema_config_error(self):
         raw_config = {'foo': {'bar': 'baz'}}
-        self.schema.convert.side_effect = exceptions.ConfigError({'bar': 'bad'})
+        self.schema['bar'] = mock.Mock()
+        self.schema['bar'].deserialize.side_effect = ValueError('bad')
         conf, errors = config._validate(raw_config, [self.schema])
-        self.assertEqual(['foo/bar: bad'], errors)
-        self.assertEqual({}, conf)
+        self.assertEqual({'foo': {'bar': None}}, conf)
+        self.assertEqual({'foo': {'bar': 'bad'}}, errors)
 
     # TODO: add more tests
 

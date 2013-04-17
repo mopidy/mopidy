@@ -27,7 +27,7 @@ with others for debugging.
 Installed dependencies
 ======================
 
-The command :option:`mopidy --list-deps` will list the paths to and versions of
+The command :option:`mopidy --show-deps` will list the paths to and versions of
 any dependency Mopidy or the extensions might need to work. This is very useful
 data for checking that you're using the right versions, and that you're using
 the right installation if you have multiple installations of a dependency on
@@ -42,7 +42,7 @@ run :option:`mopidy --save-debug-log`, it will save the debug log to the file
 ``mopidy.log`` in the directory you ran the command from.
 
 If you want to turn on more or less logging for some component, see the
-docs for the :confval:`logging.levels/*` config section.
+docs for the :confval:`loglevels/*` config section.
 
 
 Debugging deadlocks
@@ -56,3 +56,21 @@ system is deadlocking. If you have the ``pkill`` command installed, you can use
 this by simply running::
 
     pkill -SIGUSR1 mopidy
+
+
+Debugging GStreamer
+===================
+
+If you really want to dig in and debug GStreamer behaviour, then check out the
+`Debugging section
+<http://gstreamer.freedesktop.org/data/doc/gstreamer/head/manual/html/section-checklist-debug.html>`_
+of GStreamer's documentation for your options. Note that Mopidy does not
+support the GStreamer command line options, like ``--gst-debug-level=3``, but
+setting GStreamer environment variables, like :envvar:`GST_DEBUG`, works with
+Mopidy. For example, to run Mopidy with debug logging and GStreamer logging at
+level 3, you can run::
+
+    GST_DEBUG=3 mopidy -v
+
+This will produce a lot of output, but given some GStreamer knowledge this is
+very useful for debugging GStreamer pipeline issues.

@@ -40,7 +40,8 @@ sends all requests to both, returning the primary response to the client and
 then printing any diff in the two responses.
 
 Note that this tool depends on ``gevent`` unlike the rest of Mopidy at the time
-of writing. See ``--help`` for available options. Sample session::
+of writing. See :option:`tools/debug-proxy.py --help` for available options.
+Sample session::
 
     [127.0.0.1]:59714
     listallinfo

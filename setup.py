@@ -31,7 +31,6 @@ setup(
         'spotify': ['pyspotify >= 1.9, < 1.11'],
         'scrobbler': ['pylast >= 0.5.7'],
         'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
-        'external_mixers': ['pyserial'],
     },
     test_suite='nose.collector',
     tests_require=[
@@ -43,6 +42,7 @@ setup(
         'console_scripts': [
             'mopidy = mopidy.__main__:main',
             'mopidy-scan = mopidy.scanner:main',
+            'mopidy-convert-config = mopidy.config.convert:main',
         ],
         'mopidy.ext': [
             'http = mopidy.frontends.http:Extension [http]',

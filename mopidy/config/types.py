@@ -8,6 +8,30 @@ from mopidy.utils import path
 from mopidy.config import validators
 
 
+def decode(value):
+    if isinstance(value, unicode):
+        return value
+    # TODO: only unescape \n \t and \\?
+    return value.decode('string-escape').decode('utf-8')
+
+
+def encode(value):
+    if not isinstance(value, unicode):
+        return value
+    for char in ('\\', '\n', '\t'):  # TODO: more escapes?
+        value = value.replace(char, char.encode('unicode-escape'))
+    return value.encode('utf-8')
+
+
+class ExpandedPath(bytes):
+    def __new__(self, value):
+        expanded = path.expand_path(value)
+        return super(ExpandedPath, self).__new__(self, expanded)
+
+    def __init__(self, value):
+        self.original = value
+
+
 class ConfigValue(object):
     """Represents a config key's value and how to handle it.
 
@@ -25,95 +49,90 @@ class ConfigValue(object):
     the code interacting with the config should simply skip None config values.
     """
 
-    choices = None
-    """
-    Collection of valid choices for converted value. Must be combined with
-    :func:`~mopidy.config.validators.validate_choice` in :meth:`deserialize`
-    do any thing.
-    """
-
-    minimum = None
-    """
-    Minimum of converted value. Must be combined with
-    :func:`~mopidy.config.validators.validate_minimum` in :meth:`deserialize`
-    do any thing.
-    """
-
-    maximum = None
-    """
-    Maximum of converted value. Must be combined with
-    :func:`~mopidy.config.validators.validate_maximum` in :meth:`deserialize`
-    do any thing.
-    """
-
-    optional = None
-    """Indicate if this field is required."""
-
-    secret = None
-    """Indicate if we should mask the when printing for human consumption."""
-
-    def __init__(self, **kwargs):
-        self.choices = kwargs.get('choices')
-        self.minimum = kwargs.get('minimum')
-        self.maximum = kwargs.get('maximum')
-        self.optional = kwargs.get('optional')
-        self.secret = kwargs.get('secret')
-
     def deserialize(self, value):
         """Cast raw string to appropriate type."""
         return value
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         """Convert value back to string for saving."""
-        return str(value)
-
-    def format(self, value):
-        """Format value for display."""
-        if self.secret and value is not None:
-            return '********'
-        return self.serialize(value)
+        if value is None:
+            return b''
+        return bytes(value)
 
 
 class String(ConfigValue):
-    """String value
+    """String value.
 
-    Supported kwargs: ``optional``, ``choices``, and ``secret``.
+    Is decoded as utf-8 and \\n \\t escapes should work and be preserved.
     """
+    def __init__(self, optional=False, choices=None):
+        self._required = not optional
+        self._choices = choices
+
     def deserialize(self, value):
-        value = value.strip()
-        validators.validate_required(value, not self.optional)
-        validators.validate_choice(value, self.choices)
+        value = decode(value).strip()
+        validators.validate_required(value, self._required)
+        validators.validate_choice(value, self._choices)
         if not value:
             return None
         return value
 
-    def serialize(self, value):
-        return value.encode('utf-8').encode('string-escape')
+    def serialize(self, value, display=False):
+        if value is None:
+            return b''
+        return encode(value)
+
+
+class Secret(ConfigValue):
+    """Secret value.
+
+    Should be used for passwords, auth tokens etc. Deserializing will not
+    convert to unicode. Will mask value when being displayed.
+    """
+    def __init__(self, optional=False, choices=None):
+        self._required = not optional
+
+    def deserialize(self, value):
+        value = value.strip()
+        validators.validate_required(value, self._required)
+        if not value:
+            return None
+        return value
+
+    def serialize(self, value, display=False):
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        if value is None:
+            return b''
+        elif display:
+            return b'********'
+        return value
 
 
 class Integer(ConfigValue):
-    """Integer value
+    """Integer value."""
 
-    Supported kwargs: ``choices``, ``minimum``, ``maximum``, and ``secret``
-    """
+    def __init__(self, minimum=None, maximum=None, choices=None):
+        self._minimum = minimum
+        self._maximum = maximum
+        self._choices = choices
+
     def deserialize(self, value):
         value = int(value)
-        validators.validate_choice(value, self.choices)
-        validators.validate_minimum(value, self.minimum)
-        validators.validate_maximum(value, self.maximum)
+        validators.validate_choice(value, self._choices)
+        validators.validate_minimum(value, self._minimum)
+        validators.validate_maximum(value, self._maximum)
         return value
 
 
 class Boolean(ConfigValue):
-    """Boolean value
+    """Boolean value.
 
     Accepts ``1``, ``yes``, ``true``, and ``on`` with any casing as
     :class:`True`.
 
     Accepts ``0``, ``no``, ``false``, and ``off`` with any casing as
     :class:`False`.
-
-    Supported kwargs: ``secret``
     """
     true_values = ('1', 'yes', 'true', 'on')
     false_values = ('0', 'no', 'false', 'off')
@@ -123,66 +142,71 @@ class Boolean(ConfigValue):
             return True
         elif value.lower() in self.false_values:
             return False
-
         raise ValueError('invalid value for boolean: %r' % value)
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         if value:
-            return 'true'
+            return b'true'
         else:
-            return 'false'
+            return b'false'
 
 
 class List(ConfigValue):
-    """List value
+    """List value.
 
-    Supports elements split by commas or newlines.
-
-    Supported kwargs: ``optional`` and ``secret``
+    Supports elements split by commas or newlines. Newlines take presedence and
+    empty list items will be filtered out.
     """
-    def deserialize(self, value):
-        validators.validate_required(value, not self.optional)
-        if '\n' in value:
-            values = re.split(r'\s*\n\s*', value.strip())
-        else:
-            values = re.split(r'\s*,\s*', value.strip())
-        return tuple([v for v in values if v])
+    def __init__(self, optional=False):
+        self._required = not optional
 
-    def serialize(self, value):
-        return '\n  ' + '\n  '.join(v.encode('utf-8') for v in value)
+    def deserialize(self, value):
+        if b'\n' in value:
+            values = re.split(r'\s*\n\s*', value)
+        else:
+            values = re.split(r'\s*,\s*', value)
+        values = (decode(v).strip() for v in values)
+        values = filter(None, values)
+        validators.validate_required(values, self._required)
+        return tuple(values)
+
+    def serialize(self, value, display=False):
+        return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 
 class LogLevel(ConfigValue):
-    """Log level value
+    """Log level value.
 
     Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``
     with any casing.
-
-    Supported kwargs: ``secret``
     """
     levels = {
-        'critical': logging.CRITICAL,
-        'error': logging.ERROR,
-        'warning': logging.WARNING,
-        'info': logging.INFO,
-        'debug': logging.DEBUG,
+        b'critical': logging.CRITICAL,
+        b'error': logging.ERROR,
+        b'warning': logging.WARNING,
+        b'info': logging.INFO,
+        b'debug': logging.DEBUG,
     }
 
     def deserialize(self, value):
         validators.validate_choice(value.lower(), self.levels.keys())
         return self.levels.get(value.lower())
 
-    def serialize(self, value):
-        return dict((v, k) for k, v in self.levels.items()).get(value)
+    def serialize(self, value, display=False):
+        lookup = dict((v, k) for k, v in self.levels.items())
+        if value in lookup:
+            return lookup[value]
+        return b''
 
 
 class Hostname(ConfigValue):
-    """Hostname value
+    """Network hostname value."""
 
-    Supported kwargs: ``optional`` and ``secret``
-    """
-    def deserialize(self, value):
-        validators.validate_required(value, not self.optional)
+    def __init__(self, optional=False):
+        self._required = not optional
+
+    def deserialize(self, value, display=False):
+        validators.validate_required(value, self._required)
         if not value.strip():
             return None
         try:
@@ -193,26 +217,14 @@ class Hostname(ConfigValue):
 
 
 class Port(Integer):
-    """Port value
+    """Network port value.
 
-    Expects integer in the range 1-65535
-
-    Supported kwargs: ``choices`` and ``secret``
+    Expects integer in the range 0-65535, zero tells the kernel to simply
+    allocate a port for us.
     """
     # TODO: consider probing if port is free or not?
-    def __init__(self, **kwargs):
-        super(Port, self).__init__(**kwargs)
-        self.minimum = 1
-        self.maximum = 2 ** 16 - 1
-
-
-class ExpandedPath(bytes):
-    def __new__(self, value):
-        expanded = path.expand_path(value)
-        return super(ExpandedPath, self).__new__(self, expanded)
-
-    def __init__(self, value):
-        self.original = value
+    def __init__(self, choices=None):
+        super(Port, self).__init__(minimum=0, maximum=2**16-1, choices=choices)
 
 
 class Path(ConfigValue):
@@ -232,15 +244,19 @@ class Path(ConfigValue):
 
     Supported kwargs: ``optional``, ``choices``, and ``secret``
     """
+    def __init__(self, optional=False, choices=None):
+        self._required = not optional
+        self._choices = choices
+
     def deserialize(self, value):
         value = value.strip()
-        validators.validate_required(value, not self.optional)
-        validators.validate_choice(value, self.choices)
+        validators.validate_required(value, self._required)
+        validators.validate_choice(value, self._choices)
         if not value:
             return None
         return ExpandedPath(value)
 
-    def serialize(self, value):
+    def serialize(self, value, display=False):
         if isinstance(value, ExpandedPath):
             return value.original
         return value

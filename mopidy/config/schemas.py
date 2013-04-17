@@ -1,7 +1,11 @@
 from __future__ import unicode_literals
 
-from mopidy import exceptions
+import collections
+
 from mopidy.config import types
+
+# TODO: 2.6 cleanup (#344).
+ordered_dict = getattr(collections, 'OrderedDict', dict)
 
 
 def _did_you_mean(name, choices):
@@ -40,9 +44,11 @@ class ConfigSchema(object):
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
-    instances.  Once setup :meth:`convert` can be called with a list of
-    ``(key, value)`` tuples to process. For convienience we also support
-    :meth:`format` method that can used for printing out the converted values.
+    instances.  Once setup :meth:`deserialize` can be called with a dict of
+    values to process. For convienience we also support :meth:`format` method
+    that can used for converting the values to a dict that can be printed and
+    :meth:`serialize` for converting the values to a form suitable for
+    persistence.
     """
     # TODO: Use collections.OrderedDict once 2.6 support is gone (#344)
     def __init__(self, name):
@@ -58,43 +64,38 @@ class ConfigSchema(object):
     def __getitem__(self, key):
         return self._schema[key]
 
-    def format(self, values):
-        """Returns the schema as a config section with the given ``values``
-        filled in"""
-        # TODO: should the output be encoded utf-8 since we use that in
-        # serialize for strings?
-        lines = ['[%s]' % self.name]
-        for key in self._order:
-            value = values.get(key)
-            if value is not None:
-                lines.append('%s = %s' % (
-                    key, self._schema[key].format(value)))
-        return '\n'.join(lines)
+    def deserialize(self, values):
+        """Validates the given ``values`` using the config schema.
 
-    def convert(self, items):
-        """Validates the given ``items`` using the config schema and returns
-        clean values"""
+         Returns a tuple with cleaned values and errors."""
         errors = {}
-        values = {}
+        result = {}
 
-        for key, value in items:
+        for key, value in values.items():
             try:
-                values[key] = self._schema[key].deserialize(value)
+                result[key] = self._schema[key].deserialize(value)
             except KeyError:  # not in our schema
                 errors[key] = 'unknown config key.'
                 suggestion = _did_you_mean(key, self._schema.keys())
                 if suggestion:
                     errors[key] += ' Did you mean %s?' % suggestion
             except ValueError as e:  # deserialization failed
+                result[key] = None
                 errors[key] = str(e)
 
         for key in self._schema:
-            if key not in values and key not in errors:
+            if key not in result and key not in errors:
+                result[key] = None
                 errors[key] = 'config key not found.'
 
-        if errors:
-            raise exceptions.ConfigError(errors)
-        return values
+        return result, errors
+
+    def serialize(self, values, display=False):
+        result = ordered_dict()  # TODO: 2.6 cleanup (#344).
+        for key in self._order:
+            if key in values:
+                result[key] = self._schema[key].serialize(values[key], display)
+        return result
 
 
 class ExtensionConfigSchema(ConfigSchema):
@@ -105,6 +106,8 @@ class ExtensionConfigSchema(ConfigSchema):
     def __init__(self, name):
         super(ExtensionConfigSchema, self).__init__(name)
         self['enabled'] = types.Boolean()
+
+    # TODO: override serialize to gate on enabled=true?
 
 
 class LogLevelConfigSchema(object):
@@ -118,25 +121,20 @@ class LogLevelConfigSchema(object):
         self.name = name
         self._config_value = types.LogLevel()
 
-    def format(self, values):
-        lines = ['[%s]' % self.name]
-        for key, value in sorted(values.items()):
-            if value is not None:
-                lines.append('%s = %s' % (
-                    key, self._config_value.format(value)))
-        return '\n'.join(lines)
-
-    def convert(self, items):
+    def deserialize(self, values):
         errors = {}
-        values = {}
+        result = {}
 
-        for key, value in items:
+        for key, value in values.items():
             try:
-                if value.strip():
-                    values[key] = self._config_value.deserialize(value)
+                result[key] = self._config_value.deserialize(value)
             except ValueError as e:  # deserialization failed
+                result[key] = None
                 errors[key] = str(e)
+        return result, errors
 
-        if errors:
-            raise exceptions.ConfigError(errors)
-        return values
+    def serialize(self, values, display=False):
+        result = ordered_dict()  # TODO: 2.6 cleanup (#344)
+        for key in sorted(values.keys()):
+            result[key] = self._config_value.serialize(values[key], display)
+        return result
