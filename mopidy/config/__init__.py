@@ -15,6 +15,7 @@ _logging_schema = ConfigSchema('logging')
 _logging_schema['console_format'] = String()
 _logging_schema['debug_format'] = String()
 _logging_schema['debug_file'] = Path()
+_logging_schema['config_file'] = Path(optional=True)
 
 _loglevels_schema = LogLevelConfigSchema('loglevels')
 

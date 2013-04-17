@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import logging.config
 import logging.handlers
 
 from . import versioning
@@ -14,6 +15,9 @@ def setup_logging(config, verbosity_level, save_debug_log):
     if hasattr(logging, 'captureWarnings'):
         # New in Python 2.7
         logging.captureWarnings(True)
+
+    if config['logging']['config_file']:
+        logging.config.fileConfig(config['logging']['config_file'])
 
     logger = logging.getLogger('mopidy.utils.log')
     logger.info('Starting Mopidy %s', versioning.get_version())

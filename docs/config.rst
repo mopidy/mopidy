@@ -97,6 +97,12 @@ Core configuration values
     The file to dump debug log data to when Mopidy is run with the
     :option:`mopidy --save-debug-log` option.
 
+.. confval:: logging/config_file
+
+    Config file that overrides all logging settings, see `the Python
+    logging docs <http://docs.python.org/2/library/logging.config.html>`_
+    for details.
+
 .. confval:: loglevels/*
 
     The ``loglevels`` config section can be used to change the log level for
