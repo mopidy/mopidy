@@ -1,4 +1,4 @@
-include *.ini
+include *.conf
 include *.rst
 include LICENSE
 include MANIFEST.in
