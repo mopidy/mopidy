@@ -119,12 +119,12 @@ def gstreamer_info():
     other.append('  Found:')
     for element in found_elements:
         other.append('    %s' % element)
-    else:
+    if not found_elements:
         other.append('    none')
     other.append('  Not found:')
     for element in missing_elements:
         other.append('    %s' % element)
-    else:
+    if not missing_elements:
         other.append('    none')
 
     return {
