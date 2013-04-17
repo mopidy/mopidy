@@ -275,11 +275,11 @@ class MpdContext(object):
 
     def lookup_playlist_from_name(self, name):
         """
-        Helper function to retrieve a playlist from it's unique MPD name.
+        Helper function to retrieve a playlist from its unique MPD name.
         """
         if not self._playlist_uri_from_name:
             self.refresh_playlists_mapping()
         if name not in self._playlist_uri_from_name:
-            return None;
+            return None
         uri = self._playlist_uri_from_name[name]
         return self.core.playlists.lookup(uri).get()
