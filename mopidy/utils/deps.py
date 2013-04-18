@@ -52,10 +52,14 @@ def _format_dependency(dep_info):
     if 'version' not in dep_info:
         lines.append('%s: not found' % dep_info['name'])
     else:
-        lines.append('%s: %s from %s' % (
+        if 'path' in dep_info:
+            source = ' from %s' % os.path.dirname(dep_info['path'])
+        else:
+            source = ''
+        lines.append('%s: %s%s' % (
             dep_info['name'],
             dep_info['version'],
-            os.path.dirname(dep_info.get('path', 'none')),
+            source,
         ))
 
     if 'other' in dep_info:
