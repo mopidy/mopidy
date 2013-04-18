@@ -94,16 +94,21 @@ def python_info():
 def pkg_info(project_name=None, include_extras=False):
     if project_name is None:
         project_name = 'Mopidy'
-    distribution = pkg_resources.get_distribution(project_name)
-    extras = include_extras and distribution.extras or []
-    dependencies = [
-        pkg_info(d) for d in distribution.requires(extras)]
-    return {
-        'name': distribution.project_name,
-        'version': distribution.version,
-        'path': distribution.location,
-        'dependencies': dependencies,
-    }
+    try:
+        distribution = pkg_resources.get_distribution(project_name)
+        extras = include_extras and distribution.extras or []
+        dependencies = [
+            pkg_info(d) for d in distribution.requires(extras)]
+        return {
+            'name': project_name,
+            'version': distribution.version,
+            'path': distribution.location,
+            'dependencies': dependencies,
+        }
+    except pkg_resources.ResolutionError:
+        return {
+            'name': project_name,
+        }
 
 
 def gstreamer_info():

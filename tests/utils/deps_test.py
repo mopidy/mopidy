@@ -7,6 +7,7 @@ pygst.require('0.10')
 import gst
 
 import mock
+import pkg_resources
 
 from mopidy.utils import deps
 
@@ -107,3 +108,23 @@ class DepsTest(unittest.TestCase):
         dep_info_setuptools = dep_info_pykka['dependencies'][0]
         self.assertEquals('setuptools', dep_info_setuptools['name'])
         self.assertEquals('0.6', dep_info_setuptools['version'])
+
+    @mock.patch('pkg_resources.get_distribution')
+    def test_pkg_info_for_missing_dist(self, get_distribution_mock):
+        get_distribution_mock.side_effect = pkg_resources.DistributionNotFound
+
+        result = deps.pkg_info()
+
+        self.assertEquals('Mopidy', result['name'])
+        self.assertNotIn('version', result)
+        self.assertNotIn('path', result)
+
+    @mock.patch('pkg_resources.get_distribution')
+    def test_pkg_info_for_wrong_dist_version(self, get_distribution_mock):
+        get_distribution_mock.side_effect = pkg_resources.VersionConflict
+
+        result = deps.pkg_info()
+
+        self.assertEquals('Mopidy', result['name'])
+        self.assertNotIn('version', result)
+        self.assertNotIn('path', result)
