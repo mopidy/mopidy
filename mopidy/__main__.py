@@ -43,6 +43,7 @@ def main():
     config_overrides = options.overrides
 
     enabled_extensions = []  # Make sure it is defined before the finally block
+    logging_initialized = False
 
     # TODO: figure out a way to make the boilerplate in this file reusable in
     # scanner and other places we need it.
@@ -54,6 +55,7 @@ def main():
         # TODO: setup_logging needs defaults in-case config values are None
         log.setup_logging(
             logging_config, options.verbosity_level, options.save_debug_log)
+        logging_initialized = True
 
         installed_extensions = ext.load_extensions()
 
@@ -85,9 +87,12 @@ def main():
         setup_frontends(config, enabled_extensions, core)
         loop.run()
     except KeyboardInterrupt:
-        logger.info('Interrupted. Exiting...')
+        if logging_initialized:
+            logger.info('Interrupted. Exiting...')
     except Exception as ex:
-        logger.exception(ex)
+        if logging_initialized:
+            logger.exception(ex)
+        raise
     finally:
         loop.quit()
         stop_frontends(enabled_extensions)
