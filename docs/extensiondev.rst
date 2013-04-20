@@ -51,9 +51,11 @@ extension, Mopidy-Soundspot::
 
     mopidy-soundspot/           # The Git repo root
         LICENSE                 # The license text
+        MANIFEST.in             # List of data files to include in PyPI package
         README.rst              # Document what it is and how to use it
         mopidy_soundspot/       # Your code
             __init__.py
+            ext.conf            # Default config for the extension
             ...
         setup.py                # Installation script
 
@@ -173,6 +175,18 @@ class that will connect the rest of the dots.
         ],
     )
 
+To make sure your README, license file and default config file is included in
+the package that is uploaded to PyPI, we'll also need to add a ``MANIFEST.in``
+file::
+
+    include LICENSE
+    include MANIFEST.in
+    include README.rst
+    include mopidy_soundspot/ext.conf
+
+For details on the ``MANIFEST.in`` file format, check out the `distuitls docs
+<http://docs.python.org/2/distutils/sourcedist.html#manifest-template>`_.
+
 
 Example __init__.py
 ===================
@@ -199,11 +213,15 @@ for all config values so that as few users as possible will need to change
 them. The exception is if the config value has security implications; in that
 case you should default to the most secure configuration. Leave any
 configurations that doesn't have meaningful defaults blank, like ``username``
-and ``password``.
+and ``password``. In the example below, we've chosen to maintain the default
+config as a separate file named ``ext.conf``. This makes it easy to e.g.
+include the default config in documentation without duplicating it.
 
-::
+This is ``mopidy_soundspot/__init__.py``::
 
     from __future__ import unicode_literals
+
+    import os
 
     import pygst
     pygst.require('0.10')
@@ -215,13 +233,6 @@ and ``password``.
 
     __version__ = '0.1'
 
-    default_config = """
-    [soundspot]
-    enabled = true
-    username =
-    password =
-    """
-
 
     class Extension(ext.Extension):
 
@@ -230,7 +241,8 @@ and ``password``.
         version = __version__
 
         def get_default_config(self):
-            return bytes(default_config)
+            conf_file = os.path.join(os.path.dirname(__file__, 'ext.conf')
+            return config.read(conf_file)
 
         def get_config_schema(self):
             schema = super(Extension, self).get_config_schema()
@@ -261,7 +273,16 @@ and ``password``.
             gst.element_register(
                 SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
 
-For more detailed documentation, see the :ref:`ext-api`.
+And this is ``mopidy_soundspot/ext.conf``:
+
+.. code-block:: ini
+
+    [soundspot]
+    enabled = true
+    username =
+    password =
+
+For more detailed documentation on the extension class, see the :ref:`ext-api`.
 
 
 Example frontend
