@@ -30,6 +30,22 @@ These extensions are maintained outside Mopidy's core, often by other
 developers.
 
 
+Mopidy-Beets
+------------
+
+Provides a backend for playing music from your `Beets
+<http://beets.radbox.org/>`_ music library through Beets' web extension.
+
+Author:
+    Janez Troha
+PyPI:
+    `Mopidy-Beets <https://pypi.python.org/pypi/Mopidy-Beets>`_
+GitHub:
+    `dz0ny/mopidy-beets <https://github.com/dz0ny/mopidy-beets>`_
+Issues:
+    https://github.com/dz0ny/mopidy-beets/issues
+
+
 Mopidy-NAD
 ----------
 
