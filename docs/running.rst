@@ -33,7 +33,7 @@ mopidy command
 
     Show help message and exit.
 
-.. cmdoption:: -q, --quite
+.. cmdoption:: -q, --quiet
 
     Show less output: warning level and higher.
 
@@ -82,7 +82,7 @@ mopidy-scan command
 
     Show help message and exit.
 
-.. cmdoption:: -q, --quite
+.. cmdoption:: -q, --quiet
 
     Show less output: warning level and higher.
 
