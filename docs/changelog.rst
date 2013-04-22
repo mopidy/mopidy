@@ -23,11 +23,12 @@ and improved.
   Python file. This makes configuration easier for users, and also makes it
   possible for Mopidy extensions to have their own config sections.
 
-- Many config values got slightly modified names. We've made a configuration
-  conversion tool to convert the old ``settings.py`` to a new ``mopidy.conf``
-  file. This tool takes care of all the renamed config values as well.
+  Many config values got slightly modified names.
 
-  TODO: Describe how to use the configuration conversion tool.
+  We've made a tool named :option:`mopidy-convert-config` for automatically
+  converting the old ``settings.py`` to a new ``mopidy.conf`` file. This tool
+  takes care of all the renamed config values as well. See
+  :ref:`mopidy-convert-config` for details on how to use it.
 
 - A long wanted feature: You can now enable or disable specific frontends or
   backends without having to redefine :attr:`~mopidy.settings.FRONTENDS` or

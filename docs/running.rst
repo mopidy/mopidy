@@ -89,3 +89,53 @@ mopidy-scan command
 .. cmdoption:: -v, --verbose
 
     Show more output: debug level and higher.
+
+
+.. _mopidy-convert-config:
+
+mopidy-convert-config command
+=============================
+
+.. program:: mopidy-convert-config
+
+This program does not take any options. It looks for the pre-0.14 settings file
+at ``$XDG_CONFIG_DIR/mopidy/settings.py``, and if it exists it converts it and
+ouputs a Mopidy 0.14 compatible ini-format configuration. If you don't already
+have a config file at ``$XDG_CONFIG_DIR/mopidy/mopidy.conf``, you're asked if
+you want to save the converted config to that file.
+
+Example usage::
+
+    $ cat ~/.config/mopidy/settings.py
+    LOCAL_MUSIC_PATH = u'~/music'
+    MPD_SERVER_HOSTNAME = u'::'
+    SPOTIFY_PASSWORD = u'secret'
+    SPOTIFY_USERNAME = u'alice'
+
+    $ mopidy-convert-config
+    Checking /home/alice/.config/mopidy/settings.py
+    Converted config:
+
+    [spotify]
+    username = alice
+    password = ********
+
+    [mpd]
+    hostname = ::
+
+    [local]
+    media_dir = ~/music
+
+    Write new config to /home/alice/.config/mopidy/mopidy.conf? [yN] y
+    Done.
+
+    $ cat ~/.config/mopidy/mopidy.conf
+    [spotify]
+    username = alice
+    password = secret
+
+    [mpd]
+    hostname = ::
+
+    [local]
+    media_dir = ~/music
