@@ -10,18 +10,10 @@ import gobject
 gobject.threads_init()
 
 
-# Extract any non-GStreamer arguments, and leave the GStreamer arguments for
-# processing by GStreamer. This needs to be done before GStreamer is imported,
-# so that GStreamer doesn't hijack e.g. ``--help``.
-# NOTE This naive fix does not support values like ``bar`` in
-# ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
-
-def is_gst_arg(argument):
-    return argument.startswith('--gst') or argument == '--help-gst'
-
-gstreamer_args = [arg for arg in sys.argv[1:] if is_gst_arg(arg)]
-mopidy_args = [arg for arg in sys.argv[1:] if not is_gst_arg(arg)]
-sys.argv[1:] = gstreamer_args
+# Extract any command line arguments. This needs to be done before GStreamer is
+# imported, so that GStreamer doesn't hijack e.g. ``--help``.
+mopidy_args = sys.argv[1:]
+sys.argv[1:] = []
 
 
 # Add ../ to the path so we can run Mopidy from a Git checkout without
@@ -54,7 +46,8 @@ def main():
     log.setup_console_logging(logging_config, options.verbosity_level)
 
     extensions = ext.load_extensions()
-    config, errors = config_lib.load(config_files, extensions, config_overrides)
+    config, errors = config_lib.load(
+        config_files, extensions, config_overrides)
     log.setup_log_levels(config)
 
     # TODO: missing error checking and other default setup code.
