@@ -54,7 +54,6 @@ MOCK_MODULES = [
     'pykka.future',
     'pykka.registry',
     'pylast',
-    'serial',
     'ws4py',
     'ws4py.messaging',
     'ws4py.server',
