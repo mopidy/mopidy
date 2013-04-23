@@ -80,17 +80,13 @@ Core configuration values
 
     The log format used for informational logging.
 
-    See `the Python logging docs
-    <http://docs.python.org/2/library/logging.html#formatter-objects>`_ for
-    details on the format.
+    See `the Python logging docs`_ for details on the format.
 
 .. confval:: logging/debug_format
 
     The log format used for debug logging.
 
-    See `the Python logging docs
-    <http://docs.python.org/2/library/logging.html#formatter-objects>`_ for
-    details on the format.
+    See `the Python logging docs`_ for details on the format.
 
 .. confval:: logging/debug_file
 
@@ -99,9 +95,8 @@ Core configuration values
 
 .. confval:: logging/config_file
 
-    Config file that overrides all logging settings, see `the Python
-    logging docs <http://docs.python.org/2/library/logging.config.html>`_
-    for details.
+    Config file that overrides all logging settings, see `the Python logging
+    docs`_ for details.
 
 .. confval:: loglevels/*
 
@@ -124,6 +119,10 @@ Core configuration values
 .. confval:: proxy/password
 
     Password for the proxy server, if required.
+
+.. _the Python logging docs:
+
+    http://docs.python.org/2/library/logging.config.html
 
 
 Advanced configurations
