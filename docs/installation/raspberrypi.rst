@@ -4,13 +4,8 @@
 Installation on Raspberry Pi
 ****************************
 
-As of early August, 2012, running Mopidy on a `Raspberry Pi
-<http://www.raspberrypi.org/>`_ is possible, although there are a few
-significant drawbacks to doing so. This document is intended to help you get
-Mopidy running on your Raspberry Pi and to document the progress made and
-issues surrounding running Mopidy on the Raspberry Pi.
-
-As of January 2013, Mopidy will run with Spotify support on both the armel
+Mopidy runs nicely on a `Raspberry Pi <http://www.raspberrypi.org/>`_. As of
+January 2013, Mopidy will run with Spotify support on both the armel
 (soft-float) and armhf (hard-float) architectures, which includes the Raspbian
 distribution.
 
