@@ -201,27 +201,27 @@ class ExpandPathTest(unittest.TestCase):
     # TODO: test via mocks?
 
     def test_empty_path(self):
-        self.assertEqual(os.path.abspath('.'), path.expand_path(''))
+        self.assertEqual(os.path.abspath(b'.'), path.expand_path(b''))
 
     def test_absolute_path(self):
-        self.assertEqual('/tmp/foo', path.expand_path('/tmp/foo'))
+        self.assertEqual(b'/tmp/foo', path.expand_path(b'/tmp/foo'))
 
     def test_home_dir_expansion(self):
         self.assertEqual(
-            os.path.expanduser('~/foo'), path.expand_path('~/foo'))
+            os.path.expanduser(b'~/foo'), path.expand_path(b'~/foo'))
 
     def test_abspath(self):
-        self.assertEqual(os.path.abspath('./foo'), path.expand_path('./foo'))
+        self.assertEqual(os.path.abspath(b'./foo'), path.expand_path(b'./foo'))
 
     def test_xdg_subsititution(self):
         self.assertEqual(
-            glib.get_user_data_dir() + '/foo',
-            path.expand_path('$XDG_DATA_DIR/foo'))
+            glib.get_user_data_dir() + b'/foo',
+            path.expand_path(b'$XDG_DATA_DIR/foo'))
 
     def test_xdg_subsititution_unknown(self):
         self.assertEqual(
-            '/tmp/$XDG_INVALID_DIR/foo',
-            path.expand_path('/tmp/$XDG_INVALID_DIR/foo'))
+            b'/tmp/$XDG_INVALID_DIR/foo',
+            path.expand_path(b'/tmp/$XDG_INVALID_DIR/foo'))
 
 
 class FindFilesTest(unittest.TestCase):

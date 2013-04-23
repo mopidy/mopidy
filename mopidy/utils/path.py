@@ -11,19 +11,15 @@ import urllib
 
 import glib
 
+
 logger = logging.getLogger('mopidy.utils.path')
 
-XDG_CACHE_DIR = glib.get_user_cache_dir().decode('utf-8')
-XDG_CONFIG_DIR = glib.get_user_config_dir().decode('utf-8')
-XDG_DATA_DIR = glib.get_user_data_dir().decode('utf-8')
-XDG_MUSIC_DIR = glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC)
-if XDG_MUSIC_DIR:
-    XDG_MUSIC_DIR = XDG_MUSIC_DIR.decode('utf-8')
+
 XDG_DIRS = {
-    'XDG_CACHE_DIR': XDG_CACHE_DIR,
-    'XDG_CONFIG_DIR': XDG_CONFIG_DIR,
-    'XDG_DATA_DIR': XDG_DATA_DIR,
-    'XDG_MUSIC_DIR': XDG_MUSIC_DIR,
+    'XDG_CACHE_DIR': glib.get_user_cache_dir(),
+    'XDG_CONFIG_DIR': glib.get_user_config_dir(),
+    'XDG_DATA_DIR': glib.get_user_data_dir(),
+    'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
 }
 
 
