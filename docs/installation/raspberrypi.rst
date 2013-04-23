@@ -77,25 +77,9 @@ How to for Debian 7 (Wheezy)
    booting.
 
 
-Audio quality issues
-====================
-
-The Raspberry Pi's audio quality can be sub-par through the analog output. This
-is known and unlikely to be fixed as including any higher-quality hardware
-would increase the cost of the board. If you experience crackling/hissing or
-skipping audio, you may want to try a USB sound card. Additionally, you could
-lower your default ALSA sampling rate to 22KHz, though this will lead to a
-substantial decrease in sound quality.
+Fixing audio quality issues
+===========================
 
 As of January 2013, some reports also indicate that pushing the audio through
 PulseAudio may help. We hope to, in the future, provide a complete set of
 instructions here leading to acceptable analog audio quality.
-
-
-Support
-=======
-
-If you had trouble with the above or got Mopidy working a different way on
-Raspberry Pi, please send us a pull request to update this page with your new
-information. As usual, the folks at ``#mopidy`` on ``irc.freenode.net`` may be
-able to help with any problems encountered.
