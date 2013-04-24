@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from __future__ import unicode_literals
 
 import mock
@@ -14,6 +16,12 @@ class LoadConfigTest(unittest.TestCase):
     def test_load_single_default(self):
         default = b'[foo]\nbar = baz'
         expected = {'foo': {'bar': 'baz'}}
+        result = config._load([], [default], [])
+        self.assertEqual(expected, result)
+
+    def test_unicode_default(self):
+        default = '[foo]\nbar = æøå'
+        expected = {'foo': {'bar': 'æøå'.encode('utf-8')}}
         result = config._load([], [default], [])
         self.assertEqual(expected, result)
 

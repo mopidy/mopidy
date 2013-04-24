@@ -72,6 +72,8 @@ def _load(files, defaults, overrides):
     # TODO: simply return path to config file for defaults so we can load it
     # all in the same way?
     for default in defaults:
+        if isinstance(default, unicode):
+            default = default.encode('utf-8')
         parser.readfp(io.BytesIO(default))
 
     # Load config from a series of config files

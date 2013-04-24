@@ -208,10 +208,10 @@ The default configuration for the extension is defined by the
 :mod:`ConfigParser` compatible config section. The config section's name must
 be the same as the extension's short name, as defined in the ``entry_points``
 part of ``setup.py``, for example ``soundspot``. All extensions must include
-an ``enabled`` config which should default to ``true``. Provide good defaults
-for all config values so that as few users as possible will need to change
-them. The exception is if the config value has security implications; in that
-case you should default to the most secure configuration. Leave any
+an ``enabled`` config which normally should default to ``true``. Provide good
+defaults for all config values so that as few users as possible will need to
+change them. The exception is if the config value has security implications; in
+that case you should default to the most secure configuration. Leave any
 configurations that doesn't have meaningful defaults blank, like ``username``
 and ``password``. In the example below, we've chosen to maintain the default
 config as a separate file named ``ext.conf``. This makes it easy to e.g.
