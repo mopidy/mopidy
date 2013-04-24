@@ -98,18 +98,6 @@ class ConfigSchema(object):
         return result
 
 
-class ExtensionConfigSchema(ConfigSchema):
-    """Sub-classed :class:`ConfigSchema` for use in extensions.
-
-    Ensures that ``enabled`` config value is present.
-    """
-    def __init__(self, name):
-        super(ExtensionConfigSchema, self).__init__(name)
-        self['enabled'] = types.Boolean()
-
-    # TODO: override serialize to gate on enabled=true?
-
-
 class LogLevelConfigSchema(object):
     """Special cased schema for handling a config section with loglevels.
 

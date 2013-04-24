@@ -77,12 +77,6 @@ class ConfigSchemaTest(unittest.TestCase):
         self.assertIsNone(result['baz'])
 
 
-class ExtensionConfigSchemaTest(unittest.TestCase):
-    def test_schema_includes_enabled(self):
-        schema = schemas.ExtensionConfigSchema('test')
-        self.assertIsInstance(schema['enabled'], types.Boolean)
-
-
 class LogLevelConfigSchemaTest(unittest.TestCase):
     def test_conversion(self):
         schema = schemas.LogLevelConfigSchema('test')

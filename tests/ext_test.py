@@ -23,7 +23,6 @@ class ExtensionTest(unittest.TestCase):
 
     def test_get_config_schema_returns_extension_schema(self):
         schema = self.ext.get_config_schema()
-        self.assertIsInstance(schema, config.ExtensionConfigSchema)
         self.assertIsInstance(schema['enabled'], config.Boolean)
 
     def test_validate_environment_does_nothing_by_default(self):

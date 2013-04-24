@@ -46,7 +46,9 @@ class Extension(object):
 
         :returns: :class:`~mopidy.config.schema.ExtensionConfigSchema`
         """
-        return config_lib.ExtensionConfigSchema(self.ext_name)
+        schema = config_lib.ConfigSchema(self.ext_name)
+        schema['enabled'] = config_lib.Boolean()
+        return schema
 
     def validate_environment(self):
         """Checks if the extension can run in the current environment
