@@ -114,11 +114,11 @@ Core configuration values
 
 .. confval:: proxy/username
 
-    Username for the proxy server, if required.
+    Username for the proxy server, if needed.
 
 .. confval:: proxy/password
 
-    Password for the proxy server, if required.
+    Password for the proxy server, if needed.
 
 .. _the Python logging docs:
 
