@@ -324,47 +324,47 @@ class PortTest(unittest.TestCase):
 
 class ExpandedPathTest(unittest.TestCase):
     def test_is_bytes(self):
-        self.assertIsInstance(types.ExpandedPath('/tmp'), bytes)
+        self.assertIsInstance(types.ExpandedPath(b'/tmp'), bytes)
 
     @mock.patch('mopidy.utils.path.expand_path')
     def test_defaults_to_expanded(self, expand_path_mock):
-        expand_path_mock.return_value = 'expanded_path'
-        self.assertEqual('expanded_path', types.ExpandedPath('~'))
+        expand_path_mock.return_value = b'expanded_path'
+        self.assertEqual(b'expanded_path', types.ExpandedPath(b'~'))
 
     @mock.patch('mopidy.utils.path.expand_path')
     def test_orginal_stores_unexpanded(self, expand_path_mock):
-        self.assertEqual('~', types.ExpandedPath('~').original)
+        self.assertEqual('~', types.ExpandedPath(b'~').original)
 
 
 class PathTest(unittest.TestCase):
     def test_deserialize_conversion_success(self):
-        result = types.Path().deserialize('/foo')
+        result = types.Path().deserialize(b'/foo')
         self.assertEqual('/foo', result)
         self.assertIsInstance(result, types.ExpandedPath)
         self.assertIsInstance(result, bytes)
 
     def test_deserialize_enforces_choices(self):
         value = types.Path(choices=['/foo', '/bar', '/baz'])
-        self.assertEqual('/foo', value.deserialize('/foo'))
-        self.assertRaises(ValueError, value.deserialize, '/foobar')
+        self.assertEqual('/foo', value.deserialize(b'/foo'))
+        self.assertRaises(ValueError, value.deserialize, b'/foobar')
 
     def test_deserialize_enforces_required(self):
         value = types.Path()
-        self.assertRaises(ValueError, value.deserialize, '')
+        self.assertRaises(ValueError, value.deserialize, b'')
 
     def test_deserialize_respects_optional(self):
         value = types.Path(optional=True)
-        self.assertIsNone(value.deserialize(''))
-        self.assertIsNone(value.deserialize(' '))
+        self.assertIsNone(value.deserialize(b''))
+        self.assertIsNone(value.deserialize(b' '))
 
     @mock.patch('mopidy.utils.path.expand_path')
     def test_serialize_uses_original(self, expand_path_mock):
-        expand_path_mock.return_value = 'expanded_path'
-        path = types.ExpandedPath('original_path')
+        expand_path_mock.return_value = b'expanded_path'
+        path = types.ExpandedPath(b'original_path')
         value = types.Path()
         self.assertEqual('expanded_path', path)
         self.assertEqual('original_path', value.serialize(path))
 
     def test_serialize_plain_string(self):
         value = types.Path()
-        self.assertEqual('path', value.serialize('path'))
+        self.assertEqual('path', value.serialize(b'path'))

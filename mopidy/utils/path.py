@@ -24,6 +24,8 @@ XDG_DIRS = {
 
 
 def get_or_create_dir(dir_path):
+    if not isinstance(dir_path, bytes):
+        raise ValueError('Path is not a bytestring.')
     dir_path = expand_path(dir_path)
     if os.path.isfile(dir_path):
         raise OSError(
@@ -36,6 +38,8 @@ def get_or_create_dir(dir_path):
 
 
 def get_or_create_file(file_path):
+    if not isinstance(file_path, bytes):
+        raise ValueError('Path is not a bytestring.')
     file_path = expand_path(file_path)
     get_or_create_dir(os.path.dirname(file_path))
     if not os.path.isfile(file_path):
@@ -93,6 +97,8 @@ def split_path(path):
 
 
 def expand_path(path):
+    if not isinstance(path, bytes):
+        raise ValueError('Path is not a bytestring.')
     # TODO: expandvars as well?
     path = string.Template(path).safe_substitute(XDG_DIRS)
     path = os.path.expanduser(path)
