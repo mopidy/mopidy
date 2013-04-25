@@ -12,8 +12,6 @@ Config API
 Config section schemas
 ======================
 
-.. inheritance-diagram:: mopidy.config.schemas
-
 .. automodule:: mopidy.config.schemas
     :synopsis: Config section validation schemas
     :members:
@@ -21,8 +19,6 @@ Config section schemas
 
 Config value types
 ==================
-
-.. inheritance-diagram:: mopidy.config.types
 
 .. automodule:: mopidy.config.types
     :synopsis: Config value validation types
