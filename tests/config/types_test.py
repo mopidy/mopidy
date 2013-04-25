@@ -324,16 +324,19 @@ class PortTest(unittest.TestCase):
 
 class ExpandedPathTest(unittest.TestCase):
     def test_is_bytes(self):
-        self.assertIsInstance(types.ExpandedPath(b'/tmp'), bytes)
+        self.assertIsInstance(types.ExpandedPath(b'/tmp', b'foo'), bytes)
 
-    @mock.patch('mopidy.utils.path.expand_path')
-    def test_defaults_to_expanded(self, expand_path_mock):
-        expand_path_mock.return_value = b'expanded_path'
-        self.assertEqual(b'expanded_path', types.ExpandedPath(b'~'))
+    def test_defaults_to_expanded(self,):
+        original = b'~'
+        expanded = b'expanded_path'
+        self.assertEqual(expanded, types.ExpandedPath(original, expanded))
 
     @mock.patch('mopidy.utils.path.expand_path')
     def test_orginal_stores_unexpanded(self, expand_path_mock):
-        self.assertEqual('~', types.ExpandedPath(b'~').original)
+        original = b'~'
+        expanded = b'expanded_path'
+        result = types.ExpandedPath(original, expanded)
+        self.assertEqual(original, result.original)
 
 
 class PathTest(unittest.TestCase):
@@ -342,11 +345,6 @@ class PathTest(unittest.TestCase):
         self.assertEqual('/foo', result)
         self.assertIsInstance(result, types.ExpandedPath)
         self.assertIsInstance(result, bytes)
-
-    def test_deserialize_enforces_choices(self):
-        value = types.Path(choices=['/foo', '/bar', '/baz'])
-        self.assertEqual('/foo', value.deserialize(b'/foo'))
-        self.assertRaises(ValueError, value.deserialize, b'/foobar')
 
     def test_deserialize_enforces_required(self):
         value = types.Path()
@@ -357,10 +355,8 @@ class PathTest(unittest.TestCase):
         self.assertIsNone(value.deserialize(b''))
         self.assertIsNone(value.deserialize(b' '))
 
-    @mock.patch('mopidy.utils.path.expand_path')
-    def test_serialize_uses_original(self, expand_path_mock):
-        expand_path_mock.return_value = b'expanded_path'
-        path = types.ExpandedPath(b'original_path')
+    def test_serialize_uses_original(self):
+        path = types.ExpandedPath(b'original_path', b'expanded_path')
         value = types.Path()
         self.assertEqual('expanded_path', path)
         self.assertEqual('original_path', value.serialize(path))
