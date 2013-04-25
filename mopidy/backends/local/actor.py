@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import os.path
 
 import pykka
 
@@ -19,7 +20,7 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
 
         self.config = config
 
-        self.create_dirs_and_files()
+        self.check_dirs_and_files()
 
         self.library = LocalLibraryProvider(backend=self)
         self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
@@ -27,20 +28,14 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
 
         self.uri_schemes = ['file']
 
-    def create_dirs_and_files(self):
-        try:
-            path.get_or_create_dir(self.config['local']['media_dir'])
-        except EnvironmentError as error:
-            logger.warning(
-                'Could not create local media dir: %s',
-                encoding.locale_decode(error))
+    def check_dirs_and_files(self):
+        if not os.path.isdir(self.config['local']['media_dir']):
+            logger.warning('Local media dir %s does not exist.' %
+                           self.config['local']['media_dir'])
 
-        try:
-            path.get_or_create_dir(self.config['local']['playlists_dir'])
-        except EnvironmentError as error:
-            logger.warning(
-                'Could not create local playlists dir: %s',
-                encoding.locale_decode(error))
+        if not os.path.isdir(self.config['local']['playlists_dir']):
+            logger.warning('Local playlists dir %s does not exist.' %
+                           self.config['local']['playlists_dir'])
 
         try:
             path.get_or_create_file(self.config['local']['tag_cache_file'])
