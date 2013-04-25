@@ -237,8 +237,7 @@ class ExpandPathTest(unittest.TestCase):
             path.expand_path(b'$XDG_DATA_DIR/foo'))
 
     def test_xdg_subsititution_unknown(self):
-        self.assertEqual(
-            b'/tmp/$XDG_INVALID_DIR/foo',
+        self.assertIsNone(
             path.expand_path(b'/tmp/$XDG_INVALID_DIR/foo'))
 
 

@@ -22,6 +22,9 @@ XDG_DIRS = {
     'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
 }
 
+# XDG_MUSIC_DIR can be none, so filter out any bad data.
+XDG_DIRS = dict((k, v) for k, v in XDG_DIRS.items() if v is not None)
+
 
 def get_or_create_dir(dir_path):
     if not isinstance(dir_path, bytes):
@@ -97,10 +100,13 @@ def split_path(path):
 
 
 def expand_path(path):
+    # TODO: document as we want people to use this.
     if not isinstance(path, bytes):
         raise ValueError('Path is not a bytestring.')
-    # TODO: expandvars as well?
-    path = string.Template(path).safe_substitute(XDG_DIRS)
+    try:
+        path = string.Template(path).substitute(XDG_DIRS)
+    except KeyError:
+        return None
     path = os.path.expanduser(path)
     path = os.path.abspath(path)
     return path
