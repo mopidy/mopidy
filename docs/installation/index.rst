@@ -71,9 +71,10 @@ it out.
 Arch Linux: Install from AUR
 ============================
 
-If you are running Arch Linux, you can install a development snapshot of Mopidy
+If you are running Arch Linux, you can install the latest release of Mopidy
 using the `mopidy-git <https://aur.archlinux.org/packages/mopidy-git/>`_
-package found in AUR.
+package found in AUR. The package installs from the ``master`` branch of the
+Mopidy Git repo, which always corresponds to the latest release.
 
 #. To install Mopidy with GStreamer, libspotify and pyspotify, you can use
    ``packer``, ``yaourt``, or do it by hand like this::
