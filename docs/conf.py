@@ -99,7 +99,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Mopidy'
-copyright = '2010-2012, Stein Magnus Jodal and contributors'
+copyright = '2010-2013, Stein Magnus Jodal and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
