@@ -35,8 +35,8 @@ from mopidy.utils import log, path, versioning
 def main():
     options = parse_options()
     # TODO: support config files and overrides (shared from main?)
-    config_files = ['/etc/mopidy/mopidy.conf',
-                    '$XDG_CONFIG_DIR/mopidy/mopidy.conf']
+    config_files = [b'/etc/mopidy/mopidy.conf',
+                    b'$XDG_CONFIG_DIR/mopidy/mopidy.conf']
     config_overrides = []
 
     # TODO: decide if we want to avoid this boilerplate some how.
@@ -49,6 +49,10 @@ def main():
     config, errors = config_lib.load(
         config_files, extensions, config_overrides)
     log.setup_log_levels(config)
+
+    if not config['local']['media_dir']:
+        logging.warning('local/media_dir is not set.')
+        return
 
     # TODO: missing error checking and other default setup code.
 
