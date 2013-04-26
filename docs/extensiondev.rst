@@ -241,7 +241,7 @@ This is ``mopidy_soundspot/__init__.py``::
         version = __version__
 
         def get_default_config(self):
-            conf_file = os.path.join(os.path.dirname(__file__, 'ext.conf')
+            conf_file = os.path.join(os.path.dirname(__file__, 'ext.conf'))
             return config.read(conf_file)
 
         def get_config_schema(self):
