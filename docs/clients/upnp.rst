@@ -66,11 +66,10 @@ must be running on the same machine as Mopidy.
 
        $ rygel
        Rygel-Message: New plugin 'MediaExport' available
-       Rygel-Message: New plugin 'org.mpris.MediaPlayer2.spotify' available
        Rygel-Message: New plugin 'org.mpris.MediaPlayer2.mopidy' available
 
-   Note that in the above example, both the official Spotify client and Mopidy
-   is running and made available through Rygel.
+   In the above example, you can see that Rygel found Mopidy, and it is now
+   making Mopidy available through Rygel.
 
 
 The UPnP-Inspector client
