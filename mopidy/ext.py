@@ -62,14 +62,18 @@ class Extension(object):
         pass
 
     def get_frontend_classes(self):
-        """List of frontend actor classes to start
+        """List of frontend actor classes
+
+        Mopidy will take care of starting the actors.
 
         :returns: list of :class:`pykka.Actor` subclasses
         """
         return []
 
     def get_backend_classes(self):
-        """List of backend actor classes to start
+        """List of backend actor classes
+
+        Mopidy will take care of starting the actors.
 
         :returns: list of :class:`~mopidy.backends.base.Backend` subclasses
         """
