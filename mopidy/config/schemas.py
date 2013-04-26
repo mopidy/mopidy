@@ -44,7 +44,7 @@ class ConfigSchema(object):
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
-    instances.  Once setup :meth:`deserialize` can be called with a dict of
+    instances. Once setup :meth:`deserialize` can be called with a dict of
     values to process. For convienience we also support :meth:`format` method
     that can used for converting the values to a dict that can be printed and
     :meth:`serialize` for converting the values to a form suitable for
@@ -91,6 +91,12 @@ class ConfigSchema(object):
         return result, errors
 
     def serialize(self, values, display=False):
+        """Converts the given ``values`` to a format suitable for persistence.
+
+        If ``display`` is :class:`True` secret config values, like passwords,
+        will be masked out.
+
+        Returns a dict of config keys and values."""
         result = ordered_dict()  # TODO: 2.6 cleanup (#344).
         for key in self._order:
             if key in values:
