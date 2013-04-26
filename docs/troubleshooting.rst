@@ -14,6 +14,17 @@ When you're debugging yourself or asking for help, there are some tools built
 into Mopidy that you should know about.
 
 
+Sharing config and log output
+=============================
+
+If you're getting help at IRC, we recommend that you use a pastebin, like
+`pastebin.com <http://pastebin.com/>`_ or `GitHub Gist
+<https://gist.github.com/>`_, to share your configuration and log output.
+Pasting more than a couple of lines on IRC is generally frowned upon. On the
+mailing list or when reporting an issue, somewhat longer text dumps are
+accepted, but large logs should still be shared through a pastebin.
+
+
 Effective configuration
 =======================
 
