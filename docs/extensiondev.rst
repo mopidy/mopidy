@@ -349,6 +349,15 @@ For examples of custom GStreamer elements implemented in Python, see
 :mod:`mopidy.audio.mixers`.
 
 
+Python conventions
+==================
+
+In general, it would be nice if Mopidy extensions followed the same
+:ref:`codestyle` as Mopidy itself, as they're part of the same ecosystem. Among
+other things, the code style guide explains why all the above examples start
+with ``from __future__ import unicode_literals``.
+
+
 Use of Mopidy APIs
 ==================
 
