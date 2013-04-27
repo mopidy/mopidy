@@ -94,6 +94,13 @@ and improved.
   unset. This prevents some harmless error messages to appear, and thus
   to confuse users debugging other problems.
 
+**Development**
+
+- Developers running Mopidy from a Git clone needs to run ``python setup.py
+  develop`` to register the bundled extensions. If you don't do this, Mopidy
+  will not find any frontends or backends. As a bonus, the command also gives
+  you a ``mopidy`` executable in your virtualenv.
+
 
 v0.13.0 (2013-03-31)
 ====================
