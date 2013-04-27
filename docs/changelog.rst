@@ -19,15 +19,15 @@ and improved.
 
 **New configuration system**
 
-- Mopidy got a new configuration system based on ini-style files instead of a
+- Mopidy has a new configuration system based on ini-style files instead of a
   Python file. This makes configuration easier for users, and also makes it
   possible for Mopidy extensions to have their own config sections.
 
-  Many config values got slightly modified names.
+  As part of this change we have cleaned up the naming of our config values.
 
-  We've made a tool named :option:`mopidy-convert-config` for automatically
-  converting the old ``settings.py`` to a new ``mopidy.conf`` file. This tool
-  takes care of all the renamed config values as well. See
+  To ease migration we've made a tool named :option:`mopidy-convert-config` for
+  automatically converting the old ``settings.py`` to a new ``mopidy.conf``
+  file. This tool takes care of all the renamed config values as well. See
   :ref:`mopidy-convert-config` for details on how to use it.
 
 - A long wanted feature: You can now enable or disable specific frontends or
@@ -40,9 +40,9 @@ and improved.
 - Mopidy now supports extensions. This means that any developer now easily can
   create a Mopidy extension to add new control interfaces or music backends.
   This helps spread the maintenance burden across more developers, and also
-  makes it possible to create Mopidy features not necessarily wanted by the
-  core developers. If you're interested in creating an extension for Mopidy,
-  read up on :ref:`extensiondev`.
+  makes it possible to extend Mopidy with new backends the core developers are
+  unable to create and/or maintain geo restrictions etc. If you're interested
+  in creating an extension for Mopidy, read up on :ref:`extensiondev`.
 
 - All of Mopidy's existing frontends and backends are now plugged into Mopidy
   as extensions, but they are still distributed together with Mopidy and are
@@ -51,9 +51,9 @@ and improved.
 - The NAD mixer have been moved out of Mopidy core to its own project,
   Mopidy-NAD. See :ref:`ext` for more information.
 
-- Janez Troha have made the two first extensions for Mopidy: a backend for
-  playing music from Soundcloud, and a backend for playing music from a Beets
-  music library. See :ref:`ext` for more information.
+- Janez Troha has made the first two external extensions for Mopidy: a backend
+  for playing music from Soundcloud, and a backend for playing music from a
+  Beets music library. See :ref:`ext` for more information.
 
 **Command line options**
 
@@ -64,7 +64,8 @@ and improved.
   :option:`mopidy --show-deps`.
 
 - What configuration files to use can now be specified through the command
-  option :option:`mopidy --config`.
+  option :option:`mopidy --config`, multiple files can be specified using colon
+  as a separator.
 
 - Configuration values can now be overridden through the command option
   :option:`mopidy --option`. For example: ``mopidy --option
@@ -72,8 +73,8 @@ and improved.
 
 - The GStreamer command line options, :option:`mopidy --gst-*` and
   :option:`mopidy --help-gst` are no longer supported. To set GStreamer debug
-  flags, you can use environment variables, like :envvar:`GST_DEBUG`. Refer to
-  GStreamer's documentation for details.
+  flags, you can use environment variables such as :envvar:`GST_DEBUG`. Refer
+  to GStreamer's documentation for details.
 
 **Spotify backend**
 
@@ -91,15 +92,16 @@ and improved.
 **MPRIS frontend**
 
 - The frontend is now disabled if the :envvar:`DISPLAY` environment variable is
-  unset. This prevents some harmless error messages to appear, and thus
-  to confuse users debugging other problems.
+  unset. This avoids some harmless error messages, that have been known to
+  confuse new users debugging other problems.
 
 **Development**
 
-- Developers running Mopidy from a Git clone needs to run ``python setup.py
+- Developers running Mopidy from a Git clone now need to run ``python setup.py
   develop`` to register the bundled extensions. If you don't do this, Mopidy
-  will not find any frontends or backends. As a bonus, the command also gives
-  you a ``mopidy`` executable in your virtualenv.
+  will not find any frontends or backends. Note that we highly recomend you do
+  this in a virtualenv, not system wide. As a bonus, the command also gives
+  you a ``mopidy`` executable in your search path.
 
 
 v0.13.0 (2013-03-31)
