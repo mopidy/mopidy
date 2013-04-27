@@ -41,8 +41,9 @@ and improved.
   create a Mopidy extension to add new control interfaces or music backends.
   This helps spread the maintenance burden across more developers, and also
   makes it possible to extend Mopidy with new backends the core developers are
-  unable to create and/or maintain geo restrictions etc. If you're interested
-  in creating an extension for Mopidy, read up on :ref:`extensiondev`.
+  unable to create and/or maintain because of geo restrictions, etc. If you're
+  interested in creating an extension for Mopidy, read up on
+  :ref:`extensiondev`.
 
 - All of Mopidy's existing frontends and backends are now plugged into Mopidy
   as extensions, but they are still distributed together with Mopidy and are
