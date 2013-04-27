@@ -74,7 +74,7 @@ def main():
         log_extension_info(installed_extensions, enabled_extensions)
         check_config_errors(config_errors)
 
-        # Read-only config from here one please.
+        # Read-only config from here on, please.
         proxied_config = config_lib.Proxy(config)
 
         log.setup_log_levels(proxied_config)
