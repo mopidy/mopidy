@@ -74,17 +74,20 @@ def main():
         log_extension_info(installed_extensions, enabled_extensions)
         check_config_errors(config_errors)
 
-        log.setup_log_levels(config)
+        # Read-only config from here one please.
+        proxied_config = config_lib.Proxy(config)
+
+        log.setup_log_levels(proxied_config)
         create_file_structures()
         check_old_locations()
         ext.register_gstreamer_elements(enabled_extensions)
 
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors have been started.
-        audio = setup_audio(config)
-        backends = setup_backends(config, enabled_extensions, audio)
+        audio = setup_audio(proxied_config)
+        backends = setup_backends(proxied_config, enabled_extensions, audio)
         core = setup_core(audio, backends)
-        setup_frontends(config, enabled_extensions, core)
+        setup_frontends(proxied_config, enabled_extensions, core)
         loop.run()
     except KeyboardInterrupt:
         if logging_initialized:
