@@ -22,7 +22,7 @@ class GetOrCreateDirTest(unittest.TestCase):
             shutil.rmtree(self.parent)
 
     def test_creating_dir(self):
-        dir_path = os.path.join(self.parent, 'test')
+        dir_path = os.path.join(self.parent, b'test')
         self.assert_(not os.path.exists(dir_path))
         created = path.get_or_create_dir(dir_path)
         self.assert_(os.path.exists(dir_path))
@@ -30,8 +30,8 @@ class GetOrCreateDirTest(unittest.TestCase):
         self.assertEqual(created, dir_path)
 
     def test_creating_nested_dirs(self):
-        level2_dir = os.path.join(self.parent, 'test')
-        level3_dir = os.path.join(self.parent, 'test', 'test')
+        level2_dir = os.path.join(self.parent, b'test')
+        level3_dir = os.path.join(self.parent, b'test', b'test')
         self.assert_(not os.path.exists(level2_dir))
         self.assert_(not os.path.exists(level3_dir))
         created = path.get_or_create_dir(level3_dir)
@@ -48,10 +48,19 @@ class GetOrCreateDirTest(unittest.TestCase):
         self.assertEqual(created, self.parent)
 
     def test_create_dir_with_name_of_existing_file_throws_oserror(self):
-        conflicting_file = os.path.join(self.parent, 'test')
+        conflicting_file = os.path.join(self.parent, b'test')
         open(conflicting_file, 'w').close()
-        dir_path = os.path.join(self.parent, 'test')
+        dir_path = os.path.join(self.parent, b'test')
         self.assertRaises(OSError, path.get_or_create_dir, dir_path)
+
+    def test_create_dir_with_unicode(self):
+        with self.assertRaises(ValueError):
+            dir_path = unicode(os.path.join(self.parent, b'test'))
+            path.get_or_create_dir(dir_path)
+
+    def test_create_dir_with_none(self):
+        with self.assertRaises(ValueError):
+            path.get_or_create_dir(None)
 
 
 class GetOrCreateFileTest(unittest.TestCase):
@@ -63,7 +72,7 @@ class GetOrCreateFileTest(unittest.TestCase):
             shutil.rmtree(self.parent)
 
     def test_creating_file(self):
-        file_path = os.path.join(self.parent, 'test')
+        file_path = os.path.join(self.parent, b'test')
         self.assert_(not os.path.exists(file_path))
         created = path.get_or_create_file(file_path)
         self.assert_(os.path.exists(file_path))
@@ -71,8 +80,8 @@ class GetOrCreateFileTest(unittest.TestCase):
         self.assertEqual(created, file_path)
 
     def test_creating_nested_file(self):
-        level2_dir = os.path.join(self.parent, 'test')
-        file_path = os.path.join(self.parent, 'test', 'test')
+        level2_dir = os.path.join(self.parent, b'test')
+        file_path = os.path.join(self.parent, b'test', b'test')
         self.assert_(not os.path.exists(level2_dir))
         self.assert_(not os.path.exists(file_path))
         created = path.get_or_create_file(file_path)
@@ -83,7 +92,7 @@ class GetOrCreateFileTest(unittest.TestCase):
         self.assertEqual(created, file_path)
 
     def test_creating_existing_file(self):
-        file_path = os.path.join(self.parent, 'test')
+        file_path = os.path.join(self.parent, b'test')
         path.get_or_create_file(file_path)
         created = path.get_or_create_file(file_path)
         self.assert_(os.path.exists(file_path))
@@ -93,6 +102,15 @@ class GetOrCreateFileTest(unittest.TestCase):
     def test_create_file_with_name_of_existing_dir_throws_ioerror(self):
         conflicting_dir = os.path.join(self.parent)
         self.assertRaises(IOError, path.get_or_create_file, conflicting_dir)
+
+    def test_create_dir_with_unicode(self):
+        with self.assertRaises(ValueError):
+            file_path = unicode(os.path.join(self.parent, b'test'))
+            path.get_or_create_file(file_path)
+
+    def test_create_dir_with_none(self):
+        with self.assertRaises(ValueError):
+            path.get_or_create_file(None)
 
 
 class PathToFileURITest(unittest.TestCase):
@@ -219,8 +237,7 @@ class ExpandPathTest(unittest.TestCase):
             path.expand_path(b'$XDG_DATA_DIR/foo'))
 
     def test_xdg_subsititution_unknown(self):
-        self.assertEqual(
-            b'/tmp/$XDG_INVALID_DIR/foo',
+        self.assertIsNone(
             path.expand_path(b'/tmp/$XDG_INVALID_DIR/foo'))
 
 

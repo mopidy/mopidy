@@ -39,7 +39,7 @@ def main():
 
     loop = gobject.MainLoop()
     options = parse_options()
-    config_files = options.config.split(':')
+    config_files = options.config.split(b':')
     config_overrides = options.overrides
 
     enabled_extensions = []  # Make sure it is defined before the finally block
@@ -162,7 +162,7 @@ def parse_options():
     parser.add_option(
         b'--config',
         action='store', dest='config',
-        default='/etc/mopidy/mopidy.conf:$XDG_CONFIG_DIR/mopidy/mopidy.conf',
+        default=b'/etc/mopidy/mopidy.conf:$XDG_CONFIG_DIR/mopidy/mopidy.conf',
         help='config files to use, colon seperated, later files override')
     parser.add_option(
         b'-o', b'--option',
@@ -174,7 +174,7 @@ def parse_options():
 def show_config_callback(option, opt, value, parser):
     # TODO: don't use callback for this as --config or -o set after
     # --show-config will be ignored.
-    files = getattr(parser.values, 'config', '').split(':')
+    files = getattr(parser.values, 'config', b'').split(b':')
     overrides = getattr(parser.values, 'overrides', [])
 
     extensions = ext.load_extensions()
@@ -196,14 +196,14 @@ def show_config_callback(option, opt, value, parser):
 
 
 def check_old_locations():
-    dot_mopidy_dir = path.expand_path('~/.mopidy')
+    dot_mopidy_dir = path.expand_path(b'~/.mopidy')
     if os.path.isdir(dot_mopidy_dir):
         logger.warning(
             'Old Mopidy dot dir found at %s. Please migrate your config to '
             'the ini-file based config format. See release notes for further '
             'instructions.', dot_mopidy_dir)
 
-    old_settings_file = path.expand_path('$XDG_CONFIG_DIR/mopidy/settings.py')
+    old_settings_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/settings.py')
     if os.path.isfile(old_settings_file):
         logger.warning(
             'Old Mopidy settings file found at %s. Please migrate your '
@@ -212,8 +212,8 @@ def check_old_locations():
 
 
 def create_file_structures():
-    path.get_or_create_dir('$XDG_DATA_DIR/mopidy')
-    path.get_or_create_file('$XDG_CONFIG_DIR/mopidy/mopidy.conf')
+    path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy')
+    path.get_or_create_file(b'$XDG_CONFIG_DIR/mopidy/mopidy.conf')
 
 
 def setup_audio(config):

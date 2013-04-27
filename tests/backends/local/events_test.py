@@ -11,7 +11,7 @@ class LocalBackendEventsTest(events.BackendEventsTest, unittest.TestCase):
     config = {
         'local': {
             'media_dir': path_to_data_dir(''),
-            'playlists_dir': '',
+            'playlists_dir': b'',
             'tag_cache_file': path_to_data_dir('empty_tag_cache'),
         }
     }
