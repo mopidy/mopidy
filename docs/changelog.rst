@@ -51,6 +51,10 @@ and improved.
 - The NAD mixer have been moved out of Mopidy core to its own project,
   Mopidy-NAD. See :ref:`ext` for more information.
 
+- Janez Troha have made the two first extensions for Mopidy: a backend for
+  playing music from Soundcloud, and a backend for playing music from a Beets
+  music library. See :ref:`ext` for more information.
+
 **Command line options**
 
 - The command option :option:`mopidy --list-settings` is now named
