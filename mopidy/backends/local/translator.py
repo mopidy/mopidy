@@ -31,6 +31,7 @@ def parse_m3u(file_path, media_dir):
     - This function does not bother with Extended M3U directives.
     """
 
+    # TODO: uris as bytes
     uris = []
     try:
         with open(file_path) as m3u:
@@ -71,6 +72,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
     current = {}
     state = None
 
+    # TODO: uris as bytes
     for line in contents.split(b'\n'):
         if line == b'songList begin':
             state = 'songs'

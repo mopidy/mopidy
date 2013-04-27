@@ -51,7 +51,7 @@ def main():
     log.setup_log_levels(config)
 
     if not config['local']['media_dir']:
-        logging.warning('local/media_dir is not set.')
+        logging.warning('Config value local/media_dir is not set.')
         return
 
     # TODO: missing error checking and other default setup code.

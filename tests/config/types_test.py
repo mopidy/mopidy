@@ -326,7 +326,7 @@ class ExpandedPathTest(unittest.TestCase):
     def test_is_bytes(self):
         self.assertIsInstance(types.ExpandedPath(b'/tmp', b'foo'), bytes)
 
-    def test_defaults_to_expanded(self,):
+    def test_defaults_to_expanded(self):
         original = b'~'
         expanded = b'expanded_path'
         self.assertEqual(expanded, types.ExpandedPath(original, expanded))
