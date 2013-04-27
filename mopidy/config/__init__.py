@@ -144,3 +144,23 @@ def parse_override(override):
     section, remainder = override.split('/', 1)
     key, value = remainder.split('=', 1)
     return (section.strip(), key.strip(), value.strip())
+
+
+class Proxy(collections.Mapping):
+    def __init__(self, data):
+        self._data = data
+
+    def __getitem__(self, key):
+        item = self._data.__getitem__(key)
+        if isinstance(item, dict):
+            return Proxy(item)
+        return item
+
+    def __iter__(self):
+        return self._data.__iter__()
+
+    def __len__(self):
+        return self._data.__len__()
+
+    def __repr__(self):
+        return b'Proxy(%r)' % self._data
