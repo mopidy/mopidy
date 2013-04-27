@@ -66,7 +66,7 @@ def _load(files, defaults, overrides):
     parser = configparser.RawConfigParser()
 
     files = [path.expand_path(f) for f in files]
-    sources = ['builtin-defaults'] + files + ['command-line']
+    sources = ['builtin defaults'] + files + ['command line options']
     logger.info('Loading config from: %s', ', '.join(sources))
 
     # TODO: simply return path to config file for defaults so we can load it

@@ -51,6 +51,10 @@ and improved.
 - The NAD mixer have been moved out of Mopidy core to its own project,
   Mopidy-NAD. See :ref:`ext` for more information.
 
+- Janez Troha have made the two first extensions for Mopidy: a backend for
+  playing music from Soundcloud, and a backend for playing music from a Beets
+  music library. See :ref:`ext` for more information.
+
 **Command line options**
 
 - The command option :option:`mopidy --list-settings` is now named
@@ -89,6 +93,13 @@ and improved.
 - The frontend is now disabled if the :envvar:`DISPLAY` environment variable is
   unset. This prevents some harmless error messages to appear, and thus
   to confuse users debugging other problems.
+
+**Development**
+
+- Developers running Mopidy from a Git clone needs to run ``python setup.py
+  develop`` to register the bundled extensions. If you don't do this, Mopidy
+  will not find any frontends or backends. As a bonus, the command also gives
+  you a ``mopidy`` executable in your virtualenv.
 
 
 v0.13.0 (2013-03-31)
