@@ -81,10 +81,21 @@ def _load(files, defaults, overrides):
         try:
             with io.open(filename, 'rb') as filehandle:
                 parser.readfp(filehandle)
+        except configparser.MissingSectionHeaderError as e:
+            logging.warning('%s does not have a config section, not loaded.',
+                            filename)
+        except configparser.ParsingError as e:
+            linenos = ', '.join(str(lineno) for lineno, line in e.errors)
+            logger.warning('%s has errors, line %s has been ignored.',
+                            filename, linenos)
         except IOError:
             # TODO: if this is the initial load of logging config we might not
             # have a logger at this point, we might want to handle this better.
             logger.debug('Config file %s not found; skipping', filename)
+
+    # If there have been parse errors there is a python bug that causes the
+    # values to be lists, this little trick coerces these into strings.
+    parser.readfp(io.BytesIO())
 
     raw_config = {}
     for section in parser.sections():

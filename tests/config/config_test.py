@@ -63,6 +63,11 @@ class LoadConfigTest(unittest.TestCase):
         result = config._load([path_to_data_dir('file3.conf')], [], [])
         self.assertEqual(expected, result)
 
+    def test_load_file_with_error(self):
+        expected = {'foo': {'bar': 'baz'}}
+        result = config._load([path_to_data_dir('file4.conf')], [], [])
+        self.assertEqual(expected, result)
+
 
 class ValidateTest(unittest.TestCase):
     def setUp(self):
