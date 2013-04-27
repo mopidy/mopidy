@@ -24,12 +24,11 @@ def encode(value):
 
 
 class ExpandedPath(bytes):
-    def __new__(self, value):
-        expanded = path.expand_path(value)
+    def __new__(self, original, expanded):
         return super(ExpandedPath, self).__new__(self, expanded)
 
-    def __init__(self, value):
-        self.original = value
+    def __init__(self, original, expanded):
+        self.original = original
 
 
 class ConfigValue(object):
@@ -241,20 +240,18 @@ class Path(ConfigValue):
     - ``$XDG_DATA_DIR`` according to the XDG spec
 
     - ``$XDG_MUSIC_DIR`` according to the XDG spec
-
-    Supported kwargs: ``optional``, ``choices``, and ``secret``
     """
-    def __init__(self, optional=False, choices=None):
+    def __init__(self, optional=False):
         self._required = not optional
-        self._choices = choices
 
     def deserialize(self, value):
         value = value.strip()
+        expanded = path.expand_path(value)
         validators.validate_required(value, self._required)
-        validators.validate_choice(value, self._choices)
-        if not value:
+        validators.validate_required(expanded, self._required)
+        if not value or expanded is None:
             return None
-        return ExpandedPath(value)
+        return ExpandedPath(value, expanded)
 
     def serialize(self, value, display=False):
         if isinstance(value, ExpandedPath):

@@ -236,7 +236,7 @@ def tracks_to_tag_cache_format(tracks, media_dir):
     _add_to_tag_cache(result, dirs, files, media_dir)
     return result
 
-
+# TODO: bytes only
 def _add_to_tag_cache(result, dirs, files, media_dir):
     base_path = media_dir.encode('utf-8')
 
