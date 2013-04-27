@@ -162,7 +162,7 @@ def parse_options():
     parser.add_option(
         b'--config',
         action='store', dest='config',
-        default=b'/etc/mopidy/mopidy.conf:$XDG_CONFIG_DIR/mopidy/mopidy.conf',
+        default=b'$XDG_CONFIG_DIR/mopidy/mopidy.conf',
         help='config files to use, colon seperated, later files override')
     parser.add_option(
         b'-o', b'--option',
