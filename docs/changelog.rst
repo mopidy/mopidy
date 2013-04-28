@@ -11,7 +11,7 @@ The 0.14 release has a clear focus on two things: the new configuration system
 and extension support. Mopidy's documentation has also been greatly extended
 and improved.
 
-Since the last release a month ago, we've closed or merged 51 issues and pull
+Since the last release a month ago, we've closed or merged 53 issues and pull
 requests. A total of seven :ref:`authors <authors>` have contributed, including
 one new.
 
@@ -87,7 +87,7 @@ one new.
   users. (Fixes: :issue:`326`)
 
 - Fix crash when a new playlist is added by another Spotify client. (Fixes:
-  :issue:`387`)
+  :issue:`387`, :issue:`425`)
 
 **MPD frontend**
 
