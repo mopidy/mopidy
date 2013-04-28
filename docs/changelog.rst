@@ -86,6 +86,9 @@ one new.
 - Add support for starred playlists, both your own and those owned by other
   users. (Fixes: :issue:`326`)
 
+- Fix crash when a new playlist is added by another Spotify client. (Fixes:
+  :issue:`387`)
+
 **MPD frontend**
 
 - Playlists with identical names are now handled properly by the MPD frontend

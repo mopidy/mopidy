@@ -1,8 +1,12 @@
 from __future__ import unicode_literals
 
+import logging
+
 import spotify
 
 from mopidy.models import Artist, Album, Track, Playlist
+
+logger = logging.getLogger('mopidy.backends.spotify')
 
 
 artist_cache = {}
@@ -66,7 +70,11 @@ def to_mopidy_track(spotify_track, bitrate=None):
 def to_mopidy_playlist(spotify_playlist, bitrate=None, username=None):
     if spotify_playlist is None or spotify_playlist.type() != 'playlist':
         return
-    uri = str(spotify.Link.from_playlist(spotify_playlist))
+    try:
+        uri = str(spotify.Link.from_playlist(spotify_playlist))
+    except spotify.SpotifyError as e:
+        logger.debug('Spotify playlist translation error: %s', e)
+        return
     if not spotify_playlist.is_loaded():
         return Playlist(uri=uri, name='[loading...]')
     name = spotify_playlist.name()
