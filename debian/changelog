@@ -1,3 +1,9 @@
+mopidy (0.14.1-0mopidy1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sun, 28 Apr 2013 23:46:25 +0200
+
 mopidy (0.14.0-0mopidy1) unstable; urgency=low
 
   * New upstream release.
