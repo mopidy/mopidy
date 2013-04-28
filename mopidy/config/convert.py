@@ -9,7 +9,7 @@ from mopidy.utils import path
 
 
 def load():
-    settings_file = path.expand_path('$XDG_CONFIG_DIR/mopidy/settings.py')
+    settings_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/settings.py')
     print 'Checking %s' % settings_file
 
     setting_globals = {}
@@ -109,7 +109,7 @@ def main():
     print b'Converted config:\n'
     print config_lib.format(config, extensions)
 
-    conf_file = path.expand_path('$XDG_CONFIG_DIR/mopidy/mopidy.conf')
+    conf_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/mopidy.conf')
     if os.path.exists(conf_file):
         print '%s exists, exiting.' % conf_file
         sys.exit(1)
