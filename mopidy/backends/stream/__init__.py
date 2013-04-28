@@ -1,23 +1,29 @@
-"""A backend for playing music for streaming music.
-
-This backend will handle streaming of URIs in
-:attr:`mopidy.settings.STREAM_PROTOCOLS` assuming the right plugins are
-installed.
-
-**Issues:**
-
-https://github.com/mopidy/mopidy/issues?labels=Stream+backend
-
-**Dependencies:**
-
-- None
-
-**Settings:**
-
-- :attr:`mopidy.settings.STREAM_PROTOCOLS`
-"""
-
 from __future__ import unicode_literals
 
-# flake8: noqa
-from .actor import StreamBackend
+import os
+
+import mopidy
+from mopidy import config, ext
+
+
+class Extension(ext.Extension):
+
+    dist_name = 'Mopidy-Stream'
+    ext_name = 'stream'
+    version = mopidy.__version__
+
+    def get_default_config(self):
+        conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
+        return config.read(conf_file)
+
+    def get_config_schema(self):
+        schema = super(Extension, self).get_config_schema()
+        schema['protocols'] = config.List()
+        return schema
+
+    def validate_environment(self):
+        pass
+
+    def get_backend_classes(self):
+        from .actor import StreamBackend
+        return [StreamBackend]

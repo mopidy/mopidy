@@ -8,9 +8,9 @@ MPRIS clients
 Specification. It's a spec that describes a standard D-Bus interface for making
 media players available to other applications on the same system.
 
-Mopidy's :ref:`MPRIS frontend <mpris-frontend>` currently implements all
-required parts of the MPRIS spec, plus the optional playlist interface. It does
-not implement the optional tracklist interface.
+Mopidy's :ref:`MPRIS frontend <ext-mpris>` currently implements all required
+parts of the MPRIS spec, plus the optional playlist interface. It does not
+implement the optional tracklist interface.
 
 
 .. _ubuntu-sound-menu:
@@ -36,12 +36,11 @@ Mopidy executable. If this isn't in place, the sound menu will not detect that
 Mopidy is running.
 
 Next, Mopidy's MPRIS frontend must be running for the sound menu to be able to
-control Mopidy. The frontend is activated by default, so unless you've changed
-the :attr:`mopidy.settings.FRONTENDS` setting, you should be good to go. Keep
-an eye out for warnings or errors from the MPRIS frontend when you start
-Mopidy, since it may fail because of missing dependencies or because Mopidy is
-started outside of X; the frontend won't work if ``$DISPLAY`` isn't set when
-Mopidy is started.
+control Mopidy. The frontend is enabled by default, so as long as you have all
+its dependencies available, you should be good to go. Keep an eye out for
+warnings or errors from the MPRIS frontend when you start Mopidy, since it may
+fail because of missing dependencies or because Mopidy is started outside of X;
+the frontend won't work if ``$DISPLAY`` isn't set when Mopidy is started.
 
 Under normal use, if Mopidy isn't running and you open the menu and click on
 "Mopidy Music Server", a terminal window will open and automatically start

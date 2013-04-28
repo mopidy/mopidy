@@ -8,11 +8,7 @@ import threading
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
-from mopidy import exceptions
-
-
 logger = logging.getLogger('mopidy.utils.process')
-
 
 SIGNALS = dict(
     (k, v) for v, k in signal.__dict__.iteritems()
@@ -65,8 +61,6 @@ class BaseThread(threading.Thread):
             self.run_inside_try()
         except KeyboardInterrupt:
             logger.info('Interrupted by user')
-        except exceptions.SettingsError as e:
-            logger.error(e.message)
         except ImportError as e:
             logger.error(e)
         except ActorDeadError as e:

@@ -4,18 +4,13 @@ import logging
 import json
 import os
 
+import cherrypy
 import pykka
+from ws4py.messaging import TextMessage
+from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 
-from mopidy import exceptions, models, settings
+from mopidy import models
 from mopidy.core import CoreListener
-
-try:
-    import cherrypy
-    from ws4py.messaging import TextMessage
-    from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
-except ImportError as import_error:
-    raise exceptions.OptionalDependencyError(import_error)
-
 from . import ws
 
 
@@ -23,8 +18,9 @@ logger = logging.getLogger('mopidy.frontends.http')
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
-    def __init__(self, core):
+    def __init__(self, config, core):
         super(HttpFrontend, self).__init__()
+        self.config = config
         self.core = core
         self._setup_server()
         self._setup_websocket_plugin()
@@ -34,9 +30,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def _setup_server(self):
         cherrypy.config.update({
             'engine.autoreload_on': False,
-            'server.socket_host': (
-                settings.HTTP_SERVER_HOSTNAME.encode('utf-8')),
-            'server.socket_port': settings.HTTP_SERVER_PORT,
+            'server.socket_host': self.config['http']['hostname'],
+            'server.socket_port': self.config['http']['port'],
         })
 
     def _setup_websocket_plugin(self):
@@ -48,8 +43,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         root.mopidy = MopidyResource()
         root.mopidy.ws = ws.WebSocketResource(self.core)
 
-        if settings.HTTP_SERVER_STATIC_DIR:
-            static_dir = settings.HTTP_SERVER_STATIC_DIR
+        if self.config['http']['static_dir']:
+            static_dir = self.config['http']['static_dir']
         else:
             static_dir = os.path.join(os.path.dirname(__file__), 'data')
         logger.debug('HTTP server will serve "%s" at /', static_dir)

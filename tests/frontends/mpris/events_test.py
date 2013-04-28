@@ -1,25 +1,25 @@
 from __future__ import unicode_literals
 
-import sys
-
 import mock
 
-from mopidy.exceptions import OptionalDependencyError
+try:
+    import dbus
+except ImportError:
+    dbus = False
+
 from mopidy.models import Playlist, TlTrack
 
-try:
-    from mopidy.frontends.mpris import MprisFrontend, objects
-except OptionalDependencyError:
-    pass
+if dbus:
+    from mopidy.frontends.mpris import actor, objects
 
 from tests import unittest
 
 
-@unittest.skipUnless(sys.platform.startswith('linux'), 'requires Linux')
+@unittest.skipUnless(dbus, 'dbus not found')
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
         # As a plain class, not an actor:
-        self.mpris_frontend = MprisFrontend(core=None)
+        self.mpris_frontend = actor.MprisFrontend(config=None, core=None)
         self.mpris_object = mock.Mock(spec=objects.MprisObject)
         self.mpris_frontend.mpris_object = self.mpris_object
 

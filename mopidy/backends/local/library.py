@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-
-from mopidy import settings
 from mopidy.backends import base
 from mopidy.models import Album, SearchResult
 
@@ -15,18 +13,23 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(LocalLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
+        self._media_dir = self.backend.config['local']['media_dir']
+        self._tag_cache_file = self.backend.config['local']['tag_cache_file']
         self.refresh()
 
     def refresh(self, uri=None):
-        tracks = parse_mpd_tag_cache(
-            settings.LOCAL_TAG_CACHE_FILE, settings.LOCAL_MUSIC_PATH)
+        logger.debug(
+            'Loading local tracks from %s using %s',
+            self._media_dir, self._tag_cache_file)
 
-        logger.info(
-            'Loading tracks from %s using %s',
-            settings.LOCAL_MUSIC_PATH, settings.LOCAL_TAG_CACHE_FILE)
+        tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
+
+        logger.info(
+            'Loaded %d local tracks from %s using %s',
+            len(tracks), self._media_dir, self._tag_cache_file)
 
     def lookup(self, uri):
         try:

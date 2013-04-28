@@ -5,13 +5,13 @@ used in tests of the frontends.
 
 The backend handles URIs starting with ``dummy:``.
 
-**Dependencies:**
+**Dependencies**
 
-- None
+None
 
-**Settings:**
+**Default config**
 
-- None
+None
 """
 
 from __future__ import unicode_literals
@@ -22,8 +22,12 @@ from mopidy.backends import base
 from mopidy.models import Playlist, SearchResult
 
 
+def create_dummy_backend_proxy(config=None, audio=None):
+    return DummyBackend.start(config=config, audio=audio).proxy()
+
+
 class DummyBackend(pykka.ThreadingActor, base.Backend):
-    def __init__(self, audio):
+    def __init__(self, config, audio):
         super(DummyBackend, self).__init__()
 
         self.library = DummyLibraryProvider(backend=self)

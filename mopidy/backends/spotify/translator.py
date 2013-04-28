@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
 
-from spotify import Link
+import logging
 
-from mopidy import settings
+import spotify
+
 from mopidy.models import Artist, Album, Track, Playlist
+
+logger = logging.getLogger('mopidy.backends.spotify')
 
 
 artist_cache = {}
@@ -14,7 +17,7 @@ track_cache = {}
 def to_mopidy_artist(spotify_artist):
     if spotify_artist is None:
         return
-    uri = str(Link.from_artist(spotify_artist))
+    uri = str(spotify.Link.from_artist(spotify_artist))
     if uri in artist_cache:
         return artist_cache[uri]
     if not spotify_artist.is_loaded():
@@ -26,7 +29,7 @@ def to_mopidy_artist(spotify_artist):
 def to_mopidy_album(spotify_album):
     if spotify_album is None:
         return
-    uri = str(Link.from_album(spotify_album))
+    uri = str(spotify.Link.from_album(spotify_album))
     if uri in album_cache:
         return album_cache[uri]
     if not spotify_album.is_loaded():
@@ -39,10 +42,10 @@ def to_mopidy_album(spotify_album):
     return album_cache[uri]
 
 
-def to_mopidy_track(spotify_track):
+def to_mopidy_track(spotify_track, bitrate=None):
     if spotify_track is None:
         return
-    uri = str(Link.from_track(spotify_track, 0))
+    uri = str(spotify.Link.from_track(spotify_track, 0))
     if uri in track_cache:
         return track_cache[uri]
     if not spotify_track.is_loaded():
@@ -60,27 +63,31 @@ def to_mopidy_track(spotify_track):
         track_no=spotify_track.index(),
         date=date,
         length=spotify_track.duration(),
-        bitrate=settings.SPOTIFY_BITRATE)
+        bitrate=bitrate)
     return track_cache[uri]
 
 
-def to_mopidy_playlist(spotify_playlist):
+def to_mopidy_playlist(spotify_playlist, bitrate=None, username=None):
     if spotify_playlist is None or spotify_playlist.type() != 'playlist':
         return
-    uri = str(Link.from_playlist(spotify_playlist))
+    try:
+        uri = str(spotify.Link.from_playlist(spotify_playlist))
+    except spotify.SpotifyError as e:
+        logger.debug('Spotify playlist translation error: %s', e)
+        return
     if not spotify_playlist.is_loaded():
         return Playlist(uri=uri, name='[loading...]')
     name = spotify_playlist.name()
+    tracks = [
+        to_mopidy_track(spotify_track, bitrate=bitrate)
+        for spotify_track in spotify_playlist
+        if not spotify_track.is_local()
+    ]
     if not name:
-        # Other user's "starred" playlists isn't handled properly by pyspotify
-        # See https://github.com/mopidy/pyspotify/issues/81
-        return
-    if spotify_playlist.owner().canonical_name() != settings.SPOTIFY_USERNAME:
+        name = 'Starred'
+        # Tracks in the Starred playlist are in reverse order from the official
+        # client.
+        tracks.reverse()
+    if spotify_playlist.owner().canonical_name() != username:
         name += ' by ' + spotify_playlist.owner().canonical_name()
-    return Playlist(
-        uri=uri,
-        name=name,
-        tracks=[
-            to_mopidy_track(spotify_track)
-            for spotify_track in spotify_playlist
-            if not spotify_track.is_local()])
+    return Playlist(uri=uri, name=name, tracks=tracks)

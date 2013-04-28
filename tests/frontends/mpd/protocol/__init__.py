@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import mock
 import pykka
 
-from mopidy import core, settings
+from mopidy import core
 from mopidy.backends import dummy
 from mopidy.frontends.mpd import session
 
@@ -23,18 +23,25 @@ class MockConnection(mock.Mock):
 
 
 class BaseTestCase(unittest.TestCase):
+    def get_config(self):
+        return {
+            'mpd': {
+                'password': None,
+            }
+        }
+
     def setUp(self):
-        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
         self.connection = MockConnection()
-        self.session = session.MpdSession(self.connection, core=self.core)
+        self.session = session.MpdSession(
+            self.connection, config=self.get_config(), core=self.core)
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
-        settings.runtime.clear()
 
     def sendRequest(self, request):
         self.connection.response = []

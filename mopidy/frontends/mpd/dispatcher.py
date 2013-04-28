@@ -5,7 +5,6 @@ import re
 
 import pykka
 
-from mopidy import settings
 from mopidy.frontends.mpd import exceptions, protocol
 
 logger = logging.getLogger('mopidy.frontends.mpd.dispatcher')
@@ -22,13 +21,15 @@ class MpdDispatcher(object):
 
     _noidle = re.compile(r'^noidle$')
 
-    def __init__(self, session=None, core=None):
+    def __init__(self, session=None, config=None, core=None):
+        self.config = config
         self.authenticated = False
         self.command_list_receiving = False
         self.command_list_ok = False
         self.command_list = []
         self.command_list_index = None
-        self.context = MpdContext(self, session=session, core=core)
+        self.context = MpdContext(
+            self, session=session, config=config, core=core)
 
     def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -82,7 +83,7 @@ class MpdDispatcher(object):
     def _authenticate_filter(self, request, response, filter_chain):
         if self.authenticated:
             return self._call_next_filter(request, response, filter_chain)
-        elif settings.MPD_SERVER_PASSWORD is None:
+        elif self.config['mpd']['password'] is None:
             self.authenticated = True
             return self._call_next_filter(request, response, filter_chain)
         else:
@@ -223,6 +224,9 @@ class MpdContext(object):
     #: The current :class:`mopidy.frontends.mpd.MpdSession`.
     session = None
 
+    #: The Mopidy configuration.
+    config = None
+
     #: The Mopidy core API. An instance of :class:`mopidy.core.Core`.
     core = None
 
@@ -232,9 +236,55 @@ class MpdContext(object):
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    def __init__(self, dispatcher, session=None, core=None):
+    def __init__(self, dispatcher, session=None, config=None, core=None):
         self.dispatcher = dispatcher
         self.session = session
+        self.config = config
         self.core = core
         self.events = set()
         self.subscriptions = set()
+        self._playlist_uri_from_name = {}
+        self._playlist_name_from_uri = {}
+        self.refresh_playlists_mapping()
+
+    def create_unique_name(self, playlist_name):
+        name = playlist_name
+        i = 2
+        while name in self._playlist_uri_from_name:
+            name = '%s [%d]' % (playlist_name, i)
+            i += 1
+        return name
+
+    def refresh_playlists_mapping(self):
+        """
+        Maintain map between playlists and unique playlist names to be used by
+        MPD
+        """
+        if self.core is not None:
+            self._playlist_uri_from_name.clear()
+            self._playlist_name_from_uri.clear()
+            for playlist in self.core.playlists.playlists.get():
+                if not playlist.name:
+                    continue
+                name = self.create_unique_name(playlist.name)
+                self._playlist_uri_from_name[name] = playlist.uri
+                self._playlist_name_from_uri[playlist.uri] = name
+
+    def lookup_playlist_from_name(self, name):
+        """
+        Helper function to retrieve a playlist from its unique MPD name.
+        """
+        if not self._playlist_uri_from_name:
+            self.refresh_playlists_mapping()
+        if name not in self._playlist_uri_from_name:
+            return None
+        uri = self._playlist_uri_from_name[name]
+        return self.core.playlists.lookup(uri).get()
+
+    def lookup_playlist_name_from_uri(self, uri):
+        """
+        Helper function to retrieve the unique MPD playlist name from its uri.
+        """
+        if uri not in self._playlist_name_from_uri:
+            self.refresh_playlists_mapping()
+        return self._playlist_name_from_uri[uri]

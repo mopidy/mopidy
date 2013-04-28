@@ -320,7 +320,29 @@ purchased from `MPaD at iTunes Store
   when waiting for the connection to a server to succeed.
 
 
+.. _mpd-web-clients:
+
 Web clients
 ===========
 
-See :ref:`http-clients`.
+The following web clients use the MPD protocol to communicate with Mopidy. For
+other web clients, see :ref:`http-clients`.
+
+
+Rompr
+-----
+
+.. image:: /_static/rompr.png
+    :width: 557
+    :height: 600
+
+`Rompr <http://sourceforge.net/projects/rompr/>`_ is a web based MPD client.
+`mrvanes <https://github.com/mrvanes>`_, a Mopidy and Rompr user, said: "These
+projects are a real match made in heaven."
+
+
+Partify
+-------
+
+`Partify <http://www.partify.us/>`_ is a web based MPD client focusing on
+making music playing collaborative and social.

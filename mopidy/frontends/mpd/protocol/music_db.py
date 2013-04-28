@@ -381,10 +381,8 @@ def searchaddpl(context, playlist_name, mpd_query):
         return
     results = context.core.library.search(**query).get()
 
-    playlists = context.core.playlists.filter(name=playlist_name).get()
-    if playlists:
-        playlist = playlists[0]
-    else:
+    playlist = context.lookup_playlist_from_name(playlist_name)
+    if not playlist:
         playlist = context.core.playlists.create(playlist_name).get()
     tracks = list(playlist.tracks) + _get_tracks(results)
     playlist = playlist.copy(tracks=tracks)

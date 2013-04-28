@@ -41,8 +41,8 @@ After npm completes, you can import Mopidy.js using ``require()``:
 Using the library
 -----------------
 
-See Mopidy's [HTTP frontend
-documentation](http://docs.mopidy.com/en/latest/modules/frontends/http/).
+See Mopidy's [HTTP API
+documentation](http://docs.mopidy.com/en/latest/api/http/).
 
 
 Building from source

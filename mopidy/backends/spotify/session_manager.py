@@ -6,7 +6,7 @@ import threading
 
 from spotify.manager import SpotifySessionManager as PyspotifySessionManager
 
-from mopidy import audio, settings
+from mopidy import audio
 from mopidy.backends.listener import BackendListener
 from mopidy.utils import process, versioning
 
@@ -23,23 +23,30 @@ BITRATES = {96: 2, 160: 0, 320: 1}
 
 
 class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
-    cache_location = settings.SPOTIFY_CACHE_PATH
-    settings_location = cache_location
+    cache_location = None
+    settings_location = None
     appkey_file = os.path.join(os.path.dirname(__file__), 'spotify_appkey.key')
     user_agent = 'Mopidy %s' % versioning.get_version()
 
-    def __init__(self, username, password, audio, backend_ref, proxy=None,
-                 proxy_username=None, proxy_password=None):
+    def __init__(self, config, audio, backend_ref):
+
+        self.cache_location = config['spotify']['cache_dir']
+        self.settings_location = config['spotify']['cache_dir']
+
         PyspotifySessionManager.__init__(
-            self, username, password, proxy=proxy,
-            proxy_username=proxy_username,
-            proxy_password=proxy_password)
+            self, config['spotify']['username'], config['spotify']['password'],
+            proxy=config['proxy']['hostname'],
+            proxy_username=config['proxy']['username'],
+            proxy_password=config['proxy']['password'])
+
         process.BaseThread.__init__(self)
         self.name = 'SpotifyThread'
 
         self.audio = audio
         self.backend = None
         self.backend_ref = backend_ref
+
+        self.bitrate = config['spotify']['bitrate']
 
         self.connected = threading.Event()
         self.push_audio_data = True
@@ -66,10 +73,8 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         if not hasattr(self, 'session'):
             self.session = session
 
-        logger.debug(
-            'Preferred Spotify bitrate is %s kbps',
-            settings.SPOTIFY_BITRATE)
-        session.set_preferred_bitrate(BITRATES[settings.SPOTIFY_BITRATE])
+        logger.debug('Preferred Spotify bitrate is %d kbps', self.bitrate)
+        session.set_preferred_bitrate(BITRATES[self.bitrate])
 
         self.container_manager = SpotifyContainerManager(self)
         self.playlist_manager = SpotifyPlaylistManager(self)
@@ -167,11 +172,17 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         if not self._initial_data_receive_completed:
             logger.debug('Still getting data; skipped refresh of playlists')
             return
-        playlists = map(
-            translator.to_mopidy_playlist, self.session.playlist_container())
+        playlists = []
+        for spotify_playlist in self.session.playlist_container():
+            playlists.append(translator.to_mopidy_playlist(
+                spotify_playlist,
+                bitrate=self.bitrate, username=self.username))
+        playlists.append(translator.to_mopidy_playlist(
+            self.session.starred(),
+            bitrate=self.bitrate, username=self.username))
         playlists = filter(None, playlists)
         self.backend.playlists.playlists = playlists
-        logger.info('Loaded %d Spotify playlist(s)', len(playlists))
+        logger.info('Loaded %d Spotify playlists', len(playlists))
         BackendListener.send('playlists_loaded')
 
     def logout(self):

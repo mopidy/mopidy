@@ -1,6 +1,6 @@
 coverage
 flake8
-mock >= 0.7
+mock >= 1.0
 nose
 pylint
 tox

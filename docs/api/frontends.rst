@@ -13,15 +13,18 @@ The following requirements applies to any frontend implementation:
   <http://pykka.readthedocs.org/>`_ actor, called the "main actor" from here
   on.
 
-- The main actor MUST accept a constructor argument ``core``, which will be an
-  :class:`ActorProxy <pykka.proxy.ActorProxy>` for the core actor. This object
-  gives access to the full :ref:`core-api`.
+- The main actor MUST accept two constructor arguments:
+
+  - ``config``, which is a dict structure with the entire Mopidy configuration.
+
+  - ``core``, which will be an :class:`ActorProxy <pykka.proxy.ActorProxy>` for
+    the core actor. This object gives access to the full :ref:`core-api`.
 
 - It MAY use additional actors to implement whatever it does, and using actors
   in frontend implementations is encouraged.
 
-- The frontend is activated by including its main actor in the
-  :attr:`mopidy.settings.FRONTENDS` setting.
+- The frontend is enabled if the extension it is part of is enabled. See
+  :ref:`extensiondev` for more information.
 
 - The main actor MUST be able to start and stop the frontend when the main
   actor is started and stopped.
@@ -45,6 +48,6 @@ Frontend implementations
 ========================
 
 * :mod:`mopidy.frontends.http`
-* :mod:`mopidy.frontends.lastfm`
 * :mod:`mopidy.frontends.mpd`
 * :mod:`mopidy.frontends.mpris`
+* :mod:`mopidy.frontends.scrobbler`

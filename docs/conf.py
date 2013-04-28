@@ -32,7 +32,8 @@ class Mock(object):
     def __getattr__(self, name):
         if name in ('__file__', '__path__'):
             return '/dev/null'
-        elif name[0] == name[0].upper() and not name.startswith('MIXER_TRACK'):
+        elif (name[0] == name[0].upper()
+                and not name.startswith('MIXER_TRACK_')):
             return type(name, (), {})
         else:
             return Mock()
@@ -53,7 +54,6 @@ MOCK_MODULES = [
     'pykka.future',
     'pykka.registry',
     'pylast',
-    'serial',
     'ws4py',
     'ws4py.messaging',
     'ws4py.server',
@@ -98,7 +98,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Mopidy'
-copyright = '2010-2012, Stein Magnus Jodal and contributors'
+copyright = '2010-2013, Stein Magnus Jodal and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -266,3 +266,12 @@ latex_documents = [
 needs_sphinx = '1.0'
 
 extlinks = {'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#')}
+
+
+def setup(app):
+    from sphinx.ext.autodoc import cut_lines
+    app.connect(b'autodoc-process-docstring', cut_lines(4, what=['module']))
+    app.add_object_type(
+        b'confval', 'confval',
+        objname='configuration value',
+        indextemplate='pair: %s; configuration value')

@@ -38,7 +38,7 @@ class Calculator(object):
 
 class JsonRpcTestBase(unittest.TestCase):
     def setUp(self):
-        self.backend = dummy.DummyBackend.start(audio=None).proxy()
+        self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
         self.jrw = jsonrpc.JsonRpcWrapper(

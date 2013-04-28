@@ -4,14 +4,15 @@
 HTTP clients
 ************
 
-Mopidy added an :ref:`HTTP frontend <http-frontend>` in 0.10 which provides the
-building blocks needed for creating web clients for Mopidy with the help of a
-WebSocket and a JavaScript library provided by Mopidy.
+Mopidy added an :ref:`HTTP frontend <ext-http>` and an :ref:`HTTP API
+<http-api>` in 0.10 which together provides the building blocks needed for
+creating web clients for Mopidy with the help of a WebSocket and a JavaScript
+library provided by Mopidy.
 
-This page will list any HTTP/web Mopidy clients. If you've created one, please
-notify us so we can include your client on this page.
+This page will list any Mopidy web clients using the HTTP frontend. If you've
+created one, please notify us so we can include your client on this page.
 
-See :ref:`http-frontend` for details on how to build your own web client.
+See :ref:`http-api` for details on how to build your own web client.
 
 
 woutervanwijk/Mopidy-Webclient
@@ -24,9 +25,9 @@ woutervanwijk/Mopidy-Webclient
 The first web client for Mopidy is still under development, but is already very
 usable. It targets both desktop and mobile browsers.
 
-To try it out, get a copy of https://github.com/woutervanwijk/Mopidy-WebClient
-and point the :attr:`mopidy.settings.HTTP_SERVER_STATIC_DIR` setting towards
-your copy of the web client.
+The web client used for the `Pi Musicbox
+<http://www.woutervanwijk.nl/pimusicbox/>`_ is also available for other users
+of Mopidy. See https://github.com/woutervanwijk/Mopidy-WebClient for details.
 
 
 Mopidy Lux
@@ -47,13 +48,8 @@ New web client developed by Meantime IT in the UK for their office jukebox. See
 https://github.com/meantimeit/jukepi for details.
 
 
-Rompr
-=====
+Other web clients
+=================
 
-.. image:: /_static/rompr.png
-    :width: 557
-    :height: 600
-
-`Rompr <http://sourceforge.net/projects/rompr/>`_ is a web based MPD client.
-`mrvanes <https://github.com/mrvanes>`_, a Mopidy and Rompr user, said: "These
-projects are a real match made in heaven."
+For Mopidy web clients using Mopidy's MPD frontend instead of HTTP, see
+:ref:`mpd-web-clients`.

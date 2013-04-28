@@ -16,9 +16,5 @@ class MopidyException(Exception):
         self._message = message
 
 
-class SettingsError(MopidyException):
-    pass
-
-
-class OptionalDependencyError(MopidyException):
+class ExtensionError(MopidyException):
     pass

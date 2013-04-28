@@ -4,16 +4,11 @@ import base64
 import logging
 import os
 
-try:
-    import dbus
-    import dbus.mainloop.glib
-    import dbus.service
-    import gobject
-except ImportError as import_error:
-    from mopidy.exceptions import OptionalDependencyError
-    raise OptionalDependencyError(import_error)
+import dbus
+import dbus.mainloop.glib
+import dbus.service
+import gobject
 
-from mopidy import settings
 from mopidy.core import PlaybackState
 from mopidy.utils.process import exit_process
 
@@ -36,7 +31,8 @@ class MprisObject(dbus.service.Object):
 
     properties = None
 
-    def __init__(self, core):
+    def __init__(self, config, core):
+        self.config = config
         self.core = core
         self.properties = {
             ROOT_IFACE: self._get_root_iface_properties(),
@@ -93,7 +89,7 @@ class MprisObject(dbus.service.Object):
         mainloop = dbus.mainloop.glib.DBusGMainLoop()
         bus_name = dbus.service.BusName(
             BUS_NAME, dbus.SessionBus(mainloop=mainloop))
-        logger.info('Connected to D-Bus')
+        logger.info('MPRIS server connected to D-Bus')
         return bus_name
 
     def get_playlist_id(self, playlist_uri):
@@ -175,7 +171,8 @@ class MprisObject(dbus.service.Object):
     ### Root interface properties
 
     def get_DesktopEntry(self):
-        return os.path.splitext(os.path.basename(settings.DESKTOP_FILE))[0]
+        return os.path.splitext(os.path.basename(
+            self.config['mpris']['desktop_file']))[0]
 
     def get_SupportedUriSchemes(self):
         return dbus.Array(self.core.uri_schemes.get(), signature='s')

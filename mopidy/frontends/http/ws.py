@@ -2,14 +2,11 @@ from __future__ import unicode_literals
 
 import logging
 
-from mopidy import core, exceptions, models
-from mopidy.utils import jsonrpc
+import cherrypy
+from ws4py.websocket import WebSocket
 
-try:
-    import cherrypy
-    from ws4py.websocket import WebSocket
-except ImportError as import_error:
-    raise exceptions.OptionalDependencyError(import_error)
+from mopidy import core, models
+from mopidy.utils import jsonrpc
 
 
 logger = logging.getLogger('mopidy.frontends.http')
