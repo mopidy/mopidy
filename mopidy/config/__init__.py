@@ -141,8 +141,8 @@ def _format(config, comments, schemas, display):
 
 def parse_override(override):
     """Parse ``section/key=value`` command line overrides"""
-    section, remainder = override.split('/', 1)
-    key, value = remainder.split('=', 1)
+    section, remainder = override.split(b'/', 1)
+    key, value = remainder.split(b'=', 1)
     return (section.strip(), key.strip(), value.strip())
 
 
