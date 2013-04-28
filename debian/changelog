@@ -1,3 +1,14 @@
+mopidy (0.14.0-0mopidy1) unstable; urgency=low
+
+  * New upstream release.
+  * Add dependency on python-setuptools.
+  * Remove suggests on python-serial, as external mixers support have been
+    moved to an extension.
+  * Update path to changelog.
+  * Bump Standards-Version to 3.9.4.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sun, 28 Apr 2013 22:43:41 +0200
+
 mopidy (0.13.0-0mopidy1) unstable; urgency=low
 
   * New upstream release.
