@@ -4,7 +4,7 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v0.14.0 (UNRELEASED)
+v0.14.0 (2013-04-28)
 ====================
 
 The 0.14 release has a clear focus on two things: the new configuration system
