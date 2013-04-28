@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from spotify import Link
+import spotify
 
 from mopidy.models import Artist, Album, Track, Playlist
 
@@ -13,7 +13,7 @@ track_cache = {}
 def to_mopidy_artist(spotify_artist):
     if spotify_artist is None:
         return
-    uri = str(Link.from_artist(spotify_artist))
+    uri = str(spotify.Link.from_artist(spotify_artist))
     if uri in artist_cache:
         return artist_cache[uri]
     if not spotify_artist.is_loaded():
@@ -25,7 +25,7 @@ def to_mopidy_artist(spotify_artist):
 def to_mopidy_album(spotify_album):
     if spotify_album is None:
         return
-    uri = str(Link.from_album(spotify_album))
+    uri = str(spotify.Link.from_album(spotify_album))
     if uri in album_cache:
         return album_cache[uri]
     if not spotify_album.is_loaded():
@@ -41,7 +41,7 @@ def to_mopidy_album(spotify_album):
 def to_mopidy_track(spotify_track, bitrate=None):
     if spotify_track is None:
         return
-    uri = str(Link.from_track(spotify_track, 0))
+    uri = str(spotify.Link.from_track(spotify_track, 0))
     if uri in track_cache:
         return track_cache[uri]
     if not spotify_track.is_loaded():
@@ -66,7 +66,7 @@ def to_mopidy_track(spotify_track, bitrate=None):
 def to_mopidy_playlist(spotify_playlist, bitrate=None, username=None):
     if spotify_playlist is None or spotify_playlist.type() != 'playlist':
         return
-    uri = str(Link.from_playlist(spotify_playlist))
+    uri = str(spotify.Link.from_playlist(spotify_playlist))
     if not spotify_playlist.is_loaded():
         return Playlist(uri=uri, name='[loading...]')
     name = spotify_playlist.name()
