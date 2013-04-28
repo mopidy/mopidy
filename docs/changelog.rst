@@ -4,6 +4,15 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.14.1 (2013-04-28)
+====================
+
+This release addresses an issue in v0.14.0 where the new
+:option:`mopidy-convert-config` tool and the new :option:`mopidy --option`
+command line option was broken because some string operations inadvertently
+converted some byte strings to unicode.
+
+
 v0.14.0 (2013-04-28)
 ====================
 
