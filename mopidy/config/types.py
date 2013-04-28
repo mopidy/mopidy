@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import re
 import socket
+import sys
 
 from mopidy.utils import path
 from mopidy.config import validators
@@ -254,6 +255,8 @@ class Path(ConfigValue):
         return ExpandedPath(value, expanded)
 
     def serialize(self, value, display=False):
+        if isinstance(value, unicode):
+            value = value.encode(sys.getfilesystemencoding())
         if isinstance(value, ExpandedPath):
             return value.original
         return value

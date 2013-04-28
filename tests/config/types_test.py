@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import logging
 import mock
 import socket
+import sys
 
 from mopidy.config import types
 
@@ -364,3 +365,10 @@ class PathTest(unittest.TestCase):
     def test_serialize_plain_string(self):
         value = types.Path()
         self.assertEqual('path', value.serialize(b'path'))
+
+    def test_serialize_unicode_string(self):
+        value = types.Path()
+        expected = 'æøå'.encode(sys.getfilesystemencoding())
+        result = value.serialize('æøå')
+        self.assertEqual(expected, result)
+        self.assertIsInstance(result, bytes)
