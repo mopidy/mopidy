@@ -1,3 +1,5 @@
+.. _api-ref:
+
 *************
 API reference
 *************
@@ -11,3 +13,6 @@ API reference
     core
     audio
     frontends
+    ext
+    config
+    http

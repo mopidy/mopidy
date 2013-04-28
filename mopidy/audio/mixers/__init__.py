@@ -7,7 +7,6 @@ import gobject
 
 from .auto import AutoAudioMixer
 from .fake import FakeMixer
-from .nad import NadMixer
 
 
 def register_mixer(mixer_class):
@@ -19,4 +18,3 @@ def register_mixer(mixer_class):
 def register_mixers():
     register_mixer(AutoAudioMixer)
     register_mixer(FakeMixer)
-    register_mixer(NadMixer)

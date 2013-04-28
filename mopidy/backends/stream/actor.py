@@ -5,7 +5,7 @@ import urlparse
 
 import pykka
 
-from mopidy import audio as audio_lib, settings
+from mopidy import audio as audio_lib
 from mopidy.backends import base
 from mopidy.models import Track
 
@@ -13,7 +13,7 @@ logger = logging.getLogger('mopidy.backends.stream')
 
 
 class StreamBackend(pykka.ThreadingActor, base.Backend):
-    def __init__(self, audio):
+    def __init__(self, config, audio):
         super(StreamBackend, self).__init__()
 
         self.library = StreamLibraryProvider(backend=self)
@@ -21,7 +21,7 @@ class StreamBackend(pykka.ThreadingActor, base.Backend):
         self.playlists = None
 
         self.uri_schemes = audio_lib.supported_uri_schemes(
-            settings.STREAM_PROTOCOLS)
+            config['stream']['protocols'])
 
 
 # TODO: Should we consider letting lookup know how to expand common playlist

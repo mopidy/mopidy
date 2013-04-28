@@ -28,6 +28,9 @@ class AudioListener(object):
         *MAY* be implemented by actor. By default, this method forwards the
         event to the specific event methods.
 
+        For a list of what event names to expect, see the names of the other
+        methods in :class:`AudioListener`.
+
         :param event: the event name
         :type event: string
         :param kwargs: any other arguments to the specific event handlers

@@ -10,7 +10,7 @@ from mopidy.utils.path import path_to_uri
 logger = logging.getLogger('mopidy.backends.local')
 
 
-def parse_m3u(file_path, music_folder):
+def parse_m3u(file_path, media_dir):
     r"""
     Convert M3U file list of uris
 
@@ -31,6 +31,7 @@ def parse_m3u(file_path, music_folder):
     - This function does not bother with Extended M3U directives.
     """
 
+    # TODO: uris as bytes
     uris = []
     try:
         with open(file_path) as m3u:
@@ -49,7 +50,7 @@ def parse_m3u(file_path, music_folder):
         if line.startswith('file://'):
             uris.append(line)
         else:
-            path = path_to_uri(music_folder, line)
+            path = path_to_uri(media_dir, line)
             uris.append(path)
 
     return uris
@@ -71,6 +72,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
     current = {}
     state = None
 
+    # TODO: uris as bytes
     for line in contents.split(b'\n'):
         if line == b'songList begin':
             state = 'songs'

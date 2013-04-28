@@ -10,18 +10,10 @@ import gobject
 gobject.threads_init()
 
 
-# Extract any non-GStreamer arguments, and leave the GStreamer arguments for
-# processing by GStreamer. This needs to be done before GStreamer is imported,
-# so that GStreamer doesn't hijack e.g. ``--help``.
-# NOTE This naive fix does not support values like ``bar`` in
-# ``--gst-foo bar``. Use equals to pass values, like ``--gst-foo=bar``.
-
-def is_gst_arg(argument):
-    return argument.startswith('--gst') or argument == '--help-gst'
-
-gstreamer_args = [arg for arg in sys.argv[1:] if is_gst_arg(arg)]
-mopidy_args = [arg for arg in sys.argv[1:] if not is_gst_arg(arg)]
-sys.argv[1:] = gstreamer_args
+# Extract any command line arguments. This needs to be done before GStreamer is
+# imported, so that GStreamer doesn't hijack e.g. ``--help``.
+mopidy_args = sys.argv[1:]
+sys.argv[1:] = []
 
 
 # Add ../ to the path so we can run Mopidy from a Git checkout without
@@ -34,7 +26,7 @@ import pygst
 pygst.require('0.10')
 import gst
 
-from mopidy import settings
+from mopidy import config as config_lib, ext
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
@@ -42,9 +34,27 @@ from mopidy.utils import log, path, versioning
 
 def main():
     options = parse_options()
+    # TODO: support config files and overrides (shared from main?)
+    config_files = [b'/etc/mopidy/mopidy.conf',
+                    b'$XDG_CONFIG_DIR/mopidy/mopidy.conf']
+    config_overrides = []
 
+    # TODO: decide if we want to avoid this boilerplate some how.
+    # Initial config without extensions to bootstrap logging.
+    logging_config, _ = config_lib.load(config_files, [], config_overrides)
     log.setup_root_logger()
-    log.setup_console_logging(options.verbosity_level)
+    log.setup_console_logging(logging_config, options.verbosity_level)
+
+    extensions = ext.load_extensions()
+    config, errors = config_lib.load(
+        config_files, extensions, config_overrides)
+    log.setup_log_levels(config)
+
+    if not config['local']['media_dir']:
+        logging.warning('Config value local/media_dir is not set.')
+        return
+
+    # TODO: missing error checking and other default setup code.
 
     tracks = []
 
@@ -57,9 +67,9 @@ def main():
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-    logging.info('Scanning %s', settings.LOCAL_MUSIC_PATH)
+    logging.info('Scanning %s', config['local']['media_dir'])
 
-    scanner = Scanner(settings.LOCAL_MUSIC_PATH, store, debug)
+    scanner = Scanner(config['local']['media_dir'], store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
@@ -67,7 +77,8 @@ def main():
 
     logging.info('Done scanning; writing tag cache...')
 
-    for row in mpd_translator.tracks_to_tag_cache_format(tracks):
+    for row in mpd_translator.tracks_to_tag_cache_format(
+            tracks, config['local']['media_dir']):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
@@ -141,9 +152,9 @@ def translator(data):
 
 
 class Scanner(object):
-    def __init__(self, folder, data_callback, error_callback=None):
+    def __init__(self, base_dir, data_callback, error_callback=None):
         self.data = {}
-        self.files = path.find_files(folder)
+        self.files = path.find_files(base_dir)
         self.data_callback = data_callback
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
@@ -153,8 +164,8 @@ class Scanner(object):
         self.fakesink.connect('handoff', self.process_handoff)
 
         self.uribin = gst.element_factory_make('uridecodebin')
-        self.uribin.set_property('caps',
-            gst.Caps(b'audio/x-raw-int; audio/x-raw-float'))
+        self.uribin.set_property(
+            'caps', gst.Caps(b'audio/x-raw-int; audio/x-raw-float'))
         self.uribin.connect('pad-added', self.process_new_pad)
 
         self.pipe = gst.element_factory_make('pipeline')

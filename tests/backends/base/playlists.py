@@ -1,34 +1,24 @@
 from __future__ import unicode_literals
 
-import os
-import shutil
-import tempfile
-
 import pykka
 
-from mopidy import audio, core, settings
+from mopidy import audio, core
 from mopidy.models import Playlist
 
-from tests import unittest, path_to_data_dir
+from tests import unittest
 
 
 class PlaylistsControllerTest(object):
-    def setUp(self):
-        settings.LOCAL_PLAYLIST_PATH = tempfile.mkdtemp()
-        settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('library_tag_cache')
-        settings.LOCAL_MUSIC_PATH = path_to_data_dir('')
+    config = {}
 
+    def setUp(self):
         self.audio = audio.DummyAudio.start().proxy()
-        self.backend = self.backend_class.start(audio=self.audio).proxy()
+        self.backend = self.backend_class.start(
+            config=self.config, audio=self.audio).proxy()
         self.core = core.Core(backends=[self.backend])
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
-
-        if os.path.exists(settings.LOCAL_PLAYLIST_PATH):
-            shutil.rmtree(settings.LOCAL_PLAYLIST_PATH)
-
-        settings.runtime.clear()
 
     def test_create_returns_playlist_with_name_set(self):
         playlist = self.core.playlists.create('test')

@@ -2,14 +2,18 @@
 
 This is Mopidy's default mixer.
 
-**Dependencies:**
 
-- None
+Dependencies
+============
 
-**Settings:**
+None
 
-- If this wasn't the default, you would set :attr:`mopidy.settings.MIXER`
-  to ``autoaudiomixer`` to use this mixer.
+
+Configuration
+=============
+
+If this wasn't the default, you would set the :confval:`audio/mixer` config
+value to ``autoaudiomixer`` to use this mixer.
 """
 
 from __future__ import unicode_literals

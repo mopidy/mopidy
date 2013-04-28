@@ -2,6 +2,8 @@
 :mod:`mopidy.frontends.mpd` -- MPD server
 *****************************************
 
+For details on how to use Mopidy's MPD server, see :ref:`ext-mpd`.
+
 .. automodule:: mopidy.frontends.mpd
     :synopsis: MPD server frontend
 

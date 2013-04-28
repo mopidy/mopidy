@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
 
 import os
+import shutil
+import tempfile
 
-from mopidy import settings
-from mopidy.backends.local import LocalBackend
+from mopidy.backends.local import actor
 from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
@@ -16,25 +17,35 @@ from tests.backends.local import generate_song
 class LocalPlaylistsControllerTest(
         PlaylistsControllerTest, unittest.TestCase):
 
-    backend_class = LocalBackend
+    backend_class = actor.LocalBackend
+    config = {
+        'local': {
+            'media_dir': path_to_data_dir(''),
+            'tag_cache_file': path_to_data_dir('library_tag_cache'),
+        }
+    }
 
     def setUp(self):
-        settings.LOCAL_TAG_CACHE_FILE = path_to_data_dir('empty_tag_cache')
+        self.config['local']['playlists_dir'] = tempfile.mkdtemp()
+        self.playlists_dir = self.config['local']['playlists_dir']
+
         super(LocalPlaylistsControllerTest, self).setUp()
 
     def tearDown(self):
         super(LocalPlaylistsControllerTest, self).tearDown()
-        settings.runtime.clear()
+
+        if os.path.exists(self.playlists_dir):
+            shutil.rmtree(self.playlists_dir)
 
     def test_created_playlist_is_persisted(self):
-        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
+        path = os.path.join(self.playlists_dir, 'test.m3u')
         self.assertFalse(os.path.exists(path))
 
         self.core.playlists.create('test')
         self.assertTrue(os.path.exists(path))
 
     def test_create_slugifies_playlist_name(self):
-        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test-foo-bar.m3u')
+        path = os.path.join(self.playlists_dir, 'test-foo-bar.m3u')
         self.assertFalse(os.path.exists(path))
 
         playlist = self.core.playlists.create('test FOO baR')
@@ -42,7 +53,7 @@ class LocalPlaylistsControllerTest(
         self.assertTrue(os.path.exists(path))
 
     def test_create_slugifies_names_which_tries_to_change_directory(self):
-        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test-foo-bar.m3u')
+        path = os.path.join(self.playlists_dir, 'test-foo-bar.m3u')
         self.assertFalse(os.path.exists(path))
 
         playlist = self.core.playlists.create('../../test FOO baR')
@@ -50,8 +61,8 @@ class LocalPlaylistsControllerTest(
         self.assertTrue(os.path.exists(path))
 
     def test_saved_playlist_is_persisted(self):
-        path1 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test1.m3u')
-        path2 = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test2-foo-bar.m3u')
+        path1 = os.path.join(self.playlists_dir, 'test1.m3u')
+        path2 = os.path.join(self.playlists_dir, 'test2-foo-bar.m3u')
 
         playlist = self.core.playlists.create('test1')
 
@@ -66,7 +77,7 @@ class LocalPlaylistsControllerTest(
         self.assertTrue(os.path.exists(path2))
 
     def test_deleted_playlist_is_removed(self):
-        path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
+        path = os.path.join(self.playlists_dir, 'test.m3u')
         self.assertFalse(os.path.exists(path))
 
         playlist = self.core.playlists.create('test')
@@ -89,14 +100,14 @@ class LocalPlaylistsControllerTest(
         self.assertEqual(track_path, contents.strip())
 
     def test_playlists_are_loaded_at_startup(self):
-        playlist_path = os.path.join(settings.LOCAL_PLAYLIST_PATH, 'test.m3u')
+        playlist_path = os.path.join(self.playlists_dir, 'test.m3u')
 
         track = Track(uri=path_to_uri(path_to_data_dir('uri2')))
         playlist = self.core.playlists.create('test')
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        backend = self.backend_class(audio=self.audio)
+        backend = self.backend_class(config=self.config, audio=self.audio)
 
         self.assert_(backend.playlists.playlists)
         self.assertEqual(
@@ -112,5 +123,5 @@ class LocalPlaylistsControllerTest(
         pass
 
     @unittest.SkipTest
-    def test_playlist_folder_is_createad(self):
+    def test_playlist_dir_is_created(self):
         pass

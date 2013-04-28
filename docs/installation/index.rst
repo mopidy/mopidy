@@ -42,7 +42,7 @@ in the same way as you get updates to the rest of your distribution.
        sudo apt-get update
        sudo apt-get install mopidy
 
-#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
+#. Finally, you need to set a couple of :doc:`config values </config>`, and then
    you're ready to :doc:`run Mopidy </running>`.
 
 When a new release of Mopidy is out, and you can't wait for you system to
@@ -71,9 +71,10 @@ it out.
 Arch Linux: Install from AUR
 ============================
 
-If you are running Arch Linux, you can install a development snapshot of Mopidy
+If you are running Arch Linux, you can install the latest release of Mopidy
 using the `mopidy-git <https://aur.archlinux.org/packages/mopidy-git/>`_
-package found in AUR.
+package found in AUR. The package installs from the ``master`` branch of the
+Mopidy Git repo, which always corresponds to the latest release.
 
 #. To install Mopidy with GStreamer, libspotify and pyspotify, you can use
    ``packer``, ``yaourt``, or do it by hand like this::
@@ -89,8 +90,8 @@ package found in AUR.
    install `python2-pylast
    <https://aur.archlinux.org/packages/python2-pylast/>`_ from AUR.
 
-#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
-   you're ready to :doc:`run Mopidy </running>`.
+#. Finally, you need to set a couple of :doc:`config values </config>`, and
+   then you're ready to :doc:`run Mopidy </running>`.
 
 
 OS X: Install from Homebrew and Pip
@@ -107,13 +108,19 @@ Pip.
        brew update
        brew upgrade
 
+#. Mopidy requires GStreamer 0.10, but Homebrew's main formula repo has
+   upgraded its GStreamer packages to 1.0. Thus, you'll need to add an
+   alternative formula repo (aka "tap") that has the old GStreamer formulas::
+
+       brew tap homebrew/versions
+
 #. Install the required packages from Homebrew::
 
-       brew install gst-python gst-plugins-good gst-plugins-ugly libspotify
+       brew install gst-python010 gst-plugins-good010 gst-plugins-ugly010 libspotify
 
 #. Make sure to include Homebrew's Python ``site-packages`` directory in your
    ``PYTHONPATH``. If you don't include this, Mopidy will not find GStreamer
-   and crash.
+   and it will crash.
 
    You can either amend your ``PYTHONPATH`` permanently, by adding the
    following statement to your shell's init file, e.g. ``~/.bashrc``::
@@ -135,13 +142,13 @@ Pip.
 
        sudo easy_install pip
 
-#. Then get, build, and install the latest releast of pyspotify, pylast, pykka,
+#. Then get, build, and install the latest release of pyspotify, pylast,
    and Mopidy using Pip::
 
-       sudo pip install -U pyspotify pylast pykka mopidy
+       sudo pip install -U pyspotify pylast cherrypy ws4py mopidy
 
-#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
-   you're ready to :doc:`run Mopidy </running>`.
+#. Finally, you need to set a couple of :doc:`config values </config>`, and
+   then you're ready to :doc:`run Mopidy </running>`.
 
 
 Otherwise: Install from source using Pip
@@ -171,15 +178,7 @@ can install Mopidy from PyPI using Pip.
 
        sudo yum install -y gcc python-devel python-pip
 
-#. Then you'll need to install all of Mopidy's hard dependencies:
-
-   - Pykka >= 1.0::
-
-         sudo pip install -U pykka
-
-     On Fedora the binary is called ``pip-python``::
-
-         sudo pip-python install -U pykka
+#. Then you'll need to install all of Mopidy's hard non-Python dependencies:
 
    - GStreamer 0.10.x, with Python bindings. GStreamer is packaged for most
      popular Linux distributions. Search for GStreamer in your package manager,
@@ -235,7 +234,8 @@ can install Mopidy from PyPI using Pip.
 
           sudo pip install -U pyspotify
 
-          # Fedora:
+      On Fedora the binary is called ``pip-python``::
+
           sudo pip-python install -U pyspotify
 
 #. Optional: If you want to scrobble your played tracks to Last.fm, you need
@@ -243,8 +243,18 @@ can install Mopidy from PyPI using Pip.
 
       sudo pip install -U pylast
 
-      # Fedora:
+   On Fedora the binary is called ``pip-python``::
+
       sudo pip-python install -U pylast
+
+#. Optional: If you want to use the HTTP frontend and web clients, you need
+   cherrypy and ws4py::
+
+      sudo pip install -U cherrypy ws4py
+
+   On Fedora the binary is called ``pip-python``::
+
+      sudo pip-python install -U cherrypy ws4py
 
 #. Optional: To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound
    Menu or from an UPnP client via Rygel, you need some additional
@@ -259,7 +269,8 @@ can install Mopidy from PyPI using Pip.
 
        sudo pip install -U mopidy
 
-       # Fedora:
+   On Fedora the binary is called ``pip-python``::
+
        sudo pip-python install -U mopidy
 
    To upgrade Mopidy to future releases, just rerun this command.
@@ -269,5 +280,5 @@ can install Mopidy from PyPI using Pip.
 
         sudo pip install mopidy==dev
 
-#. Finally, you need to set a couple of :doc:`settings </settings>`, and then
-   you're ready to :doc:`run Mopidy </running>`.
+#. Finally, you need to set a couple of :doc:`config values </config>`, and
+   then you're ready to :doc:`run Mopidy </running>`.

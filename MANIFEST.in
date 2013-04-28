@@ -1,13 +1,15 @@
-include *.ini
 include *.rst
 include LICENSE
 include MANIFEST.in
 include data/mopidy.desktop
 include mopidy/backends/spotify/spotify_appkey.key
 include pylintrc
+
 recursive-include docs *
 prune docs/_build
-recursive-include mopidy/frontends/http/data/
+
+recursive-include mopidy *.conf
+recursive-include mopidy/frontends/http/data *
 recursive-include requirements *
 recursive-include tests *.py
 recursive-include tests/data *

@@ -1,50 +1,33 @@
-"""The MPD server frontend.
-
-MPD stands for Music Player Daemon. MPD is an independent project and server.
-Mopidy implements the MPD protocol, and is thus compatible with clients for the
-original MPD server.
-
-**Dependencies:**
-
-- None
-
-**Settings:**
-
-- :attr:`mopidy.settings.MPD_SERVER_HOSTNAME`
-- :attr:`mopidy.settings.MPD_SERVER_PORT`
-- :attr:`mopidy.settings.MPD_SERVER_PASSWORD`
-
-**Usage:**
-
-Make sure :attr:`mopidy.settings.FRONTENDS` includes
-``mopidy.frontends.mpd.MpdFrontend``. By default, the setting includes the MPD
-frontend.
-
-**Limitations:**
-
-This is a non exhaustive list of MPD features that Mopidy doesn't support.
-Items on this list will probably not be supported in the near future.
-
-- Toggling of audio outputs is not supported
-- Channels for client-to-client communication are not supported
-- Stickers are not supported
-- Crossfade is not supported
-- Replay gain is not supported
-- ``count`` does not provide any statistics
-- ``stats`` does not provide any statistics
-- ``list`` does not support listing tracks by genre
-- ``decoders`` does not provide information about available decoders
-
-The following items are currently not supported, but should be added in the
-near future:
-
-- Modifying stored playlists is not supported
-- ``tagtypes`` is not supported
-- Browsing the file system is not supported
-- Live update of the music database is not supported
-"""
-
 from __future__ import unicode_literals
 
-# flake8: noqa
-from .actor import MpdFrontend
+import os
+
+import mopidy
+from mopidy import config, ext
+
+
+class Extension(ext.Extension):
+
+    dist_name = 'Mopidy-MPD'
+    ext_name = 'mpd'
+    version = mopidy.__version__
+
+    def get_default_config(self):
+        conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
+        return config.read(conf_file)
+
+    def get_config_schema(self):
+        schema = super(Extension, self).get_config_schema()
+        schema['hostname'] = config.Hostname()
+        schema['port'] = config.Port()
+        schema['password'] = config.Secret(optional=True)
+        schema['max_connections'] = config.Integer(minimum=1)
+        schema['connection_timeout'] = config.Integer(minimum=1)
+        return schema
+
+    def validate_environment(self):
+        pass
+
+    def get_frontend_classes(self):
+        from .actor import MpdFrontend
+        return [MpdFrontend]

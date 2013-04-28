@@ -11,17 +11,17 @@ class Backend(object):
     audio = None
 
     #: The library provider. An instance of
-    #: :class:`mopidy.backends.base.BaseLibraryProvider`, or :class:`None` if
+    #: :class:`~mopidy.backends.base.BaseLibraryProvider`, or :class:`None` if
     #: the backend doesn't provide a library.
     library = None
 
     #: The playback provider. An instance of
-    #: :class:`mopidy.backends.base.BasePlaybackProvider`, or :class:`None` if
+    #: :class:`~mopidy.backends.base.BasePlaybackProvider`, or :class:`None` if
     #: the backend doesn't provide playback.
     playback = None
 
     #: The playlists provider. An instance of
-    #: :class:`mopidy.backends.base.BasePlaylistsProvider`, or class:`None` if
+    #: :class:`~mopidy.backends.base.BasePlaylistsProvider`, or class:`None` if
     #: the backend doesn't provide playlists.
     playlists = None
 
