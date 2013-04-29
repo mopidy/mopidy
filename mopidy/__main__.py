@@ -59,7 +59,6 @@ def main():
 
         installed_extensions = ext.load_extensions()
 
-        # TODO: wrap config in RO proxy.
         config, config_errors = config_lib.load(
             config_files, installed_extensions, config_overrides)
 
