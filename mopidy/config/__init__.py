@@ -5,8 +5,8 @@ import io
 import logging
 import os.path
 
-from mopidy.config.schemas import *
-from mopidy.config.types import *
+from mopidy.config.schemas import *  # noqa
+from mopidy.config.types import *  # noqa
 from mopidy.utils import path
 
 logger = logging.getLogger('mopidy.config')
@@ -86,8 +86,8 @@ def _load(files, defaults, overrides):
                             filename)
         except configparser.ParsingError as e:
             linenos = ', '.join(str(lineno) for lineno, line in e.errors)
-            logger.warning('%s has errors, line %s has been ignored.',
-                            filename, linenos)
+            logger.warning(
+                '%s has errors, line %s has been ignored.', filename, linenos)
         except IOError:
             # TODO: if this is the initial load of logging config we might not
             # have a logger at this point, we might want to handle this better.
@@ -124,7 +124,8 @@ def _validate(raw_config, schemas):
 def _format(config, comments, schemas, display):
     output = []
     for schema in schemas:
-        serialized = schema.serialize(config.get(schema.name, {}), display=display)
+        serialized = schema.serialize(
+            config.get(schema.name, {}), display=display)
         if not serialized:
             continue
         output.append(b'[%s]' % bytes(schema.name))
