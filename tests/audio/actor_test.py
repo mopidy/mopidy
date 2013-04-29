@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import unittest
+
 import pygst
 pygst.require('0.10')
 import gst
@@ -9,7 +11,7 @@ import pykka
 from mopidy import audio
 from mopidy.utils.path import path_to_uri
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class AudioTest(unittest.TestCase):

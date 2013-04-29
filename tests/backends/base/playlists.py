@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
+import unittest
+
 import pykka
 
 from mopidy import audio, core
 from mopidy.models import Playlist
-
-from tests import unittest
 
 
 class PlaylistsControllerTest(object):

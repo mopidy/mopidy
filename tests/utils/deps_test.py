@@ -1,17 +1,16 @@
 from __future__ import unicode_literals
 
 import platform
+import mock
+import unittest
 
 import pygst
 pygst.require('0.10')
 import gst
 
-import mock
 import pkg_resources
 
 from mopidy.utils import deps
-
-from tests import unittest
 
 
 class DepsTest(unittest.TestCase):

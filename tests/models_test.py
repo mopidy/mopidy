@@ -2,12 +2,11 @@ from __future__ import unicode_literals
 
 import datetime
 import json
+import unittest
 
 from mopidy.models import (
     Artist, Album, TlTrack, Track, Playlist, SearchResult,
     ModelJSONEncoder, model_json_decoder)
-
-from tests import unittest
 
 
 class GenericCopyTest(unittest.TestCase):

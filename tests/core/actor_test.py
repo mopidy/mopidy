@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
+
 import pykka
 
 from mopidy.core import Core
-
-from tests import unittest
 
 
 class CoreActorTest(unittest.TestCase):

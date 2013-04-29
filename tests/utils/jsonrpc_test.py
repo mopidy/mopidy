@@ -1,15 +1,14 @@
 from __future__ import unicode_literals
 
 import json
+import mock
+import unittest
 
 import pykka
-import mock
 
 from mopidy import core, models
 from mopidy.backends import dummy
 from mopidy.utils import jsonrpc
-
-from tests import unittest
 
 
 class Calculator(object):

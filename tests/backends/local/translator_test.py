@@ -4,12 +4,13 @@ from __future__ import unicode_literals
 
 import os
 import tempfile
+import unittest
 
 from mopidy.backends.local.translator import parse_m3u, parse_mpd_tag_cache
 from mopidy.models import Track, Artist, Album
 from mopidy.utils.path import path_to_uri
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 data_dir = path_to_data_dir('')
 song1_path = path_to_data_dir('song1.mp3')

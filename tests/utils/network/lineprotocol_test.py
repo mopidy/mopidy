@@ -2,12 +2,11 @@
 
 from __future__ import unicode_literals
 
-import re
 from mock import sentinel, Mock
+import re
+import unittest
 
 from mopidy.utils import network
-
-from tests import unittest
 
 
 class LineProtocolTest(unittest.TestCase):

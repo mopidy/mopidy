@@ -1,11 +1,10 @@
 from __future__ import unicode_literals
 
-import socket
 from mock import patch, Mock
+import socket
+import unittest
 
 from mopidy.utils import network
-
-from tests import unittest
 
 
 class FormatHostnameTest(unittest.TestCase):

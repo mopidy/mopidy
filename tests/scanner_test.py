@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 
+import unittest
+
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class FakeGstDate(object):

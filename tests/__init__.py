@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import os
 import sys
-import unittest  # noqa
 
 
 def path_to_data_dir(name):

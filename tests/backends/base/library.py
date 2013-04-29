@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 
+import unittest
+
 import pykka
 
 from mopidy import core
 from mopidy.models import Track, Album, Artist
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class LibraryControllerTest(object):
