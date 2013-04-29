@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import functools
 import os
 import platform
-import sys
 
 import pygst
 pygst.require('0.10')
@@ -12,12 +11,6 @@ import gst
 import pkg_resources
 
 from . import formatting
-
-
-def show_deps_task():
-    """Prints a list of all dependencies and exits."""
-    print format_dependency_list()
-    sys.exit(0)
 
 
 def format_dependency_list(adapters=None):

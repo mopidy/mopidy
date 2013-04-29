@@ -24,11 +24,11 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 
-from mopidy import ext
+from mopidy import commands, ext
 from mopidy.audio import Audio
 from mopidy import config as config_lib
 from mopidy.core import Core
-from mopidy.utils import deps, log, path, process, versioning
+from mopidy.utils import log, path, process, versioning
 
 logger = logging.getLogger('mopidy.main')
 
@@ -39,9 +39,9 @@ def main():
 
     args = parse_args()
     if args.show_config:
-        show_config_task(args)
+        commands.show_config(args)
     if args.show_deps:
-        deps.show_deps_task()
+        commands.show_deps()
 
     config_files = args.config.split(b':')
     config_overrides = args.overrides
@@ -171,28 +171,6 @@ def parse_args():
         action='append', dest='overrides', type=config_override_type,
         help='`section/key=value` values to override config options')
     return parser.parse_args(args=mopidy_args)
-
-
-def show_config_task(args):
-    files = vars(args).get('config', b'').split(b':')
-    overrides = vars(args).get('overrides', [])
-
-    extensions = ext.load_extensions()
-    config, errors = config_lib.load(files, extensions, overrides)
-
-    # Clear out any config for disabled extensions.
-    for extension in extensions:
-        if not ext.validate_extension(extension):
-            config[extension.ext_name] = {b'enabled': False}
-            errors[extension.ext_name] = {
-                b'enabled': b'extension disabled its self.'}
-        elif not config[extension.ext_name]['enabled']:
-            config[extension.ext_name] = {b'enabled': False}
-            errors[extension.ext_name] = {
-                b'enabled': b'extension disabled by config.'}
-
-    print config_lib.format(config, extensions, errors)
-    sys.exit(0)
 
 
 def check_old_locations():
