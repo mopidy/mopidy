@@ -139,35 +139,33 @@ def parse_options():
     optparse.Option.TYPES += ('config_override',)
     optparse.Option.TYPE_CHECKER['config_override'] = check_config_override
 
-    # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
-    # See https://github.com/mopidy/mopidy/issues/302 for details
     parser.add_option(
-        b'-q', '--quiet',
+        '-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
     parser.add_option(
-        b'-v', '--verbose',
+        '-v', '--verbose',
         action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
     parser.add_option(
-        b'--save-debug-log',
+        '--save-debug-log',
         action='store_true', dest='save_debug_log',
         help='save debug log to "./mopidy.log"')
     parser.add_option(
-        b'--show-config',
+        '--show-config',
         action='callback', callback=show_config_callback,
         help='show current config')
     parser.add_option(
-        b'--show-deps',
+        '--show-deps',
         action='callback', callback=deps.show_deps_optparse_callback,
         help='show dependencies and their versions')
     parser.add_option(
-        b'--config',
+        '--config',
         action='store', dest='config',
         default=b'$XDG_CONFIG_DIR/mopidy/mopidy.conf',
         help='config files to use, colon seperated, later files override')
     parser.add_option(
-        b'-o', b'--option',
+        '-o', '--option',
         action='append', dest='overrides', type='config_override',
         help='`section/key=value` values to override config options')
     return parser.parse_args(args=mopidy_args)[0]

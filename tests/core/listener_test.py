@@ -1,11 +1,10 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
 
 from mopidy.core import CoreListener, PlaybackState
 from mopidy.models import Playlist, TlTrack
-
-from tests import unittest
 
 
 class CoreListenerTest(unittest.TestCase):

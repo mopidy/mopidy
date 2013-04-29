@@ -139,8 +139,6 @@ def query_from_mpd_list_format(field, mpd_query):
     """
     Converts an MPD ``list`` query to a Mopidy query.
     """
-    # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
-    # See https://github.com/mopidy/mopidy/issues/302 for details
     if mpd_query is None:
         return {}
     try:
@@ -156,7 +154,7 @@ def query_from_mpd_list_format(field, mpd_query):
         if field == 'album':
             if not tokens[0]:
                 raise ValueError
-            return {b'artist': [tokens[0]]}  # See above NOTE
+            return {'artist': [tokens[0]]}  # See above NOTE
         else:
             raise MpdArgError(
                 'should be "Album" for 3 arguments', command='list')

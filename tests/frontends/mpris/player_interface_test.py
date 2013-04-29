@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
+
 import pykka
 
 try:
@@ -15,8 +17,6 @@ from mopidy.models import Album, Artist, Track
 
 if dbus:
     from mopidy.frontends.mpris import objects
-
-from tests import unittest
 
 PLAYING = PlaybackState.PLAYING
 PAUSED = PlaybackState.PAUSED

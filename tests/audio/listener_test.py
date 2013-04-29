@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
 
 from mopidy import audio
-
-from tests import unittest
 
 
 class AudioListenerTest(unittest.TestCase):

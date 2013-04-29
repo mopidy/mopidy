@@ -1,15 +1,17 @@
 from __future__ import unicode_literals
 
 import errno
-import gobject
 import logging
-import pykka
-import socket
 from mock import patch, sentinel, Mock
+import socket
+import unittest
+
+import gobject
+import pykka
 
 from mopidy.utils import network
 
-from tests import unittest, any_int, any_unicode
+from tests import any_int, any_unicode
 
 
 class ConnectionTest(unittest.TestCase):

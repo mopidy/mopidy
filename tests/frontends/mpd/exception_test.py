@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 
+import unittest
+
 from mopidy.frontends.mpd.exceptions import (
     MpdAckError, MpdPermissionError, MpdUnknownCommand, MpdSystemError,
     MpdNotImplemented)
-
-from tests import unittest
 
 
 class MpdExceptionsTest(unittest.TestCase):

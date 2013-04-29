@@ -3,10 +3,9 @@ from __future__ import unicode_literals
 import os
 import subprocess
 import sys
+import unittest
 
 import mopidy
-
-from tests import unittest
 
 
 class HelpTest(unittest.TestCase):

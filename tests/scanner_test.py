@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 
+import unittest
+
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class FakeGstDate(object):
@@ -32,40 +34,36 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz-albumartistid': 'mbalbumartistid',
         }
 
-        # NOTE: kwargs are explicitly made bytestrings to work on Python
-        # 2.6.0/2.6.1. See https://github.com/mopidy/mopidy/issues/302 for
-        # details.
-
         self.album = {
-            b'name': 'albumname',
-            b'num_tracks': 2,
-            b'musicbrainz_id': 'mbalbumid',
+            'name': 'albumname',
+            'num_tracks': 2,
+            'musicbrainz_id': 'mbalbumid',
         }
 
         self.artist = {
-            b'name': 'name',
-            b'musicbrainz_id': 'mbartistid',
+            'name': 'name',
+            'musicbrainz_id': 'mbartistid',
         }
 
         self.albumartist = {
-            b'name': 'albumartistname',
-            b'musicbrainz_id': 'mbalbumartistid',
+            'name': 'albumartistname',
+            'musicbrainz_id': 'mbalbumartistid',
         }
 
         self.track = {
-            b'uri': 'uri',
-            b'name': 'trackname',
-            b'date': '2006-01-01',
-            b'track_no': 1,
-            b'length': 4531,
-            b'musicbrainz_id': 'mbtrackid',
+            'uri': 'uri',
+            'name': 'trackname',
+            'date': '2006-01-01',
+            'track_no': 1,
+            'length': 4531,
+            'musicbrainz_id': 'mbtrackid',
         }
 
     def build_track(self):
         if self.albumartist:
-            self.album[b'artists'] = [Artist(**self.albumartist)]
-        self.track[b'album'] = Album(**self.album)
-        self.track[b'artists'] = [Artist(**self.artist)]
+            self.album['artists'] = [Artist(**self.albumartist)]
+        self.track['album'] = Album(**self.album)
+        self.track['artists'] = [Artist(**self.artist)]
         return Track(**self.track)
 
     def check(self):

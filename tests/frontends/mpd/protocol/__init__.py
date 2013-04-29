@@ -1,13 +1,13 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
+
 import pykka
 
 from mopidy import core
 from mopidy.backends import dummy
 from mopidy.frontends.mpd import session
-
-from tests import unittest
 
 
 class MockConnection(mock.Mock):

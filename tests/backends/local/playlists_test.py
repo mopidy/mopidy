@@ -3,12 +3,13 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+import unittest
 
 from mopidy.backends.local import actor
 from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 from tests.backends.base.playlists import (
     PlaylistsControllerTest)
 from tests.backends.local import generate_song

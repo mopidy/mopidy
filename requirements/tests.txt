@@ -3,5 +3,3 @@ flake8
 mock >= 1.0
 nose
 pylint
-tox
-unittest2

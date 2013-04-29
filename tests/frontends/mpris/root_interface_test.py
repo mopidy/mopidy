@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
+
 import pykka
 
 try:
@@ -13,8 +15,6 @@ from mopidy.backends import dummy
 
 if dbus:
     from mopidy.frontends.mpris import objects
-
-from tests import unittest
 
 
 @unittest.skipUnless(dbus, 'dbus not found')

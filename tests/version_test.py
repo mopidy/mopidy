@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
 from distutils.version import StrictVersion as SV
+import unittest
 
 from mopidy import __version__
-
-from tests import unittest
 
 
 class VersionTest(unittest.TestCase):
