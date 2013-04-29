@@ -4,9 +4,6 @@ import collections
 
 from mopidy.config import types
 
-# TODO: 2.6 cleanup (#344).
-ordered_dict = getattr(collections, 'OrderedDict', dict)
-
 
 def _did_you_mean(name, choices):
     """Suggest most likely setting based on levenshtein."""
@@ -40,7 +37,7 @@ def _levenshtein(a, b):
     return current[n]
 
 
-class ConfigSchema(object):
+class ConfigSchema(collections.OrderedDict):
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
@@ -50,19 +47,9 @@ class ConfigSchema(object):
     :meth:`serialize` for converting the values to a form suitable for
     persistence.
     """
-    # TODO: Use collections.OrderedDict once 2.6 support is gone (#344)
     def __init__(self, name):
+        super(ConfigSchema, self).__init__()
         self.name = name
-        self._schema = {}
-        self._order = []
-
-    def __setitem__(self, key, value):
-        if key not in self._schema:
-            self._order.append(key)
-        self._schema[key] = value
-
-    def __getitem__(self, key):
-        return self._schema[key]
 
     def deserialize(self, values):
         """Validates the given ``values`` using the config schema.
@@ -73,17 +60,17 @@ class ConfigSchema(object):
 
         for key, value in values.items():
             try:
-                result[key] = self._schema[key].deserialize(value)
+                result[key] = self[key].deserialize(value)
             except KeyError:  # not in our schema
                 errors[key] = 'unknown config key.'
-                suggestion = _did_you_mean(key, self._schema.keys())
+                suggestion = _did_you_mean(key, self.keys())
                 if suggestion:
                     errors[key] += ' Did you mean %s?' % suggestion
             except ValueError as e:  # deserialization failed
                 result[key] = None
                 errors[key] = str(e)
 
-        for key in self._schema:
+        for key in self.keys():
             if key not in result and key not in errors:
                 result[key] = None
                 errors[key] = 'config key not found.'
@@ -97,10 +84,10 @@ class ConfigSchema(object):
         will be masked out.
 
         Returns a dict of config keys and values."""
-        result = ordered_dict()  # TODO: 2.6 cleanup (#344).
-        for key in self._order:
+        result = collections.OrderedDict()
+        for key in self.keys():
             if key in values:
-                result[key] = self._schema[key].serialize(values[key], display)
+                result[key] = self[key].serialize(values[key], display)
         return result
 
 
@@ -109,7 +96,8 @@ class LogLevelConfigSchema(object):
 
     Expects the config keys to be logger names and the values to be log levels
     as understood by the :class:`LogLevel` config value. Does not sub-class
-    :class:`ConfigSchema`, but implements the same interface.
+    :class:`ConfigSchema`, but implements the same serialize/deserialize
+    interface.
     """
     def __init__(self, name):
         self.name = name
@@ -128,7 +116,7 @@ class LogLevelConfigSchema(object):
         return result, errors
 
     def serialize(self, values, display=False):
-        result = ordered_dict()  # TODO: 2.6 cleanup (#344)
+        result = collections.OrderedDict()
         for key in sorted(values.keys()):
             result[key] = self._config_value.serialize(values[key], display)
         return result
