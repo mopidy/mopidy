@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
+import argparse
 import logging
-import optparse
 import os
 import signal
 import sys
@@ -37,11 +37,16 @@ def main():
     signal.signal(signal.SIGTERM, process.exit_handler)
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
-    loop = gobject.MainLoop()
-    options = parse_options()
-    config_files = options.config.split(b':')
-    config_overrides = options.overrides
+    args = parse_args()
+    if args.show_config:
+        show_config_task(args)
+    if args.show_deps:
+        deps.show_deps_task()
 
+    config_files = args.config.split(b':')
+    config_overrides = args.overrides
+
+    loop = gobject.MainLoop()
     enabled_extensions = []  # Make sure it is defined before the finally block
     logging_initialized = False
 
@@ -54,7 +59,7 @@ def main():
 
         # TODO: setup_logging needs defaults in-case config values are None
         log.setup_logging(
-            logging_config, options.verbosity_level, options.save_debug_log)
+            logging_config, args.verbosity_level, args.save_debug_log)
         logging_initialized = True
 
         installed_extensions = ext.load_extensions()
@@ -123,59 +128,54 @@ def check_config_errors(errors):
     sys.exit(1)
 
 
-def check_config_override(option, opt, override):
+def config_override_type(value):
     try:
-        return config_lib.parse_override(override)
+        return config_lib.parse_override(value)
     except ValueError:
-        raise optparse.OptionValueError(
-            'option %s: must have the format section/key=value' % opt)
+        raise argparse.ArgumentTypeError(
+            '%s must have the format section/key=value' % value)
 
 
-def parse_options():
-    parser = optparse.OptionParser(
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--version', action='version',
         version='Mopidy %s' % versioning.get_version())
-
-    # Ugly extension of optparse type checking magic :/
-    optparse.Option.TYPES += ('config_override',)
-    optparse.Option.TYPE_CHECKER['config_override'] = check_config_override
-
-    parser.add_option(
+    parser.add_argument(
         '-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
-    parser.add_option(
+    parser.add_argument(
         '-v', '--verbose',
         action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
-    parser.add_option(
+    parser.add_argument(
         '--save-debug-log',
         action='store_true', dest='save_debug_log',
         help='save debug log to "./mopidy.log"')
-    parser.add_option(
+    parser.add_argument(
         '--show-config',
-        action='callback', callback=show_config_callback,
+        action='store_true', dest='show_config',
         help='show current config')
-    parser.add_option(
+    parser.add_argument(
         '--show-deps',
-        action='callback', callback=deps.show_deps_optparse_callback,
+        action='store_true', dest='show_deps',
         help='show dependencies and their versions')
-    parser.add_option(
+    parser.add_argument(
         '--config',
         action='store', dest='config',
         default=b'$XDG_CONFIG_DIR/mopidy/mopidy.conf',
         help='config files to use, colon seperated, later files override')
-    parser.add_option(
+    parser.add_argument(
         '-o', '--option',
-        action='append', dest='overrides', type='config_override',
+        action='append', dest='overrides', type=config_override_type,
         help='`section/key=value` values to override config options')
-    return parser.parse_args(args=mopidy_args)[0]
+    return parser.parse_args(args=mopidy_args)
 
 
-def show_config_callback(option, opt, value, parser):
-    # TODO: don't use callback for this as --config or -o set after
-    # --show-config will be ignored.
-    files = getattr(parser.values, 'config', b'').split(b':')
-    overrides = getattr(parser.values, 'overrides', [])
+def show_config_task(args):
+    files = vars(args).get('config', b'').split(b':')
+    overrides = vars(args).get('overrides', [])
 
     extensions = ext.load_extensions()
     config, errors = config_lib.load(files, extensions, overrides)

@@ -14,13 +14,8 @@ import pkg_resources
 from . import formatting
 
 
-def show_deps_optparse_callback(*args):
-    """
-    Prints a list of all dependencies.
-
-    Called by optparse when Mopidy is run with the :option:`--show-deps`
-    option.
-    """
+def show_deps_task():
+    """Prints a list of all dependencies and exits."""
     print format_dependency_list()
     sys.exit(0)
 
