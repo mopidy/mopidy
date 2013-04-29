@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import argparse
 import logging
 import os
 import signal
@@ -28,7 +27,7 @@ from mopidy import commands, ext
 from mopidy.audio import Audio
 from mopidy import config as config_lib
 from mopidy.core import Core
-from mopidy.utils import log, path, process, versioning
+from mopidy.utils import log, path, process
 
 logger = logging.getLogger('mopidy.main')
 
@@ -37,7 +36,7 @@ def main():
     signal.signal(signal.SIGTERM, process.exit_handler)
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
-    args = parse_args()
+    args = commands.parser.parse_args(args=mopidy_args)
     if args.show_config:
         commands.show_config(args)
     if args.show_deps:
@@ -126,51 +125,6 @@ def check_config_errors(errors):
         for key, msg in errors[section].items():
             logger.error('Config value %s/%s %s', section, key, msg)
     sys.exit(1)
-
-
-def config_override_type(value):
-    try:
-        return config_lib.parse_override(value)
-    except ValueError:
-        raise argparse.ArgumentTypeError(
-            '%s must have the format section/key=value' % value)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--version', action='version',
-        version='Mopidy %s' % versioning.get_version())
-    parser.add_argument(
-        '-q', '--quiet',
-        action='store_const', const=0, dest='verbosity_level',
-        help='less output (warning level)')
-    parser.add_argument(
-        '-v', '--verbose',
-        action='count', default=1, dest='verbosity_level',
-        help='more output (debug level)')
-    parser.add_argument(
-        '--save-debug-log',
-        action='store_true', dest='save_debug_log',
-        help='save debug log to "./mopidy.log"')
-    parser.add_argument(
-        '--show-config',
-        action='store_true', dest='show_config',
-        help='show current config')
-    parser.add_argument(
-        '--show-deps',
-        action='store_true', dest='show_deps',
-        help='show dependencies and their versions')
-    parser.add_argument(
-        '--config',
-        action='store', dest='config',
-        default=b'$XDG_CONFIG_DIR/mopidy/mopidy.conf',
-        help='config files to use, colon seperated, later files override')
-    parser.add_argument(
-        '-o', '--option',
-        action='append', dest='overrides', type=config_override_type,
-        help='`section/key=value` values to override config options')
-    return parser.parse_args(args=mopidy_args)
 
 
 def check_old_locations():
