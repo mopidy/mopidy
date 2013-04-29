@@ -218,12 +218,10 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         self.assertEqual(self.core.playback.get_volume().get(), 37)
 
     def test_call_methods_with_named_params(self):
-        # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
-        # See https://github.com/mopidy/mopidy/issues/302 for details.
         request = {
             'jsonrpc': '2.0',
             'method': 'core.playback.set_volume',
-            'params': {b'volume': 37},
+            'params': {'volume': 37},
             'id': 1,
         }
         response = self.jrw.handle_data(request)
