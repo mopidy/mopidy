@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 
+import unittest
+
 from mopidy.backends.local import actor
 from mopidy.core import PlaybackState
 from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 from tests.backends.base.playback import PlaybackControllerTest
 from tests.backends.local import generate_song
 

@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import unittest
+
 import pykka
 
 from mopidy import core
@@ -8,8 +10,6 @@ from mopidy.core import PlaybackState
 from mopidy.frontends.mpd import dispatcher
 from mopidy.frontends.mpd.protocol import status
 from mopidy.models import Track
-
-from tests import unittest
 
 
 PAUSED = PlaybackState.PAUSED

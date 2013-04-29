@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
 
 from mopidy.backends.listener import BackendListener
-
-from tests import unittest
 
 
 class BackendListenerTest(unittest.TestCase):

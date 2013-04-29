@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from mopidy import exceptions
+import unittest
 
-from tests import unittest
+from mopidy import exceptions
 
 
 class ExceptionsTest(unittest.TestCase):

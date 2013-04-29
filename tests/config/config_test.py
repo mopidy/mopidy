@@ -3,10 +3,11 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
 
 from mopidy import config
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class LoadConfigTest(unittest.TestCase):
@@ -111,9 +112,12 @@ class ParseOverrideTest(unittest.TestCase):
     def test_valid_override(self):
         expected = (b'section', b'key', b'value')
         self.assertEqual(expected, config.parse_override(b'section/key=value'))
-        self.assertEqual(expected, config.parse_override(b'section/key=value '))
-        self.assertEqual(expected, config.parse_override(b'section/key =value'))
-        self.assertEqual(expected, config.parse_override(b'section /key=value'))
+        self.assertEqual(
+            expected, config.parse_override(b'section/key=value '))
+        self.assertEqual(
+            expected, config.parse_override(b'section/key =value'))
+        self.assertEqual(
+            expected, config.parse_override(b'section /key=value'))
 
     def test_valid_override_is_bytes(self):
         section, key, value = config.parse_override(b'section/key=value')

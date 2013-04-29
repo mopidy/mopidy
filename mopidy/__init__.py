@@ -9,9 +9,9 @@ import warnings
 import pykka
 
 
-if not (2, 6) <= sys.version_info < (3,):
+if not (2, 7) <= sys.version_info < (3,):
     sys.exit(
-        'Mopidy requires Python >= 2.6, < 3, but found %s' %
+        'Mopidy requires Python >= 2.7, < 3, but found %s' %
         '.'.join(map(str, sys.version_info[:3])))
 
 if (isinstance(pykka.__version__, basestring)

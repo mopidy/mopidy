@@ -1,13 +1,15 @@
 from __future__ import unicode_literals
 
 import errno
-import gobject
-import socket
 from mock import patch, sentinel, Mock
+import socket
+import unittest
+
+import gobject
 
 from mopidy.utils import network
 
-from tests import unittest, any_int
+from tests import any_int
 
 
 class ServerTest(unittest.TestCase):

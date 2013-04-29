@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 import json
+import mock
+import unittest
 
 try:
     import cherrypy
@@ -14,9 +16,6 @@ except ImportError:
 
 if cherrypy and ws4py:
     from mopidy.frontends.http import actor
-
-import mock
-from tests import unittest
 
 
 @unittest.skipUnless(cherrypy, 'cherrypy not found')

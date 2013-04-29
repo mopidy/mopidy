@@ -1,13 +1,13 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
+
 import pykka
 
 from mopidy import core
 from mopidy.backends import dummy
 from mopidy.models import Track
-
-from tests import unittest
 
 
 @mock.patch.object(core.CoreListener, 'send')

@@ -2,15 +2,17 @@
 
 from __future__ import unicode_literals
 
-import glib
 import os
 import shutil
 import sys
 import tempfile
+import unittest
+
+import glib
 
 from mopidy.utils import path
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class GetOrCreateDirTest(unittest.TestCase):

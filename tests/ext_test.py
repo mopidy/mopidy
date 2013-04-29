@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from mopidy import config, ext
+import unittest
 
-from tests import unittest
+from mopidy import config, ext
 
 
 class ExtensionTest(unittest.TestCase):

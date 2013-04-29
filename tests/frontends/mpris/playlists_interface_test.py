@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
 import datetime
-
 import mock
+import unittest
+
 import pykka
 
 try:
@@ -17,8 +18,6 @@ from mopidy.models import Track
 
 if dbus:
     from mopidy.frontends.mpris import objects
-
-from tests import unittest
 
 
 @unittest.skipUnless(dbus, 'dbus not found')

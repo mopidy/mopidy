@@ -2,10 +2,11 @@ from __future__ import unicode_literals
 
 import logging
 import mock
+import unittest
 
-from mopidy.config import schemas, types
+from mopidy.config import schemas
 
-from tests import unittest, any_unicode
+from tests import any_unicode
 
 
 class ConfigSchemaTest(unittest.TestCase):

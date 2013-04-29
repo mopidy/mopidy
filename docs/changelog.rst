@@ -9,6 +9,11 @@ v0.15.0 (UNRELEASED)
 
 (no description yet)
 
+**Dependencies**
+
+- Mopidy no longer supports Python 2.6. Currently, the only Python version
+  supported by Mopidy is Python 2.7.
+
 
 v0.14.1 (2013-04-28)
 ====================

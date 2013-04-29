@@ -6,10 +6,9 @@ import logging
 import mock
 import socket
 import sys
+import unittest
 
 from mopidy.config import types
-
-from tests import unittest
 
 # TODO: DecodeTest and EncodeTest
 
