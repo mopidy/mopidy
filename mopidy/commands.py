@@ -13,7 +13,9 @@ def config_files_type(value):
 
 def config_override_type(value):
     try:
-        return config_lib.parse_override(value)
+        section, remainder = value.split(b'/', 1)
+        key, value = remainder.split(b'=', 1)
+        return (section.strip(), key.strip(), value.strip())
     except ValueError:
         raise argparse.ArgumentTypeError(
             '%s must have the format section/key=value' % value)
