@@ -7,6 +7,10 @@ from mopidy import config as config_lib, ext
 from mopidy.utils import deps, versioning
 
 
+def config_files_type(value):
+    return value.split(b':')
+
+
 def config_override_type(value):
     try:
         return config_lib.parse_override(value)
@@ -41,22 +45,20 @@ parser.add_argument(
     help='show dependencies and their versions')
 parser.add_argument(
     '--config',
-    action='store', dest='config',
+    action='store', dest='config_files', type=config_files_type,
     default=b'$XDG_CONFIG_DIR/mopidy/mopidy.conf',
     help='config files to use, colon seperated, later files override')
 parser.add_argument(
     '-o', '--option',
-    action='append', dest='overrides', type=config_override_type,
+    action='append', dest='config_overrides', type=config_override_type,
     help='`section/key=value` values to override config options')
 
 
 def show_config(args):
     """Prints the effective config and exits."""
-    files = vars(args).get('config', b'').split(b':')
-    overrides = vars(args).get('overrides', [])
-
     extensions = ext.load_extensions()
-    config, errors = config_lib.load(files, extensions, overrides)
+    config, errors = config_lib.load(
+        args.config_files, extensions, args.config_overrides)
 
     # Clear out any config for disabled extensions.
     for extension in extensions:

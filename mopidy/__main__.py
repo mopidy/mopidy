@@ -42,9 +42,6 @@ def main():
     if args.show_deps:
         commands.show_deps()
 
-    config_files = args.config.split(b':')
-    config_overrides = args.overrides
-
     loop = gobject.MainLoop()
     enabled_extensions = []  # Make sure it is defined before the finally block
     logging_initialized = False
@@ -54,7 +51,8 @@ def main():
 
     try:
         # Initial config without extensions to bootstrap logging.
-        logging_config, _ = config_lib.load(config_files, [], config_overrides)
+        logging_config, _ = config_lib.load(
+            args.config_files, [], args.config_overrides)
 
         # TODO: setup_logging needs defaults in-case config values are None
         log.setup_logging(
@@ -64,7 +62,7 @@ def main():
         installed_extensions = ext.load_extensions()
 
         config, config_errors = config_lib.load(
-            config_files, installed_extensions, config_overrides)
+            args.config_files, installed_extensions, args.config_overrides)
 
         # Filter out disabled extensions and remove any config errors for them.
         for extension in installed_extensions:
