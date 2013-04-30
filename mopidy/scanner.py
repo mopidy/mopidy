@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
+import argparse
 import datetime
 import logging
-import optparse
 import os
 import sys
 
@@ -33,7 +33,7 @@ from mopidy.utils import log, path, versioning
 
 
 def main():
-    options = parse_options()
+    args = parse_args()
     # TODO: support config files and overrides (shared from main?)
     config_files = [b'/etc/mopidy/mopidy.conf',
                     b'$XDG_CONFIG_DIR/mopidy/mopidy.conf']
@@ -43,7 +43,7 @@ def main():
     # Initial config without extensions to bootstrap logging.
     logging_config, _ = config_lib.load(config_files, [], config_overrides)
     log.setup_root_logger()
-    log.setup_console_logging(logging_config, options.verbosity_level)
+    log.setup_console_logging(logging_config, args.verbosity_level)
 
     extensions = ext.load_extensions()
     config, errors = config_lib.load(
@@ -87,18 +87,20 @@ def main():
     logging.info('Done writing tag cache')
 
 
-def parse_options():
-    parser = optparse.OptionParser(
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--version', action='version',
         version='Mopidy %s' % versioning.get_version())
-    parser.add_option(
+    parser.add_argument(
         '-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
-    parser.add_option(
+    parser.add_argument(
         '-v', '--verbose',
         action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
-    return parser.parse_args(args=mopidy_args)[0]
+    return parser.parse_args(args=mopidy_args)
 
 
 def translator(data):

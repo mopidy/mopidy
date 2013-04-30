@@ -140,13 +140,6 @@ def _format(config, comments, schemas, display):
     return b'\n'.join(output)
 
 
-def parse_override(override):
-    """Parse ``section/key=value`` command line overrides"""
-    section, remainder = override.split(b'/', 1)
-    key, value = remainder.split(b'=', 1)
-    return (section.strip(), key.strip(), value.strip())
-
-
 class Proxy(collections.Mapping):
     def __init__(self, data):
         self._data = data

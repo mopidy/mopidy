@@ -14,6 +14,14 @@ v0.15.0 (UNRELEASED)
 - Mopidy no longer supports Python 2.6. Currently, the only Python version
   supported by Mopidy is Python 2.7. (Fixes: :issue:`344`)
 
+**Command line options**
+
+- Converted from the optparse to the argparse library for handling command line
+  options.
+
+- :option:`mopidy --show-config` will now take into consideration any
+  :option:`mopidy --option` arguments appearing later on the command line.
+
 
 v0.14.1 (2013-04-28)
 ====================
