@@ -2,16 +2,6 @@
 
 This is Mopidy's default mixer.
 
-
-Dependencies
-============
-
-None
-
-
-Configuration
-=============
-
 If this wasn't the default, you would set the :confval:`audio/mixer` config
 value to ``autoaudiomixer`` to use this mixer.
 """

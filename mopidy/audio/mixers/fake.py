@@ -1,14 +1,5 @@
 """Fake mixer for use in tests.
 
-Dependencies
-============
-
-None
-
-
-Configuration
-=============
-
 Set the :confval:`audio/mixer:` config value to ``fakemixer`` to use this
 mixer.
 """
