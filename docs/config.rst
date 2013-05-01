@@ -17,11 +17,11 @@ as simple as this:
 
 Mopidy primarily reads config from the file ``~/.config/mopidy/mopidy.conf``,
 where ``~`` means your *home directory*. If your username is ``alice`` and you
-are running Linux, the settings file should probably be at
+are running Linux, the config file should probably be at
 ``/home/alice/.config/mopidy/mopidy.conf``. You can either create the
 configuration file yourself, or run the ``mopidy`` command, and it will create
-an empty settings file for you and print what config values must be set
-to successfully start Mopidy.
+an empty config file for you and print what config values must be set to
+successfully start Mopidy.
 
 When you have created the configuration file, open it in a text editor, and add
 the config values you want to change. If you want to keep the default for a
@@ -109,8 +109,8 @@ Core configuration values
 
 .. confval:: logging/config_file
 
-    Config file that overrides all logging settings, see `the Python logging
-    docs`_ for details.
+    Config file that overrides all logging config values, see `the Python
+    logging docs`_ for details.
 
 .. confval:: loglevels/*
 
@@ -212,9 +212,9 @@ can use with the ``gst-launch-0.10`` command can be plugged into
 New configuration values
 ------------------------
 
-Mopidy's settings validator will stop you from defining any config values in
-your settings file that Mopidy doesn't know about. This may sound obnoxious,
-but it helps us detect typos in your settings, and deprecated settings that
+Mopidy's config validator will stop you from defining any config values in
+your config file that Mopidy doesn't know about. This may sound obnoxious,
+but it helps us detect typos in your config, and deprecated config values that
 should be removed or updated.
 
 If you're extending Mopidy, and want to use Mopidy's configuration
