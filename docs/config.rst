@@ -37,11 +37,13 @@ below, together with their default values. In addition, all :ref:`extensions
 <ext>` got additional config values. The extension's config values and config
 defaults are documented on the :ref:`extension pages <ext>`.
 
-Migrating from pre 0.14
------------------------
 
-For those users upgrading from versions prior to 0.14 we made :option:`mopidy-convert-config` tool,
-to ease proces of migrating settings to new config format.
+Migrating from pre 0.14
+=======================
+
+For those users upgrading from versions prior to 0.14 we made
+the :option:`mopidy-convert-config` tool, to ease the process of migrating
+settings to the new config format.
 
 
 Default core configuration
