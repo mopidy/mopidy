@@ -132,9 +132,7 @@ Core configuration values
 
     Password for the proxy server, if needed.
 
-.. _the Python logging docs:
-
-    http://docs.python.org/2/library/logging.config.html
+.. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
 
 
 Advanced configurations
