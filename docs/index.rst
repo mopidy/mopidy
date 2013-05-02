@@ -71,6 +71,7 @@ Reference
 .. toctree::
     :maxdepth: 2
 
+    glossary
     api/index
     modules/index
 
