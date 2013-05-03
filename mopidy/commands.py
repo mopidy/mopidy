@@ -67,7 +67,7 @@ def show_config(args):
         if not ext.validate_extension(extension):
             config[extension.ext_name] = {b'enabled': False}
             errors[extension.ext_name] = {
-                b'enabled': b'extension disabled its self.'}
+                b'enabled': b'extension disabled itself.'}
         elif not config[extension.ext_name]['enabled']:
             config[extension.ext_name] = {b'enabled': False}
             errors[extension.ext_name] = {
