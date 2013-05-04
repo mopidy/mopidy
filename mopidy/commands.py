@@ -27,11 +27,11 @@ parser.add_argument(
     version='Mopidy %s' % versioning.get_version())
 parser.add_argument(
     '-q', '--quiet',
-    action='store_const', const=0, dest='verbosity_level',
+    action='store_const', const=-1, dest='verbosity_level',
     help='less output (warning level)')
 parser.add_argument(
     '-v', '--verbose',
-    action='count', default=1, dest='verbosity_level',
+    action='count', dest='verbosity_level',
     help='more output (debug level)')
 parser.add_argument(
     '--save-debug-log',

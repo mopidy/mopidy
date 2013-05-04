@@ -34,10 +34,10 @@ def setup_root_logger():
 
 
 def setup_console_logging(config, verbosity_level):
-    if verbosity_level == 0:
+    if verbosity_level == -1:
         log_level = logging.WARNING
         log_format = config['logging']['console_format']
-    elif verbosity_level >= 2:
+    elif verbosity_level >= 1:
         log_level = logging.DEBUG
         log_format = config['logging']['debug_format']
     else:
