@@ -57,7 +57,7 @@ How to for Debian 7 (Wheezy)
 #. Since I have a HDMI cable connected, but want the sound on the analog sound
    connector, I have to run::
 
-       amixer cset numid=3 1
+       sudo amixer cset numid=3 1
 
    to force it to use analog output. ``1`` means analog, ``0`` means auto, and
    is the default, while ``2`` means HDMI. You can test sound output
@@ -75,6 +75,60 @@ How to for Debian 7 (Wheezy)
 Fixing audio quality issues
 ===========================
 
-As of January 2013, some reports also indicate that pushing the audio through
-PulseAudio may help. We hope to, in the future, provide a complete set of
-instructions here leading to acceptable analog audio quality.
+As of about April 2013 the following steps should resolve any audio
+issues for HDMI and analog without the use of an external USB sound
+card.
+
+#. Ensure you system is up to date, for debian based systems run::
+
+      sudo apt-get update
+      sudo apt-get full-upgrade
+
+#. Ensure you have a new enough firmware, on debian based systems
+   `rpi-update <http://apt.mopidy.com://github.com/Hexxeh/rpi-update>`_
+   can be used.
+
+#. Update either ``~/.asoundrc`` or ``/etc/asound.conf`` to the
+   following::
+
+       pcm.!default {
+               type hw
+               card 0
+       }
+       ctl.!default {
+               type hw
+               card 0
+       }
+
+   Note that if you have an ``asoundrc`` it will overide
+   any global settings.
+
+#. Update your ``~/.config/mopidy/mopidy.conf`` to contain::
+
+       [audio]
+       output = alsasink
+
+   This is to tell GStreamer not to pick Jack which it seems to like
+   picking on RaspberryPis for some reason.
+
+
+Following these steps you should be able to get crackle free sound on
+either HDMI or analog. Note that you might need to ensure that pulse
+is no longer running to get this working nicely.
+
+This recipe has been confirmed as working by a number of users on our
+bug tracker and irc. As a reference, the following versions where used
+for testing this, however all newer and some older version are likely
+to work as we have not determined the exact revision that fixed this::
+
+       $ uname -a
+       Linux raspberrypi 3.6.11+ #408 PREEMPT Wed Apr 10 20:33:39 BST 2013 armv6l GNU/Linux
+
+       $ /opt/vc/bin/vcgencmd version
+       Apr 25 2013 01:07:36
+       Copyright (c) 2012 Broadcom
+       version 386589 (release)
+
+The only remaining known issues is a slight gap in playback at track
+changes this is likely due to gapless playback not being implemented
+and is being worked on irrespective of raspi related work.
