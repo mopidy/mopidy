@@ -100,7 +100,7 @@ card.
                card 0
        }
 
-   Note that if you have an ``~-/.asoundrc`` it will overide any global
+   Note that if you have an ``~/.asoundrc`` it will overide any global
    settings from ``/etc/asound.conf``.
 
 #. Update your ``~/.config/mopidy/mopidy.conf`` to contain::
