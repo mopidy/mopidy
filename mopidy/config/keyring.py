@@ -22,19 +22,19 @@ else:
 def fetch():
     if not dbus:
         logger.debug('Keyring lookup failed as D-Bus not installed.')
-        return None
+        return []
 
     bus = _bus()
     if not _secrets_running(bus):
         logger.debug('Keyring lookup failed as Secrets service not running.')
-        return None
+        return []
 
     service = _serivce(bus)
     session = service.OpenSession('plain', EMPTY_STRING)[1]
     items, locked = service.SearchItems({'service': 'mopidy'})
 
     if not locked and not items:
-        return None
+        return []
 
     if locked:
         # There is a chance we can unlock without prompting the users...
@@ -42,15 +42,15 @@ def fetch():
         if prompt != '/':
             _prompt(bus, prompt).Dismiss()
             logger.debug('Keyring lookup failed as it is locked.')
-            return None
+            return []
 
-    config = {}
+    result = []
     secrets = service.GetSecrets(items, session, byte_arrays=True)
     for item_path, values in secrets.iteritems():
         session_path, parameters, value, content_type = values
         attrs = _item_attributes(bus, item_path)
-        config.setdefault(attrs['section'], {})[attrs['key']] = bytes(value)
-    return config
+        result.append((attrs['section'], attrs['key'], bytes(value)))
+    return result
 
 
 def set(section, key, value):
