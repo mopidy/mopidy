@@ -69,7 +69,7 @@ You can now run the tests:
 
 To run tests automatically when you save a file:
 
-    npm run-script watch
+    npm start
 
 To run tests, concatenate, minify the source, and update the JavaScript files
 in `mopidy/frontends/http/data/`:

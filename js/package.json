@@ -31,6 +31,6 @@
   "scripts": {
     "test": "grunt test",
     "build": "grunt build",
-    "watch": "grunt watch"
+    "start": "grunt watch"
   }
 }
