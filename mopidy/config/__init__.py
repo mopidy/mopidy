@@ -5,6 +5,7 @@ import io
 import logging
 import os.path
 
+from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
 from mopidy.utils import path
@@ -47,7 +48,7 @@ def load(files, extensions, overrides):
     config_dir = os.path.dirname(__file__)
     defaults = [read(os.path.join(config_dir, 'default.conf'))]
     defaults.extend(e.get_default_config() for e in extensions)
-    raw_config = _load(files, defaults, overrides)
+    raw_config = _load(files, defaults, keyring.fetch() + (overrides or []))
 
     schemas = _schemas[:]
     schemas.extend(e.get_config_schema() for e in extensions)
@@ -101,7 +102,7 @@ def _load(files, defaults, overrides):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
-    for section, key, value in overrides or []:
+    for section, key, value in overrides:
         raw_config.setdefault(section, {})[key] = value
 
     return raw_config
