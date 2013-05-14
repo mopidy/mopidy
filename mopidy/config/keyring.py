@@ -11,7 +11,7 @@ except ImportError:
 
 
 # XXX: Hack to workaround introspection bug caused by gnome-keyring, should be
-# version fixed by 3.5 per:
+# fixed by version 3.5 per:
 # https://git.gnome.org/browse/gnome-keyring/commit/?id=5dccbe88eb94eea9934e2b7
 if dbus:
     EMPTY_STRING = dbus.String('', variant_level=1)
@@ -35,7 +35,7 @@ def fetch():
             'Fetching from keyring failed: secrets service not running.')
         return []
 
-    service = _serivce(bus)
+    service = _service(bus)
     session = service.OpenSession('plain', EMPTY_STRING)[1]
     items, locked = service.SearchItems({'service': 'mopidy'})
 
@@ -62,7 +62,7 @@ def fetch():
 def set(section, key, value):
     """Store a secret config value for a given section/key.
 
-    Indicates if storage failed or succeded.
+    Indicates if storage failed or succeeded.
     """
     if not dbus:
         logger.debug('Saving %s/%s to keyring failed: dbus not installed.',
@@ -81,7 +81,7 @@ def set(section, key, value):
             section, key)
         return False
 
-    service = _serivce(bus)
+    service = _service(bus)
     collection = _collection(bus)
     if not collection:
         return False
@@ -113,16 +113,16 @@ def set(section, key, value):
     return False
 
 
-def _serivce(bus):
+def _service(bus):
     return _interface(bus, '/org/freedesktop/secrets',
                       'org.freedesktop.Secret.Service')
 
 
-# NOTE: depending on versions and setup default might not exists, so try and
-# use it but fall back to the login collection, and finally the session one if
-# all else fails. We should probably create a keyring/collection setting that
-# allows users to set this so they have control over where their secrets get
-# stored.
+# NOTE: depending on versions and setup 'default' might not exists, so try and
+# use it but fall back to the 'login' collection, and finally the 'session' one
+# if all else fails. We should probably create a keyring/collection setting
+# that allows users to set this so they have control over where their secrets
+# get stored.
 def _collection(bus):
     for name in 'aliases/default', 'collection/login', 'collection/session':
         path = '/org/freedesktop/secrets/' + name
