@@ -27,6 +27,7 @@ pygst.require('0.10')
 import gst
 
 from mopidy import config as config_lib, ext
+from mopidy.audio import dummy as dummy_audio
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
@@ -45,9 +46,9 @@ def main():
     log.setup_root_logger()
     log.setup_console_logging(logging_config, args.verbosity_level)
 
-    extensions = ext.load_extensions()
+    extensions = dict((e.ext_name, e) for e in ext.load_extensions())
     config, errors = config_lib.load(
-        config_files, extensions, config_overrides)
+        config_files, extensions.values(), config_overrides)
     log.setup_log_levels(config)
 
     if not config['local']['media_dir']:
@@ -56,7 +57,13 @@ def main():
 
     # TODO: missing error checking and other default setup code.
 
-    tracks = []
+    audio = dummy_audio.DummyAudio()
+    local_backend_class = extensions['local'].get_backend_classes()
+    local_backend = local_backend_class[0](config, audio)
+
+    tracks = {}
+    for track in local_backend.library.search().tracks:
+        tracks[track.uri] = track
 
     def find(base_directory):
         for p in path.find_files(base_directory):
@@ -64,7 +71,7 @@ def main():
 
     def store(data):
         track = translator(data)
-        tracks.append(track)
+        tracks[track.uri] = track
         logging.debug('Added %s', track.uri)
 
     def debug(uri, error, debug):
@@ -83,7 +90,7 @@ def main():
     logging.info('Done scanning; writing tag cache...')
 
     for row in mpd_translator.tracks_to_tag_cache_format(
-            tracks, config['local']['media_dir']):
+            tracks.values(), config['local']['media_dir']):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
