@@ -58,6 +58,10 @@ def main():
 
     tracks = []
 
+    def find(base_directory):
+        for p in path.find_files(base_directory):
+            yield path.path_to_uri(p)
+
     def store(data):
         track = translator(data)
         tracks.append(track)
@@ -69,7 +73,8 @@ def main():
 
     logging.info('Scanning %s', config['local']['media_dir'])
 
-    scanner = Scanner(config['local']['media_dir'], store, debug)
+    uris = find(config['local']['media_dir'])
+    scanner = Scanner(uris, store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
@@ -150,9 +155,9 @@ def translator(data):
 
 
 class Scanner(object):
-    def __init__(self, base_dir, data_callback, error_callback=None):
+    def __init__(self, uris, data_callback, error_callback=None):
         self.data = {}
-        self.files = path.find_files(base_dir)
+        self.uris = iter(uris)
         self.data_callback = data_callback
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
@@ -237,7 +242,7 @@ class Scanner(object):
     def next_uri(self):
         self.data = {}
         try:
-            uri = path.path_to_uri(self.files.next())
+            uri = next(self.uris)
         except StopIteration:
             self.stop()
             return False
