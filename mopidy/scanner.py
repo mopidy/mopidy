@@ -61,13 +61,31 @@ def main():
     local_backend_class = extensions['local'].get_backend_classes()
     local_backend = local_backend_class[0](config, audio)
 
-    tracks = {}
+    tracks = {}  # Current lib.
+    update = []  # Paths to rescan for updates/adds.
+    remove = []  # Paths to delete from lib.
+
     for track in local_backend.library.search().tracks:
         tracks[track.uri] = track
 
-    def find(base_directory):
-        for p in path.find_files(base_directory):
-            yield path.path_to_uri(p)
+    logging.info('Checking %d files from library.', len(tracks))
+    for track in tracks.itervalues():
+        try:
+            stat = os.stat(path.uri_to_path(track.uri))
+            if int(stat.st_mtime) > track.last_modified:
+                update.append(track.uri)
+        except OSError:
+            remove.append(track.uri)
+
+    logging.info('Removing %d files from library.', len(remove))
+    for uri in remove:
+        del tracks[uri]
+
+    logging.info('Checking %s for changes.', config['local']['media_dir'])
+    for p in path.find_files(config['local']['media_dir']):
+        uri = path.path_to_uri(p)
+        if uri not in tracks:
+            update.append(uri)
 
     def store(data):
         track = translator(data)
@@ -78,10 +96,9 @@ def main():
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-    logging.info('Scanning %s', config['local']['media_dir'])
 
-    uris = find(config['local']['media_dir'])
-    scanner = Scanner(uris, store, debug)
+    logging.info('Scanning %d files.', len(update))
+    scanner = Scanner(update, store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
