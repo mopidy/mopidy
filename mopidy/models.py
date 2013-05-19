@@ -231,6 +231,8 @@ class Track(ImmutableObject):
     :type bitrate: integer
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
+    :param last_modified: integer representing last modifcation time
+    :type last_modified: integer
     """
 
     #: The track URI. Read-only.
@@ -262,6 +264,10 @@ class Track(ImmutableObject):
 
     #: The MusicBrainz ID of the track. Read-only.
     musicbrainz_id = None
+
+    #: Integer representing when the track was last modified, exact meaning
+    #: depends on source of track.
+    last_modified = 0
 
     def __init__(self, *args, **kwargs):
         self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
