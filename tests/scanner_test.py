@@ -32,6 +32,7 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz-albumid': 'mbalbumid',
             'musicbrainz-artistid': 'mbartistid',
             'musicbrainz-albumartistid': 'mbalbumartistid',
+            'mtime': 1234,
         }
 
         self.album = {
@@ -57,6 +58,7 @@ class TranslatorTest(unittest.TestCase):
             'track_no': 1,
             'length': 4531,
             'musicbrainz_id': 'mbtrackid',
+            'last_modified': 1234,
         }
 
     def build_track(self):

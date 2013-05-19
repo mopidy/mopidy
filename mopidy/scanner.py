@@ -141,6 +141,7 @@ def translator(data):
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
     track_kwargs['uri'] = data['uri']
+    track_kwargs['last_modified'] = int(data['mtime'])
     track_kwargs['length'] = data[gst.TAG_DURATION]
     track_kwargs['album'] = Album(**album_kwargs)
     track_kwargs['artists'] = [Artist(**artist_kwargs)]
@@ -195,7 +196,9 @@ class Scanner(object):
         if message.structure.get_name() != 'handoff':
             return
 
-        self.data['uri'] = unicode(self.uribin.get_property('uri'))
+        uri = unicode(self.uribin.get_property('uri'))
+        self.data['uri'] = uri
+        self.data['mtime'] = os.path.getmtime(path.uri_to_path(uri))
         self.data[gst.TAG_DURATION] = self.get_duration()
 
         try:
