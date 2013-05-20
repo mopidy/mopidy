@@ -101,7 +101,8 @@ def generate_track(path, ident):
     uri = path_to_uri(path_to_data_dir(path))
     track = Track(
         uri=uri, name='trackname', artists=expected_artists,
-        album=expected_albums[0], track_no=1, date='2006', length=4000)
+        album=expected_albums[0], track_no=1, date='2006', length=4000,
+        last_modified=1272319626)
     expected_tracks.append(track)
 
 
@@ -128,7 +129,8 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         uri = path_to_uri(path_to_data_dir('song1.mp3'))
         track = Track(
             uri=uri, name='trackname', artists=expected_artists, track_no=1,
-            album=expected_albums[0], date='2006', length=4000)
+            album=expected_albums[0], date='2006', length=4000,
+            last_modified=1272319626)
         self.assertEqual(set([track]), tracks)
 
     def test_advanced_cache(self):
@@ -144,7 +146,8 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         artists = [Artist(name='æøå')]
         album = Album(name='æøå', artists=artists)
         track = Track(
-            uri=uri, name='æøå', artists=artists, album=album, length=4000)
+            uri=uri, name='æøå', artists=artists, album=album, length=4000,
+            last_modified=1272319626)
 
         self.assertEqual(track, list(tracks)[0])
 
@@ -157,7 +160,8 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         tracks = parse_mpd_tag_cache(
             path_to_data_dir('blank_tag_cache'), path_to_data_dir(''))
         uri = path_to_uri(path_to_data_dir('song1.mp3'))
-        self.assertEqual(set([Track(uri=uri, length=4000)]), tracks)
+        expected = Track(uri=uri, length=4000, last_modified=1272319626)
+        self.assertEqual(set([expected]), tracks)
 
     def test_musicbrainz_tagcache(self):
         tracks = parse_mpd_tag_cache(
@@ -184,5 +188,5 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         album = expected_albums[0].copy(artists=[artist])
         track = Track(
             uri=uri, name='trackname', artists=expected_artists, track_no=1,
-            album=album, date='2006', length=4000)
+            album=album, date='2006', length=4000, last_modified=1272319626)
         self.assertEqual(track, list(tracks)[0])
