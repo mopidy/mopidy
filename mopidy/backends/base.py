@@ -15,6 +15,11 @@ class Backend(object):
     #: the backend doesn't provide a library.
     library = None
 
+    #: The library update provider. An instance of
+    #: :class:`~mopidy.backends.base.BaseLibraryUpdateProvider`, or
+    #: :class:`None` if the backend doesn't provide a library.
+    updater = None
+
     #: The playback provider. An instance of
     #: :class:`~mopidy.backends.base.BasePlaybackProvider`, or :class:`None` if
     #: the backend doesn't provide playback.
@@ -35,6 +40,9 @@ class Backend(object):
     def has_library(self):
         return self.library is not None
 
+    def has_updater(self):
+        return self.updater is not None
+
     def has_playback(self):
         return self.playback is not None
 
@@ -53,6 +61,7 @@ class BaseLibraryProvider(object):
     def __init__(self, backend):
         self.backend = backend
 
+    # TODO: replace with search(query, exact=Ture, ...)
     def find_exact(self, query=None, uris=None):
         """
         See :meth:`mopidy.core.LibraryController.find_exact`.
@@ -80,6 +89,48 @@ class BaseLibraryProvider(object):
     def search(self, query=None, uris=None):
         """
         See :meth:`mopidy.core.LibraryController.search`.
+
+        *MAY be implemented by subclass.*
+        """
+        pass
+
+
+class BaseLibraryUpdateProvider(object):
+    """
+    :param backend: backend the controller is a part of
+    :type backend: :class:`mopidy.backends.base.Backend`
+    """
+
+    pykka_traversable = True
+
+    def __init__(self, backend):
+        self.backend = backend
+
+    def load(self):
+        """Loads the library and returns all tracks in it.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def add(self, track):
+        """Adds given track to library.
+
+        Overwrites any existing entry with same uri.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def remove(self, uri):
+        """Removes given track from library.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def commit(self):
+        """Persist changes to library.
 
         *MAY be implemented by subclass.*
         """

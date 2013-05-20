@@ -111,15 +111,19 @@ def main():
     tmp = tempfile.NamedTemporaryFile(
         prefix=basename + '.', dir=directory, delete=False)
 
-    for row in mpd_translator.tracks_to_tag_cache_format(
-            tracks.values(), config['local']['media_dir']):
-        if len(row) == 1:
-            tmp.write(('%s\n' % row).encode('utf-8'))
-        else:
-            tmp.write(('%s: %s\n' % row).encode('utf-8'))
+    try:
+        for row in mpd_translator.tracks_to_tag_cache_format(
+                tracks.values(), config['local']['media_dir']):
+            if len(row) == 1:
+                tmp.write(('%s\n' % row).encode('utf-8'))
+            else:
+                tmp.write(('%s: %s\n' % row).encode('utf-8'))
 
-    os.rename(tmp.name, config['local']['tag_cache_file'])
-    logging.info('Done writing; overwriting active tag cache.')
+        logging.info('Done writing; overwriting active tag cache.')
+        os.rename(tmp.name, config['local']['tag_cache_file'])
+    finally:
+        if os.path.exists(tmp.name):
+            os.remove(tmp.name)
 
 
 def parse_args():
