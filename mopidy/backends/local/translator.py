@@ -112,6 +112,9 @@ def _convert_mpd_data(data, tracks, music_dir):
         else:
             track_kwargs['track_no'] = int(data['track'])
 
+    if 'mtime' in data:
+        track_kwargs['last_modified'] = int(data['mtime'])
+
     if 'artist' in data:
         artist_kwargs['name'] = data['artist']
         albumartist_kwargs['name'] = data['artist']

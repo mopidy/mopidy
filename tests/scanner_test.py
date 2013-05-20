@@ -4,6 +4,7 @@ import unittest
 
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
+from mopidy.utils import path as path_lib
 
 from tests import path_to_data_dir
 
@@ -32,6 +33,7 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz-albumid': 'mbalbumid',
             'musicbrainz-artistid': 'mbartistid',
             'musicbrainz-albumartistid': 'mbalbumartistid',
+            'mtime': 1234,
         }
 
         self.album = {
@@ -57,6 +59,7 @@ class TranslatorTest(unittest.TestCase):
             'track_no': 1,
             'length': 4531,
             'musicbrainz_id': 'mbtrackid',
+            'last_modified': 1234,
         }
 
     def build_track(self):
@@ -141,8 +144,9 @@ class ScannerTest(unittest.TestCase):
         self.data = {}
 
     def scan(self, path):
-        scanner = Scanner(
-            path_to_data_dir(path), self.data_callback, self.error_callback)
+        paths = path_lib.find_files(path_to_data_dir(path))
+        uris = (path_lib.path_to_uri(p) for p in paths)
+        scanner = Scanner(uris, self.data_callback, self.error_callback)
         scanner.start()
 
     def check(self, name, key, value):

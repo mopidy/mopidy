@@ -27,6 +27,7 @@ pygst.require('0.10')
 import gst
 
 from mopidy import config as config_lib, ext
+from mopidy.audio import dummy as dummy_audio
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
@@ -45,9 +46,9 @@ def main():
     log.setup_root_logger()
     log.setup_console_logging(logging_config, args.verbosity_level)
 
-    extensions = ext.load_extensions()
+    extensions = dict((e.ext_name, e) for e in ext.load_extensions())
     config, errors = config_lib.load(
-        config_files, extensions, config_overrides)
+        config_files, extensions.values(), config_overrides)
     log.setup_log_levels(config)
 
     if not config['local']['media_dir']:
@@ -56,20 +57,48 @@ def main():
 
     # TODO: missing error checking and other default setup code.
 
-    tracks = []
+    audio = dummy_audio.DummyAudio()
+    local_backend_classes = extensions['local'].get_backend_classes()
+    local_backend = local_backend_classes[0](config, audio)
+
+    tracks = {}  # Current lib.
+    update = []  # Paths to rescan for updates/adds.
+    remove = []  # Paths to delete from lib.
+
+    for track in local_backend.library.search().tracks:
+        tracks[track.uri] = track
+
+    logging.info('Checking %d files from library.', len(tracks))
+    for track in tracks.itervalues():
+        try:
+            stat = os.stat(path.uri_to_path(track.uri))
+            if int(stat.st_mtime) > track.last_modified:
+                update.append(track.uri)
+        except OSError:
+            remove.append(track.uri)
+
+    logging.info('Removing %d files from library.', len(remove))
+    for uri in remove:
+        del tracks[uri]
+
+    logging.info('Checking %s for changes.', config['local']['media_dir'])
+    for p in path.find_files(config['local']['media_dir']):
+        uri = path.path_to_uri(p)
+        if uri not in tracks:
+            update.append(uri)
 
     def store(data):
         track = translator(data)
-        tracks.append(track)
+        tracks[track.uri] = track
         logging.debug('Added %s', track.uri)
 
     def debug(uri, error, debug):
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-    logging.info('Scanning %s', config['local']['media_dir'])
 
-    scanner = Scanner(config['local']['media_dir'], store, debug)
+    logging.info('Scanning %d new/changed files.', len(update))
+    scanner = Scanner(update, store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
@@ -78,7 +107,7 @@ def main():
     logging.info('Done scanning; writing tag cache...')
 
     for row in mpd_translator.tracks_to_tag_cache_format(
-            tracks, config['local']['media_dir']):
+            tracks.values(), config['local']['media_dir']):
         if len(row) == 1:
             print ('%s' % row).encode('utf-8')
         else:
@@ -141,6 +170,7 @@ def translator(data):
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
     track_kwargs['uri'] = data['uri']
+    track_kwargs['last_modified'] = int(data['mtime'])
     track_kwargs['length'] = data[gst.TAG_DURATION]
     track_kwargs['album'] = Album(**album_kwargs)
     track_kwargs['artists'] = [Artist(**artist_kwargs)]
@@ -149,9 +179,9 @@ def translator(data):
 
 
 class Scanner(object):
-    def __init__(self, base_dir, data_callback, error_callback=None):
+    def __init__(self, uris, data_callback, error_callback=None):
         self.data = {}
-        self.files = path.find_files(base_dir)
+        self.uris = iter(uris)
         self.data_callback = data_callback
         self.error_callback = error_callback
         self.loop = gobject.MainLoop()
@@ -195,7 +225,9 @@ class Scanner(object):
         if message.structure.get_name() != 'handoff':
             return
 
-        self.data['uri'] = unicode(self.uribin.get_property('uri'))
+        uri = unicode(self.uribin.get_property('uri'))
+        self.data['uri'] = uri
+        self.data['mtime'] = os.path.getmtime(path.uri_to_path(uri))
         self.data[gst.TAG_DURATION] = self.get_duration()
 
         try:
@@ -234,7 +266,7 @@ class Scanner(object):
     def next_uri(self):
         self.data = {}
         try:
-            uri = path.path_to_uri(self.files.next())
+            uri = next(self.uris)
         except StopIteration:
             self.stop()
             return False
