@@ -5,6 +5,7 @@ import datetime
 import logging
 import os
 import sys
+import tempfile
 
 import gobject
 gobject.threads_init()
@@ -104,16 +105,21 @@ def main():
     except KeyboardInterrupt:
         scanner.stop()
 
-    logging.info('Done scanning; writing tag cache...')
+    logging.info('Done scanning; writing tag cache to temporary file.')
+
+    directory, basename = os.path.split(config['local']['tag_cache_file'])
+    tmp = tempfile.NamedTemporaryFile(
+        prefix=basename + '.', dir=directory, delete=False)
 
     for row in mpd_translator.tracks_to_tag_cache_format(
             tracks.values(), config['local']['media_dir']):
         if len(row) == 1:
-            print ('%s' % row).encode('utf-8')
+            tmp.write(('%s\n' % row).encode('utf-8'))
         else:
-            print ('%s: %s' % row).encode('utf-8')
+            tmp.write(('%s: %s\n' % row).encode('utf-8'))
 
-    logging.info('Done writing tag cache')
+    os.rename(tmp.name, config['local']['tag_cache_file'])
+    logging.info('Done writing; overwriting active tag cache.')
 
 
 def parse_args():
@@ -132,6 +138,7 @@ def parse_args():
     return parser.parse_args(args=mopidy_args)
 
 
+# TODO: move into scanner.
 def translator(data):
     albumartist_kwargs = {}
     album_kwargs = {}
