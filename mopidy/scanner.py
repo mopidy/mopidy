@@ -58,8 +58,8 @@ def main():
     # TODO: missing error checking and other default setup code.
 
     audio = dummy_audio.DummyAudio()
-    local_backend_class = extensions['local'].get_backend_classes()
-    local_backend = local_backend_class[0](config, audio)
+    local_backend_classes = extensions['local'].get_backend_classes()
+    local_backend = local_backend_classes[0](config, audio)
 
     tracks = {}  # Current lib.
     update = []  # Paths to rescan for updates/adds.
@@ -97,7 +97,7 @@ def main():
         logging.debug('Debug info for %s: %s', uri, debug)
 
 
-    logging.info('Scanning %d files.', len(update))
+    logging.info('Scanning %d new/changed files.', len(update))
     scanner = Scanner(update, store, debug)
     try:
         scanner.start()

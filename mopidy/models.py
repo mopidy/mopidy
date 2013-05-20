@@ -231,7 +231,7 @@ class Track(ImmutableObject):
     :type bitrate: integer
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
-    :param last_modified: integer representing last modifcation time
+    :param last_modified: Represents last modification time
     :type last_modified: integer
     """
 
@@ -266,7 +266,8 @@ class Track(ImmutableObject):
     musicbrainz_id = None
 
     #: Integer representing when the track was last modified, exact meaning
-    #: depends on source of track.
+    #: depends on source of track. For local files this is the mtime, for other
+    #: backends it could be a timestamp or simply a version counter.
     last_modified = 0
 
     def __init__(self, *args, **kwargs):
