@@ -141,6 +141,11 @@ def find_files(path):
                 yield os.path.join(dirpath, filename)
 
 
+def find_uris(path):
+    for p in find_files(path):
+        yield path_to_uri(p)
+
+
 def check_file_path_is_inside_base_dir(file_path, base_path):
     assert not file_path.endswith(os.sep), (
         'File path %s cannot end with a path separator' % file_path)
