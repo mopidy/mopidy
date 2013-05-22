@@ -61,7 +61,7 @@ class BaseLibraryProvider(object):
     def __init__(self, backend):
         self.backend = backend
 
-    # TODO: replace with search(query, exact=Ture, ...)
+    # TODO: replace with search(query, exact=True, ...)
     def find_exact(self, query=None, uris=None):
         """
         See :meth:`mopidy.core.LibraryController.find_exact`.
@@ -116,7 +116,7 @@ class BaseLibraryUpdateProvider(object):
     def add(self, track):
         """Adds given track to library.
 
-        Overwrites any existing entry with same uri.
+        Overwrites any existing track with same URI.
 
         *MUST be implemented by subclass.*
         """

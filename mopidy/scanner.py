@@ -86,7 +86,7 @@ def main():
         if uri not in uris_library:
             uris_update.add(uri)
 
-    logging.info('Found %d new or changed tracks.', len(uris_update))
+    logging.info('Found %d new or modified tracks.', len(uris_update))
 
     def store(data):
         track = translator(data)
@@ -97,7 +97,7 @@ def main():
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-    logging.info('Scanning new and changed tracks.')
+    logging.info('Scanning new and modified tracks.')
     # TODO: just pass the library in instead?
     scanner = Scanner(uris_update, store, debug)
     try:
