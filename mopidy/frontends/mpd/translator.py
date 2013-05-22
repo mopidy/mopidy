@@ -10,6 +10,8 @@ from mopidy.frontends.mpd.exceptions import MpdArgError
 from mopidy.models import TlTrack
 from mopidy.utils.path import mtime as get_mtime, uri_to_path, split_path
 
+# TODO: special handling of local:// uri scheme
+
 
 def track_to_mpd_format(track, position=None):
     """
@@ -213,6 +215,7 @@ def query_from_mpd_search_format(mpd_query):
     return query
 
 
+# TODO: move to tagcache backend.
 def tracks_to_tag_cache_format(tracks, media_dir):
     """
     Format list of tracks for output to MPD tag cache
@@ -233,6 +236,7 @@ def tracks_to_tag_cache_format(tracks, media_dir):
     dirs, files = tracks_to_directory_tree(tracks, media_dir)
     _add_to_tag_cache(result, dirs, files, media_dir)
     return result
+
 
 # TODO: bytes only
 def _add_to_tag_cache(result, dirs, files, media_dir):

@@ -28,7 +28,6 @@ import gst
 
 from mopidy import config as config_lib, ext
 from mopidy.audio import dummy as dummy_audio
-from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
 
@@ -55,65 +54,60 @@ def main():
         logging.warning('Config value local/media_dir is not set.')
         return
 
-    # TODO: missing error checking and other default setup code.
+    # TODO: missing config error checking and other default setup code.
 
     audio = dummy_audio.DummyAudio()
     local_backend_classes = extensions['local'].get_backend_classes()
     local_backend = local_backend_classes[0](config, audio)
+    local_updater = local_backend.updater
 
-    tracks = {}  # Current lib.
-    update = []  # Paths to rescan for updates/adds.
-    remove = []  # Paths to delete from lib.
+    media_dir = config['local']['media_dir']
 
-    for track in local_backend.library.search().tracks:
-        tracks[track.uri] = track
+    uris_library = set()
+    uris_update = set()
+    uris_remove = set()
 
-    logging.info('Checking %d files from library.', len(tracks))
-    for track in tracks.itervalues():
+    logging.info('Checking tracks from library.')
+    for track in local_updater.load():
         try:
             stat = os.stat(path.uri_to_path(track.uri))
             if int(stat.st_mtime) > track.last_modified:
-                update.append(track.uri)
+                uris_update.add(track.uri)
+            uris_library.add(track.uri)
         except OSError:
-            remove.append(track.uri)
+            uris_remove.add(track.uri)
 
-    logging.info('Removing %d files from library.', len(remove))
-    for uri in remove:
-        del tracks[uri]
+    logging.info('Removing %d moved or deleted tracks.', len(uris_remove))
+    for uri in uris_remove:
+        local_updater.remove(uri)
 
-    logging.info('Checking %s for changes.', config['local']['media_dir'])
-    for p in path.find_files(config['local']['media_dir']):
-        uri = path.path_to_uri(p)
-        if uri not in tracks:
-            update.append(uri)
+    logging.info('Checking %s for new or modified tracks.', media_dir)
+    for uri in path.find_uris(config['local']['media_dir']):
+        if uri not in uris_library:
+            uris_update.add(uri)
+
+    logging.info('Found %d new or modified tracks.', len(uris_update))
 
     def store(data):
         track = translator(data)
-        tracks[track.uri] = track
+        local_updater.add(track)
         logging.debug('Added %s', track.uri)
 
     def debug(uri, error, debug):
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-
-    logging.info('Scanning %d new/changed files.', len(update))
-    scanner = Scanner(update, store, debug)
+    logging.info('Scanning new and modified tracks.')
+    # TODO: just pass the library in instead?
+    scanner = Scanner(uris_update, store, debug)
     try:
         scanner.start()
     except KeyboardInterrupt:
         scanner.stop()
+        raise
 
-    logging.info('Done scanning; writing tag cache...')
-
-    for row in mpd_translator.tracks_to_tag_cache_format(
-            tracks.values(), config['local']['media_dir']):
-        if len(row) == 1:
-            print ('%s' % row).encode('utf-8')
-        else:
-            print ('%s: %s' % row).encode('utf-8')
-
-    logging.info('Done writing tag cache')
+    logging.info('Done scanning; commiting changes.')
+    local_updater.commit()
 
 
 def parse_args():
@@ -132,6 +126,7 @@ def parse_args():
     return parser.parse_args(args=mopidy_args)
 
 
+# TODO: move into scanner.
 def translator(data):
     albumartist_kwargs = {}
     album_kwargs = {}

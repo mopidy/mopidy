@@ -256,7 +256,7 @@ class FindFilesTest(unittest.TestCase):
     def test_file(self):
         files = self.find('blank.mp3')
         self.assertEqual(len(files), 1)
-        self.assert_(files[0], path_to_data_dir('blank.mp3'))
+        self.assertEqual(files[0], path_to_data_dir('blank.mp3'))
 
     def test_names_are_bytestrings(self):
         is_bytes = lambda f: isinstance(f, bytes)
@@ -271,6 +271,30 @@ class FindFilesTest(unittest.TestCase):
         self.assertEqual(self.find('.blank.mp3'), [])
 
 
+class FindUrisTest(unittest.TestCase):
+    def find(self, value):
+        return list(path.find_uris(path_to_data_dir(value)))
+
+    def test_basic_dir(self):
+        self.assert_(self.find(''))
+
+    def test_nonexistant_dir(self):
+        self.assertEqual(self.find('does-not-exist'), [])
+
+    def test_file(self):
+        uris = self.find('blank.mp3')
+        expected = path.path_to_uri(path_to_data_dir('blank.mp3'))
+        self.assertEqual(len(uris), 1)
+        self.assertEqual(uris[0], expected)
+
+    def test_ignores_hidden_dirs(self):
+        self.assertEqual(self.find('.hidden'), [])
+
+    def test_ignores_hidden_files(self):
+        self.assertEqual(self.find('.blank.mp3'), [])
+
+
+# TODO: kill this in favour of just os.path.getmtime + mocks
 class MtimeTest(unittest.TestCase):
     def tearDown(self):
         path.mtime.undo_fake()
