@@ -40,7 +40,7 @@ def detect_xspf_header(typefind):
 
 
 def parse_m3u(data):
-    # TODO: convert non uris to file uris.
+    # TODO: convert non URIs to file URIs.
     for line in data.readlines():
         if not line.startswith('#') and line.strip():
             yield line
@@ -48,7 +48,7 @@ def parse_m3u(data):
 
 def parse_pls(data):
     # TODO: error handling of bad playlists.
-    # TODO: convert non uris to file uris.
+    # TODO: convert non URIs to file URIs.
     cp = configparser.RawConfigParser()
     cp.readfp(data)
     for i in xrange(1, cp.getint('playlist', 'numberofentries')):
@@ -87,31 +87,64 @@ def register_typefinders():
 
 
 class BasePlaylistElement(gst.Bin):
-    sinktemplate = None
-    srctemplate = None
-    ghostsrc = False
+    """Base class for creating GStreamer elements for playlist support.
+
+    This element performs the following steps:
+
+    1. Initializes src and sink pads for the element.
+    2. Collects data from the sink until EOS is reached.
+    3. Passes the collected data to :meth:`convert` to get a list of URIs.
+    4. Passes the list of URIs to :meth:`handle`, default handling is to pass
+       the URIs to the src element as a uri-list.
+    5. If handle returned true, the EOS consumed and nothing more happens, if
+       it is not consumed it flows on to the next element downstream, which is
+       likely our uri-list consumer which needs the EOS to know we are done
+       sending URIs.
+    """
+
+    sinkpad_template = None
+    """GStreamer pad template to use for sink, must be overriden."""
+
+    srcpad_template = None
+    """GStreamer pad template to use for src, must be overriden."""
+
+    ghost_srcpad = False
+    """Indicates if src pad should be ghosted or not."""
 
     def __init__(self):
+        """Sets up src and sink pads plus behaviour."""
         super(BasePlaylistElement, self).__init__()
         self._data = io.BytesIO()
         self._done = False
 
-        self.sink = gst.Pad(self.sinktemplate)
-        self.sink.set_chain_function(self._chain)
-        self.sink.set_event_function(self._event)
-        self.add_pad(self.sink)
+        self.sinkpad = gst.Pad(self.sinkpad_template)
+        self.sinkpad.set_chain_function(self._chain)
+        self.sinkpad.set_event_function(self._event)
+        self.add_pad(self.sinkpad)
 
-        if self.ghostsrc:
-            self.src = gst.ghost_pad_new_notarget('src', gst.PAD_SRC)
+        if self.ghost_srcpad:
+            self.srcpad = gst.ghost_pad_new_notarget('src', gst.PAD_SRC)
         else:
-            self.src = gst.Pad(self.srctemplate)
-        self.add_pad(self.src)
+            self.srcpad = gst.Pad(self.srcpad_template)
+        self.add_pad(self.srcpad)
 
     def convert(self, data):
+        """Convert the data we have colleted to URIs.
+
+        :param data: Collected data buffer.
+        :type data: :class:`io.BytesIO`
+        :returns: iterable or generator of URIs.
+        """
         raise NotImplementedError
 
     def handle(self, uris):
-        self.src.push(gst.Buffer('\n'.join(uris)))
+        """Do something usefull with the URIs.
+
+        :param uris: List of URIs.
+        :type uris: :type:`list`
+        :returns: Boolean indicating if EOS should be consumed.
+        """
+        self.srcpad.push(gst.Buffer('\n'.join(uris)))
         return False
 
     def _chain(self, pad, buf):
@@ -129,6 +162,8 @@ class BasePlaylistElement(gst.Bin):
             self._data.seek(0)
             if self.handle(list(self.convert(self._data))):
                 return True
+
+        # Ensure we handle remaining events in a sane way.
         return pad.event_default(event)
 
 
@@ -138,17 +173,17 @@ class M3UDecoder(BasePlaylistElement):
                       'Convert .m3u to text/uri-list',
                       'Mopidy')
 
-    sinktemplate = gst.PadTemplate ('sink',
+    sinkpad_template = gst.PadTemplate ('sink',
         gst.PAD_SINK,
         gst.PAD_ALWAYS,
         gst.caps_from_string('audio/x-mpegurl'))
 
-    srctemplate = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate ('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
-    __gsttemplates__ = (sinktemplate, srctemplate)
+    __gsttemplates__ = (sinkpad_template, srcpad_template)
 
     def convert(self, data):
         return parse_m3u(data)
@@ -160,17 +195,17 @@ class PLSDecoder(BasePlaylistElement):
                       'Convert .pls to text/uri-list',
                       'Mopidy')
 
-    sinktemplate = gst.PadTemplate ('sink',
+    sinkpad_template = gst.PadTemplate ('sink',
         gst.PAD_SINK,
         gst.PAD_ALWAYS,
         gst.caps_from_string('audio/x-scpls'))
 
-    srctemplate = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate ('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
-    __gsttemplates__ = (sinktemplate, srctemplate)
+    __gsttemplates__ = (sinkpad_template, srcpad_template)
 
     def convert(self, data):
         return parse_pls(data)
@@ -182,17 +217,17 @@ class XSPFDecoder(BasePlaylistElement):
                       'Convert .pls to text/uri-list',
                       'Mopidy')
 
-    sinktemplate = gst.PadTemplate ('sink',
+    sinkpad_template = gst.PadTemplate ('sink',
         gst.PAD_SINK,
         gst.PAD_ALWAYS,
         gst.caps_from_string('application/xspf+xml'))
 
-    srctemplate = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate ('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
-    __gsttemplates__ = (sinktemplate, srctemplate)
+    __gsttemplates__ = (sinkpad_template, srcpad_template)
 
     def convert(self, data):
         return parse_xspf(data)
@@ -204,19 +239,19 @@ class UriListElement(BasePlaylistElement):
                       'Convert a text/uri-list to a stream',
                       'Mopidy')
 
-    sinktemplate = gst.PadTemplate ('sink',
+    sinkpad_template = gst.PadTemplate ('sink',
         gst.PAD_SINK,
         gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
-    srctemplate = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate ('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_new_any())
 
-    ghostsrc = True  # We need to hook this up to our internal decodebin
+    ghost_srcpad = True  # We need to hook this up to our internal decodebin
 
-    __gsttemplates__ = (sinktemplate, srctemplate)
+    __gsttemplates__ = (sinkpad_template, srcpad_template)
 
     def __init__(self):
         super(UriListElement, self).__init__()
@@ -227,10 +262,10 @@ class UriListElement(BasePlaylistElement):
         self.uridecodebin.set_property('caps', gst.caps_new_any())
 
     def pad_added(self, src, pad):
-        self.src.set_target(pad)
+        self.srcpad.set_target(pad)
 
     def handle(self, uris):
-        # TODO: hookup about to finish and errors to rest of uris so we
+        # TODO: hookup about to finish and errors to rest of URIs so we
         # round robin, only giving up once all have been tried.
         self.add(self.uridecodebin)
         self.uridecodebin.set_state(gst.STATE_READY)
