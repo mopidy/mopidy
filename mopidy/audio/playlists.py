@@ -4,6 +4,8 @@ import pygst
 pygst.require('0.10')
 import gst
 
+import ConfigParser as configparser
+import xml.etree.ElementTree
 import xml.dom.pulldom
 
 
@@ -33,6 +35,36 @@ def detect_xspf_header(typefind):
             return (node.tagName == 'playlist' and
                     node.node.namespaceURI == 'http://xspf.org/ns/0/')
     return False
+
+
+def parse_m3u(data):
+    # TODO: convert non uris to file uris.
+    for line in data.readlines():
+        if not line.startswith('#') and line.strip():
+            yield line
+
+
+def parse_pls(data):
+    # TODO: error handling of bad playlists.
+    # TODO: convert non uris to file uris.
+    cp = configparser.RawConfigParser()
+    cp.readfp(data)
+    for i in xrange(1, cp.getint('playlist', 'numberofentries')):
+        yield cp.get('playlist', 'file%d' % i)
+
+
+def parse_xspf(data):
+    # TODO: handle parser errors
+    root = xml.etree.ElementTree.fromstring(data.read())
+    tracklist = tree.find('{http://xspf.org/ns/0/}trackList')
+    for track in tracklist.findall('{http://xspf.org/ns/0/}track'):
+        yield track.findtext('{http://xspf.org/ns/0/}location')
+
+
+def parse_urilist(data):
+    for line in data.readlines():
+        if not line.startswith('#') and line.strip():
+            yield line
 
 
 def playlist_typefinder(typefind, func, caps):
