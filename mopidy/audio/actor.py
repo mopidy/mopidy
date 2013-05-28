@@ -18,7 +18,9 @@ from .listener import AudioListener
 logger = logging.getLogger('mopidy.audio')
 
 mixers.register_mixers()
+
 playlists.register_typefinders()
+playlists.register_elements()
 
 
 MB = 1 << 20

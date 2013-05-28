@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import pygst
 pygst.require('0.10')
 import gst
+import gobject
 
 import ConfigParser as configparser
 import io
@@ -129,3 +130,82 @@ class BasePlaylistElement(gst.Bin):
             if self.handle(list(self.convert(self._data))):
                 return True
         return pad.event_default(event)
+
+
+class M3UDecoder(BasePlaylistElement):
+    __gstdetails__ = ('M3U Decoder',
+                      'Decoder',
+                      'Convert .m3u to text/uri-list',
+                      'Mopidy')
+
+    sinktemplate = gst.PadTemplate ('sink',
+        gst.PAD_SINK,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('audio/x-mpegurl'))
+
+    srctemplate = gst.PadTemplate ('src',
+        gst.PAD_SRC,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('text/uri-list'))
+
+    __gsttemplates__ = (sinktemplate, srctemplate)
+
+    def convert(self, data):
+        return parse_m3u(data)
+
+
+class PLSDecoder(BasePlaylistElement):
+    __gstdetails__ = ('PLS Decoder',
+                      'Decoder',
+                      'Convert .pls to text/uri-list',
+                      'Mopidy')
+
+    sinktemplate = gst.PadTemplate ('sink',
+        gst.PAD_SINK,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('audio/x-scpls'))
+
+    srctemplate = gst.PadTemplate ('src',
+        gst.PAD_SRC,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('text/uri-list'))
+
+    __gsttemplates__ = (sinktemplate, srctemplate)
+
+    def convert(self, data):
+        return parse_pls(data)
+
+
+class XSPFDecoder(BasePlaylistElement):
+    __gstdetails__ = ('XSPF Decoder',
+                      'Decoder',
+                      'Convert .pls to text/uri-list',
+                      'Mopidy')
+
+    sinktemplate = gst.PadTemplate ('sink',
+        gst.PAD_SINK,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('application/xspf+xml'))
+
+    srctemplate = gst.PadTemplate ('src',
+        gst.PAD_SRC,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('text/uri-list'))
+
+    __gsttemplates__ = (sinktemplate, srctemplate)
+
+    def convert(self, data):
+        return parse_xspf(data)
+
+
+
+def register_element(element_class):
+    gobject.type_register(element_class)
+    gst.element_register(
+        element_class, element_class.__name__.lower(), gst.RANK_MARGINAL)
+
+
+def register_elements():
+    register_element(M3UDecoder)
+    register_element(PLSDecoder)
+    register_element(XSPFDecoder)
