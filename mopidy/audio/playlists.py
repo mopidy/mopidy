@@ -277,6 +277,55 @@ class UriListElement(BasePlaylistElement):
         return parse_urilist(data)
 
 
+class IcySrc(gst.Bin, gst.URIHandler):
+    __gstdetails__ = ('IcySrc',
+                      'Src',
+                      'Http src wrapper for icy:// support.',
+                      'Mopidy')
+
+    srcpad_template = gst.PadTemplate ('src',
+        gst.PAD_SRC,
+        gst.PAD_ALWAYS,
+        gst.caps_new_any())
+
+    __gsttemplates__ = (srcpad_template,)
+
+    def __init__(self):
+        super(IcySrc, self).__init__()
+        self._httpsrc = gst.element_make_from_uri(gst.URI_SRC, 'http://')
+        try:
+            self._httpsrc.set_property('iradio-mode', True)
+        except TypeError:
+            pass
+        self.add(self._httpsrc)
+
+        self._srcpad = gst.GhostPad('src', self._httpsrc.get_pad('src'))
+        self.add_pad(self._srcpad)
+
+    @classmethod
+    def do_get_type_full(cls):
+        return gst.URI_SRC
+
+    @classmethod
+    def do_get_protocols_full(cls):
+        return [b'icy', b'icyx']
+
+    def do_set_uri(self, uri):
+        if uri.startswith('icy://'):
+            return self._httpsrc.set_uri(b'http://' + uri[len('icy://'):])
+        elif uri.startswith('icyx://'):
+            return self._httpsrc.set_uri(b'https://' + uri[len('icyx://'):])
+        else:
+            return False
+
+    def do_get_uri(self):
+        uri = self._httpsrc.get_uri()
+        if uri.startswith('http://'):
+            return b'icy://' + uri[len('http://'):]
+        else:
+            return b'icyx://' + uri[len('https://'):]
+
+
 def register_element(element_class):
     gobject.type_register(element_class)
     gst.element_register(
@@ -288,3 +337,4 @@ def register_elements():
     register_element(PLSDecoder)
     register_element(XSPFDecoder)
     register_element(UriListElement)
+    register_element(IcySrc)
