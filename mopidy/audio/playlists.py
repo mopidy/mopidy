@@ -198,6 +198,49 @@ class XSPFDecoder(BasePlaylistElement):
         return parse_xspf(data)
 
 
+class UriListElement(BasePlaylistElement):
+    __gstdetails__ = ('URIListDemuxer',
+                      'Demuxer',
+                      'Convert a text/uri-list to a stream',
+                      'Mopidy')
+
+    sinktemplate = gst.PadTemplate ('sink',
+        gst.PAD_SINK,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('text/uri-list'))
+
+    srctemplate = gst.PadTemplate ('src',
+        gst.PAD_SRC,
+        gst.PAD_ALWAYS,
+        gst.caps_new_any())
+
+    ghostsrc = True  # We need to hook this up to our internal decodebin
+
+    __gsttemplates__ = (sinktemplate, srctemplate)
+
+    def __init__(self):
+        super(UriListElement, self).__init__()
+        self.uridecodebin = gst.element_factory_make('uridecodebin')
+        self.uridecodebin.connect('pad-added', self.pad_added)
+        # Limit to anycaps so we get a single stream out, letting other
+        # elmenets downstream figure out actual muxing
+        self.uridecodebin.set_property('caps', gst.caps_new_any())
+
+    def pad_added(self, src, pad):
+        self.src.set_target(pad)
+
+    def handle(self, uris):
+        # TODO: hookup about to finish and errors to rest of uris so we
+        # round robin, only giving up once all have been tried.
+        self.add(self.uridecodebin)
+        self.uridecodebin.set_state(gst.STATE_READY)
+        self.uridecodebin.set_property('uri', uris[0])
+        self.uridecodebin.sync_state_with_parent()
+        return True  # Make sure we consume the EOS that triggered us.
+
+    def convert(self, data):
+        return parse_urilist(data)
+
 
 def register_element(element_class):
     gobject.type_register(element_class)
@@ -209,3 +252,4 @@ def register_elements():
     register_element(M3UDecoder)
     register_element(PLSDecoder)
     register_element(XSPFDecoder)
+    register_element(UriListElement)
