@@ -5,6 +5,7 @@ pygst.require('0.10')
 import gst
 
 import ConfigParser as configparser
+import io
 import xml.etree.ElementTree
 import xml.dom.pulldom
 
@@ -82,3 +83,49 @@ def register_typefinders():
     register_typefind('audio/x-mpegurl', detect_m3u_header, [b'm3u', b'm3u8'])
     register_typefind('audio/x-scpls', detect_pls_header, [b'pls'])
     register_typefind('application/xspf+xml', detect_xspf_header, [b'xspf'])
+
+
+class BasePlaylistElement(gst.Bin):
+    sinktemplate = None
+    srctemplate = None
+    ghostsrc = False
+
+    def __init__(self):
+        super(BasePlaylistElement, self).__init__()
+        self._data = io.BytesIO()
+        self._done = False
+
+        self.sink = gst.Pad(self.sinktemplate)
+        self.sink.set_chain_function(self._chain)
+        self.sink.set_event_function(self._event)
+        self.add_pad(self.sink)
+
+        if self.ghostsrc:
+            self.src = gst.ghost_pad_new_notarget('src', gst.PAD_SRC)
+        else:
+            self.src = gst.Pad(self.srctemplate)
+        self.add_pad(self.src)
+
+    def convert(self, data):
+        raise NotImplementedError
+
+    def handle(self, uris):
+        self.src.push(gst.Buffer('\n'.join(uris)))
+        return False
+
+    def _chain(self, pad, buf):
+        if not self._done:
+            self._data.write(buf.data)
+            return gst.FLOW_OK
+        return gst.FLOW_EOS
+
+    def _event(self, pad, event):
+        if event.type == gst.EVENT_NEWSEGMENT:
+            return True
+
+        if event.type == gst.EVENT_EOS:
+            self._done = True
+            self._data.seek(0)
+            if self.handle(list(self.convert(self._data))):
+                return True
+        return pad.event_default(event)
