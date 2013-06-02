@@ -18,7 +18,6 @@ def detect_m3u_header(typefind):
 
 
 def detect_pls_header(typefind):
-    print repr(typefind.peek(0, 11) == b'[playlist]\n')
     return typefind.peek(0, 11) == b'[playlist]\n'
 
 
@@ -65,7 +64,7 @@ def parse_xspf(data):
 
 def parse_urilist(data):
     for line in data.readlines():
-        if not line.startswith('#') and line.strip():
+        if not line.startswith('#') and gst.uri_is_valid(line.strip()):
             yield line
 
 
@@ -131,18 +130,18 @@ class BasePlaylistElement(gst.Bin):
     def convert(self, data):
         """Convert the data we have colleted to URIs.
 
-        :param data: Collected data buffer.
+        :param data: collected data buffer
         :type data: :class:`io.BytesIO`
-        :returns: iterable or generator of URIs.
+        :returns: iterable or generator of URIs
         """
         raise NotImplementedError
 
     def handle(self, uris):
-        """Do something usefull with the URIs.
+        """Do something useful with the URIs.
 
-        :param uris: List of URIs.
+        :param uris: list of URIs
         :type uris: :type:`list`
-        :returns: Boolean indicating if EOS should be consumed.
+        :returns: boolean indicating if EOS should be consumed
         """
         self.srcpad.push(gst.Buffer('\n'.join(uris)))
         return False
@@ -167,18 +166,18 @@ class BasePlaylistElement(gst.Bin):
         return pad.event_default(event)
 
 
-class M3UDecoder(BasePlaylistElement):
+class M3uDecoder(BasePlaylistElement):
     __gstdetails__ = ('M3U Decoder',
                       'Decoder',
                       'Convert .m3u to text/uri-list',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate ('sink',
+    sinkpad_template = gst.PadTemplate('sink',
         gst.PAD_SINK,
         gst.PAD_ALWAYS,
         gst.caps_from_string('audio/x-mpegurl'))
 
-    srcpad_template = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
@@ -189,18 +188,18 @@ class M3UDecoder(BasePlaylistElement):
         return parse_m3u(data)
 
 
-class PLSDecoder(BasePlaylistElement):
+class PlsDecoder(BasePlaylistElement):
     __gstdetails__ = ('PLS Decoder',
                       'Decoder',
                       'Convert .pls to text/uri-list',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate ('sink',
+    sinkpad_template = gst.PadTemplate('sink',
         gst.PAD_SINK,
         gst.PAD_ALWAYS,
         gst.caps_from_string('audio/x-scpls'))
 
-    srcpad_template = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
@@ -211,18 +210,18 @@ class PLSDecoder(BasePlaylistElement):
         return parse_pls(data)
 
 
-class XSPFDecoder(BasePlaylistElement):
+class XspfDecoder(BasePlaylistElement):
     __gstdetails__ = ('XSPF Decoder',
                       'Decoder',
                       'Convert .pls to text/uri-list',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate ('sink',
+    sinkpad_template = gst.PadTemplate('sink',
         gst.PAD_SINK,
         gst.PAD_ALWAYS,
         gst.caps_from_string('application/xspf+xml'))
 
-    srcpad_template = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
@@ -239,12 +238,12 @@ class UriListElement(BasePlaylistElement):
                       'Convert a text/uri-list to a stream',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate ('sink',
+    sinkpad_template = gst.PadTemplate('sink',
         gst.PAD_SINK,
         gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
-    srcpad_template = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_new_any())
@@ -258,7 +257,7 @@ class UriListElement(BasePlaylistElement):
         self.uridecodebin = gst.element_factory_make('uridecodebin')
         self.uridecodebin.connect('pad-added', self.pad_added)
         # Limit to anycaps so we get a single stream out, letting other
-        # elmenets downstream figure out actual muxing
+        # elements downstream figure out actual muxing
         self.uridecodebin.set_property('caps', gst.caps_new_any())
 
     def pad_added(self, src, pad):
@@ -280,10 +279,10 @@ class UriListElement(BasePlaylistElement):
 class IcySrc(gst.Bin, gst.URIHandler):
     __gstdetails__ = ('IcySrc',
                       'Src',
-                      'Http src wrapper for icy:// support.',
+                      'HTTP src wrapper for icy:// support.',
                       'Mopidy')
 
-    srcpad_template = gst.PadTemplate ('src',
+    srcpad_template = gst.PadTemplate('src',
         gst.PAD_SRC,
         gst.PAD_ALWAYS,
         gst.caps_new_any())
@@ -333,8 +332,8 @@ def register_element(element_class):
 
 
 def register_elements():
-    register_element(M3UDecoder)
-    register_element(PLSDecoder)
-    register_element(XSPFDecoder)
+    register_element(M3uDecoder)
+    register_element(PlsDecoder)
+    register_element(XspfDecoder)
     register_element(UriListElement)
     register_element(IcySrc)
