@@ -82,7 +82,7 @@ card.
 #. Ensure your system is up to date. On Debian based systems run::
 
       sudo apt-get update
-      sudo apt-get full-upgrade
+      sudo apt-get dist-upgrade
 
 #. Ensure you have a new enough firmware. On Debian based systems
    `rpi-update <http://apt.mopidy.com://github.com/Hexxeh/rpi-update>`_
