@@ -36,7 +36,6 @@ setup(
     tests_require=[
         'nose',
         'mock >= 1.0',
-        'unittest2',
     ],
     entry_points={
         'console_scripts': [
