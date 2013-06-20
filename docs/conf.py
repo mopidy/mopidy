@@ -33,7 +33,10 @@ class Mock(object):
         if name in ('__file__', '__path__'):
             return '/dev/null'
         elif (name[0] == name[0].upper()
-                and not name.startswith('MIXER_TRACK_')):
+                # gst.interfaces.MIXER_TRACK_*
+                and not name.startswith('MIXER_TRACK_')
+                # dbus.String()
+                and not name == 'String'):
             return type(name, (), {})
         else:
             return Mock()
