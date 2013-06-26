@@ -224,7 +224,8 @@ class Port(Integer):
     """
     # TODO: consider probing if port is free or not?
     def __init__(self, choices=None):
-        super(Port, self).__init__(minimum=0, maximum=2**16-1, choices=choices)
+        super(Port, self).__init__(
+            minimum=0, maximum=2 ** 16 - 1, choices=choices)
 
 
 class Path(ConfigValue):
