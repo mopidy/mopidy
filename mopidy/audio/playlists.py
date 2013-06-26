@@ -7,8 +7,11 @@ import gobject
 
 import ConfigParser as configparser
 import io
-import xml.etree.ElementTree
-import xml.dom.pulldom
+
+try:
+    import xml.etree.cElementTree as elementtree
+except ImportError:
+    import xml.etree.ElementTree as elementtree
 
 
 # TODO: make detect_FOO_header reusable in general mopidy code.
@@ -23,33 +26,22 @@ def detect_pls_header(typefind):
 
 def detect_xspf_header(typefind):
     # Get more data than the 90 needed for header in case spacing is funny.
-    data = typefind.peek(0, 150)
-
-    # Bail early if the words xml and playlist are not present.
-    if not data or b'xml' not in data or b'playlist' not in data:
-        return False
-
-    # TODO: handle parser errors.
-    # Try parsing what we have, bailing on first element.
-    for event, node in xml.dom.pulldom.parseString(data):
-        if event == xml.dom.pulldom.START_ELEMENT:
-            return (node.tagName == 'playlist' and
-                    node.namespaceURI == 'http://xspf.org/ns/0/')
+    data = io.BytesIO(typefind.peek(0, 150))
+    try:
+        for event, element in elementtree.iterparse(data, events=('start',)):
+            return element.tag.lower() == '{http://xspf.org/ns/0/}playlist'
+    except elementtree.ParseError:
+        pass
     return False
 
 
 def detect_asx_header(typefind):
-    data = typefind.peek(0, 50)
-
-    # Bail early if the words xml and playlist are not present.
-    if not data or b'asx' not in data:
-        return False
-
-    # TODO: handle parser errors.
-    # Try parsing what we have, bailing on first element.
-    for event, node in xml.dom.pulldom.parseString(data):
-        if event == xml.dom.pulldom.START_ELEMENT:
-            return node.tagName == 'asx'
+    data = io.BytesIO(typefind.peek(0, 50))
+    try:
+        for event, element in elementtree.iterparse(data, events=('start',)):
+            return element.tag.lower() == 'asx'
+    except elementtree.ParseError:
+        pass
     return False
 
 
@@ -71,19 +63,21 @@ def parse_pls(data):
 
 def parse_xspf(data):
     # TODO: handle parser errors
-    # TODO: make sure tracklist == trackList etc.
-    root = xml.etree.ElementTree.fromstring(data.read())
-    tracklist = tree.find('{http://xspf.org/ns/0/}trackList')
-    for track in tracklist.findall('{http://xspf.org/ns/0/}track'):
-        yield track.findtext('{http://xspf.org/ns/0/}location')
+    for event, element in elementtree.iterparse(data):
+        element.tag = element.tag.lower()  # normalize
+
+    ns = 'http://xspf.org/ns/0/'
+    for track in element.iterfind('{%s}tracklist/{%s}track' % (ns, ns)):
+        yield track.findtext('{%s}location' % ns)
 
 
 def parse_asx(data):
     # TODO: handle parser errors
-    # TODO: make sure entry == Entry etc.
-    root = xml.etree.ElementTree.fromstring(data.read())
-    for entry in root.findall('entry'):
-        yield entry.find('ref').attrib['href']
+    for event, element in elementtree.iterparse(data):
+        element.tag = element.tag.lower()  # normalize
+
+    for ref in element.findall('entry/ref'):
+        yield ref.get('href', '').strip()
 
 
 def parse_urilist(data):
@@ -170,6 +164,7 @@ class BasePlaylistElement(gst.Bin):
         :type uris: :type:`list`
         :returns: boolean indicating if EOS should be consumed
         """
+        # TODO: handle unicode uris which we can get out of elementtree
         self.srcpad.push(gst.Buffer('\n'.join(uris)))
         return False
 
