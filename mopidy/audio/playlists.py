@@ -34,7 +34,22 @@ def detect_xspf_header(typefind):
     for event, node in xml.dom.pulldom.parseString(data):
         if event == xml.dom.pulldom.START_ELEMENT:
             return (node.tagName == 'playlist' and
-                    node.node.namespaceURI == 'http://xspf.org/ns/0/')
+                    node.namespaceURI == 'http://xspf.org/ns/0/')
+    return False
+
+
+def detect_asx_header(typefind):
+    data = typefind.peek(0, 50)
+
+    # Bail early if the words xml and playlist are not present.
+    if not data or b'asx' not in data:
+        return False
+
+    # TODO: handle parser errors.
+    # Try parsing what we have, bailing on first element.
+    for event, node in xml.dom.pulldom.parseString(data):
+        if event == xml.dom.pulldom.START_ELEMENT:
+            return node.tagName == 'asx'
     return False
 
 
@@ -56,10 +71,19 @@ def parse_pls(data):
 
 def parse_xspf(data):
     # TODO: handle parser errors
+    # TODO: make sure tracklist == trackList etc.
     root = xml.etree.ElementTree.fromstring(data.read())
     tracklist = tree.find('{http://xspf.org/ns/0/}trackList')
     for track in tracklist.findall('{http://xspf.org/ns/0/}track'):
         yield track.findtext('{http://xspf.org/ns/0/}location')
+
+
+def parse_asx(data):
+    # TODO: handle parser errors
+    # TODO: make sure entry == Entry etc.
+    root = xml.etree.ElementTree.fromstring(data.read())
+    for entry in root.findall('entry'):
+        yield entry.find('ref').attrib['href']
 
 
 def parse_urilist(data):
@@ -83,6 +107,9 @@ def register_typefinders():
     register_typefind('audio/x-mpegurl', detect_m3u_header, [b'm3u', b'm3u8'])
     register_typefind('audio/x-scpls', detect_pls_header, [b'pls'])
     register_typefind('application/xspf+xml', detect_xspf_header, [b'xspf'])
+    # NOTE: seems we can't use video/x-ms-asf which is the correct mime for asx
+    # as it is shared with asf for streaming videos :/
+    register_typefind('audio/x-ms-asx', detect_asx_header, [b'asx'])
 
 
 class BasePlaylistElement(gst.Bin):
@@ -232,6 +259,28 @@ class XspfDecoder(BasePlaylistElement):
         return parse_xspf(data)
 
 
+class AsxDecoder(BasePlaylistElement):
+    __gstdetails__ = ('ASX Decoder',
+                      'Decoder',
+                      'Convert .asx to text/uri-list',
+                      'Mopidy')
+
+    sinkpad_template = gst.PadTemplate('sink',
+        gst.PAD_SINK,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('audio/x-ms-asx'))
+
+    srcpad_template = gst.PadTemplate('src',
+        gst.PAD_SRC,
+        gst.PAD_ALWAYS,
+        gst.caps_from_string('text/uri-list'))
+
+    __gsttemplates__ = (sinkpad_template, srcpad_template)
+
+    def convert(self, data):
+        return parse_asx(data)
+
+
 class UriListElement(BasePlaylistElement):
     __gstdetails__ = ('URIListDemuxer',
                       'Demuxer',
@@ -266,6 +315,7 @@ class UriListElement(BasePlaylistElement):
     def handle(self, uris):
         # TODO: hookup about to finish and errors to rest of URIs so we
         # round robin, only giving up once all have been tried.
+        # TODO: uris could be empty.
         self.add(self.uridecodebin)
         self.uridecodebin.set_state(gst.STATE_READY)
         self.uridecodebin.set_property('uri', uris[0])
@@ -335,5 +385,7 @@ def register_elements():
     register_element(M3uDecoder)
     register_element(PlsDecoder)
     register_element(XspfDecoder)
+    register_element(AsxDecoder)
     register_element(UriListElement)
+    # TODO: only register if nothing can handle icy scheme
     register_element(IcySrc)
