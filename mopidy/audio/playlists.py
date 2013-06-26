@@ -382,5 +382,5 @@ def register_elements():
     register_element(XspfDecoder)
     register_element(AsxDecoder)
     register_element(UriListElement)
-    # TODO: only register if nothing can handle icy scheme
-    register_element(IcySrc)
+    if not gst.element_make_from_uri(gst.URI_SRC, 'icy://'):
+        register_element(IcySrc)
