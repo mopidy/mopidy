@@ -1,3 +1,9 @@
+mopidy (0.14.1-0mopidy2) unstable; urgency=low
+
+  * Update version range on python-spotify dependency to include 1.11.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 01 Jul 2013 01:31:47 +0200
+
 mopidy (0.14.1-0mopidy1) unstable; urgency=low
 
   * New upstream release.
