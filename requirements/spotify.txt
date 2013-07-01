@@ -1,4 +1,4 @@
-pyspotify >= 1.9, < 1.11
+pyspotify >= 1.9, < 2
 # The libspotify Python wrapper
 # Available as the python-spotify package from apt.mopidy.com
 
