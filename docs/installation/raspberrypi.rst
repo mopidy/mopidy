@@ -85,7 +85,7 @@ card.
       sudo apt-get dist-upgrade
 
 #. Ensure you have a new enough firmware. On Debian based systems
-   `rpi-update <http://apt.mopidy.com://github.com/Hexxeh/rpi-update>`_
+   `rpi-update <https://github.com/Hexxeh/rpi-update>`_
    can be used.
 
 #. Update either ``~/.asoundrc`` or ``/etc/asound.conf`` to the
