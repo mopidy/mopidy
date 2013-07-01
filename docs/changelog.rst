@@ -23,6 +23,17 @@ v0.15.0 (UNRELEASED)
   :option:`mopidy --option` arguments appearing later on the command line.
 
 
+v0.14.2 (2013-07-01)
+====================
+
+This is a maintenance release to make Mopidy 0.14 work with pyspotify 1.11.
+
+**Dependencies**
+
+- pyspotify >= 1.9, < 2 is now required for Spotify support. In other words,
+  you're free to upgrade to pyspotify 1.11, but it isn't a requirement.
+
+
 v0.14.1 (2013-04-28)
 ====================
 

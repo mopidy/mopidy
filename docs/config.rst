@@ -155,6 +155,24 @@ following to your ``mopidy.conf``::
     enabled = false
 
 
+Extension configuration
+=======================
+
+Mopidy's extensions have their own config values that you may want to tweak.
+For the available config values, please refer to the docs for each extension.
+Most, if not all, can be found at :ref:`ext`.
+
+Mopidy extensions are enabled by default when they are installed. If you want
+to disable an extension without uninstalling it, all extensions support the
+``enabled`` config value even if it isn't explicitly documented by all
+extensions. If the ``enabled`` config value is set to ``false`` the extension
+will not be started. For example, to disable the Spotify extension, add the
+following to your ``mopidy.conf``::
+
+    [spotify]
+    enabled = false
+
+
 Advanced configurations
 =======================
 
