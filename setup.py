@@ -28,7 +28,7 @@ setup(
         'Pykka >= 1.1',
     ],
     extras_require={
-        'spotify': ['pyspotify >= 1.9, < 1.11'],
+        'spotify': ['pyspotify >= 1.9, < 2'],
         'scrobbler': ['pylast >= 0.5.7'],
         'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
     },
