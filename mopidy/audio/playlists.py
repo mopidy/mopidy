@@ -306,8 +306,21 @@ class UriListElement(BasePlaylistElement):
 
     def pad_added(self, src, pad):
         self.srcpad.set_target(pad)
+        pad.add_event_probe(self.pad_event)
+
+    def pad_event(self, pad, event):
+        if event.has_name('urilist-played'):
+            error = gst.GError(gst.RESOURCE_ERROR, gst.RESOURCE_ERROR_FAILED,
+                               b'Nested playlists not supported.')
+            message = gst.message_new_error(self, error, b'Playlists pointing to other playlists is not supported')
+            self.post_message(message)
+        return True
 
     def handle(self, uris):
+        struct = gst.Structure('urilist-played')
+        event = gst.event_new_custom(gst.EVENT_CUSTOM_UPSTREAM, struct)
+        self.sinkpad.push_event(event)
+
         # TODO: hookup about to finish and errors to rest of URIs so we
         # round robin, only giving up once all have been tried.
         # TODO: uris could be empty.
