@@ -135,11 +135,12 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
 
 # TODO: rename and move to tagcache extension.
 class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
-    def __init__(self, *args, **kwargs):
-        super(LocalLibraryUpdateProvider, self).__init__(*args, **kwargs)
+    uri_schemes = ['file']
+
+    def __init__(self, config):
         self._tracks = {}
-        self._media_dir = self.backend.config['local']['media_dir']
-        self._tag_cache_file = self.backend.config['local']['tag_cache_file']
+        self._media_dir = config['local']['media_dir']
+        self._tag_cache_file = config['local']['tag_cache_file']
 
     def load(self):
         tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
@@ -156,6 +157,8 @@ class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
 
     def commit(self):
         directory, basename = os.path.split(self._tag_cache_file)
+
+        # TODO: cleanup directory/basename.* files.
         tmp = tempfile.NamedTemporaryFile(
             prefix=basename + '.', dir=directory, delete=False)
 

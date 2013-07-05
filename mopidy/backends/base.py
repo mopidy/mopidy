@@ -96,15 +96,7 @@ class BaseLibraryProvider(object):
 
 
 class BaseLibraryUpdateProvider(object):
-    """
-    :param backend: backend the controller is a part of
-    :type backend: :class:`mopidy.backends.base.Backend`
-    """
-
-    pykka_traversable = True
-
-    def __init__(self, backend):
-        self.backend = backend
+    uri_schemes = []
 
     def load(self):
         """Loads the library and returns all tracks in it.

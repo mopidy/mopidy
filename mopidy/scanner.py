@@ -45,9 +45,9 @@ def main():
     log.setup_root_logger()
     log.setup_console_logging(logging_config, args.verbosity_level)
 
-    extensions = dict((e.ext_name, e) for e in ext.load_extensions())
+    extensions = ext.load_extensions()
     config, errors = config_lib.load(
-        config_files, extensions.values(), config_overrides)
+        config_files, extensions, config_overrides)
     log.setup_log_levels(config)
 
     if not config['local']['media_dir']:
@@ -56,10 +56,21 @@ def main():
 
     # TODO: missing config error checking and other default setup code.
 
-    audio = dummy_audio.DummyAudio()
-    local_backend_classes = extensions['local'].get_backend_classes()
-    local_backend = local_backend_classes[0](config, audio)
-    local_updater = local_backend.updater
+    updaters = {}
+    for e in extensions:
+        for updater_class in e.get_library_updaters():
+            if updater_class and 'file' in updater_class.uri_schemes:
+                updaters[e.ext_name] = updater_class
+
+    if not updaters:
+        logging.error('No usable updaters found.')
+        return
+    elif len(updaters) > 1:
+        names = ', '.join(updaters.keys())
+        logging.error('More than one updater found. Provided by: %s', names)
+        return
+
+    local_updater = updaters.values()[0](config)  # TODO: switch to actor?
 
     media_dir = config['local']['media_dir']
 
