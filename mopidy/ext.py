@@ -79,6 +79,9 @@ class Extension(object):
         """
         return []
 
+    def get_library_updaters(self):
+        return []
+
     def register_gstreamer_elements(self):
         """Hook for registering custom GStreamer elements
 
