@@ -15,11 +15,6 @@ class Backend(object):
     #: the backend doesn't provide a library.
     library = None
 
-    #: The library update provider. An instance of
-    #: :class:`~mopidy.backends.base.BaseLibraryUpdateProvider`, or
-    #: :class:`None` if the backend doesn't provide a library.
-    updater = None
-
     #: The playback provider. An instance of
     #: :class:`~mopidy.backends.base.BasePlaybackProvider`, or :class:`None` if
     #: the backend doesn't provide playback.
@@ -39,9 +34,6 @@ class Backend(object):
 
     def has_library(self):
         return self.library is not None
-
-    def has_updater(self):
-        return self.updater is not None
 
     def has_playback(self):
         return self.playback is not None
