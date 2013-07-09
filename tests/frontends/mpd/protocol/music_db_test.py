@@ -7,13 +7,19 @@ from tests.frontends.mpd import protocol
 
 class MusicDatabaseHandlerTest(protocol.BaseTestCase):
     def test_count(self):
-        self.sendRequest('count "tag" "needle"')
+        self.sendRequest('count "artist" "needle"')
         self.assertInResponse('songs: 0')
         self.assertInResponse('playtime: 0')
         self.assertInResponse('OK')
 
     def test_count_without_quotes(self):
-        self.sendRequest('count tag "needle"')
+        self.sendRequest('count artist "needle"')
+        self.assertInResponse('songs: 0')
+        self.assertInResponse('playtime: 0')
+        self.assertInResponse('OK')
+
+    def test_count_with_multiple_pairs(self):
+        self.sendRequest('count "artist" "foo" "album" "bar"')
         self.assertInResponse('songs: 0')
         self.assertInResponse('playtime: 0')
         self.assertInResponse('OK')

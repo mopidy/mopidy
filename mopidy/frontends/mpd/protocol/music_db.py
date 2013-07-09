@@ -39,8 +39,8 @@ def _artist_as_track(artist):
         artists=[artist])
 
 
-@handle_request(r'^count "?(?P<tag>[^"]+)"? "(?P<needle>[^"]*)"$')
-def count(context, tag, needle):
+@handle_request(r'^count ' + QUERY_RE)
+def count(context, mpd_query):
     """
     *musicpd.org, music database section:*
 
@@ -52,6 +52,7 @@ def count(context, tag, needle):
     *GMPC:*
 
     - does not add quotes around the tag argument.
+    - use multiple tag-needle pairs to make more specific searches.
     """
     return [('songs', 0), ('playtime', 0)]  # TODO
 
