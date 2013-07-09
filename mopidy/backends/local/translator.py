@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 import urllib
 
 from mopidy.models import Track, Artist, Album
@@ -50,7 +51,7 @@ def parse_m3u(file_path, media_dir):
         if line.startswith('file://'):
             uris.append(line)
         else:
-            path = path_to_uri(media_dir, line)
+            path = path_to_uri(os.path.join(media_dir, line))
             uris.append(path)
 
     return uris
@@ -167,7 +168,7 @@ def _convert_mpd_data(data, tracks, music_dir):
 
     # Make sure we only pass bytestrings to path_to_uri to avoid implicit
     # decoding of bytestrings to unicode strings
-    track_kwargs['uri'] = path_to_uri(music_dir, path)
+    track_kwargs['uri'] = path_to_uri(os.path.join(music_dir, path))
 
     track_kwargs['length'] = int(data.get('time', 0)) * 1000
 

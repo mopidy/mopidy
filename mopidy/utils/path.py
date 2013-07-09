@@ -51,7 +51,7 @@ def get_or_create_file(file_path):
     return file_path
 
 
-def path_to_uri(*parts):
+def path_to_uri(path):
     """
     Convert OS specific path to file:// URI.
 
@@ -61,7 +61,6 @@ def path_to_uri(*parts):
 
     Returns a file:// URI as an unicode string.
     """
-    path = os.path.join(*parts)
     if isinstance(path, unicode):
         path = path.encode('utf-8')
     path = urllib.quote(path)

@@ -119,10 +119,6 @@ class PathToFileURITest(unittest.TestCase):
         result = path.path_to_uri('/etc/fstab')
         self.assertEqual(result, 'file:///etc/fstab')
 
-    def test_dir_and_path(self):
-        result = path.path_to_uri('/etc', 'fstab')
-        self.assertEqual(result, 'file:///etc/fstab')
-
     def test_space_in_path(self):
         result = path.path_to_uri('/tmp/test this')
         self.assertEqual(result, 'file:///tmp/test%20this')
