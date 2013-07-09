@@ -12,6 +12,12 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('playtime: 0')
         self.assertInResponse('OK')
 
+    def test_count_without_quotes(self):
+        self.sendRequest('count tag "needle"')
+        self.assertInResponse('songs: 0')
+        self.assertInResponse('playtime: 0')
+        self.assertInResponse('OK')
+
     def test_findadd(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
