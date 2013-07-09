@@ -155,9 +155,22 @@ class BasePlaybackProvider(object):
         :type track: :class:`mopidy.models.Track`
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self.audio.prepare_change()
-        self.audio.set_uri(track.uri).get()
+        self.audio.prepare_change()  # TODO: add .get() to this?
+        self.change_track(track)
         return self.audio.start_playback().get()
+
+    def change_track(self, track):
+        """
+        Swith to provided track.
+
+        *MAY be reimplemented by subclass.*
+
+        :param track: the track to play
+        :type track: :class:`mopidy.models.Track`
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        self.audio.set_uri(track.uri).get()
+        return True
 
     def resume(self):
         """
