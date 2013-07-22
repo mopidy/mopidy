@@ -156,14 +156,14 @@ def query_from_mpd_list_format(field, mpd_query):
         if field == 'album':
             if not tokens[0]:
                 raise ValueError
-            return {'artist': [tokens[0]]}  # See above NOTE
+            return {'artist': [tokens[0]]}
         else:
             raise MpdArgError(
                 'should be "Album" for 3 arguments', command='list')
     elif len(tokens) % 2 == 0:
         query = {}
         while tokens:
-            key = str(tokens[0].lower())  # See above NOTE
+            key = tokens[0].lower()
             value = tokens[1]
             tokens = tokens[2:]
             if key not in ('artist', 'album', 'date', 'genre'):
