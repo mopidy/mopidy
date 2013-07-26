@@ -22,6 +22,11 @@ v0.15.0 (UNRELEASED)
 - :option:`mopidy --show-config` will now take into consideration any
   :option:`mopidy --option` arguments appearing later on the command line.
 
+**Local backend**
+
+- An album's number of discs and a track's disc number are now extracted when
+  scanning your music collection.
+
 
 v0.14.2 (2013-07-01)
 ====================
