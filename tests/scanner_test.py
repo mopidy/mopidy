@@ -59,7 +59,7 @@ class TranslatorTest(unittest.TestCase):
             'uri': 'uri',
             'name': 'trackname',
             'date': '2006-01-01',
-            'track_no': 1,            
+            'track_no': 1,
             'disc_no': 2,
             'length': 4531,
             'musicbrainz_id': 'mbtrackid',
