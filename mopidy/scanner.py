@@ -139,6 +139,7 @@ def translator(data):
 
     _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
+    _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs)
     _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
 
     if gst.TAG_DATE in data and data[gst.TAG_DATE]:
@@ -152,6 +153,7 @@ def translator(data):
 
     _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
     _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
+    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
 
     # Following keys don't seem to have TAG_* constant.
     _retrieve('album-artist', 'name', albumartist_kwargs)

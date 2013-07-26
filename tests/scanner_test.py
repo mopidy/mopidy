@@ -26,6 +26,8 @@ class TranslatorTest(unittest.TestCase):
             'album-artist': 'albumartistname',
             'title': 'trackname',
             'track-count': 2,
+            'album-disc-number': 2,
+            'album-disc-count': 3,
             'date': FakeGstDate(2006, 1, 1,),
             'container-format': 'ID3 tag',
             'duration': 4531,
@@ -39,6 +41,7 @@ class TranslatorTest(unittest.TestCase):
         self.album = {
             'name': 'albumname',
             'num_tracks': 2,
+            'num_discs': 3,
             'musicbrainz_id': 'mbalbumid',
         }
 
@@ -56,7 +59,8 @@ class TranslatorTest(unittest.TestCase):
             'uri': 'uri',
             'name': 'trackname',
             'date': '2006-01-01',
-            'track_no': 1,
+            'track_no': 1,            
+            'disc_no': 2,
             'length': 4531,
             'musicbrainz_id': 'mbtrackid',
             'last_modified': 1234,
