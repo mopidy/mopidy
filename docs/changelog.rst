@@ -27,6 +27,12 @@ v0.15.0 (UNRELEASED)
 - An album's number of discs and a track's disc number are now extracted when
   scanning your music collection.
 
+**Spotify backend**
+
+- Prepend playlist folder names to the playlist name, so that the playlist
+  hierarchy from your Spotify account is available in Mopidy. (Fixes:
+  :issue:`62`)
+
 
 v0.14.2 (2013-07-01)
 ====================
