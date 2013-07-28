@@ -67,7 +67,7 @@ def to_mopidy_track(spotify_track, bitrate=None):
     return track_cache[uri]
 
 
-def to_mopidy_playlist(spotify_playlist, spotify_folders, bitrate=None, username=None):
+def to_mopidy_playlist(spotify_playlist, folders=None, bitrate=None, username=None):
     if spotify_playlist is None or spotify_playlist.type() != 'playlist':
         return
     try:
@@ -78,8 +78,8 @@ def to_mopidy_playlist(spotify_playlist, spotify_folders, bitrate=None, username
     if not spotify_playlist.is_loaded():
         return Playlist(uri=uri, name='[loading...]')
     name = spotify_playlist.name()
-    if spotify_folders:
-        folder_names = '/'.join(folder.name() for folder in spotify_folders)
+    if folders:
+        folder_names = '/'.join(folder.name() for folder in folders)
         name = folder_names + '/' + name
     tracks = [
         to_mopidy_track(spotify_track, bitrate=bitrate)

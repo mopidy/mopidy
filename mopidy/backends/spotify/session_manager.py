@@ -180,10 +180,10 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             if spotify_playlist.type() == 'folder_end':
                 folders.pop()
             playlists.append(translator.to_mopidy_playlist(
-                spotify_playlist, folders,
+                spotify_playlist, folders=folders,
                 bitrate=self.bitrate, username=self.username))
         playlists.append(translator.to_mopidy_playlist(
-            self.session.starred(), None,
+            self.session.starred(),
             bitrate=self.bitrate, username=self.username))
         playlists = filter(None, playlists)
         self.backend.playlists.playlists = playlists
