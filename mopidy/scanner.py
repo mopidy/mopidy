@@ -27,7 +27,6 @@ pygst.require('0.10')
 import gst
 
 from mopidy import config as config_lib, ext
-from mopidy.audio import dummy as dummy_audio
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
 
@@ -59,7 +58,7 @@ def main():
     updaters = {}
     for e in extensions:
         for updater_class in e.get_library_updaters():
-            if updater_class and 'file' in updater_class.uri_schemes:
+            if updater_class and 'local' in updater_class.uri_schemes:
                 updaters[e.ext_name] = updater_class
 
     if not updaters:

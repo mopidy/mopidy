@@ -157,7 +157,8 @@ class BasePlaybackProvider(object):
         """
         self.audio.prepare_change()  # TODO: add .get() to this?
         self.change_track(track)
-        return self.audio.start_playback().get()
+        self.audio.start_playback().get()
+        return True
 
     def change_track(self, track):
         """
