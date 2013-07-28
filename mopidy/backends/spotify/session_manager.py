@@ -173,9 +173,14 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             logger.debug('Still getting data; skipped refresh of playlists')
             return
         playlists = []
+        folders = []
         for spotify_playlist in self.session.playlist_container():
+            if spotify_playlist.type() == 'folder_start':
+                folders.append(spotify_playlist)
+            if spotify_playlist.type() == 'folder_end':
+                folders.pop()
             playlists.append(translator.to_mopidy_playlist(
-                spotify_playlist,
+                spotify_playlist, folders=folders,
                 bitrate=self.bitrate, username=self.username))
         playlists.append(translator.to_mopidy_playlist(
             self.session.starred(),
