@@ -29,7 +29,7 @@ _proxy_schema = ConfigSchema('proxy')
 _proxy_schema['hostname'] = Hostname(optional=True)
 _proxy_schema['username'] = String(optional=True)
 _proxy_schema['password'] = Secret(optional=True)
-_proxy_schema['port'] = Port(optional=True)
+_proxy_schema['port'] = Port()
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 #_outputs_schema = config.AudioOutputConfigSchema()

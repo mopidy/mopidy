@@ -117,10 +117,7 @@ class Integer(ConfigValue):
         self._choices = choices
 
     def deserialize(self, value):
-        try:
-            value = int(value)
-        except:
-            value = 0
+        value = int(value)
         validators.validate_choice(value, self._choices)
         validators.validate_minimum(value, self._minimum)
         validators.validate_maximum(value, self._maximum)
@@ -225,10 +222,28 @@ class Port(Integer):
     allocate a port for us.
     """
     # TODO: consider probing if port is free or not?
-    def __init__(self, choices=None, optional=False):
-        self._required = not optional        
+    def __init__(self, choices=None):
         super(Port, self).__init__(
             minimum=0, maximum=2 ** 16 - 1, choices=choices)
+
+    def deserialize(self, value):
+        # in case of no value is given, just return nothing
+        if not len(value):
+            return value
+        # now we can try to convert
+        try:
+            value = int(value)
+        except ValueError:
+            try:
+                value = socket.getservbyname(value, 'tcp')
+            except socket.error:
+                raise ValueError('must be a valid port number')
+        else:
+            validators.validate_choice(value, self._choices)
+            validators.validate_minimum(value, self._minimum)
+            validators.validate_maximum(value, self._maximum)
+        return value
+
 
 
 class Path(ConfigValue):
