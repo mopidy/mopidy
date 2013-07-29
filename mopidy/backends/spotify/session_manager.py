@@ -33,9 +33,14 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.cache_location = config['spotify']['cache_dir']
         self.settings_location = config['spotify']['cache_dir']
 
+        # Add proxy port only if available
+        full_proxy = config['proxy']['hostname']
+        if 'port' in config['proxy']:
+            full_proxy = full_proxy + ':' + str(config['proxy']['port'])
+
         PyspotifySessionManager.__init__(
             self, config['spotify']['username'], config['spotify']['password'],
-            proxy=config['proxy']['hostname'],
+            proxy=full_proxy,
             proxy_username=config['proxy']['username'],
             proxy_password=config['proxy']['password'])
 
