@@ -227,10 +227,6 @@ class Port(Integer):
             minimum=0, maximum=2 ** 16 - 1, choices=choices)
 
     def deserialize(self, value):
-        # in case of no value is given, just return nothing
-        if not len(value):
-            return value
-        # now we can try to convert
         try:
             value = int(value)
         except ValueError:
@@ -238,10 +234,10 @@ class Port(Integer):
                 value = socket.getservbyname(value, 'tcp')
             except socket.error:
                 raise ValueError('must be a valid port number')
-        else:
-            validators.validate_choice(value, self._choices)
-            validators.validate_minimum(value, self._minimum)
-            validators.validate_maximum(value, self._maximum)
+        
+        validators.validate_choice(value, self._choices)
+        validators.validate_minimum(value, self._minimum)
+        validators.validate_maximum(value, self._maximum)
         return value
 
 
