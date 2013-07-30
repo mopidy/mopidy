@@ -6,7 +6,7 @@ import os
 from mopidy.backends import base
 from mopidy.utils import path
 
-logger = logging.getLogger('mopidy.backends.spotify')
+logger = logging.getLogger('mopidy.backends.local')
 
 
 class LocalPlaybackProvider(base.BasePlaybackProvider):

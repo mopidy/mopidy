@@ -6,9 +6,9 @@ from mopidy.backends.local import actor
 from mopidy.core import PlaybackState
 from mopidy.models import Track
 
+from tests import path_to_data_dir
 from tests.backends.base.playback import PlaybackControllerTest
 from tests.backends.local import generate_song
-from tests import path_to_data_dir
 
 
 class LocalPlaybackControllerTest(PlaybackControllerTest, unittest.TestCase):

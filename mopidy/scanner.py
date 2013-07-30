@@ -62,11 +62,11 @@ def main():
                 updaters[e.ext_name] = updater_class
 
     if not updaters:
-        logging.error('No usable updaters found.')
+        logging.error('No usable library updaters found.')
         return
     elif len(updaters) > 1:
-        names = ', '.join(updaters.keys())
-        logging.error('More than one updater found. Provided by: %s', names)
+        logging.error('More than one library updater found. '
+                      'Provided by: %s', ', '.join(updaters.keys()))
         return
 
     local_updater = updaters.values()[0](config)  # TODO: switch to actor?
