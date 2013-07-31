@@ -33,6 +33,11 @@ v0.15.0 (UNRELEASED)
   hierarchy from your Spotify account is available in Mopidy. (Fixes:
   :issue:`62`)
 
+**Audio**
+
+- Added support for viusalization. :confval:`audio/visualizer` can now be set
+  to GStreamer visualizers.
+
 
 v0.14.2 (2013-07-01)
 ====================
