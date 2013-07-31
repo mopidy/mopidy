@@ -366,6 +366,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.sendRequest('list "album" "album" "analbum"')
         self.assertInResponse('OK')
 
+    def test_list_album_by_albumartist(self):
+        self.sendRequest('list "album" "albumartist" "anartist"')
+        self.assertInResponse('OK')
+
     def test_list_album_by_full_date(self):
         self.sendRequest('list "album" "date" "2001-01-01"')
         self.assertInResponse('OK')

@@ -166,7 +166,7 @@ def query_from_mpd_list_format(field, mpd_query):
             key = tokens[0].lower()
             value = tokens[1]
             tokens = tokens[2:]
-            if key not in ('artist', 'album', 'date', 'genre'):
+            if key not in ('artist', 'album', 'albumartist', 'date', 'genre'):
                 raise MpdArgError('not able to parse args', command='list')
             if not value:
                 raise ValueError
