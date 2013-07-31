@@ -36,7 +36,6 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         full_proxy = ''
         if config['proxy']['hostname']:
             full_proxy = config['proxy']['hostname']
-            # Add proxy port and scheme only if available
             if config['proxy']['port']:
                 full_proxy += ':' + str(config['proxy']['port'])
             if config['proxy']['scheme']:

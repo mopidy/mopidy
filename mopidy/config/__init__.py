@@ -27,9 +27,9 @@ _audio_schema['output'] = String()
 
 _proxy_schema = ConfigSchema('proxy')
 _proxy_schema['scheme'] = String(optional=True,
-                                 choices=['', 'https', 'socks4', 'socks5'])
+                                 choices=['http', 'https', 'socks4', 'socks5'])
 _proxy_schema['hostname'] = Hostname(optional=True)
-_proxy_schema['port'] = Port()
+_proxy_schema['port'] = Port(optional=True)
 _proxy_schema['username'] = String(optional=True)
 _proxy_schema['password'] = Secret(optional=True)
 

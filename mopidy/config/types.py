@@ -71,9 +71,9 @@ class String(ConfigValue):
     def deserialize(self, value):
         value = decode(value).strip()
         validators.validate_required(value, self._required)
-        validators.validate_choice(value, self._choices)
         if not value:
             return None
+        validators.validate_choice(value, self._choices)
         return value
 
     def serialize(self, value, display=False):
@@ -111,12 +111,16 @@ class Secret(ConfigValue):
 class Integer(ConfigValue):
     """Integer value."""
 
-    def __init__(self, minimum=None, maximum=None, choices=None):
+    def __init__(self, minimum=None, maximum=None, choices=None, optional=False):
+        self._required = not optional
         self._minimum = minimum
         self._maximum = maximum
         self._choices = choices
 
     def deserialize(self, value):
+        validators.validate_required(value, self._required)
+        if not value:
+            return None
         value = int(value)
         validators.validate_choice(value, self._choices)
         validators.validate_minimum(value, self._minimum)
@@ -222,23 +226,9 @@ class Port(Integer):
     allocate a port for us.
     """
     # TODO: consider probing if port is free or not?
-    def __init__(self, choices=None):
+    def __init__(self, choices=None, optional=False):
         super(Port, self).__init__(
-            minimum=0, maximum=2 ** 16 - 1, choices=choices)
-
-    def deserialize(self, value):
-        try:
-            value = int(value)
-        except ValueError:
-            try:
-                value = socket.getservbyname(value, 'tcp')
-            except socket.error:
-                raise ValueError('must be a valid port number')
-        
-        validators.validate_choice(value, self._choices)
-        validators.validate_minimum(value, self._minimum)
-        validators.validate_maximum(value, self._maximum)
-        return value
+            minimum=0, maximum=2 ** 16 - 1, choices=choices, optional=optional)
 
 
 class Path(ConfigValue):
