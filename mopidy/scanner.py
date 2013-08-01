@@ -98,9 +98,9 @@ def main():
         logging.debug('Debug info for %s: %s', uri, debug)
 
     if not config['local']['scan_timeout']:
-        scan_timeout = 1000
-    else:
-        scan_timeout = config['local']['scan_timeout']
+        self.error_callback(uri, 'Config value local/scan_timeout is not set.', 'debug')
+
+    scan_timeout = config['local']['scan_timeout']
 
     logging.info('Scanning new and modified tracks.')
     # TODO: just pass the library in instead?
@@ -262,7 +262,7 @@ class Scanner(object):
     def process_timeout(self):
         if self.error_callback:
             uri = self.uribin.get_property('uri')
-            self.error_callback(uri, 'Processing timeout after %i seconds' % self.timeout, 'debug')
+            self.error_callback(uri, 'Processing timeout after %i seconds' % self.scan_timeout, 'debug')
         self.next_uri()
         return True
 
