@@ -237,7 +237,7 @@ class MpdContext(object):
     subscriptions = None
 
     #regex for invalid characters in playlist names
-    _invalid_playlist_chars = re.compile(r'[\n\t\\/]')
+    _invalid_playlist_chars = re.compile(r'[\n\r\\/]')
 
     def __init__(self, dispatcher, session=None, config=None, core=None):
         self.dispatcher = dispatcher
