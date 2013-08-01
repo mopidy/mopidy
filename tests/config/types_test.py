@@ -98,7 +98,7 @@ class StringTest(unittest.TestCase):
         self.assertIsInstance(result, bytes)
         self.assertEqual(b'', result)
 
-    def test_deserialize_enforces_choices_optionnal(self):
+    def test_deserialize_enforces_choices_optional(self):
         value = types.String(optional=True, choices=['foo', 'bar', 'baz'])
         self.assertEqual(None, value.deserialize(b''))
         self.assertRaises(ValueError, value.deserialize, b'foobar')
