@@ -33,6 +33,9 @@ v0.15.0 (UNRELEASED)
   hierarchy from your Spotify account is available in Mopidy. (Fixes:
   :issue:`62`)
 
+- Fix proxy config values that was broken with the config system change in
+  0.14. (Fixes: :issue:`472`)
+
 
 v0.14.2 (2013-07-01)
 ====================
