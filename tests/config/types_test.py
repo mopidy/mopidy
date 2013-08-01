@@ -98,6 +98,11 @@ class StringTest(unittest.TestCase):
         self.assertIsInstance(result, bytes)
         self.assertEqual(b'', result)
 
+    def test_deserialize_enforces_choices_optional(self):
+        value = types.String(optional=True, choices=['foo', 'bar', 'baz'])
+        self.assertEqual(None, value.deserialize(b''))
+        self.assertRaises(ValueError, value.deserialize, b'foobar')
+
 
 class SecretTest(unittest.TestCase):
     def test_deserialize_passes_through(self):
@@ -162,6 +167,10 @@ class IntegerTest(unittest.TestCase):
         value = types.Integer(maximum=10)
         self.assertEqual(5, value.deserialize('5'))
         self.assertRaises(ValueError, value.deserialize, '15')
+
+    def test_deserialize_respects_optional(self):
+        value = types.Integer(optional=True)
+        self.assertEqual(None, value.deserialize(''))
 
 
 class BooleanTest(unittest.TestCase):
