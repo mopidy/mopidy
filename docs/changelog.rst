@@ -32,6 +32,14 @@ v0.15.0 (UNRELEASED)
 - An album's number of discs and a track's disc number are now extracted when
   scanning your music collection.
 
+- Added support for plugable library updaters. This allows extension writers
+  to start providing their own custom libraries instead of being stuck with
+  just our tag cache as the only option.
+
+- Converted local backend to use new `local:playlist:path` and
+  `local:track:path` uri scheme. Also moves support of `file://` to streaming
+  backend.
+
 **Spotify backend**
 
 - Prepend playlist folder names to the playlist name, so that the playlist

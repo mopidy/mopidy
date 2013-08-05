@@ -15,11 +15,6 @@ class Backend(object):
     #: the backend doesn't provide a library.
     library = None
 
-    #: The library update provider. An instance of
-    #: :class:`~mopidy.backends.base.BaseLibraryUpdateProvider`, or
-    #: :class:`None` if the backend doesn't provide a library.
-    updater = None
-
     #: The playback provider. An instance of
     #: :class:`~mopidy.backends.base.BasePlaybackProvider`, or :class:`None` if
     #: the backend doesn't provide playback.
@@ -39,9 +34,6 @@ class Backend(object):
 
     def has_library(self):
         return self.library is not None
-
-    def has_updater(self):
-        return self.updater is not None
 
     def has_playback(self):
         return self.playback is not None
@@ -96,15 +88,7 @@ class BaseLibraryProvider(object):
 
 
 class BaseLibraryUpdateProvider(object):
-    """
-    :param backend: backend the controller is a part of
-    :type backend: :class:`mopidy.backends.base.Backend`
-    """
-
-    pykka_traversable = True
-
-    def __init__(self, backend):
-        self.backend = backend
+    uri_schemes = []
 
     def load(self):
         """Loads the library and returns all tracks in it.
@@ -172,8 +156,21 @@ class BasePlaybackProvider(object):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         self.audio.prepare_change()
-        self.audio.set_uri(track.uri).get()
+        self.change_track(track)
         return self.audio.start_playback().get()
+
+    def change_track(self, track):
+        """
+        Swith to provided track.
+
+        *MAY be reimplemented by subclass.*
+
+        :param track: the track to play
+        :type track: :class:`mopidy.models.Track`
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        self.audio.set_uri(track.uri).get()
+        return True
 
     def resume(self):
         """
