@@ -22,6 +22,11 @@ v0.15.0 (UNRELEASED)
 - :option:`mopidy --show-config` will now take into consideration any
   :option:`mopidy --option` arguments appearing later on the command line.
 
+**Audio**
+
+- Added support for viusalization. :confval:`audio/visualizer` can now be set
+  to GStreamer visualizers.
+
 **Local backend**
 
 - An album's number of discs and a track's disc number are now extracted when
