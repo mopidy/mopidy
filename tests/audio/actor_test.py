@@ -21,6 +21,7 @@ class AudioTest(unittest.TestCase):
                 'mixer': 'fakemixer track_max_volume=65536',
                 'mixer_track': None,
                 'output': 'fakesink',
+                'visualizer': None,
             }
         }
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
@@ -70,6 +71,7 @@ class AudioTest(unittest.TestCase):
                 'mixer': 'fakemixer track_max_volume=40',
                 'mixer_track': None,
                 'output': 'fakesink',
+                'visualizer': None,
             }
         }
         self.audio = audio.Audio.start(config=config).proxy()

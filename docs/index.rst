@@ -48,7 +48,7 @@ About
     :maxdepth: 1
 
     authors
-    licenses
+    license
     changelog
     versioning
 

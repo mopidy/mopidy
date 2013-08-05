@@ -22,6 +22,11 @@ v0.15.0 (UNRELEASED)
 - :option:`mopidy --show-config` will now take into consideration any
   :option:`mopidy --option` arguments appearing later on the command line.
 
+**Audio**
+
+- Added support for viusalization. :confval:`audio/visualizer` can now be set
+  to GStreamer visualizers.
+
 **Local backend**
 
 - An album's number of discs and a track's disc number are now extracted when
@@ -32,6 +37,9 @@ v0.15.0 (UNRELEASED)
 - Prepend playlist folder names to the playlist name, so that the playlist
   hierarchy from your Spotify account is available in Mopidy. (Fixes:
   :issue:`62`)
+
+- Fix proxy config values that was broken with the config system change in
+  0.14. (Fixes: :issue:`472`)
 
 
 v0.14.2 (2013-07-01)
