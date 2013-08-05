@@ -54,6 +54,10 @@ def main():
         logging.warning('Config value local/media_dir is not set.')
         return
 
+    if not config['local']['scan_timeout']:
+        logging.warning('Config value local/scan_timeout is not set.')
+        return
+
     # TODO: missing config error checking and other default setup code.
 
     audio = dummy_audio.DummyAudio()
@@ -96,9 +100,6 @@ def main():
     def debug(uri, error, debug):
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
-
-    if not config['local']['scan_timeout']:
-        self.error_callback(uri, 'Config value local/scan_timeout is not set.', 'debug')
 
     scan_timeout = config['local']['scan_timeout']
 
