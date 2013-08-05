@@ -265,7 +265,7 @@ class Scanner(object):
             uri = self.uribin.get_property('uri')
             self.error_callback(uri, 'Processing timeout after %i seconds' % self.scan_timeout, 'debug')
         self.next_uri()
-        return True
+        return False
 
     def get_duration(self):
         self.pipe.get_state()  # Block until state change is done.
