@@ -24,7 +24,7 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
 
     def create(self, name):
         name = formatting.slugify(name)
-        uri = path.path_to_uri(self._get_m3u_path(name))
+        uri = 'local:playlist:%s.m3u' % name
         playlist = Playlist(uri=uri, name=name)
         return self.save(playlist)
 
@@ -37,6 +37,7 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
         self._delete_m3u(playlist.uri)
 
     def lookup(self, uri):
+        # TODO: store as {uri: playlist}?
         for playlist in self._playlists:
             if playlist.uri == uri:
                 return playlist
@@ -45,8 +46,8 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
         playlists = []
 
         for m3u in glob.glob(os.path.join(self._playlists_dir, '*.m3u')):
-            uri = path.path_to_uri(m3u)
             name = os.path.splitext(os.path.basename(m3u))[0]
+            uri = 'local:playlist:%s' % name
 
             tracks = []
             for track_uri in parse_m3u(m3u, self._media_dir):
@@ -61,6 +62,7 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
             playlists.append(playlist)
 
         self.playlists = playlists
+        # TODO: send what scheme we loaded them for?
         listener.BackendListener.send('playlists_loaded')
 
         logger.info(
@@ -86,38 +88,30 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
 
         return playlist
 
-    def _get_m3u_path(self, name):
-        name = formatting.slugify(name)
-        file_path = os.path.join(self._playlists_dir, name + '.m3u')
+    def _m3u_uri_to_path(self, uri):
+        # TODO: create uri handling helpers for local uri types.
+        file_path = path.uri_to_path(uri).split(':', 1)[1]
+        file_path = os.path.join(self._playlists_dir, file_path)
         path.check_file_path_is_inside_base_dir(file_path, self._playlists_dir)
         return file_path
 
     def _save_m3u(self, playlist):
-        file_path = path.uri_to_path(playlist.uri)
-        path.check_file_path_is_inside_base_dir(file_path, self._playlists_dir)
+        file_path = self._m3u_uri_to_path(playlist.uri)
         with open(file_path, 'w') as file_handle:
             for track in playlist.tracks:
-                if track.uri.startswith('file://'):
-                    uri = path.uri_to_path(track.uri)
-                else:
-                    uri = track.uri
-                file_handle.write(uri + '\n')
+                file_handle.write(track.uri + '\n')
 
     def _delete_m3u(self, uri):
-        file_path = path.uri_to_path(uri)
-        path.check_file_path_is_inside_base_dir(file_path, self._playlists_dir)
+        file_path = self._m3u_uri_to_path(uri)
         if os.path.exists(file_path):
             os.remove(file_path)
 
     def _rename_m3u(self, playlist):
-        src_file_path = path.uri_to_path(playlist.uri)
-        path.check_file_path_is_inside_base_dir(
-            src_file_path, self._playlists_dir)
+        dst_name = formatting.slugify(playlist.name)
+        dst_uri = 'local:playlist:%s.m3u' % dst_name
 
-        dst_file_path = self._get_m3u_path(playlist.name)
-        path.check_file_path_is_inside_base_dir(
-            dst_file_path, self._playlists_dir)
+        src_file_path = self._m3u_uri_to_path(playlist.uri)
+        dst_file_path = self._m3u_uri_to_path(dst_uri)
 
         shutil.move(src_file_path, dst_file_path)
-
-        return playlist.copy(uri=path.path_to_uri(dst_file_path))
+        return playlist.copy(uri=dst_uri)
