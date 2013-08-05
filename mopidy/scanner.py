@@ -54,6 +54,10 @@ def main():
         logging.warning('Config value local/media_dir is not set.')
         return
 
+    if not config['local']['scan_timeout']:
+        logging.warning('Config value local/scan_timeout is not set.')
+        return
+
     # TODO: missing config error checking and other default setup code.
 
     audio = dummy_audio.DummyAudio()
@@ -97,9 +101,11 @@ def main():
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
+    scan_timeout = config['local']['scan_timeout']
+
     logging.info('Scanning new and modified tracks.')
     # TODO: just pass the library in instead?
-    scanner = Scanner(uris_update, store, debug)
+    scanner = Scanner(uris_update, store, debug, scan_timeout)
     try:
         scanner.start()
     except KeyboardInterrupt:
@@ -176,12 +182,14 @@ def translator(data):
 
 
 class Scanner(object):
-    def __init__(self, uris, data_callback, error_callback=None):
+    def __init__(self, uris, data_callback, error_callback=None, scan_timeout=1000):
         self.data = {}
         self.uris = iter(uris)
         self.data_callback = data_callback
         self.error_callback = error_callback
+        self.scan_timeout = scan_timeout
         self.loop = gobject.MainLoop()
+        self.timeout_id = None
 
         self.fakesink = gst.element_factory_make('fakesink')
         self.fakesink.set_property('signal-handoffs', True)
@@ -252,6 +260,14 @@ class Scanner(object):
             self.error_callback(uri, error, debug)
         self.next_uri()
 
+    def process_timeout(self):
+        if self.error_callback:
+            uri = self.uribin.get_property('uri')
+            self.error_callback(
+                uri, 'Scan timed out after %d ms' % self.scan_timeout, None)
+        self.next_uri()
+        return False
+
     def get_duration(self):
         self.pipe.get_state()  # Block until state change is done.
         try:
@@ -262,6 +278,9 @@ class Scanner(object):
 
     def next_uri(self):
         self.data = {}
+        if self.timeout_id:
+            gobject.source_remove(self.timeout_id)
+            self.timeout_id = None
         try:
             uri = next(self.uris)
         except StopIteration:
@@ -269,6 +288,7 @@ class Scanner(object):
             return False
         self.pipe.set_state(gst.STATE_NULL)
         self.uribin.set_property('uri', uri)
+        self.timeout_id = gobject.timeout_add(self.scan_timeout, self.process_timeout)
         self.pipe.set_state(gst.STATE_PLAYING)
         return True
 
