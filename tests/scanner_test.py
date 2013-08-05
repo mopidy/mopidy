@@ -210,6 +210,10 @@ class ScannerTest(unittest.TestCase):
         self.scan('scanner/image')
         self.assert_(self.errors)
 
+    def test_log_file_is_ignored(self):
+        self.scan('scanner/example.log')
+        self.assert_(self.errors)
+
     @unittest.SkipTest
     def test_song_without_time_is_handeled(self):
         pass

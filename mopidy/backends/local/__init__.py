@@ -18,6 +18,7 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
+        schema['scan_timeout'] = config.Integer(minimum=0)
         schema['media_dir'] = config.Path()
         schema['playlists_dir'] = config.Path()
         schema['tag_cache_file'] = config.Path()
