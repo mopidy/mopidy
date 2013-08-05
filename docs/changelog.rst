@@ -32,6 +32,10 @@ v0.15.0 (UNRELEASED)
 - An album's number of discs and a track's disc number are now extracted when
   scanning your music collection.
 
+- The scanner now gives up scanning a file after a second, and continues with
+  the next file. This fixes some hangs on non-media files, like logs. (Fixes:
+  :issue:`476`, :issue:`483`)
+
 **Spotify backend**
 
 - Prepend playlist folder names to the playlist name, so that the playlist
