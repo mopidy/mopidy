@@ -7,8 +7,6 @@ import pykka
 from mopidy import core
 from mopidy.models import Track, Album, Artist
 
-from tests import path_to_data_dir
-
 
 class LibraryControllerTest(object):
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
@@ -17,13 +15,10 @@ class LibraryControllerTest(object):
         Album(name='album2', artists=artists[1:2]),
         Album()]
     tracks = [
-        Track(
-            uri='file://' + path_to_data_dir('uri1'), name='track1',
-            artists=artists[:1], album=albums[0], date='2001-02-03',
-            length=4000),
-        Track(
-            uri='file://' + path_to_data_dir('uri2'), name='track2',
-            artists=artists[1:2], album=albums[1], date='2002', length=4000),
+        Track(uri='local:track:path1', name='track1', artists=artists[:1],
+              album=albums[0], date='2001-02-03', length=4000),
+        Track(uri='local:track:path2', name='track2', artists=artists[1:2],
+              album=albums[1], date='2002', length=4000),
         Track()]
     config = {}
 
@@ -66,11 +61,11 @@ class LibraryControllerTest(object):
         self.assertEqual(list(result[0].tracks), [])
 
     def test_find_exact_uri(self):
-        track_1_uri = 'file://' + path_to_data_dir('uri1')
+        track_1_uri = 'local:track:path1'
         result = self.library.find_exact(uri=track_1_uri)
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        track_2_uri = 'file://' + path_to_data_dir('uri2')
+        track_2_uri = 'local:track:path2'
         result = self.library.find_exact(uri=track_2_uri)
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
@@ -136,10 +131,10 @@ class LibraryControllerTest(object):
         self.assertEqual(list(result[0].tracks), [])
 
     def test_search_uri(self):
-        result = self.library.search(uri=['RI1'])
+        result = self.library.search(uri=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(uri=['RI2'])
+        result = self.library.search(uri=['TH2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_track(self):
@@ -183,7 +178,7 @@ class LibraryControllerTest(object):
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
         result = self.library.search(any=['Bum1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
-        result = self.library.search(any=['RI1'])
+        result = self.library.search(any=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
     def test_search_wrong_type(self):

@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 import urllib
+import urlparse
 
 from mopidy.models import Track, Artist, Album
 from mopidy.utils.encoding import locale_decode
@@ -30,7 +32,6 @@ def parse_m3u(file_path, media_dir):
     - m3u files are latin-1.
     - This function does not bother with Extended M3U directives.
     """
-
     # TODO: uris as bytes
     uris = []
     try:
@@ -46,16 +47,19 @@ def parse_m3u(file_path, media_dir):
         if line.startswith('#'):
             continue
 
-        # FIXME what about other URI types?
-        if line.startswith('file://'):
+        if urlparse.urlsplit(line).scheme:
             uris.append(line)
+        elif os.path.normpath(line) == os.path.abspath(line):
+            path = path_to_uri(line)
+            uris.append(path)
         else:
-            path = path_to_uri(media_dir, line)
+            path = path_to_uri(os.path.join(media_dir, line))
             uris.append(path)
 
     return uris
 
 
+# TODO: remove music_dir from API
 def parse_mpd_tag_cache(tag_cache, music_dir=''):
     """
     Converts a MPD tag_cache into a lists of tracks, artists and albums.
@@ -86,17 +90,17 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
         key, value = line.split(b': ', 1)
 
         if key == b'key':
-            _convert_mpd_data(current, tracks, music_dir)
+            _convert_mpd_data(current, tracks)
             current.clear()
 
         current[key.lower()] = value.decode('utf-8')
 
-    _convert_mpd_data(current, tracks, music_dir)
+    _convert_mpd_data(current, tracks)
 
     return tracks
 
 
-def _convert_mpd_data(data, tracks, music_dir):
+def _convert_mpd_data(data, tracks):
     if not data:
         return
 
@@ -160,15 +164,8 @@ def _convert_mpd_data(data, tracks, music_dir):
         path = data['file'][1:]
     else:
         path = data['file']
-    path = urllib.unquote(path.encode('utf-8'))
 
-    if isinstance(music_dir, unicode):
-        music_dir = music_dir.encode('utf-8')
-
-    # Make sure we only pass bytestrings to path_to_uri to avoid implicit
-    # decoding of bytestrings to unicode strings
-    track_kwargs['uri'] = path_to_uri(music_dir, path)
-
+    track_kwargs['uri'] = 'local:track:%s' % path
     track_kwargs['length'] = int(data.get('time', 0)) * 1000
 
     track = Track(**track_kwargs)

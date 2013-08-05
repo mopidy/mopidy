@@ -401,6 +401,7 @@ class PlaybackController(object):
                 if self.random and self._shuffled:
                     self._shuffled.remove(tl_track)
                 if on_error_step == 1:
+                    # TODO: can cause an endless loop for single track repeat.
                     self.next()
                 elif on_error_step == -1:
                     self.previous()

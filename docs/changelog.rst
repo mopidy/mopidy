@@ -36,6 +36,14 @@ v0.15.0 (UNRELEASED)
   the next file. This fixes some hangs on non-media files, like logs. (Fixes:
   :issue:`476`, :issue:`483`)
 
+- Added support for plugable library updaters. This allows extension writers
+  to start providing their own custom libraries instead of being stuck with
+  just our tag cache as the only option.
+
+- Converted local backend to use new `local:playlist:path` and
+  `local:track:path` uri scheme. Also moves support of `file://` to streaming
+  backend.
+
 **Spotify backend**
 
 - Prepend playlist folder names to the playlist name, so that the playlist

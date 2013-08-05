@@ -266,6 +266,7 @@ class MpdContext(object):
             for playlist in self.core.playlists.playlists.get():
                 if not playlist.name:
                     continue
+                # TODO: add scheme to name perhaps 'foo (spotify)' etc.
                 name = self.create_unique_name(playlist.name)
                 self._playlist_uri_from_name[name] = playlist.uri
                 self._playlist_name_from_uri[playlist.uri] = name

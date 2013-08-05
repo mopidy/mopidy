@@ -2,12 +2,11 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import re
 # pylint: disable = W0402
 import string
 # pylint: enable = W0402
-import sys
 import urllib
+import urlparse
 
 import glib
 
@@ -51,7 +50,7 @@ def get_or_create_file(file_path):
     return file_path
 
 
-def path_to_uri(*paths):
+def path_to_uri(path):
     """
     Convert OS specific path to file:// URI.
 
@@ -61,17 +60,15 @@ def path_to_uri(*paths):
 
     Returns a file:// URI as an unicode string.
     """
-    path = os.path.join(*paths)
     if isinstance(path, unicode):
         path = path.encode('utf-8')
-    if sys.platform == 'win32':
-        return 'file:' + urllib.quote(path)
-    return 'file://' + urllib.quote(path)
+    path = urllib.quote(path)
+    return urlparse.urlunsplit((b'file', b'', path, b'', b''))
 
 
 def uri_to_path(uri):
     """
-    Convert the file:// to a OS specific path.
+    Convert an URI to a OS specific path.
 
     Returns a bytestring, since the file path can contain chars with other
     encoding than UTF-8.
@@ -82,10 +79,7 @@ def uri_to_path(uri):
     """
     if isinstance(uri, unicode):
         uri = uri.encode('utf-8')
-    if sys.platform == 'win32':
-        return urllib.unquote(re.sub(b'^file:', b'', uri))
-    else:
-        return urllib.unquote(re.sub(b'^file://', b'', uri))
+    return urllib.unquote(urlparse.urlsplit(uri).path)
 
 
 def split_path(path):

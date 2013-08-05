@@ -8,8 +8,9 @@ import pykka
 from mopidy.backends import base
 from mopidy.utils import encoding, path
 
-from .library import LocalLibraryProvider, LocalLibraryUpdateProvider
+from .library import LocalLibraryProvider
 from .playlists import LocalPlaylistsProvider
+from .playback import LocalPlaybackProvider
 
 logger = logging.getLogger('mopidy.backends.local')
 
@@ -23,11 +24,10 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
         self.check_dirs_and_files()
 
         self.library = LocalLibraryProvider(backend=self)
-        self.updater = LocalLibraryUpdateProvider(backend=self)
-        self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
+        self.playback = LocalPlaybackProvider(audio=audio, backend=self)
         self.playlists = LocalPlaylistsProvider(backend=self)
 
-        self.uri_schemes = ['file']
+        self.uri_schemes = ['local']
 
     def check_dirs_and_files(self):
         if not os.path.isdir(self.config['local']['media_dir']):
