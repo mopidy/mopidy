@@ -6,7 +6,7 @@ import pykka
 
 from mopidy import core
 from mopidy.backends import dummy
-from mopidy.frontends.mpd.dispatcher import MpdDispatcher, MpdContext
+from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.exceptions import MpdAckError
 from mopidy.frontends.mpd.protocol import request_handlers, handle_request
 
@@ -63,31 +63,3 @@ class MpdDispatcherTest(unittest.TestCase):
         result = self.dispatcher.handle_request('known request')
         self.assertIn('OK', result)
         self.assertIn(expected, result)
-
-
-class MpdContextTest(unittest.TestCase):
-    def setUp(self):
-        config = {
-            'mpd': {
-                'password': None,
-            }
-        }
-        self.backend = dummy.create_dummy_backend_proxy()
-        self.core = core.Core.start(backends=[self.backend]).proxy()
-        self.dispatcher = MpdDispatcher(config=config)
-        self.context = self.dispatcher.context
-
-    def tearDown(self):
-        pykka.ActorRegistry.stop_all()
-
-    def test_context_create_unique_name_replaces_newlines_with_space(self):
-        result = self.context.create_unique_name("playlist name\n")
-        self.assertEqual("playlist name ", result)
-
-    def test_context_create_unique_name_replaces_carriage_returns_with_space(self):
-        result = self.context.create_unique_name("playlist name\r")
-        self.assertEqual("playlist name ", result)
-
-    def test_context_create_unique_name_replaces_forward_slashes_with_space(self):
-        result = self.context.create_unique_name("playlist name/")
-        self.assertEqual("playlist name ", result)
