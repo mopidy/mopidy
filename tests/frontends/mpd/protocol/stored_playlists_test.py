@@ -107,6 +107,30 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertNotInResponse('playlist: ')
         self.assertInResponse('OK')
 
+    def test_listplaylists_replaces_newline_with_space(self):
+        self.backend.playlists.playlists = [
+                Playlist(name='a\n', uri='dummy:')]
+        self.sendRequest('listplaylists')
+        self.assertInResponse('playlist: a ')
+        self.assertNotInResponse('playlist: a\n')
+        self.assertInResponse('OK')
+
+    def test_listplaylists_replaces_carriage_return_with_space(self):
+        self.backend.playlists.playlists = [
+                Playlist(name='a\r', uri='dummy:')]
+        self.sendRequest('listplaylists')
+        self.assertInResponse('playlist: a ')
+        self.assertNotInResponse('playlist: a\r')
+        self.assertInResponse('OK')
+
+    def test_listplaylists_replaces_forward_slash_with_space(self):
+        self.backend.playlists.playlists = [
+                Playlist(name='a/', uri='dummy:')]
+        self.sendRequest('listplaylists')
+        self.assertInResponse('playlist: a ')
+        self.assertNotInResponse('playlist: a/')
+        self.assertInResponse('OK')
+
     def test_load_appends_to_tracklist(self):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
