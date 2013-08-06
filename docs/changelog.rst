@@ -53,6 +53,11 @@ v0.15.0 (UNRELEASED)
 - Fix proxy config values that was broken with the config system change in
   0.14. (Fixes: :issue:`472`)
 
+**MPD frontend**
+
+- Replace newline, carriage return and forward slash in playlist names. (Fixes:
+  :issue:`474`, :issue:`480`)
+
 
 v0.14.2 (2013-07-01)
 ====================
