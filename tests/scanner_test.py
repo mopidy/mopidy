@@ -214,6 +214,10 @@ class ScannerTest(unittest.TestCase):
         self.scan('scanner/example.log')
         self.assert_(self.errors)
 
+    def test_empty_wav_file_is_ignored(self):
+        self.scan('scanner/empty.wav')
+        self.assert_(self.errors)
+
     @unittest.SkipTest
     def test_song_without_time_is_handeled(self):
         pass
