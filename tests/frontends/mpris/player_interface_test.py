@@ -50,45 +50,45 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEqual('Stopped', result)
 
     def test_get_loop_status_is_none_when_not_looping(self):
-        self.core.playback.repeat = False
-        self.core.playback.single = False
+        self.core.tracklist.repeat = False
+        self.core.tracklist.single = False
         result = self.mpris.Get(objects.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('None', result)
 
     def test_get_loop_status_is_track_when_looping_a_single_track(self):
-        self.core.playback.repeat = True
-        self.core.playback.single = True
+        self.core.tracklist.repeat = True
+        self.core.tracklist.single = True
         result = self.mpris.Get(objects.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('Track', result)
 
     def test_get_loop_status_is_playlist_when_looping_tracklist(self):
-        self.core.playback.repeat = True
-        self.core.playback.single = False
+        self.core.tracklist.repeat = True
+        self.core.tracklist.single = False
         result = self.mpris.Get(objects.PLAYER_IFACE, 'LoopStatus')
         self.assertEqual('Playlist', result)
 
     def test_set_loop_status_is_ignored_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
-        self.core.playback.repeat = True
-        self.core.playback.single = True
+        self.core.tracklist.repeat = True
+        self.core.tracklist.single = True
         self.mpris.Set(objects.PLAYER_IFACE, 'LoopStatus', 'None')
-        self.assertEqual(self.core.playback.repeat.get(), True)
-        self.assertEqual(self.core.playback.single.get(), True)
+        self.assertEqual(self.core.tracklist.repeat.get(), True)
+        self.assertEqual(self.core.tracklist.single.get(), True)
 
     def test_set_loop_status_to_none_unsets_repeat_and_single(self):
         self.mpris.Set(objects.PLAYER_IFACE, 'LoopStatus', 'None')
-        self.assertEqual(self.core.playback.repeat.get(), False)
-        self.assertEqual(self.core.playback.single.get(), False)
+        self.assertEqual(self.core.tracklist.repeat.get(), False)
+        self.assertEqual(self.core.tracklist.single.get(), False)
 
     def test_set_loop_status_to_track_sets_repeat_and_single(self):
         self.mpris.Set(objects.PLAYER_IFACE, 'LoopStatus', 'Track')
-        self.assertEqual(self.core.playback.repeat.get(), True)
-        self.assertEqual(self.core.playback.single.get(), True)
+        self.assertEqual(self.core.tracklist.repeat.get(), True)
+        self.assertEqual(self.core.tracklist.single.get(), True)
 
     def test_set_loop_status_to_playlists_sets_repeat_and_not_single(self):
         self.mpris.Set(objects.PLAYER_IFACE, 'LoopStatus', 'Playlist')
-        self.assertEqual(self.core.playback.repeat.get(), True)
-        self.assertEqual(self.core.playback.single.get(), False)
+        self.assertEqual(self.core.tracklist.repeat.get(), True)
+        self.assertEqual(self.core.tracklist.single.get(), False)
 
     def test_get_rate_is_greater_or_equal_than_minimum_rate(self):
         rate = self.mpris.Get(objects.PLAYER_IFACE, 'Rate')
@@ -116,32 +116,32 @@ class PlayerInterfaceTest(unittest.TestCase):
         self.assertEqual(self.core.playback.state.get(), PAUSED)
 
     def test_get_shuffle_returns_true_if_random_is_active(self):
-        self.core.playback.random = True
+        self.core.tracklist.random = True
         result = self.mpris.Get(objects.PLAYER_IFACE, 'Shuffle')
         self.assertTrue(result)
 
     def test_get_shuffle_returns_false_if_random_is_inactive(self):
-        self.core.playback.random = False
+        self.core.tracklist.random = False
         result = self.mpris.Get(objects.PLAYER_IFACE, 'Shuffle')
         self.assertFalse(result)
 
     def test_set_shuffle_is_ignored_if_can_control_is_false(self):
         self.mpris.get_CanControl = lambda *_: False
-        self.core.playback.random = False
+        self.core.tracklist.random = False
         self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', True)
-        self.assertFalse(self.core.playback.random.get())
+        self.assertFalse(self.core.tracklist.random.get())
 
     def test_set_shuffle_to_true_activates_random_mode(self):
-        self.core.playback.random = False
-        self.assertFalse(self.core.playback.random.get())
+        self.core.tracklist.random = False
+        self.assertFalse(self.core.tracklist.random.get())
         self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', True)
-        self.assertTrue(self.core.playback.random.get())
+        self.assertTrue(self.core.tracklist.random.get())
 
     def test_set_shuffle_to_false_deactivates_random_mode(self):
-        self.core.playback.random = True
-        self.assertTrue(self.core.playback.random.get())
+        self.core.tracklist.random = True
+        self.assertTrue(self.core.tracklist.random.get())
         self.mpris.Set(objects.PLAYER_IFACE, 'Shuffle', False)
-        self.assertFalse(self.core.playback.random.get())
+        self.assertFalse(self.core.tracklist.random.get())
 
     def test_get_metadata_has_trackid_even_when_no_current_track(self):
         result = self.mpris.Get(objects.PLAYER_IFACE, 'Metadata')
@@ -308,7 +308,7 @@ class PlayerInterfaceTest(unittest.TestCase):
     def test_can_go_next_is_false_if_next_track_is_the_same(self):
         self.mpris.get_CanControl = lambda *_: True
         self.core.tracklist.add([Track(uri='dummy:a')])
-        self.core.playback.repeat = True
+        self.core.tracklist.repeat = True
         self.core.playback.play()
         result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoNext')
         self.assertFalse(result)
@@ -331,7 +331,7 @@ class PlayerInterfaceTest(unittest.TestCase):
     def test_can_go_previous_is_false_if_previous_track_is_the_same(self):
         self.mpris.get_CanControl = lambda *_: True
         self.core.tracklist.add([Track(uri='dummy:a')])
-        self.core.playback.repeat = True
+        self.core.tracklist.repeat = True
         self.core.playback.play()
         result = self.mpris.Get(objects.PLAYER_IFACE, 'CanGoPrevious')
         self.assertFalse(result)

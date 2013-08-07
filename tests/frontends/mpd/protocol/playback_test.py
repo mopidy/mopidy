@@ -16,22 +16,22 @@ STOPPED = PlaybackState.STOPPED
 class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
     def test_consume_off(self):
         self.sendRequest('consume "0"')
-        self.assertFalse(self.core.playback.consume.get())
+        self.assertFalse(self.core.tracklist.consume.get())
         self.assertInResponse('OK')
 
     def test_consume_off_without_quotes(self):
         self.sendRequest('consume 0')
-        self.assertFalse(self.core.playback.consume.get())
+        self.assertFalse(self.core.tracklist.consume.get())
         self.assertInResponse('OK')
 
     def test_consume_on(self):
         self.sendRequest('consume "1"')
-        self.assertTrue(self.core.playback.consume.get())
+        self.assertTrue(self.core.tracklist.consume.get())
         self.assertInResponse('OK')
 
     def test_consume_on_without_quotes(self):
         self.sendRequest('consume 1')
-        self.assertTrue(self.core.playback.consume.get())
+        self.assertTrue(self.core.tracklist.consume.get())
         self.assertInResponse('OK')
 
     def test_crossfade(self):
@@ -40,42 +40,42 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
     def test_random_off(self):
         self.sendRequest('random "0"')
-        self.assertFalse(self.core.playback.random.get())
+        self.assertFalse(self.core.tracklist.random.get())
         self.assertInResponse('OK')
 
     def test_random_off_without_quotes(self):
         self.sendRequest('random 0')
-        self.assertFalse(self.core.playback.random.get())
+        self.assertFalse(self.core.tracklist.random.get())
         self.assertInResponse('OK')
 
     def test_random_on(self):
         self.sendRequest('random "1"')
-        self.assertTrue(self.core.playback.random.get())
+        self.assertTrue(self.core.tracklist.random.get())
         self.assertInResponse('OK')
 
     def test_random_on_without_quotes(self):
         self.sendRequest('random 1')
-        self.assertTrue(self.core.playback.random.get())
+        self.assertTrue(self.core.tracklist.random.get())
         self.assertInResponse('OK')
 
     def test_repeat_off(self):
         self.sendRequest('repeat "0"')
-        self.assertFalse(self.core.playback.repeat.get())
+        self.assertFalse(self.core.tracklist.repeat.get())
         self.assertInResponse('OK')
 
     def test_repeat_off_without_quotes(self):
         self.sendRequest('repeat 0')
-        self.assertFalse(self.core.playback.repeat.get())
+        self.assertFalse(self.core.tracklist.repeat.get())
         self.assertInResponse('OK')
 
     def test_repeat_on(self):
         self.sendRequest('repeat "1"')
-        self.assertTrue(self.core.playback.repeat.get())
+        self.assertTrue(self.core.tracklist.repeat.get())
         self.assertInResponse('OK')
 
     def test_repeat_on_without_quotes(self):
         self.sendRequest('repeat 1')
-        self.assertTrue(self.core.playback.repeat.get())
+        self.assertTrue(self.core.tracklist.repeat.get())
         self.assertInResponse('OK')
 
     def test_setvol_below_min(self):
@@ -115,22 +115,22 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
     def test_single_off(self):
         self.sendRequest('single "0"')
-        self.assertFalse(self.core.playback.single.get())
+        self.assertFalse(self.core.tracklist.single.get())
         self.assertInResponse('OK')
 
     def test_single_off_without_quotes(self):
         self.sendRequest('single 0')
-        self.assertFalse(self.core.playback.single.get())
+        self.assertFalse(self.core.tracklist.single.get())
         self.assertInResponse('OK')
 
     def test_single_on(self):
         self.sendRequest('single "1"')
-        self.assertTrue(self.core.playback.single.get())
+        self.assertTrue(self.core.tracklist.single.get())
         self.assertInResponse('OK')
 
     def test_single_on_without_quotes(self):
         self.sendRequest('single 1')
-        self.assertTrue(self.core.playback.single.get())
+        self.assertTrue(self.core.tracklist.single.get())
         self.assertInResponse('OK')
 
     def test_replay_gain_mode_off(self):

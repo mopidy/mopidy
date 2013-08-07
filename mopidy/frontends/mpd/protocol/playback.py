@@ -19,9 +19,9 @@ def consume(context, state):
         playlist.
     """
     if int(state):
-        context.core.playback.consume = True
+        context.core.tracklist.consume = True
     else:
-        context.core.playback.consume = False
+        context.core.tracklist.consume = False
 
 
 @handle_request(r'^crossfade "(?P<seconds>\d+)"$')
@@ -263,9 +263,9 @@ def random(context, state):
         Sets random state to ``STATE``, ``STATE`` should be 0 or 1.
     """
     if int(state):
-        context.core.playback.random = True
+        context.core.tracklist.random = True
     else:
-        context.core.playback.random = False
+        context.core.tracklist.random = False
 
 
 @handle_request(r'^repeat (?P<state>[01])$')
@@ -279,9 +279,9 @@ def repeat(context, state):
         Sets repeat state to ``STATE``, ``STATE`` should be 0 or 1.
     """
     if int(state):
-        context.core.playback.repeat = True
+        context.core.tracklist.repeat = True
     else:
-        context.core.playback.repeat = False
+        context.core.tracklist.repeat = False
 
 
 @handle_request(r'^replay_gain_mode "(?P<mode>(off|track|album))"$')
@@ -329,7 +329,7 @@ def seek(context, songpos, seconds):
 
     - issues ``seek 1 120`` without quotes around the arguments.
     """
-    if context.core.playback.tracklist_position.get() != int(songpos):
+    if context.core.tracklist.tracklist_position.get() != int(songpos):
         playpos(context, songpos)
     context.core.playback.seek(int(seconds) * 1000).get()
 
@@ -404,9 +404,9 @@ def single(context, state):
         song is repeated if the ``repeat`` mode is enabled.
     """
     if int(state):
-        context.core.playback.single = True
+        context.core.tracklist.single = True
     else:
-        context.core.playback.single = False
+        context.core.tracklist.single = False
 
 
 @handle_request(r'^stop$')
