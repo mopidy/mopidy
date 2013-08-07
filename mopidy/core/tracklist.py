@@ -142,7 +142,7 @@ class TracklistController(object):
         if tl_track is None:
             return None
         try:
-            return self.core.tracklist.tl_tracks.index(tl_track)
+            return self.tl_tracks.index(tl_track)
         except ValueError:
             return None
 
@@ -152,15 +152,14 @@ class TracklistController(object):
         # Too many return statements
 
         current_tl_track = self.core.playback.current_tl_track
-        tl_tracks = self.core.tracklist.tl_tracks
 
-        if not tl_tracks:
+        if not self.tl_tracks:
             return None
 
         if self.random and not self._shuffled:
             if self.repeat or self._first_shuffle:
                 logger.debug('Shuffling tracks')
-                self._shuffled = tl_tracks
+                self._shuffled = self.tl_tracks
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
@@ -168,17 +167,17 @@ class TracklistController(object):
             return self._shuffled[0]
 
         if current_tl_track is None:
-            return tl_tracks[0]
+            return self.tl_tracks[0]
 
         position = self.tracklist_position(current_tl_track)
         if self.repeat and self.single:
-            return tl_tracks[position]
+            return self.tl_tracks[position]
 
         if self.repeat and not self.single:
-            return tl_tracks[(position + 1) % len(tl_tracks)]
+            return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
 
         try:
-            return tl_tracks[position + 1]
+            return self.tl_tracks[position + 1]
         except IndexError:
             return None
 
@@ -192,7 +191,7 @@ class TracklistController(object):
     """
 
     def get_tl_track_at_next(self):
-        tl_tracks = self.core.tracklist.tl_tracks
+        tl_tracks = self.tl_tracks
         current_tl_track = self.core.playback.current_tl_track
 
         if not tl_tracks:
@@ -234,14 +233,14 @@ class TracklistController(object):
 
     def get_tl_track_at_previous(self):
         current_tl_track = self.core.playback.current_tl_track
-        if self.repeat or self.core.tracklist.consume or self.random:
+        if self.repeat or self.consume or self.random:
             return current_tl_track
 
         position = self.tracklist_position(current_tl_track)
         if position in (None, 0):
             return None
 
-        return self.core.tracklist.tl_tracks[position - 1]
+        return self.tl_tracks[position - 1]
 
     tl_track_at_previous = property(get_tl_track_at_previous)
     """
