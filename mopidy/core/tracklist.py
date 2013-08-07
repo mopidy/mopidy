@@ -135,9 +135,7 @@ class TracklistController(object):
 
     def tracklist_position(self, tl_track):
         """
-        The position of the current track in the tracklist.
-
-        Read-only.
+        The position of the given track in the tracklist.
         """
         if tl_track is None:
             return None
@@ -147,11 +145,14 @@ class TracklistController(object):
             return None
 
 
-    def get_tl_track_at_eot(self):
+    def tl_track_at_eot(self, tl_track):
+        """
+        The track that will be played after the given track.
+
+        Not necessarily the same track as :meth:`tl_track_at_next`.
+        """
         # pylint: disable = R0911
         # Too many return statements
-
-        current_tl_track = self.core.playback.current_tl_track
 
         if not self.tl_tracks:
             return None
@@ -166,10 +167,10 @@ class TracklistController(object):
         if self.random and self._shuffled:
             return self._shuffled[0]
 
-        if current_tl_track is None:
+        if tl_track is None:
             return self.tl_tracks[0]
 
-        position = self.tracklist_position(current_tl_track)
+        position = self.tracklist_position(tl_track)
         if self.repeat and self.single:
             return self.tl_tracks[position]
 
@@ -180,15 +181,6 @@ class TracklistController(object):
             return self.tl_tracks[position + 1]
         except IndexError:
             return None
-
-    tl_track_at_eot = property(get_tl_track_at_eot)
-    """
-    The track that will be played at the end of the current track.
-
-    Read-only. A :class:`mopidy.models.TlTrack`.
-
-    Not necessarily the same track as :attr:`tl_track_at_next`.
-    """
 
     def get_tl_track_at_next(self):
         tl_tracks = self.tl_tracks
