@@ -170,9 +170,10 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        if self.core.tracklist.tl_track_at_next:
+        tl_track = self.core.tracklist.tl_track_at_next(self.current_tl_track)
+        if tl_track:
             self._trigger_track_playback_ended()
-            self.change_track(self.core.tracklist.tl_track_at_next)
+            self.change_track(tl_track)
         else:
             self.stop(clear_current_track=True)
 
@@ -203,7 +204,7 @@ class PlaybackController(object):
             elif self.current_tl_track is not None:
                 tl_track = self.current_tl_track
             elif self.current_tl_track is None and on_error_step == 1:
-                tl_track = self.core.tracklist.tl_track_at_next
+                tl_track = self.core.tracklist.tl_track_at_next(tl_track)
             elif self.current_tl_track is None and on_error_step == -1:
                 tl_track = self.core.tracklist.tl_track_at_previous
 

@@ -182,46 +182,40 @@ class TracklistController(object):
         except IndexError:
             return None
 
-    def get_tl_track_at_next(self):
-        tl_tracks = self.tl_tracks
-        current_tl_track = self.core.playback.current_tl_track
+    def tl_track_at_next(self, tl_track):
+        """
+        The track that will be played if calling :meth:`next()`.
 
-        if not tl_tracks:
+        For normal playback this is the next track in the playlist. If repeat
+        is enabled the next track can loop around the playlist. When random is
+        enabled this should be a random track, all tracks should be played once
+        before the list repeats.
+        """
+
+        if not self.tl_tracks:
             return None
 
         if self.random and not self._shuffled:
             if self.repeat or self._first_shuffle:
                 logger.debug('Shuffling tracks')
-                self._shuffled = tl_tracks
+                self._shuffled = self.tl_tracks
                 random.shuffle(self._shuffled)
                 self._first_shuffle = False
 
         if self.random and self._shuffled:
             return self._shuffled[0]
 
-        if current_tl_track is None:
-            return tl_tracks[0]
+        if tl_track is None:
+            return self.tl_tracks[0]
 
-        position = self.tracklist_position(current_tl_track)
+        position = self.tracklist_position(tl_track)
         if self.repeat:
-            return tl_tracks[(position + 1) % len(tl_tracks)]
+            return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
 
         try:
-            return tl_tracks[position + 1]
+            return self.tl_tracks[position + 1]
         except IndexError:
             return None
-
-    tl_track_at_next = property(get_tl_track_at_next)
-    """
-    The track that will be played if calling :meth:`next()`.
-
-    Read-only. A :class:`mopidy.models.TlTrack`.
-
-    For normal playback this is the next track in the playlist. If repeat
-    is enabled the next track can loop around the playlist. When random is
-    enabled this should be a random track, all tracks should be played once
-    before the list repeats.
-    """
 
     def get_tl_track_at_previous(self):
         current_tl_track = self.core.playback.current_tl_track
