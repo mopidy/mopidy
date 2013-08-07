@@ -414,9 +414,10 @@ class MprisObject(dbus.service.Object):
     def get_CanGoPrevious(self):
         if not self.get_CanControl():
             return False
+        tl_track = self.core.playback.current_tl_track
         return (
-            self.core.tracklist.tl_track_at_previous.get() !=
-            self.core.playback.current_tl_track.get())
+            self.core.tracklist.tl_track_at_previous(tl_track).get() !=
+            tl_track)
 
     def get_CanPlay(self):
         if not self.get_CanControl():

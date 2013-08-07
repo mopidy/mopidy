@@ -217,27 +217,25 @@ class TracklistController(object):
         except IndexError:
             return None
 
-    def get_tl_track_at_previous(self):
-        current_tl_track = self.core.playback.current_tl_track
-        if self.repeat or self.consume or self.random:
-            return current_tl_track
+    def tl_track_at_previous(self, tl_track):
+        """
+        Returns the track that will be played if calling :meth:`previous()`.
 
-        position = self.tracklist_position(current_tl_track)
+        A :class:`mopidy.models.TlTrack`.
+
+        For normal playback this is the previous track in the playlist. If
+        random and/or consume is enabled it should return the current track
+        instead.
+        """
+        if self.repeat or self.consume or self.random:
+            return tl_track
+
+        position = self.tracklist_position(tl_track)
         if position in (None, 0):
             return None
 
         return self.tl_tracks[position - 1]
 
-    tl_track_at_previous = property(get_tl_track_at_previous)
-    """
-    The track that will be played if calling :meth:`previous()`.
-
-    A :class:`mopidy.models.TlTrack`.
-
-    For normal playback this is the previous track in the playlist. If
-    random and/or consume is enabled it should return the current track
-    instead.
-    """
 
     def add(self, tracks=None, at_position=None, uri=None):
         """

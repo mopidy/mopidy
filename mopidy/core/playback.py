@@ -206,7 +206,7 @@ class PlaybackController(object):
             elif self.current_tl_track is None and on_error_step == 1:
                 tl_track = self.core.tracklist.tl_track_at_next(tl_track)
             elif self.current_tl_track is None and on_error_step == -1:
-                tl_track = self.core.tracklist.tl_track_at_previous
+                tl_track = self.core.tracklist.tl_track_at_previous(tl_track)
 
         if tl_track is not None:
             self.current_tl_track = tl_track
@@ -235,7 +235,8 @@ class PlaybackController(object):
         will continue. If it was paused, it will still be paused, etc.
         """
         self._trigger_track_playback_ended()
-        self.change_track(self.core.tracklist.tl_track_at_previous, on_error_step=-1)
+        tl_track = self.current_tl_track
+        self.change_track(self.core.tracklist.tl_track_at_previous(tl_track), on_error_step=-1)
 
     def resume(self):
         """If paused, resume playing the current track."""
