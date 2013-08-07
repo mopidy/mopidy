@@ -133,25 +133,25 @@ class TracklistController(object):
         Playback continues after current song.
     """
 
-    def get_tracklist_position(self):
-        if self.core.playback.current_tl_track is None:
+    def tracklist_position(self, tl_track):
+        """
+        The position of the current track in the tracklist.
+
+        Read-only.
+        """
+        if tl_track is None:
             return None
         try:
-            return self.core.tracklist.tl_tracks.index(self.core.playback.current_tl_track)
+            return self.core.tracklist.tl_tracks.index(tl_track)
         except ValueError:
             return None
 
-    tracklist_position = property(get_tracklist_position)
-    """
-    The position of the current track in the tracklist.
-
-    Read-only.
-    """
 
     def get_tl_track_at_eot(self):
         # pylint: disable = R0911
         # Too many return statements
 
+        current_tl_track = self.core.playback.current_tl_track
         tl_tracks = self.core.tracklist.tl_tracks
 
         if not tl_tracks:
@@ -167,17 +167,18 @@ class TracklistController(object):
         if self.random and self._shuffled:
             return self._shuffled[0]
 
-        if self.core.playback.current_tl_track is None:
+        if current_tl_track is None:
             return tl_tracks[0]
 
+        position = self.tracklist_position(current_tl_track)
         if self.repeat and self.single:
-            return tl_tracks[self.tracklist_position]
+            return tl_tracks[position]
 
         if self.repeat and not self.single:
-            return tl_tracks[(self.tracklist_position + 1) % len(tl_tracks)]
+            return tl_tracks[(position + 1) % len(tl_tracks)]
 
         try:
-            return tl_tracks[self.tracklist_position + 1]
+            return tl_tracks[position + 1]
         except IndexError:
             return None
 
@@ -192,6 +193,7 @@ class TracklistController(object):
 
     def get_tl_track_at_next(self):
         tl_tracks = self.core.tracklist.tl_tracks
+        current_tl_track = self.core.playback.current_tl_track
 
         if not tl_tracks:
             return None
@@ -206,14 +208,15 @@ class TracklistController(object):
         if self.random and self._shuffled:
             return self._shuffled[0]
 
-        if self.core.playback.current_tl_track is None:
+        if current_tl_track is None:
             return tl_tracks[0]
 
+        position = self.tracklist_position(current_tl_track)
         if self.repeat:
-            return tl_tracks[(self.tracklist_position + 1) % len(tl_tracks)]
+            return tl_tracks[(position + 1) % len(tl_tracks)]
 
         try:
-            return tl_tracks[self.tracklist_position + 1]
+            return tl_tracks[position + 1]
         except IndexError:
             return None
 
@@ -230,13 +233,15 @@ class TracklistController(object):
     """
 
     def get_tl_track_at_previous(self):
+        current_tl_track = self.core.playback.current_tl_track
         if self.repeat or self.core.tracklist.consume or self.random:
-            return self.core.playback.current_tl_track
+            return current_tl_track
 
-        if self.tracklist_position in (None, 0):
+        position = self.tracklist_position(current_tl_track)
+        if position in (None, 0):
             return None
 
-        return self.core.tracklist.tl_tracks[self.tracklist_position - 1]
+        return self.core.tracklist.tl_tracks[position - 1]
 
     tl_track_at_previous = property(get_tl_track_at_previous)
     """

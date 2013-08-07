@@ -36,10 +36,10 @@ def currentsong(context):
         Displays the song info of the current song (same song that is
         identified in status).
     """
-    current_tl_track = context.core.playback.current_tl_track.get()
-    if current_tl_track is not None:
-        position = context.core.tracklist.tracklist_position.get()
-        return track_to_mpd_format(current_tl_track, position=position)
+    tl_track = context.core.playback.current_tl_track.get()
+    if tl_track is not None:
+        position = context.core.tracklist.tracklist_position(tl_track).get()
+        return track_to_mpd_format(tl_track, position=position)
 
 
 @handle_request(r'^idle$')
@@ -185,7 +185,8 @@ def status(context):
         'playback.state': context.core.playback.state,
         'playback.current_tl_track': context.core.playback.current_tl_track,
         'tracklist.tracklist_position': (
-            context.core.tracklist.tracklist_position),
+            context.core.tracklist.tracklist_position(
+                context.core.playback.current_tl_track.get())),
         'playback.time_position': context.core.playback.time_position,
     }
     pykka.get_all(futures.values())
