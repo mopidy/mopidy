@@ -18,9 +18,6 @@ logger = logging.getLogger('mopidy.backends.spotify')
 
 BITRATES = {96: 2, 160: 0, 320: 1}
 
-# pylint: disable = R0901
-# SpotifySessionManager: Too many ancestors (9/7)
-
 
 class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     cache_location = None
@@ -116,9 +113,6 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     def music_delivery(self, session, frames, frame_size, num_frames,
                        sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
-        # pylint: disable = R0913
-        # Too many arguments (8/5)
-
         if not self.push_audio_data:
             return 0
 

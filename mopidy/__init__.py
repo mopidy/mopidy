@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
 
-# pylint: disable = E0611,F0401
 from distutils.version import StrictVersion as SV
-# pylint: enable = E0611,F0401
 import sys
 import warnings
 
