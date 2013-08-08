@@ -434,18 +434,25 @@ class TracklistController(object):
         """
         return self._tl_tracks[start:end]
 
-    def mark_consumed(self, **kwargs):
+    def mark(self, what, tl_track):
         """
-        Marks the given track as played.
+        Marks the given track as specified.
 
         :param tl_track: Track to mark
         :type tl_track: :class:`mopidy.models.TlTrack`
         :rtype: True if the track was actually removed from the tracklist
         """
-        if not self.consume:
-            return False
-        self.remove(**kwargs)
-        return True
+        if what == "consumed":
+            if not self.consume:
+                return False
+            self.remove(tlid=tl_track.tlid)
+            return True
+        elif what == "played":
+            if self.random and tl_track in self._shuffled:
+                self._shuffled.remove(tl_track)
+        elif what == "unplayable":
+            if self.random and self._shuffled:
+                self._shuffled.remove(tl_track)
 
     def _trigger_tracklist_changed(self):
         self._first_shuffle = True

@@ -148,7 +148,7 @@ class PlaybackController(object):
         else:
             self.stop(clear_current_track=True)
 
-        self.core.tracklist.mark_consumed(tlid=original_tl_track.tlid)
+        self.core.tracklist.mark("consumed", original_tl_track)
 
     def on_tracklist_change(self):
         """
@@ -213,16 +213,14 @@ class PlaybackController(object):
             backend = self._get_backend()
             if not backend or not backend.playback.play(tl_track.track).get():
                 logger.warning('Track is not playable: %s', tl_track.track.uri)
-                if self.core.tracklist.random and self.core.tracklist._shuffled:
-                    self.core.tracklist._shuffled.remove(tl_track)
+                self.core.tracklist.mark("unplayable", tl_track)
                 if on_error_step == 1:
                     self.next()
                 elif on_error_step == -1:
                     self.previous()
                 return
 
-        if self.core.tracklist.random and self.current_tl_track in self.core.tracklist._shuffled:
-            self.core.tracklist._shuffled.remove(self.current_tl_track)
+        self.core.tracklist.mark("played", tl_track)
 
         self._trigger_track_playback_started()
 
