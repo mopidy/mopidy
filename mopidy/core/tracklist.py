@@ -150,6 +150,9 @@ class TracklistController(object):
         The track that will be played after the given track.
 
         Not necessarily the same track as :meth:`tl_track_at_next`.
+
+        :param tl_track: The reference track
+        :type tl_track: :class:`mopidy.models.TlTrack`
         """
         # pylint: disable = R0911
         # Too many return statements
@@ -184,12 +187,16 @@ class TracklistController(object):
 
     def tl_track_at_next(self, tl_track):
         """
-        The track that will be played if calling :meth:`next()`.
+        The track that will be played if calling 
+        :meth:`mopidy.core.PlaybackController.next()`.
 
         For normal playback this is the next track in the playlist. If repeat
         is enabled the next track can loop around the playlist. When random is
         enabled this should be a random track, all tracks should be played once
         before the list repeats.
+
+        :param tl_track: The reference track
+        :type tl_track: :class:`mopidy.models.TlTrack`
         """
 
         if not self.tl_tracks:
@@ -219,13 +226,17 @@ class TracklistController(object):
 
     def tl_track_at_previous(self, tl_track):
         """
-        Returns the track that will be played if calling :meth:`previous()`.
+        Returns the track that will be played if calling
+        :meth:`mopidy.core.PlaybackController.previous()`.
 
         A :class:`mopidy.models.TlTrack`.
 
         For normal playback this is the previous track in the playlist. If
         random and/or consume is enabled it should return the current track
         instead.
+
+        :param tl_track: The reference track
+        :type tl_track: :class:`mopidy.models.TlTrack`
         """
         if self.repeat or self.consume or self.random:
             return tl_track
@@ -436,8 +447,13 @@ class TracklistController(object):
 
     def mark(self, what, tl_track):
         """
-        Marks the given track as specified.
+        Marks the given track as specified. Currently supports::
+            * `consumed` The track has been completely played.
+            * `played` The track has been played, at least a piece of it.
+            * `unplayable` The track is unplayable
 
+        :param what: What to be marked as
+        :type what: string
         :param tl_track: Track to mark
         :type tl_track: :class:`mopidy.models.TlTrack`
         :rtype: True if the track was actually removed from the tracklist
