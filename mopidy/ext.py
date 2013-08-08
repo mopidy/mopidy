@@ -82,7 +82,8 @@ class Extension(object):
     def get_library_updaters(self):
         """List of library updater classes
 
-        :returns: list of :class:`~mopidy.backends.base.BaseLibraryUpdateProvider`
+        :returns: list of
+          :class:`~mopidy.backends.base.BaseLibraryUpdateProvider`
         subclasses
         """
         return []

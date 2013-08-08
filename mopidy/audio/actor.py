@@ -35,8 +35,8 @@ MB = 1 << 20
 # GST_PLAY_FLAG_SOFT_COLORBALANCE (1<<10)
 
 # Default flags to use for playbin: AUDIO, SOFT_VOLUME, DOWNLOAD
-PLAYBIN_FLAGS = (1<<1) | (1<<4) | (1<<7)
-PLAYBIN_VIS_FLAGS = PLAYBIN_FLAGS | (1<<3)
+PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
+PLAYBIN_VIS_FLAGS = PLAYBIN_FLAGS | (1 << 3)
 
 
 class Audio(pykka.ThreadingActor):
@@ -175,7 +175,8 @@ class Audio(pykka.ThreadingActor):
             logger.info('Audio visualizer set to "%s"', visualizer_element)
         except gobject.GError as ex:
             logger.error(
-                'Failed to create audio visualizer "%s": %s', visualizer_element, ex)
+                'Failed to create audio visualizer "%s": %s',
+                visualizer_element, ex)
 
     def _setup_mixer(self):
         mixer_desc = self._config['audio']['mixer']
