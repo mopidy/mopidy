@@ -145,11 +145,11 @@ class TracklistController(object):
             return None
 
 
-    def tl_track_at_eot(self, tl_track):
+    def eot_track(self, tl_track):
         """
         The track that will be played after the given track.
 
-        Not necessarily the same track as :meth:`tl_track_at_next`.
+        Not necessarily the same track as :meth:`next_track`.
 
         :param tl_track: The reference track
         :type tl_track: :class:`mopidy.models.TlTrack`
@@ -185,7 +185,7 @@ class TracklistController(object):
         except IndexError:
             return None
 
-    def tl_track_at_next(self, tl_track):
+    def next_track(self, tl_track):
         """
         The track that will be played if calling 
         :meth:`mopidy.core.PlaybackController.next()`.
@@ -224,7 +224,7 @@ class TracklistController(object):
         except IndexError:
             return None
 
-    def tl_track_at_previous(self, tl_track):
+    def previous_track(self, tl_track):
         """
         Returns the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.

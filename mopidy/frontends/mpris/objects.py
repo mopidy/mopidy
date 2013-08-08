@@ -408,7 +408,7 @@ class MprisObject(dbus.service.Object):
             return False
         tl_track = self.core.playback.current_tl_track.get()
         return (
-            self.core.tracklist.tl_track_at_next(tl_track).get() !=
+            self.core.tracklist.next_track(tl_track).get() !=
             self.core.playback.current_tl_track.get())
 
     def get_CanGoPrevious(self):
@@ -416,7 +416,7 @@ class MprisObject(dbus.service.Object):
             return False
         tl_track = self.core.playback.current_tl_track
         return (
-            self.core.tracklist.tl_track_at_previous(tl_track).get() !=
+            self.core.tracklist.previous_track(tl_track).get() !=
             tl_track)
 
     def get_CanPlay(self):
@@ -425,7 +425,7 @@ class MprisObject(dbus.service.Object):
         tl_track = self.core.playback.current_tl_track.get()
         return (
             self.core.playback.current_tl_track.get() is not None or
-            self.core.tracklist.tl_track_at_next(tl_track).get() is not None)
+            self.core.tracklist.next_track(tl_track).get() is not None)
 
     def get_CanPause(self):
         if not self.get_CanControl():
