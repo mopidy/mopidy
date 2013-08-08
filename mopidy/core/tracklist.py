@@ -72,7 +72,7 @@ class TracklistController(object):
 
     def set_consume(self, value):
         if self.get_consume() != value:
-            self.core.playback._trigger_options_changed()
+            self._trigger_options_changed()
         return setattr(self, '_consume', value)
 
     consume = property(get_consume, set_consume)
@@ -88,7 +88,7 @@ class TracklistController(object):
 
     def set_random(self, value):
         if self.get_random() != value:
-            self.core.playback._trigger_options_changed()
+            self._trigger_options_changed()
         return setattr(self, '_random', value)
 
     random = property(get_random, set_random)
@@ -104,7 +104,7 @@ class TracklistController(object):
 
     def set_repeat(self, value):
         if self.get_repeat() != value:
-            self.core.playback._trigger_options_changed()
+            self._trigger_options_changed()
         return setattr(self, '_repeat', value)
 
     repeat = property(get_repeat, set_repeat)
@@ -121,7 +121,7 @@ class TracklistController(object):
 
     def set_single(self, value):
         if self.get_single() != value:
-            self.core.playback._trigger_options_changed()
+            self._trigger_options_changed()
         return setattr(self, '_single', value)
 
     single = property(get_single, set_single)
@@ -475,3 +475,7 @@ class TracklistController(object):
         self._shuffled = []
         logger.debug('Triggering event: tracklist_changed()')
         listener.CoreListener.send('tracklist_changed')
+
+    def _trigger_options_changed(self):
+        logger.debug('Triggering options changed event')
+        listener.CoreListener.send('options_changed')

@@ -330,10 +330,6 @@ class PlaybackController(object):
             'playback_state_changed',
             old_state=old_state, new_state=new_state)
 
-    def _trigger_options_changed(self):
-        logger.debug('Triggering options changed event')
-        listener.CoreListener.send('options_changed')
-
     def _trigger_volume_changed(self, volume):
         logger.debug('Triggering volume changed event')
         listener.CoreListener.send('volume_changed', volume=volume)
