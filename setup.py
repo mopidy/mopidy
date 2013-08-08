@@ -28,7 +28,7 @@ setup(
         'Pykka >= 1.1',
     ],
     extras_require={
-        'spotify': ['pyspotify >= 1.9, < 1.11'],
+        'spotify': ['pyspotify >= 1.9, < 2'],
         'scrobbler': ['pylast >= 0.5.7'],
         'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
     },
@@ -36,7 +36,6 @@ setup(
     tests_require=[
         'nose',
         'mock >= 1.0',
-        'unittest2',
     ],
     entry_points={
         'console_scripts': [
@@ -61,7 +60,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Topic :: Multimedia :: Sound/Audio :: Players',
     ],

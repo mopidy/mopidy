@@ -81,7 +81,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return SearchResult(uri='file:search', tracks=result_tracks)
+        # TODO: add local:search:<query>
+        return SearchResult(uri='local:search', tracks=result_tracks)
 
     def search(self, query=None, uris=None):
         # TODO Only return results within URI roots given by ``uris``
@@ -122,7 +123,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return SearchResult(uri='file:search', tracks=result_tracks)
+        # TODO: add local:search:<query>
+        return SearchResult(uri='local:search', tracks=result_tracks)
 
     def _validate_query(self, query):
         for (_, values) in query.iteritems():
@@ -135,11 +137,12 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
 
 # TODO: rename and move to tagcache extension.
 class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
-    def __init__(self, *args, **kwargs):
-        super(LocalLibraryUpdateProvider, self).__init__(*args, **kwargs)
+    uri_schemes = ['local']
+
+    def __init__(self, config):
         self._tracks = {}
-        self._media_dir = self.backend.config['local']['media_dir']
-        self._tag_cache_file = self.backend.config['local']['tag_cache_file']
+        self._media_dir = config['local']['media_dir']
+        self._tag_cache_file = config['local']['tag_cache_file']
 
     def load(self):
         tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
@@ -156,6 +159,8 @@ class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
 
     def commit(self):
         directory, basename = os.path.split(self._tag_cache_file)
+
+        # TODO: cleanup directory/basename.* files.
         tmp = tempfile.NamedTemporaryFile(
             prefix=basename + '.', dir=directory, delete=False)
 

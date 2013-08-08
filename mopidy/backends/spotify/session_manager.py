@@ -33,9 +33,17 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.cache_location = config['spotify']['cache_dir']
         self.settings_location = config['spotify']['cache_dir']
 
+        full_proxy = ''
+        if config['proxy']['hostname']:
+            full_proxy = config['proxy']['hostname']
+            if config['proxy']['port']:
+                full_proxy += ':' + str(config['proxy']['port'])
+            if config['proxy']['scheme']:
+                full_proxy = config['proxy']['scheme'] + "://" + full_proxy
+
         PyspotifySessionManager.__init__(
             self, config['spotify']['username'], config['spotify']['password'],
-            proxy=config['proxy']['hostname'],
+            proxy=full_proxy,
             proxy_username=config['proxy']['username'],
             proxy_password=config['proxy']['password'])
 
@@ -173,9 +181,14 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             logger.debug('Still getting data; skipped refresh of playlists')
             return
         playlists = []
+        folders = []
         for spotify_playlist in self.session.playlist_container():
+            if spotify_playlist.type() == 'folder_start':
+                folders.append(spotify_playlist)
+            if spotify_playlist.type() == 'folder_end':
+                folders.pop()
             playlists.append(translator.to_mopidy_playlist(
-                spotify_playlist,
+                spotify_playlist, folders=folders,
                 bitrate=self.bitrate, username=self.username))
         playlists.append(translator.to_mopidy_playlist(
             self.session.starred(),

@@ -25,4 +25,5 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 - Mailing list: `mopidy@googlegroups.com <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
 - Twitter: `@mopidy <https://twitter.com/mopidy/>`_
 
-.. image:: https://secure.travis-ci.org/mopidy/mopidy.png?branch=develop
+.. image:: https://travis-ci.org/mopidy/mopidy.png?branch=develop
+    :target: https://travis-ci.org/mopidy/mopidy

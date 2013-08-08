@@ -22,6 +22,53 @@ v0.15.0 (UNRELEASED)
 - :option:`mopidy --show-config` will now take into consideration any
   :option:`mopidy --option` arguments appearing later on the command line.
 
+**Audio**
+
+- Added support for viusalization. :confval:`audio/visualizer` can now be set
+  to GStreamer visualizers.
+
+**Local backend**
+
+- An album's number of discs and a track's disc number are now extracted when
+  scanning your music collection.
+
+- The scanner now gives up scanning a file after a second, and continues with
+  the next file. This fixes some hangs on non-media files, like logs. (Fixes:
+  :issue:`476`, :issue:`483`)
+
+- Added support for plugable library updaters. This allows extension writers
+  to start providing their own custom libraries instead of being stuck with
+  just our tag cache as the only option.
+
+- Converted local backend to use new `local:playlist:path` and
+  `local:track:path` uri scheme. Also moves support of `file://` to streaming
+  backend.
+
+**Spotify backend**
+
+- Prepend playlist folder names to the playlist name, so that the playlist
+  hierarchy from your Spotify account is available in Mopidy. (Fixes:
+  :issue:`62`)
+
+- Fix proxy config values that was broken with the config system change in
+  0.14. (Fixes: :issue:`472`)
+
+**MPD frontend**
+
+- Replace newline, carriage return and forward slash in playlist names. (Fixes:
+  :issue:`474`, :issue:`480`)
+
+
+v0.14.2 (2013-07-01)
+====================
+
+This is a maintenance release to make Mopidy 0.14 work with pyspotify 1.11.
+
+**Dependencies**
+
+- pyspotify >= 1.9, < 2 is now required for Spotify support. In other words,
+  you're free to upgrade to pyspotify 1.11, but it isn't a requirement.
+
 
 v0.14.1 (2013-04-28)
 ====================

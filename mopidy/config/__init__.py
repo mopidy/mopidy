@@ -24,9 +24,13 @@ _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()
 _audio_schema['mixer_track'] = String(optional=True)
 _audio_schema['output'] = String()
+_audio_schema['visualizer'] = String(optional=True)
 
 _proxy_schema = ConfigSchema('proxy')
+_proxy_schema['scheme'] = String(optional=True,
+                                 choices=['http', 'https', 'socks4', 'socks5'])
 _proxy_schema['hostname'] = Hostname(optional=True)
+_proxy_schema['port'] = Port(optional=True)
 _proxy_schema['username'] = String(optional=True)
 _proxy_schema['password'] = Secret(optional=True)
 

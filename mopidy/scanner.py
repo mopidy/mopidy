@@ -27,7 +27,6 @@ pygst.require('0.10')
 import gst
 
 from mopidy import config as config_lib, ext
-from mopidy.audio import dummy as dummy_audio
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
 
@@ -45,21 +44,36 @@ def main():
     log.setup_root_logger()
     log.setup_console_logging(logging_config, args.verbosity_level)
 
-    extensions = dict((e.ext_name, e) for e in ext.load_extensions())
+    extensions = ext.load_extensions()
     config, errors = config_lib.load(
-        config_files, extensions.values(), config_overrides)
+        config_files, extensions, config_overrides)
     log.setup_log_levels(config)
 
     if not config['local']['media_dir']:
         logging.warning('Config value local/media_dir is not set.')
         return
 
+    if not config['local']['scan_timeout']:
+        logging.warning('Config value local/scan_timeout is not set.')
+        return
+
     # TODO: missing config error checking and other default setup code.
 
-    audio = dummy_audio.DummyAudio()
-    local_backend_classes = extensions['local'].get_backend_classes()
-    local_backend = local_backend_classes[0](config, audio)
-    local_updater = local_backend.updater
+    updaters = {}
+    for e in extensions:
+        for updater_class in e.get_library_updaters():
+            if updater_class and 'local' in updater_class.uri_schemes:
+                updaters[e.ext_name] = updater_class
+
+    if not updaters:
+        logging.error('No usable library updaters found.')
+        return
+    elif len(updaters) > 1:
+        logging.error('More than one library updater found. '
+                      'Provided by: %s', ', '.join(updaters.keys()))
+        return
+
+    local_updater = updaters.values()[0](config)  # TODO: switch to actor?
 
     media_dir = config['local']['media_dir']
 
@@ -97,9 +111,11 @@ def main():
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
+    scan_timeout = config['local']['scan_timeout']
+
     logging.info('Scanning new and modified tracks.')
     # TODO: just pass the library in instead?
-    scanner = Scanner(uris_update, store, debug)
+    scanner = Scanner(uris_update, store, debug, scan_timeout)
     try:
         scanner.start()
     except KeyboardInterrupt:
@@ -139,6 +155,7 @@ def translator(data):
 
     _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
+    _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs)
     _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
 
     if gst.TAG_DATE in data and data[gst.TAG_DATE]:
@@ -152,6 +169,7 @@ def translator(data):
 
     _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
     _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
+    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
 
     # Following keys don't seem to have TAG_* constant.
     _retrieve('album-artist', 'name', albumartist_kwargs)
@@ -174,12 +192,14 @@ def translator(data):
 
 
 class Scanner(object):
-    def __init__(self, uris, data_callback, error_callback=None):
+    def __init__(self, uris, data_callback, error_callback=None, scan_timeout=1000):
         self.data = {}
         self.uris = iter(uris)
         self.data_callback = data_callback
         self.error_callback = error_callback
+        self.scan_timeout = scan_timeout
         self.loop = gobject.MainLoop()
+        self.timeout_id = None
 
         self.fakesink = gst.element_factory_make('fakesink')
         self.fakesink.set_property('signal-handoffs', True)
@@ -250,6 +270,14 @@ class Scanner(object):
             self.error_callback(uri, error, debug)
         self.next_uri()
 
+    def process_timeout(self):
+        if self.error_callback:
+            uri = self.uribin.get_property('uri')
+            self.error_callback(
+                uri, 'Scan timed out after %d ms' % self.scan_timeout, None)
+        self.next_uri()
+        return False
+
     def get_duration(self):
         self.pipe.get_state()  # Block until state change is done.
         try:
@@ -260,6 +288,9 @@ class Scanner(object):
 
     def next_uri(self):
         self.data = {}
+        if self.timeout_id:
+            gobject.source_remove(self.timeout_id)
+            self.timeout_id = None
         try:
             uri = next(self.uris)
         except StopIteration:
@@ -267,6 +298,7 @@ class Scanner(object):
             return False
         self.pipe.set_state(gst.STATE_NULL)
         self.uribin.set_property('uri', uri)
+        self.timeout_id = gobject.timeout_add(self.scan_timeout, self.process_timeout)
         self.pipe.set_state(gst.STATE_PLAYING)
         return True
 

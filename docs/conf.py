@@ -33,7 +33,10 @@ class Mock(object):
         if name in ('__file__', '__path__'):
             return '/dev/null'
         elif (name[0] == name[0].upper()
-                and not name.startswith('MIXER_TRACK_')):
+                # gst.interfaces.MIXER_TRACK_*
+                and not name.startswith('MIXER_TRACK_')
+                # dbus.String()
+                and not name == 'String'):
             return type(name, (), {})
         else:
             return Mock()
@@ -98,7 +101,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Mopidy'
-copyright = '2010-2013, Stein Magnus Jodal and contributors'
+copyright = '2009-2013, Stein Magnus Jodal and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -39,6 +39,7 @@ def convert(settings):
     helper('audio/output', 'OUTPUT')
 
     helper('proxy/hostname', 'SPOTIFY_PROXY_HOST')
+    helper('proxy/port', 'SPOTIFY_PROXY_PORT')
     helper('proxy/username', 'SPOTIFY_PROXY_USERNAME')
     helper('proxy/password', 'SPOTIFY_PROXY_PASSWORD')
 

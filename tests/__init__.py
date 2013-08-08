@@ -1,12 +1,11 @@
 from __future__ import unicode_literals
 
 import os
-import sys
 
 
 def path_to_data_dir(name):
     if not isinstance(name, bytes):
-        name = name.encode(sys.getfilesystemencoding())
+        name = name.encode('utf-8')
     path = os.path.dirname(__file__)
     path = os.path.join(path, b'data')
     path = os.path.abspath(path)
