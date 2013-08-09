@@ -322,7 +322,6 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.jrw.handle_data(request)
 
-        print response
         self.assertIn('result', response)
 
         result = response['result']
