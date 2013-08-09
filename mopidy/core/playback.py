@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-import random
 import urlparse
 
 from mopidy.audio import PlaybackState
@@ -234,7 +233,8 @@ class PlaybackController(object):
         """
         self._trigger_track_playback_ended()
         tl_track = self.current_tl_track
-        self.change_track(self.core.tracklist.previous_track(tl_track), on_error_step=-1)
+        self.change_track(self.core.tracklist.previous_track(tl_track),
+                          on_error_step=-1)
 
     def resume(self):
         """If paused, resume playing the current track."""

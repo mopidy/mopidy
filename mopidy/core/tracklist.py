@@ -144,7 +144,6 @@ class TracklistController(object):
         except ValueError:
             return None
 
-
     def eot_track(self, tl_track):
         """
         The track that will be played after the given track.
@@ -187,7 +186,7 @@ class TracklistController(object):
 
     def next_track(self, tl_track):
         """
-        The track that will be played if calling 
+        The track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
         For normal playback this is the next track in the playlist. If repeat
@@ -246,7 +245,6 @@ class TracklistController(object):
             return None
 
         return self.tl_tracks[position - 1]
-
 
     def add(self, tracks=None, at_position=None, uri=None):
         """
