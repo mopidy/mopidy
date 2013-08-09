@@ -133,14 +133,14 @@ class TracklistController(object):
         Playback continues after current song.
     """
 
-    def tracklist_position(self, tl_track):
+    def index(self, tl_track):
         """
         The position of the given track in the tracklist.
         """
         if tl_track is None:
             return None
         try:
-            return self.tl_tracks.index(tl_track)
+            return self._tl_tracks.index(tl_track)
         except ValueError:
             return None
 
@@ -172,7 +172,7 @@ class TracklistController(object):
         if tl_track is None:
             return self.tl_tracks[0]
 
-        position = self.tracklist_position(tl_track)
+        position = self.index(tl_track)
         if self.repeat and self.single:
             return self.tl_tracks[position]
 
@@ -214,7 +214,7 @@ class TracklistController(object):
         if tl_track is None:
             return self.tl_tracks[0]
 
-        position = self.tracklist_position(tl_track)
+        position = self.index(tl_track)
         if self.repeat:
             return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
 
@@ -240,7 +240,7 @@ class TracklistController(object):
         if self.repeat or self.consume or self.random:
             return tl_track
 
-        position = self.tracklist_position(tl_track)
+        position = self.index(tl_track)
         if position in (None, 0):
             return None
 
@@ -334,18 +334,6 @@ class TracklistController(object):
                 matches = filter(
                     lambda ct: getattr(ct.track, key) == value, matches)
         return matches
-
-    def index(self, tl_track):
-        """
-        Get index of the given :class:`mopidy.models.TlTrack` in the tracklist.
-
-        Raises :exc:`ValueError` if not found.
-
-        :param tl_track: track to find the index of
-        :type tl_track: :class:`mopidy.models.TlTrack`
-        :rtype: int
-        """
-        return self._tl_tracks.index(tl_track)
 
     def move(self, start, end, to_position):
         """

@@ -330,7 +330,7 @@ def seek(context, songpos, seconds):
     - issues ``seek 1 120`` without quotes around the arguments.
     """
     tl_track = context.core.playback.current_tl_track.get()
-    if context.core.tracklist.tracklist_position(tl_track).get() != int(songpos):
+    if context.core.tracklist.index(tl_track).get() != int(songpos):
         playpos(context, songpos)
     context.core.playback.seek(int(seconds) * 1000).get()
 

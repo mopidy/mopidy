@@ -38,7 +38,7 @@ def currentsong(context):
     """
     tl_track = context.core.playback.current_tl_track.get()
     if tl_track is not None:
-        position = context.core.tracklist.tracklist_position(tl_track).get()
+        position = context.core.tracklist.index(tl_track).get()
         return track_to_mpd_format(tl_track, position=position)
 
 
@@ -184,8 +184,8 @@ def status(context):
         'tracklist.single': context.core.tracklist.single,
         'playback.state': context.core.playback.state,
         'playback.current_tl_track': context.core.playback.current_tl_track,
-        'tracklist.tracklist_position': (
-            context.core.tracklist.tracklist_position(
+        'tracklist.index': (
+            context.core.tracklist.index(
                 context.core.playback.current_tl_track.get())),
         'playback.time_position': context.core.playback.time_position,
     }
@@ -254,7 +254,7 @@ def _status_songid(futures):
 
 
 def _status_songpos(futures):
-    return futures['tracklist.tracklist_position'].get()
+    return futures['tracklist.index'].get()
 
 
 def _status_state(futures):

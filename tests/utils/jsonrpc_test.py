@@ -313,7 +313,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
-    def test_application_error_response(self):
+    def test_application_error_response_is_none(self):
         request = {
             'jsonrpc': '2.0',
             'method': 'core.tracklist.index',
@@ -322,17 +322,11 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.jrw.handle_data(request)
 
-        self.assertNotIn('result', response)
+        print response
+        self.assertIn('result', response)
 
-        error = response['error']
-        self.assertEqual(error['code'], 0)
-        self.assertEqual(error['message'], 'Application error')
-
-        data = error['data']
-        self.assertEqual(data['type'], 'ValueError')
-        self.assertIn('not in list', data['message'])
-        self.assertIn('traceback', data)
-        self.assertIn('Traceback (most recent call last):', data['traceback'])
+        result = response['result']
+        self.assertEqual(result, None)
 
     def test_missing_jsonrpc_member_causes_invalid_request_error(self):
         request = {

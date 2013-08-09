@@ -180,14 +180,14 @@ class PlaybackControllerTest(object):
         self.playback.play()
 
         tl_track = self.playback.current_tl_track
-        old_position = self.tracklist.tracklist_position(tl_track)
+        old_position = self.tracklist.index(tl_track)
         old_uri = tl_track.track.uri
 
         self.playback.next()
 
         tl_track = self.playback.current_tl_track
         self.assertEqual(
-            self.tracklist.tracklist_position(tl_track), old_position + 1)
+            self.tracklist.index(tl_track), old_position + 1)
         self.assertNotEqual(self.playback.current_track.uri, old_uri)
 
     @populate_tracklist
@@ -208,7 +208,7 @@ class PlaybackControllerTest(object):
             self.assertEqual(self.playback.state, PlaybackState.PLAYING)
             self.assertEqual(self.playback.current_track, track)
             tl_track = self.playback.current_tl_track
-            self.assertEqual(self.tracklist.tracklist_position(tl_track), i)
+            self.assertEqual(self.tracklist.index(tl_track), i)
 
             self.playback.next()
 
@@ -328,14 +328,14 @@ class PlaybackControllerTest(object):
         self.playback.play()
 
         tl_track = self.playback.current_tl_track
-        old_position = self.tracklist.tracklist_position(tl_track)
+        old_position = self.tracklist.index(tl_track)
         old_uri = tl_track.track.uri
 
         self.playback.on_end_of_track()
 
         tl_track = self.playback.current_tl_track
         self.assertEqual(
-            self.tracklist.tracklist_position(tl_track), old_position + 1)
+            self.tracklist.index(tl_track), old_position + 1)
         self.assertNotEqual(self.playback.current_track.uri, old_uri)
 
     @populate_tracklist
@@ -356,7 +356,7 @@ class PlaybackControllerTest(object):
             self.assertEqual(self.playback.state, PlaybackState.PLAYING)
             self.assertEqual(self.playback.current_track, track)
             tl_track = self.playback.current_tl_track
-            self.assertEqual(self.tracklist.tracklist_position(tl_track), i)
+            self.assertEqual(self.tracklist.index(tl_track), i)
 
             self.playback.on_end_of_track()
 
@@ -528,29 +528,29 @@ class PlaybackControllerTest(object):
         self.assertEqual(self.playback.current_track, self.tracks[1])
 
     @populate_tracklist
-    def test_initial_tracklist_position(self):
+    def test_initial_index(self):
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.tracklist_position(tl_track), None)
+        self.assertEqual(self.tracklist.index(tl_track), None)
 
     @populate_tracklist
-    def test_tracklist_position_during_play(self):
+    def test_index_during_play(self):
         self.playback.play()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.tracklist_position(tl_track), 0)
+        self.assertEqual(self.tracklist.index(tl_track), 0)
 
     @populate_tracklist
-    def test_tracklist_position_after_next(self):
+    def test_index_after_next(self):
         self.playback.play()
         self.playback.next()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.tracklist_position(tl_track), 1)
+        self.assertEqual(self.tracklist.index(tl_track), 1)
 
     @populate_tracklist
-    def test_tracklist_position_at_end_of_playlist(self):
+    def test_index_at_end_of_playlist(self):
         self.playback.play(self.tracklist.tl_tracks[-1])
         self.playback.on_end_of_track()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.tracklist_position(tl_track), None)
+        self.assertEqual(self.tracklist.index(tl_track), None)
 
     def test_on_tracklist_change_gets_called(self):
         callback = self.playback.on_tracklist_change

@@ -21,8 +21,8 @@ v0.15.0 (UNRELEASED)
   mark songs, some Playback properties have been converted into functions and
   both functions and properties have been moved into Tracklist to have more
   modularity:
-      - Properties converted into functions that need arguments:
-        :meth:`tracklist_position`
+      - Properties merged into functions: :attr:`tracklist_position` merged to
+        :meth:`index`
       - Properties moved: :attr:`random`, :attr:`repeat`, :attr:`consume` and
         :attr:`single`
       - Method created from properties: :meth:`next_track` from 
