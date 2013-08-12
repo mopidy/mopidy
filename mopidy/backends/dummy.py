@@ -33,6 +33,7 @@ class DummyBackend(pykka.ThreadingActor, base.Backend):
         self.library = DummyLibraryProvider(backend=self)
         self.playback = DummyPlaybackProvider(audio=audio, backend=self)
         self.playlists = DummyPlaylistsProvider(backend=self)
+        self.tracklist = DummyTracklistProvider(backend=self)
 
         self.uri_schemes = ['dummy']
 
@@ -113,3 +114,29 @@ class DummyPlaylistsProvider(base.BasePlaylistsProvider):
             self._playlists.append(playlist)
 
         return playlist
+
+
+class DummyTracklistProvider(base.BaseTracklistProvider):
+    def next_track(self, tracklist, tl_track):
+        return str()
+
+    def previous_track(self, tracklist, tl_track):
+        return str()
+
+    def eot_track(self, tracklist, tl_track):
+        return str()
+
+    def add(self, tracklist, tracks=None, at_position=None, uri=None):
+        return False
+
+    def move(self, tracklist, start, end, to_position):
+        return False
+
+    def remove(self, tracklist, criteria=None, **kwargs):
+        return False
+
+    def shuffle(self, tracklist, start, end):
+        return False
+
+    def mark(self, tracklist, how, tl_track):
+        return False

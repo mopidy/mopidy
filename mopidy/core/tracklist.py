@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 import random
+import urlparse
 
 from mopidy.models import TlTrack
 
@@ -14,7 +15,8 @@ logger = logging.getLogger('mopidy.core')
 class TracklistController(object):
     pykka_traversable = True
 
-    def __init__(self, core):
+    def __init__(self, backends, core):
+        self.backends = backends
         self.core = core
         self._next_tlid = 0
         self._tl_tracks = []
@@ -22,6 +24,12 @@ class TracklistController(object):
 
         self._shuffled = []
         self._first_shuffle = True
+
+    def _get_backend(self, tl_track):
+        if tl_track is None:
+            return None
+        uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
+        return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
 
     ### Properties
 
@@ -137,6 +145,12 @@ class TracklistController(object):
         """
         The position of the given track in the tracklist.
         """
+        backend = self._get_backend(tl_track)
+        if backend and backend.has_tracklist():
+            index = backend.tracklist.index(self, tl_track).get()
+            if type(index) in [type(None), int]:
+                return index
+
         if tl_track is None:
             return None
         try:
@@ -155,6 +169,12 @@ class TracklistController(object):
         """
         # pylint: disable = R0911
         # Too many return statements
+
+        backend = self._get_backend(tl_track)
+        if backend and backend.has_tracklist():
+            eot_tl_track = backend.tracklist.eot_track(self, tl_track).get()
+            if type(eot_tl_track) in [TlTrack, type(None)]:
+                return eot_tl_track
 
         if not self.tl_tracks:
             return None
@@ -197,6 +217,11 @@ class TracklistController(object):
         :param tl_track: The reference track
         :type tl_track: :class:`mopidy.models.TlTrack`
         """
+        backend = self._get_backend(tl_track)
+        if backend and backend.has_tracklist():
+            next_tl_track = backend.tracklist.next_track(self, tl_track).get()
+            if type(next_tl_track) in [TlTrack, type(None)]:
+                return next_tl_track
 
         if not self.tl_tracks:
             return None
@@ -237,6 +262,13 @@ class TracklistController(object):
         :param tl_track: The reference track
         :type tl_track: :class:`mopidy.models.TlTrack`
         """
+        backend = self._get_backend(tl_track)
+        if backend and backend.has_tracklist():
+            previous_tl_track = backend.tracklist.previous_track(
+                self, tl_track).get()
+            if type(previous_tl_track) in [TlTrack, type(None)]:
+                return previous_tl_track
+
         if self.repeat or self.consume or self.random:
             return tl_track
 
@@ -269,6 +301,13 @@ class TracklistController(object):
         """
         assert tracks is not None or uri is not None, \
             'tracks or uri must be provided'
+
+        backend = self._get_backend(self.core.playback.current_tl_track)
+        if backend and backend.has_tracklist():
+            tracklist = backend.tracklist.add(self, tracks, at_position,
+                                              uri).get()
+            if type(tracklist) in [list, ]:
+                return tracklist
 
         if tracks is None and uri is not None:
             tracks = self.core.library.lookup(uri)
@@ -361,6 +400,11 @@ class TracklistController(object):
         assert to_position <= len(tl_tracks), \
             'to_position can not be larger than tracklist length'
 
+        backend = self._get_backend(self.core.playback.current_tl_track)
+        if backend and backend.has_tracklist():
+            if backend.tracklist.move(self, start, end, to_position).get():
+                return
+
         new_tl_tracks = tl_tracks[:start] + tl_tracks[end:]
         for tl_track in tl_tracks[start:end]:
             new_tl_tracks.insert(to_position, tl_track)
@@ -381,6 +425,13 @@ class TracklistController(object):
         :rtype: list of :class:`mopidy.models.TlTrack` that was removed
         """
         tl_tracks = self.filter(criteria, **kwargs)
+
+        backend = self._get_backend(self.core.playback.current_tl_track)
+        if backend and backend.has_tracklist():
+            removed = backend.tracklist.remove(self, tl_tracks).get()
+            if type(removed) in [list, ]:
+                return removed
+
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]
@@ -399,6 +450,11 @@ class TracklistController(object):
         :param end: position after last track to shuffle
         :type end: int or :class:`None`
         """
+        backend = self._get_backend(self.core.playback.current_tl_track)
+        if backend and backend.has_tracklist():
+            if backend.tracklist.shuffle(self, start, end).get():
+                return
+
         tl_tracks = self._tl_tracks
 
         if start is not None and end is not None:
@@ -431,28 +487,33 @@ class TracklistController(object):
         """
         return self._tl_tracks[start:end]
 
-    def mark(self, what, tl_track):
+    def mark(self, how, tl_track):
         """
         Marks the given track as specified. Currently supports::
             * `consumed` The track has been completely played.
             * `played` The track has been played, at least a piece of it.
             * `unplayable` The track is unplayable
 
-        :param what: What to be marked as
-        :type what: string
+        :param how: How to mark the song
+        :type how: string
         :param tl_track: Track to mark
         :type tl_track: :class:`mopidy.models.TlTrack`
         :rtype: True if the track was actually removed from the tracklist
         """
-        if what == "consumed":
+        backend = self._get_backend(self.core.playback.current_tl_track)
+        if backend and backend.has_tracklist():
+            if backend.tracklist.mark(self, how, tl_track).get():
+                return
+
+        if how == "consumed":
             if not self.consume:
                 return False
             self.remove(tlid=tl_track.tlid)
             return True
-        elif what == "played":
+        elif how == "played":
             if self.random and tl_track in self._shuffled:
                 self._shuffled.remove(tl_track)
-        elif what == "unplayable":
+        elif how == "unplayable":
             if self.random and self._shuffled:
                 self._shuffled.remove(tl_track)
 

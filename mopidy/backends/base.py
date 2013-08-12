@@ -25,6 +25,11 @@ class Backend(object):
     #: the backend doesn't provide playlists.
     playlists = None
 
+    #: The tracklist provider. An instance of
+    #: :class:`~mopidy.backends.base.BasePlaylistsProvider`, or class:`None` if
+    #: the backend doesn't provide tracklist additional control logic
+    tracklist = None
+
     #: List of URI schemes this backend can handle.
     uri_schemes = []
 
@@ -40,6 +45,9 @@ class Backend(object):
 
     def has_playlists(self):
         return self.playlists is not None
+
+    def has_tracklist(self):
+        return self.tracklist is not None
 
 
 class BaseLibraryProvider(object):
@@ -279,3 +287,161 @@ class BasePlaylistsProvider(object):
         *MUST be implemented by subclass.*
         """
         raise NotImplementedError
+
+
+class BaseTracklistProvider(object):
+    """
+    :param backend: backend the controller is a part of
+    :type backend: :class:`mopidy.backends.base.Backend`
+    """
+
+    pykka_traversable = True
+
+    def __init__(self, backend):
+        self.backend = backend
+
+    def next_track(self, tracklist, tl_track):
+        """
+        Get the next track to be played if the user used next button. The
+        Provider should be careful with all the tracklist states. See
+        :meth:`mopidy.core.TracklistController.next_track` code to know which
+        parameters to take care of.
+
+        :param tracklist: The instance of core's TracklistController
+        :type tracklist: :class:`mopidy.core.TracklistController`
+        :param tl_track: The track to have the next song's of
+        :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: It should be a :class:`mopidy.models.TlTrack`, None if the
+        intention is to tell there is no way to go onwards. For example under
+        a continuous non-seekable stream. Or finally, any other datatype than
+        :class:`mopidy.models.TlTrack` or None, which will denote that normal
+        actions should be following.
+        """
+        return str()
+
+    def previous_track(self, tracklist, tl_track):
+        """
+        Get the track to be played if the user used previous button. The
+        Provider should be careful with all the tracklist states. See
+        :meth:`mopidy.core.TracklistController.previous_track` code to know
+        which parameters to take care of.
+
+        :param tracklist: The instance of core's TracklistController
+        :type tracklist: :class:`mopidy.core.TracklistController`
+        :param tl_track: The track to have the previous song's of
+        :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: It should be a :class:`mopidy.models.TlTrack`, None if the
+        intention is to tell there is no way to go backwards. For example under
+        a continuous non-seekable stream. Or finally, any other datatype than
+        :class:`mopidy.models.TlTrack` or None, which will denote that normal
+        actions should be following.
+        """
+        return str()
+
+    def eot_track(self, tracklist, tl_track):
+        """
+        Get the track to be played if the previous track ended naturally. The
+        Provider should be careful with all the tracklist states. See
+        :meth:`mopidy.core.TracklistController.eot_track` code to know
+        which parameters to take care of.
+
+        :param tracklist: The instance of core's TracklistController
+        :type tracklist: :class:`mopidy.core.TracklistController`
+        :param tl_track: The track to have the next song's of
+        :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: It should be a :class:`mopidy.models.TlTrack`, None if the
+        intention is to tell there is no way to go onwards for example when the
+        tracklist is finished. Or finally, any other datatype than
+        :class:`mopidy.models.TlTrack` or None, which will denote that normal
+        actions should be following.
+        """
+        return str()
+
+    def add(self, tracklist, tracks=None, at_position=None, uri=None):
+        """
+        When adding a new song, the Provider may decide to add or replace
+        :meth:`mopidy.core.TracklistController.add`.
+
+        :param tracklist: The instance of core's TracklistController
+        :type tracklist: :class:`mopidy.core.TracklistController`
+        :param tracks: tracks to add
+        :type tracks: list of :class:`mopidy.models.Track`
+        :param at_position: position in tracklist to add track
+        :type at_position: int or :class:`None`
+        :param uri: URI for tracks to add
+        :type uri: string
+        :rtype: It should be a list of :class:`mopidy.models.TlTrack`, pointing
+        out which where actually the added songs. Anything else will be
+        considered as that the Controller should be running standard behaviour
+        """
+        return None
+
+    def move(self, tracklist, start, end, to_position):
+        """
+        When moving songs from one position to another, this method can be
+        used to add or replace the logic into
+        :meth:`mopidy.core.TracklistController.move`.
+
+        :param tracklist: The instance of core's TracklistController
+        :type tracklist: :class:`mopidy.core.TracklistController`
+        :param start: Where to move tracks from tracklist position start
+        :type start: int
+        :param end: Where to move tracks from tracklist position end
+        :type end: int
+        :rtype: In order to add some login before, the Provider must return
+        False, to replace the logic, the Provider must return True.
+        """
+        return False
+
+    def remove(self, tracklist, tl_tracks):
+        """
+        When revmoving a song list, more logic can be added before or replacing
+        completelly the standard one in
+        :meth:`mopidy.core.TracklistController.remove`
+
+        :param tracklist: The instance of core's TracklistController
+        :type tracklist: :class:`mopidy.core.TracklistController`
+        :param tl_tracks: The tracks we are trying to remove from the tracklist
+        :type tl_tracks: list of :class:`mopidy.models.TlTrack`
+        :rtype: It should be a list of :class:`mopidy.models.TlTrack`, pointing
+        out which where actually the removed songs. Anything else will be
+        considered as that the Controller should be running standard behaviour
+        """
+        return None
+
+    def shuffle(self, tracklist, start, end):
+        """
+        When suffling a slice of the tracklist, more logic can be added before
+         or replacing completelly the standard one in
+        :meth:`mopidy.core.TracklistController.shuffle`
+
+        :param tracklist: The instance of core's TracklistController
+        :type tracklist: :class:`mopidy.core.TracklistController`
+        :param start: Where to shuffle tracklist from
+        :type start: int
+        :param end: Where to shuffle tracklist to
+        :type end: int
+        :rtype: In order to add some login before, the Provider must return
+        False, to replace the logic, the Provider must return True.
+        """
+        return False
+
+    def mark(self, tracklist, how, tl_track):
+        """
+        Marking actions can vary and they let the backend know when tracks have
+        been skipped, played completelly, partially, etc. This is a call meant
+        to not only control TracklistController's internal state in regards on
+        actions to be carried as an action of skipping/playing a track but to
+        let the backend use some reporting features that some services may
+        require, like listening reporting.
+
+        :param tracklist: The instance of core's TracklistController
+        :type tracklist: :class:`mopidy.core.TracklistController`
+        :param how: How the track must be marked as
+        :type how: str
+        :param tl_track: The track to be marked
+        :type how: :class:`mopidy.models.TlTrack`
+        :rtype: In order to add some login before, the Provider must return
+        False, to replace the logic, the Provider must return True.
+        """
+        return False
