@@ -35,6 +35,17 @@ def autocoverage(path=None):
     auto(coverage, path=path)
 
 
+@task
+def lint(path=None):
+    path = path or '.'
+    local('flake8 $(find %s -iname "*.py")' % path)
+
+
+@task
+def autolint(path=None):
+    auto(lint, path=path)
+
+
 def auto(task, *args, **kwargs):
     while True:
         local('clear')
