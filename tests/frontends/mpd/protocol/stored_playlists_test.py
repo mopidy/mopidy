@@ -10,8 +10,8 @@ from tests.frontends.mpd import protocol
 class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylist(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', uri='dummy:name',
-                tracks=[Track(uri='dummy:a')])]
+            Playlist(
+                name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylist "name"')
         self.assertInResponse('file: dummy:a')
@@ -19,8 +19,8 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylist_without_quotes(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', uri='dummy:name', 
-                tracks=[Track(uri='dummy:a')])]
+            Playlist(
+                name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylist name')
         self.assertInResponse('file: dummy:a')
@@ -41,8 +41,8 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylistinfo(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', uri='dummy:name', 
-                tracks=[Track(uri='dummy:a')])]
+            Playlist(
+                name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylistinfo "name"')
         self.assertInResponse('file: dummy:a')
@@ -52,8 +52,8 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylistinfo_without_quotes(self):
         self.backend.playlists.playlists = [
-            Playlist(name='name', uri='dummy:name', 
-                tracks=[Track(uri='dummy:a')])]
+            Playlist(
+                name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])]
 
         self.sendRequest('listplaylistinfo name')
         self.assertInResponse('file: dummy:a')
@@ -109,7 +109,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylists_replaces_newline_with_space(self):
         self.backend.playlists.playlists = [
-                Playlist(name='a\n', uri='dummy:')]
+            Playlist(name='a\n', uri='dummy:')]
         self.sendRequest('listplaylists')
         self.assertInResponse('playlist: a ')
         self.assertNotInResponse('playlist: a\n')
@@ -117,7 +117,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylists_replaces_carriage_return_with_space(self):
         self.backend.playlists.playlists = [
-                Playlist(name='a\r', uri='dummy:')]
+            Playlist(name='a\r', uri='dummy:')]
         self.sendRequest('listplaylists')
         self.assertInResponse('playlist: a ')
         self.assertNotInResponse('playlist: a\r')
@@ -125,7 +125,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylists_replaces_forward_slash_with_space(self):
         self.backend.playlists.playlists = [
-                Playlist(name='a/', uri='dummy:')]
+            Playlist(name='a/', uri='dummy:')]
         self.sendRequest('listplaylists')
         self.assertInResponse('playlist: a ')
         self.assertNotInResponse('playlist: a/')

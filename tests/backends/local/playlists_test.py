@@ -7,7 +7,6 @@ import unittest
 
 from mopidy.backends.local import actor
 from mopidy.models import Track
-from mopidy.utils.path import path_to_uri, uri_to_path
 
 from tests import path_to_data_dir
 from tests.backends.base.playlists import (
@@ -100,8 +99,6 @@ class LocalPlaylistsControllerTest(
         self.assertEqual(track.uri, contents.strip())
 
     def test_playlists_are_loaded_at_startup(self):
-        playlist_path = os.path.join(self.playlists_dir, 'test.m3u')
-
         track = Track(uri='local:track:path2')
         playlist = self.core.playlists.create('test')
         playlist = playlist.copy(tracks=[track])

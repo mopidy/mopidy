@@ -67,7 +67,8 @@ def to_mopidy_track(spotify_track, bitrate=None):
     return track_cache[uri]
 
 
-def to_mopidy_playlist(spotify_playlist, folders=None, bitrate=None, username=None):
+def to_mopidy_playlist(
+        spotify_playlist, folders=None, bitrate=None, username=None):
     if spotify_playlist is None or spotify_playlist.type() != 'playlist':
         return
     try:

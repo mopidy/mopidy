@@ -2,9 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 import os
-# pylint: disable = W0402
 import string
-# pylint: enable = W0402
 import urllib
 import urlparse
 

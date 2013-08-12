@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import urllib
 import urlparse
 
 from mopidy.models import Track, Artist, Album

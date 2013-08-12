@@ -72,9 +72,7 @@ def load_protocol_modules():
     The protocol modules must be imported to get them registered in
     :attr:`request_handlers` and :attr:`mpd_commands`.
     """
-    # pylint: disable = W0612
     from . import (  # noqa
         audio_output, channels, command_list, connection, current_playlist,
         empty, music_db, playback, reflection, status, stickers,
         stored_playlists)
-    # pylint: enable = W0612

@@ -12,9 +12,6 @@ logger = logging.getLogger('mopidy.core')
 
 
 class PlaybackController(object):
-    # pylint: disable = R0902
-    # Too many instance attributes
-
     pykka_traversable = True
 
     def __init__(self, audio, backends, core):

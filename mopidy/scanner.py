@@ -192,7 +192,8 @@ def translator(data):
 
 
 class Scanner(object):
-    def __init__(self, uris, data_callback, error_callback=None, scan_timeout=1000):
+    def __init__(
+            self, uris, data_callback, error_callback=None, scan_timeout=1000):
         self.data = {}
         self.uris = iter(uris)
         self.data_callback = data_callback
@@ -298,7 +299,8 @@ class Scanner(object):
             return False
         self.pipe.set_state(gst.STATE_NULL)
         self.uribin.set_property('uri', uri)
-        self.timeout_id = gobject.timeout_add(self.scan_timeout, self.process_timeout)
+        self.timeout_id = gobject.timeout_add(
+            self.scan_timeout, self.process_timeout)
         self.pipe.set_state(gst.STATE_PLAYING)
         return True
 
