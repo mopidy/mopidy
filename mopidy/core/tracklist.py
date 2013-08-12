@@ -28,6 +28,10 @@ class TracklistController(object):
     def _get_backend(self, tl_track):
         if tl_track is None:
             return None
+        if tl_track.track is None:
+            return None
+        if tl_track.track.uri is None:
+            return None
         uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
         return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
 
@@ -145,11 +149,6 @@ class TracklistController(object):
         """
         The position of the given track in the tracklist.
         """
-        backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist():
-            index = backend.tracklist.index(self, tl_track).get()
-            if type(index) in [type(None), int]:
-                return index
 
         if tl_track is None:
             return None
@@ -171,7 +170,7 @@ class TracklistController(object):
         # Too many return statements
 
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist():
+        if backend and backend.has_tracklist().get():
             eot_tl_track = backend.tracklist.eot_track(self, tl_track).get()
             if type(eot_tl_track) in [TlTrack, type(None)]:
                 return eot_tl_track
@@ -218,7 +217,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack`
         """
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist():
+        if backend and backend.has_tracklist().get():
             next_tl_track = backend.tracklist.next_track(self, tl_track).get()
             if type(next_tl_track) in [TlTrack, type(None)]:
                 return next_tl_track
@@ -263,7 +262,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack`
         """
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist():
+        if backend and backend.has_tracklist().get():
             previous_tl_track = backend.tracklist.previous_track(
                 self, tl_track).get()
             if type(previous_tl_track) in [TlTrack, type(None)]:
@@ -303,7 +302,7 @@ class TracklistController(object):
             'tracks or uri must be provided'
 
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist():
+        if backend and backend.has_tracklist().get():
             tracklist = backend.tracklist.add(self, tracks, at_position,
                                               uri).get()
             if type(tracklist) in [list, ]:
@@ -401,7 +400,7 @@ class TracklistController(object):
             'to_position can not be larger than tracklist length'
 
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist():
+        if backend and backend.has_tracklist().get():
             if backend.tracklist.move(self, start, end, to_position).get():
                 return
 
@@ -427,7 +426,7 @@ class TracklistController(object):
         tl_tracks = self.filter(criteria, **kwargs)
 
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist():
+        if backend and backend.has_tracklist().get():
             removed = backend.tracklist.remove(self, tl_tracks).get()
             if type(removed) in [list, ]:
                 return removed
@@ -451,7 +450,7 @@ class TracklistController(object):
         :type end: int or :class:`None`
         """
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist():
+        if backend and backend.has_tracklist().get():
             if backend.tracklist.shuffle(self, start, end).get():
                 return
 
@@ -501,7 +500,7 @@ class TracklistController(object):
         :rtype: True if the track was actually removed from the tracklist
         """
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist():
+        if backend and backend.has_tracklist().get():
             if backend.tracklist.mark(self, how, tl_track).get():
                 return
 
