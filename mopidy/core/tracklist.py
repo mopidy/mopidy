@@ -33,7 +33,7 @@ class TracklistController(object):
         if tl_track.track.uri is None:
             return None
         uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
-        return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
+        return self.backends.with_tracklist_by_uri_scheme.get(uri_scheme, None)
 
     ### Properties
 

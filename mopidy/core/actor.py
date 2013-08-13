@@ -86,7 +86,7 @@ class Backends(list):
         self.with_library = [b for b in backends if b.has_library().get()]
         self.with_playback = [b for b in backends if b.has_playback().get()]
         self.with_playlists = [b for b in backends if b.has_playlists().get()]
-        self.with_tracklists = [b for b in backends if b.has_tracklist().get()]
+        self.with_tracklist = [b for b in backends if b.has_tracklist().get()]
 
         self.by_uri_scheme = {}
         for backend in backends:
@@ -102,7 +102,7 @@ class Backends(list):
         self.with_library_by_uri_scheme = {}
         self.with_playback_by_uri_scheme = {}
         self.with_playlists_by_uri_scheme = {}
-        self.with_tracklists_by_uri_scheme = {}
+        self.with_tracklist_by_uri_scheme = {}
 
         for uri_scheme, backend in self.by_uri_scheme.items():
             if backend.has_library().get():
@@ -112,4 +112,4 @@ class Backends(list):
             if backend.has_playlists().get():
                 self.with_playlists_by_uri_scheme[uri_scheme] = backend
             if backend.has_tracklist().get():
-                self.with_tracklists_by_uri_scheme[uri_scheme] = backend
+                self.with_tracklist_by_uri_scheme[uri_scheme] = backend
