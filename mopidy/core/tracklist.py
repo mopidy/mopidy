@@ -148,6 +148,10 @@ class TracklistController(object):
     def index(self, tl_track):
         """
         The position of the given track in the tracklist.
+
+        :param tl_track: The reference track
+        :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: int
         """
 
         if tl_track is None:
@@ -165,6 +169,7 @@ class TracklistController(object):
 
         :param tl_track: The reference track
         :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: :class:`mopidy.models.TlTrack`
         """
         # pylint: disable = R0911
         # Too many return statements
@@ -215,6 +220,7 @@ class TracklistController(object):
 
         :param tl_track: The reference track
         :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: :class:`mopidy.models.TlTrack`
         """
         backend = self._get_backend(tl_track)
         if backend and backend.has_tracklist().get():
@@ -260,6 +266,7 @@ class TracklistController(object):
 
         :param tl_track: The reference track
         :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: :class:`mopidy.models.TlTrack`
         """
         backend = self._get_backend(tl_track)
         if backend and backend.has_tracklist().get():
