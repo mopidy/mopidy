@@ -426,7 +426,7 @@ class BaseTracklistProvider(object):
         """
         return False
 
-    def mark(self, tracklist, how, tl_track):
+    def mark(self, tracklist, how, tl_track, **kwargs):
         """
         Marking actions can vary and they let the backend know when tracks have
         been skipped, played completelly, partially, etc. This is a call meant

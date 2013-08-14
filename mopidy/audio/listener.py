@@ -59,3 +59,14 @@ class AudioListener(object):
         :type new_state: string from :class:`mopidy.core.PlaybackState` field
         """
         pass
+
+    def stream_metadata_changed(self, metadata):
+        """
+        Called after the stream sends some tag information.
+
+        *MAY* be implmeneted by actor.
+
+        :param metadata: the actual metadata
+        :type metadata: dict
+        """
+        pass

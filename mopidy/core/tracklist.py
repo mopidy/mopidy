@@ -318,6 +318,9 @@ class TracklistController(object):
         if tracks is None and uri is not None:
             tracks = self.core.library.lookup(uri)
 
+        return self._add(tracks, at_position)
+
+    def _add(self, tracks, at_position):
         tl_tracks = []
 
         for track in tracks:
@@ -334,6 +337,7 @@ class TracklistController(object):
             self._increase_version()
 
         return tl_tracks
+
 
     def clear(self):
         """
@@ -493,9 +497,9 @@ class TracklistController(object):
         """
         return self._tl_tracks[start:end]
 
-    def mark(self, how, tl_track):
+    def mark(self, how, tl_track, **kwargs):
         """
-        Marks the given track as specified. Currently supports::
+        Marks the given track as specified. Currently by default supports::
             * `consumed` The track has been completely played.
             * `played` The track has been played, at least a piece of it.
             * `unplayable` The track is unplayable
@@ -508,7 +512,7 @@ class TracklistController(object):
         """
         backend = self._get_backend(self.core.playback.current_tl_track)
         if backend and backend.has_tracklist().get():
-            if backend.tracklist.mark(self, how, tl_track).get():
+            if backend.tracklist.mark(self, how, tl_track, **kwargs).get():
                 return
 
         if how == "consumed":

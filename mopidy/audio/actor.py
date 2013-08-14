@@ -60,6 +60,7 @@ class Audio(pykka.ThreadingActor):
         self._mixer_scale = None
         self._software_mixing = False
         self._volume_set = None
+        self._metadata = None
 
         self._appsrc = None
         self._appsrc_caps = None
@@ -279,6 +280,12 @@ class Audio(pykka.ThreadingActor):
             logger.warning(
                 '%s Debug message: %s',
                 str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        elif message.type == gst.MESSAGE_TAG:
+            taglist = message.parse_tag()
+            tags = dict()
+            for key in taglist.keys():
+                tags[key] = taglist[key]
+            self._on_tag_update(tags)
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
@@ -313,6 +320,22 @@ class Audio(pykka.ThreadingActor):
         logger.debug('Triggering reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
 
+    def _on_tag_update(self, tags):
+        trigger = False
+        for key in tags:
+            if key in self._metadata:
+                if not self._metadata[key] == tags[key]:
+                    self._metadata[key] = tags[key]
+                    trigger = True
+            else:
+                self._metadata[key] = tags[key]
+                trigger = True
+
+        if trigger:
+            logger.debug("Tiggering event: stream_metadata_changed")
+            AudioListener.send('stream_metadata_changed',
+                               metadata=self._metadata)
+
     def set_uri(self, uri):
         """
         Set URI of audio to be played.
@@ -322,6 +345,7 @@ class Audio(pykka.ThreadingActor):
         :param uri: the URI to play
         :type uri: string
         """
+        self._metadata = dict()
         self._playbin.set_property('uri', uri)
 
     def set_appsrc(
@@ -342,6 +366,8 @@ class Audio(pykka.ThreadingActor):
             to continue playback
         :type seek_data: callable which takes time position in ms
         """
+        self._metadata = dict()
+
         if isinstance(caps, unicode):
             caps = caps.encode('utf-8')
         self._appsrc_caps = gst.Caps(caps)
