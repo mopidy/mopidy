@@ -27,6 +27,8 @@ v0.15.0 (UNRELEASED)
 - Added support for viusalization. :confval:`audio/visualizer` can now be set
   to GStreamer visualizers.
 
+- Properly encode localised mixer names before logging.
+
 **Local backend**
 
 - An album's number of discs and a track's disc number are now extracted when
