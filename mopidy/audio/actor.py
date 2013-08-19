@@ -223,7 +223,8 @@ class Audio(pykka.ThreadingActor):
             self._mixer_track.min_volume, self._mixer_track.max_volume)
         logger.info(
             'Audio mixer set to "%s" using track "%s"',
-            mixer.get_factory().get_name(), track.label)
+            str(mixer.get_factory().get_name()).decode('utf-8'),
+            str(track.label).decode('utf-8'))
 
     def _select_mixer_track(self, mixer, track_label):
         # Ignore tracks without volumes, then look for track with
