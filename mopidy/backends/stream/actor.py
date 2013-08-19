@@ -143,7 +143,6 @@ class StreamTracklistProvider(base.BaseTracklistProvider):
 
         position = tracklist.index(tl_track)
         track=[Track(**track_args)]
-#        position = position + 1 if position else 1
         next = tracklist._add(tracks=track, at_position=position)
         logger.debug("The track to be played is " + repr(next))
         listener.CoreListener.send('track_playback_ended',
