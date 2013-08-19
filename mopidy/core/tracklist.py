@@ -502,6 +502,7 @@ class TracklistController(object):
             * `consumed` The track has been completely played.
             * `played` The track has been played, at least a piece of it.
             * `unplayable` The track is unplayable
+            * `metadata` The metadata of the song changed
 
         :param how: How to mark the song
         :type how: string
