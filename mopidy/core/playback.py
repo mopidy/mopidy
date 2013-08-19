@@ -154,8 +154,7 @@ class PlaybackController(object):
         """
 
         if (not self.core.tracklist.tl_tracks or
-                self.current_tl_track not in
-                self.core.tracklist.tl_tracks):
+                self.current_tl_track not in self.core.tracklist.tl_tracks):
             self.stop(clear_current_track=True)
 
     def next(self):
