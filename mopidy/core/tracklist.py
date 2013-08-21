@@ -440,7 +440,9 @@ class TracklistController(object):
             removed = backend.tracklist.remove(self, tl_tracks).get()
             if type(removed) in [list, ]:
                 return removed
+        return self._remove(tl_tracks)
 
+    def _remove(self, tl_tracks):
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]
