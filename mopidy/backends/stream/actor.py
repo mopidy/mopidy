@@ -43,8 +43,7 @@ class StreamTracklistProvider(base.BaseTracklistProvider):
     def mark(self, tracklist, how, tl_track, **kwargs):
         if not how == "metadata":
             return False
-        meta = kwargs['metadata']
-        logger.debug("Calling stream's mark function with meta: " + repr(meta))
+        meta = kwargs[how]
 
         track_args = dict()
         album_args = dict()

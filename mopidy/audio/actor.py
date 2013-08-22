@@ -282,11 +282,7 @@ class Audio(pykka.ThreadingActor):
                 '%s Debug message: %s',
                 str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
         elif message.type == gst.MESSAGE_TAG:
-            taglist = message.parse_tag()
-            tags = dict()
-            for key in taglist.keys():
-                tags[key] = taglist[key]
-            self._on_tag_update(tags)
+            self._on_tag_update(dict(message.parse_tag()))
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
@@ -323,14 +319,15 @@ class Audio(pykka.ThreadingActor):
 
     def _on_tag_update(self, tags):
         trigger = False
-        for key in tags:
+        for key, value in tags.iteritems():
             if key in self._metadata:
-                if not self._metadata[key] == tags[key]:
-                    self._metadata[key] = tags[key]
+                if not self._metadata[key] == value:
+                    self._metadata[key] = value
                     trigger = True
             else:
-                self._metadata[key] = tags[key]
+                self._metadata[key] = value
                 trigger = True
+            print value
 
         if trigger:
             logger.debug("Tiggering event: stream_metadata_changed")
