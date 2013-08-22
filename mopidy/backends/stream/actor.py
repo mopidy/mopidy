@@ -144,6 +144,11 @@ class StreamTracklistProvider(base.BaseTracklistProvider):
 
         position = tracklist.index(tl_track)
         track=[Track(**track_args)]
+
+        # Check if the next track is the leader (source) stream or not
+        if tl_track.track.name != tl_track.track.uri:
+            position += 1
+
         next = tracklist._add(tracks=track, at_position=position)[0]
         listener.CoreListener.send('track_playback_ended',
                     tl_track=tl_track,
