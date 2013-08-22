@@ -7,6 +7,7 @@ import pykka
 
 from mopidy import audio as audio_lib
 from mopidy.backends import base
+from mopidy.core import listener
 from mopidy.models import Track, Album, Artist
 
 logger = logging.getLogger('mopidy.backends.stream')
@@ -143,15 +144,12 @@ class StreamTracklistProvider(base.BaseTracklistProvider):
 
         position = tracklist.index(tl_track)
         track=[Track(**track_args)]
-        next = tracklist._add(tracks=track, at_position=position)
-        logger.debug("The track to be played is " + repr(next))
+        next = tracklist._add(tracks=track, at_position=position)[0]
         listener.CoreListener.send('track_playback_ended',
                     tl_track=tl_track,
                     time_position=self.backend.playback.get_time_position())
-        tracklist.core.playback.current_tl_track = next[0]
-        logger.debug("The next track is "+ repr(next[0]))
-        listener.CoreListener.send(
-                    'track_playback_started',
+        tracklist.core.playback.current_tl_track = next
+        listener.CoreListener.send('track_playback_started',
                     tl_track=next)
 
         return True
