@@ -338,7 +338,6 @@ class TracklistController(object):
 
         return tl_tracks
 
-
     def clear(self):
         """
         Clear the tracklist.
