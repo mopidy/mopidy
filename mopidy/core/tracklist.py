@@ -440,7 +440,9 @@ class TracklistController(object):
             removed = backend.tracklist.remove(self, tl_tracks).get()
             if type(removed) in [list, ]:
                 return removed
+        return self._remove(tl_tracks)
 
+    def _remove(self, tl_tracks):
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]
@@ -502,6 +504,7 @@ class TracklistController(object):
             * `consumed` The track has been completely played.
             * `played` The track has been played, at least a piece of it.
             * `unplayable` The track is unplayable
+            * `metadata` The metadata of the song changed
 
         :param how: How to mark the song
         :type how: string
