@@ -333,7 +333,6 @@ class Audio(pykka.ThreadingActor):
             else:
                 self._metadata[key] = value
                 trigger = True
-            print value
 
         if trigger:
             logger.debug("Tiggering event: stream_metadata_changed")
