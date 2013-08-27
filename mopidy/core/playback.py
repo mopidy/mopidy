@@ -216,7 +216,7 @@ class PlaybackController(object):
                     self.previous()
                 return
 
-        self.core.tracklist.mark("played", tl_track)
+        self.core.tracklist.mark("starting", tl_track)
 
         self._trigger_track_playback_started()
 
