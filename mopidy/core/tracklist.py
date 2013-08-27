@@ -502,7 +502,8 @@ class TracklistController(object):
         """
         Marks the given track as specified. Currently by default supports::
             * `consumed` The track has been completely played.
-            * `played` The track has been played, at least a piece of it.
+            * `starting` The track has just starting playback, at least a
+              piece of it.
             * `unplayable` The track is unplayable
             * `metadata` The metadata of the song changed
 
@@ -522,7 +523,7 @@ class TracklistController(object):
                 return False
             self.remove(tlid=tl_track.tlid)
             return True
-        elif how == "played":
+        elif how == "starting":
             if self.random and tl_track in self._shuffled:
                 self._shuffled.remove(tl_track)
         elif how == "unplayable":
