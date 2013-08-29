@@ -282,12 +282,8 @@ class Audio(pykka.ThreadingActor):
                 '%s Debug message: %s',
                 str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
         elif message.type == gst.MESSAGE_TAG:
-            tags = dict()
             for key, value in dict(message.parse_tag()).iteritems():
-                if type(value) == unicode:
-                    tags[key] = str(value) # FIXME
-                else:
-                    tags[key] = value
+                tags[key] = value
             self._on_tag_update(tags)
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
