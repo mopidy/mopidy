@@ -24,7 +24,7 @@ v0.15.0 (UNRELEASED)
 
 **Audio**
 
-- Added support for viusalization. :confval:`audio/visualizer` can now be set
+- Added support for audio visualization. :confval:`audio/visualizer` can now be set
   to GStreamer visualizers.
 
 - Properly encode localised mixer names before logging.
