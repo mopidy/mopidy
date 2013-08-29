@@ -285,7 +285,7 @@ class Audio(pykka.ThreadingActor):
             tags = dict()
             for key, value in dict(message.parse_tag()).iteritems():
                 if type(value) == unicode:
-                    tags[key] = str(value).decode('utf-8')
+                    tags[key] = str(value) # FIXME
                 else:
                     tags[key] = value
             self._on_tag_update(tags)
