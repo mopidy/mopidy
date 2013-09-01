@@ -10,7 +10,7 @@ Title: track1
 Album: album1
 Date: 2001-02-03
 Time: 4
-key: key1
+key: key2
 file: /path2
 Artist: artist2
 Title: track2
@@ -19,8 +19,10 @@ Date: 2002
 Time: 4
 key: key3
 file: /path3
-Artist: artist3
+Artist: artist4
+AlbumArtist: artist3
 Title: track3
 Album: album3
+Date: 2003
 Time: 4
 songList end
