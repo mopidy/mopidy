@@ -42,9 +42,9 @@ v0.15.0 (UNRELEASED)
   to start providing their own custom libraries instead of being stuck with
   just our tag cache as the only option.
 
-- Converted local backend to use new `local:playlist:path` and
-  `local:track:path` uri scheme. Also moves support of `file://` to streaming
-  backend.
+- Converted local backend to use new ``local:playlist:path`` and
+  ``local:track:path`` URI scheme. Also moves support of ``file://`` to
+  streaming backend.
 
 **Spotify backend**
 
@@ -59,6 +59,10 @@ v0.15.0 (UNRELEASED)
 
 - Replace newline, carriage return and forward slash in playlist names. (Fixes:
   :issue:`474`, :issue:`480`)
+
+- Accept ``listall`` and ``listallinfo`` commands without the URI parameter.
+  The methods are still not implemented, but now the commands are accepted as
+  valid.
 
 
 v0.14.2 (2013-07-01)
