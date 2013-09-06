@@ -101,9 +101,6 @@ def deleteid(context, tlid):
         Deletes the song ``SONGID`` from the playlist
     """
     tlid = int(tlid)
-    tl_track = context.core.playback.current_tl_track.get()
-    if tl_track and tl_track.tlid == tlid:
-        context.core.playback.next()
     tl_tracks = context.core.tracklist.remove(tlid=tlid).get()
     if not tl_tracks:
         raise MpdNoExistError('No such song', command='deleteid')
