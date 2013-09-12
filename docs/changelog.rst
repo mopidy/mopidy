@@ -15,20 +15,26 @@ v0.15.0 (UNRELEASED)
   supported by Mopidy is Python 2.7. (Fixes: :issue:`344`)
 
 **Core**
+
 - Tracklist has now the power to make decisions on which is the next/previous
   song, along with previously playback associated features, such as randomness,
   consumption, repeat and single. For that, a new method has been created to
   mark songs, some Playback properties have been converted into functions and
   both functions and properties have been moved into Tracklist to have more
   modularity:
-      - Properties merged into functions: :attr:`tracklist_position` merged to
-        :meth:`index`
-      - Properties moved: :attr:`random`, :attr:`repeat`, :attr:`consume` and
-        :attr:`single`
-      - Method created from properties: :meth:`next_track` from 
-        `tl_track_at_next`, :meth:`eot_track` from ´tl_track_at_eot` and
-        :meth:`previous_track` from `tl_track_at_previous`
-      - Method created to separe functionality: :meth:`mark` 
+
+  - Properties merged into functions: :attr:`tracklist_position` merged to
+    :meth:`index`
+
+  - Properties moved: :attr:`random`, :attr:`repeat`, :attr:`consume` and
+    :attr:`single`
+
+  - Method created from properties: :meth:`next_track` from 
+    `tl_track_at_next`, :meth:`eot_track` from `tl_track_at_eot` and
+    :meth:`previous_track` from `tl_track_at_previous`
+
+  - Method created to separe functionality: :meth:`mark` 
+
 - Tracklist's get_tl_track_at_* and tracklist_position now need a tl_track as a
   reference to give an answer.
 
