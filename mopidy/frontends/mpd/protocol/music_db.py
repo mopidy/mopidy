@@ -245,8 +245,9 @@ def _list_date(context, query):
     return dates
 
 
-@handle_request(r'^listall "(?P<uri>[^"]+)"')
-def listall(context, uri):
+@handle_request(r'^listall$')
+@handle_request(r'^listall "(?P<uri>[^"]+)"$')
+def listall(context, uri=None):
     """
     *musicpd.org, music database section:*
 
@@ -257,8 +258,9 @@ def listall(context, uri):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^listallinfo "(?P<uri>[^"]+)"')
-def listallinfo(context, uri):
+@handle_request(r'^listallinfo$')
+@handle_request(r'^listallinfo "(?P<uri>[^"]+)"$')
+def listallinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
 

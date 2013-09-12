@@ -75,3 +75,19 @@ GitHub:
     `dz0ny/mopidy-soundcloud <https://github.com/dz0ny/mopidy-soundcloud>`_
 Issues:
     https://github.com/dz0ny/mopidy-soundcloud/issues
+
+
+Mopidy-Subsonic
+---------------
+
+Provides a backend for playing music from a `Subsonic Music Streamer
+<http://www.subsonic.org/>`_ library.
+
+Author:
+    Bradon Kanyid
+PyPI:
+    `Mopidy-Subsonic <https://pypi.python.org/pypi/Mopidy-Subsonic>`_
+GitHub:
+    `rattboi/mopidy-subsonic <https://github.com/rattboi/mopidy-subsonic>`_
+Issues:
+    https://github.com/rattboi/mopidy-subsonic/issues
