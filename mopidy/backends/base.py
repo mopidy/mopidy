@@ -25,6 +25,11 @@ class Backend(object):
     #: the backend doesn't provide playlists.
     playlists = None
 
+    #: The metadata provider. An instance of
+    #: :class:`~mopidy.backends.base.BaseMetadataProvider`, or class:`None` if
+    #: the backend doesn't provide metadata.
+    metadata = None
+
     #: List of URI schemes this backend can handle.
     uri_schemes = []
 
@@ -40,6 +45,9 @@ class Backend(object):
 
     def has_playlists(self):
         return self.playlists is not None
+
+    def has_metadata(self):
+        return self.metadata is not None
 
 
 class BaseLibraryProvider(object):
@@ -279,3 +287,21 @@ class BasePlaylistsProvider(object):
         *MUST be implemented by subclass.*
         """
         raise NotImplementedError
+
+
+class BaseMetadataProvider(object):
+    """
+    :param backend: backend the controller is a part of
+    :type backend: :class:`mopidy.backends.base.Backend`
+    """
+
+    pykka_traversable = True
+
+    def __init__(self, backend):
+        self.backend = backend
+
+    def get(self, uri, key):
+        return {}
+
+    def set(self, uri, key, value):
+        return {}

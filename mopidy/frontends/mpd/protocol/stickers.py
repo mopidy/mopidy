@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
 from mopidy.frontends.mpd.protocol import handle_request
-from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.exceptions import (MpdNotImplemented,
+                                             MpdPermissionError)
 
 
 @handle_request(
@@ -46,7 +47,10 @@ def sticker_get(context, field, uri, name):
 
         Reads a sticker value for the specified object.
     """
-    raise MpdNotImplemented  # TODO
+    ans = context.core.metadata.get(uri, name).get()
+
+    for key, value in ans.iteritems():
+        return "sticker: %s=%s" % (key, str(value))
 
 
 @handle_request(r'^sticker list "(?P<field>[^"]+)" "(?P<uri>[^"]+)"$')
@@ -58,7 +62,13 @@ def sticker_list(context, field, uri):
 
         Lists the stickers for the specified object.
     """
-    raise MpdNotImplemented  # TODO
+    ans = context.core.metadata.get(uri).get()
+    stickers = list()
+
+    for key, value in ans.iteritems():
+        stickers.append("sticker: %s=%s" % (key, str(ans[key])))
+
+    return stickers
 
 
 @handle_request(
@@ -73,4 +83,6 @@ def sticker_set(context, field, uri, name, value):
         Adds a sticker value to the specified object. If a sticker item
         with that name already exists, it is replaced.
     """
-    raise MpdNotImplemented  # TODO
+
+    if not context.core.metadata.set(uri, name, value).get():
+        raise MpdPermissionError(command="sticker set")
