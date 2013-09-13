@@ -15,3 +15,4 @@ mopidy.log*
 node_modules/
 nosetests.xml
 *~
+*.orig
