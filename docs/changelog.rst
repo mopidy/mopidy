@@ -64,6 +64,11 @@ v0.15.0 (UNRELEASED)
   The methods are still not implemented, but now the commands are accepted as
   valid.
 
+**Extension support**
+
+- :class:`~mopidy.config.Secret` is now deserialized to unicode strings instead
+  of bytestrings. This may require modifications to extensions.
+
 
 v0.14.2 (2013-07-01)
 ====================
