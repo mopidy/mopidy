@@ -46,6 +46,22 @@ Issues:
     https://github.com/dz0ny/mopidy-beets/issues
 
 
+Mopidy-GMusic
+-------------
+
+Provides a backend for playing music from `Google Play Music
+<https://play.google.com/music/>`_.
+
+Author:
+    Ronald Hecht
+PyPI:
+    N/A
+GitHub:
+    `hechtus/mopidy-gmusic <https://github.com/hechtus/mopidy-gmusic>`_
+Issues:
+    https://github.com/hechtus/mopidy-gmusic/issues
+
+
 Mopidy-NAD
 ----------
 
