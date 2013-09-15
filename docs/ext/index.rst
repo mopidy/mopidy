@@ -77,6 +77,22 @@ Issues:
     https://github.com/mopidy/mopidy/issues
 
 
+Mopidy-SomaFM
+-------------
+
+Provides a backend for playing music from the `SomaFM <http://somafm.com/>`_
+service.
+
+Author:
+    Alexandre Petitjean
+PyPI:
+    `Mopidy-SomaFM <https://pypi.python.org/pypi/Mopidy-SomaFM>`_
+GitHub:
+    `AlexandrePTJ/mopidy-somafm <https://github.com/AlexandrePTJ/mopidy-somafm/>`_
+Issues:
+    https://github.com/AlexandrePTJ/mopidy-somafm/issues
+
+
 Mopidy-SoundCloud
 -----------------
 
