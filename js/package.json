@@ -16,7 +16,7 @@
   "dependencies": {
     "bane": "~1.0.0",
     "faye-websocket": "~0.4.4",
-    "when": "~2.0.0"
+    "when": "~2.4.0"
   },
   "devDependencies": {
     "buster": "~0.6.12",
