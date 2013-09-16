@@ -70,6 +70,8 @@ v0.15.0 (UNRELEASED)
   objects with ``tlid`` set to ``0`` to be sent to the HTTP client without the
   ``tlid`` field. (Fixes: :issue:`501`)
 
+- Upgrade Mopidy.js dependencies.
+
 **Extension support**
 
 - :class:`~mopidy.config.Secret` is now deserialized to unicode strings instead
