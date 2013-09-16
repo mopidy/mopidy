@@ -53,6 +53,8 @@ def main():
             logging_config, args.verbosity_level, args.save_debug_log)
         logging_initialized = True
 
+        create_file_structures()
+
         installed_extensions = ext.load_extensions()
 
         config, config_errors = config_lib.load(
@@ -73,7 +75,6 @@ def main():
         proxied_config = config_lib.Proxy(config)
 
         log.setup_log_levels(proxied_config)
-        create_file_structures()
         check_old_locations()
         ext.register_gstreamer_elements(enabled_extensions)
 
