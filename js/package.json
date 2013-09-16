@@ -14,7 +14,7 @@
   },
   "main": "src/mopidy.js",
   "dependencies": {
-    "bane": "~0.4.0",
+    "bane": "~1.0.0",
     "faye-websocket": "~0.4.4",
     "when": "~2.0.0"
   },
