@@ -75,18 +75,16 @@ def main():
         log.setup_log_levels(proxied_config)
         check_old_locations()
         ext.register_gstreamer_elements(enabled_extensions)
+
+        # Anything that wants to exit after this point must use
+        # mopidy.utils.process.exit_process as actors have been started.
+        start(proxied_config, enabled_extensions)
     except KeyboardInterrupt:
-        if logging_initialized:
-            logger.info('Interrupted. Exiting...')
-        return
+        pass
     except Exception as ex:
         if logging_initialized:
             logger.exception(ex)
         raise
-
-    # Anything that wants to exit after this point must use
-    # mopidy.utils.process.exit_process as actors have been started.
-    start(proxied_config, enabled_extensions)
 
 
 def start(config, enabled_extensions):
@@ -100,9 +98,6 @@ def start(config, enabled_extensions):
     except KeyboardInterrupt:
         logger.info('Interrupted. Exiting...')
         return
-    except Exception as ex:
-        logger.exception(ex)
-        raise
     finally:
         loop.quit()
         stop_frontends(enabled_extensions)
