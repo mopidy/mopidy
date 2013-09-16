@@ -90,7 +90,7 @@ class ImmutableObject(object):
                     for v in value]
             elif isinstance(value, ImmutableObject):
                 value = value.serialize()
-            if value:
+            if not (isinstance(value, list) and len(value) == 0):
                 data[public_key] = value
         return data
 
