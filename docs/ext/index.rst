@@ -55,7 +55,7 @@ Provides a backend for playing music from `Google Play Music
 Author:
     Ronald Hecht
 PyPI:
-    N/A
+    `Mopidy-GMusic <https://pypi.python.org/pypi/Mopidy-GMusic>`_
 GitHub:
     `hechtus/mopidy-gmusic <https://github.com/hechtus/mopidy-gmusic>`_
 Issues:
