@@ -36,15 +36,12 @@ def main():
     if args.show_deps:
         commands.show_deps()
 
-    loop = gobject.MainLoop()
-    enabled_extensions = []  # Make sure it is defined before the finally block
-    logging_initialized = False
-
     # TODO: figure out a way to make the boilerplate in this file reusable in
     # scanner and other places we need it.
 
     try:
         # Initial config without extensions to bootstrap logging.
+        logging_initialized = False
         logging_config, _ = config_lib.load(
             args.config_files, [], args.config_overrides)
 
@@ -61,6 +58,7 @@ def main():
             args.config_files, installed_extensions, args.config_overrides)
 
         # Filter out disabled extensions and remove any config errors for them.
+        enabled_extensions = []
         for extension in installed_extensions:
             enabled = config[extension.ext_name]['enabled']
             if ext.validate_extension(extension) and enabled:
@@ -77,20 +75,33 @@ def main():
         log.setup_log_levels(proxied_config)
         check_old_locations()
         ext.register_gstreamer_elements(enabled_extensions)
-
-        # Anything that wants to exit after this point must use
-        # mopidy.utils.process.exit_process as actors have been started.
-        audio = setup_audio(proxied_config)
-        backends = setup_backends(proxied_config, enabled_extensions, audio)
-        core = setup_core(audio, backends)
-        setup_frontends(proxied_config, enabled_extensions, core)
-        loop.run()
     except KeyboardInterrupt:
         if logging_initialized:
             logger.info('Interrupted. Exiting...')
+        return
     except Exception as ex:
         if logging_initialized:
             logger.exception(ex)
+        raise
+
+    # Anything that wants to exit after this point must use
+    # mopidy.utils.process.exit_process as actors have been started.
+    start(proxied_config, enabled_extensions)
+
+
+def start(config, enabled_extensions):
+    loop = gobject.MainLoop()
+    try:
+        audio = setup_audio(config)
+        backends = setup_backends(config, enabled_extensions, audio)
+        core = setup_core(audio, backends)
+        setup_frontends(config, enabled_extensions, core)
+        loop.run()
+    except KeyboardInterrupt:
+        logger.info('Interrupted. Exiting...')
+        return
+    except Exception as ex:
+        logger.exception(ex)
         raise
     finally:
         loop.quit()
