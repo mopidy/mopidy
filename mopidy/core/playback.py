@@ -24,6 +24,7 @@ class PlaybackController(object):
         self._shuffled = []
         self._first_shuffle = True
         self._volume = None
+        self._mute = None
 
     def _get_backend(self):
         if self.current_tl_track is None:
@@ -287,6 +288,22 @@ class PlaybackController(object):
 
     volume = property(get_volume, set_volume)
     """Volume as int in range [0..100] or :class:`None`"""
+
+    def get_mute(self):
+        if self.audio:
+            return self.audio.get_mute().get()
+        else:
+            return self._mute
+
+    def set_mute(self, value):
+        value = bool(value)
+        if self.audio:
+            self.audio.set_mute(value)
+        else:
+            self._mute = value
+
+    mute = property(get_mute, set_mute)
+    """Let the audio get muted, maintaining previous volume"""
 
     ### Methods
 

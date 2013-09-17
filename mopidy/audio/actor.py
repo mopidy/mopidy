@@ -537,6 +537,12 @@ class Audio(pykka.ThreadingActor):
 
         return self._mixer.get_volume(self._mixer_track) == volumes
 
+    def get_mute(self):
+        return self._playbin.get_property('mute')
+
+    def set_mute(self, status):
+        self._playbin.set_property('mute', bool(status))
+
     def _rescale(self, value, old=None, new=None):
         """Convert value between scales."""
         new_min, new_max = new
