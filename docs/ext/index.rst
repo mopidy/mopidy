@@ -46,6 +46,22 @@ Issues:
     https://github.com/dz0ny/mopidy-beets/issues
 
 
+Mopidy-GMusic
+-------------
+
+Provides a backend for playing music from `Google Play Music
+<https://play.google.com/music/>`_.
+
+Author:
+    Ronald Hecht
+PyPI:
+    `Mopidy-GMusic <https://pypi.python.org/pypi/Mopidy-GMusic>`_
+GitHub:
+    `hechtus/mopidy-gmusic <https://github.com/hechtus/mopidy-gmusic>`_
+Issues:
+    https://github.com/hechtus/mopidy-gmusic/issues
+
+
 Mopidy-NAD
 ----------
 
@@ -59,6 +75,22 @@ GitHub:
     `mopidy/mopidy-nad <https://github.com/mopidy/mopidy-nad>`_
 Issues:
     https://github.com/mopidy/mopidy/issues
+
+
+Mopidy-SomaFM
+-------------
+
+Provides a backend for playing music from the `SomaFM <http://somafm.com/>`_
+service.
+
+Author:
+    Alexandre Petitjean
+PyPI:
+    `Mopidy-SomaFM <https://pypi.python.org/pypi/Mopidy-SomaFM>`_
+GitHub:
+    `AlexandrePTJ/mopidy-somafm <https://github.com/AlexandrePTJ/mopidy-somafm/>`_
+Issues:
+    https://github.com/AlexandrePTJ/mopidy-somafm/issues
 
 
 Mopidy-SoundCloud

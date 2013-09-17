@@ -82,30 +82,22 @@ class String(ConfigValue):
         return encode(value)
 
 
-class Secret(ConfigValue):
-    """Secret value.
+class Secret(String):
+    """Secret string value.
 
-    Should be used for passwords, auth tokens etc. Deserializing will not
-    convert to unicode. Will mask value when being displayed.
+    Is decoded as utf-8 and \\n \\t escapes should work and be preserved.
+
+    Should be used for passwords, auth tokens etc. Will mask value when being
+    displayed.
     """
     def __init__(self, optional=False, choices=None):
         self._required = not optional
-
-    def deserialize(self, value):
-        value = value.strip()
-        validators.validate_required(value, self._required)
-        if not value:
-            return None
-        return value
+        self._choices = None  # Choices doesn't make sense for secrets
 
     def serialize(self, value, display=False):
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        if value is None:
-            return b''
-        elif display:
+        if value is not None and display:
             return b'********'
-        return value
+        return super(Secret, self).serialize(value, display)
 
 
 class Integer(ConfigValue):
