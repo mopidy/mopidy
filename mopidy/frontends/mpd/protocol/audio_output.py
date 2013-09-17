@@ -13,7 +13,8 @@ def disableoutput(context, outputid):
 
         Turns an output off.
     """
-    raise MpdNotImplemented  # TODO
+    if int(outputid) == 0:
+        context.core.playback.set_mute(True)
 
 
 @handle_request(r'^enableoutput "(?P<outputid>\d+)"$')
@@ -25,7 +26,8 @@ def enableoutput(context, outputid):
 
         Turns an output on.
     """
-    raise MpdNotImplemented  # TODO
+    if int(outputid) == 0:
+        context.core.playback.set_mute(False)
 
 
 @handle_request(r'^outputs$')
@@ -37,8 +39,9 @@ def outputs(context):
 
         Shows information about all outputs.
     """
+    ena = 0 if context.core.playback.get_mute().get() else 1
     return [
         ('outputid', 0),
         ('outputname', 'Default'),
-        ('outputenabled', 1),
+        ('outputenabled', ena),
     ]
