@@ -105,11 +105,11 @@ class StringTest(unittest.TestCase):
 
 
 class SecretTest(unittest.TestCase):
-    def test_deserialize_passes_through(self):
+    def test_deserialize_decodes_utf8(self):
         value = types.Secret()
-        result = value.deserialize(b'foo')
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(b'foo', result)
+        result = value.deserialize('æøå'.encode('utf-8'))
+        self.assertIsInstance(result, unicode)
+        self.assertEqual('æøå', result)
 
     def test_deserialize_enforces_required(self):
         value = types.Secret()

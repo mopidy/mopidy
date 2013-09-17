@@ -95,6 +95,11 @@ class ArtistTest(unittest.TestCase):
             {'__model__': 'Artist', 'uri': 'uri', 'name': 'name'},
             Artist(uri='uri', name='name').serialize())
 
+    def test_serialize_falsy_values(self):
+        self.assertDictEqual(
+            {'__model__': 'Artist', 'uri': '', 'name': None},
+            Artist(uri='', name=None).serialize())
+
     def test_to_json_and_back(self):
         artist1 = Artist(uri='uri', name='name')
         serialized = json.dumps(artist1, cls=ModelJSONEncoder)
