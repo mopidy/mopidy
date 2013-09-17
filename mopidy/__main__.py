@@ -17,12 +17,6 @@ mopidy_args = sys.argv[1:]
 sys.argv[1:] = []
 
 
-# Add ../ to the path so we can run Mopidy from a Git checkout without
-# installing it on the system.
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-
-
 from mopidy import commands, ext
 from mopidy.audio import Audio
 from mopidy import config as config_lib
@@ -42,15 +36,12 @@ def main():
     if args.show_deps:
         commands.show_deps()
 
-    loop = gobject.MainLoop()
-    enabled_extensions = []  # Make sure it is defined before the finally block
-    logging_initialized = False
-
     # TODO: figure out a way to make the boilerplate in this file reusable in
     # scanner and other places we need it.
 
     try:
         # Initial config without extensions to bootstrap logging.
+        logging_initialized = False
         logging_config, _ = config_lib.load(
             args.config_files, [], args.config_overrides)
 
@@ -59,12 +50,16 @@ def main():
             logging_config, args.verbosity_level, args.save_debug_log)
         logging_initialized = True
 
+        create_file_structures()
+        check_old_locations()
+
         installed_extensions = ext.load_extensions()
 
         config, config_errors = config_lib.load(
             args.config_files, installed_extensions, args.config_overrides)
 
         # Filter out disabled extensions and remove any config errors for them.
+        enabled_extensions = []
         for extension in installed_extensions:
             enabled = config[extension.ext_name]['enabled']
             if ext.validate_extension(extension) and enabled:
@@ -79,31 +74,38 @@ def main():
         proxied_config = config_lib.Proxy(config)
 
         log.setup_log_levels(proxied_config)
-        create_file_structures()
-        check_old_locations()
         ext.register_gstreamer_elements(enabled_extensions)
 
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors have been started.
-        audio = setup_audio(proxied_config)
-        backends = setup_backends(proxied_config, enabled_extensions, audio)
-        core = setup_core(audio, backends)
-        setup_frontends(proxied_config, enabled_extensions, core)
-        loop.run()
+        start(proxied_config, enabled_extensions)
     except KeyboardInterrupt:
-        if logging_initialized:
-            logger.info('Interrupted. Exiting...')
+        pass
     except Exception as ex:
         if logging_initialized:
             logger.exception(ex)
         raise
-    finally:
-        loop.quit()
-        stop_frontends(enabled_extensions)
-        stop_core()
-        stop_backends(enabled_extensions)
-        stop_audio()
-        process.stop_remaining_actors()
+
+
+def create_file_structures():
+    path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy')
+    path.get_or_create_file(b'$XDG_CONFIG_DIR/mopidy/mopidy.conf')
+
+
+def check_old_locations():
+    dot_mopidy_dir = path.expand_path(b'~/.mopidy')
+    if os.path.isdir(dot_mopidy_dir):
+        logger.warning(
+            'Old Mopidy dot dir found at %s. Please migrate your config to '
+            'the ini-file based config format. See release notes for further '
+            'instructions.', dot_mopidy_dir)
+
+    old_settings_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/settings.py')
+    if os.path.isfile(old_settings_file):
+        logger.warning(
+            'Old Mopidy settings file found at %s. Please migrate your '
+            'config to the ini-file based config format. See release notes '
+            'for further instructions.', old_settings_file)
 
 
 def log_extension_info(all_extensions, enabled_extensions):
@@ -125,28 +127,27 @@ def check_config_errors(errors):
     sys.exit(1)
 
 
-def check_old_locations():
-    dot_mopidy_dir = path.expand_path(b'~/.mopidy')
-    if os.path.isdir(dot_mopidy_dir):
-        logger.warning(
-            'Old Mopidy dot dir found at %s. Please migrate your config to '
-            'the ini-file based config format. See release notes for further '
-            'instructions.', dot_mopidy_dir)
+def start(config, extensions):
+    loop = gobject.MainLoop()
+    try:
+        audio = start_audio(config)
+        backends = start_backends(config, extensions, audio)
+        core = start_core(audio, backends)
+        start_frontends(config, extensions, core)
+        loop.run()
+    except KeyboardInterrupt:
+        logger.info('Interrupted. Exiting...')
+        return
+    finally:
+        loop.quit()
+        stop_frontends(extensions)
+        stop_core()
+        stop_backends(extensions)
+        stop_audio()
+        process.stop_remaining_actors()
 
-    old_settings_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/settings.py')
-    if os.path.isfile(old_settings_file):
-        logger.warning(
-            'Old Mopidy settings file found at %s. Please migrate your '
-            'config to the ini-file based config format. See release notes '
-            'for further instructions.', old_settings_file)
 
-
-def create_file_structures():
-    path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy')
-    path.get_or_create_file(b'$XDG_CONFIG_DIR/mopidy/mopidy.conf')
-
-
-def setup_audio(config):
+def start_audio(config):
     logger.info('Starting Mopidy audio')
     return Audio.start(config=config).proxy()
 
@@ -156,7 +157,7 @@ def stop_audio():
     process.stop_actors_by_class(Audio)
 
 
-def setup_backends(config, extensions, audio):
+def start_backends(config, extensions, audio):
     backend_classes = []
     for extension in extensions:
         backend_classes.extend(extension.get_backend_classes())
@@ -180,7 +181,7 @@ def stop_backends(extensions):
             process.stop_actors_by_class(backend_class)
 
 
-def setup_core(audio, backends):
+def start_core(audio, backends):
     logger.info('Starting Mopidy core')
     return Core.start(audio=audio, backends=backends).proxy()
 
@@ -190,7 +191,7 @@ def stop_core():
     process.stop_actors_by_class(Core)
 
 
-def setup_frontends(config, extensions, core):
+def start_frontends(config, extensions, core):
     frontend_classes = []
     for extension in extensions:
         frontend_classes.extend(extension.get_frontend_classes())
