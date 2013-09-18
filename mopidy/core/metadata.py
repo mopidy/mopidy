@@ -25,3 +25,8 @@ class MetadataController(object):
         if backend and backend.has_metadata().get():
             return backend.metadata.set(uri, key, value).get()
         return {}
+
+    def config(self):
+        backend = self._get_backend(uri)
+        if backend and backend.has_metadata().get():
+            return backend.metadata.config().get()

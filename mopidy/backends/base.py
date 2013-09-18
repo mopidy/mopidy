@@ -305,3 +305,6 @@ class BaseMetadataProvider(object):
 
     def set(self, uri, key, value):
         return {}
+
+    def config(self):
+        return
