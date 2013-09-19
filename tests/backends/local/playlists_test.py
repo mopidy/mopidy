@@ -3,12 +3,12 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+import unittest
 
 from mopidy.backends.local import actor
 from mopidy.models import Track
-from mopidy.utils.path import path_to_uri
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 from tests.backends.base.playlists import (
     PlaylistsControllerTest)
 from tests.backends.local import generate_song
@@ -88,21 +88,18 @@ class LocalPlaylistsControllerTest(
 
     def test_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1))
-        track_path = track.uri[len('file://'):]
         playlist = self.core.playlists.create('test')
-        playlist_path = playlist.uri[len('file://'):]
+        playlist_path = os.path.join(self.playlists_dir, 'test.m3u')
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
         with open(playlist_path) as playlist_file:
             contents = playlist_file.read()
 
-        self.assertEqual(track_path, contents.strip())
+        self.assertEqual(track.uri, contents.strip())
 
     def test_playlists_are_loaded_at_startup(self):
-        playlist_path = os.path.join(self.playlists_dir, 'test.m3u')
-
-        track = Track(uri=path_to_uri(path_to_data_dir('uri2')))
+        track = Track(uri='local:track:path2')
         playlist = self.core.playlists.create('test')
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
@@ -111,8 +108,7 @@ class LocalPlaylistsControllerTest(
 
         self.assert_(backend.playlists.playlists)
         self.assertEqual(
-            path_to_uri(playlist_path),
-            backend.playlists.playlists[0].uri)
+            'local:playlist:test', backend.playlists.playlists[0].uri)
         self.assertEqual(
             playlist.name, backend.playlists.playlists[0].name)
         self.assertEqual(

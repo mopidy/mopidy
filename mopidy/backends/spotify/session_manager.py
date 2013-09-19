@@ -18,9 +18,6 @@ logger = logging.getLogger('mopidy.backends.spotify')
 
 BITRATES = {96: 2, 160: 0, 320: 1}
 
-# pylint: disable = R0901
-# SpotifySessionManager: Too many ancestors (9/7)
-
 
 class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     cache_location = None
@@ -33,9 +30,17 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
         self.cache_location = config['spotify']['cache_dir']
         self.settings_location = config['spotify']['cache_dir']
 
+        full_proxy = ''
+        if config['proxy']['hostname']:
+            full_proxy = config['proxy']['hostname']
+            if config['proxy']['port']:
+                full_proxy += ':' + str(config['proxy']['port'])
+            if config['proxy']['scheme']:
+                full_proxy = config['proxy']['scheme'] + "://" + full_proxy
+
         PyspotifySessionManager.__init__(
             self, config['spotify']['username'], config['spotify']['password'],
-            proxy=config['proxy']['hostname'],
+            proxy=full_proxy,
             proxy_username=config['proxy']['username'],
             proxy_password=config['proxy']['password'])
 
@@ -108,9 +113,6 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
     def music_delivery(self, session, frames, frame_size, num_frames,
                        sample_type, sample_rate, channels):
         """Callback used by pyspotify"""
-        # pylint: disable = R0913
-        # Too many arguments (8/5)
-
         if not self.push_audio_data:
             return 0
 
@@ -173,9 +175,14 @@ class SpotifySessionManager(process.BaseThread, PyspotifySessionManager):
             logger.debug('Still getting data; skipped refresh of playlists')
             return
         playlists = []
+        folders = []
         for spotify_playlist in self.session.playlist_container():
+            if spotify_playlist.type() == 'folder_start':
+                folders.append(spotify_playlist)
+            if spotify_playlist.type() == 'folder_end':
+                folders.pop()
             playlists.append(translator.to_mopidy_playlist(
-                spotify_playlist,
+                spotify_playlist, folders=folders,
                 bitrate=self.bitrate, username=self.username))
         playlists.append(translator.to_mopidy_playlist(
             self.session.starred(),

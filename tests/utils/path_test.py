@@ -2,15 +2,16 @@
 
 from __future__ import unicode_literals
 
-import glib
 import os
 import shutil
-import sys
 import tempfile
+import unittest
+
+import glib
 
 from mopidy.utils import path
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class GetOrCreateDirTest(unittest.TestCase):
@@ -115,86 +116,42 @@ class GetOrCreateFileTest(unittest.TestCase):
 
 class PathToFileURITest(unittest.TestCase):
     def test_simple_path(self):
-        if sys.platform == 'win32':
-            result = path.path_to_uri('C:/WINDOWS/clock.avi')
-            self.assertEqual(result, 'file:///C://WINDOWS/clock.avi')
-        else:
-            result = path.path_to_uri('/etc/fstab')
-            self.assertEqual(result, 'file:///etc/fstab')
-
-    def test_dir_and_path(self):
-        if sys.platform == 'win32':
-            result = path.path_to_uri('C:/WINDOWS/', 'clock.avi')
-            self.assertEqual(result, 'file:///C://WINDOWS/clock.avi')
-        else:
-            result = path.path_to_uri('/etc', 'fstab')
-            self.assertEqual(result, 'file:///etc/fstab')
+        result = path.path_to_uri('/etc/fstab')
+        self.assertEqual(result, 'file:///etc/fstab')
 
     def test_space_in_path(self):
-        if sys.platform == 'win32':
-            result = path.path_to_uri('C:/test this')
-            self.assertEqual(result, 'file:///C://test%20this')
-        else:
-            result = path.path_to_uri('/tmp/test this')
-            self.assertEqual(result, 'file:///tmp/test%20this')
+        result = path.path_to_uri('/tmp/test this')
+        self.assertEqual(result, 'file:///tmp/test%20this')
 
     def test_unicode_in_path(self):
-        if sys.platform == 'win32':
-            result = path.path_to_uri('C:/æøå')
-            self.assertEqual(result, 'file:///C://%C3%A6%C3%B8%C3%A5')
-        else:
-            result = path.path_to_uri('/tmp/æøå')
-            self.assertEqual(result, 'file:///tmp/%C3%A6%C3%B8%C3%A5')
+        result = path.path_to_uri('/tmp/æøå')
+        self.assertEqual(result, 'file:///tmp/%C3%A6%C3%B8%C3%A5')
 
     def test_utf8_in_path(self):
-        if sys.platform == 'win32':
-            result = path.path_to_uri('C:/æøå'.encode('utf-8'))
-            self.assertEqual(result, 'file:///C://%C3%A6%C3%B8%C3%A5')
-        else:
-            result = path.path_to_uri('/tmp/æøå'.encode('utf-8'))
-            self.assertEqual(result, 'file:///tmp/%C3%A6%C3%B8%C3%A5')
+        result = path.path_to_uri('/tmp/æøå'.encode('utf-8'))
+        self.assertEqual(result, 'file:///tmp/%C3%A6%C3%B8%C3%A5')
 
     def test_latin1_in_path(self):
-        if sys.platform == 'win32':
-            result = path.path_to_uri('C:/æøå'.encode('latin-1'))
-            self.assertEqual(result, 'file:///C://%E6%F8%E5')
-        else:
-            result = path.path_to_uri('/tmp/æøå'.encode('latin-1'))
-            self.assertEqual(result, 'file:///tmp/%E6%F8%E5')
+        result = path.path_to_uri('/tmp/æøå'.encode('latin-1'))
+        self.assertEqual(result, 'file:///tmp/%E6%F8%E5')
 
 
 class UriToPathTest(unittest.TestCase):
     def test_simple_uri(self):
-        if sys.platform == 'win32':
-            result = path.uri_to_path('file:///C://WINDOWS/clock.avi')
-            self.assertEqual(result, 'C:/WINDOWS/clock.avi'.encode('utf-8'))
-        else:
-            result = path.uri_to_path('file:///etc/fstab')
-            self.assertEqual(result, '/etc/fstab'.encode('utf-8'))
+        result = path.uri_to_path('file:///etc/fstab')
+        self.assertEqual(result, '/etc/fstab'.encode('utf-8'))
 
     def test_space_in_uri(self):
-        if sys.platform == 'win32':
-            result = path.uri_to_path('file:///C://test%20this')
-            self.assertEqual(result, 'C:/test this'.encode('utf-8'))
-        else:
-            result = path.uri_to_path('file:///tmp/test%20this')
-            self.assertEqual(result, '/tmp/test this'.encode('utf-8'))
+        result = path.uri_to_path('file:///tmp/test%20this')
+        self.assertEqual(result, '/tmp/test this'.encode('utf-8'))
 
     def test_unicode_in_uri(self):
-        if sys.platform == 'win32':
-            result = path.uri_to_path('file:///C://%C3%A6%C3%B8%C3%A5')
-            self.assertEqual(result, 'C:/æøå'.encode('utf-8'))
-        else:
-            result = path.uri_to_path('file:///tmp/%C3%A6%C3%B8%C3%A5')
-            self.assertEqual(result, '/tmp/æøå'.encode('utf-8'))
+        result = path.uri_to_path('file:///tmp/%C3%A6%C3%B8%C3%A5')
+        self.assertEqual(result, '/tmp/æøå'.encode('utf-8'))
 
     def test_latin1_in_uri(self):
-        if sys.platform == 'win32':
-            result = path.uri_to_path('file:///C://%E6%F8%E5')
-            self.assertEqual(result, 'C:/æøå'.encode('latin-1'))
-        else:
-            result = path.uri_to_path('file:///tmp/%E6%F8%E5')
-            self.assertEqual(result, '/tmp/æøå'.encode('latin-1'))
+        result = path.uri_to_path('file:///tmp/%E6%F8%E5')
+        self.assertEqual(result, '/tmp/æøå'.encode('latin-1'))
 
 
 class SplitPathTest(unittest.TestCase):
@@ -254,7 +211,7 @@ class FindFilesTest(unittest.TestCase):
     def test_file(self):
         files = self.find('blank.mp3')
         self.assertEqual(len(files), 1)
-        self.assert_(files[0], path_to_data_dir('blank.mp3'))
+        self.assertEqual(files[0], path_to_data_dir('blank.mp3'))
 
     def test_names_are_bytestrings(self):
         is_bytes = lambda f: isinstance(f, bytes)
@@ -269,6 +226,30 @@ class FindFilesTest(unittest.TestCase):
         self.assertEqual(self.find('.blank.mp3'), [])
 
 
+class FindUrisTest(unittest.TestCase):
+    def find(self, value):
+        return list(path.find_uris(path_to_data_dir(value)))
+
+    def test_basic_dir(self):
+        self.assert_(self.find(''))
+
+    def test_nonexistant_dir(self):
+        self.assertEqual(self.find('does-not-exist'), [])
+
+    def test_file(self):
+        uris = self.find('blank.mp3')
+        expected = path.path_to_uri(path_to_data_dir('blank.mp3'))
+        self.assertEqual(len(uris), 1)
+        self.assertEqual(uris[0], expected)
+
+    def test_ignores_hidden_dirs(self):
+        self.assertEqual(self.find('.hidden'), [])
+
+    def test_ignores_hidden_files(self):
+        self.assertEqual(self.find('.blank.mp3'), [])
+
+
+# TODO: kill this in favour of just os.path.getmtime + mocks
 class MtimeTest(unittest.TestCase):
     def tearDown(self):
         path.mtime.undo_fake()

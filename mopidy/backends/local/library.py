@@ -1,7 +1,11 @@
 from __future__ import unicode_literals
 
 import logging
+import os
+import tempfile
+
 from mopidy.backends import base
+from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Album, SearchResult
 
 from .translator import parse_mpd_tag_cache
@@ -77,7 +81,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return SearchResult(uri='file:search', tracks=result_tracks)
+        # TODO: add local:search:<query>
+        return SearchResult(uri='local:search', tracks=result_tracks)
 
     def search(self, query=None, uris=None):
         # TODO Only return results within URI roots given by ``uris``
@@ -118,7 +123,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(any_filter, result_tracks)
                 else:
                     raise LookupError('Invalid lookup field: %s' % field)
-        return SearchResult(uri='file:search', tracks=result_tracks)
+        # TODO: add local:search:<query>
+        return SearchResult(uri='local:search', tracks=result_tracks)
 
     def _validate_query(self, query):
         for (_, values) in query.iteritems():
@@ -127,3 +133,46 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             for value in values:
                 if not value:
                     raise LookupError('Missing query')
+
+
+# TODO: rename and move to tagcache extension.
+class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
+    uri_schemes = ['local']
+
+    def __init__(self, config):
+        self._tracks = {}
+        self._media_dir = config['local']['media_dir']
+        self._tag_cache_file = config['local']['tag_cache_file']
+
+    def load(self):
+        tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
+        for track in tracks:
+            self._tracks[track.uri] = track
+        return tracks
+
+    def add(self, track):
+        self._tracks[track.uri] = track
+
+    def remove(self, uri):
+        if uri in self._tracks:
+            del self._tracks[uri]
+
+    def commit(self):
+        directory, basename = os.path.split(self._tag_cache_file)
+
+        # TODO: cleanup directory/basename.* files.
+        tmp = tempfile.NamedTemporaryFile(
+            prefix=basename + '.', dir=directory, delete=False)
+
+        try:
+            for row in mpd_translator.tracks_to_tag_cache_format(
+                    self._tracks.values(), self._media_dir):
+                if len(row) == 1:
+                    tmp.write(('%s\n' % row).encode('utf-8'))
+                else:
+                    tmp.write(('%s: %s\n' % row).encode('utf-8'))
+
+            os.rename(tmp.name, self._tag_cache_file)
+        finally:
+            if os.path.exists(tmp.name):
+                os.remove(tmp.name)

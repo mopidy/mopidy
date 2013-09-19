@@ -2,12 +2,11 @@ from __future__ import unicode_literals
 
 import datetime
 import json
+import unittest
 
 from mopidy.models import (
     Artist, Album, TlTrack, Track, Playlist, SearchResult,
     ModelJSONEncoder, model_json_decoder)
-
-from tests import unittest
 
 
 class GenericCopyTest(unittest.TestCase):
@@ -95,6 +94,11 @@ class ArtistTest(unittest.TestCase):
         self.assertDictEqual(
             {'__model__': 'Artist', 'uri': 'uri', 'name': 'name'},
             Artist(uri='uri', name='name').serialize())
+
+    def test_serialize_falsy_values(self):
+        self.assertDictEqual(
+            {'__model__': 'Artist', 'uri': '', 'name': None},
+            Artist(uri='', name=None).serialize())
 
     def test_to_json_and_back(self):
         artist1 = Artist(uri='uri', name='name')

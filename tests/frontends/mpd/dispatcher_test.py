@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import unittest
+
 import pykka
 
 from mopidy import core
@@ -7,8 +9,6 @@ from mopidy.backends import dummy
 from mopidy.frontends.mpd.dispatcher import MpdDispatcher
 from mopidy.frontends.mpd.exceptions import MpdAckError
 from mopidy.frontends.mpd.protocol import request_handlers, handle_request
-
-from tests import unittest
 
 
 class MpdDispatcherTest(unittest.TestCase):

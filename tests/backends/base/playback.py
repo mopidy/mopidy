@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import mock
 import random
 import time
+import unittest
 
 import pykka
 
@@ -10,7 +11,6 @@ from mopidy import audio, core
 from mopidy.core import PlaybackState
 from mopidy.models import Track
 
-from tests import unittest
 from tests.backends.base import populate_tracklist
 
 # TODO Test 'playlist repeat', e.g. repeat=1,single=0

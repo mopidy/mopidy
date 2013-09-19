@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
 
+import unittest
+
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
+from mopidy.utils import path as path_lib
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class FakeGstDate(object):
@@ -23,6 +26,8 @@ class TranslatorTest(unittest.TestCase):
             'album-artist': 'albumartistname',
             'title': 'trackname',
             'track-count': 2,
+            'album-disc-number': 2,
+            'album-disc-count': 3,
             'date': FakeGstDate(2006, 1, 1,),
             'container-format': 'ID3 tag',
             'duration': 4531,
@@ -30,42 +35,42 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz-albumid': 'mbalbumid',
             'musicbrainz-artistid': 'mbartistid',
             'musicbrainz-albumartistid': 'mbalbumartistid',
+            'mtime': 1234,
         }
 
-        # NOTE: kwargs are explicitly made bytestrings to work on Python
-        # 2.6.0/2.6.1. See https://github.com/mopidy/mopidy/issues/302 for
-        # details.
-
         self.album = {
-            b'name': 'albumname',
-            b'num_tracks': 2,
-            b'musicbrainz_id': 'mbalbumid',
+            'name': 'albumname',
+            'num_tracks': 2,
+            'num_discs': 3,
+            'musicbrainz_id': 'mbalbumid',
         }
 
         self.artist = {
-            b'name': 'name',
-            b'musicbrainz_id': 'mbartistid',
+            'name': 'name',
+            'musicbrainz_id': 'mbartistid',
         }
 
         self.albumartist = {
-            b'name': 'albumartistname',
-            b'musicbrainz_id': 'mbalbumartistid',
+            'name': 'albumartistname',
+            'musicbrainz_id': 'mbalbumartistid',
         }
 
         self.track = {
-            b'uri': 'uri',
-            b'name': 'trackname',
-            b'date': '2006-01-01',
-            b'track_no': 1,
-            b'length': 4531,
-            b'musicbrainz_id': 'mbtrackid',
+            'uri': 'uri',
+            'name': 'trackname',
+            'date': '2006-01-01',
+            'track_no': 1,
+            'disc_no': 2,
+            'length': 4531,
+            'musicbrainz_id': 'mbtrackid',
+            'last_modified': 1234,
         }
 
     def build_track(self):
         if self.albumartist:
-            self.album[b'artists'] = [Artist(**self.albumartist)]
-        self.track[b'album'] = Album(**self.album)
-        self.track[b'artists'] = [Artist(**self.artist)]
+            self.album['artists'] = [Artist(**self.albumartist)]
+        self.track['album'] = Album(**self.album)
+        self.track['artists'] = [Artist(**self.artist)]
         return Track(**self.track)
 
     def check(self):
@@ -143,8 +148,9 @@ class ScannerTest(unittest.TestCase):
         self.data = {}
 
     def scan(self, path):
-        scanner = Scanner(
-            path_to_data_dir(path), self.data_callback, self.error_callback)
+        paths = path_lib.find_files(path_to_data_dir(path))
+        uris = (path_lib.path_to_uri(p) for p in paths)
+        scanner = Scanner(uris, self.data_callback, self.error_callback)
         scanner.start()
 
     def check(self, name, key, value):
@@ -202,6 +208,14 @@ class ScannerTest(unittest.TestCase):
 
     def test_other_media_is_ignored(self):
         self.scan('scanner/image')
+        self.assert_(self.errors)
+
+    def test_log_file_is_ignored(self):
+        self.scan('scanner/example.log')
+        self.assert_(self.errors)
+
+    def test_empty_wav_file_is_ignored(self):
+        self.scan('scanner/empty.wav')
         self.assert_(self.errors)
 
     @unittest.SkipTest

@@ -47,6 +47,11 @@ Configuration values
 
     Path to tag cache for local media.
 
+.. confval:: local/scan_timeout
+
+    Number of milliseconds before giving up scanning a file and moving on to
+    the next file.
+
 
 Usage
 =====

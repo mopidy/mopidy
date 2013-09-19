@@ -36,7 +36,6 @@ setup(
     tests_require=[
         'nose',
         'mock >= 1.0',
-        'unittest2',
     ],
     entry_points={
         'console_scripts': [
@@ -61,7 +60,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Topic :: Multimedia :: Sound/Audio :: Players',
     ],

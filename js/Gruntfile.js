@@ -15,6 +15,9 @@ module.exports = function (grunt) {
                 minified: "../mopidy/frontends/http/data/mopidy.min.js"
             }
         },
+        buster: {
+            all: {}
+        },
         concat: {
             options: {
                 banner: "<%= meta.banner %>",

@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import unittest
+
 import pygst
 pygst.require('0.10')
 import gst
@@ -9,7 +11,7 @@ import pykka
 from mopidy import audio
 from mopidy.utils.path import path_to_uri
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 
 
 class AudioTest(unittest.TestCase):
@@ -19,6 +21,7 @@ class AudioTest(unittest.TestCase):
                 'mixer': 'fakemixer track_max_volume=65536',
                 'mixer_track': None,
                 'output': 'fakesink',
+                'visualizer': None,
             }
         }
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
@@ -68,6 +71,7 @@ class AudioTest(unittest.TestCase):
                 'mixer': 'fakemixer track_max_volume=40',
                 'mixer_track': None,
                 'output': 'fakesink',
+                'visualizer': None,
             }
         }
         self.audio = audio.Audio.start(config=config).proxy()

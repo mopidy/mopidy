@@ -1,12 +1,11 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
 
 from mopidy.backends import base
 from mopidy.core import Core
 from mopidy.models import Track
-
-from tests import unittest
 
 
 class TracklistTest(unittest.TestCase):

@@ -4,6 +4,83 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.15.0 (2013-09-19)
+====================
+
+A release with a number of small and medium fixes, with no specific focus.
+
+**Dependencies**
+
+- Mopidy no longer supports Python 2.6. Currently, the only Python version
+  supported by Mopidy is Python 2.7. We're continuously working towards running
+  Mopidy on Python 3. (Fixes: :issue:`344`)
+
+**Command line options**
+
+- Converted from the optparse to the argparse library for handling command line
+  options.
+
+- :option:`mopidy --show-config` will now take into consideration any
+  :option:`mopidy --option` arguments appearing later on the command line. This
+  helps you see the effective configuration for runs with the same
+  :option:`mopidy --options` arguments.
+
+**Audio**
+
+- Added support for audio visualization. :confval:`audio/visualizer` can now be
+  set to GStreamer visualizers.
+
+- Properly encode localized mixer names before logging.
+
+**Local backend**
+
+- An album's number of discs and a track's disc number are now extracted when
+  scanning your music collection.
+
+- The scanner now gives up scanning a file after a second, and continues with
+  the next file. This fixes some hangs on non-media files, like logs. (Fixes:
+  :issue:`476`, :issue:`483`)
+
+- Added support for pluggable library updaters. This allows extension writers
+  to start providing their own custom libraries instead of being stuck with
+  just our tag cache as the only option.
+
+- Converted local backend to use new ``local:playlist:path`` and
+  ``local:track:path`` URI scheme. Also moves support of ``file://`` to
+  streaming backend.
+
+**Spotify backend**
+
+- Prepend playlist folder names to the playlist name, so that the playlist
+  hierarchy from your Spotify account is available in Mopidy. (Fixes:
+  :issue:`62`)
+
+- Fix proxy config values that was broken with the config system change in
+  0.14. (Fixes: :issue:`472`)
+
+**MPD frontend**
+
+- Replace newline, carriage return and forward slash in playlist names. (Fixes:
+  :issue:`474`, :issue:`480`)
+
+- Accept ``listall`` and ``listallinfo`` commands without the URI parameter.
+  The methods are still not implemented, but now the commands are accepted as
+  valid.
+
+**HTTP frontend**
+
+- Fix too broad truth test that caused :class:`mopidy.models.TlTrack`
+  objects with ``tlid`` set to ``0`` to be sent to the HTTP client without the
+  ``tlid`` field. (Fixes: :issue:`501`)
+
+- Upgrade Mopidy.js dependencies. This version has been released to NPM as
+  Mopidy.js v0.1.1.
+
+**Extension support**
+
+- :class:`mopidy.config.Secret` is now deserialized to unicode instead of
+  bytes. This may require modifications to extensions.
+
 
 v0.14.2 (2013-07-01)
 ====================

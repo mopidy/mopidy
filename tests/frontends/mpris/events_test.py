@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
 
 try:
     import dbus
@@ -11,8 +12,6 @@ from mopidy.models import Playlist, TlTrack
 
 if dbus:
     from mopidy.frontends.mpris import actor, objects
-
-from tests import unittest
 
 
 @unittest.skipUnless(dbus, 'dbus not found')

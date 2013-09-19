@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
+import argparse
 import datetime
 import logging
-import optparse
 import os
 import sys
 
@@ -27,13 +27,12 @@ pygst.require('0.10')
 import gst
 
 from mopidy import config as config_lib, ext
-from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
 
 
 def main():
-    options = parse_options()
+    args = parse_args()
     # TODO: support config files and overrides (shared from main?)
     config_files = [b'/etc/mopidy/mopidy.conf',
                     b'$XDG_CONFIG_DIR/mopidy/mopidy.conf']
@@ -43,7 +42,7 @@ def main():
     # Initial config without extensions to bootstrap logging.
     logging_config, _ = config_lib.load(config_files, [], config_overrides)
     log.setup_root_logger()
-    log.setup_console_logging(logging_config, options.verbosity_level)
+    log.setup_console_logging(logging_config, args.verbosity_level)
 
     extensions = ext.load_extensions()
     config, errors = config_lib.load(
@@ -54,70 +53,109 @@ def main():
         logging.warning('Config value local/media_dir is not set.')
         return
 
-    # TODO: missing error checking and other default setup code.
+    if not config['local']['scan_timeout']:
+        logging.warning('Config value local/scan_timeout is not set.')
+        return
 
-    tracks = []
+    # TODO: missing config error checking and other default setup code.
+
+    updaters = {}
+    for e in extensions:
+        for updater_class in e.get_library_updaters():
+            if updater_class and 'local' in updater_class.uri_schemes:
+                updaters[e.ext_name] = updater_class
+
+    if not updaters:
+        logging.error('No usable library updaters found.')
+        return
+    elif len(updaters) > 1:
+        logging.error('More than one library updater found. '
+                      'Provided by: %s', ', '.join(updaters.keys()))
+        return
+
+    local_updater = updaters.values()[0](config)  # TODO: switch to actor?
+
+    media_dir = config['local']['media_dir']
+
+    uris_library = set()
+    uris_update = set()
+    uris_remove = set()
+
+    logging.info('Checking tracks from library.')
+    for track in local_updater.load():
+        try:
+            stat = os.stat(path.uri_to_path(track.uri))
+            if int(stat.st_mtime) > track.last_modified:
+                uris_update.add(track.uri)
+            uris_library.add(track.uri)
+        except OSError:
+            uris_remove.add(track.uri)
+
+    logging.info('Removing %d moved or deleted tracks.', len(uris_remove))
+    for uri in uris_remove:
+        local_updater.remove(uri)
+
+    logging.info('Checking %s for new or modified tracks.', media_dir)
+    for uri in path.find_uris(config['local']['media_dir']):
+        if uri not in uris_library:
+            uris_update.add(uri)
+
+    logging.info('Found %d new or modified tracks.', len(uris_update))
 
     def store(data):
         track = translator(data)
-        tracks.append(track)
+        local_updater.add(track)
         logging.debug('Added %s', track.uri)
 
     def debug(uri, error, debug):
         logging.warning('Failed %s: %s', uri, error)
         logging.debug('Debug info for %s: %s', uri, debug)
 
-    logging.info('Scanning %s', config['local']['media_dir'])
+    scan_timeout = config['local']['scan_timeout']
 
-    scanner = Scanner(config['local']['media_dir'], store, debug)
+    logging.info('Scanning new and modified tracks.')
+    # TODO: just pass the library in instead?
+    scanner = Scanner(uris_update, store, debug, scan_timeout)
     try:
         scanner.start()
     except KeyboardInterrupt:
         scanner.stop()
+        raise
 
-    logging.info('Done scanning; writing tag cache...')
-
-    for row in mpd_translator.tracks_to_tag_cache_format(
-            tracks, config['local']['media_dir']):
-        if len(row) == 1:
-            print ('%s' % row).encode('utf-8')
-        else:
-            print ('%s: %s' % row).encode('utf-8')
-
-    logging.info('Done writing tag cache')
+    logging.info('Done scanning; commiting changes.')
+    local_updater.commit()
 
 
-def parse_options():
-    parser = optparse.OptionParser(
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--version', action='version',
         version='Mopidy %s' % versioning.get_version())
-    # NOTE First argument to add_option must be bytestrings on Python < 2.6.2
-    # See https://github.com/mopidy/mopidy/issues/302 for details
-    parser.add_option(
-        b'-q', '--quiet',
+    parser.add_argument(
+        '-q', '--quiet',
         action='store_const', const=0, dest='verbosity_level',
         help='less output (warning level)')
-    parser.add_option(
-        b'-v', '--verbose',
+    parser.add_argument(
+        '-v', '--verbose',
         action='count', default=1, dest='verbosity_level',
         help='more output (debug level)')
-    return parser.parse_args(args=mopidy_args)[0]
+    return parser.parse_args(args=mopidy_args)
 
 
+# TODO: move into scanner.
 def translator(data):
     albumartist_kwargs = {}
     album_kwargs = {}
     artist_kwargs = {}
     track_kwargs = {}
 
-    # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
-    # See https://github.com/mopidy/mopidy/issues/302 for details.
-
     def _retrieve(source_key, target_key, target):
         if source_key in data:
-            target[str(target_key)] = data[source_key]
+            target[target_key] = data[source_key]
 
     _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
+    _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs)
     _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
 
     if gst.TAG_DATE in data and data[gst.TAG_DATE]:
@@ -127,10 +165,11 @@ def translator(data):
         except ValueError:
             pass  # Ignore invalid dates
         else:
-            track_kwargs[b'date'] = date.isoformat()
+            track_kwargs['date'] = date.isoformat()
 
     _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
     _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
+    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
 
     # Following keys don't seem to have TAG_* constant.
     _retrieve('album-artist', 'name', albumartist_kwargs)
@@ -141,23 +180,27 @@ def translator(data):
         'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if albumartist_kwargs:
-        album_kwargs[b'artists'] = [Artist(**albumartist_kwargs)]
+        album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
-    track_kwargs[b'uri'] = data['uri']
-    track_kwargs[b'length'] = data[gst.TAG_DURATION]
-    track_kwargs[b'album'] = Album(**album_kwargs)
-    track_kwargs[b'artists'] = [Artist(**artist_kwargs)]
+    track_kwargs['uri'] = data['uri']
+    track_kwargs['last_modified'] = int(data['mtime'])
+    track_kwargs['length'] = data[gst.TAG_DURATION]
+    track_kwargs['album'] = Album(**album_kwargs)
+    track_kwargs['artists'] = [Artist(**artist_kwargs)]
 
     return Track(**track_kwargs)
 
 
 class Scanner(object):
-    def __init__(self, base_dir, data_callback, error_callback=None):
+    def __init__(
+            self, uris, data_callback, error_callback=None, scan_timeout=1000):
         self.data = {}
-        self.files = path.find_files(base_dir)
+        self.uris = iter(uris)
         self.data_callback = data_callback
         self.error_callback = error_callback
+        self.scan_timeout = scan_timeout
         self.loop = gobject.MainLoop()
+        self.timeout_id = None
 
         self.fakesink = gst.element_factory_make('fakesink')
         self.fakesink.set_property('signal-handoffs', True)
@@ -198,7 +241,9 @@ class Scanner(object):
         if message.structure.get_name() != 'handoff':
             return
 
-        self.data['uri'] = unicode(self.uribin.get_property('uri'))
+        uri = unicode(self.uribin.get_property('uri'))
+        self.data['uri'] = uri
+        self.data['mtime'] = os.path.getmtime(path.uri_to_path(uri))
         self.data[gst.TAG_DURATION] = self.get_duration()
 
         try:
@@ -226,6 +271,14 @@ class Scanner(object):
             self.error_callback(uri, error, debug)
         self.next_uri()
 
+    def process_timeout(self):
+        if self.error_callback:
+            uri = self.uribin.get_property('uri')
+            self.error_callback(
+                uri, 'Scan timed out after %d ms' % self.scan_timeout, None)
+        self.next_uri()
+        return False
+
     def get_duration(self):
         self.pipe.get_state()  # Block until state change is done.
         try:
@@ -236,13 +289,18 @@ class Scanner(object):
 
     def next_uri(self):
         self.data = {}
+        if self.timeout_id:
+            gobject.source_remove(self.timeout_id)
+            self.timeout_id = None
         try:
-            uri = path.path_to_uri(self.files.next())
+            uri = next(self.uris)
         except StopIteration:
             self.stop()
             return False
         self.pipe.set_state(gst.STATE_NULL)
         self.uribin.set_property('uri', uri)
+        self.timeout_id = gobject.timeout_add(
+            self.scan_timeout, self.process_timeout)
         self.pipe.set_state(gst.STATE_PLAYING)
         return True
 

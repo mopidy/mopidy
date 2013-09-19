@@ -2,10 +2,11 @@ from __future__ import unicode_literals
 
 import logging
 import mock
+import unittest
 
-from mopidy.config import schemas, types
+from mopidy.config import schemas
 
-from tests import unittest, any_unicode
+from tests import any_unicode
 
 
 class ConfigSchemaTest(unittest.TestCase):
@@ -80,7 +81,8 @@ class ConfigSchemaTest(unittest.TestCase):
 class LogLevelConfigSchemaTest(unittest.TestCase):
     def test_conversion(self):
         schema = schemas.LogLevelConfigSchema('test')
-        result, errors = schema.deserialize({'foo.bar': 'DEBUG', 'baz': 'INFO'})
+        result, errors = schema.deserialize(
+            {'foo.bar': 'DEBUG', 'baz': 'INFO'})
 
         self.assertEqual(logging.DEBUG, result['foo.bar'])
         self.assertEqual(logging.INFO, result['baz'])

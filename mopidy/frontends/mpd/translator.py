@@ -10,6 +10,8 @@ from mopidy.frontends.mpd.exceptions import MpdArgError
 from mopidy.models import TlTrack
 from mopidy.utils.path import mtime as get_mtime, uri_to_path, split_path
 
+# TODO: special handling of local:// uri scheme
+
 
 def track_to_mpd_format(track, position=None):
     """
@@ -139,8 +141,6 @@ def query_from_mpd_list_format(field, mpd_query):
     """
     Converts an MPD ``list`` query to a Mopidy query.
     """
-    # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
-    # See https://github.com/mopidy/mopidy/issues/302 for details
     if mpd_query is None:
         return {}
     try:
@@ -156,14 +156,14 @@ def query_from_mpd_list_format(field, mpd_query):
         if field == 'album':
             if not tokens[0]:
                 raise ValueError
-            return {b'artist': [tokens[0]]}  # See above NOTE
+            return {'artist': [tokens[0]]}
         else:
             raise MpdArgError(
                 'should be "Album" for 3 arguments', command='list')
     elif len(tokens) % 2 == 0:
         query = {}
         while tokens:
-            key = str(tokens[0].lower())  # See above NOTE
+            key = tokens[0].lower()
             value = tokens[1]
             tokens = tokens[2:]
             if key not in ('artist', 'album', 'date', 'genre'):
@@ -215,6 +215,7 @@ def query_from_mpd_search_format(mpd_query):
     return query
 
 
+# TODO: move to tagcache backend.
 def tracks_to_tag_cache_format(tracks, media_dir):
     """
     Format list of tracks for output to MPD tag cache
@@ -235,6 +236,7 @@ def tracks_to_tag_cache_format(tracks, media_dir):
     dirs, files = tracks_to_directory_tree(tracks, media_dir)
     _add_to_tag_cache(result, dirs, files, media_dir)
     return result
+
 
 # TODO: bytes only
 def _add_to_tag_cache(result, dirs, files, media_dir):

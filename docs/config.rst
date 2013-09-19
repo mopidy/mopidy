@@ -90,6 +90,16 @@ Core configuration values
     ``gst-inspect-0.10`` to see what output properties can be set on the sink.
     For example: ``gst-inspect-0.10 shout2send``
 
+.. confval:: audio/visualizer
+
+    Visualizer to use.
+
+    Can be left blank if no visualizer is desired. Otherwise this expects a
+    GStreamer visualizer. Typical values are ``monoscope``, ``goom``,
+    ``goom2k1`` or one of the `libvisual`_ visualizers.
+
+.. _libvisual: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-plugin-libvisual.html
+
 .. confval:: logging/console_format
 
     The log format used for informational logging.
@@ -134,9 +144,25 @@ Core configuration values
 
     Password for the proxy server, if needed.
 
-.. _the Python logging docs:
+.. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
 
-    http://docs.python.org/2/library/logging.config.html
+
+Extension configuration
+=======================
+
+Mopidy's extensions have their own config values that you may want to tweak.
+For the available config values, please refer to the docs for each extension.
+Most, if not all, can be found at :ref:`ext`.
+
+Mopidy extensions are enabled by default when they are installed. If you want
+to disable an extension without uninstalling it, all extensions support the
+``enabled`` config value even if it isn't explicitly documented by all
+extensions. If the ``enabled`` config value is set to ``false`` the extension
+will not be started. For example, to disable the Spotify extension, add the
+following to your ``mopidy.conf``::
+
+    [spotify]
+    enabled = false
 
 
 Extension configuration

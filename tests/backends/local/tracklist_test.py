@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 
+import unittest
+
 from mopidy.backends.local import actor
 from mopidy.models import Track
 
-from tests import unittest, path_to_data_dir
+from tests import path_to_data_dir
 from tests.backends.base.tracklist import TracklistControllerTest
 from tests.backends.local import generate_song
 

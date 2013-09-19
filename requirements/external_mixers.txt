@@ -1,2 +1,0 @@
-pyserial
-# Available as python-serial in Debian/Ubuntu
