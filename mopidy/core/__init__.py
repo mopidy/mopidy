@@ -7,3 +7,4 @@ from .listener import CoreListener
 from .playback import PlaybackController, PlaybackState
 from .playlists import PlaylistsController
 from .tracklist import TracklistController
+from .metadata import MetadataController
