@@ -1,3 +1,10 @@
+mopidy (0.15.0-0mopidy1) unstable; urgency=low
+
+  * New upstream release.
+  * Removed Python 2.6 support.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Thu, 19 Sep 2013 19:33:50 +0200
+
 mopidy (0.14.2-0mopidy1) unstable; urgency=low
 
   * New upstream release.
