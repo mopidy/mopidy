@@ -2,12 +2,11 @@ from __future__ import unicode_literals
 
 import datetime
 import os
+import unittest
 
 from mopidy.utils.path import mtime, uri_to_path
 from mopidy.frontends.mpd import translator, protocol
 from mopidy.models import Album, Artist, TlTrack, Playlist, Track
-
-from tests import unittest
 
 
 class TrackMpdFormatTest(unittest.TestCase):

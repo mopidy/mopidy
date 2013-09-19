@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
 import logging
-import urllib
+import os
+import urlparse
 
 from mopidy.models import Track, Artist, Album
 from mopidy.utils.encoding import locale_decode
@@ -30,7 +31,6 @@ def parse_m3u(file_path, media_dir):
     - m3u files are latin-1.
     - This function does not bother with Extended M3U directives.
     """
-
     # TODO: uris as bytes
     uris = []
     try:
@@ -46,16 +46,19 @@ def parse_m3u(file_path, media_dir):
         if line.startswith('#'):
             continue
 
-        # FIXME what about other URI types?
-        if line.startswith('file://'):
+        if urlparse.urlsplit(line).scheme:
             uris.append(line)
+        elif os.path.normpath(line) == os.path.abspath(line):
+            path = path_to_uri(line)
+            uris.append(path)
         else:
-            path = path_to_uri(media_dir, line)
+            path = path_to_uri(os.path.join(media_dir, line))
             uris.append(path)
 
     return uris
 
 
+# TODO: remove music_dir from API
 def parse_mpd_tag_cache(tag_cache, music_dir=''):
     """
     Converts a MPD tag_cache into a lists of tracks, artists and albums.
@@ -86,22 +89,19 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
         key, value = line.split(b': ', 1)
 
         if key == b'key':
-            _convert_mpd_data(current, tracks, music_dir)
+            _convert_mpd_data(current, tracks)
             current.clear()
 
         current[key.lower()] = value.decode('utf-8')
 
-    _convert_mpd_data(current, tracks, music_dir)
+    _convert_mpd_data(current, tracks)
 
     return tracks
 
 
-def _convert_mpd_data(data, tracks, music_dir):
+def _convert_mpd_data(data, tracks):
     if not data:
         return
-
-    # NOTE kwargs dict keys must be bytestrings to work on Python < 2.6.5
-    # See https://github.com/mopidy/mopidy/issues/302 for details.
 
     track_kwargs = {}
     album_kwargs = {}
@@ -110,66 +110,62 @@ def _convert_mpd_data(data, tracks, music_dir):
 
     if 'track' in data:
         if '/' in data['track']:
-            album_kwargs[b'num_tracks'] = int(data['track'].split('/')[1])
-            track_kwargs[b'track_no'] = int(data['track'].split('/')[0])
+            album_kwargs['num_tracks'] = int(data['track'].split('/')[1])
+            track_kwargs['track_no'] = int(data['track'].split('/')[0])
         else:
-            track_kwargs[b'track_no'] = int(data['track'])
+            track_kwargs['track_no'] = int(data['track'])
+
+    if 'mtime' in data:
+        track_kwargs['last_modified'] = int(data['mtime'])
 
     if 'artist' in data:
-        artist_kwargs[b'name'] = data['artist']
-        albumartist_kwargs[b'name'] = data['artist']
+        artist_kwargs['name'] = data['artist']
+        albumartist_kwargs['name'] = data['artist']
 
     if 'albumartist' in data:
-        albumartist_kwargs[b'name'] = data['albumartist']
+        albumartist_kwargs['name'] = data['albumartist']
 
     if 'album' in data:
-        album_kwargs[b'name'] = data['album']
+        album_kwargs['name'] = data['album']
 
     if 'title' in data:
-        track_kwargs[b'name'] = data['title']
+        track_kwargs['name'] = data['title']
 
     if 'date' in data:
-        track_kwargs[b'date'] = data['date']
+        track_kwargs['date'] = data['date']
 
     if 'musicbrainz_trackid' in data:
-        track_kwargs[b'musicbrainz_id'] = data['musicbrainz_trackid']
+        track_kwargs['musicbrainz_id'] = data['musicbrainz_trackid']
 
     if 'musicbrainz_albumid' in data:
-        album_kwargs[b'musicbrainz_id'] = data['musicbrainz_albumid']
+        album_kwargs['musicbrainz_id'] = data['musicbrainz_albumid']
 
     if 'musicbrainz_artistid' in data:
-        artist_kwargs[b'musicbrainz_id'] = data['musicbrainz_artistid']
+        artist_kwargs['musicbrainz_id'] = data['musicbrainz_artistid']
 
     if 'musicbrainz_albumartistid' in data:
-        albumartist_kwargs[b'musicbrainz_id'] = (
+        albumartist_kwargs['musicbrainz_id'] = (
             data['musicbrainz_albumartistid'])
 
     if artist_kwargs:
         artist = Artist(**artist_kwargs)
-        track_kwargs[b'artists'] = [artist]
+        track_kwargs['artists'] = [artist]
 
     if albumartist_kwargs:
         albumartist = Artist(**albumartist_kwargs)
-        album_kwargs[b'artists'] = [albumartist]
+        album_kwargs['artists'] = [albumartist]
 
     if album_kwargs:
         album = Album(**album_kwargs)
-        track_kwargs[b'album'] = album
+        track_kwargs['album'] = album
 
     if data['file'][0] == '/':
         path = data['file'][1:]
     else:
         path = data['file']
-    path = urllib.unquote(path.encode('utf-8'))
 
-    if isinstance(music_dir, unicode):
-        music_dir = music_dir.encode('utf-8')
-
-    # Make sure we only pass bytestrings to path_to_uri to avoid implicit
-    # decoding of bytestrings to unicode strings
-    track_kwargs[b'uri'] = path_to_uri(music_dir, path)
-
-    track_kwargs[b'length'] = int(data.get('time', 0)) * 1000
+    track_kwargs['uri'] = 'local:track:%s' % path
+    track_kwargs['length'] = int(data.get('time', 0)) * 1000
 
     track = Track(**track_kwargs)
     tracks.add(track)

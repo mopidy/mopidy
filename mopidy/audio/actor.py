@@ -22,6 +22,22 @@ mixers.register_mixers()
 
 MB = 1 << 20
 
+# GST_PLAY_FLAG_VIDEO (1<<0)
+# GST_PLAY_FLAG_AUDIO (1<<1)
+# GST_PLAY_FLAG_TEXT (1<<2)
+# GST_PLAY_FLAG_VIS (1<<3)
+# GST_PLAY_FLAG_SOFT_VOLUME (1<<4)
+# GST_PLAY_FLAG_NATIVE_AUDIO (1<<5)
+# GST_PLAY_FLAG_NATIVE_VIDEO (1<<6)
+# GST_PLAY_FLAG_DOWNLOAD (1<<7)
+# GST_PLAY_FLAG_BUFFERING (1<<8)
+# GST_PLAY_FLAG_DEINTERLACE (1<<9)
+# GST_PLAY_FLAG_SOFT_COLORBALANCE (1<<10)
+
+# Default flags to use for playbin: AUDIO, SOFT_VOLUME, DOWNLOAD
+PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
+PLAYBIN_VIS_FLAGS = PLAYBIN_FLAGS | (1 << 3)
+
 
 class Audio(pykka.ThreadingActor):
     """
@@ -55,6 +71,7 @@ class Audio(pykka.ThreadingActor):
         try:
             self._setup_playbin()
             self._setup_output()
+            self._setup_visualizer()
             self._setup_mixer()
             self._setup_message_processor()
         except gobject.GError as ex:
@@ -78,9 +95,7 @@ class Audio(pykka.ThreadingActor):
 
     def _setup_playbin(self):
         playbin = gst.element_factory_make('playbin2')
-
-        fakesink = gst.element_factory_make('fakesink')
-        playbin.set_property('video-sink', fakesink)
+        playbin.set_property('flags', PLAYBIN_FLAGS)
 
         self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
         self._connect(playbin, 'notify::source', self._on_new_source)
@@ -149,6 +164,20 @@ class Audio(pykka.ThreadingActor):
                 'Failed to create audio output "%s": %s', output_desc, ex)
             process.exit_process()
 
+    def _setup_visualizer(self):
+        visualizer_element = self._config['audio']['visualizer']
+        if not visualizer_element:
+            return
+        try:
+            visualizer = gst.element_factory_make(visualizer_element)
+            self._playbin.set_property('vis-plugin', visualizer)
+            self._playbin.set_property('flags', PLAYBIN_VIS_FLAGS)
+            logger.info('Audio visualizer set to "%s"', visualizer_element)
+        except gobject.GError as ex:
+            logger.error(
+                'Failed to create audio visualizer "%s": %s',
+                visualizer_element, ex)
+
     def _setup_mixer(self):
         mixer_desc = self._config['audio']['mixer']
         track_desc = self._config['audio']['mixer_track']
@@ -193,7 +222,8 @@ class Audio(pykka.ThreadingActor):
             self._mixer_track.min_volume, self._mixer_track.max_volume)
         logger.info(
             'Audio mixer set to "%s" using track "%s"',
-            mixer.get_factory().get_name(), track.label)
+            str(mixer.get_factory().get_name()).decode('utf-8'),
+            str(track.label).decode('utf-8'))
 
     def _select_mixer_track(self, mixer, track_label):
         # Ignore tracks without volumes, then look for track with

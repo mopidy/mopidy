@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from mopidy.config import validators
+import unittest
 
-from tests import unittest
+from mopidy.config import validators
 
 
 class ValidateChoiceTest(unittest.TestCase):

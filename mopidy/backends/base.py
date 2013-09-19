@@ -53,6 +53,7 @@ class BaseLibraryProvider(object):
     def __init__(self, backend):
         self.backend = backend
 
+    # TODO: replace with search(query, exact=True, ...)
     def find_exact(self, query=None, uris=None):
         """
         See :meth:`mopidy.core.LibraryController.find_exact`.
@@ -80,6 +81,40 @@ class BaseLibraryProvider(object):
     def search(self, query=None, uris=None):
         """
         See :meth:`mopidy.core.LibraryController.search`.
+
+        *MAY be implemented by subclass.*
+        """
+        pass
+
+
+class BaseLibraryUpdateProvider(object):
+    uri_schemes = []
+
+    def load(self):
+        """Loads the library and returns all tracks in it.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def add(self, track):
+        """Adds given track to library.
+
+        Overwrites any existing track with same URI.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def remove(self, uri):
+        """Removes given track from library.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def commit(self):
+        """Persist changes to library.
 
         *MAY be implemented by subclass.*
         """
@@ -121,8 +156,21 @@ class BasePlaybackProvider(object):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         self.audio.prepare_change()
-        self.audio.set_uri(track.uri).get()
+        self.change_track(track)
         return self.audio.start_playback().get()
+
+    def change_track(self, track):
+        """
+        Swith to provided track.
+
+        *MAY be reimplemented by subclass.*
+
+        :param track: the track to play
+        :type track: :class:`mopidy.models.Track`
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        self.audio.set_uri(track.uri).get()
+        return True
 
     def resume(self):
         """

@@ -131,12 +131,6 @@ Pip.
 
        PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages mopidy
 
-   Note that you need to replace ``python2.7`` with ``python2.6`` in the above
-   ``PYTHONPATH`` examples if you are using Python 2.6. To find your Python
-   version, run::
-
-       python --version
-
 #. Next up, you need to install some Python packages. To do so, we use Pip. If
    you don't have the ``pip`` command, you can install it now::
 
@@ -157,7 +151,7 @@ Otherwise: Install from source using Pip
 If you are on on Linux, but can't install from the APT archive or from AUR, you
 can install Mopidy from PyPI using Pip.
 
-#. First of all, you need Python >= 2.6, < 3. Check if you have Python and what
+#. First of all, you need Python 2.7. Check if you have Python and what
    version by running::
 
        python --version

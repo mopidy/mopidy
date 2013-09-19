@@ -16,12 +16,20 @@ distribution.
 
 .. _raspi-wheezy:
 
-How to for Debian 7 (Wheezy)
-============================
+How to for Raspbian "wheezy" and Debian "wheezy"
+================================================
 
-#. Download the latest wheezy disk image from
-   http://downloads.raspberrypi.org/images/debian/7/. I used the one dated
-   2012-08-08.
+This guide applies for both:
+
+- Raspian "wheezy" for armhf (hard-float), and
+- Debian "wheezy" for armel (soft-float)
+
+If you don't know which one to select, go for the armhf variant, as it'll give
+you a lot better performance.
+
+#. Download the latest "wheezy" disk image from
+   http://www.raspberrypi.org/downloads/. This was last tested with the images
+   from 2013-05-25 for armhf and 2013-05-29 for armel.
 
 #. Flash the OS image to your SD card. See
    http://elinux.org/RPi_Easy_SD_Card_Setup for help.
@@ -85,7 +93,7 @@ card.
       sudo apt-get dist-upgrade
 
 #. Ensure you have a new enough firmware. On Debian based systems
-   `rpi-update <http://apt.mopidy.com://github.com/Hexxeh/rpi-update>`_
+   `rpi-update <https://github.com/Hexxeh/rpi-update>`_
    can be used.
 
 #. Update either ``~/.asoundrc`` or ``/etc/asound.conf`` to the

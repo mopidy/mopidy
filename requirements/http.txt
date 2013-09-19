@@ -2,4 +2,5 @@ cherrypy >= 3.2.2
 # Available as python-cherrypy3 in Debian/Ubuntu
 
 ws4py >= 0.2.3
-# Available as python-ws4py from apt.mopidy.com
+# Available as python-ws4py in newer Debian/Ubuntu and from apt.mopidy.com for
+# older releases of Debian/Ubuntu

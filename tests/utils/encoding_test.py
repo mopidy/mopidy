@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
 import mock
+import unittest
 
 from mopidy.utils.encoding import locale_decode
-
-from tests import unittest
 
 
 @mock.patch('mopidy.utils.encoding.locale.getpreferredencoding')

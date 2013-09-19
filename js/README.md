@@ -51,15 +51,15 @@ Building from source
 1. Install [Node.js](http://nodejs.org/) and npm. There is a PPA if you're
    running Ubuntu:
 
-       sudo apt-get install python-software-properties
-       sudo add-apt-repository ppa:chris-lea/node.js
-       sudo apt-get update
-       sudo apt-get install nodejs npm
+        sudo apt-get install python-software-properties
+        sudo add-apt-repository ppa:chris-lea/node.js
+        sudo apt-get update
+        sudo apt-get install nodejs
 
 2. Enter the `js/` in Mopidy's Git repo dir and install all dependencies:
 
-       cd js/
-       npm install
+        cd js/
+        npm install
 
 That's it.
 
@@ -69,7 +69,7 @@ You can now run the tests:
 
 To run tests automatically when you save a file:
 
-    npm run-script watch
+    npm start
 
 To run tests, concatenate, minify the source, and update the JavaScript files
 in `mopidy/frontends/http/data/`:

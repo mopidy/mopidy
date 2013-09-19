@@ -1,6 +1,6 @@
 {
   "name": "mopidy",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Client lib for controlling a Mopidy music server over a WebSocket",
   "homepage": "http://www.mopidy.com/",
   "author": {
@@ -14,23 +14,23 @@
   },
   "main": "src/mopidy.js",
   "dependencies": {
-    "bane": "~0.4.0",
-    "faye-websocket": "~0.4.4",
-    "when": "~2.0.0"
+    "bane": "~1.0.0",
+    "faye-websocket": "~0.7.0",
+    "when": "~2.4.0"
   },
   "devDependencies": {
-    "buster": "~0.6.12",
-    "grunt": "~0.4.0",
-    "grunt-buster": "~0.1.2",
-    "grunt-contrib-concat": "~0.1.3",
-    "grunt-contrib-jshint": "~0.2.0",
-    "grunt-contrib-uglify": "~0.1.2",
-    "grunt-contrib-watch": "~0.3.1",
-    "phantomjs": "~1.8.2"
+    "buster": "~0.6.13",
+    "grunt": "~0.4.1",
+    "grunt-buster": "~0.2.1",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-uglify": "~0.2.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "phantomjs": "~1.9.2-0"
   },
   "scripts": {
     "test": "grunt test",
     "build": "grunt build",
-    "watch": "grunt watch"
+    "start": "grunt watch"
   }
 }

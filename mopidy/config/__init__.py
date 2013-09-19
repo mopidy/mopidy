@@ -5,8 +5,9 @@ import io
 import logging
 import os.path
 
-from mopidy.config.schemas import *
-from mopidy.config.types import *
+from mopidy.config import keyring
+from mopidy.config.schemas import *  # noqa
+from mopidy.config.types import *  # noqa
 from mopidy.utils import path
 
 logger = logging.getLogger('mopidy.config')
@@ -23,9 +24,13 @@ _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()
 _audio_schema['mixer_track'] = String(optional=True)
 _audio_schema['output'] = String()
+_audio_schema['visualizer'] = String(optional=True)
 
 _proxy_schema = ConfigSchema('proxy')
+_proxy_schema['scheme'] = String(optional=True,
+                                 choices=['http', 'https', 'socks4', 'socks5'])
 _proxy_schema['hostname'] = Hostname(optional=True)
+_proxy_schema['port'] = Port(optional=True)
 _proxy_schema['username'] = String(optional=True)
 _proxy_schema['password'] = Secret(optional=True)
 
@@ -47,7 +52,7 @@ def load(files, extensions, overrides):
     config_dir = os.path.dirname(__file__)
     defaults = [read(os.path.join(config_dir, 'default.conf'))]
     defaults.extend(e.get_default_config() for e in extensions)
-    raw_config = _load(files, defaults, overrides)
+    raw_config = _load(files, defaults, keyring.fetch() + (overrides or []))
 
     schemas = _schemas[:]
     schemas.extend(e.get_config_schema() for e in extensions)
@@ -86,8 +91,8 @@ def _load(files, defaults, overrides):
                             filename)
         except configparser.ParsingError as e:
             linenos = ', '.join(str(lineno) for lineno, line in e.errors)
-            logger.warning('%s has errors, line %s has been ignored.',
-                            filename, linenos)
+            logger.warning(
+                '%s has errors, line %s has been ignored.', filename, linenos)
         except IOError:
             # TODO: if this is the initial load of logging config we might not
             # have a logger at this point, we might want to handle this better.
@@ -101,7 +106,7 @@ def _load(files, defaults, overrides):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
-    for section, key, value in overrides or []:
+    for section, key, value in overrides:
         raw_config.setdefault(section, {})[key] = value
 
     return raw_config
@@ -124,7 +129,8 @@ def _validate(raw_config, schemas):
 def _format(config, comments, schemas, display):
     output = []
     for schema in schemas:
-        serialized = schema.serialize(config.get(schema.name, {}), display=display)
+        serialized = schema.serialize(
+            config.get(schema.name, {}), display=display)
         if not serialized:
             continue
         output.append(b'[%s]' % bytes(schema.name))
@@ -137,13 +143,6 @@ def _format(config, comments, schemas, display):
                 output[-1] += b'  # ' + comment.capitalize()
         output.append(b'')
     return b'\n'.join(output)
-
-
-def parse_override(override):
-    """Parse ``section/key=value`` command line overrides"""
-    section, remainder = override.split(b'/', 1)
-    key, value = remainder.split(b'=', 1)
-    return (section.strip(), key.strip(), value.strip())
 
 
 class Proxy(collections.Mapping):
