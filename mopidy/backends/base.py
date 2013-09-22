@@ -307,4 +307,7 @@ class BaseMetadataProvider(object):
         return {}
 
     def config(self, uri):
-        return
+        return 0
+
+    def status(self, uris=None):
+        pass

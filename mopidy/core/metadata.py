@@ -30,3 +30,11 @@ class MetadataController(object):
         backend = self._get_backend(uri)
         if backend and backend.has_metadata().get():
             return backend.metadata.config().get()
+        return 0
+
+    def status(self, uris=None):
+        futures = []
+        for (backend, backend_uris) in self._get_backends_to_uris(uris).items():
+            if backend and backend.has_metadata().get():
+                futures.append(backend.metadata.status(backend_uris))
+        return [result for result in pykka.get_all(futures) if result]
