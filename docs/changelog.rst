@@ -4,15 +4,16 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v0.15.0 (UNRELEASED)
+v0.15.0 (2013-09-19)
 ====================
 
-(no description yet)
+A release with a number of small and medium fixes, with no specific focus.
 
 **Dependencies**
 
 - Mopidy no longer supports Python 2.6. Currently, the only Python version
-  supported by Mopidy is Python 2.7. (Fixes: :issue:`344`)
+  supported by Mopidy is Python 2.7. We're continuously working towards running
+  Mopidy on Python 3. (Fixes: :issue:`344`)
 
 **Core**
 
@@ -44,14 +45,16 @@ v0.15.0 (UNRELEASED)
   options.
 
 - :option:`mopidy --show-config` will now take into consideration any
-  :option:`mopidy --option` arguments appearing later on the command line.
+  :option:`mopidy --option` arguments appearing later on the command line. This
+  helps you see the effective configuration for runs with the same
+  :option:`mopidy --options` arguments.
 
 **Audio**
 
-- Added support for audio visualization. :confval:`audio/visualizer` can now be set
-  to GStreamer visualizers.
+- Added support for audio visualization. :confval:`audio/visualizer` can now be
+  set to GStreamer visualizers.
 
-- Properly encode localised mixer names before logging.
+- Properly encode localized mixer names before logging.
 
 **Local backend**
 
@@ -62,7 +65,7 @@ v0.15.0 (UNRELEASED)
   the next file. This fixes some hangs on non-media files, like logs. (Fixes:
   :issue:`476`, :issue:`483`)
 
-- Added support for plugable library updaters. This allows extension writers
+- Added support for pluggable library updaters. This allows extension writers
   to start providing their own custom libraries instead of being stuck with
   just our tag cache as the only option.
 
@@ -90,16 +93,17 @@ v0.15.0 (UNRELEASED)
 
 **HTTP frontend**
 
-- Fix too broad truthness test that caused :class:`~mopidy.models.TlTrack`
+- Fix too broad truth test that caused :class:`mopidy.models.TlTrack`
   objects with ``tlid`` set to ``0`` to be sent to the HTTP client without the
   ``tlid`` field. (Fixes: :issue:`501`)
 
-- Upgrade Mopidy.js dependencies.
+- Upgrade Mopidy.js dependencies. This version has been released to NPM as
+  Mopidy.js v0.1.1.
 
 **Extension support**
 
-- :class:`~mopidy.config.Secret` is now deserialized to unicode strings instead
-  of bytestrings. This may require modifications to extensions.
+- :class:`mopidy.config.Secret` is now deserialized to unicode instead of
+  bytes. This may require modifications to extensions.
 
 
 v0.14.2 (2013-07-01)
