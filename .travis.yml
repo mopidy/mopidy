@@ -12,7 +12,7 @@ before_script:
 
 script:
   - "flake8 $(find . -iname '*.py')"
-  - "nosetests --with-coverage --coverage-package=mopidy"
+  - "nosetests --with-coverage --cover-package=mopidy"
 
 after_success:
   - "coveralls"
