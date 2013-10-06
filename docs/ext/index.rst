@@ -77,6 +77,21 @@ Issues:
     https://github.com/mopidy/mopidy/issues
 
 
+Mopidy-Scrobbler
+----------------
+
+Extension for scrobbling played tracks to Last.fm.
+
+Author:
+    Stein Magnus Jodal
+PyPI:
+    `Mopidy-Scrobbler <https://pypi.python.org/pypi/Mopidy-Scrobbler>`_
+GitHub:
+    `mopidy/mopidy-scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_
+Issues:
+    https://github.com/mopidy/mopidy-scrobbler/issues
+
+
 Mopidy-SomaFM
 -------------
 

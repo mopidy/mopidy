@@ -7,6 +7,13 @@ This changelog is used to track all major changes to Mopidy.
 v0.16.0 (UNRELEASED)
 ====================
 
+**Extensions**
+
+- The Last.fm scrobbler has been moved to its own external extension,
+  `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`. You'll need
+  to install it in addition to Mopidy if you want it to continue to work as it
+  used to.
+
 **Audio**
 
 - Added support for parsing and playback of playlists in GStreamer. What this
