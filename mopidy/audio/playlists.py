@@ -80,7 +80,6 @@ def parse_pls(data):
 
 
 def parse_xspf(data):
-    # TODO: handle parser errors
     try:
         for event, element in elementtree.iterparse(data):
             element.tag = element.tag.lower()  # normalize
@@ -93,7 +92,6 @@ def parse_xspf(data):
 
 
 def parse_asx(data):
-    # TODO: handle parser errors
     try:
         for event, element in elementtree.iterparse(data):
             element.tag = element.tag.lower()  # normalize
