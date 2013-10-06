@@ -21,7 +21,7 @@ def detect_m3u_header(typefind):
 
 
 def detect_pls_header(typefind):
-    return typefind.peek(0, 11) == b'[playlist]\n'
+    return typefind.peek(0, 11).lower() == b'[playlist]\n'
 
 
 def detect_xspf_header(typefind):
@@ -30,7 +30,8 @@ def detect_xspf_header(typefind):
         return False
 
     try:
-        for event, element in elementtree.iterparse(data, events=('start',)):
+        data = io.BytesIO(data)
+        for event, element in elementtree.iterparse(data, events=(b'start',)):
             return element.tag.lower() == '{http://xspf.org/ns/0/}playlist'
     except elementtree.ParseError:
         pass
@@ -43,7 +44,8 @@ def detect_asx_header(typefind):
         return False
 
     try:
-        for event, element in elementtree.iterparse(data, events=('start',)):
+        data = io.BytesIO(data)
+        for event, element in elementtree.iterparse(data, events=(b'start',)):
             return element.tag.lower() == 'asx'
     except elementtree.ParseError:
         pass
@@ -52,24 +54,38 @@ def detect_asx_header(typefind):
 
 def parse_m3u(data):
     # TODO: convert non URIs to file URIs.
+    found_header = False
     for line in data.readlines():
+        if found_header or line.startswith('#EXTM3U'):
+            found_header = True
+        else:
+            continue
         if not line.startswith('#') and line.strip():
-            yield line
+            yield line.strip()
 
 
 def parse_pls(data):
-    # TODO: error handling of bad playlists.
     # TODO: convert non URIs to file URIs.
-    cp = configparser.RawConfigParser()
-    cp.readfp(data)
-    for i in xrange(1, cp.getint('playlist', 'numberofentries')):
-        yield cp.get('playlist', 'file%d' % i)
+    try:
+        cp = configparser.RawConfigParser()
+        cp.readfp(data)
+    except configparser.Error:
+        return
+
+    for section in cp.sections():
+        if section.lower() != 'playlist':
+            continue
+        for i in xrange(cp.getint(section, 'numberofentries')):
+            yield cp.get(section, 'file%d' % (i+1))
 
 
 def parse_xspf(data):
     # TODO: handle parser errors
-    for event, element in elementtree.iterparse(data):
-        element.tag = element.tag.lower()  # normalize
+    try:
+        for event, element in elementtree.iterparse(data):
+            element.tag = element.tag.lower()  # normalize
+    except elementtree.ParseError:
+        return
 
     ns = 'http://xspf.org/ns/0/'
     for track in element.iterfind('{%s}tracklist/{%s}track' % (ns, ns)):
@@ -78,8 +94,11 @@ def parse_xspf(data):
 
 def parse_asx(data):
     # TODO: handle parser errors
-    for event, element in elementtree.iterparse(data):
-        element.tag = element.tag.lower()  # normalize
+    try:
+        for event, element in elementtree.iterparse(data):
+            element.tag = element.tag.lower()  # normalize
+    except elementtree.ParseError:
+        return
 
     for ref in element.findall('entry/ref'):
         yield ref.get('href', '').strip()
