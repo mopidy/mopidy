@@ -25,9 +25,6 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 - Mailing list: `mopidy@googlegroups.com <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
 - Twitter: `@mopidy <https://twitter.com/mopidy/>`_
 
-.. image:: https://travis-ci.org/mopidy/mopidy.png?branch=develop
-    :target: https://travis-ci.org/mopidy/mopidy
-
 .. image:: https://pypip.in/v/Mopidy/badge.png
     :target: https://crate.io/packages/Mopidy/
     :alt: Latest PyPI version
@@ -35,3 +32,11 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 .. image:: https://pypip.in/d/Mopidy/badge.png
     :target: https://crate.io/packages/Mopidy/
     :alt: Number of PyPI downloads
+
+.. image:: https://travis-ci.org/mopidy/mopidy.png?branch=develop
+    :target: https://travis-ci.org/mopidy/mopidy
+    :alt: Travis CI build status
+
+.. image:: https://coveralls.io/repos/mopidy/mopidy/badge.png?branch=develop
+   :target: https://coveralls.io/r/mopidy/mopidy?branch=develop
+   :alt: Test coverage
