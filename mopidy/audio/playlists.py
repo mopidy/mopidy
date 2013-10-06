@@ -25,8 +25,10 @@ def detect_pls_header(typefind):
 
 
 def detect_xspf_header(typefind):
-    # Get more data than the 90 needed for header in case spacing is funny.
-    data = io.BytesIO(typefind.peek(0, 150))
+    data = typefind.peek(0, 150)
+    if b'xspf' not in data:
+        return False
+
     try:
         for event, element in elementtree.iterparse(data, events=('start',)):
             return element.tag.lower() == '{http://xspf.org/ns/0/}playlist'
@@ -36,7 +38,10 @@ def detect_xspf_header(typefind):
 
 
 def detect_asx_header(typefind):
-    data = io.BytesIO(typefind.peek(0, 50))
+    data = typefind.peek(0, 50)
+    if b'asx' not in data:
+        return False
+
     try:
         for event, element in elementtree.iterparse(data, events=('start',)):
             return element.tag.lower() == 'asx'
