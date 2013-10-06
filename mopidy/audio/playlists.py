@@ -317,8 +317,8 @@ class UriListElement(BasePlaylistElement):
         if event.has_name('urilist-played'):
             error = gst.GError(gst.RESOURCE_ERROR, gst.RESOURCE_ERROR_FAILED,
                                b'Nested playlists not supported.')
-            message = gst.message_new_error(self, error, b'Playlists pointing to other playlists is not supported')
-            self.post_message(message)
+            message = b'Playlists pointing to other playlists is not supported'
+            self.post_message(gst.message_new_error(self, error, message))
         return True
 
     def handle(self, uris):
@@ -400,5 +400,7 @@ def register_elements():
     register_element(XspfDecoder)
     register_element(AsxDecoder)
     register_element(UriListElement)
+
+    # Only register icy if gst install can't handle it on it's own.
     if not gst.element_make_from_uri(gst.URI_SRC, 'icy://'):
         register_element(IcySrc)
