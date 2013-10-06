@@ -5,14 +5,17 @@ install:
   - "sudo wget -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list"
   - "sudo apt-get update || true"
   - "sudo apt-get install $(apt-cache depends mopidy | awk '$2 !~ /mopidy/ {print $2}')"
-  - "pip install flake8"
+  - "pip install coveralls flake8"
 
 before_script:
   - "rm $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt"
 
 script:
   - "flake8 $(find . -iname '*.py')"
-  - "nosetests"
+  - "nosetests --with-coverage --coverage-package=mopidy"
+
+after_success:
+  - "coveralls"
 
 notifications:
   irc:
