@@ -7,13 +7,6 @@ import unittest
 
 from mopidy.audio import playlists
 
-class TypeFind(object):
-    def __init__(self, data):
-        self.data = data
-
-    def peek(self, start, end):
-        return self.data[start:end]
-
 
 BAD = b'foobarbaz'
 
@@ -75,6 +68,14 @@ XSPF = b"""<?xml version="1.0" encoding="UTF-8"?>
   </trackList>
 </playlist>
 """
+
+
+class TypeFind(object):
+    def __init__(self, data):
+        self.data = data
+
+    def peek(self, start, end):
+        return self.data[start:end]
 
 
 class BasePlaylistTest(object):

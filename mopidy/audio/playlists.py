@@ -218,14 +218,12 @@ class M3uDecoder(BasePlaylistElement):
                       'Convert .m3u to text/uri-list',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate('sink',
-        gst.PAD_SINK,
-        gst.PAD_ALWAYS,
+    sinkpad_template = gst.PadTemplate(
+        'sink', gst.PAD_SINK, gst.PAD_ALWAYS,
         gst.caps_from_string('audio/x-mpegurl'))
 
-    srcpad_template = gst.PadTemplate('src',
-        gst.PAD_SRC,
-        gst.PAD_ALWAYS,
+    srcpad_template = gst.PadTemplate(
+        'src', gst.PAD_SRC, gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
     __gsttemplates__ = (sinkpad_template, srcpad_template)
@@ -240,14 +238,12 @@ class PlsDecoder(BasePlaylistElement):
                       'Convert .pls to text/uri-list',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate('sink',
-        gst.PAD_SINK,
-        gst.PAD_ALWAYS,
+    sinkpad_template = gst.PadTemplate(
+        'sink', gst.PAD_SINK, gst.PAD_ALWAYS,
         gst.caps_from_string('audio/x-scpls'))
 
-    srcpad_template = gst.PadTemplate('src',
-        gst.PAD_SRC,
-        gst.PAD_ALWAYS,
+    srcpad_template = gst.PadTemplate(
+        'src', gst.PAD_SRC, gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
     __gsttemplates__ = (sinkpad_template, srcpad_template)
@@ -262,14 +258,12 @@ class XspfDecoder(BasePlaylistElement):
                       'Convert .pls to text/uri-list',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate('sink',
-        gst.PAD_SINK,
-        gst.PAD_ALWAYS,
+    sinkpad_template = gst.PadTemplate(
+        'sink', gst.PAD_SINK, gst.PAD_ALWAYS,
         gst.caps_from_string('application/xspf+xml'))
 
-    srcpad_template = gst.PadTemplate('src',
-        gst.PAD_SRC,
-        gst.PAD_ALWAYS,
+    srcpad_template = gst.PadTemplate(
+        'src', gst.PAD_SRC, gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
     __gsttemplates__ = (sinkpad_template, srcpad_template)
@@ -284,14 +278,12 @@ class AsxDecoder(BasePlaylistElement):
                       'Convert .asx to text/uri-list',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate('sink',
-        gst.PAD_SINK,
-        gst.PAD_ALWAYS,
+    sinkpad_template = gst.PadTemplate(
+        'sink', gst.PAD_SINK, gst.PAD_ALWAYS,
         gst.caps_from_string('audio/x-ms-asx'))
 
-    srcpad_template = gst.PadTemplate('src',
-        gst.PAD_SRC,
-        gst.PAD_ALWAYS,
+    srcpad_template = gst.PadTemplate(
+        'src', gst.PAD_SRC, gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
     __gsttemplates__ = (sinkpad_template, srcpad_template)
@@ -306,14 +298,12 @@ class UriListElement(BasePlaylistElement):
                       'Convert a text/uri-list to a stream',
                       'Mopidy')
 
-    sinkpad_template = gst.PadTemplate('sink',
-        gst.PAD_SINK,
-        gst.PAD_ALWAYS,
+    sinkpad_template = gst.PadTemplate(
+        'sink', gst.PAD_SINK, gst.PAD_ALWAYS,
         gst.caps_from_string('text/uri-list'))
 
-    srcpad_template = gst.PadTemplate('src',
-        gst.PAD_SRC,
-        gst.PAD_ALWAYS,
+    srcpad_template = gst.PadTemplate(
+        'src', gst.PAD_SRC, gst.PAD_ALWAYS,
         gst.caps_new_any())
 
     ghost_srcpad = True  # We need to hook this up to our internal decodebin
@@ -338,7 +328,7 @@ class UriListElement(BasePlaylistElement):
                                b'Nested playlists not supported.')
             message = b'Playlists pointing to other playlists is not supported'
             self.post_message(gst.message_new_error(self, error, message))
-        return True
+        return 1  # GST_PAD_PROBE_OK
 
     def handle(self, uris):
         struct = gst.Structure('urilist-played')
@@ -364,9 +354,8 @@ class IcySrc(gst.Bin, gst.URIHandler):
                       'HTTP src wrapper for icy:// support.',
                       'Mopidy')
 
-    srcpad_template = gst.PadTemplate('src',
-        gst.PAD_SRC,
-        gst.PAD_ALWAYS,
+    srcpad_template = gst.PadTemplate(
+        'src', gst.PAD_SRC, gst.PAD_ALWAYS,
         gst.caps_new_any())
 
     __gsttemplates__ = (srcpad_template,)
