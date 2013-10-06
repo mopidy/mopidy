@@ -22,8 +22,8 @@ tested by Jenkins before it is merged into the ``develop`` branch, which is a
 bit late, but good enough to get broad testing before new code is released.
 
 In addition to running tests, the Jenkins CI server also gathers coverage
-statistics and uses pylint to check for errors and possible improvements in our
-code. So, if you're out of work, the code coverage and pylint data at the CI
+statistics and uses flake8 to check for errors and possible improvements in our
+code. So, if you're out of work, the code coverage and flake8 data at the CI
 server should give you a place to start.
 
 

@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
 
-# pylint: disable = E0611,F0401
 from distutils.version import StrictVersion as SV
-# pylint: enable = E0611,F0401
 import sys
 import warnings
 
@@ -23,4 +21,4 @@ if (isinstance(pykka.__version__, basestring)
 warnings.filterwarnings('ignore', 'could not open display')
 
 
-__version__ = '0.14.1'
+__version__ = '0.15.0'

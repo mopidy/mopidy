@@ -3,10 +3,10 @@
  *
  * https://github.com/busterjs/bane
  *
- * @version 0.4.0
+ * @version 1.0.0
  */
 
-((typeof define === "function" && define.amd && function (m) { define(m); }) ||
+((typeof define === "function" && define.amd && function (m) { define("bane", m); }) ||
  (typeof module === "object" && function (m) { module.exports = m(); }) ||
  function (m) { this.bane = m(); }
 )(function () {
@@ -152,7 +152,7 @@
                 notifyListener(event, toNotify[i], args);
             }
 
-            toNotify = listeners(this, event).slice()
+            toNotify = listeners(this, event).slice();
             args = slice.call(arguments, 1);
             for (i = 0, l = toNotify.length; i < l; ++i) {
                 notifyListener(event, toNotify[i], args);

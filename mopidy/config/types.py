@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import logging
 import re
 import socket
-import sys
 
 from mopidy.utils import path
 from mopidy.config import validators
@@ -72,9 +71,9 @@ class String(ConfigValue):
     def deserialize(self, value):
         value = decode(value).strip()
         validators.validate_required(value, self._required)
-        validators.validate_choice(value, self._choices)
         if not value:
             return None
+        validators.validate_choice(value, self._choices)
         return value
 
     def serialize(self, value, display=False):
@@ -83,41 +82,38 @@ class String(ConfigValue):
         return encode(value)
 
 
-class Secret(ConfigValue):
-    """Secret value.
+class Secret(String):
+    """Secret string value.
 
-    Should be used for passwords, auth tokens etc. Deserializing will not
-    convert to unicode. Will mask value when being displayed.
+    Is decoded as utf-8 and \\n \\t escapes should work and be preserved.
+
+    Should be used for passwords, auth tokens etc. Will mask value when being
+    displayed.
     """
     def __init__(self, optional=False, choices=None):
         self._required = not optional
-
-    def deserialize(self, value):
-        value = value.strip()
-        validators.validate_required(value, self._required)
-        if not value:
-            return None
-        return value
+        self._choices = None  # Choices doesn't make sense for secrets
 
     def serialize(self, value, display=False):
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        if value is None:
-            return b''
-        elif display:
+        if value is not None and display:
             return b'********'
-        return value
+        return super(Secret, self).serialize(value, display)
 
 
 class Integer(ConfigValue):
     """Integer value."""
 
-    def __init__(self, minimum=None, maximum=None, choices=None):
+    def __init__(
+            self, minimum=None, maximum=None, choices=None, optional=False):
+        self._required = not optional
         self._minimum = minimum
         self._maximum = maximum
         self._choices = choices
 
     def deserialize(self, value):
+        validators.validate_required(value, self._required)
+        if not value:
+            return None
         value = int(value)
         validators.validate_choice(value, self._choices)
         validators.validate_minimum(value, self._minimum)
@@ -223,8 +219,9 @@ class Port(Integer):
     allocate a port for us.
     """
     # TODO: consider probing if port is free or not?
-    def __init__(self, choices=None):
-        super(Port, self).__init__(minimum=0, maximum=2**16-1, choices=choices)
+    def __init__(self, choices=None, optional=False):
+        super(Port, self).__init__(
+            minimum=0, maximum=2 ** 16 - 1, choices=choices, optional=optional)
 
 
 class Path(ConfigValue):
@@ -256,7 +253,7 @@ class Path(ConfigValue):
 
     def serialize(self, value, display=False):
         if isinstance(value, unicode):
-            value = value.encode(sys.getfilesystemencoding())
+            raise ValueError('paths should always be bytes')
         if isinstance(value, ExpandedPath):
             return value.original
         return value

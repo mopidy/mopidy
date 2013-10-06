@@ -26,6 +26,8 @@ class TranslatorTest(unittest.TestCase):
             'album-artist': 'albumartistname',
             'title': 'trackname',
             'track-count': 2,
+            'album-disc-number': 2,
+            'album-disc-count': 3,
             'date': FakeGstDate(2006, 1, 1,),
             'container-format': 'ID3 tag',
             'duration': 4531,
@@ -39,6 +41,7 @@ class TranslatorTest(unittest.TestCase):
         self.album = {
             'name': 'albumname',
             'num_tracks': 2,
+            'num_discs': 3,
             'musicbrainz_id': 'mbalbumid',
         }
 
@@ -57,6 +60,7 @@ class TranslatorTest(unittest.TestCase):
             'name': 'trackname',
             'date': '2006-01-01',
             'track_no': 1,
+            'disc_no': 2,
             'length': 4531,
             'musicbrainz_id': 'mbtrackid',
             'last_modified': 1234,
@@ -204,6 +208,14 @@ class ScannerTest(unittest.TestCase):
 
     def test_other_media_is_ignored(self):
         self.scan('scanner/image')
+        self.assert_(self.errors)
+
+    def test_log_file_is_ignored(self):
+        self.scan('scanner/example.log')
+        self.assert_(self.errors)
+
+    def test_empty_wav_file_is_ignored(self):
+        self.scan('scanner/empty.wav')
         self.assert_(self.errors)
 
     @unittest.SkipTest

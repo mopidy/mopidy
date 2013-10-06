@@ -79,6 +79,15 @@ class Extension(object):
         """
         return []
 
+    def get_library_updaters(self):
+        """List of library updater classes
+
+        :returns: list of
+          :class:`~mopidy.backends.base.BaseLibraryUpdateProvider`
+        subclasses
+        """
+        return []
+
     def register_gstreamer_elements(self):
         """Hook for registering custom GStreamer elements
 

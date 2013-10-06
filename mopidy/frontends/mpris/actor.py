@@ -34,7 +34,7 @@ class MprisFrontend(pykka.ThreadingActor, CoreListener):
             self.mpris_object = objects.MprisObject(self.config, self.core)
             self._send_startup_notification()
         except Exception as e:
-            logger.error('MPRIS frontend setup failed (%s)', e)
+            logger.warning('MPRIS frontend setup failed (%s)', e)
             self.stop()
 
     def on_stop(self):

@@ -39,8 +39,8 @@ def _artist_as_track(artist):
         artists=[artist])
 
 
-@handle_request(r'^count "(?P<tag>[^"]+)" "(?P<needle>[^"]*)"$')
-def count(context, tag, needle):
+@handle_request(r'^count ' + QUERY_RE)
+def count(context, mpd_query):
     """
     *musicpd.org, music database section:*
 
@@ -48,6 +48,11 @@ def count(context, tag, needle):
 
         Counts the number of songs and their total playtime in the db
         matching ``TAG`` exactly.
+
+    *GMPC:*
+
+    - does not add quotes around the tag argument.
+    - use multiple tag-needle pairs to make more specific searches.
     """
     return [('songs', 0), ('playtime', 0)]  # TODO
 
@@ -240,8 +245,9 @@ def _list_date(context, query):
     return dates
 
 
-@handle_request(r'^listall "(?P<uri>[^"]+)"')
-def listall(context, uri):
+@handle_request(r'^listall$')
+@handle_request(r'^listall "(?P<uri>[^"]+)"$')
+def listall(context, uri=None):
     """
     *musicpd.org, music database section:*
 
@@ -252,8 +258,9 @@ def listall(context, uri):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^listallinfo "(?P<uri>[^"]+)"')
-def listallinfo(context, uri):
+@handle_request(r'^listallinfo$')
+@handle_request(r'^listallinfo "(?P<uri>[^"]+)"$')
+def listallinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
 

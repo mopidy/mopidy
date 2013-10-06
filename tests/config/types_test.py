@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import logging
 import mock
 import socket
-import sys
 import unittest
 
 from mopidy.config import types
@@ -99,13 +98,18 @@ class StringTest(unittest.TestCase):
         self.assertIsInstance(result, bytes)
         self.assertEqual(b'', result)
 
+    def test_deserialize_enforces_choices_optional(self):
+        value = types.String(optional=True, choices=['foo', 'bar', 'baz'])
+        self.assertEqual(None, value.deserialize(b''))
+        self.assertRaises(ValueError, value.deserialize, b'foobar')
+
 
 class SecretTest(unittest.TestCase):
-    def test_deserialize_passes_through(self):
+    def test_deserialize_decodes_utf8(self):
         value = types.Secret()
-        result = value.deserialize(b'foo')
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(b'foo', result)
+        result = value.deserialize('æøå'.encode('utf-8'))
+        self.assertIsInstance(result, unicode)
+        self.assertEqual('æøå', result)
 
     def test_deserialize_enforces_required(self):
         value = types.Secret()
@@ -163,6 +167,10 @@ class IntegerTest(unittest.TestCase):
         value = types.Integer(maximum=10)
         self.assertEqual(5, value.deserialize('5'))
         self.assertRaises(ValueError, value.deserialize, '15')
+
+    def test_deserialize_respects_optional(self):
+        value = types.Integer(optional=True)
+        self.assertEqual(None, value.deserialize(''))
 
 
 class BooleanTest(unittest.TestCase):
@@ -367,7 +375,4 @@ class PathTest(unittest.TestCase):
 
     def test_serialize_unicode_string(self):
         value = types.Path()
-        expected = 'æøå'.encode(sys.getfilesystemencoding())
-        result = value.serialize('æøå')
-        self.assertEqual(expected, result)
-        self.assertIsInstance(result, bytes)
+        self.assertRaises(ValueError, value.serialize, 'æøå')

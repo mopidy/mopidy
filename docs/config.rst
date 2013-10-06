@@ -90,6 +90,16 @@ Core configuration values
     ``gst-inspect-0.10`` to see what output properties can be set on the sink.
     For example: ``gst-inspect-0.10 shout2send``
 
+.. confval:: audio/visualizer
+
+    Visualizer to use.
+
+    Can be left blank if no visualizer is desired. Otherwise this expects a
+    GStreamer visualizer. Typical values are ``monoscope``, ``goom``,
+    ``goom2k1`` or one of the `libvisual`_ visualizers.
+
+.. _libvisual: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-plugin-libvisual.html
+
 .. confval:: logging/console_format
 
     The log format used for informational logging.
