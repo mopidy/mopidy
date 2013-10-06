@@ -4,6 +4,18 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.16.0 (UNRELEASED)
+====================
+
+**Audio**
+
+- Added support for parsing and playback of playlists in GStreamer. What this
+  means for end users is basically that you can now add an radio playlist to
+  Mopidy and we will automatically download it and play the stream inside it.
+  Currently we support M3U, PLS, XSPF and ASX files, also note that we can
+  currently only play the first stream in the playlist.
+
+
 v0.15.0 (2013-09-19)
 ====================
 
