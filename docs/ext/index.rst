@@ -33,108 +33,59 @@ developers.
 Mopidy-Beets
 ------------
 
+https://github.com/mopidy/mopidy-beets
+
 Provides a backend for playing music from your `Beets
 <http://beets.radbox.org/>`_ music library through Beets' web extension.
-
-Author:
-    Janez Troha
-PyPI:
-    `Mopidy-Beets <https://pypi.python.org/pypi/Mopidy-Beets>`_
-GitHub:
-    `dz0ny/mopidy-beets <https://github.com/dz0ny/mopidy-beets>`_
-Issues:
-    https://github.com/dz0ny/mopidy-beets/issues
 
 
 Mopidy-GMusic
 -------------
 
+https://github.com/hechtus/mopidy-gmusic
+
 Provides a backend for playing music from `Google Play Music
 <https://play.google.com/music/>`_.
-
-Author:
-    Ronald Hecht
-PyPI:
-    `Mopidy-GMusic <https://pypi.python.org/pypi/Mopidy-GMusic>`_
-GitHub:
-    `hechtus/mopidy-gmusic <https://github.com/hechtus/mopidy-gmusic>`_
-Issues:
-    https://github.com/hechtus/mopidy-gmusic/issues
 
 
 Mopidy-NAD
 ----------
 
-Extension for controlling volume using an external NAD amplifier.
+https://github.com/mopidy/mopidy-nad
 
-Author:
-    Stein Magnus Jodal
-PyPI:
-    `Mopidy-NAD <https://pypi.python.org/pypi/Mopidy-NAD>`_
-GitHub:
-    `mopidy/mopidy-nad <https://github.com/mopidy/mopidy-nad>`_
-Issues:
-    https://github.com/mopidy/mopidy/issues
+Extension for controlling volume using an external NAD amplifier.
 
 
 Mopidy-Scrobbler
 ----------------
 
-Extension for scrobbling played tracks to Last.fm.
+https://github.com/mopidy/mopidy-scrobbler
 
-Author:
-    Stein Magnus Jodal
-PyPI:
-    `Mopidy-Scrobbler <https://pypi.python.org/pypi/Mopidy-Scrobbler>`_
-GitHub:
-    `mopidy/mopidy-scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_
-Issues:
-    https://github.com/mopidy/mopidy-scrobbler/issues
+Extension for scrobbling played tracks to Last.fm.
 
 
 Mopidy-SomaFM
 -------------
 
+https://github.com/AlexandrePTJ/mopidy-somafm/
+
 Provides a backend for playing music from the `SomaFM <http://somafm.com/>`_
 service.
-
-Author:
-    Alexandre Petitjean
-PyPI:
-    `Mopidy-SomaFM <https://pypi.python.org/pypi/Mopidy-SomaFM>`_
-GitHub:
-    `AlexandrePTJ/mopidy-somafm <https://github.com/AlexandrePTJ/mopidy-somafm/>`_
-Issues:
-    https://github.com/AlexandrePTJ/mopidy-somafm/issues
 
 
 Mopidy-SoundCloud
 -----------------
 
+https://github.com/mopidy/mopidy-soundcloud
+
 Provides a backend for playing music from the `SoundCloud
 <http://www.soundcloud.com/>`_ service.
-
-Author:
-    Janez Troha
-PyPI:
-    `Mopidy-SoundCloud <https://pypi.python.org/pypi/Mopidy-SoundCloud>`_
-GitHub:
-    `dz0ny/mopidy-soundcloud <https://github.com/dz0ny/mopidy-soundcloud>`_
-Issues:
-    https://github.com/dz0ny/mopidy-soundcloud/issues
 
 
 Mopidy-Subsonic
 ---------------
 
+https://github.com/rattboi/mopidy-subsonic
+
 Provides a backend for playing music from a `Subsonic Music Streamer
 <http://www.subsonic.org/>`_ library.
-
-Author:
-    Bradon Kanyid
-PyPI:
-    `Mopidy-Subsonic <https://pypi.python.org/pypi/Mopidy-Subsonic>`_
-GitHub:
-    `rattboi/mopidy-subsonic <https://github.com/rattboi/mopidy-subsonic>`_
-Issues:
-    https://github.com/rattboi/mopidy-subsonic/issues
