@@ -11,13 +11,16 @@ import pykka
 
 from mopidy.utils import process
 
-from . import mixers, utils
+from . import mixers, playlists, utils
 from .constants import PlaybackState
 from .listener import AudioListener
 
 logger = logging.getLogger('mopidy.audio')
 
 mixers.register_mixers()
+
+playlists.register_typefinders()
+playlists.register_elements()
 
 
 MB = 1 << 20
