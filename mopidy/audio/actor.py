@@ -544,6 +544,8 @@ class Audio(pykka.ThreadingActor):
         """Convert value between scales."""
         new_min, new_max = new
         old_min, old_max = old
+        if old_min == old_max:
+            return old_max
         scaling = float(new_max - new_min) / (old_max - old_min)
         return int(round(scaling * (value - old_min) + new_min))
 

@@ -15,6 +15,10 @@ v0.16.0 (UNRELEASED)
   Currently we support M3U, PLS, XSPF and ASX files, also note that we can
   currently only play the first stream in the playlist.
 
+- We now handle the rare case where an audio track has max volume equal to min.
+  This was causing divide by zero errors when scaling volumes to a zero to
+  hundred scale. (Fixes: :issue:`525`)
+
 
 v0.15.0 (2013-09-19)
 ====================
