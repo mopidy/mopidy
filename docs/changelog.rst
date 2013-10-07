@@ -9,6 +9,10 @@ v0.16.0 (UNRELEASED)
 
 **Extensions**
 
+- A cookiecutter project for quickly creating new Mopidy extensions have been
+  created. You can find it at `cookiecutter-mopidy-ext
+  <https://github.com/mopidy/cookiecutter-mopidy-ext>`_. (Fixes: :issue:`522`)
+
 - The Last.fm scrobbler has been moved to its own external extension,
   `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`. You'll need
   to install it in addition to Mopidy if you want it to continue to work as it
