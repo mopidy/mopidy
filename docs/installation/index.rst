@@ -250,8 +250,8 @@ can install Mopidy from PyPI using Pip.
 
       sudo pip-python install -U cherrypy ws4py
 
-#. Optional: To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound
-   Menu or from an UPnP client via Rygel, you need some additional
+#. Optional: To use Mopidy-MPRIS, e.g. for controlling Mopidy from the Ubuntu
+   Sound Menu or from an UPnP client via Rygel, you need some additional
    dependencies: the Python bindings for libindicate, and the Python bindings
    for libdbus, the reference D-Bus library.
 

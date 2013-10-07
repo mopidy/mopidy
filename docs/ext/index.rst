@@ -48,6 +48,15 @@ Provides a backend for playing music from `Google Play Music
 <https://play.google.com/music/>`_.
 
 
+Mopidy-MPRIS
+------------
+
+https://github.com/mopidy/mopidy-mpris
+
+Extension for controlling Mopidy through the `MPRIS <http://www.mpris.org/>`_
+D-Bus interface, for example using the Ubuntu Sound Menu.
+
+
 Mopidy-NAD
 ----------
 
@@ -67,7 +76,7 @@ Extension for scrobbling played tracks to Last.fm.
 Mopidy-SomaFM
 -------------
 
-https://github.com/AlexandrePTJ/mopidy-somafm/
+https://github.com/AlexandrePTJ/mopidy-somafm
 
 Provides a backend for playing music from the `SomaFM <http://somafm.com/>`_
 service.

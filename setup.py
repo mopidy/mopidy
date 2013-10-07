@@ -47,7 +47,6 @@ setup(
             'http = mopidy.frontends.http:Extension [http]',
             'local = mopidy.backends.local:Extension',
             'mpd = mopidy.frontends.mpd:Extension',
-            'mpris = mopidy.frontends.mpris:Extension',
             'spotify = mopidy.backends.spotify:Extension [spotify]',
             'stream = mopidy.backends.stream:Extension',
         ],
