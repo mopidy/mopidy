@@ -7,28 +7,35 @@ This changelog is used to track all major changes to Mopidy.
 v0.16.0 (UNRELEASED)
 ====================
 
-**Extensions**
-
-- A cookiecutter project for quickly creating new Mopidy extensions have been
-  created. You can find it at `cookiecutter-mopidy-ext
-  <https://github.com/mopidy/cookiecutter-mopidy-ext>`_. (Fixes: :issue:`522`)
+**Dependencies**
 
 - The Last.fm scrobbler has been moved to its own external extension,
   `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_. You'll need
   to install it in addition to Mopidy if you want it to continue to work as it
   used to.
 
+- The MPRIS frontend has been moved to its own external extension,
+  `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_. You'll need to
+  install it in addition to Mopidy if you want it to continue to work as it
+  used to.
+
 **Audio**
 
-- Added support for parsing and playback of playlists in GStreamer. What this
-  means for end users is basically that you can now add an radio playlist to
-  Mopidy and we will automatically download it and play the stream inside it.
-  Currently we support M3U, PLS, XSPF and ASX files, also note that we can
+- Added support for parsing and playback of playlists in GStreamer.  For end
+  users this basically means that you can now add a radio playlist to Mopidy
+  and we will automatically download it and play the stream inside it.
+  Currently we support M3U, PLS, XSPF and ASX files. Also note that we can
   currently only play the first stream in the playlist.
 
 - We now handle the rare case where an audio track has max volume equal to min.
   This was causing divide by zero errors when scaling volumes to a zero to
   hundred scale. (Fixes: :issue:`525`)
+
+**Extension support**
+
+- A cookiecutter project for quickly creating new Mopidy extensions have been
+  created. You can find it at `cookiecutter-mopidy-ext
+  <https://github.com/mopidy/cookiecutter-mopidy-ext>`_. (Fixes: :issue:`522`)
 
 
 v0.15.0 (2013-09-19)
