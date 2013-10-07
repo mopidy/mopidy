@@ -30,7 +30,7 @@ class MetadataController(object):
     def config(self, uri):
         backend = self._get_backend(uri)
         if backend and backend.has_metadata().get():
-            return backend.metadata.config().get()
+            return backend.metadata.config(uri).get()
         return 0
 
     def status(self, uris=None):
