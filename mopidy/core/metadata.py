@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import urlparse
+import pykka
 
 
 class MetadataController(object):
@@ -34,7 +35,8 @@ class MetadataController(object):
 
     def status(self, uris=None):
         futures = []
-        for (backend, backend_uris) in self._get_backends_to_uris(uris).items():
+        backends = self._get_backends_to_uris(uris).items()
+        for (backend, backend_uris) in backends:
             if backend and backend.has_metadata().get():
                 futures.append(backend.metadata.status(backend_uris))
         return [result for result in pykka.get_all(futures) if result]
