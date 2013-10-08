@@ -9,15 +9,18 @@ v0.16.0 (UNRELEASED)
 
 **Dependencies**
 
-- The Last.fm scrobbler has been moved to its own external extension,
-  `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_. You'll need
-  to install it in addition to Mopidy if you want it to continue to work as it
-  used to.
+Parts of Mopidy have been moved to their own external extensions. If you want
+Mopidy to continue to work like it used to, you may have to install one or more
+of the following extensions as well:
 
-- The MPRIS frontend has been moved to its own external extension,
-  `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_. You'll need to
-  install it in addition to Mopidy if you want it to continue to work as it
-  used to.
+- The Spotify backend has been moved to
+  `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-spotify>`_.
+
+- The Last.fm scrobbler has been moved to
+  `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_.
+
+- The MPRIS frontend has been moved to
+  `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_.
 
 **Audio**
 

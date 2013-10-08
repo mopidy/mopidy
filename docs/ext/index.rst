@@ -87,8 +87,17 @@ Mopidy-SoundCloud
 
 https://github.com/mopidy/mopidy-soundcloud
 
-Provides a backend for playing music from the `SoundCloud
+rovides a backend for playing music from the `SoundCloud
 <http://www.soundcloud.com/>`_ service.
+
+
+Mopidy-Spotify
+--------------
+
+https://github.com/mopidy/mopidy-spotify
+
+Extension for playing music from the `Spotify <http://www.spotify.com/>`_ music
+streaming service.
 
 
 Mopidy-Subsonic
