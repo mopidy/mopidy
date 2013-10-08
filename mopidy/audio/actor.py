@@ -552,8 +552,9 @@ class Audio(pykka.ThreadingActor):
         """
         if self._software_mixing:
             return self._playbin.get_property('mute')
-        else:
-            return bool(self._mixer_track & gst.interfaces.MIXER_TRACK_MUTE)
+        elif self._mixer_track is not None:
+            return bool(self._mixer_track.flags & 
+                        gst.interfaces.MIXER_TRACK_MUTE)
 
     def set_mute(self, status):
         """
@@ -565,7 +566,7 @@ class Audio(pykka.ThreadingActor):
         """
         if self._software_mixing:
             return self._playbin.set_property('mute', bool(status))
-        else:
+        elif self._mixer_track is not None:
             return self._mixer.set_mute(self._mixer_track, bool(status))
 
     def _rescale(self, value, old=None, new=None):
