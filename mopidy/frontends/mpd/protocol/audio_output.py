@@ -14,6 +14,7 @@ def disableoutput(context, outputid):
     """
     if int(outputid) == 0:
         context.core.playback.set_mute(True)
+    # TODO Return proper error on unknown outputid
 
 
 @handle_request(r'^enableoutput "(?P<outputid>\d+)"$')
@@ -27,6 +28,7 @@ def enableoutput(context, outputid):
     """
     if int(outputid) == 0:
         context.core.playback.set_mute(False)
+    # TODO Return proper error on unknown outputid
 
 
 @handle_request(r'^outputs$')
