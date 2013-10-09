@@ -6,11 +6,11 @@ from tests.frontends.mpd import protocol
 class AudioOutputHandlerTest(protocol.BaseTestCase):
     def test_enableoutput(self):
         self.sendRequest('enableoutput "0"')
-        self.assertInResponse('ACK [0@0] {} Not implemented')
+        self.assertInResponse('OK')
 
     def test_disableoutput(self):
         self.sendRequest('disableoutput "0"')
-        self.assertInResponse('ACK [0@0] {} Not implemented')
+        self.assertInResponse('OK')
 
     def test_outputs(self):
         self.sendRequest('outputs')

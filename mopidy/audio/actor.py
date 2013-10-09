@@ -540,6 +540,38 @@ class Audio(pykka.ThreadingActor):
 
         return self._mixer.get_volume(self._mixer_track) == volumes
 
+    def get_mute(self):
+        """
+        Get mute status
+
+        Example values:
+
+        True:
+            Muted.
+        False:
+            Unmuted.
+
+        :rtype: :class:`True` if muted, else :class:`False`
+        """
+        if self._software_mixing:
+            return self._playbin.get_property('mute')
+        elif self._mixer_track is not None:
+            return bool(self._mixer_track.flags & 
+                        gst.interfaces.MIXER_TRACK_MUTE)
+
+    def set_mute(self, status):
+        """
+        Set mute level of the configured element.
+
+        :param status: The new value for mute
+        :type status: bool
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        if self._software_mixing:
+            return self._playbin.set_property('mute', bool(status))
+        elif self._mixer_track is not None:
+            return self._mixer.set_mute(self._mixer_track, bool(status))
+
     def _rescale(self, value, old=None, new=None):
         """Convert value between scales."""
         new_min, new_max = new
