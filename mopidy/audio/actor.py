@@ -542,35 +542,34 @@ class Audio(pykka.ThreadingActor):
 
     def get_mute(self):
         """
-        Get mute status
+        Get mute status of the installed mixer.
 
-        Example values:
-
-        True:
-            Muted.
-        False:
-            Unmuted.
-
-        :rtype: :class:`True` if muted, else :class:`False`
+        :rtype: :class:`True` if muted, :class:`False` if unmuted,
+          :class:`None` if no mixer is installed.
         """
         if self._software_mixing:
             return self._playbin.get_property('mute')
-        elif self._mixer_track is not None:
-            return bool(self._mixer_track.flags & 
-                        gst.interfaces.MIXER_TRACK_MUTE)
 
-    def set_mute(self, status):
+        if self._mixer_track is None:
+            return None
+
+        return bool(self._mixer_track.flags & gst.interfaces.MIXER_TRACK_MUTE)
+
+    def set_mute(self, mute):
         """
-        Set mute level of the configured element.
+        Mute or unmute of the installed mixer.
 
-        :param status: The new value for mute
-        :type status: bool
+        :param mute: Wether to mute the mixer or not.
+        :type mute: bool
         :rtype: :class:`True` if successful, else :class:`False`
         """
         if self._software_mixing:
-            return self._playbin.set_property('mute', bool(status))
-        elif self._mixer_track is not None:
-            return self._mixer.set_mute(self._mixer_track, bool(status))
+            return self._playbin.set_property('mute', bool(mute))
+
+        if self._mixer_track is None:
+            return False
+
+        return self._mixer.set_mute(self._mixer_track, bool(mute))
 
     def _rescale(self, value, old=None, new=None):
         """Convert value between scales."""
