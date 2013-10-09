@@ -96,6 +96,10 @@ class AudioTest(unittest.TestCase):
         self.assertEqual(0, self.audio.get_volume().get())
 
     @unittest.SkipTest
+    def test_set_mute(self):
+        pass  # TODO Probably needs a fakemixer with a mixer track
+
+    @unittest.SkipTest
     def test_set_state_encapsulation(self):
         pass  # TODO
 
