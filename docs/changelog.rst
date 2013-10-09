@@ -34,6 +34,22 @@ of the following extensions as well:
   This was causing divide by zero errors when scaling volumes to a zero to
   hundred scale. (Fixes: :issue:`525`)
 
+- Added support for muting audio without setting the volume to 0. This works
+  both for the software and hardware mixers. (Fixes: :issue:`186`)
+
+**Core**
+
+- Added :attr:`mopidy.core.PlaybackController.mute` for muting and unmuting
+  audio. (Fixes: :issue:`186`)
+
+- Added :meth:`mopidy.core.CoreListener.mute_changed` event that is triggered
+  when the mute state changes.
+
+**MPD frontend**
+
+- Made the formerly unused commands ``outputs``, ``enableoutput``, and
+  ``disableoutput`` mute/unmute audio. (Related to: :issue:`186`)
+
 **Extension support**
 
 - A cookiecutter project for quickly creating new Mopidy extensions have been
