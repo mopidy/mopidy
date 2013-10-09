@@ -143,6 +143,17 @@ class CoreListener(object):
         """
         pass
 
+    def mute_changed(self, mute):
+        """
+        Called whenever the mute state is changed.
+
+        *MAY* be implemented by actor.
+
+        :param mute: the new mute state
+        :type mute: boolean
+        """
+        pass
+
     def seeked(self, time_position):
         """
         Called whenever the time position changes by an unexpected amount, e.g.

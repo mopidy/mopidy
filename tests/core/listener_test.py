@@ -51,5 +51,8 @@ class CoreListenerTest(unittest.TestCase):
     def test_listener_has_default_impl_for_volume_changed(self):
         self.listener.volume_changed(70)
 
+    def test_listener_has_default_impl_for_mute_changed(self):
+        self.listener.mute_changed(True)
+
     def test_listener_has_default_impl_for_seeked(self):
         self.listener.seeked(0)
