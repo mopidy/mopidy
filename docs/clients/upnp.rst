@@ -36,19 +36,21 @@ How to make Mopidy available as an UPnP MediaRenderer
 =====================================================
 
 With the help of `the Rygel project <https://live.gnome.org/Rygel>`_ Mopidy can
-be made available as an UPnP MediaRenderer. Rygel will interface with Mopidy's
-:ref:`MPRIS frontend <ext-mpris>`, and make Mopidy available as a MediaRenderer
-on the local network. Since this depends on the MPRIS frontend, which again
-depends on D-Bus being available, this will only work on Linux, and not OS X.
-MPRIS/D-Bus is only available to other applications on the same host, so Rygel
-must be running on the same machine as Mopidy.
+be made available as an UPnP MediaRenderer. Rygel will interface with the MPRIS
+interface provided by the `Mopidy-MPRIS extension
+<https://github.com/mopidy/mopidy-mpris>`_, and make Mopidy available as a
+MediaRenderer on the local network. Since this depends on the MPRIS frontend,
+which again depends on D-Bus being available, this will only work on Linux, and
+not OS X.  MPRIS/D-Bus is only available to other applications on the same
+host, so Rygel must be running on the same machine as Mopidy.
 
-1. Start Mopidy and make sure the :ref:`MPRIS frontend <ext-mpris>` is working.
-   It is activated by default, but you may miss dependencies or be using OS X,
-   in which case it will not work. Check the console output when Mopidy is
-   started for any errors related to the MPRIS frontend. If you're unsure it is
-   working, there are instructions for how to test it on the :ref:`MPRIS
-   frontend <ext-mpris>` page.
+1. Start Mopidy and make sure the MPRIS frontend is working.  It is activated
+   by default when the Mopidy-MPRIS extension is installed, but you may miss
+   dependencies or be using OS X, in which case it will not work. Check the
+   console output when Mopidy is started for any errors related to the MPRIS
+   frontend. If you're unsure it is working, there are instructions for how to
+   test it on in the `Mopidy-MPRIS readme
+   <https://github.com/mopidy/mopidy-mpris>`_.
 
 2. Install Rygel. On Debian/Ubuntu::
 

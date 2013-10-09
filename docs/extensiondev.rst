@@ -62,6 +62,20 @@ extension, Mopidy-Soundspot::
 Example content for the most important files follows below.
 
 
+cookiecutter project template
+=============================
+
+We've also made a `cookiecutter <http://cookiecutter.readthedocs.org/>`_
+project template for `creating new Mopidy extensions
+<https://github.com/mopidy/cookiecutter-mopidy-ext>`_. If you install
+cookiecutter and run a single command, you're asked a few questions about the
+name of your extension, etc. This is used to create a folder structure similar
+to the above, with all the needed files and most of the details filled in for
+you. This saves you a lot of tedious work and copy-pasting from this howto. See
+the readme of `cookiecutter-mopidy-ext
+<https://github.com/mopidy/cookiecutter-mopidy-ext>`_ for further details.
+
+
 Example README.rst
 ==================
 
@@ -73,23 +87,29 @@ installation using ``pip install Mopidy-Something==dev`` to work.
 
 .. code-block:: rst
 
+    ****************
     Mopidy-Soundspot
-    ================
+    ****************
 
     `Mopidy <http://www.mopidy.com/>`_ extension for playing music from
     `Soundspot <http://soundspot.example.com/>`_.
 
-    Usage
-    -----
-
     Requires a Soundspot Platina subscription and the pysoundspot library.
+
+
+    Installation
+    ============
 
     Install by running::
 
         sudo pip install Mopidy-Soundspot
 
-    Or install the Debian/Ubuntu package from `apt.mopidy.com
+    Or, if available, install the Debian/Ubuntu package from `apt.mopidy.com
     <http://apt.mopidy.com/>`_.
+
+
+    Configuration
+    =============
 
     Before starting Mopidy, you must add your Soundspot username and password
     to the Mopidy configuration file::
@@ -98,34 +118,46 @@ installation using ``pip install Mopidy-Something==dev`` to work.
         username = alice
         password = secret
 
+
     Project resources
-    -----------------
+    =================
 
     - `Source code <https://github.com/mopidy/mopidy-soundspot>`_
     - `Issue tracker <https://github.com/mopidy/mopidy-soundspot/issues>`_
-    - `Download development snapshot <https://github.com/mopidy/mopidy-soundspot/tarball/develop#egg=Mopidy-Soundspot-dev>`_
+    - `Download development snapshot <https://github.com/mopidy/mopidy-soundspot/tarball/master#egg=Mopidy-Soundspot-dev>`_
+
+
+    Changelog
+    =========
+
+    v0.1.0 (2013-09-17)
+    -------------------
+
+    - Initial release.
 
 
 Example setup.py
 ================
 
-The ``setup.py`` file must use setuptools/distribute, and not distutils. This
-is because Mopidy extensions use setuptools' entry point functionality to
-register themselves as available Mopidy extensions when they are installed on
-your system.
+The ``setup.py`` file must use setuptools, and not distutils. This is because
+Mopidy extensions use setuptools' entry point functionality to register
+themselves as available Mopidy extensions when they are installed on your
+system.
 
 The example below also includes a couple of convenient tricks for reading the
 package version from the source code so that it is defined in a single place,
 and to reuse the README file as the long description of the package for the
 PyPI registration.
 
-The package must have ``install_requires`` on ``setuptools`` and ``Mopidy``, in
-addition to any other dependencies required by your extension. The
-``entry_points`` part must be included. The ``mopidy.ext`` part cannot be
-changed, but the innermost string should be changed. It's format is
-``ext_name = package_name:Extension``. ``ext_name`` should be a short
-name for your extension, typically the part after "Mopidy-" in lowercase. This
-name is used e.g. to name the config section for your extension. The
+The package must have ``install_requires`` on ``setuptools`` and ``Mopidy >=
+0.14`` (or a newer version, if your extension requires it), in addition to any
+other dependencies required by your extension. If you implement a Mopidy
+frontend or backend, you'll need to include ``Pykka >= 1.1`` in the
+requirements. The ``entry_points`` part must be included. The ``mopidy.ext``
+part cannot be changed, but the innermost string should be changed. It's format
+is ``ext_name = package_name:Extension``.  ``ext_name`` should be a short name
+for your extension, typically the part after "Mopidy-" in lowercase. This name
+is used e.g. to name the config section for your extension. The
 ``package_name:Extension`` part is simply the Python path to the extension
 class that will connect the rest of the dots.
 
@@ -134,7 +166,7 @@ class that will connect the rest of the dots.
     from __future__ import unicode_literals
 
     import re
-    from setuptools import setup
+    from setuptools import setup, find_packages
 
 
     def get_version(filename):
@@ -146,19 +178,25 @@ class that will connect the rest of the dots.
     setup(
         name='Mopidy-Soundspot',
         version=get_version('mopidy_soundspot/__init__.py'),
-        url='http://example.com/mopidy-soundspot/',
+        url='https://github.com/your-account/mopidy-soundspot',
         license='Apache License, Version 2.0',
         author='Your Name',
         author_email='your-email@example.com',
         description='Very short description',
         long_description=open('README.rst').read(),
-        packages=['mopidy_soundspot'],
+        packages=find_packages(exclude=['tests', 'tests.*']),
         zip_safe=False,
         include_package_data=True,
         install_requires=[
             'setuptools',
-            'Mopidy',
+            'Mopidy >= 0.14',
+            'Pykka >= 1.1',
             'pysoundspot',
+        ],
+        test_suite='nose.collector',
+        tests_require=[
+            'nose',
+            'mock >= 1.0',
         ],
         entry_points={
             'mopidy.ext': [

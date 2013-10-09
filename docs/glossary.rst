@@ -24,10 +24,9 @@ Glossary
 
     frontend
         A part of Mopidy *using* the :term:`core` API. Existing frontends
-        include the :ref:`MPD server <ext-mpd>`, the :ref:`MPRIS/D-Bus
-        integration <ext-mpris>`, the :ref:`Last.fm scrobbler <ext-scrobbler>`,
-        and the :ref:`HTTP server <ext-http>` with JavaScript API. See
-        :ref:`frontend-api` for details.
+        include the :ref:`MPD server <ext-mpd>`, the MPRIS/D-Bus integration,
+        the Last.fm scrobbler, and the :ref:`HTTP server <ext-http>` with
+        JavaScript API. See :ref:`frontend-api` for details.
 
     mixer
         A GStreamer element that controls audio volume.
