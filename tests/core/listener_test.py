@@ -49,7 +49,7 @@ class CoreListenerTest(unittest.TestCase):
         self.listener.options_changed()
 
     def test_listener_has_default_impl_for_volume_changed(self):
-        self.listener.volume_changed()
+        self.listener.volume_changed(70)
 
     def test_listener_has_default_impl_for_seeked(self):
         self.listener.seeked(0)

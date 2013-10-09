@@ -132,11 +132,14 @@ class CoreListener(object):
         """
         pass
 
-    def volume_changed(self):
+    def volume_changed(self, volume):
         """
         Called whenever the volume is changed.
 
         *MAY* be implemented by actor.
+
+        :param volume: the new volume in the range [0..100]
+        :type volume: int
         """
         pass
 
