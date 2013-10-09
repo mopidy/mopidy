@@ -540,6 +540,15 @@ class Audio(pykka.ThreadingActor):
 
         return self._mixer.get_volume(self._mixer_track) == volumes
 
+    def _rescale(self, value, old=None, new=None):
+        """Convert value between scales."""
+        new_min, new_max = new
+        old_min, old_max = old
+        if old_min == old_max:
+            return old_max
+        scaling = float(new_max - new_min) / (old_max - old_min)
+        return int(round(scaling * (value - old_min) + new_min))
+
     def get_mute(self):
         """
         Get mute status of the installed mixer.
@@ -570,15 +579,6 @@ class Audio(pykka.ThreadingActor):
             return False
 
         return self._mixer.set_mute(self._mixer_track, bool(mute))
-
-    def _rescale(self, value, old=None, new=None):
-        """Convert value between scales."""
-        new_min, new_max = new
-        old_min, old_max = old
-        if old_min == old_max:
-            return old_max
-        scaling = float(new_max - new_min) / (old_max - old_min)
-        return int(round(scaling * (value - old_min) + new_min))
 
     def set_metadata(self, track):
         """
