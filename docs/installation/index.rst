@@ -87,8 +87,9 @@ Mopidy Git repo, which always corresponds to the latest release.
    To upgrade Mopidy to future releases, just rerun ``makepkg``.
 
 #. Optional: If you want to scrobble your played tracks to Last.fm, you need to
-   install `python2-pylast
-   <https://aur.archlinux.org/packages/python2-pylast/>`_ from AUR.
+   install `python2-pylast`::
+   
+       sudo pacman -S python2-pylast
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
