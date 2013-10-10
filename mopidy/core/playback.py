@@ -24,6 +24,7 @@ class PlaybackController(object):
         self._shuffled = []
         self._first_shuffle = True
         self._volume = None
+        self._mute = False
 
     def _get_backend(self):
         if self.current_tl_track is None:
@@ -288,6 +289,26 @@ class PlaybackController(object):
     volume = property(get_volume, set_volume)
     """Volume as int in range [0..100] or :class:`None`"""
 
+    def get_mute(self):
+        if self.audio:
+            return self.audio.get_mute().get()
+        else:
+            # For testing
+            return self._mute
+
+    def set_mute(self, value):
+        value = bool(value)
+        if self.audio:
+            self.audio.set_mute(value)
+        else:
+            # For testing
+            self._mute = value
+
+        self._trigger_mute_changed(value)
+
+    mute = property(get_mute, set_mute)
+    """Mute state as a :class:`True` if muted, :class:`False` otherwise"""
+
     ### Methods
 
     def change_track(self, tl_track, on_error_step=1):
@@ -517,6 +538,10 @@ class PlaybackController(object):
     def _trigger_volume_changed(self, volume):
         logger.debug('Triggering volume changed event')
         listener.CoreListener.send('volume_changed', volume=volume)
+
+    def _trigger_mute_changed(self, mute):
+        logger.debug('Triggering mute changed event')
+        listener.CoreListener.send('mute_changed', mute=mute)
 
     def _trigger_seeked(self, time_position):
         logger.debug('Triggering seeked event')
