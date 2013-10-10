@@ -12,6 +12,11 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertEqual(self.core.playback.mute.get(), False)
 
+    def test_enableoutput_unknown_outputid(self):
+        self.sendRequest('enableoutput "7"')
+
+        self.assertInResponse('ACK [50@0] {enableoutput} No such audio output')
+
     def test_disableoutput(self):
         self.core.playback.mute = False
 
@@ -19,6 +24,12 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
 
         self.assertInResponse('OK')
         self.assertEqual(self.core.playback.mute.get(), True)
+
+    def test_disableoutput_unknown_outputid(self):
+        self.sendRequest('disableoutput "7"')
+
+        self.assertInResponse(
+            'ACK [50@0] {disableoutput} No such audio output')
 
     def test_outputs_when_unmuted(self):
         self.core.playback.mute = False

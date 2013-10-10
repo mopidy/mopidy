@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from mopidy.frontends.mpd.exceptions import MpdNoExistError
 from mopidy.frontends.mpd.protocol import handle_request
 
 
@@ -14,7 +15,8 @@ def disableoutput(context, outputid):
     """
     if int(outputid) == 0:
         context.core.playback.set_mute(True)
-    # TODO Return proper error on unknown outputid
+    else:
+        raise MpdNoExistError('No such audio output', command='disableoutput')
 
 
 @handle_request(r'^enableoutput "(?P<outputid>\d+)"$')
@@ -28,7 +30,8 @@ def enableoutput(context, outputid):
     """
     if int(outputid) == 0:
         context.core.playback.set_mute(False)
-    # TODO Return proper error on unknown outputid
+    else:
+        raise MpdNoExistError('No such audio output', command='enableoutput')
 
 
 @handle_request(r'^outputs$')
