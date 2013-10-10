@@ -26,8 +26,8 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.sendRequest('outputs')
 
         self.assertInResponse('outputid: 0')
-        self.assertInResponse('outputname: Default')
-        self.assertInResponse('outputenabled: 1')
+        self.assertInResponse('outputname: Mute')
+        self.assertInResponse('outputenabled: 0')
         self.assertInResponse('OK')
 
     def test_outputs_when_muted(self):
@@ -36,6 +36,6 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.sendRequest('outputs')
 
         self.assertInResponse('outputid: 0')
-        self.assertInResponse('outputname: Default')
-        self.assertInResponse('outputenabled: 0')
+        self.assertInResponse('outputname: Mute')
+        self.assertInResponse('outputenabled: 1')
         self.assertInResponse('OK')

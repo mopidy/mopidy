@@ -40,9 +40,9 @@ def outputs(context):
 
         Shows information about all outputs.
     """
-    enabled = 0 if context.core.playback.get_mute().get() else 1
+    muted = 1 if context.core.playback.get_mute().get() else 0
     return [
         ('outputid', 0),
-        ('outputname', 'Default'),
-        ('outputenabled', enabled),
+        ('outputname', 'Mute'),
+        ('outputenabled', muted),
     ]
