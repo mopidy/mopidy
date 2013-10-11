@@ -35,6 +35,8 @@ class Mock(object):
         elif (name[0] == name[0].upper()
                 # gst.interfaces.MIXER_TRACK_*
                 and not name.startswith('MIXER_TRACK_')
+                # gst.PadTemplate
+                and not name.startswith('PadTemplate')
                 # dbus.String()
                 and not name == 'String'):
             return type(name, (), {})

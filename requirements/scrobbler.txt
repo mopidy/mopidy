@@ -1,3 +1,0 @@
-pylast >= 0.5.7
-# Available as python-pylast in newer Debian/Ubuntu and from apt.mopidy.com for
-# older releases of Debian/Ubuntu
