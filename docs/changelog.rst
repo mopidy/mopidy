@@ -4,6 +4,59 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.16.0 (UNRELEASED)
+====================
+
+**Dependencies**
+
+Parts of Mopidy have been moved to their own external extensions. If you want
+Mopidy to continue to work like it used to, you may have to install one or more
+of the following extensions as well:
+
+- The Spotify backend has been moved to
+  `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-spotify>`_.
+
+- The Last.fm scrobbler has been moved to
+  `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_.
+
+- The MPRIS frontend has been moved to
+  `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_.
+
+**Audio**
+
+- Added support for parsing and playback of playlists in GStreamer.  For end
+  users this basically means that you can now add a radio playlist to Mopidy
+  and we will automatically download it and play the stream inside it.
+  Currently we support M3U, PLS, XSPF and ASX files. Also note that we can
+  currently only play the first stream in the playlist.
+
+- We now handle the rare case where an audio track has max volume equal to min.
+  This was causing divide by zero errors when scaling volumes to a zero to
+  hundred scale. (Fixes: :issue:`525`)
+
+- Added support for muting audio without setting the volume to 0. This works
+  both for the software and hardware mixers. (Fixes: :issue:`186`)
+
+**Core**
+
+- Added :attr:`mopidy.core.PlaybackController.mute` for muting and unmuting
+  audio. (Fixes: :issue:`186`)
+
+- Added :meth:`mopidy.core.CoreListener.mute_changed` event that is triggered
+  when the mute state changes.
+
+**MPD frontend**
+
+- Made the formerly unused commands ``outputs``, ``enableoutput``, and
+  ``disableoutput`` mute/unmute audio. (Related to: :issue:`186`)
+
+**Extension support**
+
+- A cookiecutter project for quickly creating new Mopidy extensions have been
+  created. You can find it at `cookiecutter-mopidy-ext
+  <https://github.com/mopidy/cookiecutter-mopidy-ext>`_. (Fixes: :issue:`522`)
+
+
 v0.15.0 (2013-09-19)
 ====================
 

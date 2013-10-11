@@ -83,8 +83,7 @@ class Extension(object):
         """List of library updater classes
 
         :returns: list of
-          :class:`~mopidy.backends.base.BaseLibraryUpdateProvider`
-        subclasses
+          :class:`~mopidy.backends.base.BaseLibraryUpdateProvider` subclasses
         """
         return []
 

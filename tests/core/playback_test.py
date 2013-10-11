@@ -177,3 +177,10 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertFalse(self.playback1.get_time_position.called)
         self.assertFalse(self.playback2.get_time_position.called)
+
+    def test_mute(self):
+        self.assertEqual(self.core.playback.mute, False)
+
+        self.core.playback.mute = True
+
+        self.assertEqual(self.core.playback.mute, True)
