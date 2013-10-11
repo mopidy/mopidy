@@ -30,6 +30,15 @@ These extensions are maintained outside Mopidy's core, often by other
 developers.
 
 
+Mopidy-Arcam
+------------
+
+https://github.com/mopidy/mopidy-arcam
+
+Extension for controlling volume using an external Arcam amplifier. Developed
+and tested with an Arcam AVR-300.
+
+
 Mopidy-Beets
 ------------
 
