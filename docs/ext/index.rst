@@ -65,6 +65,16 @@ https://github.com/mopidy/mopidy-nad
 Extension for controlling volume using an external NAD amplifier.
 
 
+Mopidy-radio-de
+---------------
+
+https://github.com/hechtus/mopidy-radio-de
+
+Extension for listening to Internet radio stations and podcasts listed at
+`radio.de <http://www.radio.de/>`_, `rad.io <http://www.rad.io/>`_,
+`radio.fr <http://www.radio.fr/>`_, and `radio.at <http://www.radio.at/>`_.
+
+
 Mopidy-Scrobbler
 ----------------
 
