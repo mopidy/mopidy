@@ -28,8 +28,6 @@ setup(
         'Pykka >= 1.1',
     ],
     extras_require={
-        'spotify': ['pyspotify >= 1.9, < 2'],
-        'scrobbler': ['pylast >= 0.5.7'],
         'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
     },
     test_suite='nose.collector',
@@ -45,11 +43,8 @@ setup(
         ],
         'mopidy.ext': [
             'http = mopidy.frontends.http:Extension [http]',
-            'scrobbler = mopidy.frontends.scrobbler:Extension [scrobbler]',
             'local = mopidy.backends.local:Extension',
             'mpd = mopidy.frontends.mpd:Extension',
-            'mpris = mopidy.frontends.mpris:Extension',
-            'spotify = mopidy.backends.spotify:Extension [spotify]',
             'stream = mopidy.backends.stream:Extension',
         ],
     },
