@@ -165,7 +165,7 @@ class PlaybackController(object):
         else:
             self.stop(clear_current_track=True)
 
-        self.core.tracklist.mark("consumed", original_tl_track)
+        self.core.tracklist.mark_consumed(original_tl_track)
 
     def on_tracklist_change(self):
         """
@@ -175,7 +175,8 @@ class PlaybackController(object):
         """
 
         if (not self.core.tracklist.tl_tracks or
-                self.current_tl_track not in self.core.tracklist.tl_tracks):
+                self.current_tl_track not in
+                self.core.tracklist.tl_tracks):
             self.stop(clear_current_track=True)
 
     def next(self):
@@ -229,7 +230,7 @@ class PlaybackController(object):
             backend = self._get_backend()
             if not backend or not backend.playback.play(tl_track.track).get():
                 logger.warning('Track is not playable: %s', tl_track.track.uri)
-                self.core.tracklist.mark("unplayable", tl_track)
+                self.core.tracklist.mark_unplayable(tl_track)
                 if on_error_step == 1:
                     # TODO: can cause an endless loop for single track repeat.
                     self.next()
@@ -237,7 +238,7 @@ class PlaybackController(object):
                     self.previous()
                 return
 
-        self.core.tracklist.mark("starting", tl_track)
+        self.core.tracklist.mark_starting(tl_track)
 
         self._trigger_track_playback_started()
 

@@ -498,37 +498,35 @@ class TracklistController(object):
         """
         return self._tl_tracks[start:end]
 
-    def mark(self, how, tl_track, **kwargs):
-        """
-        Marks the given track as specified. Currently by default supports::
-            * `consumed` The track has been completely played.
-            * `starting` The track has just starting playback, at least a
-              piece of it.
-            * `unplayable` The track is unplayable
-            * `metadata` The metadata of the song changed
-
-        :param how: How to mark the song
-        :type how: string
-        :param tl_track: Track to mark
-        :type tl_track: :class:`mopidy.models.TlTrack`
-        :rtype: True if the track was actually removed from the tracklist
-        """
-        backend = self._get_backend(self.core.playback.current_tl_track)
+    def mark_consumed(self, tl_track):
+        backend = self._get_backend(tl_track)
         if backend and backend.has_tracklist().get():
-            if backend.tracklist.mark(self, how, tl_track, **kwargs).get():
-                return
+            result = backend.tracklist.mark_consumed(self, tl_track).get()
+            if result in [True, False]:
+                return result
 
-        if how == "consumed":
-            if not self.consume:
-                return False
-            self.remove(tlid=tl_track.tlid)
-            return True
-        elif how == "starting":
-            if self.random and tl_track in self._shuffled:
-                self._shuffled.remove(tl_track)
-        elif how == "unplayable":
-            if self.random and self._shuffled:
-                self._shuffled.remove(tl_track)
+        if not self.consume:
+            return False
+        self.remove(tlid=tl_track.tlid)
+        return True
+
+    def mark_starting(self, tl_track):
+        backend = self._get_backend(tl_track)
+        if backend and backend.has_tracklist().get():
+            result = backend.tracklist.mark_starting(self, tl_track).get()
+            if result:
+                return result
+        if self.random and tl_track in self._shuffled:
+            self._shuffled.remove(tl_track)
+
+    def mark_unplayable(self, tl_track):
+        backend = self._get_backend(tl_track)
+        if backend and backend.has_tracklist().get():
+            result = backend.tracklist.mark_unplayable(self, tl_track).get()
+            if result:
+                return result
+        if self.random and self._shuffled:
+            self._shuffled.remove(tl_track) 
 
     def _trigger_tracklist_changed(self):
         self._first_shuffle = True

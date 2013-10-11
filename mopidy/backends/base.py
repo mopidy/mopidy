@@ -426,22 +426,11 @@ class BaseTracklistProvider(object):
         """
         return False
 
-    def mark(self, tracklist, how, tl_track, **kwargs):
-        """
-        Marking actions can vary and they let the backend know when tracks have
-        been skipped, played completelly, partially, etc. This is a call meant
-        to not only control TracklistController's internal state in regards on
-        actions to be carried as an action of skipping/playing a track but to
-        let the backend use some reporting features that some services may
-        require, like listening reporting.
+    def mark_consumed(self, tracklist, tl_track):
+        return None
 
-        :param tracklist: The instance of core's TracklistController
-        :type tracklist: :class:`mopidy.core.TracklistController`
-        :param how: How the track must be marked as
-        :type how: str
-        :param tl_track: The track to be marked
-        :type how: :class:`mopidy.models.TlTrack`
-        :rtype: In order to add some login before, the Provider must return
-        False, to replace the logic, the Provider must return True.
-        """
-        return False
+    def mark_starting(self, tracklist, tl_track):
+        return None
+
+    def mark_unplayable(self, tracklist, tl_track):
+        return None
