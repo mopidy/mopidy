@@ -14,7 +14,7 @@ Mopidy to continue to work like it used to, you may have to install one or more
 of the following extensions as well:
 
 - The Spotify backend has been moved to
-  `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-spotify>`_.
+  `Mopidy-Spotify <https://github.com/mopidy/mopidy-spotify>`_.
 
 - The Last.fm scrobbler has been moved to
   `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_.
