@@ -2,7 +2,6 @@ include *.rst
 include LICENSE
 include MANIFEST.in
 include data/mopidy.desktop
-include mopidy/backends/spotify/spotify_appkey.key
 include pylintrc
 
 recursive-include docs *

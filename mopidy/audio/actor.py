@@ -11,13 +11,16 @@ import pykka
 
 from mopidy.utils import process
 
-from . import mixers, utils
+from . import mixers, playlists, utils
 from .constants import PlaybackState
 from .listener import AudioListener
 
 logger = logging.getLogger('mopidy.audio')
 
 mixers.register_mixers()
+
+playlists.register_typefinders()
+playlists.register_elements()
 
 
 MB = 1 << 20
@@ -563,8 +566,41 @@ class Audio(pykka.ThreadingActor):
         """Convert value between scales."""
         new_min, new_max = new
         old_min, old_max = old
+        if old_min == old_max:
+            return old_max
         scaling = float(new_max - new_min) / (old_max - old_min)
         return int(round(scaling * (value - old_min) + new_min))
+
+    def get_mute(self):
+        """
+        Get mute status of the installed mixer.
+
+        :rtype: :class:`True` if muted, :class:`False` if unmuted,
+          :class:`None` if no mixer is installed.
+        """
+        if self._software_mixing:
+            return self._playbin.get_property('mute')
+
+        if self._mixer_track is None:
+            return None
+
+        return bool(self._mixer_track.flags & gst.interfaces.MIXER_TRACK_MUTE)
+
+    def set_mute(self, mute):
+        """
+        Mute or unmute of the installed mixer.
+
+        :param mute: Wether to mute the mixer or not.
+        :type mute: bool
+        :rtype: :class:`True` if successful, else :class:`False`
+        """
+        if self._software_mixing:
+            return self._playbin.set_property('mute', bool(mute))
+
+        if self._mixer_track is None:
+            return False
+
+        return self._mixer.set_mute(self._mixer_track, bool(mute))
 
     def set_metadata(self, track):
         """

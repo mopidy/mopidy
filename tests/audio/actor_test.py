@@ -6,6 +6,9 @@ import pygst
 pygst.require('0.10')
 import gst
 
+import gobject
+gobject.threads_init()
+
 import pykka
 
 from mopidy import audio
@@ -79,6 +82,22 @@ class AudioTest(unittest.TestCase):
         for value in range(0, 101):
             self.assertTrue(self.audio.set_volume(value).get())
             self.assertEqual(value, self.audio.get_volume().get())
+
+    def test_set_volume_with_mixer_min_equal_max(self):
+        config = {
+            'audio': {
+                'mixer': 'fakemixer track_max_volume=0',
+                'mixer_track': None,
+                'output': 'fakesink',
+                'visualizer': None,
+            }
+        }
+        self.audio = audio.Audio.start(config=config).proxy()
+        self.assertEqual(0, self.audio.get_volume().get())
+
+    @unittest.SkipTest
+    def test_set_mute(self):
+        pass  # TODO Probably needs a fakemixer with a mixer track
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
