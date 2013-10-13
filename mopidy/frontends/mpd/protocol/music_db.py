@@ -5,7 +5,7 @@ import itertools
 
 from mopidy.models import Track
 from mopidy.frontends.mpd import translator
-from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.exceptions import MpdNotImplemented, MpdArgError
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
@@ -57,7 +57,7 @@ def count(context, mpd_query):
     try:
         query = translator.query_from_mpd_search_format(mpd_query)
     except ValueError:
-        return
+        raise MpdArgError('incorrect arguments', command='count')
     results = context.core.library.find_exact(**query).get()
     result_tracks = _get_tracks(results)
     return [('songs', len(result_tracks)),
