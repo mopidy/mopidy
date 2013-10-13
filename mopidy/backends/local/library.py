@@ -55,18 +55,22 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 values = [values]
             # FIXME this is bound to be slow for large libraries
             for value in values:
-                q = value.strip()
+                if field != 'track_no':
+                    q = value.strip()
+                else:
+                    q = value
 
                 uri_filter = lambda t: q == t.uri
-                track_filter = lambda t: q == int(t.track_no) \
-                    if t.track_no.isdigit() else None
+                track_filter = lambda t: q == t.name
                 album_filter = lambda t: q == getattr(t, 'album', Album()).name
                 artist_filter = lambda t: filter(
                     lambda a: q == a.name, t.artists)
                 date_filter = lambda t: q == t.date
+                track_no_filter = lambda t: q == t.track_no
                 any_filter = lambda t: (
                     track_filter(t) or album_filter(t) or
-                    artist_filter(t) or uri_filter(t))
+                    artist_filter(t) or uri_filter(t) or
+                    track_no_filter(t) or date_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -78,6 +82,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(artist_filter, result_tracks)
                 elif field == 'date':
                     result_tracks = filter(date_filter, result_tracks)
+                elif field == 'track_no':
+                    result_tracks = filter(track_no_filter, result_tracks)
                 elif field == 'any':
                     result_tracks = filter(any_filter, result_tracks)
                 else:
@@ -98,7 +104,10 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 values = [values]
             # FIXME this is bound to be slow for large libraries
             for value in values:
-                q = value.strip().lower()
+                if field != 'track_no':
+                    q = value.strip().lower()
+                else:
+                    q = value
 
                 uri_filter = lambda t: q in t.uri.lower()
                 track_filter = lambda t: q in t.name.lower()
@@ -107,8 +116,11 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 artist_filter = lambda t: filter(
                     lambda a: q in a.name.lower(), t.artists)
                 date_filter = lambda t: t.date and t.date.startswith(q)
-                any_filter = lambda t: track_filter(t) or album_filter(t) or \
-                    artist_filter(t) or uri_filter(t)
+                track_no_filter = lambda t: q == t.track_no
+                any_filter = lambda t: (
+                    track_filter(t) or artist_filter(t) or
+                    uri_filter(t) or album_filter(t) or
+                    track_no_filter(t) or date_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -120,6 +132,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(artist_filter, result_tracks)
                 elif field == 'date':
                     result_tracks = filter(date_filter, result_tracks)
+                elif field == 'track_no':
+                    result_tracks = filter(track_no_filter, result_tracks)
                 elif field == 'any':
                     result_tracks = filter(any_filter, result_tracks)
                 else:

@@ -59,8 +59,6 @@ def count(context, mpd_query):
     except ValueError:
         return
     results = context.core.library.find_exact(**query).get()
-    result_tracks = []
-
     result_tracks = _get_tracks(results)
     return [('songs', len(result_tracks)),
             ('playtime', sum(track.length for track in result_tracks) / 1000)]

@@ -202,6 +202,8 @@ def query_from_mpd_search_format(mpd_query):
         field = m.groupdict()['field'].lower()
         if field == 'title':
             field = 'track'
+        if field == 'track':
+            field = 'track_no'
         elif field in ('file', 'filename'):
             field = 'uri'
         field = str(field)  # Needed for kwargs keys on OS X and Windows
