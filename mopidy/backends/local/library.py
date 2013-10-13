@@ -58,7 +58,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 q = value.strip()
 
                 uri_filter = lambda t: q == t.uri
-                track_filter = lambda t: q == t.name
+                track_filter = lambda t: int(q) == t.track_no
                 album_filter = lambda t: q == getattr(t, 'album', Album()).name
                 artist_filter = lambda t: filter(
                     lambda a: q == a.name, t.artists)
