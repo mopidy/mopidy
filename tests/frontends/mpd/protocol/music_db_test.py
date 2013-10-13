@@ -24,6 +24,23 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('playtime: 0')
         self.assertInResponse('OK')
 
+    def test_count_correct_length(self):
+        self.backend.library.dummy_search_result = SearchResult(
+            tracks=[Track(name='A', date="2001", length=4000),
+                    Track(name='B', date="2001", length=50000),
+                    Track(name='C', date="2001", length=600000),
+                    Track(name='D', date="2009", length=60000)
+                    ])
+        self.sendRequest('count "date" "2009"')
+        self.assertInResponse('songs: 1')
+        self.assertInResponse('playtime: 4000')
+        self.assertInResponse('OK')
+
+        self.sendRequest('count "date" "2001"')
+        self.assertInResponse('songs: 3')
+        self.assertInResponse('playtime: 654000')
+        self.assertInResponse('OK')
+
     def test_findadd(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
@@ -233,6 +250,14 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
     def test_find_title_without_quotes(self):
         self.sendRequest('find title "what"')
+        self.assertInResponse('OK')
+
+    def test_find_track_no(self):
+        self.sendRequest('find "track" "what"')
+        self.assertInResponse('OK')
+
+    def test_find_track_no_without_quotes(self):
+        self.sendRequest('find track "what"')
         self.assertInResponse('OK')
 
     def test_find_date(self):
@@ -591,6 +616,18 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
 
     def test_search_any_without_filter_value(self):
         self.sendRequest('search "any" ""')
+        self.assertInResponse('OK')
+
+    def test_search_track_no(self):
+        self.sendRequest('search "track" "anything"')
+        self.assertInResponse('OK')
+
+    def test_search_track_no_without_quotes(self):
+        self.sendRequest('search track "anything"')
+        self.assertInResponse('OK')
+
+    def test_search_track_no_without_filter_value(self):
+        self.sendRequest('search "track" ""')
         self.assertInResponse('OK')
 
     def test_search_date(self):
