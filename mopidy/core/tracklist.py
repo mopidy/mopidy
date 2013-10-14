@@ -526,7 +526,7 @@ class TracklistController(object):
             if result:
                 return result
         if self.random and self._shuffled:
-            self._shuffled.remove(tl_track) 
+            self._shuffled.remove(tl_track)
 
     def _trigger_tracklist_changed(self):
         self._first_shuffle = True
