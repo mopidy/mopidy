@@ -526,7 +526,7 @@ class TracklistController(object):
             if result:
                 return result
         if self.random and self._shuffled:
-            self._shuffled.remove(tl_track) 
+            self._shuffled.remove(tl_track)
 
     def mark_metadata(self, tl_track, metadata):
         backend = self._get_backend(tl_track)
