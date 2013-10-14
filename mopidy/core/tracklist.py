@@ -528,6 +528,11 @@ class TracklistController(object):
         if self.random and self._shuffled:
             self._shuffled.remove(tl_track) 
 
+    def mark_metadata(self, tl_track, metadata):
+        backend = self._get_backend(tl_track)
+        if backend and backend.has_tracklist().get():
+            backend.tracklist.mark_metadata(self, tl_track, metadata).get()
+
     def _trigger_tracklist_changed(self):
         self._first_shuffle = True
         self._shuffled = []

@@ -75,8 +75,8 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
         CoreListener.send('playlists_loaded')
 
     def stream_metadata_changed(self, metadata):
-        self.tracklist.mark("metadata", self.playback.current_tl_track,
-                            metadata=metadata)
+        self.tracklist.mark_metadata(self.playback.current_tl_track,
+                                     metadata=metadata)
 
 
 class Backends(list):

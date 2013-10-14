@@ -434,3 +434,6 @@ class BaseTracklistProvider(object):
 
     def mark_unplayable(self, tracklist, tl_track):
         return None
+
+    def mark_metadata(self, tracklist, tl_track, metadata):
+        return None

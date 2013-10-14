@@ -40,10 +40,9 @@ class StreamLibraryProvider(base.BaseLibraryProvider):
 
 
 class StreamTracklistProvider(base.BaseTracklistProvider):
-    def mark(self, tracklist, how, tl_track, **kwargs):
-        if not how == "metadata":
-            return False
-        meta = kwargs[how]
+
+    def mark_metadata(self, tracklist, tl_track, metadata):
+        meta = metadata
 
         track_args = dict()
         album_args = dict()
