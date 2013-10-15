@@ -8,7 +8,7 @@ import pykka
 from mopidy import audio, core
 from mopidy.backends.local import actor
 from mopidy.core import PlaybackState
-from mopidy.models import Playlist, TlTrack, Track
+from mopidy.models import Playlist, Track
 
 from tests import path_to_data_dir
 from tests.backends.local import generate_song, populate_tracklist
@@ -174,10 +174,6 @@ class LocalTracklistControllerTest(unittest.TestCase):
         self.assertEquals(0, self.controller.index(tl_tracks[0]))
         self.assertEquals(1, self.controller.index(tl_tracks[1]))
         self.assertEquals(2, self.controller.index(tl_tracks[2]))
-
-    def test_index_raises_value_error_if_item_not_found(self):
-        test = lambda: self.controller.index(TlTrack(0, Track()))
-        self.assertRaises(ValueError, test)
 
     @populate_tracklist
     def test_move_single(self):

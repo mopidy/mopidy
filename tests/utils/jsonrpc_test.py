@@ -266,12 +266,12 @@ class JsonRpcSingleNotificationTest(JsonRpcTestBase):
 
 class JsonRpcBatchTest(JsonRpcTestBase):
     def test_batch_of_only_commands_returns_all(self):
-        self.core.playback.set_random(True).get()
+        self.core.tracklist.set_random(True).get()
 
         request = [
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_repeat', 'id': 1},
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_random', 'id': 2},
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_single', 'id': 3},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_repeat', 'id': 1},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_random', 'id': 2},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_single', 'id': 3},
         ]
         response = self.jrw.handle_data(request)
 
@@ -283,12 +283,12 @@ class JsonRpcBatchTest(JsonRpcTestBase):
         self.assertEqual(response[3]['result'], False)
 
     def test_batch_of_commands_and_notifications_returns_some(self):
-        self.core.playback.set_random(True).get()
+        self.core.tracklist.set_random(True).get()
 
         request = [
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_repeat'},
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_random', 'id': 2},
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_single', 'id': 3},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_repeat'},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_random', 'id': 2},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_single', 'id': 3},
         ]
         response = self.jrw.handle_data(request)
 
@@ -300,12 +300,12 @@ class JsonRpcBatchTest(JsonRpcTestBase):
         self.assertEqual(response[3]['result'], False)
 
     def test_batch_of_only_notifications_returns_nothing(self):
-        self.core.playback.set_random(True).get()
+        self.core.tracklist.set_random(True).get()
 
         request = [
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_repeat'},
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_random'},
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_single'},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_repeat'},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_random'},
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_single'},
         ]
         response = self.jrw.handle_data(request)
 
@@ -313,7 +313,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
-    def test_application_error_response(self):
+    def test_application_error_response_is_none(self):
         request = {
             'jsonrpc': '2.0',
             'method': 'core.tracklist.index',
@@ -322,17 +322,10 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.jrw.handle_data(request)
 
-        self.assertNotIn('result', response)
+        self.assertIn('result', response)
 
-        error = response['error']
-        self.assertEqual(error['code'], 0)
-        self.assertEqual(error['message'], 'Application error')
-
-        data = error['data']
-        self.assertEqual(data['type'], 'ValueError')
-        self.assertIn('not in list', data['message'])
-        self.assertIn('traceback', data)
-        self.assertIn('Traceback (most recent call last):', data['traceback'])
+        result = response['result']
+        self.assertEqual(result, None)
 
     def test_missing_jsonrpc_member_causes_invalid_request_error(self):
         request = {
@@ -522,10 +515,10 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
             {'jsonrpc': '2.0', 'method': 'core.playback.set_volume',
                 'params': [47], 'id': '1'},
             # Notification
-            {'jsonrpc': '2.0', 'method': 'core.playback.set_consume',
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.set_consume',
                 'params': [True]},
             # Call with positional params
-            {'jsonrpc': '2.0', 'method': 'core.playback.set_repeat',
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.set_repeat',
                 'params': [False], 'id': '2'},
             # Invalid request
             {'foo': 'boo'},
@@ -533,7 +526,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
             {'jsonrpc': '2.0', 'method': 'foo.get',
                 'params': {'name': 'myself'}, 'id': '5'},
             # Call without params
-            {'jsonrpc': '2.0', 'method': 'core.playback.get_random',
+            {'jsonrpc': '2.0', 'method': 'core.tracklist.get_random',
                 'id': '9'},
         ]
         response = self.jrw.handle_data(request)

@@ -15,10 +15,15 @@ class TracklistController(object):
     pykka_traversable = True
 
     def __init__(self, core):
-        self._core = core
+        self.core = core
         self._next_tlid = 0
         self._tl_tracks = []
         self._version = 0
+
+        self._shuffled = []
+        self._first_shuffle = True
+
+    ### Properties
 
     def get_tl_tracks(self):
         return self._tl_tracks[:]
@@ -51,7 +56,7 @@ class TracklistController(object):
 
     def _increase_version(self):
         self._version += 1
-        self._core.playback.on_tracklist_change()
+        self.core.playback.on_tracklist_change()
         self._trigger_tracklist_changed()
 
     version = property(get_version)
@@ -61,6 +66,192 @@ class TracklistController(object):
     Read-only. Integer which is increased every time the tracklist is changed.
     Is not reset before Mopidy is restarted.
     """
+
+    def get_consume(self):
+        return getattr(self, '_consume', False)
+
+    def set_consume(self, value):
+        if self.get_consume() != value:
+            self._trigger_options_changed()
+        return setattr(self, '_consume', value)
+
+    consume = property(get_consume, set_consume)
+    """
+    :class:`True`
+        Tracks are removed from the playlist when they have been played.
+    :class:`False`
+        Tracks are not removed from the playlist.
+    """
+
+    def get_random(self):
+        return getattr(self, '_random', False)
+
+    def set_random(self, value):
+        if self.get_random() != value:
+            self._trigger_options_changed()
+        return setattr(self, '_random', value)
+
+    random = property(get_random, set_random)
+    """
+    :class:`True`
+        Tracks are selected at random from the playlist.
+    :class:`False`
+        Tracks are played in the order of the playlist.
+    """
+
+    def get_repeat(self):
+        return getattr(self, '_repeat', False)
+
+    def set_repeat(self, value):
+        if self.get_repeat() != value:
+            self._trigger_options_changed()
+        return setattr(self, '_repeat', value)
+
+    repeat = property(get_repeat, set_repeat)
+    """
+    :class:`True`
+        The current playlist is played repeatedly. To repeat a single track,
+        select both :attr:`repeat` and :attr:`single`.
+    :class:`False`
+        The current playlist is played once.
+    """
+
+    def get_single(self):
+        return getattr(self, '_single', False)
+
+    def set_single(self, value):
+        if self.get_single() != value:
+            self._trigger_options_changed()
+        return setattr(self, '_single', value)
+
+    single = property(get_single, set_single)
+    """
+    :class:`True`
+        Playback is stopped after current song, unless in :attr:`repeat`
+        mode.
+    :class:`False`
+        Playback continues after current song.
+    """
+
+    def index(self, tl_track):
+        """
+        The position of the given track in the tracklist.
+
+        :param tl_track: The reference track
+        :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: int
+        """
+        if tl_track is None:
+            return None
+        try:
+            return self._tl_tracks.index(tl_track)
+        except ValueError:
+            return None
+
+    def eot_track(self, tl_track):
+        """
+        The track that will be played after the given track.
+
+        Not necessarily the same track as :meth:`next_track`.
+
+        :param tl_track: The reference track
+        :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: :class:`mopidy.models.TlTrack`
+        """
+        # pylint: disable = R0911
+        # Too many return statements
+
+        if not self.tl_tracks:
+            return None
+
+        if self.random and not self._shuffled:
+            if self.repeat or self._first_shuffle:
+                logger.debug('Shuffling tracks')
+                self._shuffled = self.tl_tracks
+                random.shuffle(self._shuffled)
+                self._first_shuffle = False
+
+        if self.random and self._shuffled:
+            return self._shuffled[0]
+
+        if tl_track is None:
+            return self.tl_tracks[0]
+
+        position = self.index(tl_track)
+        if self.repeat and self.single:
+            return self.tl_tracks[position]
+
+        if self.repeat and not self.single:
+            return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
+
+        try:
+            return self.tl_tracks[position + 1]
+        except IndexError:
+            return None
+
+    def next_track(self, tl_track):
+        """
+        The track that will be played if calling
+        :meth:`mopidy.core.PlaybackController.next()`.
+
+        For normal playback this is the next track in the playlist. If repeat
+        is enabled the next track can loop around the playlist. When random is
+        enabled this should be a random track, all tracks should be played once
+        before the list repeats.
+
+        :param tl_track: The reference track
+        :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: :class:`mopidy.models.TlTrack`
+        """
+
+        if not self.tl_tracks:
+            return None
+
+        if self.random and not self._shuffled:
+            if self.repeat or self._first_shuffle:
+                logger.debug('Shuffling tracks')
+                self._shuffled = self.tl_tracks
+                random.shuffle(self._shuffled)
+                self._first_shuffle = False
+
+        if self.random and self._shuffled:
+            return self._shuffled[0]
+
+        if tl_track is None:
+            return self.tl_tracks[0]
+
+        position = self.index(tl_track)
+        if self.repeat:
+            return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
+
+        try:
+            return self.tl_tracks[position + 1]
+        except IndexError:
+            return None
+
+    def previous_track(self, tl_track):
+        """
+        Returns the track that will be played if calling
+        :meth:`mopidy.core.PlaybackController.previous()`.
+
+        A :class:`mopidy.models.TlTrack`.
+
+        For normal playback this is the previous track in the playlist. If
+        random and/or consume is enabled it should return the current track
+        instead.
+
+        :param tl_track: The reference track
+        :type tl_track: :class:`mopidy.models.TlTrack`
+        :rtype: :class:`mopidy.models.TlTrack`
+        """
+        if self.repeat or self.consume or self.random:
+            return tl_track
+
+        position = self.index(tl_track)
+        if position in (None, 0):
+            return None
+
+        return self.tl_tracks[position - 1]
 
     def add(self, tracks=None, at_position=None, uri=None):
         """
@@ -87,7 +278,7 @@ class TracklistController(object):
             'tracks or uri must be provided'
 
         if tracks is None and uri is not None:
-            tracks = self._core.library.lookup(uri)
+            tracks = self.core.library.lookup(uri)
 
         tl_tracks = []
 
@@ -150,18 +341,6 @@ class TracklistController(object):
                 matches = filter(
                     lambda ct: getattr(ct.track, key) == value, matches)
         return matches
-
-    def index(self, tl_track):
-        """
-        Get index of the given :class:`mopidy.models.TlTrack` in the tracklist.
-
-        Raises :exc:`ValueError` if not found.
-
-        :param tl_track: track to find the index of
-        :type tl_track: :class:`mopidy.models.TlTrack`
-        :rtype: int
-        """
-        return self._tl_tracks.index(tl_track)
 
     def move(self, start, end, to_position):
         """
@@ -259,6 +438,26 @@ class TracklistController(object):
         """
         return self._tl_tracks[start:end]
 
+    def mark_consumed(self, tl_track):
+        if not self.consume:
+            return False
+        self.remove(tlid=tl_track.tlid)
+        return True
+
+    def mark_starting(self, tl_track):
+        if self.random and tl_track in self._shuffled:
+            self._shuffled.remove(tl_track)
+
+    def mark_unplayable(self, tl_track):
+        if self.random and self._shuffled:
+            self._shuffled.remove(tl_track)
+
     def _trigger_tracklist_changed(self):
+        self._first_shuffle = True
+        self._shuffled = []
         logger.debug('Triggering event: tracklist_changed()')
         listener.CoreListener.send('tracklist_changed')
+
+    def _trigger_options_changed(self):
+        logger.debug('Triggering options changed event')
+        listener.CoreListener.send('options_changed')
