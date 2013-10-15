@@ -106,7 +106,7 @@ Mopidy-SoundCloud
 
 https://github.com/mopidy/mopidy-soundcloud
 
-rovides a backend for playing music from the `SoundCloud
+Provides a backend for playing music from the `SoundCloud
 <http://www.soundcloud.com/>`_ service.
 
 
