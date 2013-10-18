@@ -15,7 +15,7 @@ from tests import path_to_data_dir
 from tests.backends.local import generate_song
 
 
-class LocalPlaylistsControllerTest(unittest.TestCase):
+class LocalPlaylistsProviderTest(unittest.TestCase):
     backend_class = actor.LocalBackend
     config = {
         'local': {
