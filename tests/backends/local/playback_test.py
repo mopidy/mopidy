@@ -19,7 +19,7 @@ from tests.backends.local import generate_song, populate_tracklist
 # TODO Test 'playlist repeat', e.g. repeat=1,single=0
 
 
-class LocalPlaybackControllerTest(unittest.TestCase):
+class LocalPlaybackProviderTest(unittest.TestCase):
     config = {
         'local': {
             'media_dir': path_to_data_dir(''),

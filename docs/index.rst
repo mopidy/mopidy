@@ -30,7 +30,7 @@ Usage
 =====
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     installation/index
     installation/raspberrypi

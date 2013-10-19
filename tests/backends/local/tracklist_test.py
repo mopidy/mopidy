@@ -14,7 +14,7 @@ from tests import path_to_data_dir
 from tests.backends.local import generate_song, populate_tracklist
 
 
-class LocalTracklistControllerTest(unittest.TestCase):
+class LocalTracklistProviderTest(unittest.TestCase):
     config = {
         'local': {
             'media_dir': path_to_data_dir(''),
