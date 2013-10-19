@@ -157,11 +157,11 @@ class PlaybackController(object):
             return
 
         original_tl_track = self.current_tl_track
-        next_track = self.core.tracklist.eot_track(original_tl_track)
+        next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
-        if next_track:
+        if next_tl_track:
             self._trigger_track_playback_ended()
-            self.play(next_track)
+            self.play(next_tl_track)
         else:
             self.stop(clear_current_track=True)
 
