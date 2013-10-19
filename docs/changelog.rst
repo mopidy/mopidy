@@ -39,6 +39,45 @@ of the following extensions as well:
 
 **Core**
 
+- Parts of the functionality in :class:`mopidy.core.PlaybackController` have
+  been moved to :class:`mopidy.core.TracklistController`:
+
+  =================================== ==================================
+  Old location                        New location
+  =================================== ==================================
+  playback.get_consume()              tracklist.get_consume()
+  playback.set_consume(v)             tracklist.set_consume(v)
+  playback.consume                    tracklist.consume
+
+  playback.get_random()               tracklist.get_random()
+  playback.set_random(v)              tracklist.set_random(v)
+  playback.random                     tracklist.random
+
+  playback.get_repeat()               tracklist.get_repeat()
+  playback.set_repeat(v)              tracklist.set_repeat(v)
+  playback.repeat                     tracklist.repeat
+
+  playback.get_single()               tracklist.get_single()
+  playback.set_single(v)              tracklist.set_single(v)
+  playback.single                     tracklist.single
+
+  playback.get_tracklist_position()   tracklist.index(tl_track)
+  playback.tracklist_position         tracklist.index(tl_track)
+
+  playback.get_tl_track_at_eot()      tracklist.eot_track(tl_track)
+  playback.tl_track_at_eot            tracklist.eot_track(tl_track)
+
+  playback.get_tl_track_at_next()     tracklist.next_track(tl_track)
+  playback.tl_track_at_next           tracklist.next_track(tl_track)
+
+  playback.get_tl_track_at_previous() tracklist.previous_track(tl_track)
+  playback.tl_track_at_previous       tracklist.previous_track(tl_track)
+  =================================== ==================================
+
+  The ``tl_track`` argument to the last four new functions are used as the
+  reference ``tl_track`` in the tracklist to find e.g. the next track. Usually,
+  this will be :attr:`~mopidy.core.PlaybackController.current_tl_track`.
+
 - Added :attr:`mopidy.core.PlaybackController.mute` for muting and unmuting
   audio. (Fixes: :issue:`186`)
 
@@ -67,30 +106,6 @@ A release with a number of small and medium fixes, with no specific focus.
 - Mopidy no longer supports Python 2.6. Currently, the only Python version
   supported by Mopidy is Python 2.7. We're continuously working towards running
   Mopidy on Python 3. (Fixes: :issue:`344`)
-
-**Core**
-
-- Tracklist has now the power to make decisions on which is the next/previous
-  song, along with previously playback associated features, such as randomness,
-  consumption, repeat and single. For that, a new method has been created to
-  mark songs, some Playback properties have been converted into functions and
-  both functions and properties have been moved into Tracklist to have more
-  modularity:
-
-  - Properties merged into functions: :attr:`tracklist_position` merged to
-    :meth:`index`
-
-  - Properties moved: :attr:`random`, :attr:`repeat`, :attr:`consume` and
-    :attr:`single`
-
-  - Method created from properties: :meth:`next_track` from 
-    `tl_track_at_next`, :meth:`eot_track` from `tl_track_at_eot` and
-    :meth:`previous_track` from `tl_track_at_previous`
-
-  - Method created to separe functionality: :meth:`mark` 
-
-- Tracklist's get_tl_track_at_* and tracklist_position now need a tl_track as a
-  reference to give an answer.
 
 **Command line options**
 
