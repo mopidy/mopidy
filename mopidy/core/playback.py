@@ -173,10 +173,7 @@ class PlaybackController(object):
 
         Used by :class:`mopidy.core.TracklistController`.
         """
-
-        if (not self.core.tracklist.tl_tracks or
-                self.current_tl_track not in
-                self.core.tracklist.tl_tracks):
+        if self.current_tl_track not in self.core.tracklist.tl_tracks:
             self.stop(clear_current_track=True)
 
     def next(self):
