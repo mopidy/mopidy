@@ -237,7 +237,6 @@ class PlaybackController(object):
             self.core.tracklist.mark_playing(tl_track)
             self._trigger_track_playback_started()
         else:
-            logger.warning('Track is not playable: %s', tl_track.track.uri)
             self.core.tracklist.mark_unplayable(tl_track)
             if on_error_step == 1:
                 # TODO: can cause an endless loop for single track repeat.
