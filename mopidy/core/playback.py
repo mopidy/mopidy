@@ -209,35 +209,41 @@ class PlaybackController(object):
         :type on_error_step: int, -1 or 1
         """
 
-        if tl_track is not None:
-            assert tl_track in self.core.tracklist.tl_tracks
-        elif tl_track is None:
+        assert on_error_step in (-1, 1)
+
+        if tl_track is None:
             if self.state == PlaybackState.PAUSED:
                 return self.resume()
-            elif self.current_tl_track is not None:
-                tl_track = self.current_tl_track
-            elif self.current_tl_track is None and on_error_step == 1:
-                tl_track = self.core.tracklist.next_track(tl_track)
-            elif self.current_tl_track is None and on_error_step == -1:
-                tl_track = self.core.tracklist.previous_track(tl_track)
 
-        if tl_track is not None:
-            self.current_tl_track = tl_track
-            self.state = PlaybackState.PLAYING
-            backend = self._get_backend()
-            if not backend or not backend.playback.play(tl_track.track).get():
-                logger.warning('Track is not playable: %s', tl_track.track.uri)
-                self.core.tracklist.mark_unplayable(tl_track)
+            if self.current_tl_track is not None:
+                tl_track = self.current_tl_track
+            else:
                 if on_error_step == 1:
-                    # TODO: can cause an endless loop for single track repeat.
-                    self.next()
+                    tl_track = self.core.tracklist.next_track(tl_track)
                 elif on_error_step == -1:
-                    self.previous()
+                    tl_track = self.core.tracklist.previous_track(tl_track)
+
+            if tl_track is None:
                 return
 
-        self.core.tracklist.mark_starting(tl_track)
+        assert tl_track in self.core.tracklist.tl_tracks
 
-        self._trigger_track_playback_started()
+        self.current_tl_track = tl_track
+        self.state = PlaybackState.PLAYING
+        backend = self._get_backend()
+        success = backend and backend.playback.play(tl_track.track).get()
+
+        if success:
+            self.core.tracklist.mark_starting(tl_track)
+            self._trigger_track_playback_started()
+        else:
+            logger.warning('Track is not playable: %s', tl_track.track.uri)
+            self.core.tracklist.mark_unplayable(tl_track)
+            if on_error_step == 1:
+                # TODO: can cause an endless loop for single track repeat.
+                self.next()
+            elif on_error_step == -1:
+                self.previous()
 
     def previous(self):
         """
