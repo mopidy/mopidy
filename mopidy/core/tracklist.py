@@ -141,8 +141,6 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack`
         :rtype: :class:`int` or :class:`None`
         """
-        if tl_track is None:
-            return None
         try:
             return self._tl_tracks.index(tl_track)
         except ValueError:
