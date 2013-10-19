@@ -137,9 +137,9 @@ class TracklistController(object):
         """
         The position of the given track in the tracklist.
 
-        :param tl_track: The reference track
+        :param tl_track: the track to find the index of
         :type tl_track: :class:`mopidy.models.TlTrack`
-        :rtype: int
+        :rtype: :class:`int` or :class:`None`
         """
         if tl_track is None:
             return None
@@ -154,9 +154,9 @@ class TracklistController(object):
 
         Not necessarily the same track as :meth:`next_track`.
 
-        :param tl_track: The reference track
-        :type tl_track: :class:`mopidy.models.TlTrack`
-        :rtype: :class:`mopidy.models.TlTrack`
+        :param tl_track: the reference track
+        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
+        :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         if not self.tl_tracks:
             return None
@@ -196,9 +196,9 @@ class TracklistController(object):
         enabled this should be a random track, all tracks should be played once
         before the list repeats.
 
-        :param tl_track: The reference track
-        :type tl_track: :class:`mopidy.models.TlTrack`
-        :rtype: :class:`mopidy.models.TlTrack`
+        :param tl_track: the reference track
+        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
+        :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
 
         if not self.tl_tracks:
@@ -231,15 +231,13 @@ class TracklistController(object):
         Returns the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
-        A :class:`mopidy.models.TlTrack`.
-
         For normal playback this is the previous track in the playlist. If
         random and/or consume is enabled it should return the current track
         instead.
 
-        :param tl_track: The reference track
-        :type tl_track: :class:`mopidy.models.TlTrack`
-        :rtype: :class:`mopidy.models.TlTrack`
+        :param tl_track: the reference track
+        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
+        :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         if self.repeat or self.consume or self.random:
             return tl_track
