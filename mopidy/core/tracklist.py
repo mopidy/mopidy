@@ -439,7 +439,7 @@ class TracklistController(object):
     def mark_unplayable(self, tl_track):
         """Private method used by :class:`mopidy.core.PlaybackController`."""
         logger.warning('Track is not playable: %s', tl_track.track.uri)
-        if self.random and self._shuffled:
+        if self.random and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
     def mark_played(self, tl_track):
