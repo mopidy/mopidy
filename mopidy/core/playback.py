@@ -165,7 +165,7 @@ class PlaybackController(object):
         else:
             self.stop(clear_current_track=True)
 
-        self.core.tracklist.mark_consumed(original_tl_track)
+        self.core.tracklist.mark_played(original_tl_track)
 
     def on_tracklist_change(self):
         """

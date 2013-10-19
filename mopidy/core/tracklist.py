@@ -431,12 +431,6 @@ class TracklistController(object):
         """
         return self._tl_tracks[start:end]
 
-    def mark_consumed(self, tl_track):
-        if not self.consume:
-            return False
-        self.remove(tlid=tl_track.tlid)
-        return True
-
     def mark_starting(self, tl_track):
         if self.random and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
@@ -444,6 +438,12 @@ class TracklistController(object):
     def mark_unplayable(self, tl_track):
         if self.random and self._shuffled:
             self._shuffled.remove(tl_track)
+
+    def mark_played(self, tl_track):
+        if not self.consume:
+            return False
+        self.remove(tlid=tl_track.tlid)
+        return True
 
     def _trigger_tracklist_changed(self):
         self._first_shuffle = True
