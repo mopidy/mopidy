@@ -278,15 +278,15 @@ class LocalPlaybackControllerTest(unittest.TestCase):
     @populate_tracklist
     def test_next_track_before_play(self):
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
     def test_next_track_during_play(self):
         self.playback.play()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     @populate_tracklist
     def test_next_track_after_previous(self):
@@ -294,13 +294,12 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.playback.next()
         self.playback.previous()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     def test_next_track_empty_playlist(self):
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         None)
+        self.assertEqual(self.tracklist.next_track(tl_track), None)
 
     @populate_tracklist
     def test_next_track_at_end_of_playlist(self):
@@ -308,8 +307,7 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         for _ in self.tracklist.tl_tracks[1:]:
             self.playback.next()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         None)
+        self.assertEqual(self.tracklist.next_track(tl_track), None)
 
     @populate_tracklist
     def test_next_track_at_end_of_playlist_with_repeat(self):
@@ -318,16 +316,16 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         for _ in self.tracks[1:]:
             self.playback.next()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
     def test_next_track_with_random(self):
         random.seed(1)
         self.tracklist.random = True
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[2])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[2])
 
     @populate_tracklist
     def test_next_with_consume(self):
@@ -362,8 +360,8 @@ class LocalPlaybackControllerTest(unittest.TestCase):
                          self.tl_tracks[2])
         self.tracklist.add(self.tracks[:1])
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     @populate_tracklist
     def test_end_of_track(self):
@@ -435,15 +433,15 @@ class LocalPlaybackControllerTest(unittest.TestCase):
     @populate_tracklist
     def test_end_of_track_track_before_play(self):
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
     def test_end_of_track_track_during_play(self):
         self.playback.play()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     @populate_tracklist
     def test_end_of_track_track_after_previous(self):
@@ -451,8 +449,8 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.playback.on_end_of_track()
         self.playback.previous()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     def test_end_of_track_track_empty_playlist(self):
         tl_track = self.playback.current_tl_track
@@ -473,16 +471,16 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         for _ in self.tracks[1:]:
             self.playback.on_end_of_track()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
     def test_end_of_track_track_with_random(self):
         random.seed(1)
         self.tracklist.random = True
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[2])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[2])
 
     @populate_tracklist
     def test_end_of_track_with_consume(self):
@@ -505,12 +503,12 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         random.seed(1)
         self.tracklist.random = True
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[2])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[2])
         self.tracklist.add(self.tracks[:1])
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     @populate_tracklist
     def test_previous_track_before_play(self):
@@ -528,8 +526,8 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.playback.play()
         self.playback.next()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.previous_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.previous_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
     def test_previous_track_after_previous(self):
@@ -538,8 +536,8 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.playback.next()  # At track 2
         self.playback.previous()  # At track 1
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.previous_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.previous_track(tl_track), self.tl_tracks[0])
 
     def test_previous_track_empty_playlist(self):
         tl_track = self.playback.current_tl_track
