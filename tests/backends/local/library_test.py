@@ -140,6 +140,29 @@ class LocalLibraryControllerTest(unittest.TestCase):
         result = self.library.find_exact(date=['2002'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
+    def test_find_exact_any(self):
+        # Matches on track artist
+        result = self.library.find_exact(any=['artist1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track
+        result = self.library.find_exact(any=['track1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track album
+        result = self.library.find_exact(any=['album1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track album artists
+        result = self.library.find_exact(any=['artist3'])
+        self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+
+        # Matches on URI
+        result = self.library.find_exact(any=['local:track:path1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+        result = self.library.find_exact(any=['local:track:path1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
     def test_find_exact_wrong_type(self):
         test = lambda: self.library.find_exact(wrong=['test'])
         self.assertRaises(LookupError, test)
@@ -225,11 +248,24 @@ class LocalLibraryControllerTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_any(self):
+        # Matches on track artist
         result = self.library.search(any=['Tist1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track
         result = self.library.search(any=['Rack1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track album
         result = self.library.search(any=['Bum1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track album artists
+        result = self.library.search(any=['Tist3'])
+        self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+
+        # Matches on URI
+        result = self.library.search(any=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
         result = self.library.search(any=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])

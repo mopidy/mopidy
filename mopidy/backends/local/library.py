@@ -67,8 +67,11 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     for a in getattr(t.album, 'artists', [])])
                 date_filter = lambda t: q == t.date
                 any_filter = lambda t: (
-                    track_filter(t) or album_filter(t) or
-                    artist_filter(t) or uri_filter(t))
+                    track_filter(t) or
+                    album_filter(t) or
+                    artist_filter(t) or
+                    albumartist_filter(t) or
+                    uri_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -114,8 +117,12 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     q in a.name.lower()
                     for a in getattr(t.album, 'artists', [])])
                 date_filter = lambda t: t.date and t.date.startswith(q)
-                any_filter = lambda t: track_filter(t) or album_filter(t) or \
-                    artist_filter(t) or uri_filter(t)
+                any_filter = lambda t: (
+                    track_filter(t) or
+                    album_filter(t) or
+                    artist_filter(t) or
+                    albumartist_filter(t) or
+                    uri_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
