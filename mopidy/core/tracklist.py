@@ -158,9 +158,6 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack`
         :rtype: :class:`mopidy.models.TlTrack`
         """
-        # pylint: disable = R0911
-        # Too many return statements
-
         if not self.tl_tracks:
             return None
 
