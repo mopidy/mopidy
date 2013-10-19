@@ -234,7 +234,7 @@ class PlaybackController(object):
         success = backend and backend.playback.play(tl_track.track).get()
 
         if success:
-            self.core.tracklist.mark_starting(tl_track)
+            self.core.tracklist.mark_playing(tl_track)
             self._trigger_track_playback_started()
         else:
             logger.warning('Track is not playable: %s', tl_track.track.uri)

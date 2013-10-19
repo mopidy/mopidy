@@ -431,7 +431,7 @@ class TracklistController(object):
         """
         return self._tl_tracks[start:end]
 
-    def mark_starting(self, tl_track):
+    def mark_playing(self, tl_track):
         if self.random and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
