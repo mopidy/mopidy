@@ -160,8 +160,6 @@ class LocalLibraryProviderTest(unittest.TestCase):
         # Matches on URI
         result = self.library.find_exact(any=['local:track:path1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
-        result = self.library.find_exact(any=['local:track:path1'])
-        self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
     def test_find_exact_wrong_type(self):
         test = lambda: self.library.find_exact(wrong=['test'])
@@ -265,8 +263,6 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[2:3])
 
         # Matches on URI
-        result = self.library.search(any=['TH1'])
-        self.assertEqual(list(result[0].tracks), self.tracks[:1])
         result = self.library.search(any=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
