@@ -36,10 +36,10 @@ def currentsong(context):
         Displays the song info of the current song (same song that is
         identified in status).
     """
-    current_tl_track = context.core.playback.current_tl_track.get()
-    if current_tl_track is not None:
-        position = context.core.playback.tracklist_position.get()
-        return track_to_mpd_format(current_tl_track, position=position)
+    tl_track = context.core.playback.current_tl_track.get()
+    if tl_track is not None:
+        position = context.core.tracklist.index(tl_track).get()
+        return track_to_mpd_format(tl_track, position=position)
 
 
 @handle_request(r'^idle$')
@@ -178,14 +178,15 @@ def status(context):
         'tracklist.length': context.core.tracklist.length,
         'tracklist.version': context.core.tracklist.version,
         'playback.volume': context.core.playback.volume,
-        'playback.consume': context.core.playback.consume,
-        'playback.random': context.core.playback.random,
-        'playback.repeat': context.core.playback.repeat,
-        'playback.single': context.core.playback.single,
+        'tracklist.consume': context.core.tracklist.consume,
+        'tracklist.random': context.core.tracklist.random,
+        'tracklist.repeat': context.core.tracklist.repeat,
+        'tracklist.single': context.core.tracklist.single,
         'playback.state': context.core.playback.state,
         'playback.current_tl_track': context.core.playback.current_tl_track,
-        'playback.tracklist_position': (
-            context.core.playback.tracklist_position),
+        'tracklist.index': (
+            context.core.tracklist.index(
+                context.core.playback.current_tl_track.get())),
         'playback.time_position': context.core.playback.time_position,
     }
     pykka.get_all(futures.values())
@@ -218,7 +219,7 @@ def _status_bitrate(futures):
 
 
 def _status_consume(futures):
-    if futures['playback.consume'].get():
+    if futures['tracklist.consume'].get():
         return 1
     else:
         return 0
@@ -233,15 +234,15 @@ def _status_playlist_version(futures):
 
 
 def _status_random(futures):
-    return int(futures['playback.random'].get())
+    return int(futures['tracklist.random'].get())
 
 
 def _status_repeat(futures):
-    return int(futures['playback.repeat'].get())
+    return int(futures['tracklist.repeat'].get())
 
 
 def _status_single(futures):
-    return int(futures['playback.single'].get())
+    return int(futures['tracklist.single'].get())
 
 
 def _status_songid(futures):
@@ -253,7 +254,7 @@ def _status_songid(futures):
 
 
 def _status_songpos(futures):
-    return futures['playback.tracklist_position'].get()
+    return futures['tracklist.index'].get()
 
 
 def _status_state(futures):

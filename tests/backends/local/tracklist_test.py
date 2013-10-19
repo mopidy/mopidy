@@ -171,13 +171,13 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
     def test_index_returns_index_of_track(self):
         tl_tracks = self.controller.add(self.tracks)
-        self.assertEquals(0, self.controller.index(tl_tracks[0]))
-        self.assertEquals(1, self.controller.index(tl_tracks[1]))
-        self.assertEquals(2, self.controller.index(tl_tracks[2]))
+        self.assertEqual(0, self.controller.index(tl_tracks[0]))
+        self.assertEqual(1, self.controller.index(tl_tracks[1]))
+        self.assertEqual(2, self.controller.index(tl_tracks[2]))
 
-    def test_index_raises_value_error_if_item_not_found(self):
-        test = lambda: self.controller.index(TlTrack(0, Track()))
-        self.assertRaises(ValueError, test)
+    def test_index_returns_none_if_item_not_found(self):
+        tl_track = TlTrack(0, Track())
+        self.assertEqual(self.controller.index(tl_track), None)
 
     @populate_tracklist
     def test_move_single(self):
