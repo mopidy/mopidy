@@ -12,19 +12,33 @@ from tests import path_to_data_dir
 
 
 class LocalLibraryProviderTest(unittest.TestCase):
-    artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
+    artists = [
+        Artist(name='artist1'),
+        Artist(name='artist2'),
+        Artist(name='artist3'),
+        Artist(name='artist4'),
+    ]
 
     albums = [
-        Album(name='album1', artists=artists[:1]),
-        Album(name='album2', artists=artists[1:2]),
-        Album()]
+        Album(name='album1', artists=[artists[0]]),
+        Album(name='album2', artists=[artists[1]]),
+        Album(name='album3', artists=[artists[2]]),
+    ]
 
     tracks = [
-        Track(uri='local:track:path1', name='track1', artists=artists[:1],
-              album=albums[0], date='2001-02-03', length=4000),
-        Track(uri='local:track:path2', name='track2', artists=artists[1:2],
-              album=albums[1], date='2002', length=4000),
-        Track()]
+        Track(
+            uri='local:track:path1', name='track1',
+            artists=[artists[0]], album=albums[0],
+            date='2001-02-03', length=4000),
+        Track(
+            uri='local:track:path2', name='track2',
+            artists=[artists[1]], album=albums[1],
+            date='2002', length=4000),
+        Track(
+            uri='local:track:path3', name='track3',
+            artists=[artists[3]], album=albums[2],
+            date='2003', length=4000),
+    ]
 
     config = {
         'local': {
@@ -35,6 +49,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
     }
 
     def setUp(self):
+
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
@@ -102,6 +117,19 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(album=['album2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
+    def test_find_exact_albumartist(self):
+        # Artist is both track artist and album artist
+        result = self.library.find_exact(albumartist=['artist1'])
+        self.assertEqual(list(result[0].tracks), [self.tracks[0]])
+
+        # Artist is both track and album artist
+        result = self.library.find_exact(albumartist=['artist2'])
+        self.assertEqual(list(result[0].tracks), [self.tracks[1]])
+
+        # Artist is just album artist
+        result = self.library.find_exact(albumartist=['artist3'])
+        self.assertEqual(list(result[0].tracks), [self.tracks[2]])
+
     def test_find_exact_date(self):
         result = self.library.find_exact(date=['2001'])
         self.assertEqual(list(result[0].tracks), [])
@@ -111,6 +139,27 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         result = self.library.find_exact(date=['2002'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
+
+    def test_find_exact_any(self):
+        # Matches on track artist
+        result = self.library.find_exact(any=['artist1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track
+        result = self.library.find_exact(any=['track1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track album
+        result = self.library.find_exact(any=['album1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track album artists
+        result = self.library.find_exact(any=['artist3'])
+        self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+
+        # Matches on URI
+        result = self.library.find_exact(any=['local:track:path1'])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
     def test_find_exact_wrong_type(self):
         test = lambda: self.library.find_exact(wrong=['test'])
@@ -163,6 +212,19 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(artist=['Tist2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
+    def test_search_albumartist(self):
+        # Artist is both track artist and album artist
+        result = self.library.search(albumartist=['Tist1'])
+        self.assertEqual(list(result[0].tracks), [self.tracks[0]])
+
+        # Artist is both track artist and album artist
+        result = self.library.search(albumartist=['Tist2'])
+        self.assertEqual(list(result[0].tracks), [self.tracks[1]])
+
+        # Artist is just album artist
+        result = self.library.search(albumartist=['Tist3'])
+        self.assertEqual(list(result[0].tracks), [self.tracks[2]])
+
     def test_search_album(self):
         result = self.library.search(album=['Bum1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
@@ -184,12 +246,23 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_any(self):
+        # Matches on track artist
         result = self.library.search(any=['Tist1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track
         result = self.library.search(any=['Rack1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track album
         result = self.library.search(any=['Bum1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track album artists
+        result = self.library.search(any=['Tist3'])
+        self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+
+        # Matches on URI
         result = self.library.search(any=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
