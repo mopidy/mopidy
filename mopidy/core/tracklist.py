@@ -133,6 +133,8 @@ class TracklistController(object):
         Playback continues after current song.
     """
 
+    ### Methods
+
     def index(self, tl_track):
         """
         The position of the given track in the tracklist.
@@ -173,6 +175,7 @@ class TracklistController(object):
             return self.tl_tracks[0]
 
         position = self.index(tl_track)
+
         if self.repeat and self.single:
             return self.tl_tracks[position]
 
@@ -216,6 +219,7 @@ class TracklistController(object):
             return self.tl_tracks[0]
 
         position = self.index(tl_track)
+
         if self.repeat:
             return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
 
@@ -241,6 +245,7 @@ class TracklistController(object):
             return tl_track
 
         position = self.index(tl_track)
+
         if position in (None, 0):
             return None
 
@@ -452,6 +457,7 @@ class TracklistController(object):
     def _trigger_tracklist_changed(self):
         self._first_shuffle = True
         self._shuffled = []
+
         logger.debug('Triggering event: tracklist_changed()')
         listener.CoreListener.send('tracklist_changed')
 
