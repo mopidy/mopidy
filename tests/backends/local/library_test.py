@@ -11,7 +11,7 @@ from mopidy.models import Track, Album, Artist
 from tests import path_to_data_dir
 
 
-class LocalLibraryControllerTest(unittest.TestCase):
+class LocalLibraryProviderTest(unittest.TestCase):
     artists = [Artist(name='artist1'), Artist(name='artist2'), Artist()]
 
     albums = [
