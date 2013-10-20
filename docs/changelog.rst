@@ -97,7 +97,7 @@ of the following extensions as well:
 
 - Replaced our custom media library scanner with GStreamer's builtin scanner.
   This should make scanning less error prone and faster as timeouts should be
-  infrequent.
+  infrequent. (Fixes: :issue:`198`)
 
 - Media files with less than 100ms duration are now excluded from the library.
 
