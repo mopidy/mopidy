@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 
 import unittest
 
-from mopidy.scanner import Scanner, ScannerError, translator
+from mopidy import exceptions
+from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import path as path_lib
 
@@ -155,7 +156,7 @@ class ScannerTest(unittest.TestCase):
             key = uri[len('file://'):]
             try:
                 self.data[key] = scanner.scan(uri)
-            except ScannerError as error:
+            except exceptions.ScannerError as error:
                 self.errors[key] = error
 
     def check(self, name, key, value):

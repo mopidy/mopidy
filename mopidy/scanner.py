@@ -27,13 +27,9 @@ pygst.require('0.10')
 import gst
 import gst.pbutils
 
-from mopidy import config as config_lib, ext, exceptions
+from mopidy import config as config_lib, exceptions, ext
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
-
-
-class ScannerError(exceptions.ExtensionError):
-    pass
 
 
 def main():
@@ -116,7 +112,7 @@ def main():
             track = translator(data)
             local_updater.add(track)
             logging.debug('Added %s', track.uri)
-        except ScannerError as error:
+        except exceptions.ScannerError as error:
             logging.warning('Failed %s: %s', uri, error)
 
     logging.info('Done scanning; commiting changes.')
@@ -197,13 +193,13 @@ class Scanner(object):
             info = self.discoverer.discover_uri(uri)
         except gobject.GError as e:
             # Loosing traceback is non-issue since this is from C code.
-            raise ScannerError(e)
+            raise exceptions.ScannerError(e)
 
         data = {}
         audio_streams = info.get_audio_streams()
 
         if not audio_streams:
-            raise ScannerError('Did not find any audio streams.')
+            raise exceptions.ScannerError('Did not find any audio streams.')
 
         for stream in audio_streams:
             taglist = stream.get_tags()
@@ -223,7 +219,7 @@ class Scanner(object):
         data[b'duration'] = info.get_duration() // gst.MSECOND
 
         if data[b'duration'] == 0:
-            raise ScannerError('Zero length audio streams are not supported.')
+            raise exceptions.ScannerError('Rejecting zero length audio.')
 
         return data
 
