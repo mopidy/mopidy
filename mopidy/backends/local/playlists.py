@@ -6,7 +6,7 @@ import os
 import shutil
 
 from mopidy.backends import base, listener
-from mopidy.models import Playlist
+from mopidy.models import Playlist, Track
 from mopidy.utils import formatting, path
 
 from .translator import parse_m3u
@@ -51,12 +51,11 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
 
             tracks = []
             for track_uri in parse_m3u(m3u, self._media_dir):
-                try:
-                    # TODO We must use core.library.lookup() to support tracks
-                    # from other backends
+                result = self.backend.library.lookup(track_uri)
+                if result:
                     tracks += self.backend.library.lookup(track_uri)
-                except LookupError as ex:
-                    logger.warning('Playlist item could not be added: %s', ex)
+                else:
+                    tracks.append(Track(uri=track_uri))
 
             playlist = Playlist(uri=uri, name=name, tracks=tracks)
             playlists.append(playlist)
