@@ -161,6 +161,11 @@ class TracklistController(object):
         if not self.tl_tracks:
             return None
 
+        if self.single and self.repeat:
+            return tl_track
+        elif self.single:
+            return None
+
         if self.random and not self._shuffled:
             if self.repeat or self._first_shuffle:
                 logger.debug('Shuffling tracks')
@@ -176,10 +181,7 @@ class TracklistController(object):
 
         position = self.index(tl_track)
 
-        if self.repeat and self.single:
-            return self.tl_tracks[position]
-
-        if self.repeat and not self.single:
+        if self.repeat:
             return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
 
         try:

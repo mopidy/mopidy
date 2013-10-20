@@ -339,6 +339,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.single = True
         self.tracklist.repeat = True
         self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
         self.playback.next()
         self.assertEqual(self.playback.current_track, self.tracks[1])
 
@@ -899,8 +900,37 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.single = True
         self.tracklist.repeat = True
         self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
         self.playback.on_end_of_track()
         self.assertEqual(self.playback.current_track, self.tracks[0])
+
+    @populate_tracklist
+    def test_end_of_song_with_single_random_and_repeat_starts_same(self):
+        self.tracklist.single = True
+        self.tracklist.repeat = True
+        self.tracklist.random = True
+        self.playback.play()
+        current_track = self.playback.current_track
+        self.playback.on_end_of_track()
+        self.assertEqual(self.playback.current_track, current_track)
+
+    @populate_tracklist
+    def test_end_of_song_with_single_stops(self):
+        self.tracklist.single = True
+        self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
+        self.playback.on_end_of_track()
+        self.assertEqual(self.playback.current_track, None)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
+
+    @populate_tracklist
+    def test_end_of_song_with_single_and_random_stops(self):
+        self.tracklist.single = True
+        self.tracklist.random = True
+        self.playback.play()
+        self.playback.on_end_of_track()
+        self.assertEqual(self.playback.current_track, None)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     @populate_tracklist
     def test_end_of_playlist_stops(self):
