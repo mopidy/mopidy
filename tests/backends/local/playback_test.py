@@ -1024,15 +1024,14 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         # Covers underlying issue IssueGH17RegressionTest tests for.
         shuffle_mock.side_effect = lambda tracks: tracks.reverse()
 
-        expected = self.tl_tracks[1::-1]
+        expected = self.tl_tracks[::-1] + [None]
         actual = []
 
         self.playback.play()
         self.tracklist.random = True
-        for _ in self.tracks[1:]:
+        while self.playback.state != PlaybackState.STOPPED:
             self.playback.next()
             actual.append(self.playback.current_tl_track)
-
         self.assertEqual(actual, expected)
 
     @populate_tracklist

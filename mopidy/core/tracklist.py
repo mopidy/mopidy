@@ -21,7 +21,6 @@ class TracklistController(object):
         self._version = 0
 
         self._shuffled = []
-        self._first_shuffle = True
 
     ### Properties
 
@@ -89,6 +88,9 @@ class TracklistController(object):
     def set_random(self, value):
         if self.get_random() != value:
             self._trigger_options_changed()
+        if value:
+            self._shuffled = self.tl_tracks
+            random.shuffle(self._shuffled)
         return setattr(self, '_random', value)
 
     random = property(get_random, set_random)
@@ -162,14 +164,16 @@ class TracklistController(object):
             return None
 
         if self.random and not self._shuffled:
-            if self.repeat or self._first_shuffle:
+            if self.repeat or not tl_track:
                 logger.debug('Shuffling tracks')
                 self._shuffled = self.tl_tracks
                 random.shuffle(self._shuffled)
-                self._first_shuffle = False
 
-        if self.random and self._shuffled:
-            return self._shuffled[0]
+        if self.random:
+            try:
+                return self._shuffled[0]
+            except IndexError:
+                return None
 
         if tl_track is None:
             return self.tl_tracks[0]
@@ -206,14 +210,16 @@ class TracklistController(object):
             return None
 
         if self.random and not self._shuffled:
-            if self.repeat or self._first_shuffle:
+            if self.repeat or not tl_track:
                 logger.debug('Shuffling tracks')
                 self._shuffled = self.tl_tracks
                 random.shuffle(self._shuffled)
-                self._first_shuffle = False
 
-        if self.random and self._shuffled:
-            return self._shuffled[0]
+        if self.random:
+            try:
+                return self._shuffled[0]
+            except IndexError:
+                return None
 
         if tl_track is None:
             return self.tl_tracks[0]
@@ -455,8 +461,11 @@ class TracklistController(object):
         return True
 
     def _trigger_tracklist_changed(self):
-        self._first_shuffle = True
-        self._shuffled = []
+        if self.random:
+            self._shuffled = self.tl_tracks
+            random.shuffle(self._shuffled)
+        else:
+            self._shuffled = []
 
         logger.debug('Triggering event: tracklist_changed()')
         listener.CoreListener.send('tracklist_changed')
