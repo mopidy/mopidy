@@ -212,8 +212,9 @@ class Scanner(object):
         data[b'uri'] = uri
         data[b'duration'] = info.get_duration() // gst.MSECOND
 
-        if data[b'duration'] == 0:
-            raise exceptions.ScannerError('Rejecting zero length audio.')
+        if data[b'duration'] < 100:
+            raise exceptions.ScannerError(
+                'Rejecting file with less than 100ms audio data.')
 
         return data
 
