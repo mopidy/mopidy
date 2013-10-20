@@ -158,36 +158,15 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        if not self.tl_tracks:
-            return None
-
         if self.single and self.repeat:
             return tl_track
         elif self.single:
             return None
 
-        if self.random and not self._shuffled:
-            if self.repeat or self._first_shuffle:
-                logger.debug('Shuffling tracks')
-                self._shuffled = self.tl_tracks
-                random.shuffle(self._shuffled)
-                self._first_shuffle = False
-
-        if self.random and self._shuffled:
-            return self._shuffled[0]
-
-        if tl_track is None:
-            return self.tl_tracks[0]
-
-        position = self.index(tl_track)
-
-        if self.repeat:
-            return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
-
-        try:
-            return self.tl_tracks[position + 1]
-        except IndexError:
-            return None
+        # Current differnce between next and eot handling is that eot needs to
+        # handle single, with that out of the way the rest of the logic is
+        # shared.
+        return self.next_track(tl_track)
 
     def next_track(self, tl_track):
         """
@@ -220,13 +199,12 @@ class TracklistController(object):
         if tl_track is None:
             return self.tl_tracks[0]
 
-        position = self.index(tl_track)
-
+        next_index = self.index(tl_track) + 1
         if self.repeat:
-            return self.tl_tracks[(position + 1) % len(self.tl_tracks)]
+            next_index %= len(self.tl_tracks)
 
         try:
-            return self.tl_tracks[position + 1]
+            return self.tl_tracks[next_index]
         except IndexError:
             return None
 
