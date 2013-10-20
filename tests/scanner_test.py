@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import unittest
 
+from mopidy import exceptions
 from mopidy.scanner import Scanner, translator
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import path as path_lib
@@ -150,20 +151,17 @@ class ScannerTest(unittest.TestCase):
     def scan(self, path):
         paths = path_lib.find_files(path_to_data_dir(path))
         uris = (path_lib.path_to_uri(p) for p in paths)
-        scanner = Scanner(uris, self.data_callback, self.error_callback)
-        scanner.start()
+        scanner = Scanner()
+        for uri in uris:
+            key = uri[len('file://'):]
+            try:
+                self.data[key] = scanner.scan(uri)
+            except exceptions.ScannerError as error:
+                self.errors[key] = error
 
     def check(self, name, key, value):
         name = path_to_data_dir(name)
         self.assertEqual(self.data[name][key], value)
-
-    def data_callback(self, data):
-        uri = data['uri'][len('file://'):]
-        self.data[uri] = data
-
-    def error_callback(self, uri, error, debug):
-        uri = uri[len('file://'):]
-        self.errors[uri] = (error, debug)
 
     def test_data_is_set(self):
         self.scan('scanner/simple')
@@ -210,7 +208,7 @@ class ScannerTest(unittest.TestCase):
         self.scan('scanner/image')
         self.assert_(self.errors)
 
-    def test_log_file_is_ignored(self):
+    def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
         self.scan('scanner/example.log')
         self.assert_(self.errors)
 
