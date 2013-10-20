@@ -17,6 +17,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
         super(LocalLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
+        self._path_mapping = {}
         self._media_dir = self.backend.config['local']['media_dir']
         self._tag_cache_file = self.backend.config['local']['tag_cache_file']
         self.refresh()
@@ -26,10 +27,15 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             'Loading local tracks from %s using %s',
             self._media_dir, self._tag_cache_file)
 
-        tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
+        tracks, directories = parse_mpd_tag_cache(self._tag_cache_file,
+                                                  self._media_dir)
+
+        for directory in directories:
+            self._add_to_path_mapping(directory.path, directory)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
+            self._add_to_path_mapping(track.path, track)
 
         logger.info(
             'Loaded %d local tracks from %s using %s',
@@ -39,8 +45,21 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
         try:
             return [self._uri_mapping[uri]]
         except KeyError:
-            logger.debug('Failed to lookup %r', uri)
-            return []
+            uri = uri[16:]
+            try:
+                if uri == '' or uri[-1] == '/':
+                    return self._path_mapping[uri[:-1]]
+                else:
+                    result = []
+                    path = uri.split('/')
+                    for entry in self._path_mapping['/'.join(path[:-1])]:
+                        if entry.name == path[-1]:
+                            result.append(entry)
+                    return result
+
+            except KeyError:
+                logger.debug('Failed to lookup %r', uri)
+                return []
 
     def find_exact(self, query=None, uris=None):
         # TODO Only return results within URI roots given by ``uris``
@@ -150,6 +169,11 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             for value in values:
                 if not value:
                     raise LookupError('Missing query')
+
+    def _add_to_path_mapping(self, path, item):
+        if not path in self._path_mapping:
+            self._path_mapping[path] = []
+        self._path_mapping[path].append(item)
 
 
 # TODO: rename and move to tagcache extension.

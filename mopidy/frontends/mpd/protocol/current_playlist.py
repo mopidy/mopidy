@@ -4,6 +4,18 @@ from mopidy.frontends.mpd import translator
 from mopidy.frontends.mpd.exceptions import (
     MpdArgError, MpdNoExistError, MpdNotImplemented)
 from mopidy.frontends.mpd.protocol import handle_request
+from mopidy.models import Directory
+
+
+def _tracks_recursive(context, uri):
+    result = []
+    content = context.core.library.lookup('local:directory:' + uri + '/').get()
+    for entry in content:
+        if isinstance(entry, Directory):
+            result += _tracks_recursive(context, entry.path + '/' + entry.name)
+        else:
+            result.append(entry)
+    return result
 
 
 @handle_request(r'^add "(?P<uri>[^"]*)"$')
@@ -24,7 +36,11 @@ def add(context, uri):
         return
     tl_tracks = context.core.tracklist.add(uri=uri).get()
     if not tl_tracks:
-        raise MpdNoExistError('directory or file not found', command='add')
+        tracks = _tracks_recursive(context, uri)
+        for track in tracks:
+            tl_tracks = context.core.tracklist.add(uri=track.uri).get()
+        if not tl_tracks:
+            raise MpdNoExistError('directory or file not found', command='add')
 
 
 @handle_request(r'^addid "(?P<uri>[^"]*)"( "(?P<songpos>\d+)")*$')

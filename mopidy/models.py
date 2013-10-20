@@ -156,6 +156,26 @@ class Artist(ImmutableObject):
     musicbrainz_id = None
 
 
+class Directory(ImmutableObject):
+    """
+    :param uri: directory uri
+    :type uri: string
+    :param name: directory name
+    :type name: string
+    :param location: relative path to the directory
+    :type path: string
+    """
+
+    #: The directory URI. Read-only.
+    uri = None
+
+    #: The directory name. Read-only.
+    name = None
+
+    #: The directory relative path. Read-only.
+    path = None
+
+
 class Album(ImmutableObject):
     """
     :param uri: album URI
@@ -233,6 +253,8 @@ class Track(ImmutableObject):
     :type musicbrainz_id: string
     :param last_modified: Represents last modification time
     :type last_modified: integer
+    :param path: relative file path
+    :type path: string
     """
 
     #: The track URI. Read-only.
@@ -264,6 +286,9 @@ class Track(ImmutableObject):
 
     #: The MusicBrainz ID of the track. Read-only.
     musicbrainz_id = None
+
+    #: The relative (to music library) path of the track. Read-only.
+    path = None
 
     #: Integer representing when the track was last modified, exact meaning
     #: depends on source of track. For local files this is the mtime, for other

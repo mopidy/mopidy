@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import functools
 import itertools
 
-from mopidy.models import Track
+from mopidy.models import Track, Directory
 from mopidy.frontends.mpd import translator
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
@@ -37,6 +37,19 @@ def _artist_as_track(artist):
         uri=artist.uri,
         name='Artist: ' + artist.name,
         artists=[artist])
+
+
+def _directory_recursive(context, uri):
+    result = []
+    result += context.core.library.lookup('local:directory:' + uri).get()
+    content = context.core.library.lookup('local:directory:' + uri + '/').get()
+    for entry in content:
+        if isinstance(entry, Directory):
+            result += _directory_recursive(context, entry.path + '/' +
+                                           entry.name)
+        else:
+            result.append(entry)
+    return result
 
 
 @handle_request(r'^count ' + QUERY_RE)
@@ -269,7 +282,8 @@ def listallinfo(context, uri=None):
         Same as ``listall``, except it also returns metadata info in the
         same format as ``lsinfo``.
     """
-    raise MpdNotImplemented  # TODO
+    result = _directory_recursive(context, uri)
+    return translator.tracks_and_directories_to_mpd_format(result)
 
 
 @handle_request(r'^lsinfo$')
@@ -290,9 +304,13 @@ def lsinfo(context, uri=None):
     directories located at the root level, for both ``lsinfo``, ``lsinfo
     ""``, and ``lsinfo "/"``.
     """
+    playlists = []
     if uri is None or uri == '/' or uri == '':
-        return stored_playlists.listplaylists(context)
-    raise MpdNotImplemented  # TODO
+        playlists = stored_playlists.listplaylists(context)
+        uri = ''
+
+    result = context.core.library.lookup('local:directory:' + uri + '/').get()
+    return translator.tracks_and_directories_to_mpd_format(result) + playlists
 
 
 @handle_request(r'^rescan( "(?P<uri>[^"]+)")*$')

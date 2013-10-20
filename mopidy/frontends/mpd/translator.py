@@ -7,7 +7,7 @@ import urllib
 
 from mopidy.frontends.mpd import protocol
 from mopidy.frontends.mpd.exceptions import MpdArgError
-from mopidy.models import TlTrack
+from mopidy.models import TlTrack, Directory, Track
 from mopidy.utils.path import mtime as get_mtime, uri_to_path, split_path
 
 # TODO: special handling of local:// uri scheme
@@ -125,6 +125,38 @@ def tracks_to_mpd_format(tracks, start=0, end=None):
     result = []
     for track, position in zip(tracks, positions):
         result.append(track_to_mpd_format(track, position))
+    return result
+
+
+def directory_to_mpd_format(directory):
+    """
+    Format track for output to MPD client.
+
+    :param directory: the directory
+    :type track: :class:`mopidy.models.Directory` or
+        :class:`mopidy.models.TlTrack`
+    """
+    if len(directory.path) > 0:
+        return (u'directory', directory.path + '/' + directory.name)
+    else:
+        return (u'directory', directory.name)
+
+
+def tracks_and_directories_to_mpd_format(tracks_and_directories):
+    """
+    Format list of tracks and directories for output to MPD client.
+
+    :param tracks_and_directories: the tracks and directories
+    :type tracks_and_directories: list of :class:`mopidy.models.Track` or
+        :class:`mopidy.models.Directory`
+    :rtype: list of lists of two-tuples
+    """
+    result = []
+    for item in tracks_and_directories:
+        if isinstance(item, Directory):
+            result.append(directory_to_mpd_format(item))
+        if isinstance(item, Track):
+            result.append(track_to_mpd_format(item))
     return result
 
 

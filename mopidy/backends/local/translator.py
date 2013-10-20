@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 import logging
 import os
 import urlparse
+import urllib
 
-from mopidy.models import Track, Artist, Album
+from mopidy.models import Track, Artist, Album, Directory
 from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri
 
@@ -61,9 +62,11 @@ def parse_m3u(file_path, media_dir):
 # TODO: remove music_dir from API
 def parse_mpd_tag_cache(tag_cache, music_dir=''):
     """
-    Converts a MPD tag_cache into a lists of tracks, artists and albums.
+    Converts a MPD tag_cache into a lists of tracks, artists and albums and
+    directories.
     """
     tracks = set()
+    directories = []
 
     try:
         with open(tag_cache) as library:
@@ -73,7 +76,9 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
         return tracks
 
     current = {}
+    directory_kwargs = {}
     state = None
+    directory = None
 
     # TODO: uris as bytes
     for line in contents.split(b'\n'):
@@ -82,6 +87,16 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
             continue
         elif line == b'songList end':
             state = None
+            continue
+        elif line[0:10] == b'directory:':
+            key, value = line.split(': ', 1)
+            path_info = value.split('/')
+            directory_kwargs['uri'] = 'local:directory:' + music_dir + '/' + \
+                value
+            directory_kwargs['name'] = path_info[-1:][0]
+            directory_kwargs['path'] = '/'.join(path_info[:-1])
+            directory = Directory(**directory_kwargs)
+            directories.append(directory)
             continue
         elif not state:
             continue
@@ -96,7 +111,7 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
 
     _convert_mpd_data(current, tracks)
 
-    return tracks
+    return (tracks, directories)
 
 
 def _convert_mpd_data(data, tracks):
@@ -166,6 +181,8 @@ def _convert_mpd_data(data, tracks):
 
     track_kwargs['uri'] = 'local:track:%s' % path
     track_kwargs['length'] = int(data.get('time', 0)) * 1000
+    path = urllib.unquote(path.encode('utf-8'))
+    track_kwargs['path'] = '/'.join(path.split('/')[:-1])
 
     track = Track(**track_kwargs)
     tracks.add(track)
