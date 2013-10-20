@@ -76,7 +76,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     artist_filter(t) or
                     albumartist_filter(t) or
                     track_no_filter(t) or
-		    date_filter(t)) or
+                    date_filter(t) or
                     uri_filter(t))
 
                 if field == 'uri':
@@ -135,7 +135,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     artist_filter(t) or
                     albumartist_filter(t) or
                     track_no_filter(t) or
-		    date_filter(t)) or
+                    date_filter(t) or
                     uri_filter(t))
 
                 if field == 'uri':
