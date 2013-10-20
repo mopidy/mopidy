@@ -354,6 +354,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
 
         self.tracklist.random = True
         self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[-1])
         self.playback.next()
         self.assertEqual(self.playback.current_track, self.tracks[-2])
 
@@ -365,22 +366,22 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.random = True
         current_tl_track = self.playback.current_tl_track
 
-        excpected_tl_track = self.tracklist.tl_tracks[-1]
+        expected_tl_track = self.tracklist.tl_tracks[-1]
         next_tl_track = self.tracklist.next_track(current_tl_track)
 
         # Baseline checking that first next_track is last tl track per our fake
         # shuffle.
-        self.assertEqual(next_tl_track, excpected_tl_track)
+        self.assertEqual(next_tl_track, expected_tl_track)
 
         self.tracklist.add(self.tracks[:1])
 
         old_next_tl_track = next_tl_track
-        excpected_tl_track = self.tracklist.tl_tracks[-1]
+        expected_tl_track = self.tracklist.tl_tracks[-1]
         next_tl_track = self.tracklist.next_track(current_tl_track)
 
         # Verify that first next track has changed since we added to the
         # playlist.
-        self.assertEqual(next_tl_track, excpected_tl_track)
+        self.assertEqual(next_tl_track, expected_tl_track)
         self.assertNotEqual(next_tl_track, old_next_tl_track)
 
     @populate_tracklist
@@ -531,22 +532,22 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.random = True
         current_tl_track = self.playback.current_tl_track
 
-        excpected_tl_track = self.tracklist.tl_tracks[-1]
+        expected_tl_track = self.tracklist.tl_tracks[-1]
         eot_tl_track = self.tracklist.eot_track(current_tl_track)
 
         # Baseline checking that first eot_track is last tl track per our fake
         # shuffle.
-        self.assertEqual(eot_tl_track, excpected_tl_track)
+        self.assertEqual(eot_tl_track, expected_tl_track)
 
         self.tracklist.add(self.tracks[:1])
 
         old_eot_tl_track = eot_tl_track
-        excpected_tl_track = self.tracklist.tl_tracks[-1]
+        expected_tl_track = self.tracklist.tl_tracks[-1]
         eot_tl_track = self.tracklist.eot_track(current_tl_track)
 
         # Verify that first next track has changed since we added to the
         # playlist.
-        self.assertEqual(eot_tl_track, excpected_tl_track)
+        self.assertEqual(eot_tl_track, expected_tl_track)
         self.assertNotEqual(eot_tl_track, old_eot_tl_track)
 
     @populate_tracklist
