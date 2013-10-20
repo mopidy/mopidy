@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import mock
-import random
 import time
 import unittest
 
@@ -369,7 +368,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         excpected_tl_track = self.tracklist.tl_tracks[-1]
         next_tl_track = self.tracklist.next_track(current_tl_track)
 
-        # Baseline checking that first next_track is last tl track per our fake shuffle.
+        # Baseline checking that first next_track is last tl track per our fake
+        # shuffle.
         self.assertEqual(next_tl_track, excpected_tl_track)
 
         self.tracklist.add(self.tracks[:1])
@@ -378,7 +378,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         excpected_tl_track = self.tracklist.tl_tracks[-1]
         next_tl_track = self.tracklist.next_track(current_tl_track)
 
-        # Verify that first next track has changed since we added to the playlist.
+        # Verify that first next track has changed since we added to the
+        # playlist.
         self.assertEqual(next_tl_track, excpected_tl_track)
         self.assertNotEqual(next_tl_track, old_next_tl_track)
 
@@ -523,7 +524,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
 
     @populate_tracklist
     @mock.patch('random.shuffle')
-    def test_end_of_track_track_with_random_after_append_playlist(self, shuffle_mock):
+    def test_end_of_track_track_with_random_after_append_playlist(
+            self, shuffle_mock):
         shuffle_mock.side_effect = lambda tracks: tracks.reverse()
 
         self.tracklist.random = True
@@ -532,7 +534,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         excpected_tl_track = self.tracklist.tl_tracks[-1]
         eot_tl_track = self.tracklist.eot_track(current_tl_track)
 
-        # Baseline checking that first eot_track is last tl track per our fake shuffle.
+        # Baseline checking that first eot_track is last tl track per our fake
+        # shuffle.
         self.assertEqual(eot_tl_track, excpected_tl_track)
 
         self.tracklist.add(self.tracks[:1])
@@ -541,7 +544,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         excpected_tl_track = self.tracklist.tl_tracks[-1]
         eot_tl_track = self.tracklist.eot_track(current_tl_track)
 
-        # Verify that first next track has changed since we added to the playlist.
+        # Verify that first next track has changed since we added to the
+        # playlist.
         self.assertEqual(eot_tl_track, excpected_tl_track)
         self.assertNotEqual(eot_tl_track, old_eot_tl_track)
 
