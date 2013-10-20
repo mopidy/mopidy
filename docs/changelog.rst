@@ -22,21 +22,6 @@ of the following extensions as well:
 - The MPRIS frontend has been moved to
   `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_.
 
-**Audio**
-
-- Added support for parsing and playback of playlists in GStreamer.  For end
-  users this basically means that you can now add a radio playlist to Mopidy
-  and we will automatically download it and play the stream inside it.
-  Currently we support M3U, PLS, XSPF and ASX files. Also note that we can
-  currently only play the first stream in the playlist.
-
-- We now handle the rare case where an audio track has max volume equal to min.
-  This was causing divide by zero errors when scaling volumes to a zero to
-  hundred scale. (Fixes: :issue:`525`)
-
-- Added support for muting audio without setting the volume to 0. This works
-  both for the software and hardware mixers. (Fixes: :issue:`186`)
-
 **Core**
 
 - Parts of the functionality in :class:`mopidy.core.PlaybackController` have
@@ -83,6 +68,27 @@ of the following extensions as well:
 
 - Added :meth:`mopidy.core.CoreListener.mute_changed` event that is triggered
   when the mute state changes.
+
+**Audio**
+
+- Added support for parsing and playback of playlists in GStreamer.  For end
+  users this basically means that you can now add a radio playlist to Mopidy
+  and we will automatically download it and play the stream inside it.
+  Currently we support M3U, PLS, XSPF and ASX files. Also note that we can
+  currently only play the first stream in the playlist.
+
+- We now handle the rare case where an audio track has max volume equal to min.
+  This was causing divide by zero errors when scaling volumes to a zero to
+  hundred scale. (Fixes: :issue:`525`)
+
+- Added support for muting audio without setting the volume to 0. This works
+  both for the software and hardware mixers. (Fixes: :issue:`186`)
+
+**Local backend**
+
+- Replaced our custom media library scanner with GStreamer's builtin scanner.
+
+- Media files with zero duration are now excluded from the library.
 
 **MPD frontend**
 
