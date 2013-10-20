@@ -87,8 +87,10 @@ of the following extensions as well:
 **Local backend**
 
 - Replaced our custom media library scanner with GStreamer's builtin scanner.
+  This should make scanning less error prone and faster as timeouts should be
+  infrequent.
 
-- Media files with zero duration are now excluded from the library.
+- Media files with less than 100ms duration are now excluded from the library.
 
 **MPD frontend**
 
