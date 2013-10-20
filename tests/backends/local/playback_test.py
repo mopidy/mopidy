@@ -957,10 +957,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.assertEqual(self.tracklist.consume, False)
 
     @populate_tracklist
-    @mock.patch('random.shuffle')
-    def test_random_until_end_of_playlist(self, shuffle_mock):
-        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
-
+    def test_random_until_end_of_playlist(self):
         self.tracklist.random = True
         self.playback.play()
         for _ in self.tracks[1:]:
@@ -969,8 +966,18 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.assertEqual(self.tracklist.next_track(tl_track), None)
 
     @populate_tracklist
+    def test_random_with_eot_until_end_of_playlist(self):
+        self.tracklist.random = True
+        self.playback.play()
+        for _ in self.tracks[1:]:
+            self.playback.on_end_of_track()
+        tl_track = self.playback.current_tl_track
+        self.assertEqual(self.tracklist.eot_track(tl_track), None)
+
+    @populate_tracklist
     def test_random_until_end_of_playlist_and_play_from_start(self):
-        self.tracklist.repeat = True
+        self.tracklist.random = True
+        self.playback.play()
         for _ in self.tracks:
             self.playback.next()
         tl_track = self.playback.current_tl_track
@@ -980,11 +987,23 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
 
     @populate_tracklist
+    def test_random_with_eot_until_end_of_playlist_and_play_from_start(self):
+        self.tracklist.random = True
+        self.playback.play()
+        for _ in self.tracks:
+            self.playback.on_end_of_track()
+        tl_track = self.playback.current_tl_track
+        self.assertNotEqual(self.tracklist.eot_track(tl_track), None)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
+        self.playback.play()
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
+
+    @populate_tracklist
     def test_random_until_end_of_playlist_with_repeat(self):
         self.tracklist.repeat = True
         self.tracklist.random = True
         self.playback.play()
-        for _ in self.tracks:
+        for _ in self.tracks[1:]:
             self.playback.next()
         tl_track = self.playback.current_tl_track
         self.assertNotEqual(self.tracklist.next_track(tl_track), None)
@@ -998,6 +1017,23 @@ class LocalPlaybackProviderTest(unittest.TestCase):
             self.assertNotIn(self.playback.current_track, played)
             played.append(self.playback.current_track)
             self.playback.next()
+
+    @populate_tracklist
+    @mock.patch('random.shuffle')
+    def test_play_track_then_enable_random(self, shuffle_mock):
+        # Covers underlying issue IssueGH17RegressionTest tests for.
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
+        expected = self.tl_tracks[1::-1]
+        actual = []
+
+        self.playback.play()
+        self.tracklist.random = True
+        for _ in self.tracks[1:]:
+            self.playback.next()
+            actual.append(self.playback.current_tl_track)
+
+        self.assertEqual(actual, expected)
 
     @populate_tracklist
     def test_playing_track_that_isnt_in_playlist(self):
