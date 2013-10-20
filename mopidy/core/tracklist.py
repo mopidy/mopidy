@@ -165,8 +165,8 @@ class TracklistController(object):
         elif self.single:
             return None
 
-        # Current differnce between next and eot handling is that eot needs to
-        # handle single, with that out of the way the rest of the logic is
+        # Current difference between next and EOT handling is that EOT needs to
+        # handle "single", with that out of the way the rest of the logic is
         # shared.
         return self.next_track(tl_track)
 
