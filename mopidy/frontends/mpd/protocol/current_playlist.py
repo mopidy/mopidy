@@ -6,6 +6,7 @@ from mopidy.frontends.mpd.exceptions import (
 from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.models import Directory
 
+
 def _tracks_recursive(context, uri):
     result = []
     content = context.core.library.lookup('local:directory:' + uri + '/').get()
@@ -14,7 +15,8 @@ def _tracks_recursive(context, uri):
             result += _tracks_recursive(context, entry.path + '/' + entry.name)
         else:
             result.append(entry)
-    return result   
+    return result
+
 
 @handle_request(r'^add "(?P<uri>[^"]*)"$')
 def add(context, uri):

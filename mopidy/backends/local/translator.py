@@ -62,7 +62,8 @@ def parse_m3u(file_path, media_dir):
 # TODO: remove music_dir from API
 def parse_mpd_tag_cache(tag_cache, music_dir=''):
     """
-    Converts a MPD tag_cache into a lists of tracks, artists and albums and directories.
+    Converts a MPD tag_cache into a lists of tracks, artists and albums and
+    directories.
     """
     tracks = set()
     directories = []
@@ -90,12 +91,13 @@ def parse_mpd_tag_cache(tag_cache, music_dir=''):
         elif line[0:10] == b'directory:':
             key, value = line.split(': ', 1)
             path_info = value.split('/')
-            directory_kwargs['uri'] = 'local:directory:' + music_dir + '/' + value
+            directory_kwargs['uri'] = 'local:directory:' + music_dir + '/' + \
+                value
             directory_kwargs['name'] = path_info[-1:][0]
             directory_kwargs['path'] = '/'.join(path_info[:-1])
             directory = Directory(**directory_kwargs)
             directories.append(directory)
-            continue            
+            continue
         elif not state:
             continue
 

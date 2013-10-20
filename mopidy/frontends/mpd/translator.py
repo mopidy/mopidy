@@ -133,7 +133,8 @@ def directory_to_mpd_format(directory):
     Format track for output to MPD client.
 
     :param directory: the directory
-    :type track: :class:`mopidy.models.Directory` or :class:`mopidy.models.TlTrack`
+    :type track: :class:`mopidy.models.Directory` or
+        :class:`mopidy.models.TlTrack`
     """
     if len(directory.path) > 0:
         return (u'directory', directory.path + '/' + directory.name)

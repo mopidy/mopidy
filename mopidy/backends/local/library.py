@@ -27,7 +27,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             'Loading local tracks from %s using %s',
             self._media_dir, self._tag_cache_file)
 
-        tracks, directories = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
+        tracks, directories = parse_mpd_tag_cache(self._tag_cache_file,
+                                                  self._media_dir)
 
         for directory in directories:
             self._add_to_path_mapping(directory.path, directory)
@@ -155,7 +156,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
     def _add_to_path_mapping(self, path, item):
         if not path in self._path_mapping:
             self._path_mapping[path] = []
-        self._path_mapping[path].append(item)                    
+        self._path_mapping[path].append(item)
 
 
 # TODO: rename and move to tagcache extension.

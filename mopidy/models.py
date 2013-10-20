@@ -254,7 +254,7 @@ class Track(ImmutableObject):
     :param last_modified: Represents last modification time
     :type last_modified: integer
     :param path: relative file path
-    :type path: string    
+    :type path: string
     """
 
     #: The track URI. Read-only.
@@ -288,7 +288,7 @@ class Track(ImmutableObject):
     musicbrainz_id = None
 
     #: The relative (to music library) path of the track. Read-only.
-    path = None    
+    path = None
 
     #: Integer representing when the track was last modified, exact meaning
     #: depends on source of track. For local files this is the mtime, for other

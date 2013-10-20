@@ -38,16 +38,19 @@ def _artist_as_track(artist):
         name='Artist: ' + artist.name,
         artists=[artist])
 
+
 def _directory_recursive(context, uri):
     result = []
     result += context.core.library.lookup('local:directory:' + uri).get()
     content = context.core.library.lookup('local:directory:' + uri + '/').get()
     for entry in content:
         if isinstance(entry, Directory):
-            result += _directory_recursive(context, entry.path + '/' + entry.name)
+            result += _directory_recursive(context, entry.path + '/' +
+                                           entry.name)
         else:
             result.append(entry)
     return result
+
 
 @handle_request(r'^count ' + QUERY_RE)
 def count(context, mpd_query):
@@ -303,10 +306,10 @@ def lsinfo(context, uri=None):
     if uri is None or uri == '/' or uri == '':
         playlists = stored_playlists.listplaylists(context)
         uri = ''
- 
+
     result = context.core.library.lookup('local:directory:' + uri + '/').get()
     return translator.tracks_and_directories_to_mpd_format(result) + playlists
- 
+
 
 @handle_request(r'^rescan( "(?P<uri>[^"]+)")*$')
 def rescan(context, uri=None):
