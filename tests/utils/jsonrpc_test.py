@@ -34,6 +34,9 @@ class Calculator(object):
     def _secret(self):
         return 'Grand Unified Theory'
 
+    def fail(self):
+        raise ValueError('What did you expect?')
+
 
 class JsonRpcTestBase(unittest.TestCase):
     def setUp(self):
@@ -313,19 +316,26 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
-    def test_application_error_response_is_none(self):
+    def test_application_error_response(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.tracklist.index',
-            'params': ['bogus'],
+            'method': 'calc.fail',
+            'params': [],
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
-        self.assertIn('result', response)
+        self.assertNotIn('result', response)
 
-        result = response['result']
-        self.assertEqual(result, None)
+        error = response['error']
+        self.assertEqual(error['code'], 0)
+        self.assertEqual(error['message'], 'Application error')
+
+        data = error['data']
+        self.assertEqual(data['type'], 'ValueError')
+        self.assertIn('What did you expect?', data['message'])
+        self.assertIn('traceback', data)
+        self.assertIn('Traceback (most recent call last):', data['traceback'])
 
     def test_missing_jsonrpc_member_causes_invalid_request_error(self):
         request = {

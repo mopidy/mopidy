@@ -426,10 +426,10 @@ class BaseTracklistProvider(object):
         """
         return False
 
-    def mark_consumed(self, tracklist, tl_track):
+    def mark_played(self, tracklist, tl_track):
         return None
 
-    def mark_starting(self, tracklist, tl_track):
+    def mark_playing(self, tracklist, tl_track):
         return None
 
     def mark_unplayable(self, tracklist, tl_track):
