@@ -175,10 +175,10 @@ can install Mopidy from PyPI using Pip.
 
 #. Then you'll need to install all of Mopidy's hard non-Python dependencies:
 
-   - GStreamer 0.10.x, with Python bindings. GStreamer is packaged for most
-     popular Linux distributions. Search for GStreamer in your package manager,
-     and make sure to install the Python bindings, and the "good" and "ugly"
-     plugin sets.
+   - GStreamer 0.10.31 or later, with Python bindings. GStreamer is packaged
+     for most popular Linux distributions. Search for GStreamer in your package
+     manager, and make sure to install the Python bindings, and the "good" and
+     "ugly" plugin sets.
 
      If you use Debian/Ubuntu you can install GStreamer like this::
 

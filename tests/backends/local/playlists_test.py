@@ -15,7 +15,7 @@ from tests import path_to_data_dir
 from tests.backends.local import generate_song
 
 
-class LocalPlaylistsControllerTest(unittest.TestCase):
+class LocalPlaylistsProviderTest(unittest.TestCase):
     backend_class = actor.LocalBackend
     config = {
         'local': {
@@ -201,6 +201,18 @@ class LocalPlaylistsControllerTest(unittest.TestCase):
         self.assertNotIn(playlist1, self.core.playlists.playlists)
         self.assertIn(playlist2, self.core.playlists.playlists)
 
-    @unittest.SkipTest
     def test_playlist_with_unknown_track(self):
-        pass
+        track = Track(uri='file:///dev/null')
+        playlist = self.core.playlists.create('test')
+        playlist = playlist.copy(tracks=[track])
+        playlist = self.core.playlists.save(playlist)
+
+        backend = self.backend_class(config=self.config, audio=self.audio)
+
+        self.assert_(backend.playlists.playlists)
+        self.assertEqual(
+            'local:playlist:test', backend.playlists.playlists[0].uri)
+        self.assertEqual(
+            playlist.name, backend.playlists.playlists[0].name)
+        self.assertEqual(
+            track.uri, backend.playlists.playlists[0].tracks[0].uri)

@@ -18,3 +18,7 @@ class MopidyException(Exception):
 
 class ExtensionError(MopidyException):
     pass
+
+
+class ScannerError(MopidyException):
+    pass

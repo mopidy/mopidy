@@ -74,6 +74,14 @@ https://github.com/mopidy/mopidy-nad
 Extension for controlling volume using an external NAD amplifier.
 
 
+Mopidy-Notifier
+---------------
+
+https://github.com/sauberfred/mopidy-notifier
+
+Extension for displaying track info as User Notifications in Mac OS X.
+
+
 Mopidy-radio-de
 ---------------
 
