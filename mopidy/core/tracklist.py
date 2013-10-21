@@ -486,7 +486,7 @@ class TracklistController(object):
         """Private method used by :class:`mopidy.core.PlaybackController`."""
         backend = self._get_backend(tl_track)
         if backend and backend.has_tracklist().get():
-            result = backend.tracklist.mark_starting(self, tl_track).get()
+            result = backend.tracklist.mark_playing(self, tl_track).get()
             if result:
                 return result
         if self.random and tl_track in self._shuffled:
