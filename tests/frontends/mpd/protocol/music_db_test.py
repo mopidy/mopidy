@@ -25,20 +25,24 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_count_correct_length(self):
-        self.backend.library.dummy_search_result = SearchResult(
-            tracks=[Track(name='A', date="2001", length=4000),
-                    Track(name='B', date="2001", length=50000),
-                    Track(name='C', date="2001", length=600000),
-                    Track(name='D', date="2009", length=60000)
-                    ])
-        self.sendRequest('count "date" "2009"')
+        # Count the lone track
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[Track(uri='dummy:a', name="foo", date="2001", length=4000)]
+            )
+        self.sendRequest('count "title" "foo"')
         self.assertInResponse('songs: 1')
-        self.assertInResponse('playtime: 4000')
+        self.assertInResponse('playtime: 4')
         self.assertInResponse('OK')
 
+        # Count multiple tracks
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[Track(uri='dummy:b', date="2001", length=50000),
+                    Track(uri='dummy:c', date="2001", length=600000)
+                    ]
+            )
         self.sendRequest('count "date" "2001"')
-        self.assertInResponse('songs: 3')
-        self.assertInResponse('playtime: 654000')
+        self.assertInResponse('songs: 2')
+        self.assertInResponse('playtime: 650')
         self.assertInResponse('OK')
 
     def test_findadd(self):
