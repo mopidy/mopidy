@@ -208,7 +208,7 @@ class TracklistController(object):
             if type(next_tl_track) in [TlTrack, type(None)]:
                 return next_tl_track
 
-		return self._next_track(tl_track)
+        return self._next_track(tl_track)
 
     def _next_track(self, tl_track):
         if not self.tl_tracks:
