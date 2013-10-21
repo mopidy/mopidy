@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import mock
-import random
 import time
 import unittest
 
@@ -19,7 +18,7 @@ from tests.backends.local import generate_song, populate_tracklist
 # TODO Test 'playlist repeat', e.g. repeat=1,single=0
 
 
-class LocalPlaybackControllerTest(unittest.TestCase):
+class LocalPlaybackProviderTest(unittest.TestCase):
     config = {
         'local': {
             'media_dir': path_to_data_dir(''),
@@ -27,8 +26,12 @@ class LocalPlaybackControllerTest(unittest.TestCase):
             'tag_cache_file': path_to_data_dir('empty_tag_cache'),
         }
     }
+
+    # We need four tracks so that our shuffled track tests behave nicely with
+    # reversed as a fake shuffle. Ensuring that shuffled order is [4,3,2,1] and
+    # normal order [1,2,3,4] which means next_track != next_track_with_random
     tracks = [
-        Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
+        Track(uri=generate_song(i), length=4464) for i in (1, 2, 3, 4)]
 
     def add_track(self, uri):
         track = Track(uri=uri, length=4464)
@@ -278,15 +281,15 @@ class LocalPlaybackControllerTest(unittest.TestCase):
     @populate_tracklist
     def test_next_track_before_play(self):
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
     def test_next_track_during_play(self):
         self.playback.play()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     @populate_tracklist
     def test_next_track_after_previous(self):
@@ -294,13 +297,12 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.playback.next()
         self.playback.previous()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     def test_next_track_empty_playlist(self):
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         None)
+        self.assertEqual(self.tracklist.next_track(tl_track), None)
 
     @populate_tracklist
     def test_next_track_at_end_of_playlist(self):
@@ -308,8 +310,7 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         for _ in self.tracklist.tl_tracks[1:]:
             self.playback.next()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         None)
+        self.assertEqual(self.tracklist.next_track(tl_track), None)
 
     @populate_tracklist
     def test_next_track_at_end_of_playlist_with_repeat(self):
@@ -318,16 +319,18 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         for _ in self.tracks[1:]:
             self.playback.next()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
-    def test_next_track_with_random(self):
-        random.seed(1)
+    @mock.patch('random.shuffle')
+    def test_next_track_with_random(self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
         self.tracklist.random = True
-        tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[2])
+        current_tl_track = self.playback.current_tl_track
+        next_tl_track = self.tracklist.next_track(current_tl_track)
+        self.assertEqual(next_tl_track, self.tl_tracks[-1])
 
     @populate_tracklist
     def test_next_with_consume(self):
@@ -341,29 +344,46 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.tracklist.single = True
         self.tracklist.repeat = True
         self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
         self.playback.next()
         self.assertEqual(self.playback.current_track, self.tracks[1])
 
     @populate_tracklist
-    def test_next_with_random(self):
-        # FIXME feels very fragile
-        random.seed(1)
+    @mock.patch('random.shuffle')
+    def test_next_with_random(self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
         self.tracklist.random = True
         self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[-1])
         self.playback.next()
-        self.assertEqual(self.playback.current_track, self.tracks[1])
+        self.assertEqual(self.playback.current_track, self.tracks[-2])
 
     @populate_tracklist
-    def test_next_track_with_random_after_append_playlist(self):
-        random.seed(1)
+    @mock.patch('random.shuffle')
+    def test_next_track_with_random_after_append_playlist(self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
         self.tracklist.random = True
-        tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[2])
+        current_tl_track = self.playback.current_tl_track
+
+        expected_tl_track = self.tracklist.tl_tracks[-1]
+        next_tl_track = self.tracklist.next_track(current_tl_track)
+
+        # Baseline checking that first next_track is last tl track per our fake
+        # shuffle.
+        self.assertEqual(next_tl_track, expected_tl_track)
+
         self.tracklist.add(self.tracks[:1])
-        tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+
+        old_next_tl_track = next_tl_track
+        expected_tl_track = self.tracklist.tl_tracks[-1]
+        next_tl_track = self.tracklist.next_track(current_tl_track)
+
+        # Verify that first next track has changed since we added to the
+        # playlist.
+        self.assertEqual(next_tl_track, expected_tl_track)
+        self.assertNotEqual(next_tl_track, old_next_tl_track)
 
     @populate_tracklist
     def test_end_of_track(self):
@@ -435,15 +455,15 @@ class LocalPlaybackControllerTest(unittest.TestCase):
     @populate_tracklist
     def test_end_of_track_track_before_play(self):
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
     def test_end_of_track_track_during_play(self):
         self.playback.play()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     @populate_tracklist
     def test_end_of_track_track_after_previous(self):
@@ -451,8 +471,8 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.playback.on_end_of_track()
         self.playback.previous()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[1])
 
     def test_end_of_track_track_empty_playlist(self):
         tl_track = self.playback.current_tl_track
@@ -473,16 +493,18 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         for _ in self.tracks[1:]:
             self.playback.on_end_of_track()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
-    def test_end_of_track_track_with_random(self):
-        random.seed(1)
+    @mock.patch('random.shuffle')
+    def test_end_of_track_track_with_random(self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
         self.tracklist.random = True
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[2])
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[-1])
 
     @populate_tracklist
     def test_end_of_track_with_consume(self):
@@ -492,25 +514,42 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.assertNotIn(self.tracks[0], self.tracklist.tracks)
 
     @populate_tracklist
-    def test_end_of_track_with_random(self):
-        # FIXME feels very fragile
-        random.seed(1)
+    @mock.patch('random.shuffle')
+    def test_end_of_track_with_random(self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
         self.tracklist.random = True
         self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[-1])
         self.playback.on_end_of_track()
-        self.assertEqual(self.playback.current_track, self.tracks[1])
+        self.assertEqual(self.playback.current_track, self.tracks[-2])
 
     @populate_tracklist
-    def test_end_of_track_track_with_random_after_append_playlist(self):
-        random.seed(1)
+    @mock.patch('random.shuffle')
+    def test_end_of_track_track_with_random_after_append_playlist(
+            self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
         self.tracklist.random = True
-        tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[2])
+        current_tl_track = self.playback.current_tl_track
+
+        expected_tl_track = self.tracklist.tl_tracks[-1]
+        eot_tl_track = self.tracklist.eot_track(current_tl_track)
+
+        # Baseline checking that first eot_track is last tl track per our fake
+        # shuffle.
+        self.assertEqual(eot_tl_track, expected_tl_track)
+
         self.tracklist.add(self.tracks[:1])
-        tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.next_track(tl_track),
-                         self.tl_tracks[1])
+
+        old_eot_tl_track = eot_tl_track
+        expected_tl_track = self.tracklist.tl_tracks[-1]
+        eot_tl_track = self.tracklist.eot_track(current_tl_track)
+
+        # Verify that first next track has changed since we added to the
+        # playlist.
+        self.assertEqual(eot_tl_track, expected_tl_track)
+        self.assertNotEqual(eot_tl_track, old_eot_tl_track)
 
     @populate_tracklist
     def test_previous_track_before_play(self):
@@ -528,8 +567,8 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.playback.play()
         self.playback.next()
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.previous_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.previous_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
     def test_previous_track_after_previous(self):
@@ -538,8 +577,8 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.playback.next()  # At track 2
         self.playback.previous()  # At track 1
         tl_track = self.playback.current_tl_track
-        self.assertEqual(self.tracklist.previous_track(tl_track),
-                         self.tl_tracks[0])
+        self.assertEqual(
+            self.tracklist.previous_track(tl_track), self.tl_tracks[0])
 
     def test_previous_track_empty_playlist(self):
         tl_track = self.playback.current_tl_track
@@ -874,15 +913,19 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.assertEqual(len(self.tracklist.tracks), 0)
 
     @populate_tracklist
-    def test_play_with_random(self):
-        random.seed(1)
+    @mock.patch('random.shuffle')
+    def test_play_with_random(self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
         self.tracklist.random = True
         self.playback.play()
-        self.assertEqual(self.playback.current_track, self.tracks[2])
+        self.assertEqual(self.playback.current_track, self.tracks[-1])
 
     @populate_tracklist
-    def test_previous_with_random(self):
-        random.seed(1)
+    @mock.patch('random.shuffle')
+    def test_previous_with_random(self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
         self.tracklist.random = True
         self.playback.play()
         self.playback.next()
@@ -901,8 +944,37 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.tracklist.single = True
         self.tracklist.repeat = True
         self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
         self.playback.on_end_of_track()
         self.assertEqual(self.playback.current_track, self.tracks[0])
+
+    @populate_tracklist
+    def test_end_of_song_with_single_random_and_repeat_starts_same(self):
+        self.tracklist.single = True
+        self.tracklist.repeat = True
+        self.tracklist.random = True
+        self.playback.play()
+        current_track = self.playback.current_track
+        self.playback.on_end_of_track()
+        self.assertEqual(self.playback.current_track, current_track)
+
+    @populate_tracklist
+    def test_end_of_song_with_single_stops(self):
+        self.tracklist.single = True
+        self.playback.play()
+        self.assertEqual(self.playback.current_track, self.tracks[0])
+        self.playback.on_end_of_track()
+        self.assertEqual(self.playback.current_track, None)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
+
+    @populate_tracklist
+    def test_end_of_song_with_single_and_random_stops(self):
+        self.tracklist.single = True
+        self.tracklist.random = True
+        self.playback.play()
+        self.playback.on_end_of_track()
+        self.assertEqual(self.playback.current_track, None)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     @populate_tracklist
     def test_end_of_playlist_stops(self):
@@ -929,8 +1001,18 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.assertEqual(self.tracklist.next_track(tl_track), None)
 
     @populate_tracklist
+    def test_random_with_eot_until_end_of_playlist(self):
+        self.tracklist.random = True
+        self.playback.play()
+        for _ in self.tracks[1:]:
+            self.playback.on_end_of_track()
+        tl_track = self.playback.current_tl_track
+        self.assertEqual(self.tracklist.eot_track(tl_track), None)
+
+    @populate_tracklist
     def test_random_until_end_of_playlist_and_play_from_start(self):
-        self.tracklist.repeat = True
+        self.tracklist.random = True
+        self.playback.play()
         for _ in self.tracks:
             self.playback.next()
         tl_track = self.playback.current_tl_track
@@ -940,11 +1022,23 @@ class LocalPlaybackControllerTest(unittest.TestCase):
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
 
     @populate_tracklist
+    def test_random_with_eot_until_end_of_playlist_and_play_from_start(self):
+        self.tracklist.random = True
+        self.playback.play()
+        for _ in self.tracks:
+            self.playback.on_end_of_track()
+        tl_track = self.playback.current_tl_track
+        self.assertNotEqual(self.tracklist.eot_track(tl_track), None)
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
+        self.playback.play()
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
+
+    @populate_tracklist
     def test_random_until_end_of_playlist_with_repeat(self):
         self.tracklist.repeat = True
         self.tracklist.random = True
         self.playback.play()
-        for _ in self.tracks:
+        for _ in self.tracks[1:]:
             self.playback.next()
         tl_track = self.playback.current_tl_track
         self.assertNotEqual(self.tracklist.next_track(tl_track), None)
@@ -958,6 +1052,22 @@ class LocalPlaybackControllerTest(unittest.TestCase):
             self.assertNotIn(self.playback.current_track, played)
             played.append(self.playback.current_track)
             self.playback.next()
+
+    @populate_tracklist
+    @mock.patch('random.shuffle')
+    def test_play_track_then_enable_random(self, shuffle_mock):
+        # Covers underlying issue IssueGH17RegressionTest tests for.
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
+
+        expected = self.tl_tracks[::-1] + [None]
+        actual = []
+
+        self.playback.play()
+        self.tracklist.random = True
+        while self.playback.state != PlaybackState.STOPPED:
+            self.playback.next()
+            actual.append(self.playback.current_tl_track)
+        self.assertEqual(actual, expected)
 
     @populate_tracklist
     def test_playing_track_that_isnt_in_playlist(self):
