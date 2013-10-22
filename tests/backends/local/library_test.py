@@ -108,22 +108,6 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(uri=track_2_uri)
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
-    def test_find_exact_any(self):
-        result = self.library.find_exact(any=['track1'])
-        self.assertEqual(list(result[0].tracks), self.tracks[:1])
-
-        result = self.library.find_exact(any=['track2'])
-        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
-
-        result = self.library.find_exact(any=['2002'])
-        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
-
-        result = self.library.find_exact(any=['album1'])
-        self.assertEqual(list(result[0].tracks), self.tracks[:1])
-
-        result = self.library.find_exact(any=['artist2'])
-        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
-
     def test_find_exact_track(self):
         result = self.library.find_exact(track=['track1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
@@ -180,9 +164,15 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(any=['artist1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
+        result = self.library.find_exact(any=['artist2'])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
+
         # Matches on track
         result = self.library.find_exact(any=['track1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        result = self.library.find_exact(any=['track2'])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on track album
         result = self.library.find_exact(any=['album1'])
@@ -191,6 +181,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         # Matches on track album artists
         result = self.library.find_exact(any=['artist3'])
         self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+
+        # Matches on track year
+        result = self.library.find_exact(any=['2002'])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on URI
         result = self.library.find_exact(any=['local:track:path1'])
