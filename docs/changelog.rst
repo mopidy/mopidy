@@ -111,7 +111,7 @@ of the following extensions as well:
 - Made the formerly unused commands ``outputs``, ``enableoutput``, and
   ``disableoutput`` mute/unmute audio. (Related to: :issue:`186`)
 
-- The MPD command ``list`` now works with ``"albumartist"`` as it's second
+- The MPD command ``list`` now works with ``"albumartist"`` as its second
   argument, e.g. ``"album" "albumartist" "anartist"``. (Fixes: :issue:`468`)
 
 **Extension support**
