@@ -75,7 +75,7 @@ of the following extensions as well:
   mode is enabled. (Fixes: :issue:`453`)
 
 - In "single" mode, after a track ended, playback continued with the next track
-  in the tracklis. It now stops after playing a single track, unless "repeat"
+  in the tracklist. It now stops after playing a single track, unless "repeat"
   mode is enabled. (Fixes: :issue:`496`)
 
 **Audio**
