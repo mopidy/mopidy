@@ -106,6 +106,9 @@ of the following extensions as well:
   e.g. HTTP radio streams and not just ``local:track:...`` URIs. This used to
   work, but was broken in Mopidy 0.15.0. (Fixes: :issue:`527`)
 
+- Fixed crash when playing ``local:track:...`` URIs which contained non-ASCII
+  chars after uridecode.
+
 **MPD frontend**
 
 - Made the formerly unused commands ``outputs``, ``enableoutput``, and
