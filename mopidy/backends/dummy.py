@@ -138,5 +138,11 @@ class DummyTracklistProvider(base.BaseTracklistProvider):
     def shuffle(self, tracklist, start, end):
         return False
 
-    def mark(self, tracklist, how, tl_track):
-        return False
+    def mark_played(self, tracklist, tl_track):
+        return None
+
+    def mark_playing(self, tracklist, tl_track):
+        return None
+
+    def mark_unplayable(self, tracklist, tl_track):
+        return None
