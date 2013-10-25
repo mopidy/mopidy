@@ -209,6 +209,13 @@ this work first::
 Streaming through SHOUTcast/Icecast
 -----------------------------------
 
+.. warning:: Known issue
+
+   Currently, Mopidy does not handle end-of-track vs end-of-stream signalling
+   in GStreamer correctly. This causes the SHOUTcast stream to be disconnected
+   at the end of each track, rendering it quite useless. For further details,
+   see :issue:`492`.
+
 If you want to play the audio on another computer than the one running Mopidy,
 you can stream the audio from Mopidy through an SHOUTcast or Icecast audio
 streaming server. Multiple media players can then be connected to the streaming
