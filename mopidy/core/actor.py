@@ -74,10 +74,6 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
         # Forward event from backend to frontends
         CoreListener.send('playlists_loaded')
 
-    def stream_metadata_changed(self, metadata):
-        self.tracklist.mark("metadata", self.playback.current_tl_track,
-                            metadata=metadata)
-
 
 class Backends(list):
     def __init__(self, backends):
