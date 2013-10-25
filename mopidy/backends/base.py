@@ -26,8 +26,8 @@ class Backend(object):
     playlists = None
 
     #: The tracklist provider. An instance of
-    #: :class:`~mopidy.backends.base.BasePlaylistsProvider`, or class:`None` if
-    #: the backend doesn't provide tracklist additional control logic
+    #: :class:`~mopidy.backends.base.BaseTracklistProvider`, or class:`None` if
+    #: the backend doesn't provide additional tracklist control logic.
     tracklist = None
 
     #: List of URI schemes this backend can handle.
