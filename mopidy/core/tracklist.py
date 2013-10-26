@@ -173,7 +173,7 @@ class TracklistController(object):
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             eot_tl_track = backend.tracklist.eot_track(self, tl_track).get()
             if type(eot_tl_track) in [TlTrack, type(None)]:
                 return eot_tl_track
@@ -203,7 +203,7 @@ class TracklistController(object):
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             next_tl_track = backend.tracklist.next_track(self, tl_track).get()
             if type(next_tl_track) in [TlTrack, type(None)]:
                 return next_tl_track
@@ -252,7 +252,7 @@ class TracklistController(object):
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             previous_tl_track = backend.tracklist.previous_track(
                 self, tl_track).get()
             if type(previous_tl_track) in [TlTrack, type(None)]:
@@ -293,7 +293,7 @@ class TracklistController(object):
             'tracks or uri must be provided'
 
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             tracklist = backend.tracklist.add(self, tracks, at_position,
                                               uri).get()
             if type(tracklist) in [list, ]:
@@ -394,7 +394,7 @@ class TracklistController(object):
             'to_position can not be larger than tracklist length'
 
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             if backend.tracklist.move(self, start, end, to_position).get():
                 return
 
@@ -420,7 +420,7 @@ class TracklistController(object):
         tl_tracks = self.filter(criteria, **kwargs)
 
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             removed = backend.tracklist.remove(self, tl_tracks).get()
             if type(removed) in [list, ]:
                 return removed
@@ -446,7 +446,7 @@ class TracklistController(object):
         :type end: int or :class:`None`
         """
         backend = self._get_backend(self.core.playback.current_tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             if backend.tracklist.shuffle(self, start, end).get():
                 return
 
@@ -485,7 +485,7 @@ class TracklistController(object):
     def mark_playing(self, tl_track):
         """Private method used by :class:`mopidy.core.PlaybackController`."""
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             result = backend.tracklist.mark_playing(self, tl_track).get()
             if result:
                 return result
@@ -496,7 +496,7 @@ class TracklistController(object):
         """Private method used by :class:`mopidy.core.PlaybackController`."""
         logger.warning('Track is not playable: %s', tl_track.track.uri)
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             result = backend.tracklist.mark_unplayable(self, tl_track).get()
             if result:
                 return result
@@ -506,7 +506,7 @@ class TracklistController(object):
     def mark_played(self, tl_track):
         """Private method used by :class:`mopidy.core.PlaybackController`."""
         backend = self._get_backend(tl_track)
-        if backend and backend.has_tracklist().get():
+        if backend:
             result = backend.tracklist.mark_consumed(self, tl_track).get()
             if result in [True, False]:
                 return result
