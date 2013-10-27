@@ -98,6 +98,9 @@ Creating releases
 
 #. Update changelog and commit it.
 
+#. Bump the version number in ``mopidy/__init__.py``. Remember to update the
+   test case in ``tests/version_test.py``.
+
 #. Merge the release branch (``develop`` in the example) into master::
 
     git checkout master
@@ -131,10 +134,12 @@ Creating releases
     pip install -U wheel
     python setup.py bdist_wheel upload
 
+#. Merge ``master`` back into ``develop`` and push the branch to GitHub.
+
 #. Make sure the new tag is built by Read the Docs, and that the ``latest``
    version shows the newly released version.
 
-#. Update the Debian package.
-
 #. Spread the word through the topic on #mopidy on IRC, @mopidy on Twitter, and
    on the mailing list.
+
+#. Update the Debian package.
