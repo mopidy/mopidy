@@ -2,8 +2,10 @@ from __future__ import unicode_literals
 
 import ConfigParser as configparser
 import io
+import itertools
 import logging
 import os.path
+import re
 
 from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
@@ -143,6 +145,41 @@ def _format(config, comments, schemas, display):
                 output[-1] += b'  # ' + comment.capitalize()
         output.append(b'')
     return b'\n'.join(output)
+
+
+def _preprocess(string):
+    """Convert a raw config into a form that preserves comments etc."""
+    results = ['[__COMMENTS__]']
+    counter = itertools.count(0)
+
+    section_re = re.compile(r'^(\[[^\]]+\])\s*(.+)$')
+    blank_line_re = re.compile(r'^\s*$')
+    comment_re = re.compile(r'^(#|;)')
+    inline_comment_re = re.compile(r' ;')
+
+    def newlines(match):
+        return '__BLANK%d__ =' % next(counter)
+
+    def comments(match):
+        if match.group(1) == '#':
+            return '__HASH%d__ =' % next(counter)
+        elif match.group(1) == ';':
+            return '__SEMICOLON%d__ =' % next(counter)
+
+    def inlinecomments(match):
+        return '\n__INLINE%d__ =' % next(counter)
+
+    def sections(match):
+        return '%s\n__SECTION%d__ = %s' % (
+            match.group(1), next(counter), match.group(2))
+
+    for line in string.splitlines():
+        line = blank_line_re.sub(newlines, line)
+        line = section_re.sub(sections, line)
+        line = comment_re.sub(comments, line)
+        line = inline_comment_re.sub(inlinecomments, line)
+        results.append(line)
+    return '\n'.join(results)
 
 
 class Proxy(collections.Mapping):
