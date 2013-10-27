@@ -179,6 +179,42 @@ def query_from_mpd_list_format(field, mpd_query):
         raise MpdArgError('not able to parse args', command='list')
 
 
+# XXX The regexps below should be refactored to reuse common patterns here
+# and in mopidy.frontends.mpd.protocol.music_db.QUERY_RE.
+
+MPD_SEARCH_QUERY_RE = re.compile(r"""
+    "?                  # Optional quote around the field type
+    (?:                 # A non-capturing group for the field type
+        [Aa]lbum
+      | [Aa]rtist
+      | [Dd]ate
+      | [Ff]ile
+      | [Ff]ilename
+      | [Tt]itle
+      | [Aa]ny
+    )
+    "?                  # End of optional quote around the field type
+    \s                  # A single space
+    "[^"]+"             # Matching a quoted search string
+""", re.VERBOSE)
+
+MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
+    "?                  # Optional quote around the field type
+    (?P<field>(         # A capturing group for the field type
+        [Aa]lbum
+      | [Aa]rtist
+      | [Dd]ate
+      | [Ff]ile
+      | [Ff]ilename
+      | [Tt]itle
+      | [Aa]ny
+    ))
+    "?                  # End of optional quote around the field type
+    \s                  # A single space
+    "(?P<what>[^"]+)"   # Capturing a quoted search string
+""", re.VERBOSE)
+
+
 def query_from_mpd_search_format(mpd_query):
     """
     Parses an MPD ``search`` or ``find`` query and converts it to the Mopidy
@@ -187,18 +223,10 @@ def query_from_mpd_search_format(mpd_query):
     :param mpd_query: the MPD search query
     :type mpd_query: string
     """
-    # XXX The regexps below should be refactored to reuse common patterns here
-    # and in mopidy.frontends.mpd.protocol.music_db.
-    query_pattern = (
-        r'"?(?:[Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
-        r'[Tt]itle|[Aa]ny)"? "[^"]+"')
-    query_parts = re.findall(query_pattern, mpd_query)
-    query_part_pattern = (
-        r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
-        r'[Tt]itle|[Aa]ny))"? "(?P<what>[^"]+)"')
+    query_parts = re.findall(MPD_SEARCH_QUERY_RE, mpd_query)
     query = {}
     for query_part in query_parts:
-        m = re.match(query_part_pattern, query_part)
+        m = re.match(MPD_SEARCH_QUERY_PART_RE, query_part)
         field = m.groupdict()['field'].lower()
         if field == 'title':
             field = 'track'
