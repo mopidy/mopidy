@@ -7,6 +7,22 @@ This changelog is used to track all major changes to Mopidy.
 v0.16.0 (UNRELEASED)
 ====================
 
+The goals for 0.16 were to add support for queuing playlists of e.g. radio
+streams directly to Mopidy, without manually extracting the stream URLs from
+the playlist first, and to move the Spotify, Last.fm, and MPRIS support out to
+independent Mopidy extensions, living outside the main Mopidy repo. In
+addition, we've seen some cleanup to the playback vs tracklist part of the core
+API, which will require some changes for user's of the HTTP/JavaScript APIs, as
+well as the addition of audio muting to the core API. To speed up the
+:ref:`development of new extensions <extensiondev>`, we've added a cookiecutter
+project to get the skeleton of a Mopidy extension up and running in a matter of
+minutes. Read below for all the details and for links to issues with even more
+details.
+
+Since the release of 0.15, we've closed or merged 31 issues and pull requests
+through about 200 commits by :ref:`five people <authors>`, including three new
+contributors.
+
 **Dependencies**
 
 Parts of Mopidy have been moved to their own external extensions. If you want
@@ -101,6 +117,11 @@ of the following extensions as well:
 
 - Media files with less than 100ms duration are now excluded from the library.
 
+- Media files with the file extensions ``.jpeg``, ``.jpg``, ``.png``, ``.txt``,
+  and ``.log`` are now skipped by the media library scanner. You can change the
+  list of excluded file extensions by setting the
+  :confval:`local/excluded_file_extensions` config value. (Fixes: :issue:`516`)
+
 - Unknown URIs found in playlists are now made into track objects with the URI
   set instead of being ignored. This makes it possible to have playlists with
   e.g. HTTP radio streams and not just ``local:track:...`` URIs. This used to
@@ -109,13 +130,25 @@ of the following extensions as well:
 - Fixed crash when playing ``local:track:...`` URIs which contained non-ASCII
   chars after uridecode.
 
+- Removed media files are now also removed from the in-memory media library
+  when the media library is reloaded from disk. (Fixes: :issue:`500`)
+
 **MPD frontend**
 
 - Made the formerly unused commands ``outputs``, ``enableoutput``, and
   ``disableoutput`` mute/unmute audio. (Related to: :issue:`186`)
 
 - The MPD command ``list`` now works with ``"albumartist"`` as its second
-  argument, e.g. ``"album" "albumartist" "anartist"``. (Fixes: :issue:`468`)
+  argument, e.g. ``list "album" "albumartist" "anartist"``. (Fixes:
+  :issue:`468`)
+
+- The MPD commands ``find`` and ``search`` now accepts ``albumartist`` and
+  ``track`` (this is the track number, not the track name) as field types to
+  limit the search result with.
+
+- The MPD command ``count`` is now implemented. It accepts the same type of
+  arguments as ``find`` and ``search``, but returns the number of tracks and
+  their total playtime instead.
 
 **Extension support**
 
