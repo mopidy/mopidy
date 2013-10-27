@@ -5,7 +5,7 @@ import itertools
 
 from mopidy.models import Track
 from mopidy.frontends.mpd import translator
-from mopidy.frontends.mpd.exceptions import MpdNotImplemented, MpdArgError
+from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
