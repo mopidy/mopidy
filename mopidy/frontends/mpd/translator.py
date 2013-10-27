@@ -227,10 +227,10 @@ def query_from_mpd_search_format(mpd_query):
     :param mpd_query: the MPD search query
     :type mpd_query: string
     """
-    query_parts = re.findall(MPD_SEARCH_QUERY_RE, mpd_query)
+    query_parts = MPD_SEARCH_QUERY_RE.findall(mpd_query)
     query = {}
     for query_part in query_parts:
-        m = re.match(MPD_SEARCH_QUERY_PART_RE, query_part)
+        m = MPD_SEARCH_QUERY_PART_RE.match(query_part)
         field = m.groupdict()['field'].lower()
         if field == 'title':
             field = 'track'
