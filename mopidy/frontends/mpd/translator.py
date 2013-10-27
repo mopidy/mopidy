@@ -195,13 +195,15 @@ def query_from_mpd_search_format(mpd_query):
     query_parts = re.findall(query_pattern, mpd_query)
     query_part_pattern = (
         r'"?(?P<field>([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
-        r'[Tt]itle|[Aa]ny))"? "(?P<what>[^"]+)"')
+        r'[Tt]itle|[Tt]rack|[Aa]ny))"? "(?P<what>[^"]+)"')
     query = {}
     for query_part in query_parts:
         m = re.match(query_part_pattern, query_part)
         field = m.groupdict()['field'].lower()
         if field == 'title':
             field = 'track'
+        elif field == 'track':
+            field = 'track_no'
         elif field in ('file', 'filename'):
             field = 'uri'
         field = str(field)  # Needed for kwargs keys on OS X and Windows
