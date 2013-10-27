@@ -204,7 +204,6 @@ def query_from_mpd_search_format(mpd_query):
             field = 'track'
         elif field in ('file', 'filename'):
             field = 'uri'
-        field = str(field)  # Needed for kwargs keys on OS X and Windows
         what = m.groupdict()['what']
         if not what:
             raise ValueError
