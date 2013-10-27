@@ -258,11 +258,15 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_find_track_no(self):
-        self.sendRequest('find "track" "what"')
+        self.sendRequest('find "track" "10"')
         self.assertInResponse('OK')
 
     def test_find_track_no_without_quotes(self):
-        self.sendRequest('find track "what"')
+        self.sendRequest('find track "10"')
+        self.assertInResponse('OK')
+
+    def test_find_track_no_without_filter_value(self):
+        self.sendRequest('find "track" ""')
         self.assertInResponse('OK')
 
     def test_find_date(self):
@@ -624,11 +628,11 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_search_track_no(self):
-        self.sendRequest('search "track" "anything"')
+        self.sendRequest('search "track" "10"')
         self.assertInResponse('OK')
 
     def test_search_track_no_without_quotes(self):
-        self.sendRequest('search track "anything"')
+        self.sendRequest('search track "10"')
         self.assertInResponse('OK')
 
     def test_search_track_no_without_filter_value(self):
