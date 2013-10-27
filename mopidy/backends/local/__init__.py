@@ -23,6 +23,7 @@ class Extension(ext.Extension):
         schema['tag_cache_file'] = config.Path()
         schema['scan_timeout'] = config.Integer(
             minimum=1000, maximum=1000*60*60)
+        schema['scan_blacklist_extensions'] = config.List(optional=True)
         return schema
 
     def validate_environment(self):
