@@ -4,7 +4,7 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v0.16.0 (UNRELEASED)
+v0.16.0 (2013-10-27)
 ====================
 
 The goals for 0.16 were to add support for queuing playlists of e.g. radio
@@ -12,7 +12,7 @@ streams directly to Mopidy, without manually extracting the stream URLs from
 the playlist first, and to move the Spotify, Last.fm, and MPRIS support out to
 independent Mopidy extensions, living outside the main Mopidy repo. In
 addition, we've seen some cleanup to the playback vs tracklist part of the core
-API, which will require some changes for user's of the HTTP/JavaScript APIs, as
+API, which will require some changes for users of the HTTP/JavaScript APIs, as
 well as the addition of audio muting to the core API. To speed up the
 :ref:`development of new extensions <extensiondev>`, we've added a cookiecutter
 project to get the skeleton of a Mopidy extension up and running in a matter of
