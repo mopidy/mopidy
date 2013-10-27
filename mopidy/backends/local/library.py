@@ -60,10 +60,10 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 values = [values]
             # FIXME this is bound to be slow for large libraries
             for value in values:
-                if field != 'track_no':
-                    q = value.strip()
-                else:
+                if field == 'track_no':
                     q = value
+                else:
+                    q = value.strip()
 
                 uri_filter = lambda t: q == t.uri
                 track_filter = lambda t: q == t.name
@@ -118,10 +118,10 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 values = [values]
             # FIXME this is bound to be slow for large libraries
             for value in values:
-                if field != 'track_no':
-                    q = value.strip().lower()
-                else:
+                if field == 'track_no':
                     q = value
+                else:
+                    q = value.strip().lower()
 
                 uri_filter = lambda t: q in t.uri.lower()
                 track_filter = lambda t: q in t.name.lower()
