@@ -60,8 +60,10 @@ def count(context, mpd_query):
         raise MpdArgError('incorrect arguments', command='count')
     results = context.core.library.find_exact(**query).get()
     result_tracks = _get_tracks(results)
-    return [('songs', len(result_tracks)),
-            ('playtime', sum(track.length for track in result_tracks) / 1000)]
+    return [
+        ('songs', len(result_tracks)),
+        ('playtime', sum(track.length for track in result_tracks) / 1000),
+    ]
 
 
 @handle_request(r'^find ' + QUERY_RE)
