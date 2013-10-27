@@ -197,6 +197,26 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
         self.assertInResponse('OK')
 
+    def test_find_albumartist_does_not_include_fake_artist_tracks(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            albums=[Album(uri='dummy:album:a', name='A', date='2001')],
+            artists=[Artist(uri='dummy:artist:b', name='B')],
+            tracks=[Track(uri='dummy:track:c', name='C')])
+
+        self.sendRequest('find "albumartist" "foo"')
+
+        self.assertNotInResponse('file: dummy:artist:b')
+        self.assertNotInResponse('Title: Artist: B')
+
+        self.assertInResponse('file: dummy:album:a')
+        self.assertInResponse('Title: Album: A')
+        self.assertInResponse('Date: 2001')
+
+        self.assertInResponse('file: dummy:track:c')
+        self.assertInResponse('Title: C')
+
+        self.assertInResponse('OK')
+
     def test_find_artist_and_album_does_not_include_fake_tracks(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             albums=[Album(uri='dummy:album:a', name='A', date='2001')],
@@ -231,6 +251,14 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
     def test_find_artist_without_quotes(self):
         self.sendRequest('find artist "what"')
+        self.assertInResponse('OK')
+
+    def test_find_albumartist(self):
+        self.sendRequest('find "albumartist" "what"')
+        self.assertInResponse('OK')
+
+    def test_find_albumartist_without_quotes(self):
+        self.sendRequest('find albumartist "what"')
         self.assertInResponse('OK')
 
     def test_find_filename(self):
@@ -577,6 +605,18 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
 
     def test_search_artist_without_filter_value(self):
         self.sendRequest('search "artist" ""')
+        self.assertInResponse('OK')
+
+    def test_search_albumartist(self):
+        self.sendRequest('search "albumartist" "analbumartist"')
+        self.assertInResponse('OK')
+
+    def test_search_albumartist_without_quotes(self):
+        self.sendRequest('search albumartist "analbumartist"')
+        self.assertInResponse('OK')
+
+    def test_search_albumartist_without_filter_value(self):
+        self.sendRequest('search "albumartist" ""')
         self.assertInResponse('OK')
 
     def test_search_filename(self):

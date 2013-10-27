@@ -10,8 +10,8 @@ from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
 QUERY_RE = (
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
-    r'[Tt]itle|[Tt]rack|[Aa]ny)"? "[^"]*"\s?)+)$')
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Aa]lbumartist|[Dd]ate|[Ff]ile|'
+    r'[Ff]ilename|[Tt]itle|[Tt]rack|[Aa]ny)"? "[^"]*"\s?)+)$')
 
 
 def _get_field(field, search_results):
@@ -100,7 +100,7 @@ def find(context, mpd_query):
         return
     results = context.core.library.find_exact(**query).get()
     result_tracks = []
-    if 'artist' not in query:
+    if 'artist' not in query and 'albumartist' not in query:
         result_tracks += [_artist_as_track(a) for a in _get_artists(results)]
     if 'album' not in query:
         result_tracks += [_album_as_track(a) for a in _get_albums(results)]
