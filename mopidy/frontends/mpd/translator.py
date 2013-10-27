@@ -193,6 +193,7 @@ MPD_SEARCH_QUERY_RE = re.compile(r"""
       | [Ff]ile
       | [Ff]ilename
       | [Tt]itle
+      | [Tt]rack
       | [Aa]ny
     )
     "?                  # End of optional quote around the field type
@@ -211,6 +212,7 @@ MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
       | [Ff]ile
       | [Ff]ilename
       | [Tt]itle
+      | [Tt]rack
       | [Aa]ny
     ))
     "?                  # End of optional quote around the field type
@@ -234,6 +236,8 @@ def query_from_mpd_search_format(mpd_query):
         field = m.groupdict()['field'].lower()
         if field == 'title':
             field = 'track'
+        elif field == 'track':
+            field = 'track_no'
         elif field in ('file', 'filename'):
             field = 'uri'
         what = m.groupdict()['what']

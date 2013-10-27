@@ -27,9 +27,14 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             self._media_dir, self._tag_cache_file)
 
         tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
+        uris_to_remove = set(self._uri_mapping)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
+            uris_to_remove.discard(track.uri)
+
+        for uri in uris_to_remove:
+            del self._uri_mapping[uri]
 
         logger.info(
             'Loaded %d local tracks from %s using %s',
@@ -55,7 +60,10 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 values = [values]
             # FIXME this is bound to be slow for large libraries
             for value in values:
-                q = value.strip()
+                if field == 'track_no':
+                    q = value
+                else:
+                    q = value.strip()
 
                 uri_filter = lambda t: q == t.uri
                 track_filter = lambda t: q == t.name
@@ -65,13 +73,16 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 albumartist_filter = lambda t: any([
                     q == a.name
                     for a in getattr(t.album, 'artists', [])])
+                track_no_filter = lambda t: q == t.track_no
                 date_filter = lambda t: q == t.date
                 any_filter = lambda t: (
+                    uri_filter(t) or
                     track_filter(t) or
                     album_filter(t) or
                     artist_filter(t) or
                     albumartist_filter(t) or
-                    uri_filter(t))
+                    track_no_filter(t) or
+                    date_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -83,6 +94,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(artist_filter, result_tracks)
                 elif field == 'albumartist':
                     result_tracks = filter(albumartist_filter, result_tracks)
+                elif field == 'track_no':
+                    result_tracks = filter(track_no_filter, result_tracks)
                 elif field == 'date':
                     result_tracks = filter(date_filter, result_tracks)
                 elif field == 'any':
@@ -105,7 +118,10 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 values = [values]
             # FIXME this is bound to be slow for large libraries
             for value in values:
-                q = value.strip().lower()
+                if field == 'track_no':
+                    q = value
+                else:
+                    q = value.strip().lower()
 
                 uri_filter = lambda t: q in t.uri.lower()
                 track_filter = lambda t: q in t.name.lower()
@@ -116,13 +132,16 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 albumartist_filter = lambda t: any([
                     q in a.name.lower()
                     for a in getattr(t.album, 'artists', [])])
+                track_no_filter = lambda t: q == t.track_no
                 date_filter = lambda t: t.date and t.date.startswith(q)
                 any_filter = lambda t: (
+                    uri_filter(t) or
                     track_filter(t) or
                     album_filter(t) or
                     artist_filter(t) or
                     albumartist_filter(t) or
-                    uri_filter(t))
+                    track_no_filter(t) or
+                    date_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -134,6 +153,8 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(artist_filter, result_tracks)
                 elif field == 'albumartist':
                     result_tracks = filter(albumartist_filter, result_tracks)
+                elif field == 'track_no':
+                    result_tracks = filter(track_no_filter, result_tracks)
                 elif field == 'date':
                     result_tracks = filter(date_filter, result_tracks)
                 elif field == 'any':

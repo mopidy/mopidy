@@ -5,13 +5,13 @@ import itertools
 
 from mopidy.models import Track
 from mopidy.frontends.mpd import translator
-from mopidy.frontends.mpd.exceptions import MpdNotImplemented
+from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
 QUERY_RE = (
     r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Aa]lbumartist|[Dd]ate|[Ff]ile|'
-    r'[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+    r'[Ff]ilename|[Tt]itle|[Tt]rack|[Aa]ny)"? "[^"]*"\s?)+)$')
 
 
 def _get_field(field, search_results):
@@ -54,7 +54,16 @@ def count(context, mpd_query):
     - does not add quotes around the tag argument.
     - use multiple tag-needle pairs to make more specific searches.
     """
-    return [('songs', 0), ('playtime', 0)]  # TODO
+    try:
+        query = translator.query_from_mpd_search_format(mpd_query)
+    except ValueError:
+        raise MpdArgError('incorrect arguments', command='count')
+    results = context.core.library.find_exact(**query).get()
+    result_tracks = _get_tracks(results)
+    return [
+        ('songs', len(result_tracks)),
+        ('playtime', sum(track.length for track in result_tracks) / 1000),
+    ]
 
 
 @handle_request(r'^find ' + QUERY_RE)
