@@ -76,13 +76,13 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 track_no_filter = lambda t: q == t.track_no
                 date_filter = lambda t: q == t.date
                 any_filter = lambda t: (
+                    uri_filter(t) or
                     track_filter(t) or
                     album_filter(t) or
                     artist_filter(t) or
                     albumartist_filter(t) or
                     track_no_filter(t) or
-                    date_filter(t) or
-                    uri_filter(t))
+                    date_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -94,10 +94,10 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(artist_filter, result_tracks)
                 elif field == 'albumartist':
                     result_tracks = filter(albumartist_filter, result_tracks)
-                elif field == 'date':
-                    result_tracks = filter(date_filter, result_tracks)
                 elif field == 'track_no':
                     result_tracks = filter(track_no_filter, result_tracks)
+                elif field == 'date':
+                    result_tracks = filter(date_filter, result_tracks)
                 elif field == 'any':
                     result_tracks = filter(any_filter, result_tracks)
                 else:
@@ -135,13 +135,13 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 track_no_filter = lambda t: q == t.track_no
                 date_filter = lambda t: t.date and t.date.startswith(q)
                 any_filter = lambda t: (
+                    uri_filter(t) or
                     track_filter(t) or
                     album_filter(t) or
                     artist_filter(t) or
                     albumartist_filter(t) or
                     track_no_filter(t) or
-                    date_filter(t) or
-                    uri_filter(t))
+                    date_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -153,10 +153,10 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(artist_filter, result_tracks)
                 elif field == 'albumartist':
                     result_tracks = filter(albumartist_filter, result_tracks)
-                elif field == 'date':
-                    result_tracks = filter(date_filter, result_tracks)
                 elif field == 'track_no':
                     result_tracks = filter(track_no_filter, result_tracks)
+                elif field == 'date':
+                    result_tracks = filter(date_filter, result_tracks)
                 elif field == 'any':
                     result_tracks = filter(any_filter, result_tracks)
                 else:
