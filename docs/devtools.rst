@@ -101,21 +101,40 @@ Creating releases
 #. Merge the release branch (``develop`` in the example) into master::
 
     git checkout master
-    git merge --no-ff -m "Release v0.2.0" develop
+    git merge --no-ff -m "Release v0.16.0" develop
+
+#. Build package and test it manually in a new virtualenv. The following
+   assumes the use of virtualenvwrapper::
+
+    python setup.py sdist
+    mktmpenv
+    pip install path/to/dist/Mopidy-0.16.0.tar.gz
+    toggleglobalsitepackages
+
+   Then test Mopidy manually to confirm that the package is working correctly.
 
 #. Tag the release::
 
-    git tag -a -m "Release v0.2.0" v0.2.0
+    git tag -a -m "Release v0.16.0" v0.16.0
 
 #. Push to GitHub::
 
     git push
     git push --tags
 
-#. Build package and upload to PyPI::
+#. Build source package and upload to PyPI::
 
     python setup.py sdist upload
 
+#. Build wheel package and upload to PyPI::
+
+    pip install -U wheel
+    python setup.py bdist_wheel upload
+
+#. Make sure the new tag is built by Read the Docs, and that the ``latest``
+   version shows the newly released version.
+
 #. Update the Debian package.
 
-#. Spread the word.
+#. Spread the word through the topic on #mopidy on IRC, @mopidy on Twitter, and
+   on the mailing list.
