@@ -238,6 +238,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertRaises(LookupError, test)
 
     def test_search_no_hits(self):
+        result = self.library.search(track=['unknown track'])
+        self.assertEqual(list(result[0].tracks), [])
+
         result = self.library.search(artist=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
@@ -247,13 +250,13 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(track_no=[9])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(date=['unknown'])
+        result = self.library.search(date=['unknown date'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(uri=['unknown'])
+        result = self.library.search(uri=['unknown uri'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(any=['unknown'])
+        result = self.library.search(any=['unknown anything'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_search_uri(self):
