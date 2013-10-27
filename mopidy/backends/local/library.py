@@ -27,9 +27,14 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             self._media_dir, self._tag_cache_file)
 
         tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
+        uris_to_remove = set(self._uri_mapping)
 
         for track in tracks:
             self._uri_mapping[track.uri] = track
+            uris_to_remove.discard(track.uri)
+
+        for uri in uris_to_remove:
+            del self._uri_mapping[uri]
 
         logger.info(
             'Loaded %d local tracks from %s using %s',

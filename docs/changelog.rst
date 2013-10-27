@@ -69,6 +69,15 @@ of the following extensions as well:
 - Added :meth:`mopidy.core.CoreListener.mute_changed` event that is triggered
   when the mute state changes.
 
+- In "random" mode, after a full playthrough of the tracklist, playback
+  continued from the last track played to the end of the playlist in non-random
+  order. It now stops when all tracks have been played once, unless "repeat"
+  mode is enabled. (Fixes: :issue:`453`)
+
+- In "single" mode, after a track ended, playback continued with the next track
+  in the tracklist. It now stops after playing a single track, unless "repeat"
+  mode is enabled. (Fixes: :issue:`496`)
+
 **Audio**
 
 - Added support for parsing and playback of playlists in GStreamer.  For end
@@ -88,16 +97,24 @@ of the following extensions as well:
 
 - Replaced our custom media library scanner with GStreamer's builtin scanner.
   This should make scanning less error prone and faster as timeouts should be
-  infrequent.
+  infrequent. (Fixes: :issue:`198`)
 
 - Media files with less than 100ms duration are now excluded from the library.
+
+- Unknown URIs found in playlists are now made into track objects with the URI
+  set instead of being ignored. This makes it possible to have playlists with
+  e.g. HTTP radio streams and not just ``local:track:...`` URIs. This used to
+  work, but was broken in Mopidy 0.15.0. (Fixes: :issue:`527`)
+
+- Fixed crash when playing ``local:track:...`` URIs which contained non-ASCII
+  chars after uridecode.
 
 **MPD frontend**
 
 - Made the formerly unused commands ``outputs``, ``enableoutput``, and
   ``disableoutput`` mute/unmute audio. (Related to: :issue:`186`)
 
-- The MPD command ``list`` now works with ``"albumartist"`` as it's second
+- The MPD command ``list`` now works with ``"albumartist"`` as its second
   argument, e.g. ``"album" "albumartist" "anartist"``. (Fixes: :issue:`468`)
 
 **Extension support**

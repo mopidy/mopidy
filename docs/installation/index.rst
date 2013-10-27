@@ -88,7 +88,7 @@ Mopidy Git repo, which always corresponds to the latest release.
 
 #. Optional: If you want to scrobble your played tracks to Last.fm, you need to
    install `python2-pylast`::
-   
+
        sudo pacman -S python2-pylast
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
@@ -175,10 +175,10 @@ can install Mopidy from PyPI using Pip.
 
 #. Then you'll need to install all of Mopidy's hard non-Python dependencies:
 
-   - GStreamer 0.10.x, with Python bindings. GStreamer is packaged for most
-     popular Linux distributions. Search for GStreamer in your package manager,
-     and make sure to install the Python bindings, and the "good" and "ugly"
-     plugin sets.
+   - GStreamer 0.10 (>= 0.10.31, < 0.11), with Python bindings. GStreamer is
+     packaged for most popular Linux distributions. Search for GStreamer in
+     your package manager, and make sure to install the Python bindings, and
+     the "good" and "ugly" plugin sets.
 
      If you use Debian/Ubuntu you can install GStreamer like this::
 

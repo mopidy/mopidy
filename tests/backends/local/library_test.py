@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import tempfile
 import unittest
 
 import pykka
@@ -11,6 +12,8 @@ from mopidy.models import Track, Album, Artist
 from tests import path_to_data_dir
 
 
+# TODO: update tests to only use backend, not core. we need a seperate
+# core test that does this integration test.
 class LocalLibraryProviderTest(unittest.TestCase):
     artists = [
         Artist(name='artist1'),
@@ -49,7 +52,6 @@ class LocalLibraryProviderTest(unittest.TestCase):
     }
 
     def setUp(self):
-
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
@@ -65,9 +67,31 @@ class LocalLibraryProviderTest(unittest.TestCase):
     def test_refresh_uri(self):
         pass
 
-    @unittest.SkipTest
     def test_refresh_missing_uri(self):
-        pass
+        # Verifies that https://github.com/mopidy/mopidy/issues/500
+        # has been fixed.
+
+        tag_cache = tempfile.NamedTemporaryFile()
+        with open(self.config['local']['tag_cache_file']) as fh:
+            tag_cache.write(fh.read())
+        tag_cache.flush()
+
+        config = {'local': self.config['local'].copy()}
+        config['local']['tag_cache_file'] = tag_cache.name
+        backend = actor.LocalBackend(config=config, audio=None)
+
+        # Sanity check that value is in tag cache
+        result = backend.library.lookup(self.tracks[0].uri)
+        self.assertEqual(result, self.tracks[0:1])
+
+        # Clear tag cache and refresh
+        tag_cache.seek(0)
+        tag_cache.truncate()
+        backend.library.refresh()
+
+        # Now it should be gone.
+        result = backend.library.lookup(self.tracks[0].uri)
+        self.assertEqual(result, [])
 
     def test_lookup(self):
         tracks = self.library.lookup(self.tracks[0].uri)
