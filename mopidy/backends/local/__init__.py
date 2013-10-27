@@ -21,7 +21,9 @@ class Extension(ext.Extension):
         schema['media_dir'] = config.Path()
         schema['playlists_dir'] = config.Path()
         schema['tag_cache_file'] = config.Path()
-        schema['scan_timeout'] = config.Integer(minimum=0)
+        schema['scan_timeout'] = config.Integer(
+            minimum=1000, maximum=1000*60*60)
+        schema['excluded_file_extensions'] = config.List(optional=True)
         return schema
 
     def validate_environment(self):

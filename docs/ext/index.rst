@@ -30,96 +30,107 @@ These extensions are maintained outside Mopidy's core, often by other
 developers.
 
 
+Mopidy-Arcam
+------------
+
+https://github.com/TooDizzy/mopidy-arcam
+
+Extension for controlling volume using an external Arcam amplifier. Developed
+and tested with an Arcam AVR-300.
+
+
 Mopidy-Beets
 ------------
 
+https://github.com/mopidy/mopidy-beets
+
 Provides a backend for playing music from your `Beets
 <http://beets.radbox.org/>`_ music library through Beets' web extension.
-
-Author:
-    Janez Troha
-PyPI:
-    `Mopidy-Beets <https://pypi.python.org/pypi/Mopidy-Beets>`_
-GitHub:
-    `dz0ny/mopidy-beets <https://github.com/dz0ny/mopidy-beets>`_
-Issues:
-    https://github.com/dz0ny/mopidy-beets/issues
 
 
 Mopidy-GMusic
 -------------
 
+https://github.com/hechtus/mopidy-gmusic
+
 Provides a backend for playing music from `Google Play Music
 <https://play.google.com/music/>`_.
 
-Author:
-    Ronald Hecht
-PyPI:
-    `Mopidy-GMusic <https://pypi.python.org/pypi/Mopidy-GMusic>`_
-GitHub:
-    `hechtus/mopidy-gmusic <https://github.com/hechtus/mopidy-gmusic>`_
-Issues:
-    https://github.com/hechtus/mopidy-gmusic/issues
+
+Mopidy-MPRIS
+------------
+
+https://github.com/mopidy/mopidy-mpris
+
+Extension for controlling Mopidy through the `MPRIS <http://www.mpris.org/>`_
+D-Bus interface, for example using the Ubuntu Sound Menu.
 
 
 Mopidy-NAD
 ----------
 
+https://github.com/mopidy/mopidy-nad
+
 Extension for controlling volume using an external NAD amplifier.
 
-Author:
-    Stein Magnus Jodal
-PyPI:
-    `Mopidy-NAD <https://pypi.python.org/pypi/Mopidy-NAD>`_
-GitHub:
-    `mopidy/mopidy-nad <https://github.com/mopidy/mopidy-nad>`_
-Issues:
-    https://github.com/mopidy/mopidy/issues
+
+Mopidy-Notifier
+---------------
+
+https://github.com/sauberfred/mopidy-notifier
+
+Extension for displaying track info as User Notifications in Mac OS X.
+
+
+Mopidy-radio-de
+---------------
+
+https://github.com/hechtus/mopidy-radio-de
+
+Extension for listening to Internet radio stations and podcasts listed at
+`radio.de <http://www.radio.de/>`_, `rad.io <http://www.rad.io/>`_,
+`radio.fr <http://www.radio.fr/>`_, and `radio.at <http://www.radio.at/>`_.
+
+
+Mopidy-Scrobbler
+----------------
+
+https://github.com/mopidy/mopidy-scrobbler
+
+Extension for scrobbling played tracks to Last.fm.
 
 
 Mopidy-SomaFM
 -------------
 
+https://github.com/AlexandrePTJ/mopidy-somafm
+
 Provides a backend for playing music from the `SomaFM <http://somafm.com/>`_
 service.
-
-Author:
-    Alexandre Petitjean
-PyPI:
-    `Mopidy-SomaFM <https://pypi.python.org/pypi/Mopidy-SomaFM>`_
-GitHub:
-    `AlexandrePTJ/mopidy-somafm <https://github.com/AlexandrePTJ/mopidy-somafm/>`_
-Issues:
-    https://github.com/AlexandrePTJ/mopidy-somafm/issues
 
 
 Mopidy-SoundCloud
 -----------------
 
+https://github.com/mopidy/mopidy-soundcloud
+
 Provides a backend for playing music from the `SoundCloud
 <http://www.soundcloud.com/>`_ service.
 
-Author:
-    Janez Troha
-PyPI:
-    `Mopidy-SoundCloud <https://pypi.python.org/pypi/Mopidy-SoundCloud>`_
-GitHub:
-    `dz0ny/mopidy-soundcloud <https://github.com/dz0ny/mopidy-soundcloud>`_
-Issues:
-    https://github.com/dz0ny/mopidy-soundcloud/issues
+
+Mopidy-Spotify
+--------------
+
+https://github.com/mopidy/mopidy-spotify
+
+Extension for playing music from the `Spotify <http://www.spotify.com/>`_ music
+streaming service.
 
 
 Mopidy-Subsonic
 ---------------
 
+https://github.com/rattboi/mopidy-subsonic
+
 Provides a backend for playing music from a `Subsonic Music Streamer
 <http://www.subsonic.org/>`_ library.
-
-Author:
-    Bradon Kanyid
-PyPI:
-    `Mopidy-Subsonic <https://pypi.python.org/pypi/Mopidy-Subsonic>`_
-GitHub:
-    `rattboi/mopidy-subsonic <https://github.com/rattboi/mopidy-subsonic>`_
-Issues:
-    https://github.com/rattboi/mopidy-subsonic/issues

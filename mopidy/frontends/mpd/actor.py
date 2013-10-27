@@ -55,3 +55,6 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
 
     def volume_changed(self, volume):
         self.send_idle('mixer')
+
+    def mute_changed(self, mute):
+        self.send_idle('output')

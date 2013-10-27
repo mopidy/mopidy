@@ -4,6 +4,159 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.16.0 (2013-10-27)
+====================
+
+The goals for 0.16 were to add support for queuing playlists of e.g. radio
+streams directly to Mopidy, without manually extracting the stream URLs from
+the playlist first, and to move the Spotify, Last.fm, and MPRIS support out to
+independent Mopidy extensions, living outside the main Mopidy repo. In
+addition, we've seen some cleanup to the playback vs tracklist part of the core
+API, which will require some changes for users of the HTTP/JavaScript APIs, as
+well as the addition of audio muting to the core API. To speed up the
+:ref:`development of new extensions <extensiondev>`, we've added a cookiecutter
+project to get the skeleton of a Mopidy extension up and running in a matter of
+minutes. Read below for all the details and for links to issues with even more
+details.
+
+Since the release of 0.15, we've closed or merged 31 issues and pull requests
+through about 200 commits by :ref:`five people <authors>`, including three new
+contributors.
+
+**Dependencies**
+
+Parts of Mopidy have been moved to their own external extensions. If you want
+Mopidy to continue to work like it used to, you may have to install one or more
+of the following extensions as well:
+
+- The Spotify backend has been moved to
+  `Mopidy-Spotify <https://github.com/mopidy/mopidy-spotify>`_.
+
+- The Last.fm scrobbler has been moved to
+  `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_.
+
+- The MPRIS frontend has been moved to
+  `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_.
+
+**Core**
+
+- Parts of the functionality in :class:`mopidy.core.PlaybackController` have
+  been moved to :class:`mopidy.core.TracklistController`:
+
+  =================================== ==================================
+  Old location                        New location
+  =================================== ==================================
+  playback.get_consume()              tracklist.get_consume()
+  playback.set_consume(v)             tracklist.set_consume(v)
+  playback.consume                    tracklist.consume
+
+  playback.get_random()               tracklist.get_random()
+  playback.set_random(v)              tracklist.set_random(v)
+  playback.random                     tracklist.random
+
+  playback.get_repeat()               tracklist.get_repeat()
+  playback.set_repeat(v)              tracklist.set_repeat(v)
+  playback.repeat                     tracklist.repeat
+
+  playback.get_single()               tracklist.get_single()
+  playback.set_single(v)              tracklist.set_single(v)
+  playback.single                     tracklist.single
+
+  playback.get_tracklist_position()   tracklist.index(tl_track)
+  playback.tracklist_position         tracklist.index(tl_track)
+
+  playback.get_tl_track_at_eot()      tracklist.eot_track(tl_track)
+  playback.tl_track_at_eot            tracklist.eot_track(tl_track)
+
+  playback.get_tl_track_at_next()     tracklist.next_track(tl_track)
+  playback.tl_track_at_next           tracklist.next_track(tl_track)
+
+  playback.get_tl_track_at_previous() tracklist.previous_track(tl_track)
+  playback.tl_track_at_previous       tracklist.previous_track(tl_track)
+  =================================== ==================================
+
+  The ``tl_track`` argument to the last four new functions are used as the
+  reference ``tl_track`` in the tracklist to find e.g. the next track. Usually,
+  this will be :attr:`~mopidy.core.PlaybackController.current_tl_track`.
+
+- Added :attr:`mopidy.core.PlaybackController.mute` for muting and unmuting
+  audio. (Fixes: :issue:`186`)
+
+- Added :meth:`mopidy.core.CoreListener.mute_changed` event that is triggered
+  when the mute state changes.
+
+- In "random" mode, after a full playthrough of the tracklist, playback
+  continued from the last track played to the end of the playlist in non-random
+  order. It now stops when all tracks have been played once, unless "repeat"
+  mode is enabled. (Fixes: :issue:`453`)
+
+- In "single" mode, after a track ended, playback continued with the next track
+  in the tracklist. It now stops after playing a single track, unless "repeat"
+  mode is enabled. (Fixes: :issue:`496`)
+
+**Audio**
+
+- Added support for parsing and playback of playlists in GStreamer.  For end
+  users this basically means that you can now add a radio playlist to Mopidy
+  and we will automatically download it and play the stream inside it.
+  Currently we support M3U, PLS, XSPF and ASX files. Also note that we can
+  currently only play the first stream in the playlist.
+
+- We now handle the rare case where an audio track has max volume equal to min.
+  This was causing divide by zero errors when scaling volumes to a zero to
+  hundred scale. (Fixes: :issue:`525`)
+
+- Added support for muting audio without setting the volume to 0. This works
+  both for the software and hardware mixers. (Fixes: :issue:`186`)
+
+**Local backend**
+
+- Replaced our custom media library scanner with GStreamer's builtin scanner.
+  This should make scanning less error prone and faster as timeouts should be
+  infrequent. (Fixes: :issue:`198`)
+
+- Media files with less than 100ms duration are now excluded from the library.
+
+- Media files with the file extensions ``.jpeg``, ``.jpg``, ``.png``, ``.txt``,
+  and ``.log`` are now skipped by the media library scanner. You can change the
+  list of excluded file extensions by setting the
+  :confval:`local/excluded_file_extensions` config value. (Fixes: :issue:`516`)
+
+- Unknown URIs found in playlists are now made into track objects with the URI
+  set instead of being ignored. This makes it possible to have playlists with
+  e.g. HTTP radio streams and not just ``local:track:...`` URIs. This used to
+  work, but was broken in Mopidy 0.15.0. (Fixes: :issue:`527`)
+
+- Fixed crash when playing ``local:track:...`` URIs which contained non-ASCII
+  chars after uridecode.
+
+- Removed media files are now also removed from the in-memory media library
+  when the media library is reloaded from disk. (Fixes: :issue:`500`)
+
+**MPD frontend**
+
+- Made the formerly unused commands ``outputs``, ``enableoutput``, and
+  ``disableoutput`` mute/unmute audio. (Related to: :issue:`186`)
+
+- The MPD command ``list`` now works with ``"albumartist"`` as its second
+  argument, e.g. ``list "album" "albumartist" "anartist"``. (Fixes:
+  :issue:`468`)
+
+- The MPD commands ``find`` and ``search`` now accepts ``albumartist`` and
+  ``track`` (this is the track number, not the track name) as field types to
+  limit the search result with.
+
+- The MPD command ``count`` is now implemented. It accepts the same type of
+  arguments as ``find`` and ``search``, but returns the number of tracks and
+  their total playtime instead.
+
+**Extension support**
+
+- A cookiecutter project for quickly creating new Mopidy extensions have been
+  created. You can find it at `cookiecutter-mopidy-ext
+  <https://github.com/mopidy/cookiecutter-mopidy-ext>`_. (Fixes: :issue:`522`)
+
+
 v0.15.0 (2013-09-19)
 ====================
 

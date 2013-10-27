@@ -24,6 +24,28 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('playtime: 0')
         self.assertInResponse('OK')
 
+    def test_count_correct_length(self):
+        # Count the lone track
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[
+                Track(uri='dummy:a', name="foo", date="2001", length=4000),
+            ])
+        self.sendRequest('count "title" "foo"')
+        self.assertInResponse('songs: 1')
+        self.assertInResponse('playtime: 4')
+        self.assertInResponse('OK')
+
+        # Count multiple tracks
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[
+                Track(uri='dummy:b', date="2001", length=50000),
+                Track(uri='dummy:c', date="2001", length=600000),
+            ])
+        self.sendRequest('count "date" "2001"')
+        self.assertInResponse('songs: 2')
+        self.assertInResponse('playtime: 650')
+        self.assertInResponse('OK')
+
     def test_findadd(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
@@ -175,6 +197,26 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
         self.assertInResponse('OK')
 
+    def test_find_albumartist_does_not_include_fake_artist_tracks(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            albums=[Album(uri='dummy:album:a', name='A', date='2001')],
+            artists=[Artist(uri='dummy:artist:b', name='B')],
+            tracks=[Track(uri='dummy:track:c', name='C')])
+
+        self.sendRequest('find "albumartist" "foo"')
+
+        self.assertNotInResponse('file: dummy:artist:b')
+        self.assertNotInResponse('Title: Artist: B')
+
+        self.assertInResponse('file: dummy:album:a')
+        self.assertInResponse('Title: Album: A')
+        self.assertInResponse('Date: 2001')
+
+        self.assertInResponse('file: dummy:track:c')
+        self.assertInResponse('Title: C')
+
+        self.assertInResponse('OK')
+
     def test_find_artist_and_album_does_not_include_fake_tracks(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             albums=[Album(uri='dummy:album:a', name='A', date='2001')],
@@ -211,6 +253,14 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
         self.sendRequest('find artist "what"')
         self.assertInResponse('OK')
 
+    def test_find_albumartist(self):
+        self.sendRequest('find "albumartist" "what"')
+        self.assertInResponse('OK')
+
+    def test_find_albumartist_without_quotes(self):
+        self.sendRequest('find albumartist "what"')
+        self.assertInResponse('OK')
+
     def test_find_filename(self):
         self.sendRequest('find "filename" "afilename"')
         self.assertInResponse('OK')
@@ -233,6 +283,18 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
     def test_find_title_without_quotes(self):
         self.sendRequest('find title "what"')
+        self.assertInResponse('OK')
+
+    def test_find_track_no(self):
+        self.sendRequest('find "track" "10"')
+        self.assertInResponse('OK')
+
+    def test_find_track_no_without_quotes(self):
+        self.sendRequest('find track "10"')
+        self.assertInResponse('OK')
+
+    def test_find_track_no_without_filter_value(self):
+        self.sendRequest('find "track" ""')
         self.assertInResponse('OK')
 
     def test_find_date(self):
@@ -364,6 +426,10 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list_album_by_album(self):
         self.sendRequest('list "album" "album" "analbum"')
+        self.assertInResponse('OK')
+
+    def test_list_album_by_albumartist(self):
+        self.sendRequest('list "album" "albumartist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_album_by_full_date(self):
@@ -541,6 +607,18 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.sendRequest('search "artist" ""')
         self.assertInResponse('OK')
 
+    def test_search_albumartist(self):
+        self.sendRequest('search "albumartist" "analbumartist"')
+        self.assertInResponse('OK')
+
+    def test_search_albumartist_without_quotes(self):
+        self.sendRequest('search albumartist "analbumartist"')
+        self.assertInResponse('OK')
+
+    def test_search_albumartist_without_filter_value(self):
+        self.sendRequest('search "albumartist" ""')
+        self.assertInResponse('OK')
+
     def test_search_filename(self):
         self.sendRequest('search "filename" "afilename"')
         self.assertInResponse('OK')
@@ -587,6 +665,18 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
 
     def test_search_any_without_filter_value(self):
         self.sendRequest('search "any" ""')
+        self.assertInResponse('OK')
+
+    def test_search_track_no(self):
+        self.sendRequest('search "track" "10"')
+        self.assertInResponse('OK')
+
+    def test_search_track_no_without_quotes(self):
+        self.sendRequest('search track "10"')
+        self.assertInResponse('OK')
+
+    def test_search_track_no_without_filter_value(self):
+        self.sendRequest('search "track" ""')
         self.assertInResponse('OK')
 
     def test_search_date(self):

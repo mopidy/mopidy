@@ -54,5 +54,4 @@ Backend implementations
 
 * :mod:`mopidy.backends.dummy`
 * :mod:`mopidy.backends.local`
-* :mod:`mopidy.backends.spotify`
 * :mod:`mopidy.backends.stream`

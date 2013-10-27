@@ -87,8 +87,9 @@ Mopidy Git repo, which always corresponds to the latest release.
    To upgrade Mopidy to future releases, just rerun ``makepkg``.
 
 #. Optional: If you want to scrobble your played tracks to Last.fm, you need to
-   install `python2-pylast
-   <https://aur.archlinux.org/packages/python2-pylast/>`_ from AUR.
+   install `python2-pylast`::
+
+       sudo pacman -S python2-pylast
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
@@ -174,10 +175,10 @@ can install Mopidy from PyPI using Pip.
 
 #. Then you'll need to install all of Mopidy's hard non-Python dependencies:
 
-   - GStreamer 0.10.x, with Python bindings. GStreamer is packaged for most
-     popular Linux distributions. Search for GStreamer in your package manager,
-     and make sure to install the Python bindings, and the "good" and "ugly"
-     plugin sets.
+   - GStreamer 0.10 (>= 0.10.31, < 0.11), with Python bindings. GStreamer is
+     packaged for most popular Linux distributions. Search for GStreamer in
+     your package manager, and make sure to install the Python bindings, and
+     the "good" and "ugly" plugin sets.
 
      If you use Debian/Ubuntu you can install GStreamer like this::
 
@@ -250,8 +251,8 @@ can install Mopidy from PyPI using Pip.
 
       sudo pip-python install -U cherrypy ws4py
 
-#. Optional: To use MPRIS, e.g. for controlling Mopidy from the Ubuntu Sound
-   Menu or from an UPnP client via Rygel, you need some additional
+#. Optional: To use Mopidy-MPRIS, e.g. for controlling Mopidy from the Ubuntu
+   Sound Menu or from an UPnP client via Rygel, you need some additional
    dependencies: the Python bindings for libindicate, and the Python bindings
    for libdbus, the reference D-Bus library.
 
