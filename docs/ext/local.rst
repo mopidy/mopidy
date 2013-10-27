@@ -52,9 +52,9 @@ Configuration values
     Number of milliseconds before giving up scanning a file and moving on to
     the next file.
 
-.. confval:: local/scan_blacklist_extensions
+.. confval:: local/excluded_file_extensions
 
-    File extensions to ignore when scanning the media directory.
+    File extensions to exclude when scanning the media directory.
 
 
 Usage

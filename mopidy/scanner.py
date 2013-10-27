@@ -71,7 +71,7 @@ def main():
     local_updater = updaters.values()[0](config)  # TODO: switch to actor?
 
     media_dir = config['local']['media_dir']
-    blacklist_extensions = config['local']['scan_blacklist_extensions']
+    excluded_extensions = config['local']['excluded_file_extensions']
 
     uris_library = set()
     uris_update = set()
@@ -93,8 +93,8 @@ def main():
 
     logging.info('Checking %s for new or modified tracks.', media_dir)
     for uri in path.find_uris(config['local']['media_dir']):
-        if os.path.splitext(path.uri_to_path(uri))[1] in blacklist_extensions:
-            logging.debug('Skipped %s: File extension blacklisted.', uri)
+        if os.path.splitext(path.uri_to_path(uri))[1] in excluded_extensions:
+            logging.debug('Skipped %s: File extension excluded.', uri)
             continue
 
         if uri not in uris_library:
