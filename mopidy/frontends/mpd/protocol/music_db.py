@@ -10,8 +10,8 @@ from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
 QUERY_RE = (
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Dd]ate|[Ff]ile|[Ff]ilename|'
-    r'[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Aa]lbumartist|[Dd]ate|[Ff]ile|'
+    r'[Ff]ilename|[Tt]itle|[Aa]ny)"? "[^"]*"\s?)+)$')
 
 
 def _get_field(field, search_results):
