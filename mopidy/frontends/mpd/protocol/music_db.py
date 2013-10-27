@@ -91,7 +91,7 @@ def find(context, mpd_query):
         return
     results = context.core.library.find_exact(**query).get()
     result_tracks = []
-    if 'artist' not in query:
+    if 'artist' not in query and 'albumartist' not in query:
         result_tracks += [_artist_as_track(a) for a in _get_artists(results)]
     if 'album' not in query:
         result_tracks += [_album_as_track(a) for a in _get_albums(results)]
