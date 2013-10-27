@@ -117,8 +117,7 @@ this-should-equal-everything = baz # as this is not a comment
 
 # this is also a comment ; and the next line should be a blank comment.
 ;
-# foo # = should all be treated as a comment.
-"""
+# foo # = should all be treated as a comment."""
 
 PROCESSED_CONFIG = """[__COMMENTS__]
 __HASH0__ = comments before first section should work
@@ -137,20 +136,20 @@ __SEMICOLON9__ =
 __HASH10__ = foo # = should all be treated as a comment."""
 
 
-class ProcessorTest(unittest.TestCase):
-    maxDiff = None # Show entire diff.
+class PreProcessorTest(unittest.TestCase):
+    maxDiff = None  # Show entire diff.
 
-    def test_preprocessor_empty_config(self):
+    def test_empty_config(self):
         result = config._preprocess('')
         self.assertEqual(result, '[__COMMENTS__]')
 
-    def test_preprocessor_plain_section(self):
+    def test_plain_section(self):
         result = config._preprocess('[section]\nfoo = bar')
         self.assertEqual(result, '[__COMMENTS__]\n'
                                  '[section]\n'
                                  'foo = bar')
 
-    def test_preprocessor_initial_comments(self):
+    def test_initial_comments(self):
         result = config._preprocess('; foobar')
         self.assertEqual(result, '[__COMMENTS__]\n'
                                  '__SEMICOLON0__ = foobar')
@@ -164,41 +163,105 @@ class ProcessorTest(unittest.TestCase):
                                  '__SEMICOLON0__ = foo\n'
                                  '__HASH1__ = bar')
 
-    def test_preprocessor_initial_comment_inline_handling(self):
+    def test_initial_comment_inline_handling(self):
         result = config._preprocess('; foo ; bar ; baz')
         self.assertEqual(result, '[__COMMENTS__]\n'
                                  '__SEMICOLON0__ = foo\n'
                                  '__INLINE1__ = bar\n'
                                  '__INLINE2__ = baz')
 
-    def test_preprocessor_inline_semicolon_comment(self):
+    def test_inline_semicolon_comment(self):
         result = config._preprocess('[section]\nfoo = bar ; baz')
         self.assertEqual(result, '[__COMMENTS__]\n'
                                  '[section]\n'
                                  'foo = bar\n'
                                  '__INLINE0__ = baz')
 
-    def test_preprocessor_no_inline_hash_comment(self):
+    def test_no_inline_hash_comment(self):
         result = config._preprocess('[section]\nfoo = bar # baz')
         self.assertEqual(result, '[__COMMENTS__]\n'
                                  '[section]\n'
                                  'foo = bar # baz')
 
-    def test_preprocessor_section_extra_text(self):
+    def test_section_extra_text(self):
         result = config._preprocess('[section] foobar')
         self.assertEqual(result, '[__COMMENTS__]\n'
                                  '[section]\n'
                                  '__SECTION0__ = foobar')
 
-    def test_preprocessor_section_extra_text_inline_semicolon(self):
+    def test_section_extra_text_inline_semicolon(self):
         result = config._preprocess('[section] foobar ; baz')
         self.assertEqual(result, '[__COMMENTS__]\n'
                                  '[section]\n'
                                  '__SECTION0__ = foobar\n'
                                  '__INLINE1__ = baz')
 
-    def test_preprocessor_conversion(self):
+    def test_conversion(self):
         """Tests all of the above cases at once."""
         result = config._preprocess(INPUT_CONFIG)
         self.assertEqual(result, PROCESSED_CONFIG)
 
+
+class PostProcessorTest(unittest.TestCase):
+    maxDiff = None  # Show entire diff.
+
+    def test_empty_config(self):
+        result = config._postprocess('[__COMMENTS__]')
+        self.assertEqual(result, '')
+
+    def test_plain_section(self):
+        result = config._postprocess('[__COMMENTS__]\n'
+                                     '[section]\n'
+                                     'foo = bar')
+        self.assertEqual(result, '[section]\nfoo = bar')
+
+    def test_initial_comments(self):
+        result = config._postprocess('[__COMMENTS__]\n'
+                                     '__SEMICOLON0__ = foobar')
+        self.assertEqual(result, '; foobar')
+
+        result = config._postprocess('[__COMMENTS__]\n'
+                                     '__HASH0__ = foobar')
+        self.assertEqual(result, '# foobar')
+
+        result = config._postprocess('[__COMMENTS__]\n'
+                                     '__SEMICOLON0__ = foo\n'
+                                     '__HASH1__ = bar')
+        self.assertEqual(result, '; foo\n# bar')
+
+    def test_initial_comment_inline_handling(self):
+        result = config._postprocess('[__COMMENTS__]\n'
+                                     '__SEMICOLON0__ = foo\n'
+                                     '__INLINE1__ = bar\n'
+                                     '__INLINE2__ = baz')
+        self.assertEqual(result, '; foo ; bar ; baz')
+
+    def test_inline_semicolon_comment(self):
+        result = config._postprocess('[__COMMENTS__]\n'
+                                     '[section]\n'
+                                     'foo = bar\n'
+                                     '__INLINE0__ = baz')
+        self.assertEqual(result, '[section]\nfoo = bar ; baz')
+
+    def test_no_inline_hash_comment(self):
+        result = config._preprocess('[section]\nfoo = bar # baz')
+        self.assertEqual(result, '[__COMMENTS__]\n'
+                                 '[section]\n'
+                                 'foo = bar # baz')
+
+    def test_section_extra_text(self):
+        result = config._postprocess('[__COMMENTS__]\n'
+                                     '[section]\n'
+                                     '__SECTION0__ = foobar')
+        self.assertEqual(result, '[section] foobar')
+
+    def test_section_extra_text_inline_semicolon(self):
+        result = config._postprocess('[__COMMENTS__]\n'
+                                     '[section]\n'
+                                     '__SECTION0__ = foobar\n'
+                                     '__INLINE1__ = baz')
+        self.assertEqual(result, '[section] foobar ; baz')
+
+    def test_conversion(self):
+        result = config._postprocess(PROCESSED_CONFIG)
+        self.assertEqual(result, INPUT_CONFIG)

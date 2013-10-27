@@ -147,7 +147,7 @@ def _format(config, comments, schemas, display):
     return b'\n'.join(output)
 
 
-def _preprocess(string):
+def _preprocess(config_string):
     """Convert a raw config into a form that preserves comments etc."""
     results = ['[__COMMENTS__]']
     counter = itertools.count(0)
@@ -173,13 +173,25 @@ def _preprocess(string):
         return '%s\n__SECTION%d__ = %s' % (
             match.group(1), next(counter), match.group(2))
 
-    for line in string.splitlines():
+    for line in config_string.splitlines():
         line = blank_line_re.sub(newlines, line)
         line = section_re.sub(sections, line)
         line = comment_re.sub(comments, line)
         line = inline_comment_re.sub(inlinecomments, line)
         results.append(line)
     return '\n'.join(results)
+
+
+def _postprocess(config_string):
+    """Converts a preprocessed config back to original form."""
+    flags = re.IGNORECASE | re.MULTILINE
+    result = re.sub(r'^\[__COMMENTS__\](\n|$)', '', config_string, flags=flags)
+    result = re.sub(r'\n__INLINE\d+__ =(.*)$', ' ;\g<1>', result, flags=flags)
+    result = re.sub(r'^__HASH\d+__ =(.*)$', '#\g<1>', result, flags=flags)
+    result = re.sub(r'^__SEMICOLON\d+__ =(.*)$', ';\g<1>', result, flags=flags)
+    result = re.sub(r'\n__SECTION\d+__ =(.*)$', '\g<1>', result, flags=flags)
+    result = re.sub(r'^__BLANK\d+__ =$', '', result, flags=flags)
+    return result
 
 
 class Proxy(collections.Mapping):
