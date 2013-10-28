@@ -1,4 +1,4 @@
-Format: http://dep.debian.net/deps/dep5
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: mopidy
 Upstream-Contact: Stein Magnus Jodal <stein.magnus@jodal.no>
 Source: https://github.com/mopidy/mopidy
