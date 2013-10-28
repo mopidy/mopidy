@@ -1,6 +1,7 @@
 mopidy (0.16.0-0mopidy1) unstable; urgency=low
 
   * New upstream release.
+  * Use https in watch URL.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 28 Oct 2013 11:20:51 +0100
 
