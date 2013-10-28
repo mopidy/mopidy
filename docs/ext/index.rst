@@ -33,7 +33,7 @@ developers.
 Mopidy-Arcam
 ------------
 
-https://github.com/mopidy/mopidy-arcam
+https://github.com/TooDizzy/mopidy-arcam
 
 Extension for controlling volume using an external Arcam amplifier. Developed
 and tested with an Arcam AVR-300.

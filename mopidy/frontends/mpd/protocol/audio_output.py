@@ -14,7 +14,7 @@ def disableoutput(context, outputid):
         Turns an output off.
     """
     if int(outputid) == 0:
-        context.core.playback.set_mute(True)
+        context.core.playback.set_mute(False)
     else:
         raise MpdNoExistError('No such audio output', command='disableoutput')
 
@@ -29,7 +29,7 @@ def enableoutput(context, outputid):
         Turns an output on.
     """
     if int(outputid) == 0:
-        context.core.playback.set_mute(False)
+        context.core.playback.set_mute(True)
     else:
         raise MpdNoExistError('No such audio output', command='enableoutput')
 
