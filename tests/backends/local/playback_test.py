@@ -72,6 +72,14 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.play()
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
 
+    def test_play_uri_with_non_ascii_bytes(self):
+        # Regression test: If trying to do .split(u':') on a bytestring, the
+        # string will be decoded from ASCII to Unicode, which will crash on
+        # non-ASCII strings, like the bytestring the following URI decodes to.
+        self.add_track('local:track:12%20Doin%E2%80%99%20It%20Right.flac')
+        self.playback.play()
+        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
+
     def test_initial_state_is_stopped(self):
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 

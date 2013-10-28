@@ -78,6 +78,9 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../'))
 # the string True.
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
+# Enable Read the Docs' new theme
+RTD_NEW_THEME = True
+
 # -- General configuration ----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
