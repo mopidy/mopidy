@@ -163,7 +163,7 @@ def validate_extension(extension):
 def register_gstreamer_elements(enabled_extensions):
     """Registers custom GStreamer elements from extensions.
 
-    :params enabled_extensions: list of enabled extensions
+    :param enabled_extensions: list of enabled extensions
     """
 
     for extension in enabled_extensions:
