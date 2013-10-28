@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import tempfile
 import unittest
 
 import pykka
@@ -11,6 +12,8 @@ from mopidy.models import Track, Album, Artist
 from tests import path_to_data_dir
 
 
+# TODO: update tests to only use backend, not core. we need a seperate
+# core test that does this integration test.
 class LocalLibraryProviderTest(unittest.TestCase):
     artists = [
         Artist(name='artist1'),
@@ -29,15 +32,15 @@ class LocalLibraryProviderTest(unittest.TestCase):
         Track(
             uri='local:track:path1', name='track1',
             artists=[artists[0]], album=albums[0],
-            date='2001-02-03', length=4000),
+            date='2001-02-03', length=4000, track_no=1),
         Track(
             uri='local:track:path2', name='track2',
             artists=[artists[1]], album=albums[1],
-            date='2002', length=4000),
+            date='2002', length=4000, track_no=2),
         Track(
             uri='local:track:path3', name='track3',
             artists=[artists[3]], album=albums[2],
-            date='2003', length=4000),
+            date='2003', length=4000, track_no=3),
     ]
 
     config = {
@@ -49,7 +52,6 @@ class LocalLibraryProviderTest(unittest.TestCase):
     }
 
     def setUp(self):
-
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
@@ -65,9 +67,31 @@ class LocalLibraryProviderTest(unittest.TestCase):
     def test_refresh_uri(self):
         pass
 
-    @unittest.SkipTest
     def test_refresh_missing_uri(self):
-        pass
+        # Verifies that https://github.com/mopidy/mopidy/issues/500
+        # has been fixed.
+
+        tag_cache = tempfile.NamedTemporaryFile()
+        with open(self.config['local']['tag_cache_file']) as fh:
+            tag_cache.write(fh.read())
+        tag_cache.flush()
+
+        config = {'local': self.config['local'].copy()}
+        config['local']['tag_cache_file'] = tag_cache.name
+        backend = actor.LocalBackend(config=config, audio=None)
+
+        # Sanity check that value is in tag cache
+        result = backend.library.lookup(self.tracks[0].uri)
+        self.assertEqual(result, self.tracks[0:1])
+
+        # Clear tag cache and refresh
+        tag_cache.seek(0)
+        tag_cache.truncate()
+        backend.library.refresh()
+
+        # Now it should be gone.
+        result = backend.library.lookup(self.tracks[0].uri)
+        self.assertEqual(result, [])
 
     def test_lookup(self):
         tracks = self.library.lookup(self.tracks[0].uri)
@@ -85,6 +109,18 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.find_exact(album=['unknown artist'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.find_exact(date=['1990'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.find_exact(track_no=[9])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.find_exact(uri=['fake uri'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.find_exact(any=['unknown any'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_find_exact_uri(self):
@@ -130,6 +166,13 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(albumartist=['artist3'])
         self.assertEqual(list(result[0].tracks), [self.tracks[2]])
 
+    def test_find_exact_track_no(self):
+        result = self.library.find_exact(track_no=[1])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        result = self.library.find_exact(track_no=[2])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
+
     def test_find_exact_date(self):
         result = self.library.find_exact(date=['2001'])
         self.assertEqual(list(result[0].tracks), [])
@@ -145,9 +188,15 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(any=['artist1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
+        result = self.library.find_exact(any=['artist2'])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
+
         # Matches on track
         result = self.library.find_exact(any=['track1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        result = self.library.find_exact(any=['track2'])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on track album
         result = self.library.find_exact(any=['album1'])
@@ -156,6 +205,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         # Matches on track album artists
         result = self.library.find_exact(any=['artist3'])
         self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+
+        # Matches on track year
+        result = self.library.find_exact(any=['2002'])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on URI
         result = self.library.find_exact(any=['local:track:path1'])
@@ -175,6 +228,15 @@ class LocalLibraryProviderTest(unittest.TestCase):
         test = lambda: self.library.find_exact(album=[''])
         self.assertRaises(LookupError, test)
 
+        test = lambda: self.library.find_exact(track_no=[])
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.find_exact(date=[''])
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.find_exact(any=[''])
+        self.assertRaises(LookupError, test)
+
     def test_search_no_hits(self):
         result = self.library.search(track=['unknown track'])
         self.assertEqual(list(result[0].tracks), [])
@@ -185,10 +247,16 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(album=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(uri=['unknown'])
+        result = self.library.search(track_no=[9])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(any=['unknown'])
+        result = self.library.search(date=['unknown date'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.search(uri=['unknown uri'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.search(any=['unknown anything'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_search_uri(self):
@@ -245,6 +313,13 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(date=['2002'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
+    def test_search_track_no(self):
+        result = self.library.search(track_no=[1])
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        result = self.library.search(track_no=[2])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
+
     def test_search_any(self):
         # Matches on track artist
         result = self.library.search(any=['Tist1'])
@@ -253,6 +328,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         # Matches on track
         result = self.library.search(any=['Rack1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        result = self.library.search(any=['Rack2'])
+        self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on track album
         result = self.library.search(any=['Bum1'])
@@ -278,6 +356,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.search(album=[''])
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.search(date=[''])
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.search(uri=[''])
