@@ -4,9 +4,9 @@ Mopidy
 
 Mopidy is a music server which can play music both from multiple sources, like
 your :ref:`local hard drive <ext-local>`, :ref:`radio streams <ext-stream>`,
-and from :ref:`Spotify <ext-spotify>` and SoundCloud. Searches combines results
-from all music sources, and you can mix tracks from all sources in your play
-queue. Your playlists from Spotify or SoundCloud are also available for use.
+and from Spotify and SoundCloud. Searches combines results from all music
+sources, and you can mix tracks from all sources in your play queue. Your
+playlists from Spotify or SoundCloud are also available for use.
 
 To control your Mopidy music server, you can use one of Mopidy's :ref:`web
 clients <http-clients>`, the :ref:`Ubuntu Sound Menu <ubuntu-sound-menu>`, any
@@ -30,7 +30,7 @@ Usage
 =====
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
     installation/index
     installation/raspberrypi
@@ -81,4 +81,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`

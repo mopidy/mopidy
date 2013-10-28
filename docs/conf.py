@@ -35,6 +35,8 @@ class Mock(object):
         elif (name[0] == name[0].upper()
                 # gst.interfaces.MIXER_TRACK_*
                 and not name.startswith('MIXER_TRACK_')
+                # gst.PadTemplate
+                and not name.startswith('PadTemplate')
                 # dbus.String()
                 and not name == 'String'):
             return type(name, (), {})
@@ -75,6 +77,9 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../'))
 # When RTD builds the project, it sets the READTHEDOCS environment variable to
 # the string True.
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+# Enable Read the Docs' new theme
+RTD_NEW_THEME = True
 
 # -- General configuration ----------------------------------------------------
 
