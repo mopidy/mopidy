@@ -3,6 +3,7 @@ mopidy (0.16.0-0mopidy1) unstable; urgency=low
   * New upstream release.
   * Use https in watch URL.
   * Update copyright year.
+  * Refer to copy of Apache 2.0 license in /usr/share/common-licenses.
   * Remove dependency on python-spotify, python-pylast, python-dbus, and
     python-indicate as the extensions requiring them are no longer included in
     the main Mopidy project.
