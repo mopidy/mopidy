@@ -8,6 +8,7 @@ mopidy (0.16.0-0mopidy1) unstable; urgency=low
     python-indicate as the extensions requiring them are no longer included in
     the main Mopidy project.
   * Update package descriptions.
+  * Add *.egg-info/* to debian/clean.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 28 Oct 2013 11:20:51 +0100
 
