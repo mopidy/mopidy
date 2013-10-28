@@ -4,11 +4,11 @@ Upstream-Contact: Stein Magnus Jodal <stein.magnus@jodal.no>
 Source: https://github.com/mopidy/mopidy
 
 Files: *
-Copyright: 2009-2012 Stein Magnus Jodal and contributors
+Copyright: 2009-2013 Stein Magnus Jodal and contributors
 License: Apache-2.0
 
 Files: debian/*
-Copyright: 2010-2012 Stein Magnus Jodal <stein.magnus@jodal.no>
+Copyright: 2010-2013 Stein Magnus Jodal <stein.magnus@jodal.no>
 License: Apache-2.0
 
 License: Apache-2.0
