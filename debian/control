@@ -28,10 +28,6 @@ Recommends:
     gstreamer0.10-alsa,
     gstreamer0.10-plugins-ugly,
     gstreamer0.10-tools,
-    python-spotify (>= 1.9), python-spotify (<< 2),
-    python-pylast (>= 0.5.7),
-    python-dbus,
-    python-indicate,
     python-cherrypy3,
     python-ws4py
 Suggests:
