@@ -1,4 +1,4 @@
-mopidy (0.16.0-0mopidy2) UNRELEASED; urgency=low
+mopidy (0.16.0-0mopidy2) saucy; urgency=low
 
   * Update copyright format URL.
   * Add python-setuptools to Build-Depends.
@@ -6,7 +6,7 @@ mopidy (0.16.0-0mopidy2) UNRELEASED; urgency=low
   * Convert from python-support to dh_python2.
   * Install as a private module.
 
- -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 28 Oct 2013 21:47:52 +0100
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Tue, 29 Oct 2013 23:12:45 +0100
 
 mopidy (0.16.0-0mopidy1) unstable; urgency=low
 
