@@ -4,6 +4,7 @@ mopidy (0.16.0-0mopidy2) UNRELEASED; urgency=low
   * Add python-setuptools to Build-Depends.
   * Bump debhelper to >= 8.0.0.
   * Convert from python-support to dh_python2.
+  * Install as a private module.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 28 Oct 2013 21:47:52 +0100
 

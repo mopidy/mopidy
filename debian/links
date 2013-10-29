@@ -1,0 +1,3 @@
+/usr/share/mopidy/mopidy-serve /usr/bin/mopidy
+/usr/share/mopidy/mopidy-scan /usr/bin/mopidy-scan
+/usr/share/mopidy/mopidy-convert-config /usr/bin/mopidy-convert-config
