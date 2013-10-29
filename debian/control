@@ -3,7 +3,7 @@ Section: sound
 Priority: optional
 Maintainer: Stein Magnus Jodal <stein.magnus@jodal.no>
 Build-Depends:
-    debhelper (>= 7.0.50~),
+    debhelper (>= 8.0.0),
     python-setuptools,
     python-support,
     python-sphinx (>= 1.0),
