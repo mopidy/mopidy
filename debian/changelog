@@ -1,3 +1,11 @@
+mopidy (0.16.0-0mopidy3) unstable; urgency=low
+
+  * Remove bad X-Python3-Version declaration.
+  * Remove redundant Provides on binary package.
+  * Use dh_python2 to find Python dependencies.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 30 Oct 2013 23:38:09 +0100
+
 mopidy (0.16.0-0mopidy2) saucy; urgency=low
 
   * Update copyright format URL.
