@@ -7,6 +7,7 @@ key: song1.mp3
 file: /song1.mp3
 Time: 4
 Artist: name
+AlbumArtist: name
 Title: trackname
 Album: albumname
 Track: 1/2
