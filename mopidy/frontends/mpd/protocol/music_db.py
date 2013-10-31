@@ -127,7 +127,7 @@ def findadd(context, mpd_query):
 
 
 @handle_request(
-    r'^list "?(?P<field>([Aa]rtist|[Aa]lbum|[Dd]ate|[Gg]enre))"?'
+    r'^list "?(?P<field>([Aa]rtist|[Aa]lbumartist|[Aa]lbum|[Dd]ate|[Gg]enre))"?'
     r'( (?P<mpd_query>.*))?$')
 def list_(context, field, mpd_query=None):
     """
@@ -136,7 +136,7 @@ def list_(context, field, mpd_query=None):
         ``list {TYPE} [ARTIST]``
 
         Lists all tags of the specified type. ``TYPE`` should be ``album``,
-        ``artist``, ``date``, or ``genre``.
+        ``artist``, ``albumartist``, ``date``, or ``genre``.
 
         ``ARTIST`` is an optional parameter when type is ``album``,
         ``date``, or ``genre``. This filters the result list by an artist.
@@ -218,6 +218,8 @@ def list_(context, field, mpd_query=None):
         return
     if field == 'artist':
         return _list_artist(context, query)
+    if field == 'albumartist':
+        return _list_albumartist(context, query)
     elif field == 'album':
         return _list_album(context, query)
     elif field == 'date':
@@ -234,6 +236,18 @@ def _list_artist(context, query):
             if artist.name:
                 artists.add(('Artist', artist.name))
     return artists
+
+
+def _list_albumartist(context, query):
+    import logging
+    logger = logging.getLogger('mopidy.backends.local')
+    albumartists = set()
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
+        for artist in track.album.artists:
+            if artist.name:
+                albumartists.add(('AlbumArtist', artist.name))
+    return albumartists
 
 
 def _list_album(context, query):
