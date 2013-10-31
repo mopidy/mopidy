@@ -11,6 +11,7 @@ key: song8.mp3
 file: subdir1/subsubdir/song8.mp3
 Time: 4
 Artist: name
+AlbumArtist: name
 Title: trackname
 Album: albumname
 Track: 1/2
@@ -32,6 +33,7 @@ key: song4.mp3
 file: subdir1/song4.mp3
 Time: 4
 Artist: name
+AlbumArtist: name
 Title: trackname
 Album: albumname
 Track: 1/2
@@ -41,6 +43,7 @@ key: song5.mp3
 file: subdir1/song5.mp3
 Time: 4
 Artist: name
+AlbumArtist: name
 Title: trackname
 Album: albumname
 Track: 1/2
@@ -76,6 +79,7 @@ key: song1.mp3
 file: /song1.mp3
 Time: 4
 Artist: name
+AlbumArtist: name
 Title: trackname
 Album: albumname
 Track: 1/2
@@ -85,6 +89,7 @@ key: song2.mp3
 file: /song2.mp3
 Time: 4
 Artist: name
+AlbumArtist: name
 Title: trackname
 Album: albumname
 Track: 1/2

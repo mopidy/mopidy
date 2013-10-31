@@ -93,28 +93,30 @@ class URItoM3UTest(unittest.TestCase):
 
 expected_artists = [Artist(name='name')]
 expected_albums = [
-    Album(name='albumname', artists=expected_artists, num_tracks=2)]
+    Album(name='albumname', artists=expected_artists, num_tracks=2),
+    Album(name='albumname', num_tracks=2)
+    ]
 expected_tracks = []
 
 
-def generate_track(path, ident):
+def generate_track(path, ident, album_id):
     uri = 'local:track:%s' % path
     track = Track(
         uri=uri, name='trackname', artists=expected_artists,
-        album=expected_albums[0], track_no=1, date='2006', length=4000,
+        album=expected_albums[album_id], track_no=1, date='2006', length=4000,
         last_modified=1272319626)
     expected_tracks.append(track)
 
 
-generate_track('song1.mp3', 6)
-generate_track('song2.mp3', 7)
-generate_track('song3.mp3', 8)
-generate_track('subdir1/song4.mp3', 2)
-generate_track('subdir1/song5.mp3', 3)
-generate_track('subdir2/song6.mp3', 4)
-generate_track('subdir2/song7.mp3', 5)
-generate_track('subdir1/subsubdir/song8.mp3', 0)
-generate_track('subdir1/subsubdir/song9.mp3', 1)
+generate_track('song1.mp3', 6, 0)
+generate_track('song2.mp3', 7, 0)
+generate_track('song3.mp3', 8, 1)
+generate_track('subdir1/song4.mp3', 2, 0)
+generate_track('subdir1/song5.mp3', 3, 0)
+generate_track('subdir2/song6.mp3', 4, 1)
+generate_track('subdir2/song7.mp3', 5, 1)
+generate_track('subdir1/subsubdir/song8.mp3', 0, 0)
+generate_track('subdir1/subsubdir/song9.mp3', 1, 1)
 
 
 class MPDTagCacheToTracksTest(unittest.TestCase):
