@@ -114,7 +114,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(date=['1990'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(track_no=[9])
+        result = self.library.find_exact(track_no=['9'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.find_exact(uri=['fake uri'])
@@ -167,10 +167,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), [self.tracks[2]])
 
     def test_find_exact_track_no(self):
-        result = self.library.find_exact(track_no=[1])
+        result = self.library.find_exact(track_no=['1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(track_no=[2])
+        result = self.library.find_exact(track_no=['2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_date(self):
@@ -228,7 +228,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         test = lambda: self.library.find_exact(album=[''])
         self.assertRaises(LookupError, test)
 
-        test = lambda: self.library.find_exact(track_no=[])
+        test = lambda: self.library.find_exact(track_no=[''])
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.find_exact(date=[''])
@@ -247,7 +247,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(album=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(track_no=[9])
+        result = self.library.search(track_no=['9'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.search(date=['unknown date'])
@@ -314,10 +314,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_track_no(self):
-        result = self.library.search(track_no=[1])
+        result = self.library.search(track_no=['1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(track_no=[2])
+        result = self.library.search(track_no=['2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_any(self):
