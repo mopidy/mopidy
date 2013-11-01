@@ -8,7 +8,6 @@ Synopsis
 ========
 
 mopidy-convert-config
-    [-h] [--version] [-q] [-v]
 
 
 Description
