@@ -71,6 +71,7 @@ Reference
     :maxdepth: 2
 
     glossary
+    commands/index
     api/index
     modules/index
 

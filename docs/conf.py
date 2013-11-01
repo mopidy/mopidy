@@ -136,6 +136,33 @@ latex_documents = [
 ]
 
 
+# -- Options for manpages output ----------------------------------------------
+
+man_pages = [
+    (
+        'commands/mopidy',
+        'mopidy',
+        'music server',
+        '',
+        '1'
+    ),
+    (
+        'commands/mopidy-scan',
+        'mopidy-scan',
+        'index music for playback with mopidy',
+        '',
+        '1'
+    ),
+    (
+        'commands/mopidy-convert-config',
+        'mopidy-convert-config',
+        'migrate config files from mopidy pre-0.14',
+        '',
+        '1'
+    ),
+]
+
+
 # -- Options for extlink extension --------------------------------------------
 
 extlinks = {'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#')}
