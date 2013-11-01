@@ -23,6 +23,8 @@ class Extension(ext.Extension):
         schema['password'] = config.Secret(optional=True)
         schema['max_connections'] = config.Integer(minimum=1)
         schema['connection_timeout'] = config.Integer(minimum=1)
+        schema['zeroconf_enabled'] = config.Boolean()
+        schema['zeroconf_name'] = config.String()
         return schema
 
     def validate_environment(self):
