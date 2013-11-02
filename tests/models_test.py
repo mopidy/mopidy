@@ -450,12 +450,14 @@ class TrackTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEquals(
-            "Track(artists=[], name=u'name', uri=u'uri')",
+            "Track(artists=[], composers=[], name=u'name', "
+            "performers=[], uri=u'uri')",
             repr(Track(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEquals(
-            "Track(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
+            "Track(artists=[Artist(name=u'foo')], composers=[], name=u'name', "
+            "performers=[], uri=u'uri')",
             repr(Track(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):
@@ -670,7 +672,8 @@ class TlTrackTest(unittest.TestCase):
 
     def test_repr(self):
         self.assertEquals(
-            "TlTrack(tlid=123, track=Track(artists=[], uri=u'uri'))",
+            "TlTrack(tlid=123, track=Track(artists=[], composers=[], "
+            "performers=[], uri=u'uri'))",
             repr(TlTrack(tlid=123, track=Track(uri='uri'))))
 
     def test_serialize(self):
@@ -804,8 +807,8 @@ class PlaylistTest(unittest.TestCase):
 
     def test_repr_with_tracks(self):
         self.assertEquals(
-            "Playlist(name=u'name', tracks=[Track(artists=[], name=u'foo')], "
-            "uri=u'uri')",
+            "Playlist(name=u'name', tracks=[Track(artists=[], composers=[], "
+            "name=u'foo', performers=[])], uri=u'uri')",
             repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
 
     def test_serialize_without_tracks(self):

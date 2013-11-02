@@ -10,8 +10,9 @@ from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
 QUERY_RE = (
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Aa]lbumartist|[Dd]ate|[Ff]ile|'
-    r'[Ff]ilename|[Tt]itle|[Tt]rack|[Aa]ny)"? "[^"]*"\s?)+)$')
+    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Aa]lbumartist|[Cc]omment|'
+    r'[Cc]omposer|[Dd]ate|[Ff]ile|[Ff]ilename|[Gg]enre|[Pp]erformer|'
+    r'[Tt]itle|[Tt]rack|[Aa]ny)"? "[^"]*"\s?)+)$')
 
 
 def _get_field(field, search_results):
@@ -100,9 +101,12 @@ def find(context, mpd_query):
         return
     results = context.core.library.find_exact(**query).get()
     result_tracks = []
-    if 'artist' not in query and 'albumartist' not in query:
+    if ('artist' not in query and
+            'albumartist' not in query and
+            'composer' not in query and
+            'performer' not in query):
         result_tracks += [_artist_as_track(a) for a in _get_artists(results)]
-    if 'album' not in query:
+    if 'album' not in query and 'genre' not in query:
         result_tracks += [_album_as_track(a) for a in _get_albums(results)]
     result_tracks += _get_tracks(results)
     return translator.tracks_to_mpd_format(result_tracks)
@@ -127,7 +131,8 @@ def findadd(context, mpd_query):
 
 
 @handle_request(
-    r'^list "?(?P<field>([Aa]rtist|[Aa]lbum|[Dd]ate|[Gg]enre))"?'
+    r'^list "?(?P<field>([Aa]rtist|[Aa]lbum|[Cc]omposer|[Dd]ate|[Gg]enre|'
+    r'[Pp]erformer))"?'
     r'( (?P<mpd_query>.*))?$')
 def list_(context, field, mpd_query=None):
     """
@@ -220,10 +225,14 @@ def list_(context, field, mpd_query=None):
         return _list_artist(context, query)
     elif field == 'album':
         return _list_album(context, query)
+    elif field == 'composer':
+        return _list_composer(context, query)
+    elif field == 'performer':
+        return _list_performer(context, query)
     elif field == 'date':
         return _list_date(context, query)
     elif field == 'genre':
-        pass  # TODO We don't have genre in our internal data structures yet
+        return _list_genre(context, query)
 
 
 def _list_artist(context, query):
@@ -245,6 +254,24 @@ def _list_album(context, query):
     return albums
 
 
+def _list_composer(context, query):
+    composers = set()
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
+        if track.composer and track.composer.name:
+            composers.add(('Composer', track.composer.name))
+    return composers
+
+
+def _list_performer(context, query):
+    performers = set()
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
+        if track.performer and track.performer.name:
+            performers.add(('Performer', track.performer.name))
+    return performers
+
+
 def _list_date(context, query):
     dates = set()
     results = context.core.library.find_exact(**query).get()
@@ -252,6 +279,15 @@ def _list_date(context, query):
         if track.date:
             dates.add(('Date', track.date))
     return dates
+
+
+def _list_genre(context, query):
+    genres = set()
+    results = context.core.library.find_exact(**query).get()
+    for track in _get_tracks(results):
+        if track.genre:
+            genres.add(('Genre', track.genre))
+    return genres
 
 
 @handle_request(r'^listall$')

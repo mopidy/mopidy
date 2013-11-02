@@ -139,6 +139,8 @@ def translator(data):
     albumartist_kwargs = {}
     album_kwargs = {}
     artist_kwargs = {}
+    composer_kwargs = {}
+    performer_kwargs = {}
     track_kwargs = {}
 
     def _retrieve(source_key, target_key, target):
@@ -149,6 +151,22 @@ def translator(data):
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
     _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs)
     _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
+    _retrieve(gst.TAG_COMPOSER, 'name', composer_kwargs)
+    _retrieve(gst.TAG_PERFORMER, 'name', performer_kwargs)
+    _retrieve(gst.TAG_ALBUM_ARTIST, 'name', albumartist_kwargs)
+    _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
+    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
+    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
+    _retrieve(gst.TAG_GENRE, 'genre', track_kwargs)
+    _retrieve(gst.TAG_BITRATE, 'bitrate', track_kwargs)
+
+    # Following keys don't seem to have TAG_* constant.
+    _retrieve('comment', 'comment', track_kwargs)
+    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
+    _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
+    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
+    _retrieve(
+        'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if gst.TAG_DATE in data and data[gst.TAG_DATE]:
         date = data[gst.TAG_DATE]
@@ -159,18 +177,6 @@ def translator(data):
         else:
             track_kwargs['date'] = date.isoformat()
 
-    _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
-    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
-    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
-
-    # Following keys don't seem to have TAG_* constant.
-    _retrieve('album-artist', 'name', albumartist_kwargs)
-    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
-    _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
-    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
-    _retrieve(
-        'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
-
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
@@ -179,6 +185,12 @@ def translator(data):
     track_kwargs['length'] = data[gst.TAG_DURATION]
     track_kwargs['album'] = Album(**album_kwargs)
     track_kwargs['artists'] = [Artist(**artist_kwargs)]
+
+    if composer_kwargs:
+        track_kwargs['composers'] = [Artist(**composer_kwargs)]
+
+    if performer_kwargs:
+        track_kwargs['performers'] = [Artist(**performer_kwargs)]
 
     return Track(**track_kwargs)
 
