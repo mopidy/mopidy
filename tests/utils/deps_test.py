@@ -20,7 +20,7 @@ class DepsTest(unittest.TestCase):
             lambda: dict(name='Platform', version='Loonix 4.0.1'),
             lambda: dict(
                 name='Pykka', version='1.1',
-                path='/foo/bar/baz.py', other='Quux'),
+                path='/foo/bar', other='Quux'),
             lambda: dict(name='Foo'),
             lambda: dict(name='Mopidy', version='0.13', dependencies=[
                 dict(name='pylast', version='0.5', dependencies=[
@@ -58,6 +58,7 @@ class DepsTest(unittest.TestCase):
         self.assertIn(platform.python_implementation(), result['version'])
         self.assertIn(platform.python_version(), result['version'])
         self.assertIn('python', result['path'])
+        self.assertNotIn('platform.py', result['path'])
 
     def test_gstreamer_info(self):
         result = deps.gstreamer_info()
@@ -66,6 +67,7 @@ class DepsTest(unittest.TestCase):
         self.assertEquals(
             '.'.join(map(str, gst.get_gst_version())), result['version'])
         self.assertIn('gst', result['path'])
+        self.assertNotIn('__init__.py', result['path'])
         self.assertIn('Python wrapper: gst-python', result['other'])
         self.assertIn(
             '.'.join(map(str, gst.get_pygst_version())), result['other'])
