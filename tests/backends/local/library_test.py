@@ -218,7 +218,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track album artists
         result = self.library.find_exact(any=['artist3'])
-        self.assertEqual(list(result[0].tracks), [self.tracks[3], self.tracks[2]])
+        self.assertEqual(list(result[0].tracks), [self.tracks[3],
+                                                  self.tracks[2]])
 
         # Matches on track year
         result = self.library.find_exact(any=['2002'])
@@ -352,7 +353,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track album artists
         result = self.library.search(any=['Tist3'])
-        self.assertEqual(list(result[0].tracks), [self.tracks[3], self.tracks[2]])
+        self.assertEqual(list(result[0].tracks), [self.tracks[3],
+                                                  self.tracks[2]])
 
         # Matches on URI
         result = self.library.search(any=['TH1'])
