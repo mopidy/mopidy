@@ -4,6 +4,27 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.17.0 (UNRELEASED)
+====================
+
+**Core**
+
+- The search field ``track`` has been renamed to ``track_name`` to avoid
+  confusion with ``track_no``.
+
+**Local backend**
+
+- Fix search filtering by track number.
+
+- When scanning, we no longer default the album artist to be the same as the
+  track artist. Album artist is now only populated if the scanned file got an
+  explicit album artist set.
+
+**MPD frontend**
+
+- Add support for ``list "albumartist" ...``.
+
+
 v0.16.0 (2013-10-27)
 ====================
 

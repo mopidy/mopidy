@@ -47,9 +47,6 @@ def track_to_mpd_format(track, position=None):
             track.track_no, track.album.num_tracks)))
     else:
         result.append(('Track', track.track_no))
-    if track.album is not None and track.album.artists:
-        artists = artists_to_mpd_format(track.album.artists)
-        result.append(('AlbumArtist', artists))
     if position is not None and tlid is not None:
         result.append(('Pos', position))
         result.append(('Id', tlid))
@@ -58,6 +55,8 @@ def track_to_mpd_format(track, position=None):
     # FIXME don't use first and best artist?
     # FIXME don't duplicate following code?
     if track.album is not None and track.album.artists:
+        artists = artists_to_mpd_format(track.album.artists)
+        result.append(('AlbumArtist', artists))
         artists = filter(
             lambda a: a.musicbrainz_id is not None, track.album.artists)
         if artists:
@@ -262,7 +261,7 @@ def query_from_mpd_search_format(mpd_query):
         m = MPD_SEARCH_QUERY_PART_RE.match(query_part)
         field = m.groupdict()['field'].lower()
         if field == 'title':
-            field = 'track'
+            field = 'track_name'
         elif field == 'track':
             field = 'track_no'
         elif field in ('file', 'filename'):

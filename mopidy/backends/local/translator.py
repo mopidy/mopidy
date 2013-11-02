@@ -120,7 +120,6 @@ def _convert_mpd_data(data, tracks):
 
     if 'artist' in data:
         artist_kwargs['name'] = data['artist']
-        albumartist_kwargs['name'] = data['artist']
 
     if 'albumartist' in data:
         albumartist_kwargs['name'] = data['albumartist']
