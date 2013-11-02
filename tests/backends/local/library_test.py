@@ -26,6 +26,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         Album(name='album1', artists=[artists[0]]),
         Album(name='album2', artists=[artists[1]]),
         Album(name='album3', artists=[artists[2]]),
+        Album(name='album4'),
     ]
 
     tracks = [
@@ -41,6 +42,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
             uri='local:track:path3', name='track3',
             artists=[artists[3]], album=albums[2],
             date='2003', length=4000, track_no=3),
+        Track(
+            uri='local:track:path4', name='track4',
+            artists=[artists[2]], album=albums[3],
+            date='2004', length=60000, track_no=4),
     ]
 
     config = {
@@ -152,6 +157,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(artist=['artist2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
+        result = self.library.find_exact(artist=['artist3'])
+        self.assertEqual(list(result[0].tracks), self.tracks[3:4])
+
     def test_find_exact_album(self):
         result = self.library.find_exact(album=['album1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
@@ -210,7 +218,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track album artists
         result = self.library.find_exact(any=['artist3'])
-        self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+        self.assertEqual(
+            list(result[0].tracks), [self.tracks[3], self.tracks[2]])
 
         # Matches on track year
         result = self.library.find_exact(any=['2002'])
@@ -353,7 +362,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track album artists
         result = self.library.search(any=['Tist3'])
-        self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+        self.assertEqual(
+            list(result[0].tracks), [self.tracks[3], self.tracks[2]])
 
         # Matches on URI
         result = self.library.search(any=['TH1'])
