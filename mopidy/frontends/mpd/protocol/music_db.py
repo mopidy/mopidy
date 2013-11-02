@@ -127,8 +127,8 @@ def findadd(context, mpd_query):
 
 
 @handle_request(
-    r'^list "?(?P<field>([Aa]rtist|[Aa]lbumartist|[Aa]lbum|[Dd]ate|[Gg]enre))"?'
-    r'( (?P<mpd_query>.*))?$')
+    r'^list "?(?P<field>([Aa]rtist|[Aa]lbumartist|[Aa]lbum|[Dd]ate|'
+    r'[Gg]enre))"?( (?P<mpd_query>.*))?$')
 def list_(context, field, mpd_query=None):
     """
     *musicpd.org, music database section:*
@@ -239,8 +239,6 @@ def _list_artist(context, query):
 
 
 def _list_albumartist(context, query):
-    import logging
-    logger = logging.getLogger('mopidy.backends.local')
     albumartists = set()
     results = context.core.library.find_exact(**query).get()
     for track in _get_tracks(results):
