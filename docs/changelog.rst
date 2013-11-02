@@ -11,6 +11,10 @@ v0.17.0 (UNRELEASED)
 
 - Fix search filtering by track number.
 
+- When scanning, we no longer default the album artist to be the same as the
+  track artist. Album artist is now only populated if the scanned file got an
+  explicit album artist set.
+
 **MPD frontend**
 
 - Add support for ``list "albumartist" ...``.
