@@ -4,6 +4,18 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.17.0 (UNRELEASED)
+====================
+
+**Local backend**
+
+- Fix search filtering by track number.
+
+**MPD frontend**
+
+- Add support for ``list "albumartist" ...``.
+
+
 v0.16.0 (2013-10-27)
 ====================
 
