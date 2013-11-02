@@ -4,7 +4,13 @@
 Authors
 *******
 
-Contributors to Mopidy in the order of appearance:
+Mopidy is copyright 2009-2013 Stein Magnus Jodal and contributors. Mopidy is
+licensed under the `Apache License, Version 2.0
+<http://www.apache.org/licenses/LICENSE-2.0>`_.
+
+The following persons have contributed to Mopidy. The list is in the order of
+first contribution. For details on who have contributed what, please refer to
+our Git repository.
 
 .. include:: ../AUTHORS
 

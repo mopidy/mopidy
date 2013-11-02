@@ -98,24 +98,118 @@ Creating releases
 
 #. Update changelog and commit it.
 
+#. Bump the version number in ``mopidy/__init__.py``. Remember to update the
+   test case in ``tests/version_test.py``.
+
 #. Merge the release branch (``develop`` in the example) into master::
 
     git checkout master
-    git merge --no-ff -m "Release v0.2.0" develop
+    git merge --no-ff -m "Release v0.16.0" develop
+
+#. Build package and test it manually in a new virtualenv. The following
+   assumes the use of virtualenvwrapper::
+
+    python setup.py sdist
+    mktmpenv
+    pip install path/to/dist/Mopidy-0.16.0.tar.gz
+    toggleglobalsitepackages
+
+   Then test Mopidy manually to confirm that the package is working correctly.
 
 #. Tag the release::
 
-    git tag -a -m "Release v0.2.0" v0.2.0
+    git tag -a -m "Release v0.16.0" v0.16.0
 
 #. Push to GitHub::
 
     git push
     git push --tags
 
-#. Build package and upload to PyPI::
+#. Build source package and upload to PyPI::
 
     python setup.py sdist upload
 
+#. Build wheel package and upload to PyPI::
+
+    pip install -U wheel
+    python setup.py bdist_wheel upload
+
+#. Merge ``master`` back into ``develop`` and push the branch to GitHub.
+
+#. Make sure the new tag is built by Read the Docs, and that the ``latest``
+   version shows the newly released version.
+
+#. Spread the word through the topic on #mopidy on IRC, @mopidy on Twitter, and
+   on the mailing list.
+
 #. Update the Debian package.
 
-#. Spread the word.
+
+Updating Debian packages
+========================
+
+This howto is not intended to learn you all the details, just to give someone
+already familiar with Debian packaging an overview of how Mopidy's Debian
+packages is maintained.
+
+#. Install the basic packaging tools::
+
+       sudo apt-get install build-essential git-buildpackage
+
+#. Check out the ``debian`` branch of the repo::
+
+       git checkout -t origin/debian
+       git pull
+
+#. Merge the latest release tag into the ``debian`` branch::
+
+       git merge v0.16.0
+
+#. Update the ``debian/changelog`` with a "New upstream release" entry::
+
+       dch -v 0.16.0-0mopidy1
+       git add debian/changelog
+       git commit -m "debian: New upstream release"
+
+#. Check if any dependencies in ``debian/control`` or similar needs updating.
+
+#. Install any Build-Deps listed in ``debian/control``.
+
+#. Build the package and fix any issues repeatedly until the build succeeds and
+   the Lintian check at the end of the build is satisfactory::
+
+       git buildpackage -uc -us
+
+#. Install and test newly built package::
+
+       sudo debi
+
+#. If everything is OK, build the package a final time to tag the package
+   version::
+
+       git buildpackage -uc -us --git-tag
+
+#. Push the changes you've done to the ``debian`` branch and the new tag::
+
+       git push
+       git push --tags
+
+#. If you're building for multiple architectures, checkout the ``debian``
+   branch on the other builders and run::
+
+       git buildpackage -uc -us
+
+#. Copy files to the APT server. Make sure to select the correct part of the
+   repo, e.g. main, contrib, or non-free::
+
+       scp ../mopidy*_0.16* bonobo.mopidy.com:/srv/apt.mopidy.com/app/incoming/stable/main
+
+#. Update the APT repo::
+
+       ssh bonobo.mopidy.com
+       /srv/apt.mopidy.com/app/update.sh
+
+#. Test installation from apt.mopidy.com::
+
+       sudo apt-get update
+       sudo apt-get dist-upgrade
