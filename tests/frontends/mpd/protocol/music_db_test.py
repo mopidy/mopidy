@@ -398,6 +398,66 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Artist: ')
         self.assertInResponse('OK')
 
+    ### Albumartist
+
+    def test_list_albumartist_with_quotes(self):
+        self.sendRequest('list "albumartist"')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_without_quotes(self):
+        self.sendRequest('list albumartist')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_without_quotes_and_capitalized(self):
+        self.sendRequest('list Albumartist')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_with_query_of_one_token(self):
+        self.sendRequest('list "albumartist" "anartist"')
+        self.assertEqualResponse(
+            'ACK [2@0] {list} should be "Album" for 3 arguments')
+
+    def test_list_albumartist_with_unknown_field_in_query_returns_ack(self):
+        self.sendRequest('list "albumartist" "foo" "bar"')
+        self.assertEqualResponse('ACK [2@0] {list} not able to parse args')
+
+    def test_list_albumartist_by_artist(self):
+        self.sendRequest('list "albumartist" "artist" "anartist"')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_by_album(self):
+        self.sendRequest('list "albumartist" "album" "analbum"')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_by_full_date(self):
+        self.sendRequest('list "albumartist" "date" "2001-01-01"')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_by_year(self):
+        self.sendRequest('list "albumartist" "date" "2001"')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_by_genre(self):
+        self.sendRequest('list "albumartist" "genre" "agenre"')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_by_artist_and_album(self):
+        self.sendRequest(
+            'list "albumartist" "artist" "anartist" "album" "analbum"')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_without_filter_value(self):
+        self.sendRequest('list "albumartist" "artist" ""')
+        self.assertInResponse('OK')
+
+    def test_list_albumartist_should_not_return_artists_without_names(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[Track(album=Album(artists=[Artist(name='')]))])
+
+        self.sendRequest('list "albumartist"')
+        self.assertNotInResponse('Artist: ')
+        self.assertInResponse('OK')
+
     ### Album
 
     def test_list_album_with_quotes(self):
