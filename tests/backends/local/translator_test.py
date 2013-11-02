@@ -94,8 +94,8 @@ class URItoM3UTest(unittest.TestCase):
 expected_artists = [Artist(name='name')]
 expected_albums = [
     Album(name='albumname', artists=expected_artists, num_tracks=2),
-    Album(name='albumname', num_tracks=2)
-    ]
+    Album(name='albumname', num_tracks=2),
+]
 expected_tracks = []
 
 
