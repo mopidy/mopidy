@@ -108,6 +108,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(artist=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
+        result = self.library.find_exact(albumartist=['unknown albumartist'])
+        self.assertEqual(list(result[0].tracks), [])
+
         result = self.library.find_exact(album=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
@@ -222,6 +225,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         test = lambda: self.library.find_exact(artist=[''])
         self.assertRaises(LookupError, test)
 
+        test = lambda: self.library.find_exact(albumartist=[''])
+        self.assertRaises(LookupError, test)
+
         test = lambda: self.library.find_exact(track=[''])
         self.assertRaises(LookupError, test)
 
@@ -242,6 +248,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.search(artist=['unknown artist'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.search(albumartist=['unknown albumartist'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.search(album=['unknown artist'])
@@ -350,6 +359,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
     def test_search_with_empty_query(self):
         test = lambda: self.library.search(artist=[''])
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.search(albumartist=[''])
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.search(track=[''])
