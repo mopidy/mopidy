@@ -117,6 +117,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(track_no=['9'])
         self.assertEqual(list(result[0].tracks), [])
 
+        result = self.library.find_exact(track_no=['no_match'])
+        self.assertEqual(list(result[0].tracks), [])
+
         result = self.library.find_exact(uri=['fake uri'])
         self.assertEqual(list(result[0].tracks), [])
 
@@ -248,6 +251,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.search(track_no=['9'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.search(track_no=['no_match'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.search(date=['unknown date'])
