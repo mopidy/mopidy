@@ -157,9 +157,6 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(artist=['artist2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
-        import logging
-        logger = logging.getLogger('mopidy.backends.local')
-        logger.debug("==TEST= tracks: {}".format(self.tracks[2:3]))
         result = self.library.find_exact(artist=['artist3'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
