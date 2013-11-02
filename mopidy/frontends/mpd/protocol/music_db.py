@@ -242,9 +242,10 @@ def _list_albumartist(context, query):
     albumartists = set()
     results = context.core.library.find_exact(**query).get()
     for track in _get_tracks(results):
-        for artist in track.album.artists:
-            if artist.name:
-                albumartists.add(('AlbumArtist', artist.name))
+        if track.album:
+            for artist in track.album.artists:
+                if artist.name:
+                    albumartists.add(('AlbumArtist', artist.name))
     return albumartists
 
 
