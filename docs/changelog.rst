@@ -7,6 +7,11 @@ This changelog is used to track all major changes to Mopidy.
 v0.17.0 (UNRELEASED)
 ====================
 
+**Core**
+
+- The search field ``track`` has been renamed to ``track_name`` to avoid
+  confusion with ``track_no``.
+
 **Local backend**
 
 - Fix search filtering by track number.
