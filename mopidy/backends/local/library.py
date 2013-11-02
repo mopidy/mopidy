@@ -21,6 +21,12 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
         self._tag_cache_file = self.backend.config['local']['tag_cache_file']
         self.refresh()
 
+    def _convert_to_int(self, string):
+        try:
+            return int(string)
+        except ValueError:
+            return object()
+
     def refresh(self, uri=None):
         logger.debug(
             'Loading local tracks from %s using %s',
@@ -61,7 +67,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             # FIXME this is bound to be slow for large libraries
             for value in values:
                 if field == 'track_no':
-                    q = value
+                    q = self._convert_to_int(value)
                 else:
                     q = value.strip()
 
@@ -81,7 +87,6 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     album_filter(t) or
                     artist_filter(t) or
                     albumartist_filter(t) or
-                    track_no_filter(t) or
                     date_filter(t))
 
                 if field == 'uri':
@@ -119,7 +124,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
             # FIXME this is bound to be slow for large libraries
             for value in values:
                 if field == 'track_no':
-                    q = value
+                    q = self._convert_to_int(value)
                 else:
                     q = value.strip().lower()
 
@@ -140,7 +145,6 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     album_filter(t) or
                     artist_filter(t) or
                     albumartist_filter(t) or
-                    track_no_filter(t) or
                     date_filter(t))
 
                 if field == 'uri':
