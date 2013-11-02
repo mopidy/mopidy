@@ -24,3 +24,7 @@ override_dh_installchangelogs:
 override_dh_installdocs:
 	make -C docs/ clean html
 	dh_installdocs
+
+override_dh_installman:
+	make -C docs/ clean man
+	dh_installman
