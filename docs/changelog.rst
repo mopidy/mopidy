@@ -4,6 +4,30 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v0.16.1 (2013-11-02)
+====================
+
+This is very small release to get Mopidy's Debian package ready for inclusion
+in Debian.
+
+**Commands**
+
+- Fix removal of last dir level in paths to dependencies in
+  ``mopidy --show-deps`` output.
+
+- Add manpages for all commands.
+
+**Local backend**
+
+- Fix search filtering by track number that was added in 0.16.0.
+
+**MPD frontend**
+
+- Add support for ``list "albumartist" ...`` which was missed when ``find`` and
+  ``search`` learned to handle ``albumartist`` in 0.16.0.
+
+
 v0.16.0 (2013-10-27)
 ====================
 
