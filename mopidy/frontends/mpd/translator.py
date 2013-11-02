@@ -235,7 +235,7 @@ def query_from_mpd_search_format(mpd_query):
         m = MPD_SEARCH_QUERY_PART_RE.match(query_part)
         field = m.groupdict()['field'].lower()
         if field == 'title':
-            field = 'track'
+            field = 'track_name'
         elif field == 'track':
             field = 'track_no'
         elif field in ('file', 'filename'):
