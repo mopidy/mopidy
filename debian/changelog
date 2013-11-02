@@ -1,6 +1,7 @@
 mopidy (0.16.1-0mopidy1) unstable; urgency=low
 
   * New upstream release.
+  * Add dist/* to list of files to clean.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sat, 02 Nov 2013 23:52:15 +0100
 
