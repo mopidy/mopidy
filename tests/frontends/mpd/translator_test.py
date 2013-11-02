@@ -36,8 +36,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Title', ''), result)
         self.assertIn(('Album', ''), result)
         self.assertIn(('Track', 0), result)
-        self.assertIn(('Date', ''), result)
-        self.assertEqual(len(result), 7)
+        self.assertEqual(len(result), 6)
 
     def test_track_to_mpd_format_with_position(self):
         result = translator.track_to_mpd_format(Track(), position=1)
