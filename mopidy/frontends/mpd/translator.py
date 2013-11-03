@@ -209,6 +209,7 @@ MPD_SEARCH_QUERY_RE = re.compile(r"""
         [Aa]lbum
       | [Aa]rtist
       | [Aa]lbumartist
+      | [Cc]omment
       | [Cc]omposer
       | [Dd]ate
       | [Ff]ile
@@ -231,6 +232,7 @@ MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
         [Aa]lbum
       | [Aa]rtist
       | [Aa]lbumartist
+      | [Cc]omment
       | [Cc]omposer
       | [Dd]ate
       | [Ff]ile
