@@ -952,6 +952,18 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.sendRequest('search "date" ""')
         self.assertInResponse('OK')
 
+    def test_search_comment(self):
+        self.sendRequest('search "comment" "acomment"')
+        self.assertInResponse('OK')
+
+    def test_search_comment_without_quotes(self):
+        self.sendRequest('search comment "acomment"')
+        self.assertInResponse('OK')
+
+    def test_search_comment_without_filter_value(self):
+        self.sendRequest('search "comment" ""')
+        self.assertInResponse('OK')
+
     def test_search_else_should_fail(self):
         self.sendRequest('search "sometype" "something"')
         self.assertEqualResponse('ACK [2@0] {search} incorrect arguments')
