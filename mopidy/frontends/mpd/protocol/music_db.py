@@ -271,8 +271,9 @@ def _list_composer(context, query):
     composers = set()
     results = context.core.library.find_exact(**query).get()
     for track in _get_tracks(results):
-        if track.composer and track.composer.name:
-            composers.add(('Composer', track.composer.name))
+        for composer in track.composers:
+            if composer.name:
+                composers.add(('Composer', composer.name))
     return composers
 
 
@@ -280,8 +281,9 @@ def _list_performer(context, query):
     performers = set()
     results = context.core.library.find_exact(**query).get()
     for track in _get_tracks(results):
-        if track.performer and track.performer.name:
-            performers.add(('Performer', track.performer.name))
+        for performer in track.performers:
+            if performer.name:
+                performers.add(('Performer', performer.name))
     return performers
 
 

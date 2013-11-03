@@ -47,7 +47,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         Track(
             uri='local:track:path4', name='track4',
             artists=[artists[2]], album=albums[3],
-            date='2004', length=60000, track_no=4),
+            date='2004', length=60000, track_no=4,
+            comment='Music server with support for MPD/HTTP clients '
+            'and Spotify streaming http://www.mopidy.com'),
         Track(
             uri='local:track:path5', name='track5', genre='genre1',
             album=albums[3], length=4000, composers=[artists[4]]),
@@ -145,6 +147,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(track_no=['no_match'])
         self.assertEqual(list(result[0].tracks), [])
 
+        result = self.library.find_exact(comment=['fake comment'])
+        self.assertEqual(list(result[0].tracks), [])
+
         result = self.library.find_exact(uri=['fake uri'])
         self.assertEqual(list(result[0].tracks), [])
 
@@ -160,7 +165,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(uri=track_2_uri)
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
-    def test_find_exact_track(self):
+    def test_find_exact_track_name(self):
         result = self.library.find_exact(track_name=['track1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
@@ -181,9 +186,15 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(composer=['artist5'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
+        result = self.library.find_exact(composer=['artist6'])
+        self.assertEqual(list(result[0].tracks), [])
+
     def test_find_exact_performer(self):
         result = self.library.find_exact(performer=['artist6'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
+
+        result = self.library.find_exact(performer=['artist5'])
+        self.assertEqual(list(result[0].tracks), [])
 
     def test_find_exact_album(self):
         result = self.library.find_exact(album=['album1'])
@@ -229,6 +240,16 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(date=['2002'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
+    def test_find_exact_comment(self):
+        result = self.library.find_exact(
+            comment=['Music server with support for MPD/HTTP clients '
+                     'and Spotify streaming http://www.mopidy.com'])
+        self.assertEqual(list(result[0].tracks), self.tracks[3:4])
+
+        result = self.library.find_exact(
+            comment=['Music server with support for MPD/HTTP clients'])
+        self.assertEqual(list(result[0].tracks), [])
+
     def test_find_exact_any(self):
         # Matches on track artist
         result = self.library.find_exact(any=['artist1'])
@@ -237,7 +258,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(any=['artist2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
-        # Matches on track
+        # Matches on track name
         result = self.library.find_exact(any=['track1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
@@ -268,9 +289,15 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(any=['genre2'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
-        # Matches on track year
+        # Matches on track date
         result = self.library.find_exact(any=['2002'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
+
+        # Matches on track comment
+        result = self.library.find_exact(
+            any=['Music server with support for MPD/HTTP clients '
+                 'and Spotify streaming http://www.mopidy.com'])
+        self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
         # Matches on URI
         result = self.library.find_exact(any=['local:track:path1'])
@@ -308,6 +335,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         test = lambda: self.library.find_exact(date=[''])
         self.assertRaises(LookupError, test)
 
+        test = lambda: self.library.find_exact(comment=[''])
+        self.assertRaises(LookupError, test)
+
         test = lambda: self.library.find_exact(any=[''])
         self.assertRaises(LookupError, test)
 
@@ -342,6 +372,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(date=['unknown date'])
         self.assertEqual(list(result[0].tracks), [])
 
+        result = self.library.search(comment=['unknown comment'])
+        self.assertEqual(list(result[0].tracks), [])
+
         result = self.library.search(uri=['unknown uri'])
         self.assertEqual(list(result[0].tracks), [])
 
@@ -355,7 +388,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(uri=['TH2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
-    def test_search_track(self):
+    def test_search_track_name(self):
         result = self.library.search(track_name=['Rack1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
@@ -424,6 +457,13 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(track_no=['2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
+    def test_search_comment(self):
+        result = self.library.search(comment=['mopidy'])
+        self.assertEqual(list(result[0].tracks), self.tracks[3:4])
+
+        result = self.library.search(comment=['Potify'])
+        self.assertEqual(list(result[0].tracks), self.tracks[3:4])
+
     def test_search_any(self):
         # Matches on track artist
         result = self.library.search(any=['Tist1'])
@@ -460,6 +500,13 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.search(any=['Enre2'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
+        # Matches on track comment
+        result = self.library.search(any=['http'])
+        self.assertEqual(list(result[0].tracks), self.tracks[3:4])
+
+        result = self.library.search(any=['streaming'])
+        self.assertEqual(list(result[0].tracks), self.tracks[3:4])
+
         # Matches on URI
         result = self.library.search(any=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
@@ -491,6 +538,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.search(date=[''])
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.search(comment=[''])
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.search(uri=[''])

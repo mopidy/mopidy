@@ -142,6 +142,9 @@ def _convert_mpd_data(data, tracks):
     if 'date' in data:
         track_kwargs['date'] = data['date']
 
+    if 'comment' in data:
+        track_kwargs['comment'] = data['comment']
+
     if 'musicbrainz_trackid' in data:
         track_kwargs['musicbrainz_id'] = data['musicbrainz_trackid']
 
