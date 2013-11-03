@@ -11,7 +11,7 @@ v0.17.0 (UNRELEASED)
 **Core**
 
 - The search field ``track`` has been renamed to ``track_name`` to avoid
-  confusion with ``track_no``.
+  confusion with ``track_no``. (Fixes: :issue:`535`)
 
 **Local backend**
 
@@ -40,7 +40,7 @@ in Debian.
 **MPD frontend**
 
 - Add support for ``list "albumartist" ...`` which was missed when ``find`` and
-  ``search`` learned to handle ``albumartist`` in 0.16.0.
+  ``search`` learned to handle ``albumartist`` in 0.16.0. (Fixes: :issue:`553`)
 
 
 v0.16.0 (2013-10-27)
