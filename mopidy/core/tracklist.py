@@ -317,11 +317,13 @@ class TracklistController(object):
         criteria = criteria or kwargs
         matches = self._tl_tracks
         for (key, value) in criteria.iteritems():
+            if not type(value) is list:
+                value = [value]
             if key == 'tlid':
-                matches = filter(lambda ct: value in ct.tlid, matches)
+                matches = filter(lambda ct: ct.tlid in value, matches)
             else:
                 matches = filter(
-                    lambda ct: value in getattr(ct.track, key), matches)
+                    lambda ct: getattr(ct.track, key) in value, matches)
         return matches
 
     def move(self, start, end, to_position):
