@@ -47,7 +47,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 lo = re.search('(?<![.\d])(127|0)[.]', self.hostname)
                 hostname = "" if lo else self.hostname
 
-                from .zeroconf import Zeroconf
+                from mopidy.utils.zeroconf import Zeroconf
                 self.service = Zeroconf(
                     stype="_mpd._tcp",
                     name=name, port=self.port, host=hostname)
