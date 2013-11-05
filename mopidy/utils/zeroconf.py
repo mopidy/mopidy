@@ -18,9 +18,13 @@ class Zeroconf:
         self.name = name
         self.stype = stype
         self.domain = domain
-        self.host = host
         self.port = port
         self.text = text
+        # Let avahi choose how to advertise services
+        # listening on lo and meta addresses
+        import re
+        lo = re.search('(?<![.\d])(127|0)[.]', host)
+        self.host = "" if lo else host
 
     def publish(self):
         bus = dbus.SystemBus()

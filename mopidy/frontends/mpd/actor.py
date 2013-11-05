@@ -43,14 +43,11 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         try:
             if self.config['mpd']['zeroconf_enabled']:
                 name = self.config['mpd']['zeroconf_name']
-                import re
-                lo = re.search('(?<![.\d])(127|0)[.]', self.hostname)
-                hostname = "" if lo else self.hostname
 
                 from mopidy.utils.zeroconf import Zeroconf
                 self.service = Zeroconf(
                     stype="_mpd._tcp",
-                    name=name, port=self.port, host=hostname)
+                    name=name, port=self.port, host=self.hostname)
                 self.service.publish()
 
                 logger.info('Registered with Avahi as %s', name)
