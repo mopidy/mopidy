@@ -24,6 +24,8 @@ class TranslatorTest(unittest.TestCase):
             'album': 'albumname',
             'track-number': 1,
             'artist': 'name',
+            'composer': 'composer',
+            'performer': 'performer',
             'album-artist': 'albumartistname',
             'title': 'trackname',
             'track-count': 2,
@@ -31,7 +33,9 @@ class TranslatorTest(unittest.TestCase):
             'album-disc-count': 3,
             'date': FakeGstDate(2006, 1, 1,),
             'container-format': 'ID3 tag',
+            'genre': 'genre',
             'duration': 4531,
+            'comment': 'comment',
             'musicbrainz-trackid': 'mbtrackid',
             'musicbrainz-albumid': 'mbalbumid',
             'musicbrainz-artistid': 'mbartistid',
@@ -51,6 +55,16 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz_id': 'mbartistid',
         }
 
+        self.composer = {
+            'name': 'composer',
+            #'musicbrainz_id': 'mbcomposerid',
+        }
+
+        self.performer = {
+            'name': 'performer',
+            #'musicbrainz_id': 'mbperformerid',
+        }
+
         self.albumartist = {
             'name': 'albumartistname',
             'musicbrainz_id': 'mbalbumartistid',
@@ -60,8 +74,10 @@ class TranslatorTest(unittest.TestCase):
             'uri': 'uri',
             'name': 'trackname',
             'date': '2006-01-01',
+            'genre': 'genre',
             'track_no': 1,
             'disc_no': 2,
+            'comment': 'comment',
             'length': 4531,
             'musicbrainz_id': 'mbtrackid',
             'last_modified': 1234,
@@ -72,6 +88,10 @@ class TranslatorTest(unittest.TestCase):
             self.album['artists'] = [Artist(**self.albumartist)]
         self.track['album'] = Album(**self.album)
         self.track['artists'] = [Artist(**self.artist)]
+        if self.composer:
+            self.track['composers'] = [Artist(**self.composer)]
+        if self.performer:
+            self.track['performers'] = [Artist(**self.performer)]
         return Track(**self.track)
 
     def check(self):
@@ -117,6 +137,16 @@ class TranslatorTest(unittest.TestCase):
         del self.artist['name']
         self.check()
 
+    def test_missing_composer_name(self):
+        del self.data['composer']
+        del self.composer['name']
+        self.check()
+
+    def test_missing_performer_name(self):
+        del self.data['performer']
+        del self.performer['name']
+        self.check()
+
     def test_missing_artist_musicbrainz_id(self):
         del self.data['musicbrainz-artistid']
         del self.artist['musicbrainz_id']
@@ -132,6 +162,11 @@ class TranslatorTest(unittest.TestCase):
         del self.albumartist['musicbrainz_id']
         self.check()
 
+    def test_missing_genre(self):
+        del self.data['genre']
+        del self.track['genre']
+        self.check()
+
     def test_missing_date(self):
         del self.data['date']
         del self.track['date']
@@ -140,6 +175,11 @@ class TranslatorTest(unittest.TestCase):
     def test_invalid_date(self):
         self.data['date'] = FakeGstDate(65535, 1, 1)
         del self.track['date']
+        self.check()
+
+    def test_missing_comment(self):
+        del self.data['comment']
+        del self.track['comment']
         self.check()
 
 
