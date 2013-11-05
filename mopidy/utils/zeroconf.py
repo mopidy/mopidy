@@ -14,7 +14,7 @@ class Zeroconf:
     """
 
     def __init__(self, name, port, stype="_http._tcp",
-                 domain="", host="", text=""):
+                 domain="", host="", text=[]):
         self.name = name
         self.stype = stype
         self.domain = domain
@@ -38,6 +38,9 @@ class Zeroconf:
             bus.get_object("org.freedesktop.Avahi",
                            server.EntryGroupNew()),
             "org.freedesktop.Avahi.EntryGroup")
+
+        if self.text:
+            self.text = [[dbus.Byte(ord(c)) for c in s] for s in self.text]
 
         g.AddService(avahi_IF_UNSPEC, avahi_PROTO_UNSPEC,
                      dbus.UInt32(avahi_PublishFlags_None),

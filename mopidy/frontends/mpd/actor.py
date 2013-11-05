@@ -17,7 +17,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         super(MpdFrontend, self).__init__()
         hostname = network.format_hostname(config['mpd']['hostname'])
         port = config['mpd']['port']
-        self.config = config
+        self.config_section = config['mpd']
         self.hostname = hostname
         self.port = port
 
@@ -41,8 +41,8 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
 
     def on_start(self):
         try:
-            if self.config['mpd']['zeroconf_enabled']:
-                name = self.config['mpd']['zeroconf_name']
+            if self.config_section['zeroconf_enabled']:
+                name = self.config_section['zeroconf_name']
 
                 from mopidy.utils.zeroconf import Zeroconf
                 self.service = Zeroconf(

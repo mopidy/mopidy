@@ -28,10 +28,13 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         self._setup_logging(app)
 
     def _setup_server(self):
+        self.config_section = self.config['http']
+        self.hostname = self.config_section['hostname']
+        self.port = self.config_section['port']
         cherrypy.config.update({
             'engine.autoreload_on': False,
-            'server.socket_host': self.config['http']['hostname'],
-            'server.socket_port': self.config['http']['port'],
+            'server.socket_host': self.hostname,
+            'server.socket_port': self.port,
         })
 
     def _setup_websocket_plugin(self):
@@ -87,11 +90,30 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug('Starting HTTP server')
         cherrypy.engine.start()
         logger.info('HTTP server running at %s', cherrypy.server.base())
+        try:
+            if self.config_section['zeroconf_enabled']:
+                name = self.config_section['zeroconf_name']
+
+                from mopidy.utils.zeroconf import Zeroconf
+                self.service = Zeroconf(
+                    stype="_http._tcp",
+                    name=name, port=self.port, host=self.hostname,
+                    text=["path=/"])
+                self.service.publish()
+
+                logger.info('Registered with Avahi as %s', name)
+        except Exception as e:
+            logger.warning('Avahi registration failed (%s)', e)
 
     def on_stop(self):
         logger.debug('Stopping HTTP server')
         cherrypy.engine.exit()
         logger.info('Stopped HTTP server')
+        try:
+            if self.service:
+                self.service.unpublish()
+        except Exception as e:
+            logger.warning('Avahi unregistration failed (%s)', e)
 
     def on_event(self, name, **data):
         event = data
