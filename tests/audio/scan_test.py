@@ -31,7 +31,7 @@ class TranslatorTest(unittest.TestCase):
             'album-disc-count': 3,
             'date': FakeGstDate(2006, 1, 1,),
             'container-format': 'ID3 tag',
-            'duration': 4531,
+            'duration': 4531000000,
             'musicbrainz-trackid': 'mbtrackid',
             'musicbrainz-albumid': 'mbalbumid',
             'musicbrainz-artistid': 'mbartistid',
@@ -182,8 +182,8 @@ class ScannerTest(unittest.TestCase):
 
     def test_duration_is_set(self):
         self.scan('scanner/simple')
-        self.check('scanner/simple/song1.mp3', 'duration', 4680)
-        self.check('scanner/simple/song1.ogg', 'duration', 4680)
+        self.check('scanner/simple/song1.mp3', 'duration', 4680000000)
+        self.check('scanner/simple/song1.ogg', 'duration', 4680000000)
 
     def test_artist_is_set(self):
         self.scan('scanner/simple')

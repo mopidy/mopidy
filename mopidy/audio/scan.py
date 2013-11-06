@@ -43,7 +43,7 @@ class Scanner(object):
         finally:
             self._reset()
 
-        if data[gst.TAG_DURATION] < self.min_duration_ms:
+        if data[gst.TAG_DURATION] < self.min_duration_ms * gst.MSECOND:
             raise exceptions.ScannerError('Rejecting file with less than %dms '
                                           'audio data.' % self.min_duration_ms)
         return data
@@ -88,8 +88,7 @@ class Scanner(object):
 
     def _query_duration(self):
         try:
-            duration = self.pipe.query_duration(gst.FORMAT_TIME, None)[0]
-            return duration // gst.MSECOND
+            return self.pipe.query_duration(gst.FORMAT_TIME, None)[0]
         except gst.QueryError:
             return None
 
@@ -136,7 +135,7 @@ def audio_data_to_track(data):
 
     track_kwargs['uri'] = data['uri']
     track_kwargs['last_modified'] = int(data['mtime'])
-    track_kwargs['length'] = data[gst.TAG_DURATION]
+    track_kwargs['length'] = data[gst.TAG_DURATION] // gst.MSECOND
     track_kwargs['album'] = Album(**album_kwargs)
     track_kwargs['artists'] = [Artist(**artist_kwargs)]
 
