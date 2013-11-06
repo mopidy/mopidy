@@ -40,6 +40,10 @@ class Scanner(object):
         finally:
             self._reset()
 
+        # TODO: this should be an option or just moved out.
+        if data[gst.TAG_DURATION] < 100:
+            raise exceptions.ScannerError(
+                'Rejecting file with less than 100ms audio data.')
         return data
 
     def _setup(self, uri):

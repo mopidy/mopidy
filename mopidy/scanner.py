@@ -19,9 +19,9 @@ sys.argv[1:] = []
 import pygst
 pygst.require('0.10')
 import gst
-import gst.pbutils
 
 from mopidy import config as config_lib, exceptions, ext
+from mopidy.audio import scan
 from mopidy.models import Track, Artist, Album
 from mopidy.utils import log, path, versioning
 
@@ -103,11 +103,12 @@ def main():
     logging.info('Found %d new or modified tracks.', len(uris_update))
     logging.info('Scanning new and modified tracks.')
 
-    scanner = Scanner(config['local']['scan_timeout'])
+    scanner = scan.Scanner(config['local']['scan_timeout'])
     for uri in uris_update:
         try:
             data = scanner.scan(uri)
             data[b'mtime'] = os.path.getmtime(path.uri_to_path(uri))
+            # TODO: check minumum time
             track = translator(data)
             local_updater.add(track)
             logging.debug('Added %s', track.uri)
@@ -181,47 +182,6 @@ def translator(data):
     track_kwargs['artists'] = [Artist(**artist_kwargs)]
 
     return Track(**track_kwargs)
-
-
-class Scanner(object):
-    def __init__(self, timeout=1000):
-        self.discoverer = gst.pbutils.Discoverer(timeout * 1000000)
-
-    def scan(self, uri):
-        try:
-            info = self.discoverer.discover_uri(uri)
-        except gobject.GError as e:
-            # Loosing traceback is non-issue since this is from C code.
-            raise exceptions.ScannerError(e)
-
-        data = {}
-        audio_streams = info.get_audio_streams()
-
-        if not audio_streams:
-            raise exceptions.ScannerError('Did not find any audio streams.')
-
-        for stream in audio_streams:
-            taglist = stream.get_tags()
-            if not taglist:
-                continue
-            for key in taglist.keys():
-                # XXX: For some crazy reason some wma files spit out lists
-                # here, not sure if this is due to better data in headers or
-                # wma being stupid. So ugly hack for now :/
-                if type(taglist[key]) is list:
-                    data[key] = taglist[key][0]
-                else:
-                    data[key] = taglist[key]
-
-        # Never trust metadata for these fields:
-        data[b'uri'] = uri
-        data[b'duration'] = info.get_duration() // gst.MSECOND
-
-        if data[b'duration'] < 100:
-            raise exceptions.ScannerError(
-                'Rejecting file with less than 100ms audio data.')
-
-        return data
 
 
 if __name__ == '__main__':

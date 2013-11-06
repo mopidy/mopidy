@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 import unittest
 
 from mopidy import exceptions
+from mopidy.audio.scan import Scanner
 from mopidy.models import Track, Artist, Album
-from mopidy.scanner import Scanner, translator
+from mopidy.scanner import translator
 from mopidy.utils import path as path_lib
 
 from tests import path_to_data_dir
