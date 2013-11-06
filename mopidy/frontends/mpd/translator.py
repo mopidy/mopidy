@@ -301,6 +301,7 @@ def _add_to_tag_cache(result, dirs, files, media_dir):
         relative_path = os.path.relpath(path, base_path)
         relative_uri = urllib.quote(relative_path)
 
+        # TODO: use track.last_modified
         track_result['file'] = relative_uri
         track_result['mtime'] = get_mtime(path)
         track_result['key'] = os.path.basename(text_path)

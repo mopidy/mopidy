@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import pygst
 pygst.require('0.10')
 import gst
-import gobject
 
 import datetime
 import os
