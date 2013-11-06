@@ -122,7 +122,7 @@ class Progress(object):
         self.total = total
         self.start = time.time()
 
-    def increment(self, force=False):
+    def increment(self):
         self.count += 1
         if self.count % 1000 == 0 or self.count == self.total:
             duration = time.time() - self.start
