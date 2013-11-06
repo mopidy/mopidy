@@ -6,10 +6,12 @@ import gst
 import gobject
 
 import datetime
+import os
 import time
 
 from mopidy import exceptions
 from mopidy.models import Track, Artist, Album
+from mopidy.utils import path
 
 
 class Scanner(object):
@@ -39,6 +41,7 @@ class Scanner(object):
             data = self._collect()
             # Make sure uri and duration does not come from tags.
             data[b'uri'] = uri
+            data[b'mtime'] = self._query_mtime(uri)
             data[gst.TAG_DURATION] = self._query_duration()
         finally:
             self._reset()
@@ -91,6 +94,11 @@ class Scanner(object):
             return self.pipe.query_duration(gst.FORMAT_TIME, None)[0]
         except gst.QueryError:
             return None
+
+    def _query_mtime(self, uri):
+        if not uri.startswith('file:'):
+            return None
+        return os.path.getmtime(path.uri_to_path(uri))
 
 
 def audio_data_to_track(data):

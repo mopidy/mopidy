@@ -104,8 +104,6 @@ def main():
     for uri in sorted(uris_update):
         try:
             data = scanner.scan(uri)
-            data[b'mtime'] = os.path.getmtime(path.uri_to_path(uri))
-            # TODO: check minumum time here instead of in scanner.
             track = scan.audio_data_to_track(data)
             local_updater.add(track)
             logging.debug('Added %s', track.uri)
