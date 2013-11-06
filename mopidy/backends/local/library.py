@@ -8,7 +8,7 @@ from mopidy.backends import base
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Album, SearchResult
 
-from .translator import parse_mpd_tag_cache
+from .translator import local_to_file_uri, parse_mpd_tag_cache
 
 logger = logging.getLogger('mopidy.backends.local')
 
@@ -189,7 +189,10 @@ class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
     def load(self):
         tracks = parse_mpd_tag_cache(self._tag_cache_file, self._media_dir)
         for track in tracks:
-            self._tracks[track.uri] = track
+            # TODO: this should use uris as is, i.e. hack that should go away
+            # with tag caches.
+            uri = local_to_file_uri(track.uri, self._media_dir)
+            self._tracks[uri] = track.copy(uri=uri)
         return tracks
 
     def add(self, track):
