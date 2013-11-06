@@ -5,6 +5,7 @@ import datetime
 import logging
 import os
 import sys
+import time
 
 import gobject
 gobject.threads_init()
@@ -104,7 +105,9 @@ def main():
     logging.info('Scanning new and modified tracks.')
 
     scanner = scan.Scanner(config['local']['scan_timeout'])
-    for uri in uris_update:
+    progress = Progress(len(uris_update))
+
+    for uri in sorted(uris_update):
         try:
             data = scanner.scan(uri)
             data[b'mtime'] = os.path.getmtime(path.uri_to_path(uri))
@@ -115,8 +118,25 @@ def main():
         except exceptions.ScannerError as error:
             logging.warning('Failed %s: %s', uri, error)
 
-    logging.info('Done scanning; commiting changes.')
+        progress.increment()
+
+    logging.info('Commiting changes.')
     local_updater.commit()
+
+
+class Progress(object):
+    def __init__(self, total):
+        self.count = 0
+        self.total = total
+        self.start = time.time()
+
+    def increment(self, force=False):
+        self.count += 1
+        if self.count % 1000 == 0 or self.count == self.total:
+            duration = time.time() - self.start
+            remainder = duration / self.count * (self.total - self.count)
+            logging.info('Scanned %d of %d files in %ds, ~%ds left.',
+                         self.count, self.total, duration, remainder)
 
 
 def parse_args():
