@@ -13,8 +13,9 @@ from mopidy.models import Track, Artist, Album
 
 
 class Scanner(object):
-    def __init__(self, timeout=1000):
+    def __init__(self, timeout=1000, min_duration=100):
         self.timeout_ms = timeout
+        self.min_duration_ms = min_duration
 
         sink = gst.element_factory_make('fakesink')
 
@@ -42,10 +43,9 @@ class Scanner(object):
         finally:
             self._reset()
 
-        # TODO: this should be an option or just moved out.
-        if data[gst.TAG_DURATION] < 100:
-            raise exceptions.ScannerError(
-                'Rejecting file with less than 100ms audio data.')
+        if data[gst.TAG_DURATION] < self.min_duration_ms:
+            raise exceptions.ScannerError('Rejecting file with less than %dms '
+                                          'audio data.' % self.min_duration_ms)
         return data
 
     def _setup(self, uri):
