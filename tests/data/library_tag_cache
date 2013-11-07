@@ -6,6 +6,7 @@ songList begin
 key: key1
 file: /path1
 Artist: artist1
+AlbumArtist: artist1
 Title: track1
 Album: album1
 Date: 2001-02-03
@@ -14,6 +15,7 @@ Time: 4
 key: key2
 file: /path2
 Artist: artist2
+AlbumArtist: artist2
 Title: track2
 Album: album2
 Date: 2002
@@ -28,4 +30,12 @@ Album: album3
 Date: 2003
 Track: 3
 Time: 4
+key: key4
+file: /path4
+Artist: artist3
+Title: track4
+Album: album4
+Date: 2004
+Track: 4
+Time: 60
 songList end
