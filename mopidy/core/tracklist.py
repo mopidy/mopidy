@@ -291,7 +291,7 @@ class TracklistController(object):
     def filter(self, criteria=None, **kwargs):
         """
         Filter the tracklist by the given criterias. The value of the field to
-        check can be a list or a set.
+        check can be a list, a tuple or a set.
 
         Examples::
 
@@ -334,7 +334,7 @@ class TracklistController(object):
         criteria = criteria or kwargs
         matches = self._tl_tracks
         for (key, value) in criteria.iteritems():
-            if not type(value) in [list, set]:
+            if not type(value) in [list, tuple, set]:
                 value = [value]
             if key == 'tlid':
                 matches = filter(lambda ct: ct.tlid in value, matches)
