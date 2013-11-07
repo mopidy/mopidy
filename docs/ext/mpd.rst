@@ -33,7 +33,6 @@ Items on this list will probably not be supported in the near future.
 - Stickers are not supported
 - Crossfade is not supported
 - Replay gain is not supported
-- ``count`` does not provide any statistics
 - ``stats`` does not provide any statistics
 - ``list`` does not support listing tracks by genre
 - ``decoders`` does not provide information about available decoders
