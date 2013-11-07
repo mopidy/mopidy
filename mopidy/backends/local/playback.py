@@ -1,10 +1,8 @@
 from __future__ import unicode_literals
 
 import logging
-import os
 
 from mopidy.backends import base
-from mopidy.utils import path
 
 from . import translator
 
