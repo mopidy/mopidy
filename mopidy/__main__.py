@@ -30,7 +30,9 @@ def main():
     signal.signal(signal.SIGTERM, process.exit_handler)
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
-    args = commands.parser.parse_args(args=mopidy_args)
+    parser = commands.build_parser()
+    args = parser.parse_args(args=mopidy_args)
+
     if args.show_config:
         commands.show_config(args)
     if args.show_deps:
