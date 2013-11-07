@@ -298,17 +298,33 @@ class TracklistController(object):
             filter({'tlid': 7})
             filter(tlid=7)
 
+            # Returns tracks with TLIDs 1, 2, 3 and 4
+            filter({'tlid': [1, 2, 3, 4]})
+            filter(tlid=[1, 2, 3, 4])
+
             # Returns track with ID 1
             filter({'id': 1})
             filter(id=1)
+
+            # Returns track with IDs 1 5 and 7
+            filter({'id': [1, 5, 7]})
+            filter(id=[1, 5, 7])
 
             # Returns track with URI 'xyz'
             filter({'uri': 'xyz'})
             filter(uri='xyz')
 
+            # Returns track with URIs 'xyz' and 'abc'
+            filter({'uri': ['xyz', 'abc']})
+            filter(uri=['xyz', 'abc'])
+
             # Returns track with ID 1 and URI 'xyz'
             filter({'id': 1, 'uri': 'xyz'})
             filter(id=1, uri='xyz')
+
+            # Returns track with IDs (1, 3 or 6) and URIs ('xyz' or 'abc')
+            filter({'id': [1, 3, 6], 'uri': ['xyz', 'abc']})
+            filter(id=[1, 3, 6], uri=['xyz', 'abc'])
 
         :param criteria: on or more criteria to match by
         :type criteria: dict

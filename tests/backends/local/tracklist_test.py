@@ -241,15 +241,15 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
     @populate_tracklist
     def test_remove_lists(self):
+        track0 = self.controller.tracks[0]
         track1 = self.controller.tracks[1]
         track2 = self.controller.tracks[2]
-        track3 = self.controller.tracks[3]
         version = self.controller.version
-        self.controller.remove(uri=[track1.uri, track3.uri])
+        self.controller.remove(uri=[track0.uri, track2.uri])
         self.assertLess(version, self.controller.version)
-        self.assertNotIn(track1, self.controller.tracks)
-        self.assertNotIn(track3, self.controller.tracks)
-        self.assertEqual(track2, self.controller.tracks[1])
+        self.assertNotIn(track0, self.controller.tracks)
+        self.assertNotIn(track2, self.controller.tracks)
+        self.assertEqual(track1, self.controller.tracks[0])
 
     @populate_tracklist
     def test_shuffle(self):
