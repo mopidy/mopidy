@@ -41,7 +41,7 @@ def _format_dependency(dep_info):
         lines.append('%s: not found' % dep_info['name'])
     else:
         if 'path' in dep_info:
-            source = ' from %s' % os.path.dirname(dep_info['path'])
+            source = ' from %s' % dep_info['path']
         else:
             source = ''
         lines.append('%s: %s%s' % (
@@ -75,7 +75,7 @@ def python_info():
         'name': 'Python',
         'version': '%s %s' % (
             platform.python_implementation(), platform.python_version()),
-        'path': platform.__file__,
+        'path': os.path.dirname(platform.__file__),
     }
 
 
@@ -127,7 +127,7 @@ def gstreamer_info():
     return {
         'name': 'GStreamer',
         'version': '.'.join(map(str, gst.get_gst_version())),
-        'path': gst.__file__,
+        'path': os.path.dirname(gst.__file__),
         'other': '\n'.join(other),
     }
 

@@ -143,3 +143,73 @@ Creating releases
    on the mailing list.
 
 #. Update the Debian package.
+
+
+Updating Debian packages
+========================
+
+This howto is not intended to learn you all the details, just to give someone
+already familiar with Debian packaging an overview of how Mopidy's Debian
+packages is maintained.
+
+#. Install the basic packaging tools::
+
+       sudo apt-get install build-essential git-buildpackage
+
+#. Check out the ``debian`` branch of the repo::
+
+       git checkout -t origin/debian
+       git pull
+
+#. Merge the latest release tag into the ``debian`` branch::
+
+       git merge v0.16.0
+
+#. Update the ``debian/changelog`` with a "New upstream release" entry::
+
+       dch -v 0.16.0-0mopidy1
+       git add debian/changelog
+       git commit -m "debian: New upstream release"
+
+#. Check if any dependencies in ``debian/control`` or similar needs updating.
+
+#. Install any Build-Deps listed in ``debian/control``.
+
+#. Build the package and fix any issues repeatedly until the build succeeds and
+   the Lintian check at the end of the build is satisfactory::
+
+       git buildpackage -uc -us
+
+#. Install and test newly built package::
+
+       sudo debi
+
+#. If everything is OK, build the package a final time to tag the package
+   version::
+
+       git buildpackage -uc -us --git-tag
+
+#. Push the changes you've done to the ``debian`` branch and the new tag::
+
+       git push
+       git push --tags
+
+#. If you're building for multiple architectures, checkout the ``debian``
+   branch on the other builders and run::
+
+       git buildpackage -uc -us
+
+#. Copy files to the APT server. Make sure to select the correct part of the
+   repo, e.g. main, contrib, or non-free::
+
+       scp ../mopidy*_0.16* bonobo.mopidy.com:/srv/apt.mopidy.com/app/incoming/stable/main
+
+#. Update the APT repo::
+
+       ssh bonobo.mopidy.com
+       /srv/apt.mopidy.com/app/update.sh
+
+#. Test installation from apt.mopidy.com::
+
+       sudo apt-get update
+       sudo apt-get dist-upgrade
