@@ -38,20 +38,9 @@ def main():
     if args.show_deps:
         commands.show_deps()
 
-    # TODO: figure out a way to make the boilerplate in this file reusable in
-    # scanner and other places we need it.
+    bootstrap_logging(args)
 
     try:
-        # Initial config without extensions to bootstrap logging.
-        logging_initialized = False
-        logging_config, _ = config_lib.load(
-            args.config_files, [], args.config_overrides)
-
-        # TODO: setup_logging needs defaults in-case config values are None
-        log.setup_logging(
-            logging_config, args.verbosity_level, args.save_debug_log)
-        logging_initialized = True
-
         create_file_structures()
         check_old_locations()
 
@@ -84,9 +73,18 @@ def main():
     except KeyboardInterrupt:
         pass
     except Exception as ex:
-        if logging_initialized:
-            logger.exception(ex)
+        logger.exception(ex)
         raise
+
+
+def bootstrap_logging(args):
+    # Initial config without extensions to bootstrap logging.
+    logging_config, _ = config_lib.load(
+        args.config_files, [], args.config_overrides)
+
+    # TODO: setup_logging needs defaults in-case config values are None
+    log.setup_logging(
+        logging_config, args.verbosity_level, args.save_debug_log)
 
 
 def create_file_structures():
