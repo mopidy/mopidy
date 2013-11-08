@@ -33,25 +33,11 @@ def main():
     signal.signal(signal.SIGTERM, process.exit_handler)
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
-    parser = commands.build_parser()
-    subparser = parser.add_subparsers(title='commands', metavar='COMMAND')
-
-    run_parser = subparser.add_parser('run', help='start mopidy server')
-    run_parser.set_defaults(command='run')
-    config_parser = subparser.add_parser('config', help='show current config')
-    config_parser.set_defaults(command='config')
-    deps_parser = subparser.add_parser('deps', help='show dependencies')
-    deps_parser.set_defaults(command='deps')
-
-    bootstrap_args = parser.parse_known_args(args=mopidy_args)[0]
-
-    if bootstrap_args.command in ('config', 'deps'):
-        bootstrap_args.verbosity_level -= 1
-    bootstrap_logging(bootstrap_args)
-
     try:
         create_file_structures()
         check_old_locations()
+
+        parser, subparser = commands.build_parser()
 
         installed_extensions = ext.load_extensions()
         # TODO: install extension subcommands.

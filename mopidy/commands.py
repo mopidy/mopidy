@@ -47,4 +47,11 @@ def build_parser():
         action='append', dest='config_overrides', type=config_override_type,
         help='`section/key=value` values to override config options')
 
-    return parser
+    subparser = parser.add_subparsers(
+        title='commands', metavar='COMMAND', dest='command')
+
+    subparser.add_parser('run', help='start mopidy server')
+    subparser.add_parser('config', help='show current config')
+    subparser.add_parser('deps', help='show dependencies')
+
+    return parser, subparser
