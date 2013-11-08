@@ -300,13 +300,14 @@ class BaseSubCommandProvider(object):
     def __init__(self, parser):
         pass
 
-    def run(self, args, config):
+    def run(self, args, config, extensions):
         """Run the sub-command implemented by this provider.
 
         *MUST be implemented by subclass.*
 
         :param args: the argments object from argpase.
         :param config: read only version of the mopidy config.
+        :param extensions: list of enabled extensions.
         :returns: integer exit value for the process.
         """
         raise NotImplementedError

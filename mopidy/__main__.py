@@ -97,7 +97,9 @@ def main():
                 parser.error('Can not run sub-command %s from the disabled '
                              'extension %s.' % (cmd.name, extension.ext_name))
 
-            sys.exit(cmd.run(args, proxied_config))
+            logging.info('Running %s command provided by %s.', cmd.name,
+                         extension.ext_name)
+            sys.exit(cmd.run(args, proxied_config, enabled_extensions))
 
         if args.command == 'run':
             ext.register_gstreamer_elements(enabled_extensions)
