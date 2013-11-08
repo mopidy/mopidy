@@ -36,3 +36,7 @@ class Extension(ext.Extension):
     def get_library_updaters(self):
         from .library import LocalLibraryUpdateProvider
         return [LocalLibraryUpdateProvider]
+
+    def get_sub_commands(self):
+        from .scan import ScanSubCommand
+        return [ScanSubCommand]
