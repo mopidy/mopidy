@@ -81,7 +81,7 @@ class TranslatorTest(unittest.TestCase):
 
         if ('name' in self.artist and
                 type(self.artist['name']) is list):
-            self.track['artists'] = [Artist(**{'name': artist})
+            self.track['artists'] = [Artist(name=artist)
                                      for artist in self.artist['name']]
         else:
             self.track['artists'] = [Artist(**self.artist)]

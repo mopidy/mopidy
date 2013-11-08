@@ -147,7 +147,7 @@ def audio_data_to_track(data):
 
     if ('name' in artist_kwargs and
             type(artist_kwargs['name']) is list):
-        track_kwargs['artists'] = [Artist(**{'name': artist})
+        track_kwargs['artists'] = [Artist(name=artist)
                                    for artist in artist_kwargs['name']]
     else:
         track_kwargs['artists'] = [Artist(**artist_kwargs)]
