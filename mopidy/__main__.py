@@ -21,7 +21,7 @@ from mopidy import commands, ext
 from mopidy.audio import Audio
 from mopidy import config as config_lib
 from mopidy.core import Core
-from mopidy.utils import log, path, process
+from mopidy.utils import deps, log, path, process
 
 logger = logging.getLogger('mopidy.main')
 
@@ -33,10 +33,8 @@ def main():
     parser = commands.build_parser()
     args = parser.parse_args(args=mopidy_args)
 
-    if args.show_config:
-        commands.show_config(args)
-    if args.show_deps:
-        commands.show_deps()
+    if args.show_deps or args.show_config:
+        args.verbosity_level -= 1
 
     bootstrap_logging(args)
 
@@ -45,20 +43,40 @@ def main():
         check_old_locations()
 
         installed_extensions = ext.load_extensions()
-
         config, config_errors = config_lib.load(
             args.config_files, installed_extensions, args.config_overrides)
 
-        # Filter out disabled extensions and remove any config errors for them.
         enabled_extensions = []
         for extension in installed_extensions:
-            enabled = config[extension.ext_name]['enabled']
-            if ext.validate_extension(extension) and enabled:
+            if not ext.validate_extension(extension):
+                config[extension.ext_name] = {b'enabled': False}
+                config_errors[extension.ext_name] = {
+                    b'enabled': b'extension disabled by self check.'}
+            elif not config[extension.ext_name]['enabled']:
+                config[extension.ext_name] = {b'enabled': False}
+                config_errors[extension.ext_name] = {
+                    b'enabled': b'extension disabled by user config.'}
+            else:
                 enabled_extensions.append(extension)
-            elif extension.ext_name in config_errors:
-                del config_errors[extension.ext_name]
 
         log_extension_info(installed_extensions, enabled_extensions)
+
+        # TODO: move to 'mopidy config' and 'mopidy deps'
+        if args.show_config:
+            logger.info('Dumping sanitized user config and exiting.')
+            print config_lib.format(
+                config, installed_extensions, config_errors)
+            sys.exit(0)
+        if args.show_deps:
+            logger.info('Dumping debug info about dependencies and exiting.')
+            print deps.format_dependency_list()
+            sys.exit(0)
+
+        # Remove errors for extensions that are not enabled:
+        for extension in installed_extensions:
+            if extension not in enabled_extensions:
+                config_errors.pop(extension.ext_name, None)
+
         check_config_errors(config_errors)
 
         # Read-only config from here on, please.

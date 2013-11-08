@@ -1,10 +1,8 @@
 from __future__ import unicode_literals
 
 import argparse
-import sys
 
-from mopidy import config as config_lib, ext
-from mopidy.utils import deps, versioning
+from mopidy.utils import versioning
 
 
 def config_files_type(value):
@@ -23,6 +21,7 @@ def config_override_type(value):
 
 def build_parser():
     parser = argparse.ArgumentParser()
+    parser.set_defaults(verbosity_level=0)
     parser.add_argument(
         '--version', action='version',
         version='Mopidy %s' % versioning.get_version())
@@ -57,30 +56,3 @@ def build_parser():
         help='`section/key=value` values to override config options')
 
     return parser
-
-
-def show_config(args):
-    """Prints the effective config and exits."""
-    extensions = ext.load_extensions()
-    config, errors = config_lib.load(
-        args.config_files, extensions, args.config_overrides)
-
-    # Clear out any config for disabled extensions.
-    for extension in extensions:
-        if not ext.validate_extension(extension):
-            config[extension.ext_name] = {b'enabled': False}
-            errors[extension.ext_name] = {
-                b'enabled': b'extension disabled itself.'}
-        elif not config[extension.ext_name]['enabled']:
-            config[extension.ext_name] = {b'enabled': False}
-            errors[extension.ext_name] = {
-                b'enabled': b'extension disabled by config.'}
-
-    print config_lib.format(config, extensions, errors)
-    sys.exit(0)
-
-
-def show_deps():
-    """Prints a list of all dependencies and exits."""
-    print deps.format_dependency_list()
-    sys.exit(0)
