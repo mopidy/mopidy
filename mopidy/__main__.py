@@ -40,18 +40,20 @@ def main():
     deps_parser = subparser.add_parser('deps', help='show dependencies')
     deps_parser.set_defaults(command='deps')
 
-    args = parser.parse_args(args=mopidy_args)
+    bootstrap_args = parser.parse_known_args(args=mopidy_args)[0]
 
-    if args.command in ('config', 'deps'):
-        args.verbosity_level -= 1
-
-    bootstrap_logging(args)
+    if bootstrap_args.command in ('config', 'deps'):
+        bootstrap_args.verbosity_level -= 1
+    bootstrap_logging(bootstrap_args)
 
     try:
         create_file_structures()
         check_old_locations()
 
         installed_extensions = ext.load_extensions()
+        # TODO: install extension subcommands.
+
+        args = parser.parse_args(args=mopidy_args)
         config, config_errors = config_lib.load(
             args.config_files, installed_extensions, args.config_overrides)
 
