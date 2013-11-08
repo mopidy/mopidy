@@ -18,6 +18,10 @@ v0.17.0 (UNRELEASED)
 - When scanning, we no longer default the album artist to be the same as the
   track artist. Album artist is now only populated if the scanned file got an
   explicit album artist set.
+- Library scanning has been switched back to custom code due to various issues
+  with GStreamer's built in scanner in 0.10. This also fixes the scanner slowdown.
+  (Fixes: :issue:`565`)
+- Fix scanner so that mtime is respected when deciding which files can be skipped.
 
 
 v0.16.1 (2013-11-02)
