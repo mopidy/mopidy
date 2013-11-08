@@ -21,12 +21,15 @@ from mopidy import commands, ext
 from mopidy.audio import Audio
 from mopidy import config as config_lib
 from mopidy.core import Core
-from mopidy.utils import deps, log, path, process
+from mopidy.utils import deps, log, path, process, versioning
 
 logger = logging.getLogger('mopidy.main')
 
 
 def main():
+    log.bootstrap_delayed_logging()
+    logger.info('Starting Mopidy %s', versioning.get_version())
+
     signal.signal(signal.SIGTERM, process.exit_handler)
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
@@ -54,8 +57,13 @@ def main():
         # TODO: install extension subcommands.
 
         args = parser.parse_args(args=mopidy_args)
+        if args.command in ('deps', 'config'):
+            args.verbosity_level -= 1
+
         config, config_errors = config_lib.load(
             args.config_files, installed_extensions, args.config_overrides)
+
+        log.setup_logging(config, args.verbosity_level, args.save_debug_log)
 
         enabled_extensions = []
         for extension in installed_extensions:
@@ -92,7 +100,6 @@ def main():
         # Read-only config from here on, please.
         proxied_config = config_lib.Proxy(config)
 
-        log.setup_log_levels(proxied_config)
         ext.register_gstreamer_elements(enabled_extensions)
 
         # Anything that wants to exit after this point must use

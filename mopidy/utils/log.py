@@ -4,14 +4,40 @@ import logging
 import logging.config
 import logging.handlers
 
-from . import versioning
+
+class DelayedHandler(logging.Handler):
+    def __init__(self):
+        logging.Handler.__init__(self)
+        self._released = False
+        self._buffer = []
+
+    def handle(self, record):
+        if not self._released:
+            self._buffer.append(record)
+
+    def release(self):
+        self._released = True
+        root = logging.getLogger('')
+        while self._buffer:
+            root.handle(self._buffer.pop(0))
+
+
+_delayed_handler = DelayedHandler()
+
+
+def bootstrap_delayed_logging():
+    root = logging.getLogger('')
+    root.setLevel(logging.DEBUG)
+    root.addHandler(_delayed_handler)
 
 
 def setup_logging(config, verbosity_level, save_debug_log):
-    setup_root_logger()
     setup_console_logging(config, verbosity_level)
+    setup_log_levels(config)
+
     if save_debug_log:
         setup_debug_logging_to_file(config)
+
     if hasattr(logging, 'captureWarnings'):
         # New in Python 2.7
         logging.captureWarnings(True)
@@ -19,18 +45,12 @@ def setup_logging(config, verbosity_level, save_debug_log):
     if config['logging']['config_file']:
         logging.config.fileConfig(config['logging']['config_file'])
 
-    logger = logging.getLogger('mopidy.utils.log')
-    logger.info('Starting Mopidy %s', versioning.get_version())
+    _delayed_handler.release()
 
 
 def setup_log_levels(config):
     for name, level in config['loglevels'].items():
         logging.getLogger(name).setLevel(level)
-
-
-def setup_root_logger():
-    root = logging.getLogger('')
-    root.setLevel(logging.DEBUG)
 
 
 def setup_console_logging(config, verbosity_level):
