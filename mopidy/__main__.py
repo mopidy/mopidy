@@ -38,9 +38,13 @@ def main():
         check_old_locations()
 
         parser, subparser = commands.build_parser()
-
         installed_extensions = ext.load_extensions()
-        # TODO: install extension subcommands.
+        extension_sub_commands = {}
+
+        for extension in installed_extensions:
+            for cls in extension.get_sub_commands():
+                cmd_parser = subparser.add_parser(cls.name, help=cls.help)
+                extension_sub_commands[cls.name] = (extension, cls(cmd_parser))
 
         args = parser.parse_args(args=mopidy_args)
         if args.command in ('deps', 'config'):
@@ -86,11 +90,25 @@ def main():
         # Read-only config from here on, please.
         proxied_config = config_lib.Proxy(config)
 
-        ext.register_gstreamer_elements(enabled_extensions)
+        if args.command in extension_sub_commands:
+            extension, cmd = extension_sub_commands[args.command]
 
-        # Anything that wants to exit after this point must use
-        # mopidy.utils.process.exit_process as actors have been started.
-        start(proxied_config, enabled_extensions)
+            if extension not in enabled_extensions:
+                parser.error('Can not run sub-command %s from the disabled '
+                             'extension %s.' % (cmd.name, extension.ext_name))
+
+            sys.exit(cmd.run(args, proxied_config))
+
+        if args.command == 'run':
+            ext.register_gstreamer_elements(enabled_extensions)
+
+            # Anything that wants to exit after this point must use
+            # mopidy.utils.process.exit_process as actors have been started.
+            start(proxied_config, enabled_extensions)
+            sys.exit(0)
+
+        parser.error(
+            'Unknown command %s, this should never happen.' % args.command)
     except KeyboardInterrupt:
         pass
     except Exception as ex:
