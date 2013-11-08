@@ -38,14 +38,6 @@ def build_parser():
         action='store_true', dest='save_debug_log',
         help='save debug log to "./mopidy.log"')
     parser.add_argument(
-        '--show-config',
-        action='store_true', dest='show_config',
-        help='show current config')
-    parser.add_argument(
-        '--show-deps',
-        action='store_true', dest='show_deps',
-        help='show dependencies and their versions')
-    parser.add_argument(
         '--config',
         action='store', dest='config_files', type=config_files_type,
         default=b'$XDG_CONFIG_DIR/mopidy/mopidy.conf',

@@ -31,9 +31,18 @@ def main():
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
     parser = commands.build_parser()
+    subparser = parser.add_subparsers(title='commands', metavar='COMMAND')
+
+    run_parser = subparser.add_parser('run', help='start mopidy server')
+    run_parser.set_defaults(command='run')
+    config_parser = subparser.add_parser('config', help='show current config')
+    config_parser.set_defaults(command='config')
+    deps_parser = subparser.add_parser('deps', help='show dependencies')
+    deps_parser.set_defaults(command='deps')
+
     args = parser.parse_args(args=mopidy_args)
 
-    if args.show_deps or args.show_config:
+    if args.command in ('config', 'deps'):
         args.verbosity_level -= 1
 
     bootstrap_logging(args)
@@ -61,13 +70,12 @@ def main():
 
         log_extension_info(installed_extensions, enabled_extensions)
 
-        # TODO: move to 'mopidy config' and 'mopidy deps'
-        if args.show_config:
+        if args.command == 'config':
             logger.info('Dumping sanitized user config and exiting.')
             print config_lib.format(
                 config, installed_extensions, config_errors)
             sys.exit(0)
-        if args.show_deps:
+        elif args.command == 'deps':
             logger.info('Dumping debug info about dependencies and exiting.')
             print deps.format_dependency_list()
             sys.exit(0)
