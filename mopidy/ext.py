@@ -87,6 +87,14 @@ class Extension(object):
         """
         return []
 
+    def get_sub_commands(self):
+        """List of sub-command classes
+
+        :returns: list of
+          :class:`~mopidy.backends.base.BaseSubCommandProvider` subclasses
+        """
+        return []
+
     def register_gstreamer_elements(self):
         """Hook for registering custom GStreamer elements
 

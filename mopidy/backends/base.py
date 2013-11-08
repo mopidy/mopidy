@@ -279,3 +279,34 @@ class BasePlaylistsProvider(object):
         *MUST be implemented by subclass.*
         """
         raise NotImplementedError
+
+
+class BaseSubCommandProvider(object):
+    """Sub-classes may optionally add arguments to the passed in parser.
+
+    :param parser: parser you may add arguments to
+    :type parser: :class:`argparse.ArgumentParser`
+    """
+
+    name = None
+    """What the sub-command should be called. Will be run as ``mopidy NAME``
+
+    Example: ``scan``
+    """
+
+    help = None
+    """Optional help text for the sub-command, will be displayed in help."""
+
+    def __init__(self, parser):
+        pass
+
+    def run(self, args, config):
+        """Run the sub-command implemented by this provider.
+
+        *MUST be implemented by subclass.*
+
+        :param args: the argments object from argpase.
+        :param config: read only version of the mopidy config.
+        :returns: integer exit value for the process.
+        """
+        raise NotImplementedError
