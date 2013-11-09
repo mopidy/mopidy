@@ -24,7 +24,7 @@ def _filter_loopback_and_meta_addresses(host):
 
 
 def _convert_text_to_dbus_bytes(text):
-    return [[dbus.Byte(ord(c)) for c in s] for s in text]
+    return [dbus.Byte(ord(c)) for c in text]
 
 
 class Zeroconf:
@@ -62,7 +62,7 @@ class Zeroconf:
             bus.get_object("org.freedesktop.Avahi", server.EntryGroupNew()),
             "org.freedesktop.Avahi.EntryGroup")
 
-        text = _convert_text_to_dbus_bytes(self.text)
+        text = [_convert_text_to_dbus_bytes(t) for t in self.text]
         self.group.AddService(_AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
                               dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE),
                               self.name, self.stype, self.domain, self.host,
