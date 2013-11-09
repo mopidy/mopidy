@@ -19,6 +19,22 @@ v0.17.0 (UNRELEASED)
   track artist. Album artist is now only populated if the scanned file got an
   explicit album artist set.
 
+**Sub-commands**
+
+- Swtiched to sub-commands for mopidy this implies the following changes
+  (fixes :issue:`437`):
+
+  ===================== =============
+  Old command           New command
+  ===================== =============
+  mopidy                mopidy run
+  mopidy --show-deps    mopidy deps
+  mopidy --show-config  mopidy config
+  mopidy-scan           mopidy scan
+
+- Added hooks for extensions to create their own custom sub-commands and
+  converted ``mopidy-scan`` as first user of new API (Fixes :issue:`436`).
+
 
 v0.16.1 (2013-11-02)
 ====================
