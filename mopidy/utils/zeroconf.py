@@ -1,15 +1,19 @@
 from __future__ import unicode_literals
 
+import logging
+import re
+
+logger = logging.getLogger('mopidy.utils.zerconf')
+
 try:
     import dbus
 except ImportError:
     dbus = None
 
-import re
-
 _AVAHI_IF_UNSPEC = -1
 _AVAHI_PROTO_UNSPEC = -1
 _AVAHI_PUBLISHFLAGS_NONE = 0
+
 
 
 def _filter_loopback_and_meta_addresses(host):
@@ -37,7 +41,20 @@ class Zeroconf:
         self.group = None
 
     def publish(self):
-        bus = dbus.SystemBus()
+        if not dbus:
+            logger.debug('Zeroconf publish failed: dbus not installed.')
+            return False
+
+        try:
+            bus = dbus.SystemBus()
+        except dbus.exceptions.DBusException as e:
+            logger.debug('Zeroconf publish failed: %s', e)
+            return False
+
+        if not bus.name_has_owner('org.freedesktop.Avahi'):
+            logger.debug('Zeroconf publish failed: avahi service not running.')
+            return False
+
         server = dbus.Interface(bus.get_object("org.freedesktop.Avahi", "/"),
                                 "org.freedesktop.Avahi.Server")
 
@@ -52,6 +69,7 @@ class Zeroconf:
                               dbus.UInt16(self.port), text)
 
         self.group.Commit()
+        return True
 
     def unpublish(self):
         if self.group:
