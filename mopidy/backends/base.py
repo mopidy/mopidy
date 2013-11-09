@@ -289,9 +289,10 @@ class BaseSubCommandProvider(object):
     """
 
     name = None
-    """What the sub-command should be called. Will be run as ``mopidy NAME``
+    """What the sub-command should be called. Will be run as ``mopidy NAME``.
 
-    Example: ``scan``
+    Will be converted to :type:`bytes` and should be limited to ASCII
+    characters.  Example: ``scan``
     """
 
     help = None
@@ -306,7 +307,7 @@ class BaseSubCommandProvider(object):
         *MUST be implemented by subclass.*
 
         :param args: the argments object from argpase.
-        :param config: read only version of the mopidy config.
+        :param config: read-only version of the mopidy config.
         :param extensions: list of enabled extensions.
         :returns: integer exit value for the process.
         """

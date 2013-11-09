@@ -43,7 +43,8 @@ def main():
 
         for extension in installed_extensions:
             for cls in extension.get_sub_commands():
-                cmd_parser = subparser.add_parser(cls.name, help=cls.help)
+                cmd_parser = subparser.add_parser(bytes(cls.name),
+                                                  help=cls.help)
                 extension_sub_commands[cls.name] = (extension, cls(cmd_parser))
 
         args = parser.parse_args(args=mopidy_args)
@@ -58,13 +59,13 @@ def main():
         enabled_extensions = []
         for extension in installed_extensions:
             if not ext.validate_extension(extension):
-                config[extension.ext_name] = {b'enabled': False}
+                config[extension.ext_name] = {'enabled': False}
                 config_errors[extension.ext_name] = {
-                    b'enabled': b'extension disabled by self check.'}
+                    'enabled': 'extension disabled by self check.'}
             elif not config[extension.ext_name]['enabled']:
-                config[extension.ext_name] = {b'enabled': False}
+                config[extension.ext_name] = {'enabled': False}
                 config_errors[extension.ext_name] = {
-                    b'enabled': b'extension disabled by user config.'}
+                    'enabled': 'extension disabled by user config.'}
             else:
                 enabled_extensions.append(extension)
 

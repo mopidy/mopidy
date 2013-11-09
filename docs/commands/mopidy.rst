@@ -53,7 +53,7 @@ Options
 .. cmdoption:: --config <file>
 
     Specify config file to use. To use multiple config files, separate them
-    with colon. The later files override the earlier ones if there's a
+    with a colon. The later files override the earlier ones if there's a
     conflict.
 
 .. cmdoption:: -o <option>, --option <option>

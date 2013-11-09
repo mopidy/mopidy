@@ -25,8 +25,8 @@ v0.17.0 (UNRELEASED)
 
 **Sub-commands**
 
-- Swtiched to sub-commands for mopidy this implies the following changes
-  (fixes :issue:`437`):
+- Switched to sub-commands for the ``mopidy`` command , this implies the
+  following changes (fixes :issue:`437`):
 
   ===================== =============
   Old command           New command
