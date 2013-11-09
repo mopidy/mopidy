@@ -23,6 +23,11 @@ v0.17.0 (UNRELEASED)
   (Fixes: :issue:`565`)
 - Fix scanner so that mtime is respected when deciding which files can be skipped.
 
+**MPD frontend**
+
+- Add support for ``composer``, ``comment``, ``genre``, and ``performer``.
+  These tags can be used with ``list ...``, ``search ...``, and
+  ``find ...`` and their variants, and are supported in the ``any`` tag also
 
 v0.16.1 (2013-11-02)
 ====================
