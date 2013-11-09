@@ -7,7 +7,7 @@ import pykka
 
 from mopidy.core import CoreListener
 from mopidy.frontends.mpd import session
-from mopidy.utils import encoding, network, process
+from mopidy.utils import encoding, network, process, zeroconf
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
@@ -20,6 +20,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         self.config_section = config['mpd']
         self.hostname = hostname
         self.port = port
+        self.zeroconf_service = None
 
         try:
             network.Server(
@@ -40,27 +41,22 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         logger.info('MPD server running at [%s]:%s', hostname, port)
 
     def on_start(self):
-        try:
-            if self.config_section['zeroconf_enabled']:
-                name = self.config_section['zeroconf_name']
+        if self.config_section['zeroconf_enabled']:
+            name = self.config_section['zeroconf_name']
+            self.zeroconf_service = zeroconf.Zeroconf(
+                stype="_mpd._tcp", name=name, port=self.port,
+                host=self.hostname)
 
-                from mopidy.utils.zeroconf import Zeroconf
-                self.service = Zeroconf(
-                    stype="_mpd._tcp",
-                    name=name, port=self.port, host=self.hostname)
-                self.service.publish()
-
-                logger.info('Registered with Avahi as %s', name)
-        except Exception as e:
-            logger.warning('Avahi registration failed (%s)', e)
+            if self.zeroconf_service.publish():
+                logger.info('Registered MPD with zeroconf as %s', name)
+            else:
+                logger.warning('Registering MPD with zeroconf failed.')
 
     def on_stop(self):
+        if self.zeroconf_service:
+            self.zeroconf_service.unpublish()
+
         process.stop_actors_by_class(session.MpdSession)
-        try:
-            if self.service:
-                self.service.unpublish()
-        except Exception as e:
-            logger.warning('Avahi unregistration failed (%s)', e)
 
     def send_idle(self, subsystem):
         listeners = pykka.ActorRegistry.get_by_class(session.MpdSession)

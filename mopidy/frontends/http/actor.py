@@ -11,6 +11,7 @@ from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 
 from mopidy import models
 from mopidy.core import CoreListener
+from mopidy.utils import zeroconf
 from . import ws
 
 
@@ -22,6 +23,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         super(HttpFrontend, self).__init__()
         self.config = config
         self.core = core
+        self.zeroconf_service = None
         self._setup_server()
         self._setup_websocket_plugin()
         app = self._create_app()
@@ -90,30 +92,25 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug('Starting HTTP server')
         cherrypy.engine.start()
         logger.info('HTTP server running at %s', cherrypy.server.base())
-        try:
-            if self.config_section['zeroconf_enabled']:
-                name = self.config_section['zeroconf_name']
 
-                from mopidy.utils.zeroconf import Zeroconf
-                self.service = Zeroconf(
-                    stype="_http._tcp",
-                    name=name, port=self.port, host=self.hostname,
-                    text=["path=/"])
-                self.service.publish()
+        if self.config_section['zeroconf_enabled']:
+            name = self.config_section['zeroconf_name']
+            self.zeroconf_service = zeroconf.Zeroconf(
+                stype="_http._tcp", name=name, port=self.port,
+                host=self.hostname)
 
-                logger.info('Registered with Avahi as %s', name)
-        except Exception as e:
-            logger.warning('Avahi registration failed (%s)', e)
+            if self.zeroconf_service.publish():
+                logger.info('Registered HTTP with zeroconf as %s', name)
+            else:
+                logger.warning('Registering HTTP with zeroconf failed.')
 
     def on_stop(self):
+        if self.zeroconf_service:
+            self.zeroconf_service.unpublish()
+
         logger.debug('Stopping HTTP server')
         cherrypy.engine.exit()
         logger.info('Stopped HTTP server')
-        try:
-            if self.service:
-                self.service.unpublish()
-        except Exception as e:
-            logger.warning('Avahi unregistration failed (%s)', e)
 
     def on_event(self, name, **data):
         event = data
