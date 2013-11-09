@@ -79,8 +79,8 @@ class TranslatorTest(unittest.TestCase):
             self.album['artists'] = [Artist(**self.albumartist)]
         self.track['album'] = Album(**self.album)
 
-        if ('name' in self.artist and
-                type(self.artist['name']) is list):
+        if ('name' in self.artist
+                and not isinstance(self.artist['name'], basestring)):
             self.track['artists'] = [Artist(name=artist)
                                      for artist in self.artist['name']]
         else:

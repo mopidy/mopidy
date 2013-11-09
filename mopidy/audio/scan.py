@@ -145,8 +145,8 @@ def audio_data_to_track(data):
     track_kwargs['length'] = data[gst.TAG_DURATION] // gst.MSECOND
     track_kwargs['album'] = Album(**album_kwargs)
 
-    if ('name' in artist_kwargs and
-            type(artist_kwargs['name']) is list):
+    if ('name' in artist_kwargs
+            and not isinstance(artist_kwargs['name'], basestring)):
         track_kwargs['artists'] = [Artist(name=artist)
                                    for artist in artist_kwargs['name']]
     else:
