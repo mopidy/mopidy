@@ -8,11 +8,6 @@ import os
 import sys
 
 
-# -- Read The Docs configuration ----------------------------------------------
-
-RTD_NEW_THEME = True
-
-
 # -- Workarounds to have autodoc generate API docs ----------------------------
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
