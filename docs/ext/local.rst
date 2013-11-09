@@ -6,7 +6,7 @@ Mopidy-Local
 
 Extension for playing music from a local music archive.
 
-This backend handles URIs starting with ``file:``.
+This backend handles URIs starting with ``local:``.
 
 
 Known issues

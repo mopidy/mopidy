@@ -353,7 +353,7 @@ Example backend
 
 If you want to extend Mopidy to support new music and playlist sources, you
 want to implement a backend. A backend does not have access to Mopidy's core
-API at all and got a bunch of interfaces to implement.
+API at all and have a bunch of interfaces to implement.
 
 The skeleton of a backend would look like this. See :ref:`backend-api` for more
 details.
