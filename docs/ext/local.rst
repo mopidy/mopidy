@@ -71,7 +71,7 @@ music...
 Generating a tag cache
 ----------------------
 
-The program :command:`mopidy-scan` will scan the path set in the
+The program :command:`mopidy scan` will scan the path set in the
 :confval:`local/media_dir` config value for any media files and build a MPD
 compatible ``tag_cache``.
 
@@ -80,16 +80,11 @@ To make a ``tag_cache`` of your local music available for Mopidy:
 #. Ensure that the :confval:`local/media_dir` config value points to where your
    music is located. Check the current setting by running::
 
-    mopidy --show-config
+    mopidy config
 
-#. Scan your media library. The command outputs the ``tag_cache`` to
-   standard output, which means that you will need to redirect the output to a
-   file yourself::
+#. Scan your media library. The command writes the ``tag_cache`` to
+   the :confval:`local/tag_cache_file`::
 
-    mopidy-scan > tag_cache
-
-#. Move the ``tag_cache`` file to the location
-   set in the :confval:`local/tag_cache_file` config value, or change the
-   config value to point to where your ``tag_cache`` file is.
+    mopidy scan
 
 #. Start Mopidy, find the music library in a client, and play some local music!

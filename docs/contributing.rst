@@ -70,9 +70,9 @@ repo.
 #. Now you can run the Mopidy command, and it will run using the code
    in the Git repo::
 
-      mopidy
+      mopidy run
 
-   If you do any changes to the code, you'll just need to restart ``mopidy``
+   If you do any changes to the code, you'll just need to restart ``mopidy run``
    to see the changes take effect.
 
 
