@@ -146,16 +146,26 @@ def audio_data_to_track(data):
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
-    if composer_kwargs:
-        track_kwargs['composers'] = [Artist(**composer_kwargs)]
-
-    if performer_kwargs:
-        track_kwargs['performers'] = [Artist(**performer_kwargs)]
-
     track_kwargs['uri'] = data['uri']
     track_kwargs['last_modified'] = int(data['mtime'])
     track_kwargs['length'] = data[gst.TAG_DURATION] // gst.MSECOND
     track_kwargs['album'] = Album(**album_kwargs)
     track_kwargs['artists'] = [Artist(**artist_kwargs)]
+
+    if ('name' in composer_kwargs
+            and not isinstance(composer_kwargs['name'], basestring)):
+        track_kwargs['composers'] = [Artist(name=artist)
+                                     for artist in composer_kwargs['name']]
+    else:
+        track_kwargs['composers'] = \
+            [Artist(**composer_kwargs)] if composer_kwargs else ''
+
+    if ('name' in performer_kwargs
+            and not isinstance(performer_kwargs['name'], basestring)):
+        track_kwargs['performers'] = [Artist(name=artist)
+                                      for artist in performer_kwargs['name']]
+    else:
+        track_kwargs['performers'] = \
+            [Artist(**performer_kwargs)] if performer_kwargs else ''
 
     return Track(**track_kwargs)

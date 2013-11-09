@@ -55,13 +55,25 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz_id': 'mbartistid',
         }
 
-        self.composer = {
+        self.composer_single = {
             'name': 'composer',
         }
 
-        self.performer = {
+        self.composer_multiple = {
+            'name': ['composer1', 'composer2'],
+        }
+
+        self.composer = self.composer_single
+
+        self.performer_single = {
             'name': 'performer',
         }
+
+        self.performer_multiple = {
+            'name': ['performer1', 'performer2'],
+        }
+
+        self.performer = self.performer_single
 
         self.albumartist = {
             'name': 'albumartistname',
@@ -86,10 +98,23 @@ class TranslatorTest(unittest.TestCase):
             self.album['artists'] = [Artist(**self.albumartist)]
         self.track['album'] = Album(**self.album)
         self.track['artists'] = [Artist(**self.artist)]
-        if self.composer:
-            self.track['composers'] = [Artist(**self.composer)]
-        if self.performer:
-            self.track['performers'] = [Artist(**self.performer)]
+
+        if ('name' in self.composer
+                and not isinstance(self.composer['name'], basestring)):
+            self.track['composers'] = [Artist(name=artist)
+                                       for artist in self.composer['name']]
+        else:
+            self.track['composers'] = [Artist(**self.composer)] \
+                if self.composer else ''
+
+        if ('name' in self.performer
+                and not isinstance(self.performer['name'], basestring)):
+            self.track['performers'] = [Artist(name=artist)
+                                        for artist in self.performer['name']]
+        else:
+            self.track['performers'] = [Artist(**self.performer)] \
+                if self.performer else ''
+
         return Track(**self.track)
 
     def check(self):
@@ -138,6 +163,16 @@ class TranslatorTest(unittest.TestCase):
     def test_missing_composer_name(self):
         del self.data['composer']
         del self.composer['name']
+        self.check()
+
+    def test_multiple_track_composers(self):
+        self.data['composer'] = ['composer1', 'composer2']
+        self.composer = self.composer_multiple
+        self.check()
+
+    def test_multiple_track_performers(self):
+        self.data['performer'] = ['performer1', 'performer2']
+        self.performer = self.performer_multiple
         self.check()
 
     def test_missing_performer_name(self):
