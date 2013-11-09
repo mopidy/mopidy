@@ -1,17 +1,30 @@
-import dbus
+from __future__ import unicode_literals
 
-__all__ = ["Zeroconf"]
+try:
+    import dbus
+except ImportError:
+    dbus = None
 
-avahi_IF_UNSPEC = -1
-avahi_PROTO_UNSPEC = -1
-avahi_PublishFlags_None = 0
+import re
+
+_AVAHI_IF_UNSPEC = -1
+_AVAHI_PROTO_UNSPEC = -1
+_AVAHI_PUBLISHFLAGS_NONE = 0
+
+
+def _filter_loopback_and_meta_addresses(host):
+    # TODO: see if we can find a cleaner way of handling this.
+    if re.search(r'(?<![.\d])(127|0)[.]', host):
+        return ''
+    return host
+
+
+def _convert_text_to_dbus_bytes(text):
+    return [[dbus.Byte(ord(c)) for c in s] for s in text]
 
 
 class Zeroconf:
-    """A simple class to publish a network service with zeroconf using
-    avahi.
-
-    """
+    """Publish a network service with zeroconf using avahi."""
 
     def __init__(self, name, port, stype="_http._tcp",
                  domain="", host="", text=[]):
@@ -20,35 +33,27 @@ class Zeroconf:
         self.domain = domain
         self.port = port
         self.text = text
-        # Let avahi choose how to advertise services
-        # listening on lo and meta addresses
-        import re
-        lo = re.search('(?<![.\d])(127|0)[.]', host)
-        self.host = "" if lo else host
+        self.host = _filter_loopback_and_meta_addresses(host)
+        self.group = None
 
     def publish(self):
         bus = dbus.SystemBus()
-        server = dbus.Interface(
-            bus.get_object(
-                "org.freedesktop.Avahi",
-                "/"),
-            "org.freedesktop.Avahi.Server")
+        server = dbus.Interface(bus.get_object("org.freedesktop.Avahi", "/"),
+                                "org.freedesktop.Avahi.Server")
 
-        g = dbus.Interface(
-            bus.get_object("org.freedesktop.Avahi",
-                           server.EntryGroupNew()),
+        self.group = dbus.Interface(
+            bus.get_object("org.freedesktop.Avahi", server.EntryGroupNew()),
             "org.freedesktop.Avahi.EntryGroup")
 
-        if self.text:
-            self.text = [[dbus.Byte(ord(c)) for c in s] for s in self.text]
+        text = _convert_text_to_dbus_bytes(self.text)
+        self.group.AddService(_AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
+                              dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE),
+                              self.name, self.stype, self.domain, self.host,
+                              dbus.UInt16(self.port), text)
 
-        g.AddService(avahi_IF_UNSPEC, avahi_PROTO_UNSPEC,
-                     dbus.UInt32(avahi_PublishFlags_None),
-                     self.name, self.stype, self.domain, self.host,
-                     dbus.UInt16(self.port), self.text)
-
-        g.Commit()
-        self.group = g
+        self.group.Commit()
 
     def unpublish(self):
-        self.group.Reset()
+        if self.group:
+            self.group.Reset()
+            self.group = None
