@@ -306,9 +306,9 @@ class BaseSubCommandProvider(object):
 
         *MUST be implemented by subclass.*
 
-        :param args: the argments object from argpase.
-        :param config: read-only version of the mopidy config.
-        :param extensions: list of enabled extensions.
-        :returns: integer exit value for the process.
+        :param args: the argments object from argparse
+        :param config: read-only version of the mopidy config
+        :param extensions: list of enabled extensions
+        :returns: integer exit value for the process
         """
         raise NotImplementedError

@@ -84,8 +84,8 @@ Extension sub-commands
 ======================
 
 Additionally, extensions can provide extra sub-commands. See ``mopidy --help``
-for a list of what is availbale on your system and ``mopidy COMMAND --help``
-for command specific help. Sub-commands for disabled extensions will be listed,
+for a list of what is available on your system and ``mopidy COMMAND --help``
+for command-specific help. Sub-commands for disabled extensions will be listed,
 but can not be run.
 
 .. cmdoption:: local
