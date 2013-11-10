@@ -34,13 +34,13 @@ class ScanSubCommand(base.BaseSubCommandProvider):
             return 1
         elif len(updaters) > 1:
             logger.error('More than one library updater found. '
-                          'Provided by: %s', ', '.join(updaters.keys()))
+                         'Provided by: %s', ', '.join(updaters.keys()))
             return 1
 
         local_updater = updaters.values()[0](config)
 
-        # TODO: cleanup to consistently use local urls, not a random mix of local
-        # and file uris depending on how the data was loaded.
+        # TODO: cleanup to consistently use local urls, not a random mix of
+        # local and file uris depending on how the data was loaded.
         uris_library = set()
         uris_update = set()
         uris_remove = set()
@@ -74,7 +74,7 @@ class ScanSubCommand(base.BaseSubCommandProvider):
         logger.info('Found %d unknown tracks.', len(uris_update))
         logger.info('Scanning...')
 
-        scanner = scan.Scanner(config['local']['scan_timeout'])
+        scanner = scan.Scanner(scan_timeout)
         progress = Progress(len(uris_update))
 
         for uri in sorted(uris_update):
@@ -93,7 +93,6 @@ class ScanSubCommand(base.BaseSubCommandProvider):
         return 0
 
 
-
 # TODO: move to utils?
 class Progress(object):
     def __init__(self, total):
@@ -107,4 +106,4 @@ class Progress(object):
             duration = time.time() - self.start
             remainder = duration / self.count * (self.total - self.count)
             logger.info('Scanned %d of %d files in %ds, ~%ds left.',
-                         self.count, self.total, duration, remainder)
+                        self.count, self.total, duration, remainder)
