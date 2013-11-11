@@ -13,6 +13,17 @@ v0.17.0 (UNRELEASED)
 - The search field ``track`` has been renamed to ``track_name`` to avoid
   confusion with ``track_no``. (Fixes: :issue:`535`)
 
+- The signature of the tracklist's
+  :meth:`~mopidy.core.TracklistController.filter` and
+  :meth:`~mopidy.core.TracklistController.remove` methods have changed.
+  Previously, they expected e.g. ``tracklist.filter(tlid=17)``. Now, the value
+  must always be a list, e.g. ``tracklist.filter(tlid=[17])``. This change
+  allows you to get or remove multiple tracks with a single call, e.g.
+  ``tracklist.remove(tlid=[1, 2, 7])``. This is especially useful for web
+  clients, as requests can be batched. This also brings the interface closer to
+  the library's :meth:`~mopidy.core.LibraryController.find_exact` and
+  :meth:`~mopidy.core.LibraryController.search` methods.
+
 **Local backend**
 
 - Library scanning has been switched back to custom code due to various issues

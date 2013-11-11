@@ -105,7 +105,7 @@ class BackendEventsTest(unittest.TestCase):
         self.core.tracklist.add([Track(uri='dummy:a')]).get()
         send.reset_mock()
 
-        self.core.tracklist.remove(uri='dummy:a').get()
+        self.core.tracklist.remove(uri=['dummy:a']).get()
 
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
