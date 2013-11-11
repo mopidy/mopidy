@@ -15,16 +15,16 @@ logger = logging.getLogger('mopidy.frontends.mpd')
 class MpdFrontend(pykka.ThreadingActor, CoreListener):
     def __init__(self, config, core):
         super(MpdFrontend, self).__init__()
+
         hostname = network.format_hostname(config['mpd']['hostname'])
-        port = config['mpd']['port']
-        self.config_section = config['mpd']
         self.hostname = hostname
-        self.port = port
+        self.port = config['mpd']['port']
+        self.zeroconf_name = config['mpd']['zeroconf']
         self.zeroconf_service = None
 
         try:
             network.Server(
-                hostname, port,
+                self.hostname, self.port,
                 protocol=session.MpdSession,
                 protocol_kwargs={
                     'config': config,
@@ -38,12 +38,12 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 encoding.locale_decode(error))
             sys.exit(1)
 
-        logger.info('MPD server running at [%s]:%s', hostname, port)
+        logger.info('MPD server running at [%s]:%s', self.hostname, self.port)
 
     def on_start(self):
-        if self.config_section['zeroconf']:
+        if self.zeroconf_name:
             self.zeroconf_service = zeroconf.Zeroconf(
-                stype='_mpd._tcp', name=self.config_section['zeroconf'],
+                stype='_mpd._tcp', name=self.zeroconf_name,
                 host=self.hostname, port=self.port)
 
             if self.zeroconf_service.publish():

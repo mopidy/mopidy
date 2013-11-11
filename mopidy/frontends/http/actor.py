@@ -23,16 +23,18 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         super(HttpFrontend, self).__init__()
         self.config = config
         self.core = core
+
+        self.hostname = config['http']['hostname']
+        self.port = config['http']['port']
+        self.zeroconf_name = config['http']['zeroconf']
         self.zeroconf_service = None
+
         self._setup_server()
         self._setup_websocket_plugin()
         app = self._create_app()
         self._setup_logging(app)
 
     def _setup_server(self):
-        self.config_section = self.config['http']
-        self.hostname = self.config_section['hostname']
-        self.port = self.config_section['port']
         cherrypy.config.update({
             'engine.autoreload_on': False,
             'server.socket_host': self.hostname,
@@ -93,9 +95,9 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         cherrypy.engine.start()
         logger.info('HTTP server running at %s', cherrypy.server.base())
 
-        if self.config_section['zeroconf']:
+        if self.zeroconf_name:
             self.zeroconf_service = zeroconf.Zeroconf(
-                stype='_http._tcp', name=self.config_section['zeroconf'],
+                stype='_http._tcp', name=self.zeroconf_name,
                 host=self.hostname, port=self.port)
 
             if self.zeroconf_service.publish():
