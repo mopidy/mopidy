@@ -15,7 +15,6 @@ _AVAHI_PROTO_UNSPEC = -1
 _AVAHI_PUBLISHFLAGS_NONE = 0
 
 
-
 def _filter_loopback_and_meta_addresses(host):
     # TODO: see if we can find a cleaner way of handling this.
     if re.search(r'(?<![.\d])(127|0)[.]', host):
@@ -28,7 +27,7 @@ def _convert_text_to_dbus_bytes(text):
 
 
 class Zeroconf:
-    """Publish a network service with zeroconf using avahi."""
+    """Publish a network service with zeroconf using Avahi."""
 
     def __init__(self, name, port, stype="_http._tcp",
                  domain="", host="", text=[]):
@@ -52,7 +51,7 @@ class Zeroconf:
             return False
 
         if not bus.name_has_owner('org.freedesktop.Avahi'):
-            logger.debug('Zeroconf publish failed: avahi service not running.')
+            logger.debug('Zeroconf publish failed: Avahi service not running.')
             return False
 
         server = dbus.Interface(bus.get_object("org.freedesktop.Avahi", "/"),

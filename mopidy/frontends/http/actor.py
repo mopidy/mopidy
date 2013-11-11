@@ -96,13 +96,13 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         if self.config_section['zeroconf_enabled']:
             name = self.config_section['zeroconf_name']
             self.zeroconf_service = zeroconf.Zeroconf(
-                stype="_http._tcp", name=name, port=self.port,
-                host=self.hostname)
+                stype='_http._tcp', name=name,
+                host=self.hostname, port=self.port)
 
             if self.zeroconf_service.publish():
-                logger.info('Registered HTTP with zeroconf as %s', name)
+                logger.info('Registered HTTP with Zeroconf as %s', name)
             else:
-                logger.warning('Registering HTTP with zeroconf failed.')
+                logger.warning('Registering HTTP with Zeroconf failed.')
 
     def on_stop(self):
         if self.zeroconf_service:
