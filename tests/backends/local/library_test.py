@@ -26,6 +26,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         Album(name='album1', artists=[artists[0]]),
         Album(name='album2', artists=[artists[1]]),
         Album(name='album3', artists=[artists[2]]),
+        Album(name='album4'),
     ]
 
     tracks = [
@@ -41,6 +42,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
             uri='local:track:path3', name='track3',
             artists=[artists[3]], album=albums[2],
             date='2003', length=4000, track_no=3),
+        Track(
+            uri='local:track:path4', name='track4',
+            artists=[artists[2]], album=albums[3],
+            date='2004', length=60000, track_no=4),
     ]
 
     config = {
@@ -102,10 +107,13 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(tracks, [])
 
     def test_find_exact_no_hits(self):
-        result = self.library.find_exact(track=['unknown track'])
+        result = self.library.find_exact(track_name=['unknown track'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.find_exact(artist=['unknown artist'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.find_exact(albumartist=['unknown albumartist'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.find_exact(album=['unknown artist'])
@@ -114,7 +122,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.find_exact(date=['1990'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(track_no=[9])
+        result = self.library.find_exact(track_no=['9'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.find_exact(track_no=['no_match'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.find_exact(uri=['fake uri'])
@@ -133,10 +144,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_track(self):
-        result = self.library.find_exact(track=['track1'])
+        result = self.library.find_exact(track_name=['track1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(track=['track2'])
+        result = self.library.find_exact(track_name=['track2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_artist(self):
@@ -145,6 +156,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         result = self.library.find_exact(artist=['artist2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
+
+        result = self.library.find_exact(artist=['artist3'])
+        self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
     def test_find_exact_album(self):
         result = self.library.find_exact(album=['album1'])
@@ -167,10 +181,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), [self.tracks[2]])
 
     def test_find_exact_track_no(self):
-        result = self.library.find_exact(track_no=[1])
+        result = self.library.find_exact(track_no=['1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(track_no=[2])
+        result = self.library.find_exact(track_no=['2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_date(self):
@@ -204,7 +218,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track album artists
         result = self.library.find_exact(any=['artist3'])
-        self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+        self.assertEqual(
+            list(result[0].tracks), [self.tracks[3], self.tracks[2]])
 
         # Matches on track year
         result = self.library.find_exact(any=['2002'])
@@ -222,13 +237,16 @@ class LocalLibraryProviderTest(unittest.TestCase):
         test = lambda: self.library.find_exact(artist=[''])
         self.assertRaises(LookupError, test)
 
-        test = lambda: self.library.find_exact(track=[''])
+        test = lambda: self.library.find_exact(albumartist=[''])
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.find_exact(track_name=[''])
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.find_exact(album=[''])
         self.assertRaises(LookupError, test)
 
-        test = lambda: self.library.find_exact(track_no=[])
+        test = lambda: self.library.find_exact(track_no=[''])
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.find_exact(date=[''])
@@ -238,16 +256,22 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertRaises(LookupError, test)
 
     def test_search_no_hits(self):
-        result = self.library.search(track=['unknown track'])
+        result = self.library.search(track_name=['unknown track'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.search(artist=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
+        result = self.library.search(albumartist=['unknown albumartist'])
+        self.assertEqual(list(result[0].tracks), [])
+
         result = self.library.search(album=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(track_no=[9])
+        result = self.library.search(track_no=['9'])
+        self.assertEqual(list(result[0].tracks), [])
+
+        result = self.library.search(track_no=['no_match'])
         self.assertEqual(list(result[0].tracks), [])
 
         result = self.library.search(date=['unknown date'])
@@ -267,10 +291,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_track(self):
-        result = self.library.search(track=['Rack1'])
+        result = self.library.search(track_name=['Rack1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(track=['Rack2'])
+        result = self.library.search(track_name=['Rack2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_artist(self):
@@ -314,10 +338,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_track_no(self):
-        result = self.library.search(track_no=[1])
+        result = self.library.search(track_no=['1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(track_no=[2])
+        result = self.library.search(track_no=['2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_any(self):
@@ -338,7 +362,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track album artists
         result = self.library.search(any=['Tist3'])
-        self.assertEqual(list(result[0].tracks), self.tracks[2:3])
+        self.assertEqual(
+            list(result[0].tracks), [self.tracks[3], self.tracks[2]])
 
         # Matches on URI
         result = self.library.search(any=['TH1'])
@@ -352,7 +377,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         test = lambda: self.library.search(artist=[''])
         self.assertRaises(LookupError, test)
 
-        test = lambda: self.library.search(track=[''])
+        test = lambda: self.library.search(albumartist=[''])
+        self.assertRaises(LookupError, test)
+
+        test = lambda: self.library.search(track_name=[''])
         self.assertRaises(LookupError, test)
 
         test = lambda: self.library.search(album=[''])

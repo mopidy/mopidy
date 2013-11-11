@@ -7,7 +7,7 @@ import pykka
 
 from mopidy.core import CoreListener
 from mopidy.frontends.mpd import session
-from mopidy.utils import encoding, network, process
+from mopidy.utils import encoding, network, process, zeroconf
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
@@ -15,12 +15,16 @@ logger = logging.getLogger('mopidy.frontends.mpd')
 class MpdFrontend(pykka.ThreadingActor, CoreListener):
     def __init__(self, config, core):
         super(MpdFrontend, self).__init__()
+
         hostname = network.format_hostname(config['mpd']['hostname'])
-        port = config['mpd']['port']
+        self.hostname = hostname
+        self.port = config['mpd']['port']
+        self.zeroconf_name = config['mpd']['zeroconf']
+        self.zeroconf_service = None
 
         try:
             network.Server(
-                hostname, port,
+                self.hostname, self.port,
                 protocol=session.MpdSession,
                 protocol_kwargs={
                     'config': config,
@@ -34,9 +38,24 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 encoding.locale_decode(error))
             sys.exit(1)
 
-        logger.info('MPD server running at [%s]:%s', hostname, port)
+        logger.info('MPD server running at [%s]:%s', self.hostname, self.port)
+
+    def on_start(self):
+        if self.zeroconf_name:
+            self.zeroconf_service = zeroconf.Zeroconf(
+                stype='_mpd._tcp', name=self.zeroconf_name,
+                host=self.hostname, port=self.port)
+
+            if self.zeroconf_service.publish():
+                logger.info('Registered MPD with Zeroconf as "%s"',
+                            self.zeroconf_service.name)
+            else:
+                logger.warning('Registering MPD with Zeroconf failed.')
 
     def on_stop(self):
+        if self.zeroconf_service:
+            self.zeroconf_service.unpublish()
+
         process.stop_actors_by_class(session.MpdSession)
 
     def send_idle(self, subsystem):

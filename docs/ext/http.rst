@@ -59,6 +59,13 @@ Configuration values
     Change this to have Mopidy serve e.g. files for your JavaScript client.
     "/mopidy" will continue to work as usual even if you change this setting.
 
+.. confval:: http/zeroconf
+
+    Name of the HTTP service when published through Zeroconf. The variables
+    ``$hostname`` and ``$port`` can be used in the name.
+
+    Set to an empty string to disable Zeroconf for HTTP.
+
 
 Usage
 =====

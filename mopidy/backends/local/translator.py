@@ -6,9 +6,16 @@ import urlparse
 
 from mopidy.models import Track, Artist, Album
 from mopidy.utils.encoding import locale_decode
-from mopidy.utils.path import path_to_uri
+from mopidy.utils.path import path_to_uri, uri_to_path
 
 logger = logging.getLogger('mopidy.backends.local')
+
+
+def local_to_file_uri(uri, media_dir):
+    # TODO: check that type is correct.
+    file_path = uri_to_path(uri).split(b':', 1)[1]
+    file_path = os.path.join(media_dir, file_path)
+    return path_to_uri(file_path)
 
 
 def parse_m3u(file_path, media_dir):
@@ -120,7 +127,6 @@ def _convert_mpd_data(data, tracks):
 
     if 'artist' in data:
         artist_kwargs['name'] = data['artist']
-        albumartist_kwargs['name'] = data['artist']
 
     if 'albumartist' in data:
         albumartist_kwargs['name'] = data['albumartist']

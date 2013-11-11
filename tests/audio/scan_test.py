@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 import unittest
 
 from mopidy import exceptions
+from mopidy.audio import scan
 from mopidy.models import Track, Artist, Album
-from mopidy.scanner import Scanner, translator
 from mopidy.utils import path as path_lib
 
 from tests import path_to_data_dir
@@ -31,7 +31,7 @@ class TranslatorTest(unittest.TestCase):
             'album-disc-count': 3,
             'date': FakeGstDate(2006, 1, 1,),
             'container-format': 'ID3 tag',
-            'duration': 4531,
+            'duration': 4531000000,
             'musicbrainz-trackid': 'mbtrackid',
             'musicbrainz-albumid': 'mbalbumid',
             'musicbrainz-artistid': 'mbartistid',
@@ -46,10 +46,17 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz_id': 'mbalbumid',
         }
 
-        self.artist = {
+        self.artist_single = {
             'name': 'name',
             'musicbrainz_id': 'mbartistid',
         }
+
+        self.artist_multiple = {
+            'name': ['name1', 'name2'],
+            'musicbrainz_id': 'mbartistid',
+        }
+
+        self.artist = self.artist_single
 
         self.albumartist = {
             'name': 'albumartistname',
@@ -71,12 +78,19 @@ class TranslatorTest(unittest.TestCase):
         if self.albumartist:
             self.album['artists'] = [Artist(**self.albumartist)]
         self.track['album'] = Album(**self.album)
-        self.track['artists'] = [Artist(**self.artist)]
+
+        if ('name' in self.artist
+                and not isinstance(self.artist['name'], basestring)):
+            self.track['artists'] = [Artist(name=artist)
+                                     for artist in self.artist['name']]
+        else:
+            self.track['artists'] = [Artist(**self.artist)]
+
         return Track(**self.track)
 
     def check(self):
         expected = self.build_track()
-        actual = translator(self.data)
+        actual = scan.audio_data_to_track(self.data)
         self.assertEqual(expected, actual)
 
     def test_basic_data(self):
@@ -122,6 +136,12 @@ class TranslatorTest(unittest.TestCase):
         del self.artist['musicbrainz_id']
         self.check()
 
+    def test_multiple_track_artists(self):
+        self.data['artist'] = ['name1', 'name2']
+        self.data['musicbrainz-artistid'] = 'mbartistid'
+        self.artist = self.artist_multiple
+        self.check()
+
     def test_missing_album_artist(self):
         del self.data['album-artist']
         del self.albumartist['name']
@@ -151,7 +171,7 @@ class ScannerTest(unittest.TestCase):
     def scan(self, path):
         paths = path_lib.find_files(path_to_data_dir(path))
         uris = (path_lib.path_to_uri(p) for p in paths)
-        scanner = Scanner()
+        scanner = scan.Scanner()
         for uri in uris:
             key = uri[len('file://'):]
             try:
@@ -182,8 +202,8 @@ class ScannerTest(unittest.TestCase):
 
     def test_duration_is_set(self):
         self.scan('scanner/simple')
-        self.check('scanner/simple/song1.mp3', 'duration', 4680)
-        self.check('scanner/simple/song1.ogg', 'duration', 4680)
+        self.check('scanner/simple/song1.mp3', 'duration', 4680000000)
+        self.check('scanner/simple/song1.ogg', 'duration', 4680000000)
 
     def test_artist_is_set(self):
         self.scan('scanner/simple')

@@ -71,25 +71,22 @@ it out.
 Arch Linux: Install from AUR
 ============================
 
-If you are running Arch Linux, you can install the latest release of Mopidy
-using the `mopidy-git <https://aur.archlinux.org/packages/mopidy-git/>`_
-package found in AUR. The package installs from the ``master`` branch of the
-Mopidy Git repo, which always corresponds to the latest release.
+If you are running Arch Linux, you can install Mopidy
+using the `mopidy <https://aur.archlinux.org/packages/mopidy/>`_
+package found in AUR.
 
-#. To install Mopidy with GStreamer, libspotify and pyspotify, you can use
-   ``packer``, ``yaourt``, or do it by hand like this::
+#. To install Mopidy with all dependencies, you can use
+   for example `yaourt <https://wiki.archlinux.org/index.php/yaourt>`_::
 
-       wget http://aur.archlinux.org/packages/mopidy-git/mopidy-git.tar.gz
-       tar xf mopidy-git.tar.gz
-       cd mopidy-git/
-       makepkg -si
+       yaourt -S mopidy
 
-   To upgrade Mopidy to future releases, just rerun ``makepkg``.
+   To upgrade Mopidy to future releases, just upgrade your system using::
 
-#. Optional: If you want to scrobble your played tracks to Last.fm, you need to
-   install `python2-pylast`::
+       yaourt -Syu
 
-       sudo pacman -S python2-pylast
+#. Optional: If you want to use any Mopidy extensions, like Spotify support or
+   Last.fm scrobbling, AUR also got `packages for several Mopidy extensions
+   <https://aur.archlinux.org/packages/?K=mopidy>`_.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.

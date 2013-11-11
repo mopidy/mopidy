@@ -48,7 +48,6 @@ About
     :maxdepth: 1
 
     authors
-    license
     changelog
     versioning
 
@@ -72,6 +71,7 @@ Reference
     :maxdepth: 2
 
     glossary
+    commands/index
     api/index
     modules/index
 
