@@ -15,16 +15,19 @@ v0.17.0 (UNRELEASED)
 
 **Local backend**
 
-- When scanning, we no longer default the album artist to be the same as the
-  track artist. Album artist is now only populated if the scanned file got an
-  explicit album artist set.
-
 - Library scanning has been switched back to custom code due to various issues
   with GStreamer's built in scanner in 0.10. This also fixes the scanner
   slowdown. (Fixes: :issue:`565`)
 
-- Fix scanner so that mtime is respected when deciding which files can be
-  skipped.
+- When scanning, we no longer default the album artist to be the same as the
+  track artist. Album artist is now only populated if the scanned file got an
+  explicit album artist set.
+
+- The scanner will now extract multiple artists from files with multiple artist
+  tags.
+
+- Fix scanner so that time of last modification is respected when deciding
+  which files can be skipped.
 
 **MPD frontend**
 
