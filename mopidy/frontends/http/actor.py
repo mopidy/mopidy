@@ -93,10 +93,9 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         cherrypy.engine.start()
         logger.info('HTTP server running at %s', cherrypy.server.base())
 
-        if self.config_section['zeroconf_enabled']:
-            name = self.config_section['zeroconf_name']
+        if self.config_section['zeroconf']:
             self.zeroconf_service = zeroconf.Zeroconf(
-                stype='_http._tcp', name=name,
+                stype='_http._tcp', name=self.config_section['zeroconf'],
                 host=self.hostname, port=self.port)
 
             if self.zeroconf_service.publish():
