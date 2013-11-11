@@ -28,17 +28,17 @@ def _convert_text_to_dbus_bytes(text):
     return [dbus.Byte(ord(c)) for c in text]
 
 
-class Zeroconf:
-    """Publish a network service with zeroconf using Avahi."""
+class Zeroconf(object):
+    """Publish a network service with Zeroconf using Avahi."""
 
-    def __init__(self, name, port, stype="_http._tcp",
-                 domain="", host="", text=[]):
+    def __init__(self, name, port, stype=None, domain=None,
+                 host=None, text=None):
         self.group = None
-        self.stype = stype
-        self.domain = domain
+        self.stype = stype or '_http._tcp'
+        self.domain = domain or ''
         self.port = port
-        self.text = text
-        self.host = _filter_loopback_and_meta_addresses(host)
+        self.text = text or []
+        self.host = _filter_loopback_and_meta_addresses(host or '')
 
         template = string.Template(name)
         self.name = template.safe_substitute(
@@ -59,12 +59,12 @@ class Zeroconf:
             logger.debug('Zeroconf publish failed: Avahi service not running.')
             return False
 
-        server = dbus.Interface(bus.get_object("org.freedesktop.Avahi", "/"),
-                                "org.freedesktop.Avahi.Server")
+        server = dbus.Interface(bus.get_object('org.freedesktop.Avahi', '/'),
+                                'org.freedesktop.Avahi.Server')
 
         self.group = dbus.Interface(
-            bus.get_object("org.freedesktop.Avahi", server.EntryGroupNew()),
-            "org.freedesktop.Avahi.EntryGroup")
+            bus.get_object('org.freedesktop.Avahi', server.EntryGroupNew()),
+            'org.freedesktop.Avahi.EntryGroup')
 
         text = [_convert_text_to_dbus_bytes(t) for t in self.text]
         self.group.AddService(_AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
