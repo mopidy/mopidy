@@ -21,6 +21,8 @@ class Extension(ext.Extension):
         schema['hostname'] = config.Hostname()
         schema['port'] = config.Port()
         schema['static_dir'] = config.Path(optional=True)
+        schema['zeroconf_enabled'] = config.Boolean()
+        schema['zeroconf_name'] = config.String()
         return schema
 
     def validate_environment(self):
