@@ -290,7 +290,8 @@ class TracklistController(object):
 
     def filter(self, criteria=None, **kwargs):
         """
-        Filter the tracklist by the given criterias.
+        Filter the tracklist by the given criterias. The value of the field to
+        check can be a list, a tuple or a set.
 
         Examples::
 
@@ -298,17 +299,33 @@ class TracklistController(object):
             filter({'tlid': 7})
             filter(tlid=7)
 
+            # Returns tracks with TLIDs 1, 2, 3 and 4
+            filter({'tlid': [1, 2, 3, 4]})
+            filter(tlid=[1, 2, 3, 4])
+
             # Returns track with ID 1
             filter({'id': 1})
             filter(id=1)
+
+            # Returns track with IDs 1 5 and 7
+            filter({'id': [1, 5, 7]})
+            filter(id=[1, 5, 7])
 
             # Returns track with URI 'xyz'
             filter({'uri': 'xyz'})
             filter(uri='xyz')
 
+            # Returns track with URIs 'xyz' and 'abc'
+            filter({'uri': ['xyz', 'abc']})
+            filter(uri=['xyz', 'abc'])
+
             # Returns track with ID 1 and URI 'xyz'
             filter({'id': 1, 'uri': 'xyz'})
             filter(id=1, uri='xyz')
+
+            # Returns track with IDs (1, 3 or 6) and URIs ('xyz' or 'abc')
+            filter({'id': [1, 3, 6], 'uri': ['xyz', 'abc']})
+            filter(id=[1, 3, 6], uri=['xyz', 'abc'])
 
         :param criteria: on or more criteria to match by
         :type criteria: dict
@@ -317,11 +334,13 @@ class TracklistController(object):
         criteria = criteria or kwargs
         matches = self._tl_tracks
         for (key, value) in criteria.iteritems():
+            if not type(value) in [list, tuple, set]:
+                value = [value]
             if key == 'tlid':
-                matches = filter(lambda ct: ct.tlid == value, matches)
+                matches = filter(lambda ct: ct.tlid in value, matches)
             else:
                 matches = filter(
-                    lambda ct: getattr(ct.track, key) == value, matches)
+                    lambda ct: getattr(ct.track, key) in value, matches)
         return matches
 
     def move(self, start, end, to_position):

@@ -240,6 +240,18 @@ class LocalTracklistProviderTest(unittest.TestCase):
         self.controller.remove(uri='/nonexistant')
 
     @populate_tracklist
+    def test_remove_lists(self):
+        track0 = self.controller.tracks[0]
+        track1 = self.controller.tracks[1]
+        track2 = self.controller.tracks[2]
+        version = self.controller.version
+        self.controller.remove(uri=[track0.uri, track2.uri])
+        self.assertLess(version, self.controller.version)
+        self.assertNotIn(track0, self.controller.tracks)
+        self.assertNotIn(track2, self.controller.tracks)
+        self.assertEqual(track1, self.controller.tracks[0])
+
+    @populate_tracklist
     def test_shuffle(self):
         random.seed(1)
         self.controller.shuffle()
