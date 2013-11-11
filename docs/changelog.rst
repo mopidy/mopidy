@@ -28,7 +28,7 @@ v0.17.0 (UNRELEASED)
 
 **MPD frontend**
 
-- The MPD service is now published as a Zeroconf service if avahi-deamon is
+- The MPD service is now published as a Zeroconf service if avahi-daemon is
   running on the system. Some MPD clients will use this to present Mopidy as an
   available server on the local network without needing any configuration. See
   the :confval:`mpd/zeroconf` config value to change the service name or
@@ -36,7 +36,7 @@ v0.17.0 (UNRELEASED)
 
 **HTTP frontend**
 
-- The HTTP service is now published as a Zeroconf service if avahi-deamon is
+- The HTTP service is now published as a Zeroconf service if avahi-daemon is
   running on the system. Some browsers will present HTTP Zeroconf services on
   the local network as "local sites" bookmarks. See the
   :confval:`http/zeroconf` config value to change the service name or disable
