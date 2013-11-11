@@ -97,6 +97,13 @@ Configuration values
     Number of seconds an MPD client can stay inactive before the connection is
     closed by the server.
 
+.. confval:: mpd/zeroconf
+
+    Name of the MPD service when published through Zeroconf. The variables
+    ``$hostname`` and ``$port`` can be used in the name.
+
+    Set to an empty string to disable Zeroconf for MPD.
+
 
 Usage
 =====
