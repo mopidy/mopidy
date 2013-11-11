@@ -151,7 +151,7 @@ def playid(context, tlid):
     tlid = int(tlid)
     if tlid == -1:
         return _play_minus_one(context)
-    tl_tracks = context.core.tracklist.filter(tlid=tlid).get()
+    tl_tracks = context.core.tracklist.filter(tlid=[tlid]).get()
     if not tl_tracks:
         raise MpdNoExistError('No such song', command='playid')
     return context.core.playback.play(tl_tracks[0]).get()

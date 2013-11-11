@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import collections
 import logging
 import random
 
@@ -292,36 +293,51 @@ class TracklistController(object):
         """
         Filter the tracklist by the given criterias.
 
+        A criteria consists of a model field to check and a list of values to
+        compare it against. If the model field matches one of the values, it
+        may be returned.
+
+        Only tracks that matches all the given criterias are returned.
+
         Examples::
 
-            # Returns track with TLID 7 (tracklist ID)
-            filter({'tlid': 7})
-            filter(tlid=7)
+            # Returns tracks with TLIDs 1, 2, 3, or 4 (tracklist ID)
+            filter({'tlid': [1, 2, 3, 4]})
+            filter(tlid=[1, 2, 3, 4])
 
-            # Returns track with ID 1
-            filter({'id': 1})
-            filter(id=1)
+            # Returns track with IDs 1, 5, or 7
+            filter({'id': [1, 5, 7]})
+            filter(id=[1, 5, 7])
 
-            # Returns track with URI 'xyz'
-            filter({'uri': 'xyz'})
-            filter(uri='xyz')
+            # Returns track with URIs 'xyz' or 'abc'
+            filter({'uri': ['xyz', 'abc']})
+            filter(uri=['xyz', 'abc'])
 
-            # Returns track with ID 1 and URI 'xyz'
-            filter({'id': 1, 'uri': 'xyz'})
-            filter(id=1, uri='xyz')
+            # Returns tracks with ID 1 and URI 'xyz'
+            filter({'id': [1], 'uri': ['xyz']})
+            filter(id=[1], uri=['xyz'])
+
+            # Returns track with a matching ID (1, 3 or 6) and a matching URI
+            # ('xyz' or 'abc')
+            filter({'id': [1, 3, 6], 'uri': ['xyz', 'abc']})
+            filter(id=[1, 3, 6], uri=['xyz', 'abc'])
 
         :param criteria: on or more criteria to match by
-        :type criteria: dict
+        :type criteria: dict, of (string, list) pairs
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
         criteria = criteria or kwargs
         matches = self._tl_tracks
-        for (key, value) in criteria.iteritems():
+        for (key, values) in criteria.iteritems():
+            if (not isinstance(values, collections.Iterable)
+                    or isinstance(values, basestring)):
+                # Fail hard if anyone is using the <0.17 calling style
+                raise ValueError('Filter values must be iterable: %r' % values)
             if key == 'tlid':
-                matches = filter(lambda ct: ct.tlid == value, matches)
+                matches = filter(lambda ct: ct.tlid in values, matches)
             else:
                 matches = filter(
-                    lambda ct: getattr(ct.track, key) == value, matches)
+                    lambda ct: getattr(ct.track, key) in values, matches)
         return matches
 
     def move(self, start, end, to_position):
@@ -435,7 +451,7 @@ class TracklistController(object):
         """Private method used by :class:`mopidy.core.PlaybackController`."""
         if not self.consume:
             return False
-        self.remove(tlid=tl_track.tlid)
+        self.remove(tlid=[tl_track.tlid])
         return True
 
     def _trigger_tracklist_changed(self):
