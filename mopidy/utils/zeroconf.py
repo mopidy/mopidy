@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 import logging
 import re
+import socket
+import string
 
 logger = logging.getLogger('mopidy.utils.zerconf')
 
@@ -31,13 +33,16 @@ class Zeroconf:
 
     def __init__(self, name, port, stype="_http._tcp",
                  domain="", host="", text=[]):
-        self.name = name
+        self.group = None
         self.stype = stype
         self.domain = domain
         self.port = port
         self.text = text
         self.host = _filter_loopback_and_meta_addresses(host)
-        self.group = None
+
+        template = string.Template(name)
+        self.name = template.safe_substitute(
+            hostname=self.host or socket.getfqdn(), port=self.port)
 
     def publish(self):
         if not dbus:
