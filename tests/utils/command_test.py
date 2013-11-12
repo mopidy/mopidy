@@ -17,15 +17,6 @@ class CommandParsingTest(unittest.TestCase):
         result = cmd.parse([])
         self.assertFalse(hasattr(result, '_args'))
 
-    def test_sub_command_delegation(self):
-        mock_cmd = mock.Mock(spec=command.Command)
-
-        cmd = command.Command()
-        cmd.add_child('foo', mock_cmd)
-
-        cmd.parse(['foo'])
-        mock_cmd.parse.assert_called_with([], mock.ANY)
-
     def test_unknown_options_raises_error(self):
         cmd = command.Command()
         with self.assertRaises(command.CommandError):
@@ -54,22 +45,6 @@ class CommandParsingTest(unittest.TestCase):
         result = cmd.parse(['--bar', 'baz', 'foo'])
         self.assertEqual(result.bar, 'baz')
         self.assertEqual(result.baz, None)
-
-    def test_multiple_sub_commands(self):
-        mock_foo_cmd = mock.Mock(spec=command.Command)
-        mock_bar_cmd = mock.Mock(spec=command.Command)
-        mock_baz_cmd = mock.Mock(spec=command.Command)
-
-        cmd = command.Command()
-        cmd.add_child('foo', mock_foo_cmd)
-        cmd.add_child('bar', mock_bar_cmd)
-        cmd.add_child('baz', mock_baz_cmd)
-
-        cmd.parse(['bar'])
-        mock_bar_cmd.parse.assert_called_with([], mock.ANY)
-
-        cmd.parse(['baz'])
-        mock_baz_cmd.parse.assert_called_with([], mock.ANY)
 
     def test_subcommand_may_have_positional(self):
         child = command.Command()
@@ -102,6 +77,18 @@ class CommandParsingTest(unittest.TestCase):
 
         result = cmd.parse([])
         self.assertEqual(result.command, cmd)
+
+        child2 = command.Command()
+        cmd.add_child('bar', child2)
+
+        subchild = command.Command()
+        child.add_child('baz', subchild)
+
+        result = cmd.parse(['bar'])
+        self.assertEqual(result.command, child2)
+
+        result = cmd.parse(['foo', 'baz'])
+        self.assertEqual(result.command, subchild)
 
     def test_invalid_type(self):
         cmd = command.Command()
@@ -142,6 +129,34 @@ class CommandParsingTest(unittest.TestCase):
             cmd.parse(['bar'])
 
         self.assertEqual(cm.exception.message, 'too few arguments')
+
+    def test_set_defaults(self):
+        cmd = command.Command()
+        cmd.set_defaults(foo='bar')
+
+        result = cmd.parse([])
+        self.assertEqual(result.foo, 'bar')
+
+    def test_defaults_propegate(self):
+        child = command.Command()
+
+        cmd = command.Command()
+        cmd.set_defaults(foo='bar')
+        cmd.add_child('command', child)
+
+        result = cmd.parse(['command'])
+        self.assertEqual(result.foo, 'bar')
+
+    def test_innermost_defaults_wins(self):
+        child = command.Command()
+        child.set_defaults(foo='bar')
+
+        cmd = command.Command()
+        cmd.set_defaults(foo='baz')
+        cmd.add_child('command', child)
+
+        result = cmd.parse(['command'])
+        self.assertEqual(result.foo, 'bar')
 
 
 class UsageTest(unittest.TestCase):

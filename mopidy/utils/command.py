@@ -17,6 +17,7 @@ class Command(object):
     def __init__(self):
         self._children = collections.OrderedDict()
         self._arguments = []
+        self._defaults = {}
 
     def _build(self):
         actions = []
@@ -34,6 +35,9 @@ class Command(object):
 
     def add_argument(self, *args, **kwargs):
         self._arguments.append((args, kwargs))
+
+    def set_defaults(self, **kwargs):
+        self._defaults.update(kwargs)
 
     def format_usage(self, prog=None):
         actions = self._build()[1]
@@ -85,24 +89,27 @@ class Command(object):
         for childname, child in self._children.items():
             child._subhelp(' '.join((name, childname)), result)
 
-    def parse(self, args, namespace=None):
-        if not namespace:
-            namespace = argparse.Namespace()
+    def parse(self, args):
+        return self._parse(args, argparse.Namespace(), self._defaults.copy())
 
+    def _parse(self, args, namespace, defaults):
+        defaults.update(self._defaults)
         parser = self._build()[0]
         result, unknown = parser.parse_known_args(args, namespace)
 
         if unknown:
             raise CommandError('Unknown command options.')
 
-        args = result._args
-        delattr(result, '_args')
-
-        if not args:
+        if not result._args:
+            for attr, value in defaults.items():
+                if not hasattr(result, attr):
+                    setattr(result, attr, value)
+            delattr(result, '_args')
             result.command = self
             return result
 
-        if args[0] not in self._children:
+        child = self._children.get(result._args[0])
+        if not child:
             raise CommandError('Invalid sub-command provided.')
 
-        return self._children[args[0]].parse(args[1:], result)
+        return child._parse(result._args[1:], result, defaults)
