@@ -103,39 +103,72 @@ class CommandParsingTest(unittest.TestCase):
         result = cmd.parse([])
         self.assertEqual(result.command, cmd)
 
+    def test_invalid_type(self):
+        cmd = command.Command()
+        cmd.add_argument('--bar', type=int)
+
+        with self.assertRaises(command.CommandError) as cm:
+            cmd.parse(['--bar', b'zero'])
+
+        self.assertEqual(cm.exception.message,
+                         "argument --bar: invalid int value: 'zero'")
+
+    def test_missing_required(self):
+        cmd = command.Command()
+        cmd.add_argument('--bar', required=True)
+
+        with self.assertRaises(command.CommandError) as cm:
+            cmd.parse([])
+
+        self.assertEqual(cm.exception.message, 'argument --bar is required')
+
     def test_missing_positionals(self):
         cmd = command.Command()
-        cmd.add_argument('foo')
+        cmd.add_argument('bar')
 
-        with self.assertRaises(command.CommandError):
+        with self.assertRaises(command.CommandError) as cm:
             cmd.parse([])
+
+        self.assertEqual(cm.exception.message, 'too few arguments')
+
+    def test_missing_positionals_subcommand(self):
+        child = command.Command()
+        child.add_argument('baz')
+
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+
+        with self.assertRaises(command.CommandError) as cm:
+            cmd.parse(['bar'])
+
+        self.assertEqual(cm.exception.message, 'too few arguments')
 
 
 class UsageTest(unittest.TestCase):
     @mock.patch('sys.argv')
-    def test_basic_usage(self, argv_mock):
-        argv_mock.__getitem__.return_value = 'foo'
-
+    def test_prog_name_default_and_override(self, argv_mock):
+        argv_mock.__getitem__.return_value = '/usr/bin/foo'
         cmd = command.Command()
         self.assertEqual('usage: foo', cmd.format_usage().strip())
-
         self.assertEqual('usage: baz', cmd.format_usage('baz').strip())
 
+    def test_basic_usage(self):
+        cmd = command.Command()
+        self.assertEqual('usage: foo', cmd.format_usage('foo').strip())
+
         cmd.add_argument('-h', '--help', action='store_true')
-        self.assertEqual('usage: foo [-h]', cmd.format_usage().strip())
+        self.assertEqual('usage: foo [-h]', cmd.format_usage('foo').strip())
 
         cmd.add_argument('bar')
-        self.assertEqual('usage: foo [-h] bar', cmd.format_usage().strip())
+        self.assertEqual('usage: foo [-h] bar',
+                         cmd.format_usage('foo').strip())
 
-    @mock.patch('sys.argv')
-    def test_nested_usage(self, argv_mock):
-        argv_mock.__getitem__.return_value = 'foo'
-
+    def test_nested_usage(self):
         child = command.Command()
         cmd = command.Command()
         cmd.add_child('bar', child)
 
-        self.assertEqual('usage: foo', cmd.format_usage().strip())
+        self.assertEqual('usage: foo', cmd.format_usage('foo').strip())
         self.assertEqual('usage: foo bar', cmd.format_usage('foo bar').strip())
 
         cmd.add_argument('-h', '--help', action='store_true')
@@ -145,3 +178,194 @@ class UsageTest(unittest.TestCase):
         child.add_argument('-h', '--help', action='store_true')
         self.assertEqual('usage: foo bar [-h]',
                          child.format_usage('foo bar').strip())
+
+
+class HelpTest(unittest.TestCase):
+    @mock.patch('sys.argv')
+    def test_prog_name_default_and_override(self, argv_mock):
+        argv_mock.__getitem__.return_value = '/usr/bin/foo'
+        cmd = command.Command()
+        self.assertEqual('usage: foo', cmd.format_help().strip())
+        self.assertEqual('usage: bar', cmd.format_help('bar').strip())
+
+    def test_command_without_documenation_or_options(self):
+        cmd = command.Command()
+        self.assertEqual('usage: bar', cmd.format_help('bar').strip())
+
+    def test_command_with_option(self):
+        cmd = command.Command()
+        cmd.add_argument('-h', '--help', action='store_true',
+                         help='show this message')
+
+        expected = ('usage: foo [-h]\n\n'
+                    'OPTIONS:\n\n'
+                    '  -h, --help  show this message')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_command_with_option_and_positional(self):
+        cmd = command.Command()
+        cmd.add_argument('-h', '--help', action='store_true',
+                         help='show this message')
+        cmd.add_argument('bar', help='some help text')
+
+        expected = ('usage: foo [-h] bar\n\n'
+                    'OPTIONS:\n\n'
+                    '  -h, --help  show this message\n'
+                    '  bar         some help text')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_command_with_documentation(self):
+        cmd = command.Command()
+        cmd.__doc__ = 'some text about everything this command does.'
+
+        expected = ('usage: foo\n\n'
+                    'some text about everything this command does.')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_command_with_documentation_and_option(self):
+        cmd = command.Command()
+        cmd.__doc__ = 'some text about everything this command does.'
+        cmd.add_argument('-h', '--help', action='store_true',
+                         help='show this message')
+
+        expected = ('usage: foo [-h]\n\n'
+                    'some text about everything this command does.\n\n'
+                    'OPTIONS:\n\n'
+                    '  -h, --help  show this message')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_subcommand_without_documentation_or_options(self):
+        child = command.Command()
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+
+        self.assertEqual('usage: foo', cmd.format_help('foo').strip())
+
+    def test_subcommand_with_documentation_shown(self):
+        child = command.Command()
+        child.__doc__ = 'some text about everything this command does.'
+
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+        expected = ('usage: foo\n\n'
+                    'COMMANDS:\n\n'
+                    'bar\n\n'
+                    '  some text about everything this command does.')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_subcommand_with_options_shown(self):
+        child = command.Command()
+        child.add_argument('-h', '--help', action='store_true',
+                           help='show this message')
+
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+
+        expected = ('usage: foo\n\n'
+                    'COMMANDS:\n\n'
+                    'bar [-h]\n\n'
+                    '    -h, --help  show this message')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_subcommand_with_positional_shown(self):
+        child = command.Command()
+        child.add_argument('baz', help='the great and wonderful')
+
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+
+        expected = ('usage: foo\n\n'
+                    'COMMANDS:\n\n'
+                    'bar baz\n\n'
+                    '    baz  the great and wonderful')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_subcommand_with_options_and_documentation(self):
+        child = command.Command()
+        child.__doc__ = '  some text about everything this command does.'
+        child.add_argument('-h', '--help', action='store_true',
+                           help='show this message')
+
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+
+        expected = ('usage: foo\n\n'
+                    'COMMANDS:\n\n'
+                    'bar [-h]\n\n'
+                    '  some text about everything this command does.\n\n'
+                    '    -h, --help  show this message')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_nested_subcommands_with_options(self):
+        subchild = command.Command()
+        subchild.add_argument('--test', help='the great and wonderful')
+
+        child = command.Command()
+        child.add_child('baz', subchild)
+        child.add_argument('-h', '--help', action='store_true',
+                           help='show this message')
+
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+
+        expected = ('usage: foo\n\n'
+                    'COMMANDS:\n\n'
+                    'bar [-h]\n\n'
+                    '    -h, --help  show this message\n\n'
+                    'bar baz [--test TEST]\n\n'
+                    '    --test TEST  the great and wonderful')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_nested_subcommands_skipped_intermediate(self):
+        subchild = command.Command()
+        subchild.add_argument('--test', help='the great and wonderful')
+
+        child = command.Command()
+        child.add_child('baz', subchild)
+
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+
+        expected = ('usage: foo\n\n'
+                    'COMMANDS:\n\n'
+                    'bar baz [--test TEST]\n\n'
+                    '    --test TEST  the great and wonderful')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_command_with_option_and_subcommand_with_option(self):
+        child = command.Command()
+        child.add_argument('--test', help='the great and wonderful')
+
+        cmd = command.Command()
+        cmd.add_argument('-h', '--help', action='store_true',
+                         help='show this message')
+        cmd.add_child('bar', child)
+
+        expected = ('usage: foo [-h]\n\n'
+                    'OPTIONS:\n\n'
+                    '  -h, --help  show this message\n\n'
+                    'COMMANDS:\n\n'
+                    'bar [--test TEST]\n\n'
+                    '    --test TEST  the great and wonderful')
+        self.assertEqual(expected, cmd.format_help('foo').strip())
+
+    def test_command_with_options_doc_and_subcommand_with_option_and_doc(self):
+        child = command.Command()
+        child.__doc__ = 'some text about this sub-command.'
+        child.add_argument('--test', help='the great and wonderful')
+
+        cmd = command.Command()
+        cmd.__doc__ = 'some text about everything this command does.'
+        cmd.add_argument('-h', '--help', action='store_true',
+                         help='show this message')
+        cmd.add_child('bar', child)
+
+        expected = ('usage: foo [-h]\n\n'
+                    'some text about everything this command does.\n\n'
+                    'OPTIONS:\n\n'
+                    '  -h, --help  show this message\n\n'
+                    'COMMANDS:\n\n'
+                    'bar [--test TEST]\n\n'
+                    '  some text about this sub-command.\n\n'
+                    '    --test TEST  the great and wonderful')
+        self.assertEqual(expected, cmd.format_help('foo').strip())

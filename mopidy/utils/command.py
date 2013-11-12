@@ -1,5 +1,6 @@
 import argparse
 import collections
+import os
 import sys
 
 
@@ -24,11 +25,8 @@ class Command(object):
         for args, kwargs in self._arguments:
             actions.append(parser.add_argument(*args, **kwargs))
 
-        if self._children:
-            parser.add_argument('_args', nargs=argparse.REMAINDER)
-        else:
-            parser.set_defaults(_args=[])
-
+        parser.add_argument('_args', nargs=argparse.REMAINDER,
+                            help=argparse.SUPPRESS)
         return parser, actions
 
     def add_child(self, name, command):
@@ -39,9 +37,53 @@ class Command(object):
 
     def format_usage(self, prog=None):
         actions = self._build()[1]
-        formatter = argparse.HelpFormatter(prog or sys.argv[0])
+        prog = prog or os.path.basename(sys.argv[0])
+        formatter = argparse.HelpFormatter(prog)
         formatter.add_usage(None, actions, [])
         return formatter.format_help()
+
+    def format_help(self, prog=None):
+        actions = self._build()[1]
+        prog = prog or os.path.basename(sys.argv[0])
+
+        formatter = argparse.HelpFormatter(prog)
+        formatter.add_usage(None, actions, [])
+
+        if self.__doc__:
+            formatter.add_text(self.__doc__)
+
+        if actions:
+            formatter.add_text('OPTIONS:')
+            formatter.start_section(None)
+            formatter.add_arguments(actions)
+            formatter.end_section()
+
+        subhelp = []
+        for name, child in self._children.items():
+            child._subhelp(name, subhelp)
+
+        if subhelp:
+            formatter.add_text('COMMANDS:')
+            subhelp.insert(0, '')
+
+        return formatter.format_help() + '\n'.join(subhelp)
+
+    def _subhelp(self, name, result):
+        actions = self._build()[1]
+
+        if self.__doc__ or actions:
+            formatter = argparse.HelpFormatter(name)
+            formatter.add_usage(None, actions, [], '')
+            formatter.start_section(None)
+            formatter.add_text(self.__doc__)
+            formatter.start_section(None)
+            formatter.add_arguments(actions)
+            formatter.end_section()
+            formatter.end_section()
+            result.append(formatter.format_help())
+
+        for childname, child in self._children.items():
+            child._subhelp(' '.join((name, childname)), result)
 
     def parse(self, args, namespace=None):
         if not namespace:
