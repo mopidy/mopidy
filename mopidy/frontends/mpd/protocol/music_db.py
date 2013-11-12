@@ -106,7 +106,7 @@ def find(context, mpd_query):
             'composer' not in query and
             'performer' not in query):
         result_tracks += [_artist_as_track(a) for a in _get_artists(results)]
-    if 'album' not in query and 'genre' not in query:
+    if 'album' not in query:
         result_tracks += [_album_as_track(a) for a in _get_albums(results)]
     result_tracks += _get_tracks(results)
     return translator.tracks_to_mpd_format(result_tracks)

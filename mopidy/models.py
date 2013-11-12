@@ -219,10 +219,10 @@ class Track(ImmutableObject):
     :type artists: list of :class:`Artist`
     :param album: track album
     :type album: :class:`Album`
-    :param composer: track composer
-    :type composer: string
-    :param performer: track performer
-    :type performer: string
+    :param composers: track composers
+    :type composers: string
+    :param performers: track performers
+    :type performers: string
     :param genre: track genre
     :type genre: string
     :param track_no: track number in album

@@ -48,8 +48,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
             uri='local:track:path4', name='track4',
             artists=[artists[2]], album=albums[3],
             date='2004', length=60000, track_no=4,
-            comment='Music server with support for MPD/HTTP clients '
-            'and Spotify streaming http://www.mopidy.com'),
+            comment='This is a fantastic track'),
         Track(
             uri='local:track:path5', name='track5', genre='genre1',
             album=albums[3], length=4000, composers=[artists[4]]),
@@ -242,12 +241,11 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
     def test_find_exact_comment(self):
         result = self.library.find_exact(
-            comment=['Music server with support for MPD/HTTP clients '
-                     'and Spotify streaming http://www.mopidy.com'])
+            comment=['This is a fantastic track'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
         result = self.library.find_exact(
-            comment=['Music server with support for MPD/HTTP clients'])
+            comment=['This is a fantastic'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_find_exact_any(self):
@@ -295,8 +293,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track comment
         result = self.library.find_exact(
-            any=['Music server with support for MPD/HTTP clients '
-                 'and Spotify streaming http://www.mopidy.com'])
+            any=['This is a fantastic track'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
         # Matches on URI
@@ -458,10 +455,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_comment(self):
-        result = self.library.search(comment=['mopidy'])
+        result = self.library.search(comment=['fantastic'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
-        result = self.library.search(comment=['Potify'])
+        result = self.library.search(comment=['antasti'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
     def test_search_any(self):
@@ -501,10 +498,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
         # Matches on track comment
-        result = self.library.search(any=['http'])
+        result = self.library.search(any=['fanta'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
-        result = self.library.search(any=['streaming'])
+        result = self.library.search(any=['is a fan'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
         # Matches on URI
