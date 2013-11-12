@@ -13,11 +13,48 @@ v0.17.0 (UNRELEASED)
 - The search field ``track`` has been renamed to ``track_name`` to avoid
   confusion with ``track_no``. (Fixes: :issue:`535`)
 
+- The signature of the tracklist's
+  :meth:`~mopidy.core.TracklistController.filter` and
+  :meth:`~mopidy.core.TracklistController.remove` methods have changed.
+  Previously, they expected e.g. ``tracklist.filter(tlid=17)``. Now, the value
+  must always be a list, e.g. ``tracklist.filter(tlid=[17])``. This change
+  allows you to get or remove multiple tracks with a single call, e.g.
+  ``tracklist.remove(tlid=[1, 2, 7])``. This is especially useful for web
+  clients, as requests can be batched. This also brings the interface closer to
+  the library's :meth:`~mopidy.core.LibraryController.find_exact` and
+  :meth:`~mopidy.core.LibraryController.search` methods.
+
 **Local backend**
+
+- Library scanning has been switched back to custom code due to various issues
+  with GStreamer's built in scanner in 0.10. This also fixes the scanner
+  slowdown. (Fixes: :issue:`565`)
 
 - When scanning, we no longer default the album artist to be the same as the
   track artist. Album artist is now only populated if the scanned file got an
   explicit album artist set.
+
+- The scanner will now extract multiple artists from files with multiple artist
+  tags.
+
+- Fix scanner so that time of last modification is respected when deciding
+  which files can be skipped.
+
+**MPD frontend**
+
+- The MPD service is now published as a Zeroconf service if avahi-daemon is
+  running on the system. Some MPD clients will use this to present Mopidy as an
+  available server on the local network without needing any configuration. See
+  the :confval:`mpd/zeroconf` config value to change the service name or
+  disable the service. (Fixes: :issue:`39`)
+
+**HTTP frontend**
+
+- The HTTP service is now published as a Zeroconf service if avahi-daemon is
+  running on the system. Some browsers will present HTTP Zeroconf services on
+  the local network as "local sites" bookmarks. See the
+  :confval:`http/zeroconf` config value to change the service name or disable
+  the service. (Fixes: :issue:`39`)
 
 
 v0.16.1 (2013-11-02)
