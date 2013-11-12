@@ -46,10 +46,17 @@ class TranslatorTest(unittest.TestCase):
             'musicbrainz_id': 'mbalbumid',
         }
 
-        self.artist = {
+        self.artist_single = {
             'name': 'name',
             'musicbrainz_id': 'mbartistid',
         }
+
+        self.artist_multiple = {
+            'name': ['name1', 'name2'],
+            'musicbrainz_id': 'mbartistid',
+        }
+
+        self.artist = self.artist_single
 
         self.albumartist = {
             'name': 'albumartistname',
@@ -71,7 +78,14 @@ class TranslatorTest(unittest.TestCase):
         if self.albumartist:
             self.album['artists'] = [Artist(**self.albumartist)]
         self.track['album'] = Album(**self.album)
-        self.track['artists'] = [Artist(**self.artist)]
+
+        if ('name' in self.artist
+                and not isinstance(self.artist['name'], basestring)):
+            self.track['artists'] = [Artist(name=artist)
+                                     for artist in self.artist['name']]
+        else:
+            self.track['artists'] = [Artist(**self.artist)]
+
         return Track(**self.track)
 
     def check(self):
@@ -120,6 +134,12 @@ class TranslatorTest(unittest.TestCase):
     def test_missing_artist_musicbrainz_id(self):
         del self.data['musicbrainz-artistid']
         del self.artist['musicbrainz_id']
+        self.check()
+
+    def test_multiple_track_artists(self):
+        self.data['artist'] = ['name1', 'name2']
+        self.data['musicbrainz-artistid'] = 'mbartistid'
+        self.artist = self.artist_multiple
         self.check()
 
     def test_missing_album_artist(self):

@@ -12,9 +12,8 @@ def setup_logging(config, verbosity_level, save_debug_log):
     setup_console_logging(config, verbosity_level)
     if save_debug_log:
         setup_debug_logging_to_file(config)
-    if hasattr(logging, 'captureWarnings'):
-        # New in Python 2.7
-        logging.captureWarnings(True)
+
+    logging.captureWarnings(True)
 
     if config['logging']['config_file']:
         logging.config.fileConfig(config['logging']['config_file'])
