@@ -95,28 +95,46 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_argument('--bar', type=int)
 
         with self.assertRaises(command.CommandError) as cm:
-            cmd.parse(['--bar', b'zero'])
+            cmd.parse(['--bar', b'zero'], prog='foo')
 
         self.assertEqual(cm.exception.message,
                          "argument --bar: invalid int value: 'zero'")
+        self.assertEqual(cm.exception.usage, 'usage: foo [--bar BAR]')
+
+    @mock.patch('sys.argv')
+    def test_command_error_usage_prog(self, argv_mock):
+        argv_mock.__getitem__.return_value = '/usr/bin/foo'
+
+        cmd = command.Command()
+        cmd.add_argument('--bar', required=True)
+
+        with self.assertRaises(command.CommandError) as cm:
+            cmd.parse([])
+        self.assertEqual(cm.exception.usage, 'usage: foo --bar BAR')
+
+        with self.assertRaises(command.CommandError) as cm:
+            cmd.parse([], prog='baz')
+        self.assertEqual(cm.exception.usage, 'usage: baz --bar BAR')
 
     def test_missing_required(self):
         cmd = command.Command()
         cmd.add_argument('--bar', required=True)
 
         with self.assertRaises(command.CommandError) as cm:
-            cmd.parse([])
+            cmd.parse([], prog='foo')
 
         self.assertEqual(cm.exception.message, 'argument --bar is required')
+        self.assertEqual(cm.exception.usage, 'usage: foo --bar BAR')
 
     def test_missing_positionals(self):
         cmd = command.Command()
         cmd.add_argument('bar')
 
         with self.assertRaises(command.CommandError) as cm:
-            cmd.parse([])
+            cmd.parse([], prog='foo')
 
         self.assertEqual(cm.exception.message, 'too few arguments')
+        self.assertEqual(cm.exception.usage, 'usage: foo bar')
 
     def test_missing_positionals_subcommand(self):
         child = command.Command()
@@ -126,9 +144,30 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_child('bar', child)
 
         with self.assertRaises(command.CommandError) as cm:
-            cmd.parse(['bar'])
+            cmd.parse(['bar'], prog='foo')
 
         self.assertEqual(cm.exception.message, 'too few arguments')
+        self.assertEqual(cm.exception.usage, 'usage: foo bar baz')
+
+    def test_unknown_command(self):
+        cmd = command.Command()
+
+        with self.assertRaises(command.CommandError) as cm:
+            cmd.parse(['--help'], prog='foo')
+
+        self.assertEqual(
+            cm.exception.message, 'unrecognized arguments: --help')
+        self.assertEqual(cm.exception.usage, 'usage: foo')
+
+    def test_invalid_subcommand(self):
+        cmd = command.Command()
+        cmd.add_child('baz', command.Command())
+
+        with self.assertRaises(command.CommandError) as cm:
+            cmd.parse(['bar'], prog='foo')
+
+        self.assertEqual(cm.exception.message, 'unrecognized command: bar')
+        self.assertEqual(cm.exception.usage, 'usage: foo')
 
     def test_set_defaults(self):
         cmd = command.Command()
