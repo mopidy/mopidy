@@ -16,6 +16,7 @@ sys.argv[1:] = []
 
 from mopidy import config as config_lib, exceptions, ext
 from mopidy.audio import scan
+from mopidy.backends.local import translator
 from mopidy.utils import log, path, versioning
 
 
@@ -66,6 +67,8 @@ def main():
     media_dir = config['local']['media_dir']
     excluded_extensions = config['local']['excluded_file_extensions']
 
+    # TODO: cleanup to consistently use local urls, not a random mix of local
+    # and file uris depending on how the data was loaded.
     uris_library = set()
     uris_update = set()
     uris_remove = set()
@@ -73,20 +76,20 @@ def main():
     logging.info('Checking tracks from library.')
     for track in local_updater.load():
         try:
-            # TODO: convert local to file uri / path
-            stat = os.stat(path.uri_to_path(track.uri))
+            uri = translator.local_to_file_uri(track.uri, media_dir)
+            stat = os.stat(path.uri_to_path(uri))
             if int(stat.st_mtime) > track.last_modified:
-                uris_update.add(track.uri)
-            uris_library.add(track.uri)
+                uris_update.add(uri)
+            uris_library.add(uri)
         except OSError:
             logging.debug('Missing file %s', track.uri)
             uris_remove.add(track.uri)
 
-    logging.info('Removing %d moved or deleted tracks.', len(uris_remove))
+    logging.info('Removing %d missing tracks.', len(uris_remove))
     for uri in uris_remove:
         local_updater.remove(uri)
 
-    logging.info('Checking %s for new or modified tracks.', media_dir)
+    logging.info('Checking %s for unknown tracks.', media_dir)
     for uri in path.find_uris(config['local']['media_dir']):
         if os.path.splitext(path.uri_to_path(uri))[1] in excluded_extensions:
             logging.debug('Skipped %s: File extension excluded.', uri)
@@ -95,8 +98,8 @@ def main():
         if uri not in uris_library:
             uris_update.add(uri)
 
-    logging.info('Found %d new or modified tracks.', len(uris_update))
-    logging.info('Scanning new and modified tracks.')
+    logging.info('Found %d unknown tracks.', len(uris_update))
+    logging.info('Scanning...')
 
     scanner = scan.Scanner(config['local']['scan_timeout'])
     progress = Progress(len(uris_update))
