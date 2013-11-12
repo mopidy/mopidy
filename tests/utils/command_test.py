@@ -103,6 +103,13 @@ class CommandParsingTest(unittest.TestCase):
         result = cmd.parse([])
         self.assertEqual(result.command, cmd)
 
+    def test_missing_positionals(self):
+        cmd = command.Command()
+        cmd.add_argument('foo')
+
+        with self.assertRaises(command.CommandError):
+            cmd.parse([])
+
 
 class UsageTest(unittest.TestCase):
     @mock.patch('sys.argv')

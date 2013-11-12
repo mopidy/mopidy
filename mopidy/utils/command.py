@@ -7,6 +7,11 @@ class CommandError(Exception):
     pass
 
 
+class ArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        raise CommandError(message)
+
+
 class Command(object):
     def __init__(self):
         self._children = collections.OrderedDict()
@@ -14,7 +19,7 @@ class Command(object):
 
     def _build(self):
         actions = []
-        parser = argparse.ArgumentParser(add_help=False)
+        parser = ArgumentParser(add_help=False)
 
         for args, kwargs in self._arguments:
             actions.append(parser.add_argument(*args, **kwargs))
