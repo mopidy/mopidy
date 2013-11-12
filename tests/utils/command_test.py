@@ -434,3 +434,9 @@ class CommandErrorTest(unittest.TestCase):
     def test_str_command_error(self):
         error = command.CommandError('message', usage='usage: foo')
         self.assertEqual(str(error), 'usage: foo\n\nerror: message\n')
+
+
+class RunTest(unittest.TestCase):
+    def test_default_implmentation_raises_error(self):
+        with self.assertRaises(NotImplementedError):
+            command.Command().run()

@@ -127,3 +127,6 @@ class Command(object):
 
         return self._children[child]._parse(
             result._args, result, defaults, ' '.join([prog, child]))
+
+    def run(self, *args, **kwargs):
+        raise NotImplementedError
