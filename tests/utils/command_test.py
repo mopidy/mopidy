@@ -102,3 +102,39 @@ class CommandParsingTest(unittest.TestCase):
 
         result = cmd.parse([])
         self.assertEqual(result.command, cmd)
+
+
+class UsageTest(unittest.TestCase):
+    @mock.patch('sys.argv')
+    def test_basic_usage(self, argv_mock):
+        argv_mock.__getitem__.return_value = 'foo'
+
+        cmd = command.Command()
+        self.assertEqual('usage: foo', cmd.format_usage().strip())
+
+        self.assertEqual('usage: baz', cmd.format_usage('baz').strip())
+
+        cmd.add_argument('-h', '--help', action='store_true')
+        self.assertEqual('usage: foo [-h]', cmd.format_usage().strip())
+
+        cmd.add_argument('bar')
+        self.assertEqual('usage: foo [-h] bar', cmd.format_usage().strip())
+
+    @mock.patch('sys.argv')
+    def test_nested_usage(self, argv_mock):
+        argv_mock.__getitem__.return_value = 'foo'
+
+        child = command.Command()
+        cmd = command.Command()
+        cmd.add_child('bar', child)
+
+        self.assertEqual('usage: foo', cmd.format_usage().strip())
+        self.assertEqual('usage: foo bar', cmd.format_usage('foo bar').strip())
+
+        cmd.add_argument('-h', '--help', action='store_true')
+        self.assertEqual('usage: foo bar',
+                         child.format_usage('foo bar').strip())
+
+        child.add_argument('-h', '--help', action='store_true')
+        self.assertEqual('usage: foo bar [-h]',
+                         child.format_usage('foo bar').strip())

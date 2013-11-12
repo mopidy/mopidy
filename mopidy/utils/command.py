@@ -1,5 +1,6 @@
 import argparse
 import collections
+import sys
 
 
 class CommandError(Exception):
@@ -11,18 +12,19 @@ class Command(object):
         self._children = collections.OrderedDict()
         self._arguments = []
 
-    def _build_parser(self):
+    def _build(self):
+        actions = []
         parser = argparse.ArgumentParser(add_help=False)
 
         for args, kwargs in self._arguments:
-            parser.add_argument(*args, **kwargs)
+            actions.append(parser.add_argument(*args, **kwargs))
 
         if self._children:
             parser.add_argument('_args', nargs=argparse.REMAINDER)
         else:
             parser.set_defaults(_args=[])
 
-        return parser
+        return parser, actions
 
     def add_child(self, name, command):
         self._children[name] = command
@@ -30,11 +32,17 @@ class Command(object):
     def add_argument(self, *args, **kwargs):
         self._arguments.append((args, kwargs))
 
+    def format_usage(self, prog=None):
+        actions = self._build()[1]
+        formatter = argparse.HelpFormatter(prog or sys.argv[0])
+        formatter.add_usage(None, actions, [])
+        return formatter.format_help()
+
     def parse(self, args, namespace=None):
         if not namespace:
             namespace = argparse.Namespace()
 
-        parser = self._build_parser()
+        parser = self._build()[0]
         result, unknown = parser.parse_known_args(args, namespace)
 
         if unknown:
