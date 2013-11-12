@@ -105,6 +105,8 @@ def audio_data_to_track(data):
     albumartist_kwargs = {}
     album_kwargs = {}
     artist_kwargs = {}
+    composer_kwargs = {}
+    performer_kwargs = {}
     track_kwargs = {}
 
     def _retrieve(source_key, target_key, target):
@@ -115,6 +117,22 @@ def audio_data_to_track(data):
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
     _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs)
     _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
+    _retrieve(gst.TAG_COMPOSER, 'name', composer_kwargs)
+    _retrieve(gst.TAG_PERFORMER, 'name', performer_kwargs)
+    _retrieve(gst.TAG_ALBUM_ARTIST, 'name', albumartist_kwargs)
+    _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
+    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
+    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
+    _retrieve(gst.TAG_GENRE, 'genre', track_kwargs)
+    _retrieve(gst.TAG_BITRATE, 'bitrate', track_kwargs)
+
+    # Following keys don't seem to have TAG_* constant.
+    _retrieve('comment', 'comment', track_kwargs)
+    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
+    _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
+    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
+    _retrieve(
+        'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if gst.TAG_DATE in data and data[gst.TAG_DATE]:
         date = data[gst.TAG_DATE]
@@ -124,18 +142,6 @@ def audio_data_to_track(data):
             pass  # Ignore invalid dates
         else:
             track_kwargs['date'] = date.isoformat()
-
-    _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
-    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
-    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
-
-    # Following keys don't seem to have TAG_* constant.
-    _retrieve('album-artist', 'name', albumartist_kwargs)
-    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
-    _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
-    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
-    _retrieve(
-        'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
@@ -151,5 +157,21 @@ def audio_data_to_track(data):
                                    for artist in artist_kwargs['name']]
     else:
         track_kwargs['artists'] = [Artist(**artist_kwargs)]
+
+    if ('name' in composer_kwargs
+            and not isinstance(composer_kwargs['name'], basestring)):
+        track_kwargs['composers'] = [Artist(name=artist)
+                                     for artist in composer_kwargs['name']]
+    else:
+        track_kwargs['composers'] = \
+            [Artist(**composer_kwargs)] if composer_kwargs else ''
+
+    if ('name' in performer_kwargs
+            and not isinstance(performer_kwargs['name'], basestring)):
+        track_kwargs['performers'] = [Artist(name=artist)
+                                      for artist in performer_kwargs['name']]
+    else:
+        track_kwargs['performers'] = \
+            [Artist(**performer_kwargs)] if performer_kwargs else ''
 
     return Track(**track_kwargs)

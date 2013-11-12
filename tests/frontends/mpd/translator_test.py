@@ -17,7 +17,12 @@ class TrackMpdFormatTest(unittest.TestCase):
         album=Album(name='an album', num_tracks=13,
             artists=[Artist(name='an other artist')]),
         track_no=7,
+        composers=[Artist(name='a composer')],
+        performers=[Artist(name='a performer')],
+        genre='a genre',
         date=datetime.date(1977, 1, 1),
+        disc_no='1',
+        comment='a comment',
         length=137000,
     )
 
@@ -36,8 +41,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Title', ''), result)
         self.assertIn(('Album', ''), result)
         self.assertIn(('Track', 0), result)
-        self.assertIn(('Date', ''), result)
-        self.assertEqual(len(result), 7)
+        self.assertNotIn(('Date', ''), result)
+        self.assertEqual(len(result), 6)
 
     def test_track_to_mpd_format_with_position(self):
         result = translator.track_to_mpd_format(Track(), position=1)
@@ -62,11 +67,16 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Title', 'a name'), result)
         self.assertIn(('Album', 'an album'), result)
         self.assertIn(('AlbumArtist', 'an other artist'), result)
+        self.assertIn(('Composer', 'a composer'), result)
+        self.assertIn(('Performer', 'a performer'), result)
+        self.assertIn(('Genre', 'a genre'), result)
         self.assertIn(('Track', '7/13'), result)
         self.assertIn(('Date', datetime.date(1977, 1, 1)), result)
+        self.assertIn(('Disc', '1'), result)
+        self.assertIn(('Comment', 'a comment'), result)
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)
-        self.assertEqual(len(result), 10)
+        self.assertEqual(len(result), 15)
 
     def test_track_to_mpd_format_musicbrainz_trackid(self):
         track = self.track.copy(musicbrainz_id='foo')

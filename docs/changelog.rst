@@ -56,6 +56,11 @@ v0.17.0 (UNRELEASED)
   :confval:`http/zeroconf` config value to change the service name or disable
   the service. (Fixes: :issue:`39`)
 
+**MPD frontend**
+
+- Add support for ``composer``, ``comment``, ``genre``, and ``performer``.
+  These tags can be used with ``list ...``, ``search ...``, and
+  ``find ...`` and their variants, and are supported in the ``any`` tag also
 
 v0.16.1 (2013-11-02)
 ====================
