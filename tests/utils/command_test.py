@@ -423,3 +423,14 @@ class HelpTest(unittest.TestCase):
                     '  some text about this sub-command.\n\n'
                     '    --test TEST  the great and wonderful')
         self.assertEqual(expected, cmd.format_help('foo').strip())
+
+
+class CommandErrorTest(unittest.TestCase):
+    def test_args_get_stored(self):
+        error = command.CommandError('message', usage='usage: foo')
+        self.assertEqual(error.message, 'message')
+        self.assertEqual(error.usage, 'usage: foo')
+
+    def test_str_command_error(self):
+        error = command.CommandError('message', usage='usage: foo')
+        self.assertEqual(str(error), 'usage: foo\n\nerror: message\n')

@@ -9,6 +9,9 @@ class CommandError(Exception):
         self.message = message
         self.usage = usage
 
+    def __str__(self):
+        return '%s\n\nerror: %s\n' % (self.usage, self.message)
+
 
 class ArgumentParser(argparse.ArgumentParser):
     def error(self, message):
