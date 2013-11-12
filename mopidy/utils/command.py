@@ -7,8 +7,7 @@ class CommandError(Exception):
 
 
 class Command(object):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
         self._children = collections.OrderedDict()
         self._arguments = []
 
@@ -25,8 +24,8 @@ class Command(object):
 
         return parser
 
-    def add_child(self, command):
-        self._children[command.name] = command
+    def add_child(self, name, command):
+        self._children[name] = command
 
     def add_argument(self, *args, **kwargs):
         self._arguments.append((args, kwargs))
