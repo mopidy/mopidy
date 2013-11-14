@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 import copy
 
+from mopidy.utils import command
+
 
 class Backend(object):
     #: Actor proxy to an instance of :class:`mopidy.audio.Audio`.
@@ -281,6 +283,12 @@ class BasePlaylistsProvider(object):
         raise NotImplementedError
 
 
+# Re-exporting from this location for backends.
+class Command(command.Command):
+    pass
+
+
+# TODO: remove
 class BaseSubCommandProvider(object):
     """Sub-classes may optionally add arguments to the passed in parser.
 
