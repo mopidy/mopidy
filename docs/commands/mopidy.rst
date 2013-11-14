@@ -21,7 +21,7 @@ combines results from all music sources, and you can mix tracks from all
 sources in your play queue. Your playlists from Spotify or SoundCloud are also
 available for use.
 
-The ``mopidy run`` command is used to start the server.
+The ``mopidy`` command is used to start the server.
 
 
 Options
@@ -109,7 +109,7 @@ Examples
 
 To start the music server, run::
 
-    mopidy run
+    mopidy
 
 To start the server with an additional config file than can override configs
 set in the default config files, run::

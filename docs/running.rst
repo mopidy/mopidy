@@ -4,7 +4,7 @@ Running Mopidy
 
 To start Mopidy, simply open a terminal and run::
 
-    mopidy run
+    mopidy
 
 For a complete reference to the Mopidy commands and their command line options,
 see :ref:`mopidy-cmd`.

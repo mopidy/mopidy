@@ -71,13 +71,13 @@ v0.17.0 (UNRELEASED)
 - Switched to sub-commands for the ``mopidy`` command , this implies the
   following changes (fixes :issue:`437`):
 
-  ===================== =============
+  ===================== =================
   Old command           New command
-  ===================== =============
-  mopidy                mopidy run
+  ===================== =================
+  mopidy                mopidy
   mopidy --show-deps    mopidy deps
   mopidy --show-config  mopidy config
-  mopidy-scan           mopidy scan
+  mopidy-scan           mopidy local scan
 
 - Added hooks for extensions to create their own custom sub-commands and
   converted ``mopidy-scan`` as first user of new API (Fixes :issue:`436`).
