@@ -14,9 +14,14 @@ from . import translator
 logger = logging.getLogger('mopidy.backends.local.scan')
 
 
-class ScanSubCommand(base.BaseSubCommandProvider):
-    name = 'scan'
-    help = 'scan local media files'
+class LocalCommand(base.Command):
+    def __init__(self):
+        super(LocalCommand, self).__init__()
+        self.add_child('scan', ScanCommand())
+
+
+class ScanCommand(base.Command):
+    """Scan local media files"""
 
     def run(self, args, config, extensions):
         media_dir = config['local']['media_dir']
