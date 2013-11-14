@@ -197,6 +197,16 @@ class CommandParsingTest(unittest.TestCase):
         result = cmd.parse(['command'])
         self.assertEqual(result.foo, 'bar')
 
+    def test_help_action_works(self):
+        cmd = command.Command()
+        cmd.add_argument('-h', action='help')
+        cmd.format_help = mock.Mock()
+        cmd.exit = mock.Mock()
+
+        cmd.parse(['-h'])
+        cmd.format_help.assert_called_once_with(mock.ANY)
+        cmd.exit.assert_called_once_with(0)
+
 
 class UsageTest(unittest.TestCase):
     @mock.patch('sys.argv')

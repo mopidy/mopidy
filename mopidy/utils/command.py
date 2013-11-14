@@ -18,6 +18,23 @@ class ArgumentParser(argparse.ArgumentParser):
         raise CommandError(message)
 
 
+class _HelpError(Exception):
+    """Internal exception used to trigger help code path."""
+
+
+class _HelpAction(argparse.Action):
+    def __init__(self, option_strings, dest=None, help=None):
+        super(_HelpAction, self).__init__(
+            option_strings=option_strings,
+            dest=dest or argparse.SUPPRESS,
+            default=argparse.SUPPRESS,
+            nargs=0,
+            help=help)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        raise _HelpError()
+
+
 class Command(object):
     def __init__(self):
         self._children = collections.OrderedDict()
@@ -27,6 +44,7 @@ class Command(object):
     def _build(self):
         actions = []
         parser = ArgumentParser(add_help=False)
+        parser.register('action', 'help', _HelpAction)
 
         for args, kwargs in self._arguments:
             actions.append(parser.add_argument(*args, **kwargs))
@@ -43,6 +61,9 @@ class Command(object):
 
     def set_defaults(self, **kwargs):
         self._defaults.update(kwargs)
+
+    def exit(self, return_code):
+        sys.exit(return_code)
 
     def format_usage(self, prog=None):
         actions = self._build()[1]
@@ -99,8 +120,12 @@ class Command(object):
 
     def parse(self, args, prog=None):
         prog = prog or os.path.basename(sys.argv[0])
-        return self._parse(
-            args, argparse.Namespace(), self._defaults.copy(), prog)
+        try:
+            return self._parse(
+                args, argparse.Namespace(), self._defaults.copy(), prog)
+        except _HelpError:
+            print self.format_help(prog)
+            self.exit(0)
 
     def _parse(self, args, namespace, defaults, prog):
         defaults.update(self._defaults)
