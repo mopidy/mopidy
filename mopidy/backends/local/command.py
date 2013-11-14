@@ -6,21 +6,20 @@ import time
 
 from mopidy import exceptions
 from mopidy.audio import scan
-from mopidy.backends import base
-from mopidy.utils import path
+from mopidy.utils import command, path
 
 from . import translator
 
 logger = logging.getLogger('mopidy.backends.local.scan')
 
 
-class LocalCommand(base.Command):
+class LocalCommand(command.Command):
     def __init__(self):
         super(LocalCommand, self).__init__()
         self.add_child('scan', ScanCommand())
 
 
-class ScanCommand(base.Command):
+class ScanCommand(command.Command):
     """Scan local media files"""
 
     def run(self, args, config, extensions):

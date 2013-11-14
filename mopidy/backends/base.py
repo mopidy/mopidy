@@ -2,8 +2,6 @@ from __future__ import unicode_literals
 
 import copy
 
-from mopidy.utils import command
-
 
 class Backend(object):
     #: Actor proxy to an instance of :class:`mopidy.audio.Audio`.
@@ -279,44 +277,5 @@ class BasePlaylistsProvider(object):
         See :meth:`mopidy.core.PlaylistsController.save`.
 
         *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
-
-# Re-exporting from this location for backends.
-class Command(command.Command):
-    pass
-
-
-# TODO: remove
-class BaseSubCommandProvider(object):
-    """Sub-classes may optionally add arguments to the passed in parser.
-
-    :param parser: parser you may add arguments to
-    :type parser: :class:`argparse.ArgumentParser`
-    """
-
-    name = None
-    """What the sub-command should be called. Will be run as ``mopidy NAME``.
-
-    Will be converted to :type:`bytes` and should be limited to ASCII
-    characters.  Example: ``scan``
-    """
-
-    help = None
-    """Optional help text for the sub-command, will be displayed in help."""
-
-    def __init__(self, parser):
-        pass
-
-    def run(self, args, config, extensions):
-        """Run the sub-command implemented by this provider.
-
-        *MUST be implemented by subclass.*
-
-        :param args: the argments object from argparse
-        :param config: read-only version of the mopidy config
-        :param extensions: list of enabled extensions
-        :returns: integer exit value for the process
         """
         raise NotImplementedError

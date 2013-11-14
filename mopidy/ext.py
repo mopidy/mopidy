@@ -87,15 +87,12 @@ class Extension(object):
         """
         return []
 
-    def get_sub_commads(self):
-        # TODO: remove
-        return []
-
     def get_command(self):
         """Command to expose to command line users running mopidy.
 
         :returns:
-          :class:`~mopidy.backends.base.Command` instance
+          Instance of a :class:`~mopidy.utils.command.Command` class
+          or sub-class.
         """
         pass
 
