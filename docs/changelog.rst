@@ -10,6 +10,9 @@ v0.17.0 (UNRELEASED)
 
 **Core**
 
+- The :class:`~mopidy.models.Track` model has grown fields for ``composers``,
+  ``performers``, ``genre``, and ``comment``.
+
 - The search field ``track`` has been renamed to ``track_name`` to avoid
   confusion with ``track_no``. (Fixes: :issue:`535`)
 
@@ -37,6 +40,9 @@ v0.17.0 (UNRELEASED)
 - The scanner will now extract multiple artists from files with multiple artist
   tags.
 
+- The scanner will now extract composers and performers, as well as genre,
+  bitrate, and comments. (Fixes: :issue:`577`)
+
 - Fix scanner so that time of last modification is respected when deciding
   which files can be skipped.
 
@@ -48,6 +54,10 @@ v0.17.0 (UNRELEASED)
   the :confval:`mpd/zeroconf` config value to change the service name or
   disable the service. (Fixes: :issue:`39`)
 
+- Add support for ``composer``, ``performer``, ``comment``, ``genre``, and
+  ``performer``.  These tags can be used with ``list ...``, ``search ...``, and
+  ``find ...`` and their variants, and are supported in the ``any`` tag also
+
 **HTTP frontend**
 
 - The HTTP service is now published as a Zeroconf service if avahi-daemon is
@@ -56,11 +66,6 @@ v0.17.0 (UNRELEASED)
   :confval:`http/zeroconf` config value to change the service name or disable
   the service. (Fixes: :issue:`39`)
 
-**MPD frontend**
-
-- Add support for ``composer``, ``comment``, ``genre``, and ``performer``.
-  These tags can be used with ``list ...``, ``search ...``, and
-  ``find ...`` and their variants, and are supported in the ``any`` tag also
 
 v0.16.1 (2013-11-02)
 ====================
