@@ -8,6 +8,14 @@ from mopidy.utils import command
 
 
 class CommandParsingTest(unittest.TestCase):
+    def setUp(self):
+        self.exit_patcher = mock.patch.object(command.Command, 'exit')
+        self.exit_mock = self.exit_patcher.start()
+        self.exit_mock.side_effect = SystemExit
+
+    def tearDown(self):
+        self.exit_patcher.stop()
+
     def test_command_parsing_returns_namespace(self):
         cmd = command.Command()
         self.assertIsInstance(cmd.parse([]), argparse.Namespace)
@@ -17,14 +25,14 @@ class CommandParsingTest(unittest.TestCase):
         result = cmd.parse([])
         self.assertFalse(hasattr(result, '_args'))
 
-    def test_unknown_options_raises_error(self):
+    def test_unknown_options_bails(self):
         cmd = command.Command()
-        with self.assertRaises(command.CommandError):
+        with self.assertRaises(SystemExit):
             cmd.parse(['--foobar'])
 
-    def test_invalid_sub_command_raises_error(self):
+    def test_invalid_sub_command_bails(self):
         cmd = command.Command()
-        with self.assertRaises(command.CommandError):
+        with self.assertRaises(SystemExit):
             cmd.parse(['foo'])
 
     def test_command_arguments(self):
@@ -94,12 +102,12 @@ class CommandParsingTest(unittest.TestCase):
         cmd = command.Command()
         cmd.add_argument('--bar', type=int)
 
-        with self.assertRaises(command.CommandError) as cm:
+        with self.assertRaises(SystemExit):
             cmd.parse(['--bar', b'zero'], prog='foo')
 
-        self.assertEqual(cm.exception.message,
-                         "argument --bar: invalid int value: 'zero'")
-        self.assertEqual(cm.exception.usage, 'usage: foo [--bar BAR]')
+        self.exit_mock.assert_called_once_with(
+            1, "argument --bar: invalid int value: 'zero'",
+            'usage: foo [--bar BAR]')
 
     @mock.patch('sys.argv')
     def test_command_error_usage_prog(self, argv_mock):
@@ -108,33 +116,37 @@ class CommandParsingTest(unittest.TestCase):
         cmd = command.Command()
         cmd.add_argument('--bar', required=True)
 
-        with self.assertRaises(command.CommandError) as cm:
+        with self.assertRaises(SystemExit):
             cmd.parse([])
-        self.assertEqual(cm.exception.usage, 'usage: foo --bar BAR')
+        self.exit_mock.assert_called_once_with(
+            mock.ANY, mock.ANY, 'usage: foo --bar BAR')
 
-        with self.assertRaises(command.CommandError) as cm:
+        self.exit_mock.reset_mock()
+        with self.assertRaises(SystemExit):
             cmd.parse([], prog='baz')
-        self.assertEqual(cm.exception.usage, 'usage: baz --bar BAR')
+
+        self.exit_mock.assert_called_once_with(
+            mock.ANY, mock.ANY, 'usage: baz --bar BAR')
 
     def test_missing_required(self):
         cmd = command.Command()
         cmd.add_argument('--bar', required=True)
 
-        with self.assertRaises(command.CommandError) as cm:
+        with self.assertRaises(SystemExit):
             cmd.parse([], prog='foo')
 
-        self.assertEqual(cm.exception.message, 'argument --bar is required')
-        self.assertEqual(cm.exception.usage, 'usage: foo --bar BAR')
+        self.exit_mock.assert_called_once_with(
+            1, 'argument --bar is required', 'usage: foo --bar BAR')
 
     def test_missing_positionals(self):
         cmd = command.Command()
         cmd.add_argument('bar')
 
-        with self.assertRaises(command.CommandError) as cm:
+        with self.assertRaises(SystemExit):
             cmd.parse([], prog='foo')
 
-        self.assertEqual(cm.exception.message, 'too few arguments')
-        self.assertEqual(cm.exception.usage, 'usage: foo bar')
+        self.exit_mock.assert_called_once_with(
+            1, 'too few arguments', 'usage: foo bar')
 
     def test_missing_positionals_subcommand(self):
         child = command.Command()
@@ -143,31 +155,30 @@ class CommandParsingTest(unittest.TestCase):
         cmd = command.Command()
         cmd.add_child('bar', child)
 
-        with self.assertRaises(command.CommandError) as cm:
+        with self.assertRaises(SystemExit):
             cmd.parse(['bar'], prog='foo')
 
-        self.assertEqual(cm.exception.message, 'too few arguments')
-        self.assertEqual(cm.exception.usage, 'usage: foo bar baz')
+        self.exit_mock.assert_called_once_with(
+            1, 'too few arguments', 'usage: foo bar baz')
 
     def test_unknown_command(self):
         cmd = command.Command()
 
-        with self.assertRaises(command.CommandError) as cm:
+        with self.assertRaises(SystemExit):
             cmd.parse(['--help'], prog='foo')
 
-        self.assertEqual(
-            cm.exception.message, 'unrecognized arguments: --help')
-        self.assertEqual(cm.exception.usage, 'usage: foo')
+        self.exit_mock.assert_called_once_with(
+            1, 'unrecognized arguments: --help', 'usage: foo')
 
     def test_invalid_subcommand(self):
         cmd = command.Command()
         cmd.add_child('baz', command.Command())
 
-        with self.assertRaises(command.CommandError) as cm:
+        with self.assertRaises(SystemExit):
             cmd.parse(['bar'], prog='foo')
 
-        self.assertEqual(cm.exception.message, 'unrecognized command: bar')
-        self.assertEqual(cm.exception.usage, 'usage: foo')
+        self.exit_mock.assert_called_once_with(
+            1, 'unrecognized command: bar', 'usage: foo')
 
     def test_set_defaults(self):
         cmd = command.Command()
@@ -201,11 +212,12 @@ class CommandParsingTest(unittest.TestCase):
         cmd = command.Command()
         cmd.add_argument('-h', action='help')
         cmd.format_help = mock.Mock()
-        cmd.exit = mock.Mock()
 
-        cmd.parse(['-h'])
+        with self.assertRaises(SystemExit):
+            cmd.parse(['-h'])
+
         cmd.format_help.assert_called_once_with(mock.ANY)
-        cmd.exit.assert_called_once_with(0)
+        self.exit_mock.assert_called_once_with(0, cmd.format_help.return_value)
 
 
 class UsageTest(unittest.TestCase):
@@ -433,17 +445,6 @@ class HelpTest(unittest.TestCase):
                     '  some text about this sub-command.\n\n'
                     '    --test TEST  the great and wonderful')
         self.assertEqual(expected, cmd.format_help('foo').strip())
-
-
-class CommandErrorTest(unittest.TestCase):
-    def test_args_get_stored(self):
-        error = command.CommandError('message', usage='usage: foo')
-        self.assertEqual(error.message, 'message')
-        self.assertEqual(error.usage, 'usage: foo')
-
-    def test_str_command_error(self):
-        error = command.CommandError('message', usage='usage: foo')
-        self.assertEqual(str(error), 'usage: foo\n\nerror: message')
 
 
 class RunTest(unittest.TestCase):

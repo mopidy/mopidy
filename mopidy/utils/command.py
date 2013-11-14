@@ -4,22 +4,17 @@ import os
 import sys
 
 
-class CommandError(Exception):
-    def __init__(self, message, usage=None):
-        self.message = message
-        self.usage = usage
-
-    def __str__(self):
-        return '%s\n\nerror: %s' % (self.usage, self.message)
-
-
-class ArgumentParser(argparse.ArgumentParser):
-    def error(self, message):
-        raise CommandError(message)
+class _ParserError(Exception):
+    pass
 
 
 class _HelpError(Exception):
-    """Internal exception used to trigger help code path."""
+    pass
+
+
+class _ArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        raise _ParserError(message)
 
 
 class _HelpAction(argparse.Action):
@@ -43,7 +38,7 @@ class Command(object):
 
     def _build(self):
         actions = []
-        parser = ArgumentParser(add_help=False)
+        parser = _ArgumentParser(add_help=False)
         parser.register('action', 'help', _HelpAction)
 
         for args, kwargs in self._arguments:
@@ -62,8 +57,9 @@ class Command(object):
     def set_defaults(self, **kwargs):
         self._defaults.update(kwargs)
 
-    def exit(self, return_code):
-        sys.exit(return_code)
+    def exit(self, status_code=0, message=None, usage=None):
+        print '\n\n'.join(m for m in (usage, message) if m.strip)
+        sys.exit(status_code)
 
     def format_usage(self, prog=None):
         actions = self._build()[1]
@@ -124,8 +120,7 @@ class Command(object):
             return self._parse(
                 args, argparse.Namespace(), self._defaults.copy(), prog)
         except _HelpError:
-            print self.format_help(prog)
-            self.exit(0)
+            self.exit(0, self.format_help(prog))
 
     def _parse(self, args, namespace, defaults, prog):
         defaults.update(self._defaults)
@@ -133,9 +128,8 @@ class Command(object):
 
         try:
             result = parser.parse_args(args, namespace)
-        except CommandError as e:
-            e.usage = self._usage(actions, prog)
-            raise
+        except _ParserError as e:
+            self.exit(1, e.message, self._usage(actions, prog))
 
         if not result._args:
             for attr, value in defaults.items():
@@ -147,8 +141,8 @@ class Command(object):
 
         child = result._args.pop(0)
         if child not in self._children:
-            raise CommandError('unrecognized command: %s' % child,
-                               usage=self._usage(actions, prog))
+            usage = self._usage(actions, prog)
+            self.exit(1, 'unrecognized command: %s' % child, usage)
 
         return self._children[child]._parse(
             result._args, result, defaults, ' '.join([prog, child]))
