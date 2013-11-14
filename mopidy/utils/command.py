@@ -10,7 +10,7 @@ class CommandError(Exception):
         self.usage = usage
 
     def __str__(self):
-        return '%s\n\nerror: %s\n' % (self.usage, self.message)
+        return '%s\n\nerror: %s' % (self.usage, self.message)
 
 
 class ArgumentParser(argparse.ArgumentParser):

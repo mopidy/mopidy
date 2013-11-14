@@ -433,7 +433,7 @@ class CommandErrorTest(unittest.TestCase):
 
     def test_str_command_error(self):
         error = command.CommandError('message', usage='usage: foo')
-        self.assertEqual(str(error), 'usage: foo\n\nerror: message\n')
+        self.assertEqual(str(error), 'usage: foo\n\nerror: message')
 
 
 class RunTest(unittest.TestCase):
