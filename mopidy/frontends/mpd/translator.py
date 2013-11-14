@@ -37,8 +37,11 @@ def track_to_mpd_format(track, position=None):
         ('Artist', artists_to_mpd_format(track.artists)),
         ('Title', track.name or ''),
         ('Album', track.album and track.album.name or ''),
-        ('Date', track.date or ''),
     ]
+
+    if track.date:
+        result.append(('Date', track.date))
+
     if track.album is not None and track.album.num_tracks != 0:
         result.append(('Track', '%d/%d' % (
             track.track_no, track.album.num_tracks)))
@@ -63,14 +66,31 @@ def track_to_mpd_format(track, position=None):
         artists = filter(lambda a: a.musicbrainz_id is not None, track.artists)
         if artists:
             result.append(('MUSICBRAINZ_ARTISTID', artists[0].musicbrainz_id))
+
+    if track.composers:
+        result.append(('Composer', artists_to_mpd_format(track.composers)))
+
+    if track.performers:
+        result.append(('Performer', artists_to_mpd_format(track.performers)))
+
+    if track.genre:
+        result.append(('Genre', track.genre))
+
+    if track.disc_no:
+        result.append(('Disc', track.disc_no))
+
+    if track.comment:
+        result.append(('Comment', track.comment))
+
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
     return result
 
 
 MPD_KEY_ORDER = '''
-    key file Time Artist AlbumArtist Title Album Track Date MUSICBRAINZ_ALBUMID
-    MUSICBRAINZ_ALBUMARTISTID MUSICBRAINZ_ARTISTID MUSICBRAINZ_TRACKID mtime
+    key file Time Artist Album AlbumArtist Title Track Genre Date Composer
+    Performer Comment Disc MUSICBRAINZ_ALBUMID MUSICBRAINZ_ALBUMARTISTID
+    MUSICBRAINZ_ARTISTID MUSICBRAINZ_TRACKID mtime
 '''.split()
 
 
@@ -165,7 +185,8 @@ def query_from_mpd_list_format(field, mpd_query):
             key = tokens[0].lower()
             value = tokens[1]
             tokens = tokens[2:]
-            if key not in ('artist', 'album', 'albumartist', 'date', 'genre'):
+            if key not in ('artist', 'album', 'albumartist', 'composer',
+                           'date', 'genre', 'performer'):
                 raise MpdArgError('not able to parse args', command='list')
             if not value:
                 raise ValueError
@@ -188,9 +209,13 @@ MPD_SEARCH_QUERY_RE = re.compile(r"""
         [Aa]lbum
       | [Aa]rtist
       | [Aa]lbumartist
+      | [Cc]omment
+      | [Cc]omposer
       | [Dd]ate
       | [Ff]ile
       | [Ff]ilename
+      | [Gg]enre
+      | [Pp]erformer
       | [Tt]itle
       | [Tt]rack
       | [Aa]ny
@@ -207,9 +232,13 @@ MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
         [Aa]lbum
       | [Aa]rtist
       | [Aa]lbumartist
+      | [Cc]omment
+      | [Cc]omposer
       | [Dd]ate
       | [Ff]ile
       | [Ff]ilename
+      | [Gg]enre
+      | [Pp]erformer
       | [Tt]itle
       | [Tt]rack
       | [Aa]ny

@@ -131,14 +131,26 @@ def _convert_mpd_data(data, tracks):
     if 'albumartist' in data:
         albumartist_kwargs['name'] = data['albumartist']
 
+    if 'composer' in data:
+        track_kwargs['composers'] = [Artist(name=data['composer'])]
+
+    if 'performer' in data:
+        track_kwargs['performers'] = [Artist(name=data['performer'])]
+
     if 'album' in data:
         album_kwargs['name'] = data['album']
 
     if 'title' in data:
         track_kwargs['name'] = data['title']
 
+    if 'genre' in data:
+        track_kwargs['genre'] = data['genre']
+
     if 'date' in data:
         track_kwargs['date'] = data['date']
+
+    if 'comment' in data:
+        track_kwargs['comment'] = data['comment']
 
     if 'musicbrainz_trackid' in data:
         track_kwargs['musicbrainz_id'] = data['musicbrainz_trackid']
