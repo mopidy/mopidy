@@ -49,8 +49,9 @@ class ScanCommand(command.Command):
         uris_update = set()
         uris_remove = set()
 
-        logger.info('Checking tracks from library.')
-        for track in local_updater.load():
+        tracks = local_updater.load()
+        logger.info('Checking %d tracks from library.', len(tracks))
+        for track in tracks:
             try:
                 uri = translator.local_to_file_uri(track.uri, media_dir)
                 stat = os.stat(path.uri_to_path(uri))
