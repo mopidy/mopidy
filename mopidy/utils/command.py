@@ -34,7 +34,7 @@ class Command(object):
     def __init__(self):
         self._children = collections.OrderedDict()
         self._arguments = []
-        self._defaults = {}
+        self._overrides = {}
 
     def _build(self):
         actions = []
@@ -54,11 +54,11 @@ class Command(object):
     def add_argument(self, *args, **kwargs):
         self._arguments.append((args, kwargs))
 
-    def set_defaults(self, **kwargs):
-        self._defaults.update(kwargs)
+    def set(self, **kwargs):
+        self._overrides.update(kwargs)
 
     def exit(self, status_code=0, message=None, usage=None):
-        print '\n\n'.join(m for m in (usage, message) if m.strip)
+        print '\n\n'.join(m for m in (usage, message) if m)
         sys.exit(status_code)
 
     def format_usage(self, prog=None):
@@ -118,12 +118,12 @@ class Command(object):
         prog = prog or os.path.basename(sys.argv[0])
         try:
             return self._parse(
-                args, argparse.Namespace(), self._defaults.copy(), prog)
+                args, argparse.Namespace(), self._overrides.copy(), prog)
         except _HelpError:
             self.exit(0, self.format_help(prog))
 
-    def _parse(self, args, namespace, defaults, prog):
-        defaults.update(self._defaults)
+    def _parse(self, args, namespace, overrides, prog):
+        overrides.update(self._overrides)
         parser, actions = self._build()
 
         try:
@@ -132,9 +132,8 @@ class Command(object):
             self.exit(1, e.message, self._usage(actions, prog))
 
         if not result._args:
-            for attr, value in defaults.items():
-                if not hasattr(result, attr):
-                    setattr(result, attr, value)
+            for attr, value in overrides.items():
+                setattr(result, attr, value)
             delattr(result, '_args')
             result.command = self
             return result
@@ -145,7 +144,7 @@ class Command(object):
             self.exit(1, 'unrecognized command: %s' % child, usage)
 
         return self._children[child]._parse(
-            result._args, result, defaults, ' '.join([prog, child]))
+            result._args, result, overrides, ' '.join([prog, child]))
 
     def run(self, *args, **kwargs):
         raise NotImplementedError

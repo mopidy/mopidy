@@ -180,33 +180,34 @@ class CommandParsingTest(unittest.TestCase):
         self.exit_mock.assert_called_once_with(
             1, 'unrecognized command: bar', 'usage: foo')
 
-    def test_set_defaults(self):
+    def test_set(self):
         cmd = command.Command()
-        cmd.set_defaults(foo='bar')
+        cmd.set(foo='bar')
 
         result = cmd.parse([])
         self.assertEqual(result.foo, 'bar')
 
-    def test_defaults_propegate(self):
+    def test_set_propegate(self):
         child = command.Command()
 
         cmd = command.Command()
-        cmd.set_defaults(foo='bar')
+        cmd.set(foo='bar')
         cmd.add_child('command', child)
 
         result = cmd.parse(['command'])
         self.assertEqual(result.foo, 'bar')
 
-    def test_innermost_defaults_wins(self):
+    def test_innermost_set_wins(self):
         child = command.Command()
-        child.set_defaults(foo='bar')
+        child.set(foo='bar', baz=1)
 
         cmd = command.Command()
-        cmd.set_defaults(foo='baz')
+        cmd.set(foo='baz', baz=None)
         cmd.add_child('command', child)
 
         result = cmd.parse(['command'])
         self.assertEqual(result.foo, 'bar')
+        self.assertEqual(result.baz, 1)
 
     def test_help_action_works(self):
         cmd = command.Command()
