@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-import re
 import socket
 import string
 
@@ -15,13 +14,6 @@ except ImportError:
 _AVAHI_IF_UNSPEC = -1
 _AVAHI_PROTO_UNSPEC = -1
 _AVAHI_PUBLISHFLAGS_NONE = 0
-
-
-def _filter_loopback_and_meta_addresses(host):
-    # TODO: see if we can find a cleaner way of handling this.
-    if re.search(r'(?<![.\d])(127|0)[.]', host):
-        return ''
-    return host
 
 
 def _convert_text_to_dbus_bytes(text):
@@ -38,7 +30,10 @@ class Zeroconf(object):
         self.domain = domain or ''
         self.port = port
         self.text = text or []
-        self.host = _filter_loopback_and_meta_addresses(host or '')
+        if host in ('::', '0.0.0.0'):
+            self.host = ''
+        else:
+            self.host = host
 
         template = string.Template(name)
         self.name = template.safe_substitute(
