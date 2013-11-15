@@ -66,11 +66,15 @@ class Zeroconf(object):
             bus.get_object('org.freedesktop.Avahi', server.EntryGroupNew()),
             'org.freedesktop.Avahi.EntryGroup')
 
-        text = [_convert_text_to_dbus_bytes(t) for t in self.text]
-        self.group.AddService(_AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
-                              dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE),
-                              self.name, self.stype, self.domain, self.host,
-                              dbus.UInt16(self.port), text)
+        try:
+            text = [_convert_text_to_dbus_bytes(t) for t in self.text]
+            self.group.AddService(
+                _AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
+                dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE), self.name, self.stype,
+                self.domain, self.host, dbus.UInt16(self.port), text)
+        except dbus.exceptions.DBusException as e:
+            logger.debug('Zeroconf publish failed: %s', e)
+            return False
 
         self.group.Commit()
         return True
