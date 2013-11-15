@@ -5,7 +5,7 @@ import re
 import socket
 import string
 
-logger = logging.getLogger('mopidy.utils.zerconf')
+logger = logging.getLogger('mopidy.utils.zeroconf')
 
 try:
     import dbus
