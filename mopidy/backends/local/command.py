@@ -10,7 +10,7 @@ from mopidy.utils import command, path
 
 from . import translator
 
-logger = logging.getLogger('mopidy.backends.local.scan')
+logger = logging.getLogger('mopidy.backends.local.command')
 
 
 class LocalCommand(command.Command):
@@ -20,7 +20,11 @@ class LocalCommand(command.Command):
 
 
 class ScanCommand(command.Command):
-    """Scan local media files"""
+    """Scan local media files and populate the local library."""
+
+    def __init__(self):
+        super(ScanCommand, self).__init__()
+        self.add_argument('--limit', type=int, help='number of tracks to scan')
 
     def run(self, args, config, extensions):
         media_dir = config['local']['media_dir']

@@ -62,12 +62,8 @@ Options
     be provided multiple times.
 
 
-Built in sub-commands
-=====================
-
-.. cmdoption:: run
-
-    Run the mopidy server.
+Built in commands
+=================
 
 .. cmdoption:: config
 
@@ -80,15 +76,14 @@ Built in sub-commands
     Show dependencies, their versions and installation location.
 
 
-Extension sub-commands
-======================
+Extension commands
+==================
 
-Additionally, extensions can provide extra sub-commands. See ``mopidy --help``
-for a list of what is available on your system and ``mopidy COMMAND --help``
-for command-specific help. Sub-commands for disabled extensions will be listed,
-but can not be run.
+Additionally, extensions can provide extra commands. See ``mopidy --help``
+for a list of what is available on your system and command-specific help.
+Commands for disabled extensions will be listed, but can not be run.
 
-.. cmdoption:: local
+.. cmdoption:: local scan
 
     Scan local media files present in your library.
 
@@ -114,19 +109,19 @@ To start the music server, run::
 To start the server with an additional config file than can override configs
 set in the default config files, run::
 
-    mopidy --config ./my-config.conf run
+    mopidy --config ./my-config.conf
 
 To start the server and change a config value directly on the command line,
 run::
 
-    mopidy --option mpd/enabled=false run
+    mopidy --option mpd/enabled=false
 
 The :option:`--option` flag may be repeated multiple times to change multiple
 configs::
 
-    mopidy -o mpd/enabled=false -o spotify/bitrate=320 run
+    mopidy -o mpd/enabled=false -o spotify/bitrate=320
 
-``mopidy config`` output shows the effect of the :option:`--option` flags::
+The ``mopidy config`` output shows the effect of the :option:`--option` flags::
 
     mopidy -o mpd/enabled=false -o spotify/bitrate=320 config
 

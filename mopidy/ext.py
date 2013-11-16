@@ -91,8 +91,7 @@ class Extension(object):
         """Command to expose to command line users running mopidy.
 
         :returns:
-          Instance of a :class:`~mopidy.utils.command.Command` class
-          or sub-class.
+          Instance of a :class:`~mopidy.utils.command.Command` class.
         """
         pass
 

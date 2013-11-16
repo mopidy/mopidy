@@ -39,11 +39,6 @@ Library provider
 .. autoclass:: mopidy.backends.base.BaseLibraryProvider
     :members:
 
-Sub-command provider
-====================
-
-.. autoclass:: mopidy.backends.base.BaseSubCommandProvider
-    :members:
 
 Backend listener
 ================
