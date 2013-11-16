@@ -46,6 +46,11 @@ v0.17.0 (UNRELEASED)
 - Fix scanner so that time of last modification is respected when deciding
   which files can be skipped.
 
+- The scanner now ignores the capitalization of file extensions in
+  :confval:`local/excluded_file_extensions`, so you no longer need to list both
+  ``.jpg`` and ``.JPG`` to ignore JPEG files when scanning. (Fixes:
+  :issue:`525`)
+
 **MPD frontend**
 
 - The MPD service is now published as a Zeroconf service if avahi-daemon is
@@ -57,6 +62,9 @@ v0.17.0 (UNRELEASED)
 - Add support for ``composer``, ``performer``, ``comment``, ``genre``, and
   ``performer``.  These tags can be used with ``list ...``, ``search ...``, and
   ``find ...`` and their variants, and are supported in the ``any`` tag also
+
+- The ``bitrate`` field in the ``status`` response is now always an integer.
+  This follows the behavior of the original MPD server. (Fixes: :issue:`577`)
 
 **HTTP frontend**
 

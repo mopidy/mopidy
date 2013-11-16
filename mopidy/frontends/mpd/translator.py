@@ -322,6 +322,12 @@ def _add_to_tag_cache(result, dirs, files, media_dir):
     for track in files:
         track_result = dict(track_to_mpd_format(track))
 
+        # XXX Don't save comments to the tag cache as they may span multiple
+        # lines. We'll start saving track comments when we move from tag_cache
+        # to a JSON file. See #579 for details.
+        if 'Comment' in track_result:
+            del track_result['Comment']
+
         path = uri_to_path(track_result['file'])
         try:
             text_path = path.decode('utf-8')

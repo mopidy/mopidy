@@ -29,7 +29,8 @@ class ScanCommand(commands.Command):
     def run(self, args, config, extensions):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
-        excluded_file_extensions = config['local']['excluded_file_extensions']
+        excluded_file_extensions = set(
+            ext.lower() for ext in config['local']['excluded_file_extensions'])
 
         updaters = {}
         for e in extensions:
@@ -73,7 +74,7 @@ class ScanCommand(commands.Command):
         logger.info('Checking %s for unknown tracks.', media_dir)
         for uri in path.find_uris(media_dir):
             file_extension = os.path.splitext(path.uri_to_path(uri))[1]
-            if file_extension in excluded_file_extensions:
+            if file_extension.lower() in excluded_file_extensions:
                 logger.debug('Skipped %s: File extension excluded.', uri)
                 continue
 
