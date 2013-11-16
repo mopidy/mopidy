@@ -65,7 +65,9 @@ def main():
     local_updater = updaters.values()[0](config)  # TODO: switch to actor?
 
     media_dir = config['local']['media_dir']
-    excluded_extensions = config['local']['excluded_file_extensions']
+    excluded_extensions = set(
+        file_ext.lower()
+        for file_ext in config['local']['excluded_file_extensions'])
 
     # TODO: cleanup to consistently use local urls, not a random mix of local
     # and file uris depending on how the data was loaded.
@@ -91,7 +93,8 @@ def main():
 
     logging.info('Checking %s for unknown tracks.', media_dir)
     for uri in path.find_uris(config['local']['media_dir']):
-        if os.path.splitext(path.uri_to_path(uri))[1] in excluded_extensions:
+        file_ext = os.path.splitext(path.uri_to_path(uri))[1]
+        if file_ext.lower() in excluded_extensions:
             logging.debug('Skipped %s: File extension excluded.', uri)
             continue
 
