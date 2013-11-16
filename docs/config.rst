@@ -60,17 +60,23 @@ Core configuration values
 
     Audio mixer to use.
 
-    Expects a GStreamer mixer to use, typical values are: ``autoaudiomixer``,
-    ``alsamixer``, ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
+    Expects a GStreamer mixer to use, typical values are: ``software``,
+    ``autoaudiomixer``, ``alsamixer``, ``pulsemixer``, ``ossmixer``, and
+    ``oss4mixer``.
 
-    The default is ``autoaudiomixer``, which attempts to select a sane mixer
-    for you automatically. When Mopidy is started, it will log what mixer
-    ``autoaudiomixer`` selected, for example::
+    The default is ``software``, which does volume control inside Mopidy before
+    the audio is sent to the audio output. This mixer does not affect the
+    volume of any other audio playback on the system. It is the only mixer that
+    will affect the audio volume if you're streaming the audio from Mopidy
+    through Shoutcast.
+
+    If you want to use a hardware mixer, try ``autoaudiomixer``. It attempts to
+    select a sane hardware mixer for you automatically. When Mopidy is started,
+    it will log what mixer ``autoaudiomixer`` selected, for example::
 
         INFO     Audio mixer set to "alsamixer" using track "Master"
 
-    Setting the config value to blank turns off volume control. ``software``
-    can be used to force software mixing in the application.
+    Setting the config value to blank turns off volume control.
 
 .. confval:: audio/mixer_track
 

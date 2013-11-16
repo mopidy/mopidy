@@ -45,6 +45,13 @@ Still in development.
   the library's :meth:`~mopidy.core.LibraryController.find_exact` and
   :meth:`~mopidy.core.LibraryController.search` methods.
 
+**Audio**
+
+- Change default volume mixer from ``autoaudiomixer`` to ``software``.
+  GStreamer 1.x does not support volume control, so we're changing to use
+  software mixing by default, as that may be the only thing we'll support in
+  the future when we upgrade to GStreamer 1.x.
+
 **Local backend**
 
 - Library scanning has been switched back to custom code due to various issues
