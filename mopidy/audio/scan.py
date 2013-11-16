@@ -127,7 +127,8 @@ def audio_data_to_track(data):
     _retrieve(gst.TAG_BITRATE, 'bitrate', track_kwargs)
 
     # Following keys don't seem to have TAG_* constant.
-    _retrieve('comment', 'comment', track_kwargs)
+    # Comment out to avoid issues with multiline comments
+    #_retrieve('comment', 'comment', track_kwargs)
     _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
     _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
     _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
