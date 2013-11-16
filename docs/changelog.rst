@@ -69,6 +69,8 @@ Still in development.
   ``.jpg`` and ``.JPG`` to ignore JPEG files when scanning. (Fixes:
   :issue:`525`)
 
+- The scanner now by default ignores ``*.nfo`` and ``*.html`` files too.
+
 **MPD frontend**
 
 - The MPD service is now published as a Zeroconf service if avahi-daemon is
