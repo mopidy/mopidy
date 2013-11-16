@@ -167,7 +167,7 @@ class List(ConfigValue):
         return tuple(values)
 
     def serialize(self, value, display=False):
-        return b'\n    ' + b'\n    '.join(encode(v) for v in value if v)
+        return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 
 class LogLevel(ConfigValue):
