@@ -66,7 +66,7 @@ def format(config, extensions, comments=None, display=True):
     # need to know about extensions.
     schemas = _schemas[:]
     schemas.extend(e.get_config_schema() for e in extensions)
-    return _format(config, comments or {}, schemas, display)
+    return _format(config, comments or {}, schemas, display, False)
 
 
 def _load(files, defaults, overrides):
@@ -128,7 +128,7 @@ def _validate(raw_config, schemas):
     return config, errors
 
 
-def _format(config, comments, schemas, display):
+def _format(config, comments, schemas, display, disable):
     output = []
     for schema in schemas:
         serialized = schema.serialize(
@@ -142,9 +142,11 @@ def _format(config, comments, schemas, display):
             if value is not None:
                 output[-1] += b' ' + value
             if comment:
-                output[-1] += b'  # ' + comment.capitalize()
+                output[-1] += b'  ; ' + comment.capitalize()
+            if disable:
+                output[-1] = re.sub(r'^', b'#', output[-1], flags=re.M)
         output.append(b'')
-    return b'\n'.join(output)
+    return b'\n'.join(output[:-1])
 
 
 def _preprocess(config_string):
