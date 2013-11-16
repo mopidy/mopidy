@@ -74,6 +74,21 @@ v0.17.0 (UNRELEASED)
   :confval:`http/zeroconf` config value to change the service name or disable
   the service. (Fixes: :issue:`39`)
 
+**Sub-commands**
+
+- Switched to sub-commands for the ``mopidy`` command , this implies the
+  following changes (fixes :issue:`437`):
+
+  ===================== =================
+  Old command           New command
+  ===================== =================
+  mopidy --show-deps    mopidy deps
+  mopidy --show-config  mopidy config
+  mopidy-scan           mopidy local scan
+
+- Added hooks for extensions to create their own custom sub-commands and
+  converted ``mopidy-scan`` as first user of new API. (Fixes :issue:`436`)
+
 
 v0.16.1 (2013-11-02)
 ====================

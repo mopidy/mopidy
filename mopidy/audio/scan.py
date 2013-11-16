@@ -14,6 +14,15 @@ from mopidy.utils import path
 
 
 class Scanner(object):
+    """
+    Helper to get tags and other relevant info from URIs.
+
+    :param timeout: timeout for scanning a URI in ms
+    :type event: int
+    :param min_duration: minimum duration of scanned URI in ms, -1 for all.
+    :type event: int
+    """
+
     def __init__(self, timeout=1000, min_duration=100):
         self.timeout_ms = timeout
         self.min_duration_ms = min_duration
@@ -35,6 +44,13 @@ class Scanner(object):
         self.bus.set_flushing(True)
 
     def scan(self, uri):
+        """
+        Scan the given uri collecting relevant metadata.
+
+        :param uri: URI of the resource to scan.
+        :type event: string
+        :return: Dictionary of tags, duration, mtime and uri information.
+        """
         try:
             self._setup(uri)
             data = self._collect()

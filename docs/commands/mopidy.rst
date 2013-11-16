@@ -8,8 +8,8 @@ Synopsis
 ========
 
 mopidy
-    [-h] [--version] [-q] [-v] [--save-debug-log] [--show-config]
-    [--show-deps] [--config CONFIG_FILES] [-o CONFIG_OVERRIDES]
+    [-h] [--version] [-q] [-v] [--save-debug-log] [--config CONFIG_FILES]
+    [-o CONFIG_OVERRIDES] [COMMAND] ...
 
 
 Description
@@ -50,26 +50,42 @@ Options
     Save debug log to the file specified in the :confval:`logging/debug_file`
     config value, typically ``./mopidy.log``.
 
-.. cmdoption:: --show-config
-
-    Show the current effective config. All configuration sources are merged
-    together to show the effective document. Secret values like passwords are
-    masked out. Config for disabled extensions are not included.
-
-.. cmdoption:: --show-deps
-
-    Show dependencies, their versions and installation location.
-
 .. cmdoption:: --config <file>
 
     Specify config file to use. To use multiple config files, separate them
-    with colon. The later files override the earlier ones if there's a
+    with a colon. The later files override the earlier ones if there's a
     conflict.
 
 .. cmdoption:: -o <option>, --option <option>
 
     Specify additional config values in the ``section/key=value`` format. Can
     be provided multiple times.
+
+
+Built in commands
+=================
+
+.. cmdoption:: config
+
+    Show the current effective config. All configuration sources are merged
+    together to show the effective document. Secret values like passwords are
+    masked out. Config for disabled extensions are not included.
+
+.. cmdoption:: deps
+
+    Show dependencies, their versions and installation location.
+
+
+Extension commands
+==================
+
+Additionally, extensions can provide extra commands. See ``mopidy --help``
+for a list of what is available on your system and command-specific help.
+Commands for disabled extensions will be listed, but can not be run.
+
+.. cmdoption:: local scan
+
+    Scan local media files present in your library.
 
 
 Files
@@ -105,17 +121,15 @@ configs::
 
     mopidy -o mpd/enabled=false -o spotify/bitrate=320
 
-The :option:`--show-config` output shows the effect of the :option:`--option`
-flags::
+The ``mopidy config`` output shows the effect of the :option:`--option` flags::
 
-    mopidy -o mpd/enabled=false -o spotify/bitrate=320 --show-config
+    mopidy -o mpd/enabled=false -o spotify/bitrate=320 config
 
 
 See also
 ========
 
-:ref:`mopidy-scan(1) <mopidy-scan-cmd>`, :ref:`mopidy-convert-config(1)
-<mopidy-convert-config>`
+:ref:`mopidy-convert-config(1) <mopidy-convert-config>`
 
 Reporting bugs
 ==============
