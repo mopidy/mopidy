@@ -22,10 +22,6 @@ class LocalCommand(commands.Command):
 class ScanCommand(commands.Command):
     help = "Scan local media files and populate the local library."
 
-    def __init__(self):
-        super(ScanCommand, self).__init__()
-        self.add_argument('--limit', type=int, help='number of tracks to scan')
-
     def run(self, args, config, extensions):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
