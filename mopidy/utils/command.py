@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import argparse
 import collections
 import os
@@ -31,6 +33,8 @@ class _HelpAction(argparse.Action):
 
 
 class Command(object):
+    help = None
+
     def __init__(self):
         self._children = collections.OrderedDict()
         self._arguments = []
@@ -78,8 +82,8 @@ class Command(object):
         formatter = argparse.HelpFormatter(prog)
         formatter.add_usage(None, actions, [])
 
-        if self.__doc__:
-            formatter.add_text(self.__doc__)
+        if self.help:
+            formatter.add_text(self.help)
 
         if actions:
             formatter.add_text('OPTIONS:')
@@ -100,11 +104,11 @@ class Command(object):
     def _subhelp(self, name, result):
         actions = self._build()[1]
 
-        if self.__doc__ or actions:
+        if self.help or actions:
             formatter = argparse.HelpFormatter(name)
             formatter.add_usage(None, actions, [], '')
             formatter.start_section(None)
-            formatter.add_text(self.__doc__)
+            formatter.add_text(self.help)
             formatter.start_section(None)
             formatter.add_arguments(actions)
             formatter.end_section()

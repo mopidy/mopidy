@@ -136,7 +136,7 @@ class RootCommand(command.Command):
 
 
 class ConfigCommand(command.Command):
-    """Show currently active configuration."""
+    help = "Show currently active configuration."
 
     def __init__(self):
         super(ConfigCommand, self).__init__()
@@ -148,7 +148,7 @@ class ConfigCommand(command.Command):
 
 
 class DepsCommand(command.Command):
-    """Show dependencies and debug information."""
+    help = "Show dependencies and debug information."
 
     def __init__(self):
         super(DepsCommand, self).__init__()

@@ -293,7 +293,7 @@ class HelpTest(unittest.TestCase):
 
     def test_command_with_documentation(self):
         cmd = command.Command()
-        cmd.__doc__ = 'some text about everything this command does.'
+        cmd.help = 'some text about everything this command does.'
 
         expected = ('usage: foo\n\n'
                     'some text about everything this command does.')
@@ -301,7 +301,7 @@ class HelpTest(unittest.TestCase):
 
     def test_command_with_documentation_and_option(self):
         cmd = command.Command()
-        cmd.__doc__ = 'some text about everything this command does.'
+        cmd.help = 'some text about everything this command does.'
         cmd.add_argument('-h', '--help', action='store_true',
                          help='show this message')
 
@@ -320,7 +320,7 @@ class HelpTest(unittest.TestCase):
 
     def test_subcommand_with_documentation_shown(self):
         child = command.Command()
-        child.__doc__ = 'some text about everything this command does.'
+        child.help = 'some text about everything this command does.'
 
         cmd = command.Command()
         cmd.add_child('bar', child)
@@ -359,7 +359,7 @@ class HelpTest(unittest.TestCase):
 
     def test_subcommand_with_options_and_documentation(self):
         child = command.Command()
-        child.__doc__ = '  some text about everything this command does.'
+        child.help = '  some text about everything this command does.'
         child.add_argument('-h', '--help', action='store_true',
                            help='show this message')
 
@@ -428,11 +428,11 @@ class HelpTest(unittest.TestCase):
 
     def test_command_with_options_doc_and_subcommand_with_option_and_doc(self):
         child = command.Command()
-        child.__doc__ = 'some text about this sub-command.'
+        child.help = 'some text about this sub-command.'
         child.add_argument('--test', help='the great and wonderful')
 
         cmd = command.Command()
-        cmd.__doc__ = 'some text about everything this command does.'
+        cmd.help = 'some text about everything this command does.'
         cmd.add_argument('-h', '--help', action='store_true',
                          help='show this message')
         cmd.add_child('bar', child)

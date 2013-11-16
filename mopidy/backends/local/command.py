@@ -20,7 +20,7 @@ class LocalCommand(command.Command):
 
 
 class ScanCommand(command.Command):
-    """Scan local media files and populate the local library."""
+    help = "Scan local media files and populate the local library."
 
     def __init__(self):
         super(ScanCommand, self).__init__()
