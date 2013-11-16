@@ -75,5 +75,9 @@ class Zeroconf(object):
 
     def unpublish(self):
         if self.group:
-            self.group.Reset()
-            self.group = None
+            try:
+                self.group.Reset()
+            except dbus.exceptions.DBusException as e:
+                logger.debug('Zeroconf unpublish failed: %s', e)
+            finally:
+                self.group = None
