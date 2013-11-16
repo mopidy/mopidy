@@ -327,7 +327,7 @@ class RootCommand(Command):
 
 
 class ConfigCommand(Command):
-    help = "Show currently active configuration."
+    help = 'Show currently active configuration.'
 
     def __init__(self):
         super(ConfigCommand, self).__init__()
@@ -339,7 +339,7 @@ class ConfigCommand(Command):
 
 
 class DepsCommand(Command):
-    help = "Show dependencies and debug information."
+    help = 'Show dependencies and debug information.'
 
     def __init__(self):
         super(DepsCommand, self).__init__()
