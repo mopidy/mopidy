@@ -214,8 +214,11 @@ def status(context):
 
 def _status_bitrate(futures):
     current_tl_track = futures['playback.current_tl_track'].get()
-    if current_tl_track is not None:
-        return current_tl_track.track.bitrate
+    if current_tl_track is None:
+        return 0
+    if current_tl_track.track.bitrate is None:
+        return 0
+    return current_tl_track.track.bitrate
 
 
 def _status_consume(futures):
