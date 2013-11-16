@@ -38,5 +38,5 @@ class Extension(ext.Extension):
         return [LocalLibraryUpdateProvider]
 
     def get_command(self):
-        from .command import LocalCommand
+        from .commands import LocalCommand
         return LocalCommand()

@@ -4,22 +4,22 @@ import logging
 import os
 import time
 
-from mopidy import exceptions
+from mopidy import commands, exceptions
 from mopidy.audio import scan
-from mopidy.utils import command, path
+from mopidy.utils import path
 
 from . import translator
 
-logger = logging.getLogger('mopidy.backends.local.command')
+logger = logging.getLogger('mopidy.backends.local.commands')
 
 
-class LocalCommand(command.Command):
+class LocalCommand(commands.Command):
     def __init__(self):
         super(LocalCommand, self).__init__()
         self.add_child('scan', ScanCommand())
 
 
-class ScanCommand(command.Command):
+class ScanCommand(commands.Command):
     help = "Scan local media files and populate the local library."
 
     def __init__(self):
