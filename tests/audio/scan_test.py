@@ -35,7 +35,7 @@ class TranslatorTest(unittest.TestCase):
             'container-format': 'ID3 tag',
             'genre': 'genre',
             'duration': 4531000000,
-            'comment': 'comment',
+            #'comment': 'comment',
             'musicbrainz-trackid': 'mbtrackid',
             'musicbrainz-albumid': 'mbalbumid',
             'musicbrainz-artistid': 'mbartistid',
@@ -94,7 +94,7 @@ class TranslatorTest(unittest.TestCase):
             'genre': 'genre',
             'track_no': 1,
             'disc_no': 2,
-            'comment': 'comment',
+            #'comment': 'comment',
             'length': 4531,
             'musicbrainz_id': 'mbtrackid',
             'last_modified': 1234,
@@ -229,10 +229,10 @@ class TranslatorTest(unittest.TestCase):
         del self.track['date']
         self.check()
 
-    def test_missing_comment(self):
-        del self.data['comment']
-        del self.track['comment']
-        self.check()
+    #def test_missing_comment(self):
+        #del self.data['comment']
+        #del self.track['comment']
+        #self.check()
 
 
 class ScannerTest(unittest.TestCase):
