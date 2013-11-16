@@ -9,7 +9,7 @@ Synopsis
 
 mopidy
     [-h] [--version] [-q] [-v] [--save-debug-log] [--config CONFIG_FILES]
-    [-o CONFIG_OVERRIDES] COMMAND ...
+    [-o CONFIG_OVERRIDES] [COMMAND] ...
 
 
 Description
