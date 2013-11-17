@@ -43,7 +43,7 @@ def currentsong(context):
 
 
 @handle_request(r'^idle$')
-@handle_request(r'^idle (?P<subsystems>.+)$')
+@handle_request(r'^idle\ (?P<subsystems>.+)$')
 def idle(context, subsystems=None):
     """
     *musicpd.org, status section:*

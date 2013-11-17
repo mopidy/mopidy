@@ -29,7 +29,7 @@ def kill(context):
     raise MpdPermissionError(command='kill')
 
 
-@handle_request(r'^password "(?P<password>[^"]+)"$', auth_required=False)
+@handle_request(r'^password\ "(?P<password>[^"]+)"$', auth_required=False)
 def password_(context, password):
     """
     *musicpd.org, connection section:*

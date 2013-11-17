@@ -44,7 +44,7 @@ def handle_request(pattern, auth_required=True):
     For example, if the command is ``do that thing`` the ``what`` argument will
     be ``this thing``::
 
-        @handle_request('^do (?P<what>.+)$')
+        @handle_request('^do\ (?P<what>.+)$')
         def do(what):
             ...
 
@@ -56,7 +56,7 @@ def handle_request(pattern, auth_required=True):
         if match is not None:
             mpd_commands.add(
                 MpdCommand(name=match.group(), auth_required=auth_required))
-        compiled_pattern = re.compile(pattern, flags=re.UNICODE)
+        compiled_pattern = re.compile(pattern, flags=(re.UNICODE | re.VERBOSE))
         if compiled_pattern in request_handlers:
             raise ValueError('Tried to redefine handler for %s with %s' % (
                 pattern, func))
