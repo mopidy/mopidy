@@ -9,10 +9,33 @@ from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
-QUERY_RE = (
-    r'(?P<mpd_query>("?([Aa]lbum|[Aa]rtist|[Aa]lbumartist|[Cc]omment|'
-    r'[Cc]omposer|[Dd]ate|[Ff]ile|[Ff]ilename|[Gg]enre|[Pp]erformer|'
-    r'[Tt]itle|[Tt]rack|[Aa]ny)"?\ "[^"]*"\s?)+)$')
+QUERY_RE = r"""
+  (?P<mpd_query>
+    (
+      "?                # Optional quote around the field type
+      (
+          [Aa]lbum
+        | [Aa]rtist
+        | [Aa]lbumartist
+        | [Cc]omment
+        | [Cc]omposer
+        | [Dd]ate
+        | [Ff]ile
+        | [Ff]ilename
+        | [Gg]enre
+        | [Pp]erformer
+        | [Tt]itle
+        | [Tt]rack
+        | [Aa]ny
+      )
+      "?                # End of optional quote around the field type
+      \                 # A single space
+      "[^"]*"           # Matching a quoted search string
+      \s?
+    )+
+  )
+  $
+"""
 
 
 def _get_field(field, search_results):
