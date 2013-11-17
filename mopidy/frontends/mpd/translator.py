@@ -221,7 +221,7 @@ MPD_SEARCH_QUERY_RE = re.compile(r"""
     | [Aa]ny
   )
   "?                  # End of optional quote around the field type
-  \s                  # A single space
+  \                   # A single space
   "[^"]+"             # Matching a quoted search string
 """, flags=(re.UNICODE | re.VERBOSE))
 
@@ -244,7 +244,7 @@ MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
     | [Aa]ny
   ))
   "?                  # End of optional quote around the field type
-  \s                  # A single space
+  \                   # A single space
   "(?P<what>[^"]+)"   # Capturing a quoted search string
 """, flags=(re.UNICODE | re.VERBOSE))
 
