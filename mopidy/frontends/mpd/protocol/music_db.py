@@ -10,6 +10,25 @@ from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
+LIST_QUERY = r"""
+  "?                    # Optional quote around the field type
+  (?P<field>(           # Field to list in the response
+      [Aa]rtist
+    | [Aa]lbumartist
+    | [Aa]lbum
+    | [Cc]omposer
+    | [Dd]ate
+    | [Gg]enre
+    | [Pp]erformer
+  ))
+  "?                    # End of optional quote around the field type
+  (?:                   # Non-capturing group for optional search query
+    \                   # A single space
+    (?P<mpd_query>.*)
+  )?
+  $
+"""
+
 SEARCH_FIELDS = r"""
     [Aa]lbum
   | [Aa]rtist
@@ -213,10 +232,7 @@ def findadd(context, mpd_query):
     context.core.tracklist.add(_get_tracks(results))
 
 
-@handle_request(
-    r'list\ "?(?P<field>([Aa]rtist|[Aa]lbumartist|[Aa]lbum|[Cc]omposer|'
-    r'[Dd]ate|[Gg]enre|[Pp]erformer))"?'
-    r'(\ (?P<mpd_query>.*))?$')
+@handle_request(r'list\ ' + LIST_QUERY)
 def list_(context, field, mpd_query=None):
     """
     *musicpd.org, music database section:*
