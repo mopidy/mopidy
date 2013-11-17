@@ -40,7 +40,7 @@ def _artist_as_track(artist):
         artists=[artist])
 
 
-@handle_request(r'^count\ ' + QUERY_RE)
+@handle_request(r'count\ ' + QUERY_RE)
 def count(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -67,7 +67,7 @@ def count(context, mpd_query):
     ]
 
 
-@handle_request(r'^find\ ' + QUERY_RE)
+@handle_request(r'find\ ' + QUERY_RE)
 def find(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -112,7 +112,7 @@ def find(context, mpd_query):
     return translator.tracks_to_mpd_format(result_tracks)
 
 
-@handle_request(r'^findadd\ ' + QUERY_RE)
+@handle_request(r'findadd\ ' + QUERY_RE)
 def findadd(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -131,7 +131,7 @@ def findadd(context, mpd_query):
 
 
 @handle_request(
-    r'^list\ "?(?P<field>([Aa]rtist|[Aa]lbumartist|[Aa]lbum|[Cc]omposer|'
+    r'list\ "?(?P<field>([Aa]rtist|[Aa]lbumartist|[Aa]lbum|[Cc]omposer|'
     r'[Dd]ate|[Gg]enre|[Pp]erformer))"?'
     r'(\ (?P<mpd_query>.*))?$')
 def list_(context, field, mpd_query=None):
@@ -305,8 +305,8 @@ def _list_genre(context, query):
     return genres
 
 
-@handle_request(r'^listall$')
-@handle_request(r'^listall\ "(?P<uri>[^"]+)"$')
+@handle_request(r'listall$')
+@handle_request(r'listall\ "(?P<uri>[^"]+)"$')
 def listall(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -318,8 +318,8 @@ def listall(context, uri=None):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^listallinfo$')
-@handle_request(r'^listallinfo\ "(?P<uri>[^"]+)"$')
+@handle_request(r'listallinfo$')
+@handle_request(r'listallinfo\ "(?P<uri>[^"]+)"$')
 def listallinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -332,8 +332,8 @@ def listallinfo(context, uri=None):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^lsinfo$')
-@handle_request(r'^lsinfo\ "(?P<uri>[^"]*)"$')
+@handle_request(r'lsinfo$')
+@handle_request(r'lsinfo\ "(?P<uri>[^"]*)"$')
 def lsinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -355,7 +355,7 @@ def lsinfo(context, uri=None):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^rescan(\ "(?P<uri>[^"]+)")*$')
+@handle_request(r'rescan(\ "(?P<uri>[^"]+)")*$')
 def rescan(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -367,7 +367,7 @@ def rescan(context, uri=None):
     return update(context, uri, rescan_unmodified_files=True)
 
 
-@handle_request(r'^search\ ' + QUERY_RE)
+@handle_request(r'search\ ' + QUERY_RE)
 def search(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -406,7 +406,7 @@ def search(context, mpd_query):
     return translator.tracks_to_mpd_format(artists + albums + tracks)
 
 
-@handle_request(r'^searchadd\ ' + QUERY_RE)
+@handle_request(r'searchadd\ ' + QUERY_RE)
 def searchadd(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -427,7 +427,7 @@ def searchadd(context, mpd_query):
     context.core.tracklist.add(_get_tracks(results))
 
 
-@handle_request(r'^searchaddpl\ "(?P<playlist_name>[^"]+)"\ ' + QUERY_RE)
+@handle_request(r'searchaddpl\ "(?P<playlist_name>[^"]+)"\ ' + QUERY_RE)
 def searchaddpl(context, playlist_name, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -456,7 +456,7 @@ def searchaddpl(context, playlist_name, mpd_query):
     context.core.playlists.save(playlist)
 
 
-@handle_request(r'^update(\ "(?P<uri>[^"]+)")*$')
+@handle_request(r'update(\ "(?P<uri>[^"]+)")*$')
 def update(context, uri=None, rescan_unmodified_files=False):
     """
     *musicpd.org, music database section:*

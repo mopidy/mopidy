@@ -4,7 +4,7 @@ from mopidy.frontends.mpd.exceptions import MpdPermissionError
 from mopidy.frontends.mpd.protocol import handle_request, mpd_commands
 
 
-@handle_request(r'^config$', auth_required=False)
+@handle_request(r'config$', auth_required=False)
 def config(context):
     """
     *musicpd.org, reflection section:*
@@ -18,7 +18,7 @@ def config(context):
     raise MpdPermissionError(command='config')
 
 
-@handle_request(r'^commands$', auth_required=False)
+@handle_request(r'commands$', auth_required=False)
 def commands(context):
     """
     *musicpd.org, reflection section:*
@@ -45,7 +45,7 @@ def commands(context):
         ('command', command_name) for command_name in sorted(command_names)]
 
 
-@handle_request(r'^decoders$')
+@handle_request(r'decoders$')
 def decoders(context):
     """
     *musicpd.org, reflection section:*
@@ -72,7 +72,7 @@ def decoders(context):
     return  # TODO
 
 
-@handle_request(r'^notcommands$', auth_required=False)
+@handle_request(r'notcommands$', auth_required=False)
 def notcommands(context):
     """
     *musicpd.org, reflection section:*
@@ -95,7 +95,7 @@ def notcommands(context):
         ('command', command_name) for command_name in sorted(command_names)]
 
 
-@handle_request(r'^tagtypes$')
+@handle_request(r'tagtypes$')
 def tagtypes(context):
     """
     *musicpd.org, reflection section:*
@@ -107,7 +107,7 @@ def tagtypes(context):
     pass  # TODO
 
 
-@handle_request(r'^urlhandlers$')
+@handle_request(r'urlhandlers$')
 def urlhandlers(context):
     """
     *musicpd.org, reflection section:*

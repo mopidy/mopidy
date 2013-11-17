@@ -7,8 +7,8 @@ from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.translator import playlist_to_mpd_format
 
 
-@handle_request(r'^listplaylist\ (?P<name>\w+)$')
-@handle_request(r'^listplaylist\ "(?P<name>[^"]+)"$')
+@handle_request(r'listplaylist\ (?P<name>\w+)$')
+@handle_request(r'listplaylist\ "(?P<name>[^"]+)"$')
 def listplaylist(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -29,8 +29,8 @@ def listplaylist(context, name):
     return ['file: %s' % t.uri for t in playlist.tracks]
 
 
-@handle_request(r'^listplaylistinfo\ (?P<name>\w+)$')
-@handle_request(r'^listplaylistinfo\ "(?P<name>[^"]+)"$')
+@handle_request(r'listplaylistinfo\ (?P<name>\w+)$')
+@handle_request(r'listplaylistinfo\ "(?P<name>[^"]+)"$')
 def listplaylistinfo(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -50,7 +50,7 @@ def listplaylistinfo(context, name):
     return playlist_to_mpd_format(playlist)
 
 
-@handle_request(r'^listplaylists$')
+@handle_request(r'listplaylists$')
 def listplaylists(context):
     """
     *musicpd.org, stored playlists section:*
@@ -93,7 +93,7 @@ def listplaylists(context):
 
 
 @handle_request(
-    r'^load\ "(?P<name>[^"]+)"(\ "(?P<start>\d+):(?P<end>\d+)*")*$')
+    r'load\ "(?P<name>[^"]+)"(\ "(?P<start>\d+):(?P<end>\d+)*")*$')
 def load(context, name, start=None, end=None):
     """
     *musicpd.org, stored playlists section:*
@@ -125,7 +125,7 @@ def load(context, name, start=None, end=None):
     context.core.tracklist.add(playlist.tracks[start:end])
 
 
-@handle_request(r'^playlistadd\ "(?P<name>[^"]+)"\ "(?P<uri>[^"]+)"$')
+@handle_request(r'playlistadd\ "(?P<name>[^"]+)"\ "(?P<uri>[^"]+)"$')
 def playlistadd(context, name, uri):
     """
     *musicpd.org, stored playlists section:*
@@ -139,7 +139,7 @@ def playlistadd(context, name, uri):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^playlistclear\ "(?P<name>[^"]+)"$')
+@handle_request(r'playlistclear\ "(?P<name>[^"]+)"$')
 def playlistclear(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -151,7 +151,7 @@ def playlistclear(context, name):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^playlistdelete\ "(?P<name>[^"]+)"\ "(?P<songpos>\d+)"$')
+@handle_request(r'playlistdelete\ "(?P<name>[^"]+)"\ "(?P<songpos>\d+)"$')
 def playlistdelete(context, name, songpos):
     """
     *musicpd.org, stored playlists section:*
@@ -164,7 +164,7 @@ def playlistdelete(context, name, songpos):
 
 
 @handle_request(
-    r'^playlistmove\ "(?P<name>[^"]+)"\ '
+    r'playlistmove\ "(?P<name>[^"]+)"\ '
     r'"(?P<from_pos>\d+)"\ "(?P<to_pos>\d+)"$')
 def playlistmove(context, name, from_pos, to_pos):
     """
@@ -184,7 +184,7 @@ def playlistmove(context, name, from_pos, to_pos):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^rename\ "(?P<old_name>[^"]+)"\ "(?P<new_name>[^"]+)"$')
+@handle_request(r'rename\ "(?P<old_name>[^"]+)"\ "(?P<new_name>[^"]+)"$')
 def rename(context, old_name, new_name):
     """
     *musicpd.org, stored playlists section:*
@@ -196,7 +196,7 @@ def rename(context, old_name, new_name):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^rm\ "(?P<name>[^"]+)"$')
+@handle_request(r'rm\ "(?P<name>[^"]+)"$')
 def rm(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -208,7 +208,7 @@ def rm(context, name):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^save\ "(?P<name>[^"]+)"$')
+@handle_request(r'save\ "(?P<name>[^"]+)"$')
 def save(context, name):
     """
     *musicpd.org, stored playlists section:*
