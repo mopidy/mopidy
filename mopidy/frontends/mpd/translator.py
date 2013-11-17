@@ -223,7 +223,7 @@ MPD_SEARCH_QUERY_RE = re.compile(r"""
     "?                  # End of optional quote around the field type
     \s                  # A single space
     "[^"]+"             # Matching a quoted search string
-""", re.VERBOSE)
+""", flags=(re.UNICODE | re.VERBOSE))
 
 MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
     \b                  # Only begin matching at word bundaries
@@ -246,7 +246,7 @@ MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
     "?                  # End of optional quote around the field type
     \s                  # A single space
     "(?P<what>[^"]+)"   # Capturing a quoted search string
-""", re.VERBOSE)
+""", flags=(re.UNICODE | re.VERBOSE))
 
 
 def query_from_mpd_search_format(mpd_query):
