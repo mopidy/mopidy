@@ -203,49 +203,49 @@ def query_from_mpd_list_format(field, mpd_query):
 # and in mopidy.frontends.mpd.protocol.music_db.QUERY_RE.
 
 MPD_SEARCH_QUERY_RE = re.compile(r"""
-    \b                  # Only begin matching at word bundaries
-    "?                  # Optional quote around the field type
-    (?:                 # A non-capturing group for the field type
-        [Aa]lbum
-      | [Aa]rtist
-      | [Aa]lbumartist
-      | [Cc]omment
-      | [Cc]omposer
-      | [Dd]ate
-      | [Ff]ile
-      | [Ff]ilename
-      | [Gg]enre
-      | [Pp]erformer
-      | [Tt]itle
-      | [Tt]rack
-      | [Aa]ny
-    )
-    "?                  # End of optional quote around the field type
-    \s                  # A single space
-    "[^"]+"             # Matching a quoted search string
+  \b                  # Only begin matching at word bundaries
+  "?                  # Optional quote around the field type
+  (?:                 # A non-capturing group for the field type
+      [Aa]lbum
+    | [Aa]rtist
+    | [Aa]lbumartist
+    | [Cc]omment
+    | [Cc]omposer
+    | [Dd]ate
+    | [Ff]ile
+    | [Ff]ilename
+    | [Gg]enre
+    | [Pp]erformer
+    | [Tt]itle
+    | [Tt]rack
+    | [Aa]ny
+  )
+  "?                  # End of optional quote around the field type
+  \s                  # A single space
+  "[^"]+"             # Matching a quoted search string
 """, flags=(re.UNICODE | re.VERBOSE))
 
 MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
-    \b                  # Only begin matching at word bundaries
-    "?                  # Optional quote around the field type
-    (?P<field>(         # A capturing group for the field type
-        [Aa]lbum
-      | [Aa]rtist
-      | [Aa]lbumartist
-      | [Cc]omment
-      | [Cc]omposer
-      | [Dd]ate
-      | [Ff]ile
-      | [Ff]ilename
-      | [Gg]enre
-      | [Pp]erformer
-      | [Tt]itle
-      | [Tt]rack
-      | [Aa]ny
-    ))
-    "?                  # End of optional quote around the field type
-    \s                  # A single space
-    "(?P<what>[^"]+)"   # Capturing a quoted search string
+  \b                  # Only begin matching at word bundaries
+  "?                  # Optional quote around the field type
+  (?P<field>(         # A capturing group for the field type
+      [Aa]lbum
+    | [Aa]rtist
+    | [Aa]lbumartist
+    | [Cc]omment
+    | [Cc]omposer
+    | [Dd]ate
+    | [Ff]ile
+    | [Ff]ilename
+    | [Gg]enre
+    | [Pp]erformer
+    | [Tt]itle
+    | [Tt]rack
+    | [Aa]ny
+  ))
+  "?                  # End of optional quote around the field type
+  \s                  # A single space
+  "(?P<what>[^"]+)"   # Capturing a quoted search string
 """, flags=(re.UNICODE | re.VERBOSE))
 
 
