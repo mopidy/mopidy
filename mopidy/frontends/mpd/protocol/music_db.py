@@ -10,24 +10,28 @@ from mopidy.frontends.mpd.exceptions import MpdArgError, MpdNotImplemented
 from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
+QUERY_FIELDS = r"""
+    [Aa]lbum
+  | [Aa]rtist
+  | [Aa]lbumartist
+  | [Cc]omment
+  | [Cc]omposer
+  | [Dd]ate
+  | [Ff]ile
+  | [Ff]ilename
+  | [Gg]enre
+  | [Pp]erformer
+  | [Tt]itle
+  | [Tt]rack
+  | [Aa]ny
+"""
+
 QUERY_RE = r"""
   (?P<mpd_query>
     (
       "?                # Optional quote around the field type
       (
-          [Aa]lbum
-        | [Aa]rtist
-        | [Aa]lbumartist
-        | [Cc]omment
-        | [Cc]omposer
-        | [Dd]ate
-        | [Ff]ile
-        | [Ff]ilename
-        | [Gg]enre
-        | [Pp]erformer
-        | [Tt]itle
-        | [Tt]rack
-        | [Aa]ny
+""" + QUERY_FIELDS + """
       )
       "?                # End of optional quote around the field type
       \                 # A single space
@@ -42,19 +46,7 @@ MPD_SEARCH_QUERY_RE = re.compile(r"""
   \b                  # Only begin matching at word bundaries
   "?                  # Optional quote around the field type
   (?:                 # A non-capturing group for the field type
-      [Aa]lbum
-    | [Aa]rtist
-    | [Aa]lbumartist
-    | [Cc]omment
-    | [Cc]omposer
-    | [Dd]ate
-    | [Ff]ile
-    | [Ff]ilename
-    | [Gg]enre
-    | [Pp]erformer
-    | [Tt]itle
-    | [Tt]rack
-    | [Aa]ny
+""" + QUERY_FIELDS + """
   )
   "?                  # End of optional quote around the field type
   \                   # A single space
@@ -65,19 +57,7 @@ MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
   \b                  # Only begin matching at word bundaries
   "?                  # Optional quote around the field type
   (?P<field>(         # A capturing group for the field type
-      [Aa]lbum
-    | [Aa]rtist
-    | [Aa]lbumartist
-    | [Cc]omment
-    | [Cc]omposer
-    | [Dd]ate
-    | [Ff]ile
-    | [Ff]ilename
-    | [Gg]enre
-    | [Pp]erformer
-    | [Tt]itle
-    | [Tt]rack
-    | [Aa]ny
+""" + QUERY_FIELDS + """
   ))
   "?                  # End of optional quote around the field type
   \                   # A single space
