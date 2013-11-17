@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import functools
 import itertools
+import re
 
 from mopidy.models import Track
 from mopidy.frontends.mpd import translator
@@ -36,6 +37,81 @@ QUERY_RE = r"""
   )
   $
 """
+
+MPD_SEARCH_QUERY_RE = re.compile(r"""
+  \b                  # Only begin matching at word bundaries
+  "?                  # Optional quote around the field type
+  (?:                 # A non-capturing group for the field type
+      [Aa]lbum
+    | [Aa]rtist
+    | [Aa]lbumartist
+    | [Cc]omment
+    | [Cc]omposer
+    | [Dd]ate
+    | [Ff]ile
+    | [Ff]ilename
+    | [Gg]enre
+    | [Pp]erformer
+    | [Tt]itle
+    | [Tt]rack
+    | [Aa]ny
+  )
+  "?                  # End of optional quote around the field type
+  \                   # A single space
+  "[^"]+"             # Matching a quoted search string
+""", flags=(re.UNICODE | re.VERBOSE))
+
+MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
+  \b                  # Only begin matching at word bundaries
+  "?                  # Optional quote around the field type
+  (?P<field>(         # A capturing group for the field type
+      [Aa]lbum
+    | [Aa]rtist
+    | [Aa]lbumartist
+    | [Cc]omment
+    | [Cc]omposer
+    | [Dd]ate
+    | [Ff]ile
+    | [Ff]ilename
+    | [Gg]enre
+    | [Pp]erformer
+    | [Tt]itle
+    | [Tt]rack
+    | [Aa]ny
+  ))
+  "?                  # End of optional quote around the field type
+  \                   # A single space
+  "(?P<what>[^"]+)"   # Capturing a quoted search string
+""", flags=(re.UNICODE | re.VERBOSE))
+
+
+def _query_from_mpd_search_format(mpd_query):
+    """
+    Parses an MPD ``search`` or ``find`` query and converts it to the Mopidy
+    query format.
+
+    :param mpd_query: the MPD search query
+    :type mpd_query: string
+    """
+    query_parts = MPD_SEARCH_QUERY_RE.findall(mpd_query)
+    query = {}
+    for query_part in query_parts:
+        m = MPD_SEARCH_QUERY_PART_RE.match(query_part)
+        field = m.groupdict()['field'].lower()
+        if field == 'title':
+            field = 'track_name'
+        elif field == 'track':
+            field = 'track_no'
+        elif field in ('file', 'filename'):
+            field = 'uri'
+        what = m.groupdict()['what']
+        if not what:
+            raise ValueError
+        if field in query:
+            query[field].append(what)
+        else:
+            query[field] = [what]
+    return query
 
 
 def _get_field(field, search_results):
@@ -79,7 +155,7 @@ def count(context, mpd_query):
     - use multiple tag-needle pairs to make more specific searches.
     """
     try:
-        query = translator.query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_format(mpd_query)
     except ValueError:
         raise MpdArgError('incorrect arguments', command='count')
     results = context.core.library.find_exact(**query).get()
@@ -119,7 +195,7 @@ def find(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = translator.query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     results = context.core.library.find_exact(**query).get()
@@ -146,7 +222,7 @@ def findadd(context, mpd_query):
         current playlist. Parameters have the same meaning as for ``find``.
     """
     try:
-        query = translator.query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     results = context.core.library.find_exact(**query).get()
@@ -419,7 +495,7 @@ def search(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = translator.query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
@@ -443,7 +519,7 @@ def searchadd(context, mpd_query):
         not case sensitive.
     """
     try:
-        query = translator.query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
@@ -466,7 +542,7 @@ def searchaddpl(context, playlist_name, mpd_query):
         not case sensitive.
     """
     try:
-        query = translator.query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_format(mpd_query)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
