@@ -88,6 +88,14 @@ class PlaybackController(object):
     time_position = property(get_time_position)
     """Time position in milliseconds."""
 
+    def get_track_length(self):
+        if self.audio:
+            return self.audio.get_length()
+        return self.current_tl_track and self.current_tl_track.track.length or None
+
+    track_length = property(get_track_length)
+    """Track known duration in miliseconds"""
+
     def get_volume(self):
         if self.audio:
             return self.audio.get_volume().get()
