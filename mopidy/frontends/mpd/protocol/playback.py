@@ -6,8 +6,7 @@ from mopidy.frontends.mpd.exceptions import (
     MpdArgError, MpdNoExistError, MpdNotImplemented)
 
 
-@handle_request(r'consume\ (?P<state>[01])$')
-@handle_request(r'consume\ "(?P<state>[01])"$')
+@handle_request(r'consume\ ("?)(?P<state>[01])\1$')
 def consume(context, state):
     """
     *musicpd.org, playback section:*
@@ -129,8 +128,7 @@ def play(context):
     return context.core.playback.play().get()
 
 
-@handle_request(r'playid\ (?P<tlid>-?\d+)$')
-@handle_request(r'playid\ "(?P<tlid>-?\d+)"$')
+@handle_request(r'playid\ ("?)(?P<tlid>-?\d+)\1$')
 def playid(context, tlid):
     """
     *musicpd.org, playback section:*
@@ -157,8 +155,7 @@ def playid(context, tlid):
     return context.core.playback.play(tl_tracks[0]).get()
 
 
-@handle_request(r'play\ (?P<songpos>-?\d+)$')
-@handle_request(r'play\ "(?P<songpos>-?\d+)"$')
+@handle_request(r'play\ ("?)(?P<songpos>-?\d+)\1$')
 def playpos(context, songpos):
     """
     *musicpd.org, playback section:*
@@ -252,8 +249,7 @@ def previous(context):
     return context.core.playback.previous().get()
 
 
-@handle_request(r'random\ (?P<state>[01])$')
-@handle_request(r'random\ "(?P<state>[01])"$')
+@handle_request(r'random\ ("?)(?P<state>[01])\1$')
 def random(context, state):
     """
     *musicpd.org, playback section:*
@@ -268,8 +264,7 @@ def random(context, state):
         context.core.tracklist.random = False
 
 
-@handle_request(r'repeat\ (?P<state>[01])$')
-@handle_request(r'repeat\ "(?P<state>[01])"$')
+@handle_request(r'repeat\ ("?)(?P<state>[01])\1$')
 def repeat(context, state):
     """
     *musicpd.org, playback section:*
@@ -314,8 +309,7 @@ def replay_gain_status(context):
     return 'off'  # TODO
 
 
-@handle_request(r'seek\ (?P<songpos>\d+)\ (?P<seconds>\d+)$')
-@handle_request(r'seek\ "(?P<songpos>\d+)"\ "(?P<seconds>\d+)"$')
+@handle_request(r'seek\ ("?)(?P<songpos>\d+)\1\ ("?)(?P<seconds>\d+)\3$')
 def seek(context, songpos, seconds):
     """
     *musicpd.org, playback section:*
@@ -370,8 +364,7 @@ def seekcur(context, position=None, diff=None):
         context.core.playback.seek(position).get()
 
 
-@handle_request(r'setvol\ (?P<volume>[-+]*\d+)$')
-@handle_request(r'setvol\ "(?P<volume>[-+]*\d+)"$')
+@handle_request(r'setvol\ ("?)(?P<volume>[-+]*\d+)\1$')
 def setvol(context, volume):
     """
     *musicpd.org, playback section:*
@@ -392,8 +385,7 @@ def setvol(context, volume):
     context.core.playback.volume = volume
 
 
-@handle_request(r'single\ (?P<state>[01])$')
-@handle_request(r'single\ "(?P<state>[01])"$')
+@handle_request(r'single\ ("?)(?P<state>[01])\1$')
 def single(context, state):
     """
     *musicpd.org, playback section:*

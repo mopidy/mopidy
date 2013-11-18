@@ -11,7 +11,7 @@ from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 
 
 LIST_QUERY = r"""
-  "?                    # Optional quote around the field type
+  ("?)                  # Optional quote around the field type
   (?P<field>(           # Field to list in the response
       [Aa]rtist
     | [Aa]lbumartist
@@ -21,7 +21,7 @@ LIST_QUERY = r"""
     | [Gg]enre
     | [Pp]erformer
   ))
-  "?                    # End of optional quote around the field type
+  \1                    # End of optional quote around the field type
   (?:                   # Non-capturing group for optional search query
     \                   # A single space
     (?P<mpd_query>.*)
@@ -47,10 +47,10 @@ SEARCH_FIELDS = r"""
 
 SEARCH_QUERY = r"""
   (?P<mpd_query>
-    (
+    (?:                 # Non-capturing group for repeating query pairs
       "?                # Optional quote around the field type
       (?:
-""" + SEARCH_FIELDS + """
+""" + SEARCH_FIELDS + r"""
       )
       "?                # End of optional quote around the field type
       \                 # A single space
@@ -454,7 +454,8 @@ def lsinfo(context, uri=None):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'rescan(\ "(?P<uri>[^"]+)")*$')
+@handle_request(r'rescan$')
+@handle_request(r'rescan\ "(?P<uri>[^"]+)"$')
 def rescan(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -555,7 +556,8 @@ def searchaddpl(context, playlist_name, mpd_query):
     context.core.playlists.save(playlist)
 
 
-@handle_request(r'update(\ "(?P<uri>[^"]+)")*$')
+@handle_request(r'update$')
+@handle_request(r'update\ "(?P<uri>[^"]+)"$')
 def update(context, uri=None, rescan_unmodified_files=False):
     """
     *musicpd.org, music database section:*

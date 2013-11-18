@@ -180,8 +180,7 @@ def playlist(context):
     return playlistinfo(context)
 
 
-@handle_request(r'playlistfind\ (?P<tag>[^"]+)\ "(?P<needle>[^"]+)"$')
-@handle_request(r'playlistfind\ "(?P<tag>[^"]+)"\ "(?P<needle>[^"]+)"$')
+@handle_request(r'playlistfind\ ("?)(?P<tag>[^"]+)\1\ "(?P<needle>[^"]+)"$')
 def playlistfind(context, tag, needle):
     """
     *musicpd.org, current playlist section:*
@@ -263,8 +262,7 @@ def playlistinfo(context, songpos=None, start=None, end=None):
         return translator.tracks_to_mpd_format(tl_tracks, start, end)
 
 
-@handle_request(r'playlistsearch\ "(?P<tag>[^"]+)"\ "(?P<needle>[^"]+)"$')
-@handle_request(r'playlistsearch\ (?P<tag>\w+)\ "(?P<needle>[^"]+)"$')
+@handle_request(r'playlistsearch\ ("?)(?P<tag>\w+)\1\ "(?P<needle>[^"]+)"$')
 def playlistsearch(context, tag, needle):
     """
     *musicpd.org, current playlist section:*
@@ -282,8 +280,7 @@ def playlistsearch(context, tag, needle):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'plchanges\ (?P<version>-?\d+)$')
-@handle_request(r'plchanges\ "(?P<version>-?\d+)"$')
+@handle_request(r'plchanges\ ("?)(?P<version>-?\d+)\1$')
 def plchanges(context, version):
     """
     *musicpd.org, current playlist section:*
