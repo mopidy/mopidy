@@ -13,9 +13,9 @@ from mopidy.frontends.mpd.protocol import handle_request, stored_playlists
 LIST_QUERY = r"""
   ("?)                  # Optional quote around the field type
   (?P<field>(           # Field to list in the response
-      [Aa]rtist
+      [Aa]lbum
     | [Aa]lbumartist
-    | [Aa]lbum
+    | [Aa]rtist
     | [Cc]omposer
     | [Dd]ate
     | [Gg]enre
@@ -31,8 +31,9 @@ LIST_QUERY = r"""
 
 SEARCH_FIELDS = r"""
     [Aa]lbum
-  | [Aa]rtist
   | [Aa]lbumartist
+  | [Aa]ny
+  | [Aa]rtist
   | [Cc]omment
   | [Cc]omposer
   | [Dd]ate
@@ -42,7 +43,6 @@ SEARCH_FIELDS = r"""
   | [Pp]erformer
   | [Tt]itle
   | [Tt]rack
-  | [Aa]ny
 """
 
 SEARCH_QUERY = r"""
