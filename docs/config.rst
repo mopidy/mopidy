@@ -3,8 +3,8 @@ Configuration
 *************
 
 Mopidy has a lot of config values you can tweak, but you only need to change a
-few to get up and running. A complete ``~/.config/mopidy/mopidy.conf`` may be
-as simple as this:
+few to get up and running. A complete :file:`~/.config/mopidy/mopidy.conf` may
+be as simple as this:
 
 .. code-block:: ini
 
@@ -15,17 +15,18 @@ as simple as this:
     username = alice
     password = mysecret
 
-Mopidy primarily reads config from the file ``~/.config/mopidy/mopidy.conf``,
-where ``~`` means your *home directory*. If your username is ``alice`` and you
-are running Linux, the config file should probably be at
-``/home/alice/.config/mopidy/mopidy.conf``. You can either create the
-configuration file yourself, or run the ``mopidy`` command, and it will create
-an empty config file for you and print what config values must be set to
-successfully start Mopidy.
+Mopidy primarily reads config from the file
+:file:`~/.config/mopidy/mopidy.conf`, where ``~`` means your *home directory*.
+If your username is ``alice`` and you are running Linux, the config file should
+probably be at :file:`/home/alice/.config/mopidy/mopidy.conf`. You can either
+create the configuration file yourself, or run the ``mopidy`` command, and it
+will create an empty config file for you and print what config values must be
+set to successfully start Mopidy.
 
 When you have created the configuration file, open it in a text editor, and add
 the config values you want to change. If you want to keep the default for a
-config value, you **should not** add it to ``~/.config/mopidy/mopidy.conf``.
+config value, you **should not** add it to
+:file:`~/.config/mopidy/mopidy.conf`.
 
 To see what's the effective configuration for your Mopidy installation, you can
 run :option:`mopidy --show-config`. It will print your full effective config

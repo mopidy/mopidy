@@ -29,7 +29,7 @@ Options
 
 .. program:: mopidy
 
-.. cmdoption:: -h, --help
+.. cmdoption:: --help, -h
 
     Show help message and exit.
 
@@ -37,11 +37,11 @@ Options
 
     Show Mopidy's version number and exit.
 
-.. cmdoption:: -q, --quiet
+.. cmdoption:: --quiet, -q
 
     Show less output: warning level and higher.
 
-.. cmdoption:: -v, --verbose
+.. cmdoption:: --verbose, -v
 
     Show more output: debug level and higher.
 
@@ -56,7 +56,7 @@ Options
     with a colon. The later files override the earlier ones if there's a
     conflict.
 
-.. cmdoption:: -o <option>, --option <option>
+.. cmdoption:: --option <option>, -o <option>
 
     Specify additional config values in the ``section/key=value`` format. Can
     be provided multiple times.
@@ -79,7 +79,7 @@ Built in commands
 Extension commands
 ==================
 
-Additionally, extensions can provide extra commands. See ``mopidy --help``
+Additionally, extensions can provide extra commands. Run `mopidy --help`
 for a list of what is available on your system and command-specific help.
 Commands for disabled extensions will be listed, but can not be run.
 
@@ -91,10 +91,10 @@ Commands for disabled extensions will be listed, but can not be run.
 Files
 =====
 
-/etc/mopidy/mopidy.conf
+:file:`/etc/mopidy/mopidy.conf`
     System wide Mopidy configuration file.
 
-~/.config/mopidy/mopidy.conf
+:file:`~/.config/mopidy/mopidy.conf`
     Your personal Mopidy configuration file. Overrides any configs from the
     system wide configuration file.
 
@@ -130,6 +130,7 @@ See also
 ========
 
 :ref:`mopidy-convert-config(1) <mopidy-convert-config>`
+
 
 Reporting bugs
 ==============
