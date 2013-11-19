@@ -16,6 +16,10 @@ _AVAHI_PROTO_UNSPEC = -1
 _AVAHI_PUBLISHFLAGS_NONE = 0
 
 
+def _is_loopback_address(host):
+    return host.startswith('127.') or host == '::1'
+
+
 def _convert_text_to_dbus_bytes(text):
     return [dbus.Byte(ord(c)) for c in text]
 
@@ -40,6 +44,11 @@ class Zeroconf(object):
             hostname=self.host or socket.getfqdn(), port=self.port)
 
     def publish(self):
+        if _is_loopback_address(self.host):
+            logger.info(
+                'Zeroconf publish on loopback interface is not supported.')
+            return False
+
         if not dbus:
             logger.debug('Zeroconf publish failed: dbus not installed.')
             return False
