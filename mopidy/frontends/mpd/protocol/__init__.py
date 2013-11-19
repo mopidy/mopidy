@@ -44,7 +44,7 @@ def handle_request(pattern, auth_required=True):
     For example, if the command is ``do that thing`` the ``what`` argument will
     be ``this thing``::
 
-        @handle_request('^do\ (?P<what>.+)$')
+        @handle_request('do\ (?P<what>.+)$')
         def do(what):
             ...
 
