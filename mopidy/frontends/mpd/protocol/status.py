@@ -13,7 +13,7 @@ SUBSYSTEMS = [
     'stored_playlist', 'update']
 
 
-@handle_request(r'^clearerror$')
+@handle_request(r'clearerror$')
 def clearerror(context):
     """
     *musicpd.org, status section:*
@@ -26,7 +26,7 @@ def clearerror(context):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^currentsong$')
+@handle_request(r'currentsong$')
 def currentsong(context):
     """
     *musicpd.org, status section:*
@@ -42,8 +42,8 @@ def currentsong(context):
         return track_to_mpd_format(tl_track, position=position)
 
 
-@handle_request(r'^idle$')
-@handle_request(r'^idle (?P<subsystems>.+)$')
+@handle_request(r'idle$')
+@handle_request(r'idle\ (?P<subsystems>.+)$')
 def idle(context, subsystems=None):
     """
     *musicpd.org, status section:*
@@ -100,7 +100,7 @@ def idle(context, subsystems=None):
     return response
 
 
-@handle_request(r'^noidle$')
+@handle_request(r'noidle$')
 def noidle(context):
     """See :meth:`_status_idle`."""
     if not context.subscriptions:
@@ -110,7 +110,7 @@ def noidle(context):
     context.session.prevent_timeout = False
 
 
-@handle_request(r'^stats$')
+@handle_request(r'stats$')
 def stats(context):
     """
     *musicpd.org, status section:*
@@ -137,7 +137,7 @@ def stats(context):
     }
 
 
-@handle_request(r'^status$')
+@handle_request(r'status$')
 def status(context):
     """
     *musicpd.org, status section:*

@@ -1,8 +1,25 @@
 from __future__ import unicode_literals
 
+import unittest
+
+from mopidy.frontends.mpd.protocol import music_db
 from mopidy.models import Album, Artist, SearchResult, Track
 
 from tests.frontends.mpd import protocol
+
+
+class QueryFromMpdSearchFormatTest(unittest.TestCase):
+    def test_dates_are_extracted(self):
+        result = music_db._query_from_mpd_search_format(
+            'Date "1974-01-02" Date "1975"')
+        self.assertEqual(result['date'][0], '1974-01-02')
+        self.assertEqual(result['date'][1], '1975')
+
+    # TODO Test more mappings
+
+
+class QueryFromMpdListFormatTest(unittest.TestCase):
+    pass  # TODO
 
 
 class MusicDatabaseHandlerTest(protocol.BaseTestCase):
