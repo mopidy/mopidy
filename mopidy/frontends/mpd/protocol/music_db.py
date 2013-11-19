@@ -45,6 +45,7 @@ SEARCH_FIELDS = r"""
   | [Tt]rack
 """
 
+# TODO Would be nice to get ("?)...\1 working for the quotes here
 SEARCH_QUERY = r"""
   (?P<mpd_query>
     (?:                 # Non-capturing group for repeating query pairs
@@ -61,6 +62,7 @@ SEARCH_QUERY = r"""
   $
 """
 
+# TODO Would be nice to get ("?)...\1 working for the quotes here
 SEARCH_PAIR_WITHOUT_GROUPS = r"""
   \b                  # Only begin matching at word bundaries
   "?                  # Optional quote around the field type
@@ -74,6 +76,7 @@ SEARCH_PAIR_WITHOUT_GROUPS = r"""
 SEARCH_PAIR_WITHOUT_GROUPS_RE = re.compile(
     SEARCH_PAIR_WITHOUT_GROUPS, flags=(re.UNICODE | re.VERBOSE))
 
+# TODO Would be nice to get ("?)...\1 working for the quotes here
 SEARCH_PAIR_WITH_GROUPS = r"""
   \b                  # Only begin matching at word bundaries
   "?                  # Optional quote around the field type
