@@ -202,7 +202,8 @@ def playlistfind(context, tag, needle):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'playlistid(\ "(?P<tlid>\d+)")*$')
+@handle_request(r'playlistid$')
+@handle_request(r'playlistid\ "(?P<tlid>\d+)"$')
 def playlistid(context, tlid=None):
     """
     *musicpd.org, current playlist section:*
