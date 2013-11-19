@@ -48,6 +48,11 @@ def handle_request(pattern, auth_required=True):
         def do(what):
             ...
 
+    Note that the patterns are compiled with the :attr:`re.VERBOSE` flag. Thus,
+    you must escape any space characters you want to match, but you're also
+    free to add non-escaped whitespace to format the pattern for easier
+    reading.
+
     :param pattern: regexp pattern for matching commands
     :type pattern: string
     """
