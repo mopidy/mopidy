@@ -28,3 +28,10 @@ Audio listener
 
 .. autoclass:: mopidy.audio.AudioListener
     :members:
+
+
+Audio scanner
+=============
+
+.. autoclass:: mopidy.audio.scan.Scanner
+    :members:

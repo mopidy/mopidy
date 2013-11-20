@@ -4,7 +4,7 @@ from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdUnknownCommand
 
 
-@handle_request(r'^command_list_begin$')
+@handle_request(r'command_list_begin$')
 def command_list_begin(context):
     """
     *musicpd.org, command list section:*
@@ -26,7 +26,7 @@ def command_list_begin(context):
     context.dispatcher.command_list = []
 
 
-@handle_request(r'^command_list_end$')
+@handle_request(r'command_list_end$')
 def command_list_end(context):
     """See :meth:`command_list_begin()`."""
     if not context.dispatcher.command_list_receiving:
@@ -49,7 +49,7 @@ def command_list_end(context):
     return command_list_response
 
 
-@handle_request(r'^command_list_ok_begin$')
+@handle_request(r'command_list_ok_begin$')
 def command_list_ok_begin(context):
     """See :meth:`command_list_begin()`."""
     context.dispatcher.command_list_receiving = True

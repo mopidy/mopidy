@@ -142,13 +142,6 @@ man_pages = [
         '1'
     ),
     (
-        'commands/mopidy-scan',
-        'mopidy-scan',
-        'index music for playback with mopidy',
-        '',
-        '1'
-    ),
-    (
         'commands/mopidy-convert-config',
         'mopidy-convert-config',
         'migrate config files from mopidy pre-0.14',

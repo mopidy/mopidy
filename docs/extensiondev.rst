@@ -305,6 +305,10 @@ This is ``mopidy_soundspot/__init__.py``::
             from .backend import SoundspotBackend
             return [SoundspotBackend]
 
+        def get_command(self):
+            from .commands import SoundspotCommand
+            return SoundspotCommand()
+
         def register_gstreamer_elements(self):
             from .mixer import SoundspotMixer
             gobject.type_register(SoundspotMixer)
@@ -353,7 +357,8 @@ Example backend
 
 If you want to extend Mopidy to support new music and playlist sources, you
 want to implement a backend. A backend does not have access to Mopidy's core
-API at all and got a bunch of interfaces to implement.
+API at all, but it does have a bunch of interfaces it can implement to extend
+Mopidy.
 
 The skeleton of a backend would look like this. See :ref:`backend-api` for more
 details.
@@ -371,6 +376,34 @@ details.
             self.audio = audio
 
         # Your backend implementation
+
+
+Example command
+===============
+
+If you want to extend the Mopidy with a new helper not run from the server,
+such as scanning for media, adding a command is the way to go. Your top level
+command name will always match your extension name, but you are free to add
+sub-commands with names of your choosing.
+
+The skeleton of a commands would look like this. See :ref:`command-api` for more
+details.
+
+::
+
+    from mopidy import commands
+
+
+    class SoundspotCommand(commands.Command):
+        help = 'Some text that will show up in --help'
+
+        def __init__(self):
+            super(SoundspotCommand, self).__init__()
+            self.add_argument('--foo')
+
+        def run(self, args, config, extensions):
+           # Your backend implementation
+           return 0
 
 
 Example GStreamer element
