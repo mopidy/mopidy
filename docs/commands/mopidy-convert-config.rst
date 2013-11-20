@@ -19,8 +19,8 @@ combines results from all music sources, and you can mix tracks from all
 sources in your play queue. Your playlists from Spotify or SoundCloud are also
 available for use.
 
-The ``mopidy-convert-config`` command is used to convert ``settings.py``
-configuration files used by ``mopidy`` < 0.14 to the ``mopidy.conf`` config
+The ``mopidy-convert-config`` command is used to convert :file:`settings.py`
+configuration files used by ``mopidy`` < 0.14 to the :file:`mopidy.conf` config
 file used by ``mopidy`` >= 0.14.
 
 
@@ -30,16 +30,16 @@ Options
 .. program:: mopidy-convert-config
 
 This program does not take any options. It looks for the pre-0.14 settings file
-at ``$XDG_CONFIG_DIR/mopidy/settings.py``, and if it exists it converts it and
-ouputs a Mopidy 0.14 compatible ini-format configuration. If you don't already
-have a config file at ``$XDG_CONFIG_DIR/mopidy/mopidy.conf``, you're asked if
-you want to save the converted config to that file.
+at :file:`{$XDG_CONFIG_DIR}/mopidy/settings.py`, and if it exists it converts
+it and ouputs a Mopidy 0.14 compatible ini-format configuration. If you don't
+already have a config file at :file:`{$XDG_CONFIG_DIR}/mopidy/mopidy.conf``,
+you're asked if you want to save the converted config to that file.
 
 
 Example
 =======
 
-Given the following contents in ``~/.config/mopidy/settings.py``:
+Given the following contents in :file:`~/.config/mopidy/settings.py`:
 
 ::
 
@@ -49,7 +49,7 @@ Given the following contents in ``~/.config/mopidy/settings.py``:
     SPOTIFY_USERNAME = u'alice'
 
 Running ``mopidy-convert-config`` will convert the config and create a new
-``mopidy.conf`` config file:
+:file:`mopidy.conf` config file:
 
 .. code-block:: none
 
@@ -70,7 +70,7 @@ Running ``mopidy-convert-config`` will convert the config and create a new
     Write new config to /home/alice/.config/mopidy/mopidy.conf? [yN] y
     Done.
 
-Contents of ``~/.config/mopidy/mopidy.conf`` after the conversion:
+Contents of :file:`~/.config/mopidy/mopidy.conf` after the conversion:
 
 .. code-block:: ini
 

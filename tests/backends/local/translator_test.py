@@ -147,7 +147,9 @@ class MPDTagCacheToTracksTest(unittest.TestCase):
         album = Album(name='æøå', artists=artists)
         track = Track(
             uri='local:track:song1.mp3', name='æøå', artists=artists,
-            album=album, length=4000, last_modified=1272319626)
+            composers=artists, performers=artists, genre='æøå',
+            album=album, length=4000, last_modified=1272319626,
+            comment='æøå&^`ൂ㔶')
 
         self.assertEqual(track, list(tracks)[0])
 

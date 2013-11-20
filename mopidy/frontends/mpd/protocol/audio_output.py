@@ -4,7 +4,7 @@ from mopidy.frontends.mpd.exceptions import MpdNoExistError
 from mopidy.frontends.mpd.protocol import handle_request
 
 
-@handle_request(r'^disableoutput "(?P<outputid>\d+)"$')
+@handle_request(r'disableoutput\ "(?P<outputid>\d+)"$')
 def disableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
@@ -19,7 +19,7 @@ def disableoutput(context, outputid):
         raise MpdNoExistError('No such audio output', command='disableoutput')
 
 
-@handle_request(r'^enableoutput "(?P<outputid>\d+)"$')
+@handle_request(r'enableoutput\ "(?P<outputid>\d+)"$')
 def enableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
@@ -34,7 +34,7 @@ def enableoutput(context, outputid):
         raise MpdNoExistError('No such audio output', command='enableoutput')
 
 
-@handle_request(r'^outputs$')
+@handle_request(r'outputs$')
 def outputs(context):
     """
     *musicpd.org, audio output section:*

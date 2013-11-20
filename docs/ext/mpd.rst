@@ -34,7 +34,6 @@ Items on this list will probably not be supported in the near future.
 - Crossfade is not supported
 - Replay gain is not supported
 - ``stats`` does not provide any statistics
-- ``list`` does not support listing tracks by genre
 - ``decoders`` does not provide information about available decoders
 
 The following items are currently not supported, but should be added in the

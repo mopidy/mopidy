@@ -37,5 +37,20 @@ Title: track4
 Album: album4
 Date: 2004
 Track: 4
+Comment: This is a fantastic track
 Time: 60
+key: key5
+file: /path5
+Composer: artist5
+Title: track5
+Album: album4
+Genre: genre1
+Time: 4
+key: key6
+file: /path6
+Performer: artist6
+Title: track6
+Album: album4
+Genre: genre2
+Time: 4
 songList end
