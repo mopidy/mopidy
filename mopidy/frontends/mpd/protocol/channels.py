@@ -4,7 +4,7 @@ from mopidy.frontends.mpd.protocol import handle_request
 from mopidy.frontends.mpd.exceptions import MpdNotImplemented
 
 
-@handle_request(r'^subscribe "(?P<channel>[A-Za-z0-9:._-]+)"$')
+@handle_request(r'subscribe\ "(?P<channel>[A-Za-z0-9:._-]+)"$')
 def subscribe(context, channel):
     """
     *musicpd.org, client to client section:*
@@ -18,7 +18,7 @@ def subscribe(context, channel):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^unsubscribe "(?P<channel>[A-Za-z0-9:._-]+)"$')
+@handle_request(r'unsubscribe\ "(?P<channel>[A-Za-z0-9:._-]+)"$')
 def unsubscribe(context, channel):
     """
     *musicpd.org, client to client section:*
@@ -30,7 +30,7 @@ def unsubscribe(context, channel):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^channels$')
+@handle_request(r'channels$')
 def channels(context):
     """
     *musicpd.org, client to client section:*
@@ -43,7 +43,7 @@ def channels(context):
     raise MpdNotImplemented  # TODO
 
 
-@handle_request(r'^readmessages$')
+@handle_request(r'readmessages$')
 def readmessages(context):
     """
     *musicpd.org, client to client section:*
@@ -57,7 +57,7 @@ def readmessages(context):
 
 
 @handle_request(
-    r'^sendmessage "(?P<channel>[A-Za-z0-9:._-]+)" "(?P<text>[^"]*)"$')
+    r'sendmessage\ "(?P<channel>[A-Za-z0-9:._-]+)"\ "(?P<text>[^"]*)"$')
 def sendmessage(context, channel, text):
     """
     *musicpd.org, client to client section:*
