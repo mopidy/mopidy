@@ -8,7 +8,28 @@ This changelog is used to track all major changes to Mopidy.
 v0.17.0 (UNRELEASED)
 ====================
 
+Still in development.
+
+**Commands**
+
+- Switched to sub-commands for the ``mopidy`` command , this implies the
+  following changes (fixes :issue:`437`):
+
+  ===================== =================
+  Old command           New command
+  ===================== =================
+  mopidy --show-deps    mopidy deps
+  mopidy --show-config  mopidy config
+  mopidy-scan           mopidy local scan
+  ===================== =================
+
+- Added hooks for extensions to create their own custom sub-commands and
+  converted ``mopidy-scan`` as first user of new API. (Fixes :issue:`436`)
+
 **Core**
+
+- The :class:`~mopidy.models.Track` model has grown fields for ``composers``,
+  ``performers``, ``genre``, and ``comment``.
 
 - The search field ``track`` has been renamed to ``track_name`` to avoid
   confusion with ``track_no``. (Fixes: :issue:`535`)
@@ -24,6 +45,13 @@ v0.17.0 (UNRELEASED)
   the library's :meth:`~mopidy.core.LibraryController.find_exact` and
   :meth:`~mopidy.core.LibraryController.search` methods.
 
+**Audio**
+
+- Change default volume mixer from ``autoaudiomixer`` to ``software``.
+  GStreamer 1.x does not support volume control, so we're changing to use
+  software mixing by default, as that may be the only thing we'll support in
+  the future when we upgrade to GStreamer 1.x.
+
 **Local backend**
 
 - Library scanning has been switched back to custom code due to various issues
@@ -37,8 +65,18 @@ v0.17.0 (UNRELEASED)
 - The scanner will now extract multiple artists from files with multiple artist
   tags.
 
+- The scanner will now extract composers and performers, as well as genre,
+  bitrate, and comments. (Fixes: :issue:`577`)
+
 - Fix scanner so that time of last modification is respected when deciding
   which files can be skipped.
+
+- The scanner now ignores the capitalization of file extensions in
+  :confval:`local/excluded_file_extensions`, so you no longer need to list both
+  ``.jpg`` and ``.JPG`` to ignore JPEG files when scanning. (Fixes:
+  :issue:`525`)
+
+- The scanner now by default ignores ``*.nfo`` and ``*.html`` files too.
 
 **MPD frontend**
 
@@ -47,6 +85,13 @@ v0.17.0 (UNRELEASED)
   available server on the local network without needing any configuration. See
   the :confval:`mpd/zeroconf` config value to change the service name or
   disable the service. (Fixes: :issue:`39`)
+
+- Add support for ``composer``, ``performer``, ``comment``, ``genre``, and
+  ``performer``.  These tags can be used with ``list ...``, ``search ...``, and
+  ``find ...`` and their variants, and are supported in the ``any`` tag also
+
+- The ``bitrate`` field in the ``status`` response is now always an integer.
+  This follows the behavior of the original MPD server. (Fixes: :issue:`577`)
 
 **HTTP frontend**
 

@@ -79,15 +79,28 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 albumartist_filter = lambda t: any([
                     q == a.name
                     for a in getattr(t.album, 'artists', [])])
+                composer_filter = lambda t: any([
+                    q == a.name
+                    for a in getattr(t, 'composers', [])])
+                performer_filter = lambda t: any([
+                    q == a.name
+                    for a in getattr(t, 'performers', [])])
                 track_no_filter = lambda t: q == t.track_no
+                genre_filter = lambda t: t.genre and q == t.genre
                 date_filter = lambda t: q == t.date
+                comment_filter = lambda t: q == t.comment
                 any_filter = lambda t: (
                     uri_filter(t) or
                     track_name_filter(t) or
                     album_filter(t) or
                     artist_filter(t) or
                     albumartist_filter(t) or
-                    date_filter(t))
+                    composer_filter(t) or
+                    performer_filter(t) or
+                    track_no_filter(t) or
+                    genre_filter(t) or
+                    date_filter(t) or
+                    comment_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -99,10 +112,18 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(artist_filter, result_tracks)
                 elif field == 'albumartist':
                     result_tracks = filter(albumartist_filter, result_tracks)
+                elif field == 'composer':
+                    result_tracks = filter(composer_filter, result_tracks)
+                elif field == 'performer':
+                    result_tracks = filter(performer_filter, result_tracks)
                 elif field == 'track_no':
                     result_tracks = filter(track_no_filter, result_tracks)
+                elif field == 'genre':
+                    result_tracks = filter(genre_filter, result_tracks)
                 elif field == 'date':
                     result_tracks = filter(date_filter, result_tracks)
+                elif field == 'comment':
+                    result_tracks = filter(comment_filter, result_tracks)
                 elif field == 'any':
                     result_tracks = filter(any_filter, result_tracks)
                 else:
@@ -137,15 +158,28 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                 albumartist_filter = lambda t: any([
                     q in a.name.lower()
                     for a in getattr(t.album, 'artists', [])])
+                composer_filter = lambda t: any([
+                    q in a.name.lower()
+                    for a in getattr(t, 'composers', [])])
+                performer_filter = lambda t: any([
+                    q in a.name.lower()
+                    for a in getattr(t, 'performers', [])])
                 track_no_filter = lambda t: q == t.track_no
+                genre_filter = lambda t: t.genre and q in t.genre.lower()
                 date_filter = lambda t: t.date and t.date.startswith(q)
+                comment_filter = lambda t: t.comment and q in t.comment.lower()
                 any_filter = lambda t: (
                     uri_filter(t) or
                     track_name_filter(t) or
                     album_filter(t) or
                     artist_filter(t) or
                     albumartist_filter(t) or
-                    date_filter(t))
+                    composer_filter(t) or
+                    performer_filter(t) or
+                    track_no_filter(t) or
+                    genre_filter(t) or
+                    date_filter(t) or
+                    comment_filter(t))
 
                 if field == 'uri':
                     result_tracks = filter(uri_filter, result_tracks)
@@ -157,10 +191,18 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     result_tracks = filter(artist_filter, result_tracks)
                 elif field == 'albumartist':
                     result_tracks = filter(albumartist_filter, result_tracks)
+                elif field == 'composer':
+                    result_tracks = filter(composer_filter, result_tracks)
+                elif field == 'performer':
+                    result_tracks = filter(performer_filter, result_tracks)
                 elif field == 'track_no':
                     result_tracks = filter(track_no_filter, result_tracks)
+                elif field == 'genre':
+                    result_tracks = filter(genre_filter, result_tracks)
                 elif field == 'date':
                     result_tracks = filter(date_filter, result_tracks)
+                elif field == 'comment':
+                    result_tracks = filter(comment_filter, result_tracks)
                 elif field == 'any':
                     result_tracks = filter(any_filter, result_tracks)
                 else:
