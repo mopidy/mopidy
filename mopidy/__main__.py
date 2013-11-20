@@ -8,9 +8,13 @@ import sys
 import gobject
 gobject.threads_init()
 
-import dbus.mainloop.glib
-dbus.mainloop.glib.threads_init()
-dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+try:
+    # Make GObject's mainloop the event loop for python-dbus
+    import dbus.mainloop.glib
+    dbus.mainloop.glib.threads_init()
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+except ImportError:
+    pass
 
 import pykka.debug
 
