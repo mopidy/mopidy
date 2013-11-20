@@ -10,7 +10,7 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.sendRequest('enableoutput "0"')
 
         self.assertInResponse('OK')
-        self.assertEqual(self.core.playback.mute.get(), True)
+        self.assertEqual(self.core.playback.mute.get(), False)
 
     def test_enableoutput_unknown_outputid(self):
         self.sendRequest('enableoutput "7"')
@@ -23,7 +23,7 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.sendRequest('disableoutput "0"')
 
         self.assertInResponse('OK')
-        self.assertEqual(self.core.playback.mute.get(), False)
+        self.assertEqual(self.core.playback.mute.get(), True)
 
     def test_disableoutput_unknown_outputid(self):
         self.sendRequest('disableoutput "7"')
@@ -38,7 +38,7 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
 
         self.assertInResponse('outputid: 0')
         self.assertInResponse('outputname: Mute')
-        self.assertInResponse('outputenabled: 0')
+        self.assertInResponse('outputenabled: 1')
         self.assertInResponse('OK')
 
     def test_outputs_when_muted(self):
@@ -48,5 +48,5 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
 
         self.assertInResponse('outputid: 0')
         self.assertInResponse('outputname: Mute')
-        self.assertInResponse('outputenabled: 1')
+        self.assertInResponse('outputenabled: 0')
         self.assertInResponse('OK')
