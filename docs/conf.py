@@ -153,4 +153,8 @@ man_pages = [
 
 # -- Options for extlink extension --------------------------------------------
 
-extlinks = {'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#')}
+extlinks = {
+    'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#'),
+    'mpris': (
+        'https://github.com/mopidy/mopidy-mpris/issues/%s', 'mopidy-mpris#'),
+}

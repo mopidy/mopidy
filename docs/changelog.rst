@@ -101,6 +101,11 @@ Still in development.
   :confval:`http/zeroconf` config value to change the service name or disable
   the service. (Fixes: :issue:`39`)
 
+**DBUS/MPRIS**
+
+- The ``mopidy`` process now registers it's GObject event loop as the default
+  eventloop for dbus-python. (Fixes: :mpris:`2`)
+
 
 v0.16.1 (2013-11-02)
 ====================
