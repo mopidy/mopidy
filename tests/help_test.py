@@ -12,11 +12,9 @@ class HelpTest(unittest.TestCase):
     def test_help_has_mopidy_options(self):
         mopidy_dir = os.path.dirname(mopidy.__file__)
         args = [sys.executable, mopidy_dir, '--help']
-        python_path = sys.path[:]
-        python_path.insert(0, os.path.join(mopidy_dir, '..'))
         process = subprocess.Popen(
             args,
-            env={'PYTHONPATH': ':'.join(python_path)},
+            env={'PYTHONPATH': os.path.join(mopidy_dir, '..')},
             stdout=subprocess.PIPE)
         output = process.communicate()[0]
         self.assertIn('--version', output)
