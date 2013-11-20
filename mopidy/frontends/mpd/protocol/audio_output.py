@@ -43,7 +43,7 @@ def outputs(context):
 
         Shows information about all outputs.
     """
-    muted = 1 if context.core.playback.get_mute().get() else 0
+    muted = 0 if context.core.playback.get_mute().get() else 1
     return [
         ('outputid', 0),
         ('outputname', 'Mute'),
