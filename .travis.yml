@@ -5,8 +5,6 @@ install:
   - "sudo wget -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list"
   - "sudo apt-get update || true"
   - "sudo apt-get install $(apt-cache depends mopidy | awk '$2 !~ /mopidy|python:any/ {print $2}')"
-  # Until the mopidy package gets a dependency on python-dbus
-  - "sudo apt-get install python-dbus"
   - "pip install coveralls flake8"
 
 before_script:
