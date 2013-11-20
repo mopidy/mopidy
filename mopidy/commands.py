@@ -2,10 +2,11 @@ from __future__ import unicode_literals
 
 import argparse
 import collections
-import gobject
 import logging
 import os
 import sys
+
+import gobject
 
 from mopidy import config as config_lib
 from mopidy.audio import Audio
