@@ -102,6 +102,8 @@ class Audio(pykka.ThreadingActor):
 
         self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
         self._connect(playbin, 'notify::source', self._on_new_source)
+        self._connect(playbin, 'notify::mute', self._on_mute_changed)
+        self._connect(playbin, 'notify::volume', self._on_mute_changed)
 
         self._playbin = playbin
 
@@ -132,6 +134,9 @@ class Audio(pykka.ThreadingActor):
         self._connect(source, 'seek-data', self._appsrc_on_seek_data)
 
         self._appsrc = source
+
+    def _on_mute_changed(self, *args, **kwargs):
+        print args, kwargs
 
     def _appsrc_on_need_data(self, appsrc, gst_length_hint):
         length_hint = utils.clocktime_to_millisecond(gst_length_hint)
@@ -223,6 +228,8 @@ class Audio(pykka.ThreadingActor):
         self._mixer_track = track
         self._mixer_scale = (
             self._mixer_track.min_volume, self._mixer_track.max_volume)
+        self._connect(track, 'mute-toggled', self._on_mute_changed)
+        self._connect(track, 'volume-changed', self._on_mute_changed)
         logger.info(
             'Audio mixer set to "%s" using track "%s"',
             str(mixer.get_factory().get_name()).decode('utf-8'),
