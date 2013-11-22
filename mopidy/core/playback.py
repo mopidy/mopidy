@@ -91,7 +91,8 @@ class PlaybackController(object):
     def get_track_length(self):
         if self.audio:
             return self.audio.get_length()
-        return self.current_tl_track and self.current_tl_track.track.length or None
+        if self.current_tl_track:
+            return self.current_tl_track.track.length
 
     track_length = property(get_track_length)
     """Track known duration in miliseconds"""
