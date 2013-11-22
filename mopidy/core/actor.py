@@ -74,6 +74,12 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
         # Forward event from backend to frontends
         CoreListener.send('playlists_loaded')
 
+    def audio_mute_changed(self, mute):
+        self.playback._trigger_mute_changed(mute)
+
+    def audio_volume_changed(self, volume):
+        self.playback._trigger_volume_changed(volume)
+
 
 class Backends(list):
     def __init__(self, backends):

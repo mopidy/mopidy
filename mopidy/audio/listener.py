@@ -59,3 +59,15 @@ class AudioListener(object):
         :type new_state: string from :class:`mopidy.core.PlaybackState` field
         """
         pass
+
+    def audio_mute_changed(self, mute):
+        """
+        Called when gstreamer gets mute's value changed by an external app.
+        """
+        pass
+
+    def audio_volume_changed(self, volume):
+        """
+        Called when gstreamer gets volume level changed by another app
+        """
+        pass
