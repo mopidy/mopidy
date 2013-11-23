@@ -102,16 +102,28 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def test_create_file_with_name_of_existing_dir_throws_ioerror(self):
         conflicting_dir = os.path.join(self.parent)
-        self.assertRaises(IOError, path.get_or_create_file, conflicting_dir)
+        with self.assertRaises(IOError):
+            path.get_or_create_file(conflicting_dir)
 
     def test_create_dir_with_unicode(self):
         with self.assertRaises(ValueError):
             file_path = unicode(os.path.join(self.parent, b'test'))
             path.get_or_create_file(file_path)
 
-    def test_create_dir_with_none(self):
+    def test_create_file_with_none(self):
         with self.assertRaises(ValueError):
             path.get_or_create_file(None)
+
+    def test_create_dir_without_mkdir(self):
+        file_path = os.path.join(self.parent, b'foo', b'bar')
+        with self.assertRaises(IOError):
+            path.get_or_create_file(file_path, mkdir=False)
+
+    def test_create_dir_with_default_content(self):
+        file_path = os.path.join(self.parent, b'test')
+        created = path.get_or_create_file(file_path, content=b'foobar')
+        with open(created) as fh:
+            self.assertEqual(fh.read(), b'foobar')
 
 
 class PathToFileURITest(unittest.TestCase):

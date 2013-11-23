@@ -3,8 +3,8 @@ Configuration
 *************
 
 Mopidy has a lot of config values you can tweak, but you only need to change a
-few to get up and running. A complete ``~/.config/mopidy/mopidy.conf`` may be
-as simple as this:
+few to get up and running. A complete :file:`~/.config/mopidy/mopidy.conf` may
+be as simple as this:
 
 .. code-block:: ini
 
@@ -15,17 +15,18 @@ as simple as this:
     username = alice
     password = mysecret
 
-Mopidy primarily reads config from the file ``~/.config/mopidy/mopidy.conf``,
-where ``~`` means your *home directory*. If your username is ``alice`` and you
-are running Linux, the config file should probably be at
-``/home/alice/.config/mopidy/mopidy.conf``. You can either create the
-configuration file yourself, or run the ``mopidy`` command, and it will create
-an empty config file for you and print what config values must be set to
-successfully start Mopidy.
+Mopidy primarily reads config from the file
+:file:`~/.config/mopidy/mopidy.conf`, where ``~`` means your *home directory*.
+If your username is ``alice`` and you are running Linux, the config file should
+probably be at :file:`/home/alice/.config/mopidy/mopidy.conf`. You can either
+create the configuration file yourself, or run the ``mopidy`` command, and it
+will create an empty config file for you and print what config values must be
+set to successfully start Mopidy.
 
 When you have created the configuration file, open it in a text editor, and add
 the config values you want to change. If you want to keep the default for a
-config value, you **should not** add it to ``~/.config/mopidy/mopidy.conf``.
+config value, you **should not** add it to
+:file:`~/.config/mopidy/mopidy.conf`.
 
 To see what's the effective configuration for your Mopidy installation, you can
 run :option:`mopidy --show-config`. It will print your full effective config
@@ -60,17 +61,23 @@ Core configuration values
 
     Audio mixer to use.
 
-    Expects a GStreamer mixer to use, typical values are: ``autoaudiomixer``,
-    ``alsamixer``, ``pulsemixer``, ``ossmixer``, and ``oss4mixer``.
+    Expects a GStreamer mixer to use, typical values are: ``software``,
+    ``autoaudiomixer``, ``alsamixer``, ``pulsemixer``, ``ossmixer``, and
+    ``oss4mixer``.
 
-    The default is ``autoaudiomixer``, which attempts to select a sane mixer
-    for you automatically. When Mopidy is started, it will log what mixer
-    ``autoaudiomixer`` selected, for example::
+    The default is ``software``, which does volume control inside Mopidy before
+    the audio is sent to the audio output. This mixer does not affect the
+    volume of any other audio playback on the system. It is the only mixer that
+    will affect the audio volume if you're streaming the audio from Mopidy
+    through Shoutcast.
+
+    If you want to use a hardware mixer, try ``autoaudiomixer``. It attempts to
+    select a sane hardware mixer for you automatically. When Mopidy is started,
+    it will log what mixer ``autoaudiomixer`` selected, for example::
 
         INFO     Audio mixer set to "alsamixer" using track "Master"
 
-    Setting the config value to blank turns off volume control. ``software``
-    can be used to force software mixing in the application.
+    Setting the config value to blank turns off volume control.
 
 .. confval:: audio/mixer_track
 

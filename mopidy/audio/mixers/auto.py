@@ -1,9 +1,7 @@
 """Mixer element that automatically selects the real mixer to use.
 
-This is Mopidy's default mixer.
-
-If this wasn't the default, you would set the :confval:`audio/mixer` config
-value to ``autoaudiomixer`` to use this mixer.
+Set the :confval:`audio/mixer` config value to ``autoaudiomixer`` to use this
+mixer.
 """
 
 from __future__ import unicode_literals

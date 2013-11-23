@@ -8,11 +8,6 @@ import os
 import sys
 
 
-# -- Read The Docs configuration ----------------------------------------------
-
-RTD_NEW_THEME = True
-
-
 # -- Workarounds to have autodoc generate API docs ----------------------------
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -147,13 +142,6 @@ man_pages = [
         '1'
     ),
     (
-        'commands/mopidy-scan',
-        'mopidy-scan',
-        'index music for playback with mopidy',
-        '',
-        '1'
-    ),
-    (
         'commands/mopidy-convert-config',
         'mopidy-convert-config',
         'migrate config files from mopidy pre-0.14',
@@ -165,4 +153,8 @@ man_pages = [
 
 # -- Options for extlink extension --------------------------------------------
 
-extlinks = {'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#')}
+extlinks = {
+    'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#'),
+    'mpris': (
+        'https://github.com/mopidy/mopidy-mpris/issues/%s', 'mopidy-mpris#'),
+}

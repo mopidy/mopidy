@@ -71,34 +71,34 @@ class LocalTracklistProviderTest(unittest.TestCase):
     def test_filter_by_tlid(self):
         tl_track = self.controller.tl_tracks[1]
         self.assertEqual(
-            [tl_track], self.controller.filter(tlid=tl_track.tlid))
+            [tl_track], self.controller.filter(tlid=[tl_track.tlid]))
 
     @populate_tracklist
     def test_filter_by_uri(self):
         tl_track = self.controller.tl_tracks[1]
         self.assertEqual(
-            [tl_track], self.controller.filter(uri=tl_track.track.uri))
+            [tl_track], self.controller.filter(uri=[tl_track.track.uri]))
 
     @populate_tracklist
     def test_filter_by_uri_returns_nothing_for_invalid_uri(self):
-        self.assertEqual([], self.controller.filter(uri='foobar'))
+        self.assertEqual([], self.controller.filter(uri=['foobar']))
 
     def test_filter_by_uri_returns_single_match(self):
         track = Track(uri='a')
         self.controller.add([Track(uri='z'), track, Track(uri='y')])
-        self.assertEqual(track, self.controller.filter(uri='a')[0].track)
+        self.assertEqual(track, self.controller.filter(uri=['a'])[0].track)
 
     def test_filter_by_uri_returns_multiple_matches(self):
         track = Track(uri='a')
         self.controller.add([Track(uri='z'), track, track])
-        tl_tracks = self.controller.filter(uri='a')
+        tl_tracks = self.controller.filter(uri=['a'])
         self.assertEqual(track, tl_tracks[0].track)
         self.assertEqual(track, tl_tracks[1].track)
 
     def test_filter_by_uri_returns_nothing_if_no_match(self):
         self.controller.playlist = Playlist(
-            tracks=[Track(uri='z'), Track(uri='y')])
-        self.assertEqual([], self.controller.filter(uri='a'))
+            tracks=[Track(uri=['z']), Track(uri=['y'])])
+        self.assertEqual([], self.controller.filter(uri=['a']))
 
     def test_filter_by_multiple_criteria_returns_elements_matching_all(self):
         track1 = Track(uri='a', name='x')
@@ -106,18 +106,18 @@ class LocalTracklistProviderTest(unittest.TestCase):
         track3 = Track(uri='b', name='y')
         self.controller.add([track1, track2, track3])
         self.assertEqual(
-            track1, self.controller.filter(uri='a', name='x')[0].track)
+            track1, self.controller.filter(uri=['a'], name=['x'])[0].track)
         self.assertEqual(
-            track2, self.controller.filter(uri='b', name='x')[0].track)
+            track2, self.controller.filter(uri=['b'], name=['x'])[0].track)
         self.assertEqual(
-            track3, self.controller.filter(uri='b', name='y')[0].track)
+            track3, self.controller.filter(uri=['b'], name=['y'])[0].track)
 
     def test_filter_by_criteria_that_is_not_present_in_all_elements(self):
         track1 = Track()
         track2 = Track(uri='b')
         track3 = Track()
         self.controller.add([track1, track2, track3])
-        self.assertEqual(track2, self.controller.filter(uri='b')[0].track)
+        self.assertEqual(track2, self.controller.filter(uri=['b'])[0].track)
 
     @populate_tracklist
     def test_clear(self):
@@ -227,17 +227,29 @@ class LocalTracklistProviderTest(unittest.TestCase):
         track1 = self.controller.tracks[1]
         track2 = self.controller.tracks[2]
         version = self.controller.version
-        self.controller.remove(uri=track1.uri)
+        self.controller.remove(uri=[track1.uri])
         self.assertLess(version, self.controller.version)
         self.assertNotIn(track1, self.controller.tracks)
         self.assertEqual(track2, self.controller.tracks[1])
 
     @populate_tracklist
     def test_removing_track_that_does_not_exist_does_nothing(self):
-        self.controller.remove(uri='/nonexistant')
+        self.controller.remove(uri=['/nonexistant'])
 
     def test_removing_from_empty_playlist_does_nothing(self):
-        self.controller.remove(uri='/nonexistant')
+        self.controller.remove(uri=['/nonexistant'])
+
+    @populate_tracklist
+    def test_remove_lists(self):
+        track0 = self.controller.tracks[0]
+        track1 = self.controller.tracks[1]
+        track2 = self.controller.tracks[2]
+        version = self.controller.version
+        self.controller.remove(uri=[track0.uri, track2.uri])
+        self.assertLess(version, self.controller.version)
+        self.assertNotIn(track0, self.controller.tracks)
+        self.assertNotIn(track2, self.controller.tracks)
+        self.assertEqual(track1, self.controller.tracks[0])
 
     @populate_tracklist
     def test_shuffle(self):

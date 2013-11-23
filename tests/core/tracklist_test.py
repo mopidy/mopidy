@@ -37,7 +37,7 @@ class TracklistTest(unittest.TestCase):
         self.assertEqual(tl_tracks, self.core.tracklist.tl_tracks[-1:])
 
     def test_remove_removes_tl_tracks_matching_query(self):
-        tl_tracks = self.core.tracklist.remove(name='foo')
+        tl_tracks = self.core.tracklist.remove(name=['foo'])
 
         self.assertEqual(2, len(tl_tracks))
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
@@ -46,7 +46,7 @@ class TracklistTest(unittest.TestCase):
         self.assertListEqual(self.tl_tracks[2:], self.core.tracklist.tl_tracks)
 
     def test_remove_works_with_dict_instead_of_kwargs(self):
-        tl_tracks = self.core.tracklist.remove({'name': 'foo'})
+        tl_tracks = self.core.tracklist.remove({'name': ['foo']})
 
         self.assertEqual(2, len(tl_tracks))
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
@@ -55,15 +55,21 @@ class TracklistTest(unittest.TestCase):
         self.assertListEqual(self.tl_tracks[2:], self.core.tracklist.tl_tracks)
 
     def test_filter_returns_tl_tracks_matching_query(self):
-        tl_tracks = self.core.tracklist.filter(name='foo')
+        tl_tracks = self.core.tracklist.filter(name=['foo'])
 
         self.assertEqual(2, len(tl_tracks))
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
     def test_filter_works_with_dict_instead_of_kwargs(self):
-        tl_tracks = self.core.tracklist.filter({'name': 'foo'})
+        tl_tracks = self.core.tracklist.filter({'name': ['foo']})
 
         self.assertEqual(2, len(tl_tracks))
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
+
+    def test_filter_fails_if_values_isnt_iterable(self):
+        self.assertRaises(ValueError, self.core.tracklist.filter, tlid=3)
+
+    def test_filter_fails_if_values_is_a_string(self):
+        self.assertRaises(ValueError, self.core.tracklist.filter, uri='a')
 
     # TODO Extract tracklist tests from the base backend tests

@@ -37,16 +37,16 @@ def track_to_mpd_format(track, position=None):
         ('Artist', artists_to_mpd_format(track.artists)),
         ('Title', track.name or ''),
         ('Album', track.album and track.album.name or ''),
-        ('Date', track.date or ''),
     ]
+
+    if track.date:
+        result.append(('Date', track.date))
+
     if track.album is not None and track.album.num_tracks != 0:
         result.append(('Track', '%d/%d' % (
             track.track_no, track.album.num_tracks)))
     else:
         result.append(('Track', track.track_no))
-    if track.album is not None and track.album.artists:
-        artists = artists_to_mpd_format(track.album.artists)
-        result.append(('AlbumArtist', artists))
     if position is not None and tlid is not None:
         result.append(('Pos', position))
         result.append(('Id', tlid))
@@ -55,6 +55,8 @@ def track_to_mpd_format(track, position=None):
     # FIXME don't use first and best artist?
     # FIXME don't duplicate following code?
     if track.album is not None and track.album.artists:
+        artists = artists_to_mpd_format(track.album.artists)
+        result.append(('AlbumArtist', artists))
         artists = filter(
             lambda a: a.musicbrainz_id is not None, track.album.artists)
         if artists:
@@ -64,14 +66,31 @@ def track_to_mpd_format(track, position=None):
         artists = filter(lambda a: a.musicbrainz_id is not None, track.artists)
         if artists:
             result.append(('MUSICBRAINZ_ARTISTID', artists[0].musicbrainz_id))
+
+    if track.composers:
+        result.append(('Composer', artists_to_mpd_format(track.composers)))
+
+    if track.performers:
+        result.append(('Performer', artists_to_mpd_format(track.performers)))
+
+    if track.genre:
+        result.append(('Genre', track.genre))
+
+    if track.disc_no:
+        result.append(('Disc', track.disc_no))
+
+    if track.comment:
+        result.append(('Comment', track.comment))
+
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
     return result
 
 
 MPD_KEY_ORDER = '''
-    key file Time Artist AlbumArtist Title Album Track Date MUSICBRAINZ_ALBUMID
-    MUSICBRAINZ_ALBUMARTISTID MUSICBRAINZ_ARTISTID MUSICBRAINZ_TRACKID mtime
+    key file Time Artist Album AlbumArtist Title Track Genre Date Composer
+    Performer Comment Disc MUSICBRAINZ_ALBUMID MUSICBRAINZ_ALBUMARTISTID
+    MUSICBRAINZ_ARTISTID MUSICBRAINZ_TRACKID mtime
 '''.split()
 
 
@@ -166,7 +185,8 @@ def query_from_mpd_list_format(field, mpd_query):
             key = tokens[0].lower()
             value = tokens[1]
             tokens = tokens[2:]
-            if key not in ('artist', 'album', 'albumartist', 'date', 'genre'):
+            if key not in ('artist', 'album', 'albumartist', 'composer',
+                           'date', 'genre', 'performer'):
                 raise MpdArgError('not able to parse args', command='list')
             if not value:
                 raise ValueError
@@ -177,77 +197,6 @@ def query_from_mpd_list_format(field, mpd_query):
         return query
     else:
         raise MpdArgError('not able to parse args', command='list')
-
-
-# XXX The regexps below should be refactored to reuse common patterns here
-# and in mopidy.frontends.mpd.protocol.music_db.QUERY_RE.
-
-MPD_SEARCH_QUERY_RE = re.compile(r"""
-    \b                  # Only begin matching at word bundaries
-    "?                  # Optional quote around the field type
-    (?:                 # A non-capturing group for the field type
-        [Aa]lbum
-      | [Aa]rtist
-      | [Aa]lbumartist
-      | [Dd]ate
-      | [Ff]ile
-      | [Ff]ilename
-      | [Tt]itle
-      | [Tt]rack
-      | [Aa]ny
-    )
-    "?                  # End of optional quote around the field type
-    \s                  # A single space
-    "[^"]+"             # Matching a quoted search string
-""", re.VERBOSE)
-
-MPD_SEARCH_QUERY_PART_RE = re.compile(r"""
-    \b                  # Only begin matching at word bundaries
-    "?                  # Optional quote around the field type
-    (?P<field>(         # A capturing group for the field type
-        [Aa]lbum
-      | [Aa]rtist
-      | [Aa]lbumartist
-      | [Dd]ate
-      | [Ff]ile
-      | [Ff]ilename
-      | [Tt]itle
-      | [Tt]rack
-      | [Aa]ny
-    ))
-    "?                  # End of optional quote around the field type
-    \s                  # A single space
-    "(?P<what>[^"]+)"   # Capturing a quoted search string
-""", re.VERBOSE)
-
-
-def query_from_mpd_search_format(mpd_query):
-    """
-    Parses an MPD ``search`` or ``find`` query and converts it to the Mopidy
-    query format.
-
-    :param mpd_query: the MPD search query
-    :type mpd_query: string
-    """
-    query_parts = MPD_SEARCH_QUERY_RE.findall(mpd_query)
-    query = {}
-    for query_part in query_parts:
-        m = MPD_SEARCH_QUERY_PART_RE.match(query_part)
-        field = m.groupdict()['field'].lower()
-        if field == 'title':
-            field = 'track'
-        elif field == 'track':
-            field = 'track_no'
-        elif field in ('file', 'filename'):
-            field = 'uri'
-        what = m.groupdict()['what']
-        if not what:
-            raise ValueError
-        if field in query:
-            query[field].append(what)
-        else:
-            query[field] = [what]
-    return query
 
 
 # TODO: move to tagcache backend.
@@ -294,6 +243,12 @@ def _add_to_tag_cache(result, dirs, files, media_dir):
     for track in files:
         track_result = dict(track_to_mpd_format(track))
 
+        # XXX Don't save comments to the tag cache as they may span multiple
+        # lines. We'll start saving track comments when we move from tag_cache
+        # to a JSON file. See #579 for details.
+        if 'Comment' in track_result:
+            del track_result['Comment']
+
         path = uri_to_path(track_result['file'])
         try:
             text_path = path.decode('utf-8')
@@ -302,6 +257,7 @@ def _add_to_tag_cache(result, dirs, files, media_dir):
         relative_path = os.path.relpath(path, base_path)
         relative_uri = urllib.quote(relative_path)
 
+        # TODO: use track.last_modified
         track_result['file'] = relative_uri
         track_result['mtime'] = get_mtime(path)
         track_result['key'] = os.path.basename(text_path)

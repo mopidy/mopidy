@@ -10,7 +10,7 @@ import re
 from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
-from mopidy.utils import path
+from mopidy.utils import path, versioning
 
 logger = logging.getLogger('mopidy.config')
 
@@ -41,6 +41,18 @@ _proxy_schema['password'] = Secret(optional=True)
 
 _schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
 
+_INITIAL_HELP = """
+# For further information about options in this file see:
+#   http://docs.mopidy.com/
+#
+# The initial commented out values reflect the defaults as of:
+#   %(versions)s
+#
+# Available options and defaults might have changed since then,
+# run `mopidy config` to see the current effective config and
+# `mopidy --version` to check the current version.
+"""
+
 
 def read(config_file):
     """Helper to load config defaults in same way across core and extensions"""
@@ -66,7 +78,25 @@ def format(config, extensions, comments=None, display=True):
     # need to know about extensions.
     schemas = _schemas[:]
     schemas.extend(e.get_config_schema() for e in extensions)
-    return _format(config, comments or {}, schemas, display)
+    return _format(config, comments or {}, schemas, display, False)
+
+
+def format_initial(extensions):
+    config_dir = os.path.dirname(__file__)
+    defaults = [read(os.path.join(config_dir, 'default.conf'))]
+    defaults.extend(e.get_default_config() for e in extensions)
+    raw_config = _load([], defaults, [])
+
+    schemas = _schemas[:]
+    schemas.extend(e.get_config_schema() for e in extensions)
+
+    config, errors = _validate(raw_config, schemas)
+
+    versions = ['Mopidy %s' % versioning.get_version()]
+    for extension in sorted(extensions, key=lambda ext: ext.dist_name):
+        versions.append('%s %s' % (extension.dist_name, extension.version))
+    description = _INITIAL_HELP.strip() % {'versions': '\n#   '.join(versions)}
+    return description + '\n\n' + _format(config, {}, schemas, False, True)
 
 
 def _load(files, defaults, overrides):
@@ -128,7 +158,7 @@ def _validate(raw_config, schemas):
     return config, errors
 
 
-def _format(config, comments, schemas, display):
+def _format(config, comments, schemas, display, disable):
     output = []
     for schema in schemas:
         serialized = schema.serialize(
@@ -142,9 +172,11 @@ def _format(config, comments, schemas, display):
             if value is not None:
                 output[-1] += b' ' + value
             if comment:
-                output[-1] += b'  # ' + comment.capitalize()
+                output[-1] += b'  ; ' + comment.capitalize()
+            if disable:
+                output[-1] = re.sub(r'^', b'#', output[-1], flags=re.M)
         output.append(b'')
-    return b'\n'.join(output)
+    return b'\n'.join(output).strip()
 
 
 def _preprocess(config_string):
