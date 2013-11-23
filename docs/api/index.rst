@@ -13,6 +13,7 @@ API reference
     core
     audio
     frontends
+    commands
     ext
     config
     http

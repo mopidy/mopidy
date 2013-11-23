@@ -21,7 +21,7 @@ class StatusHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('Title: ')
         self.assertInResponse('Album: ')
         self.assertInResponse('Track: 0')
-        self.assertInResponse('Date: ')
+        self.assertNotInResponse('Date: ')
         self.assertInResponse('Pos: 0')
         self.assertInResponse('Id: 0')
         self.assertInResponse('OK')

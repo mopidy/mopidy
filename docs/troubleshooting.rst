@@ -28,7 +28,7 @@ accepted, but large logs should still be shared through a pastebin.
 Effective configuration
 =======================
 
-The command :option:`mopidy --show-config` will print your full effective
+The command ``mopidy config`` will print your full effective
 configuration the way Mopidy sees it after all defaults and all config files
 have been merged into a single config document. Any secret values like
 passwords are masked out, so the output of the command should be safe to share
@@ -38,7 +38,7 @@ with others for debugging.
 Installed dependencies
 ======================
 
-The command :option:`mopidy --show-deps` will list the paths to and versions of
+The command ``mopidy deps`` will list the paths to and versions of
 any dependency Mopidy or the extensions might need to work. This is very useful
 data for checking that you're using the right versions, and that you're using
 the right installation if you have multiple installations of a dependency on

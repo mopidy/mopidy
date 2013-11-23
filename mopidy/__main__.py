@@ -8,6 +8,14 @@ import sys
 import gobject
 gobject.threads_init()
 
+try:
+    # Make GObject's mainloop the event loop for python-dbus
+    import dbus.mainloop.glib
+    dbus.mainloop.glib.threads_init()
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+except ImportError:
+    pass
+
 import pykka.debug
 
 
@@ -18,78 +26,119 @@ sys.argv[1:] = []
 
 
 from mopidy import commands, ext
-from mopidy.audio import Audio
 from mopidy import config as config_lib
-from mopidy.core import Core
-from mopidy.utils import log, path, process
+from mopidy.utils import log, path, process, versioning
 
 logger = logging.getLogger('mopidy.main')
 
 
 def main():
+    log.bootstrap_delayed_logging()
+    logger.info('Starting Mopidy %s', versioning.get_version())
+
     signal.signal(signal.SIGTERM, process.exit_handler)
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
-    args = commands.parser.parse_args(args=mopidy_args)
-    if args.show_config:
-        commands.show_config(args)
-    if args.show_deps:
-        commands.show_deps()
-
-    # TODO: figure out a way to make the boilerplate in this file reusable in
-    # scanner and other places we need it.
-
     try:
-        # Initial config without extensions to bootstrap logging.
-        logging_initialized = False
-        logging_config, _ = config_lib.load(
-            args.config_files, [], args.config_overrides)
+        root_cmd = commands.RootCommand()
+        config_cmd = commands.ConfigCommand()
+        deps_cmd = commands.DepsCommand()
 
-        # TODO: setup_logging needs defaults in-case config values are None
-        log.setup_logging(
-            logging_config, args.verbosity_level, args.save_debug_log)
-        logging_initialized = True
-
-        create_file_structures()
-        check_old_locations()
+        root_cmd.set(extension=None)
+        root_cmd.add_child('config', config_cmd)
+        root_cmd.add_child('deps', deps_cmd)
 
         installed_extensions = ext.load_extensions()
+
+        for extension in installed_extensions:
+            ext_cmd = extension.get_command()
+            if ext_cmd:
+                ext_cmd.set(extension=extension)
+                root_cmd.add_child(extension.ext_name, ext_cmd)
+
+        args = root_cmd.parse(mopidy_args)
+
+        create_file_structures_and_config(args, installed_extensions)
+        check_old_locations()
 
         config, config_errors = config_lib.load(
             args.config_files, installed_extensions, args.config_overrides)
 
-        # Filter out disabled extensions and remove any config errors for them.
+        verbosity_level = args.base_verbosity_level
+        if args.verbosity_level:
+            verbosity_level += args.verbosity_level
+
+        log.setup_logging(config, verbosity_level, args.save_debug_log)
+
         enabled_extensions = []
         for extension in installed_extensions:
-            enabled = config[extension.ext_name]['enabled']
-            if ext.validate_extension(extension) and enabled:
+            if not ext.validate_extension(extension):
+                config[extension.ext_name] = {'enabled': False}
+                config_errors[extension.ext_name] = {
+                    'enabled': 'extension disabled by self check.'}
+            elif not config[extension.ext_name]['enabled']:
+                config[extension.ext_name] = {'enabled': False}
+                config_errors[extension.ext_name] = {
+                    'enabled': 'extension disabled by user config.'}
+            else:
                 enabled_extensions.append(extension)
-            elif extension.ext_name in config_errors:
-                del config_errors[extension.ext_name]
 
         log_extension_info(installed_extensions, enabled_extensions)
+        ext.register_gstreamer_elements(enabled_extensions)
+
+        # Config and deps commands are simply special cased for now.
+        if args.command == config_cmd:
+            return args.command.run(
+                config, config_errors, installed_extensions)
+        elif args.command == deps_cmd:
+            return args.command.run()
+
+        # Remove errors for extensions that are not enabled:
+        for extension in installed_extensions:
+            if extension not in enabled_extensions:
+                config_errors.pop(extension.ext_name, None)
         check_config_errors(config_errors)
 
         # Read-only config from here on, please.
         proxied_config = config_lib.Proxy(config)
 
-        log.setup_log_levels(proxied_config)
-        ext.register_gstreamer_elements(enabled_extensions)
+        if args.extension and args.extension not in enabled_extensions:
+            logger.error(
+                'Unable to run command provided by disabled extension %s',
+                args.extension.ext_name)
+            return 1
 
         # Anything that wants to exit after this point must use
-        # mopidy.utils.process.exit_process as actors have been started.
-        start(proxied_config, enabled_extensions)
+        # mopidy.utils.process.exit_process as actors can have been started.
+        try:
+            return args.command.run(args, proxied_config, enabled_extensions)
+        except NotImplementedError:
+            print root_cmd.format_help()
+            return 1
+
     except KeyboardInterrupt:
         pass
     except Exception as ex:
-        if logging_initialized:
-            logger.exception(ex)
+        logger.exception(ex)
         raise
 
 
-def create_file_structures():
+def create_file_structures_and_config(args, extensions):
     path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy')
-    path.get_or_create_file(b'$XDG_CONFIG_DIR/mopidy/mopidy.conf')
+    path.get_or_create_dir(b'$XDG_CONFIG_DIR/mopidy')
+
+    # Initialize whatever the last config file is with defaults
+    config_file = args.config_files[-1]
+    if os.path.exists(config_file):
+        return
+
+    try:
+        default = config_lib.format_initial(extensions)
+        path.get_or_create_file(config_file, mkdir=False, content=default)
+        logger.info('Initialized %s with default config', config_file)
+    except IOError as e:
+        logger.warning('Unable to initialize %s with default config: %s',
+                       config_file, e)
 
 
 def check_old_locations():
@@ -127,89 +176,5 @@ def check_config_errors(errors):
     sys.exit(1)
 
 
-def start(config, extensions):
-    loop = gobject.MainLoop()
-    try:
-        audio = start_audio(config)
-        backends = start_backends(config, extensions, audio)
-        core = start_core(audio, backends)
-        start_frontends(config, extensions, core)
-        loop.run()
-    except KeyboardInterrupt:
-        logger.info('Interrupted. Exiting...')
-        return
-    finally:
-        loop.quit()
-        stop_frontends(extensions)
-        stop_core()
-        stop_backends(extensions)
-        stop_audio()
-        process.stop_remaining_actors()
-
-
-def start_audio(config):
-    logger.info('Starting Mopidy audio')
-    return Audio.start(config=config).proxy()
-
-
-def stop_audio():
-    logger.info('Stopping Mopidy audio')
-    process.stop_actors_by_class(Audio)
-
-
-def start_backends(config, extensions, audio):
-    backend_classes = []
-    for extension in extensions:
-        backend_classes.extend(extension.get_backend_classes())
-
-    logger.info(
-        'Starting Mopidy backends: %s',
-        ', '.join(b.__name__ for b in backend_classes) or 'none')
-
-    backends = []
-    for backend_class in backend_classes:
-        backend = backend_class.start(config=config, audio=audio).proxy()
-        backends.append(backend)
-
-    return backends
-
-
-def stop_backends(extensions):
-    logger.info('Stopping Mopidy backends')
-    for extension in extensions:
-        for backend_class in extension.get_backend_classes():
-            process.stop_actors_by_class(backend_class)
-
-
-def start_core(audio, backends):
-    logger.info('Starting Mopidy core')
-    return Core.start(audio=audio, backends=backends).proxy()
-
-
-def stop_core():
-    logger.info('Stopping Mopidy core')
-    process.stop_actors_by_class(Core)
-
-
-def start_frontends(config, extensions, core):
-    frontend_classes = []
-    for extension in extensions:
-        frontend_classes.extend(extension.get_frontend_classes())
-
-    logger.info(
-        'Starting Mopidy frontends: %s',
-        ', '.join(f.__name__ for f in frontend_classes) or 'none')
-
-    for frontend_class in frontend_classes:
-        frontend_class.start(config=config, core=core)
-
-
-def stop_frontends(extensions):
-    logger.info('Stopping Mopidy frontends')
-    for extension in extensions:
-        for frontend_class in extension.get_frontend_classes():
-            process.stop_actors_by_class(frontend_class)
-
-
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

@@ -219,6 +219,12 @@ class Track(ImmutableObject):
     :type artists: list of :class:`Artist`
     :param album: track album
     :type album: :class:`Album`
+    :param composers: track composers
+    :type composers: string
+    :param performers: track performers
+    :type performers: string
+    :param genre: track genre
+    :type genre: string
     :param track_no: track number in album
     :type track_no: integer
     :param disc_no: disc number in album
@@ -229,6 +235,8 @@ class Track(ImmutableObject):
     :type length: integer
     :param bitrate: bitrate in kbit/s
     :type bitrate: integer
+    :param comment: track comment
+    :type comment: string
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     :param last_modified: Represents last modification time
@@ -247,6 +255,15 @@ class Track(ImmutableObject):
     #: The track :class:`Album`. Read-only.
     album = None
 
+    #: A set of track composers. Read-only.
+    composers = frozenset()
+
+    #: A set of track performers`. Read-only.
+    performers = frozenset()
+
+    #: The track genre. Read-only.
+    genre = None
+
     #: The track number in the album. Read-only.
     track_no = 0
 
@@ -262,6 +279,9 @@ class Track(ImmutableObject):
     #: The track's bitrate in kbit/s. Read-only.
     bitrate = None
 
+    #: The track comment. Read-only.
+    comment = None
+
     #: The MusicBrainz ID of the track. Read-only.
     musicbrainz_id = None
 
@@ -272,6 +292,8 @@ class Track(ImmutableObject):
 
     def __init__(self, *args, **kwargs):
         self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
+        self.__dict__['composers'] = frozenset(kwargs.pop('composers', []))
+        self.__dict__['performers'] = frozenset(kwargs.pop('performers', []))
         super(Track, self).__init__(*args, **kwargs)
 
 

@@ -33,9 +33,7 @@ Items on this list will probably not be supported in the near future.
 - Stickers are not supported
 - Crossfade is not supported
 - Replay gain is not supported
-- ``count`` does not provide any statistics
 - ``stats`` does not provide any statistics
-- ``list`` does not support listing tracks by genre
 - ``decoders`` does not provide information about available decoders
 
 The following items are currently not supported, but should be added in the
@@ -97,6 +95,13 @@ Configuration values
 
     Number of seconds an MPD client can stay inactive before the connection is
     closed by the server.
+
+.. confval:: mpd/zeroconf
+
+    Name of the MPD service when published through Zeroconf. The variables
+    ``$hostname`` and ``$port`` can be used in the name.
+
+    Set to an empty string to disable Zeroconf for MPD.
 
 
 Usage

@@ -5,6 +5,126 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.17.0 (2013-11-23)
+====================
+
+The focus of 0.17 has been on introducing subcommands to the ``mopidy``
+command, making it possible for extensions to add subcommands of their own, and
+to improve the default config file when starting Mopidy the first time. In
+addition, we've grown support for Zeroconf publishing of the MPD and HTTP
+servers, and gotten a much faster scanner. The scanner now also scans some
+additional tags like composers and performers.
+
+Since the release of 0.16, we've closed or merged 22 issues and pull requests
+through about 200 commits by :ref:`five people <authors>`, including one new
+contributor.
+
+**Commands**
+
+- Switched to subcommands for the ``mopidy`` command , this implies the
+  following changes: (Fixes: :issue:`437`)
+
+  ===================== =================
+  Old command           New command
+  ===================== =================
+  mopidy --show-deps    mopidy deps
+  mopidy --show-config  mopidy config
+  mopidy-scan           mopidy local scan
+  ===================== =================
+
+- Added hooks for extensions to create their own custom subcommands and
+  converted ``mopidy-scan`` as a first user of the new API. (Fixes:
+  :issue:`436`)
+
+**Configuration**
+
+- When ``mopidy`` is started for the first time we create an empty
+  :file:`{$XDG_CONFIG_DIR}/mopidy/mopidy.conf` file. We now populate this file
+  with the default config for all installed extensions so it'll be easier to
+  set up Mopidy without looking through all the documentation for relevant
+  config values. (Fixes: :issue:`467`)
+
+**Core API**
+
+- The :class:`~mopidy.models.Track` model has grown fields for ``composers``,
+  ``performers``, ``genre``, and ``comment``.
+
+- The search field ``track`` has been renamed to ``track_name`` to avoid
+  confusion with ``track_no``. (Fixes: :issue:`535`)
+
+- The signature of the tracklist's
+  :meth:`~mopidy.core.TracklistController.filter` and
+  :meth:`~mopidy.core.TracklistController.remove` methods have changed.
+  Previously, they expected e.g. ``tracklist.filter(tlid=17)``. Now, the value
+  must always be a list, e.g. ``tracklist.filter(tlid=[17])``. This change
+  allows you to get or remove multiple tracks with a single call, e.g.
+  ``tracklist.remove(tlid=[1, 2, 7])``. This is especially useful for web
+  clients, as requests can be batched. This also brings the interface closer to
+  the library's :meth:`~mopidy.core.LibraryController.find_exact` and
+  :meth:`~mopidy.core.LibraryController.search` methods.
+
+**Audio**
+
+- Change default volume mixer from ``autoaudiomixer`` to ``software``.
+  GStreamer 1.x does not support volume control, so we're changing to use
+  software mixing by default, as that may be the only thing we'll support in
+  the future when we upgrade to GStreamer 1.x.
+
+**Local backend**
+
+- Library scanning has been switched back from GStreamer's discoverer to our
+  custom implementation due to various issues with GStreamer 0.10's built in
+  scanner. This also fixes the scanner slowdown. (Fixes: :issue:`565`)
+
+- When scanning, we no longer default the album artist to be the same as the
+  track artist. Album artist is now only populated if the scanned file got an
+  explicit album artist set.
+
+- The scanner will now extract multiple artists from files with multiple artist
+  tags.
+
+- The scanner will now extract composers and performers, as well as genre,
+  bitrate, and comments. (Fixes: :issue:`577`)
+
+- Fix scanner so that time of last modification is respected when deciding
+  which files can be skipped when scanning the music collection for changes.
+
+- The scanner now ignores the capitalization of file extensions in
+  :confval:`local/excluded_file_extensions`, so you no longer need to list both
+  ``.jpg`` and ``.JPG`` to ignore JPEG files when scanning. (Fixes:
+  :issue:`525`)
+
+- The scanner now by default ignores ``*.nfo`` and ``*.html`` files too.
+
+**MPD frontend**
+
+- The MPD service is now published as a Zeroconf service if avahi-daemon is
+  running on the system. Some MPD clients will use this to present Mopidy as an
+  available server on the local network without needing any configuration. See
+  the :confval:`mpd/zeroconf` config value to change the service name or
+  disable the service. (Fixes: :issue:`39`)
+
+- Add support for ``composer``, ``performer``, ``comment``, ``genre``, and
+  ``performer``.  These tags can be used with ``list ...``, ``search ...``, and
+  ``find ...`` and their variants, and are supported in the ``any`` tag also
+
+- The ``bitrate`` field in the ``status`` response is now always an integer.
+  This follows the behavior of the original MPD server. (Fixes: :issue:`577`)
+
+**HTTP frontend**
+
+- The HTTP service is now published as a Zeroconf service if avahi-daemon is
+  running on the system. Some browsers will present HTTP Zeroconf services on
+  the local network as "local sites" bookmarks. See the
+  :confval:`http/zeroconf` config value to change the service name or disable
+  the service. (Fixes: :issue:`39`)
+
+**DBUS/MPRIS**
+
+- The ``mopidy`` process now registers it's GObject event loop as the default
+  eventloop for dbus-python. (Fixes: :mpris:`2`)
+
+
 v0.16.1 (2013-11-02)
 ====================
 
@@ -25,7 +145,7 @@ in Debian.
 **MPD frontend**
 
 - Add support for ``list "albumartist" ...`` which was missed when ``find`` and
-  ``search`` learned to handle ``albumartist`` in 0.16.0.
+  ``search`` learned to handle ``albumartist`` in 0.16.0. (Fixes: :issue:`553`)
 
 
 v0.16.0 (2013-10-27)
