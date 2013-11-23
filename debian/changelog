@@ -1,3 +1,9 @@
+mopidy (0.17.0-0mopidy1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sat, 23 Nov 2013 20:30:58 +0100
+
 mopidy (0.16.1-0mopidy2) unstable; urgency=low
 
   * Remove mostly redundant mopidy.pydist which is ignored by wheezy anyway.
