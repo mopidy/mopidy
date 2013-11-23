@@ -1,6 +1,7 @@
 mopidy (0.17.0-0mopidy1) unstable; urgency=low
 
   * New upstream release.
+  * Remove symlink to mopidy-scan command, which has been removed.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sat, 23 Nov 2013 20:30:58 +0100
 
