@@ -37,14 +37,17 @@ def get_or_create_dir(dir_path):
     return dir_path
 
 
-def get_or_create_file(file_path):
+def get_or_create_file(file_path, mkdir=True, content=None):
     if not isinstance(file_path, bytes):
         raise ValueError('Path is not a bytestring.')
     file_path = expand_path(file_path)
-    get_or_create_dir(os.path.dirname(file_path))
+    if mkdir:
+        get_or_create_dir(os.path.dirname(file_path))
     if not os.path.isfile(file_path):
         logger.info('Creating file %s', file_path)
-        open(file_path, 'w').close()
+        with open(file_path, 'w') as fh:
+            if content:
+                fh.write(content)
     return file_path
 
 

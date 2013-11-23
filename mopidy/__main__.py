@@ -40,9 +40,6 @@ def main():
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
     try:
-        create_file_structures()
-        check_old_locations()
-
         root_cmd = commands.RootCommand()
         config_cmd = commands.ConfigCommand()
         deps_cmd = commands.DepsCommand()
@@ -60,6 +57,9 @@ def main():
                 root_cmd.add_child(extension.ext_name, ext_cmd)
 
         args = root_cmd.parse(mopidy_args)
+
+        create_file_structures_and_config(args, installed_extensions)
+        check_old_locations()
 
         config, config_errors = config_lib.load(
             args.config_files, installed_extensions, args.config_overrides)
@@ -123,9 +123,22 @@ def main():
         raise
 
 
-def create_file_structures():
+def create_file_structures_and_config(args, extensions):
     path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy')
-    path.get_or_create_file(b'$XDG_CONFIG_DIR/mopidy/mopidy.conf')
+    path.get_or_create_dir(b'$XDG_CONFIG_DIR/mopidy')
+
+    # Initialize whatever the last config file is with defaults
+    config_file = args.config_files[-1]
+    if os.path.exists(config_file):
+        return
+
+    try:
+        default = config_lib.format_initial(extensions)
+        path.get_or_create_file(config_file, mkdir=False, content=default)
+        logger.info('Initialized %s with default config', config_file)
+    except IOError as e:
+        logger.warning('Unable to initialize %s with default config: %s',
+                       config_file, e)
 
 
 def check_old_locations():
