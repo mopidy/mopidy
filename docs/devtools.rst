@@ -106,15 +106,26 @@ Creating releases
     git checkout master
     git merge --no-ff -m "Release v0.16.0" develop
 
+#. Install/upgrade tools used for packaging::
+
+    pip install -U twine wheel
+
 #. Build package and test it manually in a new virtualenv. The following
    assumes the use of virtualenvwrapper::
 
-    python setup.py sdist
+    python setup.py sdist bdist_wheel
+
     mktmpenv
     pip install path/to/dist/Mopidy-0.16.0.tar.gz
     toggleglobalsitepackages
+    # do manual test
+    deactivate
 
-   Then test Mopidy manually to confirm that the package is working correctly.
+    mktmpenv
+    pip install path/to/dist/Mopidy-0.16.0-py27-none-any.whl
+    toggleglobalsitepackages
+    # do manual test
+    deactivate
 
 #. Tag the release::
 
@@ -125,14 +136,10 @@ Creating releases
     git push
     git push --tags
 
-#. Build source package and upload to PyPI::
+#. Upload the previously built and tested sdist and bdist_wheel packages to
+   PyPI::
 
-    python setup.py sdist upload
-
-#. Build wheel package and upload to PyPI::
-
-    pip install -U wheel
-    python setup.py bdist_wheel upload
+    twine upload dist/Mopidy-0.16.0*
 
 #. Merge ``master`` back into ``develop`` and push the branch to GitHub.
 
