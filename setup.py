@@ -28,7 +28,7 @@ setup(
         'Pykka >= 1.1',
     ],
     extras_require={
-        'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
+        'http': ['CherryPy >= 3.2.2', 'ws4py >= 0.2.3'],
     },
     test_suite='nose.collector',
     tests_require=[
