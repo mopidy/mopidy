@@ -5,7 +5,7 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v0.17.0 (UNRELEASED)
+v0.17.0 (2013-11-23)
 ====================
 
 The focus of 0.17 has been on introducing subcommands to the ``mopidy``
