@@ -119,7 +119,7 @@ class GetOrCreateFileTest(unittest.TestCase):
         with self.assertRaises(IOError):
             path.get_or_create_file(file_path, mkdir=False)
 
-    def test_create_dir_with_defualt_content(self):
+    def test_create_dir_with_default_content(self):
         file_path = os.path.join(self.parent, b'test')
         created = path.get_or_create_file(file_path, content=b'foobar')
         with open(created) as fh:

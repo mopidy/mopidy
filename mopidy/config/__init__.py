@@ -43,13 +43,14 @@ _schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
 
 _INITIAL_HELP = """
 # For further information about options in this file see:
-#   http://docs.mopidy.com/en/latest/config/
+#   http://docs.mopidy.com/
 #
 # The initial commented out values reflect the defaults as of:
 #   %(versions)s
 #
 # Available options and defaults might have changed since then,
-# run `mopidy config` to see the current effective config.
+# run `mopidy config` to see the current effective config and
+# `mopidy --version` to check the current version.
 """
 
 
@@ -175,7 +176,7 @@ def _format(config, comments, schemas, display, disable):
             if disable:
                 output[-1] = re.sub(r'^', b'#', output[-1], flags=re.M)
         output.append(b'')
-    return b'\n'.join(output[:-1]).strip()
+    return b'\n'.join(output).strip()
 
 
 def _preprocess(config_string):
