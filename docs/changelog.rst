@@ -8,12 +8,21 @@ This changelog is used to track all major changes to Mopidy.
 v0.17.0 (UNRELEASED)
 ====================
 
-Still in development.
+The focus of 0.17 has been on introducing subcommands to the ``mopidy``
+command, making it possible for extensions to add subcommands of their own, and
+to improve the default config file when starting Mopidy the first time. In
+addition, we've grown support for Zeroconf publishing of the MPD and HTTP
+servers, and gotten a much faster scanner. The scanner now also scans some
+additional tags like composers and performers.
+
+Since the release of 0.16, we've closed or merged 22 issues and pull requests
+through about 200 commits by :ref:`five people <authors>`, including one new
+contributor.
 
 **Commands**
 
-- Switched to sub-commands for the ``mopidy`` command , this implies the
-  following changes (fixes :issue:`437`):
+- Switched to subcommands for the ``mopidy`` command , this implies the
+  following changes: (Fixes: :issue:`437`)
 
   ===================== =================
   Old command           New command
@@ -23,10 +32,19 @@ Still in development.
   mopidy-scan           mopidy local scan
   ===================== =================
 
-- Added hooks for extensions to create their own custom sub-commands and
-  converted ``mopidy-scan`` as first user of new API. (Fixes :issue:`436`)
+- Added hooks for extensions to create their own custom subcommands and
+  converted ``mopidy-scan`` as a first user of the new API. (Fixes:
+  :issue:`436`)
 
-**Core**
+**Configuration**
+
+- When ``mopidy`` is started for the first time we create an empty
+  :file:`{$XDG_CONFIG_DIR}/mopidy/mopidy.conf` file. We now populate this file
+  with the default config for all installed extensions so it'll be easier to
+  set up Mopidy without looking through all the documentation for relevant
+  config values. (Fixes: :issue:`467`)
+
+**Core API**
 
 - The :class:`~mopidy.models.Track` model has grown fields for ``composers``,
   ``performers``, ``genre``, and ``comment``.
@@ -54,9 +72,9 @@ Still in development.
 
 **Local backend**
 
-- Library scanning has been switched back to custom code due to various issues
-  with GStreamer's built in scanner in 0.10. This also fixes the scanner
-  slowdown. (Fixes: :issue:`565`)
+- Library scanning has been switched back from GStreamer's discoverer to our
+  custom implementation due to various issues with GStreamer 0.10's built in
+  scanner. This also fixes the scanner slowdown. (Fixes: :issue:`565`)
 
 - When scanning, we no longer default the album artist to be the same as the
   track artist. Album artist is now only populated if the scanned file got an
@@ -69,7 +87,7 @@ Still in development.
   bitrate, and comments. (Fixes: :issue:`577`)
 
 - Fix scanner so that time of last modification is respected when deciding
-  which files can be skipped.
+  which files can be skipped when scanning the music collection for changes.
 
 - The scanner now ignores the capitalization of file extensions in
   :confval:`local/excluded_file_extensions`, so you no longer need to list both
