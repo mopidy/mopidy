@@ -68,8 +68,18 @@ def handle_request(pattern, auth_required=True):
             raise ValueError('Tried to redefine handler for %s with %s' % (
                 pattern, func))
         request_handlers[compiled_pattern] = func
-        func.__doc__ = '*Pattern:*\n\n.. code-block:: text\n\n%s\n\n%s' % (
-            formatting.indent(pattern, places=4), func.__doc__ or '')
+        func.__doc__ = """
+    *Pattern:*
+
+    .. code-block:: text
+
+%(pattern)s
+
+%(docs)s
+        """ % {
+            'pattern': formatting.indent(pattern, places=8, singles=True),
+            'docs': func.__doc__ or '',
+        }
         return func
     return decorator
 
