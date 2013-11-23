@@ -15,6 +15,8 @@ from __future__ import unicode_literals
 from collections import namedtuple
 import re
 
+from mopidy.utils import formatting
+
 #: The MPD protocol uses UTF-8 for encoding all data.
 ENCODING = 'UTF-8'
 
@@ -66,8 +68,8 @@ def handle_request(pattern, auth_required=True):
             raise ValueError('Tried to redefine handler for %s with %s' % (
                 pattern, func))
         request_handlers[compiled_pattern] = func
-        func.__doc__ = '    - *Pattern:* ``%s``\n\n%s' % (
-            pattern, func.__doc__ or '')
+        func.__doc__ = '*Pattern:*\n\n.. code-block:: text\n\n%s\n\n%s' % (
+            formatting.indent(pattern, places=4), func.__doc__ or '')
         return func
     return decorator
 
