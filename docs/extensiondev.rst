@@ -386,8 +386,8 @@ such as scanning for media, adding a command is the way to go. Your top level
 command name will always match your extension name, but you are free to add
 sub-commands with names of your choosing.
 
-The skeleton of a commands would look like this. See :ref:`command-api` for more
-details.
+The skeleton of a commands would look like this. See :ref:`commands-api` for
+more details.
 
 ::
 
