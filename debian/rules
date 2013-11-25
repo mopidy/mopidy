@@ -12,11 +12,18 @@ override_dh_clean:
 
 override_dh_auto_build:
 
+HTTP_DATA = debian/tmp/usr/share/mopidy/mopidy/frontends/http/data
+
 override_dh_auto_install:
 	python setup.py install --root=debian/tmp --install-layout=deb --install-lib=/usr/share/mopidy --install-scripts=/usr/share/mopidy/bin
+	# Fix name collision between `mopidy` package and `mopidy` command
 	mv debian/tmp/usr/share/mopidy/bin/mopidy debian/tmp/usr/share/mopidy/mopidy-cmd
 	mv debian/tmp/usr/share/mopidy/bin/* debian/tmp/usr/share/mopidy/
 	rm -r debian/tmp/usr/share/mopidy/bin/
+	# Rebuild JavaScript library
+	rm $(HTTP_DATA)/*.js
+	cat js/lib/bane-*.js js/lib/when-define-shim.js js/lib/when-2.*.js js/src/mopidy.js > $(HTTP_DATA)/mopidy.js
+	NODE_PATH=/usr/lib/nodejs uglifyjs --no-copyright --output $(HTTP_DATA)/mopidy.min.js $(HTTP_DATA)/mopidy.js
 
 override_dh_installchangelogs:
 	dh_installchangelogs docs/changelog.rst

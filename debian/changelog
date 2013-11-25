@@ -1,6 +1,7 @@
 mopidy (0.17.0-0mopidy2) unstable; urgency=low
 
   * Add missing licenses to debian/copyright.
+  * Rebuild JavaScript library as part of the build.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 25 Nov 2013 18:11:03 +0100
 
