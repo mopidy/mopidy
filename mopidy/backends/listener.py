@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-import pykka
+from mopidy import listener
 
 
-class BackendListener(object):
+class BackendListener(listener.Listener):
     """
     Marker interface for recipients of events sent by the backend actors.
 
@@ -19,22 +19,7 @@ class BackendListener(object):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of backend listener events"""
-        listeners = pykka.ActorRegistry.get_by_class(BackendListener)
-        for listener in listeners:
-            listener.proxy().on_event(event, **kwargs)
-
-    def on_event(self, event, **kwargs):
-        """
-        Called on all events.
-
-        *MAY* be implemented by actor. By default, this method forwards the
-        event to the specific event methods.
-
-        :param event: the event name
-        :type event: string
-        :param kwargs: any other arguments to the specific event handlers
-        """
-        getattr(self, event)(**kwargs)
+        listener.send_async(BackendListener, event, **kwargs)
 
     def playlists_loaded(self):
         """
