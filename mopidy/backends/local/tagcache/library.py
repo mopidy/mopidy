@@ -5,10 +5,10 @@ import os
 import tempfile
 
 from mopidy.backends import base
-from mopidy.frontends.mpd import translator as mpd_translator
+from mopidy.backends.local.translator import local_to_file_uri
 from mopidy.models import Album, SearchResult
 
-from ..translator import local_to_file_uri, parse_mpd_tag_cache
+from .translator import parse_mpd_tag_cache, tracks_to_tag_cache_format
 
 logger = logging.getLogger('mopidy.backends.local.tagcache')
 
@@ -251,7 +251,7 @@ class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
             prefix=basename + '.', dir=directory, delete=False)
 
         try:
-            for row in mpd_translator.tracks_to_tag_cache_format(
+            for row in tracks_to_tag_cache_format(
                     self._tracks.values(), self._media_dir):
                 if len(row) == 1:
                     tmp.write(('%s\n' % row).encode('utf-8'))
