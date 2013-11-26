@@ -129,7 +129,7 @@ def create_file_structures_and_config(args, extensions):
 
     # Initialize whatever the last config file is with defaults
     config_file = args.config_files[-1]
-    if os.path.exists(config_file):
+    if os.path.exists(path.expand_path(config_file)):
         return
 
     try:
