@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
-import gobject
 import logging
+
+import gobject
 import pykka
 
 logger = logging.getLogger('mopidy.listener')
