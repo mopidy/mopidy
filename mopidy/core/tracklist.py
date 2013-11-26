@@ -5,7 +5,7 @@ import logging
 import random
 import urlparse
 
-from mopidy.models import TlTrack
+from mopidy.models import TlTrack, Track
 
 from . import listener
 
@@ -28,11 +28,16 @@ class TracklistController(object):
     def _get_backend(self, tl_track):
         if tl_track is None:
             return None
-        if tl_track.track is None:
-            return None
-        if tl_track.track.uri is None:
-            return None
-        uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
+        if isinstance(tl_track, TlTrack):
+            if tl_track.track is None:
+                return None
+            if tl_track.track.uri is None:
+                return None
+            uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
+        elif isinstance(tl_track, Track):
+            if tl_track.uri is None:
+                return None
+            uri_scheme = urlparse.urlparse(tl_track.uri).scheme
         return self.backends.with_tracklist_by_uri_scheme.get(uri_scheme, None)
 
     ### Properties
@@ -293,15 +298,15 @@ class TracklistController(object):
         assert tracks is not None or uri is not None, \
             'tracks or uri must be provided'
 
-        backend = self._get_backend(self.core.playback.current_tl_track)
+        if tracks is None and uri is not None:
+            tracks = self.core.library.lookup(uri)
+
+        backend = self._get_backend(tracks[0])
         if backend:
             tracklist = backend.tracklist.add(self, tracks, at_position,
                                               uri).get()
             if type(tracklist) in [list, ]:
                 return tracklist
-
-        if tracks is None and uri is not None:
-            tracks = self.core.library.lookup(uri)
 
         return self._add(tracks, at_position)
 
