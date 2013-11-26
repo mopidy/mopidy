@@ -8,9 +8,9 @@ from mopidy.backends import base
 from mopidy.frontends.mpd import translator as mpd_translator
 from mopidy.models import Album, SearchResult
 
-from .translator import local_to_file_uri, parse_mpd_tag_cache
+from ..translator import local_to_file_uri, parse_mpd_tag_cache
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger('mopidy.backends.local.tagcache')
 
 
 class LocalLibraryProvider(base.BaseLibraryProvider):
@@ -219,7 +219,6 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     raise LookupError('Missing query')
 
 
-# TODO: rename and move to tagcache extension.
 class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
     uri_schemes = ['local']
 

@@ -8,7 +8,7 @@ import pykka
 from mopidy.backends import base
 from mopidy.utils import encoding, path
 
-from .library import LocalLibraryProvider
+from .tagcache.library import LocalLibraryProvider
 from .playlists import LocalPlaylistsProvider
 from .playback import LocalPlaybackProvider
 

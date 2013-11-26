@@ -34,7 +34,7 @@ class Extension(ext.Extension):
         return [LocalBackend]
 
     def get_library_updaters(self):
-        from .library import LocalLibraryUpdateProvider
+        from .tagcache.library import LocalLibraryUpdateProvider
         return [LocalLibraryUpdateProvider]
 
     def get_command(self):
