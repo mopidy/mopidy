@@ -6,7 +6,7 @@ import unittest
 import pykka
 
 from mopidy import core
-from mopidy.backends.local import actor
+from mopidy.backends.local.tagcache import actor
 from mopidy.models import Track, Album, Artist
 
 from tests import path_to_data_dir
@@ -66,7 +66,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
     }
 
     def setUp(self):
-        self.backend = actor.LocalBackend.start(
+        self.backend = actor.LocalTagcacheBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
         self.library = self.core.library
@@ -92,7 +92,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         config = {'local': self.config['local'].copy()}
         config['local']['tag_cache_file'] = tag_cache.name
-        backend = actor.LocalBackend(config=config, audio=None)
+        backend = actor.LocalTagcacheBackend(config=config, audio=None)
 
         # Sanity check that value is in tag cache
         result = backend.library.lookup(self.tracks[0].uri)

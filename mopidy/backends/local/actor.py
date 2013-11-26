@@ -8,7 +8,6 @@ import pykka
 from mopidy.backends import base
 from mopidy.utils import encoding, path
 
-from .tagcache.library import LocalLibraryProvider
 from .playlists import LocalPlaylistsProvider
 from .playback import LocalPlaybackProvider
 
@@ -23,7 +22,6 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
 
         self.check_dirs_and_files()
 
-        self.library = LocalLibraryProvider(backend=self)
         self.playback = LocalPlaybackProvider(audio=audio, backend=self)
         self.playlists = LocalPlaylistsProvider(backend=self)
 
@@ -39,11 +37,4 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
         except EnvironmentError as error:
             logger.warning(
                 'Could not create local playlists dir: %s',
-                encoding.locale_decode(error))
-
-        try:
-            path.get_or_create_file(self.config['local']['tag_cache_file'])
-        except EnvironmentError as error:
-            logger.warning(
-                'Could not create empty tag cache file: %s',
                 encoding.locale_decode(error))

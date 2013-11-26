@@ -13,9 +13,9 @@ from .translator import parse_mpd_tag_cache, tracks_to_tag_cache_format
 logger = logging.getLogger('mopidy.backends.local.tagcache')
 
 
-class LocalLibraryProvider(base.BaseLibraryProvider):
+class LocalTagcacheLibraryProvider(base.BaseLibraryProvider):
     def __init__(self, *args, **kwargs):
-        super(LocalLibraryProvider, self).__init__(*args, **kwargs)
+        super(LocalTagcacheLibraryProvider, self).__init__(*args, **kwargs)
         self._uri_mapping = {}
         self._media_dir = self.backend.config['local']['media_dir']
         self._tag_cache_file = self.backend.config['local']['tag_cache_file']
@@ -219,7 +219,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
                     raise LookupError('Missing query')
 
 
-class LocalLibraryUpdateProvider(base.BaseLibraryProvider):
+class LocalTagcacheLibraryUpdateProvider(base.BaseLibraryProvider):
     uri_schemes = ['local']
 
     def __init__(self, config):

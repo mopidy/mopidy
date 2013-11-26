@@ -33,10 +33,6 @@ class Extension(ext.Extension):
         from .actor import LocalBackend
         return [LocalBackend]
 
-    def get_library_updaters(self):
-        from .tagcache.library import LocalLibraryUpdateProvider
-        return [LocalLibraryUpdateProvider]
-
     def get_command(self):
         from .commands import LocalCommand
         return LocalCommand()
