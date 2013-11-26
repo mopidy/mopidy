@@ -5,6 +5,16 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.18.0 (UNRELEASED)
+====================
+
+**Internal changes**
+
+- Events from the audio actor, backends, and core actor are now emitted
+  asyncronously through the GObject event loop. This should resolve the issue
+  that has blocked the merge of the EOT-vs-EOS fix for a long time.
+
+
 v0.17.0 (2013-11-23)
 ====================
 
