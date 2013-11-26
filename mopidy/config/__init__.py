@@ -119,8 +119,8 @@ def _load(files, defaults, overrides):
             with io.open(filename, 'rb') as filehandle:
                 parser.readfp(filehandle)
         except configparser.MissingSectionHeaderError as e:
-            logging.warning('%s does not have a config section, not loaded.',
-                            filename)
+            logger.warning('%s does not have a config section, not loaded.',
+                           filename)
         except configparser.ParsingError as e:
             linenos = ', '.join(str(lineno) for lineno, line in e.errors)
             logger.warning(

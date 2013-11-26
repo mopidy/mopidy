@@ -130,7 +130,7 @@ def load_extensions():
             'Loaded extension: %s %s', extension.dist_name, extension.version)
 
     names = (e.ext_name for e in installed_extensions)
-    logging.debug('Discovered extensions: %s', ', '.join(names))
+    logger.debug('Discovered extensions: %s', ', '.join(names))
     return installed_extensions
 
 

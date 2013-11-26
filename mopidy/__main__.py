@@ -161,9 +161,9 @@ def log_extension_info(all_extensions, enabled_extensions):
     # TODO: distinguish disabled vs blocked by env?
     enabled_names = set(e.ext_name for e in enabled_extensions)
     disabled_names = set(e.ext_name for e in all_extensions) - enabled_names
-    logging.info(
+    logger.info(
         'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
-    logging.info(
+    logger.info(
         'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
 
 
