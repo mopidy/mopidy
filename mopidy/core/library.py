@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from collections import defaultdict
+import collections
 import urlparse
 
 import pykka
@@ -15,18 +15,18 @@ class LibraryController(object):
 
     def _get_backend(self, uri):
         uri_scheme = urlparse.urlparse(uri).scheme
-        return self.backends.with_library_by_uri_scheme.get(uri_scheme, None)
+        return self.backends.with_library.get(uri_scheme, None)
 
     def _get_backends_to_uris(self, uris):
         if uris:
-            backends_to_uris = defaultdict(list)
+            backends_to_uris = collections.defaultdict(list)
             for uri in uris:
                 backend = self._get_backend(uri)
                 if backend is not None:
                     backends_to_uris[backend].append(uri)
         else:
             backends_to_uris = dict([
-                (b, None) for b in self.backends.with_library])
+                (b, None) for b in self.backends.with_library.values()])
         return backends_to_uris
 
     def find_exact(self, query=None, uris=None, **kwargs):
@@ -103,8 +103,8 @@ class LibraryController(object):
             if backend:
                 backend.library.refresh(uri).get()
         else:
-            futures = [
-                b.library.refresh(uri) for b in self.backends.with_library]
+            futures = [b.library.refresh(uri)
+                       for b in self.backends.with_library.values()]
             pykka.get_all(futures)
 
     def search(self, query=None, uris=None, **kwargs):

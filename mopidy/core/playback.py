@@ -28,7 +28,7 @@ class PlaybackController(object):
             return None
         uri = self.current_tl_track.track.uri
         uri_scheme = urlparse.urlparse(uri).scheme
-        return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
+        return self.backends.with_playback.get(uri_scheme, None)
 
     ### Properties
 
