@@ -68,12 +68,13 @@ class ScanCommand(commands.Command):
             local_updater.remove(uri)
 
         logger.info('Checking %s for unknown tracks.', media_dir)
-        for uri in path.find_uris(media_dir):
-            file_extension = os.path.splitext(path.uri_to_path(uri))[1]
+        for relpath in path.find_files(media_dir):
+            file_extension = os.path.splitext(relpath)[1]
             if file_extension.lower() in excluded_file_extensions:
                 logger.debug('Skipped %s: File extension excluded.', uri)
                 continue
 
+            uri = path.path_to_uri(os.path.join(media_dir, relpath))
             if uri not in uris_library:
                 uris_update.add(uri)
 
