@@ -6,7 +6,7 @@ import tempfile
 
 from mopidy.backends import base
 from mopidy.backends.local.translator import local_to_file_uri
-from mopidy.models import Album, SearchResult
+from mopidy.backends.local import search
 
 from .translator import parse_mpd_tag_cache, tracks_to_tag_cache_format
 
@@ -20,12 +20,6 @@ class LocalTagcacheLibraryProvider(base.BaseLibraryProvider):
         self._media_dir = self.backend.config['local']['media_dir']
         self._tag_cache_file = self.backend.config['local']['tag_cache_file']
         self.refresh()
-
-    def _convert_to_int(self, string):
-        try:
-            return int(string)
-        except ValueError:
-            return object()
 
     def refresh(self, uri=None):
         logger.debug(
@@ -54,169 +48,12 @@ class LocalTagcacheLibraryProvider(base.BaseLibraryProvider):
             return []
 
     def find_exact(self, query=None, uris=None):
-        # TODO Only return results within URI roots given by ``uris``
-
-        if query is None:
-            query = {}
-        self._validate_query(query)
-        result_tracks = self._uri_mapping.values()
-
-        for (field, values) in query.iteritems():
-            if not hasattr(values, '__iter__'):
-                values = [values]
-            # FIXME this is bound to be slow for large libraries
-            for value in values:
-                if field == 'track_no':
-                    q = self._convert_to_int(value)
-                else:
-                    q = value.strip()
-
-                uri_filter = lambda t: q == t.uri
-                track_name_filter = lambda t: q == t.name
-                album_filter = lambda t: q == getattr(t, 'album', Album()).name
-                artist_filter = lambda t: filter(
-                    lambda a: q == a.name, t.artists)
-                albumartist_filter = lambda t: any([
-                    q == a.name
-                    for a in getattr(t.album, 'artists', [])])
-                composer_filter = lambda t: any([
-                    q == a.name
-                    for a in getattr(t, 'composers', [])])
-                performer_filter = lambda t: any([
-                    q == a.name
-                    for a in getattr(t, 'performers', [])])
-                track_no_filter = lambda t: q == t.track_no
-                genre_filter = lambda t: t.genre and q == t.genre
-                date_filter = lambda t: q == t.date
-                comment_filter = lambda t: q == t.comment
-                any_filter = lambda t: (
-                    uri_filter(t) or
-                    track_name_filter(t) or
-                    album_filter(t) or
-                    artist_filter(t) or
-                    albumartist_filter(t) or
-                    composer_filter(t) or
-                    performer_filter(t) or
-                    track_no_filter(t) or
-                    genre_filter(t) or
-                    date_filter(t) or
-                    comment_filter(t))
-
-                if field == 'uri':
-                    result_tracks = filter(uri_filter, result_tracks)
-                elif field == 'track_name':
-                    result_tracks = filter(track_name_filter, result_tracks)
-                elif field == 'album':
-                    result_tracks = filter(album_filter, result_tracks)
-                elif field == 'artist':
-                    result_tracks = filter(artist_filter, result_tracks)
-                elif field == 'albumartist':
-                    result_tracks = filter(albumartist_filter, result_tracks)
-                elif field == 'composer':
-                    result_tracks = filter(composer_filter, result_tracks)
-                elif field == 'performer':
-                    result_tracks = filter(performer_filter, result_tracks)
-                elif field == 'track_no':
-                    result_tracks = filter(track_no_filter, result_tracks)
-                elif field == 'genre':
-                    result_tracks = filter(genre_filter, result_tracks)
-                elif field == 'date':
-                    result_tracks = filter(date_filter, result_tracks)
-                elif field == 'comment':
-                    result_tracks = filter(comment_filter, result_tracks)
-                elif field == 'any':
-                    result_tracks = filter(any_filter, result_tracks)
-                else:
-                    raise LookupError('Invalid lookup field: %s' % field)
-        # TODO: add local:search:<query>
-        return SearchResult(uri='local:search', tracks=result_tracks)
+        tracks = self._uri_mapping.values()
+        return search.find_exact(tracks, query=query, uris=uris)
 
     def search(self, query=None, uris=None):
-        # TODO Only return results within URI roots given by ``uris``
-
-        if query is None:
-            query = {}
-        self._validate_query(query)
-        result_tracks = self._uri_mapping.values()
-
-        for (field, values) in query.iteritems():
-            if not hasattr(values, '__iter__'):
-                values = [values]
-            # FIXME this is bound to be slow for large libraries
-            for value in values:
-                if field == 'track_no':
-                    q = self._convert_to_int(value)
-                else:
-                    q = value.strip().lower()
-
-                uri_filter = lambda t: q in t.uri.lower()
-                track_name_filter = lambda t: q in t.name.lower()
-                album_filter = lambda t: q in getattr(
-                    t, 'album', Album()).name.lower()
-                artist_filter = lambda t: filter(
-                    lambda a: q in a.name.lower(), t.artists)
-                albumartist_filter = lambda t: any([
-                    q in a.name.lower()
-                    for a in getattr(t.album, 'artists', [])])
-                composer_filter = lambda t: any([
-                    q in a.name.lower()
-                    for a in getattr(t, 'composers', [])])
-                performer_filter = lambda t: any([
-                    q in a.name.lower()
-                    for a in getattr(t, 'performers', [])])
-                track_no_filter = lambda t: q == t.track_no
-                genre_filter = lambda t: t.genre and q in t.genre.lower()
-                date_filter = lambda t: t.date and t.date.startswith(q)
-                comment_filter = lambda t: t.comment and q in t.comment.lower()
-                any_filter = lambda t: (
-                    uri_filter(t) or
-                    track_name_filter(t) or
-                    album_filter(t) or
-                    artist_filter(t) or
-                    albumartist_filter(t) or
-                    composer_filter(t) or
-                    performer_filter(t) or
-                    track_no_filter(t) or
-                    genre_filter(t) or
-                    date_filter(t) or
-                    comment_filter(t))
-
-                if field == 'uri':
-                    result_tracks = filter(uri_filter, result_tracks)
-                elif field == 'track_name':
-                    result_tracks = filter(track_name_filter, result_tracks)
-                elif field == 'album':
-                    result_tracks = filter(album_filter, result_tracks)
-                elif field == 'artist':
-                    result_tracks = filter(artist_filter, result_tracks)
-                elif field == 'albumartist':
-                    result_tracks = filter(albumartist_filter, result_tracks)
-                elif field == 'composer':
-                    result_tracks = filter(composer_filter, result_tracks)
-                elif field == 'performer':
-                    result_tracks = filter(performer_filter, result_tracks)
-                elif field == 'track_no':
-                    result_tracks = filter(track_no_filter, result_tracks)
-                elif field == 'genre':
-                    result_tracks = filter(genre_filter, result_tracks)
-                elif field == 'date':
-                    result_tracks = filter(date_filter, result_tracks)
-                elif field == 'comment':
-                    result_tracks = filter(comment_filter, result_tracks)
-                elif field == 'any':
-                    result_tracks = filter(any_filter, result_tracks)
-                else:
-                    raise LookupError('Invalid lookup field: %s' % field)
-        # TODO: add local:search:<query>
-        return SearchResult(uri='local:search', tracks=result_tracks)
-
-    def _validate_query(self, query):
-        for (_, values) in query.iteritems():
-            if not values:
-                raise LookupError('Missing query')
-            for value in values:
-                if not value:
-                    raise LookupError('Missing query')
+        tracks = self._uri_mapping.values()
+        return search.search(tracks, query=query, uris=uris)
 
 
 class LocalTagcacheLibraryUpdateProvider(base.BaseLibraryProvider):
