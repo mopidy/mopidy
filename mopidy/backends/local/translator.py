@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import os
 import urlparse
+import urllib
 
 from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri, uri_to_path
@@ -10,11 +11,25 @@ from mopidy.utils.path import path_to_uri, uri_to_path
 logger = logging.getLogger('mopidy.backends.local')
 
 
+# TODO: remove once tag cache is gone
 def local_to_file_uri(uri, media_dir):
     # TODO: check that type is correct.
     file_path = uri_to_path(uri).split(b':', 1)[1]
     file_path = os.path.join(media_dir, file_path)
     return path_to_uri(file_path)
+
+
+def local_to_path(uri, media_dir):
+    if not uri.startswith('local:track:'):
+        raise Exception
+    file_path = uri_to_path(uri).split(b':', 1)[1]
+    return os.path.join(media_dir, file_path)
+
+
+def path_to_local(relpath):
+    if isinstance(relpath, unicode):
+        relpath = relpath.encode('utf-8')
+    return b'local:track:%s' % urllib.quote(relpath)
 
 
 def parse_m3u(file_path, media_dir):
