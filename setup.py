@@ -44,6 +44,7 @@ setup(
             'http = mopidy.frontends.http:Extension [http]',
             'local = mopidy.backends.local:Extension',
             'local-tagcache = mopidy.backends.local.tagcache:Extension',
+            'local-json = mopidy.backends.local.json:Extension',
             'mpd = mopidy.frontends.mpd:Extension',
             'stream = mopidy.backends.stream:Extension',
         ],
