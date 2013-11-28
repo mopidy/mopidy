@@ -4,7 +4,7 @@ import logging
 import mock
 import unittest
 
-from mopidy.config import schemas
+from mopidy.config import schemas, types
 
 from tests import any_unicode
 
@@ -76,6 +76,14 @@ class ConfigSchemaTest(unittest.TestCase):
         self.assertIn('foo', result)
         self.assertIsNone(result['bar'])
         self.assertIsNone(result['baz'])
+
+    def test_deserialize_none_value(self):
+        self.schema['foo'].deserialize.return_value = types.DeprecatedValue()
+
+        result, errors = self.schema.deserialize(self.values)
+        print result, errors
+        self.assertItemsEqual(['bar', 'baz'], result.keys())
+        self.assertNotIn('foo', errors)
 
 
 class LogLevelConfigSchemaTest(unittest.TestCase):

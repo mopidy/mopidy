@@ -31,6 +31,10 @@ class ExpandedPath(bytes):
         self.original = original
 
 
+class DeprecatedValue(object):
+    pass
+
+
 class ConfigValue(object):
     """Represents a config key's value and how to handle it.
 
@@ -57,6 +61,20 @@ class ConfigValue(object):
         if value is None:
             return b''
         return bytes(value)
+
+
+class Deprecated(ConfigValue):
+    """Deprecated value
+
+    Used for ignoring old config values that are no longer in use, but should
+    not cause the config parser to crash.
+    """
+
+    def deserialize(self, value):
+        return DeprecatedValue()
+
+    def serialize(self, value, display=False):
+        return DeprecatedValue()
 
 
 class String(ConfigValue):

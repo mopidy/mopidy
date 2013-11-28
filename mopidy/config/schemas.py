@@ -74,6 +74,8 @@ class ConfigSchema(collections.OrderedDict):
             if key not in result and key not in errors:
                 result[key] = None
                 errors[key] = 'config key not found.'
+            if isinstance(result[key], types.DeprecatedValue):
+                del result[key]
 
         return result, errors
 
