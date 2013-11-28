@@ -21,9 +21,6 @@ class Extension(ext.Extension):
         schema['json_file'] = config.Path()
         return schema
 
-    def validate_environment(self):
-        pass
-
     def get_backend_classes(self):
         from .actor import LocalJsonBackend
         return [LocalJsonBackend]

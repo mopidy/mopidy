@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 import os
 import unittest
 
-from mopidy.utils.path import mtime, uri_to_path
-from mopidy.frontends.mpd import translator as mpd, protocol
 from mopidy.backends.local.tagcache import translator
+from mopidy.frontends.mpd import translator as mpd, protocol
 from mopidy.models import Album, Artist, Track
+from mopidy.utils.path import mtime, uri_to_path
 
 from tests import path_to_data_dir
 

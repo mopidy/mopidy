@@ -19,9 +19,6 @@ class Extension(ext.Extension):
     # Config only contains local-tagcache/enabled since we are not setting our
     # own schema.
 
-    def validate_environment(self):
-        pass
-
     def get_backend_classes(self):
         from .actor import LocalTagcacheBackend
         return [LocalTagcacheBackend]

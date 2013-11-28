@@ -225,8 +225,8 @@ class FindFilesTest(unittest.TestCase):
 
     def test_files(self):
         files = self.find('find')
-        excepted = [b'foo/bar/file', b'foo/file', b'baz/file']
-        self.assertItemsEqual(excepted, files)
+        expected = [b'foo/bar/file', b'foo/file', b'baz/file']
+        self.assertItemsEqual(expected, files)
 
     def test_names_are_bytestrings(self):
         is_bytes = lambda f: isinstance(f, bytes)

@@ -5,8 +5,8 @@ import os
 import tempfile
 
 from mopidy.backends import base
-from mopidy.backends.local.translator import local_to_file_uri
 from mopidy.backends.local import search
+from mopidy.backends.local.translator import local_to_file_uri
 
 from .translator import parse_mpd_tag_cache, tracks_to_tag_cache_format
 

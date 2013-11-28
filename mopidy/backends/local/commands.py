@@ -52,10 +52,11 @@ class ScanCommand(commands.Command):
         tracks = local_updater.load()
         logger.info('Checking %d tracks from library.', len(tracks))
         for track in tracks:
-            track_path = translator.local_to_path(track.uri, media_dir)
-            uri_path_mapping[track.uri] = track_path
+            uri_path_mapping[track.uri] = translator.local_track_uri_to_path(
+                track.uri, media_dir)
             try:
-                if int(os.stat(track_path).st_mtime) > track.last_modified:
+                stat = os.stat(uri_path_mapping[track.uri])
+                if int(stat.st_mtime) > track.last_modified:
                     uris_to_update.add(track.uri)
                 uris_in_library.add(track.uri)
             except OSError:
@@ -73,7 +74,7 @@ class ScanCommand(commands.Command):
                 logger.debug('Skipped %s: File extension excluded.', uri)
                 continue
 
-            uri = translator.path_to_local(relpath)
+            uri = translator.path_to_local_track_uri(relpath)
             if uri not in uris_in_library:
                 uris_to_update.add(uri)
                 uri_path_mapping[uri] = os.path.join(media_dir, relpath)
