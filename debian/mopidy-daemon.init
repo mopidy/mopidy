@@ -21,8 +21,6 @@ DAEMON_ARGS="--quiet --config /etc/mopidy/mopidy.conf"
 PIDFILE=/var/run/$NAME.pid
 # TODO @jodal: change to /etc/init.d/$NAME when incorporated into mopidy
 SCRIPTNAME=/etc/init.d/mopidy-daemon
-# TODO @jodal: change to sub-command for 0.17.0
-RELOAD_CMD="/usr/bin/mopidy-scan 2>>/var/log/mopidy/mopidy-scan.log"
 
 # Exit if the package is not installed
 [ -x $DAEMON ] || exit 0
@@ -65,7 +63,7 @@ do_stop()
 
 do_reload() 
 {
-    su -s /bin/sh -c "$RELOAD_CMD" $DAEMON_USER && return 0
+    su -s /bin/sh -c "$DAEMON $DAEMON_ARGS local scan" $DAEMON_USER && return 0
     log_warning_msg "$NAME: reload failed with error code $?."
     return 2
 }
