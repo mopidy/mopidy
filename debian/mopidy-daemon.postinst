@@ -1,0 +1,32 @@
+#!/bin/sh
+# postinst script for mopidy
+
+set -e
+
+case "$1" in
+    configure)
+        adduser --quiet --system --home /var/lib/mopidy --ingroup audio mopidy
+
+        chown mopidy:audio /var/cache/mopidy
+        chown mopidy:audio /var/lib/mopidy
+        chown mopidy:audio /var/lib/mopidy/media
+        chown mopidy:audio /var/lib/mopidy/playlists
+        chown mopidy:audio /var/log/mopidy
+
+        # mopidy.conf may contain passwords and other confidential information
+        chown mopidy:root /etc/mopidy/mopidy.conf
+        chmod 640 /etc/mopidy/mopidy.conf
+        ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

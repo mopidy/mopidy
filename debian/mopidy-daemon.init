@@ -1,0 +1,121 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          mopidy
+# Required-Start:    $network $local_fs $remote_fs
+# Required-Stop:     $network $local_fs $remote_fs
+# Should-Start:      alsa-utils pulseaudio
+# Should-Stop:       alsa-utils pulseaudio
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Mopidy music server
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="Mopidy music server"
+NAME=mopidy
+DAEMON=/usr/bin/mopidy
+DAEMON_USER=mopidy
+DAEMON_GROUP=audio
+DAEMON_ARGS="--quiet --config /etc/mopidy/mopidy.conf"
+PIDFILE=/var/run/$NAME.pid
+# TODO @jodal: change to /etc/init.d/$NAME when incorporated into mopidy
+SCRIPTNAME=/etc/init.d/mopidy-daemon
+# TODO @jodal: change to sub-command for 0.17.0
+RELOAD_CMD="/usr/bin/mopidy-scan 2>>/var/log/mopidy/mopidy-scan.log"
+
+# Exit if the package is not installed
+[ -x $DAEMON ] || exit 0
+
+# Read configuration variable file if present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+. /lib/lsb/init-functions
+
+do_start()
+{
+    start-stop-daemon --start --quiet --name $NAME --pidfile $PIDFILE \
+        --startas $DAEMON --test > /dev/null \
+        || return 1
+    start-stop-daemon --start --quiet --name $NAME --pidfile $PIDFILE \
+        --chuid $DAEMON_USER:$DAEMON_GROUP --background --make-pidfile \
+        --startas $DAEMON -- $DAEMON_ARGS \
+        || return 2
+}
+
+do_stop()
+{
+    start-stop-daemon --stop --quiet --name $NAME --pidfile $PIDFILE \
+        --retry=TERM/30/KILL/5
+    RETVAL="$?"
+    [ "$RETVAL" = 2 ] && return 2
+    # Wait for children to finish too if this is a daemon that forks
+    # and if the daemon is only ever run from this initscript.
+    # This typically happens with pulseaudio.
+    start-stop-daemon --stop --quiet --oknodo --user $DAEMON_USER \
+        --retry=TERM/30/KILL/5
+    [ "$?" = 2 ] && return 2
+    rm -f $PIDFILE
+    return "$RETVAL"
+}
+
+do_reload() 
+{
+    su -s /bin/sh -c "$RELOAD_CMD" $DAEMON_USER && return 0
+    log_warning_msg "$NAME: reload failed with error code $?."
+    return 2
+}
+
+case "$1" in
+    start)
+        [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC " "$NAME"
+        do_start
+        case "$?" in
+            0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+            2)   [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+        esac
+        ;;
+    stop)
+        [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+        do_stop
+        case "$?" in
+            0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+            2)   [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+        esac
+        ;;
+    status)
+        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+        ;;
+    restart|force-reload)
+        log_daemon_msg "Restarting $DESC" "$NAME"
+        do_stop
+        case "$?" in
+            0|1)
+                if [ "$1" = "force-reload" ]; then
+                    do_reload && do_start
+                else
+                    do_start
+                fi
+                case "$?" in
+                    0) log_end_msg 0 ;;
+                    1) log_end_msg 1 ;; # Old process is still running
+                    *) log_end_msg 1 ;; # Failed to start
+                esac
+                ;;
+            *)
+                # Failed to stop
+                log_end_msg 1
+                ;;
+        esac
+        ;;
+    *)
+        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+        exit 3
+        ;;
+esac
+
+:
