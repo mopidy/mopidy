@@ -1,3 +1,11 @@
+mopidy (0.17.0-1) unstable; urgency=low
+
+  * Include Apache 2.0 declaration in debian/copyright.
+  * Update license text for js/lib/bane-*.js to BSD 2-clause.
+  * Upload to unstable.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sun, 01 Dec 2013 21:25:55 +0100
+
 mopidy (0.17.0-0mopidy2) unstable; urgency=low
 
   * Add missing licenses to debian/copyright.
