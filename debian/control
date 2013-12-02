@@ -56,7 +56,7 @@ Description: music server with support for MPD/HTTP clients - documentation
 Package: mopidy-daemon
 Architecture: all
 Depends: ${misc:Depends}, adduser, lsb-base, mopidy
-Description: music server with support for MPD/HTTP clients - documentation
+Description: music server with support for MPD/HTTP clients - daemon
  Mopidy is a music server which can play music both from multiple sources, like
  your local hard drive, radio streams, and from Spotify and SoundCloud.
  .
