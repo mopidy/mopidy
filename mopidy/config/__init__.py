@@ -23,6 +23,8 @@ _logging_schema['config_file'] = Path(optional=True)
 _loglevels_schema = LogLevelConfigSchema('loglevels')
 
 _audio_schema = ConfigSchema('audio')
+_audio_schema['mute'] = String()
+_audio_schema['volume'] = String()
 _audio_schema['mixer'] = String()
 _audio_schema['mixer_track'] = String(optional=True)
 _audio_schema['output'] = String()

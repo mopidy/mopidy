@@ -61,7 +61,8 @@ class Audio(pykka.ThreadingActor):
         self._mixer = None
         self._mixer_track = None
         self._mixer_scale = None
-        self._software_mixing = False
+        self._software_volume = False
+        self._software_mute = False
         self._volume_set = None
 
         self._appsrc = None
@@ -182,16 +183,29 @@ class Audio(pykka.ThreadingActor):
                 visualizer_element, ex)
 
     def _setup_mixer(self):
+        mute_desc = self._config['audio']['mute']
+        volume_desc = self._config['audio']['volume']
         mixer_desc = self._config['audio']['mixer']
         track_desc = self._config['audio']['mixer_track']
+
+        if mixer_desc == 'software':
+            self._software_volume = True
+            self._software_mute = True
+            logger.info('Audio mixer is using software volume and mute')
 
         if mixer_desc is None:
             logger.info('Not setting up audio mixer')
             return
 
-        if mixer_desc == 'software':
-            self._software_mixing = True
-            logger.info('Audio mixer is using software mixing')
+        if volume_desc == 'software':
+            logger.info('Audio mixer is using software volume')
+            self._software_volume = True
+
+        if mute_desc == 'software':
+            logger.info('Audio mixer is using software mute')
+            self._software_mute = True
+
+        if self._software_volume and self._software_mute:
             return
 
         try:
@@ -490,7 +504,7 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: int in range [0..100] or :class:`None`
         """
-        if self._software_mixing:
+        if self._software_volume:
             return int(round(self._playbin.get_property('volume') * 100))
 
         if self._mixer is None:
@@ -521,7 +535,7 @@ class Audio(pykka.ThreadingActor):
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        if self._software_mixing:
+        if self._software_volume:
             self._playbin.set_property('volume', volume / 100.0)
             return True
 
@@ -556,7 +570,7 @@ class Audio(pykka.ThreadingActor):
         :rtype: :class:`True` if muted, :class:`False` if unmuted,
           :class:`None` if no mixer is installed.
         """
-        if self._software_mixing:
+        if self._software_mute:
             return self._playbin.get_property('mute')
 
         if self._mixer_track is None:
@@ -572,7 +586,7 @@ class Audio(pykka.ThreadingActor):
         :type mute: bool
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        if self._software_mixing:
+        if self._software_mute:
             return self._playbin.set_property('mute', bool(mute))
 
         if self._mixer_track is None:
