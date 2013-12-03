@@ -301,6 +301,9 @@ class TracklistController(object):
         if tracks is None and uri is not None:
             tracks = self.core.library.lookup(uri)
 
+        if not tracks:
+            return []
+
         backend = self._get_backend(tracks[0])
         if backend:
             tracklist = backend.tracklist.add(self, tracks, at_position,
