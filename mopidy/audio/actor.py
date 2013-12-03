@@ -62,6 +62,7 @@ class Audio(pykka.ThreadingActor):
         self._mixer_track = None
         self._mixer_scale = None
         self._software_mixing = False
+        self._setting_volume_mute = False
         self._volume_set = None
 
         self._appsrc = None
@@ -102,6 +103,8 @@ class Audio(pykka.ThreadingActor):
 
         self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
         self._connect(playbin, 'notify::source', self._on_new_source)
+        self._connect(playbin, 'notify::mute', self._on_mute_change)
+        self._connect(playbin, 'notify::volume', self._on_volume_change)
 
         self._playbin = playbin
 
@@ -132,6 +135,16 @@ class Audio(pykka.ThreadingActor):
         self._connect(source, 'seek-data', self._appsrc_on_seek_data)
 
         self._appsrc = source
+
+    def _on_mute_change(self, playbin, param):
+        if self._setting_volume_mute:
+            return
+        AudioListener.send('audio_mute_changed', mute=self.get_mute())
+
+    def _on_volume_change(self, playbin, param):
+        if self._setting_volume_mute:
+            return
+        AudioListener.send('audio_volume_changed', volume=self.get_volume())
 
     def _appsrc_on_need_data(self, appsrc, gst_length_hint):
         length_hint = utils.clocktime_to_millisecond(gst_length_hint)
@@ -223,6 +236,8 @@ class Audio(pykka.ThreadingActor):
         self._mixer_track = track
         self._mixer_scale = (
             self._mixer_track.min_volume, self._mixer_track.max_volume)
+        self._connect(mixer, 'mute-toggled', self._on_mute_change)
+        self._connect(mixer, 'volume-changed', self._on_volume_change)
         logger.info(
             'Audio mixer set to "%s" using track "%s"',
             str(mixer.get_factory().get_name()).decode('utf-8'),
@@ -522,7 +537,9 @@ class Audio(pykka.ThreadingActor):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         if self._software_mixing:
+            self._setting_volume_mute = True
             self._playbin.set_property('volume', volume / 100.0)
+            self._setting_volume_mute = False
             return True
 
         if self._mixer is None:
@@ -536,7 +553,10 @@ class Audio(pykka.ThreadingActor):
             volume, old=internal_scale, new=self._mixer_scale)
 
         volumes = (volume,) * self._mixer_track.num_channels
+
+        self._setting_volume_mute = True
         self._mixer.set_volume(self._mixer_track, volumes)
+        self._setting_volume_mute = False
 
         return self._mixer.get_volume(self._mixer_track) == volumes
 
@@ -573,12 +593,18 @@ class Audio(pykka.ThreadingActor):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         if self._software_mixing:
-            return self._playbin.set_property('mute', bool(mute))
+            self._setting_volume_mute = True
+            ret = self._playbin.set_property('mute', bool(mute))
+            self._setting_volume_mute = False
+            return ret
 
         if self._mixer_track is None:
             return False
 
-        return self._mixer.set_mute(self._mixer_track, bool(mute))
+        self._setting_volume_mute = True
+        ret = self._mixer.set_mute(self._mixer_track, bool(mute))
+        self._setting_volume_mute = False
+        return ret
 
     def set_metadata(self, track):
         """
