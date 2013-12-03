@@ -54,7 +54,8 @@ Configuration values
 
 .. confval:: local/excluded_file_extensions
 
-    File extensions to exclude when scanning the media directory.
+    File extensions to exclude when scanning the media directory. Values
+    should be separated by either comma or newline.
 
 
 Usage

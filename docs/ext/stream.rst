@@ -39,7 +39,8 @@ Configuration values
 
 .. confval:: stream/protocols
 
-    Whitelist of URI schemas to allow streaming from.
+    Whitelist of URI schemas to allow streaming from. Values should be
+    separated by either comma or newline.
 
 
 Usage
