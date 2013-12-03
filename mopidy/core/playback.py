@@ -312,6 +312,20 @@ class PlaybackController(object):
         if clear_current_track:
             self.current_tl_track = None
 
+    def on_playback_error(self, error, debug):
+        """
+        When playback fails for whatever reason, carry out an stop and try
+        default fallback onwards
+        """
+        backend = self._get_backend()
+        if backend and backend.playback.on_playback_error(error, debug).get():
+            self.core.tracklist.mark_unplayable(self.current_tl_track)
+            self.stop()
+            self.next()
+            self.play()
+        else:
+            self.stop()
+
     def _trigger_track_playback_paused(self):
         logger.debug('Triggering track playback paused event')
         if self.current_track is None:

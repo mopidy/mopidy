@@ -41,3 +41,10 @@ class AudioListener(listener.Listener):
         :type new_state: string from :class:`mopidy.core.PlaybackState` field
         """
         pass
+
+    def playback_error(self, error, debug):
+        """
+        Called when gstreamer can't play the given track. It is meant
+        to notify the core about it.
+        """
+        pass

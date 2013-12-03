@@ -214,6 +214,14 @@ class BasePlaybackProvider(object):
         """
         return self.audio.get_position().get()
 
+    def on_playback_error(self, error, debug):
+        """
+        Notify the playback provider about errors on playback
+
+        *May be reimplemented by subclass.*
+        """
+        return False
+
 
 class BasePlaylistsProvider(object):
     """

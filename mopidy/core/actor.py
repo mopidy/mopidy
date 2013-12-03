@@ -74,6 +74,9 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
         # Forward event from backend to frontends
         CoreListener.send('playlists_loaded')
 
+    def playback_error(self, error, debug):
+        self.playback.on_playback_error(error, debug)
+
 
 class Backends(list):
     def __init__(self, backends):
