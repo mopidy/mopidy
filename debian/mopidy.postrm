@@ -4,7 +4,7 @@
 set -e
 
 if [ "$1" = "purge" ]; then
-    rm -f /var/cache/mopidy/tag_cache
+    rm -f /var/lib/mopidy/tag_cache
     rm -f /var/log/mopidy/mopidy.log
     rm -f /var/log/mopidy/mopidy-debug.log
 fi
