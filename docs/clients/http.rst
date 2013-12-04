@@ -19,15 +19,18 @@ woutervanwijk/Mopidy-Webclient
 ==============================
 
 .. image:: /_static/woutervanwijk-mopidy-webclient.png
-    :width: 382
-    :height: 621
+    :width: 1275
+    :height: 600
 
-The first web client for Mopidy is still under development, but is already very
-usable. It targets both desktop and mobile browsers.
+The first web client for Mopidy, made with jQuery Mobile by Wouter van Wijk.
+Also the web client used for Wouter's popular `Pi Musicbox
+<http://www.woutervanwijk.nl/pimusicbox/>`_ image for Raspberry Pi.
 
-The web client used for the `Pi Musicbox
-<http://www.woutervanwijk.nl/pimusicbox/>`_ is also available for other users
-of Mopidy. See https://github.com/woutervanwijk/Mopidy-WebClient for details.
+    With Mopidy Browser Client, you can play your music on your computer (or
+    Rapsberry Pi) and remotely control it from a computer, phone, tablet,
+    laptop. From your couch.
+
+    -- https://github.com/woutervanwijk/Mopidy-WebClient
 
 
 Mopidy Lux
@@ -37,15 +40,40 @@ Mopidy Lux
     :width: 1000
     :height: 645
 
-New web client developed by Janez Troha. See
-https://github.com/dz0ny/mopidy-lux for details.
+A Mopidy web client made with AngularJS by Janez Troha.
+
+    A shiny new remote web control interface for Mopidy player.
+
+    -- https://github.com/dz0ny/mopidy-lux
+
+
+Moped
+=====
+
+.. image:: /_static/martijnboland-moped.png
+    :width: 720
+    :height: 450
+
+A Mopidy web client made with Durandal and KnockoutJS by Martijn Boland.
+
+    Moped is a responsive web client for the Mopidy music server. It is
+    inspired by Mopidy-Webclient, but built from scratch based on a different
+    technology stack with Durandal and Bootstrap 3.
+
+    -- https://github.com/martijnboland/moped
 
 
 JukePi
 ======
 
-New web client developed by Meantime IT in the UK for their office jukebox. See
-https://github.com/meantimeit/jukepi for details.
+A Mopidy web client made with Backbone.js by Meantime IT in the UK for their
+office jukebox.
+
+    JukePi is a web client for the Mopidy music server. Mopidy empowers you to
+    create a custom music server that can connect to Spotify, play local mp3s
+    and more.
+
+    -- https://github.com/meantimeit/jukepi
 
 
 Other web clients
