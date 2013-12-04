@@ -20,8 +20,10 @@ Architecture: all
 Depends:
     ${misc:Depends},
     ${python:Depends},
-    python-gst0.10,
-    gstreamer0.10-plugins-good
+    adduser,
+    lsb-base,
+    gstreamer0.10-plugins-good,
+    python-gst0.10
 Recommends:
     gstreamer0.10-alsa,
     gstreamer0.10-plugins-ugly,
