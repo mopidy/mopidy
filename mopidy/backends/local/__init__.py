@@ -1,9 +1,13 @@
 from __future__ import unicode_literals
 
+import logging
 import os
 
 import mopidy
 from mopidy import config, ext
+from mopidy.utils import encoding, path
+
+logger = logging.getLogger('mopidy.backends.local')
 
 
 class Extension(ext.Extension):
@@ -27,7 +31,11 @@ class Extension(ext.Extension):
         return schema
 
     def validate_environment(self):
-        pass
+        try:
+            path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy/local')
+        except EnvironmentError as error:
+            error = encoding.locale_decode(error)
+            logger.warning('Could not create local data dir: %s', error)
 
     def get_backend_classes(self):
         from .actor import LocalBackend

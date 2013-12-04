@@ -14,13 +14,31 @@ from mopidy.backends.local import search
 logger = logging.getLogger('mopidy.backends.local.json')
 
 
-def _load_tracks(json_file):
+def load_library(json_file):
     try:
         with gzip.open(json_file, 'rb') as fp:
-            result = json.load(fp, object_hook=models.model_json_decoder)
-    except IOError:
-        return []
-    return result.get('tracks', [])
+            return json.load(fp, object_hook=models.model_json_decoder)
+    except (IOError, ValueError) as e:
+        logger.warning('Loading JSON local library failed: %s', e)
+        return {}
+
+
+def write_library(json_file, data):
+    data['version'] = mopidy.__version__
+    directory, basename = os.path.split(json_file)
+
+    # TODO: cleanup directory/basename.* files.
+    tmp = tempfile.NamedTemporaryFile(
+        prefix=basename + '.', dir=directory, delete=False)
+
+    try:
+        with gzip.GzipFile(fileobj=tmp, mode='wb') as fp:
+            json.dump(data, fp, cls=models.ModelJSONEncoder,
+                      indent=2, separators=(',', ': '))
+        os.rename(tmp.name, json_file)
+    finally:
+        if os.path.exists(tmp.name):
+            os.remove(tmp.name)
 
 
 class LocalJsonLibraryProvider(base.BaseLibraryProvider):
@@ -36,7 +54,7 @@ class LocalJsonLibraryProvider(base.BaseLibraryProvider):
             'Loading local tracks from %s using %s',
             self._media_dir, self._json_file)
 
-        tracks = _load_tracks(self._json_file)
+        tracks = load_library(self._json_file).get('tracks', [])
         uris_to_remove = set(self._uri_mapping)
 
         for track in tracks:
@@ -75,7 +93,7 @@ class LocalJsonLibraryUpdateProvider(base.BaseLibraryProvider):
         self._json_file = config['local-json']['json_file']
 
     def load(self):
-        for track in _load_tracks(self._json_file):
+        for track in load_library(self._json_file).get('tracks', []):
             self._tracks[track.uri] = track
         return self._tracks.values()
 
@@ -87,19 +105,4 @@ class LocalJsonLibraryUpdateProvider(base.BaseLibraryProvider):
             del self._tracks[uri]
 
     def commit(self):
-        directory, basename = os.path.split(self._json_file)
-
-        # TODO: cleanup directory/basename.* files.
-        tmp = tempfile.NamedTemporaryFile(
-            prefix=basename + '.', dir=directory, delete=False)
-
-        try:
-            with gzip.GzipFile(fileobj=tmp, mode='wb') as fp:
-                data = {'version': mopidy.__version__,
-                        'tracks': self._tracks.values()}
-                json.dump(data, fp, cls=models.ModelJSONEncoder,
-                          indent=2, separators=(',', ': '))
-            os.rename(tmp.name, self._json_file)
-        finally:
-            if os.path.exists(tmp.name):
-                os.remove(tmp.name)
+        write_library(self._json_file, {'tracks': self._tracks.values()})
