@@ -324,6 +324,7 @@ class PlaybackController(object):
             self.next()
             self.play()
         else:
+            logger.error('%s Debug message: %s', error, debug)
             self.stop()
 
     def _trigger_track_playback_paused(self):
