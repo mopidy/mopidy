@@ -33,6 +33,16 @@ class ConfigValueTest(unittest.TestCase):
         self.assertIsInstance(value.serialize(object(), display=True), bytes)
 
 
+class DeprecatedTest(unittest.TestCase):
+    def test_deserialize_returns_deprecated_value(self):
+        self.assertIsInstance(types.Deprecated().deserialize(b'foobar'),
+                              types.DeprecatedValue)
+
+    def test_serialize_returns_deprecated_value(self):
+        self.assertIsInstance(types.Deprecated().serialize('foobar'),
+                              types.DeprecatedValue)
+
+
 class StringTest(unittest.TestCase):
     def test_deserialize_conversion_success(self):
         value = types.String()

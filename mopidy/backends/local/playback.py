@@ -11,7 +11,6 @@ logger = logging.getLogger('mopidy.backends.local')
 
 class LocalPlaybackProvider(base.BasePlaybackProvider):
     def change_track(self, track):
-        media_dir = self.backend.config['local']['media_dir']
-        uri = translator.local_to_file_uri(track.uri, media_dir)
-        track = track.copy(uri=uri)
+        track = track.copy(uri=translator.local_track_uri_to_file_uri(
+            track.uri, self.backend.config['local']['media_dir']))
         return super(LocalPlaybackProvider, self).change_track(track)

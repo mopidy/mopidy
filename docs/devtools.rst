@@ -66,11 +66,8 @@ Sample session::
     -OK
     +ACK [2@0] {listallinfo} incorrect arguments
 
-To ensure that Mopidy and MPD have comparable state it is suggested you setup
-both to use ``tests/data/advanced_tag_cache`` for their tag cache and
-``tests/data/scanner/advanced/`` for the music folder and ``tests/data`` for
-playlists.
-
+To ensure that Mopidy and MPD have comparable state it is suggested you scan
+the same media directory with both servers.
 
 Documentation writing
 =====================

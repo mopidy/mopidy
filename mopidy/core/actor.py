@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import collections
 import itertools
 
 import pykka
@@ -79,34 +80,29 @@ class Backends(list):
     def __init__(self, backends):
         super(Backends, self).__init__(backends)
 
-        # These lists keeps the backends in the original order, but only
-        # includes those which implements the required backend provider. Since
-        # it is important to keep the order, we can't simply use .values() on
-        # the X_by_uri_scheme dicts below.
-        self.with_library = [b for b in backends if b.has_library().get()]
-        self.with_playback = [b for b in backends if b.has_playback().get()]
-        self.with_playlists = [
-            b for b in backends if b.has_playlists().get()]
+        self.with_library = collections.OrderedDict()
+        self.with_playback = collections.OrderedDict()
+        self.with_playlists = collections.OrderedDict()
 
-        self.by_uri_scheme = {}
         for backend in backends:
-            for uri_scheme in backend.uri_schemes.get():
-                assert uri_scheme not in self.by_uri_scheme, (
-                    'Cannot add URI scheme %s for %s, '
-                    'it is already handled by %s'
-                ) % (
-                    uri_scheme, backend.__class__.__name__,
-                    self.by_uri_scheme[uri_scheme].__class__.__name__)
-                self.by_uri_scheme[uri_scheme] = backend
+            has_library = backend.has_library().get()
+            has_playback = backend.has_playback().get()
+            has_playlists = backend.has_playlists().get()
 
-        self.with_library_by_uri_scheme = {}
-        self.with_playback_by_uri_scheme = {}
-        self.with_playlists_by_uri_scheme = {}
+            for scheme in backend.uri_schemes.get():
+                self.add(self.with_library, has_library, scheme, backend)
+                self.add(self.with_playback, has_playback, scheme, backend)
+                self.add(self.with_playlists, has_playlists, scheme, backend)
 
-        for uri_scheme, backend in self.by_uri_scheme.items():
-            if backend.has_library().get():
-                self.with_library_by_uri_scheme[uri_scheme] = backend
-            if backend.has_playback().get():
-                self.with_playback_by_uri_scheme[uri_scheme] = backend
-            if backend.has_playlists().get():
-                self.with_playlists_by_uri_scheme[uri_scheme] = backend
+    def add(self, registry, supported, uri_scheme, backend):
+        if not supported:
+            return
+
+        if uri_scheme not in registry:
+            registry[uri_scheme] = backend
+            return
+
+        get_name = lambda actor: actor.actor_ref.actor_class.__name__
+        raise AssertionError(
+            'Cannot add URI scheme %s for %s, it is already handled by %s' %
+            (uri_scheme, get_name(backend), get_name(registry[uri_scheme])))
