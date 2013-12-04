@@ -45,7 +45,6 @@ def convert(settings):
 
     helper('local/media_dir', 'LOCAL_MUSIC_PATH')
     helper('local/playlists_dir', 'LOCAL_PLAYLIST_PATH')
-    helper('local/tag_cache_file', 'LOCAL_TAG_CACHE_FILE')
 
     helper('spotify/username', 'SPOTIFY_USERNAME')
     helper('spotify/password', 'SPOTIFY_PASSWORD')

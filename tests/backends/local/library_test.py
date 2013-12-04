@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
+import copy
 import tempfile
 import unittest
 
 import pykka
 
 from mopidy import core
-from mopidy.backends.local.tagcache import actor
+from mopidy.backends.local.json import actor
 from mopidy.models import Track, Album, Artist
 
 from tests import path_to_data_dir
@@ -61,12 +62,14 @@ class LocalLibraryProviderTest(unittest.TestCase):
         'local': {
             'media_dir': path_to_data_dir(''),
             'playlists_dir': b'',
-            'tag_cache_file': path_to_data_dir('library_tag_cache'),
-        }
+        },
+        'local-json': {
+            'json_file': path_to_data_dir('library.json.gz'),
+        },
     }
 
     def setUp(self):
-        self.backend = actor.LocalTagcacheBackend.start(
+        self.backend = actor.LocalJsonBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
         self.library = self.core.library
@@ -85,27 +88,27 @@ class LocalLibraryProviderTest(unittest.TestCase):
         # Verifies that https://github.com/mopidy/mopidy/issues/500
         # has been fixed.
 
-        tag_cache = tempfile.NamedTemporaryFile()
-        with open(self.config['local']['tag_cache_file']) as fh:
-            tag_cache.write(fh.read())
-        tag_cache.flush()
+        with tempfile.NamedTemporaryFile() as library:
+            with open(self.config['local-json']['json_file']) as fh:
+                library.write(fh.read())
+            library.flush()
 
-        config = {'local': self.config['local'].copy()}
-        config['local']['tag_cache_file'] = tag_cache.name
-        backend = actor.LocalTagcacheBackend(config=config, audio=None)
+            config = copy.deepcopy(self.config)
+            config['local-json']['json_file'] = library.name
+            backend = actor.LocalJsonBackend(config=config, audio=None)
 
-        # Sanity check that value is in tag cache
-        result = backend.library.lookup(self.tracks[0].uri)
-        self.assertEqual(result, self.tracks[0:1])
+            # Sanity check that value is in the library
+            result = backend.library.lookup(self.tracks[0].uri)
+            self.assertEqual(result, self.tracks[0:1])
 
-        # Clear tag cache and refresh
-        tag_cache.seek(0)
-        tag_cache.truncate()
-        backend.library.refresh()
+            # Clear library and refresh
+            library.seek(0)
+            library.truncate()
+            backend.library.refresh()
 
-        # Now it should be gone.
-        result = backend.library.lookup(self.tracks[0].uri)
-        self.assertEqual(result, [])
+            # Now it should be gone.
+            result = backend.library.lookup(self.tracks[0].uri)
+            self.assertEqual(result, [])
 
     def test_lookup(self):
         tracks = self.library.lookup(self.tracks[0].uri)
@@ -115,6 +118,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         tracks = self.library.lookup('fake uri')
         self.assertEqual(tracks, [])
 
+    # TODO: move to search_test module
     def test_find_exact_no_hits(self):
         result = self.library.find_exact(track_name=['unknown track'])
         self.assertEqual(list(result[0].tracks), [])

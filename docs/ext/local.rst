@@ -43,10 +43,6 @@ Configuration values
 
     Path to playlists directory with m3u files for local media.
 
-.. confval:: local/tag_cache_file
-
-    Path to tag cache for local media.
-
 .. confval:: local/scan_timeout
 
     Number of milliseconds before giving up scanning a file and moving on to
