@@ -71,11 +71,11 @@ class ConfigSchema(collections.OrderedDict):
                 errors[key] = str(e)
 
         for key in self.keys():
-            if key not in result and key not in errors:
+            if isinstance(self[key], types.Deprecated):
+                result.pop(key, None)
+            elif key not in result and key not in errors:
                 result[key] = None
                 errors[key] = 'config key not found.'
-            if isinstance(result[key], types.DeprecatedValue):
-                del result[key]
 
         return result, errors
 

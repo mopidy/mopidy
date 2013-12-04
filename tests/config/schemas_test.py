@@ -77,11 +77,10 @@ class ConfigSchemaTest(unittest.TestCase):
         self.assertIsNone(result['bar'])
         self.assertIsNone(result['baz'])
 
-    def test_deserialize_none_value(self):
-        self.schema['foo'].deserialize.return_value = types.DeprecatedValue()
+    def test_deserialize_deprecated_value(self):
+        self.schema['foo'] = types.Deprecated()
 
         result, errors = self.schema.deserialize(self.values)
-        print result, errors
         self.assertItemsEqual(['bar', 'baz'], result.keys())
         self.assertNotIn('foo', errors)
 

@@ -167,6 +167,8 @@ def _format(config, comments, schemas, display, disable):
             continue
         output.append(b'[%s]' % bytes(schema.name))
         for key, value in serialized.items():
+            if isinstance(value, types.DeprecatedValue):
+                continue
             comment = bytes(comments.get(schema.name, {}).get(key, ''))
             output.append(b'%s =' % bytes(key))
             if value is not None:
