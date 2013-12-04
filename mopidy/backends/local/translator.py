@@ -17,13 +17,13 @@ def local_track_uri_to_file_uri(uri, media_dir):
 
 def local_track_uri_to_path(uri, media_dir):
     if not uri.startswith('local:track:'):
-        raise ValueError('Invalid uri.')
+        raise ValueError('Invalid URI.')
     file_path = uri_to_path(uri).split(b':', 1)[1]
     return os.path.join(media_dir, file_path)
 
 
 def path_to_local_track_uri(relpath):
-    """Convert path releative to media_dir to local track uri"""
+    """Convert path releative to media_dir to local track URI."""
     if isinstance(relpath, unicode):
         relpath = relpath.encode('utf-8')
     return b'local:track:%s' % urllib.quote(relpath)

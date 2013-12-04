@@ -428,18 +428,7 @@ solution you happen to prefer.
             super(SoundspotLibraryUpdateProvider, self).__init__(config)
             self.config = config
 
-        def load(self):
-            # Your track loading code
-            return tracks
-
-        def add(self, track):
-            # Your code for handling adding a new track
-
-        def remove(self, uri):
-            # Your code for removing the track coresponding to this uri
-
-        def commit(self):
-            # Your code to persist the library, if needed.
+        # Your library provider implementation here.
 
 
 Example GStreamer element

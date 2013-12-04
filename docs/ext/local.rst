@@ -85,11 +85,11 @@ To make a local library for your music available for Mopidy:
 #. Start Mopidy, find the music library in a client, and play some local music!
 
 
-Plugable library support
-------------------------
+Pluggable library support
+-------------------------
 
 Local libraries are fully pluggable. What this means is that users may opt to
-disable the current default library `local-json`, replacing it with a third
+disable the current default library ``local-json``, replacing it with a third
 party one. When running :command:`mopidy local scan` mopidy will populate
 whatever the current active library is with data. Only one library may be
 active at a time.
@@ -115,8 +115,8 @@ Configuration values
 
 .. confval:: local-json/enabled
 
-    If the local extension should be enabled or not.
+    If the local-json extension should be enabled or not.
 
 .. confval:: local-json/json_file
 
-    Path to a file to store the gziped json data in.
+    Path to a file to store the GZiped JSON data in.
