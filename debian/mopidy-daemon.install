@@ -1,0 +1,2 @@
+debian/daemon/mopidy.conf /etc/mopidy
+debian/daemon/logging.conf /etc/mopidy

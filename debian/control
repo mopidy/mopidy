@@ -31,7 +31,8 @@ Recommends:
     python-cherrypy3,
     python-ws4py
 Suggests:
-    mopidy-doc
+    mopidy-doc,
+    mopidy-daemon
 Description: music server with support for MPD/HTTP clients
  Mopidy is a music server which can play music both from multiple sources, like
  your local hard drive, radio streams, and from Spotify and SoundCloud.
@@ -53,3 +54,12 @@ Description: music server with support for MPD/HTTP clients - documentation
  your local hard drive, radio streams, and from Spotify and SoundCloud.
  .
  The packages includes documentation for Mopidy.
+
+Package: mopidy-daemon
+Architecture: all
+Depends: ${misc:Depends}, adduser, lsb-base, mopidy
+Description: music server with support for MPD/HTTP clients - daemon
+ Mopidy is a music server which can play music both from multiple sources, like
+ your local hard drive, radio streams, and from Spotify and SoundCloud.
+ .
+ This package lets you run Mopidy as a system daemon.
