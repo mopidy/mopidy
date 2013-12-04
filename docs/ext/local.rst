@@ -120,4 +120,4 @@ Configuration values
 
 .. confval:: local-json/json_file
 
-    Path to a file to store the GZiped JSON data in.
+    Path to a file to store the gzipped JSON data in.
