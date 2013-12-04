@@ -54,7 +54,8 @@ class ConfigSchema(collections.OrderedDict):
     def deserialize(self, values):
         """Validates the given ``values`` using the config schema.
 
-         Returns a tuple with cleaned values and errors."""
+        Returns a tuple with cleaned values and errors.
+        """
         errors = {}
         result = {}
 
