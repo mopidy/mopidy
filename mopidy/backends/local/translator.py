@@ -11,12 +11,8 @@ from mopidy.utils.path import path_to_uri, uri_to_path
 logger = logging.getLogger('mopidy.backends.local')
 
 
-# TODO: remove once tag cache is gone
-def local_to_file_uri(uri, media_dir):
-    # TODO: check that type is correct.
-    file_path = uri_to_path(uri).split(b':', 1)[1]
-    file_path = os.path.join(media_dir, file_path)
-    return path_to_uri(file_path)
+def local_track_uri_to_file_uri(uri, media_dir):
+    return path_to_uri(local_track_uri_to_path(uri, media_dir))
 
 
 def local_track_uri_to_path(uri, media_dir):
