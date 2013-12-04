@@ -7,12 +7,13 @@ class StickersHandlerTest(protocol.BaseTestCase):
     def test_sticker_get(self):
         self.sendRequest(
             'sticker get "song" "file:///dev/urandom" "a_name"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('OK')
 
     def test_sticker_set(self):
         self.sendRequest(
             'sticker set "song" "file:///dev/urandom" "a_name" "a_value"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [4@0] {sticker set} you don\'t'
+                                 ' have permission for "sticker set"')
 
     def test_sticker_delete_with_name(self):
         self.sendRequest(
@@ -27,7 +28,7 @@ class StickersHandlerTest(protocol.BaseTestCase):
     def test_sticker_list(self):
         self.sendRequest(
             'sticker list "song" "file:///dev/urandom"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('OK')
 
     def test_sticker_find(self):
         self.sendRequest(

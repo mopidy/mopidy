@@ -12,6 +12,7 @@ from .listener import CoreListener
 from .playback import PlaybackController
 from .playlists import PlaylistsController
 from .tracklist import TracklistController
+from .metadata import MetadataController
 
 
 class Core(pykka.ThreadingActor, AudioListener, BackendListener):
@@ -31,6 +32,10 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     #: :class:`mopidy.core.TracklistController`.
     tracklist = None
 
+    #: The metadata controller. An instance of
+    #: :class:`mopidy.core.MetadataController`.
+    metadata = None
+
     def __init__(self, audio=None, backends=None):
         super(Core, self).__init__()
 
@@ -45,6 +50,8 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
             backends=self.backends, core=self)
 
         self.tracklist = TracklistController(core=self)
+
+        self.metadata = MetadataController(backends=self.backends, core=self)
 
     def get_uri_schemes(self):
         futures = [b.uri_schemes for b in self.backends]
@@ -85,8 +92,8 @@ class Backends(list):
         # the X_by_uri_scheme dicts below.
         self.with_library = [b for b in backends if b.has_library().get()]
         self.with_playback = [b for b in backends if b.has_playback().get()]
-        self.with_playlists = [
-            b for b in backends if b.has_playlists().get()]
+        self.with_playlists = [b for b in backends if b.has_playlists().get()]
+        self.with_metadata = [b for b in backends if b.has_metadata().get()]
 
         self.by_uri_scheme = {}
         for backend in backends:
@@ -102,6 +109,7 @@ class Backends(list):
         self.with_library_by_uri_scheme = {}
         self.with_playback_by_uri_scheme = {}
         self.with_playlists_by_uri_scheme = {}
+        self.with_metadata_by_uri_scheme = {}
 
         for uri_scheme, backend in self.by_uri_scheme.items():
             if backend.has_library().get():
@@ -110,3 +118,5 @@ class Backends(list):
                 self.with_playback_by_uri_scheme[uri_scheme] = backend
             if backend.has_playlists().get():
                 self.with_playlists_by_uri_scheme[uri_scheme] = backend
+            if backend.has_metadata().get():
+                self.with_metadata_by_uri_scheme[uri_scheme] = backend
