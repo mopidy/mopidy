@@ -314,8 +314,13 @@ class PlaybackController(object):
 
     def on_playback_error(self, error, debug):
         """
-        When playback fails for whatever reason, carry out an stop and try
-        default fallback onwards
+        When playback fails, handle error by either stop or continue with
+        playback.
+
+        :param error: Error message from GStreamer
+        :type error: str
+        :param debug: Debug information for the error if available
+        :type debug: str
         """
         backend = self._get_backend()
         if backend and backend.playback.on_playback_error(error, debug).get():

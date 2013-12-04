@@ -44,7 +44,13 @@ class AudioListener(listener.Listener):
 
     def playback_error(self, error, debug):
         """
-        Called when gstreamer can't play the given track. It is meant
-        to notify the core about it.
+        Called when Gstreamer encounters an error on playback
+
+        *May be implemented by actor.*
+
+        :param error: Error message from GStreamer
+        :type error: str
+        :param debug: Debug information for the error if available
+        :type debug: str
         """
         pass
