@@ -44,49 +44,51 @@ class ScanCommand(commands.Command):
 
         local_updater = updaters.values()[0](config)
 
-        # TODO: cleanup to consistently use local urls, not a random mix of
-        # local and file uris depending on how the data was loaded.
-        uris_library = set()
-        uris_update = set()
-        uris_remove = set()
+        uri_path_mapping = {}
+        uris_in_library = set()
+        uris_to_update = set()
+        uris_to_remove = set()
 
         tracks = local_updater.load()
         logger.info('Checking %d tracks from library.', len(tracks))
         for track in tracks:
+            uri_path_mapping[track.uri] = translator.local_track_uri_to_path(
+                track.uri, media_dir)
             try:
-                uri = translator.local_to_file_uri(track.uri, media_dir)
-                stat = os.stat(path.uri_to_path(uri))
+                stat = os.stat(uri_path_mapping[track.uri])
                 if int(stat.st_mtime) > track.last_modified:
-                    uris_update.add(uri)
-                uris_library.add(uri)
+                    uris_to_update.add(track.uri)
+                uris_in_library.add(track.uri)
             except OSError:
                 logger.debug('Missing file %s', track.uri)
-                uris_remove.add(track.uri)
+                uris_to_remove.add(track.uri)
 
-        logger.info('Removing %d missing tracks.', len(uris_remove))
-        for uri in uris_remove:
+        logger.info('Removing %d missing tracks.', len(uris_to_remove))
+        for uri in uris_to_remove:
             local_updater.remove(uri)
 
         logger.info('Checking %s for unknown tracks.', media_dir)
-        for uri in path.find_uris(media_dir):
-            file_extension = os.path.splitext(path.uri_to_path(uri))[1]
+        for relpath in path.find_files(media_dir):
+            file_extension = os.path.splitext(relpath)[1]
             if file_extension.lower() in excluded_file_extensions:
                 logger.debug('Skipped %s: File extension excluded.', uri)
                 continue
 
-            if uri not in uris_library:
-                uris_update.add(uri)
+            uri = translator.path_to_local_track_uri(relpath)
+            if uri not in uris_in_library:
+                uris_to_update.add(uri)
+                uri_path_mapping[uri] = os.path.join(media_dir, relpath)
 
-        logger.info('Found %d unknown tracks.', len(uris_update))
+        logger.info('Found %d unknown tracks.', len(uris_to_update))
         logger.info('Scanning...')
 
         scanner = scan.Scanner(scan_timeout)
-        progress = Progress(len(uris_update))
+        progress = Progress(len(uris_to_update))
 
-        for uri in sorted(uris_update):
+        for uri in sorted(uris_to_update):
             try:
-                data = scanner.scan(uri)
-                track = scan.audio_data_to_track(data)
+                data = scanner.scan(path.path_to_uri(uri_path_mapping[uri]))
+                track = scan.audio_data_to_track(data).copy(uri=uri)
                 local_updater.add(track)
                 logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:

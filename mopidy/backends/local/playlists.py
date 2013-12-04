@@ -51,11 +51,8 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
 
             tracks = []
             for track_uri in parse_m3u(m3u, self._media_dir):
-                result = self.backend.library.lookup(track_uri)
-                if result:
-                    tracks += self.backend.library.lookup(track_uri)
-                else:
-                    tracks.append(Track(uri=track_uri))
+                # TODO: switch to having playlists being a list of uris
+                tracks.append(Track(uri=track_uri))
 
             playlist = Playlist(uri=uri, name=name, tracks=tracks)
             playlists.append(playlist)

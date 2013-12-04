@@ -4,9 +4,26 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-
 v0.18.0 (UNRELEASED)
 ====================
+
+**Pluggable local libraries**
+
+Fixes issues :issue:`44`, partially resolves :issue:`397`, and causes
+a temporary regression of :issue:`527`.
+
+- Finished the work on creating pluggable libraries. Users can now
+  reconfigure Mopidy to use alternate library providers of their choosing
+  for local files.
+
+- Switched default local library provider from "tag cache" to JSON. This
+  greatly simplifies our library code and reuses our existing serialization
+  code.
+
+- Killed our outdated and bug-ridden "tag cache" implementation.
+
+- Added support for deprecated config values in order to allow for
+  graceful removal of :confval:`local/tag_cache_file`.
 
 **Internal changes**
 

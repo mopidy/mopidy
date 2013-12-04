@@ -20,7 +20,6 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
     config = {
         'local': {
             'media_dir': path_to_data_dir(''),
-            'tag_cache_file': path_to_data_dir('library_tag_cache'),
         }
     }
 

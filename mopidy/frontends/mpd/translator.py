@@ -1,14 +1,9 @@
 from __future__ import unicode_literals
 
-import os
-import re
 import shlex
-import urllib
 
-from mopidy.frontends.mpd import protocol
 from mopidy.frontends.mpd.exceptions import MpdArgError
 from mopidy.models import TlTrack
-from mopidy.utils.path import mtime as get_mtime, uri_to_path, split_path
 
 # TODO: special handling of local:// uri scheme
 
@@ -85,27 +80,6 @@ def track_to_mpd_format(track, position=None):
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
     return result
-
-
-MPD_KEY_ORDER = '''
-    key file Time Artist Album AlbumArtist Title Track Genre Date Composer
-    Performer Comment Disc MUSICBRAINZ_ALBUMID MUSICBRAINZ_ALBUMARTISTID
-    MUSICBRAINZ_ARTISTID MUSICBRAINZ_TRACKID mtime
-'''.split()
-
-
-def order_mpd_track_info(result):
-    """
-    Order results from
-    :func:`mopidy.frontends.mpd.translator.track_to_mpd_format` so that it
-    matches MPD's ordering. Simply a cosmetic fix for easier diffing of
-    tag_caches.
-
-    :param result: the track info
-    :type result: list of tuples
-    :rtype: list of tuples
-    """
-    return sorted(result, key=lambda i: MPD_KEY_ORDER.index(i[0]))
 
 
 def artists_to_mpd_format(artists):
@@ -197,92 +171,3 @@ def query_from_mpd_list_format(field, mpd_query):
         return query
     else:
         raise MpdArgError('not able to parse args', command='list')
-
-
-# TODO: move to tagcache backend.
-def tracks_to_tag_cache_format(tracks, media_dir):
-    """
-    Format list of tracks for output to MPD tag cache
-
-    :param tracks: the tracks
-    :type tracks: list of :class:`mopidy.models.Track`
-    :param media_dir: the path to the music dir
-    :type media_dir: string
-    :rtype: list of lists of two-tuples
-    """
-    result = [
-        ('info_begin',),
-        ('mpd_version', protocol.VERSION),
-        ('fs_charset', protocol.ENCODING),
-        ('info_end',)
-    ]
-    tracks.sort(key=lambda t: t.uri)
-    dirs, files = tracks_to_directory_tree(tracks, media_dir)
-    _add_to_tag_cache(result, dirs, files, media_dir)
-    return result
-
-
-# TODO: bytes only
-def _add_to_tag_cache(result, dirs, files, media_dir):
-    base_path = media_dir.encode('utf-8')
-
-    for path, (entry_dirs, entry_files) in dirs.items():
-        try:
-            text_path = path.decode('utf-8')
-        except UnicodeDecodeError:
-            text_path = urllib.quote(path).decode('utf-8')
-        name = os.path.split(text_path)[1]
-        result.append(('directory', text_path))
-        result.append(('mtime', get_mtime(os.path.join(base_path, path))))
-        result.append(('begin', name))
-        _add_to_tag_cache(result, entry_dirs, entry_files, media_dir)
-        result.append(('end', name))
-
-    result.append(('songList begin',))
-
-    for track in files:
-        track_result = dict(track_to_mpd_format(track))
-
-        # XXX Don't save comments to the tag cache as they may span multiple
-        # lines. We'll start saving track comments when we move from tag_cache
-        # to a JSON file. See #579 for details.
-        if 'Comment' in track_result:
-            del track_result['Comment']
-
-        path = uri_to_path(track_result['file'])
-        try:
-            text_path = path.decode('utf-8')
-        except UnicodeDecodeError:
-            text_path = urllib.quote(path).decode('utf-8')
-        relative_path = os.path.relpath(path, base_path)
-        relative_uri = urllib.quote(relative_path)
-
-        # TODO: use track.last_modified
-        track_result['file'] = relative_uri
-        track_result['mtime'] = get_mtime(path)
-        track_result['key'] = os.path.basename(text_path)
-        track_result = order_mpd_track_info(track_result.items())
-
-        result.extend(track_result)
-
-    result.append(('songList end',))
-
-
-def tracks_to_directory_tree(tracks, media_dir):
-    directories = ({}, [])
-
-    for track in tracks:
-        path = b''
-        current = directories
-
-        absolute_track_dir_path = os.path.dirname(uri_to_path(track.uri))
-        relative_track_dir_path = re.sub(
-            '^' + re.escape(media_dir), b'', absolute_track_dir_path)
-
-        for part in split_path(relative_track_dir_path):
-            path = os.path.join(path, part)
-            if path not in current[0]:
-                current[0][path] = ({}, [])
-            current = current[0][path]
-        current[1].append(track)
-    return directories

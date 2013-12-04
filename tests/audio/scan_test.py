@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import os
 import unittest
 
 from mopidy import exceptions
@@ -240,11 +241,15 @@ class ScannerTest(unittest.TestCase):
         self.errors = {}
         self.data = {}
 
-    def scan(self, path):
-        paths = path_lib.find_files(path_to_data_dir(path))
-        uris = (path_lib.path_to_uri(p) for p in paths)
+    def find(self, path):
+        media_dir = path_to_data_dir(path)
+        for path in path_lib.find_files(media_dir):
+            yield os.path.join(media_dir, path)
+
+    def scan(self, paths):
         scanner = scan.Scanner()
-        for uri in uris:
+        for path in paths:
+            uri = path_lib.path_to_uri(path)
             key = uri[len('file://'):]
             try:
                 self.data[key] = scanner.scan(uri)
@@ -256,15 +261,15 @@ class ScannerTest(unittest.TestCase):
         self.assertEqual(self.data[name][key], value)
 
     def test_data_is_set(self):
-        self.scan('scanner/simple')
+        self.scan(self.find('scanner/simple'))
         self.assert_(self.data)
 
     def test_errors_is_not_set(self):
-        self.scan('scanner/simple')
+        self.scan(self.find('scanner/simple'))
         self.assert_(not self.errors)
 
     def test_uri_is_set(self):
-        self.scan('scanner/simple')
+        self.scan(self.find('scanner/simple'))
         self.check(
             'scanner/simple/song1.mp3', 'uri',
             'file://%s' % path_to_data_dir('scanner/simple/song1.mp3'))
@@ -273,39 +278,39 @@ class ScannerTest(unittest.TestCase):
             'file://%s' % path_to_data_dir('scanner/simple/song1.ogg'))
 
     def test_duration_is_set(self):
-        self.scan('scanner/simple')
+        self.scan(self.find('scanner/simple'))
         self.check('scanner/simple/song1.mp3', 'duration', 4680000000)
         self.check('scanner/simple/song1.ogg', 'duration', 4680000000)
 
     def test_artist_is_set(self):
-        self.scan('scanner/simple')
+        self.scan(self.find('scanner/simple'))
         self.check('scanner/simple/song1.mp3', 'artist', 'name')
         self.check('scanner/simple/song1.ogg', 'artist', 'name')
 
     def test_album_is_set(self):
-        self.scan('scanner/simple')
+        self.scan(self.find('scanner/simple'))
         self.check('scanner/simple/song1.mp3', 'album', 'albumname')
         self.check('scanner/simple/song1.ogg', 'album', 'albumname')
 
     def test_track_is_set(self):
-        self.scan('scanner/simple')
+        self.scan(self.find('scanner/simple'))
         self.check('scanner/simple/song1.mp3', 'title', 'trackname')
         self.check('scanner/simple/song1.ogg', 'title', 'trackname')
 
     def test_nonexistant_dir_does_not_fail(self):
-        self.scan('scanner/does-not-exist')
+        self.scan(self.find('scanner/does-not-exist'))
         self.assert_(not self.errors)
 
     def test_other_media_is_ignored(self):
-        self.scan('scanner/image')
+        self.scan(self.find('scanner/image'))
         self.assert_(self.errors)
 
     def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
-        self.scan('scanner/example.log')
+        self.scan([path_to_data_dir('scanner/example.log')])
         self.assert_(self.errors)
 
     def test_empty_wav_file_is_ignored(self):
-        self.scan('scanner/empty.wav')
+        self.scan([path_to_data_dir('scanner/empty.wav')])
         self.assert_(self.errors)
 
     @unittest.SkipTest
