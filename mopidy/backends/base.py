@@ -219,6 +219,12 @@ class BasePlaybackProvider(object):
         Notify the playback provider about errors on playback
 
         *May be reimplemented by subclass.*
+
+        :param error: Error message from GStreamer
+        :type error: str
+        :param debug: Debug information for the error if available
+        :type debug: str
+        :rtype: :class:`True` if playback may continue, else :class:`False`
         """
         return False
 
