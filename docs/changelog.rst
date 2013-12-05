@@ -25,6 +25,10 @@ a temporary regression of :issue:`527`.
 - Added support for deprecated config values in order to allow for
   graceful removal of :confval:`local/tag_cache_file`.
 
+**Streaming backend**
+
+- Live lookup of URI metadata has been added. (Fixes :issue:`540`)
+
 **Internal changes**
 
 - Events from the audio actor, backends, and core actor are now emitted
