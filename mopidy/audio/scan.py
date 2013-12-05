@@ -83,15 +83,14 @@ class Scanner(object):
         """Polls for messages to collect data."""
         start = time.time()
         timeout_s = self._timeout_ms / float(1000)
-        poll_timeout_ns = 1000
         data = {}
 
         while time.time() - start < timeout_s:
-            message = self._bus.poll(gst.MESSAGE_ANY, poll_timeout_ns)
+            if not self._bus.have_pending():
+                continue
+            message = self._bus.pop()
 
-            if message is None:
-                pass  # polling the bus timed out.
-            elif message.type == gst.MESSAGE_ERROR:
+            if message.type == gst.MESSAGE_ERROR:
                 raise exceptions.ScannerError(message.parse_error()[0])
             elif message.type == gst.MESSAGE_EOS:
                 return data
