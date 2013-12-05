@@ -39,7 +39,7 @@ class StreamLibraryProvider(base.BaseLibraryProvider):
             data = self._scanner.scan(uri)
             track = scan.audio_data_to_track(data)
         except exceptions.ScannerError as e:
-            logger.warning('Problem looking up %s - %s', uri, e)
+            logger.warning('Problem looking up %s: %s', uri, e)
             track = Track(uri=uri, name=uri)
 
         return [track]
