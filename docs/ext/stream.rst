@@ -42,6 +42,10 @@ Configuration values
     Whitelist of URI schemas to allow streaming from. Values should be
     separated by either comma or newline.
 
+.. confval:: stream/timeout
+
+    Number of milliseconds before giving up looking up stream metadata.
+
 
 Usage
 =====

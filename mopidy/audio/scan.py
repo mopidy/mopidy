@@ -83,15 +83,14 @@ class Scanner(object):
         """Polls for messages to collect data."""
         start = time.time()
         timeout_s = self._timeout_ms / float(1000)
-        poll_timeout_ns = 1000
         data = {}
 
         while time.time() - start < timeout_s:
-            message = self._bus.poll(gst.MESSAGE_ANY, poll_timeout_ns)
+            if not self._bus.have_pending():
+                continue
+            message = self._bus.pop()
 
-            if message is None:
-                pass  # polling the bus timed out.
-            elif message.type == gst.MESSAGE_ERROR:
+            if message.type == gst.MESSAGE_ERROR:
                 raise exceptions.ScannerError(message.parse_error()[0])
             elif message.type == gst.MESSAGE_EOS:
                 return data
@@ -133,7 +132,7 @@ def audio_data_to_track(data):
 
     def _retrieve(source_key, target_key, target):
         if source_key in data:
-            target[target_key] = data[source_key]
+            target.setdefault(target_key, data[source_key])
 
     _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
@@ -156,6 +155,11 @@ def audio_data_to_track(data):
     _retrieve(
         'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
 
+    # For streams, will not override if a better value has already been set.
+    _retrieve(gst.TAG_ORGANIZATION, 'name', track_kwargs)
+    _retrieve(gst.TAG_LOCATION, 'comment', track_kwargs)
+    _retrieve(gst.TAG_COPYRIGHT, 'comment', track_kwargs)
+
     if gst.TAG_DATE in data and data[gst.TAG_DATE]:
         date = data[gst.TAG_DATE]
         try:
@@ -168,9 +172,13 @@ def audio_data_to_track(data):
     if albumartist_kwargs:
         album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
 
+    if data['mtime']:
+        track_kwargs['last_modified'] = int(data['mtime'])
+
+    if data[gst.TAG_DURATION]:
+        track_kwargs['length'] = data[gst.TAG_DURATION] // gst.MSECOND
+
     track_kwargs['uri'] = data['uri']
-    track_kwargs['last_modified'] = int(data['mtime'])
-    track_kwargs['length'] = data[gst.TAG_DURATION] // gst.MSECOND
     track_kwargs['album'] = Album(**album_kwargs)
 
     if ('name' in artist_kwargs
