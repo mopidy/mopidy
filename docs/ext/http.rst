@@ -18,7 +18,15 @@ https://github.com/mopidy/mopidy/issues?labels=HTTP+frontend
 Dependencies
 ============
 
-.. literalinclude:: ../../requirements/http.txt
+- cherrypy >= 3.2.2. Available as python-cherrypy3 in Debian/Ubuntu.
+
+- ws4py >= 0.2.3. Available as python-ws4py in newer Debian/Ubuntu and from
+  apt.mopidy.com for older releases of Debian/Ubuntu.
+
+If you're installing Mopidy with pip, you can run the following command to
+install Mopidy with the extra dependencies for required for Mopidy-HTTP::
+
+    pip install --upgrade Mopidy[http]
 
 
 Default configuration
