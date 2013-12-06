@@ -8,6 +8,5 @@ prune docs/_build
 
 recursive-include mopidy *.conf
 recursive-include mopidy/frontends/http/data *
-recursive-include requirements *
 recursive-include tests *.py
 recursive-include tests/data *
