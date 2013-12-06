@@ -108,10 +108,16 @@ def main():
                 args.extension.ext_name)
             return 1
 
+        registry = {'backends': [], 'frontends': [], 'local:library': []}
+        for extension in enabled_extensions:
+            registry['backends'].extend(extension.get_backend_classes())
+            registry['frontends'].extend(extension.get_frontend_classes())
+            registry['local:library'].extend(extension.get_library_updaters())
+
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors can have been started.
         try:
-            return args.command.run(args, proxied_config, enabled_extensions)
+            return args.command.run(args, proxied_config, registry)
         except NotImplementedError:
             print root_cmd.format_help()
             return 1

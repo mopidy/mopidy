@@ -22,27 +22,22 @@ class LocalCommand(commands.Command):
 class ScanCommand(commands.Command):
     help = "Scan local media files and populate the local library."
 
-    def run(self, args, config, extensions):
+    def run(self, args, config, registry):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
         excluded_file_extensions = set(
             ext.lower() for ext in config['local']['excluded_file_extensions'])
 
-        updaters = {}
-        for e in extensions:
-            for updater_class in e.get_library_updaters():
-                if updater_class and 'local' in updater_class.uri_schemes:
-                    updaters[e.ext_name] = updater_class
-
+        # TODO: select updater / library to use by name
+        updaters = registry['local:library']
         if not updaters:
             logger.error('No usable library updaters found.')
             return 1
         elif len(updaters) > 1:
             logger.error('More than one library updater found. '
-                         'Provided by: %s', ', '.join(updaters.keys()))
+                         'Provided by: %s', ', '.join(updaters))
             return 1
-
-        local_updater = updaters.values()[0](config)
+        local_updater = updaters[0](config)
 
         uri_path_mapping = {}
         uris_in_library = set()
