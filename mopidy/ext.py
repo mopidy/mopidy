@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import collections
 import logging
 import pkg_resources
 
@@ -61,6 +62,18 @@ class Extension(object):
         """
         pass
 
+    def setup(self):
+        for backend_class in self.get_backend_classes():
+            registry.add('backend', backend_class)
+
+        for frontend_class in self.get_frontend_classes():
+            registry.add('frontend', frontend_class)
+
+        for library_updater in self.get_library_updaters():
+            registry.add('local:library', library_updater)
+
+        self.register_gstreamer_elements()
+
     def get_frontend_classes(self):
         """List of frontend actor classes
 
@@ -110,6 +123,29 @@ class Extension(object):
         :returns: :class:`None`
         """
         pass
+
+
+class _Registry(collections.Mapping):
+    def __init__(self):
+        self._registry = collections.defaultdict(list)
+
+    def add(self, name, cls):
+        self._registry[name].append(cls)
+
+    def __getitem__(self, name):
+        return self._registry[name]
+
+    def __iter__(self):
+        return iter(self._registry)
+
+    def __len__(self):
+        return len(self._registry)
+
+
+# TODO: document the registry
+# TODO: consider if we should avoid having this as a global and pass an
+#       instance from __main__ around instead?
+registry = _Registry()
 
 
 def load_extensions():
@@ -166,15 +202,3 @@ def validate_extension(extension):
         return False
 
     return True
-
-
-def register_gstreamer_elements(enabled_extensions):
-    """Registers custom GStreamer elements from extensions.
-
-    :param enabled_extensions: list of enabled extensions
-    """
-
-    for extension in enabled_extensions:
-        logger.debug(
-            'Registering GStreamer elements for: %s', extension.ext_name)
-        extension.register_gstreamer_elements()

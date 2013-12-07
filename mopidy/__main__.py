@@ -84,7 +84,6 @@ def main():
                 enabled_extensions.append(extension)
 
         log_extension_info(installed_extensions, enabled_extensions)
-        ext.register_gstreamer_elements(enabled_extensions)
 
         # Config and deps commands are simply special cased for now.
         if args.command == config_cmd:
@@ -108,16 +107,13 @@ def main():
                 args.extension.ext_name)
             return 1
 
-        registry = {'backends': [], 'frontends': [], 'local:library': []}
         for extension in enabled_extensions:
-            registry['backends'].extend(extension.get_backend_classes())
-            registry['frontends'].extend(extension.get_frontend_classes())
-            registry['local:library'].extend(extension.get_library_updaters())
+            extension.setup()
 
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors can have been started.
         try:
-            return args.command.run(args, proxied_config, registry)
+            return args.command.run(args, proxied_config)
         except NotImplementedError:
             print root_cmd.format_help()
             return 1

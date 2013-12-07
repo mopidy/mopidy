@@ -9,7 +9,7 @@ import sys
 import glib
 import gobject
 
-from mopidy import config as config_lib
+from mopidy import config as config_lib, ext
 from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.utils import deps, process, versioning
@@ -257,22 +257,26 @@ class RootCommand(Command):
             type=config_override_type, metavar='OPTIONS',
             help='`section/key=value` values to override config options')
 
-    def run(self, args, config, registry):
+    def run(self, args, config):
         loop = gobject.MainLoop()
+
+        backend_classes = ext.registry['backend']
+        frontend_classes = ext.registry['frontend']
+
         try:
             audio = self.start_audio(config)
-            backends = self.start_backends(config, registry, audio)
+            backends = self.start_backends(config, backend_classes, audio)
             core = self.start_core(audio, backends)
-            self.start_frontends(config, registry, core)
+            self.start_frontends(config, frontend_classes, core)
             loop.run()
         except KeyboardInterrupt:
             logger.info('Interrupted. Exiting...')
             return
         finally:
             loop.quit()
-            self.stop_frontends(registry)
+            self.stop_frontends(frontend_classes)
             self.stop_core()
-            self.stop_backends(registry)
+            self.stop_backends(backend_classes)
             self.stop_audio()
             process.stop_remaining_actors()
 
@@ -280,9 +284,7 @@ class RootCommand(Command):
         logger.info('Starting Mopidy audio')
         return Audio.start(config=config).proxy()
 
-    def start_backends(self, config, registry, audio):
-        backend_classes = registry['backends']
-
+    def start_backends(self, config, backend_classes, audio):
         logger.info(
             'Starting Mopidy backends: %s',
             ', '.join(b.__name__ for b in backend_classes) or 'none')
@@ -298,9 +300,7 @@ class RootCommand(Command):
         logger.info('Starting Mopidy core')
         return Core.start(audio=audio, backends=backends).proxy()
 
-    def start_frontends(self, config, registry, core):
-        frontend_classes = registry['frontends']
-
+    def start_frontends(self, config, frontend_classes, core):
         logger.info(
             'Starting Mopidy frontends: %s',
             ', '.join(f.__name__ for f in frontend_classes) or 'none')
@@ -308,18 +308,18 @@ class RootCommand(Command):
         for frontend_class in frontend_classes:
             frontend_class.start(config=config, core=core)
 
-    def stop_frontends(self, registry):
+    def stop_frontends(self, frontend_classes):
         logger.info('Stopping Mopidy frontends')
-        for frontend_class in registry['frontends']:
+        for frontend_class in frontend_classes:
             process.stop_actors_by_class(frontend_class)
 
     def stop_core(self):
         logger.info('Stopping Mopidy core')
         process.stop_actors_by_class(Core)
 
-    def stop_backends(self, registry):
+    def stop_backends(self, backend_classes):
         logger.info('Stopping Mopidy backends')
-        for backend_class in registry['backends']:
+        for backend_class in backend_classes:
             process.stop_actors_by_class(backend_class)
 
     def stop_audio(self):

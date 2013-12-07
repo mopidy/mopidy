@@ -4,7 +4,7 @@ import logging
 import os
 import time
 
-from mopidy import commands, exceptions
+from mopidy import commands, exceptions, ext
 from mopidy.audio import scan
 from mopidy.utils import path
 
@@ -22,14 +22,15 @@ class LocalCommand(commands.Command):
 class ScanCommand(commands.Command):
     help = "Scan local media files and populate the local library."
 
-    def run(self, args, config, registry):
+    def run(self, args, config):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
+        excluded_file_extensions = config['local']['excluded_file_extensions']
         excluded_file_extensions = set(
-            ext.lower() for ext in config['local']['excluded_file_extensions'])
+            file_ext.lower() for file_ext in excluded_file_extensions)
 
         # TODO: select updater / library to use by name
-        updaters = registry['local:library']
+        updaters = ext.registry['local:library']
         if not updaters:
             logger.error('No usable library updaters found.')
             return 1
