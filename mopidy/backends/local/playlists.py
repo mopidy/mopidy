@@ -6,7 +6,7 @@ import os
 import shutil
 
 from mopidy.backends import base, listener
-from mopidy.models import Playlist, Track
+from mopidy.models import Playlist
 from mopidy.utils import formatting, path
 
 from .translator import parse_m3u
@@ -50,9 +50,8 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
             uri = 'local:playlist:%s' % name
 
             tracks = []
-            for track_uri in parse_m3u(m3u, self._media_dir):
-                # TODO: switch to having playlists being a list of uris
-                tracks.append(Track(uri=track_uri))
+            for track in parse_m3u(m3u, self._media_dir):
+                tracks.append(track)
 
             playlist = Playlist(uri=uri, name=name, tracks=tracks)
             playlists.append(playlist)

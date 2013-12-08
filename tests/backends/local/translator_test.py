@@ -7,6 +7,7 @@ import tempfile
 import unittest
 
 from mopidy.backends.local.translator import parse_m3u
+from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 
 from tests import path_to_data_dir
@@ -18,29 +19,32 @@ encoded_path = path_to_data_dir('æøå.mp3')
 song1_uri = path_to_uri(song1_path)
 song2_uri = path_to_uri(song2_path)
 encoded_uri = path_to_uri(encoded_path)
+song1_track = Track(uri=song1_uri)
+song2_track = Track(uri=song2_uri)
+encoded_track = Track(uri=encoded_uri)
+
 
 # FIXME use mock instead of tempfile.NamedTemporaryFile
 
-
 class M3UToUriTest(unittest.TestCase):
     def test_empty_file(self):
-        uris = parse_m3u(path_to_data_dir('empty.m3u'), data_dir)
-        self.assertEqual([], uris)
+        tracks = parse_m3u(path_to_data_dir('empty.m3u'), data_dir)
+        self.assertEqual([], tracks)
 
     def test_basic_file(self):
-        uris = parse_m3u(path_to_data_dir('one.m3u'), data_dir)
-        self.assertEqual([song1_uri], uris)
+        tracks = parse_m3u(path_to_data_dir('one.m3u'), data_dir)
+        self.assertEqual([song1_track], tracks)
 
     def test_file_with_comment(self):
-        uris = parse_m3u(path_to_data_dir('comment.m3u'), data_dir)
-        self.assertEqual([song1_uri], uris)
+        tracks = parse_m3u(path_to_data_dir('comment.m3u'), data_dir)
+        self.assertEqual([song1_track], tracks)
 
     def test_file_is_relative_to_correct_dir(self):
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write('song1.mp3')
         try:
-            uris = parse_m3u(tmp.name, data_dir)
-            self.assertEqual([song1_uri], uris)
+            tracks = parse_m3u(tmp.name, data_dir)
+            self.assertEqual([song1_track], tracks)
         finally:
             if os.path.exists(tmp.name):
                 os.remove(tmp.name)
@@ -49,8 +53,8 @@ class M3UToUriTest(unittest.TestCase):
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(song1_path)
         try:
-            uris = parse_m3u(tmp.name, data_dir)
-            self.assertEqual([song1_uri], uris)
+            tracks = parse_m3u(tmp.name, data_dir)
+            self.assertEqual([song1_track], tracks)
         finally:
             if os.path.exists(tmp.name):
                 os.remove(tmp.name)
@@ -61,8 +65,8 @@ class M3UToUriTest(unittest.TestCase):
             tmp.write('# comment \n')
             tmp.write(song2_path)
         try:
-            uris = parse_m3u(tmp.name, data_dir)
-            self.assertEqual([song1_uri, song2_uri], uris)
+            tracks = parse_m3u(tmp.name, data_dir)
+            self.assertEqual([song1_track, song2_track], tracks)
         finally:
             if os.path.exists(tmp.name):
                 os.remove(tmp.name)
@@ -71,19 +75,19 @@ class M3UToUriTest(unittest.TestCase):
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(song1_uri)
         try:
-            uris = parse_m3u(tmp.name, data_dir)
-            self.assertEqual([song1_uri], uris)
+            tracks = parse_m3u(tmp.name, data_dir)
+            self.assertEqual([song1_track], tracks)
         finally:
             if os.path.exists(tmp.name):
                 os.remove(tmp.name)
 
     def test_encoding_is_latin1(self):
-        uris = parse_m3u(path_to_data_dir('encoding.m3u'), data_dir)
-        self.assertEqual([encoded_uri], uris)
+        tracks = parse_m3u(path_to_data_dir('encoding.m3u'), data_dir)
+        self.assertEqual([encoded_track], tracks)
 
     def test_open_missing_file(self):
-        uris = parse_m3u(path_to_data_dir('non-existant.m3u'), data_dir)
-        self.assertEqual([], uris)
+        tracks = parse_m3u(path_to_data_dir('non-existant.m3u'), data_dir)
+        self.assertEqual([], tracks)
 
 
 class URItoM3UTest(unittest.TestCase):

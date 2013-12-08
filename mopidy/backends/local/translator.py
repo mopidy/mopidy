@@ -2,11 +2,15 @@ from __future__ import unicode_literals
 
 import logging
 import os
+import re
 import urlparse
 import urllib
 
+from mopidy.models import Track
 from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri, uri_to_path
+
+EXTINF_RE = re.compile(r'^#EXTINF:\s*(-1|\d+)\s*,\s*(.+?)\s*$')
 
 logger = logging.getLogger('mopidy.backends.local')
 
@@ -29,9 +33,22 @@ def path_to_local_track_uri(relpath):
     return b'local:track:%s' % urllib.quote(relpath)
 
 
+def extm3u_directive_to_track(line):
+    """Convert extended M3U directive to track template."""
+    m = EXTINF_RE.match(line)
+    if not m:
+        logger.warning('Invalid extended M3U directive: %s', line)
+        return Track()
+    (runtime, title) = m.groups()
+    if int(runtime) > 0:
+        return Track(name=title, length=1000*int(runtime))
+    else:
+        return Track(name=title)
+
+
 def parse_m3u(file_path, media_dir):
     r"""
-    Convert M3U file list of uris
+    Convert M3U file list to list of tracks
 
     Example M3U data::
 
@@ -43,34 +60,50 @@ def parse_m3u(file_path, media_dir):
         http://www.example.com:8000/Listen.pls
         http://www.example.com/~user/Mine.mp3
 
+    Example extended M3U data::
+
+        #EXTM3U
+        #EXTINF:123, Sample artist - Sample title
+        Sample.mp3
+        #EXTINF:321,Example Artist - Example title
+        Greatest Hits\Example.ogg
+        #EXTINF:-1,Radio XMP
+        http://mp3stream.example.com:8000/
+
     - Relative paths of songs should be with respect to location of M3U.
-    - Paths are normaly platform specific.
-    - Lines starting with # should be ignored.
+    - Paths are normally platform specific.
+    - Lines starting with # are ignored, except for extended M3U directives.
+    - Track.name and Track.length are set from extended M3U directives.
     - m3u files are latin-1.
-    - This function does not bother with Extended M3U directives.
     """
     # TODO: uris as bytes
-    uris = []
+    tracks = []
     try:
         with open(file_path) as m3u:
             contents = m3u.readlines()
     except IOError as error:
         logger.warning('Couldn\'t open m3u: %s', locale_decode(error))
-        return uris
+        return tracks
 
+    extm3u = contents and contents[0].decode('latin1').startswith('#EXTM3U')
+
+    track = Track()
     for line in contents:
         line = line.strip().decode('latin1')
 
         if line.startswith('#'):
+            if extm3u and line.startswith('#EXTINF'):
+                track = extm3u_directive_to_track(line)
             continue
 
         if urlparse.urlsplit(line).scheme:
-            uris.append(line)
+            tracks.append(track.copy(uri=line))
         elif os.path.normpath(line) == os.path.abspath(line):
             path = path_to_uri(line)
-            uris.append(path)
+            tracks.append(track.copy(uri=path))
         else:
             path = path_to_uri(os.path.join(media_dir, line))
-            uris.append(path)
+            tracks.append(track.copy(uri=path))
 
-    return uris
+        track = Track()
+    return tracks
