@@ -93,7 +93,7 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
     def _write_m3u_extinf(self, file_handle, track):
         title = track.name.encode('latin-1', 'replace')
         runtime = track.length / 1000 if track.length else -1
-        file_handle.write('#EXTINF:' + runtime + ',' + title + '\n')
+        file_handle.write('#EXTINF:' + str(runtime) + ',' + title + '\n')
 
     def _save_m3u(self, playlist):
         file_path = self._m3u_uri_to_path(playlist.uri)
