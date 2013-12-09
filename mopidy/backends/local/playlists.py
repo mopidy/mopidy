@@ -90,10 +90,20 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
         path.check_file_path_is_inside_base_dir(file_path, self._playlists_dir)
         return file_path
 
+    def _write_m3u_extinf(self, file_handle, track):
+        title = track.name.encode('latin-1', 'replace')
+        runtime = track.length / 1000 if track.length else -1
+        file_handle.write('#EXTINF:' + runtime + ',' + title + '\n')
+
     def _save_m3u(self, playlist):
         file_path = self._m3u_uri_to_path(playlist.uri)
+        extended = any(track.name for track in playlist.tracks)
         with open(file_path, 'w') as file_handle:
+            if extended:
+                file_handle.write('#EXTM3U\n')
             for track in playlist.tracks:
+                if extended and track.name:
+                    self._write_m3u_extinf(file_handle, track)
                 file_handle.write(track.uri + '\n')
 
     def _delete_m3u(self, uri):

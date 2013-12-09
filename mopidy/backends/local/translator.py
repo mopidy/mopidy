@@ -10,7 +10,7 @@ from mopidy.models import Track
 from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri, uri_to_path
 
-EXTINF_RE = re.compile(r'^#EXTINF:\s*(-1|\d+)\s*,\s*(.+?)\s*$')
+M3U_EXTINF_RE = re.compile(r'#EXTINF:(-1|\d+),(.*)')
 
 logger = logging.getLogger('mopidy.backends.local')
 
@@ -33,9 +33,9 @@ def path_to_local_track_uri(relpath):
     return b'local:track:%s' % urllib.quote(relpath)
 
 
-def extm3u_directive_to_track(line):
+def m3u_extinf_to_track(line):
     """Convert extended M3U directive to track template."""
-    m = EXTINF_RE.match(line)
+    m = M3U_EXTINF_RE.match(line)
     if not m:
         logger.warning('Invalid extended M3U directive: %s', line)
         return Track()
@@ -85,15 +85,18 @@ def parse_m3u(file_path, media_dir):
         logger.warning('Couldn\'t open m3u: %s', locale_decode(error))
         return tracks
 
-    extm3u = contents and contents[0].decode('latin1').startswith('#EXTM3U')
+    if not contents:
+        return tracks
+
+    extended = contents[0].decode('latin1').startswith('#EXTM3U')
 
     track = Track()
     for line in contents:
         line = line.strip().decode('latin1')
 
         if line.startswith('#'):
-            if extm3u and line.startswith('#EXTINF'):
-                track = extm3u_directive_to_track(line)
+            if extended and line.startswith('#EXTINF'):
+                track = m3u_extinf_to_track(line)
             continue
 
         if urlparse.urlsplit(line).scheme:
