@@ -22,6 +22,9 @@ encoded_uri = path_to_uri(encoded_path)
 song1_track = Track(uri=song1_uri)
 song2_track = Track(uri=song2_uri)
 encoded_track = Track(uri=encoded_uri)
+song1_ext_track = song1_track.copy(name='song1')
+song2_ext_track = song2_track.copy(name='song2', length=60000)
+encoded_ext_track = encoded_track.copy(name='æøå')
 
 
 # FIXME use mock instead of tempfile.NamedTemporaryFile
@@ -89,6 +92,25 @@ class M3UToUriTest(unittest.TestCase):
         tracks = parse_m3u(path_to_data_dir('non-existant.m3u'), data_dir)
         self.assertEqual([], tracks)
 
+    def test_empty_ext_file(self):
+        tracks = parse_m3u(path_to_data_dir('empty-ext.m3u'), data_dir)
+        self.assertEqual([], tracks)
+
+    def test_basic_ext_file(self):
+        tracks = parse_m3u(path_to_data_dir('one-ext.m3u'), data_dir)
+        self.assertEqual([song1_ext_track], tracks)
+
+    def test_multi_ext_file(self):
+        tracks = parse_m3u(path_to_data_dir('two-ext.m3u'), data_dir)
+        self.assertEqual([song1_ext_track, song2_ext_track], tracks)
+
+    def test_ext_file_with_comment(self):
+        tracks = parse_m3u(path_to_data_dir('comment-ext.m3u'), data_dir)
+        self.assertEqual([song1_ext_track], tracks)
+
+    def test_ext_encoding_is_latin1(self):
+        tracks = parse_m3u(path_to_data_dir('encoding-ext.m3u'), data_dir)
+        self.assertEqual([encoded_ext_track], tracks)
 
 class URItoM3UTest(unittest.TestCase):
     pass
