@@ -29,7 +29,7 @@ config value, you **should not** add it to
 :file:`~/.config/mopidy/mopidy.conf`.
 
 To see what's the effective configuration for your Mopidy installation, you can
-run :option:`mopidy --show-config`. It will print your full effective config
+run :option:`mopidy config`. It will print your full effective config
 with passwords masked out so that you safely can share the output with others
 for debugging.
 
