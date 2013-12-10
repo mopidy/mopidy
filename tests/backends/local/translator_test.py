@@ -112,5 +112,6 @@ class M3UToUriTest(unittest.TestCase):
         tracks = parse_m3u(path_to_data_dir('encoding-ext.m3u'), data_dir)
         self.assertEqual([encoded_ext_track], tracks)
 
+
 class URItoM3UTest(unittest.TestCase):
     pass
