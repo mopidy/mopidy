@@ -7,6 +7,7 @@ import pykka
 
 from mopidy.audio import AudioListener, PlaybackState
 from mopidy.backends.listener import BackendListener
+from mopidy.utils import versioning
 
 from .library import LibraryController
 from .listener import CoreListener
@@ -74,6 +75,9 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     def playlists_loaded(self):
         # Forward event from backend to frontends
         CoreListener.send('playlists_loaded')
+
+    def get_version(self):
+        return versioning.get_version()
 
 
 class Backends(list):
