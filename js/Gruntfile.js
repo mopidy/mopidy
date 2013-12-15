@@ -11,6 +11,7 @@ module.exports = function (grunt) {
                 " * Licensed under the Apache License, Version 2.0 */\n",
             files: {
                 own: ["Gruntfile.js", "src/**/*.js", "test/**/*-test.js"],
+                main: "src/mopidy.js",
                 concat: "../mopidy/frontends/http/data/mopidy.js",
                 minified: "../mopidy/frontends/http/data/mopidy.min.js"
             }
@@ -18,19 +19,16 @@ module.exports = function (grunt) {
         buster: {
             all: {}
         },
-        concat: {
-            options: {
-                banner: "<%= meta.banner %>",
-                stripBanners: true
-            },
-            all: {
+        browserify: {
+            dist: {
                 files: {
-                    "<%= meta.files.concat %>": [
-                        "lib/bane-*.js",
-                        "lib/when-define-shim.js",
-                        "lib/when-*.js",
-                        "src/mopidy.js"
-                    ]
+                    "<%= meta.files.concat %>": "<%= meta.files.main %>"
+                },
+                options: {
+                    postBundleCB: function (err, src, next) {
+                        next(null, grunt.template.process("<%= meta.banner %>") + src);
+                    },
+                    standalone: "Mopidy"
                 }
             }
         },
@@ -71,11 +69,11 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask("test", ["jshint", "buster"]);
-    grunt.registerTask("build", ["test", "concat", "uglify"]);
+    grunt.registerTask("build", ["test", "browserify", "uglify"]);
     grunt.registerTask("default", ["build"]);
 
     grunt.loadNpmTasks("grunt-buster");
-    grunt.loadNpmTasks("grunt-contrib-concat");
+    grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-jshint");
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-watch");
