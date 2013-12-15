@@ -79,6 +79,9 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     def get_version(self):
         return versioning.get_version()
 
+    version = property(get_version)
+    """Version of the Mopidy core API"""
+
 
 class Backends(list):
     def __init__(self, backends):
