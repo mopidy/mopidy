@@ -57,6 +57,12 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     uri_schemes = property(get_uri_schemes)
     """List of URI schemes we can handle"""
 
+    def get_version(self):
+        return versioning.get_version()
+
+    version = property(get_version)
+    """Version of the Mopidy core API"""
+
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()
 
@@ -75,12 +81,6 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
     def playlists_loaded(self):
         # Forward event from backend to frontends
         CoreListener.send('playlists_loaded')
-
-    def get_version(self):
-        return versioning.get_version()
-
-    version = property(get_version)
-    """Version of the Mopidy core API"""
 
 
 class Backends(list):

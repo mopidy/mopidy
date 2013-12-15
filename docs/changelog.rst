@@ -9,8 +9,8 @@ v0.18.0 (UNRELEASED)
 
 **Core API**
 
-- Expose :meth:`mopidy.core.Core.get_version` to HTTP clients for managing
-  compatability between API versions. (Fixes: :issue:`597`)
+- Expose :meth:`mopidy.core.Core.version` for HTTP clients to manage
+  compatibility between API versions. (Fixes: :issue:`597`)
 
 **Pluggable local libraries**
 

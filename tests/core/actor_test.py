@@ -6,6 +6,7 @@ import unittest
 import pykka
 
 from mopidy.core import Core
+from mopidy.utils import versioning
 
 
 class CoreActorTest(unittest.TestCase):
@@ -54,3 +55,6 @@ class CoreActorTest(unittest.TestCase):
                          {'dummy1': self.backend1})
         self.assertEqual(core.backends.with_library,
                          {'dummy1': self.backend2})
+
+    def test_version(self):
+        self.assertEqual(self.core.version, versioning.get_version())
