@@ -7,6 +7,11 @@ This changelog is used to track all major changes to Mopidy.
 v0.18.0 (UNRELEASED)
 ====================
 
+**Core API**
+
+- Expose :meth:`mopidy.core.Core.get_version` to HTTP clients for managing
+  compatability between API versions. (Fixes: :issue:`597`)
+
 **Pluggable local libraries**
 
 Fixes issues :issue:`44`, partially resolves :issue:`397`, and causes
