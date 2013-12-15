@@ -18,6 +18,7 @@ class WebSocketResource(object):
         inspector = jsonrpc.JsonRpcInspector(
             objects={
                 'core.get_uri_schemes': core.Core.get_uri_schemes,
+                'core.get_version': core.Core.get_version,
                 'core.library': core.LibraryController,
                 'core.playback': core.PlaybackController,
                 'core.playlists': core.PlaylistsController,
@@ -27,6 +28,7 @@ class WebSocketResource(object):
             objects={
                 'core.describe': inspector.describe,
                 'core.get_uri_schemes': self._core.get_uri_schemes,
+                'core.get_version': self._core.get_version,
                 'core.library': self._core.library,
                 'core.playback': self._core.playback,
                 'core.playlists': self._core.playlists,
