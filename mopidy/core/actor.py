@@ -16,21 +16,21 @@ from .tracklist import TracklistController
 
 
 class Core(pykka.ThreadingActor, AudioListener, BackendListener):
-    #: The library controller. An instance of
-    # :class:`mopidy.core.LibraryController`.
     library = None
+    """The library controller. An instance of
+    :class:`mopidy.core.LibraryController`."""
 
-    #: The playback controller. An instance of
-    #: :class:`mopidy.core.PlaybackController`.
     playback = None
+    """The playback controller. An instance of
+    :class:`mopidy.core.PlaybackController`."""
 
-    #: The playlists controller. An instance of
-    #: :class:`mopidy.core.PlaylistsController`.
     playlists = None
+    """The playlists controller. An instance of
+    :class:`mopidy.core.PlaylistsController`."""
 
-    #: The tracklist controller. An instance of
-    #: :class:`mopidy.core.TracklistController`.
     tracklist = None
+    """The tracklist controller. An instance of
+    :class:`mopidy.core.TracklistController`."""
 
     def __init__(self, audio=None, backends=None):
         super(Core, self).__init__()
