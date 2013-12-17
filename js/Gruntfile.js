@@ -20,6 +20,25 @@ module.exports = function (grunt) {
             all: {}
         },
         browserify: {
+            test_mopidy: {
+                files: {
+                    "test/lib/mopidy.js": "<%= meta.files.main %>"
+                },
+                options: {
+                    postBundleCB: function (err, src, next) {
+                        next(null, grunt.template.process("<%= meta.banner %>") + src);
+                    },
+                    standalone: "Mopidy"
+                }
+            },
+            test_when: {
+                files: {
+                    "test/lib/when.js": "node_modules/when/when.js"
+                },
+                options: {
+                    standalone: "when"
+                }
+            },
             dist: {
                 files: {
                     "<%= meta.files.concat %>": "<%= meta.files.main %>"
@@ -68,8 +87,9 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask("test", ["jshint", "buster"]);
-    grunt.registerTask("build", ["test", "browserify", "uglify"]);
+    grunt.registerTask("test_build", ["browserify:test_when", "browserify:test_mopidy"]);
+    grunt.registerTask("test", ["jshint", "test_build", "buster"]);
+    grunt.registerTask("build", ["test", "browserify:dist", "uglify"]);
     grunt.registerTask("default", ["build"]);
 
     grunt.loadNpmTasks("grunt-buster");
