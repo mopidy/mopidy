@@ -2,7 +2,7 @@
 
 if (typeof module === "object" && typeof require === "function") {
     var buster = require("buster");
-    var Mopidy = require("../src/mopidy").Mopidy;
+    var Mopidy = require("../src/mopidy");
     var when = require("when");
 }
 
