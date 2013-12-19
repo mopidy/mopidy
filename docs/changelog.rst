@@ -42,7 +42,7 @@ a temporary regression of :issue:`527`.
 
 **Config file loading**
 
-- The default for the config flag has been uptated to include
+- The default for the config flag has been updated to include
   ``$XDG_CONFIG_DIRS`` in addition to ``$XDG_CONFIG_DIR``. (Fixes :issue:`431`)
 
 
