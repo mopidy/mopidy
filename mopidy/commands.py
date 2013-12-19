@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 
+import glib
 import gobject
 
 from mopidy import config as config_lib
@@ -14,6 +15,11 @@ from mopidy.core import Core
 from mopidy.utils import deps, process, versioning
 
 logger = logging.getLogger('mopidy.commands')
+
+_default_config = []
+for base in glib.get_system_config_dirs() + (glib.get_user_config_dir(),):
+    _default_config.append(os.path.join(base, b'mopidy', b'mopidy.conf'))
+DEFAULT_CONFIG = b':'.join(_default_config)
 
 
 def config_files_type(value):
@@ -243,7 +249,7 @@ class RootCommand(Command):
         self.add_argument(
             '--config',
             action='store', dest='config_files', type=config_files_type,
-            default=b'$XDG_CONFIG_DIR/mopidy/mopidy.conf', metavar='FILES',
+            default=DEFAULT_CONFIG, metavar='FILES',
             help='config files to use, colon seperated, later files override')
         self.add_argument(
             '-o', '--option',

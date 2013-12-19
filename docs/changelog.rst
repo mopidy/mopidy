@@ -40,6 +40,11 @@ a temporary regression of :issue:`527`.
   asyncronously through the GObject event loop. This should resolve the issue
   that has blocked the merge of the EOT-vs-EOS fix for a long time.
 
+**Config file loading**
+
+- The default for the config flag has been updated to include
+  ``$XDG_CONFIG_DIRS`` in addition to ``$XDG_CONFIG_DIR``. (Fixes :issue:`431`)
+
 
 v0.17.0 (2013-11-23)
 ====================
