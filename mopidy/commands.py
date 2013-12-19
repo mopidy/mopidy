@@ -20,7 +20,6 @@ _default_config = []
 for base in glib.get_system_config_dirs() + (glib.get_user_config_dir(),):
     _default_config.append(os.path.join(base, b'mopidy', b'mopidy.conf'))
 DEFAULT_CONFIG = b':'.join(_default_config)
-print DEFAULT_CONFIG
 
 
 def config_files_type(value):
