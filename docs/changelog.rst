@@ -1755,7 +1755,7 @@ to this problem.
 
 - Packaging and distribution:
 
-  - Setup APT repository and crate Debian packages of Mopidy. See
+  - Setup APT repository and create Debian packages of Mopidy. See
     :ref:`installation` for instructions for how to install Mopidy, including
     all dependencies, from APT.
 
