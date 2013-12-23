@@ -39,6 +39,11 @@ Configuration values
 
     Path to directory with local media files.
 
+.. confval:: local/data_dir
+
+    Path to directory to store local metadata such as libraries and playlists
+    in.
+
 .. confval:: local/playlists_dir
 
     Path to playlists directory with m3u files for local media.

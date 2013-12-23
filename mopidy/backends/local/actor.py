@@ -33,6 +33,14 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
                            self.config['local']['media_dir'])
 
         try:
+            path.get_or_create_dir(self.config['local']['data_dir'])
+        except EnvironmentError as error:
+            logger.warning(
+                'Could not create local data dir: %s',
+                encoding.locale_decode(error))
+
+        # TODO: replace with data dir?
+        try:
             path.get_or_create_dir(self.config['local']['playlists_dir'])
         except EnvironmentError as error:
             logger.warning(
