@@ -62,7 +62,7 @@ class Extension(object):
         """
         pass
 
-    def setup(self):
+    def setup(self, registry):
         for backend_class in self.get_backend_classes():
             registry.add('backend', backend_class)
 
@@ -125,27 +125,22 @@ class Extension(object):
         pass
 
 
-class _Registry(collections.Mapping):
+# TODO: document
+class Registry(collections.Mapping):
     def __init__(self):
-        self._registry = collections.defaultdict(list)
+        self._registry = {}
 
     def add(self, name, cls):
-        self._registry[name].append(cls)
+        self._registry.setdefault(name, []).append(cls)
 
     def __getitem__(self, name):
-        return self._registry[name]
+        return self._registry.setdefault(name, [])
 
     def __iter__(self):
         return iter(self._registry)
 
     def __len__(self):
         return len(self._registry)
-
-
-# TODO: document the registry
-# TODO: consider if we should avoid having this as a global and pass an
-#       instance from __main__ around instead?
-registry = _Registry()
 
 
 def load_extensions():

@@ -40,11 +40,13 @@ def main():
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
     try:
+        registry = ext.Registry()
+
         root_cmd = commands.RootCommand()
         config_cmd = commands.ConfigCommand()
         deps_cmd = commands.DepsCommand()
 
-        root_cmd.set(extension=None)
+        root_cmd.set(extension=None, registry=registry)
         root_cmd.add_child('config', config_cmd)
         root_cmd.add_child('deps', deps_cmd)
 
@@ -108,7 +110,7 @@ def main():
             return 1
 
         for extension in enabled_extensions:
-            extension.setup()
+            extension.setup(registry)
 
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors can have been started.

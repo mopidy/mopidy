@@ -4,7 +4,7 @@ import logging
 import os
 import time
 
-from mopidy import commands, exceptions, ext
+from mopidy import commands, exceptions
 from mopidy.audio import scan
 from mopidy.utils import path
 
@@ -30,7 +30,7 @@ class ScanCommand(commands.Command):
             file_ext.lower() for file_ext in excluded_file_extensions)
 
         # TODO: select updater / library to use by name
-        updaters = ext.registry['local:library']
+        updaters = args.registry['local:library']
         if not updaters:
             logger.error('No usable library updaters found.')
             return 1

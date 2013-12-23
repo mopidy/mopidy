@@ -9,7 +9,7 @@ import sys
 import glib
 import gobject
 
-from mopidy import config as config_lib, ext
+from mopidy import config as config_lib
 from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.utils import deps, process, versioning
@@ -260,8 +260,8 @@ class RootCommand(Command):
     def run(self, args, config):
         loop = gobject.MainLoop()
 
-        backend_classes = ext.registry['backend']
-        frontend_classes = ext.registry['frontend']
+        backend_classes = args.registry['backend']
+        frontend_classes = args.registry['frontend']
 
         try:
             audio = self.start_audio(config)
