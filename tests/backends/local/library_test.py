@@ -7,7 +7,7 @@ import unittest
 import pykka
 
 from mopidy import core
-from mopidy.backends.local import actor
+from mopidy.backends.local import actor, json
 from mopidy.models import Track, Album, Artist
 
 from tests import path_to_data_dir
@@ -63,10 +63,12 @@ class LocalLibraryProviderTest(unittest.TestCase):
             'media_dir': path_to_data_dir(''),
             'data_dir': path_to_data_dir(''),
             'playlists_dir': b'',
+            'library': 'json',
         },
     }
 
     def setUp(self):
+        actor.LocalBackend.libraries = [json.JsonLibrary]
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
@@ -74,6 +76,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
+        actor.LocalBackend.libraries = []
 
     def test_refresh(self):
         self.library.refresh()

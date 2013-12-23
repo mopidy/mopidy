@@ -8,7 +8,6 @@ import pykka
 from mopidy.backends import base
 from mopidy.utils import encoding, path
 
-from .json import JsonLibrary
 from .library import LocalLibraryProvider
 from .playback import LocalPlaybackProvider
 from .playlists import LocalPlaylistsProvider
@@ -18,6 +17,7 @@ logger = logging.getLogger('mopidy.backends.local')
 
 class LocalBackend(pykka.ThreadingActor, base.Backend):
     uri_schemes = ['local']
+    libraries = []
 
     def __init__(self, config, audio):
         super(LocalBackend, self).__init__()
@@ -26,8 +26,15 @@ class LocalBackend(pykka.ThreadingActor, base.Backend):
 
         self.check_dirs_and_files()
 
-        # TODO: move to getting this from registry
-        library = JsonLibrary(config)
+        libraries = dict((l.name, l) for l in self.libraries)
+        library_name = config['local']['library']
+
+        if library_name in libraries:
+            library = libraries[library_name](config)
+            logger.debug('Using %s as the local library', library_name)
+        else:
+            library = None
+            logger.warning('Local library %s not found', library_name)
 
         self.playback = LocalPlaybackProvider(audio=audio, backend=self)
         self.playlists = LocalPlaylistsProvider(backend=self)

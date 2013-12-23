@@ -69,9 +69,6 @@ class Extension(object):
         for frontend_class in self.get_frontend_classes():
             registry.add('frontend', frontend_class)
 
-        for library_updater in self.get_library_updaters():
-            registry.add('local:library', library_updater)
-
         self.register_gstreamer_elements()
 
     def get_frontend_classes(self):
@@ -92,6 +89,7 @@ class Extension(object):
         """
         return []
 
+    # TODO: remove
     def get_library_updaters(self):
         """List of library updater classes
 

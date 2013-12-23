@@ -21,6 +21,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         'local': {
             'media_dir': path_to_data_dir(''),
             'data_dir': path_to_data_dir(''),
+            'library': 'json',
         }
     }
 

@@ -21,6 +21,7 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
+        schema['library'] = config.String()
         schema['media_dir'] = config.Path()
         schema['data_dir'] = config.Path()
         schema['playlists_dir'] = config.Path()
@@ -30,9 +31,14 @@ class Extension(ext.Extension):
         schema['excluded_file_extensions'] = config.List(optional=True)
         return schema
 
-    def get_backend_classes(self):
+    def setup(self, registry):
         from .actor import LocalBackend
-        return [LocalBackend]
+        from .json import JsonLibrary
+
+        LocalBackend.libraries = registry['local:library']
+
+        registry.add('backend', LocalBackend)
+        registry.add('local:library', JsonLibrary)
 
     def get_command(self):
         from .commands import LocalCommand

@@ -35,6 +35,11 @@ Configuration values
 
     If the local extension should be enabled or not.
 
+.. confval:: local/library
+
+    Local library provider to use, change this if you want to use a third party
+    library for local files.
+
 .. confval:: local/media_dir
 
     Path to directory with local media files.
