@@ -29,25 +29,24 @@ class ScanCommand(commands.Command):
         excluded_file_extensions = set(
             file_ext.lower() for file_ext in excluded_file_extensions)
 
-        # TODO: select updater / library to use by name
-        updaters = args.registry['local:library']
-        if not updaters:
-            logger.error('No usable library updaters found.')
+        libraries = dict((l.name, l) for l in args.registry['local:library'])
+        library_name = config['local']['library']
+
+        if library_name not in libraries:
+            logger.warning('Local library %s not found', library_name)
             return 1
-        elif len(updaters) > 1:
-            logger.error('More than one library updater found. '
-                         'Provided by: %s', ', '.join(updaters))
-            return 1
-        local_updater = updaters[0](config)
+
+        library = libraries[library_name](config)
+        logger.debug('Using %s as the local library', library_name)
 
         uri_path_mapping = {}
         uris_in_library = set()
         uris_to_update = set()
         uris_to_remove = set()
 
-        tracks = local_updater.load()
-        logger.info('Checking %d tracks from library.', len(tracks))
-        for track in tracks:
+        num_tracks = library.load()
+        logger.info('Checking %d tracks from library.', num_tracks)
+        for track in library.tracks():
             uri_path_mapping[track.uri] = translator.local_track_uri_to_path(
                 track.uri, media_dir)
             try:
@@ -61,7 +60,7 @@ class ScanCommand(commands.Command):
 
         logger.info('Removing %d missing tracks.', len(uris_to_remove))
         for uri in uris_to_remove:
-            local_updater.remove(uri)
+            library.remove(uri)
 
         logger.info('Checking %s for unknown tracks.', media_dir)
         for relpath in path.find_files(media_dir):
@@ -85,7 +84,7 @@ class ScanCommand(commands.Command):
             try:
                 data = scanner.scan(path.path_to_uri(uri_path_mapping[uri]))
                 track = scan.audio_data_to_track(data).copy(uri=uri)
-                local_updater.add(track)
+                library.add(track)
                 logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)
@@ -93,7 +92,7 @@ class ScanCommand(commands.Command):
             progress.increment()
 
         logger.info('Commiting changes.')
-        local_updater.commit()
+        library.commit()
         return 0
 
 
