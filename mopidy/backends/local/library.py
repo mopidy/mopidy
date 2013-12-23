@@ -24,7 +24,11 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
     def lookup(self, uri):
         if not self._library:
             return []
-        return self._library.lookup(uri)
+        track = self._library.lookup(uri)
+        if not uri:
+            logger.debug('Failed to lookup %r', uri)
+            return []
+        return [track]
 
     def find_exact(self, query=None, uris=None):
         if not self._library:

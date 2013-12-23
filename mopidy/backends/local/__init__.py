@@ -63,6 +63,14 @@ class Library(object):
         """
         return 0
 
+    def tracks(self):
+        """
+        Iterator over all tracks.
+
+        :rtype: :class:`mopidy.models.Track` iterator
+        """
+        raise NotImplementedError
+
     def add(self, track):
         """
         Add the given track to library.
@@ -99,7 +107,7 @@ class Library(object):
 
         :param uri: track URI
         :type uri: string
-        :rtype: list of :class:`mopidy.models.Track`
+        :rtype: :class:`mopidy.models.Track`
         """
         raise NotImplementedError
 

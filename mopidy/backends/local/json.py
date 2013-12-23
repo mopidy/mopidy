@@ -56,6 +56,9 @@ class JsonLibrary(local.Library):
         self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
         return len(self._tracks)
 
+    def tracks(self):
+        return self._tracks.itervalues()
+
     def add(self, track):
         self._tracks[track.uri] = track
 
@@ -67,10 +70,9 @@ class JsonLibrary(local.Library):
 
     def lookup(self, uri):
         try:
-            return [self._tracks[uri]]
+            return self._tracks[uri]
         except KeyError:
-            logger.debug('Failed to lookup %r', uri)
-            return []
+            return None
 
     def search(self, query=None, uris=None, exact=False):
         tracks = self._tracks.values()
