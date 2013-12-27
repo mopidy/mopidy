@@ -9,7 +9,7 @@ January 2013, Mopidy will run with Spotify support on both the armel
 (soft-float) and armhf (hard-float) architectures, which includes the Raspbian
 distribution.
 
-.. image:: /_static/raspberry-pi-by-jwrodgers.jpg
+.. image:: raspberry-pi-by-jwrodgers.jpg
     :width: 640
     :height: 427
 
