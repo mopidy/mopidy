@@ -4,11 +4,12 @@ import logging
 
 from mopidy.backends import base
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger('mopidy.backends.local.library')
 
 
 class LocalLibraryProvider(base.BaseLibraryProvider):
     """Proxy library that delegates work to our active local library."""
+
     def __init__(self, backend, library):
         super(LocalLibraryProvider, self).__init__(backend)
         self._library = library
@@ -25,7 +26,7 @@ class LocalLibraryProvider(base.BaseLibraryProvider):
         if not self._library:
             return []
         track = self._library.lookup(uri)
-        if not uri:
+        if track is None:
             logger.debug('Failed to lookup %r', uri)
             return []
         return [track]

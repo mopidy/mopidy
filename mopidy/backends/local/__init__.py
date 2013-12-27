@@ -111,18 +111,20 @@ class Library(object):
         """
         raise NotImplementedError
 
-    # TODO: support case with returning all tracks?
-    # TODO: remove uris?
+    # TODO: remove uris, replacing it with support in query language.
+    # TODO: remove exact, replacing it with support in query language.
     def search(self, query=None, exact=False, uris=None):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
         :param query: one or more queries to search for
         :type query: dict
-        :param exact: look for exact matches?
+        :param exact: whether to look for exact matches
         :type query: boolean
         :param uris: zero or more URI roots to limit the search to
         :type uris: list of strings or :class:`None`
         :rtype: :class:`mopidy.models.SearchResult`
         """
         raise NotImplementedError
+
+    # TODO: add file browsing support.
