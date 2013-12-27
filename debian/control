@@ -44,8 +44,7 @@ Section: doc
 Architecture: all
 Depends:
     ${misc:Depends},
-    libjs-jquery,
-    libjs-underscore
+    ${sphinxdoc:Depends}
 Recommends: mopidy
 Replaces: mopidy (<< 0.7.3-2)
 Description: music server with support for MPD/HTTP clients - documentation

@@ -1,2 +1,2 @@
 README.rst
-docs/_build/html/
+build/sphinx/html
