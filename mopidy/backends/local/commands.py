@@ -64,12 +64,13 @@ class ScanCommand(commands.Command):
 
         logger.info('Checking %s for unknown tracks.', media_dir)
         for relpath in path.find_files(media_dir):
+            uri = translator.path_to_local_track_uri(relpath)
             file_extension = os.path.splitext(relpath)[1]
+
             if file_extension.lower() in excluded_file_extensions:
                 logger.debug('Skipped %s: File extension excluded.', uri)
                 continue
 
-            uri = translator.path_to_local_track_uri(relpath)
             if uri not in uris_in_library:
                 uris_to_update.add(uri)
                 uri_path_mapping[uri] = os.path.join(media_dir, relpath)
