@@ -138,6 +138,10 @@ def model_json_decoder(dct):
 
 class Ref(ImmutableObject):
     """
+    Model to represent URI references with a human friendly name and type
+    attached. This is intended for use a lightweight object "free" of metadata
+    that can be passed around instead of using full blown models.
+
     :param uri: object URI
     :type uri: string
     :param name: object name
