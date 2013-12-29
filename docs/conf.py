@@ -28,6 +28,12 @@ class Mock(object):
     def __getattr__(self, name):
         if name in ('__file__', '__path__'):
             return '/dev/null'
+        elif name == 'get_system_config_dirs':
+            # glib.get_system_config_dirs()
+            return tuple
+        elif name == 'get_user_config_dir':
+            # glib.get_user_config_dir()
+            return str
         elif (name[0] == name[0].upper()
                 # gst.interfaces.MIXER_TRACK_*
                 and not name.startswith('MIXER_TRACK_')

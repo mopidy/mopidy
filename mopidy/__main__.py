@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import logging
 import os
@@ -117,7 +117,7 @@ def main():
         try:
             return args.command.run(args, proxied_config)
         except NotImplementedError:
-            print root_cmd.format_help()
+            print(root_cmd.format_help())
             return 1
 
     except KeyboardInterrupt:

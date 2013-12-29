@@ -4,7 +4,7 @@ import logging
 import socket
 import string
 
-logger = logging.getLogger('mopidy.utils.zeroconf')
+logger = logging.getLogger('mopidy.zeroconf')
 
 try:
     import dbus
@@ -25,7 +25,20 @@ def _convert_text_to_dbus_bytes(text):
 
 
 class Zeroconf(object):
-    """Publish a network service with Zeroconf using Avahi."""
+    """Publish a network service with Zeroconf.
+
+    Currently, this only works on Linux using Avahi via D-Bus.
+
+    :param str name: human readable name of the service, e.g. 'MPD on neptune'
+    :param int port: TCP port of the service, e.g. 6600
+    :param str stype: service type, e.g. '_mpd._tcp'
+    :param str domain: local network domain name, defaults to ''
+    :param str host: interface to advertise the service on, defaults to all
+        interfaces
+    :param text: extra information depending on ``stype``, defaults to empty
+        list
+    :type text: list of str
+    """
 
     def __init__(self, name, port, stype=None, domain=None,
                  host=None, text=None):
@@ -44,6 +57,11 @@ class Zeroconf(object):
             hostname=self.host or socket.getfqdn(), port=self.port)
 
     def publish(self):
+        """Publish the service.
+
+        Call when your service starts.
+        """
+
         if _is_loopback_address(self.host):
             logger.info(
                 'Zeroconf publish on loopback interface is not supported.')
@@ -83,6 +101,11 @@ class Zeroconf(object):
             return False
 
     def unpublish(self):
+        """Unpublish the service.
+
+        Call when your service shuts down.
+        """
+
         if self.group:
             try:
                 self.group.Reset()

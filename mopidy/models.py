@@ -136,6 +136,31 @@ def model_json_decoder(dct):
     return dct
 
 
+class Ref(ImmutableObject):
+    """
+    Model to represent URI references with a human friendly name and type
+    attached. This is intended for use a lightweight object "free" of metadata
+    that can be passed around instead of using full blown models.
+
+    :param uri: object URI
+    :type uri: string
+    :param name: object name
+    :type name: string
+    :param type: object type
+    :type name: string
+    """
+
+    #: The object URI. Read-only.
+    uri = None
+
+    #: The object name. Read-only.
+    name = None
+
+    #: The object type, e.g. "artist", "album", "track", "playlist",
+    #: "directory". Read-only.
+    type = None
+
+
 class Artist(ImmutableObject):
     """
     :param uri: artist URI

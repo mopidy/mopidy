@@ -18,7 +18,7 @@ See :ref:`http-api` for details on how to build your own web client.
 woutervanwijk/Mopidy-Webclient
 ==============================
 
-.. image:: /_static/woutervanwijk-mopidy-webclient.png
+.. image:: woutervanwijk-mopidy-webclient.png
     :width: 1275
     :height: 600
 
@@ -36,7 +36,7 @@ Also the web client used for Wouter's popular `Pi Musicbox
 Mopidy Lux
 ==========
 
-.. image:: /_static/dz0ny-mopidy-lux.png
+.. image:: dz0ny-mopidy-lux.png
     :width: 1000
     :height: 645
 
@@ -50,7 +50,7 @@ A Mopidy web client made with AngularJS by Janez Troha.
 Moped
 =====
 
-.. image:: /_static/martijnboland-moped.png
+.. image:: martijnboland-moped.png
     :width: 720
     :height: 450
 

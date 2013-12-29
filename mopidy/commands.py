@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import argparse
 import collections
@@ -112,7 +112,7 @@ class Command(object):
 
     def exit(self, status_code=0, message=None, usage=None):
         """Optionally print a message and exit."""
-        print '\n\n'.join(m for m in (usage, message) if m)
+        print('\n\n'.join(m for m in (usage, message) if m))
         sys.exit(status_code)
 
     def format_usage(self, prog=None):
@@ -335,7 +335,7 @@ class ConfigCommand(Command):
         self.set(base_verbosity_level=-1)
 
     def run(self, config, errors, extensions):
-        print config_lib.format(config, extensions, errors)
+        print(config_lib.format(config, extensions, errors))
         return 0
 
 
@@ -347,5 +347,5 @@ class DepsCommand(Command):
         self.set(base_verbosity_level=-1)
 
     def run(self):
-        print deps.format_dependency_list()
+        print(deps.format_dependency_list())
         return 0
