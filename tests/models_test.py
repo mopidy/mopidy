@@ -5,7 +5,7 @@ import json
 import unittest
 
 from mopidy.models import (
-    Artist, Album, TlTrack, Track, Playlist, SearchResult,
+    Ref, Artist, Album, TlTrack, Track, Playlist, SearchResult,
     ModelJSONEncoder, model_json_decoder)
 
 
@@ -52,6 +52,40 @@ class GenericCopyTest(unittest.TestCase):
     def test_copying_track_with_invalid_key(self):
         test = lambda: Track().copy(invalid_key=True)
         self.assertRaises(TypeError, test)
+
+
+class RefTest(unittest.TestCase):
+    def test_uri(self):
+        uri = 'an_uri'
+        ref = Ref(uri=uri)
+        self.assertEqual(ref.uri, uri)
+        self.assertRaises(AttributeError, setattr, ref, 'uri', None)
+
+    def test_name(self):
+        name = 'a name'
+        ref = Ref(name=name)
+        self.assertEqual(ref.name, name)
+        self.assertRaises(AttributeError, setattr, ref, 'name', None)
+
+    def test_invalid_kwarg(self):
+        test = lambda: SearchResult(foo='baz')
+        self.assertRaises(TypeError, test)
+
+    def test_repr_without_results(self):
+        self.assertEquals(
+            "Ref(name=u'foo', type=u'artist', uri=u'uri')",
+            repr(Ref(uri='uri', name='foo', type='artist')))
+
+    def test_serialize_without_results(self):
+        self.assertDictEqual(
+            {'__model__': 'Ref', 'uri': 'uri'},
+            Ref(uri='uri').serialize())
+
+    def test_to_json_and_back(self):
+        ref1 = Ref(uri='uri')
+        serialized = json.dumps(ref1, cls=ModelJSONEncoder)
+        ref2 = json.loads(serialized, object_hook=model_json_decoder)
+        self.assertEqual(ref1, ref2)
 
 
 class ArtistTest(unittest.TestCase):
