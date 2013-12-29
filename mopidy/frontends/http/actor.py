@@ -9,9 +9,8 @@ import pykka
 from ws4py.messaging import TextMessage
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 
-from mopidy import models
+from mopidy import models, zeroconf
 from mopidy.core import CoreListener
-from mopidy.utils import zeroconf
 from . import ws
 
 

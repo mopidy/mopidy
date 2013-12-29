@@ -16,4 +16,5 @@ API reference
     commands
     ext
     config
+    zeroconf
     http

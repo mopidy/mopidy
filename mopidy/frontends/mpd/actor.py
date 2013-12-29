@@ -5,9 +5,10 @@ import sys
 
 import pykka
 
+from mopidy import zeroconf
 from mopidy.core import CoreListener
 from mopidy.frontends.mpd import session
-from mopidy.utils import encoding, network, process, zeroconf
+from mopidy.utils import encoding, network, process
 
 logger = logging.getLogger('mopidy.frontends.mpd')
 
