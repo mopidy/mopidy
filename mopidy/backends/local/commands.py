@@ -26,6 +26,8 @@ class ScanCommand(commands.Command):
         super(ScanCommand, self).__init__()
         self.add_argument('--clear', action='store_true', dest='clear',
                           help='Clear out library storage')
+        self.add_argument('--limit', action='store', type=int, dest='limit',
+                          default=0, help='Maxmimum number of tracks to scan')
 
     def run(self, args, config):
         media_dir = config['local']['media_dir']
@@ -94,10 +96,10 @@ class ScanCommand(commands.Command):
 
         scanner = scan.Scanner(scan_timeout)
         count = 0
-        total = len(uris_to_update)
+        total = args.limit or len(uris_to_update)
         start = time.time()
 
-        for uri in sorted(uris_to_update):
+        for uri in sorted(uris_to_update)[:args.limit or None]:
             try:
                 data = scanner.scan(path.path_to_uri(uri_path_mapping[uri]))
                 track = scan.audio_data_to_track(data).copy(uri=uri)
