@@ -56,7 +56,21 @@ class JsonLibrary(local.Library):
         self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
         return len(self._tracks)
 
-    def tracks(self):
+    def lookup(self, uri):
+        try:
+            return self._tracks[uri]
+        except KeyError:
+            return None
+
+    def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
+        tracks = self._tracks.values()
+        # TODO: pass limit and offset into search helpers
+        if exact:
+            return search.find_exact(tracks, query=query, uris=uris)
+        else:
+            return search.search(tracks, query=query, uris=uris)
+
+    def begin(self):
         return self._tracks.itervalues()
 
     def add(self, track):
@@ -65,18 +79,12 @@ class JsonLibrary(local.Library):
     def remove(self, uri):
         self._tracks.pop(uri, None)
 
-    def commit(self):
+    def close(self):
         write_library(self._json_file, {'tracks': self._tracks.values()})
 
-    def lookup(self, uri):
+    def clear(self):
         try:
-            return self._tracks[uri]
-        except KeyError:
-            return None
-
-    def search(self, query=None, uris=None, exact=False):
-        tracks = self._tracks.values()
-        if exact:
-            return search.find_exact(tracks, query=query, uris=uris)
-        else:
-            return search.search(tracks, query=query, uris=uris)
+            os.remove(self._json_file)
+            return True
+        except OSError:
+            return False

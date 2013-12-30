@@ -46,7 +46,17 @@ class Extension(ext.Extension):
 
 
 class Library(object):
-    #: Name of the local library implementation.
+    """
+    Local library interface.
+
+    Extensions that whish to provide an alternate local library storage backend
+    need to sub-class this class and install and confgure it with an extension.
+    Both scanning and library calls will use the active local library.
+
+    :param config: Config dictionary
+    """
+
+    #: Name of the local library implementation, must be overriden.
     name = None
 
     def __init__(self, config):
@@ -54,20 +64,53 @@ class Library(object):
 
     def load(self):
         """
-        Initialize whatever resources are needed for this library.
-
-        This is where you load the tracks into memory, setup a database
-        conection etc.
+        (Re)load any tracks stored in memory, if any, otherwise just return
+        number of available tracks currently available. Will be called at
+        startup for both library and update use cases, so if you plan to store
+        tracks in memory this is when the should be (re)loaded.
 
         :rtype: :class:`int` representing number of tracks in library.
         """
         return 0
 
-    def tracks(self):
+    def lookup(self, uri):
         """
-        Iterator over all tracks.
+        Lookup the given URI.
 
-        :rtype: :class:`mopidy.models.Track` iterator
+        Unlike the core APIs, local tracks uris can only be resolved to a
+        single track.
+
+        :param string uri: track URI
+        :rtype: :class:`~mopidy.models.Track`
+        """
+        raise NotImplementedError
+
+    # TODO: remove uris, replacing it with support in query language.
+    # TODO: remove exact, replacing it with support in query language.
+    def search(self, query=None, limit=100, offset=0, exact=False, uris=None):
+        """
+        Search the library for tracks where ``field`` contains ``values``.
+
+        :param dict query: one or more queries to search for
+        :param int limit: maximum number of results to return
+        :param int offset: offset into result set to use.
+        :param bool exact: whether to look for exact matches
+        :param uris: zero or more URI roots to limit the search to
+        :type uris: list of strings or :class:`None`
+        :rtype: :class:`~mopidy.models.SearchResult`
+        """
+        raise NotImplementedError
+
+    # TODO: add file browsing support.
+
+    # Remaining methods are use for the update process.
+    def begin(self):
+        """
+        Prepare library for accepting updates. Exactly what this means is
+        highly implementation depended. This must however return an iterator
+        that generates all tracks in the library for efficient scanning.
+
+        :rtype: :class:`~mopidy.models.Track` iterator
         """
         raise NotImplementedError
 
@@ -75,8 +118,7 @@ class Library(object):
         """
         Add the given track to library.
 
-        :param track: Track to add to the library/
-        :type track: :class:`mopidy.models.Track`
+        :param :class:`~mopidy.models.Track` track: Track to add to the library
         """
         raise NotImplementedError
 
@@ -84,47 +126,27 @@ class Library(object):
         """
         Remove the given track from the library.
 
-        :param uri: URI to remove from the library/
-        :type uri: string
+        :param str uri: URI to remove from the library/
         """
         raise NotImplementedError
 
-    def commit(self):
+    def flush(self):
         """
-        Persist any changes to the library.
-
-        This is where you write your data file to disk, commit transactions
-        etc. depending on the requirements of your library implementation.
+        Called for every n-th track indicating that work should be commited,
+        implementors are free to ignore these hints.
         """
         pass
 
-    def lookup(self, uri):
+    def close(self):
         """
-        Lookup the given URI.
-
-        If the URI expands to multiple tracks, the returned list will contain
-        them all.
-
-        :param uri: track URI
-        :type uri: string
-        :rtype: :class:`mopidy.models.Track`
+        Close any resources used for updating, commit outstanding work etc.
         """
-        raise NotImplementedError
+        pass
 
-    # TODO: remove uris, replacing it with support in query language.
-    # TODO: remove exact, replacing it with support in query language.
-    def search(self, query=None, exact=False, uris=None):
+    def clear(self):
         """
-        Search the library for tracks where ``field`` contains ``values``.
+        Clear out whatever data storage is used by this backend.
 
-        :param query: one or more queries to search for
-        :type query: dict
-        :param exact: whether to look for exact matches
-        :type query: boolean
-        :param uris: zero or more URI roots to limit the search to
-        :type uris: list of strings or :class:`None`
-        :rtype: :class:`mopidy.models.SearchResult`
+        :rtype: Boolean indicating if state was cleared.
         """
-        raise NotImplementedError
-
-    # TODO: add file browsing support.
+        return False

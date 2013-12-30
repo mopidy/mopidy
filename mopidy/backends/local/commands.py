@@ -46,7 +46,8 @@ class ScanCommand(commands.Command):
 
         num_tracks = library.load()
         logger.info('Checking %d tracks from library.', num_tracks)
-        for track in library.tracks():
+
+        for track in library.begin():
             uri_path_mapping[track.uri] = translator.local_track_uri_to_path(
                 track.uri, media_dir)
             try:
@@ -90,10 +91,12 @@ class ScanCommand(commands.Command):
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)
 
+                # TODO: trigger this on batch size intervals instead and add
+                # flush
             progress.increment()
 
         logger.info('Commiting changes.')
-        library.commit()
+        library.close()
         return 0
 
 
