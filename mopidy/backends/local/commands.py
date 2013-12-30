@@ -22,6 +22,11 @@ class LocalCommand(commands.Command):
 class ScanCommand(commands.Command):
     help = "Scan local media files and populate the local library."
 
+    def __init__(self):
+        super(ScanCommand, self).__init__()
+        self.add_argument('--clear', action='store_true', dest='clear',
+                          help='Clear out library storage')
+
     def run(self, args, config):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
@@ -39,6 +44,13 @@ class ScanCommand(commands.Command):
 
         library = libraries[library_name](config)
         logger.debug('Using %s as the local library', library_name)
+
+        if args.clear:
+            if library.clear():
+                logging.info('Library succesfully cleared.')
+                return 0
+            logging.warning('Unable to clear library.')
+            return 1
 
         uri_path_mapping = {}
         uris_in_library = set()
