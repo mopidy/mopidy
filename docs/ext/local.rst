@@ -58,6 +58,11 @@ Configuration values
     Number of milliseconds before giving up scanning a file and moving on to
     the next file.
 
+.. confval:: local/scan_flush_threshold
+
+    Number of tracks to wait before telling library it should try and store
+    it's progress so far. Some libraries might not respect this setting.
+
 .. confval:: local/excluded_file_extensions
 
     File extensions to exclude when scanning the media directory. Values

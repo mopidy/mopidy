@@ -25,6 +25,7 @@ class ScanCommand(commands.Command):
     def run(self, args, config):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
+        flush_threshold = config['local']['scan_flush_threshold']
         excluded_file_extensions = config['local']['excluded_file_extensions']
         excluded_file_extensions = set(
             file_ext.lower() for file_ext in excluded_file_extensions)
@@ -80,7 +81,9 @@ class ScanCommand(commands.Command):
         logger.info('Scanning...')
 
         scanner = scan.Scanner(scan_timeout)
-        progress = Progress(len(uris_to_update))
+        count = 0
+        total = len(uris_to_update)
+        start = time.time()
 
         for uri in sorted(uris_to_update):
             try:
@@ -91,26 +94,14 @@ class ScanCommand(commands.Command):
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)
 
-                # TODO: trigger this on batch size intervals instead and add
-                # flush
-            progress.increment()
+            count += 1
+            if count % flush_threshold == 0 or count == total:
+                duration = time.time() - start
+                remainder = duration / count * (total - count)
+                logger.info('Scanned %d of %d files in %ds, ~%ds left.',
+                            count, total, duration, remainder)
+                library.flush()
 
-        logger.info('Commiting changes.')
         library.close()
+        logger.info('Done scanning.')
         return 0
-
-
-# TODO: move to utils?
-class Progress(object):
-    def __init__(self, total):
-        self.count = 0
-        self.total = total
-        self.start = time.time()
-
-    def increment(self):
-        self.count += 1
-        if self.count % 1000 == 0 or self.count == self.total:
-            duration = time.time() - self.start
-            remainder = duration / self.count * (self.total - self.count)
-            logger.info('Scanned %d of %d files in %ds, ~%ds left.',
-                        self.count, self.total, duration, remainder)

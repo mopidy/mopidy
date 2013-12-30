@@ -28,6 +28,7 @@ class Extension(ext.Extension):
         schema['tag_cache_file'] = config.Deprecated()
         schema['scan_timeout'] = config.Integer(
             minimum=1000, maximum=1000*60*60)
+        schema['scan_flush_threshold'] = config.Integer(minimum=0)
         schema['excluded_file_extensions'] = config.List(optional=True)
         return schema
 
