@@ -13,19 +13,49 @@ from . import translator
 logger = logging.getLogger('mopidy.backends.local.commands')
 
 
+def _get_library(args, config):
+    libraries = dict((l.name, l) for l in args.registry['local:library'])
+    library_name = config['local']['library']
+
+    if library_name not in libraries:
+        logger.warning('Local library %s not found', library_name)
+        return 1
+
+    logger.debug('Using %s as the local library', library_name)
+    return libraries[library_name](config)
+
+
 class LocalCommand(commands.Command):
     def __init__(self):
         super(LocalCommand, self).__init__()
         self.add_child('scan', ScanCommand())
+        self.add_child('clear', ClearCommand())
+
+
+class ClearCommand(commands.Command):
+    help = 'Clear local media files from the local library.'
+
+    def run(self, args, config):
+        library = _get_library(args, config)
+        prompt = 'Are you sure you want to clear the library? [y/N] '
+
+        if raw_input(prompt).lower() != 'y':
+            logging.info('Clearing library aborted.')
+            return 0
+
+        if library.clear():
+            logging.info('Library succesfully cleared.')
+            return 0
+
+        logging.warning('Unable to clear library.')
+        return 1
 
 
 class ScanCommand(commands.Command):
-    help = "Scan local media files and populate the local library."
+    help = 'Scan local media files and populate the local library.'
 
     def __init__(self):
         super(ScanCommand, self).__init__()
-        self.add_argument('--clear', action='store_true', dest='clear',
-                          help='Clear out library storage')
         self.add_argument('--limit', action='store', type=int, dest='limit',
                           default=0, help='Maxmimum number of tracks to scan')
 
@@ -37,22 +67,7 @@ class ScanCommand(commands.Command):
         excluded_file_extensions = set(
             file_ext.lower() for file_ext in excluded_file_extensions)
 
-        libraries = dict((l.name, l) for l in args.registry['local:library'])
-        library_name = config['local']['library']
-
-        if library_name not in libraries:
-            logger.warning('Local library %s not found', library_name)
-            return 1
-
-        library = libraries[library_name](config)
-        logger.debug('Using %s as the local library', library_name)
-
-        if args.clear:
-            if library.clear():
-                logging.info('Library succesfully cleared.')
-                return 0
-            logging.warning('Unable to clear library.')
-            return 1
+        library = _get_library(args, config)
 
         uri_path_mapping = {}
         uris_in_library = set()
