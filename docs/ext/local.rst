@@ -61,7 +61,7 @@ Configuration values
 .. confval:: local/scan_flush_threshold
 
     Number of tracks to wait before telling library it should try and store
-    it's progress so far. Some libraries might not respect this setting.
+    its progress so far. Some libraries might not respect this setting.
 
 .. confval:: local/excluded_file_extensions
 

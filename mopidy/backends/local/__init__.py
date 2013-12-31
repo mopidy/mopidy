@@ -50,9 +50,10 @@ class Library(object):
     """
     Local library interface.
 
-    Extensions that whish to provide an alternate local library storage backend
-    need to sub-class this class and install and confgure it with an extension.
-    Both scanning and library calls will use the active local library.
+    Extensions that wish to provide an alternate local library storage backend
+    need to sub-class this class and install and configure it with an
+    extension. Both scanning and library calls will use the active local
+    library.
 
     :param config: Config dictionary
     """
@@ -133,10 +134,12 @@ class Library(object):
 
     def flush(self):
         """
-        Called for every n-th track indicating that work should be commited,
-        implementors are free to ignore these hints.
+        Called for every n-th track indicating that work should be comitted.
+        Sub-classes are free to ignore these hints.
+
+        :rtype: Boolean indicating if state was flushed.
         """
-        pass
+        return False
 
     def close(self):
         """

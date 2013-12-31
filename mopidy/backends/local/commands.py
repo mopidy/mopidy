@@ -56,8 +56,9 @@ class ScanCommand(commands.Command):
 
     def __init__(self):
         super(ScanCommand, self).__init__()
-        self.add_argument('--limit', action='store', type=int, dest='limit',
-                          default=0, help='Maxmimum number of tracks to scan')
+        self.add_argument('--limit',
+                          action='store', type=int, dest='limit', default=None,
+                          help='Maxmimum number of tracks to scan')
 
     def run(self, args, config):
         media_dir = config['local']['media_dir']
@@ -114,7 +115,7 @@ class ScanCommand(commands.Command):
         total = args.limit or len(uris_to_update)
         start = time.time()
 
-        for uri in sorted(uris_to_update)[:args.limit or None]:
+        for uri in sorted(uris_to_update)[:args.limit]:
             try:
                 data = scanner.scan(path.path_to_uri(uri_path_mapping[uri]))
                 track = scan.audio_data_to_track(data).copy(uri=uri)
@@ -129,6 +130,8 @@ class ScanCommand(commands.Command):
                 remainder = duration / count * (total - count)
                 logger.info('Scanned %d of %d files in %ds, ~%ds left.',
                             count, total, duration, remainder)
+                # TODO: log if flush succeeded
+                # TODO: don't flush when count == total
                 library.flush()
 
         library.close()
