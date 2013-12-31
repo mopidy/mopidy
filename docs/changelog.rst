@@ -1701,8 +1701,8 @@ to this problem.
 - Local backend:
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
-    any help from the original MPD server. See :ref:`generating-a-tag-cache`
-    for instructions on how to use it.
+    any help from the original MPD server. See
+    :ref:`generating-a-local-library` for instructions on how to use it.
 
   - Fix support for UTF-8 encoding in tag caches.
 
