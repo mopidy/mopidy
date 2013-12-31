@@ -110,12 +110,12 @@ class ScanCommand(commands.Command):
         logger.info('Found %d unknown tracks.', len(uris_to_update))
         logger.info('Scanning...')
 
-        scanner = scan.Scanner(scan_timeout)
-        count = 0
-        total = args.limit or len(uris_to_update)
-        start = time.time()
+        uris_to_update = sorted(uris_to_update)[:args.limit]
 
-        for uri in sorted(uris_to_update)[:args.limit]:
+        scanner = scan.Scanner(scan_timeout)
+        progress = _Progress(flush_threshold, len(uris_to_update))
+
+        for uri in uris_to_update:
             try:
                 data = scanner.scan(path.path_to_uri(uri_path_mapping[uri]))
                 track = scan.audio_data_to_track(data).copy(uri=uri)
@@ -124,16 +124,30 @@ class ScanCommand(commands.Command):
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)
 
-            count += 1
-            if count % flush_threshold == 0 or count == total:
-                duration = time.time() - start
-                remainder = duration / count * (total - count)
-                logger.info('Scanned %d of %d files in %ds, ~%ds left.',
-                            count, total, duration, remainder)
-                # TODO: log if flush succeeded
-                # TODO: don't flush when count == total
-                library.flush()
+            if progress.increment():
+                progress.log()
+                if library.flush():
+                    logger.debug('Progress flushed.')
 
+        progress.log()
         library.close()
         logger.info('Done scanning.')
         return 0
+
+
+class _Progress(object):
+    def __init__(self, batch_size, total):
+        self.count = 0
+        self.batch_size = batch_size
+        self.total = total
+        self.start = time.time()
+
+    def increment(self):
+        self.count += 1
+        return self.count % self.batch_size == 0
+
+    def log(self):
+        duration = time.time() - self.start
+        remainder = duration / self.count * (self.total - self.count)
+        logger.info('Scanned %d of %d files in %ds, ~%ds left.',
+                    self.count, self.total, duration, remainder)
