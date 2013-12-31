@@ -12,8 +12,7 @@ server project <http://mpd.wikia.com/>`_. Mopidy does not depend on the
 original MPD server, but implements the MPD protocol itself, and is thus
 compatible with clients for the original MPD server.
 
-For more details on our MPD server implementation, see
-:mod:`mopidy.frontends.mpd`.
+For more details on our MPD server implementation, see :mod:`mopidy.mpd`.
 
 
 Known issues
@@ -54,7 +53,7 @@ None. The extension just needs Mopidy.
 Default configuration
 =====================
 
-.. literalinclude:: ../../mopidy/frontends/mpd/ext.conf
+.. literalinclude:: ../../mopidy/mpd/ext.conf
     :language: ini
 
 

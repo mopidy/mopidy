@@ -48,4 +48,4 @@ Frontend implementations
 ========================
 
 * :mod:`mopidy.http`
-* :mod:`mopidy.frontends.mpd`
+* :mod:`mopidy.mpd`
