@@ -11,8 +11,8 @@ module.exports = function (grunt) {
                 " * Licensed under the Apache License, Version 2.0 */\n",
             files: {
                 own: ["Gruntfile.js", "src/**/*.js", "test/**/*-test.js"],
-                concat: "../mopidy/frontends/http/data/mopidy.js",
-                minified: "../mopidy/frontends/http/data/mopidy.min.js"
+                concat: "../mopidy/http/data/mopidy.js",
+                minified: "../mopidy/http/data/mopidy.min.js"
             }
         },
         buster: {

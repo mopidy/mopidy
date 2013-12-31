@@ -12,6 +12,9 @@ v0.18.0 (UNRELEASED)
 - Expose :meth:`mopidy.core.Core.version` for HTTP clients to manage
   compatibility between API versions. (Fixes: :issue:`597`)
 
+- Add :class:`mopidy.models.Ref` class for use as a lightweight reference to
+  other model types, containing just an URI, a name, and an object type.
+
 **Pluggable local libraries**
 
 Fixes issues :issue:`44`, partially resolves :issue:`397`, and causes

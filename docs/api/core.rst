@@ -8,8 +8,8 @@ Core API
     :synopsis: Core API for use by frontends
 
 The core API is the interface that is used by frontends like
-:mod:`mopidy.frontends.mpd`. The core layer is inbetween the frontends and the
-backends.
+:mod:`mopidy.http` and :mod:`mopidy.mpd`. The core layer is inbetween the
+frontends and the backends.
 
 .. autoclass:: mopidy.core.Core
     :members:

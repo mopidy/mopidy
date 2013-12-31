@@ -113,8 +113,8 @@ HTML file:
 If you don't use Mopidy to host your web client, you can find the JS files in
 the Git repo at:
 
-- ``mopidy/frontends/http/data/mopidy.js``
-- ``mopidy/frontends/http/data/mopidy.min.js``
+- ``mopidy/http/data/mopidy.js``
+- ``mopidy/http/data/mopidy.min.js``
 
 
 Getting the library for Node.js use
