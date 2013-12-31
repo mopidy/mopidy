@@ -41,7 +41,7 @@ setup(
             'mopidy-convert-config = mopidy.config.convert:main',
         ],
         'mopidy.ext': [
-            'http = mopidy.frontends.http:Extension [http]',
+            'http = mopidy.http:Extension [http]',
             'local = mopidy.backends.local:Extension',
             'local-json = mopidy.backends.local.json:Extension',
             'mpd = mopidy.frontends.mpd:Extension',

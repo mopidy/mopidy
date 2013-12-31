@@ -21,8 +21,8 @@ You may need to adjust hostname and port for your local setup.
 
 In the source repo, you can find the files at:
 
-- `mopidy/frontends/http/data/mopidy.js`
-- `mopidy/frontends/http/data/mopidy.min.js`
+- `mopidy/http/data/mopidy.js`
+- `mopidy/http/data/mopidy.min.js`
 
 
 Getting it for Node.js use
@@ -72,7 +72,7 @@ To run tests automatically when you save a file:
     npm start
 
 To run tests, concatenate, minify the source, and update the JavaScript files
-in `mopidy/frontends/http/data/`:
+in `mopidy/http/data/`:
 
     npm run-script build
 

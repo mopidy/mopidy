@@ -15,7 +15,7 @@ except ImportError:
     ws4py = False
 
 if cherrypy and ws4py:
-    from mopidy.frontends.http import actor
+    from mopidy.http import actor
 
 
 @unittest.skipUnless(cherrypy, 'cherrypy not found')
