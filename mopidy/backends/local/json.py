@@ -52,6 +52,7 @@ class JsonLibrary(local.Library):
             config['local']['data_dir'], b'library.json.gz')
 
     def load(self):
+        logger.debug('Loading json library from %s', self._json_file)
         library = load_library(self._json_file)
         self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
         return len(self._tracks)

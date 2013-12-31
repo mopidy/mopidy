@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
-import copy
+import os
+import shutil
 import tempfile
 import unittest
 
@@ -89,30 +90,29 @@ class LocalLibraryProviderTest(unittest.TestCase):
         # Verifies that https://github.com/mopidy/mopidy/issues/500
         # has been fixed.
 
-        # TODO: re-add something that tests this in a more sane way
-        return
+        tmpdir = tempfile.mkdtemp()
+        try:
+            tmplib = os.path.join(tmpdir, 'library.json.gz')
+            shutil.copy(path_to_data_dir('library.json.gz'), tmplib)
 
-        with tempfile.NamedTemporaryFile() as library:
-            with open(self.config['local-json']['json_file']) as fh:
-                library.write(fh.read())
-            library.flush()
-
-            config = copy.deepcopy(self.config)
-            config['local-json']['json_file'] = library.name
+            config = {'local': self.config['local'].copy()}
+            config['local']['data_dir'] = tmpdir
             backend = actor.LocalBackend(config=config, audio=None)
 
             # Sanity check that value is in the library
             result = backend.library.lookup(self.tracks[0].uri)
             self.assertEqual(result, self.tracks[0:1])
 
-            # Clear library and refresh
-            library.seek(0)
-            library.truncate()
+            # Clear and refresh.
+            open(tmplib, 'w').close()
             backend.library.refresh()
 
             # Now it should be gone.
             result = backend.library.lookup(self.tracks[0].uri)
             self.assertEqual(result, [])
+
+        finally:
+            shutil.rmtree(tmpdir)
 
     def test_lookup(self):
         tracks = self.library.lookup(self.tracks[0].uri)
