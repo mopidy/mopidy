@@ -9,12 +9,6 @@ from a web based client. See :ref:`http-api` for details on how to integrate
 with Mopidy over HTTP.
 
 
-Known issues
-============
-
-https://github.com/mopidy/mopidy/issues?labels=HTTP+frontend
-
-
 Dependencies
 ============
 
@@ -32,7 +26,7 @@ install Mopidy with the extra dependencies for required for Mopidy-HTTP::
 Default configuration
 =====================
 
-.. literalinclude:: ../../mopidy/frontends/http/ext.conf
+.. literalinclude:: ../../mopidy/http/ext.conf
     :language: ini
 
 
