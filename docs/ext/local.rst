@@ -9,12 +9,6 @@ Extension for playing music from a local music archive.
 This backend handles URIs starting with ``local:``.
 
 
-Known issues
-============
-
-https://github.com/mopidy/mopidy/issues?labels=Local+backend
-
-
 Dependencies
 ============
 
