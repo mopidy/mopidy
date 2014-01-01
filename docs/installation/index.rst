@@ -193,6 +193,18 @@ can install Mopidy from PyPI using Pip.
          sudo yum install -y python-gst0.10 gstreamer0.10-plugins-good \
              gstreamer0.10-plugins-ugly gstreamer0.10-tools
 
+     If you use Gentoo you need to be careful because gstreamer 0.10 is in 
+     a different (lower) slot than 1.0, the default. Your emerge commands
+     will need to include the slot::
+
+         emerge -av gst-python gst-plugins-bad:0.10 gst-plugins-good:0.10 \
+             gst-plugins-ugly:0.10 gst-plugins-meta:0.10
+
+     gst-plugins-meta:0.10 is the one that actually pulls in the plugins
+     you want, so pay attention to the use flags (e.g., alsa, mp3)
+
+
+
 #. Optional: If you want Spotify support in Mopidy, you'll need to install
    libspotify and the Python bindings, pyspotify.
 
