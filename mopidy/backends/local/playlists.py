@@ -12,7 +12,7 @@ from mopidy.utils import formatting, path
 from .translator import parse_m3u
 
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger(__name__)
 
 
 class LocalPlaylistsProvider(base.BasePlaylistsProvider):

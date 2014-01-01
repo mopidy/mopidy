@@ -7,7 +7,7 @@ import mopidy
 from mopidy import config, ext
 from mopidy.utils import encoding, path
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger(__name__)
 
 
 class Extension(ext.Extension):

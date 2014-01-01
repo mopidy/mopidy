@@ -29,7 +29,7 @@ from mopidy import commands, ext
 from mopidy import config as config_lib
 from mopidy.utils import log, path, process, versioning
 
-logger = logging.getLogger('mopidy.main')
+logger = logging.getLogger(__name__)
 
 
 def main():

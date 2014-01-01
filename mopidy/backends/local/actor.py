@@ -11,7 +11,7 @@ from mopidy.utils import encoding, path
 from .playlists import LocalPlaylistsProvider
 from .playback import LocalPlaybackProvider
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger(__name__)
 
 
 class LocalBackend(pykka.ThreadingActor, base.Backend):

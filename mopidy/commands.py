@@ -14,7 +14,7 @@ from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.utils import deps, process, versioning
 
-logger = logging.getLogger('mopidy.commands')
+logger = logging.getLogger(__name__)
 
 _default_config = []
 for base in glib.get_system_config_dirs() + (glib.get_user_config_dir(),):

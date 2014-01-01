@@ -12,7 +12,7 @@ from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
 from mopidy.utils import path, versioning
 
-logger = logging.getLogger('mopidy.config')
+logger = logging.getLogger(__name__)
 
 _logging_schema = ConfigSchema('logging')
 _logging_schema['console_format'] = String()

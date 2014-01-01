@@ -7,7 +7,7 @@ import pykka
 
 from mopidy.mpd import exceptions, protocol
 
-logger = logging.getLogger('mopidy.mpd.dispatcher')
+logger = logging.getLogger(__name__)
 
 protocol.load_protocol_modules()
 

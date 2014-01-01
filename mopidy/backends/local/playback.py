@@ -6,7 +6,7 @@ from mopidy.backends import base
 
 from . import translator
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger(__name__)
 
 
 class LocalPlaybackProvider(base.BasePlaybackProvider):

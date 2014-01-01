@@ -9,7 +9,7 @@ import urlparse
 import glib
 
 
-logger = logging.getLogger('mopidy.utils.path')
+logger = logging.getLogger(__name__)
 
 
 XDG_DIRS = {

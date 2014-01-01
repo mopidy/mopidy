@@ -10,7 +10,7 @@ from mopidy.core import CoreListener
 from mopidy.mpd import session
 from mopidy.utils import encoding, network, process
 
-logger = logging.getLogger('mopidy.mpd')
+logger = logging.getLogger(__name__)
 
 
 class MpdFrontend(pykka.ThreadingActor, CoreListener):

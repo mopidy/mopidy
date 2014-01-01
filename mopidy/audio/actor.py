@@ -15,7 +15,7 @@ from . import mixers, playlists, utils
 from .constants import PlaybackState
 from .listener import AudioListener
 
-logger = logging.getLogger('mopidy.audio')
+logger = logging.getLogger(__name__)
 
 mixers.register_mixers()
 

@@ -10,7 +10,7 @@ from mopidy.utils import path
 
 from . import translator
 
-logger = logging.getLogger('mopidy.backends.local.commands')
+logger = logging.getLogger(__name__)
 
 
 class LocalCommand(commands.Command):

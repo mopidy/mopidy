@@ -10,7 +10,7 @@ from mopidy.utils import encoding
 
 from . import library
 
-logger = logging.getLogger('mopidy.backends.local.json')
+logger = logging.getLogger(__name__)
 
 
 class LocalJsonBackend(pykka.ThreadingActor, base.Backend):
