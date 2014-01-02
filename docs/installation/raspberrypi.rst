@@ -61,6 +61,7 @@ you a lot better performance.
        sudo wget -q -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
        sudo apt-get update
        sudo apt-get install mopidy
+       sudo apt-get install mopidy-spotify
 
 #. Since I have a HDMI cable connected, but want the sound on the analog sound
    connector, I have to run::
