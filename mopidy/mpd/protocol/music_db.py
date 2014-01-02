@@ -452,9 +452,23 @@ def lsinfo(context, uri=None):
     directories located at the root level, for both ``lsinfo``, ``lsinfo
     ""``, and ``lsinfo "/"``.
     """
+    result = []
     if uri is None or uri == '/' or uri == '':
-        return stored_playlists.listplaylists(context)
-    raise MpdNotImplemented  # TODO
+        result.extend(stored_playlists.listplaylists(context))
+        uri = '/'
+    if not uri.startswith('/'):
+        uri = '/%s' % uri
+    for ref in context.core.library.browse(uri).get():
+        if ref.type == 'directory':
+            assert ref.uri.startswith('/'), (
+                'Directory URIs must start with /: %r' % ref)
+            result.append(('directory', ref.uri[1:]))
+        elif ref.type == 'track':
+            # TODO Lookup tracks in batch for better performance
+            tracks = context.core.library.lookup(ref.uri).get()
+            if tracks:
+                result.extend(translator.track_to_mpd_format(tracks[0]))
+    return result
 
 
 @handle_request(r'rescan$')

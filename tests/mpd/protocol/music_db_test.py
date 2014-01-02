@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
 
+import datetime
 import unittest
 
 from mopidy.mpd.protocol import music_db
-from mopidy.models import Album, Artist, SearchResult, Track
+from mopidy.models import Album, Artist, Playlist, Ref, SearchResult, Track
 
 from tests.mpd import protocol
 
@@ -137,20 +138,76 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.sendRequest('listallinfo "file:///dev/urandom"')
         self.assertEqualResponse('ACK [0@0] {} Not implemented')
 
-    def test_lsinfo_without_path_returns_same_as_listplaylists(self):
-        lsinfo_response = self.sendRequest('lsinfo')
-        listplaylists_response = self.sendRequest('listplaylists')
-        self.assertEqual(lsinfo_response, listplaylists_response)
+    def test_lsinfo_without_path_returns_same_as_for_root(self):
+        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        self.backend.playlists.playlists = [
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
-    def test_lsinfo_with_empty_path_returns_same_as_listplaylists(self):
-        lsinfo_response = self.sendRequest('lsinfo ""')
-        listplaylists_response = self.sendRequest('listplaylists')
-        self.assertEqual(lsinfo_response, listplaylists_response)
+        response1 = self.sendRequest('lsinfo')
+        response2 = self.sendRequest('lsinfo "/"')
+        self.assertEqual(response1, response2)
 
-    def test_lsinfo_for_root_returns_same_as_listplaylists(self):
-        lsinfo_response = self.sendRequest('lsinfo "/"')
-        listplaylists_response = self.sendRequest('listplaylists')
-        self.assertEqual(lsinfo_response, listplaylists_response)
+    def test_lsinfo_with_empty_path_returns_same_as_for_root(self):
+        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        self.backend.playlists.playlists = [
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
+
+        response1 = self.sendRequest('lsinfo ""')
+        response2 = self.sendRequest('lsinfo "/"')
+        self.assertEqual(response1, response2)
+
+    def test_lsinfo_for_root_includes_playlists(self):
+        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        self.backend.playlists.playlists = [
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
+
+        self.sendRequest('lsinfo "/"')
+        self.assertInResponse('playlist: a')
+        # Date without microseconds and with time zone information
+        self.assertInResponse('Last-Modified: 2001-03-17T13:41:17Z')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_root_includes_dirs_for_each_lib_with_content(self):
+        self.backend.library.dummy_browse_result = [
+            Ref(uri='dummy:/a', name='a', type='track'),
+            Ref(uri='/foo', name='foo', type='directory'),
+        ]
+
+        self.sendRequest('lsinfo "/"')
+        self.assertInResponse('directory: dummy')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_dir_with_and_without_leading_slash_is_the_same(self):
+        self.backend.library.dummy_browse_result = [
+            Ref(uri='dummy:/a', name='a', type='track'),
+            Ref(uri='/foo', name='foo', type='directory'),
+        ]
+
+        response1 = self.sendRequest('lsinfo "dummy"')
+        response2 = self.sendRequest('lsinfo "/dummy"')
+        self.assertEqual(response1, response2)
+
+    def test_lsinfo_for_dir_includes_tracks(self):
+        self.backend.library.dummy_library = [
+            Track(uri='dummy:/a', name='a'),
+        ]
+        self.backend.library.dummy_browse_result = [
+            Ref(uri='dummy:/a', name='a', type='track'),
+        ]
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertInResponse('file: dummy:/a')
+        self.assertInResponse('Title: a')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_dir_includes_subdirs(self):
+        self.backend.library.dummy_browse_result = [
+            Ref(uri='/foo', name='foo', type='directory'),
+        ]
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertInResponse('directory: dummy/foo')
+        self.assertInResponse('OK')
 
     def test_update_without_uri(self):
         self.sendRequest('update')
