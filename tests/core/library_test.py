@@ -5,7 +5,7 @@ import unittest
 
 from mopidy.backends import base
 from mopidy.core import Core
-from mopidy.models import SearchResult, Track
+from mopidy.models import Ref, SearchResult, Track
 
 
 class CoreLibraryTest(unittest.TestCase):
@@ -13,11 +13,13 @@ class CoreLibraryTest(unittest.TestCase):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.library1 = mock.Mock(spec=base.BaseLibraryProvider)
+        self.library1.name.get.return_value = 'dummy1'
         self.backend1.library = self.library1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.library2 = mock.Mock(spec=base.BaseLibraryProvider)
+        self.library2.name.get.return_value = 'dummy2'
         self.backend2.library = self.library2
 
         # A backend without the optional library provider
@@ -27,6 +29,72 @@ class CoreLibraryTest(unittest.TestCase):
 
         self.core = Core(audio=None, backends=[
             self.backend1, self.backend2, self.backend3])
+
+    def test_browse_root_returns_dir_ref_for_each_library_with_content(self):
+        result1 = [
+            Ref(uri='/foo/bar', name='bar', type='directory'),
+            Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type='track'),
+        ]
+        self.library1.browse().get.return_value = result1
+        self.library1.browse.reset_mock()
+        self.library2.browse().get.return_value = []
+        self.library2.browse.reset_mock()
+
+        result = self.core.library.browse('/')
+
+        self.assertEqual(result, [
+            Ref(uri='/dummy1', name='dummy1', type='directory'),
+        ])
+        self.assertTrue(self.library1.browse.called)
+        self.assertTrue(self.library2.browse.called)
+        self.assertFalse(self.backend3.library.browse.called)
+
+    def test_browse_empty_string_returns_nothing(self):
+        result = self.core.library.browse('')
+
+        self.assertEqual(result, [])
+        self.assertFalse(self.library1.browse.called)
+        self.assertFalse(self.library2.browse.called)
+
+    def test_browse_dummy1_selects_dummy1_backend(self):
+        self.library1.browse().get.return_value = []
+        self.library1.browse.reset_mock()
+
+        self.core.library.browse('/dummy1/foo')
+
+        self.library1.browse.assert_called_once_with('/foo')
+        self.assertFalse(self.library2.browse.called)
+
+    def test_browse_dummy2_selects_dummy2_backend(self):
+        self.library2.browse().get.return_value = []
+        self.library2.browse.reset_mock()
+
+        self.core.library.browse('/dummy2/bar')
+
+        self.assertFalse(self.library1.browse.called)
+        self.library2.browse.assert_called_once_with('/bar')
+
+    def test_browse_dummy3_returns_nothing(self):
+        result = self.core.library.browse('/dummy3')
+
+        self.assertEqual(result, [])
+        self.assertFalse(self.library1.browse.called)
+        self.assertFalse(self.library2.browse.called)
+
+    def test_browse_dir_returns_subdirs_and_tracks(self):
+        result1 = [
+            Ref(uri='/foo/bar', name='bar', type='directory'),
+            Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type='track'),
+        ]
+        self.library1.browse().get.return_value = result1
+        self.library1.browse.reset_mock()
+
+        result = self.core.library.browse('/dummy1/foo')
+
+        self.assertEqual(result, [
+            Ref(uri='/dummy1/foo/bar', name='bar', type='directory'),
+            Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type='track'),
+        ])
 
     def test_lookup_selects_dummy1_backend(self):
         self.core.library.lookup('dummy1:a')
