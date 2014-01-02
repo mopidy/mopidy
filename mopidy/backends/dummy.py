@@ -38,11 +38,17 @@ class DummyBackend(pykka.ThreadingActor, base.Backend):
 
 
 class DummyLibraryProvider(base.BaseLibraryProvider):
+    name = 'dummy'
+
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)
         self.dummy_library = []
+        self.dummy_browse_result = []
         self.dummy_find_exact_result = SearchResult()
         self.dummy_search_result = SearchResult()
+
+    def browse(self, path):
+        return self.dummy_browse_result
 
     def find_exact(self, **query):
         return self.dummy_find_exact_result

@@ -50,8 +50,27 @@ class BaseLibraryProvider(object):
 
     pykka_traversable = True
 
+    name = None
+    """
+    Name of the library.
+
+    Used as the library directory name in Mopidy's virtual file system.
+
+    *MUST be set by any class that implements :meth:`browse`.*
+    """
+
     def __init__(self, backend):
         self.backend = backend
+
+    def browse(self, path):
+        """
+        See :meth:`mopidy.core.LibraryController.browse`.
+
+        If you implement this method, make sure to also set :attr:`name`.
+
+        *MAY be implemented by subclass.*
+        """
+        return []
 
     # TODO: replace with search(query, exact=True, ...)
     def find_exact(self, query=None, uris=None):

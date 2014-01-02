@@ -110,6 +110,10 @@ class LocalLibraryProviderTest(unittest.TestCase):
             result = backend.library.lookup(self.tracks[0].uri)
             self.assertEqual(result, [])
 
+    @unittest.SkipTest
+    def test_browse(self):
+        pass  # TODO
+
     def test_lookup(self):
         tracks = self.library.lookup(self.tracks[0].uri)
         self.assertEqual(tracks, self.tracks[0:1])
