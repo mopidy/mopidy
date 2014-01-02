@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import collections
+import re
 import urlparse
 
 import pykka
@@ -62,31 +63,36 @@ class LibraryController(object):
         """
         if not path.startswith('/'):
             return []
+
+        backends = {
+            backend.library.name.get(): backend
+            for backend in self.backends.with_library.values()
+            if backend.library.browse('/').get()}
+
         if path == '/':
-            library_names = [
-                backend.library.name.get()
-                for backend in self.backends.with_library.values()
-                if backend.library.browse('/').get()]
             return [
                 Ref(uri='/%s' % name, name=name, type='directory')
-                for name in library_names]
-        uri_scheme = path.split('/', 2)[1]
-        backend = self.backends.with_library.get(uri_scheme, None)
-        if backend:
-            backend_path = path.replace('/%s' % uri_scheme, '')
-            if not backend_path.startswith('/'):
-                backend_path = '/%s' % backend_path
-            refs = backend.library.browse(backend_path).get()
-            result = []
-            for ref in refs:
-                if ref.type == 'directory':
-                    result.append(
-                        ref.copy(uri='/%s%s' % (uri_scheme, ref.uri)))
-                else:
-                    result.append(ref)
-            return result
-        else:
+                for name in backends.keys()]
+
+        groups = re.match('/(?P<library>[^/]+)(?P<path>.*)', path).groupdict()
+        library_name = groups['library']
+        backend_path = groups['path']
+        if not backend_path.startswith('/'):
+            backend_path = '/%s' % backend_path
+
+        backend = backends.get(library_name, None)
+        if not backend:
             return []
+
+        refs = backend.library.browse(backend_path).get()
+        result = []
+        for ref in refs:
+            if ref.type == 'directory':
+                result.append(
+                    ref.copy(uri='/%s%s' % (library_name, ref.uri)))
+            else:
+                result.append(ref)
+        return result
 
     def find_exact(self, query=None, uris=None, **kwargs):
         """

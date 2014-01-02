@@ -31,11 +31,10 @@ class CoreLibraryTest(unittest.TestCase):
             self.backend1, self.backend2, self.backend3])
 
     def test_browse_root_returns_dir_ref_for_each_library_with_content(self):
-        result1 = [
+        self.library1.browse().get.return_value = [
             Ref(uri='/foo/bar', name='bar', type='directory'),
             Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type='track'),
         ]
-        self.library1.browse().get.return_value = result1
         self.library1.browse.reset_mock()
         self.library2.browse().get.return_value = []
         self.library2.browse.reset_mock()
@@ -57,29 +56,37 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertFalse(self.library2.browse.called)
 
     def test_browse_dummy1_selects_dummy1_backend(self):
-        self.library1.browse().get.return_value = []
+        self.library1.browse().get.return_value = [
+            Ref(uri='/foo/bar', name='bar', type='directory'),
+            Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type='track'),
+        ]
         self.library1.browse.reset_mock()
 
         self.core.library.browse('/dummy1/foo')
 
-        self.library1.browse.assert_called_once_with('/foo')
-        self.assertFalse(self.library2.browse.called)
+        self.assertEqual(self.library1.browse.call_count, 2)
+        self.assertEqual(self.library2.browse.call_count, 1)
+        self.library1.browse.assert_called_with('/foo')
 
     def test_browse_dummy2_selects_dummy2_backend(self):
-        self.library2.browse().get.return_value = []
+        self.library2.browse().get.return_value = [
+            Ref(uri='/bar/quux', name='quux', type='directory'),
+            Ref(uri='dummy2:/foo/baz.mp3', name='Baz', type='track'),
+        ]
         self.library2.browse.reset_mock()
 
         self.core.library.browse('/dummy2/bar')
 
-        self.assertFalse(self.library1.browse.called)
-        self.library2.browse.assert_called_once_with('/bar')
+        self.assertEqual(self.library1.browse.call_count, 1)
+        self.assertEqual(self.library2.browse.call_count, 2)
+        self.library2.browse.assert_called_with('/bar')
 
     def test_browse_dummy3_returns_nothing(self):
         result = self.core.library.browse('/dummy3')
 
         self.assertEqual(result, [])
-        self.assertFalse(self.library1.browse.called)
-        self.assertFalse(self.library2.browse.called)
+        self.assertEqual(self.library1.browse.call_count, 1)
+        self.assertEqual(self.library2.browse.call_count, 1)
 
     def test_browse_dir_returns_subdirs_and_tracks(self):
         result1 = [
