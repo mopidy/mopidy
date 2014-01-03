@@ -1,10 +1,13 @@
-/*global require:false, assert:false, refute:false*/
+/*global require:false */
 
 if (typeof module === "object" && typeof require === "function") {
     var buster = require("buster");
     var Mopidy = require("../src/mopidy");
     var when = require("when");
 }
+
+var assert = buster.assert;
+var refute = buster.refute;
 
 buster.testCase("Mopidy", {
     setUp: function () {
