@@ -88,6 +88,7 @@ class Backends(list):
         super(Backends, self).__init__(backends)
 
         self.with_library = collections.OrderedDict()
+        self.with_browsable_library = collections.OrderedDict()
         self.with_playback = collections.OrderedDict()
         self.with_playlists = collections.OrderedDict()
 
@@ -100,6 +101,13 @@ class Backends(list):
                 self.add(self.with_library, has_library, scheme, backend)
                 self.add(self.with_playback, has_playback, scheme, backend)
                 self.add(self.with_playlists, has_playlists, scheme, backend)
+
+            if has_library:
+                root_dir_name = backend.library.root_directory_name.get()
+                has_browsable_library = root_dir_name is not None
+                self.add(
+                    self.with_browsable_library, has_browsable_library,
+                    root_dir_name, backend)
 
     def add(self, registry, supported, uri_scheme, backend):
         if not supported:
