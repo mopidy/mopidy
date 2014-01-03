@@ -170,7 +170,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
     def test_lsinfo_for_root_includes_dirs_for_each_lib_with_content(self):
         self.backend.library.dummy_browse_result = [
             Ref(uri='dummy:/a', name='a', type='track'),
-            Ref(uri='/foo', name='foo', type='directory'),
+            Ref(uri='/foo', name='foo', type=Ref.DIRECTORY),
         ]
 
         self.sendRequest('lsinfo "/"')
@@ -180,7 +180,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
     def test_lsinfo_for_dir_with_and_without_leading_slash_is_the_same(self):
         self.backend.library.dummy_browse_result = [
             Ref(uri='dummy:/a', name='a', type='track'),
-            Ref(uri='/foo', name='foo', type='directory'),
+            Ref(uri='/foo', name='foo', type=Ref.DIRECTORY),
         ]
 
         response1 = self.sendRequest('lsinfo "dummy"')
@@ -202,7 +202,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_dir_includes_subdirs(self):
         self.backend.library.dummy_browse_result = [
-            Ref(uri='/foo', name='foo', type='directory'),
+            Ref(uri='/foo', name='foo', type=Ref.DIRECTORY),
         ]
 
         self.sendRequest('lsinfo "/dummy"')

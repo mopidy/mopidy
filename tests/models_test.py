@@ -87,6 +87,13 @@ class RefTest(unittest.TestCase):
         ref2 = json.loads(serialized, object_hook=model_json_decoder)
         self.assertEqual(ref1, ref2)
 
+    def test_type_constants(self):
+        self.assertEqual(Ref.ALBUM, 'album')
+        self.assertEqual(Ref.ARTIST, 'artist')
+        self.assertEqual(Ref.DIRECTORY, 'directory')
+        self.assertEqual(Ref.PLAYLIST, 'playlist')
+        self.assertEqual(Ref.TRACK, 'track')
+
 
 class ArtistTest(unittest.TestCase):
     def test_uri(self):

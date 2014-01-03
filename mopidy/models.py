@@ -160,6 +160,21 @@ class Ref(ImmutableObject):
     #: "directory". Read-only.
     type = None
 
+    #: Constant used for comparision with the :attr:`type` field.
+    ALBUM = 'album'
+
+    #: Constant used for comparision with the :attr:`type` field.
+    ARTIST = 'artist'
+
+    #: Constant used for comparision with the :attr:`type` field.
+    DIRECTORY = 'directory'
+
+    #: Constant used for comparision with the :attr:`type` field.
+    PLAYLIST = 'playlist'
+
+    #: Constant used for comparision with the :attr:`type` field.
+    TRACK = 'track'
+
 
 class Artist(ImmutableObject):
     """
