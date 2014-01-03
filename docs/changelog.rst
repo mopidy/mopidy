@@ -37,6 +37,12 @@ a temporary regression of :issue:`527`.
 
 - Live lookup of URI metadata has been added. (Fixes :issue:`540`)
 
+**HTTP frontend**
+
+- Upgrade Mopidy.js dependencies and add support for using Mopidy.js with
+  Browserify. This version has been released to npm as Mopidy.js v0.2.0.
+  (Fixes: :issue:`609`)
+
 **Internal changes**
 
 - Events from the audio actor, backends, and core actor are now emitted
@@ -414,7 +420,7 @@ A release with a number of small and medium fixes, with no specific focus.
   objects with ``tlid`` set to ``0`` to be sent to the HTTP client without the
   ``tlid`` field. (Fixes: :issue:`501`)
 
-- Upgrade Mopidy.js dependencies. This version has been released to NPM as
+- Upgrade Mopidy.js dependencies. This version has been released to npm as
   Mopidy.js v0.1.1.
 
 **Extension support**
