@@ -85,7 +85,7 @@ To run other [grunt](http://gruntjs.com/) targets which isn't predefined in
 Changelog
 ---------
 
-### 0.2.0 (UNRELEASED)
+### 0.2.0 (2014-01-04)
 
 - **Backwards incompatible change for Node.js users:**
   `var Mopidy = require('mopidy').Mopidy;` must be changed to
