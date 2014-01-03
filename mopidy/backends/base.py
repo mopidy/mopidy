@@ -50,11 +50,9 @@ class BaseLibraryProvider(object):
 
     pykka_traversable = True
 
-    name = None
+    root_directory_name = None
     """
-    Name of the library.
-
-    Used as the library directory name in Mopidy's virtual file system.
+    Name of the library's root directory in Mopidy's virtual file system.
 
     *MUST be set by any class that implements :meth:`browse`.*
     """
@@ -66,7 +64,8 @@ class BaseLibraryProvider(object):
         """
         See :meth:`mopidy.core.LibraryController.browse`.
 
-        If you implement this method, make sure to also set :attr:`name`.
+        If you implement this method, make sure to also set
+        :attr:`root_directory_name`.
 
         *MAY be implemented by subclass.*
         """

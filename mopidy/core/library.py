@@ -65,7 +65,7 @@ class LibraryController(object):
             return []
 
         backends = {
-            backend.library.name.get(): backend
+            backend.library.root_directory_name.get(): backend
             for backend in self.backends.with_library.values()
             if backend.library.browse('/').get()}
 

@@ -13,13 +13,13 @@ class CoreLibraryTest(unittest.TestCase):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.library1 = mock.Mock(spec=base.BaseLibraryProvider)
-        self.library1.name.get.return_value = 'dummy1'
+        self.library1.root_directory_name.get.return_value = 'dummy1'
         self.backend1.library = self.library1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.library2 = mock.Mock(spec=base.BaseLibraryProvider)
-        self.library2.name.get.return_value = 'dummy2'
+        self.library2.root_directory_name.get.return_value = 'dummy2'
         self.backend2.library = self.library2
 
         # A backend without the optional library provider
@@ -89,11 +89,10 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertEqual(self.library2.browse.call_count, 1)
 
     def test_browse_dir_returns_subdirs_and_tracks(self):
-        result1 = [
+        self.library1.browse().get.return_value = [
             Ref(uri='/foo/bar', name='bar', type=Ref.DIRECTORY),
             Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type=Ref.TRACK),
         ]
-        self.library1.browse().get.return_value = result1
         self.library1.browse.reset_mock()
 
         result = self.core.library.browse('/dummy1/foo')

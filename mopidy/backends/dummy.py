@@ -38,7 +38,7 @@ class DummyBackend(pykka.ThreadingActor, base.Backend):
 
 
 class DummyLibraryProvider(base.BaseLibraryProvider):
-    name = 'dummy'
+    root_directory_name = 'dummy'
 
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)
