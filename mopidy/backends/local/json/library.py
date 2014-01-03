@@ -42,7 +42,7 @@ def write_library(json_file, data):
 
 
 class LocalJsonLibraryProvider(base.BaseLibraryProvider):
-    name = 'local'
+    root_directory_name = 'local'
 
     def __init__(self, *args, **kwargs):
         super(LocalJsonLibraryProvider, self).__init__(*args, **kwargs)
