@@ -35,7 +35,7 @@ Mopidy.js using npm:
 
 After npm completes, you can import Mopidy.js using ``require()``:
 
-    var Mopidy = require("mopidy").Mopidy;
+    var Mopidy = require("mopidy");
 
 
 Using the library
@@ -80,3 +80,26 @@ To run other [grunt](http://gruntjs.com/) targets which isn't predefined in
 `package.json` and thus isn't available through `npm run-script`:
 
     PATH=./node_modules/.bin:$PATH grunt foo
+
+
+Changelog
+---------
+
+### 0.2.0 (UNRELEASED)
+
+- **Backwards incompatible change for Node.js users:**
+  `var Mopidy = require('mopidy').Mopidy;` must be changed to
+  `var Mopidy = require('mopidy');`
+
+- Add support for [Browserify](http://browserify.org/).
+
+- Upgrade dependencies.
+
+### 0.1.1 (2013-09-17)
+
+- Upgrade dependencies.
+
+### 0.1.0 (2013-03-31)
+
+- Initial release as a Node.js module to the
+  [npm registry](https://npmjs.org/).
