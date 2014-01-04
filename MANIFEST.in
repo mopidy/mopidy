@@ -1,12 +1,23 @@
+include *.py
 include *.rst
+include .coveragerc
+include .mailmap
+include .travis.yml
+include AUTHORS
 include LICENSE
 include MANIFEST.in
-include data/mopidy.desktop
+
+recursive-include data *
 
 recursive-include docs *
 prune docs/_build
 
+recursive-include js *
+prune js/node_modules
+prune js/test/lib
+
 recursive-include mopidy *.conf
 recursive-include mopidy/http/data *
+
 recursive-include tests *.py
 recursive-include tests/data *
