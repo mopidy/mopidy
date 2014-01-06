@@ -7,6 +7,11 @@ This changelog is used to track all major changes to Mopidy.
 v0.18.0 (UNRELEASED)
 ====================
 
+**MPD frontend**
+
+- Empty commands now return a ``ACK [5@0] {} No command given`` error instead
+  of ``OK``. This is consistent with the original MPD server implementation.
+
 **Core API**
 
 - Expose :meth:`mopidy.core.Core.version` for HTTP clients to manage
