@@ -134,7 +134,7 @@ class Library(object):
 
     def flush(self):
         """
-        Called for every n-th track indicating that work should be comitted.
+        Called for every n-th track indicating that work should be committed.
         Sub-classes are free to ignore these hints.
 
         :rtype: Boolean indicating if state was flushed.
