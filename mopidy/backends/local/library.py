@@ -4,7 +4,7 @@ import logging
 
 from mopidy.backends import base
 
-logger = logging.getLogger('mopidy.backends.local.library')
+logger = logging.getLogger(__name__)
 
 
 class LocalLibraryProvider(base.BaseLibraryProvider):

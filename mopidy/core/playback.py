@@ -8,7 +8,7 @@ from mopidy.audio import PlaybackState
 from . import listener
 
 
-logger = logging.getLogger('mopidy.core')
+logger = logging.getLogger(__name__)
 
 
 class PlaybackController(object):

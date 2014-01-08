@@ -6,7 +6,7 @@ import os
 import mopidy
 from mopidy import config, ext
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger(__name__)
 
 
 class Extension(ext.Extension):

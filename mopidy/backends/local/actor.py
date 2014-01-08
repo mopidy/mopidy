@@ -12,7 +12,7 @@ from .library import LocalLibraryProvider
 from .playback import LocalPlaybackProvider
 from .playlists import LocalPlaylistsProvider
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger(__name__)
 
 
 class LocalBackend(pykka.ThreadingActor, base.Backend):

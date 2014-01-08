@@ -14,7 +14,7 @@ from mopidy.core import CoreListener
 from . import ws
 
 
-logger = logging.getLogger('mopidy.http')
+logger = logging.getLogger(__name__)
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):

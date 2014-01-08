@@ -9,7 +9,7 @@ from mopidy import core, models
 from mopidy.utils import jsonrpc
 
 
-logger = logging.getLogger('mopidy.http')
+logger = logging.getLogger(__name__)
 
 
 class WebSocketResource(object):

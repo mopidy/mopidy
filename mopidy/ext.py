@@ -8,7 +8,7 @@ from mopidy import exceptions
 from mopidy import config as config_lib
 
 
-logger = logging.getLogger('mopidy.ext')
+logger = logging.getLogger(__name__)
 
 
 class Extension(object):

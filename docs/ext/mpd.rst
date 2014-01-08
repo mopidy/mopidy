@@ -15,12 +15,6 @@ compatible with clients for the original MPD server.
 For more details on our MPD server implementation, see :mod:`mopidy.mpd`.
 
 
-Known issues
-============
-
-https://github.com/mopidy/mopidy/issues?labels=MPD+frontend
-
-
 Limitations
 ===========
 

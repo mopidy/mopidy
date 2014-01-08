@@ -11,12 +11,6 @@ The stream backend will handle streaming of URIs matching the
 are installed.
 
 
-Known issues
-============
-
-https://github.com/mopidy/mopidy/issues?labels=Stream+backend
-
-
 Dependencies
 ============
 

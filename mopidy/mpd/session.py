@@ -5,7 +5,7 @@ import logging
 from mopidy.mpd import dispatcher, protocol
 from mopidy.utils import formatting, network
 
-logger = logging.getLogger('mopidy.mpd')
+logger = logging.getLogger(__name__)
 
 
 class MpdSession(network.LineProtocol):

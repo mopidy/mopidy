@@ -10,7 +10,7 @@ from mopidy.audio import scan
 from mopidy.backends import base
 from mopidy.models import Track
 
-logger = logging.getLogger('mopidy.backends.stream')
+logger = logging.getLogger(__name__)
 
 
 class StreamBackend(pykka.ThreadingActor, base.Backend):

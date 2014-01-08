@@ -62,6 +62,19 @@ you a lot better performance.
        sudo apt-get update
        sudo apt-get install mopidy
 
+   Note that this will only install the main Mopidy package. For e.g. Spotify
+   or SoundCloud support you need to install the respective extension packages.
+   To list all the extensions available from apt.mopidy.com, you can run::
+
+       apt-cache search mopidy
+
+   To install one of the listed packages, e.g. ``mopidy-spotify``, simply run::
+
+       sudo apt-get install mopidy-spotify
+
+   For a full list of available Mopidy extensions, including those not
+   installable from apt.mopidy.com, see :ref:`ext`.
+
 #. Since I have a HDMI cable connected, but want the sound on the analog sound
    connector, I have to run::
 

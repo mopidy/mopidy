@@ -8,7 +8,7 @@ import urllib
 from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri, uri_to_path
 
-logger = logging.getLogger('mopidy.backends.local')
+logger = logging.getLogger(__name__)
 
 
 def local_track_uri_to_file_uri(uri, media_dir):

@@ -11,7 +11,7 @@ from mopidy import models
 from mopidy.backends import local
 from mopidy.backends.local import search
 
-logger = logging.getLogger('mopidy.backends.local.json')
+logger = logging.getLogger(__name__)
 
 
 # TODO: move to load and dump in models?

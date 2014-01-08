@@ -42,6 +42,19 @@ in the same way as you get updates to the rest of your distribution.
        sudo apt-get update
        sudo apt-get install mopidy
 
+   Note that this will only install the main Mopidy package. For e.g. Spotify
+   or SoundCloud support you need to install the respective extension packages.
+   To list all the extensions available from apt.mopidy.com, you can run::
+
+       apt-cache search mopidy
+
+   To install one of the listed packages, e.g. ``mopidy-spotify``, simply run::
+
+       sudo apt-get install mopidy-spotify
+
+   For a full list of available Mopidy extensions, including those not
+   installable from apt.mopidy.com, see :ref:`ext`.
+
 #. Finally, you need to set a couple of :doc:`config values </config>`, and then
    you're ready to :doc:`run Mopidy </running>`.
 
@@ -192,6 +205,16 @@ can install Mopidy from PyPI using Pip.
 
          sudo yum install -y python-gst0.10 gstreamer0.10-plugins-good \
              gstreamer0.10-plugins-ugly gstreamer0.10-tools
+
+     If you use Gentoo you need to be careful because GStreamer 0.10 is in
+     a different lower slot than 1.0, the default. Your emerge commands will
+     need to include the slot::
+
+         emerge -av gst-python gst-plugins-bad:0.10 gst-plugins-good:0.10 \
+             gst-plugins-ugly:0.10 gst-plugins-meta:0.10
+
+     gst-plugins-meta:0.10 is the one that actually pulls in the plugins
+     you want, so pay attention to the use flags, e.g. ``alsa``, ``mp3``, etc.
 
 #. Optional: If you want Spotify support in Mopidy, you'll need to install
    libspotify and the Python bindings, pyspotify.
