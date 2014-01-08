@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 import unittest
 
 from mopidy.mpd.exceptions import (
-    MpdAckError, MpdPermissionError, MpdUnknownCommand, MpdSystemError,
-    MpdNotImplemented)
+    MpdAckError, MpdPermissionError, MpdUnknownCommand, MpdNoCommand, 
+    MpdSystemError, MpdNotImplemented)
 
 
 class MpdExceptionsTest(unittest.TestCase):
@@ -40,6 +40,14 @@ class MpdExceptionsTest(unittest.TestCase):
             self.assertEqual(
                 e.get_mpd_ack(),
                 'ACK [5@0] {} unknown command "play"')
+
+    def test_mpd_no_command(self):
+        try:
+            raise MpdNoCommand
+        except MpdAckError as e:
+            self.assertEqual(
+                e.get_mpd_ack(),
+                'ACK [5@0] {} No command given')
 
     def test_mpd_system_error(self):
         try:

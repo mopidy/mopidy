@@ -62,6 +62,12 @@ class MpdUnknownCommand(MpdAckError):
         self.command = ''
 
 
+class MpdNoCommand(MpdUnknownCommand):
+    def __init__(self, *args, **kwargs):
+        super(MpdNoCommand, self).__init__(*args, **kwargs)
+        self.message = 'No command given'
+
+
 class MpdNoExistError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_NO_EXIST
 
