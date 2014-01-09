@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
 
 import collections
+import re
 import urlparse
 
 import pykka
+
+from mopidy.models import Ref
 
 
 class LibraryController(object):
@@ -28,6 +31,63 @@ class LibraryController(object):
             backends_to_uris = dict([
                 (b, None) for b in self.backends.with_library.values()])
         return backends_to_uris
+
+    def browse(self, path):
+        """
+        Browse directories and tracks at the given ``path``.
+
+        ``path`` is a string that always starts with "/". It points to a
+        directory in Mopidy's virtual file system.
+
+        Returns a list of :class:`mopidy.models.Ref` objects for the
+        directories and tracks at the given ``path``.
+
+        The :class:`~mopidy.models.Ref` objects representing tracks keeps the
+        track's original URI. A matching pair of objects can look like this::
+
+            Track(uri='dummy:/foo.mp3', name='foo', artists=..., album=...)
+            Ref.track(uri='dummy:/foo.mp3', name='foo')
+
+        The :class:`~mopidy.models.Ref` objects representing directories has
+        plain paths, not including any URI schema. For example, the dummy
+        library's ``/bar`` directory is returned like this::
+
+            Ref.directory(uri='/dummy/bar', name='bar')
+
+        Note to backend implementors: The ``/dummy`` part of the URI is added
+        by Mopidy core, not the individual backends.
+
+        :param path: path to browse
+        :type path: string
+        :rtype: list of :class:`mopidy.models.Ref`
+        """
+        if not path.startswith('/'):
+            return []
+
+        if path == '/':
+            return [
+                Ref.directory(uri='/%s' % name, name=name)
+                for name in self.backends.with_browsable_library.keys()]
+
+        groups = re.match('/(?P<library>[^/]+)(?P<path>.*)', path).groupdict()
+        library_name = groups['library']
+        backend_path = groups['path']
+        if not backend_path.startswith('/'):
+            backend_path = '/%s' % backend_path
+
+        backend = self.backends.with_browsable_library.get(library_name, None)
+        if not backend:
+            return []
+
+        refs = backend.library.browse(backend_path).get()
+        result = []
+        for ref in refs:
+            if ref.type == Ref.DIRECTORY:
+                result.append(
+                    ref.copy(uri='/%s%s' % (library_name, ref.uri)))
+            else:
+                result.append(ref)
+        return result
 
     def find_exact(self, query=None, uris=None, **kwargs):
         """

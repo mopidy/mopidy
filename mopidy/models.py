@@ -160,6 +160,51 @@ class Ref(ImmutableObject):
     #: "directory". Read-only.
     type = None
 
+    #: Constant used for comparision with the :attr:`type` field.
+    ALBUM = 'album'
+
+    #: Constant used for comparision with the :attr:`type` field.
+    ARTIST = 'artist'
+
+    #: Constant used for comparision with the :attr:`type` field.
+    DIRECTORY = 'directory'
+
+    #: Constant used for comparision with the :attr:`type` field.
+    PLAYLIST = 'playlist'
+
+    #: Constant used for comparision with the :attr:`type` field.
+    TRACK = 'track'
+
+    @classmethod
+    def album(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`ALBUM`."""
+        kwargs['type'] = Ref.ALBUM
+        return cls(**kwargs)
+
+    @classmethod
+    def artist(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`ARTIST`."""
+        kwargs['type'] = Ref.ARTIST
+        return cls(**kwargs)
+
+    @classmethod
+    def directory(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`DIRECTORY`."""
+        kwargs['type'] = Ref.DIRECTORY
+        return cls(**kwargs)
+
+    @classmethod
+    def playlist(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`PLAYLIST`."""
+        kwargs['type'] = Ref.PLAYLIST
+        return cls(**kwargs)
+
+    @classmethod
+    def track(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`TRACK`."""
+        kwargs['type'] = Ref.TRACK
+        return cls(**kwargs)
+
 
 class Artist(ImmutableObject):
     """

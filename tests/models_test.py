@@ -87,6 +87,43 @@ class RefTest(unittest.TestCase):
         ref2 = json.loads(serialized, object_hook=model_json_decoder)
         self.assertEqual(ref1, ref2)
 
+    def test_type_constants(self):
+        self.assertEqual(Ref.ALBUM, 'album')
+        self.assertEqual(Ref.ARTIST, 'artist')
+        self.assertEqual(Ref.DIRECTORY, 'directory')
+        self.assertEqual(Ref.PLAYLIST, 'playlist')
+        self.assertEqual(Ref.TRACK, 'track')
+
+    def test_album_constructor(self):
+        ref = Ref.album(uri='foo', name='bar')
+        self.assertEqual(ref.uri, 'foo')
+        self.assertEqual(ref.name, 'bar')
+        self.assertEqual(ref.type, Ref.ALBUM)
+
+    def test_artist_constructor(self):
+        ref = Ref.artist(uri='foo', name='bar')
+        self.assertEqual(ref.uri, 'foo')
+        self.assertEqual(ref.name, 'bar')
+        self.assertEqual(ref.type, Ref.ARTIST)
+
+    def test_directory_constructor(self):
+        ref = Ref.directory(uri='foo', name='bar')
+        self.assertEqual(ref.uri, 'foo')
+        self.assertEqual(ref.name, 'bar')
+        self.assertEqual(ref.type, Ref.DIRECTORY)
+
+    def test_playlist_constructor(self):
+        ref = Ref.playlist(uri='foo', name='bar')
+        self.assertEqual(ref.uri, 'foo')
+        self.assertEqual(ref.name, 'bar')
+        self.assertEqual(ref.type, Ref.PLAYLIST)
+
+    def test_track_constructor(self):
+        ref = Ref.track(uri='foo', name='bar')
+        self.assertEqual(ref.uri, 'foo')
+        self.assertEqual(ref.name, 'bar')
+        self.assertEqual(ref.type, Ref.TRACK)
+
 
 class ArtistTest(unittest.TestCase):
     def test_uri(self):

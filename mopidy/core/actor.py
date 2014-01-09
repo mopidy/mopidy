@@ -88,6 +88,7 @@ class Backends(list):
         super(Backends, self).__init__(backends)
 
         self.with_library = collections.OrderedDict()
+        self.with_browsable_library = collections.OrderedDict()
         self.with_playback = collections.OrderedDict()
         self.with_playlists = collections.OrderedDict()
 
@@ -112,3 +113,8 @@ class Backends(list):
                     self.with_playback[scheme] = backend
                 if has_playlists:
                     self.with_playlists[scheme] = backend
+
+            if has_library:
+                root_dir_name = backend.library.root_directory_name.get()
+                if root_dir_name is not None:
+                    self.with_browsable_library[root_dir_name] = backend
