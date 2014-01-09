@@ -64,6 +64,15 @@ class Library(object):
     def __init__(self, config):
         self._config = config
 
+    def browse(self, path):
+        """
+        Browse directories and tracks at the given path.
+
+        :param string path: path to browse or None for root.
+        :rtype: List of :class:`~mopidy.models.Ref` tracks and directories.
+        """
+        raise NotImplementedError
+
     def load(self):
         """
         (Re)load any tracks stored in memory, if any, otherwise just return

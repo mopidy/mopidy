@@ -50,6 +50,9 @@ class JsonLibrary(local.Library):
         self._json_file = os.path.join(
             config['local']['data_dir'], b'library.json.gz')
 
+    def browse(self, path):
+        return []
+
     def load(self):
         logger.debug('Loading json library from %s', self._json_file)
         library = load_library(self._json_file)
