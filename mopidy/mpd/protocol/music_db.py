@@ -4,7 +4,7 @@ import functools
 import itertools
 import re
 
-from mopidy.models import Track
+from mopidy.models import Ref, Track
 from mopidy.mpd import translator
 from mopidy.mpd.exceptions import MpdArgError, MpdNotImplemented
 from mopidy.mpd.protocol import handle_request, stored_playlists
@@ -459,11 +459,11 @@ def lsinfo(context, uri=None):
     if not uri.startswith('/'):
         uri = '/%s' % uri
     for ref in context.core.library.browse(uri).get():
-        if ref.type == 'directory':
+        if ref.type == Ref.DIRECTORY:
             assert ref.uri.startswith('/'), (
                 'Directory URIs must start with /: %r' % ref)
             result.append(('directory', ref.uri[1:]))
-        elif ref.type == 'track':
+        elif ref.type == Ref.TRACK:
             # TODO Lookup tracks in batch for better performance
             tracks = context.core.library.lookup(ref.uri).get()
             if tracks:
