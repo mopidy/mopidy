@@ -57,6 +57,9 @@ a temporary regression of :issue:`527`.
 
 - Live lookup of URI metadata has been added. (Fixes :issue:`540`)
 
+- Support for extended M3U added, meaning that basic track metadata stored in
+  playlists will be provided for playlist tracks.
+
 **HTTP frontend**
 
 - Upgrade Mopidy.js dependencies and add support for using Mopidy.js with
