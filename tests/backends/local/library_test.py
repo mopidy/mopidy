@@ -1,13 +1,14 @@
 from __future__ import unicode_literals
 
-import copy
+import os
+import shutil
 import tempfile
 import unittest
 
 import pykka
 
 from mopidy import core
-from mopidy.backends.local.json import actor
+from mopidy.backends.local import actor, json
 from mopidy.models import Track, Album, Artist
 
 from tests import path_to_data_dir
@@ -61,21 +62,22 @@ class LocalLibraryProviderTest(unittest.TestCase):
     config = {
         'local': {
             'media_dir': path_to_data_dir(''),
+            'data_dir': path_to_data_dir(''),
             'playlists_dir': b'',
-        },
-        'local-json': {
-            'json_file': path_to_data_dir('library.json.gz'),
+            'library': 'json',
         },
     }
 
     def setUp(self):
-        self.backend = actor.LocalJsonBackend.start(
+        actor.LocalBackend.libraries = [json.JsonLibrary]
+        self.backend = actor.LocalBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
         self.library = self.core.library
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
+        actor.LocalBackend.libraries = []
 
     def test_refresh(self):
         self.library.refresh()
@@ -88,27 +90,29 @@ class LocalLibraryProviderTest(unittest.TestCase):
         # Verifies that https://github.com/mopidy/mopidy/issues/500
         # has been fixed.
 
-        with tempfile.NamedTemporaryFile() as library:
-            with open(self.config['local-json']['json_file']) as fh:
-                library.write(fh.read())
-            library.flush()
+        tmpdir = tempfile.mkdtemp()
+        try:
+            tmplib = os.path.join(tmpdir, 'library.json.gz')
+            shutil.copy(path_to_data_dir('library.json.gz'), tmplib)
 
-            config = copy.deepcopy(self.config)
-            config['local-json']['json_file'] = library.name
-            backend = actor.LocalJsonBackend(config=config, audio=None)
+            config = {'local': self.config['local'].copy()}
+            config['local']['data_dir'] = tmpdir
+            backend = actor.LocalBackend(config=config, audio=None)
 
             # Sanity check that value is in the library
             result = backend.library.lookup(self.tracks[0].uri)
             self.assertEqual(result, self.tracks[0:1])
 
-            # Clear library and refresh
-            library.seek(0)
-            library.truncate()
+            # Clear and refresh.
+            open(tmplib, 'w').close()
             backend.library.refresh()
 
             # Now it should be gone.
             result = backend.library.lookup(self.tracks[0].uri)
             self.assertEqual(result, [])
+
+        finally:
+            shutil.rmtree(tmpdir)
 
     @unittest.SkipTest
     def test_browse(self):

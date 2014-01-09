@@ -13,45 +13,72 @@ from . import translator
 logger = logging.getLogger(__name__)
 
 
+def _get_library(args, config):
+    libraries = dict((l.name, l) for l in args.registry['local:library'])
+    library_name = config['local']['library']
+
+    if library_name not in libraries:
+        logger.warning('Local library %s not found', library_name)
+        return 1
+
+    logger.debug('Using %s as the local library', library_name)
+    return libraries[library_name](config)
+
+
 class LocalCommand(commands.Command):
     def __init__(self):
         super(LocalCommand, self).__init__()
         self.add_child('scan', ScanCommand())
+        self.add_child('clear', ClearCommand())
+
+
+class ClearCommand(commands.Command):
+    help = 'Clear local media files from the local library.'
+
+    def run(self, args, config):
+        library = _get_library(args, config)
+        prompt = 'Are you sure you want to clear the library? [y/N] '
+
+        if raw_input(prompt).lower() != 'y':
+            logging.info('Clearing library aborted.')
+            return 0
+
+        if library.clear():
+            logging.info('Library succesfully cleared.')
+            return 0
+
+        logging.warning('Unable to clear library.')
+        return 1
 
 
 class ScanCommand(commands.Command):
-    help = "Scan local media files and populate the local library."
+    help = 'Scan local media files and populate the local library.'
 
-    def run(self, args, config, extensions):
+    def __init__(self):
+        super(ScanCommand, self).__init__()
+        self.add_argument('--limit',
+                          action='store', type=int, dest='limit', default=None,
+                          help='Maxmimum number of tracks to scan')
+
+    def run(self, args, config):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
+        flush_threshold = config['local']['scan_flush_threshold']
+        excluded_file_extensions = config['local']['excluded_file_extensions']
         excluded_file_extensions = set(
-            ext.lower() for ext in config['local']['excluded_file_extensions'])
+            file_ext.lower() for file_ext in excluded_file_extensions)
 
-        updaters = {}
-        for e in extensions:
-            for updater_class in e.get_library_updaters():
-                if updater_class and 'local' in updater_class.uri_schemes:
-                    updaters[e.ext_name] = updater_class
-
-        if not updaters:
-            logger.error('No usable library updaters found.')
-            return 1
-        elif len(updaters) > 1:
-            logger.error('More than one library updater found. '
-                         'Provided by: %s', ', '.join(updaters.keys()))
-            return 1
-
-        local_updater = updaters.values()[0](config)
+        library = _get_library(args, config)
 
         uri_path_mapping = {}
         uris_in_library = set()
         uris_to_update = set()
         uris_to_remove = set()
 
-        tracks = local_updater.load()
-        logger.info('Checking %d tracks from library.', len(tracks))
-        for track in tracks:
+        num_tracks = library.load()
+        logger.info('Checking %d tracks from library.', num_tracks)
+
+        for track in library.begin():
             uri_path_mapping[track.uri] = translator.local_track_uri_to_path(
                 track.uri, media_dir)
             try:
@@ -65,16 +92,17 @@ class ScanCommand(commands.Command):
 
         logger.info('Removing %d missing tracks.', len(uris_to_remove))
         for uri in uris_to_remove:
-            local_updater.remove(uri)
+            library.remove(uri)
 
         logger.info('Checking %s for unknown tracks.', media_dir)
         for relpath in path.find_files(media_dir):
+            uri = translator.path_to_local_track_uri(relpath)
             file_extension = os.path.splitext(relpath)[1]
+
             if file_extension.lower() in excluded_file_extensions:
                 logger.debug('Skipped %s: File extension excluded.', uri)
                 continue
 
-            uri = translator.path_to_local_track_uri(relpath)
             if uri not in uris_in_library:
                 uris_to_update.add(uri)
                 uri_path_mapping[uri] = os.path.join(media_dir, relpath)
@@ -82,36 +110,44 @@ class ScanCommand(commands.Command):
         logger.info('Found %d unknown tracks.', len(uris_to_update))
         logger.info('Scanning...')
 
-        scanner = scan.Scanner(scan_timeout)
-        progress = Progress(len(uris_to_update))
+        uris_to_update = sorted(uris_to_update)[:args.limit]
 
-        for uri in sorted(uris_to_update):
+        scanner = scan.Scanner(scan_timeout)
+        progress = _Progress(flush_threshold, len(uris_to_update))
+
+        for uri in uris_to_update:
             try:
                 data = scanner.scan(path.path_to_uri(uri_path_mapping[uri]))
                 track = scan.audio_data_to_track(data).copy(uri=uri)
-                local_updater.add(track)
+                library.add(track)
                 logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)
 
-            progress.increment()
+            if progress.increment():
+                progress.log()
+                if library.flush():
+                    logger.debug('Progress flushed.')
 
-        logger.info('Commiting changes.')
-        local_updater.commit()
+        progress.log()
+        library.close()
+        logger.info('Done scanning.')
         return 0
 
 
-# TODO: move to utils?
-class Progress(object):
-    def __init__(self, total):
+class _Progress(object):
+    def __init__(self, batch_size, total):
         self.count = 0
+        self.batch_size = batch_size
         self.total = total
         self.start = time.time()
 
     def increment(self):
         self.count += 1
-        if self.count % 1000 == 0 or self.count == self.total:
-            duration = time.time() - self.start
-            remainder = duration / self.count * (self.total - self.count)
-            logger.info('Scanned %d of %d files in %ds, ~%ds left.',
-                        self.count, self.total, duration, remainder)
+        return self.count % self.batch_size == 0
+
+    def log(self):
+        duration = time.time() - self.start
+        remainder = duration / self.count * (self.total - self.count)
+        logger.info('Scanned %d of %d files in %ds, ~%ds left.',
+                    self.count, self.total, duration, remainder)

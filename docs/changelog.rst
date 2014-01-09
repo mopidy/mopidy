@@ -7,6 +7,11 @@ This changelog is used to track all major changes to Mopidy.
 v0.18.0 (UNRELEASED)
 ====================
 
+**MPD frontend**
+
+- Empty commands now return a ``ACK [5@0] {} No command given`` error instead
+  of ``OK``. This is consistent with the original MPD server implementation.
+
 **Core API**
 
 - Expose :meth:`mopidy.core.Core.version` for HTTP clients to manage
@@ -14,6 +19,12 @@ v0.18.0 (UNRELEASED)
 
 - Add :class:`mopidy.models.Ref` class for use as a lightweight reference to
   other model types, containing just an URI, a name, and an object type.
+
+**Extension registry**
+
+- Switched to using a registry model for classes provided by extension. This
+  allows extensions to be extended as needed for plugable local libraries.
+  (Fixes :issue:`601`)
 
 **Pluggable local libraries**
 
@@ -33,9 +44,24 @@ a temporary regression of :issue:`527`.
 - Added support for deprecated config values in order to allow for
   graceful removal of :confval:`local/tag_cache_file`.
 
+- Added :confval:`local/library` to select which library to use.
+
+- Added :confval:`local/data_dir` to have a common setting for where to store
+  local library data. This is intended to avoid every single local library
+  provider having to have it's own setting for this.
+
+- Added :confval:`local/scan_flush_threshold` to control how often to tell
+  local libraries to store changes.
+
 **Streaming backend**
 
 - Live lookup of URI metadata has been added. (Fixes :issue:`540`)
+
+**HTTP frontend**
+
+- Upgrade Mopidy.js dependencies and add support for using Mopidy.js with
+  Browserify. This version has been released to npm as Mopidy.js v0.2.0.
+  (Fixes: :issue:`609`)
 
 **Internal changes**
 
@@ -414,7 +440,7 @@ A release with a number of small and medium fixes, with no specific focus.
   objects with ``tlid`` set to ``0`` to be sent to the HTTP client without the
   ``tlid`` field. (Fixes: :issue:`501`)
 
-- Upgrade Mopidy.js dependencies. This version has been released to NPM as
+- Upgrade Mopidy.js dependencies. This version has been released to npm as
   Mopidy.js v0.1.1.
 
 **Extension support**

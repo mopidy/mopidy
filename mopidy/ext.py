@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import collections
 import logging
 import pkg_resources
 
@@ -61,6 +62,15 @@ class Extension(object):
         """
         pass
 
+    def setup(self, registry):
+        for backend_class in self.get_backend_classes():
+            registry.add('backend', backend_class)
+
+        for frontend_class in self.get_frontend_classes():
+            registry.add('frontend', frontend_class)
+
+        self.register_gstreamer_elements()
+
     def get_frontend_classes(self):
         """List of frontend actor classes
 
@@ -79,6 +89,7 @@ class Extension(object):
         """
         return []
 
+    # TODO: remove
     def get_library_updaters(self):
         """List of library updater classes
 
@@ -110,6 +121,24 @@ class Extension(object):
         :returns: :class:`None`
         """
         pass
+
+
+# TODO: document
+class Registry(collections.Mapping):
+    def __init__(self):
+        self._registry = {}
+
+    def add(self, name, cls):
+        self._registry.setdefault(name, []).append(cls)
+
+    def __getitem__(self, name):
+        return self._registry.setdefault(name, [])
+
+    def __iter__(self):
+        return iter(self._registry)
+
+    def __len__(self):
+        return len(self._registry)
 
 
 def load_extensions():
@@ -166,15 +195,3 @@ def validate_extension(extension):
         return False
 
     return True
-
-
-def register_gstreamer_elements(enabled_extensions):
-    """Registers custom GStreamer elements from extensions.
-
-    :param enabled_extensions: list of enabled extensions
-    """
-
-    for extension in enabled_extensions:
-        logger.debug(
-            'Registering GStreamer elements for: %s', extension.ext_name)
-        extension.register_gstreamer_elements()

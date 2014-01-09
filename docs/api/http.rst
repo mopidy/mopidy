@@ -129,7 +129,7 @@ After npm completes, you can import Mopidy.js using ``require()``:
 
 .. code-block:: js
 
-    var Mopidy = require("mopidy").Mopidy;
+    var Mopidy = require("mopidy");
 
 
 Getting the library for development on the library

@@ -181,6 +181,12 @@ def audio_data_to_track(data):
     track_kwargs['uri'] = data['uri']
     track_kwargs['album'] = Album(**album_kwargs)
 
+    # TODO: this feels like a half assed workaround. we need to be sure that we
+    # don't suddenly have lists in our models where we expect strings etc
+    if ('genre' in track_kwargs and
+            not isinstance(track_kwargs['genre'], basestring)):
+        track_kwargs['genre'] = ', '.join(track_kwargs['genre'])
+
     if ('name' in artist_kwargs
             and not isinstance(artist_kwargs['name'], basestring)):
         track_kwargs['artists'] = [Artist(name=artist)

@@ -92,32 +92,29 @@ class Backends(list):
         self.with_playback = collections.OrderedDict()
         self.with_playlists = collections.OrderedDict()
 
+        backends_by_scheme = {}
+        name = lambda backend: backend.actor_ref.actor_class.__name__
+
         for backend in backends:
             has_library = backend.has_library().get()
             has_playback = backend.has_playback().get()
             has_playlists = backend.has_playlists().get()
 
             for scheme in backend.uri_schemes.get():
-                self.add(self.with_library, has_library, scheme, backend)
-                self.add(self.with_playback, has_playback, scheme, backend)
-                self.add(self.with_playlists, has_playlists, scheme, backend)
+                assert scheme not in backends_by_scheme, (
+                    'Cannot add URI scheme %s for %s, '
+                    'it is already handled by %s'
+                ) % (scheme, name(backend), name(backends_by_scheme[scheme]))
+                backends_by_scheme[scheme] = backend
+
+                if has_library:
+                    self.with_library[scheme] = backend
+                if has_playback:
+                    self.with_playback[scheme] = backend
+                if has_playlists:
+                    self.with_playlists[scheme] = backend
 
             if has_library:
                 root_dir_name = backend.library.root_directory_name.get()
-                has_browsable_library = root_dir_name is not None
-                self.add(
-                    self.with_browsable_library, has_browsable_library,
-                    root_dir_name, backend)
-
-    def add(self, registry, supported, uri_scheme, backend):
-        if not supported:
-            return
-
-        if uri_scheme not in registry:
-            registry[uri_scheme] = backend
-            return
-
-        get_name = lambda actor: actor.actor_ref.actor_class.__name__
-        raise AssertionError(
-            'Cannot add URI scheme %s for %s, it is already handled by %s' %
-            (uri_scheme, get_name(backend), get_name(registry[uri_scheme])))
+                if root_dir_name is not None:
+                    self.with_browsable_library[root_dir_name] = backend
