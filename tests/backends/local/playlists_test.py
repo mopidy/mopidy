@@ -101,6 +101,18 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
 
         self.assertEqual(track.uri, contents.strip())
 
+    def test_extended_playlist_contents_is_written_to_disk(self):
+        track = Track(uri=generate_song(1), name='Test', length=60000)
+        playlist = self.core.playlists.create('test')
+        playlist_path = os.path.join(self.playlists_dir, 'test.m3u')
+        playlist = playlist.copy(tracks=[track])
+        playlist = self.core.playlists.save(playlist)
+
+        with open(playlist_path) as playlist_file:
+            contents = playlist_file.read().splitlines()
+
+        self.assertEqual(contents, ['#EXTM3U', '#EXTINF:60,Test', track.uri])
+
     def test_playlists_are_loaded_at_startup(self):
         track = Track(uri='local:track:path2')
         playlist = self.core.playlists.create('test')
