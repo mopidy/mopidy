@@ -43,7 +43,6 @@ setup(
         'mopidy.ext': [
             'http = mopidy.http:Extension [http]',
             'local = mopidy.backends.local:Extension',
-            'local-json = mopidy.backends.local.json:Extension',
             'mpd = mopidy.mpd:Extension',
             'stream = mopidy.backends.stream:Extension',
         ],

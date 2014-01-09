@@ -20,6 +20,12 @@ v0.18.0 (UNRELEASED)
 - Add :class:`mopidy.models.Ref` class for use as a lightweight reference to
   other model types, containing just an URI, a name, and an object type.
 
+**Extension registry**
+
+- Switched to using a registry model for classes provided by extension. This
+  allows extensions to be extended as needed for plugable local libraries.
+  (Fixes :issue:`601`)
+
 **Pluggable local libraries**
 
 Fixes issues :issue:`44`, partially resolves :issue:`397`, and causes
@@ -37,6 +43,15 @@ a temporary regression of :issue:`527`.
 
 - Added support for deprecated config values in order to allow for
   graceful removal of :confval:`local/tag_cache_file`.
+
+- Added :confval:`local/library` to select which library to use.
+
+- Added :confval:`local/data_dir` to have a common setting for where to store
+  local library data. This is intended to avoid every single local library
+  provider having to have it's own setting for this.
+
+- Added :confval:`local/scan_flush_threshold` to control how often to tell
+  local libraries to store changes.
 
 **Streaming backend**
 
