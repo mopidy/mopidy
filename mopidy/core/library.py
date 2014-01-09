@@ -46,13 +46,13 @@ class LibraryController(object):
         track's original URI. A matching pair of objects can look like this::
 
             Track(uri='dummy:/foo.mp3', name='foo', artists=..., album=...)
-            Ref(uri='dummy:/foo.mp3', name='foo', type=Ref.TRACK)
+            Ref.track(uri='dummy:/foo.mp3', name='foo')
 
         The :class:`~mopidy.models.Ref` objects representing directories has
         plain paths, not including any URI schema. For example, the dummy
         library's ``/bar`` directory is returned like this::
 
-            Ref(uri='/dummy/bar', name='bar', type=Ref.DIRECTORY)
+            Ref.directory(uri='/dummy/bar', name='bar')
 
         Note to backend implementors: The ``/dummy`` part of the URI is added
         by Mopidy core, not the individual backends.
@@ -66,7 +66,7 @@ class LibraryController(object):
 
         if path == '/':
             return [
-                Ref(uri='/%s' % name, name=name, type=Ref.DIRECTORY)
+                Ref.directory(uri='/%s' % name, name=name)
                 for name in self.backends.with_browsable_library.keys()]
 
         groups = re.match('/(?P<library>[^/]+)(?P<path>.*)', path).groupdict()

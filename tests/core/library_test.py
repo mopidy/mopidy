@@ -34,8 +34,8 @@ class CoreLibraryTest(unittest.TestCase):
         result = self.core.library.browse('/')
 
         self.assertEqual(result, [
-            Ref(uri='/dummy1', name='dummy1', type=Ref.DIRECTORY),
-            Ref(uri='/dummy2', name='dummy2', type=Ref.DIRECTORY),
+            Ref.directory(uri='/dummy1', name='dummy1'),
+            Ref.directory(uri='/dummy2', name='dummy2'),
         ])
         self.assertFalse(self.library1.browse.called)
         self.assertFalse(self.library2.browse.called)
@@ -50,8 +50,8 @@ class CoreLibraryTest(unittest.TestCase):
 
     def test_browse_dummy1_selects_dummy1_backend(self):
         self.library1.browse().get.return_value = [
-            Ref(uri='/foo/bar', name='bar', type=Ref.DIRECTORY),
-            Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type=Ref.TRACK),
+            Ref.directory(uri='/foo/bar', name='bar'),
+            Ref.track(uri='dummy1:/foo/baz.mp3', name='Baz'),
         ]
         self.library1.browse.reset_mock()
 
@@ -63,8 +63,8 @@ class CoreLibraryTest(unittest.TestCase):
 
     def test_browse_dummy2_selects_dummy2_backend(self):
         self.library2.browse().get.return_value = [
-            Ref(uri='/bar/quux', name='quux', type=Ref.DIRECTORY),
-            Ref(uri='dummy2:/foo/baz.mp3', name='Baz', type=Ref.TRACK),
+            Ref.directory(uri='/bar/quux', name='quux'),
+            Ref.track(uri='dummy2:/foo/baz.mp3', name='Baz'),
         ]
         self.library2.browse.reset_mock()
 
@@ -83,16 +83,16 @@ class CoreLibraryTest(unittest.TestCase):
 
     def test_browse_dir_returns_subdirs_and_tracks(self):
         self.library1.browse().get.return_value = [
-            Ref(uri='/foo/bar', name='bar', type=Ref.DIRECTORY),
-            Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type=Ref.TRACK),
+            Ref.directory(uri='/foo/bar', name='bar'),
+            Ref.track(uri='dummy1:/foo/baz.mp3', name='Baz'),
         ]
         self.library1.browse.reset_mock()
 
         result = self.core.library.browse('/dummy1/foo')
 
         self.assertEqual(result, [
-            Ref(uri='/dummy1/foo/bar', name='bar', type=Ref.DIRECTORY),
-            Ref(uri='dummy1:/foo/baz.mp3', name='Baz', type=Ref.TRACK),
+            Ref.directory(uri='/dummy1/foo/bar', name='bar'),
+            Ref.track(uri='dummy1:/foo/baz.mp3', name='Baz'),
         ])
 
     def test_lookup_selects_dummy1_backend(self):
