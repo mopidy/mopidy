@@ -20,6 +20,10 @@ v0.18.0 (UNRELEASED)
 - Add :class:`mopidy.models.Ref` class for use as a lightweight reference to
   other model types, containing just an URI, a name, and an object type.
 
+- Add :meth:`mopidy.core.LibraryController.browse` method for browsing a
+  virtual file system of tracks. Backends can implement support for this by
+  implementing :meth:`mopidy.backends.base.BaseLibraryController.browse`.
+
 **Extension registry**
 
 - Switched to using a registry model for classes provided by extension. This
@@ -65,6 +69,13 @@ a temporary regression of :issue:`527`.
 - Upgrade Mopidy.js dependencies and add support for using Mopidy.js with
   Browserify. This version has been released to npm as Mopidy.js v0.2.0.
   (Fixes: :issue:`609`)
+
+**MPD frontend**
+
+- Make the ``lsinfo`` command support browsing of Mopidy's virtual file
+  system. Note that the related ``listall`` and ``listallinfo`` commands are
+  still not implemented. Also note that this adds very little until e.g. the
+  local backend is extended with support for library browsing.
 
 **Internal changes**
 
