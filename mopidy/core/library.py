@@ -42,13 +42,13 @@ class LibraryController(object):
         Returns a list of :class:`mopidy.models.Ref` objects for the
         directories and tracks at the given ``path``.
 
-        The :class:`~mopidy.models.Ref` objects representing tracks keeps the
+        The :class:`~mopidy.models.Ref` objects representing tracks keep the
         track's original URI. A matching pair of objects can look like this::
 
             Track(uri='dummy:/foo.mp3', name='foo', artists=..., album=...)
             Ref.track(uri='dummy:/foo.mp3', name='foo')
 
-        The :class:`~mopidy.models.Ref` objects representing directories has
+        The :class:`~mopidy.models.Ref` objects representing directories have
         plain paths, not including any URI schema. For example, the dummy
         library's ``/bar`` directory is returned like this::
 
