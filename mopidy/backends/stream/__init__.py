@@ -26,6 +26,6 @@ class Extension(ext.Extension):
     def validate_environment(self):
         pass
 
-    def get_backend_classes(self):
+    def setup(self, registry):
         from .actor import StreamBackend
-        return [StreamBackend]
+        registry.add('backend', StreamBackend)

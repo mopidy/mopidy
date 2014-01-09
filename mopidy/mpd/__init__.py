@@ -29,6 +29,6 @@ class Extension(ext.Extension):
     def validate_environment(self):
         pass
 
-    def get_frontend_classes(self):
+    def setup(self, registry):
         from .actor import MpdFrontend
-        return [MpdFrontend]
+        registry.add('frontend', MpdFrontend)

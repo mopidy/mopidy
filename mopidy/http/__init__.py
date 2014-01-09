@@ -35,6 +35,6 @@ class Extension(ext.Extension):
         except ImportError as e:
             raise exceptions.ExtensionError('ws4py library not found', e)
 
-    def get_frontend_classes(self):
+    def setup(self, registry):
         from .actor import HttpFrontend
-        return [HttpFrontend]
+        registry.add('frontend', HttpFrontend)
