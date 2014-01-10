@@ -237,7 +237,6 @@ class Audio(pykka.ThreadingActor):
             self.set_volume(volume)
             logger.info('Audio mixer volume set to %d', volume)
 
-
     def _select_mixer_track(self, mixer, track_label):
         # Ignore tracks without volumes, then look for track with
         # label equal to the audio/mixer_track config value, otherwise fallback
