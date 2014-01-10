@@ -40,7 +40,3 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 .. image:: https://coveralls.io/repos/mopidy/mopidy/badge.png?branch=develop
    :target: https://coveralls.io/r/mopidy/mopidy?branch=develop
    :alt: Test coverage
-   
-.. image:: https://sourcegraph.com/api/repos/github.com/mopidy/mopidy/counters/views-24h.png
-   :target: https://sourcegraph.com/github.com/mopidy/mopidy
-   :alt: Mopidy stats
