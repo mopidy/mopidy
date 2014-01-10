@@ -274,10 +274,9 @@ class Audio(pykka.ThreadingActor):
             self._on_end_of_stream()
         elif message.type == gst.MESSAGE_ERROR:
             error, debug = message.parse_error()
-            logger.error(
-                '%s Debug message: %s',
-                str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
-            self.stop_playback()
+            error = str(error).decode('utf-8')
+            debug = debug.decode('utf-8') or None
+            AudioListener.send('playback_error', error=error, debug=debug)
         elif message.type == gst.MESSAGE_WARNING:
             error, debug = message.parse_warning()
             logger.warning(

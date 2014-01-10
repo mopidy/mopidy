@@ -41,3 +41,16 @@ class AudioListener(listener.Listener):
         :type new_state: string from :class:`mopidy.core.PlaybackState` field
         """
         pass
+
+    def playback_error(self, error, debug):
+        """
+        Called when Gstreamer encounters an error on playback
+
+        *May be implemented by actor.*
+
+        :param error: Error message from GStreamer
+        :type error: str
+        :param debug: Debug information for the error if available
+        :type debug: str
+        """
+        pass

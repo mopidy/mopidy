@@ -312,6 +312,25 @@ class PlaybackController(object):
         if clear_current_track:
             self.current_tl_track = None
 
+    def on_playback_error(self, error, debug):
+        """
+        When playback fails, handle error by either stop or continue with
+        playback.
+
+        :param error: Error message from GStreamer
+        :type error: str
+        :param debug: Debug information for the error if available
+        :type debug: str
+        """
+        backend = self._get_backend()
+        if backend and backend.playback.on_playback_error(error, debug).get():
+            self.core.tracklist.mark_unplayable(self.current_tl_track)
+            self.stop()
+            self.next()
+            self.play()
+        else:
+            logger.error('%s Debug message: %s', error, debug)
+
     def _trigger_track_playback_paused(self):
         logger.debug('Triggering track playback paused event')
         if self.current_track is None:
