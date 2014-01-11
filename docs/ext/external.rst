@@ -119,3 +119,12 @@ https://github.com/rattboi/mopidy-subsonic
 
 Provides a backend for playing music from a `Subsonic Music Streamer
 <http://www.subsonic.org/>`_ library.
+
+
+Mopidy-VKontakte
+================
+
+https://github.com/sibuser/mopidy-vkontakte
+
+Provides a backend for playing music from the `VKontakte social network
+<http://vk.com/>`_.
