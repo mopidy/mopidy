@@ -290,28 +290,29 @@ This is ``mopidy_soundspot/__init__.py``::
             schema['password'] = config.Secret()
             return schema
 
+        def get_command(self):
+            from .commands import SoundspotCommand
+            return SoundspotCommand()
+
         def validate_environment(self):
             try:
                 import pysoundspot
             except ImportError as e:
                 raise exceptions.ExtensionError('pysoundspot library not found', e)
 
-        # You will typically only implement one of the next three methods
-        # in a single extension.
+        def setup(self, registry):
+            # You will typically only do one of the following things in a
+            # single extension.
 
-        def get_frontend_classes(self):
+            # Register a frontend
             from .frontend import SoundspotFrontend
-            return [SoundspotFrontend]
+            registry.add('frontend', SoundspotFrontend)
 
-        def get_backend_classes(self):
+            # Register a backend
             from .backend import SoundspotBackend
-            return [SoundspotBackend]
+            registry.add('backend', SoundspotBackend)
 
-        def get_command(self):
-            from .commands import SoundspotCommand
-            return SoundspotCommand()
-
-        def register_gstreamer_elements(self):
+            # Register a custom GStreamer element
             from .mixer import SoundspotMixer
             gobject.type_register(SoundspotMixer)
             gst.element_register(
@@ -415,8 +416,8 @@ If you want to extend Mopidy's GStreamer pipeline with new custom GStreamer
 elements, you'll need to register them in GStreamer before they can be used.
 
 Basically, you just implement your GStreamer element in Python and then make
-your :meth:`~mopidy.ext.Extension.register_gstreamer_elements` method register
-all your custom GStreamer elements.
+your :meth:`~mopidy.ext.Extension.setup` method register all your custom
+GStreamer elements.
 
 For examples of custom GStreamer elements implemented in Python, see
 :mod:`mopidy.audio.mixers`.
