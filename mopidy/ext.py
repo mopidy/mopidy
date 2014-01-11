@@ -89,15 +89,6 @@ class Extension(object):
         """
         return []
 
-    # TODO: remove
-    def get_library_updaters(self):
-        """List of library updater classes
-
-        :returns: list of
-          :class:`~mopidy.backends.base.BaseLibraryUpdateProvider` subclasses
-        """
-        return []
-
     def get_command(self):
         """Command to expose to command line users running mopidy.
 

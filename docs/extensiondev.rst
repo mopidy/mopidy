@@ -309,10 +309,6 @@ This is ``mopidy_soundspot/__init__.py``::
             from .commands import SoundspotCommand
             return SoundspotCommand()
 
-        def get_library_updaters(self):
-            from .library import SoundspotLibraryUpdateProvider
-            return [SoundspotLibraryUpdateProvider]
-
         def register_gstreamer_elements(self):
             from .mixer import SoundspotMixer
             gobject.type_register(SoundspotMixer)
@@ -408,27 +404,6 @@ more details.
         def run(self, args, config, extensions):
            # Your backend implementation
            return 0
-
-
-Example library provider
-========================
-
-Currently library providers are only really relevant for people who want to
-replace the default local library. Providing this in addition to a backend that
-exposes a library for the `local` uri scheme lets you plug in whatever storage
-solution you happen to prefer.
-
-::
-
-    from mopidy.backends import base
-
-
-    class SoundspotLibraryUpdateProvider(base.BaseLibraryProvider):
-        def __init__(self, config):
-            super(SoundspotLibraryUpdateProvider, self).__init__(config)
-            self.config = config
-
-        # Your library provider implementation here.
 
 
 Example GStreamer element
