@@ -1,37 +1,22 @@
-.. _ext:
-
-**********
-Extensions
-**********
-
-Here you can find a list of packages that extend Mopidy with additional
-functionality. This list is moderated and updated on a regular basis. If you
-want your package to show up here, follow the :ref:`guide on creating
-extensions <extensiondev>`.
-
-
-Bundled with Mopidy
-===================
-
-These extensions are maintained by Mopidy's core developers. They are installed
-together with Mopidy and are enabled by default.
-
-.. toctree::
-    :maxdepth: 1
-    :glob:
-
-    **
-
-
+*******************
 External extensions
-===================
+*******************
 
-These extensions are maintained outside Mopidy's core, often by other
-developers.
+Here you can find a list of external packages that extend Mopidy with
+additional functionality. This list is moderated and updated on a regular
+basis. If you want your package to show up here, follow the :ref:`guide on
+creating extensions <extensiondev>`.
+
+Mopidy also bundles some extensions:
+
+- :ref:`ext-local`
+- :ref:`ext-stream`
+- :ref:`ext-http`
+- :ref:`ext-mpd`
 
 
 Mopidy-Arcam
-------------
+============
 
 https://github.com/TooDizzy/mopidy-arcam
 
@@ -40,7 +25,7 @@ and tested with an Arcam AVR-300.
 
 
 Mopidy-Beets
-------------
+============
 
 https://github.com/mopidy/mopidy-beets
 
@@ -49,7 +34,7 @@ Provides a backend for playing music from your `Beets
 
 
 Mopidy-GMusic
--------------
+=============
 
 https://github.com/hechtus/mopidy-gmusic
 
@@ -58,7 +43,7 @@ Provides a backend for playing music from `Google Play Music
 
 
 Mopidy-MPRIS
-------------
+============
 
 https://github.com/mopidy/mopidy-mpris
 
@@ -67,7 +52,7 @@ D-Bus interface, for example using the Ubuntu Sound Menu.
 
 
 Mopidy-NAD
-----------
+==========
 
 https://github.com/mopidy/mopidy-nad
 
@@ -75,7 +60,7 @@ Extension for controlling volume using an external NAD amplifier.
 
 
 Mopidy-Notifier
----------------
+===============
 
 https://github.com/sauberfred/mopidy-notifier
 
@@ -83,7 +68,7 @@ Extension for displaying track info as User Notifications in Mac OS X.
 
 
 Mopidy-radio-de
----------------
+===============
 
 https://github.com/hechtus/mopidy-radio-de
 
@@ -93,7 +78,7 @@ Extension for listening to Internet radio stations and podcasts listed at
 
 
 Mopidy-Scrobbler
-----------------
+================
 
 https://github.com/mopidy/mopidy-scrobbler
 
@@ -101,7 +86,7 @@ Extension for scrobbling played tracks to Last.fm.
 
 
 Mopidy-SomaFM
--------------
+=============
 
 https://github.com/AlexandrePTJ/mopidy-somafm
 
@@ -110,7 +95,7 @@ service.
 
 
 Mopidy-SoundCloud
------------------
+=================
 
 https://github.com/mopidy/mopidy-soundcloud
 
@@ -119,7 +104,7 @@ Provides a backend for playing music from the `SoundCloud
 
 
 Mopidy-Spotify
---------------
+==============
 
 https://github.com/mopidy/mopidy-spotify
 
@@ -128,7 +113,7 @@ streaming service.
 
 
 Mopidy-Subsonic
----------------
+===============
 
 https://github.com/rattboi/mopidy-subsonic
 

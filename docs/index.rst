@@ -35,10 +35,35 @@ Usage
     installation/index
     installation/raspberrypi
     config
-    ext/index
     running
-    clients/index
     troubleshooting
+
+
+.. _ext:
+
+Extensions
+==========
+
+.. toctree::
+    :maxdepth: 2
+
+    ext/local
+    ext/stream
+    ext/http
+    ext/mpd
+    ext/external
+
+
+Clients
+=======
+
+.. toctree::
+    :maxdepth: 2
+
+    clients/http
+    clients/mpd
+    clients/mpris
+    clients/upnp
 
 
 About
