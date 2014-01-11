@@ -120,7 +120,8 @@ class Library(object):
         """
         Add the given track to library.
 
-        :param :class:`~mopidy.models.Track` track: Track to add to the library
+        :param track: Track to add to the library
+        :type track: :class:`~mopidy.models.Track`
         """
         raise NotImplementedError
 
