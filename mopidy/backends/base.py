@@ -105,40 +105,6 @@ class BaseLibraryProvider(object):
         pass
 
 
-class BaseLibraryUpdateProvider(object):
-    uri_schemes = []
-
-    def load(self):
-        """Loads the library and returns all tracks in it.
-
-        *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
-    def add(self, track):
-        """Adds given track to library.
-
-        Overwrites any existing track with same URI.
-
-        *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
-    def remove(self, uri):
-        """Removes given track from library.
-
-        *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
-    def commit(self):
-        """Persist changes to library.
-
-        *MAY be implemented by subclass.*
-        """
-        pass
-
-
 class BasePlaybackProvider(object):
     """
     :param audio: the audio actor
