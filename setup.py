@@ -42,9 +42,9 @@ setup(
         ],
         'mopidy.ext': [
             'http = mopidy.http:Extension [http]',
-            'local = mopidy.backends.local:Extension',
+            'local = mopidy.local:Extension',
             'mpd = mopidy.mpd:Extension',
-            'stream = mopidy.backends.stream:Extension',
+            'stream = mopidy.stream:Extension',
         ],
     },
     classifiers=[

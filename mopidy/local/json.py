@@ -7,9 +7,8 @@ import os
 import tempfile
 
 import mopidy
-from mopidy import models
-from mopidy.backends import local
-from mopidy.backends.local import search
+from mopidy import local, models
+from mopidy.local import search
 
 logger = logging.getLogger(__name__)
 

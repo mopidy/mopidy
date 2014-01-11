@@ -20,7 +20,7 @@ None. The extension just needs Mopidy.
 Default configuration
 =====================
 
-.. literalinclude:: ../../mopidy/backends/stream/ext.conf
+.. literalinclude:: ../../mopidy/stream/ext.conf
     :language: ini
 
 

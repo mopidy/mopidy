@@ -708,9 +708,9 @@ throughout Mopidy.
 **Stream backend**
 
 We've added a new backend for playing audio streams, the :mod:`stream backend
-<mopidy.backends.stream>`. It is activated by default. The stream backend
-supports the intersection of what your GStreamer installation supports and what
-protocols are included in the :attr:`mopidy.settings.STREAM_PROTOCOLS` setting.
+<mopidy.stream>`. It is activated by default. The stream backend supports the
+intersection of what your GStreamer installation supports and what protocols
+are included in the :attr:`mopidy.settings.STREAM_PROTOCOLS` setting.
 
 Current limitations:
 

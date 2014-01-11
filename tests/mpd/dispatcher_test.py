@@ -5,10 +5,11 @@ import unittest
 import pykka
 
 from mopidy import core
-from mopidy.backends import dummy
 from mopidy.mpd.dispatcher import MpdDispatcher
 from mopidy.mpd.exceptions import MpdAckError
 from mopidy.mpd.protocol import request_handlers, handle_request
+
+from tests import dummy_backend
 
 
 class MpdDispatcherTest(unittest.TestCase):
@@ -18,7 +19,7 @@ class MpdDispatcherTest(unittest.TestCase):
                 'password': None,
             }
         }
-        self.backend = dummy.create_dummy_backend_proxy()
+        self.backend = dummy_backend.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = MpdDispatcher(config=config)
 

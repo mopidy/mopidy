@@ -6,7 +6,7 @@ import os
 import tempfile
 import unittest
 
-from mopidy.backends.local.translator import parse_m3u
+from mopidy.local.translator import parse_m3u
 from mopidy.models import Track
 from mopidy.utils.path import path_to_uri
 

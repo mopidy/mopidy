@@ -52,6 +52,5 @@ Backend listener
 Backend implementations
 =======================
 
-* :mod:`mopidy.backends.dummy`
-* :mod:`mopidy.backends.local`
-* :mod:`mopidy.backends.stream`
+* :mod:`mopidy.local`
+* :mod:`mopidy.stream`

@@ -2,16 +2,6 @@
 
 This backend implements the backend API in the simplest way possible.  It is
 used in tests of the frontends.
-
-The backend handles URIs starting with ``dummy:``.
-
-**Dependencies**
-
-None
-
-**Default config**
-
-None
 """
 
 from __future__ import unicode_literals

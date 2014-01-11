@@ -8,11 +8,11 @@ import unittest
 import pykka
 
 from mopidy import audio, core
-from mopidy.backends.local import actor
+from mopidy.local import actor
 from mopidy.models import Playlist, Track
 
 from tests import path_to_data_dir
-from tests.backends.local import generate_song
+from tests.local import generate_song
 
 
 class LocalPlaylistsProviderTest(unittest.TestCase):
