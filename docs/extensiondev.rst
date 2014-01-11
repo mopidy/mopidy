@@ -239,7 +239,7 @@ The root of your Python package should have an ``__version__`` attribute with a
 class named ``Extension`` which inherits from Mopidy's extension base class,
 :class:`mopidy.ext.Extension`. This is the class referred to in the
 ``entry_points`` part of ``setup.py``. Any imports of other files in your
-extension should be kept inside methods.  This ensures that this file can be
+extension should be kept inside methods. This ensures that this file can be
 imported without raising :exc:`ImportError` exceptions for missing
 dependencies, etc.
 
@@ -436,7 +436,7 @@ Use of Mopidy APIs
 
 When writing an extension, you should only use APIs documented at
 :ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils`, may change at
-any time, and is not something extensions should rely on being stable.
+any time, and is not something extensions should use.
 
 
 Logging in extensions
