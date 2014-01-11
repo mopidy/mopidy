@@ -1,6 +1,7 @@
-/etc/mopidy
-/var/cache/mopidy
-/var/lib/mopidy
-/var/lib/mopidy/media
-/var/lib/mopidy/playlists
-/var/log/mopidy
+etc/mopidy
+etc/mopidy/extensions.d
+var/cache/mopidy
+var/lib/mopidy
+var/lib/mopidy/media
+var/lib/mopidy/playlists
+var/log/mopidy

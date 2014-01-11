@@ -1,4 +1,4 @@
-mopidy (0.17.0-1mopidy1) unstable; urgency=low
+mopidy (0.17.0-2) UNRELEASED; urgency=low
 
   * Add "mopidy" system user.
   * Add global configuration.
