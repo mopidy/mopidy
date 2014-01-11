@@ -344,10 +344,10 @@ passed a reference to the core API when it's created. See the
 
     import pykka
 
-    from mopidy.core import CoreListener
+    from mopidy import core
 
 
-    class SoundspotFrontend(pykka.ThreadingActor, CoreListener):
+    class SoundspotFrontend(pykka.ThreadingActor, core.CoreListener):
         def __init__(self, core):
             super(SoundspotFrontend, self).__init__()
             self.core = core
@@ -370,10 +370,10 @@ details.
 
     import pykka
 
-    from mopidy.backends import base
+    from mopidy import backend
 
 
-    class SoundspotBackend(pykka.ThreadingActor, base.BaseBackend):
+    class SoundspotBackend(pykka.ThreadingActor, backend.Backend):
         def __init__(self, audio):
             super(SoundspotBackend, self).__init__()
             self.audio = audio
