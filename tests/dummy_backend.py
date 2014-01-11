@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 
 import pykka
 
-from mopidy.backends import base
+from mopidy import backend
 from mopidy.models import Playlist, SearchResult
 
 
@@ -16,7 +16,7 @@ def create_dummy_backend_proxy(config=None, audio=None):
     return DummyBackend.start(config=config, audio=audio).proxy()
 
 
-class DummyBackend(pykka.ThreadingActor, base.Backend):
+class DummyBackend(pykka.ThreadingActor, backend.Backend):
     def __init__(self, config, audio):
         super(DummyBackend, self).__init__()
 
@@ -27,7 +27,7 @@ class DummyBackend(pykka.ThreadingActor, base.Backend):
         self.uri_schemes = ['dummy']
 
 
-class DummyLibraryProvider(base.BaseLibraryProvider):
+class DummyLibraryProvider(backend.LibraryProvider):
     root_directory_name = 'dummy'
 
     def __init__(self, *args, **kwargs):
@@ -53,7 +53,7 @@ class DummyLibraryProvider(base.BaseLibraryProvider):
         return self.dummy_search_result
 
 
-class DummyPlaybackProvider(base.BasePlaybackProvider):
+class DummyPlaybackProvider(backend.PlaybackProvider):
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)
         self._time_position = 0
@@ -80,7 +80,7 @@ class DummyPlaybackProvider(base.BasePlaybackProvider):
         return self._time_position
 
 
-class DummyPlaylistsProvider(base.BasePlaylistsProvider):
+class DummyPlaylistsProvider(backend.PlaylistsProvider):
     def create(self, name):
         playlist = Playlist(name=name, uri='dummy:%s' % name)
         self._playlists.append(playlist)

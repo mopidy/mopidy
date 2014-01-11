@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 import mock
 import unittest
 
-from mopidy.backends import base
-from mopidy.core import Core
+from mopidy import backend, core
 from mopidy.models import Track
 
 
@@ -18,10 +17,10 @@ class TracklistTest(unittest.TestCase):
 
         self.backend = mock.Mock()
         self.backend.uri_schemes.get.return_value = ['dummy1']
-        self.library = mock.Mock(spec=base.BaseLibraryProvider)
+        self.library = mock.Mock(spec=backend.LibraryProvider)
         self.backend.library = self.library
 
-        self.core = Core(audio=None, backends=[self.backend])
+        self.core = core.Core(audio=None, backends=[self.backend])
         self.tl_tracks = self.core.tracklist.add(self.tracks)
 
     def test_add_by_uri_looks_up_uri_in_library(self):
@@ -72,4 +71,4 @@ class TracklistTest(unittest.TestCase):
     def test_filter_fails_if_values_is_a_string(self):
         self.assertRaises(ValueError, self.core.tracklist.filter, uri='a')
 
-    # TODO Extract tracklist tests from the base backend tests
+    # TODO Extract tracklist tests from the local backend tests

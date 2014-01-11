@@ -5,7 +5,7 @@ import os
 
 import pykka
 
-from mopidy.backends import base
+from mopidy import backend
 from mopidy.utils import encoding, path
 
 from .library import LocalLibraryProvider
@@ -15,7 +15,7 @@ from .playlists import LocalPlaylistsProvider
 logger = logging.getLogger(__name__)
 
 
-class LocalBackend(pykka.ThreadingActor, base.Backend):
+class LocalBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes = ['local']
     libraries = []
 

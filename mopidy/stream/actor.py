@@ -5,28 +5,27 @@ import urlparse
 
 import pykka
 
-from mopidy import audio as audio_lib, exceptions
+from mopidy import audio as audio_lib, backend, exceptions
 from mopidy.audio import scan
-from mopidy.backends import base
 from mopidy.models import Track
 
 logger = logging.getLogger(__name__)
 
 
-class StreamBackend(pykka.ThreadingActor, base.Backend):
+class StreamBackend(pykka.ThreadingActor, backend.Backend):
     def __init__(self, config, audio):
         super(StreamBackend, self).__init__()
 
         self.library = StreamLibraryProvider(
             backend=self, timeout=config['stream']['timeout'])
-        self.playback = base.BasePlaybackProvider(audio=audio, backend=self)
+        self.playback = backend.PlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
         self.uri_schemes = audio_lib.supported_uri_schemes(
             config['stream']['protocols'])
 
 
-class StreamLibraryProvider(base.BaseLibraryProvider):
+class StreamLibraryProvider(backend.LibraryProvider):
     def __init__(self, backend, timeout):
         super(StreamLibraryProvider, self).__init__(backend)
         self._scanner = scan.Scanner(min_duration=None, timeout=timeout)
