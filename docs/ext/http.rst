@@ -4,34 +4,76 @@
 Mopidy-HTTP
 ***********
 
-The HTTP extension lets you control Mopidy through HTTP and WebSockets, e.g.
-from a web based client. See :ref:`http-api` for details on how to integrate
-with Mopidy over HTTP.
+Mopidy-HTTP is an extension that lets you control Mopidy through HTTP and
+WebSockets, for example from a web client. It is bundled with Mopidy and
+enabled by default if all dependencies are available.
+
+When it is enabled it starts a web server at the port specified by the
+:confval:`http/port` config value.
+
+.. warning::
+
+    As a simple security measure, the web server is by default only available
+    from localhost. To make it available from other computers, change the
+    :confval:`http/hostname` config value. Before you do so, note that the HTTP
+    extension does not feature any form of user authentication or
+    authorization. Anyone able to access the web server can use the full core
+    API of Mopidy. Thus, you probably only want to make the web server
+    available from your local network or place it behind a web proxy which
+    takes care or user authentication. You have been warned.
+
+
+Using a web based Mopidy client
+===============================
+
+Mopidy-HTTP's web server can also host any static files, for example the HTML,
+CSS, JavaScript, and images needed for a web based Mopidy client. To host
+static files, change the :confval:`http/static_dir` config value to point to
+the root directory of your web client, for example::
+
+    [http]
+    static_dir = /home/alice/dev/the-client
+
+If the directory includes a file named ``index.html``, it will be served on the
+root of Mopidy's web server.
+
+If you're making a web based client and wants to do server side development as
+well, you are of course free to run your own web server and just use Mopidy's
+web server to host the API end points. But, for clients implemented purely in
+JavaScript, letting Mopidy host the files is a simpler solution.
+
+See :ref:`http-api` for details on how to integrate with Mopidy over HTTP. If
+you're looking for a web based client for Mopidy, go check out
+:ref:`http-clients`.
 
 
 Dependencies
 ============
 
+In addition to Mopidy's dependencies, Mopidy-HTTP requires the following:
+
 - cherrypy >= 3.2.2. Available as python-cherrypy3 in Debian/Ubuntu.
 
 - ws4py >= 0.2.3. Available as python-ws4py in newer Debian/Ubuntu and from
-  apt.mopidy.com for older releases of Debian/Ubuntu.
+  `apt.mopidy.com <http://apt.mopidy.com/>`__ for older releases of
+  Debian/Ubuntu.
 
 If you're installing Mopidy with pip, you can run the following command to
 install Mopidy with the extra dependencies for required for Mopidy-HTTP::
 
     pip install --upgrade Mopidy[http]
 
+If you're installing Mopidy from APT, the additional dependencies needed for
+Mopidy-HTTP are always included.
 
-Default configuration
-=====================
+
+Configuration
+=============
+
+See :ref:`config` for general help on configuring Mopidy.
 
 .. literalinclude:: ../../mopidy/http/ext.conf
     :language: ini
-
-
-Configuration values
-====================
 
 .. confval:: http/enabled
 
@@ -67,46 +109,3 @@ Configuration values
     ``$hostname`` and ``$port`` can be used in the name.
 
     Set to an empty string to disable Zeroconf for HTTP.
-
-
-Usage
-=====
-
-The extension is enabled by default if all dependencies are available.
-
-When it is enabled it starts a web server at the port specified by the
-:confval:`http/port` config value.
-
-.. warning:: Security
-
-    As a simple security measure, the web server is by default only available
-    from localhost. To make it available from other computers, change the
-    :confval:`http/hostname` config value. Before you do so, note that the HTTP
-    extension does not feature any form of user authentication or
-    authorization. Anyone able to access the web server can use the full core
-    API of Mopidy. Thus, you probably only want to make the web server
-    available from your local network or place it behind a web proxy which
-    takes care or user authentication. You have been warned.
-
-
-Using a web based Mopidy client
--------------------------------
-
-The web server can also host any static files, for example the HTML, CSS,
-JavaScript, and images needed for a web based Mopidy client. To host static
-files, change the ``http/static_dir`` to point to the root directory of your
-web client, e.g.::
-
-    [http]
-    static_dir = /home/alice/dev/the-client
-
-If the directory includes a file named ``index.html``, it will be served on the
-root of Mopidy's web server.
-
-If you're making a web based client and wants to do server side development as
-well, you are of course free to run your own web server and just use Mopidy's
-web server for the APIs. But, for clients implemented purely in JavaScript,
-letting Mopidy host the files is a simpler solution.
-
-If you're looking for a web based client for Mopidy, go check out
-:ref:`http-clients`.

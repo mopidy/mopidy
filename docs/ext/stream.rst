@@ -4,28 +4,31 @@
 Mopidy-Stream
 *************
 
-Extension for playing streaming music.
+Mopidy-Stream is an extension for playing streaming music. It is bundled with
+Mopidy and enabled by default.
 
-The stream backend will handle streaming of URIs matching the
-:confval:`stream/protocols` config value, assuming the needed GStreamer plugins
-are installed.
+This backend does not provide a library or playlist storage. It simply accepts
+any URI added to Mopidy's tracklist that matches any of the protocols in the
+:confval:`stream/protocols` config value. It then tries to retrieve metadata
+and play back the URI using GStreamer. For example, if you're using an MPD
+client, you'll just have to find your clients "add URI" interface, and provide
+it with the URI of a stream.
+
+In addition to playing streams, the extension also understands how to extract
+streams from a lot of playlist formats. This is convenient as most Internet
+radio stations links to playlists instead of directly to the radio streams.
+
+If you're having trouble playing back a stream, run the ``mopidy deps``
+command to check if you have all relevant GStreamer plugins installed.
 
 
-Dependencies
-============
+Configuration
+=============
 
-None. The extension just needs Mopidy.
-
-
-Default configuration
-=====================
+See :ref:`config` for general help on configuring Mopidy.
 
 .. literalinclude:: ../../mopidy/stream/ext.conf
     :language: ini
-
-
-Configuration values
-====================
 
 .. confval:: stream/enabled
 
@@ -39,17 +42,3 @@ Configuration values
 .. confval:: stream/timeout
 
     Number of milliseconds before giving up looking up stream metadata.
-
-
-Usage
-=====
-
-This backend does not provide a library or similar. It simply takes any URI
-added to Mopidy's tracklist that matches any of the protocols in the
-:confval:`stream/protocols` setting and tries to play back the URI using
-GStreamer. E.g. if you're using an MPD client, you'll just have to find your
-clients "add URI" interface, and provide it with the direct URI of the stream.
-
-Currently the stream backend can only work with URIs pointing direcly at
-streams, and not intermediate playlists which is often used. See :issue:`303`
-to track the development of playlist expansion support.

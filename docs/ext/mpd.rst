@@ -4,8 +4,20 @@
 Mopidy-MPD
 **********
 
-This extension implements an MPD server to make Mopidy available to :ref:`MPD
-clients <mpd-clients>`.
+Mopidy-MPD is an extension that provides a full MPD server implementation to
+make Mopidy available to :ref:`MPD clients <mpd-clients>`. It is bundled with
+Mopidy and enabled by default.
+
+.. warning::
+
+    As a simple security measure, the HTTP server is by default only available
+    from localhost. To make it available from other computers, change the
+    :confval:`mpd/hostname` config value. Before you do so, note that the MPD
+    server does not support any form of encryption and only a single clear
+    text password (see :confval:`mpd/password`) for weak authentication. Anyone
+    able to access the MPD server can control music playback on your computer.
+    Thus, you probably only want to make the MPD server available from your
+    local network. You have been warned.
 
 MPD stands for Music Player Daemon, which is also the name of the `original MPD
 server project <http://mpd.wikia.com/>`_. Mopidy does not depend on the
@@ -21,6 +33,7 @@ Limitations
 This is a non exhaustive list of MPD features that Mopidy doesn't support.
 Items on this list will probably not be supported in the near future.
 
+- Only a single password is supported. It gives all-or-nothing access.
 - Toggling of audio outputs is not supported
 - Channels for client-to-client communication are not supported
 - Stickers are not supported
@@ -38,21 +51,13 @@ near future:
 - Live update of the music database is not supported
 
 
-Dependencies
-============
+Configuration
+=============
 
-None. The extension just needs Mopidy.
-
-
-Default configuration
-=====================
+See :ref:`config` for general help on configuring Mopidy.
 
 .. literalinclude:: ../../mopidy/mpd/ext.conf
     :language: ini
-
-
-Configuration values
-====================
 
 .. confval:: mpd/enabled
 
@@ -95,27 +100,3 @@ Configuration values
     ``$hostname`` and ``$port`` can be used in the name.
 
     Set to an empty string to disable Zeroconf for MPD.
-
-
-Usage
-=====
-
-The extension is enabled by default. To connect to the server, use an :ref:`MPD
-client <mpd-clients>`.
-
-
-.. _use-mpd-on-a-network:
-
-Connecting from other machines on the network
----------------------------------------------
-
-As a secure default, Mopidy only accepts connections from ``localhost``. If you
-want to open it for connections from other machines on your network, see
-the documentation for the :confval:`mpd/hostname` config value.
-
-If you open up Mopidy for your local network, you should consider turning on
-MPD password authentication by setting the :confval:`mpd/password` config value
-to the password you want to use.  If the password is set, Mopidy will require
-MPD clients to provide the password before they can do anything else. Mopidy
-only supports a single password, and do not support different permission
-schemes like the original MPD server.
