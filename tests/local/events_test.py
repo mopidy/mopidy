@@ -5,9 +5,9 @@ import unittest
 import mock
 import pykka
 
-from mopidy import core, audio
+from mopidy import audio, core
 from mopidy.backends import listener
-from mopidy.backends.local import actor
+from mopidy.local import actor
 
 from tests import path_to_data_dir
 

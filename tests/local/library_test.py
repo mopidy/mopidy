@@ -8,7 +8,7 @@ import unittest
 import pykka
 
 from mopidy import core
-from mopidy.backends.local import actor, json
+from mopidy.local import actor, json
 from mopidy.models import Track, Album, Artist
 
 from tests import path_to_data_dir

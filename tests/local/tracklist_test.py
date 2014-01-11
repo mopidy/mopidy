@@ -6,12 +6,12 @@ import unittest
 import pykka
 
 from mopidy import audio, core
-from mopidy.backends.local import actor
 from mopidy.core import PlaybackState
+from mopidy.local import actor
 from mopidy.models import Playlist, TlTrack, Track
 
 from tests import path_to_data_dir
-from tests.backends.local import generate_song, populate_tracklist
+from tests.local import generate_song, populate_tracklist
 
 
 class LocalTracklistProviderTest(unittest.TestCase):

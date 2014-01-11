@@ -53,5 +53,5 @@ Backend implementations
 =======================
 
 * :mod:`mopidy.backends.dummy`
-* :mod:`mopidy.backends.local`
+* :mod:`mopidy.local`
 * :mod:`mopidy.stream`
