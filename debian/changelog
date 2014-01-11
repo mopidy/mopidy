@@ -1,4 +1,4 @@
-mopidy (0.17.0-2) UNRELEASED; urgency=low
+mopidy (0.17.0-2) unstable; urgency=low
 
   * Add "mopidy" system user.
   * Add global configuration.
@@ -6,7 +6,7 @@ mopidy (0.17.0-2) UNRELEASED; urgency=low
   * Bump Standards-Version to 3.9.5.
   * Build docs with dh_sphinxdocs.
 
- -- Stein Magnus Jodal <stein.magnus@jodal.no>  Thu, 05 Dec 2013 00:22:35 +0100
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sat, 11 Jan 2014 22:18:30 +0100
 
 mopidy (0.17.0-1) unstable; urgency=low
 
