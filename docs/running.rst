@@ -20,8 +20,7 @@ Stopping Mopidy
 To stop Mopidy, press ``CTRL+C`` in the terminal where you started Mopidy.
 
 Mopidy will also shut down properly if you send it the TERM signal, e.g. by
-using ``kill``::
+using ``pkill``::
 
-    kill `ps ax | grep mopidy | grep -v grep | cut -d' ' -f1`
+    pkill mopidy
 
-This can be useful e.g. if you create init script for managing Mopidy.
