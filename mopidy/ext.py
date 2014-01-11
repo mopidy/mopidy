@@ -123,7 +123,7 @@ class Extension(object):
         .. deprecated:: 0.18
             Use :meth:`setup` instead.
 
-        :returns: list of :class:`~mopidy.backends.base.Backend` subclasses
+        :returns: list of :class:`~mopidy.backend.Backend` subclasses
         """
         return []
 

@@ -2,12 +2,12 @@ from __future__ import unicode_literals
 
 import logging
 
-from mopidy.backends import base
+from mopidy import backend
 
 logger = logging.getLogger(__name__)
 
 
-class LocalLibraryProvider(base.BaseLibraryProvider):
+class LocalLibraryProvider(backend.LibraryProvider):
     """Proxy library that delegates work to our active local library."""
 
     root_directory_name = 'local'

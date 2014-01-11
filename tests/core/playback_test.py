@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 import mock
 import unittest
 
-from mopidy.backends import base
-from mopidy.core import Core, PlaybackState
+from mopidy import backend, core
 from mopidy.models import Track
 
 
@@ -12,12 +11,12 @@ class CorePlaybackTest(unittest.TestCase):
     def setUp(self):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
-        self.playback1 = mock.Mock(spec=base.BasePlaybackProvider)
+        self.playback1 = mock.Mock(spec=backend.PlaybackProvider)
         self.backend1.playback = self.playback1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
-        self.playback2 = mock.Mock(spec=base.BasePlaybackProvider)
+        self.playback2 = mock.Mock(spec=backend.PlaybackProvider)
         self.backend2.playback = self.playback2
 
         # A backend without the optional playback provider
@@ -32,7 +31,7 @@ class CorePlaybackTest(unittest.TestCase):
             Track(uri='dummy1:b', length=40000),
         ]
 
-        self.core = Core(audio=None, backends=[
+        self.core = core.Core(audio=None, backends=[
             self.backend1, self.backend2, self.backend3])
         self.core.tracklist.add(self.tracks)
 
@@ -78,7 +77,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.core.playback.current_tl_track = self.unplayable_tl_track
         self.core.playback.pause()
 
-        self.assertEqual(self.core.playback.state, PlaybackState.PAUSED)
+        self.assertEqual(self.core.playback.state, core.PlaybackState.PAUSED)
         self.assertFalse(self.playback1.pause.called)
         self.assertFalse(self.playback2.pause.called)
 
@@ -100,10 +99,10 @@ class CorePlaybackTest(unittest.TestCase):
 
     def test_resume_does_nothing_if_track_is_unplayable(self):
         self.core.playback.current_tl_track = self.unplayable_tl_track
-        self.core.playback.state = PlaybackState.PAUSED
+        self.core.playback.state = core.PlaybackState.PAUSED
         self.core.playback.resume()
 
-        self.assertEqual(self.core.playback.state, PlaybackState.PAUSED)
+        self.assertEqual(self.core.playback.state, core.PlaybackState.PAUSED)
         self.assertFalse(self.playback1.resume.called)
         self.assertFalse(self.playback2.resume.called)
 
@@ -123,10 +122,10 @@ class CorePlaybackTest(unittest.TestCase):
 
     def test_stop_changes_state_even_if_track_is_unplayable(self):
         self.core.playback.current_tl_track = self.unplayable_tl_track
-        self.core.playback.state = PlaybackState.PAUSED
+        self.core.playback.state = core.PlaybackState.PAUSED
         self.core.playback.stop()
 
-        self.assertEqual(self.core.playback.state, PlaybackState.STOPPED)
+        self.assertEqual(self.core.playback.state, core.PlaybackState.STOPPED)
         self.assertFalse(self.playback1.stop.called)
         self.assertFalse(self.playback2.stop.called)
 
@@ -146,7 +145,7 @@ class CorePlaybackTest(unittest.TestCase):
 
     def test_seek_fails_for_unplayable_track(self):
         self.core.playback.current_tl_track = self.unplayable_tl_track
-        self.core.playback.state = PlaybackState.PLAYING
+        self.core.playback.state = core.PlaybackState.PLAYING
         success = self.core.playback.seek(1000)
 
         self.assertFalse(success)

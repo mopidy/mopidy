@@ -3,12 +3,12 @@ from __future__ import unicode_literals
 import mock
 import unittest
 
-from mopidy.backends.listener import BackendListener
+from mopidy import backend
 
 
 class BackendListenerTest(unittest.TestCase):
     def setUp(self):
-        self.listener = BackendListener()
+        self.listener = backend.BackendListener()
 
     def test_on_event_forwards_to_specific_handler(self):
         self.listener.playlists_loaded = mock.Mock()

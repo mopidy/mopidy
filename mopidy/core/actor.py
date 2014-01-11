@@ -5,8 +5,8 @@ import itertools
 
 import pykka
 
-from mopidy.audio import AudioListener, PlaybackState
-from mopidy.backends.listener import BackendListener
+from mopidy import audio, backend
+from mopidy.audio import PlaybackState
 from mopidy.utils import versioning
 
 from .library import LibraryController
@@ -16,7 +16,7 @@ from .playlists import PlaylistsController
 from .tracklist import TracklistController
 
 
-class Core(pykka.ThreadingActor, AudioListener, BackendListener):
+class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):
     library = None
     """The library controller. An instance of
     :class:`mopidy.core.LibraryController`."""

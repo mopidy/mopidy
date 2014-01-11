@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 import mock
 import unittest
 
-from mopidy.backends import base
-from mopidy.core import Core
+from mopidy import backend, core
 from mopidy.models import Playlist, Track
 
 
@@ -12,12 +11,12 @@ class PlaylistsTest(unittest.TestCase):
     def setUp(self):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
-        self.sp1 = mock.Mock(spec=base.BasePlaylistsProvider)
+        self.sp1 = mock.Mock(spec=backend.PlaylistsProvider)
         self.backend1.playlists = self.sp1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
-        self.sp2 = mock.Mock(spec=base.BasePlaylistsProvider)
+        self.sp2 = mock.Mock(spec=backend.PlaylistsProvider)
         self.backend2.playlists = self.sp2
 
         # A backend without the optional playlists provider
@@ -34,7 +33,7 @@ class PlaylistsTest(unittest.TestCase):
         self.pl2b = Playlist(name='B', tracks=[Track(uri='dummy2:b')])
         self.sp2.playlists.get.return_value = [self.pl2a, self.pl2b]
 
-        self.core = Core(audio=None, backends=[
+        self.core = core.Core(audio=None, backends=[
             self.backend3, self.backend1, self.backend2])
 
     def test_get_playlists_combines_result_from_backends(self):

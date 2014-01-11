@@ -5,14 +5,13 @@ import unittest
 import mock
 import pykka
 
-from mopidy import audio, core
-from mopidy.backends import listener
+from mopidy import audio, backend, core
 from mopidy.local import actor
 
 from tests import path_to_data_dir
 
 
-@mock.patch.object(listener.BackendListener, 'send')
+@mock.patch.object(backend.BackendListener, 'send')
 class LocalBackendEventsTest(unittest.TestCase):
     config = {
         'local': {

@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 import mock
 import unittest
 
-from mopidy.backends import base
-from mopidy.core import Core
+from mopidy import backend, core
 from mopidy.models import Ref, SearchResult, Track
 
 
@@ -12,13 +11,13 @@ class CoreLibraryTest(unittest.TestCase):
     def setUp(self):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
-        self.library1 = mock.Mock(spec=base.BaseLibraryProvider)
+        self.library1 = mock.Mock(spec=backend.LibraryProvider)
         self.library1.root_directory_name.get.return_value = 'dummy1'
         self.backend1.library = self.library1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
-        self.library2 = mock.Mock(spec=base.BaseLibraryProvider)
+        self.library2 = mock.Mock(spec=backend.LibraryProvider)
         self.library2.root_directory_name.get.return_value = 'dummy2'
         self.backend2.library = self.library2
 
@@ -27,7 +26,7 @@ class CoreLibraryTest(unittest.TestCase):
         self.backend3.uri_schemes.get.return_value = ['dummy3']
         self.backend3.has_library().get.return_value = False
 
-        self.core = Core(audio=None, backends=[
+        self.core = core.Core(audio=None, backends=[
             self.backend1, self.backend2, self.backend3])
 
     def test_browse_root_returns_dir_ref_for_each_lib_with_root_dir_name(self):

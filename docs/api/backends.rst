@@ -4,46 +4,46 @@
 Backend API
 ***********
 
-.. module:: mopidy.backends.base
+.. module:: mopidy.backend
     :synopsis: The API implemented by backends
 
 The backend API is the interface that must be implemented when you create a
-backend. If you are working on a frontend and need to access the backend, see
-the :ref:`core-api`.
+backend. If you are working on a frontend and need to access the backends, see
+the :ref:`core-api` instead.
 
 
 Backend class
 =============
 
-.. autoclass:: mopidy.backends.base.Backend
+.. autoclass:: mopidy.backend.Backend
     :members:
 
 
 Playback provider
 =================
 
-.. autoclass:: mopidy.backends.base.BasePlaybackProvider
+.. autoclass:: mopidy.backend.PlaybackProvider
     :members:
 
 
 Playlists provider
 ==================
 
-.. autoclass:: mopidy.backends.base.BasePlaylistsProvider
+.. autoclass:: mopidy.backend.PlaylistsProvider
     :members:
 
 
 Library provider
 ================
 
-.. autoclass:: mopidy.backends.base.BaseLibraryProvider
+.. autoclass:: mopidy.backend.LibraryProvider
     :members:
 
 
 Backend listener
 ================
 
-.. autoclass:: mopidy.backends.listener.BackendListener
+.. autoclass:: mopidy.backend.BackendListener
     :members:
 
 

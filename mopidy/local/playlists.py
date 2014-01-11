@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 
-from mopidy.backends import base, listener
+from mopidy import backend
 from mopidy.models import Playlist
 from mopidy.utils import formatting, path
 
@@ -15,7 +15,7 @@ from .translator import parse_m3u
 logger = logging.getLogger(__name__)
 
 
-class LocalPlaylistsProvider(base.BasePlaylistsProvider):
+class LocalPlaylistsProvider(backend.PlaylistsProvider):
     def __init__(self, *args, **kwargs):
         super(LocalPlaylistsProvider, self).__init__(*args, **kwargs)
         self._media_dir = self.backend.config['local']['media_dir']
@@ -58,7 +58,7 @@ class LocalPlaylistsProvider(base.BasePlaylistsProvider):
 
         self.playlists = playlists
         # TODO: send what scheme we loaded them for?
-        listener.BackendListener.send('playlists_loaded')
+        backend.BackendListener.send('playlists_loaded')
 
         logger.info(
             'Loaded %d local playlists from %s',
