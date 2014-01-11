@@ -20,6 +20,28 @@ v0.18.0 (UNRELEASED)
   virtual file system of tracks. Backends can implement support for this by
   implementing :meth:`mopidy.backends.base.BaseLibraryController.browse`.
 
+**Backend API**
+
+- Move the backend API classes from :mod:`mopidy.backends.base` to
+  :mod:`mopidy.backend` and remove the ``Base`` prefix from the class names:
+
+  - From :class:`mopidy.backends.base.Backend`
+    to :class:`mopidy.backend.Backend`
+
+  - From :class:`mopidy.backends.base.BaseLibraryProvider`
+    to :class:`mopidy.backend.LibraryProvider`
+
+  - From :class:`mopidy.backends.base.BasePlaybackProvider`
+    to :class:`mopidy.backend.PlaybackProvider`
+
+  - From :class:`mopidy.backends.base.BasePlaylistsProvider`
+    to :class:`mopidy.backend.PlaylistsProvider`
+
+  - From :class:`mopidy.backends.listener.BackendListener`
+    to :class:`mopidy.backend.BackendListener`
+
+  Imports from the old locations still works, but are deprecated.
+
 **Configuration**
 
 - The default for the :option:`mopidy --config` option has been updated to
