@@ -7,62 +7,72 @@ This changelog is used to track all major changes to Mopidy.
 v0.18.0 (UNRELEASED)
 ====================
 
-**MPD frontend**
-
-- Empty commands now return a ``ACK [5@0] {} No command given`` error instead
-  of ``OK``. This is consistent with the original MPD server implementation.
-
 **Core API**
 
-- Expose :meth:`mopidy.core.Core.version` for HTTP clients to manage
-  compatibility between API versions. (Fixes: :issue:`597`)
+- Add :meth:`mopidy.core.Core.version` for HTTP clients to manage compatibility
+  between API versions. (Fixes: :issue:`597`)
 
 - Add :class:`mopidy.models.Ref` class for use as a lightweight reference to
-  other model types, containing just an URI, a name, and an object type.
+  other model types, containing just an URI, a name, and an object type. It is
+  barely used for now, but its use will be extended over time.
 
 - Add :meth:`mopidy.core.LibraryController.browse` method for browsing a
   virtual file system of tracks. Backends can implement support for this by
   implementing :meth:`mopidy.backends.base.BaseLibraryController.browse`.
 
-**Extension registry**
+**Configuration**
+
+- The default for the :option:`mopidy --config` option has been updated to
+  include ``$XDG_CONFIG_DIRS`` in addition to ``$XDG_CONFIG_DIR``. (Fixes
+  :issue:`431`)
+
+- Added support for deprecating config values in order to allow for graceful
+  removal of the no longer used config value :confval:`local/tag_cache_file`.
+
+**Extension support**
 
 - Switched to using a registry model for classes provided by extension. This
-  allows extensions to be extended as needed for plugable local libraries.
-  (Fixes :issue:`601`)
+  allows extensions to be extended by other extensions, as needed by for
+  example pluggable libraries for the local backend. See
+  :class:`mopidy.ext.Registry` for details. (Fixes :issue:`601`)
 
-**Pluggable local libraries**
+- Added the new method :meth:`mopidy.ext.Extension.setup`. This method
+  replaces the now deprecated
+  :meth:`~mopidy.ext.Extension.get_backend_classes`,
+  :meth:`~mopidy.ext.Extension.get_frontend_classes`, and
+  :meth:`~mopidy.ext.Extension.register_gstreamer_elements`.
 
-Fixes issues :issue:`44`, partially resolves :issue:`397`, and causes
-a temporary regression of :issue:`527`.
+**Local backend**
 
 - Finished the work on creating pluggable libraries. Users can now
-  reconfigure Mopidy to use alternate library providers of their choosing
-  for local files.
+  reconfigure Mopidy to use alternate library providers of their choosing for
+  local files. (Fixes issue :issue:`44`, partially resolves :issue:`397`, and
+  causes a temporary regression of :issue:`527`.)
 
-- Switched default local library provider from "tag cache" to JSON. This
-  greatly simplifies our library code and reuses our existing serialization
-  code.
+- Switched default local library provider from a "tag cache" file that closely
+  resembled the one used by the original MPD server to a compressed JSON file.
+  This greatly simplifies our library code and reuses our existing model
+  serialization code, as used by the HTTP API and web clients.
 
-- Killed our outdated and bug-ridden "tag cache" implementation.
+- Removed our outdated and bug-ridden "tag cache" local library implementation.
 
-- Added support for deprecated config values in order to allow for
-  graceful removal of :confval:`local/tag_cache_file`.
+- Added the config value :confval:`local/library` to select which library to
+  use. It defaults to ``json``, which is the only local library bundled with
+  Mopidy.
 
-- Added :confval:`local/library` to select which library to use.
+- Added the config value :confval:`local/data_dir` to have a common config for
+  where to store local library data. This is intended to avoid every single
+  local library provider having to have it's own config value for this.
 
-- Added :confval:`local/data_dir` to have a common setting for where to store
-  local library data. This is intended to avoid every single local library
-  provider having to have it's own setting for this.
-
-- Added :confval:`local/scan_flush_threshold` to control how often to tell
-  local libraries to store changes.
+- Added the config value :confval:`local/scan_flush_threshold` to control how
+  often to tell local libraries to store changes when scanning local music.
 
 **Streaming backend**
 
-- Live lookup of URI metadata has been added. (Fixes :issue:`540`)
+- Add live lookup of URI metadata. (Fixes :issue:`540`)
 
-- Support for extended M3U added, meaning that basic track metadata stored in
-  playlists will be provided for playlist tracks.
+- Add support for extended M3U playlist, meaning that basic track metadata
+  stored in playlists will be used by Mopidy.
 
 **HTTP frontend**
 
@@ -77,16 +87,14 @@ a temporary regression of :issue:`527`.
   still not implemented. Also note that this adds very little until e.g. the
   local backend is extended with support for library browsing.
 
+- Empty commands now return a ``ACK [5@0] {} No command given`` error instead
+  of ``OK``. This is consistent with the original MPD server implementation.
+
 **Internal changes**
 
 - Events from the audio actor, backends, and core actor are now emitted
   asyncronously through the GObject event loop. This should resolve the issue
   that has blocked the merge of the EOT-vs-EOS fix for a long time.
-
-**Config file loading**
-
-- The default for the config flag has been updated to include
-  ``$XDG_CONFIG_DIRS`` in addition to ``$XDG_CONFIG_DIR``. (Fixes :issue:`431`)
 
 
 v0.17.0 (2013-11-23)
