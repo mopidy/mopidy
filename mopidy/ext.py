@@ -82,9 +82,9 @@ class Extension(object):
                 from .backend import SoundspotBackend
                 registry.add('backend', SoundspotBackend)
 
-        See :meth:`Registry.add` for a list of registry keys with a special
-        meaning. Mopidy will instantiate and start any classes registered
-        under the ``frontend`` and ``backend`` registry keys.
+        See :class:`Registry` for a list of registry keys with a special
+        meaning. Mopidy will instantiate and start any classes registered under
+        the ``frontend`` and ``backend`` registry keys.
 
         This method can also be used for other setup tasks not involving the
         extension registry. For example, to register custom GStreamer
