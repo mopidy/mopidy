@@ -105,7 +105,7 @@ whatever the current active library is with data. Only one library may be
 active at a time.
 
 To create a new library provider you must create class that implements the
-:class:`~mopidy.local.Library` interface and install it in the extension
+:class:`mopidy.local.Library` interface and install it in the extension
 registry under ``local:library``. Any data that the library needs to store on
 disc should be stored in :confval:`local/data_dir` using the library name as
 part of the filename or directory to avoid any conflicts.
