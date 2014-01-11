@@ -44,7 +44,7 @@ setup(
             'http = mopidy.http:Extension [http]',
             'local = mopidy.backends.local:Extension',
             'mpd = mopidy.mpd:Extension',
-            'stream = mopidy.backends.stream:Extension',
+            'stream = mopidy.stream:Extension',
         ],
     },
     classifiers=[
