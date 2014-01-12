@@ -42,6 +42,15 @@ v0.18.0 (UNRELEASED)
 
   Imports from the old locations still works, but are deprecated.
 
+**Commands**
+
+- Reduce amount of logging from dependencies when using :option:`mopidy -v`.
+  (Fixes: :issue:`593`)
+
+- Add support for additional logging verbosity levels with ``mopidy -vv`` and
+  ``mopidy -vvv`` which increases the amount of logging from dependencies.
+  (Fixes: :issue:`593`)
+
 **Configuration**
 
 - The default for the :option:`mopidy --config` option has been updated to
