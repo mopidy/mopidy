@@ -22,34 +22,34 @@ request touches on. The objects' URIs are compared with the backends'
 
 An often used pattern when implementing Mopidy backends is to create your own
 URI scheme which you use for all tracks, playlists, etc. related to your
-backend. In most cases the Mopidy URI is translated to an actuall URI right
+backend. In most cases the Mopidy URI is translated to an actual URI right
 before playback. For example:
 
-- Spotify already has it's own URI scheme (``spotify:track:...``,
+- Spotify already has its own URI scheme (``spotify:track:...``,
   ``spotify:playlist:...``, etc.) used throughout their applications, and thus
-  Mopidy-Spotify simply use the same URI scheme.
+  Mopidy-Spotify simply uses the same URI scheme.
 
-- Mopidy-Soundcloud created it's own URI scheme, after the model of Spotify,
+- Mopidy-SoundCloud created it's own URI scheme, after the model of Spotify,
   and use URIs of the following forms: ``soundcloud:search``,
   ``soundcloud:user-...``, ``soundcloud:exp-...``, and ``soundcloud:set-...``.
 
 - Mopidy differentiates between ``file://...`` URIs handled by
   :ref:`ext-stream` and ``local:...`` URIs handled by :ref:`ext-local`.
-  :ref:`ext-stream` can play ``file://...`` URIs to tracks and playlists
-  located anywhere on your system, but it doesn't know a thing about the
-  object before you play it. On the other hand, :ref:`ext-local` scans a
-  predefined :confval:`local/media_dir` to build a metadata library of all
+  :ref:`ext-stream` can play ``file://...`` URIs pointing to tracks and
+  playlists located anywhere on your system, but it doesn't know a thing about
+  the object before you play it. On the other hand, :ref:`ext-local` scans a
+  predefined :confval:`local/media_dir` to build a meta data library of all
   known tracks. It is thus limited to playing tracks residing in the media
   library, but can provide additional features like directory browsing and
   search. In other words, we have two different ways of playing local music,
-  handled by two different backends, and have thus created to different URI
+  handled by two different backends, and have thus created two different URI
   schemes to separate their handling.
 
 If there isn't an existing URI scheme that fits for your backend's purpose,
 you should create your own, and name it after your extension's
 :attr:`~mopidy.ext.Extension.ext_name`. Care should be taken not to conflict
-with already in use URI schemes. It is also recomended to design the format
-such that tracks, playlists and other entities can be distingished easily.
+with already in use URI schemes. It is also recommended to design the format
+such that tracks, playlists and other entities can be distinguished easily.
 
 
 Backend class
