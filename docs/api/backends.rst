@@ -22,9 +22,10 @@ request touches on. The objects' URIs are compared with the backends'
 
 An often used pattern when implementing Mopidy backends is to create your own
 URI scheme which you use for all tracks, playlists, etc. related to your
-backend. For example:
+backend. In most cases the Mopidy URI is translated to an actuall URI right
+before playback. For example:
 
-- Spotify already got an URI scheme (``spotify:track:...``,
+- Spotify already has it's own URI scheme (``spotify:track:...``,
   ``spotify:playlist:...``, etc.) used throughout their applications, and thus
   Mopidy-Spotify simply use the same URI scheme.
 
@@ -40,13 +41,15 @@ backend. For example:
   predefined :confval:`local/media_dir` to build a metadata library of all
   known tracks. It is thus limited to playing tracks residing in the media
   library, but can provide additional features like directory browsing and
-  search. In other words, we got two different ways of playing local music,
+  search. In other words, we have two different ways of playing local music,
   handled by two different backends, and have thus created to different URI
   schemes to separate their handling.
 
 If there isn't an existing URI scheme that fits for your backend's purpose,
 you should create your own, and name it after your extension's
-:attr:`~mopidy.ext.Extension.ext_name`.
+:attr:`~mopidy.ext.Extension.ext_name`. Care should be taken not to conflict
+with already in use URI schemes. It is also recomended to design the format
+such that tracks, playlists and other entities can be distingished easily.
 
 
 Backend class
