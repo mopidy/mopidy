@@ -70,7 +70,8 @@ def main():
         if args.verbosity_level:
             verbosity_level += args.verbosity_level
 
-        log.setup_logging(config, verbosity_level, args.save_debug_log)
+        log.setup_logging(
+            config, installed_extensions, verbosity_level, args.save_debug_log)
 
         enabled_extensions = []
         for extension in installed_extensions:
