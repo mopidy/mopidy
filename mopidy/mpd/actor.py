@@ -51,7 +51,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 logger.info('Registered MPD with Zeroconf as "%s"',
                             self.zeroconf_service.name)
             else:
-                logger.warning('Registering MPD with Zeroconf failed.')
+                logger.info('Registering MPD with Zeroconf failed.')
 
     def on_stop(self):
         if self.zeroconf_service:
