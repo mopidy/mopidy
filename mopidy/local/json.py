@@ -4,11 +4,13 @@ import gzip
 import json
 import logging
 import os
+import re
+import sys
 import tempfile
 
 import mopidy
 from mopidy import local, models
-from mopidy.local import search
+from mopidy.local import search, translator
 
 logger = logging.getLogger(__name__)
 
@@ -41,22 +43,68 @@ def write_library(json_file, data):
             os.remove(tmp.name)
 
 
+class _BrowseCache(object):
+    encoding = sys.getfilesystemencoding()
+
+    def __init__(self, uris):
+        """Create a dictionary tree for quick browsing.
+
+        {'foo': {'bar': {None: [ref1, ref2]},
+                 'baz': {},
+                  None: [ref3]}}
+        """
+        self._root = {}
+
+        for uri in uris:
+            path = translator.local_track_uri_to_path(uri, b'/')
+            parts = self.split(path.decode(self.encoding))
+            filename = parts.pop()
+            node = self._root
+            for part in parts:
+                node = node.setdefault(part, {})
+            ref = models.Ref.track(uri=uri, name=filename)
+            node.setdefault(None, set()).add(ref)
+
+    def split(self, path):
+        return re.findall(r'([^/]+)', path)
+
+    def lookup(self, path):
+        results = []
+        node = self._root
+
+        for part in self.split(path):
+            node = node.get(part, {})
+
+        for key, value in node.items():
+            if key is None:
+                results.extend(value)
+            else:
+                uri = os.path.join(path, key)
+                results.append(models.Ref.directory(uri=uri, name=key))
+
+        return results
+
+
 class JsonLibrary(local.Library):
     name = b'json'
 
     def __init__(self, config):
         self._tracks = {}
+        self._browse_cache = None
         self._media_dir = config['local']['media_dir']
         self._json_file = os.path.join(
             config['local']['data_dir'], b'library.json.gz')
 
     def browse(self, path):
-        return []
+        if not self._browse_cache:
+            return
+        return self._browse_cache.lookup(path)
 
     def load(self):
         logger.debug('Loading json library from %s', self._json_file)
         library = load_library(self._json_file)
         self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
+        self._browse_cache = _BrowseCache(self._tracks.keys())
         return len(self._tracks)
 
     def lookup(self, uri):
