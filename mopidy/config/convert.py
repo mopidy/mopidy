@@ -36,6 +36,7 @@ def convert(settings):
 
     helper('audio/mixer', 'MIXER')
     helper('audio/mixer_track', 'MIXER_TRACK')
+    helper('audio/mixer_volume', 'MIXER_VOLUME')
     helper('audio/output', 'OUTPUT')
 
     helper('proxy/hostname', 'SPOTIFY_PROXY_HOST')
