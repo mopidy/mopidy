@@ -452,6 +452,9 @@ as this will be visible in Mopidy's debug log::
 
     logger = logging.getLogger('mopidy_soundspot')
 
+    # Or even better, use the Python module name as the logger name:
+    logger = logging.getLogger(__name__)
+
 When logging at logging level ``info`` or higher (i.e. ``warning``, ``error``,
 and ``critical``, but not ``debug``) the log message will be displayed to all
 Mopidy users. Thus, the log messages at those levels should be well written and
