@@ -80,16 +80,14 @@ Core configuration values
 
     Setting the config value to blank turns off volume control.
 
-
 .. confval:: audio/mixer_volume
 
-    Audio mixer initial volume.
-    
-    Expects an Integer between 0 and 100.
+    Initial volume for the audio mixer.
 
-    Sets the initial volume of the audio mixer. Setting the config value to blank 
-    sets the initial volume for the software mixer to 100.
+    Expects an integer between 0 and 100.
 
+    Setting the config value to blank leaves the audio mixer volume unchanged.
+    For the software mixer blank means 100.
 
 .. confval:: audio/mixer_track
 
