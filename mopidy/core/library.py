@@ -83,8 +83,8 @@ class LibraryController(object):
         result = []
         for ref in refs:
             if ref.type == Ref.DIRECTORY:
-                result.append(
-                    ref.copy(uri='/%s%s' % (library_name, ref.uri)))
+                uri = '/'.join(['', library_name, ref.uri.lstrip('/')])
+                result.append(ref.copy(uri=uri))
             else:
                 result.append(ref)
         return result
