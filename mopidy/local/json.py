@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import collections
 import gzip
 import json
 import logging
@@ -53,7 +54,7 @@ class _BrowseCache(object):
                  'baz': {},
                   None: [ref3]}}
         """
-        self._root = {}
+        self._root = collections.OrderedDict()
 
         for uri in uris:
             path = translator.local_track_uri_to_path(uri, b'/')
@@ -61,9 +62,9 @@ class _BrowseCache(object):
             filename = parts.pop()
             node = self._root
             for part in parts:
-                node = node.setdefault(part, {})
+                node = node.setdefault(part, collections.OrderedDict())
             ref = models.Ref.track(uri=uri, name=filename)
-            node.setdefault(None, set()).add(ref)
+            node.setdefault(None, []).append(ref)
 
     def split(self, path):
         return re.findall(r'([^/]+)', path)
@@ -76,11 +77,12 @@ class _BrowseCache(object):
             node = node.get(part, {})
 
         for key, value in node.items():
-            if key is None:
-                results.extend(value)
-            else:
+            if key is not None:
                 uri = os.path.join(path, key)
                 results.append(models.Ref.directory(uri=uri, name=key))
+
+        # Get tracks afterwards to ensure ordering.
+        results.extend(node.get(None, []))
 
         return results
 
@@ -104,7 +106,7 @@ class JsonLibrary(local.Library):
         logger.debug('Loading json library from %s', self._json_file)
         library = load_library(self._json_file)
         self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
-        self._browse_cache = _BrowseCache(self._tracks.keys())
+        self._browse_cache = _BrowseCache(sorted(self._tracks))
         return len(self._tracks)
 
     def lookup(self, uri):
