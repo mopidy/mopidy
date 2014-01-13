@@ -56,7 +56,7 @@ class LibraryProvider(object):
     """
     Name of the library's root directory in Mopidy's virtual file system.
 
-    *MUST be set by any class that implements :meth:`browse`.*
+    *MUST be set by any class that implements :meth:`LibraryProvider.browse`.*
     """
 
     def __init__(self, backend):
