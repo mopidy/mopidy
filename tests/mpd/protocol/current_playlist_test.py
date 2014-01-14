@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from mopidy.models import Track
+from mopidy.models import Ref, Track
 
 from tests.mpd import protocol
 
@@ -24,9 +24,36 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse(
             'ACK [50@0] {add} directory or file not found')
 
-    def test_add_with_empty_uri_should_add_all_known_tracks_and_ok(self):
+    def test_add_with_empty_uri_should_not_add_anything_and_ok(self):
+        self.backend.library.dummy_library = [Track(uri='dummy:/a', name='a')]
+        self.backend.library.dummy_browse_result = {
+            '/': [Ref.track(uri='dummy:/a', name='a')]}
+
         self.sendRequest('add ""')
-        # TODO check that we add all tracks (we currently don't)
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
+        self.assertInResponse('OK')
+
+    def test_add_with_library_should_recurse(self):
+        tracks = [Track(uri='dummy:/a', name='a'),
+                  Track(uri='dummy:/b', name='b')]
+
+        self.backend.library.dummy_library = tracks
+        self.backend.library.dummy_browse_result = {
+            '/': [Ref.track(uri='dummy:/a', name='a'),
+                  Ref.directory(uri='/foo')],
+            '/foo': [Ref.track(uri='dummy:/b', name='b')]}
+
+        self.sendRequest('add "/dummy"')
+        self.assertEqual(self.core.tracklist.tracks.get(), tracks)
+        self.assertInResponse('OK')
+
+    def test_add_root_should_not_add_anything_and_ok(self):
+        self.backend.library.dummy_library = [Track(uri='dummy:/a', name='a')]
+        self.backend.library.dummy_browse_result = {
+            '/': [Ref.track(uri='dummy:/a', name='a')]}
+
+        self.sendRequest('add "/"')
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
         self.assertInResponse('OK')
 
     def test_addid_without_songpos(self):

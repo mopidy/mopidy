@@ -33,12 +33,12 @@ class DummyLibraryProvider(backend.LibraryProvider):
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)
         self.dummy_library = []
-        self.dummy_browse_result = []
+        self.dummy_browse_result = {}
         self.dummy_find_exact_result = SearchResult()
         self.dummy_search_result = SearchResult()
 
     def browse(self, path):
-        return self.dummy_browse_result
+        return self.dummy_browse_result.get(path, [])
 
     def find_exact(self, **query):
         return self.dummy_find_exact_result

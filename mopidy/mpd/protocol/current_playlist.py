@@ -20,11 +20,33 @@ def add(context, uri):
 
     - ``add ""`` should add all tracks in the library to the current playlist.
     """
-    if not uri:
+    if not uri.strip('/'):
         return
+
     tl_tracks = context.core.tracklist.add(uri=uri).get()
-    if not tl_tracks:
+    if tl_tracks:
+        return
+
+    if not uri.startswith('/'):
+        uri = '/%s' % uri
+
+    browse_futures = [context.core.library.browse(uri)]
+    lookup_futures = []
+    while browse_futures:
+        for ref in browse_futures.pop().get():
+            if ref.type == ref.DIRECTORY:
+                browse_futures.append(context.core.library.browse(ref.uri))
+            else:
+                lookup_futures.append(context.core.library.lookup(ref.uri))
+
+    tracks = []
+    for future in lookup_futures:
+        tracks.extend(future.get())
+
+    if not tracks:
         raise MpdNoExistError('directory or file not found', command='add')
+
+    context.core.tracklist.add(tracks=tracks)
 
 
 @handle_request(r'addid\ "(?P<uri>[^"]*)"(\ "(?P<songpos>\d+)")*$')
