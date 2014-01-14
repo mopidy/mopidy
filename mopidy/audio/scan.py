@@ -52,18 +52,17 @@ class Scanner(object):
         :return: Dictionary of tags, duration, mtime and uri information.
         """
         try:
+            data = {'uri': uri}
             self._setup(uri)
-            data = self._collect()
-            # Make sure uri, mtime and duration does not come from tags.
-            data[b'uri'] = uri
-            data[b'mtime'] = self._query_mtime(uri)
-            data[gst.TAG_DURATION] = self._query_duration()
+            data['tags'] = self._collect()
+            data['mtime'] = self._query_mtime(uri)
+            data['duration'] = self._query_duration()
         finally:
             self._reset()
 
         if self._min_duration_ms is None:
             return data
-        elif data[gst.TAG_DURATION] >= self._min_duration_ms * gst.MSECOND:
+        elif data['duration'] >= self._min_duration_ms * gst.MSECOND:
             return data
 
         raise exceptions.ScannerError('Rejecting file with less than %dms '
@@ -131,8 +130,8 @@ def audio_data_to_track(data):
     track_kwargs = {}
 
     def _retrieve(source_key, target_key, target):
-        if source_key in data:
-            target.setdefault(target_key, data[source_key])
+        if source_key in data['tags']:
+            target.setdefault(target_key, data['tags'][source_key])
 
     _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
@@ -160,8 +159,8 @@ def audio_data_to_track(data):
     _retrieve(gst.TAG_LOCATION, 'comment', track_kwargs)
     _retrieve(gst.TAG_COPYRIGHT, 'comment', track_kwargs)
 
-    if gst.TAG_DATE in data and data[gst.TAG_DATE]:
-        date = data[gst.TAG_DATE]
+    if gst.TAG_DATE in data['tags'] and data['tags'][gst.TAG_DATE]:
+        date = data['tags'][gst.TAG_DATE]
         try:
             date = datetime.date(date.year, date.month, date.day)
         except ValueError:
