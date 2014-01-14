@@ -85,6 +85,8 @@ v0.18.0 (UNRELEASED)
 
 **Local backend**
 
+- Added support for browsing local directories.
+
 - Finished the work on creating pluggable libraries. Users can now
   reconfigure Mopidy to use alternate library providers of their choosing for
   local files. (Fixes issue :issue:`44`, partially resolves :issue:`397`, and
@@ -125,8 +127,7 @@ v0.18.0 (UNRELEASED)
 
 - Make the ``lsinfo`` command support browsing of Mopidy's virtual file
   system. Note that the related ``listall`` and ``listallinfo`` commands are
-  still not implemented. Also note that this adds very little until e.g. the
-  local backend is extended with support for library browsing.
+  still not implemented.
 
 - Empty commands now return a ``ACK [5@0] {} No command given`` error instead
   of ``OK``. This is consistent with the original MPD server implementation.
