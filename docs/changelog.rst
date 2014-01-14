@@ -22,7 +22,7 @@ v0.18.0 (UNRELEASED)
 
 - Events emitted on play/stop, pause/resume, next/previous and on end of track
   has been cleaned up to work consistenly. See the message of
-  :commit:`1d108752f6` for the full details.
+  :commit:`1d108752f6` for the full details. (Fixes: :issue:`629`)
 
 **Backend API**
 
