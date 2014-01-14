@@ -20,7 +20,7 @@ def add(context, uri):
 
     - ``add ""`` should add all tracks in the library to the current playlist.
     """
-    if not uri:
+    if not uri.strip('/'):
         return
 
     tl_tracks = context.core.tracklist.add(uri=uri).get()
