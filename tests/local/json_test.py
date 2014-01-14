@@ -30,7 +30,7 @@ class BrowseCacheTest(unittest.TestCase):
     def test_lookup_foo_baz(self):
         self.assertEqual([], self.cache.lookup('/foo/baz'))
 
-    def test_lookup_normalise_slashes(self):
+    def test_lookup_normalize_slashes(self):
         expected = [Ref.track(uri=self.uris[0], name='song1'),
                     Ref.track(uri=self.uris[1], name='song2')]
         self.assertEqual(expected, self.cache.lookup('/foo//bar/'))

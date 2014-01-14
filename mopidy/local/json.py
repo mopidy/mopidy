@@ -46,6 +46,7 @@ def write_library(json_file, data):
 
 class _BrowseCache(object):
     encoding = sys.getfilesystemencoding()
+    splitpath_re = re.compile(r'([^/]+)')
 
     def __init__(self, uris):
         """Create a dictionary tree for quick browsing.
@@ -58,7 +59,7 @@ class _BrowseCache(object):
 
         for uri in uris:
             path = translator.local_track_uri_to_path(uri, b'/')
-            parts = self.split(path.decode(self.encoding))
+            parts = self.splitpath_re.findall(path.decode(self.encoding))
             filename = parts.pop()
             node = self._root
             for part in parts:
@@ -66,14 +67,11 @@ class _BrowseCache(object):
             ref = models.Ref.track(uri=uri, name=filename)
             node.setdefault(None, []).append(ref)
 
-    def split(self, path):
-        return re.findall(r'([^/]+)', path)
-
     def lookup(self, path):
         results = []
         node = self._root
 
-        for part in self.split(path):
+        for part in self.splitpath_re.findall(path):
             node = node.get(part, {})
 
         for key, value in node.items():
@@ -99,7 +97,7 @@ class JsonLibrary(local.Library):
 
     def browse(self, path):
         if not self._browse_cache:
-            return
+            return []
         return self._browse_cache.lookup(path)
 
     def load(self):
