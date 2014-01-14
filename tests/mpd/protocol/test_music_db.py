@@ -123,12 +123,41 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listall_without_uri(self):
+        tracks = [Track(uri='dummy:/a', name='a'),
+                  Track(uri='dummy:/b', name='b')]
+        self.backend.library.dummy_library = tracks
+        self.backend.library.dummy_browse_result = {
+            '/': [Ref.track(uri='dummy:/a', name='a'),
+                  Ref.directory(uri='/foo')],
+            '/foo': [Ref.track(uri='dummy:/b', name='b')]}
+
         self.sendRequest('listall')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+
+        self.assertInResponse('file: dummy:/a')
+        self.assertInResponse('directory: /dummy/foo')
+        self.assertInResponse('file: dummy:/b')
+        self.assertInResponse('OK')
 
     def test_listall_with_uri(self):
-        self.sendRequest('listall "file:///dev/urandom"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        tracks = [Track(uri='dummy:/a', name='a'),
+                  Track(uri='dummy:/b', name='b')]
+        self.backend.library.dummy_library = tracks
+        self.backend.library.dummy_browse_result = {
+            '/': [Ref.track(uri='dummy:/a', name='a'),
+                  Ref.directory(uri='/foo')],
+            '/foo': [Ref.track(uri='dummy:/b', name='b')]}
+
+        self.sendRequest('listall "/dummy/foo"')
+
+        self.assertNotInResponse('file: dummy:/a')
+        self.assertInResponse('directory: /dummy/foo')
+        self.assertInResponse('file: dummy:/b')
+        self.assertInResponse('OK')
+
+    def test_listall_with_unknown_uri(self):
+        self.sendRequest('listall "/unknown"')
+
+        self.assertEqualResponse('ACK [50@0] {listall} Not found')
 
     def test_listallinfo_without_uri(self):
         self.sendRequest('listallinfo')
