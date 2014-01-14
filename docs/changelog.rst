@@ -20,6 +20,10 @@ v0.18.0 (UNRELEASED)
   virtual file system of tracks. Backends can implement support for this by
   implementing :meth:`mopidy.backends.base.BaseLibraryController.browse`.
 
+- Events emitted on play/stop, pause/resume, next/previous and on end of track
+  has been cleaned up to work consistenly. See the message of
+  :commit:`1d108752f6` for the full details.
+
 **Backend API**
 
 - Move the backend API classes from :mod:`mopidy.backends.base` to

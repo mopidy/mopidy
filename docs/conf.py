@@ -161,6 +161,7 @@ man_pages = [
 
 extlinks = {
     'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#'),
+    'commit': ('https://github.com/mopidy/mopidy/commit/%s', 'commit '),
     'mpris': (
         'https://github.com/mopidy/mopidy-mpris/issues/%s', 'mopidy-mpris#'),
 }
