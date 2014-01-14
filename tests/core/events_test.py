@@ -25,59 +25,6 @@ class BackendEventsTest(unittest.TestCase):
 
         self.assertEqual(send.call_args[0][0], 'playlists_loaded')
 
-    def test_pause_sends_track_playback_paused_event(self, send):
-        tl_tracks = self.core.tracklist.add([Track(uri='dummy:a')]).get()
-        self.core.playback.play().get()
-        send.reset_mock()
-
-        self.core.playback.pause().get()
-
-        self.assertEqual(send.call_args[0][0], 'track_playback_paused')
-        self.assertEqual(send.call_args[1]['tl_track'], tl_tracks[0])
-        self.assertEqual(send.call_args[1]['time_position'], 0)
-
-    def test_resume_sends_track_playback_resumed(self, send):
-        tl_tracks = self.core.tracklist.add([Track(uri='dummy:a')]).get()
-        self.core.playback.play()
-        self.core.playback.pause().get()
-        send.reset_mock()
-
-        self.core.playback.resume().get()
-
-        self.assertEqual(send.call_args[0][0], 'track_playback_resumed')
-        self.assertEqual(send.call_args[1]['tl_track'], tl_tracks[0])
-        self.assertEqual(send.call_args[1]['time_position'], 0)
-
-    def test_play_sends_track_playback_started_event(self, send):
-        tl_tracks = self.core.tracklist.add([Track(uri='dummy:a')]).get()
-        send.reset_mock()
-
-        self.core.playback.play().get()
-
-        self.assertEqual(send.call_args[0][0], 'track_playback_started')
-        self.assertEqual(send.call_args[1]['tl_track'], tl_tracks[0])
-
-    def test_stop_sends_track_playback_ended_event(self, send):
-        tl_tracks = self.core.tracklist.add([Track(uri='dummy:a')]).get()
-        self.core.playback.play().get()
-        send.reset_mock()
-
-        self.core.playback.stop().get()
-
-        self.assertEqual(send.call_args_list[0][0][0], 'track_playback_ended')
-        self.assertEqual(send.call_args_list[0][1]['tl_track'], tl_tracks[0])
-        self.assertEqual(send.call_args_list[0][1]['time_position'], 0)
-
-    def test_seek_sends_seeked_event(self, send):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
-        self.core.playback.play().get()
-        send.reset_mock()
-
-        self.core.playback.seek(1000).get()
-
-        self.assertEqual(send.call_args[0][0], 'seeked')
-        self.assertEqual(send.call_args[1]['time_position'], 1000)
-
     def test_tracklist_add_sends_tracklist_changed_event(self, send):
         send.reset_mock()
 
@@ -153,12 +100,3 @@ class BackendEventsTest(unittest.TestCase):
         self.core.playlists.save(playlist).get()
 
         self.assertEqual(send.call_args[0][0], 'playlist_changed')
-
-    def test_set_volume_sends_volume_changed_event(self, send):
-        self.core.playback.set_volume(10).get()
-        send.reset_mock()
-
-        self.core.playback.set_volume(20).get()
-
-        self.assertEqual(send.call_args[0][0], 'volume_changed')
-        self.assertEqual(send.call_args[1]['volume'], 20)
