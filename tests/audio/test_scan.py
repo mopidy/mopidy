@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 import os
 import unittest
 
+import gobject
+gobject.threads_init()
+
 from mopidy import exceptions
 from mopidy.audio import scan
 from mopidy.models import Track, Artist, Album
