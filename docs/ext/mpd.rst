@@ -47,7 +47,6 @@ near future:
 
 - Modifying stored playlists is not supported
 - ``tagtypes`` is not supported
-- Browsing the file system is not supported
 - Live update of the music database is not supported
 
 

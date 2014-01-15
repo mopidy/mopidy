@@ -18,7 +18,7 @@ v0.18.0 (UNRELEASED)
 
 - Add :meth:`mopidy.core.LibraryController.browse` method for browsing a
   virtual file system of tracks. Backends can implement support for this by
-  implementing :meth:`mopidy.backends.base.BaseLibraryController.browse`.
+  implementing :meth:`mopidy.backend.LibraryProvider.browse`.
 
 - Events emitted on play/stop, pause/resume, next/previous and on end of track
   has been cleaned up to work consistenly. See the message of
@@ -45,6 +45,10 @@ v0.18.0 (UNRELEASED)
     to :class:`mopidy.backend.BackendListener`
 
   Imports from the old locations still works, but are deprecated.
+
+- Add :meth:`mopidy.backend.LibraryProvider.browse`, which can be implemented
+  by backends that wants to expose directories of tracks in Mopidy's virtual
+  file system.
 
 **Commands**
 
@@ -85,7 +89,7 @@ v0.18.0 (UNRELEASED)
 
 **Local backend**
 
-- Added support for browsing local directories.
+- Added support for browsing local directories in Mopidy's virtual file system.
 
 - Finished the work on creating pluggable libraries. Users can now
   reconfigure Mopidy to use alternate library providers of their choosing for
@@ -125,9 +129,8 @@ v0.18.0 (UNRELEASED)
 
 **MPD frontend**
 
-- Make the ``lsinfo`` command support browsing of Mopidy's virtual file
-  system. Note that the related ``listall`` and ``listallinfo`` commands are
-  still not implemented.
+- Make the ``lsinfo``, ``listall``, and ``listallinfo`` commands support
+  browsing of Mopidy's virtual file system. (Fixes: :issue:`145`)
 
 - Empty commands now return a ``ACK [5@0] {} No command given`` error instead
   of ``OK``. This is consistent with the original MPD server implementation.

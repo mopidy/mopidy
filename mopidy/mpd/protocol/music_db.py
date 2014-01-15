@@ -6,7 +6,7 @@ import re
 
 from mopidy.models import Ref, Track
 from mopidy.mpd import translator
-from mopidy.mpd.exceptions import MpdArgError, MpdNotImplemented
+from mopidy.mpd.exceptions import MpdArgError, MpdNoExistError
 from mopidy.mpd.protocol import handle_request, stored_playlists
 
 
@@ -417,7 +417,25 @@ def listall(context, uri=None):
 
         Lists all songs and directories in ``URI``.
     """
-    raise MpdNotImplemented  # TODO
+    if uri is None:
+        uri = '/'
+    if not uri.startswith('/'):
+        uri = '/%s' % uri
+
+    result = []
+    browse_futures = [context.core.library.browse(uri)]
+    while browse_futures:
+        for ref in browse_futures.pop().get():
+            if ref.type == Ref.DIRECTORY:
+                result.append(('directory', ref.uri))
+                browse_futures.append(context.core.library.browse(ref.uri))
+            elif ref.type == Ref.TRACK:
+                result.append(('file', ref.uri))
+
+    if not result:
+        raise MpdNoExistError('Not found', command='listall')
+
+    return [('directory', uri)] + result
 
 
 @handle_request(r'listallinfo$')
@@ -431,7 +449,34 @@ def listallinfo(context, uri=None):
         Same as ``listall``, except it also returns metadata info in the
         same format as ``lsinfo``.
     """
-    raise MpdNotImplemented  # TODO
+    if uri is None:
+        uri = '/'
+    if not uri.startswith('/'):
+        uri = '/%s' % uri
+
+    dirs_and_futures = []
+    browse_futures = [context.core.library.browse(uri)]
+    while browse_futures:
+        for ref in browse_futures.pop().get():
+            if ref.type == Ref.DIRECTORY:
+                dirs_and_futures.append(('directory', ref.uri))
+                browse_futures.append(context.core.library.browse(ref.uri))
+            elif ref.type == Ref.TRACK:
+                # TODO Lookup tracks in batch for better performance
+                dirs_and_futures.append(context.core.library.lookup(ref.uri))
+
+    result = []
+    for obj in dirs_and_futures:
+        if hasattr(obj, 'get'):
+            for track in obj.get():
+                result.extend(translator.track_to_mpd_format(track))
+        else:
+            result.append(obj)
+
+    if not result:
+        raise MpdNoExistError('Not found', command='listallinfo')
+
+    return [('directory', uri)] + result
 
 
 @handle_request(r'lsinfo$')
