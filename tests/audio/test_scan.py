@@ -21,6 +21,7 @@ class FakeGstDate(object):
         self.day = day
 
 
+# TODO: keep ids without name?
 class TranslatorTest(unittest.TestCase):
     def setUp(self):
         self.data = {
@@ -28,13 +29,13 @@ class TranslatorTest(unittest.TestCase):
             'duration': 4531000000,
             'mtime': 1234,
             'tags': {
-                'album': ['albumname'],
+                'album': ['album'],
                 'track-number': [1],
-                'artist': ['name'],
+                'artist': ['artist'],
                 'composer': ['composer'],
                 'performer': ['performer'],
-                'album-artist': ['albumartistname'],
-                'title': ['trackname'],
+                'album-artist': ['albumartist'],
+                'title': ['track'],
                 'track-count': [2],
                 'album-disc-number': [2],
                 'album-disc-count': [3],
@@ -42,204 +43,122 @@ class TranslatorTest(unittest.TestCase):
                 'container-format': ['ID3 tag'],
                 'genre': ['genre'],
                 'comment': ['comment'],
-                'musicbrainz-trackid': ['mbtrackid'],
-                'musicbrainz-albumid': ['mbalbumid'],
-                'musicbrainz-artistid': ['mbartistid'],
-                'musicbrainz-albumartistid': ['mbalbumartistid'],
+                'musicbrainz-trackid': ['trackid'],
+                'musicbrainz-albumid': ['albumid'],
+                'musicbrainz-artistid': ['artistid'],
+                'musicbrainz-albumartistid': ['albumartistid'],
             },
         }
 
-        self.album = {
-            'name': 'albumname',
-            'num_tracks': 2,
-            'num_discs': 3,
-            'musicbrainz_id': 'mbalbumid',
-        }
+        artist = Artist(name='artist', musicbrainz_id='artistid')
+        composer = Artist(name='composer')
+        performer = Artist(name='performer')
+        albumartist = Artist(name='albumartist',
+                             musicbrainz_id='albumartistid')
 
-        self.artist_single = {
-            'name': 'name',
-            'musicbrainz_id': 'mbartistid',
-        }
+        album = Album(name='album', num_tracks=2, num_discs=3,
+                      musicbrainz_id='albumid', artists=[albumartist])
 
-        self.artist_multiple = {
-            'name': ['name1', 'name2'],
-            'musicbrainz_id': 'mbartistid',
-        }
+        self.track = Track(uri='uri', name='track', date='2006-01-01',
+                           genre='genre', track_no=1, disc_no=2, length=4531,
+                           comment='comment', musicbrainz_id='trackid',
+                           last_modified=1234, album=album, artists=[artist],
+                           composers=[composer], performers=[performer])
 
-        self.artist = self.artist_single
-
-        self.composer_single = {
-            'name': 'composer',
-        }
-
-        self.composer_multiple = {
-            'name': ['composer1', 'composer2'],
-        }
-
-        self.composer = self.composer_single
-
-        self.performer_single = {
-            'name': 'performer',
-        }
-
-        self.performer_multiple = {
-            'name': ['performer1', 'performer2'],
-        }
-
-        self.performer = self.performer_single
-
-        self.albumartist = {
-            'name': 'albumartistname',
-            'musicbrainz_id': 'mbalbumartistid',
-        }
-
-        self.track = {
-            'uri': 'uri',
-            'name': 'trackname',
-            'date': '2006-01-01',
-            'genre': 'genre',
-            'track_no': 1,
-            'disc_no': 2,
-            'comment': 'comment',
-            'length': 4531,
-            'musicbrainz_id': 'mbtrackid',
-            'last_modified': 1234,
-        }
-
-    def build_track(self):
-        if self.albumartist:
-            self.album['artists'] = [Artist(**self.albumartist)]
-        self.track['album'] = Album(**self.album)
-
-        if ('name' in self.artist
-                and not isinstance(self.artist['name'], basestring)):
-            self.track['artists'] = [Artist(name=artist)
-                                     for artist in self.artist['name']]
-        elif 'name' in self.artist:
-            self.track['artists'] = [Artist(**self.artist)]
-
-        if ('name' in self.composer
-                and not isinstance(self.composer['name'], basestring)):
-            self.track['composers'] = [Artist(name=artist)
-                                       for artist in self.composer['name']]
-        else:
-            self.track['composers'] = [Artist(**self.composer)] \
-                if self.composer else ''
-
-        if ('name' in self.performer
-                and not isinstance(self.performer['name'], basestring)):
-            self.track['performers'] = [Artist(name=artist)
-                                        for artist in self.performer['name']]
-        else:
-            self.track['performers'] = [Artist(**self.performer)] \
-                if self.performer else ''
-
-        return Track(**self.track)
-
-    def check(self):
-        expected = self.build_track()
+    def check(self, expected):
         actual = scan.audio_data_to_track(self.data)
         self.assertEqual(expected, actual)
 
     def test_basic_data(self):
-        self.check()
+        self.check(self.track)
 
     def test_missing_track_number(self):
         del self.data['tags']['track-number']
-        del self.track['track_no']
-        self.check()
+        self.check(self.track.copy(track_no=None))
 
     def test_missing_track_count(self):
         del self.data['tags']['track-count']
-        del self.album['num_tracks']
-        self.check()
+        album = self.track.album.copy(num_tracks=None)
+        self.check(self.track.copy(album=album))
 
     def test_missing_track_name(self):
         del self.data['tags']['title']
-        del self.track['name']
-        self.check()
+        self.check(self.track.copy(name=None))
 
     def test_missing_track_musicbrainz_id(self):
         del self.data['tags']['musicbrainz-trackid']
-        del self.track['musicbrainz_id']
-        self.check()
+        self.check(self.track.copy(musicbrainz_id=None))
 
     def test_missing_album_name(self):
         del self.data['tags']['album']
-        del self.album['name']
-        self.check()
+        album = self.track.album.copy(name=None)
+        self.check(self.track.copy(album=album))
 
     def test_missing_album_musicbrainz_id(self):
         del self.data['tags']['musicbrainz-albumid']
-        del self.album['musicbrainz_id']
-        self.check()
+        album = self.track.album.copy(musicbrainz_id=None)
+        self.check(self.track.copy(album=album))
 
     def test_missing_artist_name(self):
         del self.data['tags']['artist']
-        del self.artist['name']
-        self.check()
+        self.check(self.track.copy(artists=[]))
 
     def test_missing_composer_name(self):
         del self.data['tags']['composer']
-        del self.composer['name']
-        self.check()
+        self.check(self.track.copy(composers=[]))
 
     def test_multiple_track_composers(self):
         self.data['tags']['composer'] = ['composer1', 'composer2']
-        self.composer = self.composer_multiple
-        self.check()
+        composers = [Artist(name='composer1'), Artist(name='composer2')]
+        self.check(self.track.copy(composers=composers))
 
     def test_multiple_track_performers(self):
         self.data['tags']['performer'] = ['performer1', 'performer2']
-        self.performer = self.performer_multiple
-        self.check()
+        performers = [Artist(name='performer1'), Artist(name='performer2')]
+        self.check(self.track.copy(performers=performers))
 
     def test_missing_performer_name(self):
         del self.data['tags']['performer']
-        del self.performer['name']
-        self.check()
+        self.check(self.track.copy(performers=[]))
 
     def test_missing_artist_musicbrainz_id(self):
         del self.data['tags']['musicbrainz-artistid']
-        del self.artist['musicbrainz_id']
-        self.check()
+        artist = list(self.track.artists)[0].copy(musicbrainz_id=None)
+        self.check(self.track.copy(artists=[artist]))
 
     def test_multiple_track_artists(self):
         self.data['tags']['artist'] = ['name1', 'name2']
-        self.data['musicbrainz-artistid'] = 'mbartistid'
-        self.artist = self.artist_multiple
-        self.check()
+        self.data['musicbrainz-artistid'] = 'artistid'
+        artists = [Artist(name='name1'), Artist(name='name2')]
+        self.check(self.track.copy(artists=artists))
 
     def test_missing_album_artist(self):
         del self.data['tags']['album-artist']
-        del self.albumartist['name']
-        del self.albumartist['musicbrainz_id']
-        self.check()
+        album = self.track.album.copy(artists=[])
+        self.check(self.track.copy(album=album))
 
     def test_missing_album_artist_musicbrainz_id(self):
         del self.data['tags']['musicbrainz-albumartistid']
-        del self.albumartist['musicbrainz_id']
-        self.check()
+        albumartist = list(self.track.album.artists)[0]
+        albumartist = albumartist.copy(musicbrainz_id=None)
+        album = self.track.album.copy(artists=[albumartist])
+        self.check(self.track.copy(album=album))
 
     def test_missing_genre(self):
         del self.data['tags']['genre']
-        del self.track['genre']
-        self.check()
+        self.check(self.track.copy(genre=None))
 
     def test_missing_date(self):
         del self.data['tags']['date']
-        del self.track['date']
-        self.check()
+        self.check(self.track.copy(date=None))
 
     def test_invalid_date(self):
         self.data['tags']['date'] = [FakeGstDate(65535, 1, 1)]
-        del self.track['date']
-        self.check()
+        self.check(self.track.copy(date=None))
 
     def test_missing_comment(self):
         del self.data['tags']['comment']
-        del self.track['comment']
-        self.check()
+        self.check(self.track.copy(comment=None))
 
 
 class ScannerTest(unittest.TestCase):
