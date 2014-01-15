@@ -139,7 +139,7 @@ def audio_data_to_track(data):
             target.setdefault(target_key, result)
 
     first = lambda values: values[0]
-    join = lambda values: ', '.join(values)
+    join = lambda values: '; '.join(values)
     artists = lambda values: [Artist(name=v) for v in values]
 
     _retrieve(gst.TAG_ARTIST, 'artists', track_kwargs, artists)
@@ -151,7 +151,7 @@ def audio_data_to_track(data):
     _retrieve(gst.TAG_GENRE, 'genre', track_kwargs, join)
     _retrieve(gst.TAG_BITRATE, 'bitrate', track_kwargs, first)
 
-    _retrieve(gst.TAG_ALBUM, 'name', album_kwargs, join)
+    _retrieve(gst.TAG_ALBUM, 'name', album_kwargs, first)
     _retrieve(gst.TAG_ALBUM_ARTIST, 'artists', album_kwargs, artists)
     _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs, first)
     _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs, first)

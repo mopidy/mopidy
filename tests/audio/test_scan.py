@@ -47,6 +47,7 @@ class TranslatorTest(unittest.TestCase):
                 'musicbrainz-albumid': ['albumid'],
                 'musicbrainz-artistid': ['artistid'],
                 'musicbrainz-albumartistid': ['albumartistid'],
+                'bitrate': [1000],
             },
         }
 
@@ -62,79 +63,174 @@ class TranslatorTest(unittest.TestCase):
         self.track = Track(uri='uri', name='track', date='2006-01-01',
                            genre='genre', track_no=1, disc_no=2, length=4531,
                            comment='comment', musicbrainz_id='trackid',
-                           last_modified=1234, album=album, artists=[artist],
-                           composers=[composer], performers=[performer])
+                           last_modified=1234, album=album, bitrate=1000,
+                           artists=[artist], composers=[composer],
+                           performers=[performer])
 
     def check(self, expected):
         actual = scan.audio_data_to_track(self.data)
         self.assertEqual(expected, actual)
 
-    def test_basic_data(self):
+    def test_track(self):
         self.check(self.track)
 
-    def test_missing_track_number(self):
+    def test_none_track_length(self):
+        self.data['duration'] = None
+        self.check(self.track.copy(length=None))
+
+    def test_none_track_last_modified(self):
+        self.data['mtime'] = None
+        self.check(self.track.copy(last_modified=None))
+
+    def test_missing_track_no(self):
         del self.data['tags']['track-number']
         self.check(self.track.copy(track_no=None))
 
-    def test_missing_track_count(self):
-        del self.data['tags']['track-count']
-        album = self.track.album.copy(num_tracks=None)
-        self.check(self.track.copy(album=album))
+    def test_multiple_track_no(self):
+        self.data['tags']['track-number'].append(9)
+        self.check(self.track)
+
+    def test_missing_track_disc_no(self):
+        del self.data['tags']['album-disc-number']
+        self.check(self.track.copy(disc_no=None))
+
+    def test_multiple_track_disc_no(self):
+        self.data['tags']['album-disc-number'].append(9)
+        self.check(self.track)
 
     def test_missing_track_name(self):
         del self.data['tags']['title']
         self.check(self.track.copy(name=None))
 
+    def test_multiple_track_name(self):
+        self.data['tags']['title'] = ['name1', 'name2']
+        self.check(self.track.copy(name='name1; name2'))
+
     def test_missing_track_musicbrainz_id(self):
         del self.data['tags']['musicbrainz-trackid']
         self.check(self.track.copy(musicbrainz_id=None))
+
+    def test_multiple_track_musicbrainz_id(self):
+        self.data['tags']['musicbrainz-trackid'].append('id')
+        self.check(self.track)
+
+    def test_missing_track_bitrate(self):
+        del self.data['tags']['bitrate']
+        self.check(self.track.copy(bitrate=None))
+
+    def test_multiple_track_bitrate(self):
+        self.data['tags']['bitrate'].append(1234)
+        self.check(self.track)
+
+    def test_missing_track_genre(self):
+        del self.data['tags']['genre']
+        self.check(self.track.copy(genre=None))
+
+    def test_multiple_track_genre(self):
+        self.data['tags']['genre'] = ['genre1', 'genre2']
+        self.check(self.track.copy(genre='genre1; genre2'))
+
+    def test_missing_track_date(self):
+        del self.data['tags']['date']
+        self.check(self.track.copy(date=None))
+
+    def test_multiple_track_date(self):
+        self.data['tags']['date'].append(FakeGstDate(2030, 1, 1))
+        self.check(self.track)
+
+    def test_invalid_track_date(self):
+        self.data['tags']['date'] = [FakeGstDate(65535, 1, 1)]
+        self.check(self.track.copy(date=None))
+
+    def test_missing_track_comment(self):
+        del self.data['tags']['comment']
+        self.check(self.track.copy(comment=None))
+
+    def test_multiple_track_comment(self):
+        self.data['tags']['comment'] = ['comment1', 'comment2']
+        self.check(self.track.copy(comment='comment1; comment2'))
+
+    def test_missing_track_artist_name(self):
+        del self.data['tags']['artist']
+        self.check(self.track.copy(artists=[]))
+
+    def test_multiple_track_artist_name(self):
+        self.data['tags']['artist'] = ['name1', 'name2']
+        artists = [Artist(name='name1'), Artist(name='name2')]
+        self.check(self.track.copy(artists=artists))
+
+    def test_missing_track_artist_musicbrainz_id(self):
+        del self.data['tags']['musicbrainz-artistid']
+        artist = list(self.track.artists)[0].copy(musicbrainz_id=None)
+        self.check(self.track.copy(artists=[artist]))
+
+    def test_multiple_track_artist_musicbrainz_id(self):
+        self.data['tags']['musicbrainz-artistid'].append('id')
+        self.check(self.track)
+
+    def test_missing_track_composer_name(self):
+        del self.data['tags']['composer']
+        self.check(self.track.copy(composers=[]))
+
+    def test_multiple_track_composer_name(self):
+        self.data['tags']['composer'] = ['composer1', 'composer2']
+        composers = [Artist(name='composer1'), Artist(name='composer2')]
+        self.check(self.track.copy(composers=composers))
+
+    def test_missing_track_performer_name(self):
+        del self.data['tags']['performer']
+        self.check(self.track.copy(performers=[]))
+
+    def test_multiple_track_performe_name(self):
+        self.data['tags']['performer'] = ['performer1', 'performer2']
+        performers = [Artist(name='performer1'), Artist(name='performer2')]
+        self.check(self.track.copy(performers=performers))
 
     def test_missing_album_name(self):
         del self.data['tags']['album']
         album = self.track.album.copy(name=None)
         self.check(self.track.copy(album=album))
 
+    def test_multiple_album_name(self):
+        self.data['tags']['album'].append('album2')
+        self.check(self.track)
+
     def test_missing_album_musicbrainz_id(self):
         del self.data['tags']['musicbrainz-albumid']
         album = self.track.album.copy(musicbrainz_id=None)
         self.check(self.track.copy(album=album))
 
-    def test_missing_artist_name(self):
-        del self.data['tags']['artist']
-        self.check(self.track.copy(artists=[]))
+    def test_multiple_album_musicbrainz_id(self):
+        self.data['tags']['musicbrainz-albumid'].append('id')
+        self.check(self.track)
 
-    def test_missing_composer_name(self):
-        del self.data['tags']['composer']
-        self.check(self.track.copy(composers=[]))
+    def test_missing_album_num_tracks(self):
+        del self.data['tags']['track-count']
+        album = self.track.album.copy(num_tracks=None)
+        self.check(self.track.copy(album=album))
 
-    def test_multiple_track_composers(self):
-        self.data['tags']['composer'] = ['composer1', 'composer2']
-        composers = [Artist(name='composer1'), Artist(name='composer2')]
-        self.check(self.track.copy(composers=composers))
+    def test_multiple_album_num_tracks(self):
+        self.data['tags']['track-count'].append(9)
+        self.check(self.track)
 
-    def test_multiple_track_performers(self):
-        self.data['tags']['performer'] = ['performer1', 'performer2']
-        performers = [Artist(name='performer1'), Artist(name='performer2')]
-        self.check(self.track.copy(performers=performers))
+    def test_missing_album_num_discs(self):
+        del self.data['tags']['album-disc-count']
+        album = self.track.album.copy(num_discs=None)
+        self.check(self.track.copy(album=album))
 
-    def test_missing_performer_name(self):
-        del self.data['tags']['performer']
-        self.check(self.track.copy(performers=[]))
+    def test_multiple_album_num_discs(self):
+        self.data['tags']['album-disc-count'].append(9)
+        self.check(self.track)
 
-    def test_missing_artist_musicbrainz_id(self):
-        del self.data['tags']['musicbrainz-artistid']
-        artist = list(self.track.artists)[0].copy(musicbrainz_id=None)
-        self.check(self.track.copy(artists=[artist]))
-
-    def test_multiple_track_artists(self):
-        self.data['tags']['artist'] = ['name1', 'name2']
-        self.data['musicbrainz-artistid'] = 'artistid'
-        artists = [Artist(name='name1'), Artist(name='name2')]
-        self.check(self.track.copy(artists=artists))
-
-    def test_missing_album_artist(self):
+    def test_missing_album_artist_name(self):
         del self.data['tags']['album-artist']
         album = self.track.album.copy(artists=[])
+        self.check(self.track.copy(album=album))
+
+    def test_multiple_album_artist_name(self):
+        self.data['tags']['album-artist'] = ['name1', 'name2']
+        artists = [Artist(name='name1'), Artist(name='name2')]
+        album = self.track.album.copy(artists=artists)
         self.check(self.track.copy(album=album))
 
     def test_missing_album_artist_musicbrainz_id(self):
@@ -144,21 +240,40 @@ class TranslatorTest(unittest.TestCase):
         album = self.track.album.copy(artists=[albumartist])
         self.check(self.track.copy(album=album))
 
-    def test_missing_genre(self):
-        del self.data['tags']['genre']
-        self.check(self.track.copy(genre=None))
+    def test_multiple_album_artist_musicbrainz_id(self):
+        self.data['tags']['musicbrainz-albumartistid'].append('id')
+        self.check(self.track)
 
-    def test_missing_date(self):
-        del self.data['tags']['date']
-        self.check(self.track.copy(date=None))
+    def test_stream_organization_track_name(self):
+        del self.data['tags']['title']
+        self.data['tags']['organization'] = ['organization']
+        self.check(self.track.copy(name='organization'))
 
-    def test_invalid_date(self):
-        self.data['tags']['date'] = [FakeGstDate(65535, 1, 1)]
-        self.check(self.track.copy(date=None))
+    def test_multiple_organization_track_name(self):
+        del self.data['tags']['title']
+        self.data['tags']['organization'] = ['organization1', 'organization2']
+        self.check(self.track.copy(name='organization1; organization2'))
 
-    def test_missing_comment(self):
+    # TODO: combine all comment types?
+    def test_stream_location_track_comment(self):
         del self.data['tags']['comment']
-        self.check(self.track.copy(comment=None))
+        self.data['tags']['location'] = ['location']
+        self.check(self.track.copy(comment='location'))
+
+    def test_multiple_location_track_comment(self):
+        del self.data['tags']['comment']
+        self.data['tags']['location'] = ['location1', 'location2']
+        self.check(self.track.copy(comment='location1; location2'))
+
+    def test_stream_copyright_track_comment(self):
+        del self.data['tags']['comment']
+        self.data['tags']['copyright'] = ['copyright']
+        self.check(self.track.copy(comment='copyright'))
+
+    def test_multiple_copyright_track_comment(self):
+        del self.data['tags']['comment']
+        self.data['tags']['copyright'] = ['copyright1', 'copyright2']
+        self.check(self.track.copy(comment='copyright1; copyright2'))
 
 
 class ScannerTest(unittest.TestCase):
