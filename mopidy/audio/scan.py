@@ -127,46 +127,63 @@ class Scanner(object):
         return os.path.getmtime(path.uri_to_path(uri))
 
 
+def _artists(tags, artist_name, artist_id=None):
+    # Name missing, don't set artist
+    if not tags.get(artist_name):
+        return None
+    # One artist name and id, provide artist with id.
+    if len(tags[artist_name]) == 1 and artist_id in tags:
+        return [Artist(name=tags[artist_name][0],
+                       musicbrainz_id=tags[artist_id][0])]
+    # Multiple artist, provide artists without id.
+    return [Artist(name=name) for name in tags[artist_name]]
+
+
+def _date(tags):
+    if not tags.get(gst.TAG_DATE):
+        return None
+    try:
+        date = tags[gst.TAG_DATE][0]
+        return datetime.date(date.year, date.month, date.day).isoformat()
+    except ValueError:
+        return None
+
+
 def audio_data_to_track(data):
     """Convert taglist data + our extras to a track."""
     tags = data['tags']
     album_kwargs = {}
     track_kwargs = {}
 
-    def _retrieve(source_key, target_key, target, convert):
-        if tags.get(source_key, None):
-            result = convert(tags[source_key])
-            target.setdefault(target_key, result)
+    track_kwargs['composers'] = _artists(tags, gst.TAG_COMPOSER)
+    track_kwargs['performers'] = _artists(tags, gst.TAG_PERFORMER)
+    track_kwargs['artists'] = _artists(
+        tags, gst.TAG_ARTIST, 'musicbrainz-artistid')
+    album_kwargs['artists'] = _artists(
+        tags, gst.TAG_ALBUM_ARTIST, 'musicbrainz-albumartistid')
 
-    first = lambda values: values[0]
-    join = lambda values: '; '.join(values)
-    artists = lambda values: [Artist(name=v) for v in values]
+    track_kwargs['genre'] = '; '.join(tags.get(gst.TAG_GENRE, []))
+    track_kwargs['name'] = '; '.join(tags.get(gst.TAG_TITLE, []))
+    if not track_kwargs['name']:
+        track_kwargs['name'] = '; '.join(tags.get(gst.TAG_ORGANIZATION, []))
 
-    _retrieve(gst.TAG_ARTIST, 'artists', track_kwargs, artists)
-    _retrieve(gst.TAG_COMPOSER, 'composers', track_kwargs, artists)
-    _retrieve(gst.TAG_PERFORMER, 'performers', track_kwargs, artists)
-    _retrieve(gst.TAG_TITLE, 'name', track_kwargs, join)
-    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs, first)
-    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs, first)
-    _retrieve(gst.TAG_GENRE, 'genre', track_kwargs, join)
-    _retrieve(gst.TAG_BITRATE, 'bitrate', track_kwargs, first)
+    track_kwargs['comment'] = '; '.join(tags.get('comment', []))
+    if not track_kwargs['comment']:
+        track_kwargs['comment'] = '; '.join(tags.get(gst.TAG_LOCATION, []))
+    if not track_kwargs['comment']:
+        track_kwargs['comment'] = '; '.join(tags.get(gst.TAG_COPYRIGHT, []))
 
-    _retrieve(gst.TAG_ALBUM, 'name', album_kwargs, first)
-    _retrieve(gst.TAG_ALBUM_ARTIST, 'artists', album_kwargs, artists)
-    _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs, first)
-    _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs, first)
+    track_kwargs['track_no'] = tags.get(gst.TAG_TRACK_NUMBER, [None])[0]
+    track_kwargs['disc_no'] = tags.get(gst.TAG_ALBUM_VOLUME_NUMBER, [None])[0]
+    track_kwargs['bitrate'] = tags.get(gst.TAG_BITRATE, [None])[0]
+    track_kwargs['musicbrainz_id'] = tags.get('musicbrainz-trackid', [None])[0]
 
-    # Following keys don't seem to have TAG_* constant.
-    _retrieve('comment', 'comment', track_kwargs, join)
-    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs, first)
-    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs, first)
+    album_kwargs['name'] = tags.get(gst.TAG_ALBUM, [None])[0]
+    album_kwargs['num_tracks'] = tags.get(gst.TAG_TRACK_COUNT, [None])[0]
+    album_kwargs['num_discs'] = tags.get(gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
+    album_kwargs['musicbrainz_id'] = tags.get('musicbrainz-albumid', [None])[0]
 
-    # For streams, will not override if a better value has already been set.
-    _retrieve(gst.TAG_ORGANIZATION, 'name', track_kwargs, join)
-    _retrieve(gst.TAG_LOCATION, 'comment', track_kwargs, join)
-    _retrieve(gst.TAG_COPYRIGHT, 'comment', track_kwargs, join)
-
-    if tags.get(gst.TAG_DATE, None):
+    if tags.get(gst.TAG_DATE):
         date = tags[gst.TAG_DATE][0]
         try:
             date = datetime.date(date.year, date.month, date.day)
@@ -175,19 +192,13 @@ def audio_data_to_track(data):
         else:
             track_kwargs['date'] = date.isoformat()
 
-    def _retrive_mb_artistid(source_key, target):
-        if source_key in tags and len(target.get('artists', [])) == 1:
-            target['artists'][0] = target['artists'][0].copy(
-                musicbrainz_id=tags[source_key][0])
+    track_kwargs['date'] = _date(tags)
+    track_kwargs['last_modified'] = int(data.get('mtime') or 0)
+    track_kwargs['length'] = (data.get(gst.TAG_DURATION) or 0) // gst.MSECOND
 
-    _retrive_mb_artistid('musicbrainz-artistid', track_kwargs)
-    _retrive_mb_artistid('musicbrainz-albumartistid', album_kwargs)
-
-    if data['mtime']:
-        track_kwargs['last_modified'] = int(data['mtime'])
-
-    if data[gst.TAG_DURATION]:
-        track_kwargs['length'] = data[gst.TAG_DURATION] // gst.MSECOND
+    # Clear out any empty values we found
+    track_kwargs = {k: v for k, v in track_kwargs.items() if v}
+    album_kwargs = {k: v for k, v in album_kwargs.items() if v}
 
     track_kwargs['uri'] = data['uri']
     track_kwargs['album'] = Album(**album_kwargs)
