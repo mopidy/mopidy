@@ -52,11 +52,11 @@ class Scanner(object):
         :return: Dictionary of tags, duration, mtime and uri information.
         """
         try:
-            data = {'uri': uri}
             self._setup(uri)
-            data['tags'] = self._collect()
-            data['mtime'] = self._query_mtime(uri)
-            data['duration'] = self._query_duration()
+            tags = self._collect()  # Ensure collect before queries.
+            data = {'uri': uri, 'tags': tags,
+                    'mtime': self._query_mtime(uri),
+                    'duration': self._query_duration()}
         finally:
             self._reset()
 
@@ -97,10 +97,10 @@ class Scanner(object):
                 if message.src == self._pipe:
                     return tags
             elif message.type == gst.MESSAGE_TAG:
-                # Taglists are not really dicts, hence the key usage.
-                # Beyond that, we only keep the last tag for each key,
-                # as we assume this is the best, and force everything
-                # to lists.
+                # Taglists are not really dicts, hence the lack of .items() and
+                # explicit .keys. We only keep the last tag for each key, as we
+                # assume this is the best, some formats will produce multiple
+                # taglists. Lastly we force everything to lists for conformity.
                 taglist = message.parse_tag()
                 for key in taglist.keys():
                     value = taglist[key]
@@ -182,15 +182,6 @@ def audio_data_to_track(data):
     album_kwargs['num_tracks'] = tags.get(gst.TAG_TRACK_COUNT, [None])[0]
     album_kwargs['num_discs'] = tags.get(gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
     album_kwargs['musicbrainz_id'] = tags.get('musicbrainz-albumid', [None])[0]
-
-    if tags.get(gst.TAG_DATE):
-        date = tags[gst.TAG_DATE][0]
-        try:
-            date = datetime.date(date.year, date.month, date.day)
-        except ValueError:
-            pass  # Ignore invalid dates
-        else:
-            track_kwargs['date'] = date.isoformat()
 
     track_kwargs['date'] = _date(tags)
     track_kwargs['last_modified'] = int(data.get('mtime') or 0)
