@@ -348,7 +348,7 @@ passed a reference to the core API when it's created. See the
 
 
     class SoundspotFrontend(pykka.ThreadingActor, core.CoreListener):
-        def __init__(self, core):
+        def __init__(self, config, core):
             super(SoundspotFrontend, self).__init__()
             self.core = core
 
@@ -374,7 +374,7 @@ details.
 
 
     class SoundspotBackend(pykka.ThreadingActor, backend.Backend):
-        def __init__(self, audio):
+        def __init__(self, config, audio):
             super(SoundspotBackend, self).__init__()
             self.audio = audio
 
