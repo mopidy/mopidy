@@ -53,6 +53,10 @@ class GenericCopyTest(unittest.TestCase):
         test = lambda: Track().copy(invalid_key=True)
         self.assertRaises(TypeError, test)
 
+    def test_copying_track_to_remove(self):
+        track = Track(name='foo').copy(name=None)
+        self.assertEquals(track.__dict__, Track().__dict__)
+
 
 class RefTest(unittest.TestCase):
     def test_uri(self):

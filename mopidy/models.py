@@ -69,10 +69,14 @@ class ImmutableObject(object):
         data = {}
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
-            data[public_key] = values.pop(public_key, self.__dict__[key])
+            value = values.pop(public_key, self.__dict__[key])
+            if value is not None:
+                data[public_key] = value
         for key in values.keys():
             if hasattr(self, key):
-                data[key] = values.pop(key)
+                value = values.pop(key)
+                if value is not None:
+                    data[key] = value
         if values:
             raise TypeError(
                 'copy() got an unexpected keyword argument "%s"' % key)
