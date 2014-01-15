@@ -278,8 +278,8 @@ class Album(ImmutableObject):
     # actual usage of this field with more than one image.
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
-        self.__dict__['images'] = frozenset(kwargs.pop('images', []))
+        self.__dict__['artists'] = frozenset(kwargs.pop('artists', None) or [])
+        self.__dict__['images'] = frozenset(kwargs.pop('images', None) or [])
         super(Album, self).__init__(*args, **kwargs)
 
 
@@ -365,9 +365,10 @@ class Track(ImmutableObject):
     last_modified = 0
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
-        self.__dict__['composers'] = frozenset(kwargs.pop('composers', []))
-        self.__dict__['performers'] = frozenset(kwargs.pop('performers', []))
+        get = lambda key: frozenset(kwargs.pop(key, None) or [])
+        self.__dict__['artists'] = get('artists')
+        self.__dict__['composers'] = get('composers')
+        self.__dict__['performers'] = get('performers')
         super(Track, self).__init__(*args, **kwargs)
 
 
@@ -436,7 +437,7 @@ class Playlist(ImmutableObject):
     last_modified = None
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
+        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', None) or [])
         super(Playlist, self).__init__(*args, **kwargs)
 
     # TODO: def insert(self, pos, track): ... ?
@@ -472,7 +473,7 @@ class SearchResult(ImmutableObject):
     albums = tuple()
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
-        self.__dict__['artists'] = tuple(kwargs.pop('artists', []))
-        self.__dict__['albums'] = tuple(kwargs.pop('albums', []))
+        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', None) or [])
+        self.__dict__['artists'] = tuple(kwargs.pop('artists', None) or [])
+        self.__dict__['albums'] = tuple(kwargs.pop('albums', None) or [])
         super(SearchResult, self).__init__(*args, **kwargs)

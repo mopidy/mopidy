@@ -276,6 +276,9 @@ class AlbumTest(unittest.TestCase):
         self.assertIn(artist, album.artists)
         self.assertRaises(AttributeError, setattr, album, 'artists', None)
 
+    def test_artists_none(self):
+        self.assertEqual(set(), Album(artists=None).artists)
+
     def test_num_tracks(self):
         num_tracks = 11
         album = Album(num_tracks=num_tracks)
@@ -306,6 +309,9 @@ class AlbumTest(unittest.TestCase):
         album = Album(images=[image])
         self.assertIn(image, album.images)
         self.assertRaises(AttributeError, setattr, album, 'images', None)
+
+    def test_images_none(self):
+        self.assertEqual(set(), Album(images=None).images)
 
     def test_invalid_kwarg(self):
         test = lambda: Album(foo='baz')
@@ -475,6 +481,27 @@ class TrackTest(unittest.TestCase):
         track = Track(artists=artists)
         self.assertEqual(set(track.artists), set(artists))
         self.assertRaises(AttributeError, setattr, track, 'artists', None)
+
+    def test_artists_none(self):
+        self.assertEqual(set(), Track(artists=None).artists)
+
+    def test_composers(self):
+        artists = [Artist(name='name1'), Artist(name='name2')]
+        track = Track(composers=artists)
+        self.assertEqual(set(track.composers), set(artists))
+        self.assertRaises(AttributeError, setattr, track, 'composers', None)
+
+    def test_composers_none(self):
+        self.assertEqual(set(), Track(composers=None).composers)
+
+    def test_performers(self):
+        artists = [Artist(name='name1'), Artist(name='name2')]
+        track = Track(performers=artists)
+        self.assertEqual(set(track.performers), set(artists))
+        self.assertRaises(AttributeError, setattr, track, 'performers', None)
+
+    def test_performers_none(self):
+        self.assertEqual(set(), Track(performers=None).performers)
 
     def test_album(self):
         album = Album()
