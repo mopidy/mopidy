@@ -28,24 +28,24 @@ class TranslatorTest(unittest.TestCase):
             'duration': 4531000000,
             'mtime': 1234,
             'tags': {
-                'album': 'albumname',
-                'track-number': 1,
-                'artist': 'name',
-                'composer': 'composer',
-                'performer': 'performer',
-                'album-artist': 'albumartistname',
-                'title': 'trackname',
-                'track-count': 2,
-                'album-disc-number': 2,
-                'album-disc-count': 3,
-                'date': FakeGstDate(2006, 1, 1,),
-                'container-format': 'ID3 tag',
-                'genre': 'genre',
-                'comment': 'comment',
-                'musicbrainz-trackid': 'mbtrackid',
-                'musicbrainz-albumid': 'mbalbumid',
-                'musicbrainz-artistid': 'mbartistid',
-                'musicbrainz-albumartistid': 'mbalbumartistid',
+                'album': ['albumname'],
+                'track-number': [1],
+                'artist': ['name'],
+                'composer': ['composer'],
+                'performer': ['performer'],
+                'album-artist': ['albumartistname'],
+                'title': ['trackname'],
+                'track-count': [2],
+                'album-disc-number': [2],
+                'album-disc-count': [3],
+                'date': [FakeGstDate(2006, 1, 1,)],
+                'container-format': ['ID3 tag'],
+                'genre': ['genre'],
+                'comment': ['comment'],
+                'musicbrainz-trackid': ['mbtrackid'],
+                'musicbrainz-albumid': ['mbalbumid'],
+                'musicbrainz-artistid': ['mbartistid'],
+                'musicbrainz-albumartistid': ['mbalbumartistid'],
             },
         }
 
@@ -115,7 +115,7 @@ class TranslatorTest(unittest.TestCase):
                 and not isinstance(self.artist['name'], basestring)):
             self.track['artists'] = [Artist(name=artist)
                                      for artist in self.artist['name']]
-        else:
+        elif 'name' in self.artist:
             self.track['artists'] = [Artist(**self.artist)]
 
         if ('name' in self.composer
@@ -213,6 +213,7 @@ class TranslatorTest(unittest.TestCase):
     def test_missing_album_artist(self):
         del self.data['tags']['album-artist']
         del self.albumartist['name']
+        del self.albumartist['musicbrainz_id']
         self.check()
 
     def test_missing_album_artist_musicbrainz_id(self):
@@ -231,7 +232,7 @@ class TranslatorTest(unittest.TestCase):
         self.check()
 
     def test_invalid_date(self):
-        self.data['tags']['date'] = FakeGstDate(65535, 1, 1)
+        self.data['tags']['date'] = [FakeGstDate(65535, 1, 1)]
         del self.track['date']
         self.check()
 
@@ -293,18 +294,18 @@ class ScannerTest(unittest.TestCase):
 
     def test_artist_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.check_tag('scanner/simple/song1.mp3', 'artist', 'name')
-        self.check_tag('scanner/simple/song1.ogg', 'artist', 'name')
+        self.check_tag('scanner/simple/song1.mp3', 'artist', ['name'])
+        self.check_tag('scanner/simple/song1.ogg', 'artist', ['name'])
 
     def test_album_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.check_tag('scanner/simple/song1.mp3', 'album', 'albumname')
-        self.check_tag('scanner/simple/song1.ogg', 'album', 'albumname')
+        self.check_tag('scanner/simple/song1.mp3', 'album', ['albumname'])
+        self.check_tag('scanner/simple/song1.ogg', 'album', ['albumname'])
 
     def test_track_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.check_tag('scanner/simple/song1.mp3', 'title', 'trackname')
-        self.check_tag('scanner/simple/song1.ogg', 'title', 'trackname')
+        self.check_tag('scanner/simple/song1.mp3', 'title', ['trackname'])
+        self.check_tag('scanner/simple/song1.ogg', 'title', ['trackname'])
 
     def test_nonexistant_dir_does_not_fail(self):
         self.scan(self.find('scanner/does-not-exist'))

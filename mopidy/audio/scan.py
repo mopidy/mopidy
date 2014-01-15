@@ -82,7 +82,7 @@ class Scanner(object):
         """Polls for messages to collect data."""
         start = time.time()
         timeout_s = self._timeout_ms / float(1000)
-        data = {}
+        tags = {}
 
         while time.time() - start < timeout_s:
             if not self._bus.have_pending():
@@ -92,14 +92,21 @@ class Scanner(object):
             if message.type == gst.MESSAGE_ERROR:
                 raise exceptions.ScannerError(message.parse_error()[0])
             elif message.type == gst.MESSAGE_EOS:
-                return data
+                return tags
             elif message.type == gst.MESSAGE_ASYNC_DONE:
                 if message.src == self._pipe:
-                    return data
+                    return tags
             elif message.type == gst.MESSAGE_TAG:
+                # Taglists are not really dicts, hence the key usage.
+                # Beyond that, we only keep the last tag for each key,
+                # as we assume this is the best, and force everything
+                # to lists.
                 taglist = message.parse_tag()
                 for key in taglist.keys():
-                    data[key] = taglist[key]
+                    value = taglist[key]
+                    if not isinstance(value, list):
+                        value = [value]
+                    tags[key] = value
 
         raise exceptions.ScannerError('Timeout after %dms' % self._timeout_ms)
 
@@ -122,45 +129,45 @@ class Scanner(object):
 
 def audio_data_to_track(data):
     """Convert taglist data + our extras to a track."""
-    albumartist_kwargs = {}
+    tags = data['tags']
     album_kwargs = {}
-    artist_kwargs = {}
-    composer_kwargs = {}
-    performer_kwargs = {}
     track_kwargs = {}
 
-    def _retrieve(source_key, target_key, target):
-        if source_key in data['tags']:
-            target.setdefault(target_key, data['tags'][source_key])
+    def _retrieve(source_key, target_key, target, convert):
+        if tags.get(source_key, None):
+            result = convert(tags[source_key])
+            target.setdefault(target_key, result)
 
-    _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
-    _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
-    _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs)
-    _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
-    _retrieve(gst.TAG_COMPOSER, 'name', composer_kwargs)
-    _retrieve(gst.TAG_PERFORMER, 'name', performer_kwargs)
-    _retrieve(gst.TAG_ALBUM_ARTIST, 'name', albumartist_kwargs)
-    _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
-    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
-    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
-    _retrieve(gst.TAG_GENRE, 'genre', track_kwargs)
-    _retrieve(gst.TAG_BITRATE, 'bitrate', track_kwargs)
+    first = lambda values: values[0]
+    join = lambda values: ', '.join(values)
+    artists = lambda values: [Artist(name=v) for v in values]
+
+    _retrieve(gst.TAG_ARTIST, 'artists', track_kwargs, artists)
+    _retrieve(gst.TAG_COMPOSER, 'composers', track_kwargs, artists)
+    _retrieve(gst.TAG_PERFORMER, 'performers', track_kwargs, artists)
+    _retrieve(gst.TAG_TITLE, 'name', track_kwargs, join)
+    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs, first)
+    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs, first)
+    _retrieve(gst.TAG_GENRE, 'genre', track_kwargs, join)
+    _retrieve(gst.TAG_BITRATE, 'bitrate', track_kwargs, first)
+
+    _retrieve(gst.TAG_ALBUM, 'name', album_kwargs, join)
+    _retrieve(gst.TAG_ALBUM_ARTIST, 'artists', album_kwargs, artists)
+    _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs, first)
+    _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs, first)
 
     # Following keys don't seem to have TAG_* constant.
-    _retrieve('comment', 'comment', track_kwargs)
-    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
-    _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
-    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
-    _retrieve(
-        'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
+    _retrieve('comment', 'comment', track_kwargs, join)
+    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs, first)
+    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs, first)
 
     # For streams, will not override if a better value has already been set.
-    _retrieve(gst.TAG_ORGANIZATION, 'name', track_kwargs)
-    _retrieve(gst.TAG_LOCATION, 'comment', track_kwargs)
-    _retrieve(gst.TAG_COPYRIGHT, 'comment', track_kwargs)
+    _retrieve(gst.TAG_ORGANIZATION, 'name', track_kwargs, join)
+    _retrieve(gst.TAG_LOCATION, 'comment', track_kwargs, join)
+    _retrieve(gst.TAG_COPYRIGHT, 'comment', track_kwargs, join)
 
-    if gst.TAG_DATE in data['tags'] and data['tags'][gst.TAG_DATE]:
-        date = data['tags'][gst.TAG_DATE]
+    if tags.get(gst.TAG_DATE, None):
+        date = tags[gst.TAG_DATE][0]
         try:
             date = datetime.date(date.year, date.month, date.day)
         except ValueError:
@@ -168,8 +175,13 @@ def audio_data_to_track(data):
         else:
             track_kwargs['date'] = date.isoformat()
 
-    if albumartist_kwargs:
-        album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
+    def _retrive_mb_artistid(source_key, target):
+        if source_key in tags and len(target.get('artists', [])) == 1:
+            target['artists'][0] = target['artists'][0].copy(
+                musicbrainz_id=tags[source_key][0])
+
+    _retrive_mb_artistid('musicbrainz-artistid', track_kwargs)
+    _retrive_mb_artistid('musicbrainz-albumartistid', album_kwargs)
 
     if data['mtime']:
         track_kwargs['last_modified'] = int(data['mtime'])
@@ -179,34 +191,4 @@ def audio_data_to_track(data):
 
     track_kwargs['uri'] = data['uri']
     track_kwargs['album'] = Album(**album_kwargs)
-
-    # TODO: this feels like a half assed workaround. we need to be sure that we
-    # don't suddenly have lists in our models where we expect strings etc
-    if ('genre' in track_kwargs and
-            not isinstance(track_kwargs['genre'], basestring)):
-        track_kwargs['genre'] = ', '.join(track_kwargs['genre'])
-
-    if ('name' in artist_kwargs
-            and not isinstance(artist_kwargs['name'], basestring)):
-        track_kwargs['artists'] = [Artist(name=artist)
-                                   for artist in artist_kwargs['name']]
-    else:
-        track_kwargs['artists'] = [Artist(**artist_kwargs)]
-
-    if ('name' in composer_kwargs
-            and not isinstance(composer_kwargs['name'], basestring)):
-        track_kwargs['composers'] = [Artist(name=artist)
-                                     for artist in composer_kwargs['name']]
-    else:
-        track_kwargs['composers'] = \
-            [Artist(**composer_kwargs)] if composer_kwargs else ''
-
-    if ('name' in performer_kwargs
-            and not isinstance(performer_kwargs['name'], basestring)):
-        track_kwargs['performers'] = [Artist(name=artist)
-                                      for artist in performer_kwargs['name']]
-    else:
-        track_kwargs['performers'] = \
-            [Artist(**performer_kwargs)] if performer_kwargs else ''
-
     return Track(**track_kwargs)
