@@ -59,7 +59,8 @@ class _BrowseCache(object):
 
         for uri in uris:
             path = translator.local_track_uri_to_path(uri, b'/')
-            parts = self.splitpath_re.findall(path.decode(self.encoding))
+            parts = self.splitpath_re.findall(
+                path.decode(self.encoding, 'replace'))
             filename = parts.pop()
             node = self._root
             for part in parts:
