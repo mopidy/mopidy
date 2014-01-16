@@ -26,11 +26,11 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 - Twitter: `@mopidy <https://twitter.com/mopidy/>`_
 
 .. image:: https://pypip.in/v/Mopidy/badge.png
-    :target: https://crate.io/packages/Mopidy/
+    :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Latest PyPI version
 
 .. image:: https://pypip.in/d/Mopidy/badge.png
-    :target: https://crate.io/packages/Mopidy/
+    :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Number of PyPI downloads
 
 .. image:: https://travis-ci.org/mopidy/mopidy.png?branch=develop

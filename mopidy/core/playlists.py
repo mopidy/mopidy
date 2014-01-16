@@ -16,8 +16,8 @@ class PlaylistsController(object):
         self.core = core
 
     def get_playlists(self, include_tracks=True):
-        futures = [
-            b.playlists.playlists for b in self.backends.with_playlists]
+        futures = [b.playlists.playlists
+                   for b in self.backends.with_playlists.values()]
         results = pykka.get_all(futures)
         playlists = list(itertools.chain(*results))
         if not include_tracks:
@@ -49,10 +49,11 @@ class PlaylistsController(object):
         :type uri_scheme: string
         :rtype: :class:`mopidy.models.Playlist`
         """
-        if uri_scheme in self.backends.with_playlists_by_uri_scheme:
-            backend = self.backends.by_uri_scheme[uri_scheme]
+        if uri_scheme in self.backends.with_playlists:
+            backend = self.backends.with_playlists[uri_scheme]
         else:
-            backend = self.backends.with_playlists[0]
+            # TODO: this fallback looks suspicious
+            backend = self.backends.with_playlists.values()[0]
         playlist = backend.playlists.create(name).get()
         listener.CoreListener.send('playlist_changed', playlist=playlist)
         return playlist
@@ -68,8 +69,7 @@ class PlaylistsController(object):
         :type uri: string
         """
         uri_scheme = urlparse.urlparse(uri).scheme
-        backend = self.backends.with_playlists_by_uri_scheme.get(
-            uri_scheme, None)
+        backend = self.backends.with_playlists.get(uri_scheme, None)
         if backend:
             backend.playlists.delete(uri).get()
 
@@ -111,8 +111,7 @@ class PlaylistsController(object):
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         uri_scheme = urlparse.urlparse(uri).scheme
-        backend = self.backends.with_playlists_by_uri_scheme.get(
-            uri_scheme, None)
+        backend = self.backends.with_playlists.get(uri_scheme, None)
         if backend:
             return backend.playlists.lookup(uri).get()
         else:
@@ -131,13 +130,12 @@ class PlaylistsController(object):
         :type uri_scheme: string
         """
         if uri_scheme is None:
-            futures = [
-                b.playlists.refresh() for b in self.backends.with_playlists]
+            futures = [b.playlists.refresh()
+                       for b in self.backends.with_playlists.values()]
             pykka.get_all(futures)
             listener.CoreListener.send('playlists_loaded')
         else:
-            backend = self.backends.with_playlists_by_uri_scheme.get(
-                uri_scheme, None)
+            backend = self.backends.with_playlists.get(uri_scheme, None)
             if backend:
                 backend.playlists.refresh().get()
                 listener.CoreListener.send('playlists_loaded')
@@ -167,8 +165,7 @@ class PlaylistsController(object):
         if playlist.uri is None:
             return
         uri_scheme = urlparse.urlparse(playlist.uri).scheme
-        backend = self.backends.with_playlists_by_uri_scheme.get(
-            uri_scheme, None)
+        backend = self.backends.with_playlists.get(uri_scheme, None)
         if backend:
             playlist = backend.playlists.save(playlist).get()
             listener.CoreListener.send('playlist_changed', playlist=playlist)

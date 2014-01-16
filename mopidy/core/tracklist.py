@@ -9,7 +9,7 @@ from mopidy.models import TlTrack
 from . import listener
 
 
-logger = logging.getLogger('mopidy.core')
+logger = logging.getLogger(__name__)
 
 
 class TracklistController(object):

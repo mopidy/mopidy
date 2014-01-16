@@ -24,7 +24,7 @@ sound menu in Ubuntu since 10.10 or 11.04. By default, it only includes the
 Rhytmbox music player, but many other players can integrate with the sound
 menu, including the official Spotify player and Mopidy.
 
-.. image:: /_static/ubuntu-sound-menu.png
+.. image:: ubuntu-sound-menu.png
     :height: 480
     :width: 955
 

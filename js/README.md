@@ -21,8 +21,8 @@ You may need to adjust hostname and port for your local setup.
 
 In the source repo, you can find the files at:
 
-- `mopidy/frontends/http/data/mopidy.js`
-- `mopidy/frontends/http/data/mopidy.min.js`
+- `mopidy/http/data/mopidy.js`
+- `mopidy/http/data/mopidy.min.js`
 
 
 Getting it for Node.js use
@@ -35,7 +35,7 @@ Mopidy.js using npm:
 
 After npm completes, you can import Mopidy.js using ``require()``:
 
-    var Mopidy = require("mopidy").Mopidy;
+    var Mopidy = require("mopidy");
 
 
 Using the library
@@ -72,7 +72,7 @@ To run tests automatically when you save a file:
     npm start
 
 To run tests, concatenate, minify the source, and update the JavaScript files
-in `mopidy/frontends/http/data/`:
+in `mopidy/http/data/`:
 
     npm run-script build
 
@@ -80,3 +80,26 @@ To run other [grunt](http://gruntjs.com/) targets which isn't predefined in
 `package.json` and thus isn't available through `npm run-script`:
 
     PATH=./node_modules/.bin:$PATH grunt foo
+
+
+Changelog
+---------
+
+### 0.2.0 (2014-01-04)
+
+- **Backwards incompatible change for Node.js users:**
+  `var Mopidy = require('mopidy').Mopidy;` must be changed to
+  `var Mopidy = require('mopidy');`
+
+- Add support for [Browserify](http://browserify.org/).
+
+- Upgrade dependencies.
+
+### 0.1.1 (2013-09-17)
+
+- Upgrade dependencies.
+
+### 0.1.0 (2013-03-31)
+
+- Initial release as a Node.js module to the
+  [npm registry](https://npmjs.org/).

@@ -24,24 +24,24 @@ class Scanner(object):
     """
 
     def __init__(self, timeout=1000, min_duration=100):
-        self.timeout_ms = timeout
-        self.min_duration_ms = min_duration
+        self._timeout_ms = timeout
+        self._min_duration_ms = min_duration
 
         sink = gst.element_factory_make('fakesink')
 
         audio_caps = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
         pad_added = lambda src, pad: pad.link(sink.get_pad('sink'))
 
-        self.uribin = gst.element_factory_make('uridecodebin')
-        self.uribin.set_property('caps', audio_caps)
-        self.uribin.connect('pad-added', pad_added)
+        self._uribin = gst.element_factory_make('uridecodebin')
+        self._uribin.set_property('caps', audio_caps)
+        self._uribin.connect('pad-added', pad_added)
 
-        self.pipe = gst.element_factory_make('pipeline')
-        self.pipe.add(self.uribin)
-        self.pipe.add(sink)
+        self._pipe = gst.element_factory_make('pipeline')
+        self._pipe.add(self._uribin)
+        self._pipe.add(sink)
 
-        self.bus = self.pipe.get_bus()
-        self.bus.set_flushing(True)
+        self._bus = self._pipe.get_bus()
+        self._bus.set_flushing(True)
 
     def scan(self, uri):
         """
@@ -53,60 +53,71 @@ class Scanner(object):
         """
         try:
             self._setup(uri)
-            data = self._collect()
-            # Make sure uri and duration does not come from tags.
-            data[b'uri'] = uri
-            data[b'mtime'] = self._query_mtime(uri)
-            data[gst.TAG_DURATION] = self._query_duration()
+            tags = self._collect()  # Ensure collect before queries.
+            data = {'uri': uri, 'tags': tags,
+                    'mtime': self._query_mtime(uri),
+                    'duration': self._query_duration()}
         finally:
             self._reset()
 
-        if data[gst.TAG_DURATION] < self.min_duration_ms * gst.MSECOND:
-            raise exceptions.ScannerError('Rejecting file with less than %dms '
-                                          'audio data.' % self.min_duration_ms)
-        return data
+        if self._min_duration_ms is None:
+            return data
+        elif data['duration'] >= self._min_duration_ms * gst.MSECOND:
+            return data
+
+        raise exceptions.ScannerError('Rejecting file with less than %dms '
+                                      'audio data.' % self._min_duration_ms)
 
     def _setup(self, uri):
         """Primes the pipeline for collection."""
-        self.pipe.set_state(gst.STATE_READY)
-        self.uribin.set_property(b'uri', uri)
-        self.bus.set_flushing(False)
-        self.pipe.set_state(gst.STATE_PAUSED)
+        self._pipe.set_state(gst.STATE_READY)
+        self._uribin.set_property(b'uri', uri)
+        self._bus.set_flushing(False)
+        result = self._pipe.set_state(gst.STATE_PAUSED)
+        if result == gst.STATE_CHANGE_NO_PREROLL:
+            # Live sources don't pre-roll, so set to playing to get data.
+            self._pipe.set_state(gst.STATE_PLAYING)
 
     def _collect(self):
         """Polls for messages to collect data."""
         start = time.time()
-        timeout_s = self.timeout_ms / float(1000)
-        poll_timeout_ns = 1000
-        data = {}
+        timeout_s = self._timeout_ms / float(1000)
+        tags = {}
 
         while time.time() - start < timeout_s:
-            message = self.bus.poll(gst.MESSAGE_ANY, poll_timeout_ns)
+            if not self._bus.have_pending():
+                continue
+            message = self._bus.pop()
 
-            if message is None:
-                pass  # polling the bus timed out.
-            elif message.type == gst.MESSAGE_ERROR:
+            if message.type == gst.MESSAGE_ERROR:
                 raise exceptions.ScannerError(message.parse_error()[0])
             elif message.type == gst.MESSAGE_EOS:
-                return data
+                return tags
             elif message.type == gst.MESSAGE_ASYNC_DONE:
-                if message.src == self.pipe:
-                    return data
+                if message.src == self._pipe:
+                    return tags
             elif message.type == gst.MESSAGE_TAG:
+                # Taglists are not really dicts, hence the lack of .items() and
+                # explicit .keys. We only keep the last tag for each key, as we
+                # assume this is the best, some formats will produce multiple
+                # taglists. Lastly we force everything to lists for conformity.
                 taglist = message.parse_tag()
                 for key in taglist.keys():
-                    data[key] = taglist[key]
+                    value = taglist[key]
+                    if not isinstance(value, list):
+                        value = [value]
+                    tags[key] = value
 
-        raise exceptions.ScannerError('Timeout after %dms' % self.timeout_ms)
+        raise exceptions.ScannerError('Timeout after %dms' % self._timeout_ms)
 
     def _reset(self):
         """Ensures we cleanup child elements and flush the bus."""
-        self.bus.set_flushing(True)
-        self.pipe.set_state(gst.STATE_NULL)
+        self._bus.set_flushing(True)
+        self._pipe.set_state(gst.STATE_NULL)
 
     def _query_duration(self):
         try:
-            return self.pipe.query_duration(gst.FORMAT_TIME, None)[0]
+            return self._pipe.query_duration(gst.FORMAT_TIME, None)[0]
         except gst.QueryError:
             return None
 
@@ -116,78 +127,70 @@ class Scanner(object):
         return os.path.getmtime(path.uri_to_path(uri))
 
 
+def _artists(tags, artist_name, artist_id=None):
+    # Name missing, don't set artist
+    if not tags.get(artist_name):
+        return None
+    # One artist name and id, provide artist with id.
+    if len(tags[artist_name]) == 1 and artist_id in tags:
+        return [Artist(name=tags[artist_name][0],
+                       musicbrainz_id=tags[artist_id][0])]
+    # Multiple artist, provide artists without id.
+    return [Artist(name=name) for name in tags[artist_name]]
+
+
+def _date(tags):
+    if not tags.get(gst.TAG_DATE):
+        return None
+    try:
+        date = tags[gst.TAG_DATE][0]
+        return datetime.date(date.year, date.month, date.day).isoformat()
+    except ValueError:
+        return None
+
+
 def audio_data_to_track(data):
     """Convert taglist data + our extras to a track."""
-    albumartist_kwargs = {}
+    tags = data['tags']
     album_kwargs = {}
-    artist_kwargs = {}
-    composer_kwargs = {}
-    performer_kwargs = {}
     track_kwargs = {}
 
-    def _retrieve(source_key, target_key, target):
-        if source_key in data:
-            target[target_key] = data[source_key]
+    track_kwargs['composers'] = _artists(tags, gst.TAG_COMPOSER)
+    track_kwargs['performers'] = _artists(tags, gst.TAG_PERFORMER)
+    track_kwargs['artists'] = _artists(
+        tags, gst.TAG_ARTIST, 'musicbrainz-artistid')
+    album_kwargs['artists'] = _artists(
+        tags, gst.TAG_ALBUM_ARTIST, 'musicbrainz-albumartistid')
 
-    _retrieve(gst.TAG_ALBUM, 'name', album_kwargs)
-    _retrieve(gst.TAG_TRACK_COUNT, 'num_tracks', album_kwargs)
-    _retrieve(gst.TAG_ALBUM_VOLUME_COUNT, 'num_discs', album_kwargs)
-    _retrieve(gst.TAG_ARTIST, 'name', artist_kwargs)
-    _retrieve(gst.TAG_COMPOSER, 'name', composer_kwargs)
-    _retrieve(gst.TAG_PERFORMER, 'name', performer_kwargs)
-    _retrieve(gst.TAG_ALBUM_ARTIST, 'name', albumartist_kwargs)
-    _retrieve(gst.TAG_TITLE, 'name', track_kwargs)
-    _retrieve(gst.TAG_TRACK_NUMBER, 'track_no', track_kwargs)
-    _retrieve(gst.TAG_ALBUM_VOLUME_NUMBER, 'disc_no', track_kwargs)
-    _retrieve(gst.TAG_GENRE, 'genre', track_kwargs)
-    _retrieve(gst.TAG_BITRATE, 'bitrate', track_kwargs)
+    track_kwargs['genre'] = '; '.join(tags.get(gst.TAG_GENRE, []))
+    track_kwargs['name'] = '; '.join(tags.get(gst.TAG_TITLE, []))
+    if not track_kwargs['name']:
+        track_kwargs['name'] = '; '.join(tags.get(gst.TAG_ORGANIZATION, []))
 
-    # Following keys don't seem to have TAG_* constant.
-    _retrieve('comment', 'comment', track_kwargs)
-    _retrieve('musicbrainz-trackid', 'musicbrainz_id', track_kwargs)
-    _retrieve('musicbrainz-artistid', 'musicbrainz_id', artist_kwargs)
-    _retrieve('musicbrainz-albumid', 'musicbrainz_id', album_kwargs)
-    _retrieve(
-        'musicbrainz-albumartistid', 'musicbrainz_id', albumartist_kwargs)
+    track_kwargs['comment'] = '; '.join(tags.get('comment', []))
+    if not track_kwargs['comment']:
+        track_kwargs['comment'] = '; '.join(tags.get(gst.TAG_LOCATION, []))
+    if not track_kwargs['comment']:
+        track_kwargs['comment'] = '; '.join(tags.get(gst.TAG_COPYRIGHT, []))
 
-    if gst.TAG_DATE in data and data[gst.TAG_DATE]:
-        date = data[gst.TAG_DATE]
-        try:
-            date = datetime.date(date.year, date.month, date.day)
-        except ValueError:
-            pass  # Ignore invalid dates
-        else:
-            track_kwargs['date'] = date.isoformat()
+    track_kwargs['track_no'] = tags.get(gst.TAG_TRACK_NUMBER, [None])[0]
+    track_kwargs['disc_no'] = tags.get(gst.TAG_ALBUM_VOLUME_NUMBER, [None])[0]
+    track_kwargs['bitrate'] = tags.get(gst.TAG_BITRATE, [None])[0]
+    track_kwargs['musicbrainz_id'] = tags.get('musicbrainz-trackid', [None])[0]
 
-    if albumartist_kwargs:
-        album_kwargs['artists'] = [Artist(**albumartist_kwargs)]
+    album_kwargs['name'] = tags.get(gst.TAG_ALBUM, [None])[0]
+    album_kwargs['num_tracks'] = tags.get(gst.TAG_TRACK_COUNT, [None])[0]
+    album_kwargs['num_discs'] = tags.get(gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
+    album_kwargs['musicbrainz_id'] = tags.get('musicbrainz-albumid', [None])[0]
+
+    track_kwargs['date'] = _date(tags)
+    track_kwargs['last_modified'] = int(data.get('mtime') or 0)
+    track_kwargs['length'] = (data.get(gst.TAG_DURATION) or 0) // gst.MSECOND
+
+    # Clear out any empty values we found
+    track_kwargs = {k: v for k, v in track_kwargs.items() if v}
+    album_kwargs = {k: v for k, v in album_kwargs.items() if v}
 
     track_kwargs['uri'] = data['uri']
-    track_kwargs['last_modified'] = int(data['mtime'])
-    track_kwargs['length'] = data[gst.TAG_DURATION] // gst.MSECOND
     track_kwargs['album'] = Album(**album_kwargs)
-
-    if ('name' in artist_kwargs
-            and not isinstance(artist_kwargs['name'], basestring)):
-        track_kwargs['artists'] = [Artist(name=artist)
-                                   for artist in artist_kwargs['name']]
-    else:
-        track_kwargs['artists'] = [Artist(**artist_kwargs)]
-
-    if ('name' in composer_kwargs
-            and not isinstance(composer_kwargs['name'], basestring)):
-        track_kwargs['composers'] = [Artist(name=artist)
-                                     for artist in composer_kwargs['name']]
-    else:
-        track_kwargs['composers'] = \
-            [Artist(**composer_kwargs)] if composer_kwargs else ''
-
-    if ('name' in performer_kwargs
-            and not isinstance(performer_kwargs['name'], basestring)):
-        track_kwargs['performers'] = [Artist(name=artist)
-                                      for artist in performer_kwargs['name']]
-    else:
-        track_kwargs['performers'] = \
-            [Artist(**performer_kwargs)] if performer_kwargs else ''
-
     return Track(**track_kwargs)

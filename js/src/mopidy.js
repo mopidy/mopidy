@@ -1,10 +1,8 @@
-/*global exports:false, require:false*/
+/*global module:true, require:false*/
 
-if (typeof module === "object" && typeof require === "function") {
-    var bane = require("bane");
-    var websocket = require("faye-websocket");
-    var when = require("when");
-}
+var bane = require("bane");
+var websocket = require("../lib/websocket/");
+var when = require("when");
 
 function Mopidy(settings) {
     if (!(this instanceof Mopidy)) {
@@ -26,11 +24,7 @@ function Mopidy(settings) {
     }
 }
 
-if (typeof module === "object" && typeof require === "function") {
-    Mopidy.WebSocket = websocket.Client;
-} else {
-    Mopidy.WebSocket = window.WebSocket;
-}
+Mopidy.WebSocket = websocket.Client;
 
 Mopidy.prototype._configure = function (settings) {
     var currentHost = (typeof document !== "undefined" &&
@@ -295,6 +289,4 @@ Mopidy.prototype._snakeToCamel = function (name) {
     });
 };
 
-if (typeof exports === "object") {
-    exports.Mopidy = Mopidy;
-}
+module.exports = Mopidy;

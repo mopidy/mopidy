@@ -5,7 +5,7 @@ import logging
 import gobject
 import pykka
 
-logger = logging.getLogger('mopidy.listener')
+logger = logging.getLogger(__name__)
 
 
 def send_async(cls, event, **kwargs):

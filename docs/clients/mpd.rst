@@ -51,7 +51,7 @@ ncmpcpp
 A console client that works well with Mopidy, and is regularly used by Mopidy
 developers.
 
-.. image:: /_static/mpd-client-ncmpcpp.png
+.. image:: mpd-client-ncmpcpp.png
     :width: 575
     :height: 426
 
@@ -84,7 +84,7 @@ GMPC
 `GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
 well with Mopidy.
 
-.. image:: /_static/mpd-client-gmpc.png
+.. image:: mpd-client-gmpc.png
     :width: 1000
     :height: 565
 
@@ -101,7 +101,7 @@ Sonata
 `Sonata <http://sonata.berlios.de/>`_ is a graphical MPD client (GTK+).
 It generally works well with Mopidy, except for search.
 
-.. image:: /_static/mpd-client-sonata.png
+.. image:: mpd-client-sonata.png
     :width: 475
     :height: 424
 
@@ -140,7 +140,7 @@ Test date:
 Tested version:
     1.03.1 (released 2012-10-16)
 
-.. image:: /_static/mpd-client-mpdroid.jpg
+.. image:: mpd-client-mpdroid.jpg
     :width: 288
     :height: 512
 
@@ -269,7 +269,7 @@ Test date:
 Tested version:
     1.7.1
 
-.. image:: /_static/mpd-client-mpod.jpg
+.. image:: mpd-client-mpod.jpg
     :width: 320
     :height: 480
 
@@ -297,7 +297,7 @@ Test date:
 Tested version:
     1.7.1
 
-.. image:: /_static/mpd-client-mpad.jpg
+.. image:: mpd-client-mpad.jpg
     :width: 480
     :height: 360
 
@@ -332,7 +332,7 @@ other web clients, see :ref:`http-clients`.
 Rompr
 -----
 
-.. image:: /_static/rompr.png
+.. image:: rompr.png
     :width: 557
     :height: 600
 

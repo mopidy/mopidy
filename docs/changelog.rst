@@ -4,9 +4,136 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-
 v0.18.0 (UNRELEASED)
 ====================
+
+**Core API**
+
+- Add :meth:`mopidy.core.Core.version` for HTTP clients to manage compatibility
+  between API versions. (Fixes: :issue:`597`)
+
+- Add :class:`mopidy.models.Ref` class for use as a lightweight reference to
+  other model types, containing just an URI, a name, and an object type. It is
+  barely used for now, but its use will be extended over time.
+
+- Add :meth:`mopidy.core.LibraryController.browse` method for browsing a
+  virtual file system of tracks. Backends can implement support for this by
+  implementing :meth:`mopidy.backend.LibraryProvider.browse`.
+
+- Events emitted on play/stop, pause/resume, next/previous and on end of track
+  has been cleaned up to work consistenly. See the message of
+  :commit:`1d108752f6` for the full details. (Fixes: :issue:`629`)
+
+**Backend API**
+
+- Move the backend API classes from :mod:`mopidy.backends.base` to
+  :mod:`mopidy.backend` and remove the ``Base`` prefix from the class names:
+
+  - From :class:`mopidy.backends.base.Backend`
+    to :class:`mopidy.backend.Backend`
+
+  - From :class:`mopidy.backends.base.BaseLibraryProvider`
+    to :class:`mopidy.backend.LibraryProvider`
+
+  - From :class:`mopidy.backends.base.BasePlaybackProvider`
+    to :class:`mopidy.backend.PlaybackProvider`
+
+  - From :class:`mopidy.backends.base.BasePlaylistsProvider`
+    to :class:`mopidy.backend.PlaylistsProvider`
+
+  - From :class:`mopidy.backends.listener.BackendListener`
+    to :class:`mopidy.backend.BackendListener`
+
+  Imports from the old locations still works, but are deprecated.
+
+- Add :meth:`mopidy.backend.LibraryProvider.browse`, which can be implemented
+  by backends that wants to expose directories of tracks in Mopidy's virtual
+  file system.
+
+**Commands**
+
+- Reduce amount of logging from dependencies when using :option:`mopidy -v`.
+  (Fixes: :issue:`593`)
+
+- Add support for additional logging verbosity levels with ``mopidy -vv`` and
+  ``mopidy -vvv`` which increases the amount of logging from dependencies.
+  (Fixes: :issue:`593`)
+
+**Configuration**
+
+- The default for the :option:`mopidy --config` option has been updated to
+  include ``$XDG_CONFIG_DIRS`` in addition to ``$XDG_CONFIG_DIR``. (Fixes
+  :issue:`431`)
+
+- Added support for deprecating config values in order to allow for graceful
+  removal of the no longer used config value :confval:`local/tag_cache_file`.
+
+**Extension support**
+
+- Switched to using a registry model for classes provided by extension. This
+  allows extensions to be extended by other extensions, as needed by for
+  example pluggable libraries for the local backend. See
+  :class:`mopidy.ext.Registry` for details. (Fixes :issue:`601`)
+
+- Added the new method :meth:`mopidy.ext.Extension.setup`. This method
+  replaces the now deprecated
+  :meth:`~mopidy.ext.Extension.get_backend_classes`,
+  :meth:`~mopidy.ext.Extension.get_frontend_classes`, and
+  :meth:`~mopidy.ext.Extension.register_gstreamer_elements`.
+
+*Audio**
+
+- Added :confval:`audio/mixer_volume` to set the initial volume of mixers.
+  This is especially useful for setting the software mixer volume to something
+  else than the default 100%. (Fixes: :issue:`633`)
+
+**Local backend**
+
+- Added support for browsing local directories in Mopidy's virtual file system.
+
+- Finished the work on creating pluggable libraries. Users can now
+  reconfigure Mopidy to use alternate library providers of their choosing for
+  local files. (Fixes issue :issue:`44`, partially resolves :issue:`397`, and
+  causes a temporary regression of :issue:`527`.)
+
+- Switched default local library provider from a "tag cache" file that closely
+  resembled the one used by the original MPD server to a compressed JSON file.
+  This greatly simplifies our library code and reuses our existing model
+  serialization code, as used by the HTTP API and web clients.
+
+- Removed our outdated and bug-ridden "tag cache" local library implementation.
+
+- Added the config value :confval:`local/library` to select which library to
+  use. It defaults to ``json``, which is the only local library bundled with
+  Mopidy.
+
+- Added the config value :confval:`local/data_dir` to have a common config for
+  where to store local library data. This is intended to avoid every single
+  local library provider having to have it's own config value for this.
+
+- Added the config value :confval:`local/scan_flush_threshold` to control how
+  often to tell local libraries to store changes when scanning local music.
+
+**Streaming backend**
+
+- Add live lookup of URI metadata. (Fixes :issue:`540`)
+
+- Add support for extended M3U playlist, meaning that basic track metadata
+  stored in playlists will be used by Mopidy.
+
+**HTTP frontend**
+
+- Upgrade Mopidy.js dependencies and add support for using Mopidy.js with
+  Browserify. This version has been released to npm as Mopidy.js v0.2.0.
+  (Fixes: :issue:`609`)
+
+**MPD frontend**
+
+- Make the ``lsinfo``, ``listall``, and ``listallinfo`` commands support
+  browsing of Mopidy's virtual file system. (Fixes: :issue:`145`)
+
+- Empty commands now return a ``ACK [5@0] {} No command given`` error instead
+  of ``OK``. This is consistent with the original MPD server implementation.
 
 **Internal changes**
 
@@ -380,7 +507,7 @@ A release with a number of small and medium fixes, with no specific focus.
   objects with ``tlid`` set to ``0`` to be sent to the HTTP client without the
   ``tlid`` field. (Fixes: :issue:`501`)
 
-- Upgrade Mopidy.js dependencies. This version has been released to NPM as
+- Upgrade Mopidy.js dependencies. This version has been released to npm as
   Mopidy.js v0.1.1.
 
 **Extension support**
@@ -626,9 +753,9 @@ throughout Mopidy.
 **Stream backend**
 
 We've added a new backend for playing audio streams, the :mod:`stream backend
-<mopidy.backends.stream>`. It is activated by default. The stream backend
-supports the intersection of what your GStreamer installation supports and what
-protocols are included in the :attr:`mopidy.settings.STREAM_PROTOCOLS` setting.
+<mopidy.stream>`. It is activated by default. The stream backend supports the
+intersection of what your GStreamer installation supports and what protocols
+are included in the :attr:`mopidy.settings.STREAM_PROTOCOLS` setting.
 
 Current limitations:
 
@@ -1667,8 +1794,8 @@ to this problem.
 - Local backend:
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
-    any help from the original MPD server. See :ref:`generating-a-tag-cache`
-    for instructions on how to use it.
+    any help from the original MPD server. See
+    :ref:`generating-a-local-library` for instructions on how to use it.
 
   - Fix support for UTF-8 encoding in tag caches.
 
@@ -1724,7 +1851,7 @@ to this problem.
 
 - Packaging and distribution:
 
-  - Setup APT repository and crate Debian packages of Mopidy. See
+  - Setup APT repository and create Debian packages of Mopidy. See
     :ref:`installation` for instructions for how to install Mopidy, including
     all dependencies, from APT.
 

@@ -69,10 +69,14 @@ class ImmutableObject(object):
         data = {}
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
-            data[public_key] = values.pop(public_key, self.__dict__[key])
+            value = values.pop(public_key, self.__dict__[key])
+            if value is not None:
+                data[public_key] = value
         for key in values.keys():
             if hasattr(self, key):
-                data[key] = values.pop(key)
+                value = values.pop(key)
+                if value is not None:
+                    data[key] = value
         if values:
             raise TypeError(
                 'copy() got an unexpected keyword argument "%s"' % key)
@@ -134,6 +138,76 @@ def model_json_decoder(dct):
                 kwargs[key] = value
             return cls(**kwargs)
     return dct
+
+
+class Ref(ImmutableObject):
+    """
+    Model to represent URI references with a human friendly name and type
+    attached. This is intended for use a lightweight object "free" of metadata
+    that can be passed around instead of using full blown models.
+
+    :param uri: object URI
+    :type uri: string
+    :param name: object name
+    :type name: string
+    :param type: object type
+    :type name: string
+    """
+
+    #: The object URI. Read-only.
+    uri = None
+
+    #: The object name. Read-only.
+    name = None
+
+    #: The object type, e.g. "artist", "album", "track", "playlist",
+    #: "directory". Read-only.
+    type = None
+
+    #: Constant used for comparison with the :attr:`type` field.
+    ALBUM = 'album'
+
+    #: Constant used for comparison with the :attr:`type` field.
+    ARTIST = 'artist'
+
+    #: Constant used for comparison with the :attr:`type` field.
+    DIRECTORY = 'directory'
+
+    #: Constant used for comparison with the :attr:`type` field.
+    PLAYLIST = 'playlist'
+
+    #: Constant used for comparison with the :attr:`type` field.
+    TRACK = 'track'
+
+    @classmethod
+    def album(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`ALBUM`."""
+        kwargs['type'] = Ref.ALBUM
+        return cls(**kwargs)
+
+    @classmethod
+    def artist(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`ARTIST`."""
+        kwargs['type'] = Ref.ARTIST
+        return cls(**kwargs)
+
+    @classmethod
+    def directory(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`DIRECTORY`."""
+        kwargs['type'] = Ref.DIRECTORY
+        return cls(**kwargs)
+
+    @classmethod
+    def playlist(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`PLAYLIST`."""
+        kwargs['type'] = Ref.PLAYLIST
+        return cls(**kwargs)
+
+    @classmethod
+    def track(cls, **kwargs):
+        """Create a :class:`Ref` with ``type`` :attr:`TRACK`."""
+        kwargs['type'] = Ref.TRACK
+        return cls(**kwargs)
 
 
 class Artist(ImmutableObject):
@@ -204,8 +278,8 @@ class Album(ImmutableObject):
     # actual usage of this field with more than one image.
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
-        self.__dict__['images'] = frozenset(kwargs.pop('images', []))
+        self.__dict__['artists'] = frozenset(kwargs.pop('artists', None) or [])
+        self.__dict__['images'] = frozenset(kwargs.pop('images', None) or [])
         super(Album, self).__init__(*args, **kwargs)
 
 
@@ -291,9 +365,10 @@ class Track(ImmutableObject):
     last_modified = 0
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', []))
-        self.__dict__['composers'] = frozenset(kwargs.pop('composers', []))
-        self.__dict__['performers'] = frozenset(kwargs.pop('performers', []))
+        get = lambda key: frozenset(kwargs.pop(key, None) or [])
+        self.__dict__['artists'] = get('artists')
+        self.__dict__['composers'] = get('composers')
+        self.__dict__['performers'] = get('performers')
         super(Track, self).__init__(*args, **kwargs)
 
 
@@ -362,7 +437,7 @@ class Playlist(ImmutableObject):
     last_modified = None
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
+        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', None) or [])
         super(Playlist, self).__init__(*args, **kwargs)
 
     # TODO: def insert(self, pos, track): ... ?
@@ -398,7 +473,7 @@ class SearchResult(ImmutableObject):
     albums = tuple()
 
     def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', []))
-        self.__dict__['artists'] = tuple(kwargs.pop('artists', []))
-        self.__dict__['albums'] = tuple(kwargs.pop('albums', []))
+        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', None) or [])
+        self.__dict__['artists'] = tuple(kwargs.pop('artists', None) or [])
+        self.__dict__['albums'] = tuple(kwargs.pop('albums', None) or [])
         super(SearchResult, self).__init__(*args, **kwargs)

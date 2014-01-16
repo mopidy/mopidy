@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 
+import collections
 import itertools
 
 import pykka
 
-from mopidy.audio import AudioListener, PlaybackState
-from mopidy.backends.listener import BackendListener
+from mopidy import audio, backend
+from mopidy.audio import PlaybackState
+from mopidy.utils import versioning
 
 from .library import LibraryController
 from .listener import CoreListener
@@ -14,22 +16,22 @@ from .playlists import PlaylistsController
 from .tracklist import TracklistController
 
 
-class Core(pykka.ThreadingActor, AudioListener, BackendListener):
-    #: The library controller. An instance of
-    # :class:`mopidy.core.LibraryController`.
+class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):
     library = None
+    """The library controller. An instance of
+    :class:`mopidy.core.LibraryController`."""
 
-    #: The playback controller. An instance of
-    #: :class:`mopidy.core.PlaybackController`.
     playback = None
+    """The playback controller. An instance of
+    :class:`mopidy.core.PlaybackController`."""
 
-    #: The playlists controller. An instance of
-    #: :class:`mopidy.core.PlaylistsController`.
     playlists = None
+    """The playlists controller. An instance of
+    :class:`mopidy.core.PlaylistsController`."""
 
-    #: The tracklist controller. An instance of
-    #: :class:`mopidy.core.TracklistController`.
     tracklist = None
+    """The tracklist controller. An instance of
+    :class:`mopidy.core.TracklistController`."""
 
     def __init__(self, audio=None, backends=None):
         super(Core, self).__init__()
@@ -54,6 +56,12 @@ class Core(pykka.ThreadingActor, AudioListener, BackendListener):
 
     uri_schemes = property(get_uri_schemes)
     """List of URI schemes we can handle"""
+
+    def get_version(self):
+        return versioning.get_version()
+
+    version = property(get_version)
+    """Version of the Mopidy core API"""
 
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()
@@ -82,34 +90,34 @@ class Backends(list):
     def __init__(self, backends):
         super(Backends, self).__init__(backends)
 
-        # These lists keeps the backends in the original order, but only
-        # includes those which implements the required backend provider. Since
-        # it is important to keep the order, we can't simply use .values() on
-        # the X_by_uri_scheme dicts below.
-        self.with_library = [b for b in backends if b.has_library().get()]
-        self.with_playback = [b for b in backends if b.has_playback().get()]
-        self.with_playlists = [
-            b for b in backends if b.has_playlists().get()]
+        self.with_library = collections.OrderedDict()
+        self.with_browsable_library = collections.OrderedDict()
+        self.with_playback = collections.OrderedDict()
+        self.with_playlists = collections.OrderedDict()
 
-        self.by_uri_scheme = {}
+        backends_by_scheme = {}
+        name = lambda backend: backend.actor_ref.actor_class.__name__
+
         for backend in backends:
-            for uri_scheme in backend.uri_schemes.get():
-                assert uri_scheme not in self.by_uri_scheme, (
+            has_library = backend.has_library().get()
+            has_playback = backend.has_playback().get()
+            has_playlists = backend.has_playlists().get()
+
+            for scheme in backend.uri_schemes.get():
+                assert scheme not in backends_by_scheme, (
                     'Cannot add URI scheme %s for %s, '
                     'it is already handled by %s'
-                ) % (
-                    uri_scheme, backend.__class__.__name__,
-                    self.by_uri_scheme[uri_scheme].__class__.__name__)
-                self.by_uri_scheme[uri_scheme] = backend
+                ) % (scheme, name(backend), name(backends_by_scheme[scheme]))
+                backends_by_scheme[scheme] = backend
 
-        self.with_library_by_uri_scheme = {}
-        self.with_playback_by_uri_scheme = {}
-        self.with_playlists_by_uri_scheme = {}
+                if has_library:
+                    self.with_library[scheme] = backend
+                if has_playback:
+                    self.with_playback[scheme] = backend
+                if has_playlists:
+                    self.with_playlists[scheme] = backend
 
-        for uri_scheme, backend in self.by_uri_scheme.items():
-            if backend.has_library().get():
-                self.with_library_by_uri_scheme[uri_scheme] = backend
-            if backend.has_playback().get():
-                self.with_playback_by_uri_scheme[uri_scheme] = backend
-            if backend.has_playlists().get():
-                self.with_playlists_by_uri_scheme[uri_scheme] = backend
+            if has_library:
+                root_dir_name = backend.library.root_directory_name.get()
+                if root_dir_name is not None:
+                    self.with_browsable_library[root_dir_name] = backend

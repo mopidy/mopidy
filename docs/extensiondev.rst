@@ -222,8 +222,10 @@ file::
     include README.rst
     include mopidy_soundspot/ext.conf
 
-For details on the ``MANIFEST.in`` file format, check out the `distuitls docs
+For details on the ``MANIFEST.in`` file format, check out the `distutils docs
 <http://docs.python.org/2/distutils/sourcedist.html#manifest-template>`_.
+`check-manifest <https://pypi.python.org/pypi/check-manifest>`_ is a very
+useful tool to check your ``MANIFEST.in`` file for completeness.
 
 
 Example __init__.py
@@ -237,7 +239,7 @@ The root of your Python package should have an ``__version__`` attribute with a
 class named ``Extension`` which inherits from Mopidy's extension base class,
 :class:`mopidy.ext.Extension`. This is the class referred to in the
 ``entry_points`` part of ``setup.py``. Any imports of other files in your
-extension should be kept inside methods.  This ensures that this file can be
+extension should be kept inside methods. This ensures that this file can be
 imported without raising :exc:`ImportError` exceptions for missing
 dependencies, etc.
 
@@ -288,28 +290,29 @@ This is ``mopidy_soundspot/__init__.py``::
             schema['password'] = config.Secret()
             return schema
 
+        def get_command(self):
+            from .commands import SoundspotCommand
+            return SoundspotCommand()
+
         def validate_environment(self):
             try:
                 import pysoundspot
             except ImportError as e:
                 raise exceptions.ExtensionError('pysoundspot library not found', e)
 
-        # You will typically only implement one of the next three methods
-        # in a single extension.
+        def setup(self, registry):
+            # You will typically only do one of the following things in a
+            # single extension.
 
-        def get_frontend_classes(self):
+            # Register a frontend
             from .frontend import SoundspotFrontend
-            return [SoundspotFrontend]
+            registry.add('frontend', SoundspotFrontend)
 
-        def get_backend_classes(self):
+            # Register a backend
             from .backend import SoundspotBackend
-            return [SoundspotBackend]
+            registry.add('backend', SoundspotBackend)
 
-        def get_command(self):
-            from .commands import SoundspotCommand
-            return SoundspotCommand()
-
-        def register_gstreamer_elements(self):
+            # Register a custom GStreamer element
             from .mixer import SoundspotMixer
             gobject.type_register(SoundspotMixer)
             gst.element_register(
@@ -341,11 +344,11 @@ passed a reference to the core API when it's created. See the
 
     import pykka
 
-    from mopidy.core import CoreListener
+    from mopidy import core
 
 
-    class SoundspotFrontend(pykka.ThreadingActor, CoreListener):
-        def __init__(self, core):
+    class SoundspotFrontend(pykka.ThreadingActor, core.CoreListener):
+        def __init__(self, config, core):
             super(SoundspotFrontend, self).__init__()
             self.core = core
 
@@ -367,11 +370,11 @@ details.
 
     import pykka
 
-    from mopidy.backends import base
+    from mopidy import backend
 
 
-    class SoundspotBackend(pykka.ThreadingActor, base.BaseBackend):
-        def __init__(self, audio):
+    class SoundspotBackend(pykka.ThreadingActor, backend.Backend):
+        def __init__(self, config, audio):
             super(SoundspotBackend, self).__init__()
             self.audio = audio
 
@@ -413,8 +416,8 @@ If you want to extend Mopidy's GStreamer pipeline with new custom GStreamer
 elements, you'll need to register them in GStreamer before they can be used.
 
 Basically, you just implement your GStreamer element in Python and then make
-your :meth:`~mopidy.ext.Extension.register_gstreamer_elements` method register
-all your custom GStreamer elements.
+your :meth:`~mopidy.ext.Extension.setup` method register all your custom
+GStreamer elements.
 
 For examples of custom GStreamer elements implemented in Python, see
 :mod:`mopidy.audio.mixers`.
@@ -434,7 +437,7 @@ Use of Mopidy APIs
 
 When writing an extension, you should only use APIs documented at
 :ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils`, may change at
-any time, and is not something extensions should rely on being stable.
+any time, and is not something extensions should use.
 
 
 Logging in extensions
@@ -448,6 +451,9 @@ as this will be visible in Mopidy's debug log::
     import logging
 
     logger = logging.getLogger('mopidy_soundspot')
+
+    # Or even better, use the Python module name as the logger name:
+    logger = logging.getLogger(__name__)
 
 When logging at logging level ``info`` or higher (i.e. ``warning``, ``error``,
 and ``critical``, but not ``debug``) the log message will be displayed to all
