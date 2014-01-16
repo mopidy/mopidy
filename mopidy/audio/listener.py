@@ -19,6 +19,19 @@ class AudioListener(listener.Listener):
         """Helper to allow calling of audio listener events"""
         listener.send_async(AudioListener, event, **kwargs)
 
+    def playback_error(self, error, debug):
+        """
+        Called when GStreamer encounters an error on playback.
+
+        *MAY* be implemented by actor.
+
+        :param error: Error message from GStreamer
+        :type error: string
+        :param debug: Debug information from GStreamer if available
+        :type debug: string or :class:`None`
+        """
+        pass
+
     def reached_end_of_stream(self):
         """
         Called whenever the end of the audio stream is reached.
@@ -39,18 +52,5 @@ class AudioListener(listener.Listener):
         :type old_state: string from :class:`mopidy.core.PlaybackState` field
         :param new_state: the state after the change
         :type new_state: string from :class:`mopidy.core.PlaybackState` field
-        """
-        pass
-
-    def playback_error(self, error, debug):
-        """
-        Called when Gstreamer encounters an error on playback
-
-        *May be implemented by actor.*
-
-        :param error: Error message from GStreamer
-        :type error: str
-        :param debug: Debug information for the error if available
-        :type debug: str
         """
         pass
