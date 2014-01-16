@@ -63,6 +63,13 @@ class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):
     version = property(get_version)
     """Version of the Mopidy core API"""
 
+    def playback_error(self, error, debug):
+        self.playback.on_playback_error(error, debug)
+
+    def playlists_loaded(self):
+        # Forward event from backend to frontends
+        CoreListener.send('playlists_loaded')
+
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()
 
@@ -77,10 +84,6 @@ class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):
                 and self.playback.state != PlaybackState.PAUSED):
             self.playback.state = new_state
             self.playback._trigger_track_playback_paused()
-
-    def playlists_loaded(self):
-        # Forward event from backend to frontends
-        CoreListener.send('playlists_loaded')
 
 
 class Backends(list):

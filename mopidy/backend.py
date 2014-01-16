@@ -200,6 +200,20 @@ class PlaybackProvider(object):
         """
         return self.audio.get_position().get()
 
+    def on_playback_error(self, error, debug):
+        """
+        Notify the playback provider about errors on playback
+
+        *MAY be reimplemented by subclass.*
+
+        :param error: Error message from GStreamer
+        :type error: string
+        :param debug: Debug information from GStreamer if available
+        :type debug: string or :class:`None`
+        :rtype: :class:`True` if playback may continue, else :class:`False`
+        """
+        return True
+
 
 class PlaylistsProvider(object):
     """
