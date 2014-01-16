@@ -327,9 +327,7 @@ class PlaybackController(object):
         if backend and backend.playback.on_playback_error(error, debug).get():
             logger.info('Playback error; skipping to next track.')
             self.core.tracklist.mark_unplayable(self.current_tl_track)
-            self.stop()
             self.next()
-            self.play()
         else:
             logger.info('Playback error; stopping.')
             self.stop()
