@@ -323,10 +323,10 @@ class PlaybackController(object):
         :param debug: Debug information from GStreamer if available
         :type debug: string or :class:`None`
         """
+        self.core.tracklist.mark_unplayable(self.current_tl_track)
         backend = self._get_backend()
         if backend and backend.playback.on_playback_error(error, debug).get():
             logger.info('Playback error; skipping to next track.')
-            self.core.tracklist.mark_unplayable(self.current_tl_track)
             self.next()
         else:
             logger.info('Playback error; stopping.')
