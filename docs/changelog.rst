@@ -81,7 +81,7 @@ v0.18.0 (UNRELEASED)
   :meth:`~mopidy.ext.Extension.get_frontend_classes`, and
   :meth:`~mopidy.ext.Extension.register_gstreamer_elements`.
 
-*Audio**
+**Audio**
 
 - Added :confval:`audio/mixer_volume` to set the initial volume of mixers.
   This is especially useful for setting the software mixer volume to something
