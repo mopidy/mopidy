@@ -212,7 +212,7 @@ class PlaybackProvider(object):
         :type debug: string or :class:`None`
         :rtype: :class:`True` if playback may continue, else :class:`False`
         """
-        return False
+        return True
 
 
 class PlaylistsProvider(object):
