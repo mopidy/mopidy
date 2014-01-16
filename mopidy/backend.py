@@ -37,6 +37,9 @@ class Backend(object):
     def has_library(self):
         return self.library is not None
 
+    def has_library_browse(self):
+        return self.has_library() and self.library.root_directory is not None
+
     def has_playback(self):
         return self.playback is not None
 
