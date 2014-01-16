@@ -287,6 +287,9 @@ class Audio(pykka.ThreadingActor):
             debug = debug.decode('utf-8') or None
             logger.debug('Playback error: %s; Debug info: %s', error, debug)
             AudioListener.send('playback_error', error=error, debug=debug)
+            # TODO: We must drop any further errors on the floor until the next
+            # track is played. We do not want to emit 'playback_error' more
+            # than once for a single track.
         elif message.type == gst.MESSAGE_WARNING:
             error, debug = message.parse_warning()
             logger.warning(
