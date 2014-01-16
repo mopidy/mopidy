@@ -64,10 +64,14 @@ class LibraryController(object):
         if not path.startswith('/'):
             return []
 
+        mapping = {}
+        for ref in self.backends.with_browsable_library.keys():
+            name = urlparse.urlparse(ref.uri).scheme
+            mapping[name] = ref
+
         if path == '/':
-            return [
-                Ref.directory(uri='/%s' % name, name=name)
-                for name in self.backends.with_browsable_library.keys()]
+            return [Ref.directory(uri='/%s' % name, name=name)
+                    for name in sorted(mapping)]
 
         groups = re.match('/(?P<library>[^/]+)(?P<path>.*)', path).groupdict()
         library_name = groups['library']
@@ -75,7 +79,8 @@ class LibraryController(object):
         if not backend_path.startswith('/'):
             backend_path = '/%s' % backend_path
 
-        backend = self.backends.with_browsable_library.get(library_name, None)
+        backend = self.backends.with_browsable_library.get(
+            mapping.get(library_name), None)
         if not backend:
             return []
 

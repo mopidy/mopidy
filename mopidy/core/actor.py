@@ -115,6 +115,6 @@ class Backends(list):
                     self.with_playlists[scheme] = backend
 
             if has_library:
-                root_dir_name = backend.library.root_directory_name.get()
-                if root_dir_name is not None:
-                    self.with_browsable_library[root_dir_name] = backend
+                root_dir = backend.library.root_directory.get()
+                if root_dir is not None:
+                    self.with_browsable_library[root_dir] = backend

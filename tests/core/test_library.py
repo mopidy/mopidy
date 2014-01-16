@@ -9,16 +9,18 @@ from mopidy.models import Ref, SearchResult, Track
 
 class CoreLibraryTest(unittest.TestCase):
     def setUp(self):
+        dummy1_root = Ref.directory(uri='dummy1:directory', name='dummy1')
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.library1 = mock.Mock(spec=backend.LibraryProvider)
-        self.library1.root_directory_name.get.return_value = 'dummy1'
+        self.library1.root_directory.get.return_value = dummy1_root
         self.backend1.library = self.library1
 
+        dummy2_root = Ref.directory(uri='dummy2:directory', name='dummy2')
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.library2 = mock.Mock(spec=backend.LibraryProvider)
-        self.library2.root_directory_name.get.return_value = 'dummy2'
+        self.library2.root_directory.get.return_value = dummy2_root
         self.backend2.library = self.library2
 
         # A backend without the optional library provider
