@@ -124,34 +124,34 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_listall_without_uri(self):
         tracks = [Track(uri='dummy:/a', name='a'),
-                  Track(uri='dummy:/b', name='b')]
+                  Track(uri='dummy:/foo/b', name='b')]
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a'),
-                  Ref.directory(uri='/foo')],
-            '/foo': [Ref.track(uri='dummy:/b', name='b')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('listall')
 
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('directory: /dummy/foo')
-        self.assertInResponse('file: dummy:/b')
+        self.assertInResponse('file: dummy:/foo/b')
         self.assertInResponse('OK')
 
     def test_listall_with_uri(self):
         tracks = [Track(uri='dummy:/a', name='a'),
-                  Track(uri='dummy:/b', name='b')]
+                  Track(uri='dummy:/foo/b', name='b')]
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a'),
-                  Ref.directory(uri='/foo')],
-            '/foo': [Ref.track(uri='dummy:/b', name='b')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('listall "/dummy/foo"')
 
         self.assertNotInResponse('file: dummy:/a')
         self.assertInResponse('directory: /dummy/foo')
-        self.assertInResponse('file: dummy:/b')
+        self.assertInResponse('file: dummy:/foo/b')
         self.assertInResponse('OK')
 
     def test_listall_with_unknown_uri(self):
@@ -159,39 +159,57 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         self.assertEqualResponse('ACK [50@0] {listall} Not found')
 
+    def test_listall_for_dir_with_and_without_leading_slash_is_the_same(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
+
+        response1 = self.sendRequest('listall "dummy"')
+        response2 = self.sendRequest('listall "/dummy"')
+        self.assertEqual(response1, response2)
+
+    def test_listall_for_dir_with_and_without_trailing_slash_is_the_same(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
+
+        response1 = self.sendRequest('listall "dummy"')
+        response2 = self.sendRequest('listall "dummy/"')
+        self.assertEqual(response1, response2)
+
     def test_listallinfo_without_uri(self):
         tracks = [Track(uri='dummy:/a', name='a'),
-                  Track(uri='dummy:/b', name='b')]
+                  Track(uri='dummy:/foo/b', name='b')]
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a'),
-                  Ref.directory(uri='/foo')],
-            '/foo': [Ref.track(uri='dummy:/b', name='b')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('listallinfo')
 
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('Title: a')
         self.assertInResponse('directory: /dummy/foo')
-        self.assertInResponse('file: dummy:/b')
+        self.assertInResponse('file: dummy:/foo/b')
         self.assertInResponse('Title: b')
         self.assertInResponse('OK')
 
     def test_listallinfo_with_uri(self):
         tracks = [Track(uri='dummy:/a', name='a'),
-                  Track(uri='dummy:/b', name='b')]
+                  Track(uri='dummy:/foo/b', name='b')]
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a'),
-                  Ref.directory(uri='/foo')],
-            '/foo': [Ref.track(uri='dummy:/b', name='b')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('listallinfo "/dummy/foo"')
 
         self.assertNotInResponse('file: dummy:/a')
         self.assertNotInResponse('Title: a')
         self.assertInResponse('directory: /dummy/foo')
-        self.assertInResponse('file: dummy:/b')
+        self.assertInResponse('file: dummy:/foo/b')
         self.assertInResponse('Title: b')
         self.assertInResponse('OK')
 
@@ -199,6 +217,24 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.sendRequest('listallinfo "/unknown"')
 
         self.assertEqualResponse('ACK [50@0] {listallinfo} Not found')
+
+    def test_listallinfo_for_dir_with_and_without_leading_slash_is_same(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
+
+        response1 = self.sendRequest('listallinfo "dummy"')
+        response2 = self.sendRequest('listallinfo "/dummy"')
+        self.assertEqual(response1, response2)
+
+    def test_listallinfo_for_dir_with_and_without_trailing_slash_is_same(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
+
+        response1 = self.sendRequest('listallinfo "dummy"')
+        response2 = self.sendRequest('listallinfo "dummy/"')
+        self.assertEqual(response1, response2)
 
     def test_lsinfo_without_path_returns_same_as_for_root(self):
         last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
@@ -231,8 +267,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_root_includes_dirs_for_each_lib_with_content(self):
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a'),
-                  Ref.directory(uri='/foo', name='foo')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
 
         self.sendRequest('lsinfo "/"')
         self.assertInResponse('directory: dummy')
@@ -240,11 +276,20 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_dir_with_and_without_leading_slash_is_the_same(self):
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a'),
-                  Ref.directory(uri='/foo', name='foo')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
 
         response1 = self.sendRequest('lsinfo "dummy"')
         response2 = self.sendRequest('lsinfo "/dummy"')
+        self.assertEqual(response1, response2)
+
+    def test_lsinfo_for_dir_with_and_without_trailing_slash_is_the_same(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
+
+        response1 = self.sendRequest('lsinfo "dummy"')
+        response2 = self.sendRequest('lsinfo "dummy/"')
         self.assertEqual(response1, response2)
 
     def test_lsinfo_for_dir_includes_tracks(self):
@@ -252,7 +297,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             Track(uri='dummy:/a', name='a'),
         ]
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a')]}
 
         self.sendRequest('lsinfo "/dummy"')
         self.assertInResponse('file: dummy:/a')
@@ -261,7 +306,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_dir_includes_subdirs(self):
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.directory(uri='/foo', name='foo')]}
+            'dummy:/': [Ref.directory(uri='/foo', name='foo')]}
 
         self.sendRequest('lsinfo "/dummy"')
         self.assertInResponse('directory: dummy/foo')

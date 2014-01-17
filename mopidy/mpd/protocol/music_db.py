@@ -417,25 +417,33 @@ def listall(context, uri=None):
 
         Lists all songs and directories in ``URI``.
     """
-    if uri is None:
-        uri = '/'
-    if not uri.startswith('/'):
-        uri = '/%s' % uri
-
     result = []
-    browse_futures = [context.core.library.browse(uri)]
+    root_path = translator.normalize_path(uri)
+    # TODO: doesn't the dispatcher._call_handler have enough info to catch
+    # the error this can produce, set the command and then 'raise'?
+    try:
+        uri = context.directory_path_to_uri(root_path)
+    except MpdNoExistError as e:
+        e.command = 'listall'
+        e.message = 'Not found'
+        raise
+    browse_futures = [(root_path, context.core.library.browse(uri))]
+
     while browse_futures:
-        for ref in browse_futures.pop().get():
+        base_path, future = browse_futures.pop()
+        for ref in future.get():
             if ref.type == Ref.DIRECTORY:
-                result.append(('directory', ref.uri))
-                browse_futures.append(context.core.library.browse(ref.uri))
+                path = '/'.join([base_path, ref.name.replace('/', '')])
+                result.append(('directory', path))
+                browse_futures.append(
+                    (path, context.core.library.browse(ref.uri)))
             elif ref.type == Ref.TRACK:
                 result.append(('file', ref.uri))
 
     if not result:
         raise MpdNoExistError('Not found', command='listall')
 
-    return [('directory', uri)] + result
+    return [('directory', root_path)] + result
 
 
 @handle_request(r'listallinfo$')
@@ -449,18 +457,25 @@ def listallinfo(context, uri=None):
         Same as ``listall``, except it also returns metadata info in the
         same format as ``lsinfo``.
     """
-    if uri is None:
-        uri = '/'
-    if not uri.startswith('/'):
-        uri = '/%s' % uri
-
     dirs_and_futures = []
-    browse_futures = [context.core.library.browse(uri)]
+    result = []
+    root_path = translator.normalize_path(uri)
+    try:
+        uri = context.directory_path_to_uri(root_path)
+    except MpdNoExistError as e:
+        e.command = 'listallinfo'
+        e.message = 'Not found'
+        raise
+    browse_futures = [(root_path, context.core.library.browse(uri))]
+
     while browse_futures:
-        for ref in browse_futures.pop().get():
+        base_path, future = browse_futures.pop()
+        for ref in future.get():
             if ref.type == Ref.DIRECTORY:
-                dirs_and_futures.append(('directory', ref.uri))
-                browse_futures.append(context.core.library.browse(ref.uri))
+                path = '/'.join([base_path, ref.name.replace('/', '')])
+                future = context.core.library.browse(ref.uri)
+                browse_futures.append((path, future))
+                dirs_and_futures.append(('directory', path))
             elif ref.type == Ref.TRACK:
                 # TODO Lookup tracks in batch for better performance
                 dirs_and_futures.append(context.core.library.lookup(ref.uri))
@@ -476,7 +491,7 @@ def listallinfo(context, uri=None):
     if not result:
         raise MpdNoExistError('Not found', command='listallinfo')
 
-    return [('directory', uri)] + result
+    return [('directory', root_path)] + result
 
 
 @handle_request(r'lsinfo$')
@@ -498,16 +513,21 @@ def lsinfo(context, uri=None):
     ""``, and ``lsinfo "/"``.
     """
     result = []
-    if uri is None or uri == '/' or uri == '':
+    root_path = translator.normalize_path(uri, relative=True)
+    try:
+        uri = context.directory_path_to_uri(root_path)
+    except MpdNoExistError as e:
+        e.command = 'lsinfo'
+        e.message = 'Not found'
+        raise
+
+    if uri is None:
         result.extend(stored_playlists.listplaylists(context))
-        uri = '/'
-    if not uri.startswith('/'):
-        uri = '/%s' % uri
+
     for ref in context.core.library.browse(uri).get():
         if ref.type == Ref.DIRECTORY:
-            assert ref.uri.startswith('/'), (
-                'Directory URIs must start with /: %r' % ref)
-            result.append(('directory', ref.uri[1:]))
+            path = '/'.join([root_path, ref.name.replace('/', '')])
+            result.append(('directory', path.lstrip('/')))
         elif ref.type == Ref.TRACK:
             # TODO Lookup tracks in batch for better performance
             tracks = context.core.library.lookup(ref.uri).get()
