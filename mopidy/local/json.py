@@ -62,7 +62,7 @@ class _BrowseCache(object):
             for i in range(len(parts)):
                 self._cache.setdefault(parent, collections.OrderedDict())
 
-                directory = b'/'.join(parts[:i+1])
+                directory = '/'.join(parts[:i+1])
                 dir_uri = translator.path_to_local_directory_uri(directory)
                 dir_ref = models.Ref.directory(uri=dir_uri, name=parts[i])
                 self._cache[parent][dir_uri] = dir_ref

@@ -57,8 +57,8 @@ class LibraryProvider(object):
 
     root_directory = None
     """
-    :class:`models.Ref.directory` instance with an uri and name set
-    representing the root of this libraries browse tree. URIs must
+    :class:`models.Ref.directory` instance with a URI and name set
+    representing the root of this library's browse tree. URIs must
     use one of the schemes supported by the backend, and name should
     be set to a human friendly value.
 

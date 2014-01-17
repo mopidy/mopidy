@@ -302,7 +302,7 @@ class MpdContext(object):
         uri = None
         for part in parts:
             for ref in self.core.library.browse(uri).get():
-                if ref.type == ref.DIRECTORY and part == ref.name:
+                if ref.type == ref.DIRECTORY and ref.name == part:
                     uri = ref.uri
                     break
             else:

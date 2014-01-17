@@ -52,12 +52,12 @@ class LibraryController(object):
         The only valid exception to this is checking the scheme, as it is used
         to route browse requests to the correct backend.
 
-        For example, the dummy library's ``/bar`` directory could bereturned
+        For example, the dummy library's ``/bar`` directory could be returned
         like this::
 
             Ref.directory(uri='dummy:directory:/bar', name='bar')
 
-        :param bytestring uri: uri to browse
+        :param string uri: URI to browse
         :rtype: list of :class:`mopidy.models.Ref`
         """
         if uri is None:
