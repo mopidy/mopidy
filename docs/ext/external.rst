@@ -33,6 +33,15 @@ Provides a backend for playing music from your `Beets
 <http://beets.radbox.org/>`_ music library through Beets' web extension.
 
 
+Mopidy-Dirble
+=============
+
+https://github.com/mopidy/mopidy-dirble
+
+Provides a backend for browsing the Internet radio channels from the `Dirble
+<http://dirble.com/>`_ directory.
+
+
 Mopidy-GMusic
 =============
 
