@@ -7,7 +7,7 @@ from mopidy.mpd.exceptions import MpdNotImplemented
 @handle_request(
     r'sticker\ delete\ "(?P<field>[^"]+)"\ '
     r'"(?P<uri>[^"]+)"(\ "(?P<name>[^"]+)")*$')
-def sticker_delete(context, field, uri, name=None):
+def sticker__delete(context, field, uri, name=None):
     """
     *musicpd.org, sticker section:*
 
@@ -22,7 +22,7 @@ def sticker_delete(context, field, uri, name=None):
 @handle_request(
     r'sticker\ find\ "(?P<field>[^"]+)"\ "(?P<uri>[^"]+)"\ '
     r'"(?P<name>[^"]+)"$')
-def sticker_find(context, field, uri, name):
+def sticker__find(context, field, uri, name):
     """
     *musicpd.org, sticker section:*
 
@@ -38,7 +38,7 @@ def sticker_find(context, field, uri, name):
 @handle_request(
     r'sticker\ get\ "(?P<field>[^"]+)"\ "(?P<uri>[^"]+)"\ '
     r'"(?P<name>[^"]+)"$')
-def sticker_get(context, field, uri, name):
+def sticker__get(context, field, uri, name):
     """
     *musicpd.org, sticker section:*
 
@@ -50,7 +50,7 @@ def sticker_get(context, field, uri, name):
 
 
 @handle_request(r'sticker\ list\ "(?P<field>[^"]+)"\ "(?P<uri>[^"]+)"$')
-def sticker_list(context, field, uri):
+def sticker__list(context, field, uri):
     """
     *musicpd.org, sticker section:*
 
@@ -64,7 +64,7 @@ def sticker_list(context, field, uri):
 @handle_request(
     r'sticker\ set\ "(?P<field>[^"]+)"\ "(?P<uri>[^"]+)"\ '
     r'"(?P<name>[^"]+)"\ "(?P<value>[^"]+)"$')
-def sticker_set(context, field, uri, name, value):
+def sticker__set(context, field, uri, name, value):
     """
     *musicpd.org, sticker section:*
 

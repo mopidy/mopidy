@@ -151,12 +151,12 @@ def playid(context, tlid):
         return _play_minus_one(context)
     tl_tracks = context.core.tracklist.filter(tlid=[tlid]).get()
     if not tl_tracks:
-        raise MpdNoExistError('No such song', command='playid')
+        raise MpdNoExistError('No such song')
     return context.core.playback.play(tl_tracks[0]).get()
 
 
 @handle_request(r'play\ ("?)(?P<songpos>-?\d+)\1$')
-def playpos(context, songpos):
+def play__pos(context, songpos):
     """
     *musicpd.org, playback section:*
 
@@ -184,7 +184,7 @@ def playpos(context, songpos):
         tl_track = context.core.tracklist.slice(songpos, songpos + 1).get()[0]
         return context.core.playback.play(tl_track).get()
     except IndexError:
-        raise MpdArgError('Bad song index', command='play')
+        raise MpdArgError('Bad song index')
 
 
 def _play_minus_one(context):
@@ -325,7 +325,7 @@ def seek(context, songpos, seconds):
     """
     tl_track = context.core.playback.current_tl_track.get()
     if context.core.tracklist.index(tl_track).get() != int(songpos):
-        playpos(context, songpos)
+        play__pos(context, songpos)
     context.core.playback.seek(int(seconds) * 1000).get()
 
 

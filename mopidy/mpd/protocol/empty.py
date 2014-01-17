@@ -7,4 +7,4 @@ from mopidy.mpd.exceptions import MpdNoCommand
 @handle_request(r'[\ ]*$')
 def empty(context):
     """The original MPD server returns an error on an empty request."""
-    raise MpdNoCommand
+    raise MpdNoCommand()

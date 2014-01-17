@@ -30,7 +30,7 @@ def kill(context):
 
 
 @handle_request(r'password\ "(?P<password>[^"]+)"$', auth_required=False)
-def password_(context, password):
+def password(context, password):
     """
     *musicpd.org, connection section:*
 
@@ -42,7 +42,7 @@ def password_(context, password):
     if password == context.config['mpd']['password']:
         context.dispatcher.authenticated = True
     else:
-        raise MpdPasswordError('incorrect password', command='password')
+        raise MpdPasswordError('incorrect password')
 
 
 @handle_request(r'ping$', auth_required=False)

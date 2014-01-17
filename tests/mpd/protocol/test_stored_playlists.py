@@ -189,28 +189,28 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_playlistadd(self):
         self.sendRequest('playlistadd "name" "dummy:a"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {playlistadd} Not implemented')
 
     def test_playlistclear(self):
         self.sendRequest('playlistclear "name"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {playlistclear} Not implemented')
 
     def test_playlistdelete(self):
         self.sendRequest('playlistdelete "name" "5"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {playlistdelete} Not implemented')
 
     def test_playlistmove(self):
         self.sendRequest('playlistmove "name" "5" "10"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {playlistmove} Not implemented')
 
     def test_rename(self):
         self.sendRequest('rename "old_name" "new_name"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {rename} Not implemented')
 
     def test_rm(self):
         self.sendRequest('rm "name"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {rm} Not implemented')
 
     def test_save(self):
         self.sendRequest('save "name"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {save} Not implemented')

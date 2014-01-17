@@ -253,7 +253,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
 
     def test_playlistfind(self):
         self.sendRequest('playlistfind "tag" "needle"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {playlistfind} Not implemented')
 
     def test_playlistfind_by_filename_not_in_tracklist(self):
         self.sendRequest('playlistfind "filename" "file:///dev/null"')
@@ -391,11 +391,11 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
 
     def test_playlistsearch(self):
         self.sendRequest('playlistsearch "any" "needle"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {playlistsearch} Not implemented')
 
     def test_playlistsearch_without_quotes(self):
         self.sendRequest('playlistsearch any "needle"')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {playlistsearch} Not implemented')
 
     def test_plchanges_with_lower_version_returns_changes(self):
         self.core.tracklist.add(

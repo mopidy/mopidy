@@ -36,7 +36,7 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
     def test_crossfade(self):
         self.sendRequest('crossfade "10"')
-        self.assertInResponse('ACK [0@0] {} Not implemented')
+        self.assertInResponse('ACK [0@0] {crossfade} Not implemented')
 
     def test_random_off(self):
         self.sendRequest('random "0"')
@@ -135,15 +135,15 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
     def test_replay_gain_mode_off(self):
         self.sendRequest('replay_gain_mode "off"')
-        self.assertInResponse('ACK [0@0] {} Not implemented')
+        self.assertInResponse('ACK [0@0] {replay_gain_mode} Not implemented')
 
     def test_replay_gain_mode_track(self):
         self.sendRequest('replay_gain_mode "track"')
-        self.assertInResponse('ACK [0@0] {} Not implemented')
+        self.assertInResponse('ACK [0@0] {replay_gain_mode} Not implemented')
 
     def test_replay_gain_mode_album(self):
         self.sendRequest('replay_gain_mode "album"')
-        self.assertInResponse('ACK [0@0] {} Not implemented')
+        self.assertInResponse('ACK [0@0] {replay_gain_mode} Not implemented')
 
     def test_replay_gain_status_default(self):
         self.sendRequest('replay_gain_status')

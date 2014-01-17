@@ -165,7 +165,12 @@ class MpdDispatcher(object):
 
     def _call_handler(self, request):
         (handler, kwargs) = self._find_handler(request)
-        return handler(self.context, **kwargs)
+        try:
+            return handler(self.context, **kwargs)
+        except exceptions.MpdAckError as exc:
+            if exc.command is None:
+                exc.command = handler.__name__.split('__', 1)[0]
+            raise
 
     def _find_handler(self, request):
         for pattern in protocol.request_handlers:

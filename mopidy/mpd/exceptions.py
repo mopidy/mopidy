@@ -21,7 +21,7 @@ class MpdAckError(MopidyException):
 
     error_code = 0
 
-    def __init__(self, message='', index=0, command=''):
+    def __init__(self, message='', index=0, command=None):
         super(MpdAckError, self).__init__(message, index, command)
         self.message = message
         self.index = index
@@ -50,6 +50,7 @@ class MpdPermissionError(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdPermissionError, self).__init__(*args, **kwargs)
+        assert self.command is not None, 'command must be given explicitly'
         self.message = 'you don\'t have permission for "%s"' % self.command
 
 
@@ -58,12 +59,14 @@ class MpdUnknownCommand(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
+        assert self.command is not None, 'command must be given explicitly'
         self.message = 'unknown command "%s"' % self.command
         self.command = ''
 
 
 class MpdNoCommand(MpdUnknownCommand):
     def __init__(self, *args, **kwargs):
+        kwargs['command'] = ''
         super(MpdNoCommand, self).__init__(*args, **kwargs)
         self.message = 'No command given'
 

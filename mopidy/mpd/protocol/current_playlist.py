@@ -44,7 +44,7 @@ def add(context, uri):
         tracks.extend(future.get())
 
     if not tracks:
-        raise MpdNoExistError('directory or file not found', command='add')
+        raise MpdNoExistError('directory or file not found')
 
     context.core.tracklist.add(tracks=tracks)
 
@@ -69,14 +69,14 @@ def addid(context, uri, songpos=None):
     - ``addid ""`` should return an error.
     """
     if not uri:
-        raise MpdNoExistError('No such song', command='addid')
+        raise MpdNoExistError('No such song')
     if songpos is not None:
         songpos = int(songpos)
     if songpos and songpos > context.core.tracklist.length.get():
-        raise MpdArgError('Bad song index', command='addid')
+        raise MpdArgError('Bad song index')
     tl_tracks = context.core.tracklist.add(uri=uri, at_position=songpos).get()
     if not tl_tracks:
-        raise MpdNoExistError('No such song', command='addid')
+        raise MpdNoExistError('No such song')
     return ('Id', tl_tracks[0].tlid)
 
 
@@ -125,7 +125,7 @@ def deleteid(context, tlid):
     tlid = int(tlid)
     tl_tracks = context.core.tracklist.remove(tlid=[tlid]).get()
     if not tl_tracks:
-        raise MpdNoExistError('No such song', command='deleteid')
+        raise MpdNoExistError('No such song')
 
 
 @handle_request(r'clear$')
@@ -181,7 +181,7 @@ def moveid(context, tlid, to):
     to = int(to)
     tl_tracks = context.core.tracklist.filter(tlid=[tlid]).get()
     if not tl_tracks:
-        raise MpdNoExistError('No such song', command='moveid')
+        raise MpdNoExistError('No such song')
     position = context.core.tracklist.index(tl_tracks[0]).get()
     context.core.tracklist.move(position, position + 1, to)
 
@@ -239,7 +239,7 @@ def playlistid(context, tlid=None):
         tlid = int(tlid)
         tl_tracks = context.core.tracklist.filter(tlid=[tlid]).get()
         if not tl_tracks:
-            raise MpdNoExistError('No such song', command='playlistid')
+            raise MpdNoExistError('No such song')
         position = context.core.tracklist.index(tl_tracks[0]).get()
         return translator.track_to_mpd_format(tl_tracks[0], position=position)
     else:
@@ -276,7 +276,7 @@ def playlistinfo(context, songpos=None, start=None, end=None):
             start = 0
         start = int(start)
         if not (0 <= start <= context.core.tracklist.length.get()):
-            raise MpdArgError('Bad song index', command='playlistinfo')
+            raise MpdArgError('Bad song index')
         if end is not None:
             end = int(end)
             if end > context.core.tracklist.length.get():
@@ -403,7 +403,7 @@ def swapid(context, tlid1, tlid2):
     tl_tracks1 = context.core.tracklist.filter(tlid=[tlid1]).get()
     tl_tracks2 = context.core.tracklist.filter(tlid=[tlid2]).get()
     if not tl_tracks1 or not tl_tracks2:
-        raise MpdNoExistError('No such song', command='swapid')
+        raise MpdNoExistError('No such song')
     position1 = context.core.tracklist.index(tl_tracks1[0]).get()
     position2 = context.core.tracklist.index(tl_tracks2[0]).get()
     swap(context, position1, position2)

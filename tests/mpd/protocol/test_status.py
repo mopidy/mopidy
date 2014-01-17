@@ -8,7 +8,7 @@ from tests.mpd import protocol
 class StatusHandlerTest(protocol.BaseTestCase):
     def test_clearerror(self):
         self.sendRequest('clearerror')
-        self.assertEqualResponse('ACK [0@0] {} Not implemented')
+        self.assertEqualResponse('ACK [0@0] {clearerror} Not implemented')
 
     def test_currentsong(self):
         track = Track()

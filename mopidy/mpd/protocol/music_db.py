@@ -163,7 +163,7 @@ def count(context, mpd_query):
     try:
         query = _query_from_mpd_search_format(mpd_query)
     except ValueError:
-        raise MpdArgError('incorrect arguments', command='count')
+        raise MpdArgError('incorrect arguments')
     results = context.core.library.find_exact(**query).get()
     result_tracks = _get_tracks(results)
     return [
@@ -433,7 +433,7 @@ def listall(context, uri=None):
                 result.append(('file', ref.uri))
 
     if not result:
-        raise MpdNoExistError('Not found', command='listall')
+        raise MpdNoExistError('Not found')
 
     return [('directory', uri)] + result
 
@@ -474,7 +474,7 @@ def listallinfo(context, uri=None):
             result.append(obj)
 
     if not result:
-        raise MpdNoExistError('Not found', command='listallinfo')
+        raise MpdNoExistError('Not found')
 
     return [('directory', uri)] + result
 

@@ -24,7 +24,7 @@ def listplaylist(context, name):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist', command='listplaylist')
+        raise MpdNoExistError('No such playlist')
     return ['file: %s' % t.uri for t in playlist.tracks]
 
 
@@ -44,7 +44,7 @@ def listplaylistinfo(context, name):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist', command='listplaylistinfo')
+        raise MpdNoExistError('No such playlist')
     return playlist_to_mpd_format(playlist)
 
 
@@ -115,7 +115,7 @@ def load(context, name, start=None, end=None):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist', command='load')
+        raise MpdNoExistError('No such playlist')
     if start is not None:
         start = int(start)
     if end is not None:
