@@ -101,25 +101,26 @@ def search(tracks, query=None, uris=None):
             else:
                 q = value.strip().lower()
 
-            uri_filter = lambda t: q in t.uri.lower()
-            track_name_filter = lambda t: q in t.name.lower()
-            album_filter = lambda t: q in getattr(
-                t, 'album', Album()).name.lower()
-            artist_filter = lambda t: filter(
-                lambda a: q in a.name.lower(), t.artists)
+            uri_filter = lambda t: bool(t.uri and q in t.uri.lower())
+            track_name_filter = lambda t: bool(t.name and q in t.name.lower())
+            album_filter = lambda t: bool(
+                t.album and t.album.name and q in t.album.name.lower())
+            artist_filter = lambda t: bool(filter(
+                lambda a: bool(a.name and q in a.name.lower()), t.artists))
             albumartist_filter = lambda t: any([
-                q in a.name.lower()
+                a.name and q in a.name.lower()
                 for a in getattr(t.album, 'artists', [])])
             composer_filter = lambda t: any([
-                q in a.name.lower()
+                a.name and q in a.name.lower()
                 for a in getattr(t, 'composers', [])])
             performer_filter = lambda t: any([
-                q in a.name.lower()
+                a.name and q in a.name.lower()
                 for a in getattr(t, 'performers', [])])
             track_no_filter = lambda t: q == t.track_no
-            genre_filter = lambda t: t.genre and q in t.genre.lower()
-            date_filter = lambda t: t.date and t.date.startswith(q)
-            comment_filter = lambda t: t.comment and q in t.comment.lower()
+            genre_filter = lambda t: bool(t.genre and q in t.genre.lower())
+            date_filter = lambda t: bool(t.date and t.date.startswith(q))
+            comment_filter = lambda t: bool(
+                t.comment and q in t.comment.lower())
             any_filter = lambda t: (
                 uri_filter(t) or
                 track_name_filter(t) or

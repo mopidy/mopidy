@@ -24,6 +24,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         Artist(name='artist4'),
         Artist(name='artist5'),
         Artist(name='artist6'),
+        Artist(),
     ]
 
     albums = [
@@ -31,6 +32,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         Album(name='album2', artists=[artists[1]]),
         Album(name='album3', artists=[artists[2]]),
         Album(name='album4'),
+        Album(artists=[artists[-1]]),
     ]
 
     tracks = [
@@ -57,6 +59,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
         Track(
             uri='local:track:path6', name='track6', genre='genre2',
             album=albums[3], length=4000, performers=[artists[5]]),
+        Track(uri='local:track:nameless', album=albums[-1]),
     ]
 
     config = {
