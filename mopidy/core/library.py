@@ -33,7 +33,7 @@ class LibraryController(object):
         """
         Browse directories and tracks at the given ``uri``.
 
-        ``uri`` is a sring which represents some directory belonging to a
+        ``uri`` is a string which represents some directory belonging to a
         backend. To get the intial root directories for backends pass None as
         the URI.
 
