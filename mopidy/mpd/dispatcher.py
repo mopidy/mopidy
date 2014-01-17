@@ -297,3 +297,19 @@ class MpdContext(object):
         if uri not in self._playlist_name_from_uri:
             self.refresh_playlists_mapping()
         return self._playlist_name_from_uri[uri]
+
+    # TODO: consider making context.browse(path) which uses this internally.
+    # advantage would be that all browse requests then go through the same code
+    # and we could prebuild/cache path->uri relationships instead of having to
+    # look them up all the time.
+    def directory_path_to_uri(self, path):
+        parts = re.findall(r'[^/]+', path)
+        uri = None
+        for part in parts:
+            for ref in self.core.library.browse(uri).get():
+                if ref.type == ref.DIRECTORY and ref.name == part:
+                    uri = ref.uri
+                    break
+            else:
+                raise exceptions.MpdNoExistError()
+        return uri

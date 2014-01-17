@@ -1,12 +1,9 @@
 from __future__ import unicode_literals
 
 import collections
-import re
 import urlparse
 
 import pykka
-
-from mopidy.models import Ref
 
 
 class LibraryController(object):
@@ -32,15 +29,16 @@ class LibraryController(object):
                 (b, None) for b in self.backends.with_library.values()])
         return backends_to_uris
 
-    def browse(self, path):
+    def browse(self, uri):
         """
-        Browse directories and tracks at the given ``path``.
+        Browse directories and tracks at the given ``uri``.
 
-        ``path`` is a string that always starts with "/". It points to a
-        directory in Mopidy's virtual file system.
+        ``uri`` is a sring which represents some directory belonging to a
+        backend. To get the intial root directories for backends pass None as
+        the URI.
 
         Returns a list of :class:`mopidy.models.Ref` objects for the
-        directories and tracks at the given ``path``.
+        directories and tracks at the given ``uri``.
 
         The :class:`~mopidy.models.Ref` objects representing tracks keep the
         track's original URI. A matching pair of objects can look like this::
@@ -49,45 +47,28 @@ class LibraryController(object):
             Ref.track(uri='dummy:/foo.mp3', name='foo')
 
         The :class:`~mopidy.models.Ref` objects representing directories have
-        plain paths, not including any URI schema. For example, the dummy
-        library's ``/bar`` directory is returned like this::
+        backend specific URIs. These are opaque values, so no one but the
+        backend that created them should try and derive any meaning from them.
+        The only valid exception to this is checking the scheme, as it is used
+        to route browse requests to the correct backend.
 
-            Ref.directory(uri='/dummy/bar', name='bar')
+        For example, the dummy library's ``/bar`` directory could be returned
+        like this::
 
-        Note to backend implementors: The ``/dummy`` part of the URI is added
-        by Mopidy core, not the individual backends.
+            Ref.directory(uri='dummy:directory:/bar', name='bar')
 
-        :param path: path to browse
-        :type path: string
+        :param string uri: URI to browse
         :rtype: list of :class:`mopidy.models.Ref`
         """
-        if not path.startswith('/'):
-            return []
+        if uri is None:
+            backends = self.backends.with_library_browse.values()
+            return [b.library.root_directory.get() for b in backends]
 
-        if path == '/':
-            return [
-                Ref.directory(uri='/%s' % name, name=name)
-                for name in self.backends.with_browsable_library.keys()]
-
-        groups = re.match('/(?P<library>[^/]+)(?P<path>.*)', path).groupdict()
-        library_name = groups['library']
-        backend_path = groups['path']
-        if not backend_path.startswith('/'):
-            backend_path = '/%s' % backend_path
-
-        backend = self.backends.with_browsable_library.get(library_name, None)
+        scheme = urlparse.urlparse(uri).scheme
+        backend = self.backends.with_library_browse.get(scheme)
         if not backend:
             return []
-
-        refs = backend.library.browse(backend_path).get()
-        result = []
-        for ref in refs:
-            if ref.type == Ref.DIRECTORY:
-                uri = '/'.join(['', library_name, ref.uri.lstrip('/')])
-                result.append(ref.copy(uri=uri))
-            else:
-                result.append(ref)
-        return result
+        return backend.library.browse(uri).get()
 
     def find_exact(self, query=None, uris=None, **kwargs):
         """

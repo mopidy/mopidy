@@ -37,6 +37,9 @@ class Backend(object):
     def has_library(self):
         return self.library is not None
 
+    def has_library_browse(self):
+        return self.has_library() and self.library.root_directory is not None
+
     def has_playback(self):
         return self.playback is not None
 
@@ -52,9 +55,12 @@ class LibraryProvider(object):
 
     pykka_traversable = True
 
-    root_directory_name = None
+    root_directory = None
     """
-    Name of the library's root directory in Mopidy's virtual file system.
+    :class:`models.Ref.directory` instance with a URI and name set
+    representing the root of this library's browse tree. URIs must
+    use one of the schemes supported by the backend, and name should
+    be set to a human friendly value.
 
     *MUST be set by any class that implements :meth:`LibraryProvider.browse`.*
     """

@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
-from mopidy import backend
+from mopidy import backend, models
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 class LocalLibraryProvider(backend.LibraryProvider):
     """Proxy library that delegates work to our active local library."""
 
-    root_directory_name = 'local'
+    root_directory = models.Ref.directory(uri=b'local:directory',
+                                          name='Local media')
 
     def __init__(self, backend, library):
         super(LocalLibraryProvider, self).__init__(backend)

@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 import pykka
 
 from mopidy import backend
-from mopidy.models import Playlist, SearchResult
+from mopidy.models import Playlist, Ref, SearchResult
 
 
 def create_dummy_backend_proxy(config=None, audio=None):
@@ -28,7 +28,7 @@ class DummyBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class DummyLibraryProvider(backend.LibraryProvider):
-    root_directory_name = 'dummy'
+    root_directory = Ref.directory(uri='dummy:/', name='dummy')
 
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)

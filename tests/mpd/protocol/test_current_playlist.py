@@ -27,7 +27,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
     def test_add_with_empty_uri_should_not_add_anything_and_ok(self):
         self.backend.library.dummy_library = [Track(uri='dummy:/a', name='a')]
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a')]}
 
         self.sendRequest('add ""')
         self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
@@ -35,13 +35,13 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
 
     def test_add_with_library_should_recurse(self):
         tracks = [Track(uri='dummy:/a', name='a'),
-                  Track(uri='dummy:/b', name='b')]
+                  Track(uri='dummy:/foo/b', name='b')]
 
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a'),
-                  Ref.directory(uri='/foo')],
-            '/foo': [Ref.track(uri='dummy:/b', name='b')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('add "/dummy"')
         self.assertEqual(self.core.tracklist.tracks.get(), tracks)
@@ -50,7 +50,7 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
     def test_add_root_should_not_add_anything_and_ok(self):
         self.backend.library.dummy_library = [Track(uri='dummy:/a', name='a')]
         self.backend.library.dummy_browse_result = {
-            '/': [Ref.track(uri='dummy:/a', name='a')]}
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a')]}
 
         self.sendRequest('add "/"')
         self.assertEqual(len(self.core.tracklist.tracks.get()), 0)

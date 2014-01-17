@@ -33,6 +33,13 @@ def path_to_local_track_uri(relpath):
     return b'local:track:%s' % urllib.quote(relpath)
 
 
+def path_to_local_directory_uri(relpath):
+    """Convert path relative to :confval:`local/media_dir` directory URI."""
+    if isinstance(relpath, unicode):
+        relpath = relpath.encode('utf-8')
+    return b'local:directory:%s' % urllib.quote(relpath)
+
+
 def m3u_extinf_to_track(line):
     """Convert extended M3U directive to track template."""
     m = M3U_EXTINF_RE.match(line)

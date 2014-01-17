@@ -1,11 +1,20 @@
 from __future__ import unicode_literals
 
+import re
 import shlex
 
 from mopidy.mpd.exceptions import MpdArgError
 from mopidy.models import TlTrack
 
 # TODO: special handling of local:// uri scheme
+normalize_path_re = re.compile(r'[^/]+')
+
+
+def normalize_path(path, relative=False):
+    parts = normalize_path_re.findall(path or '')
+    if not relative:
+        parts.insert(0, '')
+    return '/'.join(parts)
 
 
 def track_to_mpd_format(track, position=None):

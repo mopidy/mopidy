@@ -27,8 +27,12 @@ def add(context, uri):
     if tl_tracks:
         return
 
-    if not uri.startswith('/'):
-        uri = '/%s' % uri
+    try:
+        uri = context.directory_path_to_uri(translator.normalize_path(uri))
+    except MpdNoExistError as e:
+        e.command = 'add'
+        e.message = 'directory or file not found'
+        raise
 
     browse_futures = [context.core.library.browse(uri)]
     lookup_futures = []

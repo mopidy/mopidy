@@ -49,41 +49,31 @@ class _BrowseCache(object):
     splitpath_re = re.compile(r'([^/]+)')
 
     def __init__(self, uris):
-        """Create a dictionary tree for quick browsing.
+        # {parent_uri: {uri: ref}}
+        self._cache = {}
 
-        {'foo': {'bar': {None: [ref1, ref2]},
-                 'baz': {},
-                  None: [ref3]}}
-        """
-        self._root = collections.OrderedDict()
-
-        for uri in uris:
-            path = translator.local_track_uri_to_path(uri, b'/')
+        for track_uri in uris:
+            path = translator.local_track_uri_to_path(track_uri, b'/')
             parts = self.splitpath_re.findall(
                 path.decode(self.encoding, 'replace'))
-            filename = parts.pop()
-            node = self._root
-            for part in parts:
-                node = node.setdefault(part, collections.OrderedDict())
-            ref = models.Ref.track(uri=uri, name=filename)
-            node.setdefault(None, []).append(ref)
+            track_ref = models.Ref.track(uri=track_uri, name=parts.pop())
 
-    def lookup(self, path):
-        results = []
-        node = self._root
+            parent = 'local:directory'
+            for i in range(len(parts)):
+                self._cache.setdefault(parent, collections.OrderedDict())
 
-        for part in self.splitpath_re.findall(path):
-            node = node.get(part, {})
+                directory = '/'.join(parts[:i+1])
+                dir_uri = translator.path_to_local_directory_uri(directory)
+                dir_ref = models.Ref.directory(uri=dir_uri, name=parts[i])
+                self._cache[parent][dir_uri] = dir_ref
 
-        for key, value in node.items():
-            if key is not None:
-                uri = os.path.join(path, key)
-                results.append(models.Ref.directory(uri=uri, name=key))
+                parent = dir_uri
 
-        # Get tracks afterwards to ensure ordering.
-        results.extend(node.get(None, []))
+            self._cache.setdefault(parent, collections.OrderedDict())
+            self._cache[parent][track_uri] = track_ref
 
-        return results
+    def lookup(self, uri):
+        return self._cache.get(uri, {}).values()
 
 
 class JsonLibrary(local.Library):
