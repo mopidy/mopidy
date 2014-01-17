@@ -33,9 +33,9 @@ class LibraryController(object):
         """
         Browse directories and tracks at the given ``uri``.
 
-        ``uri`` is a bytestring which represents some directory belonging to
-        a backend. To get the intial root directories for backends pass None
-        as the URI.
+        ``uri`` is a sring which represents some directory belonging to a
+        backend. To get the intial root directories for backends pass None as
+        the URI.
 
         Returns a list of :class:`mopidy.models.Ref` objects for the
         directories and tracks at the given ``uri``.
