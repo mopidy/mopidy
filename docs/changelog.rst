@@ -68,6 +68,11 @@ guys. Thanks to everyone that has contributed!
   by backends that wants to expose directories of tracks in Mopidy's virtual
   file system.
 
+**Frontend API**
+
+- The dummy backend used for testing many frontends have moved from
+  :mod:`mopidy.backends.dummy` to :mod:`mopidy.backend.dummy`.
+
 **Commands**
 
 - Reduce amount of logging from dependencies when using :option:`mopidy -v`.

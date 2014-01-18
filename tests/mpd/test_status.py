@@ -5,12 +5,11 @@ import unittest
 import pykka
 
 from mopidy import core
+from mopidy.backend import dummy
 from mopidy.core import PlaybackState
 from mopidy.models import Track
 from mopidy.mpd import dispatcher
 from mopidy.mpd.protocol import status
-
-from tests import dummy_backend
 
 PAUSED = PlaybackState.PAUSED
 PLAYING = PlaybackState.PLAYING
@@ -22,7 +21,7 @@ STOPPED = PlaybackState.STOPPED
 
 class StatusHandlerTest(unittest.TestCase):
     def setUp(self):
-        self.backend = dummy_backend.create_dummy_backend_proxy()
+        self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = dispatcher.MpdDispatcher(core=self.core)
         self.context = self.dispatcher.context

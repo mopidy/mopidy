@@ -6,15 +6,14 @@ import unittest
 import pykka
 
 from mopidy import core
+from mopidy.backend import dummy
 from mopidy.models import Track
-
-from tests import dummy_backend
 
 
 @mock.patch.object(core.CoreListener, 'send')
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):
-        self.backend = dummy_backend.create_dummy_backend_proxy()
+        self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
     def tearDown(self):
