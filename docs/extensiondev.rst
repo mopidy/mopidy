@@ -261,6 +261,7 @@ This is ``mopidy_soundspot/__init__.py``::
 
     from __future__ import unicode_literals
 
+    import logging
     import os
 
     import pygst
@@ -272,6 +273,9 @@ This is ``mopidy_soundspot/__init__.py``::
 
 
     __version__ = '0.1'
+
+    # If you need to log, use loggers named after the current Python module
+    logger = logging.getLogger(__name__)
 
 
     class Extension(ext.Extension):
