@@ -7,6 +7,24 @@ This changelog is used to track all major changes to Mopidy.
 v0.18.0 (UNRELEASED)
 ====================
 
+The focus of 0.18 have been on two fronts: the local library and browsing.
+
+First, the local library's old tag cache file used for storing the track
+metadata scanned from your music collection has been replaced with a far
+simpler implementation using JSON as the storage format. At the same time, the
+local library have been made replaceable by extensions, so you can now create
+extensions that use your favorite database to store the metadata.
+
+Second, we've finally implemented the long awaited "file system" browsing
+feature that you know from MPD. It is supported by both the MPD frontend and
+the local and Spotify backends. It is also used by the new Mopidy-Dirble
+extension to provide you with a directory of Internet radio stations from all
+over the world.
+
+Since the release of 0.17, we've closed or merged 47 issues and pull requests
+through about 270 commits by :ref:`11 people <authors>`, including six new
+guys. Thanks to everyone that has contributed!
+
 **Core API**
 
 - Add :meth:`mopidy.core.Core.version` for HTTP clients to manage compatibility
@@ -21,7 +39,7 @@ v0.18.0 (UNRELEASED)
   implementing :meth:`mopidy.backend.LibraryProvider.browse`.
 
 - Events emitted on play/stop, pause/resume, next/previous and on end of track
-  has been cleaned up to work consistenly. See the message of
+  has been cleaned up to work consistently. See the message of
   :commit:`1d108752f6` for the full details. (Fixes: :issue:`629`)
 
 **Backend API**
@@ -88,6 +106,12 @@ v0.18.0 (UNRELEASED)
   else than the default 100%. (Fixes: :issue:`633`)
 
 **Local backend**
+
+.. note::
+
+    After upgrading to Mopidy 0.18 you must run ```mopidy local scan`` to
+    reindex your local music collection. This is due to the change of storage
+    format.
 
 - Added support for browsing local directories in Mopidy's virtual file system.
 
