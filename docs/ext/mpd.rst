@@ -10,7 +10,7 @@ Mopidy and enabled by default.
 
 .. warning::
 
-    As a simple security measure, the HTTP server is by default only available
+    As a simple security measure, the MPD server is by default only available
     from localhost. To make it available from other computers, change the
     :confval:`mpd/hostname` config value. Before you do so, note that the MPD
     server does not support any form of encryption and only a single clear
