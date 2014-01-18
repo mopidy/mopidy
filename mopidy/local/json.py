@@ -8,6 +8,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 
 import mopidy
 from mopidy import local, models
@@ -76,6 +77,20 @@ class _BrowseCache(object):
         return self._cache.get(uri, {}).values()
 
 
+# TODO: make this available to other code?
+class DebugTimer(object):
+    def __init__(self, msg):
+        self.msg = msg
+        self.start = None
+
+    def __enter__(self):
+        self.start = time.time()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        duration = (time.time() - self.start) * 1000
+        logger.debug('%s: %dms', self.msg, duration)
+
+
 class JsonLibrary(local.Library):
     name = b'json'
 
@@ -86,16 +101,18 @@ class JsonLibrary(local.Library):
         self._json_file = os.path.join(
             config['local']['data_dir'], b'library.json.gz')
 
-    def browse(self, path):
+    def browse(self, uri):
         if not self._browse_cache:
             return []
-        return self._browse_cache.lookup(path)
+        return self._browse_cache.lookup(uri)
 
     def load(self):
-        logger.debug('Loading json library from %s', self._json_file)
-        library = load_library(self._json_file)
-        self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
-        self._browse_cache = _BrowseCache(sorted(self._tracks))
+        logger.debug('Loading library: %s', self._json_file)
+        with DebugTimer('Loading tracks'):
+            library = load_library(self._json_file)
+            self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
+        with DebugTimer('Building browse cache'):
+            self._browse_cache = _BrowseCache(sorted(self._tracks.keys()))
         return len(self._tracks)
 
     def lookup(self, uri):
