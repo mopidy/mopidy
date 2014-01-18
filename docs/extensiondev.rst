@@ -299,10 +299,10 @@ This is ``mopidy_soundspot/__init__.py``::
             return SoundspotCommand()
 
         def validate_environment(self):
-            try:
-                import pysoundspot
-            except ImportError as e:
-                raise exceptions.ExtensionError('pysoundspot library not found', e)
+            # Any manual checks of the environment to fail early.
+            # Dependencies described by setup.py are checked by Mopidy, so you
+            # should not check their presence here.
+            pass
 
         def setup(self, registry):
             # You will typically only do one of the following things in a
