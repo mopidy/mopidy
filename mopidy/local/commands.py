@@ -144,10 +144,14 @@ class _Progress(object):
 
     def increment(self):
         self.count += 1
-        return self.count % self.batch_size == 0
+        return self.batch_size and self.count % self.batch_size == 0
 
     def log(self):
         duration = time.time() - self.start
-        remainder = duration / self.count * (self.total - self.count)
-        logger.info('Scanned %d of %d files in %ds, ~%ds left.',
-                    self.count, self.total, duration, remainder)
+        if self.count >= self.total or not self.count:
+            logger.info('Scanned %d of %d files in %ds.',
+                        self.count, self.total, duration)
+        else:
+            remainder = duration / self.count * (self.total - self.count)
+            logger.info('Scanned %d of %d files in %ds, ~%ds left.',
+                        self.count, self.total, duration, remainder)

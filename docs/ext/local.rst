@@ -90,6 +90,7 @@ See :ref:`config` for general help on configuring Mopidy.
 
     Number of tracks to wait before telling library it should try and store
     its progress so far. Some libraries might not respect this setting.
+    Set this to zero to disable flushing.
 
 .. confval:: local/excluded_file_extensions
 
