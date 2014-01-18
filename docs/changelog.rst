@@ -109,7 +109,7 @@ guys. Thanks to everyone that has contributed!
 
 .. note::
 
-    After upgrading to Mopidy 0.18 you must run ```mopidy local scan`` to
+    After upgrading to Mopidy 0.18 you must run ``mopidy local scan`` to
     reindex your local music collection. This is due to the change of storage
     format.
 
