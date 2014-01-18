@@ -50,8 +50,8 @@ class _BrowseCache(object):
     splitpath_re = re.compile(r'([^/]+)')
 
     def __init__(self, uris):
-        # {parent_uri: {uri: ref}}
-        self._cache = {}
+        # TODO: local.ROOT_DIRECTORY_URI
+        self._cache = {'local:directory': collections.OrderedDict()}
 
         for track_uri in uris:
             path = translator.local_track_uri_to_path(track_uri, b'/')
@@ -59,19 +59,36 @@ class _BrowseCache(object):
                 path.decode(self.encoding, 'replace'))
             track_ref = models.Ref.track(uri=track_uri, name=parts.pop())
 
-            parent = 'local:directory'
-            for i in range(len(parts)):
-                self._cache.setdefault(parent, collections.OrderedDict())
-
+            # Look for our parents backwards as this is faster than having to
+            # do a complete search for each add.
+            parent_uri = None
+            child = None
+            for i in reversed(range(len(parts))):
                 directory = '/'.join(parts[:i+1])
-                dir_uri = translator.path_to_local_directory_uri(directory)
-                dir_ref = models.Ref.directory(uri=dir_uri, name=parts[i])
-                self._cache[parent][dir_uri] = dir_ref
+                uri = translator.path_to_local_directory_uri(directory)
+                # First dir we process is our parent
+                if not parent_uri:
+                    parent_uri = uri
 
-                parent = dir_uri
+                # We found ourselves and we exist, done.
+                if uri in self._cache:
+                    break
 
-            self._cache.setdefault(parent, collections.OrderedDict())
-            self._cache[parent][track_uri] = track_ref
+                # Initialize ourselves, store child if present, and add
+                # ourselves as child for next loop.
+                self._cache[uri] = collections.OrderedDict()
+                if child:
+                    self._cache[uri][child.uri] = child
+                child = models.Ref.directory(uri=uri, name=parts[i])
+            else:
+                # Loop completed, so final child needs to be added to root.
+                if child:
+                    self._cache['local:directory'][child.uri] = child
+                # If no parent was set we belong in the root.
+                if not parent_uri:
+                    parent_uri = 'local:directory'
+
+            self._cache[parent_uri][track_uri] = track_ref
 
     def lookup(self, uri):
         return self._cache.get(uri, {}).values()
@@ -92,7 +109,7 @@ class DebugTimer(object):
 
 
 class JsonLibrary(local.Library):
-    name = b'json'
+    name = 'json'
 
     def __init__(self, config):
         self._tracks = {}
