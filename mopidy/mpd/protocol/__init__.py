@@ -12,7 +12,8 @@ implement our own MPD server which is compatible with the numerous existing
 
 from __future__ import unicode_literals
 
-from collections import namedtuple
+import collections
+import inspect
 import re
 
 from mopidy.utils import formatting
@@ -26,7 +27,7 @@ LINE_TERMINATOR = '\n'
 #: The MPD protocol version is 0.17.0.
 VERSION = '0.17.0'
 
-MpdCommand = namedtuple('MpdCommand', ['name', 'auth_required'])
+MpdCommand = collections.namedtuple('MpdCommand', ['name', 'auth_required'])
 
 #: Set of all available commands, represented as :class:`MpdCommand` objects.
 mpd_commands = set()
@@ -133,3 +134,63 @@ def tokenize(line):
         result.append(unquoted or UNESCAPE_RE.sub(r'\g<1>', quoted))
 
     return result
+
+
+def integer(value):
+    if value is None:
+        raise ValueError('None is not a valid integer')
+    return int(value)
+
+
+def boolean(value):
+    if value in ('1', '0'):
+        return bool(int(value))
+    raise ValueError('%r is not 0 or 1' % value)
+
+
+class Commands(object):
+    def __init__(self):
+        self.handlers = {}
+
+    def add(self, command, **validators):
+        def wrapper(func):
+            if command in self.handlers:
+                raise Exception('%s already registered' % command)
+
+            args, varargs, keywords, defaults = inspect.getargspec(func)
+            defaults = dict(zip(args[-len(defaults or []):], defaults or []))
+
+            if not args and not varargs:
+                raise TypeError('Handler must accept at least one argument.')
+
+            if len(args) > 1 and varargs:
+                raise TypeError(
+                    '*args may not be combined with regular argmuments')
+
+            if not set(validators.keys()).issubset(args):
+                raise TypeError('Validator for non-existent arg passed')
+
+            if keywords:
+                raise TypeError('**kwargs are not permitted')
+
+            def validate(*args, **kwargs):
+                if varargs:
+                    return func(*args, **kwargs)
+                callargs = inspect.getcallargs(func, *args, **kwargs)
+                for key, value in callargs.items():
+                    default = defaults.get(key, object())
+                    if key in validators and value != default:
+                        callargs[key] = validators[key](value)
+                return func(**callargs)
+
+            self.handlers[command] = validate
+            return func
+        return wrapper
+
+    def call(self, args, context=None):
+        if not args:
+            raise TypeError('No args provided')
+        command = args.pop(0)
+        if command not in self.handlers:
+            raise LookupError('Unknown command')
+        return self.handlers[command](context, *args)
