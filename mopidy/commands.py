@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import argparse
 import collections
@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 
+import glib
 import gobject
 
 from mopidy import config as config_lib
@@ -13,7 +14,12 @@ from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.utils import deps, process, versioning
 
-logger = logging.getLogger('mopidy.commands')
+logger = logging.getLogger(__name__)
+
+_default_config = []
+for base in glib.get_system_config_dirs() + (glib.get_user_config_dir(),):
+    _default_config.append(os.path.join(base, b'mopidy', b'mopidy.conf'))
+DEFAULT_CONFIG = b':'.join(_default_config)
 
 
 def config_files_type(value):
@@ -106,7 +112,7 @@ class Command(object):
 
     def exit(self, status_code=0, message=None, usage=None):
         """Optionally print a message and exit."""
-        print '\n\n'.join(m for m in (usage, message) if m)
+        print('\n\n'.join(m for m in (usage, message) if m))
         sys.exit(status_code)
 
     def format_usage(self, prog=None):
@@ -235,7 +241,7 @@ class RootCommand(Command):
         self.add_argument(
             '-v', '--verbose',
             action='count', dest='verbosity_level', default=0,
-            help='more output (debug level)')
+            help='more output (repeat up to 3 times for even more)')
         self.add_argument(
             '--save-debug-log',
             action='store_true', dest='save_debug_log',
@@ -243,7 +249,7 @@ class RootCommand(Command):
         self.add_argument(
             '--config',
             action='store', dest='config_files', type=config_files_type,
-            default=b'$XDG_CONFIG_DIR/mopidy/mopidy.conf', metavar='FILES',
+            default=DEFAULT_CONFIG, metavar='FILES',
             help='config files to use, colon seperated, later files override')
         self.add_argument(
             '-o', '--option',
@@ -251,22 +257,26 @@ class RootCommand(Command):
             type=config_override_type, metavar='OPTIONS',
             help='`section/key=value` values to override config options')
 
-    def run(self, args, config, extensions):
+    def run(self, args, config):
         loop = gobject.MainLoop()
+
+        backend_classes = args.registry['backend']
+        frontend_classes = args.registry['frontend']
+
         try:
             audio = self.start_audio(config)
-            backends = self.start_backends(config, extensions, audio)
+            backends = self.start_backends(config, backend_classes, audio)
             core = self.start_core(audio, backends)
-            self.start_frontends(config, extensions, core)
+            self.start_frontends(config, frontend_classes, core)
             loop.run()
         except KeyboardInterrupt:
             logger.info('Interrupted. Exiting...')
             return
         finally:
             loop.quit()
-            self.stop_frontends(extensions)
+            self.stop_frontends(frontend_classes)
             self.stop_core()
-            self.stop_backends(extensions)
+            self.stop_backends(backend_classes)
             self.stop_audio()
             process.stop_remaining_actors()
 
@@ -274,11 +284,7 @@ class RootCommand(Command):
         logger.info('Starting Mopidy audio')
         return Audio.start(config=config).proxy()
 
-    def start_backends(self, config, extensions, audio):
-        backend_classes = []
-        for extension in extensions:
-            backend_classes.extend(extension.get_backend_classes())
-
+    def start_backends(self, config, backend_classes, audio):
         logger.info(
             'Starting Mopidy backends: %s',
             ', '.join(b.__name__ for b in backend_classes) or 'none')
@@ -294,11 +300,7 @@ class RootCommand(Command):
         logger.info('Starting Mopidy core')
         return Core.start(audio=audio, backends=backends).proxy()
 
-    def start_frontends(self, config, extensions, core):
-        frontend_classes = []
-        for extension in extensions:
-            frontend_classes.extend(extension.get_frontend_classes())
-
+    def start_frontends(self, config, frontend_classes, core):
         logger.info(
             'Starting Mopidy frontends: %s',
             ', '.join(f.__name__ for f in frontend_classes) or 'none')
@@ -306,21 +308,19 @@ class RootCommand(Command):
         for frontend_class in frontend_classes:
             frontend_class.start(config=config, core=core)
 
-    def stop_frontends(self, extensions):
+    def stop_frontends(self, frontend_classes):
         logger.info('Stopping Mopidy frontends')
-        for extension in extensions:
-            for frontend_class in extension.get_frontend_classes():
-                process.stop_actors_by_class(frontend_class)
+        for frontend_class in frontend_classes:
+            process.stop_actors_by_class(frontend_class)
 
     def stop_core(self):
         logger.info('Stopping Mopidy core')
         process.stop_actors_by_class(Core)
 
-    def stop_backends(self, extensions):
+    def stop_backends(self, backend_classes):
         logger.info('Stopping Mopidy backends')
-        for extension in extensions:
-            for backend_class in extension.get_backend_classes():
-                process.stop_actors_by_class(backend_class)
+        for backend_class in backend_classes:
+            process.stop_actors_by_class(backend_class)
 
     def stop_audio(self):
         logger.info('Stopping Mopidy audio')
@@ -335,7 +335,7 @@ class ConfigCommand(Command):
         self.set(base_verbosity_level=-1)
 
     def run(self, config, errors, extensions):
-        print config_lib.format(config, extensions, errors)
+        print(config_lib.format(config, extensions, errors))
         return 0
 
 
@@ -347,5 +347,5 @@ class DepsCommand(Command):
         self.set(base_verbosity_level=-1)
 
     def run(self):
-        print deps.format_dependency_list()
+        print(deps.format_dependency_list())
         return 0

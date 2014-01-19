@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
-logger = logging.getLogger('mopidy.config.keyring')
+logger = logging.getLogger(__name__)
 
 try:
     import dbus

@@ -20,8 +20,25 @@ Stopping Mopidy
 To stop Mopidy, press ``CTRL+C`` in the terminal where you started Mopidy.
 
 Mopidy will also shut down properly if you send it the TERM signal, e.g. by
-using ``kill``::
+using ``pkill``::
 
-    kill `ps ax | grep mopidy | grep -v grep | cut -d' ' -f1`
+    pkill mopidy
 
-This can be useful e.g. if you create init script for managing Mopidy.
+
+Init scripts
+============
+
+- The ``mopidy`` package at `apt.mopidy.com <http://apt.mopidy.com/>`__ comes
+  with an `sysvinit init script
+  <https://github.com/mopidy/mopidy/blob/debian/debian/mopidy.init>`_.
+
+- The ``mopidy`` package in `Arch Linux AUR
+  <https://aur.archlinux.org/packages/mopidy>`__ comes with a systemd init
+  script.
+
+- A blog post by Benjamin Guillet explains how to `Daemonize Mopidy and Launch
+  It at Login on OS X
+  <http://www.benjaminguillet.com/blog/2013/08/16/launch-mopidy-at-login-on-os-x/>`_.
+
+- Issue :issue:`266` contains a bunch of init scripts for Mopidy, including
+  Upstart init scripts.

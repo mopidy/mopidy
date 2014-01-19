@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-import pykka
+from mopidy import listener
 
 
-class CoreListener(object):
+class CoreListener(listener.Listener):
     """
     Marker interface for recipients of events sent by the core actor.
 
@@ -17,9 +17,7 @@ class CoreListener(object):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of core listener events"""
-        listeners = pykka.ActorRegistry.get_by_class(CoreListener)
-        for listener in listeners:
-            listener.proxy().on_event(event, **kwargs)
+        listener.send_async(CoreListener, event, **kwargs)
 
     def on_event(self, event, **kwargs):
         """

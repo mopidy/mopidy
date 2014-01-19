@@ -12,7 +12,7 @@ import gst
 
 import logging
 
-logger = logging.getLogger('mopidy.audio.mixers.auto')
+logger = logging.getLogger(__name__)
 
 
 # TODO: we might want to add some ranking to the mixers we know about?

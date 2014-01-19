@@ -43,7 +43,7 @@ Options
 
 .. cmdoption:: --verbose, -v
 
-    Show more output: debug level and higher.
+    Show more output. Repeat up to 3 times for even more.
 
 .. cmdoption:: --save-debug-log
 
@@ -82,6 +82,10 @@ Extension commands
 Additionally, extensions can provide extra commands. Run `mopidy --help`
 for a list of what is available on your system and command-specific help.
 Commands for disabled extensions will be listed, but can not be run.
+
+.. cmdoption:: local clear
+
+    Clear local media files from the local library.
 
 .. cmdoption:: local scan
 

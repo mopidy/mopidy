@@ -26,11 +26,11 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 - Twitter: `@mopidy <https://twitter.com/mopidy/>`_
 
 .. image:: https://pypip.in/v/Mopidy/badge.png
-    :target: https://crate.io/packages/Mopidy/
+    :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Latest PyPI version
 
 .. image:: https://pypip.in/d/Mopidy/badge.png
-    :target: https://crate.io/packages/Mopidy/
+    :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Number of PyPI downloads
 
 .. image:: https://travis-ci.org/mopidy/mopidy.png?branch=develop
@@ -40,7 +40,3 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 .. image:: https://coveralls.io/repos/mopidy/mopidy/badge.png?branch=develop
    :target: https://coveralls.io/r/mopidy/mopidy?branch=develop
    :alt: Test coverage
-   
-.. image:: https://sourcegraph.com/api/repos/github.com/mopidy/mopidy/counters/views-24h.png
-   :target: https://sourcegraph.com/github.com/mopidy/mopidy
-   :alt: Mopidy stats

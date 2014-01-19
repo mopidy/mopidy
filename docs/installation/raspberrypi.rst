@@ -9,7 +9,7 @@ January 2013, Mopidy will run with Spotify support on both the armel
 (soft-float) and armhf (hard-float) architectures, which includes the Raspbian
 distribution.
 
-.. image:: /_static/raspberry-pi-by-jwrodgers.jpg
+.. image:: raspberry-pi-by-jwrodgers.jpg
     :width: 640
     :height: 427
 
@@ -54,14 +54,6 @@ you a lot better performance.
 
          echo ipv6 | sudo tee -a /etc/modules
 
-#. Installing Mopidy and its dependencies from `apt.mopidy.com
-   <http://apt.mopidy.com/>`_, as described in :ref:`installation`. In short::
-
-       wget -q -O - http://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
-       sudo apt-get update
-       sudo apt-get install mopidy
-
 #. Since I have a HDMI cable connected, but want the sound on the analog sound
    connector, I have to run::
 
@@ -79,9 +71,15 @@ you a lot better performance.
    command to e.g. ``/etc/rc.local``, which will be executed when the system is
    booting.
 
+#. Install Mopidy and its dependencies from `apt.mopidy.com
+   <http://apt.mopidy.com/>`_, as described in :ref:`installation`.
 
-Fixing audio quality issues
-===========================
+#. Finally, you need to set a couple of :doc:`config values </config>`, and
+   then you're ready to :doc:`run Mopidy </running>`.
+
+
+Appendix: Fixing audio quality issues
+=====================================
 
 As of about April 2013 the following steps should resolve any audio
 issues for HDMI and analog without the use of an external USB sound

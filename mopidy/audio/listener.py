@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-import pykka
+from mopidy import listener
 
 
-class AudioListener(object):
+class AudioListener(listener.Listener):
     """
     Marker interface for recipients of events sent by the audio actor.
 
@@ -17,25 +17,7 @@ class AudioListener(object):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of audio listener events"""
-        listeners = pykka.ActorRegistry.get_by_class(AudioListener)
-        for listener in listeners:
-            listener.proxy().on_event(event, **kwargs)
-
-    def on_event(self, event, **kwargs):
-        """
-        Called on all events.
-
-        *MAY* be implemented by actor. By default, this method forwards the
-        event to the specific event methods.
-
-        For a list of what event names to expect, see the names of the other
-        methods in :class:`AudioListener`.
-
-        :param event: the event name
-        :type event: string
-        :param kwargs: any other arguments to the specific event handlers
-        """
-        getattr(self, event)(**kwargs)
+        listener.send_async(AudioListener, event, **kwargs)
 
     def reached_end_of_stream(self):
         """

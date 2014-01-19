@@ -47,5 +47,12 @@ The following requirements applies to any frontend implementation:
 Frontend implementations
 ========================
 
-* :mod:`mopidy.frontends.http`
-* :mod:`mopidy.frontends.mpd`
+- :ref:`ext-http`
+
+- :ref:`ext-mpd`
+
+- `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_
+
+- `Mopidy-Notifier <https://github.com/sauberfred/mopidy-notifier>`_
+
+- `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_

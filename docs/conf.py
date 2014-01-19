@@ -28,6 +28,12 @@ class Mock(object):
     def __getattr__(self, name):
         if name in ('__file__', '__path__'):
             return '/dev/null'
+        elif name == 'get_system_config_dirs':
+            # glib.get_system_config_dirs()
+            return tuple
+        elif name == 'get_user_config_dir':
+            # glib.get_user_config_dir()
+            return str
         elif (name[0] == name[0].upper()
                 # gst.interfaces.MIXER_TRACK_*
                 and not name.startswith('MIXER_TRACK_')
@@ -91,7 +97,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = 'Mopidy'
-copyright = '2009-2013, Stein Magnus Jodal and contributors'
+copyright = '2009-2014, Stein Magnus Jodal and contributors'
 
 from mopidy.utils.versioning import get_version
 release = get_version()
@@ -155,6 +161,7 @@ man_pages = [
 
 extlinks = {
     'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#'),
+    'commit': ('https://github.com/mopidy/mopidy/commit/%s', 'commit '),
     'mpris': (
         'https://github.com/mopidy/mopidy-mpris/issues/%s', 'mopidy-mpris#'),
 }

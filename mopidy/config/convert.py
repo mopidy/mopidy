@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import io
 import os.path
@@ -10,13 +10,13 @@ from mopidy.utils import path
 
 def load():
     settings_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/settings.py')
-    print 'Checking %s' % settings_file
+    print('Checking %s' % settings_file)
 
     setting_globals = {}
     try:
         execfile(settings_file, setting_globals)
     except Exception as e:
-        print 'Problem loading settings: %s' % e
+        print('Problem loading settings: %s' % e)
     return setting_globals
 
 
@@ -36,6 +36,7 @@ def convert(settings):
 
     helper('audio/mixer', 'MIXER')
     helper('audio/mixer_track', 'MIXER_TRACK')
+    helper('audio/mixer_volume', 'MIXER_VOLUME')
     helper('audio/output', 'OUTPUT')
 
     helper('proxy/hostname', 'SPOTIFY_PROXY_HOST')
@@ -45,7 +46,6 @@ def convert(settings):
 
     helper('local/media_dir', 'LOCAL_MUSIC_PATH')
     helper('local/playlists_dir', 'LOCAL_PLAYLIST_PATH')
-    helper('local/tag_cache_file', 'LOCAL_TAG_CACHE_FILE')
 
     helper('spotify/username', 'SPOTIFY_USERNAME')
     helper('spotify/password', 'SPOTIFY_PASSWORD')
@@ -107,20 +107,20 @@ def main():
         'spotify', 'scrobbler', 'mpd', 'mpris', 'local', 'stream', 'http']
     extensions = [e for e in ext.load_extensions() if e.ext_name in known]
 
-    print b'Converted config:\n'
-    print config_lib.format(config, extensions)
+    print(b'Converted config:\n')
+    print(config_lib.format(config, extensions))
 
     conf_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/mopidy.conf')
     if os.path.exists(conf_file):
-        print '%s exists, exiting.' % conf_file
+        print('%s exists, exiting.' % conf_file)
         sys.exit(1)
 
-    print 'Write new config to %s? [yN]' % conf_file,
+    print('Write new config to %s? [yN]' % conf_file, end=' ')
     if raw_input() != 'y':
-        print 'Not saving, exiting.'
+        print('Not saving, exiting.')
         sys.exit(0)
 
     serialized_config = config_lib.format(config, extensions, display=False)
     with io.open(conf_file, 'wb') as filehandle:
         filehandle.write(serialized_config)
-    print 'Done.'
+    print('Done.')

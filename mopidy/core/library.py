@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from collections import defaultdict
+import collections
 import urlparse
 
 import pykka
@@ -15,19 +15,60 @@ class LibraryController(object):
 
     def _get_backend(self, uri):
         uri_scheme = urlparse.urlparse(uri).scheme
-        return self.backends.with_library_by_uri_scheme.get(uri_scheme, None)
+        return self.backends.with_library.get(uri_scheme, None)
 
     def _get_backends_to_uris(self, uris):
         if uris:
-            backends_to_uris = defaultdict(list)
+            backends_to_uris = collections.defaultdict(list)
             for uri in uris:
                 backend = self._get_backend(uri)
                 if backend is not None:
                     backends_to_uris[backend].append(uri)
         else:
             backends_to_uris = dict([
-                (b, None) for b in self.backends.with_library])
+                (b, None) for b in self.backends.with_library.values()])
         return backends_to_uris
+
+    def browse(self, uri):
+        """
+        Browse directories and tracks at the given ``uri``.
+
+        ``uri`` is a string which represents some directory belonging to a
+        backend. To get the intial root directories for backends pass None as
+        the URI.
+
+        Returns a list of :class:`mopidy.models.Ref` objects for the
+        directories and tracks at the given ``uri``.
+
+        The :class:`~mopidy.models.Ref` objects representing tracks keep the
+        track's original URI. A matching pair of objects can look like this::
+
+            Track(uri='dummy:/foo.mp3', name='foo', artists=..., album=...)
+            Ref.track(uri='dummy:/foo.mp3', name='foo')
+
+        The :class:`~mopidy.models.Ref` objects representing directories have
+        backend specific URIs. These are opaque values, so no one but the
+        backend that created them should try and derive any meaning from them.
+        The only valid exception to this is checking the scheme, as it is used
+        to route browse requests to the correct backend.
+
+        For example, the dummy library's ``/bar`` directory could be returned
+        like this::
+
+            Ref.directory(uri='dummy:directory:/bar', name='bar')
+
+        :param string uri: URI to browse
+        :rtype: list of :class:`mopidy.models.Ref`
+        """
+        if uri is None:
+            backends = self.backends.with_library_browse.values()
+            return [b.library.root_directory.get() for b in backends]
+
+        scheme = urlparse.urlparse(uri).scheme
+        backend = self.backends.with_library_browse.get(scheme)
+        if not backend:
+            return []
+        return backend.library.browse(uri).get()
 
     def find_exact(self, query=None, uris=None, **kwargs):
         """
@@ -103,8 +144,8 @@ class LibraryController(object):
             if backend:
                 backend.library.refresh(uri).get()
         else:
-            futures = [
-                b.library.refresh(uri) for b in self.backends.with_library]
+            futures = [b.library.refresh(uri)
+                       for b in self.backends.with_library.values()]
             pykka.get_all(futures)
 
     def search(self, query=None, uris=None, **kwargs):

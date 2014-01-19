@@ -1,3 +1,5 @@
+.. _config:
+
 *************
 Configuration
 *************
@@ -77,6 +79,15 @@ Core configuration values
         INFO     Audio mixer set to "alsamixer" using track "Master"
 
     Setting the config value to blank turns off volume control.
+
+.. confval:: audio/mixer_volume
+
+    Initial volume for the audio mixer.
+
+    Expects an integer between 0 and 100.
+
+    Setting the config value to blank leaves the audio mixer volume unchanged.
+    For the software mixer blank means 100.
 
 .. confval:: audio/mixer_track
 
@@ -220,7 +231,7 @@ Streaming through SHOUTcast/Icecast
    Currently, Mopidy does not handle end-of-track vs end-of-stream signalling
    in GStreamer correctly. This causes the SHOUTcast stream to be disconnected
    at the end of each track, rendering it quite useless. For further details,
-   see :issue:`492`.
+   see :issue:`492`. You can also try the workaround_ mentioned below.
 
 If you want to play the audio on another computer than the one running Mopidy,
 you can stream the audio from Mopidy through an SHOUTcast or Icecast audio
@@ -236,16 +247,36 @@ server simultaneously. To use the SHOUTcast output, do the following:
 #. You might also need to change the ``shout2send`` default settings, run
    ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
    you want to change ``ip``, ``username``, ``password``, and ``mount``. For
-   example, to set the username and password, use:
+   example:
 
    .. code-block:: ini
 
        [audio]
-       output = lame ! shout2send username="alice" password="secret"
+       output = lame ! shout2send username="alice" password="secret" mount="mopidy"
 
 Other advanced setups are also possible for outputs. Basically, anything you
 can use with the ``gst-launch-0.10`` command can be plugged into
 :confval:`audio/output`.
+
+.. _workaround:
+
+**Workaround for end-of-track issues - fallback streams**
+
+By using a *fallback stream* playing silence, you can somewhat mitigate the
+signalling issues.
+
+Example Icecast configuration:
+
+.. code-block:: xml
+
+    <mount>
+      <mount-name>/mopidy</mount-name>
+      <fallback-mount>/silence.mp3</fallback-mount>
+      <fallback-override>1</fallback-override>
+    </mount>
+
+The ``silence.mp3`` file needs to be placed in the directory defined by
+``<webroot>...</webroot>``.
 
 
 New configuration values

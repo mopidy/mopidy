@@ -8,7 +8,7 @@ from mopidy.audio import PlaybackState
 from . import listener
 
 
-logger = logging.getLogger('mopidy.core')
+logger = logging.getLogger(__name__)
 
 
 class PlaybackController(object):
@@ -28,7 +28,7 @@ class PlaybackController(object):
             return None
         uri = self.current_tl_track.track.uri
         uri_scheme = urlparse.urlparse(uri).scheme
-        return self.backends.with_playback_by_uri_scheme.get(uri_scheme, None)
+        return self.backends.with_playback.get(uri_scheme, None)
 
     ### Properties
 
@@ -160,8 +160,7 @@ class PlaybackController(object):
         next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
         if next_tl_track:
-            self._trigger_track_playback_ended()
-            self.play(next_tl_track)
+            self.change_track(next_tl_track)
         else:
             self.stop(clear_current_track=True)
 
@@ -185,7 +184,6 @@ class PlaybackController(object):
         """
         tl_track = self.core.tracklist.next_track(self.current_tl_track)
         if tl_track:
-            self._trigger_track_playback_ended()
             self.change_track(tl_track)
         else:
             self.stop(clear_current_track=True)
@@ -228,6 +226,9 @@ class PlaybackController(object):
 
         assert tl_track in self.core.tracklist.tl_tracks
 
+        if self.state == PlaybackState.PLAYING:
+            self.stop()
+
         self.current_tl_track = tl_track
         self.state = PlaybackState.PLAYING
         backend = self._get_backend()
@@ -251,7 +252,6 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        self._trigger_track_playback_ended()
         tl_track = self.current_tl_track
         self.change_track(
             self.core.tracklist.previous_track(tl_track), on_error_step=-1)
@@ -307,8 +307,8 @@ class PlaybackController(object):
         if self.state != PlaybackState.STOPPED:
             backend = self._get_backend()
             if not backend or backend.playback.stop().get():
-                self._trigger_track_playback_ended()
                 self.state = PlaybackState.STOPPED
+                self._trigger_track_playback_ended()
         if clear_current_track:
             self.current_tl_track = None
 
