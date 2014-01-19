@@ -4,7 +4,7 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v0.18.0 (UNRELEASED)
+v0.18.0 (2014-01-19)
 ====================
 
 The focus of 0.18 have been on two fronts: the local library and browsing.
@@ -21,8 +21,8 @@ the local and Spotify backends. It is also used by the new Mopidy-Dirble
 extension to provide you with a directory of Internet radio stations from all
 over the world.
 
-Since the release of 0.17, we've closed or merged 47 issues and pull requests
-through about 270 commits by :ref:`11 people <authors>`, including six new
+Since the release of 0.17, we've closed or merged 49 issues and pull requests
+through about 285 commits by :ref:`11 people <authors>`, including six new
 guys. Thanks to everyone that has contributed!
 
 **Core API**
