@@ -1831,9 +1831,8 @@ to this problem.
 - MPD frontend:
 
   - Add support for password authentication. See
-    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` and
-    :ref:`use-mpd-on-a-network` for details on how to use it. (Fixes:
-    :issue:`41`)
+    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` for details on how to use it.
+    (Fixes: :issue:`41`)
 
   - Support ``setvol 50`` without quotes around the argument. Fixes volume
     control in Droid MPD.
