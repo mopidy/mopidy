@@ -8,7 +8,7 @@ import threading
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
-logger = logging.getLogger('mopidy.utils.process')
+logger = logging.getLogger(__name__)
 
 SIGNALS = dict(
     (k, v) for v, k in signal.__dict__.iteritems()

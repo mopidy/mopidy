@@ -9,7 +9,7 @@ import urlparse
 import glib
 
 
-logger = logging.getLogger('mopidy.utils.path')
+logger = logging.getLogger(__name__)
 
 
 XDG_DIRS = {
@@ -119,26 +119,20 @@ def find_files(path):
         path = path.encode('utf-8')
 
     if os.path.isfile(path):
-        if not os.path.basename(path).startswith(b'.'):
-            yield path
-    else:
-        for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
-            for dirname in dirnames:
-                if dirname.startswith(b'.'):
-                    # Skip hidden dirs by modifying dirnames inplace
-                    dirnames.remove(dirname)
+        return
 
-            for filename in filenames:
-                if filename.startswith(b'.'):
-                    # Skip hidden files
-                    continue
+    for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
+        for dirname in dirnames:
+            if dirname.startswith(b'.'):
+                # Skip hidden dirs by modifying dirnames inplace
+                dirnames.remove(dirname)
 
-                yield os.path.join(dirpath, filename)
+        for filename in filenames:
+            if filename.startswith(b'.'):
+                # Skip hidden files
+                continue
 
-
-def find_uris(path):
-    for p in find_files(path):
-        yield path_to_uri(p)
+            yield os.path.relpath(os.path.join(dirpath, filename), path)
 
 
 def check_file_path_is_inside_base_dir(file_path, base_path):

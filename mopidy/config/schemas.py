@@ -54,7 +54,8 @@ class ConfigSchema(collections.OrderedDict):
     def deserialize(self, values):
         """Validates the given ``values`` using the config schema.
 
-         Returns a tuple with cleaned values and errors."""
+        Returns a tuple with cleaned values and errors.
+        """
         errors = {}
         result = {}
 
@@ -71,7 +72,9 @@ class ConfigSchema(collections.OrderedDict):
                 errors[key] = str(e)
 
         for key in self.keys():
-            if key not in result and key not in errors:
+            if isinstance(self[key], types.Deprecated):
+                result.pop(key, None)
+            elif key not in result and key not in errors:
                 result[key] = None
                 errors[key] = 'config key not found.'
 

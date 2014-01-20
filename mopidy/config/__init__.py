@@ -12,7 +12,7 @@ from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
 from mopidy.utils import path, versioning
 
-logger = logging.getLogger('mopidy.config')
+logger = logging.getLogger(__name__)
 
 _logging_schema = ConfigSchema('logging')
 _logging_schema['console_format'] = String()
@@ -25,6 +25,7 @@ _loglevels_schema = LogLevelConfigSchema('loglevels')
 _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()
 _audio_schema['mixer_track'] = String(optional=True)
+_audio_schema['mixer_volume'] = Integer(optional=True, minimum=0, maximum=100)
 _audio_schema['output'] = String()
 _audio_schema['visualizer'] = String(optional=True)
 
@@ -119,8 +120,8 @@ def _load(files, defaults, overrides):
             with io.open(filename, 'rb') as filehandle:
                 parser.readfp(filehandle)
         except configparser.MissingSectionHeaderError as e:
-            logging.warning('%s does not have a config section, not loaded.',
-                            filename)
+            logger.warning('%s does not have a config section, not loaded.',
+                           filename)
         except configparser.ParsingError as e:
             linenos = ', '.join(str(lineno) for lineno, line in e.errors)
             logger.warning(
@@ -167,6 +168,8 @@ def _format(config, comments, schemas, display, disable):
             continue
         output.append(b'[%s]' % bytes(schema.name))
         for key, value in serialized.items():
+            if isinstance(value, types.DeprecatedValue):
+                continue
             comment = bytes(comments.get(schema.name, {}).get(key, ''))
             output.append(b'%s =' % bytes(key))
             if value is not None:

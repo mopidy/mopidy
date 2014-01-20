@@ -1,0 +1,5 @@
+#EXTM3U
+#EXTINF:-1,song1
+song1.mp3
+#EXTINF:60,song2
+song2.mp3

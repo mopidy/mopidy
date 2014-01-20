@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import logging
 import os
@@ -29,7 +29,7 @@ from mopidy import commands, ext
 from mopidy import config as config_lib
 from mopidy.utils import log, path, process, versioning
 
-logger = logging.getLogger('mopidy.main')
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -40,11 +40,13 @@ def main():
     signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
     try:
+        registry = ext.Registry()
+
         root_cmd = commands.RootCommand()
         config_cmd = commands.ConfigCommand()
         deps_cmd = commands.DepsCommand()
 
-        root_cmd.set(extension=None)
+        root_cmd.set(extension=None, registry=registry)
         root_cmd.add_child('config', config_cmd)
         root_cmd.add_child('deps', deps_cmd)
 
@@ -68,7 +70,8 @@ def main():
         if args.verbosity_level:
             verbosity_level += args.verbosity_level
 
-        log.setup_logging(config, verbosity_level, args.save_debug_log)
+        log.setup_logging(
+            config, installed_extensions, verbosity_level, args.save_debug_log)
 
         enabled_extensions = []
         for extension in installed_extensions:
@@ -84,7 +87,6 @@ def main():
                 enabled_extensions.append(extension)
 
         log_extension_info(installed_extensions, enabled_extensions)
-        ext.register_gstreamer_elements(enabled_extensions)
 
         # Config and deps commands are simply special cased for now.
         if args.command == config_cmd:
@@ -108,12 +110,15 @@ def main():
                 args.extension.ext_name)
             return 1
 
+        for extension in enabled_extensions:
+            extension.setup(registry)
+
         # Anything that wants to exit after this point must use
         # mopidy.utils.process.exit_process as actors can have been started.
         try:
-            return args.command.run(args, proxied_config, enabled_extensions)
+            return args.command.run(args, proxied_config)
         except NotImplementedError:
-            print root_cmd.format_help()
+            print(root_cmd.format_help())
             return 1
 
     except KeyboardInterrupt:
@@ -129,7 +134,7 @@ def create_file_structures_and_config(args, extensions):
 
     # Initialize whatever the last config file is with defaults
     config_file = args.config_files[-1]
-    if os.path.exists(config_file):
+    if os.path.exists(path.expand_path(config_file)):
         return
 
     try:
@@ -161,9 +166,9 @@ def log_extension_info(all_extensions, enabled_extensions):
     # TODO: distinguish disabled vs blocked by env?
     enabled_names = set(e.ext_name for e in enabled_extensions)
     disabled_names = set(e.ext_name for e in all_extensions) - enabled_names
-    logging.info(
+    logger.info(
         'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
-    logging.info(
+    logger.info(
         'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
 
 

@@ -28,7 +28,7 @@ setup(
         'Pykka >= 1.1',
     ],
     extras_require={
-        'http': ['cherrypy >= 3.2.2', 'ws4py >= 0.2.3'],
+        'http': ['CherryPy >= 3.2.2', 'ws4py >= 0.2.3'],
     },
     test_suite='nose.collector',
     tests_require=[
@@ -41,10 +41,10 @@ setup(
             'mopidy-convert-config = mopidy.config.convert:main',
         ],
         'mopidy.ext': [
-            'http = mopidy.frontends.http:Extension [http]',
-            'local = mopidy.backends.local:Extension',
-            'mpd = mopidy.frontends.mpd:Extension',
-            'stream = mopidy.backends.stream:Extension',
+            'http = mopidy.http:Extension [http]',
+            'local = mopidy.local:Extension',
+            'mpd = mopidy.mpd:Extension',
+            'stream = mopidy.stream:Extension',
         ],
     },
     classifiers=[

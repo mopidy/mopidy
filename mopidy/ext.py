@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import collections
 import logging
 import pkg_resources
 
@@ -7,7 +8,7 @@ from mopidy import exceptions
 from mopidy import config as config_lib
 
 
-logger = logging.getLogger('mopidy.ext')
+logger = logging.getLogger(__name__)
 
 
 class Extension(object):
@@ -50,43 +51,6 @@ class Extension(object):
         schema['enabled'] = config_lib.Boolean()
         return schema
 
-    def validate_environment(self):
-        """Checks if the extension can run in the current environment
-
-        For example, this method can be used to check if all dependencies that
-        are needed are installed.
-
-        :raises: :class:`~mopidy.exceptions.ExtensionError`
-        :returns: :class:`None`
-        """
-        pass
-
-    def get_frontend_classes(self):
-        """List of frontend actor classes
-
-        Mopidy will take care of starting the actors.
-
-        :returns: list of :class:`pykka.Actor` subclasses
-        """
-        return []
-
-    def get_backend_classes(self):
-        """List of backend actor classes
-
-        Mopidy will take care of starting the actors.
-
-        :returns: list of :class:`~mopidy.backends.base.Backend` subclasses
-        """
-        return []
-
-    def get_library_updaters(self):
-        """List of library updater classes
-
-        :returns: list of
-          :class:`~mopidy.backends.base.BaseLibraryUpdateProvider` subclasses
-        """
-        return []
-
     def get_command(self):
         """Command to expose to command line users running mopidy.
 
@@ -95,21 +59,122 @@ class Extension(object):
         """
         pass
 
-    def register_gstreamer_elements(self):
-        """Hook for registering custom GStreamer elements
+    def validate_environment(self):
+        """Checks if the extension can run in the current environment
 
-        Register custom GStreamer elements by implementing this method.
-        Example::
+        For example, this method can be used to check if all dependencies that
+        are needed are installed. If a problem is found, raise
+        :exc:`~mopidy.exceptions.ExtensionError` with a message explaining the
+        issue.
 
-            def register_gstreamer_elements(self):
+        :raises: :exc:`~mopidy.exceptions.ExtensionError`
+        :returns: :class:`None`
+        """
+        pass
+
+    def setup(self, registry):
+        """
+        Register the extension's components in the extension :class:`Registry`.
+
+        For example, to register a backend::
+
+            def setup(self, registry):
+                from .backend import SoundspotBackend
+                registry.add('backend', SoundspotBackend)
+
+        See :class:`Registry` for a list of registry keys with a special
+        meaning. Mopidy will instantiate and start any classes registered under
+        the ``frontend`` and ``backend`` registry keys.
+
+        This method can also be used for other setup tasks not involving the
+        extension registry. For example, to register custom GStreamer
+        elements::
+
+            def setup(self, registry):
                 from .mixer import SoundspotMixer
                 gobject.type_register(SoundspotMixer)
                 gst.element_register(
                     SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
 
+        :param registry: the extension registry
+        :type registry: :class:`Registry`
+        """
+        for backend_class in self.get_backend_classes():
+            registry.add('backend', backend_class)
+
+        for frontend_class in self.get_frontend_classes():
+            registry.add('frontend', frontend_class)
+
+        self.register_gstreamer_elements()
+
+    def get_frontend_classes(self):
+        """List of frontend actor classes
+
+        .. deprecated:: 0.18
+            Use :meth:`setup` instead.
+
+        :returns: list of :class:`pykka.Actor` subclasses
+        """
+        return []
+
+    def get_backend_classes(self):
+        """List of backend actor classes
+
+        .. deprecated:: 0.18
+            Use :meth:`setup` instead.
+
+        :returns: list of :class:`~mopidy.backend.Backend` subclasses
+        """
+        return []
+
+    def register_gstreamer_elements(self):
+        """Hook for registering custom GStreamer elements.
+
+        .. deprecated:: 0.18
+            Use :meth:`setup` instead.
+
         :returns: :class:`None`
         """
         pass
+
+
+class Registry(collections.Mapping):
+    """Registry of components provided by Mopidy extensions.
+
+    Passed to the :meth:`~Extension.setup` method of all extensions. The
+    registry can be used like a dict of string keys and lists.
+
+    Some keys have a special meaning, including, but not limited to:
+
+    - ``backend`` is used for Mopidy backend classes.
+    - ``frontend`` is used for Mopidy frontend classes.
+    - ``local:library`` is used for Mopidy-Local libraries.
+
+    Extensions can use the registry for allow other to extend the extension
+    itself. For example the ``Mopidy-Local`` use the ``local:library`` key to
+    allow other extensions to register library providers for ``Mopidy-Local``
+    to use. Extensions should namespace custom keys with the extension's
+    :attr:`~Extension.ext_name`, e.g. ``local:foo`` or ``http:bar``.
+    """
+
+    def __init__(self):
+        self._registry = {}
+
+    def add(self, name, cls):
+        """Add a component to the registry.
+
+        Multiple classes can be registered to the same name.
+        """
+        self._registry.setdefault(name, []).append(cls)
+
+    def __getitem__(self, name):
+        return self._registry.setdefault(name, [])
+
+    def __iter__(self):
+        return iter(self._registry)
+
+    def __len__(self):
+        return len(self._registry)
 
 
 def load_extensions():
@@ -130,7 +195,7 @@ def load_extensions():
             'Loaded extension: %s %s', extension.dist_name, extension.version)
 
     names = (e.ext_name for e in installed_extensions)
-    logging.debug('Discovered extensions: %s', ', '.join(names))
+    logger.debug('Discovered extensions: %s', ', '.join(names))
     return installed_extensions
 
 
@@ -166,15 +231,3 @@ def validate_extension(extension):
         return False
 
     return True
-
-
-def register_gstreamer_elements(enabled_extensions):
-    """Registers custom GStreamer elements from extensions.
-
-    :param enabled_extensions: list of enabled extensions
-    """
-
-    for extension in enabled_extensions:
-        logger.debug(
-            'Registering GStreamer elements for: %s', extension.ext_name)
-        extension.register_gstreamer_elements()

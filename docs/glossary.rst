@@ -16,7 +16,7 @@ Glossary
         :term:`tracklist`. To use the core module, see :ref:`core-api`.
 
     extension
-        A Python package that can extend Mopidy with on or more
+        A Python package that can extend Mopidy with one or more
         :term:`backends <backend>`, :term:`frontends <frontend>`, or GStreamer
         elements like :term:`mixers <mixer>`. See :ref:`ext` for a list of
         existing extensions and :ref:`extensiondev` for how to make a new

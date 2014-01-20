@@ -85,7 +85,7 @@ Mopidy to come with tests.
 #. To run tests, you need a couple of dependencies. They can be installed using
    ``pip``::
 
-       pip install -r requirements/tests.txt
+       pip install --upgrade coverage flake8 mock nose
 
 #. Then, to run all tests, go to the project directory and run::
 

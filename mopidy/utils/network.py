@@ -12,7 +12,7 @@ import pykka
 from mopidy.utils import encoding
 
 
-logger = logging.getLogger('mopidy.utils.server')
+logger = logging.getLogger(__name__)
 
 
 class ShouldRetrySocketCall(Exception):

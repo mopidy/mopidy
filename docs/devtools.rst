@@ -27,51 +27,6 @@ code. So, if you're out of work, the code coverage and flake8 data at the CI
 server should give you a place to start.
 
 
-Protocol debugger
-=================
-
-Since the main interface provided to Mopidy is through the MPD protocol, it is
-crucial that we try and stay in sync with protocol developments. In an attempt
-to make it easier to debug differences Mopidy and MPD protocol handling we have
-created ``tools/debug-proxy.py``.
-
-This tool is proxy that sits in front of two MPD protocol aware servers and
-sends all requests to both, returning the primary response to the client and
-then printing any diff in the two responses.
-
-Note that this tool depends on ``gevent`` unlike the rest of Mopidy at the time
-of writing. See :option:`tools/debug-proxy.py --help` for available options.
-Sample session::
-
-    [127.0.0.1]:59714
-    listallinfo
-    --- Reference response
-    +++ Actual response
-    @@ -1,16 +1,1 @@
-    -file: uri1
-    -Time: 4
-    -Artist: artist1
-    -Title: track1
-    -Album: album1
-    -file: uri2
-    -Time: 4
-    -Artist: artist2
-    -Title: track2
-    -Album: album2
-    -file: uri3
-    -Time: 4
-    -Artist: artist3
-    -Title: track3
-    -Album: album3
-    -OK
-    +ACK [2@0] {listallinfo} incorrect arguments
-
-To ensure that Mopidy and MPD have comparable state it is suggested you setup
-both to use ``tests/data/advanced_tag_cache`` for their tag cache and
-``tests/data/scanner/advanced/`` for the music folder and ``tests/data`` for
-playlists.
-
-
 Documentation writing
 =====================
 
@@ -106,15 +61,26 @@ Creating releases
     git checkout master
     git merge --no-ff -m "Release v0.16.0" develop
 
+#. Install/upgrade tools used for packaging::
+
+    pip install -U twine wheel
+
 #. Build package and test it manually in a new virtualenv. The following
    assumes the use of virtualenvwrapper::
 
-    python setup.py sdist
+    python setup.py sdist bdist_wheel
+
     mktmpenv
     pip install path/to/dist/Mopidy-0.16.0.tar.gz
     toggleglobalsitepackages
+    # do manual test
+    deactivate
 
-   Then test Mopidy manually to confirm that the package is working correctly.
+    mktmpenv
+    pip install path/to/dist/Mopidy-0.16.0-py27-none-any.whl
+    toggleglobalsitepackages
+    # do manual test
+    deactivate
 
 #. Tag the release::
 
@@ -125,14 +91,10 @@ Creating releases
     git push
     git push --tags
 
-#. Build source package and upload to PyPI::
+#. Upload the previously built and tested sdist and bdist_wheel packages to
+   PyPI::
 
-    python setup.py sdist upload
-
-#. Build wheel package and upload to PyPI::
-
-    pip install -U wheel
-    python setup.py bdist_wheel upload
+    twine upload dist/Mopidy-0.16.0*
 
 #. Merge ``master`` back into ``develop`` and push the branch to GitHub.
 
