@@ -2,6 +2,7 @@ mopidy (0.18.0-2) unstable; urgency=low
 
   * Make the service log at INFO level instead of DEBUG level.
   * Add thread and logger name to log format.
+  * Fix use of / as a config file.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 22 Jan 2014 23:38:39 +0100
 

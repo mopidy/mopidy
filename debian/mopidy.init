@@ -17,7 +17,9 @@ NAME=mopidy
 DAEMON=/usr/bin/mopidy
 DAEMON_USER=mopidy
 DAEMON_GROUP=audio
-DAEMON_ARGS="--quiet --config $(printf "%s:" /etc/mopidy/extensions.d/*.conf /etc/mopidy/mopidy.conf)"
+CONFIG_FILES=$(printf ":%s" /etc/mopidy/extensions.d/*.conf /etc/mopidy/mopidy.conf)
+CONFIG_FILES=$(echo $CONFIG_FILES | awk '{ s=substr($0, 2); print s; }')
+DAEMON_ARGS="--quiet --config $CONFIG_FILES"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
