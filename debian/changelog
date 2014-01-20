@@ -1,6 +1,8 @@
 mopidy (0.18.0-1) unstable; urgency=low
 
   * New upstream release.
+  * Remove rebuilding of Mopidy.js, as it is now built with Browserify and
+    Grunt, which isn't available as Debian packages.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 20 Jan 2014 21:57:15 +0100
 

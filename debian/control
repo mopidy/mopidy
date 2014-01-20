@@ -4,7 +4,6 @@ Priority: optional
 Maintainer: Stein Magnus Jodal <stein.magnus@jodal.no>
 Build-Depends:
     debhelper (>= 8.0.0),
-    node-uglify,
     python (>= 2.7),
     python-setuptools,
     python-sphinx (>= 1.0),
