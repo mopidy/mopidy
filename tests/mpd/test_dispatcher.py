@@ -43,13 +43,14 @@ class MpdDispatcherTest(unittest.TestCase):
                 e.get_mpd_ack(),
                 'ACK [5@0] {} unknown command "an_unknown_command"')
 
-    def test_find_handler_for_known_command_returns_handler_and_kwargs(self):
+    def test_find_handler_for_known_command_return_name_handler_and_args(self):
         expected_handler = lambda x: None
         request_handlers['known_command (?P<arg1>.+)'] = \
             expected_handler
-        (handler, kwargs) = self.dispatcher._find_handler(
+        (name, handler, kwargs) = self.dispatcher._find_handler(
             'known_command an_arg')
         self.assertEqual(handler, expected_handler)
+        self.assertEqual('known_command', name)
         self.assertIn('arg1', kwargs)
         self.assertEqual(kwargs['arg1'], 'an_arg')
 

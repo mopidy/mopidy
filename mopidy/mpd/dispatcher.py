@@ -164,21 +164,21 @@ class MpdDispatcher(object):
             raise exceptions.MpdSystemError(e)
 
     def _call_handler(self, request):
-        (handler, kwargs) = self._find_handler(request)
+        (command_name, handler, kwargs) = self._find_handler(request)
         try:
             return handler(self.context, **kwargs)
         except exceptions.MpdAckError as exc:
             if exc.command is None:
-                exc.command = handler.__name__.split('__', 1)[0]
+                exc.command = command_name
             raise
 
     def _find_handler(self, request):
+        command_name = request.split(' ')[0]
         for pattern in protocol.request_handlers:
             matches = re.match(pattern, request)
             if matches is not None:
-                return (
-                    protocol.request_handlers[pattern], matches.groupdict())
-        command_name = request.split(' ')[0]
+                handler = protocol.request_handlers[pattern]
+                return (command_name, handler, matches.groupdict())
         if command_name in [command.name for command in protocol.mpd_commands]:
             raise exceptions.MpdArgError(
                 'incorrect arguments', command=command_name)
