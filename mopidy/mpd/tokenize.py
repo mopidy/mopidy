@@ -27,24 +27,41 @@ PARAM_RE = re.compile(r"""
     (.*)                            # Possibly a remainder to be parsed
     """ % {'unprintable': ''.join(map(chr, range(0x21)))}, re.VERBOSE)
 
+BAD_QUOTED_PARAM_RE = re.compile(r"""
+    ^
+    "[^"\\]*(?:\\.[^"\\]*)*  # start of a quoted value
+    (?:                      # followed by:
+        ("[^\s])             # non-escaped quote, followed by non-whitespace
+        |                    # or
+        ([^"])               # anything that is not a quote
+    )
+    """, re.VERBOSE)
+
 UNESCAPE_RE = re.compile(r'\\(.)')  # Backslash escapes any following char.
 
 
 def split(line):
     if not line.strip():
-        raise Error('No command given')
+        raise Error('No command given')  # 5@0
     match = WORD_RE.match(line)
     if not match:
-        raise Error('Invalid word character')
+        raise Error('Invalid word character')  # 5@0
     whitespace, command, remainder = match.groups()
     if whitespace:
-        raise Error('Letter expected')
-    result = [command]
+        raise Error('Letter expected')  # 5@0
 
+    result = [command]
     while remainder:
         match = PARAM_RE.match(remainder)
         if not match:
-            raise Error('Invalid unquoted character')
+            # Following checks are simply to match MPD error messages:
+            match = BAD_QUOTED_PARAM_RE.match(remainder)
+            if match:
+                if match.group(1):
+                    raise Error('Space expected after closing \'"\'')  # 2@0
+                else:
+                    raise Error('Missing closing \'"\'')  # 2@0
+            raise Error('Invalid unquoted character')  # 2@0
         unquoted, quoted, remainder = match.groups()
         result.append(unquoted or UNESCAPE_RE.sub(r'\g<1>', quoted))
 
