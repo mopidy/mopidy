@@ -4,6 +4,14 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v0.18.1 (UNRELEASED)
+====================
+
+- Disable extension instead of crashing if a dependency has the wrong
+  version. (Fixes: :issue:`657`)
+
+
 v0.18.0 (2014-01-19)
 ====================
 

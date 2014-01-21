@@ -222,6 +222,12 @@ def validate_extension(extension):
             'Disabled extension %s: Dependency %s not found',
             extension.ext_name, ex)
         return False
+    except pkg_resources.VersionConflict as ex:
+        found, required = ex.args
+        logger.info(
+            'Disabled extension %s: %s required, but found %s at %s',
+            extension.ext_name, required, found, found.location)
+        return False
 
     try:
         extension.validate_environment()
