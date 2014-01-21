@@ -4,23 +4,23 @@ from __future__ import unicode_literals
 
 import unittest
 
-from mopidy.mpd import protocol
+from mopidy.mpd import tokenize
 
 
 class TestTokenizer(unittest.TestCase):
     def assertTokenizeEquals(self, expected, line):
-        self.assertEqual(expected, protocol.tokenize(line))
+        self.assertEqual(expected, tokenize.split(line))
 
     def assertTokenizeRaises(self, exception, line):
         with self.assertRaises(exception):
-            protocol.tokenize(line)
+            tokenize.split(line)
 
     def test_empty_string(self):
-        self.assertTokenizeRaises(Exception, '')
+        self.assertTokenizeRaises(tokenize.TokenizeError, '')
 
     def test_whitespace(self):
-        self.assertTokenizeRaises(Exception, '   ')
-        self.assertTokenizeRaises(Exception, '\t\t\t')
+        self.assertTokenizeRaises(tokenize.TokenizeError, '   ')
+        self.assertTokenizeRaises(tokenize.TokenizeError, '\t\t\t')
 
     def test_command(self):
         self.assertTokenizeEquals(['test'], 'test')
@@ -32,14 +32,14 @@ class TestTokenizer(unittest.TestCase):
         self.assertTokenizeEquals(['test'], 'test\t\t\t')
 
     def test_command_leading_whitespace(self):
-        self.assertTokenizeRaises(Exception, ' test')
-        self.assertTokenizeRaises(Exception, '\ttest')
+        self.assertTokenizeRaises(tokenize.TokenizeError, ' test')
+        self.assertTokenizeRaises(tokenize.TokenizeError, '\ttest')
 
     def test_invalid_command(self):
-        self.assertTokenizeRaises(Exception, 'foo/bar')
-        self.assertTokenizeRaises(Exception, 'æøå')
-        self.assertTokenizeRaises(Exception, 'test?')
-        self.assertTokenizeRaises(Exception, 'te"st')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'foo/bar')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'æøå')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'test?')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'te"st')
 
     def test_unquoted_param(self):
         self.assertTokenizeEquals(['test', 'param'], 'test param')
@@ -54,11 +54,11 @@ class TestTokenizer(unittest.TestCase):
         self.assertTokenizeEquals(['test', 'param'], 'test param\t\t')
 
     def test_unquoted_param_invalid_chars(self):
-        self.assertTokenizeRaises(Exception, 'test par"m')
-        self.assertTokenizeRaises(Exception, 'test foo\\bar')
-        self.assertTokenizeRaises(Exception, 'test foo\bbar')
-        self.assertTokenizeRaises(Exception, 'test "foo"bar')
-        self.assertTokenizeRaises(Exception, 'test foo"bar"baz')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'test par"m')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'test foo\\bar')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'test foo\bbar')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'test "foo"bar')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'test fo"b"ar')
 
     def test_unquoted_param_numbers(self):
         self.assertTokenizeEquals(['test', '123'], 'test 123')
@@ -87,7 +87,7 @@ class TestTokenizer(unittest.TestCase):
         self.assertTokenizeEquals(['test', 'param'], 'test "param"\t\t')
 
     def test_quoted_param_invalid_chars(self):
-        self.assertTokenizeRaises(Exception, 'test "par"m"')
+        self.assertTokenizeRaises(tokenize.TokenizeError, 'test "par"m"')
 
     def test_quoted_param_numbers(self):
         self.assertTokenizeEquals(['test', '123'], 'test "123"')
@@ -126,4 +126,5 @@ class TestTokenizer(unittest.TestCase):
                                   r'test "foo\"bar" baz 123')
 
     def test_unbalanced_quotes(self):
-        self.assertTokenizeRaises(Exception, 'test "foo bar" baz"')
+        self.assertTokenizeRaises(tokenize.TokenizeError,
+                                  'test "foo bar" baz"')
