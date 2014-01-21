@@ -11,16 +11,18 @@ class TestTokenizer(unittest.TestCase):
     def assertTokenizeEquals(self, expected, line):
         self.assertEqual(expected, tokenize.split(line))
 
-    def assertTokenizeRaises(self, exception, line):
-        with self.assertRaises(exception):
+    def assertTokenizeRaisesError(self, line, message=None):
+        with self.assertRaises(tokenize.Error) as cm:
             tokenize.split(line)
+        if message:
+            self.assertEqual(cm.exception.message, message)
 
     def test_empty_string(self):
-        self.assertTokenizeRaises(tokenize.TokenizeError, '')
+        self.assertTokenizeRaisesError('', 'No command given')
 
     def test_whitespace(self):
-        self.assertTokenizeRaises(tokenize.TokenizeError, '   ')
-        self.assertTokenizeRaises(tokenize.TokenizeError, '\t\t\t')
+        self.assertTokenizeRaisesError('      ', 'No command given')
+        self.assertTokenizeRaisesError('\t\t\t', 'No command given')
 
     def test_command(self):
         self.assertTokenizeEquals(['test'], 'test')
@@ -32,14 +34,14 @@ class TestTokenizer(unittest.TestCase):
         self.assertTokenizeEquals(['test'], 'test\t\t\t')
 
     def test_command_leading_whitespace(self):
-        self.assertTokenizeRaises(tokenize.TokenizeError, ' test')
-        self.assertTokenizeRaises(tokenize.TokenizeError, '\ttest')
+        self.assertTokenizeRaisesError('  test', 'Letter expected')
+        self.assertTokenizeRaisesError('\ttest', 'Letter expected')
 
     def test_invalid_command(self):
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'foo/bar')
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'æøå')
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'test?')
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'te"st')
+        self.assertTokenizeRaisesError('foo/bar', 'Invalid word character')
+        self.assertTokenizeRaisesError('æøå', 'Invalid word character')
+        self.assertTokenizeRaisesError('test?', 'Invalid word character')
+        self.assertTokenizeRaisesError('te"st', 'Invalid word character')
 
     def test_unquoted_param(self):
         self.assertTokenizeEquals(['test', 'param'], 'test param')
@@ -54,11 +56,12 @@ class TestTokenizer(unittest.TestCase):
         self.assertTokenizeEquals(['test', 'param'], 'test param\t\t')
 
     def test_unquoted_param_invalid_chars(self):
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'test par"m')
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'test foo\\bar')
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'test foo\bbar')
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'test "foo"bar')
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'test fo"b"ar')
+        msg = 'Invalid unquoted character'
+        self.assertTokenizeRaisesError('test par"m', msg)
+        self.assertTokenizeRaisesError('test foo\bbar', msg)
+        self.assertTokenizeRaisesError('test "foo"bar', msg)
+        self.assertTokenizeRaisesError('test foo"bar"baz', msg)
+        self.assertTokenizeRaisesError('test foo\'bar', msg)
 
     def test_unquoted_param_numbers(self):
         self.assertTokenizeEquals(['test', '123'], 'test 123')
@@ -68,8 +71,9 @@ class TestTokenizer(unittest.TestCase):
 
     def test_unquoted_param_extended_chars(self):
         self.assertTokenizeEquals(['test', 'æøå'], 'test æøå')
-        self.assertTokenizeEquals(['test', '?#\'$'], 'test ?#\'$')
+        self.assertTokenizeEquals(['test', '?#$'], 'test ?#$')
         self.assertTokenizeEquals(['test', '/foo/bar/'], 'test /foo/bar/')
+        self.assertTokenizeEquals(['test', 'foo\\bar'], 'test foo\\bar')
 
     def test_unquoted_params(self):
         self.assertTokenizeEquals(['test', 'foo', 'bar'], 'test foo bar')
@@ -87,7 +91,10 @@ class TestTokenizer(unittest.TestCase):
         self.assertTokenizeEquals(['test', 'param'], 'test "param"\t\t')
 
     def test_quoted_param_invalid_chars(self):
-        self.assertTokenizeRaises(tokenize.TokenizeError, 'test "par"m"')
+        # TODO: Figure out how to check for " without space behind it.
+        #msg = """Space expected after closing '"'"""
+        msg = 'Invalid unquoted character'
+        self.assertTokenizeRaisesError('test "par"m"', msg)
 
     def test_quoted_param_numbers(self):
         self.assertTokenizeEquals(['test', '123'], 'test "123"')
@@ -126,5 +133,5 @@ class TestTokenizer(unittest.TestCase):
                                   r'test "foo\"bar" baz 123')
 
     def test_unbalanced_quotes(self):
-        self.assertTokenizeRaises(tokenize.TokenizeError,
-                                  'test "foo bar" baz"')
+        msg = 'Invalid unquoted character'
+        self.assertTokenizeRaisesError('test "foo bar" baz"', msg)
