@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 import re
 
+from mopidy.mpd import exceptions
+
 
 class Error(Exception):
     pass
@@ -42,27 +44,31 @@ UNESCAPE_RE = re.compile(r'\\(.)')  # Backslash escapes any following char.
 
 def split(line):
     if not line.strip():
-        raise Error('No command given')  # 5@0
+        raise exceptions.MpdNoCommand('No command given')
     match = WORD_RE.match(line)
     if not match:
-        raise Error('Invalid word character')  # 5@0
+        raise exceptions.MpdUnknownError('Invalid word character')
     whitespace, command, remainder = match.groups()
     if whitespace:
-        raise Error('Letter expected')  # 5@0
+        raise exceptions.MpdUnknownError('Letter expected')
 
     result = [command]
     while remainder:
         match = PARAM_RE.match(remainder)
         if not match:
-            # Following checks are simply to match MPD error messages:
-            match = BAD_QUOTED_PARAM_RE.match(remainder)
-            if match:
-                if match.group(1):
-                    raise Error('Space expected after closing \'"\'')  # 2@0
-                else:
-                    raise Error('Missing closing \'"\'')  # 2@0
-            raise Error('Invalid unquoted character')  # 2@0
+            msg = _determine_error_message(remainder)
+            raise exceptions.MpdArgError(msg, command=command)
         unquoted, quoted, remainder = match.groups()
         result.append(unquoted or UNESCAPE_RE.sub(r'\g<1>', quoted))
-
     return result
+
+
+def _determine_error_message(remainder):
+    # Following checks are simply to match MPD error messages:
+    match = BAD_QUOTED_PARAM_RE.match(remainder)
+    if match:
+        if match.group(1):
+            return 'Space expected after closing \'"\''
+        else:
+            return 'Missing closing \'"\''
+    return 'Invalid unquoted character'
