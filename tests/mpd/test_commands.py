@@ -185,3 +185,21 @@ class TestCommands(unittest.TestCase):
         with self.assertRaises(TypeError):
             func = lambda context: True
             self.commands.add('bar', context=lambda v: v)(func)
+
+    def test_auth_required_gets_stored(self):
+        func1 = lambda context: context
+        func2 = lambda context: context
+        self.commands.add('foo')(func1)
+        self.commands.add('bar', auth_required=False)(func2)
+
+        self.assertTrue(self.commands.handlers['foo'].auth_required)
+        self.assertFalse(self.commands.handlers['bar'].auth_required)
+
+    def test_list_command_gets_stored(self):
+        func1 = lambda context: context
+        func2 = lambda context: context
+        self.commands.add('foo')(func1)
+        self.commands.add('bar', list_command=False)(func2)
+
+        self.assertTrue(self.commands.handlers['foo'].list_command)
+        self.assertFalse(self.commands.handlers['bar'].list_command)

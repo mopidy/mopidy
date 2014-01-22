@@ -112,10 +112,10 @@ class Commands(object):
     def __init__(self):
         self.handlers = {}
 
-    def add(self, command, **validators):
+    def add(self, name, auth_required=True, list_command=True, **validators):
         def wrapper(func):
-            if command in self.handlers:
-                raise Exception('%s already registered' % command)
+            if name in self.handlers:
+                raise Exception('%s already registered' % name)
 
             args, varargs, keywords, defaults = inspect.getargspec(func)
             defaults = dict(zip(args[-len(defaults or []):], defaults or []))
@@ -143,7 +143,9 @@ class Commands(object):
                         callargs[key] = validators[key](value)
                 return func(**callargs)
 
-            self.handlers[command] = validate
+            validate.auth_required = auth_required
+            validate.list_command = list_command
+            self.handlers[name] = validate
             return func
         return wrapper
 
