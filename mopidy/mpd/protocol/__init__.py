@@ -108,6 +108,21 @@ def boolean(value):
     raise ValueError('%r is not 0 or 1' % value)
 
 
+def position_or_range(value):
+    # TODO: test and check that values are positive
+    if ':' in value:
+        start, stop = value.split(':', 1)
+        start = int(start)
+        if stop.strip():
+            stop = int(stop)
+        else:
+            stop = None
+    else:
+        start = int(value)
+        stop = start + 1
+    return slice(start, stop)
+
+
 class Commands(object):
     def __init__(self):
         self.handlers = {}
