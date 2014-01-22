@@ -12,7 +12,7 @@ from tests.mpd import protocol
 class QueryFromMpdSearchFormatTest(unittest.TestCase):
     def test_dates_are_extracted(self):
         result = music_db._query_from_mpd_search_format(
-            'Date "1974-01-02" Date "1975"')
+            'Date "1974-01-02" "Date" "1975"')
         self.assertEqual(result['date'][0], '1974-01-02')
         self.assertEqual(result['date'][1], '1975')
 
