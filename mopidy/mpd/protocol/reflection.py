@@ -26,13 +26,21 @@ def commands(context):
 
         Shows which commands the current user has access to.
     """
-    if context.dispatcher.authenticated:
-        command_names = set(command.name for command in protocol.mpd_commands)
-    else:
-        command_names = set(
-            command.name for command in protocol.mpd_commands
-            if not command.auth_required)
+    command_names = set()
+    for name, handler in protocol.commands.handlers.items():
+        if not handler.list_command:
+            continue
+        if context.dispatcher.authenticated or not handler.auth_required:
+            command_names.add(name)
 
+    # TODO: remove
+    if context.dispatcher.authenticated:
+        command_names.update(c.name for c in protocol.mpd_commands)
+    else:
+        command_names.update(c.name for c in protocol.mpd_commands
+                             if not c.auth_required)
+
+    # TODO: remove once we've marked all of these as list_command=False
     # No one is permited to use 'config' or 'kill', rest of commands are not
     # listed by MPD, so we shouldn't either.
     command_names = command_names - set([
@@ -80,15 +88,17 @@ def notcommands(context):
 
         Shows which commands the current user does not have access to.
     """
-    if context.dispatcher.authenticated:
-        command_names = []
-    else:
-        command_names = [command.name for command in protocol.mpd_commands
-                         if command.auth_required]
+    command_names = set(['config', 'kill'])  # No permission to use
+    for name, handler in protocol.commands.handlers.items():
+        if not handler.list_command:
+            continue
+        if not context.dispatcher.authenticated and handler.auth_required:
+            command_names.add(name)
 
-    # No permission to use
-    command_names.append('config')
-    command_names.append('kill')
+    # TODO: remove
+    if not context.dispatcher.authenticated:
+        command_names.update(command.name for command in protocol.mpd_commands
+                             if command.auth_required)
 
     return [
         ('command', command_name) for command_name in sorted(command_names)]
