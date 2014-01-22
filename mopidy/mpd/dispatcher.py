@@ -5,7 +5,7 @@ import re
 
 import pykka
 
-from mopidy.mpd import exceptions, protocol
+from mopidy.mpd import exceptions, protocol, tokenize
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +164,15 @@ class MpdDispatcher(object):
             raise exceptions.MpdSystemError(e)
 
     def _call_handler(self, request):
+        tokens = tokenize.split(request)
+        try:
+            return protocol.commands.call(tokens, context=self.context)
+        except exceptions.MpdAckError as exc:
+            if exc.command is None:
+                exc.command = tokens[0]
+            raise
+        except LookupError:
+            pass  # Command has not been converted, i.e. fallback...
         (command_name, handler, kwargs) = self._find_handler(request)
         try:
             return handler(self.context, **kwargs)

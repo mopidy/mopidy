@@ -150,7 +150,10 @@ class Commands(object):
     def call(self, args, context=None):
         if not args:
             raise TypeError('No args provided')
-        command = args.pop(0)
-        if command not in self.handlers:
+        if args[0] not in self.handlers:
             raise LookupError('Unknown command')
-        return self.handlers[command](context, *args)
+        return self.handlers[args[0]](context, *args[1:])
+
+
+#: Global instance to install commands into
+commands = Commands()
