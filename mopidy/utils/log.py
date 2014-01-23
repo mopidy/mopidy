@@ -31,15 +31,13 @@ def bootstrap_delayed_logging():
     root.addHandler(_delayed_handler)
 
 
-def setup_logging(config, extensions, verbosity_level, save_debug_log):
-    setup_log_levels(config)
-
-    setup_console_logging(config, extensions, verbosity_level)
-
-    if save_debug_log:
-        setup_debug_logging_to_file(config, extensions)
-
+def setup_logging(config, verbosity_level, save_debug_log):
     logging.captureWarnings(True)
+
+    setup_log_levels(config)
+    setup_console_logging(config, verbosity_level)
+    if save_debug_log:
+        setup_debug_logging_to_file(config)
 
     if config['logging']['config_file']:
         logging.config.fileConfig(config['logging']['config_file'])
@@ -61,11 +59,25 @@ LOG_LEVELS = {
 }
 
 
-def setup_console_logging(config, extensions, verbosity_level):
+class VerbosityFilter(logging.Filter):
+    def __init__(self, verbosity_level):
+        self.verbosity_level = verbosity_level
+
+    def filter(self, record):
+        if record.name.startswith('mopidy'):
+            required_log_level = LOG_LEVELS[self.verbosity_level]['mopidy']
+        else:
+            required_log_level = LOG_LEVELS[self.verbosity_level]['root']
+        return record.levelno >= required_log_level
+
+
+def setup_console_logging(config, verbosity_level):
     if verbosity_level < min(LOG_LEVELS.keys()):
         verbosity_level = min(LOG_LEVELS.keys())
     if verbosity_level > max(LOG_LEVELS.keys()):
         verbosity_level = max(LOG_LEVELS.keys())
+
+    verbosity_filter = VerbosityFilter(verbosity_level)
 
     if verbosity_level < 1:
         log_format = config['logging']['console_format']
@@ -73,34 +85,17 @@ def setup_console_logging(config, extensions, verbosity_level):
         log_format = config['logging']['debug_format']
     formatter = logging.Formatter(log_format)
 
-    root_handler = logging.StreamHandler()
-    root_handler.setFormatter(formatter)
-    root_handler.setLevel(LOG_LEVELS[verbosity_level]['root'])
-    logging.getLogger('').addHandler(root_handler)
+    handler = logging.StreamHandler()
+    handler.addFilter(verbosity_filter)
+    handler.setFormatter(formatter)
 
-    mopidy_handler = logging.StreamHandler()
-    mopidy_handler.setFormatter(formatter)
-    mopidy_handler.setLevel(LOG_LEVELS[verbosity_level]['mopidy'])
-    add_mopidy_handler(extensions, mopidy_handler)
+    logging.getLogger('').addHandler(handler)
 
 
-def setup_debug_logging_to_file(config, extensions):
+def setup_debug_logging_to_file(config):
     formatter = logging.Formatter(config['logging']['debug_format'])
     handler = logging.handlers.RotatingFileHandler(
         config['logging']['debug_file'], maxBytes=10485760, backupCount=3)
     handler.setFormatter(formatter)
 
     logging.getLogger('').addHandler(handler)
-
-    # We must add our handler explicitly, since the mopidy* handlers don't
-    # propagate to the root handler.
-    add_mopidy_handler(extensions, handler)
-
-
-def add_mopidy_handler(extensions, handler):
-    names = ['mopidy_%s' % ext.ext_name for ext in extensions]
-    names.append('mopidy')
-    for name in names:
-        logger = logging.getLogger(name)
-        logger.propagate = False
-        logger.addHandler(handler)
