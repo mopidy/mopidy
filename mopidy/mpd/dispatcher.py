@@ -37,6 +37,7 @@ class MpdDispatcher(object):
         response = []
         filter_chain = [
             self._catch_mpd_ack_errors_filter,
+            # TODO: tokenize filter
             self._authenticate_filter,
             self._command_list_filter,
             self._idle_filter,
@@ -88,9 +89,17 @@ class MpdDispatcher(object):
             return self._call_next_filter(request, response, filter_chain)
         else:
             command_name = request.split(' ')[0]
+            command = protocol.commands.handlers.get(command_name)
+            if command:
+                if command.auth_required:
+                    raise exceptions.MpdPermissionError(command=command_name)
+                else:
+                    return self._call_next_filter(
+                        request, response, filter_chain)
+
+            # TODO: remove
             command_names_not_requiring_auth = [
-                command.name for command in protocol.mpd_commands
-                if not command.auth_required]
+                c.name for c in protocol.mpd_commands if not c.auth_required]
             if command_name in command_names_not_requiring_auth:
                 return self._call_next_filter(request, response, filter_chain)
             else:
