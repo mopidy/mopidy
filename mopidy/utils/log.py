@@ -27,7 +27,7 @@ _delayed_handler = DelayedHandler()
 
 def bootstrap_delayed_logging():
     root = logging.getLogger('')
-    root.setLevel(logging.DEBUG)
+    root.setLevel(logging.NOTSET)
     root.addHandler(_delayed_handler)
 
 
