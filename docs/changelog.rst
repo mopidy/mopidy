@@ -4,6 +4,20 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v0.18.1 (2014-01-23)
+====================
+
+Bug fix release.
+
+- Disable extension instead of crashing if a dependency has the wrong
+  version. (Fixes: :issue:`657`)
+
+- Make logging work to both console, debug log file, and any custom logging
+  setup from :confval:`logging/config_file` at the same time. (Fixes:
+  :issue:`661`)
+
+
 v0.18.0 (2014-01-19)
 ====================
 
@@ -1831,9 +1845,8 @@ to this problem.
 - MPD frontend:
 
   - Add support for password authentication. See
-    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` and
-    :ref:`use-mpd-on-a-network` for details on how to use it. (Fixes:
-    :issue:`41`)
+    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` for details on how to use it.
+    (Fixes: :issue:`41`)
 
   - Support ``setvol 50`` without quotes around the argument. Fixes volume
     control in Droid MPD.
