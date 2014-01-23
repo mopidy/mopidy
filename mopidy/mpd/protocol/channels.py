@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
-from mopidy.mpd.protocol import handle_request
-from mopidy.mpd.exceptions import MpdNotImplemented
+from mopidy.mpd import exceptions, protocol
 
 
-@handle_request(r'subscribe\ "(?P<channel>[A-Za-z0-9:._-]+)"$')
+@protocol.commands.add('subscribe')
 def subscribe(context, channel):
     """
     *musicpd.org, client to client section:*
@@ -15,10 +14,11 @@ def subscribe(context, channel):
         already. The name may consist of alphanumeric ASCII characters plus
         underscore, dash, dot and colon.
     """
-    raise MpdNotImplemented  # TODO
+    # TODO: match channel against [A-Za-z0-9:._-]+
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'unsubscribe\ "(?P<channel>[A-Za-z0-9:._-]+)"$')
+@protocol.commands.add('unsubscribe')
 def unsubscribe(context, channel):
     """
     *musicpd.org, client to client section:*
@@ -27,10 +27,11 @@ def unsubscribe(context, channel):
 
         Unsubscribe from a channel.
     """
-    raise MpdNotImplemented  # TODO
+    # TODO: match channel against [A-Za-z0-9:._-]+
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'channels$')
+@protocol.commands.add('channels')
 def channels(context):
     """
     *musicpd.org, client to client section:*
@@ -40,10 +41,10 @@ def channels(context):
         Obtain a list of all channels. The response is a list of "channel:"
         lines.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'readmessages$')
+@protocol.commands.add('readmessages')
 def readmessages(context):
     """
     *musicpd.org, client to client section:*
@@ -53,11 +54,10 @@ def readmessages(context):
         Reads messages for this client. The response is a list of "channel:"
         and "message:" lines.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(
-    r'sendmessage\ "(?P<channel>[A-Za-z0-9:._-]+)"\ "(?P<text>[^"]*)"$')
+@protocol.commands.add('sendmessage')
 def sendmessage(context, channel, text):
     """
     *musicpd.org, client to client section:*
@@ -66,4 +66,5 @@ def sendmessage(context, channel, text):
 
         Send a message to the specified channel.
     """
-    raise MpdNotImplemented  # TODO
+    # TODO: match channel against [A-Za-z0-9:._-]+
+    raise exceptions.MpdNotImplemented  # TODO
