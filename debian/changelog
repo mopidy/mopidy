@@ -1,6 +1,7 @@
 mopidy (0.18.1-1) unstable; urgency=low
 
   * New upstream release.
+  * Adjust the log format again.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Thu, 23 Jan 2014 23:42:45 +0100
 
