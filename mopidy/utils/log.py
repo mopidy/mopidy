@@ -34,13 +34,15 @@ def bootstrap_delayed_logging():
 def setup_logging(config, verbosity_level, save_debug_log):
     logging.captureWarnings(True)
 
+    if config['logging']['config_file']:
+        # Logging config from file must be read before other handlers are
+        # added. If not, the other handlers will have no effect.
+        logging.config.fileConfig(config['logging']['config_file'])
+
     setup_log_levels(config)
     setup_console_logging(config, verbosity_level)
     if save_debug_log:
         setup_debug_logging_to_file(config)
-
-    if config['logging']['config_file']:
-        logging.config.fileConfig(config['logging']['config_file'])
 
     _delayed_handler.release()
 
