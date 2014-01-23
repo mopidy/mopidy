@@ -90,17 +90,7 @@ class MpdDispatcher(object):
         else:
             command_name = request.split(' ')[0]
             command = protocol.commands.handlers.get(command_name)
-            if command:
-                if command.auth_required:
-                    raise exceptions.MpdPermissionError(command=command_name)
-                else:
-                    return self._call_next_filter(
-                        request, response, filter_chain)
-
-            # TODO: remove
-            command_names_not_requiring_auth = [
-                c.name for c in protocol.mpd_commands if not c.auth_required]
-            if command_name in command_names_not_requiring_auth:
+            if command and not command.auth_required:
                 return self._call_next_filter(request, response, filter_chain)
             else:
                 raise exceptions.MpdPermissionError(command=command_name)
@@ -181,28 +171,7 @@ class MpdDispatcher(object):
                 exc.command = tokens[0]
             raise
         except LookupError:
-            pass  # Command has not been converted, i.e. fallback...
-
-        request = request.decode('string_escape')
-        (command_name, handler, kwargs) = self._find_handler(request)
-        try:
-            return handler(self.context, **kwargs)
-        except exceptions.MpdAckError as exc:
-            if exc.command is None:
-                exc.command = command_name
-            raise
-
-    def _find_handler(self, request):
-        command_name = request.split(' ')[0]
-        for pattern in protocol.request_handlers:
-            matches = re.match(pattern, request)
-            if matches is not None:
-                handler = protocol.request_handlers[pattern]
-                return (command_name, handler, matches.groupdict())
-        if command_name in [command.name for command in protocol.mpd_commands]:
-            raise exceptions.MpdArgError(
-                'incorrect arguments', command=command_name)
-        raise exceptions.MpdUnknownCommand(command=command_name)
+            raise exceptions.MpdUnknownCommand(command=tokens[0])
 
     def _format_response(self, response):
         formatted_response = []

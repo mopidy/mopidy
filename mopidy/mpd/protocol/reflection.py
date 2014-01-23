@@ -33,13 +33,6 @@ def commands(context):
         if context.dispatcher.authenticated or not handler.auth_required:
             command_names.add(name)
 
-    # TODO: remove
-    if context.dispatcher.authenticated:
-        command_names.update(c.name for c in protocol.mpd_commands)
-    else:
-        command_names.update(c.name for c in protocol.mpd_commands
-                             if not c.auth_required)
-
     return [
         ('command', command_name) for command_name in sorted(command_names)]
 
@@ -86,11 +79,6 @@ def notcommands(context):
             continue
         if not context.dispatcher.authenticated and handler.auth_required:
             command_names.add(name)
-
-    # TODO: remove
-    if not context.dispatcher.authenticated:
-        command_names.update(command.name for command in protocol.mpd_commands
-                             if command.auth_required)
 
     return [
         ('command', command_name) for command_name in sorted(command_names)]
