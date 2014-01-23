@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import functools
 import itertools
-import re
 
 from mopidy.models import Ref, Track
 from mopidy.mpd import exceptions, protocol, translator
@@ -27,94 +26,33 @@ LIST_QUERY = r"""
   $
 """
 
-SEARCH_FIELDS = r"""
-    [Aa]lbum
-  | [Aa]lbumartist
-  | [Aa]ny
-  | [Aa]rtist
-  | [Cc]omment
-  | [Cc]omposer
-  | [Dd]ate
-  | [Ff]ile
-  | [Ff]ilename
-  | [Gg]enre
-  | [Pp]erformer
-  | [Tt]itle
-  | [Tt]rack
-"""
-
-# TODO Would be nice to get ("?)...\1 working for the quotes here
-SEARCH_QUERY = r"""
-  (?P<mpd_query>
-    (?:                 # Non-capturing group for repeating query pairs
-      "?                # Optional quote around the field type
-      (?:
-""" + SEARCH_FIELDS + r"""
-      )
-      "?                # End of optional quote around the field type
-      \                 # A single space
-      "[^"]*"           # Matching a quoted search string
-      \s?
-    )+
-  )
-  $
-"""
-
-# TODO Would be nice to get ("?)...\1 working for the quotes here
-SEARCH_PAIR_WITHOUT_GROUPS = r"""
-  \b                  # Only begin matching at word bundaries
-  "?                  # Optional quote around the field type
-  (?:                 # A non-capturing group for the field type
-""" + SEARCH_FIELDS + """
-  )
-  "?                  # End of optional quote around the field type
-  \                   # A single space
-  "[^"]+"             # Matching a quoted search string
-"""
-SEARCH_PAIR_WITHOUT_GROUPS_RE = re.compile(
-    SEARCH_PAIR_WITHOUT_GROUPS, flags=(re.UNICODE | re.VERBOSE))
-
-# TODO Would be nice to get ("?)...\1 working for the quotes here
-SEARCH_PAIR_WITH_GROUPS = r"""
-  \b                  # Only begin matching at word bundaries
-  "?                  # Optional quote around the field type
-  (?P<field>(         # A capturing group for the field type
-""" + SEARCH_FIELDS + """
-  ))
-  "?                  # End of optional quote around the field type
-  \                   # A single space
-  "(?P<what>[^"]+)"   # Capturing a quoted search string
-"""
-SEARCH_PAIR_WITH_GROUPS_RE = re.compile(
-    SEARCH_PAIR_WITH_GROUPS, flags=(re.UNICODE | re.VERBOSE))
+_SEARCH_FIELD_MAPPING = {
+    'album': 'album',
+    'albumartist': 'albumartist',
+    'any': 'any',
+    'artist': 'artist',
+    'comment': 'comment',
+    'composer': 'composer',
+    'date': 'date',
+    'file': 'uri',
+    'filename': 'uri',
+    'genre': 'genre',
+    'performer': 'performer',
+    'title': 'track_name',
+    'track': 'track_no'}
 
 
-def _query_from_mpd_search_format(mpd_query):
-    """
-    Parses an MPD ``search`` or ``find`` query and converts it to the Mopidy
-    query format.
-
-    :param mpd_query: the MPD search query
-    :type mpd_query: string
-    """
-    pairs = SEARCH_PAIR_WITHOUT_GROUPS_RE.findall(mpd_query)
+def _query_from_mpd_search_parameters(parameters):
     query = {}
-    for pair in pairs:
-        m = SEARCH_PAIR_WITH_GROUPS_RE.match(pair)
-        field = m.groupdict()['field'].lower()
-        if field == 'title':
-            field = 'track_name'
-        elif field == 'track':
-            field = 'track_no'
-        elif field in ('file', 'filename'):
-            field = 'uri'
-        what = m.groupdict()['what']
-        if not what:
+    parameters = list(parameters)
+    while parameters:
+        # TODO: does it matter that this is now case insensitive
+        field = _SEARCH_FIELD_MAPPING.get(parameters.pop(0).lower())
+        if not field:
+            raise exceptions.MpdArgError('incorrect arguments')
+        if not parameters:
             raise ValueError
-        if field in query:
-            query[field].append(what)
-        else:
-            query[field] = [what]
+        query.setdefault(field, []).append(parameters.pop(0))
     return query
 
 
@@ -143,8 +81,8 @@ def _artist_as_track(artist):
         artists=[artist])
 
 
-@protocol.handle_request(r'count\ ' + SEARCH_QUERY)
-def count(context, mpd_query):
+@protocol.commands.add('count')
+def count(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -159,7 +97,7 @@ def count(context, mpd_query):
     - use multiple tag-needle pairs to make more specific searches.
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args)
     except ValueError:
         raise exceptions.MpdArgError('incorrect arguments')
     results = context.core.library.find_exact(**query).get()
@@ -170,8 +108,8 @@ def count(context, mpd_query):
     ]
 
 
-@protocol.handle_request(r'find\ ' + SEARCH_QUERY)
-def find(context, mpd_query):
+@protocol.commands.add('find')
+def find(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -199,9 +137,10 @@ def find(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args)
     except ValueError:
         return
+
     results = context.core.library.find_exact(**query).get()
     result_tracks = []
     if ('artist' not in query and
@@ -215,8 +154,8 @@ def find(context, mpd_query):
     return translator.tracks_to_mpd_format(result_tracks)
 
 
-@protocol.handle_request(r'findadd\ ' + SEARCH_QUERY)
-def findadd(context, mpd_query):
+@protocol.commands.add('findadd')
+def findadd(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -226,7 +165,7 @@ def findadd(context, mpd_query):
         current playlist. Parameters have the same meaning as for ``find``.
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args)
     except ValueError:
         return
     results = context.core.library.find_exact(**query).get()
@@ -541,8 +480,8 @@ def rescan(context, uri=None):
     return {'updating_db': 0}  # TODO
 
 
-@protocol.handle_request(r'search\ ' + SEARCH_QUERY)
-def search(context, mpd_query):
+@protocol.commands.add('search')
+def search(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -570,7 +509,7 @@ def search(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
@@ -580,8 +519,8 @@ def search(context, mpd_query):
     return translator.tracks_to_mpd_format(artists + albums + tracks)
 
 
-@protocol.handle_request(r'searchadd\ ' + SEARCH_QUERY)
-def searchadd(context, mpd_query):
+@protocol.commands.add('searchadd')
+def searchadd(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -594,16 +533,15 @@ def searchadd(context, mpd_query):
         not case sensitive.
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
     context.core.tracklist.add(_get_tracks(results))
 
 
-@protocol.handle_request(
-    r'searchaddpl\ "(?P<playlist_name>[^"]+)"\ ' + SEARCH_QUERY)
-def searchaddpl(context, playlist_name, mpd_query):
+@protocol.commands.add('searchaddpl')
+def searchaddpl(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -617,8 +555,12 @@ def searchaddpl(context, playlist_name, mpd_query):
         Parameters have the same meaning as for ``find``, except that search is
         not case sensitive.
     """
+    parameters = list(args)
+    if not parameters:
+        raise exceptions.MpdArgError('incorrect arguments')
+    playlist_name = parameters.pop(0)
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(parameters)
     except ValueError:
         return
     results = context.core.library.search(**query).get()

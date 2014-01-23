@@ -176,6 +176,7 @@ class Commands(object):
         return wrapper
 
     def call(self, args, context=None):
+        # TODO: raise mopidy.mpd.exceptions
         if not args:
             raise TypeError('No args provided')
         if args[0] not in self.handlers:
