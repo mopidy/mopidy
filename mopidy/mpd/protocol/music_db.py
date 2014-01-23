@@ -6,27 +6,7 @@ import itertools
 from mopidy.models import Ref, Track
 from mopidy.mpd import exceptions, protocol, translator
 
-
-LIST_QUERY = r"""
-  ("?)                  # Optional quote around the field type
-  (?P<field>(           # Field to list in the response
-      [Aa]lbum
-    | [Aa]lbumartist
-    | [Aa]rtist
-    | [Cc]omposer
-    | [Dd]ate
-    | [Gg]enre
-    | [Pp]erformer
-  ))
-  \1                    # End of optional quote around the field type
-  (?:                   # Non-capturing group for optional search query
-    \                   # A single space
-    (?P<mpd_query>.*)
-  )?
-  $
-"""
-
-_SEARCH_FIELD_MAPPING = {
+_SEARCH_MAPPING = {
     'album': 'album',
     'albumartist': 'albumartist',
     'any': 'any',
@@ -41,13 +21,22 @@ _SEARCH_FIELD_MAPPING = {
     'title': 'track_name',
     'track': 'track_no'}
 
+_LIST_MAPPING = {
+    'album': 'album',
+    'albumartist': 'albumartist',
+    'artist': 'artist',
+    'composer': 'composer',
+    'date': 'date',
+    'genre': 'genre',
+    'performer': 'performer'}
 
-def _query_from_mpd_search_parameters(parameters):
+
+def _query_from_mpd_search_parameters(parameters, mapping):
     query = {}
     parameters = list(parameters)
     while parameters:
         # TODO: does it matter that this is now case insensitive
-        field = _SEARCH_FIELD_MAPPING.get(parameters.pop(0).lower())
+        field = mapping.get(parameters.pop(0).lower())
         if not field:
             raise exceptions.MpdArgError('incorrect arguments')
         if not parameters:
@@ -97,7 +86,7 @@ def count(context, *args):
     - use multiple tag-needle pairs to make more specific searches.
     """
     try:
-        query = _query_from_mpd_search_parameters(args)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         raise exceptions.MpdArgError('incorrect arguments')
     results = context.core.library.find_exact(**query).get()
@@ -137,7 +126,7 @@ def find(context, *args):
     - uses "file" instead of "filename".
     """
     try:
-        query = _query_from_mpd_search_parameters(args)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
 
@@ -165,15 +154,15 @@ def findadd(context, *args):
         current playlist. Parameters have the same meaning as for ``find``.
     """
     try:
-        query = _query_from_mpd_search_parameters(args)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
     results = context.core.library.find_exact(**query).get()
     context.core.tracklist.add(_get_tracks(results))
 
 
-@protocol.handle_request(r'list\ ' + LIST_QUERY)
-def list_(context, field, mpd_query=None):
+@protocol.commands.add('list')
+def list_(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -255,11 +244,27 @@ def list_(context, field, mpd_query=None):
     - does not add quotes around the field argument.
     - capitalizes the field argument.
     """
-    field = field.lower()
+    parameters = list(args)
+    if not parameters:
+        raise exceptions.MpdArgError('incorrect arguments')
+    field = parameters.pop(0).lower()
+
+    if field not in _LIST_MAPPING:
+        raise exceptions.MpdArgError('incorrect arguments')
+
+    if len(parameters) == 1:
+        if field != 'album':
+            raise exceptions.MpdArgError('should be "Album" for 3 arguments')
+        return _list_artist(context, {'artist': parameters})
+
     try:
-        query = translator.query_from_mpd_list_format(field, mpd_query)
+        query = _query_from_mpd_search_parameters(parameters, _LIST_MAPPING)
+    except exceptions.MpdArgError as e:
+        e.message = 'not able to parse args'
+        raise
     except ValueError:
         return
+
     if field == 'artist':
         return _list_artist(context, query)
     if field == 'albumartist':
@@ -509,7 +514,7 @@ def search(context, *args):
     - uses "file" instead of "filename".
     """
     try:
-        query = _query_from_mpd_search_parameters(args)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
@@ -533,7 +538,7 @@ def searchadd(context, *args):
         not case sensitive.
     """
     try:
-        query = _query_from_mpd_search_parameters(args)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
@@ -560,7 +565,7 @@ def searchaddpl(context, *args):
         raise exceptions.MpdArgError('incorrect arguments')
     playlist_name = parameters.pop(0)
     try:
-        query = _query_from_mpd_search_parameters(parameters)
+        query = _query_from_mpd_search_parameters(parameters, _SEARCH_MAPPING)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
