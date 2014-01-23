@@ -4,7 +4,7 @@ from mopidy.core import PlaybackState
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.commands.add('consume', state=protocol.boolean)
+@protocol.commands.add('consume', state=protocol.BOOL)
 def consume(context, state):
     """
     *musicpd.org, playback section:*
@@ -18,7 +18,7 @@ def consume(context, state):
     context.core.tracklist.consume = state
 
 
-@protocol.commands.add('crossfade', seconds=protocol.integer)
+@protocol.commands.add('crossfade', seconds=protocol.UINT)
 def crossfade(context, seconds):
     """
     *musicpd.org, playback section:*
@@ -27,7 +27,6 @@ def crossfade(context, seconds):
 
         Sets crossfading between songs.
     """
-    # TODO: check that seconds is positive
     raise exceptions.MpdNotImplemented  # TODO
 
 
@@ -89,7 +88,7 @@ def next_(context):
     return context.core.playback.next().get()
 
 
-@protocol.commands.add('pause', state=protocol.boolean)
+@protocol.commands.add('pause', state=protocol.BOOL)
 def pause(context, state=None):
     """
     *musicpd.org, playback section:*
@@ -114,7 +113,7 @@ def pause(context, state=None):
         context.core.playback.resume()
 
 
-@protocol.commands.add('play', tlid=protocol.integer)
+@protocol.commands.add('play', tlid=protocol.INT)
 def play(context, tlid=None):
     """
     *musicpd.org, playback section:*
@@ -166,7 +165,7 @@ def _play_minus_one(context):
         return  # Fail silently
 
 
-@protocol.commands.add('playid', tlid=protocol.integer)
+@protocol.commands.add('playid', tlid=protocol.INT)
 def playid(context, tlid):
     """
     *musicpd.org, playback section:*
@@ -239,7 +238,7 @@ def previous(context):
     return context.core.playback.previous().get()
 
 
-@protocol.commands.add('random', state=protocol.boolean)
+@protocol.commands.add('random', state=protocol.BOOL)
 def random(context, state):
     """
     *musicpd.org, playback section:*
@@ -251,7 +250,7 @@ def random(context, state):
     context.core.tracklist.random = state
 
 
-@protocol.commands.add('repeat', state=protocol.boolean)
+@protocol.commands.add('repeat', state=protocol.BOOL)
 def repeat(context, state):
     """
     *musicpd.org, playback section:*
@@ -293,8 +292,7 @@ def replay_gain_status(context):
     return 'off'  # TODO
 
 
-@protocol.commands.add(
-    'seek', tlid=protocol.integer, seconds=protocol.integer)
+@protocol.commands.add('seek', tlid=protocol.UINT, seconds=protocol.UINT)
 def seek(context, tlid, seconds):
     """
     *musicpd.org, playback section:*
@@ -308,15 +306,13 @@ def seek(context, tlid, seconds):
 
     - issues ``seek 1 120`` without quotes around the arguments.
     """
-    # TODO: check tlid is positive
     tl_track = context.core.playback.current_tl_track.get()
     if context.core.tracklist.index(tl_track).get() != tlid:
         play(context, tlid)
     context.core.playback.seek(seconds * 1000).get()
 
 
-@protocol.commands.add(
-    'seekid', tlid=protocol.integer, seconds=protocol.integer)
+@protocol.commands.add('seekid', tlid=protocol.UINT, seconds=protocol.UINT)
 def seekid(context, tlid, seconds):
     """
     *musicpd.org, playback section:*
@@ -325,7 +321,6 @@ def seekid(context, tlid, seconds):
 
         Seeks to the position ``TIME`` (in seconds) of song ``SONGID``.
     """
-    # TODO: check that songid and time is positive
     tl_track = context.core.playback.current_tl_track.get()
     if not tl_track or tl_track.tlid != tlid:
         playid(context, tlid)
@@ -351,7 +346,7 @@ def seekcur(context, time):
         context.core.playback.seek(position).get()
 
 
-@protocol.commands.add('setvol', volume=protocol.integer)
+@protocol.commands.add('setvol', volume=protocol.INT)
 def setvol(context, volume):
     """
     *musicpd.org, playback section:*
@@ -364,14 +359,11 @@ def setvol(context, volume):
 
     - issues ``setvol 50`` without quotes around the argument.
     """
-    if volume < 0:
-        volume = 0
-    if volume > 100:
-        volume = 100
-    context.core.playback.volume = volume
+    # NOTE: we use INT as clients can pass in +N etc.
+    context.core.playback.volume = min(max(0, volume), 100)
 
 
-@protocol.commands.add('single', state=protocol.boolean)
+@protocol.commands.add('single', state=protocol.BOOL)
 def single(context, state):
     """
     *musicpd.org, playback section:*

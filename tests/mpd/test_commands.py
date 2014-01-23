@@ -9,23 +9,49 @@ from mopidy.mpd import protocol
 
 class TestConverts(unittest.TestCase):
     def test_integer(self):
-        self.assertEqual(123, protocol.integer('123'))
-        self.assertEqual(-123, protocol.integer('-123'))
-        self.assertEqual(123, protocol.integer('+123'))
-        self.assertRaises(ValueError, protocol.integer, '3.14')
-        self.assertRaises(ValueError, protocol.integer, '')
-        self.assertRaises(ValueError, protocol.integer, 'abc')
-        self.assertRaises(ValueError, protocol.integer, '12 34')
+        self.assertEqual(123, protocol.INT('123'))
+        self.assertEqual(-123, protocol.INT('-123'))
+        self.assertEqual(123, protocol.INT('+123'))
+        self.assertRaises(ValueError, protocol.INT, '3.14')
+        self.assertRaises(ValueError, protocol.INT, '')
+        self.assertRaises(ValueError, protocol.INT, 'abc')
+        self.assertRaises(ValueError, protocol.INT, '12 34')
+
+    def test_unsigned_integer(self):
+        self.assertEqual(123, protocol.UINT('123'))
+        self.assertRaises(ValueError, protocol.UINT, '-123')
+        self.assertRaises(ValueError, protocol.UINT, '+123')
+        self.assertRaises(ValueError, protocol.UINT, '3.14')
+        self.assertRaises(ValueError, protocol.UINT, '')
+        self.assertRaises(ValueError, protocol.UINT, 'abc')
+        self.assertRaises(ValueError, protocol.UINT, '12 34')
 
     def test_boolean(self):
-        self.assertEqual(True, protocol.boolean('1'))
-        self.assertEqual(False, protocol.boolean('0'))
-        self.assertRaises(ValueError, protocol.boolean, '3.14')
-        self.assertRaises(ValueError, protocol.boolean, '')
-        self.assertRaises(ValueError, protocol.boolean, 'true')
-        self.assertRaises(ValueError, protocol.boolean, 'false')
-        self.assertRaises(ValueError, protocol.boolean, 'abc')
-        self.assertRaises(ValueError, protocol.boolean, '12 34')
+        self.assertEqual(True, protocol.BOOL('1'))
+        self.assertEqual(False, protocol.BOOL('0'))
+        self.assertRaises(ValueError, protocol.BOOL, '3.14')
+        self.assertRaises(ValueError, protocol.BOOL, '')
+        self.assertRaises(ValueError, protocol.BOOL, 'true')
+        self.assertRaises(ValueError, protocol.BOOL, 'false')
+        self.assertRaises(ValueError, protocol.BOOL, 'abc')
+        self.assertRaises(ValueError, protocol.BOOL, '12 34')
+
+    def test_range(self):
+        self.assertEqual(slice(1, 2), protocol.RANGE('1'))
+        self.assertEqual(slice(0, 1), protocol.RANGE('0'))
+        self.assertEqual(slice(0, None), protocol.RANGE('0:'))
+        self.assertEqual(slice(1, 3), protocol.RANGE('1:3'))
+        self.assertRaises(ValueError, protocol.RANGE, '3.14')
+        self.assertRaises(ValueError, protocol.RANGE, '1:abc')
+        self.assertRaises(ValueError, protocol.RANGE, 'abc:1')
+        self.assertRaises(ValueError, protocol.RANGE, '2:1')
+        self.assertRaises(ValueError, protocol.RANGE, '-1:2')
+        self.assertRaises(ValueError, protocol.RANGE, '1 : 2')
+        self.assertRaises(ValueError, protocol.RANGE, '')
+        self.assertRaises(ValueError, protocol.RANGE, 'true')
+        self.assertRaises(ValueError, protocol.RANGE, 'false')
+        self.assertRaises(ValueError, protocol.RANGE, 'abc')
+        self.assertRaises(ValueError, protocol.RANGE, '12 34')
 
 
 class TestCommands(unittest.TestCase):

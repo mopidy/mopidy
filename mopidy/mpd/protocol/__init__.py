@@ -96,29 +96,40 @@ def load_protocol_modules():
         stored_playlists)
 
 
-def integer(value):
+def INT(value):
     if value is None:
         raise ValueError('None is not a valid integer')
+    # TODO: check for whitespace via value != value.strip()?
     return int(value)
 
 
-def boolean(value):
+def UINT(value):
+    if value is None:
+        raise ValueError('None is not a valid integer')
+    if not value.isdigit():
+        raise ValueError('Only positive numbers are allowed')
+    return int(value)
+
+
+def BOOL(value):
     if value in ('1', '0'):
         return bool(int(value))
     raise ValueError('%r is not 0 or 1' % value)
 
 
-def position_or_range(value):
+def RANGE(value):
     # TODO: test and check that values are positive
     if ':' in value:
         start, stop = value.split(':', 1)
-        start = int(start)
+        start = UINT(start)
         if stop.strip():
-            stop = int(stop)
+            stop = UINT(stop)
+            if start >= stop:
+                raise ValueError('End must be larger than start')
         else:
             stop = None
     else:
-        start = int(value)
+        start = UINT(value)
         stop = start + 1
     return slice(start, stop)
 
