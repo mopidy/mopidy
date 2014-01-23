@@ -11,6 +11,10 @@ v0.18.1 (UNRELEASED)
 - Disable extension instead of crashing if a dependency has the wrong
   version. (Fixes: :issue:`657`)
 
+- Make logging work to both console, debug log file, and any custom logging
+  setup from :confval:`logging/config_file` at the same time. (Fixes:
+  :issue:`661`)
+
 
 v0.18.0 (2014-01-19)
 ====================
