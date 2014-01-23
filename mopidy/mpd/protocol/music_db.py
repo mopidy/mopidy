@@ -5,9 +5,7 @@ import itertools
 import re
 
 from mopidy.models import Ref, Track
-from mopidy.mpd import translator
-from mopidy.mpd.exceptions import MpdArgError, MpdNoExistError
-from mopidy.mpd.protocol import handle_request, stored_playlists
+from mopidy.mpd import exceptions, protocol, translator
 
 
 LIST_QUERY = r"""
@@ -145,7 +143,7 @@ def _artist_as_track(artist):
         artists=[artist])
 
 
-@handle_request(r'count\ ' + SEARCH_QUERY)
+@protocol.handle_request(r'count\ ' + SEARCH_QUERY)
 def count(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -163,7 +161,7 @@ def count(context, mpd_query):
     try:
         query = _query_from_mpd_search_format(mpd_query)
     except ValueError:
-        raise MpdArgError('incorrect arguments')
+        raise exceptions.MpdArgError('incorrect arguments')
     results = context.core.library.find_exact(**query).get()
     result_tracks = _get_tracks(results)
     return [
@@ -172,7 +170,7 @@ def count(context, mpd_query):
     ]
 
 
-@handle_request(r'find\ ' + SEARCH_QUERY)
+@protocol.handle_request(r'find\ ' + SEARCH_QUERY)
 def find(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -217,7 +215,7 @@ def find(context, mpd_query):
     return translator.tracks_to_mpd_format(result_tracks)
 
 
-@handle_request(r'findadd\ ' + SEARCH_QUERY)
+@protocol.handle_request(r'findadd\ ' + SEARCH_QUERY)
 def findadd(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -235,7 +233,7 @@ def findadd(context, mpd_query):
     context.core.tracklist.add(_get_tracks(results))
 
 
-@handle_request(r'list\ ' + LIST_QUERY)
+@protocol.handle_request(r'list\ ' + LIST_QUERY)
 def list_(context, field, mpd_query=None):
     """
     *musicpd.org, music database section:*
@@ -407,8 +405,8 @@ def _list_genre(context, query):
     return genres
 
 
-@handle_request(r'listall$')
-@handle_request(r'listall\ "(?P<uri>[^"]+)"$')
+# TODO: see if we can combine listall, listallinfo and lsinfo to one helper
+@protocol.commands.add('listall')
 def listall(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -419,12 +417,9 @@ def listall(context, uri=None):
     """
     result = []
     root_path = translator.normalize_path(uri)
-    # TODO: doesn't the dispatcher._call_handler have enough info to catch
-    # the error this can produce, set the command and then 'raise'?
     try:
         uri = context.directory_path_to_uri(root_path)
-    except MpdNoExistError as e:
-        e.command = 'listall'
+    except exceptions.MpdNoExistError as e:
         e.message = 'Not found'
         raise
     browse_futures = [(root_path, context.core.library.browse(uri))]
@@ -441,13 +436,12 @@ def listall(context, uri=None):
                 result.append(('file', ref.uri))
 
     if not result:
-        raise MpdNoExistError('Not found')
+        raise exceptions.MpdNoExistError('Not found')
 
     return [('directory', root_path)] + result
 
 
-@handle_request(r'listallinfo$')
-@handle_request(r'listallinfo\ "(?P<uri>[^"]+)"$')
+@protocol.commands.add('listallinfo')
 def listallinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -462,7 +456,7 @@ def listallinfo(context, uri=None):
     root_path = translator.normalize_path(uri)
     try:
         uri = context.directory_path_to_uri(root_path)
-    except MpdNoExistError as e:
+    except exceptions.MpdNoExistError as e:
         e.command = 'listallinfo'
         e.message = 'Not found'
         raise
@@ -489,13 +483,12 @@ def listallinfo(context, uri=None):
             result.append(obj)
 
     if not result:
-        raise MpdNoExistError('Not found')
+        raise exceptions.MpdNoExistError('Not found')
 
     return [('directory', root_path)] + result
 
 
-@handle_request(r'lsinfo$')
-@handle_request(r'lsinfo\ "(?P<uri>[^"]*)"$')
+@protocol.commands.add('lsinfo')
 def lsinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -516,13 +509,13 @@ def lsinfo(context, uri=None):
     root_path = translator.normalize_path(uri, relative=True)
     try:
         uri = context.directory_path_to_uri(root_path)
-    except MpdNoExistError as e:
+    except exceptions.MpdNoExistError as e:
         e.command = 'lsinfo'
         e.message = 'Not found'
         raise
 
     if uri is None:
-        result.extend(stored_playlists.listplaylists(context))
+        result.extend(protocol.stored_playlists.listplaylists(context))
 
     for ref in context.core.library.browse(uri).get():
         if ref.type == Ref.DIRECTORY:
@@ -536,8 +529,7 @@ def lsinfo(context, uri=None):
     return result
 
 
-@handle_request(r'rescan$')
-@handle_request(r'rescan\ "(?P<uri>[^"]+)"$')
+@protocol.commands.add('rescan')
 def rescan(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -546,10 +538,10 @@ def rescan(context, uri=None):
 
         Same as ``update``, but also rescans unmodified files.
     """
-    return update(context, uri, rescan_unmodified_files=True)
+    return {'updating_db': 0}  # TODO
 
 
-@handle_request(r'search\ ' + SEARCH_QUERY)
+@protocol.handle_request(r'search\ ' + SEARCH_QUERY)
 def search(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -588,7 +580,7 @@ def search(context, mpd_query):
     return translator.tracks_to_mpd_format(artists + albums + tracks)
 
 
-@handle_request(r'searchadd\ ' + SEARCH_QUERY)
+@protocol.handle_request(r'searchadd\ ' + SEARCH_QUERY)
 def searchadd(context, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -609,7 +601,8 @@ def searchadd(context, mpd_query):
     context.core.tracklist.add(_get_tracks(results))
 
 
-@handle_request(r'searchaddpl\ "(?P<playlist_name>[^"]+)"\ ' + SEARCH_QUERY)
+@protocol.handle_request(
+    r'searchaddpl\ "(?P<playlist_name>[^"]+)"\ ' + SEARCH_QUERY)
 def searchaddpl(context, playlist_name, mpd_query):
     """
     *musicpd.org, music database section:*
@@ -638,9 +631,8 @@ def searchaddpl(context, playlist_name, mpd_query):
     context.core.playlists.save(playlist)
 
 
-@handle_request(r'update$')
-@handle_request(r'update\ "(?P<uri>[^"]+)"$')
-def update(context, uri=None, rescan_unmodified_files=False):
+@protocol.commands.add('update')
+def update(context, uri=None):
     """
     *musicpd.org, music database section:*
 
