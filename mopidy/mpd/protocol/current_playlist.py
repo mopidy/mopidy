@@ -219,11 +219,8 @@ def playlistid(context, tlid=None):
             context.core.tracklist.tl_tracks.get())
 
 
-# TODO: convert
-@protocol.handle_request(r'playlistinfo$')
-@protocol.handle_request(r'playlistinfo\ "(?P<songpos>-?\d+)"$')
-@protocol.handle_request(r'playlistinfo\ "(?P<start>\d+):(?P<end>\d+)*"$')
-def playlistinfo(context, songpos=None, start=None, end=None):
+@protocol.commands.add('playlistinfo')
+def playlistinfo(context, parameter=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -238,24 +235,18 @@ def playlistinfo(context, songpos=None, start=None, end=None):
     - uses negative indexes, like ``playlistinfo "-1"``, to request
       the entire playlist
     """
-    if songpos == '-1':
-        songpos = None
-    if songpos is not None:
-        songpos = int(songpos)
-        tl_track = context.core.tracklist.tl_tracks.get()[songpos]
-        return translator.track_to_mpd_format(tl_track, position=songpos)
+    if parameter is None or parameter == '-1':
+        start, end = 0, None
     else:
-        if start is None:
-            start = 0
-        start = int(start)
-        if not (0 <= start <= context.core.tracklist.length.get()):
-            raise exceptions.MpdArgError('Bad song index')
-        if end is not None:
-            end = int(end)
-            if end > context.core.tracklist.length.get():
-                end = None
-        tl_tracks = context.core.tracklist.tl_tracks.get()
-        return translator.tracks_to_mpd_format(tl_tracks, start, end)
+        tracklist_slice = protocol.RANGE(parameter)
+        start, end = tracklist_slice.start, tracklist_slice.stop
+
+    tl_tracks = context.core.tracklist.tl_tracks.get()
+    if start and start > len(tl_tracks):
+        raise exceptions.MpdArgError('Bad song index')
+    if end and end > len(tl_tracks):
+        end = None
+    return translator.tracks_to_mpd_format(tl_tracks, start, end)
 
 
 @protocol.commands.add('playlistsearch')
