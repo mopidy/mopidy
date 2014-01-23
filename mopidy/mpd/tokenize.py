@@ -5,10 +5,6 @@ import re
 from mopidy.mpd import exceptions
 
 
-class Error(Exception):
-    pass
-
-
 WORD_RE = re.compile(r"""
     ^
     (\s*)             # Leading whitespace not allowed, capture it to report.
