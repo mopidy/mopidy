@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.commands.add('sticker')
+@protocol.commands.add('sticker', list_command=False)
 def sticker(context, action, field, uri, name=None, value=None):
     """
     *musicpd.org, sticker section:*

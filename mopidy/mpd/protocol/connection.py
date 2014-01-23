@@ -15,7 +15,7 @@ def close(context):
     context.session.close()
 
 
-@protocol.commands.add('kill')
+@protocol.commands.add('kill', list_command=False)
 def kill(context):
     """
     *musicpd.org, connection section:*

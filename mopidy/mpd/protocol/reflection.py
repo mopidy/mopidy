@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.handle_request(r'config$', auth_required=False)
+@protocol.commands.add('config', list_command=False)
 def config(context):
     """
     *musicpd.org, reflection section:*
@@ -17,7 +17,7 @@ def config(context):
     raise exceptions.MpdPermissionError(command='config')
 
 
-@protocol.handle_request(r'commands$', auth_required=False)
+@protocol.commands.add('commands', auth_required=False)
 def commands(context):
     """
     *musicpd.org, reflection section:*
@@ -40,19 +40,11 @@ def commands(context):
         command_names.update(c.name for c in protocol.mpd_commands
                              if not c.auth_required)
 
-    # TODO: remove once we've marked all of these as list_command=False
-    # No one is permited to use 'config' or 'kill', rest of commands are not
-    # listed by MPD, so we shouldn't either.
-    command_names = command_names - set([
-        'config', 'kill', 'command_list_begin', 'command_list_ok_begin',
-        'command_list_ok_begin', 'command_list_end', 'idle', 'noidle',
-        'sticker'])
-
     return [
         ('command', command_name) for command_name in sorted(command_names)]
 
 
-@protocol.handle_request(r'decoders$')
+@protocol.commands.add('decoders')
 def decoders(context):
     """
     *musicpd.org, reflection section:*
@@ -79,7 +71,7 @@ def decoders(context):
     return  # TODO
 
 
-@protocol.handle_request(r'notcommands$', auth_required=False)
+@protocol.commands.add('notcommands', auth_required=False)
 def notcommands(context):
     """
     *musicpd.org, reflection section:*
@@ -104,7 +96,7 @@ def notcommands(context):
         ('command', command_name) for command_name in sorted(command_names)]
 
 
-@protocol.handle_request(r'tagtypes$')
+@protocol.commands.add('tagtypes')
 def tagtypes(context):
     """
     *musicpd.org, reflection section:*
@@ -116,7 +108,7 @@ def tagtypes(context):
     pass  # TODO
 
 
-@protocol.handle_request(r'urlhandlers$')
+@protocol.commands.add('urlhandlers')
 def urlhandlers(context):
     """
     *musicpd.org, reflection section:*

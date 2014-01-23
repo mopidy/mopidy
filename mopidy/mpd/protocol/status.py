@@ -40,7 +40,7 @@ def currentsong(context):
         return translator.track_to_mpd_format(tl_track, position=position)
 
 
-@protocol.commands.add('idle')
+@protocol.commands.add('idle', list_command=False)
 def idle(context, *subsystems):
     """
     *musicpd.org, status section:*
@@ -96,7 +96,7 @@ def idle(context, *subsystems):
     return response
 
 
-@protocol.commands.add('noidle')
+@protocol.commands.add('noidle', list_command=False)
 def noidle(context):
     """See :meth:`_status_idle`."""
     if not context.subscriptions:
