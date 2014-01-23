@@ -2,6 +2,7 @@ etc/mopidy
 etc/mopidy/extensions.d
 var/cache/mopidy
 var/lib/mopidy
+var/lib/mopidy/local
 var/lib/mopidy/media
 var/lib/mopidy/playlists
 var/log/mopidy

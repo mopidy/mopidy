@@ -3,6 +3,7 @@ mopidy (0.18.1-1) unstable; urgency=low
   * New upstream release.
   * Adjust the log format again.
   * Remove deprecated config value local/tag_cache_file.
+  * Create directory for new config value local/data_dir.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Thu, 23 Jan 2014 23:42:45 +0100
 

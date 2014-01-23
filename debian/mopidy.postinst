@@ -9,6 +9,7 @@ case "$1" in
 
         chown mopidy:audio /var/cache/mopidy
         chown mopidy:audio /var/lib/mopidy
+        chown mopidy:audio /var/lib/mopidy/local
         chown mopidy:audio /var/lib/mopidy/media
         chown mopidy:audio /var/lib/mopidy/playlists
         chown mopidy:audio /var/log/mopidy
