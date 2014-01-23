@@ -45,7 +45,7 @@ class MpdSession(network.LineProtocol):
 
     def decode(self, line):
         try:
-            return super(MpdSession, self).decode(line.decode('string_escape'))
+            return super(MpdSession, self).decode(line)
         except ValueError:
             logger.warning(
                 'Stopping actor due to unescaping error, data '

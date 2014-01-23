@@ -182,6 +182,8 @@ class MpdDispatcher(object):
             raise
         except LookupError:
             pass  # Command has not been converted, i.e. fallback...
+
+        request = request.decode('string_escape')
         (command_name, handler, kwargs) = self._find_handler(request)
         try:
             return handler(self.context, **kwargs)
