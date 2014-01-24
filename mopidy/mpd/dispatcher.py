@@ -229,8 +229,8 @@ class MpdContext(object):
     #: The current :class:`mopidy.mpd.MpdSession`.
     session = None
 
-    #: The Mopidy configuration.
-    config = None
+    #: The MPD password
+    password = None
 
     #: The Mopidy core API. An instance of :class:`mopidy.core.Core`.
     core = None
@@ -246,7 +246,8 @@ class MpdContext(object):
     def __init__(self, dispatcher, session=None, config=None, core=None):
         self.dispatcher = dispatcher
         self.session = session
-        self.config = config
+        if config is not None:
+            self.password = config['mpd']['password']
         self.core = core
         self.events = set()
         self.subscriptions = set()
