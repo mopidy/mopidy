@@ -62,30 +62,15 @@ SEARCH_QUERY = r"""
   $
 """
 
-# TODO Would be nice to get ("?)...\1 working for the quotes here
-SEARCH_PAIR_WITHOUT_GROUPS = r"""
+SEARCH_PAIR_WITH_GROUPS = r"""
+  ("?)                # Optional quote around the field type
   \b                  # Only begin matching at word bundaries
-  "?                  # Optional quote around the field type
-  (?:                 # A non-capturing group for the field type
+  (                   # A capturing group for the field type
 """ + SEARCH_FIELDS + """
   )
-  "?                  # End of optional quote around the field type
+  \\1                 # End of optional quote around the field type
   \                   # A single space
-  "[^"]+"             # Matching a quoted search string
-"""
-SEARCH_PAIR_WITHOUT_GROUPS_RE = re.compile(
-    SEARCH_PAIR_WITHOUT_GROUPS, flags=(re.UNICODE | re.VERBOSE))
-
-# TODO Would be nice to get ("?)...\1 working for the quotes here
-SEARCH_PAIR_WITH_GROUPS = r"""
-  \b                  # Only begin matching at word bundaries
-  "?                  # Optional quote around the field type
-  (?P<field>(         # A capturing group for the field type
-""" + SEARCH_FIELDS + """
-  ))
-  "?                  # End of optional quote around the field type
-  \                   # A single space
-  "(?P<what>[^"]+)"   # Capturing a quoted search string
+  "([^"]+)"           # Capturing a quoted search string
 """
 SEARCH_PAIR_WITH_GROUPS_RE = re.compile(
     SEARCH_PAIR_WITH_GROUPS, flags=(re.UNICODE | re.VERBOSE))
@@ -99,18 +84,18 @@ def _query_from_mpd_search_format(mpd_query):
     :param mpd_query: the MPD search query
     :type mpd_query: string
     """
-    pairs = SEARCH_PAIR_WITHOUT_GROUPS_RE.findall(mpd_query)
+    matches = SEARCH_PAIR_WITH_GROUPS_RE.findall(mpd_query)
     query = {}
-    for pair in pairs:
-        m = SEARCH_PAIR_WITH_GROUPS_RE.match(pair)
-        field = m.groupdict()['field'].lower()
+    # discard first field, which just captures optional quote
+    for _, field, what in matches:
+        field = field.lower()
         if field == 'title':
             field = 'track_name'
         elif field == 'track':
             field = 'track_no'
         elif field in ('file', 'filename'):
             field = 'uri'
-        what = m.groupdict()['what']
+
         if not what:
             raise ValueError
         if field in query:
