@@ -288,18 +288,35 @@ class MpdContext(object):
             self.refresh_playlists_mapping()
         return self._playlist_name_from_uri[uri]
 
-    # TODO: consider making context.browse(path) which uses this internally.
-    # advantage would be that all browse requests then go through the same code
-    # and we could prebuild/cache path->uri relationships instead of having to
-    # look them up all the time.
-    def directory_path_to_uri(self, path):
-        parts = re.findall(r'[^/]+', path)
+    def browse(self, path, recursive=True, lookup=True):
+        # TODO: consider caching lookups for less work mapping path->uri
+        path_parts = re.findall(r'[^/]+', path or '')
+        root_path = '/'.join([''] + path_parts)
         uri = None
-        for part in parts:
+
+        for part in path_parts:
             for ref in self.core.library.browse(uri).get():
                 if ref.type == ref.DIRECTORY and ref.name == part:
                     uri = ref.uri
                     break
             else:
-                raise exceptions.MpdNoExistError()
-        return uri
+                raise exceptions.MpdNoExistError('Not found')
+
+        if recursive:
+            yield (root_path, None)
+
+        path_and_futures = [(root_path, self.core.library.browse(uri))]
+        while path_and_futures:
+            base_path, future = path_and_futures.pop()
+            for ref in future.get():
+                path = '/'.join([base_path, ref.name.replace('/', '')])
+                if ref.type == ref.DIRECTORY:
+                    yield (path, None)
+                    if recursive:
+                        path_and_futures.append(
+                            (path, self.core.library.browse(ref.uri)))
+                elif ref.type == ref.TRACK:
+                    if lookup:
+                        yield (path, self.core.library.lookup(ref.uri))
+                    else:
+                        yield (path, ref)

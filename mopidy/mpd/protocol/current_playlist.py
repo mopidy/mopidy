@@ -20,32 +20,20 @@ def add(context, uri):
     if not uri.strip('/'):
         return
 
-    tl_tracks = context.core.tracklist.add(uri=uri).get()
-    if tl_tracks:
+    if context.core.tracklist.add(uri=uri).get():
         return
 
     try:
-        uri = context.directory_path_to_uri(translator.normalize_path(uri))
+        tracks = []
+        for path, lookup_future in context.browse(uri):
+            if lookup_future:
+                tracks.extend(lookup_future.get())
     except exceptions.MpdNoExistError as e:
         e.message = 'directory or file not found'
         raise
 
-    browse_futures = [context.core.library.browse(uri)]
-    lookup_futures = []
-    while browse_futures:
-        for ref in browse_futures.pop().get():
-            if ref.type == ref.DIRECTORY:
-                browse_futures.append(context.core.library.browse(ref.uri))
-            else:
-                lookup_futures.append(context.core.library.lookup(ref.uri))
-
-    tracks = []
-    for future in lookup_futures:
-        tracks.extend(future.get())
-
     if not tracks:
         raise exceptions.MpdNoExistError('directory or file not found')
-
     context.core.tracklist.add(tracks=tracks)
 
 

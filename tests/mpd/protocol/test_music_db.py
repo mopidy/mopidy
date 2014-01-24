@@ -306,10 +306,31 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_dir_includes_subdirs(self):
         self.backend.library.dummy_browse_result = {
-            'dummy:/': [Ref.directory(uri='/foo', name='foo')]}
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')]}
 
         self.sendRequest('lsinfo "/dummy"')
         self.assertInResponse('directory: dummy/foo')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_dir_does_not_recurse(self):
+        self.backend.library.dummy_library = [
+            Track(uri='dummy:/a', name='a'),
+        ]
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertNotInResponse('file: dummy:/a')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_dir_does_not_self(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertNotInResponse('directory: dummy')
         self.assertInResponse('OK')
 
     def test_update_without_uri(self):
