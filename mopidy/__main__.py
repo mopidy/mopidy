@@ -37,7 +37,9 @@ def main():
     logger.info('Starting Mopidy %s', versioning.get_version())
 
     signal.signal(signal.SIGTERM, process.exit_handler)
-    signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
+    # Windows does not have signal.SIGUSR1
+    if hasattr(signal, 'SIGUSR1'):
+        signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
 
     try:
         registry = ext.Registry()
