@@ -66,12 +66,15 @@ class _BrowseCache(object):
             for i in reversed(range(len(parts))):
                 directory = '/'.join(parts[:i+1])
                 uri = translator.path_to_local_directory_uri(directory)
+
                 # First dir we process is our parent
                 if not parent_uri:
                     parent_uri = uri
 
                 # We found ourselves and we exist, done.
                 if uri in self._cache:
+                    if child:
+                        self._cache[uri][child.uri] = child
                     break
 
                 # Initialize ourselves, store child if present, and add

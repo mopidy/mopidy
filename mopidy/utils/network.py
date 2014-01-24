@@ -5,6 +5,7 @@ import gobject
 import logging
 import re
 import socket
+import sys
 import threading
 
 import pykka
@@ -43,7 +44,12 @@ def create_socket():
     if has_ipv6:
         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         # Explicitly configure socket to work for both IPv4 and IPv6
-        sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        if hasattr(socket, 'IPPROTO_IPV6'):
+            sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        elif sys.platform == 'win32':  # also match 64bit windows.
+            # Python 2.7 on windows does not have the IPPROTO_IPV6 constant
+            # Use values extracted from Windows Vista/7/8's header
+            sock.setsockopt(41, 27, 0)
     else:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

@@ -4,7 +4,34 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v0.18.0 (UNRELEASED)
+
+v0.19.0 (unreleased)
+====================
+
+**MPD**
+
+- Minor refactor of context such that it stores password instead of config.
+  (Fixes: :issue:`646`)
+
+**Windows**
+
+- Network and signal handling has been updated to play nice on windows systems.
+
+
+v0.18.1 (2014-01-23)
+====================
+
+Bug fix release.
+
+- Disable extension instead of crashing if a dependency has the wrong
+  version. (Fixes: :issue:`657`)
+
+- Make logging work to both console, debug log file, and any custom logging
+  setup from :confval:`logging/config_file` at the same time. (Fixes:
+  :issue:`661`)
+
+
+v0.18.0 (2014-01-19)
 ====================
 
 The focus of 0.18 have been on two fronts: the local library and browsing.
@@ -21,8 +48,8 @@ the local and Spotify backends. It is also used by the new Mopidy-Dirble
 extension to provide you with a directory of Internet radio stations from all
 over the world.
 
-Since the release of 0.17, we've closed or merged 47 issues and pull requests
-through about 270 commits by :ref:`11 people <authors>`, including six new
+Since the release of 0.17, we've closed or merged 49 issues and pull requests
+through about 285 commits by :ref:`11 people <authors>`, including six new
 guys. Thanks to everyone that has contributed!
 
 **Core API**
@@ -1831,9 +1858,8 @@ to this problem.
 - MPD frontend:
 
   - Add support for password authentication. See
-    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` and
-    :ref:`use-mpd-on-a-network` for details on how to use it. (Fixes:
-    :issue:`41`)
+    :attr:`mopidy.settings.MPD_SERVER_PASSWORD` for details on how to use it.
+    (Fixes: :issue:`41`)
 
   - Support ``setvol 50`` without quotes around the argument. Fixes volume
     control in Droid MPD.
