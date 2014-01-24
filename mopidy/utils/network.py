@@ -45,7 +45,7 @@ def create_socket():
         # Explicitly configure socket to work for both IPv4 and IPv6
         if (hasattr(socket, 'IPPROTO_IPV6')):
             sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
-        else:
+        elif sys.platform == 'win32':
             # Python 2.7 on windows does not have the IPPROTO_IPV6 constant
             # Use values extracted from Windows Vista/7/8's header
             sock.setsockopt(41, 27, 0)
