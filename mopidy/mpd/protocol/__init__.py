@@ -14,6 +14,8 @@ from __future__ import unicode_literals
 
 import inspect
 
+from mopidy.mpd import exceptions
+
 #: The MPD protocol uses UTF-8 for encoding all data.
 ENCODING = 'UTF-8'
 
@@ -79,7 +81,7 @@ class Commands(object):
     def add(self, name, auth_required=True, list_command=True, **validators):
         def wrapper(func):
             if name in self.handlers:
-                raise Exception('%s already registered' % name)
+                raise ValueError('%s already registered' % name)
 
             args, varargs, keywords, defaults = inspect.getargspec(func)
             defaults = dict(zip(args[-len(defaults or []):], defaults or []))
@@ -104,7 +106,10 @@ class Commands(object):
                 for key, value in callargs.items():
                     default = defaults.get(key, object())
                     if key in validators and value != default:
-                        callargs[key] = validators[key](value)
+                        try:
+                            callargs[key] = validators[key](value)
+                        except ValueError:
+                            raise exceptions.MpdArgError('incorrect arguments')
                 return func(**callargs)
 
             validate.auth_required = auth_required
@@ -114,11 +119,10 @@ class Commands(object):
         return wrapper
 
     def call(self, args, context=None):
-        # TODO: raise mopidy.mpd.exceptions
         if not args:
-            raise TypeError('No args provided')
+            raise exceptions.MpdNoCommand()
         if args[0] not in self.handlers:
-            raise LookupError('Unknown command')
+            raise exceptions.MpdUnknownCommand(command=args[0])
         return self.handlers[args[0]](context, *args[1:])
 
 

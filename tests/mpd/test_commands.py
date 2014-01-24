@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-from mopidy.mpd import protocol
+from mopidy.mpd import exceptions, protocol
 
 
 class TestConverts(unittest.TestCase):
@@ -134,7 +134,7 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(sentinel3, self.commands.call(['baz']))
 
     def test_call_with_nonexistent_handler(self):
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.MpdUnknownCommand):
             self.commands.call(['bar'])
 
     def test_call_passes_context(self):
@@ -144,7 +144,7 @@ class TestCommands(unittest.TestCase):
             sentinel, self.commands.call(['foo'], context=sentinel))
 
     def test_call_without_args_fails(self):
-        with self.assertRaises(TypeError):
+        with self.assertRaises(exceptions.MpdNoCommand):
             self.commands.call([])
 
     def test_call_passes_required_argument(self):
@@ -211,6 +211,16 @@ class TestCommands(unittest.TestCase):
         with self.assertRaises(TypeError):
             func = lambda context: True
             self.commands.add('bar', context=lambda v: v)(func)
+
+    def test_validator_value_error_is_converted(self):
+        def validdate(value):
+            raise ValueError
+
+        func = lambda context, arg: True
+        self.commands.add('bar', arg=validdate)(func)
+
+        with self.assertRaises(exceptions.MpdArgError):
+            self.commands.call(['bar', 'test'])
 
     def test_auth_required_gets_stored(self):
         func1 = lambda context: context
