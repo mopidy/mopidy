@@ -5,6 +5,14 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.19.0 (unreleased)
+====================
+
+**Windows**
+
+- Network and signal handling has been updated to play nice on windows systems.
+
+
 v0.18.1 (2014-01-23)
 ====================
 
