@@ -8,6 +8,11 @@ This changelog is used to track all major changes to Mopidy.
 v0.19.0 (unreleased)
 ====================
 
+**MPD**
+
+- Minor refactor of context such that it stores password instead of config.
+  (Fixes: :issue:`646`)
+
 **Windows**
 
 - Network and signal handling has been updated to play nice on windows systems.
