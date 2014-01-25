@@ -115,6 +115,8 @@ class Audio(pykka.ThreadingActor):
         self._disconnect(source, 'enough-data')
         self._disconnect(source, 'seek-data')
 
+        logger.debug('Ready to switch to new stream')
+
     def _on_new_source(self, element, pad):
         uri = element.get_property('uri')
         if not uri or not uri.startswith('appsrc://'):
@@ -292,6 +294,9 @@ class Audio(pykka.ThreadingActor):
             logger.warning(
                 '%s Debug message: %s',
                 str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        elif message.type == gst.MESSAGE_ELEMENT:
+            if message.structure.has_name('playbin2-stream-changed'):
+                logger.debug('Playback of new stream started')
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
