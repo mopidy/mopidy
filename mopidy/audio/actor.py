@@ -160,14 +160,34 @@ class Audio(pykka.ThreadingActor):
     def _setup_output(self):
         output_desc = self._config['audio']['output']
         try:
-            output = gst.parse_bin_from_description(
+            user_output = gst.parse_bin_from_description(
                 output_desc, ghost_unconnected_pads=True)
-            self._playbin.set_property('audio-sink', output)
-            logger.info('Audio output set to "%s"', output_desc)
         except gobject.GError as ex:
             logger.error(
                 'Failed to create audio output "%s": %s', output_desc, ex)
             process.exit_process()
+
+        output = gst.Bin('output')
+
+        # Queue element to buy use time between the about to finish event and
+        # the actual switch, i.e. about to switch can block for longer thanks
+        # to this queue.
+        # TODO: make the min-max values a setting?
+        queue = gst.element_factory_make('queue')
+        queue.set_property('max-size-buffers', 0)
+        queue.set_property('max-size-bytes', 0)
+        queue.set_property('max-size-time', 5 * gst.SECOND)
+        queue.set_property('min-threshold-time', 3 * gst.SECOND)
+
+        output.add(user_output)
+        output.add(queue)
+
+        queue.link(user_output)
+        ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
+        output.add_pad(ghost_pad)
+
+        logger.info('Audio output set to "%s"', output_desc)
+        self._playbin.set_property('audio-sink', output)
 
     def _setup_visualizer(self):
         visualizer_element = self._config['audio']['visualizer']
