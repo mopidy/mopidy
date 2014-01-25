@@ -111,8 +111,11 @@ case "$1" in
                 ;;
         esac
         ;;
+    showconfig)
+        $DAEMON $DAEMON_ARGS config
+        ;;
     *)
-        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|showconfig}" >&2
         exit 3
         ;;
 esac
