@@ -11,6 +11,7 @@ from . import listener
 logger = logging.getLogger(__name__)
 
 
+# TODO: split mixing out from playback?
 class PlaybackController(object):
     pykka_traversable = True
 
@@ -24,6 +25,7 @@ class PlaybackController(object):
         self._mute = False
 
     def _get_backend(self):
+        # TODO: take in track instead
         if self.current_tl_track is None:
             return None
         uri = self.current_tl_track.track.uri
@@ -129,6 +131,7 @@ class PlaybackController(object):
 
     ### Methods
 
+    # TODO: remove this.
     def change_track(self, tl_track, on_error_step=1):
         """
         Change to the given track, keeping the current playback state.
@@ -147,6 +150,7 @@ class PlaybackController(object):
         elif old_state == PlaybackState.PAUSED:
             self.pause()
 
+    # TODO: this is not really end of track, this is on_need_next_track
     def on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
@@ -184,6 +188,9 @@ class PlaybackController(object):
         """
         tl_track = self.core.tracklist.next_track(self.current_tl_track)
         if tl_track:
+            # TODO: switch to:
+            # backend.play(track)
+            # wait for state change?
             self.change_track(tl_track)
         else:
             self.stop(clear_current_track=True)
@@ -192,6 +199,9 @@ class PlaybackController(object):
         """Pause playback."""
         backend = self._get_backend()
         if not backend or backend.playback.pause().get():
+            # TODO: switch to:
+            # backend.track(pause)
+            # wait for state change?
             self.state = PlaybackState.PAUSED
             self._trigger_track_playback_paused()
 
@@ -226,6 +236,10 @@ class PlaybackController(object):
 
         assert tl_track in self.core.tracklist.tl_tracks
 
+        # TODO: switch to:
+        # backend.play(track)
+        # wait for state change?
+
         if self.state == PlaybackState.PLAYING:
             self.stop()
 
@@ -236,6 +250,7 @@ class PlaybackController(object):
 
         if success:
             self.core.tracklist.mark_playing(tl_track)
+            # TODO: replace with stream-changed
             self._trigger_track_playback_started()
         else:
             self.core.tracklist.mark_unplayable(tl_track)
@@ -253,6 +268,9 @@ class PlaybackController(object):
         will continue. If it was paused, it will still be paused, etc.
         """
         tl_track = self.current_tl_track
+        # TODO: switch to:
+        # self.play(....)
+        # wait for state change?
         self.change_track(
             self.core.tracklist.previous_track(tl_track), on_error_step=-1)
 
@@ -263,7 +281,11 @@ class PlaybackController(object):
         backend = self._get_backend()
         if backend and backend.playback.resume().get():
             self.state = PlaybackState.PLAYING
+            # TODO: trigger via gst messages
             self._trigger_track_playback_resumed()
+        # TODO: switch to:
+        # backend.resume()
+        # wait for state change?
 
     def seek(self, time_position):
         """

@@ -42,6 +42,7 @@ PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
 PLAYBIN_VIS_FLAGS = PLAYBIN_FLAGS | (1 << 3)
 
 
+# TODO: split out mixer as these are to intertwined right now
 class Audio(pykka.ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
@@ -412,6 +413,7 @@ class Audio(pykka.ThreadingActor):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
+        # TODO: replace this with emit_data(None)?
         self._playbin.get_property('source').emit('end-of-stream')
 
     def get_position(self):
