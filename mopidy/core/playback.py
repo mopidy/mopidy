@@ -343,7 +343,8 @@ class PlaybackController(object):
             return
         listener.CoreListener.send(
             'track_playback_ended',
-            tl_track=self.current_tl_track, time_position=time_position_before_stop)
+            tl_track=self.current_tl_track,
+            time_position=time_position_before_stop)
 
     def _trigger_playback_state_changed(self, old_state, new_state):
         logger.debug('Triggering playback state change event')
