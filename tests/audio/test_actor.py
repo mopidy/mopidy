@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import mock
 import unittest
 
 import pygst
@@ -113,6 +114,18 @@ class AudioTest(unittest.TestCase):
     @unittest.SkipTest
     def test_invalid_output_raises_error(self):
         pass  # TODO
+
+    @mock.patch.object(audio.AudioListener, 'send')
+    def test_stream_changed_event(self, send_mock):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
+        self.audio.start_playback()
+
+        self.audio.wait_for_state_change()
+        self.audio.process_messages().get()
+
+        call = mock.call('stream_changed', uri=self.song_uri)
+        self.assertIn(call, send_mock.call_args_list)
 
 
 class AudioStateTest(unittest.TestCase):

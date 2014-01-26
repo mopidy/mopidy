@@ -24,3 +24,6 @@ class AudioListenerTest(unittest.TestCase):
 
     def test_listener_has_default_impl_for_state_changed(self):
         self.listener.state_changed(None, None)
+
+    def test_listener_has_default_impl_for_stream_changed(self):
+        self.listener.stream_changed(None)

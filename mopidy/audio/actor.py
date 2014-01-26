@@ -317,7 +317,12 @@ class Audio(pykka.ThreadingActor):
                 str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
         elif message.type == gst.MESSAGE_ELEMENT:
             if message.structure.has_name('playbin2-stream-changed'):
-                logger.debug('Playback of new stream started')
+                self._on_stream_changed(message)
+
+    def _on_stream_changed(self, message):
+        uri = message.structure['uri']
+        logger.debug('Triggering event: stream_changed(uri=%s)', uri)
+        AudioListener.send('stream_changed', uri=uri)
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
@@ -349,7 +354,7 @@ class Audio(pykka.ThreadingActor):
             'state_changed', old_state=old_state, new_state=new_state)
 
     def _on_end_of_stream(self):
-        logger.debug('Triggering reached_end_of_stream event')
+        logger.debug('Triggering event: reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
 
     def set_uri(self, uri):
@@ -475,6 +480,22 @@ class Audio(pykka.ThreadingActor):
         :rtype: :class:`True` if successfull, else :class:`False`
         """
         return self._set_state(gst.STATE_NULL)
+
+    def wait_for_state_change(self):
+        """Block until any pending state changes are complete.
+
+        Should only be used by test.
+        """
+        self._playbin.get_state()
+
+    def process_messages(self):
+        """Manually process messages from bus.
+
+        Should only be used by test.
+        """
+        bus = self._playbin.get_bus()
+        while bus.have_pending():
+            self._on_message(bus, bus.pop())
 
     def _set_state(self, state):
         """
