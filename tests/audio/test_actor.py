@@ -35,25 +35,25 @@ class AudioTest(unittest.TestCase):
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
-    def prepare_uri(self, uri):
-        self.audio.prepare_change()
-        self.audio.set_uri(uri)
-
     def test_start_playback_existing_file(self):
-        self.prepare_uri(self.song_uri)
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
         self.assertTrue(self.audio.start_playback().get())
 
     def test_start_playback_non_existing_file(self):
-        self.prepare_uri(self.song_uri + 'bogus')
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri + 'bogus')
         self.assertFalse(self.audio.start_playback().get())
 
     def test_pause_playback_while_playing(self):
-        self.prepare_uri(self.song_uri)
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
         self.audio.start_playback()
         self.assertTrue(self.audio.pause_playback().get())
 
     def test_stop_playback_while_playing(self):
-        self.prepare_uri(self.song_uri)
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
         self.audio.start_playback()
         self.assertTrue(self.audio.stop_playback().get())
 
