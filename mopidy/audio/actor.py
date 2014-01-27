@@ -352,6 +352,8 @@ class Audio(pykka.ThreadingActor):
             old_state, new_state)
         AudioListener.send(
             'state_changed', old_state=old_state, new_state=new_state)
+        if new_state == PlaybackState.STOPPED:
+            AudioListener.send('stream_changed', uri=None)
 
     def _on_end_of_stream(self):
         logger.debug('Triggering event: reached_end_of_stream event')
@@ -484,18 +486,21 @@ class Audio(pykka.ThreadingActor):
     def wait_for_state_change(self):
         """Block until any pending state changes are complete.
 
-        Should only be used by test.
+        Should only be used by tests.
         """
         self._playbin.get_state()
 
-    def process_messages(self):
-        """Manually process messages from bus.
+    def enable_sync_handler(self):
+        """Enable manual processing of messages from bus.
 
-        Should only be used by test.
+        Should only be used by tests.
         """
+        def sync_handler(bus, message):
+            self._on_message(bus, message)
+            return gst.BUS_DROP
+
         bus = self._playbin.get_bus()
-        while bus.have_pending():
-            self._on_message(bus, bus.pop())
+        bus.set_sync_handler(sync_handler)
 
     def _set_state(self, state):
         """
