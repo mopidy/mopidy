@@ -180,6 +180,8 @@ class Audio(pykka.ThreadingActor):
         queue.set_property('max-size-time', 5 * gst.SECOND)
         queue.set_property('min-threshold-time', 3 * gst.SECOND)
 
+        queue.get_pad('src').add_event_probe(self._on_pad_event)
+
         output.add(user_output)
         output.add(queue)
 
@@ -293,6 +295,13 @@ class Audio(pykka.ThreadingActor):
         bus = self._playbin.get_bus()
         self._disconnect(bus, 'message')
         bus.remove_signal_watch()
+
+    def _on_pad_event(self, pad, event):
+        if event.type == gst.EVENT_NEWSEGMENT:
+            # update, rate, format, start, stop, position
+            position = event.parse_new_segment()[5] // gst.MSECOND
+            AudioListener.send('position_changed', position=position)
+        return True
 
     def _on_message(self, bus, message):
         if (message.type == gst.MESSAGE_STATE_CHANGED

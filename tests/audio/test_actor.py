@@ -231,6 +231,62 @@ class AudioEventTest(unittest.TestCase):
         call = mock.call('stream_changed', uri=None)
         self.assertIn(call, send_mock.call_args_list)
 
+    def test_position_changed_on_pause(self, send_mock):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
+        self.audio.pause_playback()
+        self.audio.wait_for_state_change()
+
+        self.audio.wait_for_state_change().get()
+
+        call = mock.call('position_changed', position=0)
+        self.assertIn(call, send_mock.call_args_list)
+
+    def test_position_changed_on_play(self, send_mock):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
+        self.audio.start_playback()
+        self.audio.wait_for_state_change()
+
+        self.audio.wait_for_state_change().get()
+
+        call = mock.call('position_changed', position=0)
+        self.assertIn(call, send_mock.call_args_list)
+
+    def test_position_changed_on_seek(self, send_mock):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
+        self.audio.set_position(2000)
+
+        self.audio.wait_for_state_change().get()
+
+        call = mock.call('position_changed', position=0)
+        self.assertNotIn(call, send_mock.call_args_list)
+
+    def test_position_changed_on_seek_after_play(self, send_mock):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
+        self.audio.start_playback()
+        self.audio.wait_for_state_change()
+        self.audio.set_position(2000)
+
+        self.audio.wait_for_state_change().get()
+
+        call = mock.call('position_changed', position=2000)
+        self.assertIn(call, send_mock.call_args_list)
+
+    def test_position_changed_on_seek_after_pause(self, send_mock):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
+        self.audio.pause_playback()
+        self.audio.wait_for_state_change()
+        self.audio.set_position(2000)
+
+        self.audio.wait_for_state_change().get()
+
+        call = mock.call('position_changed', position=2000)
+        self.assertIn(call, send_mock.call_args_list)
+
     # Unlike the other events, having the state changed done is not
     # enough to ensure our event is called. So we setup a threading
     # event that we can wait for with a timeout while the track playback

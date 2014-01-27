@@ -37,6 +37,16 @@ class AudioListener(listener.Listener):
         """
         pass
 
+    def position_changed(self, position_changed):
+        """
+        Called whenever the position of the stream changes.
+
+        *MAY* be implemented by actor.
+
+        :param int position: Position in milliseconds.
+        """
+        pass
+
     def state_changed(self, old_state, new_state):
         """
         Called after the playback state have changed.
