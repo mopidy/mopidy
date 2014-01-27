@@ -324,6 +324,45 @@ class AudioEventTest(unittest.TestCase):
         if not event.wait(timeout=5.0):
             self.fail('End of stream not reached within deadline')
 
+    # Make sure that gapless really works:
+
+    def test_gapless(self, send_mock):
+        song2_uri = path_to_uri(path_to_data_dir('song2.wav'))
+
+        uris = [song2_uri]
+        events = []
+        done = threading.Event()
+
+        def callback():
+            if uris:
+                self.audio.set_uri(uris.pop()).get()
+
+        def send(name, **kwargs):
+            events.append((name, kwargs))
+            if name == 'reached_end_of_stream':
+                done.set()
+
+        send_mock.side_effect = send
+        self.audio.set_about_to_finish_callback(callback).get()
+
+        self.audio.prepare_change()
+        self.audio.set_uri(self.song_uri)
+        self.audio.start_playback()
+        self.audio.wait_for_state_change().get()
+
+        if not done.wait(timeout=5.0):
+            self.fail('EOS not received')
+
+        excepted = [
+            ('position_changed', {'position': 0}),
+            ('stream_changed', {'uri': self.song_uri}),
+            ('state_changed', {'old_state': PlaybackState.STOPPED,
+                               'new_state': PlaybackState.PLAYING}),
+            ('position_changed', {'position': 0}),
+            ('stream_changed', {'uri': song2_uri}),
+            ('reached_end_of_stream', {})]
+        self.assertEqual(excepted, events)
+
 
 class AudioStateTest(unittest.TestCase):
     def setUp(self):

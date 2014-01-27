@@ -58,6 +58,7 @@ class Audio(pykka.ThreadingActor):
 
         self._playbin = None
         self._signal_ids = {}  # {(element, event): signal_id}
+        self._about_to_finish_callback = None
 
         self._mixer = None
         self._mixer_track = None
@@ -108,15 +109,15 @@ class Audio(pykka.ThreadingActor):
 
     def _on_about_to_finish(self, element):
         source, self._appsrc = self._appsrc, None
-        if source is None:
-            return
-        self._appsrc_caps = None
+        if source is not None:
+            self._appsrc_caps = None
+            self._disconnect(source, 'need-data')
+            self._disconnect(source, 'enough-data')
+            self._disconnect(source, 'seek-data')
 
-        self._disconnect(source, 'need-data')
-        self._disconnect(source, 'enough-data')
-        self._disconnect(source, 'seek-data')
-
-        logger.debug('Ready to switch to new stream')
+        if self._about_to_finish_callback:
+            logger.debug('Calling about to finish callback.')
+            self._about_to_finish_callback()
 
     def _on_new_source(self, element, pad):
         uri = element.get_property('uri')
@@ -431,6 +432,19 @@ class Audio(pykka.ThreadingActor):
         """
         # TODO: replace this with emit_data(None)?
         self._playbin.get_property('source').emit('end-of-stream')
+
+    def set_about_to_finish_callback(self, callback):
+        """
+        Configure audio to use an about to finish callback.
+
+        This should be used to achieve gapless playback. For this to work the
+        callback *MUST* call :meth:`set_uri` with the new URI to play and
+        block until this call has been made. :meth:`prepare_change` is not
+        needed before :meth:`set_uri` in this one special case.
+
+        :param callable callback: Callback to run when we need the next URI.
+        """
+        self._about_to_finish_callback = callback
 
     def get_position(self):
         """
