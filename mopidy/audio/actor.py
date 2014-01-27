@@ -301,6 +301,8 @@ class Audio(pykka.ThreadingActor):
         if event.type == gst.EVENT_NEWSEGMENT:
             # update, rate, format, start, stop, position
             position = event.parse_new_segment()[5] // gst.MSECOND
+            logger.debug('Triggering event: position_changed(position=%s)',
+                         position)
             AudioListener.send('position_changed', position=position)
         return True
 
