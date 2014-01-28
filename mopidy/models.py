@@ -418,8 +418,9 @@ class Playlist(ImmutableObject):
     :type name: string
     :param tracks: playlist's tracks
     :type tracks: list of :class:`Track` elements
-    :param last_modified: playlist's modification time in UTC
-    :type last_modified: :class:`datetime.datetime`
+    :param last_modified:
+        playlist's modification time in milliseconds since Unix epoch
+    :type last_modified: int
     """
 
     #: The playlist URI. Read-only.
@@ -431,9 +432,10 @@ class Playlist(ImmutableObject):
     #: The playlist's tracks. Read-only.
     tracks = tuple()
 
-    #: The playlist modification time in UTC. Read-only.
+    #: The playlist modification time in milliseconds since Unix epoch.
+    #: Read-only.
     #:
-    #: :class:`datetime.datetime`, or :class:`None` if unknown.
+    #: Integer, or :class:`None` if unknown.
     last_modified = None
 
     def __init__(self, *args, **kwargs):

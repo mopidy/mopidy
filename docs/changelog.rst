@@ -8,6 +8,13 @@ This changelog is used to track all major changes to Mopidy.
 v0.19.0 (unreleased)
 ====================
 
+**Models**
+
+- The type of :attr:`mopidy.models.Playlist.last_modified` has been redefined
+  from a :class:`datetime.datetime` instance to the number of milliseconds
+  since Unix epoch as an integer. This makes serialization of the time stamp
+  simpler.
+
 **MPD**
 
 - Minor refactor of context such that it stores password instead of config.

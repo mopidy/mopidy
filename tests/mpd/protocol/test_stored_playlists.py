@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-import datetime
-
 from mopidy.models import Track, Playlist
 
 from tests.mpd import protocol
@@ -78,14 +76,14 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylists(self):
-        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = 1390942873222
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:a', last_modified=last_modified)]
 
         self.sendRequest('listplaylists')
         self.assertInResponse('playlist: a')
-        # Date without microseconds and with time zone information
-        self.assertInResponse('Last-Modified: 2001-03-17T13:41:17Z')
+        # Date without milliseconds and with time zone information
+        self.assertInResponse('Last-Modified: 2014-01-28T21:01:13Z')
         self.assertInResponse('OK')
 
     def test_listplaylists_duplicate(self):
@@ -99,7 +97,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylists_ignores_playlists_without_name(self):
-        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = 1390942873222
         self.backend.playlists.playlists = [
             Playlist(name='', uri='dummy:', last_modified=last_modified)]
 
