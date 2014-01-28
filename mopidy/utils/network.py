@@ -62,6 +62,24 @@ def format_hostname(hostname):
         hostname = '::ffff:%s' % hostname
     return hostname
 
+def format_proxy(scheme, username, password, hostname, port):
+    """Format Proxy URL"""
+    if hostname:
+        """scheme must exists, so if None is give, we set default to http"""
+        if not scheme:
+            scheme = "http"
+        """idem with port, default at 80"""
+        if not port:
+            port = 80
+        """with authentification"""
+        if username and password:
+            return "%s://%s:%s@%s:%i" % (
+                scheme, username, password, hostname, port)
+        """... or without"""
+        else:
+            return "%s://%s:%i" % (scheme, hostname, port)
+    else:
+        return None
 
 class Server(object):
     """Setup listener and register it with gobject's event loop."""
