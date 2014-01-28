@@ -138,6 +138,7 @@ class AudioEventTest(unittest.TestCase):
         pykka.ActorRegistry.stop_all()
 
     # TODO: test wihtout uri set, with bad uri and gapless...
+    # TODO: playing->playing triggered by seek should be removed
 
     def test_state_change_stopped_to_playing_event(self, send_mock):
         self.audio.prepare_change()

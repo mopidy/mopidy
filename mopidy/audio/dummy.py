@@ -17,12 +17,12 @@ class DummyAudio(pykka.ThreadingActor):
         super(DummyAudio, self).__init__()
         self.state = PlaybackState.STOPPED
         self._position = 0
-
-    def set_on_end_of_track(self, callback):
-        pass
+        self._callback = None
+        self._uri = None
 
     def set_uri(self, uri):
-        pass
+        assert self._uri is None, 'prepare change not called before set'
+        self._uri = uri
 
     def set_appsrc(self, *args, **kwargs):
         pass
@@ -38,6 +38,7 @@ class DummyAudio(pykka.ThreadingActor):
 
     def set_position(self, position):
         self._position = position
+        AudioListener.send('position_changed', position=position)
         return True
 
     def start_playback(self):
@@ -47,6 +48,7 @@ class DummyAudio(pykka.ThreadingActor):
         return self._change_state(PlaybackState.PAUSED)
 
     def prepare_change(self):
+        self._uri = None
         return True
 
     def stop_playback(self):
@@ -61,8 +63,29 @@ class DummyAudio(pykka.ThreadingActor):
     def set_metadata(self, track):
         pass
 
+    def set_about_to_finish_callback(self, callback):
+        self._callback = callback
+
     def _change_state(self, new_state):
+        if not self._uri:
+            return False
+
+        if self.state == PlaybackState.STOPPED and self._uri:
+            AudioListener.send('stream_changed', uri=self._uri)
+
         old_state, self.state = self.state, new_state
         AudioListener.send(
             'state_changed', old_state=old_state, new_state=new_state)
+
         return True
+
+    def trigger_fake_end_of_stream(self):
+        AudioListener.send('reached_end_of_stream')
+
+    def trigger_fake_about_to_finish(self):
+        if not self._callback:
+            return
+        self.prepare_change()
+        self._callback()
+        if not self._uri:
+            self.trigger_fake_end_of_stream()
