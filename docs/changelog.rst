@@ -20,6 +20,21 @@ v0.19.0 (unreleased)
 - Minor refactor of context such that it stores password instead of config.
   (Fixes: :issue:`646`)
 
+- Proper command tokenization for MPD requests. This replaces the old regex
+  based system with an MPD protocol specific tokenizer responsible for breaking
+  requests into pieces before the handlers have at them.
+  (Fixes: :issue:`591` and :issue:`592`)
+
+- Updated commands handler system. As part of the tokenizer cleanup we've updated
+  how commands are registered and making it simpler to create new handlers.
+
+- Simplifies a bunch of handlers. All the "browse" type commands now use a
+  common browse helper under the hood for less repetition. Likewise the query
+  handling of "search" commands has been somewhat simplified.
+
+- Adds placeholders for missing MPD commands, preparing the way for bumping the
+  protocol version once they have been added.
+
 **Windows**
 
 - Network and signal handling has been updated to play nice on windows systems.
