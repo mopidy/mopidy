@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import warnings
+
 from mopidy.core import PlaybackState
 from mopidy.mpd import exceptions, protocol
 
@@ -102,7 +104,10 @@ def pause(context, state=None):
     - Calls ``pause`` without any arguments to toogle pause.
     """
     if state is None:
-        # TODO: emit warning about this being deprecated
+        warnings.warn(
+            'The use of pause command w/o the PAUSE argument is deprecated.',
+            DeprecationWarning)
+
         if (context.core.playback.state.get() == PlaybackState.PLAYING):
             context.core.playback.pause()
         elif (context.core.playback.state.get() == PlaybackState.PAUSED):
@@ -339,10 +344,10 @@ def seekcur(context, time):
     """
     if time.startswith(('+', '-')):
         position = context.core.playback.time_position.get()
-        position += int(time) * 1000
+        position += protocol.INT(time) * 1000
         context.core.playback.seek(position).get()
     else:
-        position = int(time) * 1000
+        position = protocol.UINT(time) * 1000
         context.core.playback.seek(position).get()
 
 

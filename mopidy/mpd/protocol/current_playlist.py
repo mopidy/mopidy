@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import warnings
+
 from mopidy.mpd import exceptions, protocol, translator
 
 
@@ -160,7 +162,8 @@ def playlist(context):
 
             Do not use this, instead use ``playlistinfo``.
     """
-    # TODO: warn about this being deprecated
+    warnings.warn(
+        'Do not use this, instead use playlistinfo', DeprecationWarning)
     return playlistinfo(context)
 
 
