@@ -130,6 +130,8 @@ class AudioEventTest(BaseTest):
 
     # TODO: test wihtout uri set, with bad uri and gapless...
     # TODO: playing->playing triggered by seek should be removed
+    # TODO: codify expected state after EOS
+    # TODO: consider returning a future or a threading event?
 
     def test_state_change_stopped_to_playing_event(self, send_mock):
         self.audio.prepare_change()
