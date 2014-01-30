@@ -37,6 +37,7 @@ def load_protocol_modules():
 
 
 def INT(value):
+    """Converts a value that matches [+-]?\d+ into and integer."""
     if value is None:
         raise ValueError('None is not a valid integer')
     # TODO: check for whitespace via value != value.strip()?
@@ -44,6 +45,7 @@ def INT(value):
 
 
 def UINT(value):
+    """Converts a value that matches \d+ into and integer."""
     if value is None:
         raise ValueError('None is not a valid integer')
     if not value.isdigit():
@@ -52,13 +54,19 @@ def UINT(value):
 
 
 def BOOL(value):
+    """Convert the values 0 and 1 into booleans."""
     if value in ('1', '0'):
         return bool(int(value))
     raise ValueError('%r is not 0 or 1' % value)
 
 
 def RANGE(value):
-    # TODO: test and check that values are positive
+    """Convert a single integer or range spec into a slice
+
+    `n` should become `slice(n, n+1)`
+    `n:` should become `slice(n, None)`
+    `n:m` should become `slice(n, m)` and `m > n` must hold
+    """
     if ':' in value:
         start, stop = value.split(':', 1)
         start = UINT(start)
@@ -75,10 +83,38 @@ def RANGE(value):
 
 
 class Commands(object):
+    """Collection of MPD commands to expose to users.
+
+    Normally used through the global instance which command handlers have been
+    installed into.
+    """
+
     def __init__(self):
         self.handlers = {}
 
+    # TODO: consider removing auth_required and list_command in favour of
+    # additional command instances to register in?
     def add(self, name, auth_required=True, list_command=True, **validators):
+        """Create a decorator that registers a handler + validation rules.
+
+        Additional keyword arguments are treated as converts/validators to
+        apply to tokens converting them to proper python types.
+
+        Requirements for valid handlers:
+
+        - must accept a context argument as the first arg.
+        - may not use variable keyword arguments, ``**kwargs``.
+        - may use variable arguments ``*args`` *or* a mix of required and
+          optional arguments.
+
+        Decorator returns the unwrapped function so that tests etc can use the
+        functions with values with correct python types instead of strings.
+
+        :param string name: Name of the command being registered.
+        :param bool auth_required: If authorization is required.
+        :param bool list_command: If command should be listed in reflection.
+        """
+
         def wrapper(func):
             if name in self.handlers:
                 raise ValueError('%s already registered' % name)
@@ -118,12 +154,21 @@ class Commands(object):
             return func
         return wrapper
 
-    def call(self, args, context=None):
-        if not args:
+    def call(self, tokens, context=None):
+        """Find and run the handler registered for the given command.
+
+        If the handler was registered with any converters/validators there will
+        be run before calling the real handler.
+
+        :param list tokens: List of tokens to process
+        :param context: MPD context.
+        :type context: :class:`~mopidy.mpd.dispatcher.MpdContext`
+        """
+        if not tokens:
             raise exceptions.MpdNoCommand()
-        if args[0] not in self.handlers:
-            raise exceptions.MpdUnknownCommand(command=args[0])
-        return self.handlers[args[0]](context, *args[1:])
+        if tokens[0] not in self.handlers:
+            raise exceptions.MpdUnknownCommand(command=tokens[0])
+        return self.handlers[tokens[0]](context, *tokens[1:])
 
 
 #: Global instance to install commands into

@@ -39,6 +39,23 @@ UNESCAPE_RE = re.compile(r'\\(.)')  # Backslash escapes any following char.
 
 
 def split(line):
+    """Splits a line into tokens using same rules as MPD.
+
+    - Lines may not start with whitespace
+    - Tokens are split by arbitrary amount of spaces or tabs
+    - First token must match `[a-z][a-z0-9_]*`
+    - Remaining tokens can be unquoted or quoted tokens.
+    - Unquoted tokens consist of all printable characters except double quotes,
+      single quotes, spaces and tabs.
+    - Quoted tokens are surrounded by a matching pair of double quotes.
+    - The closing quote must be followed by space, tab or end of line.
+    - Any value is allowed inside a quoted token. Including double quotes,
+      assuming it is correctly escaped.
+    - Backslash inside a quoted token is used to escape the following
+      character.
+
+    For examples see the tests for this function.
+    """
     if not line.strip():
         raise exceptions.MpdNoCommand('No command given')
     match = WORD_RE.match(line)
@@ -60,6 +77,7 @@ def split(line):
 
 
 def _determine_error_message(remainder):
+    """Helper to emulate MPD errors."""
     # Following checks are simply to match MPD error messages:
     match = BAD_QUOTED_PARAM_RE.match(remainder)
     if match:
