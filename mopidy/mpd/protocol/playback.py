@@ -32,6 +32,38 @@ def crossfade(context, seconds):
     raise exceptions.MpdNotImplemented  # TODO
 
 
+# TODO: add at least reflection tests before adding NotImplemented version
+#@protocol.commands.add('mixrampdb')
+def mixrampdb(context, decibels):
+    """
+    *musicpd.org, playback section:*
+
+        ``mixrampdb {deciBels}``
+
+    Sets the threshold at which songs will be overlapped. Like crossfading but
+    doesn't fade the track volume, just overlaps. The songs need to have
+    MixRamp tags added by an external tool. 0dB is the normalized maximum
+    volume so use negative values, I prefer -17dB. In the absence of mixramp
+    tags crossfading will be used. See http://sourceforge.net/projects/mixramp
+    """
+    pass
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+#@protocol.commands.add('mixrampdelay', seconds=protocol.UINT)
+def mixrampdelay(context, seconds):
+    """
+    *musicpd.org, playback section:*
+
+        ``mixrampdelay {SECONDS}``
+
+        Additional time subtracted from the overlap calculated by mixrampdb. A
+        value of "nan" disables MixRamp overlapping and falls back to
+        crossfading.
+    """
+    pass
+
+
 @protocol.commands.add('next')
 def next_(context):
     """

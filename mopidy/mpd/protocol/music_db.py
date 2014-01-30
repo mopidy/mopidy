@@ -547,3 +547,27 @@ def update(context, uri=None):
         ``status`` response.
     """
     return {'updating_db': 0}  # TODO
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+#@protocol.commands.add('readcomments')
+def readcomments(context, uri):
+    """
+    *musicpd.org, music database section:*
+
+        ``readcomments [URI]``
+
+        Read "comments" (i.e. key-value pairs) from the file specified by
+        "URI". This "URI" can be a path relative to the music directory or a
+        URL in the form "file:///foo/bar.ogg".
+
+        This command may be used to list metadata of remote files (e.g. URI
+        beginning with "http://" or "smb://").
+
+        The response consists of lines in the form "KEY: VALUE". Comments with
+        suspicious characters (e.g. newlines) are ignored silently.
+
+        The meaning of these depends on the codec, and not all decoder plugins
+        support it. For example, on Ogg files, this lists the Vorbis comments.
+    """
+    pass

@@ -33,6 +33,19 @@ def enableoutput(context, outputid):
         raise exceptions.MpdNoExistError('No such audio output')
 
 
+# TODO: implement and test
+#@protocol.commands.add('toggleoutput', outputid=protocol.UINT)
+def toggleoutput(context, outputid):
+    """
+    *musicpd.org, audio output section:*
+
+        ``toggleoutput {ID}``
+
+        Turns an output on or off, depending on the current state.
+    """
+    pass
+
+
 @protocol.commands.add('outputs')
 def outputs(context):
     """

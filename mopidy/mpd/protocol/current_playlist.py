@@ -357,3 +357,65 @@ def swapid(context, tlid1, tlid2):
     position1 = context.core.tracklist.index(tl_tracks1[0]).get()
     position2 = context.core.tracklist.index(tl_tracks2[0]).get()
     swap(context, position1, position2)
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+#@protocol.commands.add(
+#    'prio', priority=protocol.UINT, position=protocol.RANGE)
+def prio(context, priority, position):
+    """
+    *musicpd.org, current playlist section:*
+
+        ``prio {PRIORITY} {START:END...}``
+
+        Set the priority of the specified songs. A higher priority means that
+        it will be played first when "random" mode is enabled.
+
+        A priority is an integer between 0 and 255. The default priority of new
+        songs is 0.
+    """
+    pass
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+#@protocol.commands.add('prioid')
+def prioid(context, *args):
+    """
+    *musicpd.org, current playlist section:*
+
+        ``prioid {PRIORITY} {ID...}``
+
+        Same as prio, but address the songs with their id.
+    """
+    pass
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+#@protocol.commands.add('addtagid', tlid=protocol.UINT)
+def addtagid(context, tlid, tag, value):
+    """
+    *musicpd.org, current playlist section:*
+
+        ``addtagid {SONGID} {TAG} {VALUE}``
+
+        Adds a tag to the specified song. Editing song tags is only possible
+        for remote songs. This change is volatile: it may be overwritten by
+        tags received from the server, and the data is gone when the song gets
+        removed from the queue.
+    """
+    pass
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+#@protocol.commands.add('cleartagid', tlid=protocol.UINT)
+def cleartagid(context, tlid, tag):
+    """
+    *musicpd.org, current playlist section:*
+
+        ``cleartagid {SONGID} [TAG]``
+
+        Removes tags from the specified song. If TAG is not specified, then all
+        tag values will be removed. Editing song tags is only possible for
+        remote songs.
+    """
+    pass
