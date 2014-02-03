@@ -76,6 +76,14 @@ https://github.com/sauberfred/mopidy-notifier
 Extension for displaying track info as User Notifications in Mac OS X.
 
 
+Mopidy-Podcast
+==============
+
+https://github.com/tkem/mopidy-podcast
+
+Extension for browsing RSS feeds of podcasts and stream the episodes.
+
+
 Mopidy-radio-de
 ===============
 
