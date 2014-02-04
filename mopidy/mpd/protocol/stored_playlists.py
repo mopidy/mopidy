@@ -2,7 +2,8 @@ from __future__ import division, unicode_literals
 
 import datetime
 
-from mopidy.mpd.exceptions import MpdNoExistError, MpdNotImplemented, MpdSystemError
+import mopidy.mpd.exceptions as ex
+
 from mopidy.mpd.protocol import handle_request
 from mopidy.mpd.translator import playlist_to_mpd_format
 
@@ -24,7 +25,7 @@ def listplaylist(context, name):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist')
+        raise ex.MpdNoExistError('No such playlist')
     return ['file: %s' % t.uri for t in playlist.tracks]
 
 
@@ -44,7 +45,7 @@ def listplaylistinfo(context, name):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist')
+        raise ex.MpdNoExistError('No such playlist')
     return playlist_to_mpd_format(playlist)
 
 
@@ -125,7 +126,7 @@ def load(context, name, start=None, end=None):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist')
+        raise ex.MpdNoExistError('No such playlist')
     if start is not None:
         start = int(start)
     if end is not None:
@@ -144,7 +145,7 @@ def playlistadd(context, name, uri):
 
         ``NAME.m3u`` will be created if it does not exist.
     """
-    raise MpdNotImplemented  # TODO
+    raise ex.MpdNotImplemented  # TODO
 
 
 @handle_request(r'playlistclear\ "(?P<name>[^"]+)"$')
@@ -156,7 +157,7 @@ def playlistclear(context, name):
 
         Clears the playlist ``NAME.m3u``.
     """
-    raise MpdNotImplemented  # TODO
+    raise ex.MpdNotImplemented  # TODO
 
 
 @handle_request(r'playlistdelete\ "(?P<name>[^"]+)"\ "(?P<songpos>\d+)"$')
@@ -168,7 +169,7 @@ def playlistdelete(context, name, songpos):
 
         Deletes ``SONGPOS`` from the playlist ``NAME.m3u``.
     """
-    raise MpdNotImplemented  # TODO
+    raise ex.MpdNotImplemented  # TODO
 
 
 @handle_request(
@@ -189,7 +190,7 @@ def playlistmove(context, name, from_pos, to_pos):
       documentation, but just the ``SONGPOS`` to move *from*, i.e.
       ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
     """
-    raise MpdNotImplemented  # TODO
+    raise ex.MpdNotImplemented  # TODO
 
 
 @handle_request(r'rename\ "(?P<old_name>[^"]+)"\ "(?P<new_name>[^"]+)"$')
@@ -201,7 +202,7 @@ def rename(context, old_name, new_name):
 
         Renames the playlist ``NAME.m3u`` to ``NEW_NAME.m3u``.
     """
-    raise MpdNotImplemented  # TODO
+    raise ex.MpdNotImplemented  # TODO
 
 
 @handle_request(r'rm\ "(?P<name>[^"]+)"$')
@@ -213,7 +214,7 @@ def rm(context, name):
 
         Removes the playlist ``NAME.m3u`` from the playlist directory.
     """
-    raise MpdNotImplemented  # TODO
+    raise ex.MpdNotImplemented  # TODO
 
 
 @handle_request(r'save\ "(?P<name>[^"]+)"$')
@@ -230,10 +231,13 @@ def save(context, name):
     if existingpl:
         context.core.playlists.create(name, existingpl.uri.split(":")[0])
     else:
-        uri_schema = set([track.uri.split(':')[0] for track in\
-                context.core.tracklist.get_tracks().get()])
+        uri_schema = set([track.uri.split(':')[0] for track in
+                          context.core.tracklist.get_tracks().get()])
 
-        if len(uri_schema) != 1:
-            raise MpdSystemError("Playlist is mixing different backends. Aborting.")
+        if len(uri_schema) > 1:
+            raise ex.MpdSystemError("Current playlist" +
+                                    " is mixing different backends. Aborting.")
+        elif len(uri_schema) == 0:
+            raise ex.MpdSystemError("Current playlist is empty. Aborting.")
 
         context.core.playlists.create(name, uri_schema.pop())
