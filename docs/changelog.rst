@@ -8,6 +8,12 @@ This changelog is used to track all major changes to Mopidy.
 v0.19.0 (unreleased)
 ====================
 
+**Configuration**
+
+- Fix the log setup so that it is possible to increase the amount of logging
+  from a specific logger using the ``loglevels`` config section. (Fixes:
+  :issue:`684`)
+
 **Models**
 
 - The type of :attr:`mopidy.models.Playlist.last_modified` has been redefined
