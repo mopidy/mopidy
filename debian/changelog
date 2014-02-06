@@ -1,3 +1,10 @@
+mopidy (0.18.1-2) UNRELEASED; urgency=low
+
+  * Add "run" subcommand to the init script for running arbitrary "mopidy"
+    subcommands with the correct user and configuration files.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Fri, 07 Feb 2014 00:27:56 +0100
+
 mopidy (0.18.1-1) unstable; urgency=low
 
   * New upstream release.
