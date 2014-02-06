@@ -39,17 +39,11 @@ def setup_logging(config, verbosity_level, save_debug_log):
         # added. If not, the other handlers will have no effect.
         logging.config.fileConfig(config['logging']['config_file'])
 
-    setup_log_levels(config)
     setup_console_logging(config, verbosity_level)
     if save_debug_log:
         setup_debug_logging_to_file(config)
 
     _delayed_handler.release()
-
-
-def setup_log_levels(config):
-    for name, level in config['loglevels'].items():
-        logging.getLogger(name).setLevel(level)
 
 
 LOG_LEVELS = {
