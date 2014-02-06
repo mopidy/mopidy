@@ -62,7 +62,11 @@ do_stop()
     return "$RETVAL"
 }
 
-case "$1" in
+# Remove the action from $@ before it is used by the run action
+action=$1
+shift
+
+case "$action" in
     start)
         [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC " "$NAME"
         do_start
@@ -100,11 +104,20 @@ case "$1" in
                 ;;
         esac
         ;;
-    local-scan)
-        su -s /bin/sh -c "$DAEMON $DAEMON_ARGS local scan" $DAEMON_USER
+    run)
+        if [ "$1" = "" ]; then
+            echo "Usage: $SCRIPTNAME run [options-or-subcommands]"
+            echo "Examples:"
+            echo "  $SCRIPTNAME run --help"
+            echo "  $SCRIPTNAME run config"
+            echo "  $SCRIPTNAME run local scan"
+            exit 3
+        fi
+        CMD="$DAEMON $DAEMON_ARGS $@"
+        su -s /bin/sh -c "$CMD" -- $DAEMON_USER
         ;;
     *)
-        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|local-scan}" >&2
+        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|run}" >&2
         exit 3
         ;;
 esac
