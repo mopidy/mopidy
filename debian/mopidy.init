@@ -64,7 +64,7 @@ do_stop()
 
 # Remove the action from $@ before it is used by the run action
 action=$1
-shift
+[ "$action" != "" ] && shift
 
 case "$action" in
     start)
