@@ -306,9 +306,10 @@ class PlaybackController(object):
         """
         if self.state != PlaybackState.STOPPED:
             backend = self._get_backend()
+            time_position_before_stop = self.time_position
             if not backend or backend.playback.stop().get():
                 self.state = PlaybackState.STOPPED
-                self._trigger_track_playback_ended()
+                self._trigger_track_playback_ended(time_position_before_stop)
         if clear_current_track:
             self.current_tl_track = None
 
@@ -336,13 +337,14 @@ class PlaybackController(object):
             'track_playback_started',
             tl_track=self.current_tl_track)
 
-    def _trigger_track_playback_ended(self):
+    def _trigger_track_playback_ended(self, time_position_before_stop):
         logger.debug('Triggering track playback ended event')
         if self.current_tl_track is None:
             return
         listener.CoreListener.send(
             'track_playback_ended',
-            tl_track=self.current_tl_track, time_position=self.time_position)
+            tl_track=self.current_tl_track,
+            time_position=time_position_before_stop)
 
     def _trigger_playback_state_changed(self, old_state, new_state):
         logger.debug('Triggering playback state change event')
