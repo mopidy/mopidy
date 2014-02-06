@@ -5,30 +5,26 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v0.19.0 (unreleased)
+v0.18.2 (UNRELEASED)
 ====================
 
-**Configuration**
+Bug fix release.
 
 - Fix the log setup so that it is possible to increase the amount of logging
   from a specific logger using the ``loglevels`` config section. (Fixes:
   :issue:`684`)
 
-**Models**
+- Serialization of :class:`~mopidy.models.Playlist` models with the
+  ``last_modified`` field set to a :class:`datetime.datetime` instance did not
+  work. The type of :attr:`mopidy.models.Playlist.last_modified` has been
+  redefined from a :class:`datetime.datetime` instance to the number of
+  milliseconds since Unix epoch as an integer. This makes serialization of the
+  time stamp simpler.
 
-- The type of :attr:`mopidy.models.Playlist.last_modified` has been redefined
-  from a :class:`datetime.datetime` instance to the number of milliseconds
-  since Unix epoch as an integer. This makes serialization of the time stamp
-  simpler.
+- Minor refactor of the MPD server context so that Mopidy's MPD protocol
+  implementation can easier be reused. (Fixes: :issue:`646`)
 
-**MPD**
-
-- Minor refactor of context such that it stores password instead of config.
-  (Fixes: :issue:`646`)
-
-**Windows**
-
-- Network and signal handling has been updated to play nice on windows systems.
+- Network and signal handling has been updated to play nice on Windows systems.
 
 
 v0.18.1 (2014-01-23)
