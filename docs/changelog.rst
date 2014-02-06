@@ -10,6 +10,11 @@ v0.18.2 (UNRELEASED)
 
 Bug fix release.
 
+- Fix the ``time_position`` field of the ``track_playback_ended`` event, which
+  has been always 0 since v0.18.0. This made scrobbles by Mopidy-Scrobbler not
+  be persisted by Last.fm, because Mopidy reported that you listened to 0
+  seconds of each track. (Fixes: :issue:`674`)
+
 - Fix the log setup so that it is possible to increase the amount of logging
   from a specific logger using the ``loglevels`` config section. (Fixes:
   :issue:`684`)
