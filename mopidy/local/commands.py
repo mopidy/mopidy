@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 
 import logging
 import os
@@ -40,14 +40,14 @@ class ClearCommand(commands.Command):
         prompt = '\nAre you sure you want to clear the library? [y/N] '
 
         if raw_input(prompt).lower() != 'y':
-            print 'Clearing library aborted.'
+            print('Clearing library aborted.')
             return 0
 
         if library.clear():
-            print 'Library successfully cleared.'
+            print('Library successfully cleared.')
             return 0
 
-        print 'Unable to clear library.'
+        print('Unable to clear library.')
         return 1
 
 
