@@ -37,17 +37,17 @@ class ClearCommand(commands.Command):
 
     def run(self, args, config):
         library = _get_library(args, config)
-        prompt = 'Are you sure you want to clear the library? [y/N] '
+        prompt = '\nAre you sure you want to clear the library? [y/N] '
 
         if raw_input(prompt).lower() != 'y':
-            logging.info('Clearing library aborted.')
+            print 'Clearing library aborted.'
             return 0
 
         if library.clear():
-            logging.info('Library succesfully cleared.')
+            print 'Library succesfully cleared.'
             return 0
 
-        logging.warning('Unable to clear library.')
+        print 'Unable to clear library.'
         return 1
 
 
