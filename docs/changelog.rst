@@ -10,6 +10,9 @@ v0.18.2 (UNRELEASED)
 
 Bug fix release.
 
+- Fix a crash in the server side WebSocket handler caused by connection
+  problems with clients. (Fixes: :issue:`571`)
+
 - Fix the ``time_position`` field of the ``track_playback_ended`` event, which
   has been always 0 since v0.18.0. This made scrobbles by Mopidy-Scrobbler not
   be persisted by Last.fm, because Mopidy reported that you listened to 0
