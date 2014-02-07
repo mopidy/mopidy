@@ -78,10 +78,13 @@ def setup_console_logging(config, verbosity_level):
     if verbosity_level > max(LOG_LEVELS.keys()):
         verbosity_level = max(LOG_LEVELS.keys())
 
-    verbosity_filter = VerbosityFilter(
-        verbosity_level, config.get('loglevels', {}))
+    loglevels = config.get('loglevels', {})
+    has_debug_loglevels = any([
+        level < logging.INFO for level in loglevels.values()])
 
-    if verbosity_level < 1:
+    verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
+
+    if verbosity_level < 1 and not has_debug_loglevels:
         log_format = config['logging']['console_format']
     else:
         log_format = config['logging']['debug_format']
