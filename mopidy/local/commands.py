@@ -44,7 +44,7 @@ class ClearCommand(commands.Command):
             return 0
 
         if library.clear():
-            print 'Library succesfully cleared.'
+            print 'Library successfully cleared.'
             return 0
 
         print 'Unable to clear library.'
