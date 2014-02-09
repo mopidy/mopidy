@@ -229,7 +229,7 @@ def save(context, name):
     """
     existingpl = context.lookup_playlist_from_name(name)
     if existingpl:
-        context.core.playlists.create(name, existingpl.uri.split(":")[0])
+        context.core.playlists.save(existingpl)
     else:
         uri_schema = set([track.uri.split(':')[0] for track in
                           context.core.tracklist.get_tracks().get()])
