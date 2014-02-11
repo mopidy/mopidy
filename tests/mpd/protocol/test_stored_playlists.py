@@ -211,4 +211,5 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_save(self):
         self.sendRequest('save "name"')
-        self.assertEqualResponse('ACK [0@0] {save} Not implemented')
+        self.assertEqualResponse('ACK [52@0] {save} Current playlist' +
+                                 ' is empty. Aborting.')

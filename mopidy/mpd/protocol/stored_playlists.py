@@ -2,7 +2,9 @@ from __future__ import division, unicode_literals
 
 import datetime
 
-from mopidy.mpd.exceptions import MpdNoExistError, MpdNotImplemented
+from mopidy.mpd.exceptions import (
+    MpdSystemError, MpdNoExistError, MpdNotImplemented)
+
 from mopidy.mpd.protocol import handle_request
 from mopidy.mpd.translator import playlist_to_mpd_format
 
@@ -226,4 +228,17 @@ def save(context, name):
         Saves the current playlist to ``NAME.m3u`` in the playlist
         directory.
     """
-    raise MpdNotImplemented  # TODO
+    existingpl = context.lookup_playlist_from_name(name)
+    if existingpl:
+        context.core.playlists.save(existingpl)
+    else:
+        uri_schema = set([track.uri.split(':')[0] for track in
+                          context.core.tracklist.get_tracks().get()])
+
+        if len(uri_schema) > 1:
+            raise MpdSystemError("Current playlist"
+                                 " is mixing different backends. Aborting.")
+        elif len(uri_schema) == 0:
+            raise MpdSystemError("Current playlist is empty. Aborting.")
+
+        context.core.playlists.create(name, uri_schema.pop())
