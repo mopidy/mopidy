@@ -151,10 +151,10 @@ class Audio(pykka.ThreadingActor):
                 proxy_scheme = self._config['proxy']['scheme']
 
             full_proxy = "%s://%s:%s" % (
-                    proxy_scheme,
-                    self._config['proxy']['hostname'],
-                    str(proxy_port)
-                    )
+                proxy_scheme,
+                self._config['proxy']['hostname'],
+                str(proxy_port)
+                )
 
             source.set_property('proxy', full_proxy)
             source.set_property('proxy-id', self._config['proxy']['username'])
