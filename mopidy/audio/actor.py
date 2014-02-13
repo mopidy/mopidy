@@ -140,11 +140,21 @@ class Audio(pykka.ThreadingActor):
             return
 
         if self._config['proxy']['hostname']:
-            full_proxy = self._config['proxy']['hostname']
+
+            # default values
+            proxy_scheme = 'http'
+            proxy_port = 80
+
             if self._config['proxy']['port']:
-                full_proxy += ':' + str(self._config['proxy']['port'])
+                proxy_port = self._config['proxy']['port']
             if self._config['proxy']['scheme']:
-                full_proxy = self._config['proxy']['scheme'] + "://" + full_proxy
+                proxy_scheme = self._config['proxy']['scheme']
+
+            full_proxy = "%s://%s:%s" % (
+                    proxy_scheme,
+                    self._config['proxy']['hostname'],
+                    str(proxy_port)
+                    )
 
             source.set_property('proxy', full_proxy)
             source.set_property('proxy-id', self._config['proxy']['username'])
