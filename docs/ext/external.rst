@@ -145,3 +145,12 @@ https://github.com/sibuser/mopidy-vkontakte
 
 Provides a backend for playing music from the `VKontakte social network
 <http://vk.com/>`_.
+
+
+Mopidy-Yamaha
+=============
+
+https://github.com/knutz3n/mopidy-yamaha
+
+Extension for controlling volume using an external Yamaha network connected
+amplifier.
