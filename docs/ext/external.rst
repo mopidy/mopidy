@@ -51,6 +51,15 @@ Provides a backend for playing music from `Google Play Music
 <https://play.google.com/music/>`_.
 
 
+Mopidy-InternetArchive
+======================
+
+https://github.com/tkem/mopidy-internetarchive
+
+Extension for playing music and audio from the `Internet Archive
+<https://archive.org/>`_.
+
+
 Mopidy-MPRIS
 ============
 
