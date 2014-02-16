@@ -39,17 +39,11 @@ def setup_logging(config, verbosity_level, save_debug_log):
         # added. If not, the other handlers will have no effect.
         logging.config.fileConfig(config['logging']['config_file'])
 
-    setup_log_levels(config)
     setup_console_logging(config, verbosity_level)
     if save_debug_log:
         setup_debug_logging_to_file(config)
 
     _delayed_handler.release()
-
-
-def setup_log_levels(config):
-    for name, level in config['loglevels'].items():
-        logging.getLogger(name).setLevel(level)
 
 
 LOG_LEVELS = {
@@ -62,10 +56,15 @@ LOG_LEVELS = {
 
 
 class VerbosityFilter(logging.Filter):
-    def __init__(self, verbosity_level):
+    def __init__(self, verbosity_level, loglevels):
         self.verbosity_level = verbosity_level
+        self.loglevels = loglevels
 
     def filter(self, record):
+        for name, required_log_level in self.loglevels.items():
+            if record.name == name or record.name.startswith(name + '.'):
+                return record.levelno >= required_log_level
+
         if record.name.startswith('mopidy'):
             required_log_level = LOG_LEVELS[self.verbosity_level]['mopidy']
         else:
@@ -79,9 +78,13 @@ def setup_console_logging(config, verbosity_level):
     if verbosity_level > max(LOG_LEVELS.keys()):
         verbosity_level = max(LOG_LEVELS.keys())
 
-    verbosity_filter = VerbosityFilter(verbosity_level)
+    loglevels = config.get('loglevels', {})
+    has_debug_loglevels = any([
+        level < logging.INFO for level in loglevels.values()])
 
-    if verbosity_level < 1:
+    verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
+
+    if verbosity_level < 1 and not has_debug_loglevels:
         log_format = config['logging']['console_format']
     else:
         log_format = config['logging']['debug_format']

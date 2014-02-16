@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import datetime
 import json
 import unittest
 
@@ -842,7 +841,7 @@ class PlaylistTest(unittest.TestCase):
         self.assertEqual(playlist.length, 3)
 
     def test_last_modified(self):
-        last_modified = datetime.datetime.utcnow()
+        last_modified = 1390942873000
         playlist = Playlist(last_modified=last_modified)
         self.assertEqual(playlist.last_modified, last_modified)
         self.assertRaises(
@@ -850,7 +849,7 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_uri(self):
         tracks = [Track()]
-        last_modified = datetime.datetime.utcnow()
+        last_modified = 1390942873000
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
@@ -862,7 +861,7 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_name(self):
         tracks = [Track()]
-        last_modified = datetime.datetime.utcnow()
+        last_modified = 1390942873000
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
@@ -874,7 +873,7 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_tracks(self):
         tracks = [Track()]
-        last_modified = datetime.datetime.utcnow()
+        last_modified = 1390942873000
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
@@ -887,8 +886,8 @@ class PlaylistTest(unittest.TestCase):
 
     def test_with_new_last_modified(self):
         tracks = [Track()]
-        last_modified = datetime.datetime.utcnow()
-        new_last_modified = last_modified + datetime.timedelta(1)
+        last_modified = 1390942873000
+        new_last_modified = last_modified + 1000
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)

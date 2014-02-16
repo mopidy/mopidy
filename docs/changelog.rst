@@ -5,6 +5,40 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.18.2 (2014-02-16)
+====================
+
+Bug fix release.
+
+- We now log warnings for wrongly configured extensions, and clearly label them
+  in :option:`mopidy config`, but does no longer stop Mopidy from starting
+  because of misconfigured extensions. (Fixes: :issue:`682`)
+
+- Fix a crash in the server side WebSocket handler caused by connection
+  problems with clients. (Fixes: :issue:`428`, :issue:`571`)
+
+- Fix the ``time_position`` field of the ``track_playback_ended`` event, which
+  has been always 0 since v0.18.0. This made scrobbles by Mopidy-Scrobbler not
+  be persisted by Last.fm, because Mopidy reported that you listened to 0
+  seconds of each track. (Fixes: :issue:`674`)
+
+- Fix the log setup so that it is possible to increase the amount of logging
+  from a specific logger using the ``loglevels`` config section. (Fixes:
+  :issue:`684`)
+
+- Serialization of :class:`~mopidy.models.Playlist` models with the
+  ``last_modified`` field set to a :class:`datetime.datetime` instance did not
+  work. The type of :attr:`mopidy.models.Playlist.last_modified` has been
+  redefined from a :class:`datetime.datetime` instance to the number of
+  milliseconds since Unix epoch as an integer. This makes serialization of the
+  time stamp simpler.
+
+- Minor refactor of the MPD server context so that Mopidy's MPD protocol
+  implementation can easier be reused. (Fixes: :issue:`646`)
+
+- Network and signal handling has been updated to play nice on Windows systems.
+
+
 v0.18.1 (2014-01-23)
 ====================
 

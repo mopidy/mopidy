@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import datetime
 import unittest
 
 from mopidy.mpd.protocol import music_db
@@ -12,7 +11,7 @@ from tests.mpd import protocol
 class QueryFromMpdSearchFormatTest(unittest.TestCase):
     def test_dates_are_extracted(self):
         result = music_db._query_from_mpd_search_format(
-            'Date "1974-01-02" Date "1975"')
+            'Date "1974-01-02" "Date" "1975"')
         self.assertEqual(result['date'][0], '1974-01-02')
         self.assertEqual(result['date'][1], '1975')
 
@@ -237,7 +236,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertEqual(response1, response2)
 
     def test_lsinfo_without_path_returns_same_as_for_root(self):
-        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = 1390942873222
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
@@ -246,7 +245,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertEqual(response1, response2)
 
     def test_lsinfo_with_empty_path_returns_same_as_for_root(self):
-        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = 1390942873222
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
@@ -255,14 +254,14 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertEqual(response1, response2)
 
     def test_lsinfo_for_root_includes_playlists(self):
-        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = 1390942873222
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
         self.sendRequest('lsinfo "/"')
         self.assertInResponse('playlist: a')
-        # Date without microseconds and with time zone information
-        self.assertInResponse('Last-Modified: 2001-03-17T13:41:17Z')
+        # Date without milliseconds and with time zone information
+        self.assertInResponse('Last-Modified: 2014-01-28T21:01:13Z')
         self.assertInResponse('OK')
 
     def test_lsinfo_for_root_includes_dirs_for_each_lib_with_content(self):
