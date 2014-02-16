@@ -37,7 +37,6 @@ class MpdDispatcher(object):
         response = []
         filter_chain = [
             self._catch_mpd_ack_errors_filter,
-            # TODO: tokenize filter
             self._authenticate_filter,
             self._command_list_filter,
             self._idle_filter,

@@ -98,7 +98,7 @@ class Commands(object):
         """Create a decorator that registers a handler and validation rules.
 
         Additional keyword arguments are treated as converters/validators to
-        apply to tokens converting them to proper Python type`s.
+        apply to tokens converting them to proper Python types.
 
         Requirements for valid handlers:
 
