@@ -1,13 +1,13 @@
 from __future__ import unicode_literals
 
 import logging
+import socket
 
 import cherrypy
-from ws4py.websocket import WebSocket
+import ws4py.websocket
 
 from mopidy import core, models
 from mopidy.utils import jsonrpc
-
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,28 @@ class WebSocketResource(object):
         cherrypy.request.ws_handler.jsonrpc = self.jsonrpc
 
 
-class WebSocketHandler(WebSocket):
+class _WebSocket(ws4py.websocket.WebSocket):
+    """Sub-class ws4py WebSocket with better error handling."""
+
+    def send(self, *args, **kwargs):
+        try:
+            super(_WebSocket, self).send(*args, **kwargs)
+            return True
+        except socket.error as e:
+            logger.warning('Send message failed: %s', e)
+            # This isn't really correct, but its the only way to break of out
+            # the loop in run and trick ws4py into cleaning up.
+            self.client_terminated = self.server_terminated = True
+            return False
+
+    def close(self, *args, **kwargs):
+        try:
+            super(_WebSocket, self).close(*args, **kwargs)
+        except socket.error as e:
+            logger.warning('Closing WebSocket failed: %s', e)
+
+
+class WebSocketHandler(_WebSocket):
     def opened(self):
         remote = cherrypy.request.remote
         logger.debug(
@@ -66,8 +87,7 @@ class WebSocketHandler(WebSocket):
             remote.ip, remote.port, request)
 
         response = self.jsonrpc.handle_json(request)
-        if response:
-            self.send(response)
+        if response and self.send(response):
             logger.debug(
                 'Sent WebSocket message to %s:%d: %r',
                 remote.ip, remote.port, response)

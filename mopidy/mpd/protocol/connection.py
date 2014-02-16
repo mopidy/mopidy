@@ -39,7 +39,7 @@ def password(context, password):
         This is used for authentication with the server. ``PASSWORD`` is
         simply the plaintext password.
     """
-    if password == context.config['mpd']['password']:
+    if password == context.password:
         context.dispatcher.authenticated = True
     else:
         raise MpdPasswordError('incorrect password')
