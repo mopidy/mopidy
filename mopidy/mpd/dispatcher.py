@@ -5,7 +5,7 @@ import re
 
 import pykka
 
-from mopidy.mpd import exceptions, protocol
+from mopidy.mpd import exceptions, protocol, tokenize
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +37,7 @@ class MpdDispatcher(object):
         response = []
         filter_chain = [
             self._catch_mpd_ack_errors_filter,
+            # TODO: tokenize filter
             self._authenticate_filter,
             self._command_list_filter,
             self._idle_filter,
@@ -88,10 +89,8 @@ class MpdDispatcher(object):
             return self._call_next_filter(request, response, filter_chain)
         else:
             command_name = request.split(' ')[0]
-            command_names_not_requiring_auth = [
-                command.name for command in protocol.mpd_commands
-                if not command.auth_required]
-            if command_name in command_names_not_requiring_auth:
+            command = protocol.commands.handlers.get(command_name)
+            if command and not command.auth_required:
                 return self._call_next_filter(request, response, filter_chain)
             else:
                 raise exceptions.MpdPermissionError(command=command_name)
@@ -164,25 +163,15 @@ class MpdDispatcher(object):
             raise exceptions.MpdSystemError(e)
 
     def _call_handler(self, request):
-        (handler, kwargs) = self._find_handler(request)
+        tokens = tokenize.split(request)
         try:
-            return handler(self.context, **kwargs)
+            return protocol.commands.call(tokens, context=self.context)
         except exceptions.MpdAckError as exc:
             if exc.command is None:
-                exc.command = handler.__name__.split('__', 1)[0]
+                exc.command = tokens[0]
             raise
-
-    def _find_handler(self, request):
-        for pattern in protocol.request_handlers:
-            matches = re.match(pattern, request)
-            if matches is not None:
-                return (
-                    protocol.request_handlers[pattern], matches.groupdict())
-        command_name = request.split(' ')[0]
-        if command_name in [command.name for command in protocol.mpd_commands]:
-            raise exceptions.MpdArgError(
-                'incorrect arguments', command=command_name)
-        raise exceptions.MpdUnknownCommand(command=command_name)
+        except LookupError:
+            raise exceptions.MpdUnknownCommand(command=tokens[0])
 
     def _format_response(self, response):
         formatted_response = []
@@ -299,18 +288,35 @@ class MpdContext(object):
             self.refresh_playlists_mapping()
         return self._playlist_name_from_uri[uri]
 
-    # TODO: consider making context.browse(path) which uses this internally.
-    # advantage would be that all browse requests then go through the same code
-    # and we could prebuild/cache path->uri relationships instead of having to
-    # look them up all the time.
-    def directory_path_to_uri(self, path):
-        parts = re.findall(r'[^/]+', path)
+    def browse(self, path, recursive=True, lookup=True):
+        # TODO: consider caching lookups for less work mapping path->uri
+        path_parts = re.findall(r'[^/]+', path or '')
+        root_path = '/'.join([''] + path_parts)
         uri = None
-        for part in parts:
+
+        for part in path_parts:
             for ref in self.core.library.browse(uri).get():
                 if ref.type == ref.DIRECTORY and ref.name == part:
                     uri = ref.uri
                     break
             else:
-                raise exceptions.MpdNoExistError()
-        return uri
+                raise exceptions.MpdNoExistError('Not found')
+
+        if recursive:
+            yield (root_path, None)
+
+        path_and_futures = [(root_path, self.core.library.browse(uri))]
+        while path_and_futures:
+            base_path, future = path_and_futures.pop()
+            for ref in future.get():
+                path = '/'.join([base_path, ref.name.replace('/', '')])
+                if ref.type == ref.DIRECTORY:
+                    yield (path, None)
+                    if recursive:
+                        path_and_futures.append(
+                            (path, self.core.library.browse(ref.uri)))
+                elif ref.type == ref.TRACK:
+                    if lookup:
+                        yield (path, self.core.library.lookup(ref.uri))
+                    else:
+                        yield (path, ref)

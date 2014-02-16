@@ -54,9 +54,11 @@ class MpdPermissionError(MpdAckError):
         self.message = 'you don\'t have permission for "%s"' % self.command
 
 
-class MpdUnknownCommand(MpdAckError):
+class MpdUnknownError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_UNKNOWN
 
+
+class MpdUnknownCommand(MpdUnknownError):
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
         assert self.command is not None, 'command must be given explicitly'

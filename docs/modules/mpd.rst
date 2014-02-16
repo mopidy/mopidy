@@ -7,6 +7,13 @@ For details on how to use Mopidy's MPD server, see :ref:`ext-mpd`.
 .. automodule:: mopidy.mpd
     :synopsis: MPD server frontend
 
+MPD tokenizer
+=============
+
+.. automodule:: mopidy.mpd.tokenize
+    :synopsis: MPD request tokenizer
+    :members:
+
 
 MPD dispatcher
 ==============

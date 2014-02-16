@@ -8,7 +8,20 @@ This changelog is used to track all major changes to Mopidy.
 v0.19.0 (UNRELEASED)
 ====================
 
-- Nothing yet.
+- Proper command tokenization for MPD requests. This replaces the old regex
+  based system with an MPD protocol specific tokenizer responsible for breaking
+  requests into pieces before the handlers have at them.
+  (Fixes: :issue:`591` and :issue:`592`)
+
+- Updated commands handler system. As part of the tokenizer cleanup we've updated
+  how commands are registered and making it simpler to create new handlers.
+
+- Simplifies a bunch of handlers. All the "browse" type commands now use a
+  common browse helper under the hood for less repetition. Likewise the query
+  handling of "search" commands has been somewhat simplified.
+
+- Adds placeholders for missing MPD commands, preparing the way for bumping the
+  protocol version once they have been added.
 
 
 v0.18.3 (2014-02-16)
@@ -47,6 +60,8 @@ Bug fix release.
   milliseconds since Unix epoch as an integer. This makes serialization of the
   time stamp simpler.
 
+**Windows**
+=======
 - Minor refactor of the MPD server context so that Mopidy's MPD protocol
   implementation can easier be reused. (Fixes: :issue:`646`)
 

@@ -10,8 +10,8 @@ from tests.mpd import protocol
 
 class QueryFromMpdSearchFormatTest(unittest.TestCase):
     def test_dates_are_extracted(self):
-        result = music_db._query_from_mpd_search_format(
-            'Date "1974-01-02" "Date" "1975"')
+        result = music_db._query_from_mpd_search_parameters(
+            ['Date', '1974-01-02', 'Date', '1975'], music_db._SEARCH_MAPPING)
         self.assertEqual(result['date'][0], '1974-01-02')
         self.assertEqual(result['date'][1], '1975')
 
@@ -305,10 +305,31 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_dir_includes_subdirs(self):
         self.backend.library.dummy_browse_result = {
-            'dummy:/': [Ref.directory(uri='/foo', name='foo')]}
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')]}
 
         self.sendRequest('lsinfo "/dummy"')
         self.assertInResponse('directory: dummy/foo')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_dir_does_not_recurse(self):
+        self.backend.library.dummy_library = [
+            Track(uri='dummy:/a', name='a'),
+        ]
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertNotInResponse('file: dummy:/a')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_dir_does_not_include_self(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertNotInResponse('directory: dummy')
         self.assertInResponse('OK')
 
     def test_update_without_uri(self):

@@ -389,6 +389,10 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.sendRequest('playlistinfo "0:20"')
         self.assertInResponse('OK')
 
+    def test_playlistinfo_with_zero_returns_ok(self):
+        self.sendRequest('playlistinfo "0"')
+        self.assertInResponse('OK')
+
     def test_playlistsearch(self):
         self.sendRequest('playlistsearch "any" "needle"')
         self.assertEqualResponse('ACK [0@0] {playlistsearch} Not implemented')

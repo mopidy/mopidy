@@ -2,12 +2,10 @@ from __future__ import division, unicode_literals
 
 import datetime
 
-from mopidy.mpd.exceptions import MpdNoExistError, MpdNotImplemented
-from mopidy.mpd.protocol import handle_request
-from mopidy.mpd.translator import playlist_to_mpd_format
+from mopidy.mpd import exceptions, protocol, translator
 
 
-@handle_request(r'listplaylist\ ("?)(?P<name>[^"]+)\1$')
+@protocol.commands.add('listplaylist')
 def listplaylist(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -24,11 +22,11 @@ def listplaylist(context, name):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist')
+        raise exceptions.MpdNoExistError('No such playlist')
     return ['file: %s' % t.uri for t in playlist.tracks]
 
 
-@handle_request(r'listplaylistinfo\ ("?)(?P<name>[^"]+)\1$')
+@protocol.commands.add('listplaylistinfo')
 def listplaylistinfo(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -44,11 +42,11 @@ def listplaylistinfo(context, name):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist')
-    return playlist_to_mpd_format(playlist)
+        raise exceptions.MpdNoExistError('No such playlist')
+    return translator.playlist_to_mpd_format(playlist)
 
 
-@handle_request(r'listplaylists$')
+@protocol.commands.add('listplaylists')
 def listplaylists(context):
     """
     *musicpd.org, stored playlists section:*
@@ -84,6 +82,7 @@ def listplaylists(context):
     return result
 
 
+# TODO: move to translators?
 def _get_last_modified(playlist):
     """Formats last modified timestamp of a playlist for MPD.
 
@@ -100,9 +99,8 @@ def _get_last_modified(playlist):
     return '%sZ' % dt.isoformat()
 
 
-@handle_request(
-    r'load\ "(?P<name>[^"]+)"(\ "(?P<start>\d+):(?P<end>\d+)*")*$')
-def load(context, name, start=None, end=None):
+@protocol.commands.add('load', playlist_slice=protocol.RANGE)
+def load(context, name, playlist_slice=slice(0, None)):
     """
     *musicpd.org, stored playlists section:*
 
@@ -125,15 +123,11 @@ def load(context, name, start=None, end=None):
     """
     playlist = context.lookup_playlist_from_name(name)
     if not playlist:
-        raise MpdNoExistError('No such playlist')
-    if start is not None:
-        start = int(start)
-    if end is not None:
-        end = int(end)
-    context.core.tracklist.add(playlist.tracks[start:end])
+        raise exceptions.MpdNoExistError('No such playlist')
+    context.core.tracklist.add(playlist.tracks[playlist_slice])
 
 
-@handle_request(r'playlistadd\ "(?P<name>[^"]+)"\ "(?P<uri>[^"]+)"$')
+@protocol.commands.add('playlistadd')
 def playlistadd(context, name, uri):
     """
     *musicpd.org, stored playlists section:*
@@ -144,10 +138,10 @@ def playlistadd(context, name, uri):
 
         ``NAME.m3u`` will be created if it does not exist.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'playlistclear\ "(?P<name>[^"]+)"$')
+@protocol.commands.add('playlistclear')
 def playlistclear(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -156,10 +150,10 @@ def playlistclear(context, name):
 
         Clears the playlist ``NAME.m3u``.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'playlistdelete\ "(?P<name>[^"]+)"\ "(?P<songpos>\d+)"$')
+@protocol.commands.add('playlistdelete', songpos=protocol.UINT)
 def playlistdelete(context, name, songpos):
     """
     *musicpd.org, stored playlists section:*
@@ -168,12 +162,11 @@ def playlistdelete(context, name, songpos):
 
         Deletes ``SONGPOS`` from the playlist ``NAME.m3u``.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(
-    r'playlistmove\ "(?P<name>[^"]+)"\ '
-    r'"(?P<from_pos>\d+)"\ "(?P<to_pos>\d+)"$')
+@protocol.commands.add(
+    'playlistmove', from_pos=protocol.UINT, to_pos=protocol.UINT)
 def playlistmove(context, name, from_pos, to_pos):
     """
     *musicpd.org, stored playlists section:*
@@ -189,10 +182,10 @@ def playlistmove(context, name, from_pos, to_pos):
       documentation, but just the ``SONGPOS`` to move *from*, i.e.
       ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'rename\ "(?P<old_name>[^"]+)"\ "(?P<new_name>[^"]+)"$')
+@protocol.commands.add('rename')
 def rename(context, old_name, new_name):
     """
     *musicpd.org, stored playlists section:*
@@ -201,10 +194,10 @@ def rename(context, old_name, new_name):
 
         Renames the playlist ``NAME.m3u`` to ``NEW_NAME.m3u``.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'rm\ "(?P<name>[^"]+)"$')
+@protocol.commands.add('rm')
 def rm(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -213,10 +206,10 @@ def rm(context, name):
 
         Removes the playlist ``NAME.m3u`` from the playlist directory.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'save\ "(?P<name>[^"]+)"$')
+@protocol.commands.add('save')
 def save(context, name):
     """
     *musicpd.org, stored playlists section:*
@@ -226,4 +219,4 @@ def save(context, name):
         Saves the current playlist to ``NAME.m3u`` in the playlist
         directory.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
