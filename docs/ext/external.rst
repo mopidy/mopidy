@@ -51,6 +51,15 @@ Provides a backend for playing music from `Google Play Music
 <https://play.google.com/music/>`_.
 
 
+Mopidy-InternetArchive
+======================
+
+https://github.com/tkem/mopidy-internetarchive
+
+Extension for playing music and audio from the `Internet Archive
+<https://archive.org/>`_.
+
+
 Mopidy-MPRIS
 ============
 
@@ -74,6 +83,14 @@ Mopidy-Notifier
 https://github.com/sauberfred/mopidy-notifier
 
 Extension for displaying track info as User Notifications in Mac OS X.
+
+
+Mopidy-Podcast
+==============
+
+https://github.com/tkem/mopidy-podcast
+
+Extension for browsing RSS feeds of podcasts and stream the episodes.
 
 
 Mopidy-radio-de
@@ -137,3 +154,12 @@ https://github.com/sibuser/mopidy-vkontakte
 
 Provides a backend for playing music from the `VKontakte social network
 <http://vk.com/>`_.
+
+
+Mopidy-Yamaha
+=============
+
+https://github.com/knutz3n/mopidy-yamaha
+
+Extension for controlling volume using an external Yamaha network connected
+amplifier.

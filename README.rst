@@ -19,7 +19,7 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 - `Source code <https://github.com/mopidy/mopidy>`_
 - `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
 - `CI server <https://travis-ci.org/mopidy/mopidy>`_
-- `Download development snapshot <https://github.com/mopidy/mopidy/tarball/develop#egg=mopidy-dev>`_
+- `Download development snapshot <https://github.com/mopidy/mopidy/archive/develop.tar.gz#egg=mopidy-dev>`_
 
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
 - Mailing list: `mopidy@googlegroups.com <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
