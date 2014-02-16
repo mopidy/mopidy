@@ -11,6 +11,14 @@ v0.19.0 (UNRELEASED)
 - Nothing yet.
 
 
+v0.18.3 (2014-02-16)
+====================
+
+Bug fix release.
+
+- Fix documentation build.
+
+
 v0.18.2 (2014-02-16)
 ====================
 
