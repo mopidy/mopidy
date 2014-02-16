@@ -22,7 +22,6 @@ def sticker(context, action, field, uri, name=None, value=None):
 
         Reads a sticker value for the specified object.
 
-
         ``sticker set {TYPE} {URI} {NAME} {VALUE}``
 
         Adds a sticker value to the specified object. If a sticker item

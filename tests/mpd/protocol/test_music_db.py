@@ -323,7 +323,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertNotInResponse('file: dummy:/a')
         self.assertInResponse('OK')
 
-    def test_lsinfo_for_dir_does_not_self(self):
+    def test_lsinfo_for_dir_does_not_include_self(self):
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
             'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}

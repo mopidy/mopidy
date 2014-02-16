@@ -29,7 +29,7 @@ VERSION = '0.17.0'
 def load_protocol_modules():
     """
     The protocol modules must be imported to get them registered in
-    :attr:`request_handlers` and :attr:`mpd_commands`.
+    :attr:`commands`.
     """
     from . import (  # noqa
         audio_output, channels, command_list, connection, current_playlist,
@@ -45,7 +45,7 @@ def INT(value):
 
 
 def UINT(value):
-    """Converts a value that matches \d+ into and integer."""
+    """Converts a value that matches \d+ into an integer."""
     if value is None:
         raise ValueError('None is not a valid integer')
     if not value.isdigit():
@@ -63,9 +63,9 @@ def BOOL(value):
 def RANGE(value):
     """Convert a single integer or range spec into a slice
 
-    `n` should become `slice(n, n+1)`
-    `n:` should become `slice(n, None)`
-    `n:m` should become `slice(n, m)` and `m > n` must hold
+    ``n`` should become ``slice(n, n+1)``
+    ``n:`` should become ``slice(n, None)``
+    ``n:m`` should become ``slice(n, m)`` and ``m > n`` must hold
     """
     if ':' in value:
         start, stop = value.split(':', 1)
@@ -95,10 +95,10 @@ class Commands(object):
     # TODO: consider removing auth_required and list_command in favour of
     # additional command instances to register in?
     def add(self, name, auth_required=True, list_command=True, **validators):
-        """Create a decorator that registers a handler + validation rules.
+        """Create a decorator that registers a handler and validation rules.
 
-        Additional keyword arguments are treated as converts/validators to
-        apply to tokens converting them to proper python types.
+        Additional keyword arguments are treated as converters/validators to
+        apply to tokens converting them to proper Python type`s.
 
         Requirements for valid handlers:
 
@@ -127,7 +127,7 @@ class Commands(object):
 
             if len(args) > 1 and varargs:
                 raise TypeError(
-                    '*args may not be combined with regular argmuments')
+                    '*args may not be combined with regular arguments')
 
             if not set(validators.keys()).issubset(args):
                 raise TypeError('Validator for non-existent arg passed')
@@ -157,7 +157,7 @@ class Commands(object):
     def call(self, tokens, context=None):
         """Find and run the handler registered for the given command.
 
-        If the handler was registered with any converters/validators there will
+        If the handler was registered with any converters/validators they will
         be run before calling the real handler.
 
         :param list tokens: List of tokens to process
