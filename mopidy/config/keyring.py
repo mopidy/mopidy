@@ -19,20 +19,25 @@ else:
     EMPTY_STRING = ''
 
 
+FETCH_ERROR = (
+    'Fetching passwords from your keyring failed. Any passwords '
+    'stored in the keyring will not be available.')
+
+
 def fetch():
     if not dbus:
-        logger.debug('Fetching from keyring failed: dbus not installed.')
+        logger.debug('%s (dbus not installed)', FETCH_ERROR)
         return []
 
     try:
         bus = dbus.SessionBus()
     except dbus.exceptions.DBusException as e:
-        logger.debug('Fetching from keyring failed: %s', e)
+        logger.debug('%s (%s)', FETCH_ERROR, e)
         return []
 
     if not bus.name_has_owner('org.freedesktop.secrets'):
         logger.debug(
-            'Fetching from keyring failed: secrets service not running.')
+            '%s (org.freedesktop.secrets service not running)', FETCH_ERROR)
         return []
 
     service = _service(bus)
@@ -47,7 +52,7 @@ def fetch():
         items, prompt = service.Unlock(locked)
         if prompt != '/':
             _prompt(bus, prompt).Dismiss()
-            logger.debug('Fetching from keyring failed: keyring is locked.')
+            logger.debug('%s (Keyring is locked)', FETCH_ERROR)
             return []
 
     result = []
@@ -65,19 +70,20 @@ def set(section, key, value):
     Indicates if storage failed or succeeded.
     """
     if not dbus:
-        logger.debug('Saving %s/%s to keyring failed: dbus not installed.',
+        logger.debug('Saving %s/%s to keyring failed. (dbus not installed)',
                      section, key)
         return False
 
     try:
         bus = dbus.SessionBus()
     except dbus.exceptions.DBusException as e:
-        logger.debug('Saving %s/%s to keyring failed: %s', section, key, e)
+        logger.debug('Saving %s/%s to keyring failed. (%s)', section, key, e)
         return False
 
     if not bus.name_has_owner('org.freedesktop.secrets'):
         logger.debug(
-            'Saving %s/%s to keyring failed: secrets service not running.',
+            'Saving %s/%s to keyring failed. '
+            '(org.freedesktop.secrets service not running)',
             section, key)
         return False
 
@@ -101,14 +107,14 @@ def set(section, key, value):
         item, prompt = collection.CreateItem(properties, secret, True)
     except dbus.exceptions.DBusException as e:
         # TODO: catch IsLocked errors etc.
-        logger.debug('Saving %s/%s to keyring failed: %s', section, key, e)
+        logger.debug('Saving %s/%s to keyring failed. (%s)', section, key, e)
         return False
 
     if prompt == '/':
         return True
 
     _prompt(bus, prompt).Dismiss()
-    logger.debug('Saving secret %s/%s failed: Keyring is locked',
+    logger.debug('Saving secret %s/%s failed. (Keyring is locked)',
                  section, key)
     return False
 
