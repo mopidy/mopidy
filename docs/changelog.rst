@@ -17,8 +17,8 @@ v0.18.2 (2014-02-16)
 Bug fix release.
 
 - We now log warnings for wrongly configured extensions, and clearly label them
-  in :option:`mopidy config`, but does no longer stop Mopidy from starting
-  because of misconfigured extensions. (Fixes: :issue:`682`)
+  in ``mopidy config``, but does no longer stop Mopidy from starting because of
+  misconfigured extensions. (Fixes: :issue:`682`)
 
 - Fix a crash in the server side WebSocket handler caused by connection
   problems with clients. (Fixes: :issue:`428`, :issue:`571`)
