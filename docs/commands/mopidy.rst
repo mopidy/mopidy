@@ -130,12 +130,6 @@ The ``mopidy config`` output shows the effect of the :option:`--option` flags::
     mopidy -o mpd/enabled=false -o spotify/bitrate=320 config
 
 
-See also
-========
-
-:ref:`mopidy-convert-config(1) <mopidy-convert-config>`
-
-
 Reporting bugs
 ==============
 

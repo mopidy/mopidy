@@ -38,7 +38,6 @@ setup(
     entry_points={
         'console_scripts': [
             'mopidy = mopidy.__main__:main',
-            'mopidy-convert-config = mopidy.config.convert:main',
         ],
         'mopidy.ext': [
             'http = mopidy.http:Extension [http]',

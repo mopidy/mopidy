@@ -16,6 +16,15 @@ Feature release.
   new API introuced in v0.18 is now required. Most extensions already use the
   new API location.
 
+**Commands**
+
+- The ``mopidy-convert-config`` tool for migrating the ``setings.py``
+  configuration file used by Mopidy up until 0.14 to the new config file format
+  has been removed after almost a year of trusty service. If you still need to
+  convert your old ``settings.py`` configuration file, do so using and older
+  release, like Mopidy 0.18, or migrate the configuration to the new format by
+  hand.
+
 **Extension support**
 
 - Removed the :class:`~mopidy.ext.Extension` methods that were deprecated in
@@ -687,7 +696,7 @@ one new.
   To ease migration we've made a tool named :option:`mopidy-convert-config` for
   automatically converting the old ``settings.py`` to a new ``mopidy.conf``
   file. This tool takes care of all the renamed config values as well. See
-  :ref:`mopidy-convert-config` for details on how to use it.
+  ``mopidy-convert-config`` for details on how to use it.
 
 - A long wanted feature: You can now enable or disable specific frontends or
   backends without having to redefine :attr:`~mopidy.settings.FRONTENDS` or
