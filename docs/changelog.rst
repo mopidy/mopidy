@@ -10,6 +10,12 @@ v0.19.0 (UNRELEASED)
 
 Feature release.
 
+**Backend API**
+
+- Imports of the backend API from :mod:`mopidy.backends` no longer works. The
+  new API introuced in v0.18 is now required. Most extensions already use the
+  new API location.
+
 **MPD frontend**
 
 - Proper command tokenization for MPD requests. This replaces the old regex
