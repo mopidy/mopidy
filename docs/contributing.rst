@@ -85,26 +85,35 @@ Mopidy to come with tests.
 #. To run tests, you need a couple of dependencies. They can be installed using
    ``pip``::
 
-       pip install --upgrade coverage flake8 mock nose
+       pip install --upgrade coverage mock nose tox
 
 #. Then, to run all tests, go to the project directory and run::
 
        nosetests
 
-   To run tests with test coverage statistics, remember to specify the tests
-   dir::
+   To run tests with test coverage statistics::
 
-       nosetests --with-coverage tests/
+       nosetests --with-coverage
 
    Test coverage statistics can also be viewed online at
    `coveralls.io <https://coveralls.io/r/mopidy/mopidy>`_.
 
-#. Check the code for errors and style issues using flake8::
+#. Always check the code for errors and style issues using flake8::
 
-       flake8 .
+       flake8 mopidy/ tests/
 
-For more documentation on testing, check out the `nose documentation
-<http://nose.readthedocs.org/>`_.
+   If successful, the command will not print anything at all.
+
+#. Finally, there is the ultimate but a bit slower command. To run both tests,
+   docs build, and flake8 linting, run::
+
+       tox
+
+   This will run exactly the same tests as `Travis CI
+   <https://travis-ci.org/mopidy/mopidy>`_ runs for all our branches and pull
+   requests. If this command turns green, you can be quite confident that your
+   pull request will get the green flag from Travis as well, which is a
+   requirement for it to be merged.
 
 
 Submitting changes
