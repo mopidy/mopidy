@@ -99,42 +99,6 @@ class Extension(object):
         :param registry: the extension registry
         :type registry: :class:`Registry`
         """
-        for backend_class in self.get_backend_classes():
-            registry.add('backend', backend_class)
-
-        for frontend_class in self.get_frontend_classes():
-            registry.add('frontend', frontend_class)
-
-        self.register_gstreamer_elements()
-
-    def get_frontend_classes(self):
-        """List of frontend actor classes
-
-        .. deprecated:: 0.18
-            Use :meth:`setup` instead.
-
-        :returns: list of :class:`pykka.Actor` subclasses
-        """
-        return []
-
-    def get_backend_classes(self):
-        """List of backend actor classes
-
-        .. deprecated:: 0.18
-            Use :meth:`setup` instead.
-
-        :returns: list of :class:`~mopidy.backend.Backend` subclasses
-        """
-        return []
-
-    def register_gstreamer_elements(self):
-        """Hook for registering custom GStreamer elements.
-
-        .. deprecated:: 0.18
-            Use :meth:`setup` instead.
-
-        :returns: :class:`None`
-        """
         pass
 
 

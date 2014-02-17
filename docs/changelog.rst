@@ -16,6 +16,14 @@ Feature release.
   new API introuced in v0.18 is now required. Most extensions already use the
   new API location.
 
+**Extension support**
+
+- Removed the :class:`~mopidy.ext.Extension` methods that were deprecated in
+  0.18: :meth:`~mopidy.ext.Extension.get_backend_classes`,
+  :meth:`~mopidy.ext.Extension.get_frontend_classes`, and
+  :meth:`~mopidy.ext.Extension.register_gstreamer_elements`. Use
+  meth:`mopidy.ext.Extension.setup` instead, as most extensions already do.
+
 **MPD frontend**
 
 - Proper command tokenization for MPD requests. This replaces the old regex
