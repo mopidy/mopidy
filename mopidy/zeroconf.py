@@ -63,7 +63,7 @@ class Zeroconf(object):
         """
 
         if _is_loopback_address(self.host):
-            logger.info(
+            logger.debug(
                 'Zeroconf publish on loopback interface is not supported.')
             return False
 

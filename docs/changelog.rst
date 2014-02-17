@@ -5,16 +5,25 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v0.19.0 (UNRELEASED)
-====================
-
-- Nothing yet.
-
-
-v0.18.2 (UNRELEASED)
+v0.18.3 (2014-02-16)
 ====================
 
 Bug fix release.
+
+- Fix documentation build.
+
+
+v0.18.2 (2014-02-16)
+====================
+
+Bug fix release.
+
+- We now log warnings for wrongly configured extensions, and clearly label them
+  in ``mopidy config``, but does no longer stop Mopidy from starting because of
+  misconfigured extensions. (Fixes: :issue:`682`)
+
+- Fix a crash in the server side WebSocket handler caused by connection
+  problems with clients. (Fixes: :issue:`428`, :issue:`571`)
 
 - Fix the ``time_position`` field of the ``track_playback_ended`` event, which
   has been always 0 since v0.18.0. This made scrobbles by Mopidy-Scrobbler not
