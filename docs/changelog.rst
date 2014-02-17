@@ -31,7 +31,7 @@ Feature release.
   0.18: :meth:`~mopidy.ext.Extension.get_backend_classes`,
   :meth:`~mopidy.ext.Extension.get_frontend_classes`, and
   :meth:`~mopidy.ext.Extension.register_gstreamer_elements`. Use
-  meth:`mopidy.ext.Extension.setup` instead, as most extensions already do.
+  :meth:`mopidy.ext.Extension.setup` instead, as most extensions already do.
 
 **MPD frontend**
 
