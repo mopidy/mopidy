@@ -1,21 +1,22 @@
 language: python
 
+env:
+  - TOX_ENV=py27
+  - TOX_ENV=docs
+  - TOX_ENV=flake8
+
 install:
   - "wget -O - http://apt.mopidy.com/mopidy.gpg | sudo apt-key add -"
   - "sudo wget -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list"
   - "sudo apt-get update || true"
-  - "sudo apt-get install $(apt-cache depends mopidy | awk '$2 !~ /mopidy|python:any/ {print $2}')"
-  - "pip install coveralls flake8"
-
-before_script:
-  - "rm $VIRTUAL_ENV/lib/python$TRAVIS_PYTHON_VERSION/no-global-site-packages.txt"
+  - "sudo apt-get install mopidy graphviz-dev"
+  - "pip install tox"
 
 script:
-  - "flake8 $(find . -iname '*.py')"
-  - "nosetests --with-coverage --cover-package=mopidy"
+  - "tox -e $TOX_ENV"
 
 after_success:
-  - "coveralls"
+  - "if [ $TOX_ENV == 'py27' ]; then pip install coveralls; coveralls; fi"
 
 notifications:
   irc:
