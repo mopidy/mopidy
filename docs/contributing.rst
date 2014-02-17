@@ -96,6 +96,9 @@ Mopidy to come with tests.
 
        nosetests --with-coverage tests/
 
+   Test coverage statistics can also be viewed online at
+   `coveralls.io <https://coveralls.io/r/mopidy/mopidy>`_.
+
 #. Check the code for errors and style issues using flake8::
 
        flake8 .
