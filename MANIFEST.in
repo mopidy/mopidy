@@ -6,6 +6,7 @@ include .travis.yml
 include AUTHORS
 include LICENSE
 include MANIFEST.in
+include tox.ini
 
 recursive-include data *
 
