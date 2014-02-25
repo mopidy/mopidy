@@ -147,6 +147,15 @@ Provides a backend for playing music from a `Subsonic Music Streamer
 <http://www.subsonic.org/>`_ library.
 
 
+Mopidy-TuneIn
+=============
+
+https://github.com/kingosticks/mopidy-tunein
+
+Provides a backend for playing music from the `TuneIn
+<http://www.tunein.com/>`_ online radio service.
+
+
 Mopidy-VKontakte
 ================
 
