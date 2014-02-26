@@ -200,6 +200,11 @@ def find_files(path):
     return results.iterkeys()
 
 
+def find_mtimes(root):
+    results, errors = _find(root, hidden=False, relative=False)
+    return dict((f, int(st.st_mtime)) for f, st in results.iteritems())
+
+
 def check_file_path_is_inside_base_dir(file_path, base_path):
     assert not file_path.endswith(os.sep), (
         'File path %s cannot end with a path separator' % file_path)
