@@ -182,24 +182,6 @@ def _find(root, thread_count=10, hidden=True, relative=False):
     return results, errors
 
 
-def find_files(path):
-    """
-    Finds all files within a path.
-
-    Directories and files with names starting with ``.`` is ignored.
-
-    :returns: yields the full path to files as bytestrings
-    """
-    if isinstance(path, unicode):
-        path = path.encode('utf-8')
-
-    if os.path.isfile(path):
-        return iter([])
-
-    results, errors = _find(path, hidden=False, relative=True)
-    return results.iterkeys()
-
-
 def find_mtimes(root):
     results, errors = _find(root, hidden=False, relative=False)
     return dict((f, int(st.st_mtime)) for f, st in results.iteritems())

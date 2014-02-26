@@ -65,8 +65,8 @@ class ScanCommand(commands.Command):
         scan_timeout = config['local']['scan_timeout']
         flush_threshold = config['local']['scan_flush_threshold']
         excluded_file_extensions = config['local']['excluded_file_extensions']
-        excluded_file_extensions = set(
-            file_ext.lower() for file_ext in excluded_file_extensions)
+        excluded_file_extensions = tuple(
+            bytes(file_ext.lower()) for file_ext in excluded_file_extensions)
 
         library = _get_library(args, config)
 
@@ -96,9 +96,8 @@ class ScanCommand(commands.Command):
         for abspath in file_mtimes:
             relpath = os.path.relpath(abspath, media_dir)
             uri = translator.path_to_local_track_uri(relpath)
-            file_extension = os.path.splitext(relpath)[1]
 
-            if file_extension.lower() in excluded_file_extensions:
+            if relpath.lower().endswith(excluded_file_extensions):
                 logger.debug('Skipped %s: File extension excluded.', uri)
                 continue
 

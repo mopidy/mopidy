@@ -210,31 +210,6 @@ class ExpandPathTest(unittest.TestCase):
             path.expand_path(b'/tmp/$XDG_INVALID_DIR/foo'))
 
 
-class FindFilesTest(unittest.TestCase):
-    def find(self, value):
-        return list(path.find_files(path_to_data_dir(value)))
-
-    def test_basic_dir(self):
-        self.assert_(self.find(''))
-
-    def test_nonexistant_dir(self):
-        self.assertEqual(self.find('does-not-exist'), [])
-
-    def test_file(self):
-        self.assertEqual([], self.find('blank.mp3'))
-
-    def test_files(self):
-        files = self.find('find')
-        expected = [b'foo/bar/file', b'foo/file', b'baz/file']
-        self.assertItemsEqual(expected, files)
-
-    def test_names_are_bytestrings(self):
-        is_bytes = lambda f: isinstance(f, bytes)
-        for name in self.find(''):
-            self.assert_(
-                is_bytes(name), '%s is not bytes object' % repr(name))
-
-
 class FindMTimesTest(unittest.TestCase):
     maxDiff = None
 
