@@ -91,10 +91,13 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
         self.jrw.handle_data.return_value = {'foo': models.Artist(name='bar')}
 
         request = '[]'
-        response = self.jrw.handle_json(request)
+        response = json.loads(self.jrw.handle_json(request))
 
-        self.assertEqual(
-            response, '{"foo": {"__model__": "Artist", "name": "bar"}}')
+        self.assertIn('foo', response)
+        self.assertIn('__model__', response['foo'])
+        self.assertEqual(response['foo']['__model__'], 'Artist')
+        self.assertIn('name', response['foo'])
+        self.assertEqual(response['foo']['name'], 'bar')
 
     def test_handle_json_returns_nothing_for_notices(self):
         request = '{"jsonrpc": "2.0", "method": "core.get_uri_schemes"}'

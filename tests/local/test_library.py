@@ -284,8 +284,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track album artists
         result = self.library.find_exact(any=['artist3'])
-        self.assertEqual(
-            list(result[0].tracks), [self.tracks[3], self.tracks[2]])
+        self.assertEqual(len(result[0].tracks), 2)
+        self.assertIn(self.tracks[2], result[0].tracks)
+        self.assertIn(self.tracks[3], result[0].tracks)
 
         # Matches on track composer
         result = self.library.find_exact(any=['artist5'])
@@ -502,8 +503,9 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on track album artists
         result = self.library.search(any=['Tist3'])
-        self.assertEqual(
-            list(result[0].tracks), [self.tracks[3], self.tracks[2]])
+        self.assertEqual(len(result[0].tracks), 2)
+        self.assertIn(self.tracks[2], result[0].tracks)
+        self.assertIn(self.tracks[3], result[0].tracks)
 
         # Matches on track genre
         result = self.library.search(any=['Enre1'])
