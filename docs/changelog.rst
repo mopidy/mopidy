@@ -51,6 +51,12 @@ Feature release.
 - Adds placeholders for missing MPD commands, preparing the way for bumping the
   protocol version once they have been added.
 
+**Local backend**
+
+- The ``local scan`` command now use multiple threads to walk the file system
+  and check files' modification time. This speeds up scanning, escpecially
+  when scanning remote file systems over e.g. NFS.
+
 
 v0.18.3 (2014-02-16)
 ====================
