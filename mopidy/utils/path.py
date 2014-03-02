@@ -114,7 +114,7 @@ def _find_worker(relative, hidden, done, work, results, errors):
     """Worker thread for collecting stat() results.
 
     :param str relative: directory to make results relative to
-    :param bool hidden: if entries starting with . should be ignored
+    :param bool hidden: whether to include files and dirs starting with '.'
     :param threading.Event done: event indicating that all work has been done
     :param queue.Queue work: queue of paths to process
     :param dict results: shared dictionary for storing all the stat() results
@@ -152,10 +152,10 @@ def _find(root, thread_count=10, hidden=True, relative=False):
 
     Note that we do _not_ handle loops from bad sym/hardlinks in any way.
 
-    :param str root: root directory to search from, may no be a file
+    :param str root: root directory to search from, may not be a file
     :param int thread_count: number of workers to use, mainly useful to
         mitigate network lag when scanning on NFS etc.
-    :param bool hidden: include files and directory starting with '.'?
+    :param bool hidden: whether to include files and dirs starting with '.'
     :param bool relative: if results should be relative to root or absolute
     """
     threads = []
