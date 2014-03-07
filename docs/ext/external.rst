@@ -145,3 +145,12 @@ https://github.com/sibuser/mopidy-vkontakte
 
 Provides a backend for playing music from the `VKontakte social network
 <http://vk.com/>`_.
+
+
+Mopidy-YouTube
+=================
+
+https://github.com/dz0ny/mopidy-youtube
+
+Provides a backend for playing music from the `YouTube
+<http://www.youtube.com/>`_ service.
