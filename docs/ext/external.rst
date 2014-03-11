@@ -172,3 +172,12 @@ https://github.com/knutz3n/mopidy-yamaha
 
 Extension for controlling volume using an external Yamaha network connected
 amplifier.
+
+
+Mopidy-YouTube
+=================
+
+https://github.com/dz0ny/mopidy-youtube
+
+Provides a backend for playing music from the `YouTube
+<http://www.youtube.com/>`_ service.
