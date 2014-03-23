@@ -59,6 +59,9 @@ class Backend(object):
     def has_playlists(self):
         return self.playlists is not None
 
+    def has_stored_playlists(self):
+        return self.has_playlists() and self.playlists.provides_store
+
 
 class LibraryProvider(object):
     """
@@ -228,9 +231,10 @@ class PlaylistsProvider(object):
 
     pykka_traversable = True
 
-    def __init__(self, backend):
+    def __init__(self, backend, provides_store=False):
         self.backend = backend
         self._playlists = []
+        self.provides_store = provides_store
 
     @property
     def playlists(self):
@@ -250,6 +254,22 @@ class PlaylistsProvider(object):
         See :meth:`mopidy.core.PlaylistsController.create`.
 
         *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def create_stored(self, name, tracks):
+        """
+        See :meth:`mopidy.core.PlaylistsController.create_stored`.
+
+        *MUST be implemented by subclass when :attr:`provides_store` is True.*
+        """
+        raise NotImplementedError
+
+    def rm_stored(self, name):
+        """
+        See :meth:`mopidy.core.PlaylistsController.rm_stored`.
+
+        *MUST be implemented by subclass when :attr:`provides_store` is True.*
         """
         raise NotImplementedError
 

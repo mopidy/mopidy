@@ -58,6 +58,38 @@ class PlaylistsController(object):
         listener.CoreListener.send('playlist_changed', playlist=playlist)
         return playlist
 
+    def create_stored(self, name):
+        """
+        Create a playlist of tracks that the user can modify like a traditional
+        mpc playlist as opposed to a playlist created by :meth:`create` which
+        is immutable. Returns True if playlist could be created.
+
+        :param name: name of the new playlist
+        :rtype: boolean
+        """
+        stored = self.backends.stored_playlists
+        if stored:
+            tracks = self.core.tracklist.tracks
+            playlist = stored.playlists.create_stored(name, tracks).get()
+            listener.CoreListener.send('playlist_changed', playlist=playlist)
+            return True
+        else:
+            return False
+
+    def rm_stored(self, name):
+        """
+        Remove a playlist created with create_stored. Returns True if playlist
+        could be removed.
+
+        :param name: name of the playlist to erase.
+        :rtype: boolean
+        """
+        stored = self.backends.stored_playlists
+        if stored:
+            return stored.playlists.rm_stored(name).get()
+        else:
+            return False
+
     def delete(self, uri):
         """
         Delete playlist identified by the URI.

@@ -12,17 +12,20 @@ class PlaylistsTest(unittest.TestCase):
     def setUp(self):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
+        self.backend1.actor_ref.actor_class.__name__ = 'dummy1'
         self.sp1 = mock.Mock(spec=backend.PlaylistsProvider)
         self.backend1.playlists = self.sp1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
+        self.backend2.actor_ref.actor_class.__name__ = 'dummy2'
         self.sp2 = mock.Mock(spec=backend.PlaylistsProvider)
         self.backend2.playlists = self.sp2
 
         # A backend without the optional playlists provider
         self.backend3 = mock.Mock()
         self.backend3.uri_schemes.get.return_value = ['dummy3']
+        self.backend3.actor_ref.actor_class.__name__ = 'dummy3'
         self.backend3.has_playlists().get.return_value = False
         self.backend3.playlists = None
 

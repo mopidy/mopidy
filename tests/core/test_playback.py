@@ -12,6 +12,7 @@ class CorePlaybackTest(unittest.TestCase):
     def setUp(self):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
+        self.backend1.actor_ref.actor_class.__name__ = 'dummy1'
         self.playback1 = mock.Mock(spec=backend.PlaybackProvider)
         self.playback1.get_time_position().get.return_value = 1000
         self.playback1.reset_mock()
@@ -19,6 +20,7 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
+        self.backend2.actor_ref.actor_class.__name__ = 'dummy2'
         self.playback2 = mock.Mock(spec=backend.PlaybackProvider)
         self.playback2.get_time_position().get.return_value = 2000
         self.playback2.reset_mock()
@@ -27,6 +29,7 @@ class CorePlaybackTest(unittest.TestCase):
         # A backend without the optional playback provider
         self.backend3 = mock.Mock()
         self.backend3.uri_schemes.get.return_value = ['dummy3']
+        self.backend3.actor_ref.actor_class.__name__ = 'dummy3'
         self.backend3.has_playback().get.return_value = False
 
         self.tracks = [

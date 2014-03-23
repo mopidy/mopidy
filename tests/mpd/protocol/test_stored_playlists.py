@@ -212,3 +212,29 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_save(self):
         self.sendRequest('save "name"')
         self.assertEqualResponse('ACK [0@0] {save} Not implemented')
+
+    def test_save_stored(self):
+        # add stored track
+        tracks = [Track(uri='dummy:a'), Track(uri='local:a')]
+        self.backend.playlists.provides_store = True
+        self.core.backends.get().stored_playlists = self.backend
+        tracks = self.core.tracklist.add(tracks)
+        self.sendRequest('save "name"')
+        self.assertEqualResponse('OK')
+        playlist = self.backend.playlists.lookup("dummy:stored:name").get()
+        self.assertNotEqual(playlist, None)
+        self.assertEqual(len(playlist.tracks), 2)
+
+    def test_rm_stored(self):
+        # then delete it
+        tracks = [Track(uri='dummy:a')]
+        self.backend.playlists.provides_store = True
+        self.core.backends.get().stored_playlists = self.backend
+        tracks = self.core.tracklist.add(tracks)
+        self.sendRequest('save "name"')
+        self.assertEqualResponse('OK')
+
+        self.sendRequest('rm "name"')
+        self.assertEqualResponse('OK')
+        playlist = self.backend.playlists.lookup("dummy:stored:name").get()
+        self.assertEqual(playlist, None)

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import json
 import os
 import shutil
 import tempfile
@@ -7,7 +8,7 @@ import unittest
 
 import pykka
 
-from mopidy import audio, core
+from mopidy import audio, core, models
 from mopidy.local import actor
 from mopidy.models import Playlist, Track
 
@@ -45,6 +46,13 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         self.assertFalse(os.path.exists(path))
 
         self.core.playlists.create('test')
+        self.assertTrue(os.path.exists(path))
+
+    def test_created_stored_playlist_is_persisted(self):
+        path = os.path.join(self.playlists_dir, 'test.json')
+        self.assertFalse(os.path.exists(path))
+
+        self.core.playlists.create_stored('test')
         self.assertTrue(os.path.exists(path))
 
     def test_create_slugifies_playlist_name(self):
@@ -89,6 +97,14 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         self.core.playlists.delete(playlist.uri)
         self.assertFalse(os.path.exists(path))
 
+    def test_deleted_stored_playlist_is_removed(self):
+        path = os.path.join(self.playlists_dir, 'test.json')
+        self.assertFalse(os.path.exists(path))
+        self.core.playlists.create_stored('test')
+        self.assertTrue(os.path.exists(path))
+        self.core.playlists.rm_stored('test')
+        self.assertFalse(os.path.exists(path))
+
     def test_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1))
         playlist = self.core.playlists.create('test')
@@ -100,6 +116,33 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
             contents = playlist_file.read()
 
         self.assertEqual(track.uri, contents.strip())
+
+    def test_create_stored_playlist_contents_is_written_to_disk(self):
+        track = Track(uri=generate_song(1))
+        self.core.tracklist.add(tracks=[track])
+        playlist_path = os.path.join(self.playlists_dir, 'test.json')
+        self.core.playlists.create_stored('test')
+        with open(playlist_path, 'r') as fp:
+            playlist = json.load(fp, object_hook=models.model_json_decoder)
+            self.assertEqual(len(playlist.tracks), 1)
+            self.assertEqual(track, playlist.tracks[0])
+
+    def test_create_stored_playlist_overwrites_old_disk_contents(self):
+        track = Track(uri=generate_song(1))
+        self.core.tracklist.add(tracks=[track])
+        playlist_path = os.path.join(self.playlists_dir, 'test.json')
+        self.core.playlists.create_stored('test')
+        with open(playlist_path, 'r') as fp:
+            playlist = json.load(fp, object_hook=models.model_json_decoder)
+            self.assertEqual(track, playlist.tracks[0])
+
+        self.core.tracklist.clear()
+        new_track = Track(uri=generate_song(2))
+        self.core.tracklist.add(tracks=[new_track])
+        self.core.playlists.create_stored('test')
+        with open(playlist_path, 'r') as fp:
+            playlist = json.load(fp, object_hook=models.model_json_decoder)
+            self.assertEqual(new_track, playlist.tracks[0])
 
     def test_extended_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1), name='Test', length=60000)
@@ -128,6 +171,17 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
             playlist.name, backend.playlists.playlists[0].name)
         self.assertEqual(
             track.uri, backend.playlists.playlists[0].tracks[0].uri)
+
+    def test_stored_playlists_are_loaded_at_startup(self):
+        track = Track(uri=generate_song(1))
+        self.core.tracklist.add(tracks=[track])
+        self.core.playlists.create_stored('test')
+
+        backend = self.backend_class(config=self.config, audio=self.audio)
+
+        self.assert_(backend.playlists.playlists)
+        self.assertEqual('test', backend.playlists.playlists[0].name)
+        self.assertEqual(track, backend.playlists.playlists[0].tracks[0])
 
     @unittest.SkipTest
     def test_santitising_of_playlist_filenames(self):
