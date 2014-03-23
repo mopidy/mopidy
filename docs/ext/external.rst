@@ -93,6 +93,24 @@ https://github.com/tkem/mopidy-podcast
 Extension for browsing RSS feeds of podcasts and stream the episodes.
 
 
+Mopidy-Podcast-gpodder.net
+==========================
+
+https://github.com/tkem/mopidy-podcast-gpodder
+
+Extension for Mopidy-Podcast that lets you search and browse podcasts from the
+`gpodder.net <https://gpodder.net/>`_ web site.
+
+
+Mopidy-Podcast-iTunes
+=====================
+
+https://github.com/tkem/mopidy-podcast-itunes
+
+Extension for Mopidy-Podcast that lets you search and browse podcasts from the
+Apple iTunes Store.
+
+
 Mopidy-radio-de
 ===============
 
