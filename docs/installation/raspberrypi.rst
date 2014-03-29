@@ -109,13 +109,16 @@ card.
    Note that if you have an ``~/.asoundrc`` it will overide any global
    settings from ``/etc/asound.conf``.
 
-#. Update your ``~/.config/mopidy/mopidy.conf`` to contain::
+#. For Mopidy to output audio directly to ALSA, instead of Jack which
+   GStreamer usually defaults to on Raspberry Pi, install the
+   ``gstreamer0.10-alsa`` package::
+
+       sudo apt-get install gstreamer0.10-alsa
+
+   Then update your ``~/.config/mopidy/mopidy.conf`` to contain::
 
        [audio]
        output = alsasink
-
-   This is to tell GStreamer not to pick Jack which it seems to like picking on
-   Raspberry Pis for some reason.
 
 Following these steps you should be able to get crackle free sound on either
 HDMI or analog. Note that you might need to ensure that PulseAudio is no longer
