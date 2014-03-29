@@ -26,13 +26,18 @@ will create an empty config file for you and print what config values must be
 set to successfully start Mopidy.
 
 When you have created the configuration file, open it in a text editor, and add
-the config values you want to change. If you want to keep the default for a
-config value, you **should not** add it to
-:file:`~/.config/mopidy/mopidy.conf`.
+the config values you want to change.  If you want to keep the default for a
+config value, you **should not** add it to the config file, but leave it out so
+that when we change the default value in a future version, you won't have to
+change your configuration accordingly.
 
 To see what's the effective configuration for your Mopidy installation, you can
-run ``mopidy config``. It will print your full effective config with passwords
-masked out so that you safely can share the output with others for debugging.
+run::
+
+    mopidy config
+
+This will print your full effective config with passwords masked out so that
+you safely can share the output with others for debugging.
 
 You can find a description of all config values belonging to Mopidy's core
 below, together with their default values. In addition, all :ref:`extensions
