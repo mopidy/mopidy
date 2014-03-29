@@ -55,6 +55,10 @@ in the same way as you get updates to the rest of your distribution.
    For a full list of available Mopidy extensions, including those not
    installable from apt.mopidy.com, see :ref:`ext`.
 
+#. Before continuing, make sure you've read the :ref:`debian` section to learn
+   about the differences between running Mopidy as a system service and
+   manually as your own system user.
+
 #. Finally, you need to set a couple of :doc:`config values </config>`, and then
    you're ready to :doc:`run Mopidy </running>`.
 

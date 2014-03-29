@@ -37,6 +37,7 @@ Usage
     config
     running
     troubleshooting
+    debian
 
 
 .. _ext:
