@@ -154,7 +154,7 @@ class AudioStateTest(unittest.TestCase):
         self.audio._on_playbin_state_changed(
             gst.STATE_PAUSED, gst.STATE_READY, gst.STATE_NULL)
         # We never get the following call, so the logic must work without it
-        #self.audio._on_playbin_state_changed(
-        #    gst.STATE_READY, gst.STATE_NULL, gst.STATE_VOID_PENDING)
+        # self.audio._on_playbin_state_changed(
+        #     gst.STATE_READY, gst.STATE_NULL, gst.STATE_VOID_PENDING)
 
         self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)

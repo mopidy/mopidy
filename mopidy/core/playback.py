@@ -30,7 +30,7 @@ class PlaybackController(object):
         uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
 
-    ### Properties
+    # Properties
 
     def get_current_tl_track(self):
         return self.current_tl_track
@@ -127,7 +127,7 @@ class PlaybackController(object):
     mute = property(get_mute, set_mute)
     """Mute state as a :class:`True` if muted, :class:`False` otherwise"""
 
-    ### Methods
+    # Methods
 
     def change_track(self, tl_track, on_error_step=1):
         """

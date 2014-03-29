@@ -550,7 +550,7 @@ def update(context, uri=None):
 
 
 # TODO: add at least reflection tests before adding NotImplemented version
-#@protocol.commands.add('readcomments')
+# @protocol.commands.add('readcomments')
 def readcomments(context, uri):
     """
     *musicpd.org, music database section:*

@@ -68,7 +68,7 @@ class MpdDispatcher(object):
         else:
             return response
 
-    ### Filter: catch MPD ACK errors
+    # Filter: catch MPD ACK errors
 
     def _catch_mpd_ack_errors_filter(self, request, response, filter_chain):
         try:
@@ -78,7 +78,7 @@ class MpdDispatcher(object):
                 mpd_ack_error.index = self.command_list_index
             return [mpd_ack_error.get_mpd_ack()]
 
-    ### Filter: authenticate
+    # Filter: authenticate
 
     def _authenticate_filter(self, request, response, filter_chain):
         if self.authenticated:
@@ -94,7 +94,7 @@ class MpdDispatcher(object):
             else:
                 raise exceptions.MpdPermissionError(command=command_name)
 
-    ### Filter: command list
+    # Filter: command list
 
     def _command_list_filter(self, request, response, filter_chain):
         if self._is_receiving_command_list(request):
@@ -117,7 +117,7 @@ class MpdDispatcher(object):
             self.command_list_index is not None and
             request != 'command_list_end')
 
-    ### Filter: idle
+    # Filter: idle
 
     def _idle_filter(self, request, response, filter_chain):
         if self._is_currently_idle() and not self._noidle.match(request):
@@ -140,7 +140,7 @@ class MpdDispatcher(object):
     def _is_currently_idle(self):
         return bool(self.context.subscriptions)
 
-    ### Filter: add OK
+    # Filter: add OK
 
     def _add_ok_filter(self, request, response, filter_chain):
         response = self._call_next_filter(request, response, filter_chain)
@@ -151,7 +151,7 @@ class MpdDispatcher(object):
     def _has_error(self, response):
         return response and response[-1].startswith('ACK')
 
-    ### Filter: call handler
+    # Filter: call handler
 
     def _call_handler_filter(self, request, response, filter_chain):
         try:

@@ -34,7 +34,7 @@ def enableoutput(context, outputid):
 
 
 # TODO: implement and test
-#@protocol.commands.add('toggleoutput', outputid=protocol.UINT)
+# @protocol.commands.add('toggleoutput', outputid=protocol.UINT)
 def toggleoutput(context, outputid):
     """
     *musicpd.org, audio output section:*

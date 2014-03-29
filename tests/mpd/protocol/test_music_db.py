@@ -559,7 +559,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.sendRequest('list "foo"')
         self.assertEqualResponse('ACK [2@0] {list} incorrect arguments')
 
-    ### Artist
+    # Artist
 
     def test_list_artist_with_quotes(self):
         self.sendRequest('list "artist"')
@@ -619,7 +619,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Artist: ')
         self.assertInResponse('OK')
 
-    ### Albumartist
+    # Albumartist
 
     def test_list_albumartist_with_quotes(self):
         self.sendRequest('list "albumartist"')
@@ -682,7 +682,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Performer: ')
         self.assertInResponse('OK')
 
-    ### Composer
+    # Composer
 
     def test_list_composer_with_quotes(self):
         self.sendRequest('list "composer"')
@@ -745,7 +745,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Performer: ')
         self.assertInResponse('OK')
 
-    ### Performer
+    # Performer
 
     def test_list_performer_with_quotes(self):
         self.sendRequest('list "performer"')
@@ -808,7 +808,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Performer: ')
         self.assertInResponse('OK')
 
-    ### Album
+    # Album
 
     def test_list_album_with_quotes(self):
         self.sendRequest('list "album"')
@@ -879,7 +879,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Album: ')
         self.assertInResponse('OK')
 
-    ### Date
+    # Date
 
     def test_list_date_with_quotes(self):
         self.sendRequest('list "date"')
@@ -934,7 +934,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Date: ')
         self.assertInResponse('OK')
 
-    ### Genre
+    # Genre
 
     def test_list_genre_with_quotes(self):
         self.sendRequest('list "genre"')

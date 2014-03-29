@@ -38,7 +38,7 @@ _proxy_schema['username'] = String(optional=True)
 _proxy_schema['password'] = Secret(optional=True)
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
-#_outputs_schema = config.AudioOutputConfigSchema()
+# _outputs_schema = config.AudioOutputConfigSchema()
 
 _schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
 

@@ -33,7 +33,7 @@ def crossfade(context, seconds):
 
 
 # TODO: add at least reflection tests before adding NotImplemented version
-#@protocol.commands.add('mixrampdb')
+# @protocol.commands.add('mixrampdb')
 def mixrampdb(context, decibels):
     """
     *musicpd.org, playback section:*
@@ -50,7 +50,7 @@ def mixrampdb(context, decibels):
 
 
 # TODO: add at least reflection tests before adding NotImplemented version
-#@protocol.commands.add('mixrampdelay', seconds=protocol.UINT)
+# @protocol.commands.add('mixrampdelay', seconds=protocol.UINT)
 def mixrampdelay(context, seconds):
     """
     *musicpd.org, playback section:*

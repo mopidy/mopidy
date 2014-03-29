@@ -13,7 +13,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         uri='a uri',
         artists=[Artist(name='an artist')],
         name='a name',
-        album=Album(name='an album', num_tracks=13,
+        album=Album(
+            name='an album', num_tracks=13,
             artists=[Artist(name='an other artist')]),
         track_no=7,
         composers=[Artist(name='a composer')],

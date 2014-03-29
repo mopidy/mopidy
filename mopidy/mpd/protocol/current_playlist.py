@@ -360,8 +360,8 @@ def swapid(context, tlid1, tlid2):
 
 
 # TODO: add at least reflection tests before adding NotImplemented version
-#@protocol.commands.add(
-#    'prio', priority=protocol.UINT, position=protocol.RANGE)
+# @protocol.commands.add(
+#     'prio', priority=protocol.UINT, position=protocol.RANGE)
 def prio(context, priority, position):
     """
     *musicpd.org, current playlist section:*
@@ -378,7 +378,7 @@ def prio(context, priority, position):
 
 
 # TODO: add at least reflection tests before adding NotImplemented version
-#@protocol.commands.add('prioid')
+# @protocol.commands.add('prioid')
 def prioid(context, *args):
     """
     *musicpd.org, current playlist section:*
@@ -391,7 +391,7 @@ def prioid(context, *args):
 
 
 # TODO: add at least reflection tests before adding NotImplemented version
-#@protocol.commands.add('addtagid', tlid=protocol.UINT)
+# @protocol.commands.add('addtagid', tlid=protocol.UINT)
 def addtagid(context, tlid, tag, value):
     """
     *musicpd.org, current playlist section:*
@@ -407,7 +407,7 @@ def addtagid(context, tlid, tag, value):
 
 
 # TODO: add at least reflection tests before adding NotImplemented version
-#@protocol.commands.add('cleartagid', tlid=protocol.UINT)
+# @protocol.commands.add('cleartagid', tlid=protocol.UINT)
 def cleartagid(context, tlid, tag):
     """
     *musicpd.org, current playlist section:*
