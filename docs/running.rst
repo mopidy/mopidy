@@ -30,7 +30,8 @@ Init scripts
 
 - The ``mopidy`` package at `apt.mopidy.com <http://apt.mopidy.com/>`__ comes
   with an `sysvinit init script
-  <https://github.com/mopidy/mopidy/blob/debian/debian/mopidy.init>`_.
+  <https://github.com/mopidy/mopidy/blob/debian/debian/mopidy.init>`_. For
+  more details, see the :ref:`debian` section of the docs.
 
 - The ``mopidy`` package in `Arch Linux AUR
   <https://aur.archlinux.org/packages/mopidy>`__ comes with a systemd init
