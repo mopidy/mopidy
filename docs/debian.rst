@@ -40,7 +40,7 @@ from a regular Mopidy setup you'll want to know about.
 - All configuration is in :file:`/etc/mopidy`, not in your user's home
   directory. The main configuration file is :file:`/etc/mopidy/mopidy.conf`.
   You can do all your changes in this file.
-  
+
 - Mopidy extensions installed from Debian packages will sometimes install
   additional configuration files in :file:`/etc/mopidy/extensions.d/`. These
   files just provide different defaults for the extension when run as a system
@@ -83,10 +83,10 @@ from a regular Mopidy setup you'll want to know about.
 
 - Mopidy installed from a Debian package can use both Mopidy extensions
   installed both from Debian packages and extensions installed with pip.
-  
+
   The other way around does not work: Mopidy installed with pip can use
   extensions installed with pip, but not extensions installed from a Debian
-  package. This is because the Debian packages installs extensions into
+  package. This is because the Debian packages install extensions into
   :file:`/usr/share/mopidy` which is normally not on your ``PYTHONPATH``.
   Thus, your pip-installed Mopidy will not find the Debian package-installed
   extensions.
