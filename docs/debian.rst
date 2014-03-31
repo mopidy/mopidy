@@ -31,8 +31,8 @@ Mopidy by running::
     sudo service mopidy stop
 
 
-Differences between when running as a system service
-====================================================
+Differences when running as a system service
+============================================
 
 If you want to run Mopidy using the init script, there's a few differences
 from a regular Mopidy setup you'll want to know about.
