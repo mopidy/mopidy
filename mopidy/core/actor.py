@@ -93,26 +93,26 @@ class Backends(list):
         self.with_playlists = collections.OrderedDict()
 
         backends_by_scheme = {}
-        name = lambda backend: backend.actor_ref.actor_class.__name__
+        name = lambda b: b.actor_ref.actor_class.__name__
 
-        for backend in backends:
-            has_library = backend.has_library().get()
-            has_library_browse = backend.has_library_browse().get()
-            has_playback = backend.has_playback().get()
-            has_playlists = backend.has_playlists().get()
+        for b in backends:
+            has_library = b.has_library().get()
+            has_library_browse = b.has_library_browse().get()
+            has_playback = b.has_playback().get()
+            has_playlists = b.has_playlists().get()
 
-            for scheme in backend.uri_schemes.get():
+            for scheme in b.uri_schemes.get():
                 assert scheme not in backends_by_scheme, (
                     'Cannot add URI scheme %s for %s, '
                     'it is already handled by %s'
-                ) % (scheme, name(backend), name(backends_by_scheme[scheme]))
-                backends_by_scheme[scheme] = backend
+                ) % (scheme, name(b), name(backends_by_scheme[scheme]))
+                backends_by_scheme[scheme] = b
 
                 if has_library:
-                    self.with_library[scheme] = backend
+                    self.with_library[scheme] = b
                 if has_library_browse:
-                    self.with_library_browse[scheme] = backend
+                    self.with_library_browse[scheme] = b
                 if has_playback:
-                    self.with_playback[scheme] = backend
+                    self.with_playback[scheme] = b
                 if has_playlists:
-                    self.with_playlists[scheme] = backend
+                    self.with_playlists[scheme] = b
