@@ -76,6 +76,36 @@ office jukebox.
     -- https://github.com/meantimeit/jukepi
 
 
+Apollo Player
+=============
+
+.. image:: apollo-player.gif
+    :width: 722
+    :height: 406
+
+A Mopidy web client made by Argonaut in SF for their office jukebox.
+
+    Mopidy frontend community driven playlist. Driven by Node.js, Backbone.js,
+    and Require.js.
+
+-- https://github.com/samcreate/Apollo-Player
+
+    We've released ARGONAUT's first open source playlist app, APOLLO. It uses
+    Mopidy (and the Mopidy Spotify plugin) to create a social listening
+    experience for your home or office.
+
+    Users authenticate via Twitter, then search the Spotify library and add
+    tracks to the playlist, which plays on the local machine (via Node.js
+    server). When the playlist runs out, it switches to a default playlist that
+    you define.
+
+    Users can also bomb a track---if it receives 3 down votes, it plays a
+    Spotify track to announce the bomb (we use "children booing")---then skips
+    to the next track.
+
+-- http://blog.argonautinc.com/post/83027259908/music-is-pretty-important-to-our-culture-and
+
+
 Other web clients
 =================
 
