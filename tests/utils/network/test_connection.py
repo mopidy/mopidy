@@ -416,7 +416,8 @@ class ConnectionTest(unittest.TestCase):
 
         self.assertTrue(network.Connection.recv_callback(
             self.mock, sentinel.fd, gobject.IO_IN))
-        self.mock.stop.assert_called_once_with(any_unicode)
+        self.mock.actor_ref.tell.assert_called_once_with({'close': True})
+        self.mock.disable_recv.assert_called_once_with()
 
     def test_recv_callback_recoverable_error(self):
         self.mock.sock = Mock(spec=socket.SocketType)
