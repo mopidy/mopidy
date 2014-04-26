@@ -79,10 +79,6 @@ office jukebox.
 Apollo Player
 =============
 
-.. image:: apollo-player.gif
-    :width: 722
-    :height: 406
-
 A Mopidy web client made by Argonaut in SF for their office jukebox.
 
     Mopidy frontend community driven playlist. Driven by Node.js, Backbone.js,
