@@ -29,6 +29,7 @@ class HttpEventsTest(unittest.TestCase):
                 'port': 6680,
                 'static_dir': None,
                 'zeroconf': '',
+                'zeroconf-websocket': '',
             }
         }
         self.http = actor.HttpFrontend(config=config, core=mock.Mock())
