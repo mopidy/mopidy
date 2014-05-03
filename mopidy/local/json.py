@@ -31,6 +31,9 @@ def write_library(json_file, data):
     data['version'] = mopidy.__version__
     directory, basename = os.path.split(json_file)
 
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
     # TODO: cleanup directory/basename.* files.
     tmp = tempfile.NamedTemporaryFile(
         prefix=basename + '.', dir=directory, delete=False)
