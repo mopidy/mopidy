@@ -25,18 +25,18 @@ To get started with Mopidy, check out `the docs <http://docs.mopidy.com/>`_.
 - Mailing list: `mopidy@googlegroups.com <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
 - Twitter: `@mopidy <https://twitter.com/mopidy/>`_
 
-.. image:: https://pypip.in/v/Mopidy/badge.png
+.. image:: https://img.shields.io/pypi/v/Mopidy.svg?style=flat
     :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Latest PyPI version
 
-.. image:: https://pypip.in/d/Mopidy/badge.png
+.. image:: https://img.shields.io/pypi/dm/Mopidy.svg?style=flat
     :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Number of PyPI downloads
 
-.. image:: https://travis-ci.org/mopidy/mopidy.png?branch=develop
+.. image:: https://img.shields.io/travis/mopidy/mopidy/develop.svg?style=flat
     :target: https://travis-ci.org/mopidy/mopidy
     :alt: Travis CI build status
 
-.. image:: https://coveralls.io/repos/mopidy/mopidy/badge.png?branch=develop
+.. image:: https://img.shields.io/coveralls/mopidy/mopidy/develop.svg?style=flat
    :target: https://coveralls.io/r/mopidy/mopidy?branch=develop
    :alt: Test coverage
