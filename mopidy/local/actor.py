@@ -1,13 +1,12 @@
 from __future__ import unicode_literals
 
 import logging
-import os
 
 import pykka
 
 from mopidy import backend
-from mopidy.utils import encoding, path
 
+from . import storage
 from .library import LocalLibraryProvider
 from .playback import LocalPlaybackProvider
 from .playlists import LocalPlaylistsProvider
@@ -24,7 +23,7 @@ class LocalBackend(pykka.ThreadingActor, backend.Backend):
 
         self.config = config
 
-        self.check_dirs_and_files()
+        storage.check_dirs_and_files(config)
 
         libraries = dict((l.name, l) for l in self.libraries)
         library_name = config['local']['library']
@@ -39,23 +38,3 @@ class LocalBackend(pykka.ThreadingActor, backend.Backend):
         self.playback = LocalPlaybackProvider(audio=audio, backend=self)
         self.playlists = LocalPlaylistsProvider(backend=self)
         self.library = LocalLibraryProvider(backend=self, library=library)
-
-    def check_dirs_and_files(self):
-        if not os.path.isdir(self.config['local']['media_dir']):
-            logger.warning('Local media dir %s does not exist.' %
-                           self.config['local']['media_dir'])
-
-        try:
-            path.get_or_create_dir(self.config['local']['data_dir'])
-        except EnvironmentError as error:
-            logger.warning(
-                'Could not create local data dir: %s',
-                encoding.locale_decode(error))
-
-        # TODO: replace with data dir?
-        try:
-            path.get_or_create_dir(self.config['local']['playlists_dir'])
-        except EnvironmentError as error:
-            logger.warning(
-                'Could not create local playlists dir: %s',
-                encoding.locale_decode(error))

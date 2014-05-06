@@ -59,6 +59,11 @@ Feature release.
   and check files' modification time. This speeds up scanning, escpecially
   when scanning remote file systems over e.g. NFS.
 
+- the ``local scan`` command now creates necessary folders if they don't
+  already exist. Previously, this was only done by the Mopidy server, so doing
+  a ``local scan`` before running the server the first time resulted in a
+  crash. (Fixes: :issue:`703`)
+
 
 v0.18.3 (2014-02-16)
 ====================

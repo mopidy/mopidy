@@ -12,7 +12,7 @@ import time
 
 import mopidy
 from mopidy import local, models
-from mopidy.local import search, translator
+from mopidy.local import search, storage, translator
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +30,6 @@ def load_library(json_file):
 def write_library(json_file, data):
     data['version'] = mopidy.__version__
     directory, basename = os.path.split(json_file)
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
 
     # TODO: cleanup directory/basename.* files.
     tmp = tempfile.NamedTemporaryFile(
@@ -123,6 +120,8 @@ class JsonLibrary(local.Library):
         self._media_dir = config['local']['media_dir']
         self._json_file = os.path.join(
             config['local']['data_dir'], b'library.json.gz')
+
+        storage.check_dirs_and_files(config)
 
     def browse(self, uri):
         if not self._browse_cache:
