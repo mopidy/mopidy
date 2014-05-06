@@ -22,6 +22,7 @@ class Extension(ext.Extension):
         schema['port'] = config.Port()
         schema['static_dir'] = config.Path(optional=True)
         schema['zeroconf'] = config.String(optional=True)
+        schema['zeroconf-websocket'] = config.String(optional=True)
         return schema
 
     def validate_environment(self):
