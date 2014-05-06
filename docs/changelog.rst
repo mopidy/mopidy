@@ -33,6 +33,13 @@ Feature release.
   :meth:`~mopidy.ext.Extension.register_gstreamer_elements`. Use
   :meth:`mopidy.ext.Extension.setup` instead, as most extensions already do.
 
+**HTTP frontend**
+
+- If Zeroconf is enabled, we now announce the ``_mopidy-http._tcp`` service in
+  addition to ``_http._tcp``. This is to make it easier to automatically find
+  Mopidy's HTTP server among other Zeroconf-published HTTP servers on the
+  local network.
+
 **MPD frontend**
 
 - Proper command tokenization for MPD requests. This replaces the old regex

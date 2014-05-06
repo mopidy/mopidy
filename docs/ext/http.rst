@@ -108,4 +108,7 @@ See :ref:`config` for general help on configuring Mopidy.
     Name of the HTTP service when published through Zeroconf. The variables
     ``$hostname`` and ``$port`` can be used in the name.
 
+    If set, the Zeroconf services ``_http._tcp`` and ``_mopidy-http._tcp`` will
+    be published.
+
     Set to an empty string to disable Zeroconf for HTTP.

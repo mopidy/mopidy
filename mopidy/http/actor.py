@@ -25,10 +25,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         self.hostname = config['http']['hostname']
         self.port = config['http']['port']
-        self.zeroconf_http_name = config['http']['zeroconf']
-        self.zeroconf_http_service = None
-        self.zeroconf_websocket_name = config['http']['zeroconf-websocket']
-        self.zeroconf_websocket_service = None
+        self.zeroconf_name = config['http']['zeroconf']
+        self.zeroconf_service = None
 
         self._setup_server()
         self._setup_websocket_plugin()
@@ -95,39 +93,11 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         logger.debug('Starting HTTP server')
         cherrypy.engine.start()
         logger.info('HTTP server running at %s', cherrypy.server.base())
-
-        if self.zeroconf_http_name:
-            self.zeroconf_http_service = zeroconf.Zeroconf(
-                stype='_http._tcp', name=self.zeroconf_http_name,
-                host=self.hostname, port=self.port)
-
-            if self.zeroconf_http_service.publish():
-                logger.debug(
-                    'Registered HTTP with Zeroconf as "%s"',
-                    self.zeroconf_http_service.name)
-            else:
-                logger.debug('Registering HTTP with Zeroconf failed.')
-
-        if self.zeroconf_websocket_name:
-            self.zeroconf_websocket_service = zeroconf.Zeroconf(
-                stype='_mopidy-http._tcp', name=self.zeroconf_websocket_name,
-                host=self.hostname, port=self.port)
-
-            if self.zeroconf_websocket_service.publish():
-                logger.debug(
-                    'Registered mopidy-http with Zeroconf as "%s"',
-                    self.zeroconf_websocket_service.name)
-            else:
-                logger.debug('Registering mopidy-http with Zeroconf failed.')
+        self._publish_zeroconf()
 
     def on_stop(self):
-        if self.zeroconf_http_service:
-            self.zeroconf_http_service.unpublish()
-
-        if self.zeroconf_websocket_service:
-            self.zeroconf_websocket_service.unpublish()
-
         logger.debug('Stopping HTTP server')
+        self._unpublish_zeroconf()
         cherrypy.engine.exit()
         logger.info('Stopped HTTP server')
 
@@ -136,6 +106,39 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         event['event'] = name
         message = json.dumps(event, cls=models.ModelJSONEncoder)
         cherrypy.engine.publish('websocket-broadcast', TextMessage(message))
+
+    def _publish_zeroconf(self):
+        if not self.zeroconf_name:
+            return
+
+        self.zeroconf_http_service = zeroconf.Zeroconf(
+            stype='_http._tcp', name=self.zeroconf_name,
+            host=self.hostname, port=self.port)
+
+        if self.zeroconf_http_service.publish():
+            logger.debug(
+                'Registered HTTP with Zeroconf as "%s"',
+                self.zeroconf_http_service.name)
+        else:
+            logger.debug('Registering HTTP with Zeroconf failed.')
+
+        self.zeroconf_mopidy_http_service = zeroconf.Zeroconf(
+            stype='_mopidy-http._tcp', name=self.zeroconf_name,
+            host=self.hostname, port=self.port)
+
+        if self.zeroconf_mopidy_http_service.publish():
+            logger.debug(
+                'Registered Mopidy-HTTP with Zeroconf as "%s"',
+                self.zeroconf_mopidy_http_service.name)
+        else:
+            logger.debug('Registering Mopidy-HTTP with Zeroconf failed.')
+
+    def _unpublish_zeroconf(self):
+        if self.zeroconf_http_service:
+            self.zeroconf_http_service.unpublish()
+
+        if self.zeroconf_mopidy_http_service:
+            self.zeroconf_mopidy_http_service.unpublish()
 
 
 class RootResource(object):
