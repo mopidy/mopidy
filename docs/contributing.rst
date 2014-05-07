@@ -100,7 +100,7 @@ Mopidy to come with tests.
 
 #. Always check the code for errors and style issues using flake8::
 
-       flake8 mopidy/ tests/
+       flake8
 
    If successful, the command will not print anything at all.
 
