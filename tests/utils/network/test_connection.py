@@ -2,11 +2,13 @@ from __future__ import unicode_literals
 
 import errno
 import logging
-from mock import patch, sentinel, Mock
 import socket
 import unittest
 
 import gobject
+
+from mock import Mock, patch, sentinel
+
 import pykka
 
 from mopidy.utils import network

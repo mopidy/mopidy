@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
 
+import gobject
+
 import pygst
 pygst.require('0.10')
-import gst
-import gobject
+import gst  # noqa
 
 
 def create_track(label, initial_volume, min_volume, max_volume,

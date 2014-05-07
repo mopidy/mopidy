@@ -7,6 +7,7 @@ import os
 import sys
 
 import glib
+
 import gobject
 
 from mopidy import config as config_lib

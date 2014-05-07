@@ -6,9 +6,9 @@ import time
 
 from mopidy import commands, exceptions
 from mopidy.audio import scan
+from mopidy.local import translator
 from mopidy.utils import path
 
-from . import translator
 
 logger = logging.getLogger(__name__)
 

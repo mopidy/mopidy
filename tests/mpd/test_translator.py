@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 import datetime
 import unittest
 
-from mopidy.utils.path import mtime
+from mopidy.models import Album, Artist, Playlist, TlTrack, Track
 from mopidy.mpd import translator
-from mopidy.models import Album, Artist, TlTrack, Playlist, Track
+from mopidy.utils.path import mtime
 
 
 class TrackMpdFormatTest(unittest.TestCase):

@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
-from distutils.version import StrictVersion as SV
 import unittest
+from distutils.version import StrictVersion as SV
 
 from mopidy import __version__
 

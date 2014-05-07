@@ -4,8 +4,7 @@ import logging
 import urlparse
 
 from mopidy.audio import PlaybackState
-
-from . import listener
+from mopidy.core import listener
 
 
 logger = logging.getLogger(__name__)

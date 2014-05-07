@@ -3,9 +3,10 @@
 from __future__ import unicode_literals
 
 import logging
-import mock
 import socket
 import unittest
+
+import mock
 
 from mopidy.config import types
 

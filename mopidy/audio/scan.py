@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import datetime
 import os
 import time
 
+import pygst
+pygst.require('0.10')
+import gst  # noqa
+
 from mopidy import exceptions
-from mopidy.models import Track, Artist, Album
+from mopidy.models import Album, Artist, Track
 from mopidy.utils import path
 
 

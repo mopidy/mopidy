@@ -4,6 +4,7 @@ import logging
 import socket
 
 import cherrypy
+
 import ws4py.websocket
 
 from mopidy import core, models

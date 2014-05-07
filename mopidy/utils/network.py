@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
 import errno
-import gobject
 import logging
 import re
 import socket
 import sys
 import threading
+
+import gobject
 
 import pykka
 

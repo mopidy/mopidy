@@ -25,8 +25,7 @@ mopidy_args = sys.argv[1:]
 sys.argv[1:] = []
 
 
-from mopidy import commands, ext
-from mopidy import config as config_lib
+from mopidy import commands, config as config_lib, ext
 from mopidy.utils import log, path, process, versioning
 
 logger = logging.getLogger(__name__)

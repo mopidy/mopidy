@@ -2,10 +2,10 @@ from __future__ import unicode_literals
 
 import collections
 import logging
+
 import pkg_resources
 
-from mopidy import exceptions
-from mopidy import config as config_lib
+from mopidy import config as config_lib, exceptions
 
 
 logger = logging.getLogger(__name__)

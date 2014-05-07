@@ -7,13 +7,12 @@ import pykka
 
 from mopidy import audio, backend
 from mopidy.audio import PlaybackState
+from mopidy.core.library import LibraryController
+from mopidy.core.listener import CoreListener
+from mopidy.core.playback import PlaybackController
+from mopidy.core.playlists import PlaylistsController
+from mopidy.core.tracklist import TracklistController
 from mopidy.utils import versioning
-
-from .library import LibraryController
-from .listener import CoreListener
-from .playback import PlaybackController
-from .playlists import PlaylistsController
-from .tracklist import TracklistController
 
 
 class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):

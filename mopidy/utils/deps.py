@@ -6,11 +6,11 @@ import platform
 
 import pygst
 pygst.require('0.10')
-import gst
+import gst  # noqa
 
 import pkg_resources
 
-from . import formatting
+from mopidy.utils import formatting
 
 
 def format_dependency_list(adapters=None):

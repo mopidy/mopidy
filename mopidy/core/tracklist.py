@@ -4,9 +4,8 @@ import collections
 import logging
 import random
 
+from mopidy.core import listener
 from mopidy.models import TlTrack
-
-from . import listener
 
 
 logger = logging.getLogger(__name__)

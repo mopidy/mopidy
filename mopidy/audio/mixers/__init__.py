@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
 import gobject
 
-from .auto import AutoAudioMixer
-from .fake import FakeMixer
+import pygst
+pygst.require('0.10')
+import gst  # noqa
+
+from mopidy.audio.mixers.auto import AutoAudioMixer
+from mopidy.audio.mixers.fake import FakeMixer
 
 
 def register_mixer(mixer_class):

@@ -1,19 +1,20 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
+import logging
+
 import gobject
 
-import logging
+import pygst
+pygst.require('0.10')
+import gst  # noqa
 
 import pykka
 
+from mopidy.audio import mixers, playlists, utils
+from mopidy.audio.constants import PlaybackState
+from mopidy.audio.listener import AudioListener
 from mopidy.utils import process
 
-from . import mixers, playlists, utils
-from .constants import PlaybackState
-from .listener import AudioListener
 
 logger = logging.getLogger(__name__)
 

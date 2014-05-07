@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from distutils.version import StrictVersion as SV
 import sys
 import warnings
+from distutils.version import StrictVersion as SV
 
 import pykka
 

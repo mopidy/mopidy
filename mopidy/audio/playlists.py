@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-import gobject
-
 import ConfigParser as configparser
 import io
+
+import gobject
+
+import pygst
+pygst.require('0.10')
+import gst  # noqa
 
 try:
     import xml.etree.cElementTree as elementtree

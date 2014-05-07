@@ -1,17 +1,19 @@
 from __future__ import unicode_literals
 
-import logging
 import json
+import logging
 import os
 
 import cherrypy
+
 import pykka
+
 from ws4py.messaging import TextMessage
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 
 from mopidy import models, zeroconf
 from mopidy.core import CoreListener
-from . import ws
+from mopidy.http import ws
 
 
 logger = logging.getLogger(__name__)

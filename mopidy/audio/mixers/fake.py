@@ -6,12 +6,13 @@ mixer.
 
 from __future__ import unicode_literals
 
+import gobject
+
 import pygst
 pygst.require('0.10')
-import gobject
-import gst
+import gst  # noqa
 
-from . import utils
+from mopidy.audio.mixers import utils
 
 
 class FakeMixer(gst.Element, gst.ImplementsInterface, gst.interfaces.Mixer):

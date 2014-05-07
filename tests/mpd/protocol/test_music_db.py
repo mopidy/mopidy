@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import unittest
 
-from mopidy.mpd.protocol import music_db
 from mopidy.models import Album, Artist, Playlist, Ref, SearchResult, Track
+from mopidy.mpd.protocol import music_db
 
 from tests.mpd import protocol
 

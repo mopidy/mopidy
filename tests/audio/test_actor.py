@@ -2,12 +2,12 @@ from __future__ import unicode_literals
 
 import unittest
 
-import pygst
-pygst.require('0.10')
-import gst
-
 import gobject
 gobject.threads_init()
+
+import pygst
+pygst.require('0.10')
+import gst  # noqa
 
 import pykka
 

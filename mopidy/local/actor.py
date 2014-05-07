@@ -5,11 +5,11 @@ import logging
 import pykka
 
 from mopidy import backend
+from mopidy.local import storage
+from mopidy.local.library import LocalLibraryProvider
+from mopidy.local.playback import LocalPlaybackProvider
+from mopidy.local.playlists import LocalPlaylistsProvider
 
-from . import storage
-from .library import LocalLibraryProvider
-from .playback import LocalPlaybackProvider
-from .playlists import LocalPlaylistsProvider
 
 logger = logging.getLogger(__name__)
 

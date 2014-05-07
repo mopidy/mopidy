@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
+import Queue as queue
 import logging
 import os
-import Queue as queue
 import stat
 import string
 import threading

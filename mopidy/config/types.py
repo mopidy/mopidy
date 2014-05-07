@@ -4,8 +4,8 @@ import logging
 import re
 import socket
 
-from mopidy.utils import path
 from mopidy.config import validators
+from mopidy.utils import path
 
 
 def decode(value):

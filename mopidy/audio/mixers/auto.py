@@ -6,11 +6,12 @@ mixer.
 
 from __future__ import unicode_literals
 
+import logging
+
 import pygst
 pygst.require('0.10')
-import gst
+import gst  # noqa
 
-import logging
 
 logger = logging.getLogger(__name__)
 

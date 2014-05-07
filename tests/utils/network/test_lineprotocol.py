@@ -2,9 +2,10 @@
 
 from __future__ import unicode_literals
 
-from mock import sentinel, Mock
 import re
 import unittest
+
+from mock import Mock, sentinel
 
 from mopidy.utils import network
 
