@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from mock import Mock
 import unittest
 
 import gobject
@@ -9,6 +8,8 @@ gobject.threads_init()
 import pygst
 pygst.require('0.10')
 import gst  # noqa
+
+import mock
 
 import pykka
 
@@ -164,15 +165,15 @@ class AudioStateTest(unittest.TestCase):
 class AudioBufferingTest(unittest.TestCase):
     def setUp(self):
         self.audio = audio.Audio(config=None)
-        self.audio._playbin = Mock(spec=['set_state'])
+        self.audio._playbin = mock.Mock(spec=['set_state'])
 
-        self.buffer_full_message = Mock()
+        self.buffer_full_message = mock.Mock()
         self.buffer_full_message.type = gst.MESSAGE_BUFFERING
-        self.buffer_full_message.parse_buffering = Mock(return_value=100)
+        self.buffer_full_message.parse_buffering = mock.Mock(return_value=100)
 
-        self.buffer_empty_message = Mock()
+        self.buffer_empty_message = mock.Mock()
         self.buffer_empty_message.type = gst.MESSAGE_BUFFERING
-        self.buffer_empty_message.parse_buffering = Mock(return_value=0)
+        self.buffer_empty_message.parse_buffering = mock.Mock(return_value=0)
 
     def test_pause_when_buffer_empty(self):
         playbin = self.audio._playbin
