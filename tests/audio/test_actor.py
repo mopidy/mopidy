@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from mock import Mock
 import unittest
 
 import gobject
@@ -158,3 +159,35 @@ class AudioStateTest(unittest.TestCase):
         #     gst.STATE_READY, gst.STATE_NULL, gst.STATE_VOID_PENDING)
 
         self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
+
+
+class AudioBufferingTest(unittest.TestCase):
+    def setUp(self):
+        self.audio = audio.Audio(config=None)
+        self.audio._playbin = Mock(spec=['set_state'])
+
+        self.buffer_full_message = Mock()
+        self.buffer_full_message.type = gst.MESSAGE_BUFFERING
+        self.buffer_full_message.parse_buffering = Mock(return_value=100)
+
+        self.buffer_empty_message = Mock()
+        self.buffer_empty_message.type = gst.MESSAGE_BUFFERING
+        self.buffer_empty_message.parse_buffering = Mock(return_value=0)
+
+    def test_pause_when_buffer_empty(self):
+        playbin = self.audio._playbin
+        self.audio.start_playback()
+        playbin.set_state.assert_called_with(gst.STATE_PLAYING)
+        playbin.set_state.reset_mock()
+
+        self.audio._on_message(None, self.buffer_empty_message)
+        playbin.set_state.assert_called_with(gst.STATE_PAUSED)
+
+    def test_stay_paused_when_buffering_finished(self):
+        playbin = self.audio._playbin
+        self.audio.pause_playback()
+        playbin.set_state.assert_called_with(gst.STATE_PAUSED)
+        playbin.set_state.reset_mock()
+
+        self.audio._on_message(None, self.buffer_full_message)
+        self.assertEqual(playbin.set_state.call_count, 0)

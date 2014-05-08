@@ -50,6 +50,7 @@ class Audio(pykka.ThreadingActor):
 
     #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
     state = PlaybackState.STOPPED
+    _target_state = gst.STATE_NULL
 
     def __init__(self, config):
         super(Audio, self).__init__()
@@ -100,6 +101,9 @@ class Audio(pykka.ThreadingActor):
     def _setup_playbin(self):
         playbin = gst.element_factory_make('playbin2')
         playbin.set_property('flags', PLAYBIN_FLAGS)
+
+        playbin.set_property('buffer-size', 2*1024*1024)
+        playbin.set_property('buffer-duration', 2*gst.SECOND)
 
         self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
         self._connect(playbin, 'notify::source', self._on_new_source)
@@ -279,6 +283,10 @@ class Audio(pykka.ThreadingActor):
             self._on_playbin_state_changed(old_state, new_state, pending_state)
         elif message.type == gst.MESSAGE_BUFFERING:
             percent = message.parse_buffering()
+            if percent < 10:
+                self._playbin.set_state(gst.STATE_PAUSED)
+            if percent == 100 and self._target_state == gst.STATE_PLAYING:
+                self._playbin.set_state(gst.STATE_PLAYING)
             logger.debug('Buffer %d%% full', percent)
         elif message.type == gst.MESSAGE_EOS:
             self._on_end_of_stream()
@@ -471,6 +479,7 @@ class Audio(pykka.ThreadingActor):
         :type state: :class:`gst.State`
         :rtype: :class:`True` if successfull, else :class:`False`
         """
+        self._target_state = state
         result = self._playbin.set_state(state)
         if result == gst.STATE_CHANGE_FAILURE:
             logger.warning(
