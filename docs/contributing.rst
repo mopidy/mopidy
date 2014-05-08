@@ -35,6 +35,10 @@ Making changes
 
 #. Install dependencies as described in the :ref:`installation` section.
 
+#. Install additional development dependencies::
+
+       pip install -r dev-requirements.txt
+
 #. Checkout a new branch (usually based on ``develop``) and name it accordingly
    to what you intend to do.
 
@@ -82,12 +86,7 @@ Testing
 Mopidy has quite good test coverage, and we would like all new code going into
 Mopidy to come with tests.
 
-#. To run tests, you need a couple of dependencies. They can be installed using
-   ``pip``::
-
-       pip install --upgrade coverage mock nose tox
-
-#. Then, to run all tests, go to the project directory and run::
+#. To run all tests, go to the project directory and run::
 
        nosetests
 
