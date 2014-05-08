@@ -107,6 +107,7 @@ class Audio(pykka.ThreadingActor):
 
         self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
         self._connect(playbin, 'notify::source', self._on_new_source)
+        self._connect(playbin, 'source-setup', self._on_source_setup)
 
         self._playbin = playbin
 
@@ -138,6 +139,22 @@ class Audio(pykka.ThreadingActor):
 
         self._appsrc = source
 
+    def _on_source_setup(self, element, source):
+        scheme = 'http'
+        hostname = self._config['proxy']['hostname']
+        port = 80
+
+        if hasattr(source.props, 'proxy') and hostname:
+            if self._config['proxy']['port']:
+                port = self._config['proxy']['port']
+            if self._config['proxy']['scheme']:
+                scheme = self._config['proxy']['scheme']
+
+            proxy = "%s://%s:%d" % (scheme, hostname, port)
+            source.set_property('proxy', proxy)
+            source.set_property('proxy-id', self._config['proxy']['username'])
+            source.set_property('proxy-pw', self._config['proxy']['password'])
+
     def _appsrc_on_need_data(self, appsrc, gst_length_hint):
         length_hint = utils.clocktime_to_millisecond(gst_length_hint)
         if self._appsrc_need_data_callback is not None:
@@ -158,6 +175,7 @@ class Audio(pykka.ThreadingActor):
     def _teardown_playbin(self):
         self._disconnect(self._playbin, 'about-to-finish')
         self._disconnect(self._playbin, 'notify::source')
+        self._disconnect(self._playbin, 'source-setup')
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
