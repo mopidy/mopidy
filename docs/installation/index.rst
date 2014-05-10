@@ -72,17 +72,8 @@ figure it out for itself, run the following to upgrade right away::
 Raspberry Pi running Debian
 ---------------------------
 
-Fred Hatfull has created a guide for installing a Raspberry Pi from scratch
-with Debian and Mopidy. See :ref:`raspberrypi-installation`.
-
-
-Vagrant virtual machine running Ubuntu
---------------------------------------
-
-Paul Sturgess has created a Vagrant and Chef setup that automatically creates
-and sets up a virtual machine which runs Mopidy. Check out
-https://github.com/paulsturgess/mopidy-vagrant if you're interested in trying
-it out.
+We have a guide for installing a Raspberry Pi from scratch with Debian/Raspbian
+and Mopidy. See :ref:`raspberrypi-installation`.
 
 
 Arch Linux: Install from AUR
