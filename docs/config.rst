@@ -55,6 +55,11 @@ Default core configuration
 Core configuration values
 =========================
 
+Mopidy's core has the following configuration values that you can change.
+
+Audio configuration
+-------------------
+
 .. confval:: audio/mixer
 
     Audio mixer to use.
@@ -114,6 +119,10 @@ Core configuration values
 
 .. _libvisual: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-plugin-libvisual.html
 
+
+Logging configuration
+---------------------
+
 .. confval:: logging/console_format
 
     The log format used for informational logging.
@@ -144,11 +153,31 @@ Core configuration values
     level to use for that logger, one of ``debug``, ``info``, ``warning``,
     ``error``, or ``critical``.
 
+.. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
+
+
+Proxy configuration
+-------------------
+
+Not all parts of Mopidy or all Mopidy extensions respect the proxy
+server configuration when connecting to the Internt. Currently, this is at
+least used when Mopidy's audio subsystem reads media directly from the network,
+like when listening to Internet radio streams, and by the Mopidy-Spotify
+extension. With time, we hope that more of the Mopidy ecosystem will respect
+these configurations to help users on locked down networks.
+
+.. confval:: proxy/scheme
+
+    URI scheme for the proxy server. Typically ``http``, ``https``, ``socks4``,
+    or ``socks5``.
+
 .. confval:: proxy/hostname
 
-    Proxy server to use for communication with the Internet.
+    Hostname of the proxy server.
 
-    Currently only used by the Spotify extension.
+.. confval:: proxy/port
+
+    Port number of the proxy server.
 
 .. confval:: proxy/username
 
@@ -157,8 +186,6 @@ Core configuration values
 .. confval:: proxy/password
 
     Password for the proxy server, if needed.
-
-.. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
 
 
 Extension configuration
