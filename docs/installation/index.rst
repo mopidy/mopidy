@@ -266,7 +266,7 @@ can install Mopidy from PyPI using pip.
    #. If you're on Fedora, you must add a configuration file so libspotify.so
       can be found::
 
-          su -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/libspotify.conf'
+          echo /usr/local/lib | sudo tee /etc/ld.so.conf.d/libspotify.conf
           sudo ldconfig
 
    #. Then install the latest release of Mopidy-Spotify using pip::
