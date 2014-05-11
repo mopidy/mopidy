@@ -239,7 +239,7 @@ can install Mopidy from PyPI using pip.
    Alternatively, if you want to track Mopidy development closer, you may
    install a snapshot of Mopidy's ``develop`` Git branch using pip::
 
-       sudo pip install mopidy==dev
+       sudo pip install --allow-unverified=mopidy mopidy==dev
 
 #. Optional: If you want to use the HTTP frontend and web clients, you need
    some additional dependencies::
