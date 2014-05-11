@@ -93,7 +93,7 @@ package found in AUR.
        yaourt -Syu
 
 #. Optional: If you want to use any Mopidy extensions, like Spotify support or
-   Last.fm scrobbling, AUR also got `packages for several Mopidy extensions
+   Last.fm scrobbling, AUR also has `packages for several Mopidy extensions
    <https://aur.archlinux.org/packages/?K=mopidy>`_.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
