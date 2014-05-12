@@ -21,7 +21,7 @@ How to for Raspbian "wheezy" and Debian "wheezy"
 
 This guide applies for both:
 
-- Raspian "wheezy" for armhf (hard-float), and
+- Raspbian "wheezy" for armhf (hard-float), and
 - Debian "wheezy" for armel (soft-float)
 
 If you don't know which one to select, go for the armhf variant, as it'll give
