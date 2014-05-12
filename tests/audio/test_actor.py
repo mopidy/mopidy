@@ -28,7 +28,10 @@ class AudioTest(unittest.TestCase):
                 'mixer_volume': None,
                 'output': 'fakesink',
                 'visualizer': None,
-            }
+            },
+            'proxy': {
+                'hostname': '',
+            },
         }
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
         self.audio = audio.Audio.start(config=config).proxy()
