@@ -5,7 +5,7 @@ import unittest
 
 import mock
 
-from tornado.escape import to_unicode
+from tornado.escape import json_decode, json_encode, to_unicode
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application
 
@@ -156,37 +156,37 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         )
 
     def test_should_return_rpc_error(self):
-        cmd = tornado.escape.json_encode({
+        cmd = json_encode({
             'action': 'get_version'
         })
         response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
         self.assertEqual(
-            '{"jsonrpc": "2.0", "id": null, "error": '
-            '{"message": "Invalid Request", "code": -32600, '
-            '"data": "\\"jsonrpc\\" member must be included"}}',
-            to_unicode(response.body)
+            {'jsonrpc': '2.0', 'id': None, 'error':
+                {'message': 'Invalid Request', 'code': -32600,
+                 'data': '"jsonrpc" member must be included'}},
+            json_decode(response.body)
         )
 
     def test_should_return_parse_error(self):
-        cmd = "{[[[]}"
+        cmd = '{[[[]}'
         response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
         self.assertEqual(
-            '{"jsonrpc": "2.0", "id": null, "error": '
-            '{"message": "Parse error", "code": -32700}}',
-            to_unicode(response.body)
+            {'jsonrpc': '2.0', 'id': None, 'error':
+                {'message': 'Parse error', 'code': -32700}},
+            json_decode(response.body)
         )
 
     def test_should_return_mopidy_version(self):
-        cmd = tornado.escape.json_encode({
-            "method": "core.get_version",
-            "params": [],
-            "jsonrpc": "2.0",
-            "id": 1
+        cmd = json_encode({
+            'method': 'core.get_version',
+            'params': [],
+            'jsonrpc': '2.0',
+            'id': 1
         })
         response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
         self.assertEqual(
-            '{"jsonrpc": "2.0", "id": 1, "result": "%s"}' % __version__,
-            response.body
+            {'jsonrpc': '2.0', 'id': 1, 'result': __version__},
+            json_decode(response.body)
         )
 
     def test_should_return_extra_headers(self):
