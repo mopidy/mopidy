@@ -25,10 +25,10 @@ setup(
     include_package_data=True,
     install_requires=[
         'setuptools',
-        'Pykka >= 1.1',
+        'Pykka >= 1.1', 'tornado',
     ],
     extras_require={
-        'http': ['CherryPy >= 3.2.2', 'ws4py >= 0.2.3'],
+        'http': ['tornado >= 3.1.1'],
     },
     test_suite='nose.collector',
     tests_require=[

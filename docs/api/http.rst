@@ -27,7 +27,7 @@ Node.js.
 WebSocket API
 =============
 
-The web server exposes a WebSocket at ``/mopidy/ws/``. The WebSocket gives you
+The web server exposes a WebSocket at ``/mopidy/ws``. The WebSocket gives you
 access to Mopidy's full API and enables Mopidy to instantly push events to the
 client, as they happen.
 
