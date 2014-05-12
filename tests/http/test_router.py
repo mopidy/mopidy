@@ -42,7 +42,6 @@ class HttpRouterTest(unittest.TestCase):
                 'hostname': '127.0.0.1',
                 'port': 6680,
                 'static_dir': None,
-                'allow_draft76': True,
                 'zeroconf': '',
             }
         }

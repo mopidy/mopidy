@@ -40,7 +40,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             extension = extension(self.config)
             if callable(getattr(extension, "setup_routes", None)):
                 routes.extend(extension.setup_routes())
-                logger.info('Loaded HTTP router: %s',
+                logger.info('Loaded HTTP extension: %s',
                             extension.__class__.__name__)
             else:
                 logger.info(

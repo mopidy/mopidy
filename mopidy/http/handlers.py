@@ -39,9 +39,6 @@ def construct_rpc(actor):
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    actor = None
-    jsonrpc = None
-
     def initialize(self, actor):
         self.actor = actor
         self.jsonrpc = construct_rpc(actor)

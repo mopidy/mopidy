@@ -40,7 +40,7 @@
     </div>
     <script src="mopidy.js" type="text/javascript"></script>
     <script type="text/javascript">
-      var ws = new WebSocket("ws://" + document.location.host + "/mopidy/ws");
+      var ws = new WebSocket("ws://" + document.location.host + "/mopidy/ws/");
       ws.onmessage = function (message) {
         var console = document.getElementById('ws-console');
         var newLine = (new Date()).toLocaleTimeString() + ": " +
