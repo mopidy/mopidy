@@ -2,12 +2,12 @@ from __future__ import unicode_literals
 
 import logging
 
-from mopidy import __version__, core, models
-from mopidy.utils import jsonrpc
-
 import tornado.escape
 import tornado.web
 import tornado.websocket
+
+from mopidy import __version__, core, models
+from mopidy.utils import jsonrpc
 
 
 logger = logging.getLogger(__name__)

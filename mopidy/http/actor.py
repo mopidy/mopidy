@@ -5,15 +5,15 @@ import logging
 import os
 import threading
 
-from mopidy import models, zeroconf
-from mopidy.core import CoreListener
-from mopidy.http import StaticFileHandler, handlers
-
 import pykka
 
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
+
+from mopidy import models, zeroconf
+from mopidy.core import CoreListener
+from mopidy.http import StaticFileHandler, handlers
 
 
 logger = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             list((l[0], l[1]) for l in routes)
         )
 
-        #TODO: Dynamically define all endpoints
+        # TODO: Dynamically define all endpoints
         routes.extend([
             (r"/mopidy/ws/?", handlers.WebSocketHandler, {'actor': self}),
             (r"/mopidy/rpc", handlers.JsonRpcHandler, {'actor': self}),

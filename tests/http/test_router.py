@@ -5,11 +5,11 @@ import unittest
 
 import mock
 
-from mopidy import __version__, http
-
 from tornado.escape import to_unicode
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application
+
+from mopidy import __version__, http
 
 
 try:

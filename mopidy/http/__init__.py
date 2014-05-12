@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 import logging
 import os
 
-from mopidy import __version__, config as config_lib, exceptions, ext
-
 import tornado.web
+
+from mopidy import __version__, config as config_lib, exceptions, ext
 
 
 logger = logging.getLogger(__name__)
