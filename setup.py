@@ -28,6 +28,7 @@ setup(
         'Pykka >= 1.1',
         'tornado >= 3.1.1',
     ],
+    extras_requires={'http': []},
     test_suite='nose.collector',
     tests_require=[
         'nose',
