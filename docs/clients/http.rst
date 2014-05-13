@@ -37,8 +37,8 @@ Mopidy Lux
 ==========
 
 .. image:: dz0ny-mopidy-lux.png
-    :width: 1000
-    :height: 645
+    :width: 1275
+    :height: 795
 
 A Mopidy web client made with AngularJS by Janez Troha.
 
