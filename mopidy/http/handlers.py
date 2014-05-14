@@ -6,7 +6,8 @@ import tornado.escape
 import tornado.web
 import tornado.websocket
 
-from mopidy import __version__, core, models
+import mopidy
+from mopidy import core, models
 from mopidy.utils import jsonrpc
 
 
@@ -61,17 +62,16 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.request.remote_ip)
 
     def on_message(self, message):
-
         if not message:
             return
+
         logger.debug(
             'Received WebSocket message from %s: %r',
             self.request.remote_ip, message)
 
         try:
             response = self.jsonrpc.handle_json(
-                tornado.escape.native_str(message)
-            )
+                tornado.escape.native_str(message))
             if response and self.write_message(response):
                 logger.debug(
                     'Sent WebSocket message to %s: %r',
@@ -91,18 +91,20 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
     def post(self):
         data = self.request.body
-
         if not data:
             return
-        logger.debug('Received RPC message from %s: %r',
-                     self.request.remote_ip, data)
+
+        logger.debug(
+            'Received RPC message from %s: %r', self.request.remote_ip, data)
+
         try:
             self.set_extra_headers()
             response = self.jsonrpc.handle_json(
                 tornado.escape.native_str(data))
             if response and self.write(response):
-                logger.debug('Sent RPC message to %s: %r',
-                             self.request.remote_ip, response)
+                logger.debug(
+                    'Sent RPC message to %s: %r',
+                    self.request.remote_ip, response)
         except Exception as e:
             logger.error('HTTP JSON-RPC request error:', e)
             self.write_error(500)
@@ -110,6 +112,6 @@ class JsonRpcHandler(tornado.web.RequestHandler):
     def set_extra_headers(self):
         self.set_header('Accept', 'application/json')
         self.set_header('Cache-Control', 'no-cache')
-        self.set_header('X-Mopidy-Version', __version__.encode(
-            'utf-8'))
+        self.set_header(
+            'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
         self.set_header('Content-Type', 'application/json; utf-8')
