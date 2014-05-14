@@ -4,6 +4,9 @@
 HTTP API
 ********
 
+.. module:: mopidy.http
+    :synopsis: The HTTP frontend APIs
+
 The :ref:`ext-http` extension makes Mopidy's :ref:`core-api` available over
 HTTP using WebSockets. We also provide a JavaScript wrapper, called
 :ref:`Mopidy.js <mopidy-js>` around the HTTP API for use both from browsers and
@@ -20,6 +23,16 @@ Node.js.
 
     From Mopidy 1.0 and onwards, we intend to keep the core API far more
     stable.
+
+
+Server side API
+===============
+
+TODO: Describe how this is used. Consider splitting this page into multiple
+pages.
+
+.. autoclass:: mopidy.http.Router
+    :members:
 
 
 .. _websocket-api:

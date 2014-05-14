@@ -53,11 +53,11 @@ class Router(object):
     """
     HTTP router interface.
 
-    Extensions that wish to add custom routes to HTTP server
-    need to sub-class this class and install and configure it with an
-    extension.
+    Extensions that wish to add custom routes to HTTP server needs to subclass
+    this class and have :meth:`~mopidy.ext.Extension.setup` register the class
+    in the extension registry.
 
-    :param config:dict Config dictionary
+    :param config: dict structure of the entire Mopidy configuration
     """
 
     #: Name of the HTTP router implementation, must be overridden.
@@ -77,29 +77,27 @@ class Router(object):
         """
         Absolute URL to the root of this router.
 
-        :return string: URI
+        :return: URL this router is mounted at
         """
         return 'http://%s:%s/%s/' % (self.hostname, self.port, self.name)
 
     def setup_routes(self):
         """
-        Configure routes for this interface
+        Configure routes for this interface.
 
         Implementation must return list of routes, compatible with
-        :`class:tornado.web.Application`.
+        :class:`tornado.web.Application`.
 
-        :return list: List of tornado routes
+        :return: list of Tornado routes
         """
 
-        if not self.path:
+        if self.path is None:
             raise ValueError('Undefined path in %s' % self)
         logger.info(
-            'Serving HTTP extension %s at %s' %
-            (type(self), self.linkify())
-        )
+            'Serving HTTP extension %s at %s', type(self), self.linkify())
         return [
             (r'/%s/(.*)' % self.name, StaticFileHandler, {
                 'path': self.path,
                 'default_filename': 'index.html'
-            })
+            }),
         ]
