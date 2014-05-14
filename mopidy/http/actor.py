@@ -77,25 +77,19 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         return routes
 
     def on_start(self):
-        if self.zeroconf_name:
-            self.zeroconf_service = zeroconf.Zeroconf(
-                stype='_http._tcp', name=self.zeroconf_name,
-                host=self.hostname, port=self.port)
-
-            if self.zeroconf_service.publish():
-                logger.debug(
-                    'Registered HTTP with Zeroconf as "%s"',
-                    self.zeroconf_service.name)
-            else:
-                logger.debug('Registering HTTP with Zeroconf failed.')
         threading.Thread(target=self._startup).start()
+        self._publish_zeroconf()
+
+    def on_stop(self):
+        self._unpublish_zeroconf()
+        tornado.ioloop.IOLoop.instance().add_callback(self._shutdown)
 
     def _startup(self):
         logger.debug('Starting HTTP server')
         self.app = tornado.web.Application(self._create_routes())
         self.app.listen(self.port, self.hostname)
-        logger.info('HTTP server running at http://%s:%s', self.hostname,
-                    self.port)
+        logger.info(
+            'HTTP server running at http://%s:%s', self.hostname, self.port)
         tornado.ioloop.IOLoop.instance().start()
 
     def _shutdown(self):
@@ -103,13 +97,41 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         tornado.ioloop.IOLoop.instance().stop()
         logger.info('Stopped HTTP server')
 
-    def on_stop(self):
-        tornado.ioloop.IOLoop.instance().add_callback(self._shutdown)
-        if self.zeroconf_service:
-            self.zeroconf_service.unpublish()
-
     def on_event(self, name, **data):
         event = data
         event['event'] = name
         message = json.dumps(event, cls=models.ModelJSONEncoder)
         handlers.WebSocketHandler.broadcast(self.websocket_clients, message)
+
+    def _publish_zeroconf(self):
+        if not self.zeroconf_name:
+            return
+
+        self.zeroconf_http_service = zeroconf.Zeroconf(
+            stype='_http._tcp', name=self.zeroconf_name,
+            host=self.hostname, port=self.port)
+
+        if self.zeroconf_http_service.publish():
+            logger.debug(
+                'Registered HTTP with Zeroconf as "%s"',
+                self.zeroconf_http_service.name)
+        else:
+            logger.debug('Registering HTTP with Zeroconf failed.')
+
+        self.zeroconf_mopidy_http_service = zeroconf.Zeroconf(
+            stype='_mopidy-http._tcp', name=self.zeroconf_name,
+            host=self.hostname, port=self.port)
+
+        if self.zeroconf_mopidy_http_service.publish():
+            logger.debug(
+                'Registered Mopidy-HTTP with Zeroconf as "%s"',
+                self.zeroconf_mopidy_http_service.name)
+        else:
+            logger.debug('Registering Mopidy-HTTP with Zeroconf failed.')
+
+    def _unpublish_zeroconf(self):
+        if self.zeroconf_http_service:
+            self.zeroconf_http_service.unpublish()
+
+        if self.zeroconf_mopidy_http_service:
+            self.zeroconf_mopidy_http_service.unpublish()
