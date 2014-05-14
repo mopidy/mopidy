@@ -43,8 +43,8 @@ class Extension(ext.Extension):
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
     def set_extra_headers(self, path):
-        self.set_header("Cache-Control", "no-cache")
-        self.set_header("X-Mopidy-Version", __version__.encode('utf-8'))
+        self.set_header('Cache-Control', 'no-cache')
+        self.set_header('X-Mopidy-Version', __version__.encode('utf-8'))
 
 
 class Router(object):
@@ -96,7 +96,7 @@ class Router(object):
             (type(self), self.linkify())
         )
         return [
-            (r"/%s/(.*)" % self.name, StaticFileHandler, {
+            (r'/%s/(.*)' % self.name, StaticFileHandler, {
                 'path': self.path,
                 'default_filename': 'index.html'
             })
