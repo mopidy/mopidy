@@ -39,7 +39,7 @@ setup(
             'mopidy = mopidy.__main__:main',
         ],
         'mopidy.ext': [
-            'http = mopidy.http:Extension [http]',
+            'http = mopidy.http:Extension',
             'local = mopidy.local:Extension',
             'mpd = mopidy.mpd:Extension',
             'stream = mopidy.stream:Extension',
