@@ -5,7 +5,8 @@ import os
 
 import tornado.web
 
-from mopidy import __version__, config as config_lib, exceptions, ext
+import mopidy
+from mopidy import config as config_lib, exceptions, ext
 
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Extension(ext.Extension):
     dist_name = 'Mopidy-HTTP'
     ext_name = 'http'
-    version = __version__
+    version = mopidy.__version__
 
     def get_default_config(self):
         conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
@@ -44,7 +45,8 @@ class Extension(ext.Extension):
 class StaticFileHandler(tornado.web.StaticFileHandler):
     def set_extra_headers(self, path):
         self.set_header('Cache-Control', 'no-cache')
-        self.set_header('X-Mopidy-Version', __version__.encode('utf-8'))
+        self.set_header(
+            'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
 
 
 class Router(object):
