@@ -10,6 +10,12 @@ v0.19.0 (UNRELEASED)
 
 Feature release.
 
+**Dependencies**
+
+- Mopidy now requires Tornado >= 3.1.
+
+- Mopidy no longer require CherryPy or ws4py for the HTTP frontend to work.
+
 **Backend API**
 
 - Imports of the backend API from :mod:`mopidy.backends` no longer works. The
@@ -34,6 +40,27 @@ Feature release.
   :meth:`mopidy.ext.Extension.setup` instead, as most extensions already do.
 
 **HTTP frontend**
+
+- CherryPy and ws4py have been replaced with Tornado. This will hopefully
+  reduce CPU usage on OS X (:issue:`445`) and improve error handling in corner
+  cases, like when returning the computer running Mopidy from suspend
+  (:issue:`718`).
+
+- Added support for installing web clients as Mopidy extensions. (Fixes:
+  :issue:`440`) (TODO: Link to relevant docs)
+
+- Added support for extending the HTTP frontend with additional server side
+  functionality. (TODO: Link to relevant docs)
+
+- Exposed the core API using HTTP POST requests with JSON-RPC payloads at
+  ``/mopidy/rpc``. This is the same JSON-RPC interface as is exposed over the
+  WebSocket at ``/mopidy/ws``, so you can run any core API command.
+
+  The HTTP POST interfaces does not give you access to events from Mopidy, like
+  the WebSocket does. The WebSocket interface is still recommended for web
+  clients. The HTTP POST interface may be easier to use for simpler programs,
+  that just needs to query the currently playing track or similar. (TODO: Link
+  to relevant docs)
 
 - If Zeroconf is enabled, we now announce the ``_mopidy-http._tcp`` service in
   addition to ``_http._tcp``. This is to make it easier to automatically find
