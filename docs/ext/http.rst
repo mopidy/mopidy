@@ -46,17 +46,30 @@ See :ref:`http-api` for details on how to integrate with Mopidy over HTTP. If
 you're looking for a web based client for Mopidy, go check out
 :ref:`http-clients`.
 
+Extending server
+================
+
+If you wish to extend server additional service side functionality you must
+create class that implements the :class:`mopidy.http.Router` interface and
+install it in the extension registry under ``http:router``.
+The default implementation already supports serving static files. If you just
+want to serve static files you only need to define class variable :attr:`mopidy
+.http.Router.name` and :attr:`mopidy.http.Router.path`, for example::
+
+    class WebClient(http.Router):
+        name = 'webclient'
+        path = os.path.join(os.path.dirname(__file__), 'public_html')
+
+If you wish to extend server with custom methods you can override class method
+``mopidy.http.Router.setup_routes`` and define custom routes.
+
 
 Dependencies
 ============
 
 In addition to Mopidy's dependencies, Mopidy-HTTP requires the following:
 
-- cherrypy >= 3.2.2. Available as python-cherrypy3 in Debian/Ubuntu.
-
-- ws4py >= 0.2.3. Available as python-ws4py in newer Debian/Ubuntu and from
-  `apt.mopidy.com <http://apt.mopidy.com/>`__ for older releases of
-  Debian/Ubuntu.
+- tornado >= 3.1.1 Available as python-tornado in Debian/Ubuntu.
 
 If you're installing Mopidy with pip, you can run the following command to
 install Mopidy with the extra dependencies for required for Mopidy-HTTP::
