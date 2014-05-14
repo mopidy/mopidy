@@ -6,7 +6,7 @@ Mopidy-HTTP
 
 Mopidy-HTTP is an extension that lets you control Mopidy through HTTP and
 WebSockets, for example from a web client. It is bundled with Mopidy and
-enabled by default if all dependencies are available.
+enabled by default.
 
 When it is enabled it starts a web server at the port specified by the
 :confval:`http/port` config value.
@@ -46,38 +46,25 @@ See :ref:`http-api` for details on how to integrate with Mopidy over HTTP. If
 you're looking for a web based client for Mopidy, go check out
 :ref:`http-clients`.
 
-Extending server
-================
 
-If you wish to extend server additional service side functionality you must
-create class that implements the :class:`mopidy.http.Router` interface and
-install it in the extension registry under ``http:router``.
-The default implementation already supports serving static files. If you just
-want to serve static files you only need to define class variable :attr:`mopidy
-.http.Router.name` and :attr:`mopidy.http.Router.path`, for example::
+Extending the server's functionality
+====================================
 
-    class WebClient(http.Router):
-        name = 'webclient'
+If you wish to extend the server with additional server side functionality you
+must create class that implements the :class:`mopidy.http.Router` interface and
+install it in the extension registry under the ``http:router`` name.
+
+The default implementation of :class:`mopidy.http.Router` already supports
+serving static files. If you just want to serve static files you only need to
+define the class variables :attr:`mopidy.http.Router.name` and
+:attr:`mopidy.http.Router.path`. For example::
+
+    class MyWebClient(http.Router):
+        name = 'mywebclient'
         path = os.path.join(os.path.dirname(__file__), 'public_html')
 
-If you wish to extend server with custom methods you can override class method
-``mopidy.http.Router.setup_routes`` and define custom routes.
-
-
-Dependencies
-============
-
-In addition to Mopidy's dependencies, Mopidy-HTTP requires the following:
-
-- tornado >= 3.1.1 Available as python-tornado in Debian/Ubuntu.
-
-If you're installing Mopidy with pip, you can run the following command to
-install Mopidy with the extra dependencies for required for Mopidy-HTTP::
-
-    pip install --upgrade Mopidy[http]
-
-If you're installing Mopidy from APT, the additional dependencies needed for
-Mopidy-HTTP are always included.
+If you wish to extend server with custom methods you can override the method
+:meth:`mopidy.http.Router.setup_routes` and define custom routes.
 
 
 Configuration
