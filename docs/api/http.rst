@@ -25,33 +25,32 @@ WebSocket API for use both from browsers and Node.js.
     stable.
 
 
+.. _http-post-api:
+
+HTTP POST API
+=============
+
+TODO
+
+
 .. _websocket-api:
 
 WebSocket API
 =============
 
-The web server exposes a WebSocket at ``/mopidy/ws/``. The WebSocket gives you
-access to Mopidy's full API and enables Mopidy to instantly push events to the
-client, as they happen.
+The Mopidy web server exposes a WebSocket at http://localhost:6680/mopidy/ws,
+where the ``localhost:6680`` part will vary with your local setup. The
+WebSocket gives you access to Mopidy's full API and enables Mopidy to instantly
+push events to the client, as they happen.
 
 On the WebSocket we send two different kind of messages: The client can send
-JSON-RPC 2.0 requests, and the server will respond with JSON-RPC 2.0 responses.
-In addition, the server will send event messages when something happens on the
-server. Both message types are encoded as JSON objects.
+:ref:`JSON-RPC 2.0 requests <json-rpc>`, and the server will respond with
+JSON-RPC 2.0 responses. In addition, the server will send :ref:`event messages
+<json-events>` when something happens on the server. Both message types are
+encoded as JSON objects.
 
 
-Event messages
-==============
-
-Event objects will always have a key named ``event`` whose value is the event
-type. Depending on the event type, the event may include additional fields for
-related data. The events maps directly to the :class:`mopidy.core.CoreListener`
-API. Refer to the ``CoreListener`` method names is the available event types.
-The ``CoreListener`` method's keyword arguments are all included as extra
-fields on the event objects. Example event message::
-
-    {"event": "track_playback_started", "track": {...}}
-
+.. _json-rpc:
 
 JSON-RPC 2.0 messaging
 ======================
@@ -81,3 +80,19 @@ Example JSON-RPC response::
 The JSON-RPC method ``core.describe`` returns a data structure describing all
 available methods. If you're unsure how the core API maps to JSON-RPC, having a
 look at the ``core.describe`` response can be helpful.
+
+
+.. _json-events:
+
+Event messages
+==============
+
+Event objects will always have a key named ``event`` whose value is the event
+type. Depending on the event type, the event may include additional fields for
+related data. The events maps directly to the :class:`mopidy.core.CoreListener`
+API. Refer to the :class:`~mopidy.core.CoreListener` method names is the
+available event types. The :class:`~mopidy.core.CoreListener` method's keyword
+arguments are all included as extra fields on the event objects. Example event
+message::
+
+    {"event": "track_playback_started", "track": {...}}
