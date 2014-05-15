@@ -27,3 +27,4 @@ API reference
     config
     zeroconf
     http
+    js
