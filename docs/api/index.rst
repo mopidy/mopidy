@@ -26,5 +26,6 @@ API reference
     ext
     config
     zeroconf
+    http-server
     http
     js

@@ -1,21 +1,21 @@
 .. _http-api:
 
-********
-HTTP API
-********
+*****************
+HTTP JSON-RPC API
+*****************
 
 .. module:: mopidy.http
     :synopsis: The HTTP frontend APIs
 
-The :ref:`ext-http` extension makes Mopidy's :ref:`core-api` available over
-HTTP using WebSockets. We also provide a JavaScript wrapper, called
-:ref:`Mopidy.js <mopidy-js>` around the HTTP API for use both from browsers and
-Node.js.
+The :ref:`ext-http` extension makes Mopidy's :ref:`core-api` available using
+JSON-RPC over HTTP using HTTP POST and WebSockets. We also provide a JavaScript
+wrapper, called :ref:`Mopidy.js <mopidy-js>`, around the JSON-RPC over
+WebSocket API for use both from browsers and Node.js.
 
 .. warning:: API stability
 
-    Since the HTTP API exposes our internal core API directly it is to be
-    regarded as **experimental**. We cannot promise to keep any form of
+    Since the HTTP JSON-RPC API exposes our internal core API directly it is to
+    be regarded as **experimental**. We cannot promise to keep any form of
     backwards compatibility between releases as we will need to change the core
     API while working out how to support new use cases. Thus, if you use this
     API, you must expect to do small adjustments to your client for every
@@ -23,16 +23,6 @@ Node.js.
 
     From Mopidy 1.0 and onwards, we intend to keep the core API far more
     stable.
-
-
-Server side API
-===============
-
-TODO: Describe how this is used. Consider splitting this page into multiple
-pages.
-
-.. autoclass:: mopidy.http.Router
-    :members:
 
 
 .. _websocket-api:
@@ -51,7 +41,7 @@ server. Both message types are encoded as JSON objects.
 
 
 Event messages
---------------
+==============
 
 Event objects will always have a key named ``event`` whose value is the event
 type. Depending on the event type, the event may include additional fields for
@@ -64,7 +54,7 @@ fields on the event objects. Example event message::
 
 
 JSON-RPC 2.0 messaging
-----------------------
+======================
 
 JSON-RPC 2.0 messages can be recognized by checking for the key named
 ``jsonrpc`` with the string value ``2.0``. For details on the messaging format,
