@@ -48,11 +48,11 @@ the Git repo at:
 - ``mopidy/http/data/mopidy.min.js``
 
 
-Getting the library for Node.js use
-===================================
+Getting the library for Node.js or Browserify use
+=================================================
 
-If you want to use Mopidy.js from Node.js instead of a browser, you can install
-Mopidy.js using npm::
+If you want to use Mopidy.js from Node.js or on the web through Browserify, you
+can install Mopidy.js using npm::
 
     npm install mopidy
 
