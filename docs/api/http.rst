@@ -30,7 +30,20 @@ WebSocket API for use both from browsers and Node.js.
 HTTP POST API
 =============
 
-TODO
+The Mopidy web server accepts HTTP requests with the POST method to
+http://localhost:6680/mopidy/rpc, where the ``localhost:6680`` part will vary
+with your local setup. The HTTP POST endpoint gives you access to Mopidy's
+full core API, but does not give you notification on events. If you need
+to listen to events, you should probably use the WebSocket API instead.
+
+Example usage from the command line::
+
+    $ curl -d '{"jsonrpc": "2.0", "id": 1, "method":
+    "core.playback.get_state"}' http://localhost:6680/mopidy/rpc
+    {"jsonrpc": "2.0", "id": 1, "result": "stopped"}
+    $
+
+For details on the request and response format, see :ref:`json-rpc`.
 
 
 .. _websocket-api:
@@ -49,11 +62,15 @@ JSON-RPC 2.0 responses. In addition, the server will send :ref:`event messages
 <json-events>` when something happens on the server. Both message types are
 encoded as JSON objects.
 
+If you're using the API from JavaScript, either in the browser or in Node.js,
+you should use :ref:`mopidy-js` which wraps the WebSocket API in a nice
+JavaScript API.
+
 
 .. _json-rpc:
 
-JSON-RPC 2.0 messaging
-======================
+JSON-RPC 2.0 messages
+=====================
 
 JSON-RPC 2.0 messages can be recognized by checking for the key named
 ``jsonrpc`` with the string value ``2.0``. For details on the messaging format,
