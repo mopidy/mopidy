@@ -38,10 +38,8 @@ to listen to events, you should probably use the WebSocket API instead.
 
 Example usage from the command line::
 
-    $ curl -d '{"jsonrpc": "2.0", "id": 1, "method":
-    "core.playback.get_state"}' http://localhost:6680/mopidy/rpc
+    $ curl -d '{"jsonrpc": "2.0", "id": 1, "method": "core.playback.get_state"}' http://localhost:6680/mopidy/rpc
     {"jsonrpc": "2.0", "id": 1, "result": "stopped"}
-    $
 
 For details on the request and response format, see :ref:`json-rpc`.
 
