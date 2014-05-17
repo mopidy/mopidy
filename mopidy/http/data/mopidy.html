@@ -98,7 +98,7 @@
                     return 'curl -X POST -H Content-Type:application/json' +
                             ' -d \'{\n  "method": "core.' + method + '",\n  ' +
                             '"jsonrpc": "2.0",\n  "id": 1\n}\' ' +
-                            document.location.href + 'rpc';
+                            document.location.origin + '/mopidy/rpc';
                 }
                 $scope.getParams = function (method) {
                     return $scope.getIt(method, 'params').map(function (item) {
@@ -123,7 +123,7 @@
                                     replace(/``(\S+)``/g, "<b>$1</b>").
                                     replace(/:param (\w+) (\w+):/g, "<b title=\"$1\">$2</b>").
                                     replace(/:param (\w+):/g, "<b>$1</b>").
-                                    replace(/:meth:`(\w+)\(?\)?`/g, "<code title='method'>$1</code>").
+                                    replace(/:meth:`([~\.\w]+)\(?\)?`/g, "<code title='method'>$1</code>").
                                     replace(/    (.+)/g, "<pre>$1</pre>").replace(/<\/pre>(\s?)+<pre>/gim, "\n").
                                     replace(/:type (\w+): (\w+)/g, "<i title=\"$1\">$2</i>").
                                     replace(/:class:`([~\.\w]+)`/g, "<code title=\"class\">$1</code>").
