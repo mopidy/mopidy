@@ -27,6 +27,14 @@
 
     <div ng-app="api">
         <div ng-controller="MainCtrl">
+
+            <ul id="toc">
+                <li ng-repeat="method in methods_keys track by $index">
+                    <a ng-href="#{{method}}">
+                        {{method}}
+                    </a>
+                </li>
+            </ul>
             <h3>Methods</h3>
             <ul>
                 <li id="{{method}}"
@@ -107,25 +115,24 @@
                         return '';
                     }
                     var text = input.
-                            replace(/&/g, '&amp;').
-                            replace(/</g, '&lt;').
-                            replace(/>/g, '&gt;').
-                            replace(/'/g, '&#39;').
-                            replace(/"/g, '&quot;').
-                            replace(/``(\S+)``/g, "<b>$1</b>").
-                            replace(/:param (\w+) (\w+):/g, "<b title=\"$1\">$2</b>").
-                            replace(/:param (\w+):/g, "<b>$1</b>").
-                            replace(/:meth:`(\w+)\(?\)?`/g, "<code title='method'>$1</code>").
-                            replace(/    (.+)/g, "<pre>$1</pre>").replace(/<\/pre>(\s?)+<pre>/gim,"\n").
-                            replace(/:type (\w+): (\w+)/g, "<i title=\"$1\">$2</i>").
-                            replace(/:class:`([~\.\w]+)`/g, "<code title=\"class\">$1</code>").
-                            replace(/``\[\\([\[\\]:\.\w]+)\]``/g, "<b>$1</b>").
-                            replace(/:rtype: (\w+)/g, "<i>$1</i>")
+                                    replace(/&/g, '&amp;').
+                                    replace(/</g, '&lt;').
+                                    replace(/>/g, '&gt;').
+                                    replace(/'/g, '&#39;').
+                                    replace(/"/g, '&quot;').
+                                    replace(/``(\S+)``/g, "<b>$1</b>").
+                                    replace(/:param (\w+) (\w+):/g, "<b title=\"$1\">$2</b>").
+                                    replace(/:param (\w+):/g, "<b>$1</b>").
+                                    replace(/:meth:`(\w+)\(?\)?`/g, "<code title='method'>$1</code>").
+                                    replace(/    (.+)/g, "<pre>$1</pre>").replace(/<\/pre>(\s?)+<pre>/gim, "\n").
+                                    replace(/:type (\w+): (\w+)/g, "<i title=\"$1\">$2</i>").
+                                    replace(/:class:`([~\.\w]+)`/g, "<code title=\"class\">$1</code>").
+                                    replace(/``\[\\([\[\\]:\.\w]+)\]``/g, "<b>$1</b>").
+                                    replace(/:rtype: (\w+)/g, "<i>$1</i>")
                             ;
 
                     var output = '';
-                    angular.forEach(text.split("\n\n"), function (paragraph,
-                                                                  key) {
+                    angular.forEach(text.split("\n\n"), function (paragraph, key) {
                         output += '<p>' + paragraph + '</p>';
                     });
                     return $sce.trustAsHtml(output);

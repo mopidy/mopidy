@@ -7,7 +7,7 @@ html {
 }
 
 body {
-    max-width: 40em;
+    max-width: 30em;
     margin: 0 auto;
 }
 
@@ -66,9 +66,11 @@ code, pre {
     background: #e8ecef;
     color: #555;
 }
+
 pre a {
     float: right;
 }
+
 .box a {
     color: #465158;
 }
@@ -98,4 +100,11 @@ ul li article {
 
 ul li {
     margin-bottom: 1.2em;
+}
+#toc li {
+    margin-bottom: 0;
+}
+
+#toc{
+    font-size: 12pt;
 }
