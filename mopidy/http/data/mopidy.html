@@ -123,12 +123,15 @@
                                     replace(/``(\S+)``/g, "<b>$1</b>").
                                     replace(/:param (\w+) (\w+):/g, "<b title=\"$1\">$2</b>").
                                     replace(/:param (\w+):/g, "<b>$1</b>").
+                                    replace(/:attr:`(\w+)`/g, "<b>$1</b>").
                                     replace(/:meth:`([~\.\w]+)\(?\)?`/g, "<code title='method'>$1</code>").
                                     replace(/    (.+)/g, "<pre>$1</pre>").replace(/<\/pre>(\s?)+<pre>/gim, "\n").
-                                    replace(/:type (\w+): (\w+)/g, "<i title=\"$1\">$2</i>").
+                                    replace(/:type (\w+): (\w+)/g, "<i title=\"$2\">(type)</i>").
+                                    replace(/:type (\w+):/g, "<i title=\"$1\">($1)</i>").
                                     replace(/:class:`([~\.\w]+)`/g, "<code title=\"class\">$1</code>").
                                     replace(/``\[\\([\[\\]:\.\w]+)\]``/g, "<b>$1</b>").
-                                    replace(/:rtype: (\w+)/g, "<i>$1</i>")
+                                    replace(/:rtype: (\w+)/g, "<i>$1</i>").
+                                    replace(/:rtype:/g, "return")
                             ;
 
                     var output = '';

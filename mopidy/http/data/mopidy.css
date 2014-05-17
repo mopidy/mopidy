@@ -95,9 +95,10 @@ pre a {
 ul li article {
     font-size: 12pt;
     line-height: 1.2em;
-    text-align: justify;
 }
-
+article code{
+    padding: 2px;
+}
 ul li {
     margin-bottom: 1.2em;
 }
