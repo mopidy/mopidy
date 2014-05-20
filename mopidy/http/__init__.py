@@ -77,14 +77,16 @@ class Router(object):
         """Get the absolute URL to the root of this router."""
         return 'http://%s:%s/%s/' % (self.hostname, self.port, self.name)
 
-    def setup_routes(self):
+    def get_request_handlers(self):
         """
-        Configure routes for this interface.
+        Get request handlers for the URL namespace owned by this router.
 
-        Implementation must return list of routes, compatible with
+        The default implementation of this method serves static files from
+        :attr:`static_file_path`. To extend the HTTP server with more
+        server side functionality, this method must be overridden.
+
+        Must return a list of request handlers compatible with
         :class:`tornado.web.Application`.
-
-        :return: list of Tornado routes
         """
 
         if self.static_file_path is None:

@@ -49,10 +49,14 @@ class HttpRouterTest(unittest.TestCase):
 
     def test_default_router(self):
         router = TestRouter(self.config)
-        self.assertEqual(router.setup_routes()[0][0], r'/test/(.*)')
-        self.assertIs(router.setup_routes()[0][1], http.StaticFileHandler)
-        self.assertEqual(router.setup_routes()[0][2]['path'],
-                         os.path.join(os.path.dirname(__file__), 'static'))
+
+        handlers = router.get_request_handlers()
+        (pattern, handler_class, kwargs) = handlers[0]
+
+        self.assertEqual(pattern, r'/test/(.*)')
+        self.assertIs(handler_class, http.StaticFileHandler)
+        self.assertEqual(
+            kwargs['path'], os.path.join(os.path.dirname(__file__), 'static'))
 
     def test_default_router_missing_name(self):
         with self.assertRaises(ValueError):
@@ -60,7 +64,7 @@ class HttpRouterTest(unittest.TestCase):
 
     def test_default_router_missing_path(self):
         with self.assertRaises(ValueError):
-            TestRouterMissingPath(self.config).setup_routes()
+            TestRouterMissingPath(self.config).get_request_handlers()
 
     def test_default_uri_helper(self):
         router = TestRouter(self.config)
