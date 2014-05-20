@@ -34,11 +34,12 @@ class Extension(ext.Extension):
             raise exceptions.ExtensionError('tornado library not found', e)
 
     def setup(self, registry):
-        from .actor import HttpFrontend
+        from .actor import HttpFrontend, MopidyHttpRouter
 
         HttpFrontend.routers = registry['http:router']
 
         registry.add('frontend', HttpFrontend)
+        registry.add('http:router', MopidyHttpRouter)
 
 
 class Router(object):

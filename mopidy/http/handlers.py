@@ -14,7 +14,7 @@ from mopidy.utils import jsonrpc
 logger = logging.getLogger(__name__)
 
 
-def construct_rpc(actor):
+def make_jsonrpc_wrapper(core_actor):
     inspector = jsonrpc.JsonRpcInspector(
         objects={
             'core.get_uri_schemes': core.Core.get_uri_schemes,
@@ -27,12 +27,12 @@ def construct_rpc(actor):
     return jsonrpc.JsonRpcWrapper(
         objects={
             'core.describe': inspector.describe,
-            'core.get_uri_schemes': actor.core.get_uri_schemes,
-            'core.get_version': actor.core.get_version,
-            'core.library': actor.core.library,
-            'core.playback': actor.core.playback,
-            'core.playlists': actor.core.playlists,
-            'core.tracklist': actor.core.tracklist,
+            'core.get_uri_schemes': core_actor.get_uri_schemes,
+            'core.get_version': core_actor.get_version,
+            'core.library': core_actor.library,
+            'core.playback': core_actor.playback,
+            'core.playlists': core_actor.playlists,
+            'core.tracklist': core_actor.tracklist,
         },
         decoders=[models.model_json_decoder],
         encoders=[models.ModelJSONEncoder]
@@ -40,23 +40,28 @@ def construct_rpc(actor):
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    def initialize(self, actor):
-        self.actor = actor
-        self.jsonrpc = construct_rpc(actor)
+
+    # XXX This set is shared by all WebSocketHandler objects. This isn't
+    # optimal, but there's currently no use case for having more than one of
+    # these anyway.
+    clients = set()
 
     @classmethod
-    def broadcast(cls, clients, msg):
-        for client in clients:
+    def broadcast(cls, msg):
+        for client in cls.clients:
             client.write_message(msg)
+
+    def initialize(self, core):
+        self.jsonrpc = make_jsonrpc_wrapper(core)
 
     def open(self):
         self.set_nodelay(True)
-        self.actor.websocket_clients.add(self)
+        self.clients.add(self)
         logger.debug(
             'New WebSocket connection from %s', self.request.remote_ip)
 
     def on_close(self):
-        self.actor.websocket_clients.discard(self)
+        self.clients.discard(self)
         logger.debug(
             'Closed WebSocket connection from %s',
             self.request.remote_ip)
@@ -82,8 +87,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 
 class JsonRpcHandler(tornado.web.RequestHandler):
-    def initialize(self, actor):
-        self.jsonrpc = construct_rpc(actor)
+    def initialize(self, core):
+        self.jsonrpc = make_jsonrpc_wrapper(core)
 
     def head(self):
         self.set_extra_headers()

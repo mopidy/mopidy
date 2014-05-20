@@ -22,8 +22,10 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         core.get_version = mock.MagicMock(name='get_version')
         core.get_version.return_value = mopidy.__version__
 
-        actor_http = actor.HttpFrontend(config=config, core=core)
-        return tornado.web.Application(actor_http._get_request_handlers())
+        http_frontend = actor.HttpFrontend(config=config, core=core)
+        http_frontend.routers = [actor.MopidyHttpRouter]
+
+        return tornado.web.Application(http_frontend._get_request_handlers())
 
     def test_root_should_return_index(self):
         response = self.fetch('/', method='GET')
