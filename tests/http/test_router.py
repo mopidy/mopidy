@@ -5,22 +5,13 @@ import unittest
 
 import mock
 
-from tornado.escape import json_decode, json_encode, to_unicode
-from tornado.testing import AsyncHTTPTestCase
-from tornado.web import Application
+import tornado.escape
+import tornado.testing
+import tornado.web
 
 import mopidy
 from mopidy import http
-from mopidy.http import handlers
-
-
-try:
-    import tornado
-except ImportError:
-    tornado = False
-
-if tornado:
-    from mopidy.http import actor
+from mopidy.http import actor, handlers
 
 
 class TestRouter(http.Router):
@@ -36,7 +27,6 @@ class TestRouterMissingName(http.Router):
     static_file_path = os.path.join(os.path.dirname(__file__), 'static')
 
 
-@unittest.skipUnless(tornado, 'tornado is missing')
 class HttpRouterTest(unittest.TestCase):
     def setUp(self):
         self.config = {
@@ -72,12 +62,14 @@ class HttpRouterTest(unittest.TestCase):
         self.assertEqual('http://127.0.0.1:6680/test/', router.get_root_url())
 
 
-class StaticFileHandlerTest(AsyncHTTPTestCase):
+class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
-        app = Application([(r'/(.*)', handlers.StaticFileHandler, {
-            'path': os.path.dirname(__file__),
-            'default_filename': 'test_router.py'
-        })])
+        app = tornado.web.Application([
+            (r'/(.*)', handlers.StaticFileHandler, {
+                'path': os.path.dirname(__file__),
+                'default_filename': 'test_router.py'
+            })
+        ])
         return app
 
     def test_static_handler(self):
@@ -95,7 +87,7 @@ class StaticFileHandlerTest(AsyncHTTPTestCase):
                          'no-cache')
 
 
-class DefaultHTTPServerTest(AsyncHTTPTestCase):
+class DefaultHTTPServerTest(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
         config = {
             'http': {
@@ -110,13 +102,13 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         core.get_version.return_value = mopidy.__version__
 
         actor_http = actor.HttpFrontend(config=config, core=core)
-        return Application(actor_http._get_request_handlers())
+        return tornado.web.Application(actor_http._get_request_handlers())
 
     def test_root_should_return_index(self):
         response = self.fetch('/', method='GET')
         self.assertIn(
             'Static content serving',
-            to_unicode(response.body)
+            tornado.escape.to_unicode(response.body)
         )
         self.assertEqual(response.headers['X-Mopidy-Version'],
                          mopidy.__version__)
@@ -127,7 +119,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         response = self.fetch('/mopidy/', method='GET')
         self.assertIn(
             'Here you can see events arriving from Mopidy in real time:',
-            to_unicode(response.body)
+            tornado.escape.to_unicode(response.body)
         )
         self.assertEqual(response.headers['X-Mopidy-Version'],
                          mopidy.__version__)
@@ -138,7 +130,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         response = self.fetch('/mopidy/mopidy.js', method='GET')
         self.assertIn(
             'function Mopidy',
-            to_unicode(response.body)
+            tornado.escape.to_unicode(response.body)
         )
         self.assertEqual(response.headers['X-Mopidy-Version'],
                          mopidy.__version__)
@@ -149,18 +141,18 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         response = self.fetch('/mopidy/ws', method='GET')
         self.assertEqual(
             'Can "Upgrade" only to "WebSocket".',
-            to_unicode(response.body)
+            tornado.escape.to_unicode(response.body)
         )
 
     def test_should_return_ws_old(self):
         response = self.fetch('/mopidy/ws/', method='GET')
         self.assertEqual(
             'Can "Upgrade" only to "WebSocket".',
-            to_unicode(response.body)
+            tornado.escape.to_unicode(response.body)
         )
 
     def test_should_return_rpc_error(self):
-        cmd = json_encode({
+        cmd = tornado.escape.json_encode({
             'action': 'get_version'
         })
         response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
@@ -168,7 +160,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
             {'jsonrpc': '2.0', 'id': None, 'error':
                 {'message': 'Invalid Request', 'code': -32600,
                  'data': '"jsonrpc" member must be included'}},
-            json_decode(response.body)
+            tornado.escape.json_decode(response.body)
         )
 
     def test_should_return_parse_error(self):
@@ -177,11 +169,11 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         self.assertEqual(
             {'jsonrpc': '2.0', 'id': None, 'error':
                 {'message': 'Parse error', 'code': -32700}},
-            json_decode(response.body)
+            tornado.escape.json_decode(response.body)
         )
 
     def test_should_return_mopidy_version(self):
-        cmd = json_encode({
+        cmd = tornado.escape.json_encode({
             'method': 'core.get_version',
             'params': [],
             'jsonrpc': '2.0',
@@ -190,7 +182,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
         self.assertEqual(
             {'jsonrpc': '2.0', 'id': 1, 'result': mopidy.__version__},
-            json_decode(response.body)
+            tornado.escape.json_decode(response.body)
         )
 
     def test_should_return_extra_headers(self):
