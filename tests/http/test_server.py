@@ -3,8 +3,10 @@ from __future__ import unicode_literals
 import mock
 
 import tornado.testing
+import tornado.wsgi
 
 import mopidy
+from mopidy import http
 from mopidy.http import actor
 
 
@@ -113,3 +115,45 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         self.assertIn('X-Mopidy-Version', response.headers)
         self.assertIn('Cache-Control', response.headers)
         self.assertIn('Content-Type', response.headers)
+
+
+class WsgiAppRouter(http.Router):
+    name = 'wsgi'
+
+    def get_request_handlers(self):
+        def wsgi_app(environ, start_response):
+            status = '200 OK'
+            response_headers = [('Content-type', 'text/plain')]
+            start_response(status, response_headers)
+            return ['Hello, world!\n']
+
+        return [
+            ('(.*)', tornado.web.FallbackHandler, {
+                'fallback': tornado.wsgi.WSGIContainer(wsgi_app),
+            }),
+        ]
+
+
+class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
+    def get_app(self):
+        config = {
+            'http': {
+                'hostname': '127.0.0.1',
+                'port': 6680,
+                'static_dir': None,
+                'zeroconf': '',
+            }
+        }
+        core = mock.Mock()
+
+        http_frontend = actor.HttpFrontend(config=config, core=core)
+        http_frontend.routers = [WsgiAppRouter]
+
+        return tornado.web.Application(http_frontend._get_request_handlers())
+
+    def test_can_wrap_wsgi_apps(self):
+        response = self.fetch('/wsgi', method='GET')
+
+        self.assertEqual(200, response.code)
+        self.assertIn(
+            'Hello, world!', tornado.escape.to_unicode(response.body))
