@@ -45,7 +45,7 @@ class HttpRouterTest(unittest.TestCase):
 
         (pattern, handler_class, kwargs) = router.get_request_handlers()[0]
 
-        self.assertEqual(pattern, r'/test/(.*)')
+        self.assertEqual(pattern, r'/(.*)')
         self.assertIs(handler_class, handlers.StaticFileHandler)
         self.assertEqual(
             kwargs['path'], os.path.join(os.path.dirname(__file__), 'static'))

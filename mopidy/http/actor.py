@@ -79,13 +79,16 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         return request_handlers
 
     def _get_extension_request_handlers(self):
-        request_handlers = []
+        result = []
         for router_class in self.routers:
             router = router_class(self.config, self.core)
-            request_handlers.extend(router.get_request_handlers())
-            logger.info(
-                'Loaded HTTP extension: %s', router_class.__name__)
-        return request_handlers
+            request_handlers = router.get_request_handlers()
+            for handler in request_handlers:
+                handler = list(handler)
+                handler[0] = '/%s%s' % (router.name, handler[0])
+                result.append(tuple(handler))
+            logger.info('Loaded HTTP extension: %s', router_class.__name__)
+        return result
 
     def _publish_zeroconf(self):
         if not self.zeroconf_name:
@@ -126,9 +129,9 @@ class MopidyHttpRouter(http.Router):
 
     def get_request_handlers(self):
         return [
-            (r'/mopidy/ws/?', handlers.WebSocketHandler, {'core': self.core}),
-            (r'/mopidy/rpc', handlers.JsonRpcHandler, {'core': self.core}),
-            (r'/mopidy/(.*)', handlers.StaticFileHandler, {
+            (r'/ws/?', handlers.WebSocketHandler, {'core': self.core}),
+            (r'/rpc', handlers.JsonRpcHandler, {'core': self.core}),
+            (r'/(.*)', handlers.StaticFileHandler, {
                 'path': mopidy_data_dir, 'default_filename': 'mopidy.html'
             }),
         ]

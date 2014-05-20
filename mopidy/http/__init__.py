@@ -98,7 +98,8 @@ class Router(object):
         server side functionality, this method must be overridden.
 
         Must return a list of request handlers compatible with
-        :class:`tornado.web.Application`.
+        :class:`tornado.web.Application`. The URL patterns should not include
+        the :attr:`name` prefix, as that will be prepended by the web server.
         """
         if self.static_file_path is None:
             raise ValueError('Undefined static file path in %s' % self)
@@ -108,7 +109,7 @@ class Router(object):
         logger.info(
             'Serving HTTP extension %s at %s', type(self), self.get_root_url())
         return [
-            (r'/%s/(.*)' % self.name, StaticFileHandler, {
+            (r'/(.*)', StaticFileHandler, {
                 'path': self.static_file_path,
                 'default_filename': 'index.html'
             }),
