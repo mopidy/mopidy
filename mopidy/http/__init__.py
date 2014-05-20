@@ -53,9 +53,9 @@ class Router(object):
     """
     HTTP router interface.
 
-    Extensions that wish to add custom routes to HTTP server needs to subclass
-    this class and have :meth:`~mopidy.ext.Extension.setup` register the class
-    in the extension registry.
+    Extensions that wish to extend the HTTP server needs to subclass this class
+    and have :meth:`~mopidy.ext.Extension.setup` register the class in the
+    extension registry under the ``http:router`` key.
 
     :param config: dict structure of the entire Mopidy configuration
     """
@@ -71,7 +71,7 @@ class Router(object):
         self.hostname = config['http']['hostname']
         self.port = config['http']['port']
         if not self.name:
-            raise ValueError('Undefined name in %s' % self)
+            raise ValueError('Undefined router name in %s' % self)
 
     def linkify(self):
         """
