@@ -54,7 +54,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         static_dir = self.config['http']['static_dir']
 
         # either default mopidy or user defined path to files
-        primary_dir = (r"/(.*)", StaticFileHandler, {
+        primary_dir = (r'/(.*)', StaticFileHandler, {
             'path': static_dir if static_dir else mopidy_dir,
             'default_filename': 'index.html'
         })
@@ -67,9 +67,9 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         # TODO: Dynamically define all endpoints
         routes.extend([
-            (r"/mopidy/ws/?", handlers.WebSocketHandler, {'actor': self}),
-            (r"/mopidy/rpc", handlers.JsonRpcHandler, {'actor': self}),
-            (r"/mopidy/(.*)", StaticFileHandler, {
+            (r'/mopidy/ws/?', handlers.WebSocketHandler, {'actor': self}),
+            (r'/mopidy/rpc', handlers.JsonRpcHandler, {'actor': self}),
+            (r'/mopidy/(.*)', StaticFileHandler, {
                 'path': mopidy_dir, 'default_filename': 'mopidy.html'
             }),
             primary_dir,
