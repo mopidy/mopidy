@@ -89,6 +89,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.extlinks',
     'sphinx.ext.graphviz',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
 ]
 
@@ -157,4 +158,12 @@ extlinks = {
     'commit': ('https://github.com/mopidy/mopidy/commit/%s', 'commit '),
     'mpris': (
         'https://github.com/mopidy/mopidy-mpris/issues/%s', 'mopidy-mpris#'),
+}
+
+
+# -- Options for intersphinx extension ----------------------------------------
+
+intersphinx_mapping = {
+    'python': ('http://docs.python.org/2', None),
+    'tornado': ('http://www.tornadoweb.org/en/stable/', None),
 }
