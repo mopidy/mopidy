@@ -61,7 +61,7 @@ Feature release.
   :issue:`440`) (TODO: Link to relevant docs)
 
 - Added support for extending the HTTP frontend with additional server side
-  functionality. (TODO: Link to relevant docs)
+  functionality. See :ref:`http-server-api` for details.
 
 - Exposed the core API using HTTP POST requests with JSON-RPC payloads at
   ``/mopidy/rpc``. This is the same JSON-RPC interface as is exposed over the
@@ -70,8 +70,8 @@ Feature release.
   The HTTP POST interfaces does not give you access to events from Mopidy, like
   the WebSocket does. The WebSocket interface is still recommended for web
   clients. The HTTP POST interface may be easier to use for simpler programs,
-  that just needs to query the currently playing track or similar. (TODO: Link
-  to relevant docs)
+  that just needs to query the currently playing track or similar. See
+  :ref:`http-post-api` for details.
 
 - If Zeroconf is enabled, we now announce the ``_mopidy-http._tcp`` service in
   addition to ``_http._tcp``. This is to make it easier to automatically find

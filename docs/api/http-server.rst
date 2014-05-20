@@ -1,3 +1,5 @@
+.. _http-server-api:
+
 ********************
 HTTP server side API
 ********************
