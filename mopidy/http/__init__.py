@@ -36,7 +36,8 @@ class Extension(ext.Extension):
     def setup(self, registry):
         from .actor import HttpFrontend
 
-        HttpFrontend.routers = registry['http:routers']
+        HttpFrontend.routers = registry['http:router']
+
         registry.add('frontend', HttpFrontend)
 
 
