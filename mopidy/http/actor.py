@@ -35,19 +35,13 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         self.websocket_clients = set()
 
     def _load_extensions(self):
-        routes = []
-        for extension in self.routers:
-            extension = extension(self.config)
-            if callable(getattr(extension, "setup_routes", None)):
-                routes.extend(extension.setup_routes())
-                logger.info('Loaded HTTP extension: %s',
-                            extension.__class__.__name__)
-            else:
-                logger.info(
-                    'Disabled HTTP router %s: missing setup_routes method',
-                    extension.__class__.__name__)
-
-        return routes
+        request_handlers = []
+        for router_class in self.routers:
+            router = router_class(self.config)
+            request_handlers.extend(router.get_request_handlers())
+            logger.info(
+                'Loaded HTTP extension: %s', router_class.__name__)
+        return request_handlers
 
     def _create_routes(self):
         mopidy_dir = os.path.join(os.path.dirname(__file__), 'data')
