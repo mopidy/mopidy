@@ -90,7 +90,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def _get_extension_request_handlers(self):
         request_handlers = []
         for router_class in self.routers:
-            router = router_class(self.config)
+            router = router_class(self.config, self.core)
             request_handlers.extend(router.get_request_handlers())
             logger.info(
                 'Loaded HTTP extension: %s', router_class.__name__)

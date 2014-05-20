@@ -6,7 +6,7 @@ import unittest
 import mock
 
 from mopidy import http
-from mopidy.http import actor, handlers
+from mopidy.http import handlers
 
 
 class TestRouter(http.Router):
@@ -32,10 +32,16 @@ class HttpRouterTest(unittest.TestCase):
                 'zeroconf': '',
             }
         }
-        self.http = actor.HttpFrontend(config=self.config, core=mock.Mock())
+        self.core = mock.Mock()
 
-    def test_default_router(self):
-        router = TestRouter(self.config)
+    def test_keeps_reference_to_config_and_core(self):
+        router = TestRouter(self.config, self.core)
+
+        self.assertIs(router.config, self.config)
+        self.assertIs(router.core, self.core)
+
+    def test_default_request_handlers(self):
+        router = TestRouter(self.config, self.core)
 
         (pattern, handler_class, kwargs) = router.get_request_handlers()[0]
 
@@ -46,13 +52,15 @@ class HttpRouterTest(unittest.TestCase):
 
     def test_default_router_missing_name(self):
         with self.assertRaises(ValueError):
-            TestRouterMissingName(self.config)
+            TestRouterMissingName(self.config, self.core)
 
     def test_default_router_missing_path(self):
+        router = TestRouterMissingPath(self.config, self.core)
+
         with self.assertRaises(ValueError):
-            TestRouterMissingPath(self.config).get_request_handlers()
+            router.get_request_handlers()
 
     def test_get_root_url(self):
-        router = TestRouter(self.config)
+        router = TestRouter(self.config, self.core)
 
         self.assertEqual('http://127.0.0.1:6680/test/', router.get_root_url())

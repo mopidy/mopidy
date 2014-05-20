@@ -50,6 +50,8 @@ class Router(object):
     extension registry under the ``http:router`` key.
 
     :param config: dict structure of the entire Mopidy configuration
+    :param core: :class:`pykka.ActorProxy` to the core actor, giving full
+      access to the core API
     """
 
     name = None
@@ -74,8 +76,9 @@ class Router(object):
     If you override :meth:`get_request_handlers` this attribute is not used.
     """
 
-    def __init__(self, config):
+    def __init__(self, config, core):
         self.config = config
+        self.core = core
         self.hostname = config['http']['hostname']
         self.port = config['http']['port']
         if not self.name:
