@@ -9,7 +9,8 @@ from tornado.escape import json_decode, json_encode, to_unicode
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application
 
-from mopidy import __version__, http
+import mopidy
+from mopidy import http
 
 
 try:
@@ -82,14 +83,14 @@ class StaticFileHandlerTest(AsyncHTTPTestCase):
     def test_static_handler(self):
         response = self.fetch('/test_router.py', method='GET')
         self.assertEqual(response.headers['X-Mopidy-Version'],
-                         __version__)
+                         mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'],
                          'no-cache')
 
     def test_static_default_filename(self):
         response = self.fetch('/', method='GET')
         self.assertEqual(response.headers['X-Mopidy-Version'],
-                         __version__)
+                         mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'],
                          'no-cache')
 
@@ -106,7 +107,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         }
         core = mock.Mock()
         core.get_version = mock.MagicMock(name='get_version')
-        core.get_version.return_value = __version__
+        core.get_version.return_value = mopidy.__version__
 
         actor_http = actor.HttpFrontend(config=config, core=core)
         return Application(actor_http._create_routes())
@@ -118,7 +119,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
             to_unicode(response.body)
         )
         self.assertEqual(response.headers['X-Mopidy-Version'],
-                         __version__)
+                         mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'],
                          'no-cache')
 
@@ -129,7 +130,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
             to_unicode(response.body)
         )
         self.assertEqual(response.headers['X-Mopidy-Version'],
-                         __version__)
+                         mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'],
                          'no-cache')
 
@@ -140,7 +141,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
             to_unicode(response.body)
         )
         self.assertEqual(response.headers['X-Mopidy-Version'],
-                         __version__)
+                         mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'],
                          'no-cache')
 
@@ -188,7 +189,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         })
         response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
         self.assertEqual(
-            {'jsonrpc': '2.0', 'id': 1, 'result': __version__},
+            {'jsonrpc': '2.0', 'id': 1, 'result': mopidy.__version__},
             json_decode(response.body)
         )
 
