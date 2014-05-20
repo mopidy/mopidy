@@ -63,8 +63,8 @@ class Router(object):
     #: Name of the HTTP router implementation, must be overridden.
     name = None
 
-    #: Path to location of static files.
-    path = None
+    #: Path to location of static files to be served.
+    static_file_path = None
 
     def __init__(self, config):
         self.config = config
@@ -91,13 +91,13 @@ class Router(object):
         :return: list of Tornado routes
         """
 
-        if self.path is None:
-            raise ValueError('Undefined path in %s' % self)
+        if self.static_file_path is None:
+            raise ValueError('Undefined static file path in %s' % self)
         logger.info(
             'Serving HTTP extension %s at %s', type(self), self.linkify())
         return [
             (r'/%s/(.*)' % self.name, StaticFileHandler, {
-                'path': self.path,
+                'path': self.static_file_path,
                 'default_filename': 'index.html'
             }),
         ]

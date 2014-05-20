@@ -23,7 +23,7 @@ if tornado:
 
 class TestRouter(http.Router):
     name = 'test'
-    path = os.path.join(os.path.dirname(__file__), 'static')
+    static_file_path = os.path.join(os.path.dirname(__file__), 'static')
 
 
 class TestRouterMissingPath(http.Router):
@@ -31,7 +31,7 @@ class TestRouterMissingPath(http.Router):
 
 
 class TestRouterMissingName(http.Router):
-    path = os.path.join(os.path.dirname(__file__), 'static')
+    static_file_path = os.path.join(os.path.dirname(__file__), 'static')
 
 
 @unittest.skipUnless(tornado, 'tornado is missing')
