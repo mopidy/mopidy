@@ -61,20 +61,21 @@ class Router(object):
     Must be overridden by all subclasses.
 
     This should be the same as the ``ext_name`` of the Mopidy extension
-    implementing an HTTP router. The :attr:`name` will be used to namespace all
-    URLs handled by this router.
+    implementing an HTTP router. The :attr:`~Router.name` will be used to
+    namespace all URLs handled by this router.
 
-    For example, if :attr:`name` is ``soundspot``, then the router will manage
-    all requests starting with ``http://localhost:6680/soundspot``.
+    For example, if :attr:`~Router.name` is ``soundspot``, then the router will
+    manage all requests starting with ``http://localhost:6680/soundspot``.
     """
 
     static_file_path = None
     """Path to location of static files to be served.
 
     If you only need to serve static files, set this attribute and use the
-    default implementation of :meth:`get_request_handlers`.
+    default implementation of :meth:`~Router.get_request_handlers`.
 
-    If you override :meth:`get_request_handlers` this attribute is not used.
+    If you override :meth:`~Router.get_request_handlers` this attribute is not
+    used.
     """
 
     def __init__(self, config, core):
