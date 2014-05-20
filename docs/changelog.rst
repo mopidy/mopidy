@@ -45,6 +45,9 @@ Feature release.
 
 **Audio**
 
+- Use :ref:`proxy-config` when streaming media from the Internet. (Partly
+  fixing :issue:`390`)
+
 - Fix proper decoding of exception messages that depends on the user's locale.
 
 **HTTP frontend**
