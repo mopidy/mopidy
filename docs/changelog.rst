@@ -39,6 +39,10 @@ Feature release.
   :meth:`~mopidy.ext.Extension.register_gstreamer_elements`. Use
   :meth:`mopidy.ext.Extension.setup` instead, as most extensions already do.
 
+**Audio**
+
+- Fix proper decoding of exception messages that depends on the user's locale.
+
 **HTTP frontend**
 
 - CherryPy and ws4py have been replaced with Tornado. This will hopefully
@@ -97,6 +101,8 @@ Feature release.
   already exist. Previously, this was only done by the Mopidy server, so doing
   a ``local scan`` before running the server the first time resulted in a
   crash. (Fixes: :issue:`703`)
+
+- Fix proper decoding of exception messages that depends on the user's locale.
 
 
 v0.18.3 (2014-02-16)

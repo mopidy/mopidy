@@ -13,6 +13,7 @@ import time
 import mopidy
 from mopidy import local, models
 from mopidy.local import search, storage, translator
+from mopidy.utils import encoding
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,10 @@ def load_library(json_file):
     try:
         with gzip.open(json_file, 'rb') as fp:
             return json.load(fp, object_hook=models.model_json_decoder)
-    except (IOError, ValueError) as e:
-        logger.warning('Loading JSON local library failed: %s', e)
+    except (IOError, ValueError) as error:
+        logger.warning(
+            'Loading JSON local library failed: %s',
+            encoding.locale_decode(error))
         return {}
 
 
