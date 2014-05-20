@@ -115,3 +115,10 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         self.set_header(
             'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
         self.set_header('Content-Type', 'application/json; utf-8')
+
+
+class StaticFileHandler(tornado.web.StaticFileHandler):
+    def set_extra_headers(self, path):
+        self.set_header('Cache-Control', 'no-cache')
+        self.set_header(
+            'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))

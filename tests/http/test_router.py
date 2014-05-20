@@ -11,6 +11,7 @@ from tornado.web import Application
 
 import mopidy
 from mopidy import http
+from mopidy.http import handlers
 
 
 try:
@@ -51,11 +52,10 @@ class HttpRouterTest(unittest.TestCase):
     def test_default_router(self):
         router = TestRouter(self.config)
 
-        handlers = router.get_request_handlers()
-        (pattern, handler_class, kwargs) = handlers[0]
+        (pattern, handler_class, kwargs) = router.get_request_handlers()[0]
 
         self.assertEqual(pattern, r'/test/(.*)')
-        self.assertIs(handler_class, http.StaticFileHandler)
+        self.assertIs(handler_class, handlers.StaticFileHandler)
         self.assertEqual(
             kwargs['path'], os.path.join(os.path.dirname(__file__), 'static'))
 
@@ -74,7 +74,7 @@ class HttpRouterTest(unittest.TestCase):
 
 class StaticFileHandlerTest(AsyncHTTPTestCase):
     def get_app(self):
-        app = Application([(r'/(.*)', http.StaticFileHandler, {
+        app = Application([(r'/(.*)', handlers.StaticFileHandler, {
             'path': os.path.dirname(__file__),
             'default_filename': 'test_router.py'
         })])

@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 import logging
 import os
 
-import tornado.web
-
 import mopidy
 from mopidy import config as config_lib, exceptions, ext
 
@@ -40,13 +38,6 @@ class Extension(ext.Extension):
 
         HttpFrontend.routers = registry['http:routers']
         registry.add('frontend', HttpFrontend)
-
-
-class StaticFileHandler(tornado.web.StaticFileHandler):
-    def set_extra_headers(self, path):
-        self.set_header('Cache-Control', 'no-cache')
-        self.set_header(
-            'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
 
 
 class Router(object):
@@ -104,9 +95,11 @@ class Router(object):
         Must return a list of request handlers compatible with
         :class:`tornado.web.Application`.
         """
-
         if self.static_file_path is None:
             raise ValueError('Undefined static file path in %s' % self)
+
+        from mopidy.http.handlers import StaticFileHandler
+
         logger.info(
             'Serving HTTP extension %s at %s', type(self), self.get_root_url())
         return [

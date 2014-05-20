@@ -13,7 +13,7 @@ import tornado.websocket
 
 from mopidy import models, zeroconf
 from mopidy.core import CoreListener
-from mopidy.http import StaticFileHandler, handlers
+from mopidy.http import handlers
 
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         static_dir = self.config['http']['static_dir']
 
         # either default mopidy or user defined path to files
-        primary_dir = (r'/(.*)', StaticFileHandler, {
+        primary_dir = (r'/(.*)', handlers.StaticFileHandler, {
             'path': static_dir if static_dir else mopidy_dir,
             'default_filename': 'index.html'
         })
@@ -69,7 +69,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         routes.extend([
             (r'/mopidy/ws/?', handlers.WebSocketHandler, {'actor': self}),
             (r'/mopidy/rpc', handlers.JsonRpcHandler, {'actor': self}),
-            (r'/mopidy/(.*)', StaticFileHandler, {
+            (r'/mopidy/(.*)', handlers.StaticFileHandler, {
                 'path': mopidy_dir, 'default_filename': 'mopidy.html'
             }),
             primary_dir,
