@@ -64,7 +64,7 @@ class HttpRouterTest(unittest.TestCase):
 
     def test_default_uri_helper(self):
         router = TestRouter(self.config)
-        self.assertEqual('http://127.0.0.1:6680/test/', router.linkify())
+        self.assertEqual('http://127.0.0.1:6680/test/', router.get_root_url())
 
 
 class StaticFileHandlerTest(AsyncHTTPTestCase):

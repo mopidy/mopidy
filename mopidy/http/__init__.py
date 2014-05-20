@@ -73,12 +73,8 @@ class Router(object):
         if not self.name:
             raise ValueError('Undefined router name in %s' % self)
 
-    def linkify(self):
-        """
-        Absolute URL to the root of this router.
-
-        :return: URL this router is mounted at
-        """
+    def get_root_url(self):
+        """Get the absolute URL to the root of this router."""
         return 'http://%s:%s/%s/' % (self.hostname, self.port, self.name)
 
     def setup_routes(self):
@@ -94,7 +90,7 @@ class Router(object):
         if self.static_file_path is None:
             raise ValueError('Undefined static file path in %s' % self)
         logger.info(
-            'Serving HTTP extension %s at %s', type(self), self.linkify())
+            'Serving HTTP extension %s at %s', type(self), self.get_root_url())
         return [
             (r'/%s/(.*)' % self.name, StaticFileHandler, {
                 'path': self.static_file_path,
