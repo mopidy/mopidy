@@ -26,7 +26,7 @@ sys.argv[1:] = []
 
 
 from mopidy import commands, config as config_lib, ext
-from mopidy.utils import log, path, process, versioning
+from mopidy.utils import encoding, log, path, process, versioning
 
 logger = logging.getLogger(__name__)
 
@@ -149,9 +149,10 @@ def create_file_structures_and_config(args, extensions):
         default = config_lib.format_initial(extensions)
         path.get_or_create_file(config_file, mkdir=False, content=default)
         logger.info('Initialized %s with default config', config_file)
-    except IOError as e:
-        logger.warning('Unable to initialize %s with default config: %s',
-                       config_file, e)
+    except IOError as error:
+        logger.warning(
+            'Unable to initialize %s with default config: %s',
+            config_file, encoding.locale_decode(error))
 
 
 def check_old_locations():
