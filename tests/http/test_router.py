@@ -110,7 +110,7 @@ class DefaultHTTPServerTest(AsyncHTTPTestCase):
         core.get_version.return_value = mopidy.__version__
 
         actor_http = actor.HttpFrontend(config=config, core=core)
-        return Application(actor_http._create_routes())
+        return Application(actor_http._get_request_handlers())
 
     def test_root_should_return_index(self):
         response = self.fetch('/', method='GET')
