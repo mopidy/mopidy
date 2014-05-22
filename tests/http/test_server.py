@@ -7,7 +7,7 @@ import tornado.wsgi
 
 import mopidy
 from mopidy import http
-from mopidy.http import actor
+from mopidy.http import actor, handlers
 
 
 class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
@@ -25,7 +25,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         core.get_version.return_value = mopidy.__version__
 
         http_frontend = actor.HttpFrontend(config=config, core=core)
-        http_frontend.routers = [actor.MopidyHttpRouter]
+        http_frontend.routers = [handlers.MopidyHttpRouter]
 
         return tornado.web.Application(http_frontend._get_request_handlers())
 
