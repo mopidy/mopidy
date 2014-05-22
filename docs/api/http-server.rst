@@ -4,8 +4,9 @@
 HTTP server side API
 ********************
 
-TODO: Describe how this is used. Consider splitting this page into multiple
-pages.
+TODO: Describe how this is used.
+TODO: Static web client example.
+TODO: WSGI app example.
 
 .. autoclass:: mopidy.http.Router
     :members:
