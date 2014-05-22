@@ -61,20 +61,22 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         handlers.WebSocketHandler.broadcast(message)
 
     def _get_request_handlers(self):
+        request_handlers = []
+
+        request_handlers.extend(self._get_extension_request_handlers())
+
         # Either default Mopidy or user defined path to files
         static_dir = self.config['http']['static_dir']
         data_dir = os.path.join(os.path.dirname(__file__), 'data')
-        root_dir = (r'/(.*)', handlers.StaticFileHandler, {
+        root_handler = (r'/(.*)', handlers.StaticFileHandler, {
             'path': static_dir if static_dir else data_dir,
             'default_filename': 'index.html'
         })
+        request_handlers.append(root_handler)
 
-        request_handlers = self._get_extension_request_handlers()
         logger.debug(
             'HTTP routes from extensions: %s',
             list((l[0], l[1]) for l in request_handlers))
-
-        request_handlers.append(root_dir)
         return request_handlers
 
     def _get_extension_request_handlers(self):
