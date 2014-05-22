@@ -54,7 +54,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def _shutdown(self):
         logger.debug('Stopping HTTP server')
         tornado.ioloop.IOLoop.instance().stop()
-        logger.info('Stopped HTTP server')
+        logger.debug('Stopped HTTP server')
 
     def on_event(self, name, **data):
         event = data
