@@ -1,3 +1,9 @@
+mopidy (0.18.3-2) unstable; urgency=medium
+
+  * Use debconf to ask if Mopidy server should start at boot.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sat, 24 May 2014 20:05:31 +0200
+
 mopidy (0.18.3-1) unstable; urgency=low
 
   * New upstream release.

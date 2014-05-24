@@ -1,0 +1,10 @@
+#!/bin/sh
+# prerm script for mopidy
+
+set -e
+
+invoke-rc.d mopidy stop || exit $?
+
+#DEBHELPER#
+
+exit 0

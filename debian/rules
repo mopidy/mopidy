@@ -30,3 +30,6 @@ override_dh_installdocs:
 override_dh_installman:
 	make -C docs/ clean man
 	dh_installman
+
+override_dh_installinit:
+	dh_installinit --noscripts

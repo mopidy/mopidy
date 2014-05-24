@@ -1,0 +1,13 @@
+Template: mopidy/daemon
+Type: boolean
+Default: false
+_Description: Should the Mopidy server be started at boot?
+ The Mopidy server can be run as a system service, automatically starting
+ at boot. It will be listening to MPD connections at port 6600 and HTTP
+ connections at port 6680. By default, it will only accept connections from
+ localhost.
+ .
+ You have the option of starting the Mopidy server automatically on system
+ boot. If in doubt, it is suggested to not start it automatically on boot.
+ .
+ This setting can be modified later by running 'dpkg-reconfigure mopidy'.

@@ -3,8 +3,10 @@
 
 set -e
 
+. /usr/share/debconf/confmodule
+
 case "$1" in
-    configure)
+    configure|reconfigure)
         adduser --quiet --system --no-create-home --home /var/lib/mopidy --ingroup audio mopidy
 
         chown mopidy:audio /var/cache/mopidy
@@ -17,6 +19,15 @@ case "$1" in
         # mopidy.conf may contain passwords and other confidential information
         chown mopidy:root /etc/mopidy/mopidy.conf
         chmod 640 /etc/mopidy/mopidy.conf
+
+        db_get mopidy/daemon
+        if [ "$RET" = "true" ]; then
+            update-rc.d mopidy defaults >/dev/null
+            invoke-rc.d mopidy start || exit $?
+        else
+            update-rc.d -f mopidy remove >/dev/null
+            invoke-rc.d mopidy stop || exit $?
+        fi
         ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
