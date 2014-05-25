@@ -5,6 +5,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
+#DEBHELPER#
+
 case "$1" in
     configure|reconfigure)
         adduser --quiet --system --no-create-home --home /var/lib/mopidy --ingroup audio mopidy
@@ -22,10 +24,10 @@ case "$1" in
 
         db_get mopidy/daemon
         if [ "$RET" = "true" ]; then
-            update-rc.d mopidy defaults >/dev/null
+            update-rc.d mopidy enable >/dev/null
             invoke-rc.d mopidy start || exit $?
         else
-            update-rc.d -f mopidy remove >/dev/null
+            update-rc.d mopidy disable >/dev/null
             invoke-rc.d mopidy stop || exit $?
         fi
         ;;
@@ -38,7 +40,5 @@ case "$1" in
         exit 1
         ;;
 esac
-
-#DEBHELPER#
 
 exit 0
