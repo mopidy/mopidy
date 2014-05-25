@@ -15,20 +15,33 @@ Installation
 See the Debian/Ubuntu section in the :ref:`installation` section.
 
 
-Running as a system service by default
-======================================
+Running as a system service
+===========================
 
-The Debian package comes with an init script and, by default, it starts Mopidy
-as a system service running as the ``mopidy`` user which is created by the
-package.
+The Debian package comes with an init script. It starts Mopidy as a system
+service running as the ``mopidy`` user, which is created by the package.
 
-If you've installed Mopidy from the Debian package and don't want to use the
-init script to run Mopidy as a system service, but instead just run Mopidy
-manually using your own user, you need to disable the init script and stop
-Mopidy by running::
+The Debian package version 0.18.3-1 and older starts Mopidy as a system
+service by default. Version 0.18.3-2 and newer asks if you want to run Mopidy
+as a system service, defaulting to not doing so.
 
-    sudo update-rc.d -f mopidy remove
+If you're running 0.18.3-2 or newer, and you've changed your mind about whether
+or not to run Mopidy as a system service, just run the following command to
+reconfigure the package::
+
+    sudo dpkg-reconfigure mopidy
+
+If you're running 0.18.3-1 or older, and don't want to use the init script to
+run Mopidy as a system service, but instead just run Mopidy manually using your
+own user, you need to disable the init script and stop Mopidy by running::
+
+    sudo update-rc.d mopidy disable
     sudo service mopidy stop
+
+This way of disabling the system service is compatible with the improved
+0.18.3-2 or newer version of the Debian package, so if you later upgrade to a
+newer version, you can change your mind using the ``dpkg-reconfigure`` command
+above.
 
 
 Differences when running as a system service
