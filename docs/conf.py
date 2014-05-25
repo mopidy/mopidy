@@ -165,5 +165,6 @@ extlinks = {
 
 intersphinx_mapping = {
     'python': ('http://docs.python.org/2', None),
+    'pykka': ('http://www.pykka.org/en/latest/', None),
     'tornado': ('http://www.tornadoweb.org/en/stable/', None),
 }
