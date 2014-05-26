@@ -1,3 +1,9 @@
+mopidy (0.18.3-3) unstable; urgency=medium
+
+  * Remove redundant dependency on po-debconf, as we use debhelper.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 26 May 2014 09:25:55 +0200
+
 mopidy (0.18.3-2) unstable; urgency=medium
 
   * Use debconf to ask if Mopidy server should start at boot.

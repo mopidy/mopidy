@@ -23,7 +23,6 @@ Depends:
     debconf,
     lsb-base,
     gstreamer0.10-plugins-good,
-    po-debconf,
     python-gst0.10
 Recommends:
     gstreamer0.10-alsa,
