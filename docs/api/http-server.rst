@@ -72,8 +72,8 @@ for Tornado request handlers.
 
 In the following example, we create a :class:`tornado.web.RequestHandler`
 called :class:`MyRequestHandler` that responds to HTTP GET requests with the
-string ``Hello, world!``. The router registers this Tornado request handler on
-the root URL, ``/``. The URLs returned from
+string ``Hello, world! This is Mopidy $version``. The router registers this
+Tornado request handler on the root URL, ``/``. The URLs returned from
 :meth:`~mopidy.http.Router.get_request_handlers` are combined with the
 :attr:`~mopidy.http.Router.name`` attribute of the router, so the full absolute
 URL for the request handler becomes ``/mywebclient/``.
@@ -95,8 +95,13 @@ will respond to requests to http://localhost:6680/mywebclient/ with the string
 
 
     class MyRequestHandler(tornado.web.RequestHandler):
+        def initialize(self, core):
+            self.core = core
+
         def get(self):
-            self.write('Hello, world!')
+            self.write(
+                'Hello, world! This is Mopidy %s' %
+                self.core.get_version().get())
 
 
     class MyTornadoRouter(http.Router):
@@ -104,7 +109,7 @@ will respond to requests to http://localhost:6680/mywebclient/ with the string
 
         def get_request_handlers(self):
             return [
-                ('/', MyRequestHandler)
+                ('/', MyRequestHandler, dict(core=self.core))
             ]
 
 
@@ -128,8 +133,9 @@ single thread to run on, and if your application is doing blocking I/O, it will
 block all other requests from being handled by the web server as well.
 
 The example below shows how a WSGI application that returns the string
-``Hello, world!`` on all requests. The WSGI application is wrapped as a Tornado
-application and mounted at http://localhost:6680/mywebclient/.
+``Hello, world! This is Mopidy $version`` on all requests. The WSGI application
+is wrapped as a Tornado application and mounted at
+http://localhost:6680/mywebclient/.
 
 ::
 
@@ -151,7 +157,10 @@ application and mounted at http://localhost:6680/mywebclient/.
                 status = '200 OK'
                 response_headers = [('Content-type', 'text/plain')]
                 start_response(status, response_headers)
-                return ['Hello, world!\n']
+                return [
+                    'Hello, world! This is Mopidy %s\n' %
+                    self.core.get_version().get()
+                ]
 
             return [
                 ('(.*)', tornado.web.FallbackHandler, {
