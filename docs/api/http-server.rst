@@ -173,7 +173,7 @@ http://localhost:6680/mywebclient/.
         ext_name = 'mywebclient'
 
         def setup(self, registry):
-            registry.add('http:router', MyTornadoRouter)
+            registry.add('http:router', MyWSGIRouter)
 
         # See the Extension API for the full details on this class
 
