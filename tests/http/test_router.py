@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import os
 import unittest
 
 import mock
@@ -10,7 +9,6 @@ from mopidy import http
 
 class TestRouter(http.Router):
     name = 'test'
-    static_file_path = os.path.join(os.path.dirname(__file__), 'static')
 
 
 class TestRouterMissingName(http.Router):
