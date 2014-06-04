@@ -14,12 +14,12 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
         return tornado.web.Application([
             (r'/(.*)', handlers.StaticFileHandler, {
                 'path': os.path.dirname(__file__),
-                'default_filename': 'test_router.py'
+                'default_filename': 'test_handlers.py'
             })
         ])
 
     def test_static_handler(self):
-        response = self.fetch('/test_router.py', method='GET')
+        response = self.fetch('/test_handlers.py', method='GET')
 
         self.assertEqual(200, response.code)
         self.assertEqual(

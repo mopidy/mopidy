@@ -35,13 +35,16 @@ class Extension(ext.Extension):
 
     def setup(self, registry):
         from .actor import HttpFrontend
-        from .handlers import MopidyHttpRouter
+        from .handlers import mopidy_app_factory
 
-        HttpFrontend.routers = registry['http:router']
+        HttpFrontend.apps = registry['http:app']
         HttpFrontend.statics = registry['http:static']
 
         registry.add('frontend', HttpFrontend)
-        registry.add('http:router', MopidyHttpRouter)
+        registry.add('http:app', {
+            'name': 'mopidy',
+            'factory': mopidy_app_factory,
+        })
 
 
 class Router(object):

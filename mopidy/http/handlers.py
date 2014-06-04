@@ -8,25 +8,26 @@ import tornado.web
 import tornado.websocket
 
 import mopidy
-from mopidy import core, http, models
+from mopidy import core, models
 from mopidy.utils import jsonrpc
 
 
 logger = logging.getLogger(__name__)
 
 
-class MopidyHttpRouter(http.Router):
-    name = 'mopidy'
-
-    def get_request_handlers(self):
-        data_dir = os.path.join(os.path.dirname(__file__), 'data')
-        return [
-            (r'/ws/?', WebSocketHandler, {'core': self.core}),
-            (r'/rpc', JsonRpcHandler, {'core': self.core}),
-            (r'/(.*)', StaticFileHandler, {
-                'path': data_dir, 'default_filename': 'mopidy.html'
-            }),
-        ]
+def mopidy_app_factory(config, core):
+    return [
+        (r'/ws/?', WebSocketHandler, {
+            'core': core,
+        }),
+        (r'/rpc', JsonRpcHandler, {
+            'core': core,
+        }),
+        (r'/(.*)', StaticFileHandler, {
+            'path': os.path.join(os.path.dirname(__file__), 'data'),
+            'default_filename': 'mopidy.html'
+        }),
+    ]
 
 
 def make_jsonrpc_wrapper(core_actor):

@@ -8,7 +8,6 @@ import tornado.testing
 import tornado.wsgi
 
 import mopidy
-from mopidy import http
 from mopidy.http import actor, handlers
 
 
@@ -27,7 +26,10 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         core.get_version.return_value = mopidy.__version__
 
         http_frontend = actor.HttpFrontend(config=config, core=core)
-        http_frontend.routers = [handlers.MopidyHttpRouter]
+        http_frontend.apps = [{
+            'name': 'mopidy',
+            'factory': handlers.mopidy_app_factory,
+        }]
 
         return tornado.web.Application(http_frontend._get_request_handlers())
 
@@ -148,21 +150,19 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
             response.headers['Cache-Control'], 'no-cache')
 
 
-class WsgiAppRouter(http.Router):
-    name = 'wsgi'
+def wsgi_app_factory(config, core):
 
-    def get_request_handlers(self):
-        def wsgi_app(environ, start_response):
-            status = '200 OK'
-            response_headers = [('Content-type', 'text/plain')]
-            start_response(status, response_headers)
-            return ['Hello, world!\n']
+    def wsgi_app(environ, start_response):
+        status = '200 OK'
+        response_headers = [('Content-type', 'text/plain')]
+        start_response(status, response_headers)
+        return ['Hello, world!\n']
 
-        return [
-            ('(.*)', tornado.web.FallbackHandler, {
-                'fallback': tornado.wsgi.WSGIContainer(wsgi_app),
-            }),
-        ]
+    return [
+        ('(.*)', tornado.web.FallbackHandler, {
+            'fallback': tornado.wsgi.WSGIContainer(wsgi_app),
+        }),
+    ]
 
 
 class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
@@ -178,7 +178,10 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
         core = mock.Mock()
 
         http_frontend = actor.HttpFrontend(config=config, core=core)
-        http_frontend.routers = [WsgiAppRouter]
+        http_frontend.apps = [{
+            'name': 'wsgi',
+            'factory': wsgi_app_factory,
+        }]
 
         return tornado.web.Application(http_frontend._get_request_handlers())
 

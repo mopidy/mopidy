@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
-    routers = []
+    apps = []
     statics = []
 
     def __init__(self, config, core):
@@ -64,7 +64,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def _get_request_handlers(self):
         request_handlers = []
 
-        request_handlers.extend(self._get_router_request_handlers())
+        request_handlers.extend(self._get_app_request_handlers())
         request_handlers.extend(self._get_static_request_handlers())
 
         # Either default Mopidy or user defined path to files
@@ -81,16 +81,15 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             list((l[0], l[1]) for l in request_handlers))
         return request_handlers
 
-    def _get_router_request_handlers(self):
+    def _get_app_request_handlers(self):
         result = []
-        for router_class in self.routers:
-            router = router_class(self.config, self.core)
-            request_handlers = router.get_request_handlers()
+        for app in self.apps:
+            request_handlers = app['factory'](self.config, self.core)
             for handler in request_handlers:
                 handler = list(handler)
-                handler[0] = '/%s%s' % (router.name, handler[0])
+                handler[0] = '/%s%s' % (app['name'], handler[0])
                 result.append(tuple(handler))
-            logger.debug('Loaded HTTP extension: %s', router.name)
+            logger.debug('Loaded HTTP extension: %s', app['name'])
         return result
 
     def _get_static_request_handlers(self):
