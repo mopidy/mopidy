@@ -6,7 +6,6 @@ import unittest
 import mock
 
 from mopidy import http
-from mopidy.http import handlers
 
 
 class TestRouter(http.Router):
@@ -14,12 +13,8 @@ class TestRouter(http.Router):
     static_file_path = os.path.join(os.path.dirname(__file__), 'static')
 
 
-class TestRouterMissingPath(http.Router):
-    name = 'test'
-
-
 class TestRouterMissingName(http.Router):
-    static_file_path = os.path.join(os.path.dirname(__file__), 'static')
+    pass
 
 
 class HttpRouterTest(unittest.TestCase):
@@ -40,27 +35,12 @@ class HttpRouterTest(unittest.TestCase):
         self.assertIs(router.config, self.config)
         self.assertIs(router.core, self.core)
 
-    def test_default_request_handlers(self):
-        router = TestRouter(self.config, self.core)
-
-        (pattern, handler_class, kwargs) = router.get_request_handlers()[0]
-
-        self.assertEqual(pattern, r'/(.*)')
-        self.assertIs(handler_class, handlers.StaticFileHandler)
-        self.assertEqual(
-            kwargs['path'], os.path.join(os.path.dirname(__file__), 'static'))
-
-    def test_default_router_missing_name(self):
+    def test_undefined_name_raises_error(self):
         with self.assertRaises(ValueError):
             TestRouterMissingName(self.config, self.core)
 
-    def test_default_router_missing_path(self):
-        router = TestRouterMissingPath(self.config, self.core)
-
-        with self.assertRaises(ValueError):
-            router.get_request_handlers()
-
-    def test_get_root_url(self):
+    def test_undefined_request_handlers_raises_error(self):
         router = TestRouter(self.config, self.core)
 
-        self.assertEqual('http://127.0.0.1:6680/test/', router.get_root_url())
+        with self.assertRaises(NotImplementedError):
+            router.get_request_handlers()
