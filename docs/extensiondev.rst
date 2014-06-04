@@ -413,6 +413,14 @@ more details.
            return 0
 
 
+Example web application
+=======================
+
+As of Mopidy 0.19, extensions can use Mopidy's builtin web server to host
+static web clients as well as Tornado and WSGI web applications. For several
+examples, see the :ref:`http-server` docs.
+
+
 Example GStreamer element
 =========================
 
