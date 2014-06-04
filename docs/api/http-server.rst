@@ -187,10 +187,3 @@ http://localhost:6680/mywebclient/.
             })
 
         # See the Extension API for the full details on this class
-
-
-HTTP Router API
-===============
-
-.. autoclass:: mopidy.http.Router
-    :members:
