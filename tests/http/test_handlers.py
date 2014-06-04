@@ -21,6 +21,7 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
     def test_static_handler(self):
         response = self.fetch('/test_router.py', method='GET')
 
+        self.assertEqual(200, response.code)
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(
@@ -29,6 +30,7 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
     def test_static_default_filename(self):
         response = self.fetch('/', method='GET')
 
+        self.assertEqual(200, response.code)
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(

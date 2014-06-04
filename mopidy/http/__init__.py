@@ -38,6 +38,7 @@ class Extension(ext.Extension):
         from .handlers import MopidyHttpRouter
 
         HttpFrontend.routers = registry['http:router']
+        HttpFrontend.statics = registry['http:static']
 
         registry.add('frontend', HttpFrontend)
         registry.add('http:router', MopidyHttpRouter)

@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
     routers = []
+    statics = []
 
     def __init__(self, config, core):
         super(HttpFrontend, self).__init__()
@@ -63,7 +64,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def _get_request_handlers(self):
         request_handlers = []
 
-        request_handlers.extend(self._get_extension_request_handlers())
+        request_handlers.extend(self._get_router_request_handlers())
+        request_handlers.extend(self._get_static_request_handlers())
 
         # Either default Mopidy or user defined path to files
         static_dir = self.config['http']['static_dir']
@@ -79,7 +81,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             list((l[0], l[1]) for l in request_handlers))
         return request_handlers
 
-    def _get_extension_request_handlers(self):
+    def _get_router_request_handlers(self):
         result = []
         for router_class in self.routers:
             router = router_class(self.config, self.core)
@@ -88,7 +90,21 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 handler = list(handler)
                 handler[0] = '/%s%s' % (router.name, handler[0])
                 result.append(tuple(handler))
-            logger.info('Loaded HTTP extension: %s', router_class.__name__)
+            logger.debug('Loaded HTTP extension: %s', router.name)
+        return result
+
+    def _get_static_request_handlers(self):
+        result = []
+        for static in self.statics:
+            result.append((
+                r'/%s/(.*)' % static['name'],
+                handlers.StaticFileHandler,
+                {
+                    'path': static['path'],
+                    'default_filename': 'index.html'
+                }
+            ))
+            logger.debug('Loaded HTTP extension: %s', static['name'])
         return result
 
     def _publish_zeroconf(self):

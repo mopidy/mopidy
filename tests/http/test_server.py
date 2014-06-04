@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import os
+
 import mock
 
 import tornado.testing
@@ -115,6 +117,35 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         self.assertIn('X-Mopidy-Version', response.headers)
         self.assertIn('Cache-Control', response.headers)
         self.assertIn('Content-Type', response.headers)
+
+
+class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
+    def get_app(self):
+        config = {
+            'http': {
+                'hostname': '127.0.0.1',
+                'port': 6680,
+                'static_dir': None,
+                'zeroconf': '',
+            }
+        }
+        core = mock.Mock()
+
+        http_frontend = actor.HttpFrontend(config=config, core=core)
+        http_frontend.statics = [
+            dict(name='static', path=os.path.dirname(__file__)),
+        ]
+
+        return tornado.web.Application(http_frontend._get_request_handlers())
+
+    def test_can_serve_static_files(self):
+        response = self.fetch('/static/test_server.py', method='GET')
+
+        self.assertEqual(200, response.code)
+        self.assertEqual(
+            response.headers['X-Mopidy-Version'], mopidy.__version__)
+        self.assertEqual(
+            response.headers['Cache-Control'], 'no-cache')
 
 
 class WsgiAppRouter(http.Router):

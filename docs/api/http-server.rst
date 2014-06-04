@@ -12,11 +12,14 @@ The HTTP server side API can be used to:
 
 - host static files for e.g. a Mopidy client written in pure JavaScript,
 - host a `Tornado <http://www.tornadoweb.org/>`__ application, or
-- host a WSGI application.
+- host a WSGI application, including e.g. Flask applications.
 
-To extend the web server, an extension needs to create a subclass of
-:class:`mopidy.http.Router` and register the subclass with the extension
-registry under the ``http:router`` key.
+To host static files using the web server, an extension needs to register a
+name and a file path in the extension registry under the ``http:static`` key.
+
+To extend the web server with a web application, an extension must create a
+subclass of :class:`mopidy.http.Router` and register the subclass with the
+extension registry under the ``http:router`` key.
 
 For details on how to make a Mopidy extension, see the :ref:`extensiondev`
 guide.
@@ -25,14 +28,12 @@ guide.
 Static web client example
 =========================
 
-To serve static files, you just need to declare a
-:attr:`~mopidy.http.Router.name` for your router and tell where the static
-files are located by setting the :attr:`~mopidy.http.Router.static_file_path`
-attribute on your router class.
-
-The :attr:`~mopidy.http.Router.name` attribute is used to build the URL to
-make the files available on. By convention, it should be identical with the
-extension's :attr:`~mopidy.ext.Extension.ext_name`, like in the examples here.
+To serve static files, you just need to register an ``http:static`` dictionary
+in the extension registry. The dictionary must have two keys: ``name`` and
+``path``. The ``name`` is used to build the URL the static files will be
+served on.  By convention, it should be identical with the extension's
+:attr:`~mopidy.ext.Extension.ext_name`, like in the following example. The
+``path`` tells Mopidy where on the disk the static files are located.
 
 Assuming that the code below is located in the file
 :file:`mywebclient/__init__.py`, the files in the directory
@@ -46,19 +47,17 @@ available at http://localhost:6680/mywebclient/foo.html.
 
     import os
 
-    from mopidy import ext, http
-
-
-    class MyStaticFilesRouter(http.Router):
-        name = 'mywebclient'
-        static_file_path = os.path.join(os.path.dirname(__file__), 'static')
+    from mopidy import ext
 
 
     class MyWebClientExtension(ext.Extension):
         ext_name = 'mywebclient'
 
         def setup(self, registry):
-            registry.add('http:router', MyStaticFilesRouter)
+            registry.add('http:static', {
+                'name': 'mywebclient',
+                'path': os.path.join(os.path.dirname(__file__), 'static'),
+            })
 
         # See the Extension API for the full details on this class
 
@@ -72,16 +71,18 @@ for Tornado request handlers.
 
 In the following example, we create a :class:`tornado.web.RequestHandler`
 called :class:`MyRequestHandler` that responds to HTTP GET requests with the
-string ``Hello, world! This is Mopidy $version``. The router registers this
-Tornado request handler on the root URL, ``/``. The URLs returned from
+string ``Hello, world! This is Mopidy $version``.
+
+Then a :class:`~mopidy.http.Router` subclass registers this Tornado request
+handler on the root URL, ``/``. The URLs returned from
 :meth:`~mopidy.http.Router.get_request_handlers` are combined with the
 :attr:`~mopidy.http.Router.name`` attribute of the router, so the full absolute
 URL for the request handler becomes ``/mywebclient/``.
 
 The router is added to the extension registry by
-:meth:`MyWebClientExtension.setup`. When the extension is installed, Mopidy
-will respond to requests to http://localhost:6680/mywebclient/ with the string
-``Hello, world!``.
+:meth:`MyWebClientExtension.setup` under the key ``http:router``. When the
+extension is installed, Mopidy will respond to requests to
+http://localhost:6680/mywebclient/ with the string ``Hello, world!``.
 
 ::
 
