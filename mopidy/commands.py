@@ -100,7 +100,7 @@ class Command(object):
         self._children[name] = command
 
     def add_argument(self, *args, **kwargs):
-        """Add am argument to the parser.
+        """Add an argument to the parser.
 
         This method takes all the same arguments as the
         :class:`argparse.ArgumentParser` version of this method.
