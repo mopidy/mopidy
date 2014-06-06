@@ -272,13 +272,21 @@ server simultaneously. To use the SHOUTcast output, do the following:
 
 #. You might also need to change the ``shout2send`` default settings, run
    ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
-   you want to change ``ip``, ``username``, ``password``, and ``mount``. For
-   example:
+   you want to change ``ip``, ``username``, ``password``, and ``mount``.
+   
+   Example for mp3:
 
    .. code-block:: ini
 
        [audio]
-       output = lame ! shout2send username="alice" password="secret" mount="mopidy"
+       output = lame ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
+
+   Example for vorbis:
+   
+   .. code-block:: ini
+
+       [audio]
+       output = audioresample ! audioconvert ! vorbisenc ! oggmux ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
 
 Other advanced setups are also possible for outputs. Basically, anything you
 can use with the ``gst-launch-0.10`` command can be plugged into
