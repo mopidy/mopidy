@@ -47,13 +47,9 @@ See the [Mopidy.js documentation](http://docs.mopidy.com/en/latest/api/js/).
 Building from source
 --------------------
 
-1. Install [Node.js](http://nodejs.org/) and npm. There is a PPA if you're
-   running Ubuntu:
+1. Install [Node.js](http://nodejs.org/) and npm. If you're running Ubuntu:
 
-        sudo apt-get install python-software-properties
-        sudo add-apt-repository ppa:chris-lea/node.js
-        sudo apt-get update
-        sudo apt-get install nodejs
+        sudo apt-get install nodejs-legacy npm
 
 2. Enter the `js/` in Mopidy's Git repo dir and install all dependencies:
 
