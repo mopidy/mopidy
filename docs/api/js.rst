@@ -74,7 +74,7 @@ development setup in the ``js/`` dir in our repo. The instructions in
 Creating an instance
 ====================
 
-Once you got Mopidy.js loaded, you need to create an instance of the wrapper:
+Once you have Mopidy.js loaded, you need to create an instance of the wrapper:
 
 .. code-block:: js
 
@@ -99,6 +99,31 @@ later:
     var mopidy = new Mopidy({autoConnect: false});
     // ... do other stuff, like hooking up events ...
     mopidy.connect();
+
+When creating an instance, you can specify the following settings:
+
+``autoConnect``
+    Whether or not to connect to the WebSocket on instance creation. Defaults
+    to true.
+
+``backoffDelayMin``
+    The minimum number of milliseconds to wait after a connection error before
+    we try to reconnect. For every failed attempt, the backoff delay is doubled
+    until it reaches ``backoffDelayMax``. Defaults to 1000.
+
+``backoffDelayMax``
+    The maximum number of milliseconds to wait after a connection error before
+    we try to reconnect. Defaults to 64000.
+
+``webSocket``
+    An existing WebSocket object to be used instead of creating a new
+    WebSocket. Defaults to undefined.
+
+``webSocketUrl``
+    URL used when creating new WebSocket objects. Defaults to
+    ``ws://<document.location.host>/mopidy/ws``, or
+    ``ws://localhost/mopidy/ws`` if ``document.location.host`` isn't
+    available, like it is in the browser environment.
 
 
 Hooking up to events
