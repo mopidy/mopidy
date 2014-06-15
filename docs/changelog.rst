@@ -78,6 +78,13 @@ Feature release.
   Mopidy's HTTP server among other Zeroconf-published HTTP servers on the
   local network.
 
+- Update Mopidy.js to use when.js 3. If you maintain a Mopidy client, you
+  should review the `differences between when.js 2 and 3
+  <https://github.com/cujojs/when/blob/master/docs/api.md#upgrading-to-30-from-2x>`_
+  and the `when.js debugging guide
+  <https://github.com/cujojs/when/blob/master/docs/api.md#debugging-promises>`_.
+  This version has been released to npm as Mopidy.js v0.3.0.
+
 **MPD frontend**
 
 - Proper command tokenization for MPD requests. This replaces the old regex
