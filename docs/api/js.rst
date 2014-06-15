@@ -170,7 +170,8 @@ Once your Mopidy.js object has connected to the Mopidy server and emits the
 
 Any calls you make before the ``state:online`` event is emitted will fail. If
 you've hooked up an errback (more on that a bit later) to the promise returned
-from the call, the errback will be called with an error message.
+from the call, the errback will be called with a ``Mopidy.ConnectionError``
+instance.
 
 All methods in Mopidy's :ref:`core-api` is available via Mopidy.js. The core
 API attributes is *not* available, but that shouldn't be a problem as we've
@@ -229,22 +230,34 @@ Instead, typical usage will look like this:
         }
     };
 
-    mopidy.playback.getCurrentTrack().then(
-        printCurrentTrack, console.error.bind(console));
+    mopidy.playback.getCurrentTrack()
+        .done(printCurrentTrack);
 
-The first function passed to ``then()``, ``printCurrentTrack``, is the callback
-that will be called if the method call succeeds. The second function,
-``console.error``, is the errback that will be called if anything goes wrong.
-If you don't hook up an errback, debugging will be hard as errors will silently
-go missing.
+The function passed to ``done()``, ``printCurrentTrack``, is the callback
+that will be called if the method call succeeds. If anything goes wrong,
+``done()`` will throw an exception.
 
-For debugging, you may be interested in errors from function without
-interesting return values as well. In that case, you can pass ``null`` as the
-callback:
+If you want to explicitly handle any errors and avoid an exception being
+thrown, you can register an error handler function anywhere in a promise
+chain. The function will be called with the error object as the only argument:
 
 .. code-block:: js
 
-    mopidy.playback.next().then(null, console.error.bind(console));
+    mopidy.playback.getCurrentTrack()
+        .catch(console.error.bind(console));
+        .done(printCurrentTrack);
+
+You can also register the error handler at the end of the promise chain by
+passing it as the second argument to ``done()``:
+
+.. code-block:: js
+
+    mopidy.playback.getCurrentTrack()
+        .done(printCurrentTrack, console.error.bind(console));
+
+If you don't hook up an error handler function and never call ``done()`` on the
+promise object, when.js will log warnings to the console that you have
+unhandled errors. In general, unhandled errors will not go silently missing.
 
 The promise objects returned by Mopidy.js adheres to the `CommonJS Promises/A
 <http://wiki.commonjs.org/wiki/Promises/A>`_ standard. We use the
@@ -308,44 +321,38 @@ Example to get started with
 
    .. code-block:: js
 
-        var consoleError = console.error.bind(console);
-
         var trackDesc = function (track) {
             return track.name + " by " + track.artists[0].name +
                 " from " + track.album.name;
         };
 
-        var queueAndPlayFirstPlaylist = function () {
-            mopidy.playlists.getPlaylists().then(function (playlists) {
-                var playlist = playlists[0];
+        var queueAndPlay = function (playlistNum, trackNum) {
+            playlistNum = playlistNum || 0;
+            trackNum = trackNum || 0;
+            mopidy.playlists.getPlaylists().done(function (playlists) {
+                var playlist = playlists[playlistNum];
                 console.log("Loading playlist:", playlist.name);
-                mopidy.tracklist.add(playlist.tracks).then(function (tlTracks) {
-                    mopidy.playback.play(tlTracks[0]).then(function () {
-                        mopidy.playback.getCurrentTrack().then(function (track) {
+                mopidy.tracklist.add(playlist.tracks).done(function (tlTracks) {
+                    mopidy.playback.play(tlTracks[trackNum]).done(function () {
+                        mopidy.playback.getCurrentTrack().done(function (track) {
                             console.log("Now playing:", trackDesc(track));
-                        }, consoleError);
-                    }, consoleError);
-                }, consoleError);
-            }, consoleError);
+                        });
+                    });
+                });
+            });
         };
 
         var mopidy = new Mopidy();             // Connect to server
         mopidy.on(console.log.bind(console));  // Log all events
-        mopidy.on("state:online", queueAndPlayFirstPlaylist);
+        mopidy.on("state:online", queueAndPlay);
 
    Approximately the same behavior in a more functional style, using chaining
-   of promisies.
+   of promises.
 
    .. code-block:: js
 
-        var consoleError = console.error.bind(console);
-
-        var getFirst = function (list) {
-            return list[0];
-        };
-
-        var extractTracks = function (playlist) {
-            return playlist.tracks;
+        var get = function (key, object) {
+            return object[key];
         };
 
         var printTypeAndName = function (model) {
@@ -364,33 +371,36 @@ Example to get started with
             // By returning any arguments we get, the function can be inserted
             // anywhere in the chain.
             var args = arguments;
-            return mopidy.playback.getCurrentTrack().then(function (track) {
-                console.log("Now playing:", trackDesc(track));
-                return args;
-            });
+            return mopidy.playback.getCurrentTrack()
+                .done(function (track) {
+                    console.log("Now playing:", trackDesc(track));
+                    return args;
+                });
         };
 
-        var queueAndPlayFirstPlaylist = function () {
+        var queueAndPlay = function (playlistNum, trackNum) {
+            playlistNum = playlistNum || 0;
+            trackNum = trackNum || 0;
             mopidy.playlists.getPlaylists()
                 // => list of Playlists
-                .then(getFirst, consoleError)
+                .fold(get, playlistNum)
                 // => Playlist
-                .then(printTypeAndName, consoleError)
+                .then(printTypeAndName)
                 // => Playlist
-                .then(extractTracks, consoleError)
+                .fold(get, 'tracks')
                 // => list of Tracks
-                .then(mopidy.tracklist.add, consoleError)
+                .then(mopidy.tracklist.add)
                 // => list of TlTracks
-                .then(getFirst, consoleError)
+                .fold(get, trackNum)
                 // => TlTrack
-                .then(mopidy.playback.play, consoleError)
+                .then(mopidy.playback.play)
                 // => null
-                .then(printNowPlaying, consoleError);
+                .done(printNowPlaying, console.error.bind(console));
         };
 
         var mopidy = new Mopidy();             // Connect to server
         mopidy.on(console.log.bind(console));  // Log all events
-        mopidy.on("state:online", queueAndPlayFirstPlaylist);
+        mopidy.on("state:online", queueAndPlay);
 
 9. The web page should now queue and play your first playlist every time your
    load it. See the browser's console for output from the function, any errors,
