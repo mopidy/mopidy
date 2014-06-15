@@ -175,6 +175,7 @@ buster.testCase("Mopidy", {
                 }),
                 done(function (error) {
                     assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ConnectionError);
                     assert.equals(error.message, "WebSocket closed");
                     assert.same(error.closeEvent, closeEvent);
                 })
@@ -398,6 +399,7 @@ buster.testCase("Mopidy", {
                 }),
                 done(function (error) {
                     assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ConnectionError);
                     assert.equals(
                         error.message, "WebSocket is still connecting");
                 })
@@ -416,6 +418,7 @@ buster.testCase("Mopidy", {
                 }),
                 done(function (error) {
                     assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ConnectionError);
                     assert.equals(error.message, "WebSocket is closing");
                 })
             );
@@ -433,6 +436,7 @@ buster.testCase("Mopidy", {
                 }),
                 done(function (error) {
                     assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ConnectionError);
                     assert.equals(error.message, "WebSocket is closed");
                 })
             );
@@ -610,6 +614,7 @@ buster.testCase("Mopidy", {
                 }),
                 done(function (error) {
                     assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ServerError);
                     assert.equals(error.code, responseError.code);
                     assert.equals(error.message, responseError.message);
                     refute.defined(error.data);

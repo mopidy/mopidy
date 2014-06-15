@@ -24,6 +24,20 @@ function Mopidy(settings) {
     }
 }
 
+Mopidy.ConnectionError = function (message) {
+    this.name = "ConnectionError";
+    this.message = message;
+};
+Mopidy.ConnectionError.prototype = new Error();
+Mopidy.ConnectionError.prototype.constructor = Mopidy.ConnectionError;
+
+Mopidy.ServerError = function (message) {
+    this.name = "ServerError";
+    this.message = message;
+};
+Mopidy.ServerError.prototype = new Error();
+Mopidy.ServerError.prototype.constructor = Mopidy.ServerError;
+
 Mopidy.WebSocket = websocket.Client;
 
 Mopidy.prototype._configure = function (settings) {
@@ -102,7 +116,7 @@ Mopidy.prototype._cleanup = function (closeEvent) {
     Object.keys(this._pendingRequests).forEach(function (requestId) {
         var resolver = this._pendingRequests[requestId];
         delete this._pendingRequests[requestId];
-        var error = new Error("WebSocket closed");
+        var error = new Mopidy.ConnectionError("WebSocket closed");
         error.closeEvent = closeEvent;
         resolver.reject(error);
     }.bind(this));
@@ -142,11 +156,14 @@ Mopidy.prototype._handleWebSocketError = function (error) {
 Mopidy.prototype._send = function (message) {
     switch (this._webSocket.readyState) {
     case Mopidy.WebSocket.CONNECTING:
-        return when.reject(new Error("WebSocket is still connecting"));
+        return when.reject(
+            new Mopidy.ConnectionError("WebSocket is still connecting"));
     case Mopidy.WebSocket.CLOSING:
-        return when.reject(new Error("WebSocket is closing"));
+        return when.reject(
+            new Mopidy.ConnectionError("WebSocket is closing"));
     case Mopidy.WebSocket.CLOSED:
-        return when.reject(new Error("WebSocket is closed"));
+        return when.reject(
+            new Mopidy.ConnectionError("WebSocket is closed"));
     default:
         var deferred = when.defer();
         message.jsonrpc = "2.0";
@@ -203,7 +220,7 @@ Mopidy.prototype._handleResponse = function (responseMessage) {
     if (responseMessage.hasOwnProperty("result")) {
         resolver.resolve(responseMessage.result);
     } else if (responseMessage.hasOwnProperty("error")) {
-        error = new Error(responseMessage.error.message);
+        error = new Mopidy.ServerError(responseMessage.error.message);
         error.code = responseMessage.error.code;
         error.data = responseMessage.error.data;
         resolver.reject(error);
