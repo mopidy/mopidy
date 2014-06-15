@@ -141,33 +141,22 @@ Mopidy.prototype._handleWebSocketError = function (error) {
 };
 
 Mopidy.prototype._send = function (message) {
-    var deferred = when.defer();
-
     switch (this._webSocket.readyState) {
     case Mopidy.WebSocket.CONNECTING:
-        deferred.resolver.reject({
-            message: "WebSocket is still connecting"
-        });
-        break;
+        return when.reject({message: "WebSocket is still connecting"});
     case Mopidy.WebSocket.CLOSING:
-        deferred.resolver.reject({
-            message: "WebSocket is closing"
-        });
-        break;
+        return when.reject({message: "WebSocket is closing"});
     case Mopidy.WebSocket.CLOSED:
-        deferred.resolver.reject({
-            message: "WebSocket is closed"
-        });
-        break;
+        return when.reject({message: "WebSocket is closed"});
     default:
+        var deferred = when.defer();
         message.jsonrpc = "2.0";
         message.id = this._nextRequestId();
         this._pendingRequests[message.id] = deferred.resolver;
         this._webSocket.send(JSON.stringify(message));
         this.emit("websocket:outgoingMessage", message);
+        return deferred.promise;
     }
-
-    return deferred.promise;
 };
 
 Mopidy.prototype._nextRequestId = (function () {
