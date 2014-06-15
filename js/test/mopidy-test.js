@@ -169,12 +169,16 @@ buster.testCase("Mopidy", {
             this.mopidy._cleanup(closeEvent);
 
             assert.equals(Object.keys(this.mopidy._pendingRequests).length, 0);
-            when.join(promise1, promise2).then(done(function () {
-                assert(false, "Promises should be rejected");
-            }), done(function (error) {
-                assert.equals(error.message, "WebSocket closed");
-                assert.same(error.closeEvent, closeEvent);
-            }));
+            when.join(promise1, promise2).done(
+                done(function () {
+                    assert(false, "Promises should be rejected");
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(error.message, "WebSocket closed");
+                    assert.same(error.closeEvent, closeEvent);
+                })
+            );
         },
 
         "emits 'state:offline' event when done": function () {
@@ -388,12 +392,16 @@ buster.testCase("Mopidy", {
             var promise = this.mopidy._send({method: "foo"});
 
             refute.called(this.mopidy._webSocket.send);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(
-                    error.message, "WebSocket is still connecting");
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(
+                        error.message, "WebSocket is still connecting");
+                })
+            );
         },
 
         "immediately rejects request if CLOSING": function (done) {
@@ -402,12 +410,15 @@ buster.testCase("Mopidy", {
             var promise = this.mopidy._send({method: "foo"});
 
             refute.called(this.mopidy._webSocket.send);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(
-                    error.message, "WebSocket is closing");
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(error.message, "WebSocket is closing");
+                })
+            );
         },
 
         "immediately rejects request if CLOSED": function (done) {
@@ -416,12 +427,15 @@ buster.testCase("Mopidy", {
             var promise = this.mopidy._send({method: "foo"});
 
             refute.called(this.mopidy._webSocket.send);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(
-                    error.message, "WebSocket is closed");
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(error.message, "WebSocket is closed");
+                })
+            );
         }
     },
 
@@ -544,7 +558,11 @@ buster.testCase("Mopidy", {
         "rejects and logs requests which get errors back": function (done) {
             var stub = this.stub(this.mopidy._console, "warn");
             var promise = this.mopidy._send({method: "bar"});
-            var responseError = {message: "Error", data: {}};
+            var responseError = {
+                code: -32601,
+                message: "Method not found",
+                data: {}
+            };
             var responseMessage = {
                 jsonrpc: "2.0",
                 id: Object.keys(this.mopidy._pendingRequests)[0],
@@ -555,11 +573,48 @@ buster.testCase("Mopidy", {
 
             assert.calledOnceWith(stub,
                 "Server returned error:", responseError);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(error, responseError);
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(error.code, responseError.code);
+                    assert.equals(error.message, responseError.message);
+                    assert.equals(error.data, responseError.data);
+                })
+            );
+        },
+
+        "rejects and logs requests which get errors without data": function (done) {
+            var stub = this.stub(this.mopidy._console, "warn");
+            var promise = this.mopidy._send({method: "bar"});
+            var responseError = {
+                code: -32601,
+                message: "Method not found"
+                // 'data' key intentionally missing
+            };
+            var responseMessage = {
+                jsonrpc: "2.0",
+                id: Object.keys(this.mopidy._pendingRequests)[0],
+                error: responseError
+            };
+
+            this.mopidy._handleResponse(responseMessage);
+
+            assert.calledOnceWith(stub,
+                "Server returned error:", responseError);
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(error.code, responseError.code);
+                    assert.equals(error.message, responseError.message);
+                    refute.defined(error.data);
+                })
+            );
         },
 
         "rejects and logs responses without result or error": function (done) {
@@ -575,14 +630,18 @@ buster.testCase("Mopidy", {
             assert.calledOnceWith(stub,
                 "Response without 'result' or 'error' received. Message was:",
                 responseMessage);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(
-                    error.message,
-                    "Response without 'result' or 'error' received");
-                assert.equals(error.data.response, responseMessage);
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(
+                        error.message,
+                        "Response without 'result' or 'error' received");
+                    assert.equals(error.data.response, responseMessage);
+                })
+            );
         }
     },
 

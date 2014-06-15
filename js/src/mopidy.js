@@ -102,12 +102,9 @@ Mopidy.prototype._cleanup = function (closeEvent) {
     Object.keys(this._pendingRequests).forEach(function (requestId) {
         var resolver = this._pendingRequests[requestId];
         delete this._pendingRequests[requestId];
-        // TODO Mopidy.js 1.0 should reject with an Error object to produce
-        // usable stack traces
-        resolver.reject({
-            message: "WebSocket closed",
-            closeEvent: closeEvent
-        });
+        var error = new Error("WebSocket closed");
+        error.closeEvent = closeEvent;
+        resolver.reject(error);
     }.bind(this));
 
     this.emit("state:offline");
@@ -145,17 +142,11 @@ Mopidy.prototype._handleWebSocketError = function (error) {
 Mopidy.prototype._send = function (message) {
     switch (this._webSocket.readyState) {
     case Mopidy.WebSocket.CONNECTING:
-        // TODO Mopidy.js 1.0 should reject with an Error object to produce
-        // usable stack traces
-        return when.reject({message: "WebSocket is still connecting"});
+        return when.reject(new Error("WebSocket is still connecting"));
     case Mopidy.WebSocket.CLOSING:
-        // TODO Mopidy.js 1.0 should reject with an Error object to produce
-        // usable stack traces
-        return when.reject({message: "WebSocket is closing"});
+        return when.reject(new Error("WebSocket is closing"));
     case Mopidy.WebSocket.CLOSED:
-        // TODO Mopidy.js 1.0 should reject with an Error object to produce
-        // usable stack traces
-        return when.reject({message: "WebSocket is closed"});
+        return when.reject(new Error("WebSocket is closed"));
     default:
         var deferred = when.defer();
         message.jsonrpc = "2.0";
@@ -205,23 +196,22 @@ Mopidy.prototype._handleResponse = function (responseMessage) {
         return;
     }
 
+    var error;
     var resolver = this._pendingRequests[responseMessage.id];
     delete this._pendingRequests[responseMessage.id];
 
     if (responseMessage.hasOwnProperty("result")) {
         resolver.resolve(responseMessage.result);
     } else if (responseMessage.hasOwnProperty("error")) {
-        // TODO Mopidy.js 1.0 should reject with an Error object to produce
-        // usable stack traces
-        resolver.reject(responseMessage.error);
+        error = new Error(responseMessage.error.message);
+        error.code = responseMessage.error.code;
+        error.data = responseMessage.error.data;
+        resolver.reject(error);
         this._console.warn("Server returned error:", responseMessage.error);
     } else {
-        // TODO Mopidy.js 1.0 should reject with an Error object to produce
-        // usable stack traces
-        resolver.reject({
-            message: "Response without 'result' or 'error' received",
-            data: {response: responseMessage}
-        });
+        error = new Error("Response without 'result' or 'error' received");
+        error.data = {response: responseMessage};
+        resolver.reject(error);
         this._console.warn(
             "Response without 'result' or 'error' received. Message was:",
             responseMessage);

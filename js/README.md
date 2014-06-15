@@ -88,6 +88,10 @@ Changelog
   and the
   [when.js debugging guide](https://github.com/cujojs/when/blob/master/docs/api.md#debugging-promises).
 
+- All promise rejection values are now of the Error type. This ensures that all
+  JavaScript VMs will show a useful stack trace if a rejected promise's value
+  is used to throw an exception.
+
 ### 0.2.0 (2014-01-04)
 
 - **Backwards incompatible change for Node.js users:**
