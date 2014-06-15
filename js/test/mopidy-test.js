@@ -169,15 +169,16 @@ buster.testCase("Mopidy", {
             this.mopidy._cleanup(closeEvent);
 
             assert.equals(Object.keys(this.mopidy._pendingRequests).length, 0);
-            when.join(promise1, promise2).done(
-                done(function () {
-                    assert(false, "Promises should be rejected");
-                }),
-                done(function (error) {
-                    assert(error instanceof Error);
-                    assert(error instanceof Mopidy.ConnectionError);
-                    assert.equals(error.message, "WebSocket closed");
-                    assert.same(error.closeEvent, closeEvent);
+            when.settle([promise1, promise2]).done(
+                done(function (descriptors) {
+                    assert.equals(descriptors.length, 2);
+                    descriptors.forEach(function (d) {
+                        assert.equals(d.state, "rejected");
+                        assert(d.reason instanceof Error);
+                        assert(d.reason instanceof Mopidy.ConnectionError);
+                        assert.equals(d.reason.message, "WebSocket closed");
+                        assert.same(d.reason.closeEvent, closeEvent);
+                    });
                 })
             );
         },
