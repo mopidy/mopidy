@@ -44,7 +44,7 @@ Mopidy.prototype._configure = function (settings) {
     var currentHost = (typeof document !== "undefined" &&
         document.location.host) || "localhost";
     settings.webSocketUrl = settings.webSocketUrl ||
-        "ws://" + currentHost + "/mopidy/ws/";
+        "ws://" + currentHost + "/mopidy/ws";
 
     if (settings.autoConnect !== false) {
         settings.autoConnect = true;

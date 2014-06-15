@@ -48,7 +48,7 @@ buster.testCase("Mopidy", {
                 document.location.host || "localhost";
 
             assert.calledOnceWith(this.webSocketConstructorStub,
-                "ws://" + currentHost + "/mopidy/ws/");
+                "ws://" + currentHost + "/mopidy/ws");
         },
 
         "does not connect when autoConnect is false": function () {
@@ -84,7 +84,7 @@ buster.testCase("Mopidy", {
                 document.location.host || "localhost";
 
             assert.calledOnceWith(this.webSocketConstructorStub,
-                "ws://" + currentHost + "/mopidy/ws/");
+                "ws://" + currentHost + "/mopidy/ws");
         },
 
         "does nothing when the WebSocket is open": function () {
