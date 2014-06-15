@@ -102,6 +102,8 @@ Mopidy.prototype._cleanup = function (closeEvent) {
     Object.keys(this._pendingRequests).forEach(function (requestId) {
         var resolver = this._pendingRequests[requestId];
         delete this._pendingRequests[requestId];
+        // TODO Mopidy.js 1.0 should reject with an Error object to produce
+        // usable stack traces
         resolver.reject({
             message: "WebSocket closed",
             closeEvent: closeEvent
@@ -143,10 +145,16 @@ Mopidy.prototype._handleWebSocketError = function (error) {
 Mopidy.prototype._send = function (message) {
     switch (this._webSocket.readyState) {
     case Mopidy.WebSocket.CONNECTING:
+        // TODO Mopidy.js 1.0 should reject with an Error object to produce
+        // usable stack traces
         return when.reject({message: "WebSocket is still connecting"});
     case Mopidy.WebSocket.CLOSING:
+        // TODO Mopidy.js 1.0 should reject with an Error object to produce
+        // usable stack traces
         return when.reject({message: "WebSocket is closing"});
     case Mopidy.WebSocket.CLOSED:
+        // TODO Mopidy.js 1.0 should reject with an Error object to produce
+        // usable stack traces
         return when.reject({message: "WebSocket is closed"});
     default:
         var deferred = when.defer();
@@ -203,9 +211,13 @@ Mopidy.prototype._handleResponse = function (responseMessage) {
     if (responseMessage.hasOwnProperty("result")) {
         resolver.resolve(responseMessage.result);
     } else if (responseMessage.hasOwnProperty("error")) {
+        // TODO Mopidy.js 1.0 should reject with an Error object to produce
+        // usable stack traces
         resolver.reject(responseMessage.error);
         this._console.warn("Server returned error:", responseMessage.error);
     } else {
+        // TODO Mopidy.js 1.0 should reject with an Error object to produce
+        // usable stack traces
         resolver.reject({
             message: "Response without 'result' or 'error' received",
             data: {response: responseMessage}
