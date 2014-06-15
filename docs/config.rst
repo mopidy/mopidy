@@ -274,14 +274,14 @@ server simultaneously. To use the SHOUTcast output, do the following:
    ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
    you want to change ``ip``, ``username``, ``password``, and ``mount``.
    
-   Example for mp3:
+   Example for MP3 streaming:
 
    .. code-block:: ini
 
        [audio]
        output = lame ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
 
-   Example for vorbis:
+   Example for Ogg Vorbis streaming:
    
    .. code-block:: ini
 
