@@ -402,6 +402,6 @@ Example to get started with
         mopidy.on(console.log.bind(console));  // Log all events
         mopidy.on("state:online", queueAndPlay);
 
-9. The web page should now queue and play your first playlist every time your
+9. The web page should now queue and play your first playlist every time you
    load it. See the browser's console for output from the function, any errors,
    and all events that are emitted.
