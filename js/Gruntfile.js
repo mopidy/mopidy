@@ -2,8 +2,9 @@
 module.exports = function (grunt) {
 
     grunt.initConfig({
+        pkg: grunt.file.readJSON("package.json"),
         meta: {
-            banner: "/*! Mopidy.js - built " +
+            banner: "/*! Mopidy.js v<%= pkg.version %> - built " +
                 "<%= grunt.template.today('yyyy-mm-dd') %>\n" +
                 " * http://www.mopidy.com/\n" +
                 " * Copyright (c) <%= grunt.template.today('yyyy') %> " +
