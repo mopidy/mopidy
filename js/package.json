@@ -2,17 +2,42 @@
   "name": "mopidy",
   "version": "0.3.0",
   "description": "Client lib for controlling a Mopidy music server over a WebSocket",
+  "keywords": [
+    "mopidy",
+    "music",
+    "client",
+    "websocket",
+    "json-rpc"
+  ],
   "homepage": "http://www.mopidy.com/",
+  "bugs": "https://github.com/mopidy/mopidy/issues",
+  "license": "Apache-2.0",
   "author": {
     "name": "Stein Magnus Jodal",
     "email": "stein.magnus@jodal.no",
     "url": "http://www.jodal.no"
   },
+  "contributors": [
+    {
+      "name": "Stein Magnus Jodal",
+      "email": "stein.magnus@jodal.no",
+      "url": "http://www.jodal.no"
+    },
+    {
+      "name": "Paul Connolley",
+      "email": "paul.connolley@gmail.com"
+    }
+  ],
+  "main": "src/mopidy.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/mopidy/mopidy.git"
   },
-  "main": "src/mopidy.js",
+  "scripts": {
+    "test": "grunt test",
+    "build": "grunt build",
+    "start": "grunt watch"
+  },
   "dependencies": {
     "bane": "~1.1.0",
     "faye-websocket": "~0.7.2",
@@ -29,9 +54,7 @@
     "grunt-contrib-watch": "~0.6.1",
     "phantomjs": "~1.9.7-8"
   },
-  "scripts": {
-    "test": "grunt test",
-    "build": "grunt build",
-    "start": "grunt watch"
+  "engines": {
+    "node": "*"
   }
 }
