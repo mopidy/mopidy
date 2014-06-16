@@ -26,7 +26,7 @@ module.exports = function (grunt) {
                 },
                 options: {
                     postBundleCB: function (err, src, next) {
-                        next(null, grunt.template.process("<%= meta.banner %>") + src);
+                        next(err, grunt.template.process("<%= meta.banner %>") + src);
                     },
                     standalone: "Mopidy"
                 }
@@ -45,7 +45,7 @@ module.exports = function (grunt) {
                 },
                 options: {
                     postBundleCB: function (err, src, next) {
-                        next(null, grunt.template.process("<%= meta.banner %>") + src);
+                        next(err, grunt.template.process("<%= meta.banner %>") + src);
                     },
                     standalone: "Mopidy"
                 }

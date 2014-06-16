@@ -78,6 +78,20 @@ Feature release.
   Mopidy's HTTP server among other Zeroconf-published HTTP servers on the
   local network.
 
+- Update Mopidy.js to use when.js 3. If you maintain a Mopidy client, you
+  should review the `differences between when.js 2 and 3
+  <https://github.com/cujojs/when/blob/master/docs/api.md#upgrading-to-30-from-2x>`_
+  and the `when.js debugging guide
+  <https://github.com/cujojs/when/blob/master/docs/api.md#debugging-promises>`_.
+  This version has been released to npm as Mopidy.js v0.3.0.
+
+- All of Mopidy.js' promise rejection values are now of the Error type. This
+  ensures that all JavaScript VMs will show a useful stack trace if a rejected
+  promise's value is used to throw an exception. To allow catch clauses to
+  handle different errors differently, server side errors are of the type
+  ``Mopidy.ServerError``, and connection related errors are of the type
+  ``Mopidy.ConnectionError``.
+
 **MPD frontend**
 
 - Proper command tokenization for MPD requests. This replaces the old regex

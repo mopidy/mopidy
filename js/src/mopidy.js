@@ -24,13 +24,27 @@ function Mopidy(settings) {
     }
 }
 
+Mopidy.ConnectionError = function (message) {
+    this.name = "ConnectionError";
+    this.message = message;
+};
+Mopidy.ConnectionError.prototype = new Error();
+Mopidy.ConnectionError.prototype.constructor = Mopidy.ConnectionError;
+
+Mopidy.ServerError = function (message) {
+    this.name = "ServerError";
+    this.message = message;
+};
+Mopidy.ServerError.prototype = new Error();
+Mopidy.ServerError.prototype.constructor = Mopidy.ServerError;
+
 Mopidy.WebSocket = websocket.Client;
 
 Mopidy.prototype._configure = function (settings) {
     var currentHost = (typeof document !== "undefined" &&
         document.location.host) || "localhost";
     settings.webSocketUrl = settings.webSocketUrl ||
-        "ws://" + currentHost + "/mopidy/ws/";
+        "ws://" + currentHost + "/mopidy/ws";
 
     if (settings.autoConnect !== false) {
         settings.autoConnect = true;
@@ -102,10 +116,9 @@ Mopidy.prototype._cleanup = function (closeEvent) {
     Object.keys(this._pendingRequests).forEach(function (requestId) {
         var resolver = this._pendingRequests[requestId];
         delete this._pendingRequests[requestId];
-        resolver.reject({
-            message: "WebSocket closed",
-            closeEvent: closeEvent
-        });
+        var error = new Mopidy.ConnectionError("WebSocket closed");
+        error.closeEvent = closeEvent;
+        resolver.reject(error);
     }.bind(this));
 
     this.emit("state:offline");
@@ -141,33 +154,25 @@ Mopidy.prototype._handleWebSocketError = function (error) {
 };
 
 Mopidy.prototype._send = function (message) {
-    var deferred = when.defer();
-
     switch (this._webSocket.readyState) {
     case Mopidy.WebSocket.CONNECTING:
-        deferred.resolver.reject({
-            message: "WebSocket is still connecting"
-        });
-        break;
+        return when.reject(
+            new Mopidy.ConnectionError("WebSocket is still connecting"));
     case Mopidy.WebSocket.CLOSING:
-        deferred.resolver.reject({
-            message: "WebSocket is closing"
-        });
-        break;
+        return when.reject(
+            new Mopidy.ConnectionError("WebSocket is closing"));
     case Mopidy.WebSocket.CLOSED:
-        deferred.resolver.reject({
-            message: "WebSocket is closed"
-        });
-        break;
+        return when.reject(
+            new Mopidy.ConnectionError("WebSocket is closed"));
     default:
+        var deferred = when.defer();
         message.jsonrpc = "2.0";
         message.id = this._nextRequestId();
         this._pendingRequests[message.id] = deferred.resolver;
         this._webSocket.send(JSON.stringify(message));
         this.emit("websocket:outgoingMessage", message);
+        return deferred.promise;
     }
-
-    return deferred.promise;
 };
 
 Mopidy.prototype._nextRequestId = (function () {
@@ -208,19 +213,22 @@ Mopidy.prototype._handleResponse = function (responseMessage) {
         return;
     }
 
+    var error;
     var resolver = this._pendingRequests[responseMessage.id];
     delete this._pendingRequests[responseMessage.id];
 
     if (responseMessage.hasOwnProperty("result")) {
         resolver.resolve(responseMessage.result);
     } else if (responseMessage.hasOwnProperty("error")) {
-        resolver.reject(responseMessage.error);
+        error = new Mopidy.ServerError(responseMessage.error.message);
+        error.code = responseMessage.error.code;
+        error.data = responseMessage.error.data;
+        resolver.reject(error);
         this._console.warn("Server returned error:", responseMessage.error);
     } else {
-        resolver.reject({
-            message: "Response without 'result' or 'error' received",
-            data: {response: responseMessage}
-        });
+        error = new Error("Response without 'result' or 'error' received");
+        error.data = {response: responseMessage};
+        resolver.reject(error);
         this._console.warn(
             "Response without 'result' or 'error' received. Message was:",
             responseMessage);
