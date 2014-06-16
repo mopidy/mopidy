@@ -80,7 +80,7 @@ To run other [grunt](http://gruntjs.com/) targets which isn't predefined in
 Changelog
 ---------
 
-### 0.3.0 (UNRELEASED)
+### 0.3.0 (2014-06-16)
 
 - Upgrade to when.js 3, which brings great performance improvements and better
   debugging facilities. If you maintain a Mopidy client, you should review the
