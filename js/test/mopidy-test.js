@@ -764,6 +764,22 @@ buster.testCase("Mopidy", {
             this.mopidy._createApi({});
 
             assert.calledOnceWith(spy);
+        },
+
+        "creates methods that sends correct messages": function () {
+            var sendStub = this.stub(this.mopidy, "_send");
+            this.mopidy._createApi({
+                foo: {
+                    params: ["bar", "baz"]
+                }
+            });
+
+            this.mopidy.foo(31, 97);
+
+            assert.calledOnceWith(sendStub, {
+                method: "foo",
+                params: [31, 97]
+            });
         }
     }
 });
