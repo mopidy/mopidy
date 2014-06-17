@@ -53,6 +53,9 @@ Mopidy.prototype._configure = function (settings) {
     settings.backoffDelayMin = settings.backoffDelayMin || 1000;
     settings.backoffDelayMax = settings.backoffDelayMax || 64000;
 
+    settings.callingConvention = (
+        settings.callingConvention || "by-position-only");
+
     return settings;
 };
 

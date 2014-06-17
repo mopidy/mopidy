@@ -766,20 +766,29 @@ buster.testCase("Mopidy", {
             assert.calledOnceWith(spy);
         },
 
-        "creates methods that sends correct messages": function () {
-            var sendStub = this.stub(this.mopidy, "_send");
-            this.mopidy._createApi({
-                foo: {
-                    params: ["bar", "baz"]
-                }
-            });
+        "by-position calling convention": {
+            "is the default": function () {
+                assert.equals(
+                    this.mopidy._settings.callingConvention,
+                    "by-position-only");
+            },
 
-            this.mopidy.foo(31, 97);
+            "sends messages with function arguments unchanged": function () {
+                var sendStub = this.stub(this.mopidy, "_send");
+                this.mopidy._createApi({
+                    foo: {
+                        params: ["bar", "baz"]
+                    }
+                });
 
-            assert.calledOnceWith(sendStub, {
-                method: "foo",
-                params: [31, 97]
-            });
+                this.mopidy.foo(31, 97);
+
+                assert.calledOnceWith(sendStub, {
+                    method: "foo",
+                    params: [31, 97]
+                });
+            },
         }
+
     }
 });

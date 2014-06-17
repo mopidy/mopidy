@@ -115,6 +115,10 @@ When creating an instance, you can specify the following settings:
     The maximum number of milliseconds to wait after a connection error before
     we try to reconnect. Defaults to 64000.
 
+``callingConvention``
+    Which calling convention to use when calling methods. The default is
+    "by-position-only".
+
 ``webSocket``
     An existing WebSocket object to be used instead of creating a new
     WebSocket. Defaults to undefined.
