@@ -245,8 +245,8 @@ Mopidy.prototype._handleEvent = function (eventMessage) {
 
 Mopidy.prototype._getApiSpec = function () {
     return this._send({method: "core.describe"})
-        .then(this._createApi.bind(this), this._handleWebSocketError)
-        .then(null, this._handleWebSocketError);
+        .then(this._createApi.bind(this))
+        .catch(this._handleWebSocketError);
 };
 
 Mopidy.prototype._createApi = function (methods) {
