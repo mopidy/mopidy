@@ -255,11 +255,12 @@ Mopidy.prototype._getApiSpec = function () {
 Mopidy.prototype._createApi = function (methods) {
     var caller = function (method) {
         return function () {
-            var params = Array.prototype.slice.call(arguments);
-            return this._send({
-                method: method,
-                params: params
-            });
+            var message = {method: method};
+            if (arguments.length === 0) {
+                return this._send(message);
+            }
+            message.params = Array.prototype.slice.call(arguments);
+            return this._send(message);
         }.bind(this);
     }.bind(this);
 
