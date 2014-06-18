@@ -80,6 +80,11 @@ To run other [grunt](http://gruntjs.com/) targets which isn't predefined in
 Changelog
 ---------
 
+### 0.4.0 (UNRELEASED)
+
+- Add support for method calls with by-name arguments. The old calling
+  convention, by-position-only, is still the default. See the docs for details.
+
 ### 0.3.0 (2014-06-16)
 
 - Upgrade to when.js 3, which brings great performance improvements and better

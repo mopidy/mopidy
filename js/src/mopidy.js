@@ -253,13 +253,30 @@ Mopidy.prototype._getApiSpec = function () {
 };
 
 Mopidy.prototype._createApi = function (methods) {
+    var byPositionOrByName = (
+        this._settings.callingConvention === "by-position-or-by-name");
+
     var caller = function (method) {
         return function () {
             var message = {method: method};
             if (arguments.length === 0) {
                 return this._send(message);
             }
-            message.params = Array.prototype.slice.call(arguments);
+            if (!byPositionOrByName) {
+                message.params = Array.prototype.slice.call(arguments);
+                return this._send(message);
+            }
+            if (arguments.length > 1) {
+                return when.reject(new Error(
+                    "Expected zero arguments, a single array, " +
+                    "or a single object."));
+            }
+            if (!Array.isArray(arguments[0]) &&
+                arguments[0] !== Object(arguments[0])) {
+                return when.reject(new TypeError(
+                    "Expected an array or an object."));
+            }
+            message.params = arguments[0];
             return this._send(message);
         }.bind(this);
     }.bind(this);

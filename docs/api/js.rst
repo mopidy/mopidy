@@ -116,8 +116,20 @@ When creating an instance, you can specify the following settings:
     we try to reconnect. Defaults to 64000.
 
 ``callingConvention``
-    Which calling convention to use when calling methods. The default is
-    "by-position-only".
+    Which calling convention to use when calling methods.
+
+    If set to "by-position-only", methods expect to be called with positional
+    arguments, like ``mopidy.foo.bar(null, true, 2)``.
+
+    If set to "by-position-or-by-name", methods expect to be called either with
+    an array of position arguments, like ``mopidy.foo.bar([null, true, 2])``,
+    or with an object of named arguments, like ``mopidy.foo.bar({id: 2})``. The
+    advantage of the "by-position-or-by-name" calling convention is that
+    arguments with default values can be left out of the named argument object.
+    Using named arguments also makes the code more readable, and more resistent
+    to future API changes.
+
+    For backwards compatibility, the default is "by-position-only".
 
 ``webSocket``
     An existing WebSocket object to be used instead of creating a new
