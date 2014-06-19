@@ -92,6 +92,10 @@ Feature release.
   ``Mopidy.ServerError``, and connection related errors are of the type
   ``Mopidy.ConnectionError``.
 
+- Add support for method calls with by-name arguments. The old calling
+  convention, by-position-only, is still the default. See the :ref:`mopidy-js`
+  docs for details.
+
 **MPD frontend**
 
 - Proper command tokenization for MPD requests. This replaces the old regex

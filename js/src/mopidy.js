@@ -53,6 +53,9 @@ Mopidy.prototype._configure = function (settings) {
     settings.backoffDelayMin = settings.backoffDelayMin || 1000;
     settings.backoffDelayMax = settings.backoffDelayMax || 64000;
 
+    settings.callingConvention = (
+        settings.callingConvention || "by-position-only");
+
     return settings;
 };
 
@@ -250,13 +253,31 @@ Mopidy.prototype._getApiSpec = function () {
 };
 
 Mopidy.prototype._createApi = function (methods) {
+    var byPositionOrByName = (
+        this._settings.callingConvention === "by-position-or-by-name");
+
     var caller = function (method) {
         return function () {
-            var params = Array.prototype.slice.call(arguments);
-            return this._send({
-                method: method,
-                params: params
-            });
+            var message = {method: method};
+            if (arguments.length === 0) {
+                return this._send(message);
+            }
+            if (!byPositionOrByName) {
+                message.params = Array.prototype.slice.call(arguments);
+                return this._send(message);
+            }
+            if (arguments.length > 1) {
+                return when.reject(new Error(
+                    "Expected zero arguments, a single array, " +
+                    "or a single object."));
+            }
+            if (!Array.isArray(arguments[0]) &&
+                arguments[0] !== Object(arguments[0])) {
+                return when.reject(new TypeError(
+                    "Expected an array or an object."));
+            }
+            message.params = arguments[0];
+            return this._send(message);
         }.bind(this);
     }.bind(this);
 

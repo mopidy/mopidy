@@ -766,20 +766,137 @@ buster.testCase("Mopidy", {
             assert.calledOnceWith(spy);
         },
 
-        "creates methods that sends correct messages": function () {
-            var sendStub = this.stub(this.mopidy, "_send");
-            this.mopidy._createApi({
-                foo: {
-                    params: ["bar", "baz"]
-                }
-            });
+        "by-position calling convention": {
+            setUp: function () {
+                this.mopidy._createApi({
+                    foo: {
+                        params: ["bar", "baz"]
+                    }
+                });
+                this.sendStub = this.stub(this.mopidy, "_send");
 
-            this.mopidy.foo(31, 97);
+            },
 
-            assert.calledOnceWith(sendStub, {
-                method: "foo",
-                params: [31, 97]
-            });
+            "is the default": function () {
+                assert.equals(
+                    this.mopidy._settings.callingConvention,
+                    "by-position-only");
+            },
+
+            "sends no params if no arguments passed to function": function () {
+                this.mopidy.foo();
+
+                assert.calledOnceWith(this.sendStub, {method: "foo"});
+            },
+
+            "sends messages with function arguments unchanged": function () {
+                this.mopidy.foo(31, 97);
+
+                assert.calledOnceWith(this.sendStub, {
+                    method: "foo",
+                    params: [31, 97]
+                });
+            },
+        },
+
+        "by-position-or-by-name calling convention": {
+            setUp: function () {
+                this.mopidy = new Mopidy({
+                    webSocket: this.webSocket,
+                    callingConvention: "by-position-or-by-name"
+                });
+                this.mopidy._createApi({
+                    foo: {
+                        params: ["bar", "baz"]
+                    }
+                });
+                this.sendStub = this.stub(this.mopidy, "_send");
+            },
+
+            "must be turned on manually": function () {
+                assert.equals(
+                    this.mopidy._settings.callingConvention,
+                    "by-position-or-by-name");
+            },
+
+            "sends no params if no arguments passed to function": function () {
+                this.mopidy.foo();
+
+                assert.calledOnceWith(this.sendStub, {method: "foo"});
+            },
+
+            "sends by-position if argument is a list": function () {
+                this.mopidy.foo([31, 97]);
+
+                assert.calledOnceWith(this.sendStub, {
+                    method: "foo",
+                    params: [31, 97]
+                });
+            },
+
+            "sends by-name if argument is an object": function () {
+                this.mopidy.foo({bar: 31, baz: 97});
+
+                assert.calledOnceWith(this.sendStub, {
+                    method: "foo",
+                    params: {bar: 31, baz: 97}
+                });
+            },
+
+            "rejects with error if more than one argument": function (done) {
+                var promise = this.mopidy.foo([1, 2], {c: 3, d: 4});
+
+                refute.called(this.sendStub);
+
+                promise.done(
+                    done(function () {
+                        assert(false);
+                    }),
+                    done(function (error) {
+                        assert(error instanceof Error);
+                        assert.equals(
+                            error.message,
+                            "Expected zero arguments, a single array, " +
+                            "or a single object.");
+                    })
+                );
+            },
+
+            "rejects with error if string": function (done) {
+                var promise = this.mopidy.foo("hello");
+
+                refute.called(this.sendStub);
+
+                promise.done(
+                    done(function () {
+                        assert(false);
+                    }),
+                    done(function (error) {
+                        assert(error instanceof Error);
+                        assert(error instanceof TypeError);
+                        assert.equals(
+                            error.message, "Expected an array or an object.");
+                    })
+                );
+            },
+
+            "rejects with error if number": function (done) {
+                var promise = this.mopidy.foo(1337);
+
+                refute.called(this.sendStub);
+
+                promise.done(
+                    done(function () {
+                        assert(false);
+                    }),
+                    done(function (error) {
+                        assert(error instanceof Error);
+                        assert(error instanceof TypeError);
+                        assert.equals(
+                            error.message, "Expected an array or an object.");
+                    })
+                );
+            }
         }
     }
 });
