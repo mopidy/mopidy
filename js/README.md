@@ -83,7 +83,8 @@ Changelog
 ### 0.4.0 (UNRELEASED)
 
 - Add support for method calls with by-name arguments. The old calling
-  convention, by-position-only, is still the default. See the docs for details.
+  convention, "by-position-only", is still the default, but this will change in
+  the future. See the docs for details.
 
 ### 0.3.0 (2014-06-16)
 

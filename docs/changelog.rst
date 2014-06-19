@@ -78,6 +78,8 @@ Feature release.
   Mopidy's HTTP server among other Zeroconf-published HTTP servers on the
   local network.
 
+**Mopidy.js client library**
+
 - Update Mopidy.js to use when.js 3. If you maintain a Mopidy client, you
   should review the `differences between when.js 2 and 3
   <https://github.com/cujojs/when/blob/master/docs/api.md#upgrading-to-30-from-2x>`_
@@ -93,8 +95,8 @@ Feature release.
   ``Mopidy.ConnectionError``.
 
 - Add support for method calls with by-name arguments. The old calling
-  convention, by-position-only, is still the default. See the :ref:`mopidy-js`
-  docs for details.
+  convention, ``by-position-only``, is still the default, but this will
+  probably change in the future. See the :ref:`mopidy-js` docs for details.
 
 **MPD frontend**
 

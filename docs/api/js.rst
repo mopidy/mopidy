@@ -129,7 +129,14 @@ When creating an instance, you can specify the following settings:
     Using named arguments also makes the code more readable, and more resistent
     to future API changes.
 
-    For backwards compatibility, the default is "by-position-only".
+    .. note::
+
+        For backwards compatibility, the default is "by-position-only". In the
+        future, the default will change to "by-position-or-by-name". You should
+        explicitly set this setting to your choice, so you won't be affected
+        when the default changes.
+
+    .. versionadded:: 0.19 (Mopidy.js 0.4)
 
 ``webSocket``
     An existing WebSocket object to be used instead of creating a new
