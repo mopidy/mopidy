@@ -83,11 +83,11 @@ Additionally, extensions can provide extra commands. Run `mopidy --help`
 for a list of what is available on your system and command-specific help.
 Commands for disabled extensions will be listed, but can not be run.
 
-.. cmdoption:: local clear
+.. describe:: local clear
 
     Clear local media files from the local library.
 
-.. cmdoption:: local scan
+.. describe:: local scan
 
     Scan local media files present in your library.
 
