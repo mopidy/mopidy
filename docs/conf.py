@@ -142,7 +142,7 @@ latex_documents = [
 
 man_pages = [
     (
-        'commands/mopidy',
+        'command',
         'mopidy',
         'music server',
         '',

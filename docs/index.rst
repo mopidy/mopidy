@@ -97,7 +97,7 @@ Reference
     :maxdepth: 2
 
     glossary
-    commands/index
+    command
     api/index
     modules/index
 
