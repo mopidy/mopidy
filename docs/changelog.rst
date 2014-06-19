@@ -14,7 +14,7 @@ Feature release.
 
 - Mopidy now requires Tornado >= 3.1.
 
-- Mopidy no longer require CherryPy or ws4py for the HTTP frontend to work.
+- Mopidy no longer requires CherryPy or ws4py for the HTTP frontend to work.
 
 **Backend API**
 
@@ -26,7 +26,7 @@ Feature release.
 
 - The ``mopidy-convert-config`` tool for migrating the ``setings.py``
   configuration file used by Mopidy up until 0.14 to the new config file format
-  has been removed after almost a year of trusty service. If you still need to
+  has been removed after over a year of trusty service. If you still need to
   convert your old ``settings.py`` configuration file, do so using and older
   release, like Mopidy 0.18, or migrate the configuration to the new format by
   hand.
@@ -57,8 +57,9 @@ Feature release.
   cases, like when returning the computer running Mopidy from suspend
   (:issue:`718`).
 
-- Added support for installing web clients as Mopidy extensions. (Fixes:
-  :issue:`440`) (TODO: Link to relevant docs)
+- Added support for packaging web clients as Mopidy extensions and installing
+  them using pip. See the :ref:`http-server-api` for details. (Fixes:
+  :issue:`440`)
 
 - Added support for extending the HTTP frontend with additional server side
   functionality. See :ref:`http-server-api` for details.
