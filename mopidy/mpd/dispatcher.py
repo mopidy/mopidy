@@ -169,8 +169,6 @@ class MpdDispatcher(object):
             if exc.command is None:
                 exc.command = tokens[0]
             raise
-        except LookupError:
-            raise exceptions.MpdUnknownCommand(command=tokens[0])
 
     def _format_response(self, response):
         formatted_response = []
