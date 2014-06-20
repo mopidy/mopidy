@@ -9,8 +9,8 @@ function Mopidy(settings) {
         return new Mopidy(settings);
     }
 
+    this._console = this._getConsole(settings || {});
     this._settings = this._configure(settings || {});
-    this._console = this._getConsole();
 
     this._backoffDelay = this._settings.backoffDelayMin;
     this._pendingRequests = {};
@@ -40,6 +40,20 @@ Mopidy.ServerError.prototype.constructor = Mopidy.ServerError;
 
 Mopidy.WebSocket = websocket.Client;
 
+Mopidy.prototype._getConsole = function (settings) {
+    if (typeof settings.console !== "undefined") {
+        return settings.console;
+    }
+
+    var con = typeof console !== "undefined" && console || {};
+
+    con.log = con.log || function () {};
+    con.warn = con.warn || function () {};
+    con.error = con.error || function () {};
+
+    return con;
+};
+
 Mopidy.prototype._configure = function (settings) {
     var currentHost = (typeof document !== "undefined" &&
         document.location.host) || "localhost";
@@ -57,16 +71,6 @@ Mopidy.prototype._configure = function (settings) {
         settings.callingConvention || "by-position-only");
 
     return settings;
-};
-
-Mopidy.prototype._getConsole = function () {
-    var console = typeof console !== "undefined" && console || {};
-
-    console.log = console.log || function () {};
-    console.warn = console.warn || function () {};
-    console.error = console.error || function () {};
-
-    return console;
 };
 
 Mopidy.prototype._delegateEvents = function () {
