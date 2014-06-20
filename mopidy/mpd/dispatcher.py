@@ -295,7 +295,7 @@ class MpdContext(object):
 
         for part in path_parts:
             for ref in self.core.library.browse(uri).get():
-                if ((ref.type == ref.DIRECTORY or ref.type == ref.PLAYLIST) and
+                if (ref.type in (ref.DIRECTORY, ref.type == ref.PLAYLIST) and
                         ref.name == part):
                     uri = ref.uri
                     break
@@ -310,7 +310,7 @@ class MpdContext(object):
             base_path, future = path_and_futures.pop()
             for ref in future.get():
                 path = '/'.join([base_path, ref.name.replace('/', '')])
-                if ref.type == ref.DIRECTORY or ref.type == ref.PLAYLIST:
+                if ref.type in (ref.DIRECTORY, ref.PLAYLIST):
                     yield (path, None)
                     if recursive:
                         path_and_futures.append(
