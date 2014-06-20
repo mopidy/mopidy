@@ -18,11 +18,11 @@ except ImportError:
 # TODO: make detect_FOO_header reusable in general mopidy code.
 # i.e. give it just a "peek" like function.
 def detect_m3u_header(typefind):
-    return typefind.peek(0, 8).upper() == b'#EXTM3U\n'
+    return typefind.peek(0, 7).upper() == b'#EXTM3U'
 
 
 def detect_pls_header(typefind):
-    return typefind.peek(0, 11).lower() == b'[playlist]\n'
+    return typefind.peek(0, 10).lower() == b'[playlist]'
 
 
 def detect_xspf_header(typefind):
