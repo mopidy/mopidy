@@ -170,21 +170,13 @@ class AudioBufferingTest(unittest.TestCase):
         self.audio = audio.Audio(config=None)
         self.audio._playbin = mock.Mock(spec=['set_state'])
 
-        self.buffer_full_message = mock.Mock()
-        self.buffer_full_message.type = gst.MESSAGE_BUFFERING
-        self.buffer_full_message.parse_buffering = mock.Mock(return_value=100)
-
-        self.buffer_empty_message = mock.Mock()
-        self.buffer_empty_message.type = gst.MESSAGE_BUFFERING
-        self.buffer_empty_message.parse_buffering = mock.Mock(return_value=0)
-
     def test_pause_when_buffer_empty(self):
         playbin = self.audio._playbin
         self.audio.start_playback()
         playbin.set_state.assert_called_with(gst.STATE_PLAYING)
         playbin.set_state.reset_mock()
 
-        self.audio._on_message(None, self.buffer_empty_message)
+        self.audio._on_buffering(0)
         playbin.set_state.assert_called_with(gst.STATE_PAUSED)
 
     def test_stay_paused_when_buffering_finished(self):
@@ -193,5 +185,5 @@ class AudioBufferingTest(unittest.TestCase):
         playbin.set_state.assert_called_with(gst.STATE_PAUSED)
         playbin.set_state.reset_mock()
 
-        self.audio._on_message(None, self.buffer_full_message)
+        self.audio._on_buffering(100)
         self.assertEqual(playbin.set_state.call_count, 0)
