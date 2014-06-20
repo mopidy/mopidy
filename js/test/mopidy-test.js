@@ -33,7 +33,10 @@ buster.testCase("Mopidy", {
             close: this.stub(),
             send: this.stub()
         };
-        this.mopidy = new Mopidy({webSocket: this.webSocket});
+        this.mopidy = new Mopidy({
+            callingConvention: "by-position-or-by-name",
+            webSocket: this.webSocket
+        });
     },
 
     tearDown: function () {
@@ -42,7 +45,10 @@ buster.testCase("Mopidy", {
 
     "constructor": {
         "connects when autoConnect is true": function () {
-            new Mopidy({autoConnect: true});
+            new Mopidy({
+                autoConnect: true,
+                callingConvention: "by-position-or-by-name"
+            });
 
             var currentHost = typeof document !== "undefined" &&
                 document.location.host || "localhost";
@@ -52,21 +58,73 @@ buster.testCase("Mopidy", {
         },
 
         "does not connect when autoConnect is false": function () {
-            new Mopidy({autoConnect: false});
+            new Mopidy({
+                autoConnect: false,
+                callingConvention: "by-position-or-by-name"
+            });
 
             refute.called(this.webSocketConstructorStub);
         },
 
         "does not connect when passed a WebSocket": function () {
-            new Mopidy({webSocket: {}});
+            new Mopidy({
+                callingConvention: "by-position-or-by-name",
+                webSocket: {}
+            });
 
             refute.called(this.webSocketConstructorStub);
+        },
+
+        "defaults to by-position-only calling convention": function () {
+            var console = {
+                warn: function () {}
+            };
+            var mopidy = new Mopidy({
+                console: console,
+                webSocket: this.webSocket,
+            });
+
+            assert.equals(
+                mopidy._settings.callingConvention,
+                "by-position-only");
+        },
+
+        "warns if no calling convention explicitly selected": function () {
+            var console = {
+                warn: function () {}
+            };
+            var stub = this.stub(console, "warn");
+
+            new Mopidy({console: console});
+
+            assert.calledOnceWith(
+                stub,
+                "Mopidy.js is using the default calling convention. The " +
+                "default will change in the future. You should explicitly " +
+                "specify which calling convention you use.");
+        },
+
+        "does not warn if calling convention chosen explicitly": function () {
+            var console = {
+                warn: function () {}
+            };
+            var stub = this.stub(console, "warn");
+
+            new Mopidy({
+                callingConvention: "by-position-or-by-name",
+                console: console
+            });
+
+            refute.called(stub);
         },
 
         "works without 'new' keyword": function () {
             var mopidyConstructor = Mopidy; // To trick jshint into submission
 
-            var mopidy = mopidyConstructor({webSocket: {}});
+            var mopidy = mopidyConstructor({
+                callingConvention: "by-position-or-by-name",
+                webSocket: {}
+            });
 
             assert.isObject(mopidy);
             assert(mopidy instanceof Mopidy);
@@ -75,7 +133,10 @@ buster.testCase("Mopidy", {
 
     ".connect": {
         "connects when autoConnect is false": function () {
-            var mopidy = new Mopidy({autoConnect: false});
+            var mopidy = new Mopidy({
+                autoConnect: false,
+                callingConvention: "by-position-or-by-name"
+            });
             refute.called(this.webSocketConstructorStub);
 
             mopidy.connect();
@@ -89,7 +150,10 @@ buster.testCase("Mopidy", {
 
         "does nothing when the WebSocket is open": function () {
             this.webSocket.readyState = Mopidy.WebSocket.OPEN;
-            var mopidy = new Mopidy({webSocket: this.webSocket});
+            var mopidy = new Mopidy({
+                callingConvention: "by-position-or-by-name",
+                webSocket: this.webSocket
+            });
 
             mopidy.connect();
 
@@ -766,8 +830,12 @@ buster.testCase("Mopidy", {
             assert.calledOnceWith(spy);
         },
 
-        "by-position calling convention": {
+        "by-position-only calling convention": {
             setUp: function () {
+                this.mopidy = new Mopidy({
+                    webSocket: this.webSocket,
+                    callingConvention: "by-position-only"
+                });
                 this.mopidy._createApi({
                     foo: {
                         params: ["bar", "baz"]
@@ -775,12 +843,6 @@ buster.testCase("Mopidy", {
                 });
                 this.sendStub = this.stub(this.mopidy, "_send");
 
-            },
-
-            "is the default": function () {
-                assert.equals(
-                    this.mopidy._settings.callingConvention,
-                    "by-position-only");
             },
 
             "sends no params if no arguments passed to function": function () {

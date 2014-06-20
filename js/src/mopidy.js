@@ -67,6 +67,12 @@ Mopidy.prototype._configure = function (settings) {
     settings.backoffDelayMin = settings.backoffDelayMin || 1000;
     settings.backoffDelayMax = settings.backoffDelayMax || 64000;
 
+    if (typeof settings.callingConvention === "undefined") {
+        this._console.warn(
+            "Mopidy.js is using the default calling convention. The " +
+            "default will change in the future. You should explicitly " +
+            "specify which calling convention you use.");
+    }
     settings.callingConvention = (
         settings.callingConvention || "by-position-only");
 

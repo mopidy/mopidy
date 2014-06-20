@@ -97,7 +97,9 @@ Feature release.
 
 - Add support for method calls with by-name arguments. The old calling
   convention, ``by-position-only``, is still the default, but this will
-  probably change in the future. See the :ref:`mopidy-js` docs for details.
+  change in the future. A warning is logged to the console if you don't
+  explicitly select a calling convention. See the :ref:`mopidy-js` docs for
+  details.
 
 **MPD frontend**
 
