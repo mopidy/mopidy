@@ -294,31 +294,17 @@ class Audio(pykka.ThreadingActor):
         self._disconnect(bus, 'message')
         bus.remove_signal_watch()
 
-    def _on_message(self, bus, message):
-        if (message.type == gst.MESSAGE_STATE_CHANGED
-                and message.src == self._playbin):
-            old_state, new_state, pending_state = message.parse_state_changed()
-            self._on_playbin_state_changed(old_state, new_state, pending_state)
-        elif message.type == gst.MESSAGE_BUFFERING:
-            percent = message.parse_buffering()
-            if percent < 10:
-                self._playbin.set_state(gst.STATE_PAUSED)
-            if percent == 100 and self._target_state == gst.STATE_PLAYING:
-                self._playbin.set_state(gst.STATE_PLAYING)
-            logger.debug('Buffer %d%% full', percent)
-        elif message.type == gst.MESSAGE_EOS:
+    def _on_message(self, bus, msg):
+        if msg.type == gst.MESSAGE_STATE_CHANGED and msg.src == self._playbin:
+            self._on_playbin_state_changed(*msg.parse_state_changed())
+        elif msg.type == gst.MESSAGE_BUFFERING:
+            self._on_buffering(msg.parse_buffering())
+        elif msg.type == gst.MESSAGE_EOS:
             self._on_end_of_stream()
-        elif message.type == gst.MESSAGE_ERROR:
-            error, debug = message.parse_error()
-            logger.error(
-                '%s Debug message: %s',
-                str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
-            self.stop_playback()
-        elif message.type == gst.MESSAGE_WARNING:
-            error, debug = message.parse_warning()
-            logger.warning(
-                '%s Debug message: %s',
-                str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        elif msg.type == gst.MESSAGE_ERROR:
+            self._on_error(*msg.parse_error())
+        elif msg.type == gst.MESSAGE_WARNING:
+            self._on_warning(*msg.parse_warning())
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
@@ -349,9 +335,28 @@ class Audio(pykka.ThreadingActor):
         AudioListener.send(
             'state_changed', old_state=old_state, new_state=new_state)
 
+    def _on_buffering(self, percent):
+        if percent < 10:
+            self._playbin.set_state(gst.STATE_PAUSED)
+        if percent == 100 and self._target_state == gst.STATE_PLAYING:
+            self._playbin.set_state(gst.STATE_PLAYING)
+
+        logger.debug('Buffer %d%% full', percent)
+
     def _on_end_of_stream(self):
         logger.debug('Triggering reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
+
+    def _on_error(self, error, debug):
+        logger.error(
+            '%s Debug message: %s',
+            str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        self.stop_playback()
+
+    def _on_warning(self, error, debug):
+        logger.warning(
+            '%s Debug message: %s',
+            str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
 
     def set_uri(self, uri):
         """
