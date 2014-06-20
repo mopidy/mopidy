@@ -140,6 +140,13 @@ Feature release.
 
 - Fix proper decoding of exception messages that depends on the user's locale.
 
+**Stream backend**
+
+- Add config value :confval:`stream/metadata_blacklist` to blacklist certain
+  URIs we should not open to read metadata from before they are opened for
+  playback. This is typically needed for services that invalidate URIs after a
+  single use. (Fixes: :issue:`660`)
+
 
 v0.18.3 (2014-02-16)
 ====================
