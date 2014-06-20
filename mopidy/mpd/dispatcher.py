@@ -295,7 +295,7 @@ class MpdContext(object):
 
         for part in path_parts:
             for ref in self.core.library.browse(uri).get():
-                if (ref.type in (ref.DIRECTORY, ref.type == ref.PLAYLIST) and
+                if (ref.type in (ref.DIRECTORY, ref.PLAYLIST) and
                         ref.name == part):
                     uri = ref.uri
                     break
