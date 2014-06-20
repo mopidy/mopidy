@@ -138,6 +138,10 @@ When creating an instance, you can specify the following settings:
 
     .. versionadded:: 0.19 (Mopidy.js 0.4)
 
+``console``
+    If set, this object will be used to log errors from Mopidy.js. This is
+    mostly useful for testing Mopidy.js.
+
 ``webSocket``
     An existing WebSocket object to be used instead of creating a new
     WebSocket. Defaults to undefined.
