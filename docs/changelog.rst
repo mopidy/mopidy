@@ -127,6 +127,9 @@ Feature release.
 
 - Respond to all pending requests before closing connection. (PR: :issue:`722`)
 
+- Stop incorrectly catching `LookupError` in command handling.
+  (Fixes: :issue:`741`)
+
 **Local backend**
 
 - The ``local scan`` command now use multiple threads to walk the file system
