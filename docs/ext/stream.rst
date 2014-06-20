@@ -42,3 +42,10 @@ See :ref:`config` for general help on configuring Mopidy.
 .. confval:: stream/timeout
 
     Number of milliseconds before giving up looking up stream metadata.
+
+.. confval:: stream/metadata_blacklist
+
+    List of URI globs to not fetch metadata from before playing. This feature
+    is typically needed for play once URIs provided by certain streaming
+    providers. Regular POSIX glob semantics apply, so ``http://*.example.com/*``
+    would match all example.com sub-domains.
