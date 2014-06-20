@@ -127,13 +127,15 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
-                        Ref.directory(uri='dummy:/foo', name='foo')],
+                        Ref.directory(uri='dummy:/foo', name='foo'),
+                        Ref.playlist(uri='dummy:/pl', name='pl')],
             'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('listall')
 
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('directory: /dummy/foo')
+        self.assertInResponse('directory: /dummy/pl')
         self.assertInResponse('file: dummy:/foo/b')
         self.assertInResponse('OK')
 
@@ -182,7 +184,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
-                        Ref.directory(uri='dummy:/foo', name='foo')],
+                        Ref.directory(uri='dummy:/foo', name='foo'),
+                        Ref.playlist(uri='dummy:/pl', name='pl')],
             'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('listallinfo')
@@ -190,6 +193,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('Title: a')
         self.assertInResponse('directory: /dummy/foo')
+        self.assertInResponse('directory: /dummy/pl')
         self.assertInResponse('file: dummy:/foo/b')
         self.assertInResponse('Title: b')
         self.assertInResponse('OK')
