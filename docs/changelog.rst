@@ -50,6 +50,12 @@ Feature release.
 
 - Fix proper decoding of exception messages that depends on the user's locale.
 
+- Fix recognition of ASX and XSPF playlists with tags in all caps or with
+  carriage return line endings. (Fixes: :issue:`687`)
+
+- Support simpler ASX playlist variant with ``<ENTRY>`` elements without
+  children.
+
 **HTTP frontend**
 
 - CherryPy and ws4py have been replaced with Tornado. This will hopefully
