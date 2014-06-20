@@ -132,6 +132,10 @@ Feature release.
 
 **Local backend**
 
+- The JSON local library backend now logs a friendly message telling you about
+  ``mopidy local scan`` if you don't have a local library cache. (Fixes:
+  :issue:`711`)
+
 - The ``local scan`` command now use multiple threads to walk the file system
   and check files' modification time. This speeds up scanning, escpecially
   when scanning remote file systems over e.g. NFS.

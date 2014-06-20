@@ -20,6 +20,14 @@ logger = logging.getLogger(__name__)
 
 # TODO: move to load and dump in models?
 def load_library(json_file):
+    if not os.path.isfile(json_file):
+        logger.info(
+            'No local library metadata cache found at %s. Please run '
+            '`mopidy local scan` to index your local music library. '
+            'If you do not have a local music collection, you can disable the '
+            'local backend to hide this message.',
+            json_file)
+        return {}
     try:
         with gzip.open(json_file, 'rb') as fp:
             return json.load(fp, object_hook=models.model_json_decoder)
