@@ -25,7 +25,7 @@ def mopidy_app_factory(config, core):
         }),
         (r'/(.*)', StaticFileHandler, {
             'path': os.path.join(os.path.dirname(__file__), 'data'),
-            'default_filename': 'mopidy.html'
+            'default_filename': 'index.html'
         }),
     ]
 

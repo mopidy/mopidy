@@ -39,7 +39,7 @@ class RootAppTest(HttpServerTest):
         response = self.fetch('/', method='GET')
 
         self.assertIn(
-            'Static content serving',
+            'This web server is a part of the Mopidy music server.',
             tornado.escape.to_unicode(response.body))
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
@@ -59,7 +59,7 @@ class MopidyAppTest(HttpServerTest):
         response = self.fetch('/mopidy/', method='GET')
 
         self.assertIn(
-            'Here you can see events arriving from Mopidy in real time:',
+            'This web server is a part of the Mopidy music server.',
             tornado.escape.to_unicode(response.body))
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
