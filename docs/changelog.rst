@@ -130,6 +130,9 @@ Feature release.
 - Stop incorrectly catching `LookupError` in command handling.
   (Fixes: :issue:`741`)
 
+- Browse support for playlists and albums has been added. (PR: :issue:`749`,
+  :issue:`754`)
+
 **Local backend**
 
 - The JSON local library backend now logs a friendly message telling you about
