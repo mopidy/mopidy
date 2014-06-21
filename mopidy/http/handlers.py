@@ -102,6 +102,12 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.close()
 
 
+def set_mopidy_headers(request_handler):
+    request_handler.set_header('Cache-Control', 'no-cache')
+    request_handler.set_header(
+        'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
+
+
 class JsonRpcHandler(tornado.web.RequestHandler):
     def initialize(self, core):
         self.jsonrpc = make_jsonrpc_wrapper(core)
@@ -131,18 +137,14 @@ class JsonRpcHandler(tornado.web.RequestHandler):
             self.write_error(500)
 
     def set_extra_headers(self):
+        set_mopidy_headers(self)
         self.set_header('Accept', 'application/json')
-        self.set_header('Cache-Control', 'no-cache')
-        self.set_header(
-            'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
         self.set_header('Content-Type', 'application/json; utf-8')
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
     def set_extra_headers(self, path):
-        self.set_header('Cache-Control', 'no-cache')
-        self.set_header(
-            'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
+        set_mopidy_headers(self)
 
 
 class AddSlashHandler(tornado.web.RequestHandler):
