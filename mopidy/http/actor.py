@@ -96,7 +96,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         result = []
         for static in self.statics:
             result.append((
-                r'/{}/?(.*)'.format(static['name']),
+                r'/%s/?(.*)' % static['name'],
                 handlers.StaticFileHandler,
                 {
                     'path': static['path'],
