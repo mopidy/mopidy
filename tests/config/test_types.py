@@ -268,6 +268,12 @@ class ListTest(unittest.TestCase):
         self.assertIsInstance(result, bytes)
         self.assertRegexpMatches(result, r'foo\n\s*bar\n\s*baz')
 
+    def test_serialize_none(self):
+        value = types.List()
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(result, '')
+
 
 class LogLevelTest(unittest.TestCase):
     levels = {'critical': logging.CRITICAL,

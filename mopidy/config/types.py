@@ -185,6 +185,8 @@ class List(ConfigValue):
         return tuple(values)
 
     def serialize(self, value, display=False):
+        if not value:
+            return b''
         return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 
