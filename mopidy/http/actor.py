@@ -68,13 +68,16 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         request_handlers.extend(self._get_static_request_handlers())
 
         # Either default Mopidy or user defined path to files
-        static_dir = self.config['http']['static_dir']
-        data_dir = os.path.join(os.path.dirname(__file__), 'data')
-        root_handler = (r'/(.*)', handlers.StaticFileHandler, {
-            'path': static_dir if static_dir else data_dir,
-            'default_filename': 'index.html'
-        })
-        request_handlers.append(root_handler)
+        if self.config['http']['static_dir']:
+            request_handlers.append((r'/(.*)', handlers.StaticFileHandler, {
+                'path': self.config['http']['static_dir'],
+                'default_filename': 'index.html',
+            }))
+        else:
+            request_handlers.append((r'/', tornado.web.RedirectHandler, {
+                'url': '/mopidy/',
+                'permanent': False,
+            }))
 
         logger.debug(
             'HTTP routes from extensions: %s',
