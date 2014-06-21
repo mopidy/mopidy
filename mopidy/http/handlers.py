@@ -23,7 +23,7 @@ def mopidy_app_factory(config, core):
         (r'/rpc', JsonRpcHandler, {
             'core': core,
         }),
-        (r'/(.*)', StaticFileHandler, {
+        (r'/?(.*)', StaticFileHandler, {
             'path': os.path.join(os.path.dirname(__file__), 'data'),
             'default_filename': 'mopidy.html'
         }),
