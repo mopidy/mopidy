@@ -33,7 +33,9 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
 
         return tornado.web.Application(http_frontend._get_request_handlers())
 
-    def test_root_should_return_index(self):
+
+class RootAppTest(HttpServerTest):
+    def test_should_return_index(self):
         response = self.fetch('/', method='GET')
 
         self.assertIn(
@@ -43,7 +45,9 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
 
-    def test_mopidy_should_return_index(self):
+
+class MopidyAppTest(HttpServerTest):
+    def test_should_return_index(self):
         response = self.fetch('/mopidy/', method='GET')
 
         self.assertIn(
@@ -53,7 +57,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
 
-    def test_mopidy_should_return_index_no_slash(self):
+    def test_without_slash_should_return_index(self):
         response = self.fetch('/mopidy', method='GET')
 
         self.assertIn(
@@ -63,7 +67,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
 
-    def test_should_return_js(self):
+    def test_should_return_static_files(self):
         response = self.fetch('/mopidy/mopidy.js', method='GET')
 
         self.assertIn(
@@ -73,6 +77,8 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
 
+
+class MopidyWebSocketHandlerTest(HttpServerTest):
     def test_should_return_ws(self):
         response = self.fetch('/mopidy/ws', method='GET')
 
@@ -87,6 +93,8 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
             'Can "Upgrade" only to "WebSocket".',
             tornado.escape.to_unicode(response.body))
 
+
+class MopidyRPCHandlerTest(HttpServerTest):
     def test_should_return_rpc_error(self):
         cmd = tornado.escape.json_encode({'action': 'get_version'})
 
