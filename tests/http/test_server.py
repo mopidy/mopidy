@@ -53,6 +53,16 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
 
+    def test_mopidy_should_return_index_no_slash(self):
+        response = self.fetch('/mopidy', method='GET')
+
+        self.assertIn(
+            'Here you can see events arriving from Mopidy in real time:',
+            tornado.escape.to_unicode(response.body))
+        self.assertEqual(
+            response.headers['X-Mopidy-Version'], mopidy.__version__)
+        self.assertEqual(response.headers['Cache-Control'], 'no-cache')
+
     def test_should_return_js(self):
         response = self.fetch('/mopidy/mopidy.js', method='GET')
 

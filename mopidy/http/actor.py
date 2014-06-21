@@ -96,14 +96,14 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         result = []
         for static in self.statics:
             result.append((
-                r'/%s/(.*)' % static['name'],
+                r'/{}/?(.*)'.format(static['name']),
                 handlers.StaticFileHandler,
                 {
                     'path': static['path'],
                     'default_filename': 'index.html'
                 }
             ))
-            logger.debug('Loaded HTTP extension: %s', static['name'])
+            logger.debug('Loaded static HTTP extension: %s', static['name'])
         return result
 
     def _publish_zeroconf(self):
