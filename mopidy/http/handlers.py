@@ -15,19 +15,24 @@ from mopidy.utils import jsonrpc
 logger = logging.getLogger(__name__)
 
 
-def mopidy_app_factory(config, core):
-    return [
-        (r'/ws/?', WebSocketHandler, {
-            'core': core,
-        }),
-        (r'/rpc', JsonRpcHandler, {
-            'core': core,
-        }),
-        (r'/(.*)', StaticFileHandler, {
-            'path': os.path.join(os.path.dirname(__file__), 'data'),
-            'default_filename': 'index.html'
-        }),
-    ]
+def make_mopidy_app_factory(apps, statics):
+    def mopidy_app_factory(config, core):
+        return [
+            (r'/ws/?', WebSocketHandler, {
+                'core': core,
+            }),
+            (r'/rpc', JsonRpcHandler, {
+                'core': core,
+            }),
+            (r'/(.+)', StaticFileHandler, {
+                'path': os.path.join(os.path.dirname(__file__), 'data'),
+            }),
+            (r'/', ClientListHandler, {
+                'apps': apps,
+                'statics': statics,
+            }),
+        ]
+    return mopidy_app_factory
 
 
 def make_jsonrpc_wrapper(core_actor):
@@ -140,6 +145,24 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         set_mopidy_headers(self)
         self.set_header('Accept', 'application/json')
         self.set_header('Content-Type', 'application/json; utf-8')
+
+
+class ClientListHandler(tornado.web.RequestHandler):
+    def initialize(self, apps, statics):
+        self.apps = apps
+        self.statics = statics
+
+    def get(self):
+        set_mopidy_headers(self)
+
+        names = set()
+        for app in self.apps:
+            names.add(app['name'])
+        for static in self.statics:
+            names.add(static['name'])
+        names.discard('mopidy')
+
+        self.render('data/clients.html', apps=sorted(list(names)))
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):

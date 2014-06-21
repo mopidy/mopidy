@@ -25,10 +25,13 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         core.get_version = mock.MagicMock(name='get_version')
         core.get_version.return_value = mopidy.__version__
 
+        apps = [dict(name='testapp')]
+        statics = [dict(name='teststatic')]
+
         http_frontend = actor.HttpFrontend(config=config, core=core)
         http_frontend.apps = [{
             'name': 'mopidy',
-            'factory': handlers.mopidy_app_factory,
+            'factory': handlers.make_mopidy_app_factory(apps, statics),
         }]
 
         return tornado.web.Application(http_frontend._get_request_handlers())
@@ -57,10 +60,12 @@ class RootAppTest(HttpServerTest):
 class MopidyAppTest(HttpServerTest):
     def test_should_return_index(self):
         response = self.fetch('/mopidy/', method='GET')
+        body = tornado.escape.to_unicode(response.body)
 
         self.assertIn(
-            'This web server is a part of the Mopidy music server.',
-            tornado.escape.to_unicode(response.body))
+            'This web server is a part of the Mopidy music server.', body)
+        self.assertIn('testapp', body)
+        self.assertIn('teststatic', body)
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
