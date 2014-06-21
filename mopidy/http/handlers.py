@@ -23,7 +23,7 @@ def mopidy_app_factory(config, core):
         (r'/rpc', JsonRpcHandler, {
             'core': core,
         }),
-        (r'/?(.*)', StaticFileHandler, {
+        (r'/(.*)', StaticFileHandler, {
             'path': os.path.join(os.path.dirname(__file__), 'data'),
             'default_filename': 'mopidy.html'
         }),
@@ -143,3 +143,10 @@ class StaticFileHandler(tornado.web.StaticFileHandler):
         self.set_header('Cache-Control', 'no-cache')
         self.set_header(
             'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
+
+
+class AddSlashHandler(tornado.web.RequestHandler):
+
+    @tornado.web.addslash
+    def prepare(self):
+        return super(AddSlashHandler, self).prepare()

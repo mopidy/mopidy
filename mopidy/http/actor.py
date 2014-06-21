@@ -84,6 +84,10 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def _get_app_request_handlers(self):
         result = []
         for app in self.apps:
+            result.append((
+                r'/%s' % app['name'],
+                handlers.AddSlashHandler
+            ))
             request_handlers = app['factory'](self.config, self.core)
             for handler in request_handlers:
                 handler = list(handler)
@@ -96,7 +100,11 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         result = []
         for static in self.statics:
             result.append((
-                r'/%s/?(.*)' % static['name'],
+                r'/%s' % static['name'],
+                handlers.AddSlashHandler
+            ))
+            result.append((
+                r'/%s/(.*)' % static['name'],
                 handlers.StaticFileHandler,
                 {
                     'path': static['path'],
