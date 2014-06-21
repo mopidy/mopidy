@@ -23,6 +23,10 @@ mixers.register_mixers()
 playlists.register_typefinders()
 playlists.register_elements()
 
+_GST_STATE_MAPPING = {
+    gst.STATE_PLAYING: PlaybackState.PLAYING,
+    gst.STATE_PAUSED: PlaybackState.PAUSED,
+    gst.STATE_NULL: PlaybackState.STOPPED}
 
 MB = 1 << 20
 
@@ -321,20 +325,18 @@ class Audio(pykka.ThreadingActor):
         if new_state == gst.STATE_READY:
             return  # Ignore READY state as it's GStreamer specific
 
-        if new_state == gst.STATE_PLAYING:
-            new_state = PlaybackState.PLAYING
-        elif new_state == gst.STATE_PAUSED:
-            new_state = PlaybackState.PAUSED
-        elif new_state == gst.STATE_NULL:
-            new_state = PlaybackState.STOPPED
-
+        new_state = _GST_STATE_MAPPING[new_state]
         old_state, self.state = self.state, new_state
 
+        target_state = _GST_STATE_MAPPING[self._target_state]
+        if target_state == new_state:
+            target_state = None
+
         logger.debug(
-            'Triggering event: state_changed(old_state=%s, new_state=%s)',
-            old_state, new_state)
-        AudioListener.send(
-            'state_changed', old_state=old_state, new_state=new_state)
+            'Triggering event: state_changed(old_state=%s, new_state=%s, '
+            'target_state=%s)', old_state, new_state, target_state)
+        AudioListener.send('state_changed', old_state=old_state,
+                           new_state=new_state, target_state=target_state)
 
     def _on_buffering(self, percent):
         if percent < 10 and not self._buffering:
