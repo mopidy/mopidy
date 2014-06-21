@@ -3,18 +3,17 @@ html {
     color: #555;
     font-family: "Droid Serif", "Georgia", "Times New Roman", "Palatino",
     "Hoefler Text", "Baskerville", serif;
-    font-size: 150%;
     line-height: 1.4em;
 }
 body {
-    max-width: 20em;
+    max-width: 600px;
     margin: 0 auto;
 }
 div.box {
     background: white;
     border-radius: 5px;
     box-shadow: 5px 5px 5px #d8dcdf;
-    margin: 2em 0;
+    margin: 1em;
     padding: 1em;
 }
 div.box.focus {
