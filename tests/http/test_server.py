@@ -45,6 +45,14 @@ class RootAppTest(HttpServerTest):
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
 
+    def test_should_return_static_files(self):
+        response = self.fetch('/mopidy.css', method='GET')
+
+        self.assertIn('html {', tornado.escape.to_unicode(response.body))
+        self.assertEqual(
+            response.headers['X-Mopidy-Version'], mopidy.__version__)
+        self.assertEqual(response.headers['Cache-Control'], 'no-cache')
+
 
 class MopidyAppTest(HttpServerTest):
     def test_should_return_index(self):
@@ -57,15 +65,11 @@ class MopidyAppTest(HttpServerTest):
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
 
-    def test_without_slash_should_return_index(self):
-        response = self.fetch('/mopidy', method='GET')
+    def test_without_slash_should_redirect(self):
+        response = self.fetch('/mopidy', method='GET', follow_redirects=False)
 
-        self.assertIn(
-            'Here you can see events arriving from Mopidy in real time:',
-            tornado.escape.to_unicode(response.body))
-        self.assertEqual(
-            response.headers['X-Mopidy-Version'], mopidy.__version__)
-        self.assertEqual(response.headers['Cache-Control'], 'no-cache')
+        self.assertEqual(response.code, 301)
+        self.assertEqual(response.headers['Location'], '/mopidy/')
 
     def test_should_return_static_files(self):
         response = self.fetch('/mopidy/mopidy.js', method='GET')
@@ -158,6 +162,12 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
 
         return tornado.web.Application(http_frontend._get_request_handlers())
 
+    def test_without_slash_should_redirect(self):
+        response = self.fetch('/static', method='GET', follow_redirects=False)
+
+        self.assertEqual(response.code, 301)
+        self.assertEqual(response.headers['Location'], '/static/')
+
     def test_can_serve_static_files(self):
         response = self.fetch('/static/test_server.py', method='GET')
 
@@ -203,8 +213,14 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
 
         return tornado.web.Application(http_frontend._get_request_handlers())
 
+    def test_without_slash_should_redirect(self):
+        response = self.fetch('/wsgi', method='GET', follow_redirects=False)
+
+        self.assertEqual(response.code, 301)
+        self.assertEqual(response.headers['Location'], '/wsgi/')
+
     def test_can_wrap_wsgi_apps(self):
-        response = self.fetch('/wsgi', method='GET')
+        response = self.fetch('/wsgi/', method='GET')
 
         self.assertEqual(200, response.code)
         self.assertIn(
