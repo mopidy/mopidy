@@ -133,6 +133,10 @@ Feature release.
 - Browse support for playlists and albums has been added. (PR: :issue:`749`,
   :issue:`754`)
 
+- The ``lsinfo`` command now returns browse results before local playlists.
+  This is helpful as not all clients sort the returned items. (PR:
+  :issue:`755`)
+
 - Search terms that are empty or consists of only whitespace are no longer
   included in the search query sent to backends. (PR: :issue:`758`)
 
