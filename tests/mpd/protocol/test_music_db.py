@@ -20,6 +20,11 @@ class QueryFromMpdSearchFormatTest(unittest.TestCase):
             ['Date', ''], music_db._SEARCH_MAPPING)
         self.assertEqual(result, {})
 
+    def test_whitespace_value_is_ignored(self):
+        result = music_db._query_from_mpd_search_parameters(
+            ['Date', '  '], music_db._SEARCH_MAPPING)
+        self.assertEqual(result, {})
+
     # TODO Test more mappings
 
 
