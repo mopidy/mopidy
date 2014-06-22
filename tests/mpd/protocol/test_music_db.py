@@ -350,6 +350,18 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertNotInResponse('directory: dummy')
         self.assertInResponse('OK')
 
+    def test_lsinfo_for_root_returns_browse_result_before_playlists(self):
+        last_modified = 1390942873222
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
+        self.backend.playlists.playlists = [
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
+
+        response = self.sendRequest('lsinfo "/"')
+        self.assertLess(response.index('directory: dummy'),
+                        response.index('playlist: a'))
+
     def test_update_without_uri(self):
         self.sendRequest('update')
         self.assertInResponse('updating_db: 0')

@@ -410,9 +410,6 @@ def lsinfo(context, uri=None):
     ""``, and ``lsinfo "/"``.
     """
     result = []
-    if uri in (None, '', '/'):
-        result.extend(protocol.stored_playlists.listplaylists(context))
-
     for path, lookup_future in context.browse(uri, recursive=False):
         if not lookup_future:
             result.append(('directory', path.lstrip('/')))
@@ -420,6 +417,9 @@ def lsinfo(context, uri=None):
             tracks = lookup_future.get()
             if tracks:
                 result.extend(translator.track_to_mpd_format(tracks[0]))
+
+    if uri in (None, '', '/'):
+        result.extend(protocol.stored_playlists.listplaylists(context))
 
     if not result:
         raise exceptions.MpdNoExistError('Not found')
