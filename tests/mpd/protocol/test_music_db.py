@@ -15,6 +15,16 @@ class QueryFromMpdSearchFormatTest(unittest.TestCase):
         self.assertEqual(result['date'][0], '1974-01-02')
         self.assertEqual(result['date'][1], '1975')
 
+    def test_empty_value_is_ignored(self):
+        result = music_db._query_from_mpd_search_parameters(
+            ['Date', ''], music_db._SEARCH_MAPPING)
+        self.assertEqual(result, {})
+
+    def test_whitespace_value_is_ignored(self):
+        result = music_db._query_from_mpd_search_parameters(
+            ['Date', '  '], music_db._SEARCH_MAPPING)
+        self.assertEqual(result, {})
+
     # TODO Test more mappings
 
 

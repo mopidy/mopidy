@@ -41,7 +41,9 @@ def _query_from_mpd_search_parameters(parameters, mapping):
             raise exceptions.MpdArgError('incorrect arguments')
         if not parameters:
             raise ValueError
-        query.setdefault(field, []).append(parameters.pop(0))
+        value = parameters.pop(0)
+        if value.strip():
+            query.setdefault(field, []).append(value)
     return query
 
 
