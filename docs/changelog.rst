@@ -133,6 +133,9 @@ Feature release.
 - Browse support for playlists and albums has been added. (PR: :issue:`749`,
   :issue:`754`)
 
+- Search terms that are empty or consists of only whitespace are no longer
+  included in the search query sent to backends. (PR: :issue:`758`)
+
 **Local backend**
 
 - The JSON local library backend now logs a friendly message telling you about
