@@ -21,6 +21,7 @@ API reference
     backends
     core
     audio
+    mixer
     frontends
     commands
     ext
