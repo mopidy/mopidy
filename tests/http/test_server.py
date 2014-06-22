@@ -69,28 +69,6 @@ class LegacyStaticDirAppTest(HttpServerTest):
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
 
 
-class LegacyStaticDirAppTest(HttpServerTest):
-    def get_config(self):
-        config = super(LegacyStaticDirAppTest, self).get_config()
-        config['http']['static_dir'] = os.path.dirname(__file__)
-        return config
-
-    def test_should_return_index(self):
-        response = self.fetch('/', method='GET', follow_redirects=False)
-
-        self.assertEqual(response.code, 404, 'No index.html in this dir')
-
-    def test_should_return_static_files(self):
-        response = self.fetch('/test_server.py', method='GET')
-
-        self.assertIn(
-            'test_should_return_static_files',
-            tornado.escape.to_unicode(response.body))
-        self.assertEqual(
-            response.headers['X-Mopidy-Version'], mopidy.__version__)
-        self.assertEqual(response.headers['Cache-Control'], 'no-cache')
-
-
 class MopidyAppTest(HttpServerTest):
     def test_should_return_index(self):
         response = self.fetch('/mopidy/', method='GET')
