@@ -67,6 +67,9 @@ Feature release.
   them using pip. See the :ref:`http-server-api` for details. (Fixes:
   :issue:`440`)
 
+- Added web page at ``/mopidy/`` which lists all web clients installed as
+  Mopidy extensions. (Fixes: :issue:`440`)
+
 - Added support for extending the HTTP frontend with additional server side
   functionality. See :ref:`http-server-api` for details.
 
