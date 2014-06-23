@@ -80,7 +80,7 @@ To run other [grunt](http://gruntjs.com/) targets which isn't predefined in
 Changelog
 ---------
 
-### 0.4.0 (UNRELEASED)
+### 0.4.0 (2014-06-24)
 
 - Add support for method calls with by-name arguments. The old calling
   convention, "by-position-only", is still the default, but this will change in

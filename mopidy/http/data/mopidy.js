@@ -1,4 +1,4 @@
-/*! Mopidy.js v0.3.0 - built 2014-06-16
+/*! Mopidy.js v0.4.0 - built 2014-06-24
  * http://www.mopidy.com/
  * Copyright (c) 2014 Stein Magnus Jodal and contributors
  * Licensed under the Apache License, Version 2.0 */
@@ -2337,8 +2337,8 @@ function Mopidy(settings) {
         return new Mopidy(settings);
     }
 
+    this._console = this._getConsole(settings || {});
     this._settings = this._configure(settings || {});
-    this._console = this._getConsole();
 
     this._backoffDelay = this._settings.backoffDelayMin;
     this._pendingRequests = {};
@@ -2368,6 +2368,20 @@ Mopidy.ServerError.prototype.constructor = Mopidy.ServerError;
 
 Mopidy.WebSocket = websocket.Client;
 
+Mopidy.prototype._getConsole = function (settings) {
+    if (typeof settings.console !== "undefined") {
+        return settings.console;
+    }
+
+    var con = typeof console !== "undefined" && console || {};
+
+    con.log = con.log || function () {};
+    con.warn = con.warn || function () {};
+    con.error = con.error || function () {};
+
+    return con;
+};
+
 Mopidy.prototype._configure = function (settings) {
     var currentHost = (typeof document !== "undefined" &&
         document.location.host) || "localhost";
@@ -2381,17 +2395,16 @@ Mopidy.prototype._configure = function (settings) {
     settings.backoffDelayMin = settings.backoffDelayMin || 1000;
     settings.backoffDelayMax = settings.backoffDelayMax || 64000;
 
+    if (typeof settings.callingConvention === "undefined") {
+        this._console.warn(
+            "Mopidy.js is using the default calling convention. The " +
+            "default will change in the future. You should explicitly " +
+            "specify which calling convention you use.");
+    }
+    settings.callingConvention = (
+        settings.callingConvention || "by-position-only");
+
     return settings;
-};
-
-Mopidy.prototype._getConsole = function () {
-    var console = typeof console !== "undefined" && console || {};
-
-    console.log = console.log || function () {};
-    console.warn = console.warn || function () {};
-    console.error = console.error || function () {};
-
-    return console;
 };
 
 Mopidy.prototype._delegateEvents = function () {
@@ -2573,18 +2586,36 @@ Mopidy.prototype._handleEvent = function (eventMessage) {
 
 Mopidy.prototype._getApiSpec = function () {
     return this._send({method: "core.describe"})
-        .then(this._createApi.bind(this), this._handleWebSocketError)
-        .then(null, this._handleWebSocketError);
+        .then(this._createApi.bind(this))
+        .catch(this._handleWebSocketError);
 };
 
 Mopidy.prototype._createApi = function (methods) {
+    var byPositionOrByName = (
+        this._settings.callingConvention === "by-position-or-by-name");
+
     var caller = function (method) {
         return function () {
-            var params = Array.prototype.slice.call(arguments);
-            return this._send({
-                method: method,
-                params: params
-            });
+            var message = {method: method};
+            if (arguments.length === 0) {
+                return this._send(message);
+            }
+            if (!byPositionOrByName) {
+                message.params = Array.prototype.slice.call(arguments);
+                return this._send(message);
+            }
+            if (arguments.length > 1) {
+                return when.reject(new Error(
+                    "Expected zero arguments, a single array, " +
+                    "or a single object."));
+            }
+            if (!Array.isArray(arguments[0]) &&
+                arguments[0] !== Object(arguments[0])) {
+                return when.reject(new TypeError(
+                    "Expected an array or an object."));
+            }
+            message.params = arguments[0];
+            return this._send(message);
         }.bind(this);
     }.bind(this);
 
