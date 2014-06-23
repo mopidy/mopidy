@@ -15,22 +15,27 @@ created one, please notify us so we can include your client on this page.
 See :ref:`http-api` for details on how to build your own web client.
 
 
-woutervanwijk/Mopidy-Webclient
-==============================
+Mopidy MusicBox Webclient
+=========================
 
-.. image:: woutervanwijk-mopidy-webclient.png
+.. image:: mopidy-musicbox-webclient.png
     :width: 1275
     :height: 600
 
 The first web client for Mopidy, made with jQuery Mobile by Wouter van Wijk.
 Also the web client used for Wouter's popular `Pi Musicbox
-<http://www.woutervanwijk.nl/pimusicbox/>`_ image for Raspberry Pi.
+<http://www.pimusicbox.com/>`_ image for Raspberry Pi.
 
-    With Mopidy Browser Client, you can play your music on your computer (or
-    Rapsberry Pi) and remotely control it from a computer, phone, tablet,
+    With Mopidy MusicBox Webclient, you can play your music on your computer
+    (Raspberry Pi) and remotely control it from a computer, phone, tablet,
     laptop. From your couch.
 
-    -- https://github.com/woutervanwijk/Mopidy-WebClient
+    This is a responsive HTML/JS/CSS client especially written for Mopidy, a
+    music server. Responsive, so it works on desktop and mobile browsers. You
+    can browse, search and play albums, artists, playlists, and it has cover
+    art from Last.fm.
+
+    -- https://github.com/woutervanwijk/Mopidy-MusicBox-Webclient
 
 
 Mopidy Lux
