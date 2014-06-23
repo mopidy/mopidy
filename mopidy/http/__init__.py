@@ -35,7 +35,7 @@ class Extension(ext.Extension):
 
     def setup(self, registry):
         from .actor import HttpFrontend
-        from .handlers import mopidy_app_factory
+        from .handlers import make_mopidy_app_factory
 
         HttpFrontend.apps = registry['http:app']
         HttpFrontend.statics = registry['http:static']
@@ -43,5 +43,6 @@ class Extension(ext.Extension):
         registry.add('frontend', HttpFrontend)
         registry.add('http:app', {
             'name': 'mopidy',
-            'factory': mopidy_app_factory,
+            'factory': make_mopidy_app_factory(
+                registry['http:app'], registry['http:static']),
         })

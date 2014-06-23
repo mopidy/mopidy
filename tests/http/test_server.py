@@ -12,8 +12,8 @@ from mopidy.http import actor, handlers
 
 
 class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
-    def get_app(self):
-        config = {
+    def get_config(self):
+        return {
             'http': {
                 'hostname': '127.0.0.1',
                 'port': 6680,
@@ -21,34 +21,49 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
                 'zeroconf': '',
             }
         }
+
+    def get_app(self):
         core = mock.Mock()
         core.get_version = mock.MagicMock(name='get_version')
         core.get_version.return_value = mopidy.__version__
 
-        http_frontend = actor.HttpFrontend(config=config, core=core)
+        apps = [dict(name='testapp')]
+        statics = [dict(name='teststatic')]
+
+        http_frontend = actor.HttpFrontend(config=self.get_config(), core=core)
         http_frontend.apps = [{
             'name': 'mopidy',
-            'factory': handlers.mopidy_app_factory,
+            'factory': handlers.make_mopidy_app_factory(apps, statics),
         }]
 
         return tornado.web.Application(http_frontend._get_request_handlers())
 
 
-class RootAppTest(HttpServerTest):
-    def test_should_return_index(self):
-        response = self.fetch('/', method='GET')
+class RootRedirectTest(HttpServerTest):
+    def test_should_redirect_to_mopidy_app(self):
+        response = self.fetch('/', method='GET', follow_redirects=False)
 
-        self.assertIn(
-            'Static content serving',
-            tornado.escape.to_unicode(response.body))
-        self.assertEqual(
-            response.headers['X-Mopidy-Version'], mopidy.__version__)
-        self.assertEqual(response.headers['Cache-Control'], 'no-cache')
+        self.assertEqual(response.code, 302)
+        self.assertEqual(response.headers['Location'], '/mopidy/')
+
+
+class LegacyStaticDirAppTest(HttpServerTest):
+    def get_config(self):
+        config = super(LegacyStaticDirAppTest, self).get_config()
+        config['http']['static_dir'] = os.path.dirname(__file__)
+        return config
+
+    def test_should_return_index(self):
+        response = self.fetch('/', method='GET', follow_redirects=False)
+
+        self.assertEqual(response.code, 404, 'No index.html in this dir')
 
     def test_should_return_static_files(self):
-        response = self.fetch('/mopidy.css', method='GET')
+        response = self.fetch('/test_server.py', method='GET')
 
-        self.assertIn('html {', tornado.escape.to_unicode(response.body))
+        self.assertIn(
+            'test_should_return_static_files',
+            tornado.escape.to_unicode(response.body))
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
@@ -57,10 +72,12 @@ class RootAppTest(HttpServerTest):
 class MopidyAppTest(HttpServerTest):
     def test_should_return_index(self):
         response = self.fetch('/mopidy/', method='GET')
+        body = tornado.escape.to_unicode(response.body)
 
         self.assertIn(
-            'Here you can see events arriving from Mopidy in real time:',
-            tornado.escape.to_unicode(response.body))
+            'This web server is a part of the Mopidy music server.', body)
+        self.assertIn('testapp', body)
+        self.assertIn('teststatic', body)
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
         self.assertEqual(response.headers['Cache-Control'], 'no-cache')
