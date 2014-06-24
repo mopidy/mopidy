@@ -156,6 +156,16 @@ Extension for playing music from the `Spotify <http://www.spotify.com/>`_ music
 streaming service.
 
 
+Mopidy-Spotify-Tunigo
+==============
+
+https://github.com/trygveaa/mopidy-spotify-tunigo
+
+Extension for providing the browse feature of `Spotify
+<http://www.spotify.com/>`_. This lets you browse playlists, genres and new
+releases.
+
+
 Mopidy-Subsonic
 ===============
 
