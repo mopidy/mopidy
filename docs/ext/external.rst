@@ -15,6 +15,14 @@ Mopidy also bundles some extensions:
 - :ref:`ext-mpd`
 
 
+Mopidy-API-Explorer
+===================
+
+https://github.com/dz0ny/mopidy-api-explorer
+
+Web extension for browsing the Mopidy HTTP API.
+
+
 Mopidy-Arcam
 ============
 
