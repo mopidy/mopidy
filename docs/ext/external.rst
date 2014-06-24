@@ -157,7 +157,7 @@ streaming service.
 
 
 Mopidy-Spotify-Tunigo
-==============
+=====================
 
 https://github.com/trygveaa/mopidy-spotify-tunigo
 
