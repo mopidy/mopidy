@@ -190,6 +190,15 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         response2 = self.sendRequest('listall "dummy/"')
         self.assertEqual(response1, response2)
 
+    def test_listall_duplicate(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
+                        Ref.directory(uri='dummy:/a2', name='a')]}
+
+        self.sendRequest('listall')
+        self.assertInResponse('directory: /dummy/a')
+        self.assertInResponse('directory: /dummy/a [2]')
+
     def test_listallinfo_without_uri(self):
         tracks = [Track(uri='dummy:/a', name='a'),
                   Track(uri='dummy:/foo/b', name='b')]
@@ -252,6 +261,15 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         response1 = self.sendRequest('listallinfo "dummy"')
         response2 = self.sendRequest('listallinfo "dummy/"')
         self.assertEqual(response1, response2)
+
+    def test_listallinfo_duplicate(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
+                        Ref.directory(uri='dummy:/a2', name='a')]}
+
+        self.sendRequest('listallinfo')
+        self.assertInResponse('directory: /dummy/a')
+        self.assertInResponse('directory: /dummy/a [2]')
 
     def test_lsinfo_without_path_returns_same_as_for_root(self):
         last_modified = 1390942873222
@@ -361,6 +379,15 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         response = self.sendRequest('lsinfo "/"')
         self.assertLess(response.index('directory: dummy'),
                         response.index('playlist: a'))
+
+    def test_lsinfo_duplicate(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
+                        Ref.directory(uri='dummy:/a2', name='a')]}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertInResponse('directory: dummy/a')
+        self.assertInResponse('directory: dummy/a [2]')
 
     def test_update_without_uri(self):
         self.sendRequest('update')

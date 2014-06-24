@@ -227,7 +227,8 @@ class MpdContext(object):
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    _invalid_playlist_chars = re.compile(r'[\n\r/]')
+    _invalid_browse_chars = re.compile(r'[\n\r]')
+    _invalid_playlist_chars = re.compile(r'[/]')
 
     def __init__(self, dispatcher, session=None, config=None, core=None):
         self.dispatcher = dispatcher
@@ -237,17 +238,25 @@ class MpdContext(object):
         self.core = core
         self.events = set()
         self.subscriptions = set()
-        self._playlist_uri_from_name = {}
-        self._playlist_name_from_uri = {}
+        self._uri_from_name = {}
+        self._name_from_uri = {}
         self.refresh_playlists_mapping()
 
-    def create_unique_name(self, playlist_name):
-        stripped_name = self._invalid_playlist_chars.sub(' ', playlist_name)
+    def create_unique_name(self, name, uri):
+        stripped_name = self._invalid_browse_chars.sub(' ', name)
         name = stripped_name
         i = 2
-        while name in self._playlist_uri_from_name:
+        while name in self._uri_from_name:
+            if self._uri_from_name[name] == uri:
+                return name
             name = '%s [%d]' % (stripped_name, i)
             i += 1
+        return name
+
+    def insert_name_uri_mapping(self, name, uri):
+        name = self.create_unique_name(name, uri)
+        self._uri_from_name[name] = uri
+        self._name_from_uri[uri] = name
         return name
 
     def refresh_playlists_mapping(self):
@@ -256,49 +265,50 @@ class MpdContext(object):
         MPD
         """
         if self.core is not None:
-            self._playlist_uri_from_name.clear()
-            self._playlist_name_from_uri.clear()
             for playlist in self.core.playlists.playlists.get():
                 if not playlist.name:
                     continue
                 # TODO: add scheme to name perhaps 'foo (spotify)' etc.
-                name = self.create_unique_name(playlist.name)
-                self._playlist_uri_from_name[name] = playlist.uri
-                self._playlist_name_from_uri[playlist.uri] = name
+                name = self._invalid_playlist_chars.sub(' ', playlist.name)
+                self.insert_name_uri_mapping(name, playlist.uri)
 
     def lookup_playlist_from_name(self, name):
         """
         Helper function to retrieve a playlist from its unique MPD name.
         """
-        if not self._playlist_uri_from_name:
+        if not self._uri_from_name:
             self.refresh_playlists_mapping()
-        if name not in self._playlist_uri_from_name:
+        if name not in self._uri_from_name:
             return None
-        uri = self._playlist_uri_from_name[name]
+        uri = self._uri_from_name[name]
         return self.core.playlists.lookup(uri).get()
 
     def lookup_playlist_name_from_uri(self, uri):
         """
         Helper function to retrieve the unique MPD playlist name from its uri.
         """
-        if uri not in self._playlist_name_from_uri:
+        if uri not in self._name_from_uri:
             self.refresh_playlists_mapping()
-        return self._playlist_name_from_uri[uri]
+        return self._name_from_uri[uri]
 
     def browse(self, path, recursive=True, lookup=True):
-        # TODO: consider caching lookups for less work mapping path->uri
         path_parts = re.findall(r'[^/]+', path or '')
         root_path = '/'.join([''] + path_parts)
-        uri = None
 
-        for part in path_parts:
-            for ref in self.core.library.browse(uri).get():
-                if (ref.type in (ref.DIRECTORY, ref.ALBUM, ref.PLAYLIST) and
-                        ref.name == part):
-                    uri = ref.uri
-                    break
-            else:
-                raise exceptions.MpdNoExistError('Not found')
+        if root_path not in self._uri_from_name:
+            uri = None
+            for part in path_parts:
+                for ref in self.core.library.browse(uri).get():
+                    if (ref.type in (ref.DIRECTORY, ref.ALBUM, ref.PLAYLIST)
+                            and ref.name == part):
+                        uri = ref.uri
+                        break
+                else:
+                    raise exceptions.MpdNoExistError('Not found')
+            root_path = self.insert_name_uri_mapping(root_path, uri)
+
+        else:
+            uri = self._uri_from_name[root_path]
 
         if recursive:
             yield (root_path, None)
@@ -308,6 +318,8 @@ class MpdContext(object):
             base_path, future = path_and_futures.pop()
             for ref in future.get():
                 path = '/'.join([base_path, ref.name.replace('/', '')])
+                path = self.insert_name_uri_mapping(path, ref.uri)
+
                 if ref.type in (ref.DIRECTORY, ref.ALBUM, ref.PLAYLIST):
                     yield (path, None)
                     if recursive:
