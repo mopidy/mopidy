@@ -112,6 +112,8 @@ Backend implementations
 
 - `Mopidy-Spotify <https://github.com/mopidy/mopidy-spotify>`_
 
+- `Mopidy-Spotify-Tunigo <https://github.com/trygveaa/mopidy-spotify-tunigo>`_
+
 - :ref:`ext-stream`
 
 - `Mopidy-Subsonic <https://github.com/rattboi/mopidy-subsonic>`_
