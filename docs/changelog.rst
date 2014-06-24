@@ -141,6 +141,9 @@ This version has been released to npm as Mopidy.js v0.4.0.
   This is helpful as not all clients sort the returned items. (PR:
   :issue:`755`)
 
+- Browse now supports different entries with identical names. (PR:
+  :issue:`762`)
+
 - Search terms that are empty or consists of only whitespace are no longer
   included in the search query sent to backends. (PR: :issue:`758`)
 
