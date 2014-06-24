@@ -103,7 +103,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     'Sent WebSocket message to %s: %r',
                     self.request.remote_ip, response)
         except Exception as e:
-            logger.error('WebSocket request error:', e)
+            logger.error('WebSocket request error: %s', e)
             self.close()
 
 
