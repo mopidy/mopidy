@@ -1,8 +1,8 @@
 .. _raspberrypi-installation:
 
-****************************
-Installation on Raspberry Pi
-****************************
+*************************************
+Raspberry Pi: Mopidy on a credit card
+*************************************
 
 Mopidy runs nicely on a `Raspberry Pi <http://www.raspberrypi.org/>`_. As of
 January 2013, Mopidy will run with Spotify support on both the armel
@@ -71,8 +71,7 @@ you a lot better performance.
    command to e.g. ``/etc/rc.local``, which will be executed when the system is
    booting.
 
-#. Install Mopidy and its dependencies from `apt.mopidy.com
-   <http://apt.mopidy.com/>`_, as described in :ref:`installation`.
+#. Install Mopidy and its dependencies as described in :ref:`debian-install`.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`. Alternatively you may 

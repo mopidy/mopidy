@@ -33,7 +33,6 @@ Usage
     :maxdepth: 2
 
     installation/index
-    installation/raspberrypi
     config
     running
     troubleshooting
