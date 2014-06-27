@@ -12,7 +12,7 @@ Debian-based Linux distributions.
 Installation
 ============
 
-See the Debian/Ubuntu section in the :ref:`installation` section.
+See :ref:`debian-install`.
 
 
 Running as a system service
