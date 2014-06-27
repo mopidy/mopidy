@@ -44,7 +44,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def _startup(self):
         logger.debug('Starting HTTP server')
         self.app = tornado.web.Application(self._get_request_handlers())
-        self.app.listen(self.port, self.hostname)
+        self.app.listen(self.port,
+                        self.hostname if self.hostname != '::' else None)
         logger.info(
             'HTTP server running at http://%s:%s', self.hostname, self.port)
         tornado.ioloop.IOLoop.instance().start()
