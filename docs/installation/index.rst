@@ -104,68 +104,60 @@ package found in AUR.
    then you're ready to :doc:`run Mopidy </running>`.
 
 
-OS X: Install from Homebrew and pip
-===================================
+OS X: Install from Homebrew
+===========================
 
 If you are running OS X, you can install everything needed with Homebrew and
 pip.
 
-#. Install `Homebrew <https://github.com/mxcl/homebrew>`_.
+#. Install `Homebrew <https://github.com/Homebrew/homebrew>`_.
 
-   If you are already using Homebrew, make sure your installation is up to
+#. If you are already using Homebrew, make sure your installation is up to
    date before you continue::
 
        brew update
        brew upgrade
 
-#. Mopidy requires GStreamer 0.10, but Homebrew's main formula repo has
-   upgraded its GStreamer packages to 1.0. Thus, you'll need to add an
-   alternative formula repo (aka "tap") that has the old GStreamer formulas::
+#. Mopidy works out of box if you have installed Python from Homebrew::
 
-       brew tap homebrew/versions
+       brew install python
 
-#. Install the required packages from Homebrew::
+   .. note::
 
-       brew install gst-python010 gst-plugins-good010 gst-plugins-ugly010
+       If you want to use the Python version bundled with OS X, you'll need to
+       include Python packages installed by Homebrew in your ``PYTHONPATH``.
+       If you don't do this, the ``mopidy`` executable will not find its
+       dependencies and will crash.
 
-#. Make sure to include Homebrew's Python ``site-packages`` directory in your
-   ``PYTHONPATH``. If you don't include this, Mopidy will not find GStreamer
-   and it will crash.
+       You can either amend your ``PYTHONPATH`` permanently, by adding the
+       following statement to your shell's init file, e.g. ``~/.bashrc``::
 
-   You can either amend your ``PYTHONPATH`` permanently, by adding the
-   following statement to your shell's init file, e.g. ``~/.bashrc``::
+           export PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages:$PYTHONPATH
 
-       export PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages:$PYTHONPATH
+       Or, you can prefix the Mopidy command every time you run it::
 
-   Or, you can prefix the Mopidy command every time you run it::
+           PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages mopidy
 
-       PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages mopidy
+#. Mopidy has its own `Homebrew formula repo
+   <https://github.com/mopidy/homebrew-mopidy>`_, called a "tap". To enable our
+   Homebrew tap, run::
 
-#. Next up, you need to install some Python packages. To do so, we use pip. If
-   you don't have the ``pip`` command, you can install it now::
+       brew tap mopidy/mopidy
 
-       sudo easy_install pip
+#. To install Mopidy, run::
 
-#. Then, install the latest release of Mopidy using pip::
+       brew install mopidy
 
-       sudo pip install -U mopidy
+#. Optional: If you want to use any Mopidy extensions, like Spotify support or
+   Last.fm scrobbling, the Homebrew tap has formulas for several Mopidy
+   extensions as well.
 
-#. Optionally, install additional extensions to Mopidy.
+   To list all the extensions available from our tap, you can run::
 
-   For HTTP frontend support, so you can run Mopidy web clients::
+       brew search mopidy
 
-       sudo pip install -U mopidy[http]
-
-   For playing music from Spotify::
-
-       brew install libspotify
-       sudo pip install -U mopidy-spotify
-
-   For scrobbling to Last.fm::
-
-       sudo pip install -U mopidy-scrobbler
-
-   For more extensions, see :ref:`ext`.
+   For a full list of available Mopidy extensions, including those not
+   installable from Homebrew, see :ref:`ext`.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
