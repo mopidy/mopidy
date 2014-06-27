@@ -107,6 +107,20 @@ A Mopidy web client made by Argonaut in SF for their office jukebox.
 -- http://blog.argonautinc.com/post/83027259908/music-is-pretty-important-to-our-culture-and
 
 
+Mopify
+======
+
+An in-development web client that clones the Spotify user interface on top of
+Mopidy and the Spotify web APIs.
+
+    A Mopidy web client based on the Spotify webbased interface. If you use
+    Mopidy in combination with local music this client probably won't work.
+    This client uses the Spotify and EchoNest API to speed up searching and
+    artist/album lookup.
+
+    -- https://github.com/dirkgroenen/Mopify
+
+
 Other web clients
 =================
 
