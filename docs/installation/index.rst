@@ -16,13 +16,13 @@ Debian/Ubuntu: Install from apt.mopidy.com
 ==========================================
 
 If you run a Debian based Linux distribution, like Ubuntu, the easiest way to
-install Mopidy is from the `Mopidy APT archive <http://apt.mopidy.com/>`_. When
-installing from the APT archive, you will automatically get updates to Mopidy
-in the same way as you get updates to the rest of your distribution.
+install Mopidy is from the `Mopidy APT archive <https://apt.mopidy.com/>`_.
+When installing from the APT archive, you will automatically get updates to
+Mopidy in the same way as you get updates to the rest of your distribution.
 
 #. Add the archive's GPG key::
 
-       wget -q -O - http://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
+       wget -q -O - https://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
 
 #. Add the following to ``/etc/apt/sources.list``, or if you have the directory
    ``/etc/apt/sources.list.d/``, add it to a file called ``mopidy.list`` in
@@ -35,15 +35,16 @@ in the same way as you get updates to the rest of your distribution.
    For the lazy, you can simply run the following command to create
    ``/etc/apt/sources.list.d/mopidy.list``::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/mopidy.list
 
 #. Install Mopidy and all dependencies::
 
        sudo apt-get update
        sudo apt-get install mopidy
 
-   Note that this will only install the main Mopidy package. For e.g. Spotify
-   or SoundCloud support you need to install the respective extension packages.
+#. Optional: If you want to use any Mopidy extensions, like Spotify support or
+   Last.fm scrobbling, you need to install additional packages.
+
    To list all the extensions available from apt.mopidy.com, you can run::
 
        apt-cache search mopidy
@@ -95,6 +96,9 @@ package found in AUR.
 #. Optional: If you want to use any Mopidy extensions, like Spotify support or
    Last.fm scrobbling, AUR also has `packages for several Mopidy extensions
    <https://aur.archlinux.org/packages/?K=mopidy>`_.
+
+   For a full list of available Mopidy extensions, including those not
+   installable from AUR, see :ref:`ext`.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
@@ -293,7 +297,7 @@ can install Mopidy from PyPI using pip.
 
           sudo pip install -U mopidy-mpris
 
-#. For more Mopidy extensions, see :ref:`ext`.
+#. For a full list of available Mopidy extensions, see :ref:`ext`.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
