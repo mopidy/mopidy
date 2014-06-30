@@ -155,7 +155,6 @@ def _gstreamer_check_elements():
 
         # MP3 encoding and decoding
         'mp3parse',
-        'mad',
         'id3demux',
         'id3v2mux',
         'lame',
