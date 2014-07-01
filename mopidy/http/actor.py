@@ -63,19 +63,18 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         handlers.WebSocketHandler.broadcast(message)
 
     def _get_request_handlers(self):
-        static_dir = self.config['http']['static_dir']
         request_handlers = []
 
         request_handlers.extend(self._get_app_request_handlers())
         request_handlers.extend(self._get_static_request_handlers())
 
         # Either default Mopidy or user defined path to files
-        if (static_dir and not os.path.exists(static_dir)):
+        static_dir = self.config['http']['static_dir']
+        if static_dir and not os.path.exists(static_dir):
             logger.warning(
-                'Configured http/static_dir does not exist: %s\n'
-                '  Falling back to default http handler', static_dir)
+                'Configured http/static_dir %s does not exist. '
+                'Falling back to default HTTP handler.', static_dir)
             static_dir = None
-
         if static_dir:
             request_handlers.append((r'/(.*)', handlers.StaticFileHandler, {
                 'path': self.config['http']['static_dir'],
