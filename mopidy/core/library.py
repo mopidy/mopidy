@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import collections
+import operator
 import urlparse
 
 import pykka
@@ -62,8 +63,8 @@ class LibraryController(object):
         """
         if uri is None:
             backends = self.backends.with_library_browse.values()
-            root = [b.library.root_directory.get() for b in backends]
-            return list(collections.OrderedDict.fromkeys(root))
+            unique_dirs = {b.library.root_directory.get() for b in backends}
+            return sorted(unique_dirs, key=operator.attrgetter('name'))
 
         scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
