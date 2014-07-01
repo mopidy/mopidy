@@ -19,7 +19,7 @@ class CoreLibraryTest(unittest.TestCase):
 
         dummy2_root = Ref.directory(uri='dummy2:directory', name='dummy2')
         self.backend2 = mock.Mock()
-        self.backend2.uri_schemes.get.return_value = ['dummy2']
+        self.backend2.uri_schemes.get.return_value = ['dummy2', 'du2']
         self.library2 = mock.Mock(spec=backend.LibraryProvider)
         self.library2.root_directory.get.return_value = dummy2_root
         self.backend2.library = self.library2
@@ -138,7 +138,7 @@ class CoreLibraryTest(unittest.TestCase):
         self.core.library.refresh()
 
         self.library1.refresh.assert_called_once_with(None)
-        self.library2.refresh.assert_called_once_with(None)
+        self.library2.refresh.assert_called_twice_with(None)
 
     def test_find_exact_combines_results_from_all_backends(self):
         track1 = Track(uri='dummy1:a')

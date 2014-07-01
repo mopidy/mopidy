@@ -62,7 +62,8 @@ class LibraryController(object):
         """
         if uri is None:
             backends = self.backends.with_library_browse.values()
-            return [b.library.root_directory.get() for b in backends]
+            root = [b.library.root_directory.get() for b in backends]
+            return list(collections.OrderedDict.fromkeys(root))
 
         scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
