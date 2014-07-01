@@ -1,3 +1,6 @@
+# Automate tasks
+fabric
+
 # Build documentation
 sphinx
 
