@@ -4,6 +4,14 @@ OS X: Install from Homebrew
 
 If you are running OS X, you can install everything needed with Homebrew.
 
+#. Install Xcode command line developer tools. Do this even if you already have
+   Xcode installed::
+
+       xcode-select --install
+
+#. Install `XQuartz <http://xquartz.macosforge.org/>`_. This is needed by
+   GStreamer which Mopidy use heavily.
+
 #. Install `Homebrew <https://github.com/Homebrew/homebrew>`_.
 
 #. If you are already using Homebrew, make sure your installation is up to
