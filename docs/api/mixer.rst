@@ -14,4 +14,4 @@ Audio mixer API
 Mixer implementations
 =====================
 
-- TODO
+- `Mopidy-ALSAMixer <https://github.com/mopidy/mopidy-alsamixer>`_
