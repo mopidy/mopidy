@@ -304,6 +304,7 @@ class RootCommand(Command):
         logger.debug(
             'Available Mopidy mixers: %s',
             ', '.join(m.__name__ for m in mixer_classes) or 'none')
+
         selected_mixers = [
             m for m in mixer_classes if m.name == config['audio']['mixer']]
         if len(selected_mixers) != 1:
@@ -313,8 +314,18 @@ class RootCommand(Command):
                 ', '.join([m.name for m in mixer_classes]))
             process.exit_process()
         mixer_class = selected_mixers[0]
+
         logger.info('Starting Mopidy mixer: %s', mixer_class.__name__)
-        return mixer_class.start(config=config, audio=audio).proxy()
+        mixer = mixer_class.start(config=config, audio=audio).proxy()
+
+        volume = config['audio']['mixer_volume']
+        if volume is not None:
+            mixer.set_volume(volume)
+            logger.info('Mixer volume set to %d', volume)
+        else:
+            logger.debug('Mixer volume left unchanged')
+
+        return mixer
 
     def start_core(self, mixer, backends):
         logger.info('Starting Mopidy core')
