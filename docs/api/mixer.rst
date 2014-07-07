@@ -15,3 +15,5 @@ Mixer implementations
 =====================
 
 - `Mopidy-ALSAMixer <https://github.com/mopidy/mopidy-alsamixer>`_
+
+- Mopidy-SoftwareMixer (see :mod:`mopidy.softwaremixer` in the source code)
