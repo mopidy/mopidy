@@ -20,7 +20,7 @@ class CoreActorTest(unittest.TestCase):
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.backend2.actor_ref.actor_class.__name__ = b'B2'
 
-        self.core = Core(audio=None, backends=[self.backend1, self.backend2])
+        self.core = Core(mixer=None, backends=[self.backend1, self.backend2])
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
@@ -37,7 +37,7 @@ class CoreActorTest(unittest.TestCase):
         self.assertRaisesRegexp(
             AssertionError,
             'Cannot add URI scheme dummy1 for B2, it is already handled by B1',
-            Core, audio=None, backends=[self.backend1, self.backend2])
+            Core, mixer=None, backends=[self.backend1, self.backend2])
 
     def test_version(self):
         self.assertEqual(self.core.version, versioning.get_version())

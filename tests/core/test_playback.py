@@ -36,7 +36,7 @@ class CorePlaybackTest(unittest.TestCase):
             Track(uri='dummy1:b', length=40000),
         ]
 
-        self.core = core.Core(audio=None, backends=[
+        self.core = core.Core(mixer=None, backends=[
             self.backend1, self.backend2, self.backend3])
         self.core.tracklist.add(self.tracks)
 

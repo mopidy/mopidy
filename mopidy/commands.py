@@ -269,7 +269,7 @@ class RootCommand(Command):
             audio = self.start_audio(config)
             mixer = self.start_mixer(config, audio, mixer_classes)
             backends = self.start_backends(config, backend_classes, audio)
-            core = self.start_core(audio, mixer, backends)
+            core = self.start_core(mixer, backends)
             self.start_frontends(config, frontend_classes, core)
             loop.run()
         except KeyboardInterrupt:
@@ -316,9 +316,9 @@ class RootCommand(Command):
         logger.info('Starting Mopidy mixer: %s', mixer_class.__name__)
         return mixer_class.start(config=config, audio=audio).proxy()
 
-    def start_core(self, audio, mixer, backends):
+    def start_core(self, mixer, backends):
         logger.info('Starting Mopidy core')
-        return Core.start(audio=audio, backends=backends).proxy()
+        return Core.start(mixer=mixer, backends=backends).proxy()
 
     def start_frontends(self, config, frontend_classes, core):
         logger.info(

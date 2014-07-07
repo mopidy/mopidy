@@ -32,7 +32,7 @@ class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):
     """The tracklist controller. An instance of
     :class:`mopidy.core.TracklistController`."""
 
-    def __init__(self, audio=None, backends=None):
+    def __init__(self, mixer=None, backends=None):
         super(Core, self).__init__()
 
         self.backends = Backends(backends)
@@ -40,7 +40,7 @@ class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):
         self.library = LibraryController(backends=self.backends, core=self)
 
         self.playback = PlaybackController(
-            audio=audio, backends=self.backends, core=self)
+            mixer=mixer, backends=self.backends, core=self)
 
         self.playlists = PlaylistsController(
             backends=self.backends, core=self)

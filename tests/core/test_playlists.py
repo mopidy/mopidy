@@ -34,7 +34,7 @@ class PlaylistsTest(unittest.TestCase):
         self.pl2b = Playlist(name='B', tracks=[Track(uri='dummy2:b')])
         self.sp2.playlists.get.return_value = [self.pl2a, self.pl2b]
 
-        self.core = core.Core(audio=None, backends=[
+        self.core = core.Core(mixer=None, backends=[
             self.backend3, self.backend1, self.backend2])
 
     def test_get_playlists_combines_result_from_backends(self):

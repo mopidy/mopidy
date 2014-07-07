@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 class PlaybackController(object):
     pykka_traversable = True
 
-    def __init__(self, audio, backends, core):
-        self.audio = audio
+    def __init__(self, mixer, backends, core):
+        self.mixer = mixer
         self.backends = backends
         self.core = core
 
@@ -88,15 +88,15 @@ class PlaybackController(object):
     """Time position in milliseconds."""
 
     def get_volume(self):
-        if self.audio:
-            return self.audio.get_volume().get()
+        if self.mixer:
+            return self.mixer.get_volume().get()
         else:
             # For testing
             return self._volume
 
     def set_volume(self, volume):
-        if self.audio:
-            self.audio.set_volume(volume)
+        if self.mixer:
+            self.mixer.set_volume(volume)
         else:
             # For testing
             self._volume = volume
@@ -107,16 +107,16 @@ class PlaybackController(object):
     """Volume as int in range [0..100] or :class:`None`"""
 
     def get_mute(self):
-        if self.audio:
-            return self.audio.get_mute().get()
+        if self.mixer:
+            return self.mixer.get_mute().get()
         else:
             # For testing
             return self._mute
 
     def set_mute(self, value):
         value = bool(value)
-        if self.audio:
-            self.audio.set_mute(value)
+        if self.mixer:
+            self.mixer.set_mute(value)
         else:
             # For testing
             self._mute = value

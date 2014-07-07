@@ -30,7 +30,7 @@ class CoreLibraryTest(unittest.TestCase):
         self.backend3.has_library().get.return_value = False
         self.backend3.has_library_browse().get.return_value = False
 
-        self.core = core.Core(audio=None, backends=[
+        self.core = core.Core(mixer=None, backends=[
             self.backend1, self.backend2, self.backend3])
 
     def test_browse_root_returns_dir_ref_for_each_lib_with_root_dir_name(self):
