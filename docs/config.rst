@@ -91,14 +91,6 @@ Audio configuration
     Setting the config value to blank leaves the audio mixer volume unchanged.
     For the software mixer blank means 100.
 
-.. confval:: audio/mixer_track
-
-    Audio mixer track to use.
-
-    Name of the mixer track to use. If this is not set we will try to find the
-    master output track. As an example, using ``alsamixer`` you would typically
-    set this to ``Master`` or ``PCM``.
-
 .. confval:: audio/output
 
     Audio output to use.
