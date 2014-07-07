@@ -4,6 +4,44 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.20.0 (UNRELEASED)
+====================
+
+**Audio**
+
+- Removed support for GStreamer mixers. GStreamer 1.x does not support volume
+  control, so we changed to use software mixing by default in v0.17.0. Now,
+  we're removing support for all other GStreamer mixers and are reintroducing
+  mixers as something extensions can provide independently of GStreamer.
+  (Fixes: :issue:`665`, PR: :issue:`760`)
+
+- Changed the :confval:`audio/mixer` config value to refer to Mopidy mixer
+  extensions instead of GStreamer mixers. The default value, ``software``,
+  still has the same behavior. All other values will either no longer work or
+  will at the very least require you to install an additional extension.
+
+- Changed the :confval:`audio/mixer_volume` config value behavior from
+  affecting GStreamer mixers to affecting Mopidy mixer extensions instead. The
+  end result should be the same without any changes to this config value.
+
+- Deprecated the :confval:`audio/mixer_track` config value. This config value
+  is no longer in use. Mixer extensions that needs additional configuration
+  handle this themselves.
+
+**Mixers**
+
+- Added new :class:`mopidy.mixer.Mixer` API which can be implemented by
+  extensions.
+
+- Created a bundled extension, :mod:`mopidy.softwaremixer`, for controlling
+  volume in software in GStreamer's pipeline. This is Mopidy's default mixer.
+  To use this mixer, set :confval:`audio/mixer` to ``software``.
+
+- Created an external extension, `Mopidy-ALSAMixer
+  <https://github.com/mopidy/mopidy-alsamixer/>`_, for controlling volume with
+  hardware through ALSA. To use this mixer, install the extension, and set
+  :confval:`audio/mixer` to ``alsamixer``.
+
 
 v0.19.0 (UNRELEASED)
 ====================
