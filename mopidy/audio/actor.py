@@ -10,15 +10,13 @@ import gst  # noqa
 
 import pykka
 
-from mopidy.audio import mixers, playlists, utils
+from mopidy.audio import playlists, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.utils import process
 
 
 logger = logging.getLogger(__name__)
-
-mixers.register_mixers()
 
 playlists.register_typefinders()
 playlists.register_elements()
@@ -60,12 +58,6 @@ class Audio(pykka.ThreadingActor):
         self._playbin = None
         self._signal_ids = {}  # {(element, event): signal_id}
 
-        self._mixer = None
-        self._mixer_track = None
-        self._mixer_scale = None
-        self._software_mixing = False
-        self._volume_set = None
-
         self._appsrc = None
         self._appsrc_caps = None
         self._appsrc_need_data_callback = None
@@ -77,7 +69,6 @@ class Audio(pykka.ThreadingActor):
             self._setup_playbin()
             self._setup_output()
             self._setup_visualizer()
-            self._setup_mixer()
             self._setup_message_processor()
         except gobject.GError as ex:
             logger.exception(ex)
@@ -85,7 +76,6 @@ class Audio(pykka.ThreadingActor):
 
     def on_stop(self):
         self._teardown_message_processor()
-        self._teardown_mixer()
         self._teardown_playbin()
 
     def _connect(self, element, event, *args):
@@ -203,86 +193,6 @@ class Audio(pykka.ThreadingActor):
             logger.error(
                 'Failed to create audio visualizer "%s": %s',
                 visualizer_element, ex)
-
-    def _setup_mixer(self):
-        mixer_desc = self._config['audio']['mixer']
-        track_desc = self._config['audio']['mixer_track']
-        volume = self._config['audio']['mixer_volume']
-
-        if mixer_desc is None:
-            logger.info('Not setting up audio mixer')
-            return
-
-        if mixer_desc == 'software':
-            self._software_mixing = True
-            logger.info('Audio mixer is using software mixing')
-            if volume is not None:
-                self.set_volume(volume)
-                logger.info('Audio mixer volume set to %d', volume)
-            return
-
-        try:
-            mixerbin = gst.parse_bin_from_description(
-                mixer_desc, ghost_unconnected_pads=False)
-        except gobject.GError as ex:
-            logger.warning(
-                'Failed to create audio mixer "%s": %s', mixer_desc, ex)
-            return
-
-        # We assume that the bin will contain a single mixer.
-        mixer = mixerbin.get_by_interface(b'GstMixer')
-        if not mixer:
-            logger.warning(
-                'Did not find any audio mixers in "%s"', mixer_desc)
-            return
-
-        if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
-            logger.warning(
-                'Setting audio mixer "%s" to READY failed', mixer_desc)
-            return
-
-        track = self._select_mixer_track(mixer, track_desc)
-        if not track:
-            logger.warning('Could not find usable audio mixer track')
-            return
-
-        self._mixer = mixer
-        self._mixer_track = track
-        self._mixer_scale = (
-            self._mixer_track.min_volume, self._mixer_track.max_volume)
-
-        logger.info(
-            'Audio mixer set to "%s" using track "%s"',
-            str(mixer.get_factory().get_name()).decode('utf-8'),
-            str(track.label).decode('utf-8'))
-
-        if volume is not None:
-            self.set_volume(volume)
-            logger.info('Audio mixer volume set to %d', volume)
-
-    def _select_mixer_track(self, mixer, track_label):
-        # Ignore tracks without volumes, then look for track with
-        # label equal to the audio/mixer_track config value, otherwise fallback
-        # to first usable track hoping the mixer gave them to us in a sensible
-        # order.
-
-        usable_tracks = []
-        for track in mixer.list_tracks():
-            if not mixer.get_volume(track):
-                continue
-
-            if track_label and track.label == track_label:
-                return track
-            elif track.flags & (gst.interfaces.MIXER_TRACK_MASTER |
-                                gst.interfaces.MIXER_TRACK_OUTPUT):
-                usable_tracks.append(track)
-
-        if usable_tracks:
-            return usable_tracks[0]
-
-    def _teardown_mixer(self):
-        if self._mixer is not None:
-            self._mixer.set_state(gst.STATE_NULL)
 
     def _setup_message_processor(self):
         bus = self._playbin.get_bus()
@@ -514,108 +424,49 @@ class Audio(pykka.ThreadingActor):
 
     def get_volume(self):
         """
-        Get volume level of the installed mixer.
+        Get volume level of the software mixer.
 
         Example values:
 
         0:
-            Muted.
+            Minimum volume.
         100:
-            Max volume for given system.
-        :class:`None`:
-            No mixer present, so the volume is unknown.
+            Max volume.
 
-        :rtype: int in range [0..100] or :class:`None`
+        :rtype: int in range [0..100]
         """
-        if self._software_mixing:
-            return int(round(self._playbin.get_property('volume') * 100))
-
-        if self._mixer is None:
-            return None
-
-        volumes = self._mixer.get_volume(self._mixer_track)
-        avg_volume = float(sum(volumes)) / len(volumes)
-
-        internal_scale = (0, 100)
-
-        if self._volume_set is not None:
-            volume_set_on_mixer_scale = self._rescale(
-                self._volume_set, old=internal_scale, new=self._mixer_scale)
-        else:
-            volume_set_on_mixer_scale = None
-
-        if volume_set_on_mixer_scale == avg_volume:
-            return self._volume_set
-        else:
-            return self._rescale(
-                avg_volume, old=self._mixer_scale, new=internal_scale)
+        return int(round(self._playbin.get_property('volume') * 100))
 
     def set_volume(self, volume):
         """
-        Set volume level of the installed mixer.
+        Set volume level of the software mixer.
 
         :param volume: the volume in the range [0..100]
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        if self._software_mixing:
-            self._playbin.set_property('volume', volume / 100.0)
-            return True
-
-        if self._mixer is None:
-            return False
-
-        self._volume_set = volume
-
-        internal_scale = (0, 100)
-
-        volume = self._rescale(
-            volume, old=internal_scale, new=self._mixer_scale)
-
-        volumes = (volume,) * self._mixer_track.num_channels
-        self._mixer.set_volume(self._mixer_track, volumes)
-
-        return self._mixer.get_volume(self._mixer_track) == volumes
-
-    def _rescale(self, value, old=None, new=None):
-        """Convert value between scales."""
-        new_min, new_max = new
-        old_min, old_max = old
-        if old_min == old_max:
-            return old_max
-        scaling = float(new_max - new_min) / (old_max - old_min)
-        return int(round(scaling * (value - old_min) + new_min))
+        self._playbin.set_property('volume', volume / 100.0)
+        return True
 
     def get_mute(self):
         """
-        Get mute status of the installed mixer.
+        Get mute status of the software mixer.
 
         :rtype: :class:`True` if muted, :class:`False` if unmuted,
           :class:`None` if no mixer is installed.
         """
-        if self._software_mixing:
-            return self._playbin.get_property('mute')
-
-        if self._mixer_track is None:
-            return None
-
-        return bool(self._mixer_track.flags & gst.interfaces.MIXER_TRACK_MUTE)
+        return self._playbin.get_property('mute')
 
     def set_mute(self, mute):
         """
-        Mute or unmute of the installed mixer.
+        Mute or unmute of the software mixer.
 
         :param mute: Wether to mute the mixer or not.
         :type mute: bool
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        if self._software_mixing:
-            return self._playbin.set_property('mute', bool(mute))
-
-        if self._mixer_track is None:
-            return False
-
-        return self._mixer.set_mute(self._mixer_track, bool(mute))
+        self._playbin.set_property('mute', bool(mute))
+        return True
 
     def set_metadata(self, track):
         """
