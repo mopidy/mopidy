@@ -4,6 +4,14 @@ from __future__ import unicode_literals
 class Mixer(object):
     """Audio mixer API"""
 
+    name = None
+    """Name of the mixer.
+
+    Used when configuring what mixer to use. Should usually match the
+    :attr:`~mopidy.ext.Extension.ext_name` of the extension providing the
+    mixer.
+    """
+
     def get_volume(self):
         """
         Get volume level of the mixer.
