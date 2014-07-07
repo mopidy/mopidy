@@ -261,13 +261,15 @@ class RootCommand(Command):
     def run(self, args, config):
         loop = gobject.MainLoop()
 
+        mixer_classes = args.registry['mixer']
         backend_classes = args.registry['backend']
         frontend_classes = args.registry['frontend']
 
         try:
             audio = self.start_audio(config)
+            mixer = self.start_mixer(config, audio, mixer_classes)
             backends = self.start_backends(config, backend_classes, audio)
-            core = self.start_core(audio, backends)
+            core = self.start_core(audio, mixer, backends)
             self.start_frontends(config, frontend_classes, core)
             loop.run()
         except KeyboardInterrupt:
@@ -277,6 +279,7 @@ class RootCommand(Command):
             loop.quit()
             self.stop_frontends(frontend_classes)
             self.stop_core()
+            self.stop_mixer(mixer_classes)
             self.stop_backends(backend_classes)
             self.stop_audio()
             process.stop_remaining_actors()
@@ -297,7 +300,23 @@ class RootCommand(Command):
 
         return backends
 
-    def start_core(self, audio, backends):
+    def start_mixer(self, config, audio, mixer_classes):
+        logger.debug(
+            'Available Mopidy mixers: %s',
+            ', '.join(m.__name__ for m in mixer_classes) or 'none')
+        selected_mixers = [
+            m for m in mixer_classes if m.name == config['audio']['mixer']]
+        if len(selected_mixers) != 1:
+            logger.error(
+                'Did not find unique mixer "%s". Alternatives are: %s',
+                config['audio']['mixer'],
+                ', '.join([m.name for m in mixer_classes]))
+            process.exit_process()
+        mixer_class = selected_mixers[0]
+        logger.info('Starting Mopidy mixer: %s', mixer_class.__name__)
+        return mixer_class.start(config=config, audio=audio).proxy()
+
+    def start_core(self, audio, mixer, backends):
         logger.info('Starting Mopidy core')
         return Core.start(audio=audio, backends=backends).proxy()
 
@@ -317,6 +336,11 @@ class RootCommand(Command):
     def stop_core(self):
         logger.info('Stopping Mopidy core')
         process.stop_actors_by_class(Core)
+
+    def stop_mixer(self, mixer_classes):
+        logger.info('Stopping Mopidy mixer')
+        for mixer_class in mixer_classes:
+            process.stop_actors_by_class(mixer_class)
 
     def stop_backends(self, backend_classes):
         logger.info('Stopping Mopidy backends')
