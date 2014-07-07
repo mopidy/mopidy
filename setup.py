@@ -42,6 +42,7 @@ setup(
             'http = mopidy.http:Extension',
             'local = mopidy.local:Extension',
             'mpd = mopidy.mpd:Extension',
+            'softwaremixer = mopidy.softwaremixer:Extension',
             'stream = mopidy.stream:Extension',
         ],
     },
