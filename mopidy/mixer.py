@@ -25,6 +25,8 @@ class Mixer(object):
         :class:`None`:
             Volume is unknown.
 
+        *MAY be implemented by subclass.*
+
         :rtype: int in range [0..100] or :class:`None`
         """
         return None
@@ -32,6 +34,8 @@ class Mixer(object):
     def set_volume(self, volume):
         """
         Set volume level of the mixer.
+
+        *MAY be implemented by subclass.*
 
         :param volume: Volume in the range [0..100]
         :type volume: int
@@ -43,6 +47,8 @@ class Mixer(object):
         """
         Get mute status of the mixer.
 
+        *MAY be implemented by subclass.*
+
         :rtype: :class:`True` if muted, :class:`False` if unmuted,
           :class:`None` if unknown.
         """
@@ -51,6 +57,8 @@ class Mixer(object):
     def set_mute(self, muted):
         """
         Mute or unmute the mixer.
+
+        *MAY be implemented by subclass.*
 
         :param muted: :class:`True` to mute, :class:`False` to unmute
         :type muted: bool
