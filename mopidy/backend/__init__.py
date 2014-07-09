@@ -12,6 +12,11 @@ class Backend(object):
     :exc:`~mopidy.exceptions.BackendError` with a descriptive error message.
     This will make Mopidy print the error message and exit so that the user can
     fix the issue.
+
+    :param config: the entire Mopidy configuration
+    :type config: dict
+    :param audio: actor proxy for the audio subsystem
+    :type audio: :class:`pykka.ActorProxy` for :class:`mopidy.audio.Audio`
     """
 
     #: Actor proxy to an instance of :class:`mopidy.audio.Audio`.
