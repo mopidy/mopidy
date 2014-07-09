@@ -2,7 +2,13 @@ from __future__ import unicode_literals
 
 
 class Mixer(object):
-    """Audio mixer API"""
+    """Audio mixer API
+
+    If the mixer has problems during initialization it should raise
+    :exc:`~mopidy.exceptions.MixerError` with a descriptive error message. This
+    will make Mopidy print the error message and exit so that the user can fix
+    the issue.
+    """
 
     name = None
     """Name of the mixer.
