@@ -5,7 +5,7 @@ import itertools
 
 import pykka
 
-from mopidy import audio, backend
+from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
 from mopidy.core.library import LibraryController
 from mopidy.core.listener import CoreListener
@@ -15,7 +15,10 @@ from mopidy.core.tracklist import TracklistController
 from mopidy.utils import versioning
 
 
-class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):
+class Core(
+        pykka.ThreadingActor, audio.AudioListener, backend.BackendListener,
+        mixer.MixerListener):
+
     library = None
     """The library controller. An instance of
     :class:`mopidy.core.LibraryController`."""
@@ -80,6 +83,14 @@ class Core(pykka.ThreadingActor, audio.AudioListener, backend.BackendListener):
     def playlists_loaded(self):
         # Forward event from backend to frontends
         CoreListener.send('playlists_loaded')
+
+    def volume_changed(self, volume):
+        # Forward event from mixer to frontends
+        CoreListener.send('volume_changed', volume=volume)
+
+    def mute_changed(self, muted):
+        # Forward event from mixer to frontends
+        CoreListener.send('mute_changed', mute=muted)
 
 
 class Backends(list):
