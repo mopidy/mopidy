@@ -7,7 +7,7 @@ class Mixer(object):
     name = None
     """Name of the mixer.
 
-    Used when configuring what mixer to use. Should usually match the
+    Used when configuring what mixer to use. Should match the
     :attr:`~mopidy.ext.Extension.ext_name` of the extension providing the
     mixer.
     """
