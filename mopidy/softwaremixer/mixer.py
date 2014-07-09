@@ -25,9 +25,11 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
 
     def set_volume(self, volume):
         self.audio.set_volume(volume)
+        self.trigger_volume_changed(volume)
 
     def get_mute(self):
         return self.audio.get_mute().get()
 
     def set_mute(self, muted):
         self.audio.set_mute(muted)
+        self.trigger_mute_changed(muted)
