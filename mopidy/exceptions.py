@@ -16,7 +16,19 @@ class MopidyException(Exception):
         self._message = message
 
 
+class BackendError(MopidyException):
+    pass
+
+
 class ExtensionError(MopidyException):
+    pass
+
+
+class FrontendError(MopidyException):
+    pass
+
+
+class MixerError(MopidyException):
     pass
 
 
