@@ -10,7 +10,7 @@ import glib
 
 import gobject
 
-from mopidy import config as config_lib
+from mopidy import config as config_lib, exceptions
 from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.utils import deps, process, versioning
@@ -270,9 +270,12 @@ class RootCommand(Command):
             core = self.start_core(audio, backends)
             self.start_frontends(config, frontend_classes, core)
             loop.run()
+        except (exceptions.BackendError,
+                exceptions.FrontendError,
+                exceptions.MixerError):
+            logger.info('Initialization error. Exiting...')
         except KeyboardInterrupt:
             logger.info('Interrupted. Exiting...')
-            return
         finally:
             loop.quit()
             self.stop_frontends(frontend_classes)
@@ -292,8 +295,15 @@ class RootCommand(Command):
 
         backends = []
         for backend_class in backend_classes:
-            backend = backend_class.start(config=config, audio=audio).proxy()
-            backends.append(backend)
+            try:
+                backend = backend_class.start(
+                    config=config, audio=audio).proxy()
+                backends.append(backend)
+            except exceptions.BackendError as exc:
+                logger.error(
+                    'Backend (%s) initialization error: %s',
+                    backend_class.__name__, exc.message)
+                raise
 
         return backends
 
@@ -307,7 +317,13 @@ class RootCommand(Command):
             ', '.join(f.__name__ for f in frontend_classes) or 'none')
 
         for frontend_class in frontend_classes:
-            frontend_class.start(config=config, core=core)
+            try:
+                frontend_class.start(config=config, core=core)
+            except exceptions.FrontendError as exc:
+                logger.error(
+                    'Frontend (%s) initialization error: %s',
+                    frontend_class.__name__, exc.message)
+                raise
 
     def stop_frontends(self, frontend_classes):
         logger.info('Stopping Mopidy frontends')
