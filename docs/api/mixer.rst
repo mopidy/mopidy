@@ -10,6 +10,9 @@ Audio mixer API
 .. autoclass:: mopidy.mixer.Mixer
     :members:
 
+.. autoclass:: mopidy.mixer.MixerListener
+    :members:
+
 
 Mixer implementations
 =====================
