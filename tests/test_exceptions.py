@@ -15,3 +15,7 @@ class ExceptionsTest(unittest.TestCase):
     def test_extension_error_is_a_mopidy_exception(self):
         self.assert_(issubclass(
             exceptions.ExtensionError, exceptions.MopidyException))
+
+    def test_scanner_error_is_a_mopidy_exception(self):
+        self.assert_(issubclass(
+            exceptions.ScannerError, exceptions.MopidyException))
