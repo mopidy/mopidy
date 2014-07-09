@@ -16,7 +16,6 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
 
     def __init__(self, config, audio):
         super(SoftwareMixer, self).__init__()
-        self.config = config
         self.audio = audio
 
         logger.info('Mixing using GStreamer software mixing')
