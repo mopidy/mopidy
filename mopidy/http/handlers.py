@@ -152,6 +152,9 @@ class ClientListHandler(tornado.web.RequestHandler):
         self.apps = apps
         self.statics = statics
 
+    def get_template_path(self):
+        return os.path.dirname(__file__)
+
     def get(self):
         set_mopidy_headers(self)
 
