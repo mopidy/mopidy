@@ -19,8 +19,6 @@ class Mixer(object):
 
     :param config: the entire Mopidy configuration
     :type config: dict
-    :param audio: actor proxy for the audio subsystem
-    :type audio: :class:`pykka.ActorProxy` for :class:`mopidy.audio.Audio`
     """
 
     name = None
@@ -122,7 +120,7 @@ class MixerListener(listener.Listener):
 
     @staticmethod
     def send(event, **kwargs):
-        """Helper to allow calling of audio listener events"""
+        """Helper to allow calling of mixer listener events"""
         listener.send_async(MixerListener, event, **kwargs)
 
     def volume_changed(self, volume):

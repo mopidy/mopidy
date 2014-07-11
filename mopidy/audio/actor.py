@@ -50,10 +50,11 @@ class Audio(pykka.ThreadingActor):
     state = PlaybackState.STOPPED
     _target_state = gst.STATE_NULL
 
-    def __init__(self, config):
+    def __init__(self, config, mixer):
         super(Audio, self).__init__()
 
         self._config = config
+        self._mixer = mixer
 
         self._playbin = None
         self._signal_ids = {}  # {(element, event): signal_id}
@@ -68,6 +69,7 @@ class Audio(pykka.ThreadingActor):
         try:
             self._setup_playbin()
             self._setup_output()
+            self._setup_mixer()
             self._setup_visualizer()
             self._setup_message_processor()
         except gobject.GError as ex:
@@ -76,6 +78,7 @@ class Audio(pykka.ThreadingActor):
 
     def on_stop(self):
         self._teardown_message_processor()
+        self._teardown_mixer()
         self._teardown_playbin()
 
     def _connect(self, element, event, *args):
@@ -179,6 +182,16 @@ class Audio(pykka.ThreadingActor):
             logger.error(
                 'Failed to create audio output "%s": %s', output_desc, ex)
             process.exit_process()
+
+    def _setup_mixer(self):
+        if self._config['audio']['mixer'] != 'software':
+            return
+        self._mixer.audio = self.actor_ref.proxy()
+
+    def _teardown_mixer(self):
+        if self._config['audio']['mixer'] != 'software':
+            return
+        self._mixer.audio = None
 
     def _setup_visualizer(self):
         visualizer_element = self._config['audio']['visualizer']
