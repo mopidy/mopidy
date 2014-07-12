@@ -150,7 +150,6 @@ class CoreListener(listener.Listener):
         :param mute: the new mute state
         :type mute: boolean
         """
-        # TODO Change 'mute' arg to 'muted' next time we break this API
         pass
 
     def seeked(self, time_position):

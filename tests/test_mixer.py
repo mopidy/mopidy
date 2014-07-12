@@ -23,4 +23,4 @@ class MixerListenerTest(unittest.TestCase):
         self.listener.volume_changed(volume=60)
 
     def test_listener_has_default_impl_for_mute_changed(self):
-        self.listener.mute_changed(muted=True)
+        self.listener.mute_changed(mute=True)

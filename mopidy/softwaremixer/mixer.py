@@ -37,8 +37,8 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
             return None
         return self.audio.get_mute().get()
 
-    def set_mute(self, muted):
+    def set_mute(self, mute):
         if self.audio is None:
             return False
-        self.audio.set_mute(muted)
+        self.audio.set_mute(mute)
         return True

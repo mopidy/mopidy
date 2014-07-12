@@ -32,7 +32,7 @@ class BackendEventsTest(unittest.TestCase):
         self.assertEqual(send.call_args[1]['volume'], 60)
 
     def test_forwards_mixer_mute_changed_event_to_frontends(self, send):
-        self.core.mute_changed(muted=True).get()
+        self.core.mute_changed(mute=True).get()
 
         self.assertEqual(send.call_args[0][0], 'mute_changed')
         self.assertEqual(send.call_args[1]['mute'], True)

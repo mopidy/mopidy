@@ -88,9 +88,9 @@ class Core(
         # Forward event from mixer to frontends
         CoreListener.send('volume_changed', volume=volume)
 
-    def mute_changed(self, muted):
+    def mute_changed(self, mute):
         # Forward event from mixer to frontends
-        CoreListener.send('mute_changed', mute=muted)
+        CoreListener.send('mute_changed', mute=mute)
 
 
 class Backends(list):

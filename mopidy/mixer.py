@@ -83,19 +83,19 @@ class Mixer(object):
         """
         return None
 
-    def set_mute(self, muted):
+    def set_mute(self, mute):
         """
         Mute or unmute the mixer.
 
         *MAY be implemented by subclass.*
 
-        :param muted: :class:`True` to mute, :class:`False` to unmute
-        :type muted: bool
+        :param mute: :class:`True` to mute, :class:`False` to unmute
+        :type mute: bool
         :rtype: :class:`True` if success, :class:`False` if failure
         """
         return False
 
-    def trigger_mute_changed(self, muted):
+    def trigger_mute_changed(self, mute):
         """
         Send ``mute_changed`` event to all mixer listeners.
 
@@ -103,8 +103,8 @@ class Mixer(object):
         changed, either because of a call to :meth:`set_mute` or because or
         any external entity changing the mute state.
         """
-        logger.debug('Mixer event: mute_changed(muted=%s)', muted)
-        MixerListener.send('mute_changed', muted=muted)
+        logger.debug('Mixer event: mute_changed(mute=%s)', mute)
+        MixerListener.send('mute_changed', mute=mute)
 
     def trigger_events_for_any_changes(self):
         """
@@ -117,17 +117,17 @@ class Mixer(object):
 
         if not hasattr(self, '_last_volume'):
             self._last_volume = None
-        if not hasattr(self, '_last_muted'):
-            self._last_muted = None
+        if not hasattr(self, '_last_mute'):
+            self._last_mute = None
 
         old_volume, self._last_volume = self._last_volume, self.get_volume()
-        old_muted, self._last_muted = self._last_muted, self.get_mute()
+        old_mute, self._last_mute = self._last_mute, self.get_mute()
 
         if old_volume != self._last_volume:
             self.trigger_volume_changed(self._last_volume)
 
-        if old_muted != self._last_muted:
-            self.trigger_mute_changed(self._last_muted)
+        if old_mute != self._last_mute:
+            self.trigger_mute_changed(self._last_mute)
 
 
 class MixerListener(listener.Listener):
@@ -157,13 +157,13 @@ class MixerListener(listener.Listener):
         """
         pass
 
-    def mute_changed(self, muted):
+    def mute_changed(self, mute):
         """
         Called after the mute state has changed.
 
         *MAY* be implemented by actor.
 
-        :param muted: :class:`True` if muted, :class:`False` if not muted
-        :type muted: bool
+        :param mute: :class:`True` if muted, :class:`False` if not muted
+        :type mute: bool
         """
         pass
