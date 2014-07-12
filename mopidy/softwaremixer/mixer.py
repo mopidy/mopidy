@@ -15,7 +15,7 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
     name = 'software'
 
     def __init__(self, config):
-        super(SoftwareMixer, self).__init__()
+        super(SoftwareMixer, self).__init__(config)
 
         self.audio = None
 
@@ -30,7 +30,6 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         if self.audio is None:
             return False
         self.audio.set_volume(volume)
-        self.trigger_volume_changed(volume)
         return True
 
     def get_mute(self):
@@ -42,5 +41,4 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         if self.audio is None:
             return False
         self.audio.set_mute(muted)
-        self.trigger_mute_changed(muted)
         return True

@@ -187,10 +187,17 @@ class Audio(pykka.ThreadingActor):
         if self._config['audio']['mixer'] != 'software':
             return
         self._mixer.audio = self.actor_ref.proxy()
+        self._connect(self._playbin, 'notify::volume', self._on_mixer_change)
+        self._connect(self._playbin, 'notify::mute', self._on_mixer_change)
+
+    def _on_mixer_change(self, element, gparamspec):
+        self._mixer.trigger_events_for_any_changes()
 
     def _teardown_mixer(self):
         if self._config['audio']['mixer'] != 'software':
             return
+        self._disconnect(self._playbin, 'notify::volume')
+        self._disconnect(self._playbin, 'notify::mute')
         self._mixer.audio = None
 
     def _setup_visualizer(self):
