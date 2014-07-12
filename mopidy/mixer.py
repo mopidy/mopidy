@@ -106,6 +106,29 @@ class Mixer(object):
         logger.debug('Mixer event: mute_changed(muted=%s)', muted)
         MixerListener.send('mute_changed', muted=muted)
 
+    def trigger_events_for_any_changes(self):
+        """
+        Checks current volume and mute, compares with old values, and emits
+        events if anything has changed.
+
+        This method should be called by subclasses when they know something has
+        changed, and events needs to be sent.
+        """
+
+        if not hasattr(self, '_last_volume'):
+            self._last_volume = None
+        if not hasattr(self, '_last_muted'):
+            self._last_muted = None
+
+        old_volume, self._last_volume = self._last_volume, self.get_volume()
+        old_muted, self._last_muted = self._last_muted, self.get_mute()
+
+        if old_volume != self._last_volume:
+            self.trigger_volume_changed(self._last_volume)
+
+        if old_muted != self._last_muted:
+            self.trigger_mute_changed(self._last_muted)
+
 
 class MixerListener(listener.Listener):
     """
