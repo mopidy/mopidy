@@ -23,7 +23,7 @@ class AudioTest(unittest.TestCase):
     def setUp(self):
         config = {
             'audio': {
-                'mixer': 'software',
+                'mixer': 'foomixer',
                 'mixer_volume': None,
                 'output': 'fakesink',
                 'visualizer': None,
@@ -33,7 +33,7 @@ class AudioTest(unittest.TestCase):
             },
         }
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.audio = audio.Audio.start(config=config).proxy()
+        self.audio = audio.Audio.start(config=config, mixer=None).proxy()
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
@@ -94,7 +94,7 @@ class AudioTest(unittest.TestCase):
 
 class AudioStateTest(unittest.TestCase):
     def setUp(self):
-        self.audio = audio.Audio(config=None)
+        self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
         self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
@@ -139,7 +139,7 @@ class AudioStateTest(unittest.TestCase):
 
 class AudioBufferingTest(unittest.TestCase):
     def setUp(self):
-        self.audio = audio.Audio(config=None)
+        self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=['set_state'])
 
         self.buffer_full_message = mock.Mock()
