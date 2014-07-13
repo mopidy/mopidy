@@ -123,6 +123,11 @@ Audio configuration
 Logging configuration
 ---------------------
 
+.. confval:: logging/color
+
+    Whether or not to colorize the console log based on log level. Defaults to
+    ``true``.
+
 .. confval:: logging/console_format
 
     The log format used for informational logging.

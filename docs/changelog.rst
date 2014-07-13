@@ -31,9 +31,12 @@ Feature release.
   release, like Mopidy 0.18, or migrate the configuration to the new format by
   hand.
 
-**Configuration**
+**Logging**
 
 - Fix proper decoding of exception messages that depends on the user's locale.
+
+- Colorize logs depending on log level. This can be turned off with the new
+  :confval:`logging/color` configuration. (Fixes: :issue:`772`)
 
 **Extension support**
 
