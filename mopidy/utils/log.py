@@ -5,6 +5,15 @@ import logging.config
 import logging.handlers
 
 
+LOG_LEVELS = {
+    -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
+    0: dict(root=logging.ERROR, mopidy=logging.INFO),
+    1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
+    2: dict(root=logging.INFO, mopidy=logging.DEBUG),
+    3: dict(root=logging.DEBUG, mopidy=logging.DEBUG),
+}
+
+
 class DelayedHandler(logging.Handler):
     def __init__(self):
         logging.Handler.__init__(self)
@@ -46,32 +55,6 @@ def setup_logging(config, verbosity_level, save_debug_log):
     _delayed_handler.release()
 
 
-LOG_LEVELS = {
-    -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
-    0: dict(root=logging.ERROR, mopidy=logging.INFO),
-    1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
-    2: dict(root=logging.INFO, mopidy=logging.DEBUG),
-    3: dict(root=logging.DEBUG, mopidy=logging.DEBUG),
-}
-
-
-class VerbosityFilter(logging.Filter):
-    def __init__(self, verbosity_level, loglevels):
-        self.verbosity_level = verbosity_level
-        self.loglevels = loglevels
-
-    def filter(self, record):
-        for name, required_log_level in self.loglevels.items():
-            if record.name == name or record.name.startswith(name + '.'):
-                return record.levelno >= required_log_level
-
-        if record.name.startswith('mopidy'):
-            required_log_level = LOG_LEVELS[self.verbosity_level]['mopidy']
-        else:
-            required_log_level = LOG_LEVELS[self.verbosity_level]['root']
-        return record.levelno >= required_log_level
-
-
 def setup_console_logging(config, verbosity_level):
     if verbosity_level < min(LOG_LEVELS.keys()):
         verbosity_level = min(LOG_LEVELS.keys())
@@ -104,3 +87,20 @@ def setup_debug_logging_to_file(config):
     handler.setFormatter(formatter)
 
     logging.getLogger('').addHandler(handler)
+
+
+class VerbosityFilter(logging.Filter):
+    def __init__(self, verbosity_level, loglevels):
+        self.verbosity_level = verbosity_level
+        self.loglevels = loglevels
+
+    def filter(self, record):
+        for name, required_log_level in self.loglevels.items():
+            if record.name == name or record.name.startswith(name + '.'):
+                return record.levelno >= required_log_level
+
+        if record.name.startswith('mopidy'):
+            required_log_level = LOG_LEVELS[self.verbosity_level]['mopidy']
+        else:
+            required_log_level = LOG_LEVELS[self.verbosity_level]['root']
+        return record.levelno >= required_log_level
