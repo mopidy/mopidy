@@ -451,7 +451,7 @@ class Audio(pykka.ThreadingActor):
         0:
             Minimum volume.
         100:
-            Max volume.
+            Maximum volume.
 
         :rtype: int in range [0..100]
         """

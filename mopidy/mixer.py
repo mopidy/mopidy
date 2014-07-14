@@ -39,7 +39,7 @@ class Mixer(object):
         0:
             Minimum volume, usually silent.
         100:
-            Max volume.
+            Maximum volume.
         :class:`None`:
             Volume is unknown.
 
@@ -66,7 +66,7 @@ class Mixer(object):
         Send ``volume_changed`` event to all mixer listeners.
 
         This method should be called by subclasses when the volume is changed,
-        either because of a call to :meth:`set_volume` or because or any
+        either because of a call to :meth:`set_volume` or because of any
         external entity changing the volume.
         """
         logger.debug('Mixer event: volume_changed(volume=%d)', volume)
@@ -100,7 +100,7 @@ class Mixer(object):
         Send ``mute_changed`` event to all mixer listeners.
 
         This method should be called by subclasses when the mute state is
-        changed, either because of a call to :meth:`set_mute` or because or
+        changed, either because of a call to :meth:`set_mute` or because of
         any external entity changing the mute state.
         """
         logger.debug('Mixer event: mute_changed(mute=%s)', mute)
