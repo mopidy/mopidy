@@ -178,6 +178,7 @@ class AudioBufferingTest(unittest.TestCase):
 
         self.audio._on_buffering(0)
         playbin.set_state.assert_called_with(gst.STATE_PAUSED)
+        self.assertTrue(self.audio._buffering)
 
     def test_stay_paused_when_buffering_finished(self):
         playbin = self.audio._playbin
@@ -187,3 +188,33 @@ class AudioBufferingTest(unittest.TestCase):
 
         self.audio._on_buffering(100)
         self.assertEqual(playbin.set_state.call_count, 0)
+        self.assertFalse(self.audio._buffering)
+
+    def test_change_to_paused_while_buffering(self):
+        playbin = self.audio._playbin
+        self.audio.start_playback()
+        playbin.set_state.assert_called_with(gst.STATE_PLAYING)
+        playbin.set_state.reset_mock()
+
+        self.audio._on_buffering(0)
+        playbin.set_state.assert_called_with(gst.STATE_PAUSED)
+        self.audio.pause_playback()
+        playbin.set_state.reset_mock()
+
+        self.audio._on_buffering(100)
+        self.assertEqual(playbin.set_state.call_count, 0)
+        self.assertFalse(self.audio._buffering)
+
+    def test_change_to_stopped_while_buffering(self):
+        playbin = self.audio._playbin
+        self.audio.start_playback()
+        playbin.set_state.assert_called_with(gst.STATE_PLAYING)
+        playbin.set_state.reset_mock()
+
+        self.audio._on_buffering(0)
+        playbin.set_state.assert_called_with(gst.STATE_PAUSED)
+        playbin.set_state.reset_mock()
+
+        self.audio.stop_playback()
+        playbin.set_state.assert_called_with(gst.STATE_NULL)
+        self.assertFalse(self.audio._buffering)

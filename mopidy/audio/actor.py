@@ -342,9 +342,10 @@ class Audio(pykka.ThreadingActor):
         if percent < 10 and not self._buffering:
             self._playbin.set_state(gst.STATE_PAUSED)
             self._buffering = True
-        if percent == 100 and self._target_state == gst.STATE_PLAYING:
-            self._playbin.set_state(gst.STATE_PLAYING)
+        if percent == 100:
             self._buffering = False
+            if self._target_state == gst.STATE_PLAYING:
+                self._playbin.set_state(gst.STATE_PLAYING)
 
         logger.debug('Buffer %d%% full', percent)
 
@@ -484,6 +485,7 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
+        self._buffering = False
         return self._set_state(gst.STATE_NULL)
 
     def _set_state(self, state):
