@@ -151,7 +151,13 @@ class Boolean(ConfigValue):
     true_values = ('1', 'yes', 'true', 'on')
     false_values = ('0', 'no', 'false', 'off')
 
+    def __init__(self, optional=False):
+        self._required = not optional
+
     def deserialize(self, value):
+        validators.validate_required(value, self._required)
+        if not value:
+            return None
         if value.lower() in self.true_values:
             return True
         elif value.lower() in self.false_values:

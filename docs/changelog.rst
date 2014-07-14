@@ -31,6 +31,10 @@ Feature release.
   release, like Mopidy 0.18, or migrate the configuration to the new format by
   hand.
 
+**Configuration**
+
+- Add ``optional=True`` support to :class:`mopidy.config.Boolean`.
+
 **Logging**
 
 - Fix proper decoding of exception messages that depends on the user's locale.
