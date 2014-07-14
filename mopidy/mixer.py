@@ -32,7 +32,7 @@ class Mixer(object):
 
     def get_volume(self):
         """
-        Get volume level of the mixer.
+        Get volume level of the mixer on a linear scale from 0 to 100.
 
         Example values:
 

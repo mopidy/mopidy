@@ -102,7 +102,9 @@ class PlaybackController(object):
             self._volume = volume
 
     volume = property(get_volume, set_volume)
-    """Volume as int in range [0..100] or :class:`None`"""
+    """Volume as int in range [0..100] or :class:`None` if unknown. The volume
+    scale is linear.
+    """
 
     def get_mute(self):
         if self.mixer:
