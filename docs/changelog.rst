@@ -25,7 +25,7 @@ v0.20.0 (UNRELEASED)
   end result should be the same without any changes to this config value.
 
 - Deprecated the :confval:`audio/mixer_track` config value. This config value
-  is no longer in use. Mixer extensions that needs additional configuration
+  is no longer in use. Mixer extensions that need additional configuration
   handle this themselves.
 
 **Mixers**
