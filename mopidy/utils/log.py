@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import logging.config
 import logging.handlers
+import platform
 
 
 LOG_LEVELS = {
@@ -73,7 +74,10 @@ def setup_console_logging(config, verbosity_level):
         log_format = config['logging']['debug_format']
     formatter = logging.Formatter(log_format)
 
-    handler = logging.StreamHandler()
+    if config['logging']['color']:
+        handler = ColorizingStreamHandler()
+    else:
+        handler = logging.StreamHandler()
     handler.addFilter(verbosity_filter)
     handler.setFormatter(formatter)
 
@@ -104,3 +108,76 @@ class VerbosityFilter(logging.Filter):
         else:
             required_log_level = LOG_LEVELS[self.verbosity_level]['root']
         return record.levelno >= required_log_level
+
+
+class ColorizingStreamHandler(logging.StreamHandler):
+    """
+    Stream handler which colorizes the log using ANSI escape sequences.
+
+    Does nothing on Windows, which doesn't support ANSI escape sequences.
+
+    This implementation is based upon https://gist.github.com/vsajip/758430,
+    which is:
+
+        Copyright (C) 2010-2012 Vinay Sajip. All rights reserved.
+        Licensed under the new BSD license.
+    """
+
+    color_map = {
+        'black': 0,
+        'red': 1,
+        'green': 2,
+        'yellow': 3,
+        'blue': 4,
+        'magenta': 5,
+        'cyan': 6,
+        'white': 7,
+    }
+
+    # Map logging levels to (background, foreground, bold/intense)
+    level_map = {
+        logging.DEBUG: (None, 'blue', False),
+        logging.INFO: (None, 'white', False),
+        logging.WARNING: (None, 'yellow', False),
+        logging.ERROR: (None, 'red', False),
+        logging.CRITICAL: ('red', 'white', True),
+    }
+    csi = '\x1b['
+    reset = '\x1b[0m'
+
+    is_windows = platform.system() == 'Windows'
+
+    @property
+    def is_tty(self):
+        isatty = getattr(self.stream, 'isatty', None)
+        return isatty and isatty()
+
+    def emit(self, record):
+        try:
+            message = self.format(record)
+            self.stream.write(message)
+            self.stream.write(getattr(self, 'terminator', '\n'))
+            self.flush()
+        except Exception:
+            self.handleError(record)
+
+    def format(self, record):
+        message = logging.StreamHandler.format(self, record)
+        if not self.is_tty or self.is_windows:
+            return message
+        return self.colorize(message, record)
+
+    def colorize(self, message, record):
+        if record.levelno in self.level_map:
+            bg, fg, bold = self.level_map[record.levelno]
+            params = []
+            if bg in self.color_map:
+                params.append(str(self.color_map[bg] + 40))
+            if fg in self.color_map:
+                params.append(str(self.color_map[fg] + 30))
+            if bold:
+                params.append('1')
+            if params:
+                message = ''.join((
+                    self.csi, ';'.join(params), 'm', message, self.reset))
+        return message
