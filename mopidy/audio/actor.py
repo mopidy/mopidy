@@ -481,7 +481,7 @@ class Audio(pykka.ThreadingActor):
         """
         Mute or unmute of the software mixer.
 
-        :param mute: Wether to mute the mixer or not.
+        :param mute: Whether to mute the mixer or not.
         :type mute: bool
         :rtype: :class:`True` if successful, else :class:`False`
         """
