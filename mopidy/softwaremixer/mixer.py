@@ -42,3 +42,18 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
             return False
         self.audio.set_mute(mute)
         return True
+
+    def trigger_events_for_changed_values(self):
+        if not hasattr(self, '_last_volume'):
+            self._last_volume = None
+        if not hasattr(self, '_last_mute'):
+            self._last_mute = None
+
+        old_volume, self._last_volume = self._last_volume, self.get_volume()
+        old_mute, self._last_mute = self._last_mute, self.get_mute()
+
+        if old_volume != self._last_volume:
+            self.trigger_volume_changed(self._last_volume)
+
+        if old_mute != self._last_mute:
+            self.trigger_mute_changed(self._last_mute)

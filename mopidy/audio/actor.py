@@ -191,7 +191,7 @@ class Audio(pykka.ThreadingActor):
         self._connect(self._playbin, 'notify::mute', self._on_mixer_change)
 
     def _on_mixer_change(self, element, gparamspec):
-        self._mixer.trigger_events_for_any_changes()
+        self._mixer.trigger_events_for_changed_values()
 
     def _teardown_mixer(self):
         if self._config['audio']['mixer'] != 'software':
