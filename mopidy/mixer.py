@@ -13,7 +13,7 @@ class Mixer(object):
     Audio mixer API
 
     If the mixer has problems during initialization it should raise
-    :exc:`~mopidy.exceptions.MixerError` with a descriptive error message. This
+    :exc:`mopidy.exceptions.MixerError` with a descriptive error message. This
     will make Mopidy print the error message and exit so that the user can fix
     the issue.
 

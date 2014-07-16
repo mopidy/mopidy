@@ -9,7 +9,7 @@ class Backend(object):
     """Backend API
 
     If the backend has problems during initialization it should raise
-    :exc:`~mopidy.exceptions.BackendError` with a descriptive error message.
+    :exc:`mopidy.exceptions.BackendError` with a descriptive error message.
     This will make Mopidy print the error message and exit so that the user can
     fix the issue.
 

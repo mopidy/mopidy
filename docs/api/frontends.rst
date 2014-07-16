@@ -33,7 +33,7 @@ The following requirements applies to any frontend implementation:
 
 - Such config values MUST be documented.
 
-- The main actor MUST raise the :exc:`~mopidy.exceptions.FrontendError` with a
+- The main actor MUST raise the :exc:`mopidy.exceptions.FrontendError` with a
   descriptive error message if the defined config values are not adequate for
   the frontend to work properly.
 
