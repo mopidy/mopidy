@@ -18,6 +18,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
 
         self.hostname = network.format_hostname(config['mpd']['hostname'])
         self.port = config['mpd']['port']
+
         self.zeroconf_name = config['mpd']['zeroconf']
         self.zeroconf_service = None
 
@@ -43,13 +44,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
             self.zeroconf_service = zeroconf.Zeroconf(
                 stype='_mpd._tcp', name=self.zeroconf_name,
                 host=self.hostname, port=self.port)
-
-            if self.zeroconf_service.publish():
-                logger.debug(
-                    'Registered MPD with Zeroconf as "%s"',
-                    self.zeroconf_service.name)
-            else:
-                logger.debug('Registering MPD with Zeroconf failed.')
+            self.zeroconf_service.publish()
 
     def on_stop(self):
         if self.zeroconf_service:
