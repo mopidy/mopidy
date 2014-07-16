@@ -11,10 +11,10 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-from mopidy import models, zeroconf
+from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
 from mopidy.http import handlers
-from mopidy.utils import formatting
+from mopidy.utils import encoding, formatting
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,16 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         self.port = config['http']['port']
         self.zeroconf_name = config['http']['zeroconf']
         self.zeroconf_service = None
-        self.app = None
+
+        try:
+            logger.debug('Starting HTTP server')
+            self.app = tornado.web.Application(self._get_request_handlers())
+            self.app.listen(
+                self.port, self.hostname if self.hostname != '::' else None)
+        except IOError as error:
+            raise exceptions.FrontendError(
+                'HTTP server startup failed: %s' %
+                encoding.locale_decode(error))
 
     def on_start(self):
         threading.Thread(target=self._startup).start()
@@ -44,10 +53,6 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         tornado.ioloop.IOLoop.instance().add_callback(self._shutdown)
 
     def _startup(self):
-        logger.debug('Starting HTTP server')
-        self.app = tornado.web.Application(self._get_request_handlers())
-        self.app.listen(self.port,
-                        self.hostname if self.hostname != '::' else None)
         logger.info(
             'HTTP server running at http://%s:%s', self.hostname, self.port)
         tornado.ioloop.IOLoop.instance().start()
