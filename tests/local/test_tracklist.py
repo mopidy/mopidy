@@ -30,7 +30,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
         self.audio = audio.DummyAudio.start().proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
-        self.core = core.Core(audio=self.audio, backends=[self.backend])
+        self.core = core.Core(mixer=None, backends=[self.backend])
         self.controller = self.core.tracklist
         self.playback = self.core.playback
 

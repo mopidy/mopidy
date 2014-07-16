@@ -431,9 +431,6 @@ Basically, you just implement your GStreamer element in Python and then make
 your :meth:`~mopidy.ext.Extension.setup` method register all your custom
 GStreamer elements.
 
-For examples of custom GStreamer elements implemented in Python, see
-:mod:`mopidy.audio.mixers`.
-
 
 Python conventions
 ==================

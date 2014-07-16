@@ -36,7 +36,7 @@ class CorePlaybackTest(unittest.TestCase):
             Track(uri='dummy1:b', length=40000),
         ]
 
-        self.core = core.Core(audio=None, backends=[
+        self.core = core.Core(mixer=None, backends=[
             self.backend1, self.backend2, self.backend3])
         self.core.tracklist.add(self.tracks)
 
@@ -376,17 +376,16 @@ class CorePlaybackTest(unittest.TestCase):
 
     # TODO Test on_tracklist_change
 
-    # TODO Test volume
+    def test_volume(self):
+        self.assertEqual(self.core.playback.volume, None)
 
-    @mock.patch(
-        'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
-    def test_set_volume_emits_volume_changed_event(self, listener_mock):
-        self.core.playback.set_volume(10)
-        listener_mock.reset_mock()
+        self.core.playback.volume = 30
 
-        self.core.playback.set_volume(20)
+        self.assertEqual(self.core.playback.volume, 30)
 
-        listener_mock.send.assert_called_once_with('volume_changed', volume=20)
+        self.core.playback.volume = 70
+
+        self.assertEqual(self.core.playback.volume, 70)
 
     def test_mute(self):
         self.assertEqual(self.core.playback.mute, False)

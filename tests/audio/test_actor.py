@@ -23,8 +23,7 @@ class AudioTest(unittest.TestCase):
     def setUp(self):
         config = {
             'audio': {
-                'mixer': 'fakemixer track_max_volume=65536',
-                'mixer_track': None,
+                'mixer': 'foomixer',
                 'mixer_volume': None,
                 'output': 'fakesink',
                 'visualizer': None,
@@ -34,7 +33,7 @@ class AudioTest(unittest.TestCase):
             },
         }
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
-        self.audio = audio.Audio.start(config=config).proxy()
+        self.audio = audio.Audio.start(config=config, mixer=None).proxy()
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()
@@ -74,38 +73,11 @@ class AudioTest(unittest.TestCase):
             self.assertTrue(self.audio.set_volume(value).get())
             self.assertEqual(value, self.audio.get_volume().get())
 
-    def test_set_volume_with_mixer_max_below_100(self):
-        config = {
-            'audio': {
-                'mixer': 'fakemixer track_max_volume=40',
-                'mixer_track': None,
-                'mixer_volume': None,
-                'output': 'fakesink',
-                'visualizer': None,
-            }
-        }
-        self.audio = audio.Audio.start(config=config).proxy()
-
-        for value in range(0, 101):
-            self.assertTrue(self.audio.set_volume(value).get())
-            self.assertEqual(value, self.audio.get_volume().get())
-
-    def test_set_volume_with_mixer_min_equal_max(self):
-        config = {
-            'audio': {
-                'mixer': 'fakemixer track_max_volume=0',
-                'mixer_track': None,
-                'mixer_volume': None,
-                'output': 'fakesink',
-                'visualizer': None,
-            }
-        }
-        self.audio = audio.Audio.start(config=config).proxy()
-        self.assertEqual(0, self.audio.get_volume().get())
-
     @unittest.SkipTest
     def test_set_mute(self):
-        pass  # TODO Probably needs a fakemixer with a mixer track
+        for value in (True, False):
+            self.assertTrue(self.audio.set_mute(value).get())
+            self.assertEqual(value, self.audio.get_mute().get())
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
@@ -122,7 +94,7 @@ class AudioTest(unittest.TestCase):
 
 class AudioStateTest(unittest.TestCase):
     def setUp(self):
-        self.audio = audio.Audio(config=None)
+        self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
         self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
@@ -167,7 +139,7 @@ class AudioStateTest(unittest.TestCase):
 
 class AudioBufferingTest(unittest.TestCase):
     def setUp(self):
-        self.audio = audio.Audio(config=None)
+        self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=['set_state'])
 
         self.buffer_full_message = mock.Mock()

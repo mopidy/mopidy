@@ -13,6 +13,7 @@ Mopidy also bundles some extensions:
 - :ref:`ext-stream`
 - :ref:`ext-http`
 - :ref:`ext-mpd`
+- :ref:`ext-softwaremixer`
 
 
 Mopidy-API-Explorer
