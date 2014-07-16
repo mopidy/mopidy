@@ -18,6 +18,8 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         super(SoftwareMixer, self).__init__(config)
 
         self.audio = None
+        self._last_volume = None
+        self._last_mute = None
 
         logger.info('Mixing using GStreamer software mixing')
 
@@ -44,11 +46,6 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         return True
 
     def trigger_events_for_changed_values(self):
-        if not hasattr(self, '_last_volume'):
-            self._last_volume = None
-        if not hasattr(self, '_last_mute'):
-            self._last_mute = None
-
         old_volume, self._last_volume = self._last_volume, self.get_volume()
         old_mute, self._last_mute = self._last_mute, self.get_mute()
 
