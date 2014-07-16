@@ -30,6 +30,9 @@ class Mixer(object):
     mixer.
     """
 
+    def __init__(self, config):
+        pass
+
     def get_volume(self):
         """
         Get volume level of the mixer on a linear scale from 0 to 100.
