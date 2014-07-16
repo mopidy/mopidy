@@ -27,16 +27,19 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         core.get_version = mock.MagicMock(name='get_version')
         core.get_version.return_value = mopidy.__version__
 
-        apps = [dict(name='testapp')]
-        statics = [dict(name='teststatic')]
+        testapps = [dict(name='testapp')]
+        teststatics = [dict(name='teststatic')]
 
-        http_frontend = actor.HttpFrontend(config=self.get_config(), core=core)
-        http_frontend.apps = [{
+        apps = [{
             'name': 'mopidy',
-            'factory': handlers.make_mopidy_app_factory(apps, statics),
+            'factory': handlers.make_mopidy_app_factory(testapps, teststatics),
         }]
 
-        return tornado.web.Application(http_frontend._get_request_handlers())
+        http_server = actor.HttpServer(
+            config=self.get_config(), core=core, sockets=[],
+            apps=apps, statics=[])
+
+        return tornado.web.Application(http_server._get_request_handlers())
 
 
 class RootRedirectTest(HttpServerTest):
@@ -172,12 +175,12 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        http_frontend = actor.HttpFrontend(config=config, core=core)
-        http_frontend.statics = [
-            dict(name='static', path=os.path.dirname(__file__)),
-        ]
+        statics = [dict(name='static', path=os.path.dirname(__file__))]
 
-        return tornado.web.Application(http_frontend._get_request_handlers())
+        http_server = actor.HttpServer(
+            config=config, core=core, sockets=[], apps=[], statics=statics)
+
+        return tornado.web.Application(http_server._get_request_handlers())
 
     def test_without_slash_should_redirect(self):
         response = self.fetch('/static', method='GET', follow_redirects=False)
@@ -222,13 +225,15 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        http_frontend = actor.HttpFrontend(config=config, core=core)
-        http_frontend.apps = [{
+        apps = [{
             'name': 'wsgi',
             'factory': wsgi_app_factory,
         }]
 
-        return tornado.web.Application(http_frontend._get_request_handlers())
+        http_server = actor.HttpServer(
+            config=config, core=core, sockets=[], apps=apps, statics=[])
+
+        return tornado.web.Application(http_server._get_request_handlers())
 
     def test_without_slash_should_redirect(self):
         response = self.fetch('/wsgi', method='GET', follow_redirects=False)
