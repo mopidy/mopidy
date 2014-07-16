@@ -33,9 +33,9 @@ v0.20.0 (UNRELEASED)
 - Added new :class:`mopidy.mixer.Mixer` API which can be implemented by
   extensions.
 
-- Created a bundled extension, :mod:`mopidy.softwaremixer`, for controlling
-  volume in software in GStreamer's pipeline. This is Mopidy's default mixer.
-  To use this mixer, set :confval:`audio/mixer` to ``software``.
+- Created a bundled extension, :ref:`ext-softwaremixer`, for controlling volume
+  in software in GStreamer's pipeline. This is Mopidy's default mixer. To use
+  this mixer, set :confval:`audio/mixer` to ``software``.
 
 - Created an external extension, `Mopidy-ALSAMixer
   <https://github.com/mopidy/mopidy-alsamixer/>`_, for controlling volume with

@@ -51,6 +51,7 @@ Extensions
     ext/stream
     ext/http
     ext/mpd
+    ext/softwaremixer
     ext/external
 
 
