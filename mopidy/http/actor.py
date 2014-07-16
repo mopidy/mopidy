@@ -86,32 +86,15 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
     def _get_request_handlers(self):
         request_handlers = []
-
         request_handlers.extend(self._get_app_request_handlers())
         request_handlers.extend(self._get_static_request_handlers())
-
-        # Either default Mopidy or user defined path to files
-        static_dir = self.config['http']['static_dir']
-        if static_dir and not os.path.exists(static_dir):
-            logger.warning(
-                'Configured http/static_dir %s does not exist. '
-                'Falling back to default HTTP handler.', static_dir)
-            static_dir = None
-        if static_dir:
-            request_handlers.append((r'/(.*)', handlers.StaticFileHandler, {
-                'path': self.config['http']['static_dir'],
-                'default_filename': 'index.html',
-            }))
-        else:
-            request_handlers.append((r'/', tornado.web.RedirectHandler, {
-                'url': '/mopidy/',
-                'permanent': False,
-            }))
+        request_handlers.extend(self._get_mopidy_request_handlers())
 
         logger.debug(
             'HTTP routes from extensions: %s',
             formatting.indent('\n'.join(
                 '%r: %r' % (r[0], r[1]) for r in request_handlers)))
+
         return request_handlers
 
     def _get_app_request_handlers(self):
@@ -146,3 +129,25 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             ))
             logger.debug('Loaded static HTTP extension: %s', static['name'])
         return result
+
+    def _get_mopidy_request_handlers(self):
+        # Either default Mopidy or user defined path to files
+
+        static_dir = self.config['http']['static_dir']
+
+        if static_dir and not os.path.exists(static_dir):
+            logger.warning(
+                'Configured http/static_dir %s does not exist. '
+                'Falling back to default HTTP handler.', static_dir)
+            static_dir = None
+
+        if static_dir:
+            return [(r'/(.*)', handlers.StaticFileHandler, {
+                'path': self.config['http']['static_dir'],
+                'default_filename': 'index.html',
+            })]
+        else:
+            return [(r'/', tornado.web.RedirectHandler, {
+                'url': '/mopidy/',
+                'permanent': False,
+            })]
