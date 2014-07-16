@@ -14,7 +14,7 @@ import tornado.websocket
 from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
 from mopidy.http import handlers
-from mopidy.utils import encoding, formatting
+from mopidy.utils import encoding, formatting, network
 
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
     def _startup(self):
         logger.info(
-            'HTTP server running at http://%s:%s', self.hostname, self.port)
+            'HTTP server running at [%s]:%s',
+            network.format_hostname(self.hostname), self.port)
         tornado.ioloop.IOLoop.instance().start()
 
     def _shutdown(self):
