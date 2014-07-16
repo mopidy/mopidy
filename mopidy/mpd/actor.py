@@ -1,11 +1,10 @@
 from __future__ import unicode_literals
 
 import logging
-import sys
 
 import pykka
 
-from mopidy import zeroconf
+from mopidy import exceptions, zeroconf
 from mopidy.core import CoreListener
 from mopidy.mpd import session
 from mopidy.utils import encoding, network, process
@@ -34,10 +33,9 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 max_connections=config['mpd']['max_connections'],
                 timeout=config['mpd']['connection_timeout'])
         except IOError as error:
-            logger.error(
-                'MPD server startup failed: %s',
+            raise exceptions.FrontendError(
+                'MPD server startup failed: %s' %
                 encoding.locale_decode(error))
-            sys.exit(1)
 
         logger.info('MPD server running at [%s]:%s', self.hostname, self.port)
 

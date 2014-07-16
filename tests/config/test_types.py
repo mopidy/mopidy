@@ -214,6 +214,10 @@ class BooleanTest(unittest.TestCase):
         self.assertEqual(b'false', result)
         self.assertIsInstance(result, bytes)
 
+    def test_deserialize_respects_optional(self):
+        value = types.Boolean(optional=True)
+        self.assertEqual(None, value.deserialize(''))
+
     # TODO: test None or other invalid values into serialize?
 
 

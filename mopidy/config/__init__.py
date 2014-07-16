@@ -15,6 +15,7 @@ from mopidy.utils import path, versioning
 logger = logging.getLogger(__name__)
 
 _logging_schema = ConfigSchema('logging')
+_logging_schema['color'] = Boolean()
 _logging_schema['console_format'] = String()
 _logging_schema['debug_format'] = String()
 _logging_schema['debug_file'] = Path()

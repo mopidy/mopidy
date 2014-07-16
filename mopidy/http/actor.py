@@ -14,6 +14,7 @@ import tornado.websocket
 from mopidy import models, zeroconf
 from mopidy.core import CoreListener
 from mopidy.http import handlers
+from mopidy.utils import formatting
 
 
 logger = logging.getLogger(__name__)
@@ -88,7 +89,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         logger.debug(
             'HTTP routes from extensions: %s',
-            list((l[0], l[1]) for l in request_handlers))
+            formatting.indent('\n'.join(
+                '%r: %r' % (r[0], r[1]) for r in request_handlers)))
         return request_handlers
 
     def _get_app_request_handlers(self):

@@ -71,7 +71,14 @@ Feature release.
 
 **Configuration**
 
+- Add ``optional=True`` support to :class:`mopidy.config.Boolean`.
+
+**Logging**
+
 - Fix proper decoding of exception messages that depends on the user's locale.
+
+- Colorize logs depending on log level. This can be turned off with the new
+  :confval:`logging/color` configuration. (Fixes: :issue:`772`)
 
 **Extension support**
 

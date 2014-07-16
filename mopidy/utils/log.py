@@ -3,6 +3,16 @@ from __future__ import unicode_literals
 import logging
 import logging.config
 import logging.handlers
+import platform
+
+
+LOG_LEVELS = {
+    -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
+    0: dict(root=logging.ERROR, mopidy=logging.INFO),
+    1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
+    2: dict(root=logging.INFO, mopidy=logging.DEBUG),
+    3: dict(root=logging.DEBUG, mopidy=logging.DEBUG),
+}
 
 
 class DelayedHandler(logging.Handler):
@@ -46,13 +56,41 @@ def setup_logging(config, verbosity_level, save_debug_log):
     _delayed_handler.release()
 
 
-LOG_LEVELS = {
-    -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
-    0: dict(root=logging.ERROR, mopidy=logging.INFO),
-    1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
-    2: dict(root=logging.INFO, mopidy=logging.DEBUG),
-    3: dict(root=logging.DEBUG, mopidy=logging.DEBUG),
-}
+def setup_console_logging(config, verbosity_level):
+    if verbosity_level < min(LOG_LEVELS.keys()):
+        verbosity_level = min(LOG_LEVELS.keys())
+    if verbosity_level > max(LOG_LEVELS.keys()):
+        verbosity_level = max(LOG_LEVELS.keys())
+
+    loglevels = config.get('loglevels', {})
+    has_debug_loglevels = any([
+        level < logging.INFO for level in loglevels.values()])
+
+    verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
+
+    if verbosity_level < 1 and not has_debug_loglevels:
+        log_format = config['logging']['console_format']
+    else:
+        log_format = config['logging']['debug_format']
+    formatter = logging.Formatter(log_format)
+
+    if config['logging']['color']:
+        handler = ColorizingStreamHandler()
+    else:
+        handler = logging.StreamHandler()
+    handler.addFilter(verbosity_filter)
+    handler.setFormatter(formatter)
+
+    logging.getLogger('').addHandler(handler)
+
+
+def setup_debug_logging_to_file(config):
+    formatter = logging.Formatter(config['logging']['debug_format'])
+    handler = logging.handlers.RotatingFileHandler(
+        config['logging']['debug_file'], maxBytes=10485760, backupCount=3)
+    handler.setFormatter(formatter)
+
+    logging.getLogger('').addHandler(handler)
 
 
 class VerbosityFilter(logging.Filter):
@@ -72,35 +110,74 @@ class VerbosityFilter(logging.Filter):
         return record.levelno >= required_log_level
 
 
-def setup_console_logging(config, verbosity_level):
-    if verbosity_level < min(LOG_LEVELS.keys()):
-        verbosity_level = min(LOG_LEVELS.keys())
-    if verbosity_level > max(LOG_LEVELS.keys()):
-        verbosity_level = max(LOG_LEVELS.keys())
+class ColorizingStreamHandler(logging.StreamHandler):
+    """
+    Stream handler which colorizes the log using ANSI escape sequences.
 
-    loglevels = config.get('loglevels', {})
-    has_debug_loglevels = any([
-        level < logging.INFO for level in loglevels.values()])
+    Does nothing on Windows, which doesn't support ANSI escape sequences.
 
-    verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
+    This implementation is based upon https://gist.github.com/vsajip/758430,
+    which is:
 
-    if verbosity_level < 1 and not has_debug_loglevels:
-        log_format = config['logging']['console_format']
-    else:
-        log_format = config['logging']['debug_format']
-    formatter = logging.Formatter(log_format)
+        Copyright (C) 2010-2012 Vinay Sajip. All rights reserved.
+        Licensed under the new BSD license.
+    """
 
-    handler = logging.StreamHandler()
-    handler.addFilter(verbosity_filter)
-    handler.setFormatter(formatter)
+    color_map = {
+        'black': 0,
+        'red': 1,
+        'green': 2,
+        'yellow': 3,
+        'blue': 4,
+        'magenta': 5,
+        'cyan': 6,
+        'white': 7,
+    }
 
-    logging.getLogger('').addHandler(handler)
+    # Map logging levels to (background, foreground, bold/intense)
+    level_map = {
+        logging.DEBUG: (None, 'blue', False),
+        logging.INFO: (None, 'white', False),
+        logging.WARNING: (None, 'yellow', False),
+        logging.ERROR: (None, 'red', False),
+        logging.CRITICAL: ('red', 'white', True),
+    }
+    csi = '\x1b['
+    reset = '\x1b[0m'
 
+    is_windows = platform.system() == 'Windows'
 
-def setup_debug_logging_to_file(config):
-    formatter = logging.Formatter(config['logging']['debug_format'])
-    handler = logging.handlers.RotatingFileHandler(
-        config['logging']['debug_file'], maxBytes=10485760, backupCount=3)
-    handler.setFormatter(formatter)
+    @property
+    def is_tty(self):
+        isatty = getattr(self.stream, 'isatty', None)
+        return isatty and isatty()
 
-    logging.getLogger('').addHandler(handler)
+    def emit(self, record):
+        try:
+            message = self.format(record)
+            self.stream.write(message)
+            self.stream.write(getattr(self, 'terminator', '\n'))
+            self.flush()
+        except Exception:
+            self.handleError(record)
+
+    def format(self, record):
+        message = logging.StreamHandler.format(self, record)
+        if not self.is_tty or self.is_windows:
+            return message
+        return self.colorize(message, record)
+
+    def colorize(self, message, record):
+        if record.levelno in self.level_map:
+            bg, fg, bold = self.level_map[record.levelno]
+            params = []
+            if bg in self.color_map:
+                params.append(str(self.color_map[bg] + 40))
+            if fg in self.color_map:
+                params.append(str(self.color_map[fg] + 30))
+            if bold:
+                params.append('1')
+            if params:
+                message = ''.join((
+                    self.csi, ';'.join(params), 'm', message, self.reset))
+        return message
