@@ -187,3 +187,9 @@ http://localhost:6680/mywebclient/.
             })
 
         # See the Extension API for the full details on this class
+
+
+API implementors
+================
+
+See :ref:`ext-web`.

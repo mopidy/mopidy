@@ -42,17 +42,7 @@ The following requirements applies to any frontend implementation:
   specified events.
 
 
-.. _frontend-implementations:
-
 Frontend implementations
 ========================
 
-- :ref:`ext-http`
-
-- :ref:`ext-mpd`
-
-- `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_
-
-- `Mopidy-Notifier <https://github.com/sauberfred/mopidy-notifier>`_
-
-- `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_
+See :ref:`ext-frontends`.

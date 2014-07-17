@@ -17,6 +17,4 @@ Audio mixer API
 Mixer implementations
 =====================
 
-- `Mopidy-ALSAMixer <https://github.com/mopidy/mopidy-alsamixer>`_
-
-- :ref:`ext-softwaremixer`
+See :ref:`ext-mixers`.
