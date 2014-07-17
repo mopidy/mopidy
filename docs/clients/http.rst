@@ -38,34 +38,10 @@ Also the web client used for Wouter's popular `Pi Musicbox
     -- https://github.com/woutervanwijk/Mopidy-MusicBox-Webclient
 
 
-Mopidy Lux
-==========
-
-.. image:: dz0ny-mopidy-lux.png
-    :width: 1275
-    :height: 795
-
-A Mopidy web client made with AngularJS by Janez Troha.
-
-    A shiny new remote web control interface for Mopidy player.
-
-    -- https://github.com/dz0ny/mopidy-lux
+.. include:: /ext/lux.rst
 
 
-Moped
-=====
-
-.. image:: martijnboland-moped.png
-    :width: 720
-    :height: 450
-
-A Mopidy web client made with Durandal and KnockoutJS by Martijn Boland.
-
-    Moped is a responsive web client for the Mopidy music server. It is
-    inspired by Mopidy-Webclient, but built from scratch based on a different
-    technology stack with Durandal and Bootstrap 3.
-
-    -- https://github.com/martijnboland/moped
+.. include:: /ext/moped.rst
 
 
 JukePi
