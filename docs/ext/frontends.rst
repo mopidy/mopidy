@@ -11,7 +11,17 @@ additional frontends, which includes just about anything that use the
 This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
-Mopidy bundles the frontend extensions :ref:`ext-mpd` and :ref:`ext-http`.
+
+Mopidy-HTTP
+===========
+
+Bundled with Mopidy. See :ref:`ext-http`.
+
+
+Mopidy-MPD
+==========
+
+Bundled with Mopidy. See :ref:`ext-mpd`.
 
 
 Mopidy-MPRIS

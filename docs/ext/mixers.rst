@@ -11,8 +11,6 @@ in Mopidy 0.19.
 This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
-Mopidy also bundles the mixer extension :ref:`ext-softwaremixer`.
-
 
 Mopidy-ALSAMixer
 ================
@@ -38,6 +36,12 @@ https://github.com/mopidy/mopidy-nad
 
 Extension for controlling volume using an external NAD amplifier. Developed
 and tested with a NAD C355BEE.
+
+
+Mopidy-SoftwareMixer
+====================
+
+Bundled with Mopidy. See :ref:`ext-softwaremixer`.
 
 
 Mopidy-Yamaha

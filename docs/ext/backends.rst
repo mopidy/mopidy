@@ -10,9 +10,6 @@ additional music sources by implementing the :ref:`backend-api`.
 This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
-Mopidy also bundles the backend extensions :ref:`ext-local` and
-:ref:`ext-stream`.
-
 
 Mopidy-Beets
 ============
@@ -48,6 +45,12 @@ https://github.com/tkem/mopidy-internetarchive
 
 Extension for playing music and audio from the `Internet Archive
 <https://archive.org/>`_.
+
+
+Mopidy-Local
+============
+
+Bundled with Mopidy. See :ref:`ext-local`.
 
 
 Mopidy-Podcast
@@ -121,6 +124,12 @@ https://github.com/trygveaa/mopidy-spotify-tunigo
 Extension for providing the browse feature of `Spotify
 <http://www.spotify.com/>`_. This lets you browse playlists, genres and new
 releases.
+
+
+Mopidy-Stream
+=============
+
+Bundled with Mopidy. See :ref:`ext-stream`.
 
 
 Mopidy-Subsonic
