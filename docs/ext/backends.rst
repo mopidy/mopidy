@@ -1,36 +1,17 @@
-*******************
-External extensions
-*******************
+.. _ext-backends:
+
+******************
+Backend extensions
+******************
 
 Here you can find a list of external packages that extend Mopidy with
-additional functionality. This list is moderated and updated on a regular
-basis. If you want your package to show up here, follow the :ref:`guide on
-creating extensions <extensiondev>`.
+additional music sources by implementing the :ref:`backend-api`.
 
-Mopidy also bundles some extensions:
+This list is moderated and updated on a regular basis. If you want your package
+to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
-- :ref:`ext-local`
-- :ref:`ext-stream`
-- :ref:`ext-http`
-- :ref:`ext-mpd`
-- :ref:`ext-softwaremixer`
-
-
-Mopidy-API-Explorer
-===================
-
-https://github.com/dz0ny/mopidy-api-explorer
-
-Web extension for browsing the Mopidy HTTP API.
-
-
-Mopidy-Arcam
-============
-
-https://github.com/TooDizzy/mopidy-arcam
-
-Extension for controlling volume using an external Arcam amplifier. Developed
-and tested with an Arcam AVR-300.
+Mopidy also bundles the backend extensions :ref:`ext-local` and
+:ref:`ext-stream`.
 
 
 Mopidy-Beets
@@ -69,31 +50,6 @@ Extension for playing music and audio from the `Internet Archive
 <https://archive.org/>`_.
 
 
-Mopidy-MPRIS
-============
-
-https://github.com/mopidy/mopidy-mpris
-
-Extension for controlling Mopidy through the `MPRIS <http://www.mpris.org/>`_
-D-Bus interface, for example using the Ubuntu Sound Menu.
-
-
-Mopidy-NAD
-==========
-
-https://github.com/mopidy/mopidy-nad
-
-Extension for controlling volume using an external NAD amplifier.
-
-
-Mopidy-Notifier
-===============
-
-https://github.com/sauberfred/mopidy-notifier
-
-Extension for displaying track info as User Notifications in Mac OS X.
-
-
 Mopidy-Podcast
 ==============
 
@@ -128,14 +84,6 @@ https://github.com/hechtus/mopidy-radio-de
 Extension for listening to Internet radio stations and podcasts listed at
 `radio.de <http://www.radio.de/>`_, `rad.io <http://www.rad.io/>`_,
 `radio.fr <http://www.radio.fr/>`_, and `radio.at <http://www.radio.at/>`_.
-
-
-Mopidy-Scrobbler
-================
-
-https://github.com/mopidy/mopidy-scrobbler
-
-Extension for scrobbling played tracks to Last.fm.
 
 
 Mopidy-SomaFM
@@ -202,17 +150,8 @@ Provides a backend for playing music from the `VKontakte social network
 <http://vk.com/>`_.
 
 
-Mopidy-Yamaha
-=============
-
-https://github.com/knutz3n/mopidy-yamaha
-
-Extension for controlling volume using an external Yamaha network connected
-amplifier.
-
-
 Mopidy-YouTube
-=================
+==============
 
 https://github.com/dz0ny/mopidy-youtube
 

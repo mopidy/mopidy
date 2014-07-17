@@ -52,7 +52,10 @@ Extensions
     ext/http
     ext/mpd
     ext/softwaremixer
-    ext/external
+    ext/mixers
+    ext/backends
+    ext/frontends
+    ext/web
 
 
 Clients
