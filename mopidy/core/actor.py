@@ -68,14 +68,17 @@ class Core(
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()
 
-    def state_changed(self, old_state, new_state):
+    def state_changed(self, old_state, new_state, target_state):
         # XXX: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the
         # Spotify play token is lost, the Spotify backend pauses audio
         # playback, but mopidy.core doesn't know this, so we need to update
         # mopidy.core's state to match the actual state in mopidy.audio. If we
         # don't do this, clients will think that we're still playing.
-        if (new_state == PlaybackState.PAUSED
+
+        # We ignore cases when target state is set as this is buffering
+        # updates (at least for now) and we need to get #234 fixed...
+        if (new_state == PlaybackState.PAUSED and not target_state
                 and self.playback.state != PlaybackState.PAUSED):
             self.playback.state = new_state
             self.playback._trigger_track_playback_paused()

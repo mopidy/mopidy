@@ -21,6 +21,10 @@ logger = logging.getLogger(__name__)
 playlists.register_typefinders()
 playlists.register_elements()
 
+_GST_STATE_MAPPING = {
+    gst.STATE_PLAYING: PlaybackState.PLAYING,
+    gst.STATE_PAUSED: PlaybackState.PAUSED,
+    gst.STATE_NULL: PlaybackState.STOPPED}
 
 MB = 1 << 20
 
@@ -48,13 +52,14 @@ class Audio(pykka.ThreadingActor):
 
     #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
     state = PlaybackState.STOPPED
-    _target_state = gst.STATE_NULL
 
     def __init__(self, config, mixer):
         super(Audio, self).__init__()
 
         self._config = config
         self._mixer = mixer
+        self._target_state = gst.STATE_NULL
+        self._buffering = False
 
         self._playbin = None
         self._signal_ids = {}  # {(element, event): signal_id}
@@ -224,31 +229,17 @@ class Audio(pykka.ThreadingActor):
         self._disconnect(bus, 'message')
         bus.remove_signal_watch()
 
-    def _on_message(self, bus, message):
-        if (message.type == gst.MESSAGE_STATE_CHANGED
-                and message.src == self._playbin):
-            old_state, new_state, pending_state = message.parse_state_changed()
-            self._on_playbin_state_changed(old_state, new_state, pending_state)
-        elif message.type == gst.MESSAGE_BUFFERING:
-            percent = message.parse_buffering()
-            if percent < 10:
-                self._playbin.set_state(gst.STATE_PAUSED)
-            if percent == 100 and self._target_state == gst.STATE_PLAYING:
-                self._playbin.set_state(gst.STATE_PLAYING)
-            logger.debug('Buffer %d%% full', percent)
-        elif message.type == gst.MESSAGE_EOS:
+    def _on_message(self, bus, msg):
+        if msg.type == gst.MESSAGE_STATE_CHANGED and msg.src == self._playbin:
+            self._on_playbin_state_changed(*msg.parse_state_changed())
+        elif msg.type == gst.MESSAGE_BUFFERING:
+            self._on_buffering(msg.parse_buffering())
+        elif msg.type == gst.MESSAGE_EOS:
             self._on_end_of_stream()
-        elif message.type == gst.MESSAGE_ERROR:
-            error, debug = message.parse_error()
-            logger.error(
-                '%s Debug message: %s',
-                str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
-            self.stop_playback()
-        elif message.type == gst.MESSAGE_WARNING:
-            error, debug = message.parse_warning()
-            logger.warning(
-                '%s Debug message: %s',
-                str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        elif msg.type == gst.MESSAGE_ERROR:
+            self._on_error(*msg.parse_error())
+        elif msg.type == gst.MESSAGE_WARNING:
+            self._on_warning(*msg.parse_warning())
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
@@ -264,24 +255,44 @@ class Audio(pykka.ThreadingActor):
         if new_state == gst.STATE_READY:
             return  # Ignore READY state as it's GStreamer specific
 
-        if new_state == gst.STATE_PLAYING:
-            new_state = PlaybackState.PLAYING
-        elif new_state == gst.STATE_PAUSED:
-            new_state = PlaybackState.PAUSED
-        elif new_state == gst.STATE_NULL:
-            new_state = PlaybackState.STOPPED
-
+        new_state = _GST_STATE_MAPPING[new_state]
         old_state, self.state = self.state, new_state
 
+        target_state = _GST_STATE_MAPPING[self._target_state]
+        if target_state == new_state:
+            target_state = None
+
         logger.debug(
-            'Triggering event: state_changed(old_state=%s, new_state=%s)',
-            old_state, new_state)
-        AudioListener.send(
-            'state_changed', old_state=old_state, new_state=new_state)
+            'Triggering event: state_changed(old_state=%s, new_state=%s, '
+            'target_state=%s)', old_state, new_state, target_state)
+        AudioListener.send('state_changed', old_state=old_state,
+                           new_state=new_state, target_state=target_state)
+
+    def _on_buffering(self, percent):
+        if percent < 10 and not self._buffering:
+            self._playbin.set_state(gst.STATE_PAUSED)
+            self._buffering = True
+        if percent == 100:
+            self._buffering = False
+            if self._target_state == gst.STATE_PLAYING:
+                self._playbin.set_state(gst.STATE_PLAYING)
+
+        logger.debug('Buffer %d%% full', percent)
 
     def _on_end_of_stream(self):
         logger.debug('Triggering reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
+
+    def _on_error(self, error, debug):
+        logger.error(
+            '%s Debug message: %s',
+            str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        self.stop_playback()
+
+    def _on_warning(self, error, debug):
+        logger.warning(
+            '%s Debug message: %s',
+            str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
 
     def set_uri(self, uri):
         """
@@ -404,6 +415,7 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
+        self._buffering = False
         return self._set_state(gst.STATE_NULL)
 
     def _set_state(self, state):
