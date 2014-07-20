@@ -10,7 +10,9 @@ HTTP JSON-RPC API
 The :ref:`ext-http` extension makes Mopidy's :ref:`core-api` available using
 JSON-RPC over HTTP using HTTP POST and WebSockets. We also provide a JavaScript
 wrapper, called :ref:`Mopidy.js <mopidy-js>`, around the JSON-RPC over
-WebSocket API for use both from browsers and Node.js.
+WebSocket API for use both from browsers and Node.js. The
+:ref:`http-explore-extension` extension, can also be used to get you
+familiarized with HTTP based APIs.
 
 .. warning:: API stability
 

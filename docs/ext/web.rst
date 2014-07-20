@@ -12,12 +12,7 @@ This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 
-Mopidy-API-Explorer
-===================
-
-https://github.com/dz0ny/mopidy-api-explorer
-
-Web extension for browsing the Mopidy HTTP API.
+.. include:: /ext/api_explorer.rst
 
 
 .. include:: /ext/lux.rst
